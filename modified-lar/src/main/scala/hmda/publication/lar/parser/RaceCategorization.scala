@@ -32,7 +32,6 @@ object RaceCategorization {
                                       Samoan,
                                       OtherPacificIslander)
 
-
     if (race.race1 == EmptyRaceValue) {
       "Free Form Text Only"
     } else if (race.race1 == RaceInformationNotProvided ||
@@ -40,173 +39,167 @@ object RaceCategorization {
       "Race Not Available"
     }
     // Two or more minorities
-     else if(moreThanOneMinority(raceFields,
-      asianEnums,
-      hawaiianIslanderEnums) &&
-      !AnyApplicantWhite(coRace)){
-        "2 or more minority races"
-      }
+    else if (moreThanOneMinority(raceFields, asianEnums, hawaiianIslanderEnums) &&
+             !AnyApplicantWhite(coRace)) {
+      "2 or more minority races"
+    }
 
     // Joint
-    else if(AnyApplicantAMinority(raceFields,
-      asianEnums,
-      hawaiianIslanderEnums) &&
-      AnyApplicantWhite(coRace)){
+    else if (AnyApplicantAMinority(raceFields,
+                                   asianEnums,
+                                   hawaiianIslanderEnums) &&
+             AnyApplicantWhite(coRace)) {
       "Joint"
-    }
-    else if(AnyApplicantAMinority(coRaceFields,
-      asianEnums,
-      hawaiianIslanderEnums) &&
-      race.race1==White &&
-      isRaceTwoToFiveEmpty(race)){
+    } else if (AnyApplicantAMinority(coRaceFields,
+                                     asianEnums,
+                                     hawaiianIslanderEnums) &&
+               race.race1 == White &&
+               isRaceTwoToFiveEmpty(race)) {
       "Joint"
     }
 
     //White
-    else if (race.race1==White &&
-    isRaceTwoToFiveEmpty(race)&&
-      (coRace.race1 ==White||
-        coRace.race1==RaceInformationNotProvided||
-        coRace.race1==RaceNotApplicable||
-        coRace.race1==RaceNoCoApplicant)){
+    else if (race.race1 == White &&
+             isRaceTwoToFiveEmpty(race) &&
+      isRaceTwoToFiveEmpty(coRace) &&
+      (coRace.race1 == White ||
+             coRace.race1 == RaceInformationNotProvided ||
+             coRace.race1 == RaceNotApplicable ||
+             coRace.race1 == RaceNoCoApplicant)) {
       White.description
     }
 
     //American Indian Or Alaska Native
-    else if (race.race1==AmericanIndianOrAlaskaNative &&
-      isRaceTwoToFiveEmpty(race) &&
-      !AnyApplicantWhite(coRace)){
+    else if (race.race1 == AmericanIndianOrAlaskaNative &&
+             isRaceTwoToFiveEmpty(race) &&
+             !AnyApplicantWhite(coRace)) {
       AmericanIndianOrAlaskaNative.description
-    }
-    else if (
-      (race.race1 == AmericanIndianOrAlaskaNative && race.race2 == White) ||
-        (race.race2 == AmericanIndianOrAlaskaNative && race.race1 == White) ){
-      if(isRaceThreeToFiveEmpty(race) && !AnyApplicantWhite(coRace)) {
+    } else if ((race.race1 == AmericanIndianOrAlaskaNative && race.race2 == White) ||
+               (race.race2 == AmericanIndianOrAlaskaNative && race.race1 == White)) {
+      if (isRaceThreeToFiveEmpty(race) && !AnyApplicantWhite(coRace)) {
         AmericanIndianOrAlaskaNative.description
-      }else{
+      } else {
         "Joint"
       }
     }
 
     //Asian
     else if (asianEnums.contains(race.race1) &&
-      isRaceTwoToFiveEmpty(race) &&
-      !AnyApplicantWhite(coRace)){
+             isRaceTwoToFiveEmpty(race) &&
+             !AnyApplicantWhite(coRace)) {
       Asian.description
-    }
-    else if (OnlyAsian(raceFields,asianEnums,
-      hawaiianIslanderEnums) &&
-      !AnyApplicantWhite(coRace)){
+    } else if (OnlyAsian(raceFields, asianEnums, hawaiianIslanderEnums) &&
+               !AnyApplicantWhite(coRace)) {
       Asian.description
-    }
-    else if (
-      (asianEnums.contains(race.race1) && race.race2 == White) ||
-        (asianEnums.contains(race.race2) && race.race1 == White) ){
-      if(isRaceThreeToFiveEmpty(race) && !AnyApplicantWhite(coRace)) {
+    } else if ((asianEnums.contains(race.race1) && race.race2 == White) ||
+               (asianEnums.contains(race.race2) && race.race1 == White)) {
+      if (isRaceThreeToFiveEmpty(race) && !AnyApplicantWhite(coRace)) {
         Asian.description
-      }else{
+      } else {
         "Joint"
       }
     }
 
     //Native Hawaiian or Other Pacific Islander
     else if (hawaiianIslanderEnums.contains(race.race1) &&
-      isRaceTwoToFiveEmpty(race) &&
-      !AnyApplicantWhite(race)){
+             isRaceTwoToFiveEmpty(race) &&
+             !AnyApplicantWhite(race)) {
       NativeHawaiianOrOtherPacificIslander.description
-    }
-    else if (OnlyNativeHawaiianOrOtherPacificIslander(raceFields,asianEnums,
-      hawaiianIslanderEnums) &&
-      !AnyApplicantWhite(coRace)){
+    } else if (OnlyNativeHawaiianOrOtherPacificIslander(
+                 raceFields,
+                 asianEnums,
+                 hawaiianIslanderEnums) &&
+               !AnyApplicantWhite(coRace)) {
       NativeHawaiianOrOtherPacificIslander.description
-    }
-    else if (
-      (hawaiianIslanderEnums.contains(race.race1) && race.race2 == White) ||
-        (hawaiianIslanderEnums.contains(race.race2) && race.race1 == White) ){
-      if(isRaceThreeToFiveEmpty(race) && !AnyApplicantWhite(coRace)) {
+    } else if ((hawaiianIslanderEnums.contains(race.race1) && race.race2 == White) ||
+               (hawaiianIslanderEnums.contains(race.race2) && race.race1 == White)) {
+      if (isRaceThreeToFiveEmpty(race) && !AnyApplicantWhite(coRace)) {
         NativeHawaiianOrOtherPacificIslander.description
-      }else{
+      } else {
         "Joint"
       }
     }
     //Black Or AfricanAmerican
-    else if (race.race1==BlackOrAfricanAmerican &&
-      isRaceTwoToFiveEmpty(race) &&
-      !AnyApplicantWhite(coRace)){
+    else if (race.race1 == BlackOrAfricanAmerican &&
+             isRaceTwoToFiveEmpty(race) &&
+             !AnyApplicantWhite(coRace)) {
       BlackOrAfricanAmerican.description
-    }
-    else if (
-      (race.race1 == BlackOrAfricanAmerican && race.race2 == White) ||
-        (race.race2 == BlackOrAfricanAmerican && race.race1 == White) ){
-      if(isRaceThreeToFiveEmpty(race) && !AnyApplicantWhite(coRace)) {
+    } else if ((race.race1 == BlackOrAfricanAmerican && race.race2 == White) ||
+               (race.race2 == BlackOrAfricanAmerican && race.race1 == White)) {
+      if (isRaceThreeToFiveEmpty(race) && !AnyApplicantWhite(coRace)) {
         BlackOrAfricanAmerican.description
-      }else{
+      } else {
         "Joint"
       }
-    }
-    else
+    } else
       "Joint"
   }
 
-  private def AnyApplicantAMinority(raceFields: Array[RaceEnum],
-  asianEnums: Array[RaceEnum with Product with Serializable],
-  hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable])
-  : Boolean = {
+  private def AnyApplicantAMinority(
+      raceFields: Array[RaceEnum],
+      asianEnums: Array[RaceEnum with Product with Serializable],
+      hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable])
+    : Boolean = {
     raceFields.exists(asianEnums.contains) ||
-      raceFields.contains(White) ||
-      raceFields.exists(hawaiianIslanderEnums.contains) ||
-      raceFields.contains(BlackOrAfricanAmerican) |
+    raceFields.contains(White) ||
+    raceFields.exists(hawaiianIslanderEnums.contains) ||
+    raceFields.contains(BlackOrAfricanAmerican) |
       raceFields.contains(AmericanIndianOrAlaskaNative)
   }
 
-  private def OnlyNativeHawaiianOrOtherPacificIslander(raceFields: Array[RaceEnum],
-                                    asianEnums: Array[RaceEnum with Product with Serializable],
-                                    hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable])
-  : Boolean = {
+  private def OnlyNativeHawaiianOrOtherPacificIslander(
+      raceFields: Array[RaceEnum],
+      asianEnums: Array[RaceEnum with Product with Serializable],
+      hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable])
+    : Boolean = {
     !raceFields.exists(asianEnums.contains) &&
-       raceFields.exists(hawaiianIslanderEnums.contains) &&
-      !raceFields.contains(BlackOrAfricanAmerican) &&
-      !raceFields.contains(AmericanIndianOrAlaskaNative)
+    raceFields.exists(hawaiianIslanderEnums.contains) &&
+    !raceFields.contains(BlackOrAfricanAmerican) &&
+    !raceFields.contains(AmericanIndianOrAlaskaNative)
   }
 
-  private def OnlyAsian(raceFields: Array[RaceEnum],
-                                                       asianEnums: Array[RaceEnum with Product with Serializable],
-                                                       hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable])
-  : Boolean = {
+  private def OnlyAsian(
+      raceFields: Array[RaceEnum],
+      asianEnums: Array[RaceEnum with Product with Serializable],
+      hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable])
+    : Boolean = {
     raceFields.exists(asianEnums.contains) &&
-      !raceFields.exists(hawaiianIslanderEnums.contains) &&
-      !raceFields.contains(BlackOrAfricanAmerican) &&
-      !raceFields.contains(AmericanIndianOrAlaskaNative)
+    !raceFields.exists(hawaiianIslanderEnums.contains) &&
+    !raceFields.contains(BlackOrAfricanAmerican) &&
+    !raceFields.contains(AmericanIndianOrAlaskaNative)
   }
 
-  private def OnlyBlackOrAfricanAmerican(raceFields: Array[RaceEnum],
-                        asianEnums: Array[RaceEnum with Product with Serializable],
-                        hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable])
-  : Boolean = {
+  private def OnlyBlackOrAfricanAmerican(
+      raceFields: Array[RaceEnum],
+      asianEnums: Array[RaceEnum with Product with Serializable],
+      hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable])
+    : Boolean = {
     !raceFields.exists(asianEnums.contains) &&
-      !raceFields.exists(hawaiianIslanderEnums.contains) &&
-      raceFields.contains(BlackOrAfricanAmerican) &&
-      !raceFields.contains(AmericanIndianOrAlaskaNative)
+    !raceFields.exists(hawaiianIslanderEnums.contains) &&
+    raceFields.contains(BlackOrAfricanAmerican) &&
+    !raceFields.contains(AmericanIndianOrAlaskaNative)
   }
 
-  private def OnlyAmericanIndianOrAlaskaNative(raceFields: Array[RaceEnum],
-                                         asianEnums: Array[RaceEnum with Product with Serializable],
-                                         hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable])
-  : Boolean = {
+  private def OnlyAmericanIndianOrAlaskaNative(
+      raceFields: Array[RaceEnum],
+      asianEnums: Array[RaceEnum with Product with Serializable],
+      hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable])
+    : Boolean = {
     !raceFields.exists(asianEnums.contains) &&
-       !raceFields.exists(hawaiianIslanderEnums.contains) &&
-      !raceFields.contains(BlackOrAfricanAmerican) &&
-      raceFields.contains(AmericanIndianOrAlaskaNative)
+    !raceFields.exists(hawaiianIslanderEnums.contains) &&
+    !raceFields.contains(BlackOrAfricanAmerican) &&
+    raceFields.contains(AmericanIndianOrAlaskaNative)
   }
 
-  private def OnlyWhite(raceFields: Array[RaceEnum],
-                                               asianEnums: Array[RaceEnum with Product with Serializable],
-                                               hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable])
-  : Boolean = {
+  private def OnlyWhite(
+      raceFields: Array[RaceEnum],
+      asianEnums: Array[RaceEnum with Product with Serializable],
+      hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable])
+    : Boolean = {
     !raceFields.exists(asianEnums.contains) &&
-       !raceFields.exists(hawaiianIslanderEnums.contains) &&
-      !raceFields.contains(BlackOrAfricanAmerican) &&
-      !raceFields.contains(AmericanIndianOrAlaskaNative)
+    !raceFields.exists(hawaiianIslanderEnums.contains) &&
+    !raceFields.contains(BlackOrAfricanAmerican) &&
+    !raceFields.contains(AmericanIndianOrAlaskaNative)
   }
 
   private def moreThanOneMinority(
