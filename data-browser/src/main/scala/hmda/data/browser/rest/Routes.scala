@@ -29,14 +29,14 @@ object Routes {
           )
         )
       } ~ (path("pipe") & get) {
-          complete(
-            HttpEntity(
-              `text/csv(UTF-8)`,
-              pipeSource(
-                browserService.fetchData(msaMd, state, races, actionsTaken))
-            )
+        complete(
+          HttpEntity(
+            `text/csv(UTF-8)`,
+            pipeSource(
+              browserService.fetchData(msaMd, state, races, actionsTaken))
           )
-        } ~get {
+        )
+      } ~ get {
         val inputParameters = Parameters(msaMd = Some(msaMd.msaMd),
                                          state = Some(state.entryName),
                                          races = races.map(_.entryName),
@@ -137,19 +137,19 @@ object Routes {
         )
       } ~
         get {
-        val inputParameters = Parameters(msaMd = Some(msaMd.msaMd),
-                                         state = None,
-                                         races = races.map(_.entryName),
-                                         actionsTaken =
-                                           actionsTaken.map(_.value))
+          val inputParameters = Parameters(msaMd = Some(msaMd.msaMd),
+                                           state = None,
+                                           races = races.map(_.entryName),
+                                           actionsTaken =
+                                             actionsTaken.map(_.value))
 
-        val stats =
-          browserService
-            .fetchAggregate(msaMd, races, actionsTaken)
-            .map(aggs => AggregationResponse(inputParameters, aggs))
-            .runToFuture
-        complete(OK, stats)
-      }
+          val stats =
+            browserService
+              .fetchAggregate(msaMd, races, actionsTaken)
+              .map(aggs => AggregationResponse(inputParameters, aggs))
+              .runToFuture
+          complete(OK, stats)
+        }
 
     pathPrefix("view") {
       // ?actions_taken=1&races=Asian

@@ -117,3 +117,6 @@ ALTER TABLE  public.modifiedlar2018
   ADD COLUMN sex_categorization character varying;
 
 CREATE INDEX ON modifiedlar2018 (lei);
+
+create index on modifiedlar2018prod (race_categorization);
+create index on modifiedlar2018prod (action_taken_type);
