@@ -78,11 +78,6 @@ object RaceCategorization {
       !AnyApplicantWhite(coRace)){
       AmericanIndianOrAlaskaNative.description
     }
-    else if (OnlyAmericanIndianOrAlaskaNative(raceFields,asianEnums,
-      hawaiianIslanderEnums) &&
-      !AnyApplicantWhite(coRace)){
-      AmericanIndianOrAlaskaNative.description
-    }
     else if (
       (race.race1 == AmericanIndianOrAlaskaNative && race.race2 == White) ||
         (race.race2 == AmericanIndianOrAlaskaNative && race.race1 == White) ){
@@ -134,15 +129,9 @@ object RaceCategorization {
         "Joint"
       }
     }
-
     //Black Or AfricanAmerican
     else if (race.race1==BlackOrAfricanAmerican &&
       isRaceTwoToFiveEmpty(race) &&
-      !AnyApplicantWhite(coRace)){
-      BlackOrAfricanAmerican.description
-    }
-    else if (OnlyBlackOrAfricanAmerican(raceFields,asianEnums,
-      hawaiianIslanderEnums) &&
       !AnyApplicantWhite(coRace)){
       BlackOrAfricanAmerican.description
     }
