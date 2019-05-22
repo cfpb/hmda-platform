@@ -61,8 +61,8 @@ object RaceCategorization {
     //White
     else if (race.race1 == White &&
              isRaceTwoToFiveEmpty(race) &&
-      isRaceTwoToFiveEmpty(coRace) &&
-      (coRace.race1 == White ||
+             isRaceTwoToFiveEmpty(coRace) &&
+             (coRace.race1 == White ||
              coRace.race1 == RaceInformationNotProvided ||
              coRace.race1 == RaceNotApplicable ||
              coRace.race1 == RaceNoCoApplicant)) {
@@ -141,7 +141,6 @@ object RaceCategorization {
       hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable])
     : Boolean = {
     raceFields.exists(asianEnums.contains) ||
-    raceFields.contains(White) ||
     raceFields.exists(hawaiianIslanderEnums.contains) ||
     raceFields.contains(BlackOrAfricanAmerican) |
       raceFields.contains(AmericanIndianOrAlaskaNative)
