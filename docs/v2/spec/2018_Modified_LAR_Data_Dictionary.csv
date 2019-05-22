@@ -77,10 +77,10 @@ Multifamily Affordable Units,Character Varying, 'NA' 'Exempt'
 Submission of Application,Numeric,1 2 3 1111
 Initially Payable to Your Institution,Numeric,1 2 3 1111
 Automated Underwriting System: 1,Numeric,1 2 3 4 5 6 1111
-Automated Underwriting System: 2,Character Varying,1 2 3 4 5 blank 
-Automated Underwriting System: 3,Character Varying,1 2 3 4 5 blank 
-Automated Underwriting System: 4,Character Varying,1 2 3 4 5 blank
-Automated Underwriting System: 5,Character Varying,1 2 3 4 5 blank
+Automated Underwriting System: 2,Numeric,1 2 3 4 5 null 
+Automated Underwriting System: 3,Numeric,1 2 3 4 5 null 
+Automated Underwriting System: 4,Numeric,1 2 3 4 5 null
+Automated Underwriting System: 5,Numeric,1 2 3 4 5 null
 Reverse Mortgage,Numeric,1 2 1111
 Open-End Line of Credit,Numeric,1 2 1111
 Business or Commercial Purpose,Numeric,1 2 1111
