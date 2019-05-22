@@ -14,6 +14,7 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import hmda.data.browser.models.ActionTaken._
 import hmda.data.browser.models.Race._
+import hmda.data.browser.models.Sex._
 import hmda.data.browser.models._
 import io.circe.generic.auto._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -48,11 +49,7 @@ trait DataBrowserDirectives {
 
           // if the user provides no filters, it meas they want to see all actions
           case Right(_) =>
-            provide(
-              BrowserField("actions_taken",
-                           ActionTaken.values.map(_.entryName),
-                           "action_taken_type",
-                           "ACTION"))
+            provide(BrowserField("empty", Seq(), "empty", "EMPTY"))
         }
       }
 
@@ -64,20 +61,37 @@ trait DataBrowserDirectives {
 
         case Right(races) if races.nonEmpty =>
           provide(
-            BrowserField("race",
+            BrowserField("races",
                          races.map(_.entryName),
                          "race_categorization",
                          "RACE"))
 
         // if the user provides no filters, it means they want to see all races
         case Right(_) =>
-          provide(
-            BrowserField("race",
-                         Race.values.map(_.entryName),
-                         "race_categorization",
-                         "RACE"))
+          provide(BrowserField("empty", Seq(), "empty", "EMPTY"))
       }
     }
+
+  def extractSexes: Directive1[BrowserField] = {
+    parameters("sexes".as(CsvSeq[String]) ? Nil)
+      .flatMap { rawSexes =>
+        validateSexes(rawSexes) match {
+          case Left(invalidSexes) =>
+            complete((BadRequest, InvalidActions(invalidSexes)))
+
+          case Right(sexes) if sexes.nonEmpty =>
+            provide(
+              BrowserField("sexes",
+                           sexes.map(_.entryName),
+                           "sex_categorization",
+                           "SEX"))
+
+          // if the user provides no filters, it meas they want to see all actions
+          case Right(_) =>
+            provide(BrowserField("empty", Seq(), "empty", "EMPTY"))
+        }
+      }
+  }
 
   val StateSegment: PathMatcher1[State] =
     Segment.flatMap(State.withNameInsensitiveOption)

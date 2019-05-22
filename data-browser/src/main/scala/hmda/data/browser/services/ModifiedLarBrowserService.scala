@@ -49,9 +49,9 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository,
     } yield {
       // this is only executed if the initial cache query comes back empty
       val findInDbThenUpdateCache = for {
-        stat <- findInDatabase(field1.redisName,
+        stat <- findInDatabase(field1.dbName,
                                field1Entry,
-                               field2.redisName,
+                               field2.dbName,
                                field2Entry)
         _ <- updateCache(field1.redisName,
                          field1Entry,

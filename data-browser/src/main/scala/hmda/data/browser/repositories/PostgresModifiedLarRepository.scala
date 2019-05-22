@@ -157,17 +157,17 @@ class PostgresModifiedLarRepository(tableName: String,
   }
 
   override def findAndAggregate(msaMd: Int,
-                                field1: String,
                                 field1DbName: String,
-                                field2: String,
-                                field2DbName: String): Task[Statistic] = {
+                                field1: String,
+                                field2DbName: String,
+                                field2: String): Task[Statistic] = {
     val query =
       sql"""SELECT
               COUNT(loan_amount),
               SUM(loan_amount)
             FROM #${tableName}
             WHERE msa_md = #${msaMd}
-              AND #${field1DbName} = #${field1}
+              AND #${field1DbName} = '#${field1}'
               AND #${field2DbName} = '#${field2}'
       """.as[Statistic].head
 
@@ -175,17 +175,17 @@ class PostgresModifiedLarRepository(tableName: String,
   }
 
   override def findAndAggregate(state: String,
-                                field1: String,
                                 field1DbName: String,
-                                field2: String,
-                                field2DbName: String): Task[Statistic] = {
+                                field1: String,
+                                field2DbName: String,
+                                field2: String): Task[Statistic] = {
     val query =
       sql"""SELECT
               COUNT(loan_amount),
               SUM(loan_amount)
             FROM #${tableName}
             WHERE state = '#${state}'
-              AND #${field1DbName} = #${field1.value}
+              AND #${field1DbName} = '#${field1.value}'
               AND #${field2DbName} = '#${field2.value}'
       """.as[Statistic].head
 
@@ -206,16 +206,16 @@ class PostgresModifiedLarRepository(tableName: String,
     Source.fromPublisher(publisher)
   }
 
-  override def findAndAggregate(field1: String,
-                                field1DbName: String,
-                                field2: String,
-                                field2DbName: String): Task[Statistic] = {
+  override def findAndAggregate(field1DbName: String,
+                                field1: String,
+                                field2DbName: String,
+                                field2: String): Task[Statistic] = {
     val query =
       sql"""SELECT
               COUNT(loan_amount),
               SUM(loan_amount)
             FROM #${tableName}
-            WHERE #${field1DbName} = #${field1}
+            WHERE #${field1DbName} = '#${field1}'
             AND #${field2DbName} = '#${field2}'
       """.as[Statistic].head
 
@@ -241,17 +241,17 @@ class PostgresModifiedLarRepository(tableName: String,
 
   override def findAndAggregate(msaMd: Int,
                                 state: String,
-                                field1: String,
                                 field1DbName: String,
-                                field2: String,
-                                field2DbName: String): Task[Statistic] = {
+                                field1: String,
+                                field2DbName: String,
+                                field2: String): Task[Statistic] = {
     val query = sql"""SELECT
         COUNT(loan_amount),
         SUM(loan_amount)
       FROM #${tableName}
       WHERE msa_md = #${msaMd}
       AND state = '#${state}'
-      AND #${field1DbName} = #${field1}
+      AND #${field1DbName} = '#${field1}'
       AND #${field2DbName} = '#${field2}'
       """.as[Statistic].head
 

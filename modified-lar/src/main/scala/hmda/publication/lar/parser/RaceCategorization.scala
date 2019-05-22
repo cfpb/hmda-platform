@@ -49,15 +49,10 @@ object RaceCategorization {
              isRaceTwoToFiveEmpty &&
              !isCoWhite) {
       AmericanIndianOrAlaskaNative.description
-<<<<<<< HEAD
-    } else if ((race.race1 == AmericanIndianOrAlaskaNative && race.race2 == White) ||
-               (race.race2 == AmericanIndianOrAlaskaNative && race.race1 == White)) {
-=======
     }
 
     else if((race.race1 == AmericanIndianOrAlaskaNative && race.race2 == White) ||
       (race.race2 == AmericanIndianOrAlaskaNative && race.race1 == White)){
->>>>>>> 5f71c15eeed269fced400feb26380f040b9c1d75
       AmericanIndianOrAlaskaNative.description
     }
 

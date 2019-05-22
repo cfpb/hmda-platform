@@ -72,7 +72,6 @@ lazy val packageSettings = Seq(
   // removes all jar mappings in universal and appends the fat jar
   mappings in Universal := {
     // universalMappings: Seq[(File,String)]
-    println("here")
     val universalMappings = (mappings in Universal).value
     val fatJar = (assembly in Compile).value
     // removing means filtering

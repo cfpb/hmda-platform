@@ -20,8 +20,10 @@ object Routes {
     def stateAndMsaRoute(state: State,
                          msaMd: MsaMd,
                          actionsTaken: BrowserField,
-                         race: BrowserField): Route = {
-      val filteredfields = List(actionsTaken, race).filter(_.name != "empty")
+                         race: BrowserField,
+                         sex: BrowserField): Route = {
+      val filteredfields =
+        List(actionsTaken, race, sex).filter(_.name != "empty")
       if (filteredfields.length > 2) {
         complete((BadRequest, "More than 2 fields provided"))
       } else {
@@ -56,7 +58,7 @@ object Routes {
           val field1 = filteredfields.head
           val field2 = BrowserField("raceApplicant1",
                                     List("*"),
-                                    "raceApplicant1",
+                                    "race_applicant_1",
                                     "raceApplicant1")
           (path("csv") & get) {
             complete(
@@ -85,8 +87,10 @@ object Routes {
 
     def stateRoute(state: State,
                    actionsTaken: BrowserField,
-                   race: BrowserField): Route = {
-      val filteredfields = List(actionsTaken, race).filter(_.name != "empty")
+                   race: BrowserField,
+                   sex: BrowserField): Route = {
+      val filteredfields =
+        List(actionsTaken, race, sex).filter(_.name != "empty")
       if (filteredfields.length > 2) {
         complete((BadRequest, "More than 2 fields provided"))
       } else {
@@ -120,7 +124,7 @@ object Routes {
           val field1 = filteredfields.head
           val field2 = BrowserField("raceApplicant1",
                                     List("*"),
-                                    "raceApplicant1",
+                                    "race_applicant_1",
                                     "raceApplicant1")
           (path("csv") & get) {
             complete(
@@ -148,8 +152,10 @@ object Routes {
     }
 
     def nationwideRoute(actionsTaken: BrowserField,
-                        race: BrowserField): Route = {
-      val filteredfields = List(actionsTaken, race).filter(_.name != "empty")
+                        race: BrowserField,
+                        sex: BrowserField): Route = {
+      val filteredfields =
+        List(actionsTaken, race, sex).filter(_.name != "empty")
       if (filteredfields.length > 2) {
         complete((BadRequest, "More than 2 fields provided"))
       } else {
@@ -185,7 +191,7 @@ object Routes {
           val field1 = filteredfields.head
           val field2 = BrowserField("raceApplicant1",
                                     List("*"),
-                                    "raceApplicant1",
+                                    "race_applicant_1",
                                     "raceApplicant1")
           (path("csv") & get) {
             complete(
@@ -216,8 +222,10 @@ object Routes {
 
     def msaRoute(msaMd: MsaMd,
                  actionsTaken: BrowserField,
-                 race: BrowserField): Route = {
-      val filteredfields = List(actionsTaken, race).filter(_.name != "empty")
+                 race: BrowserField,
+                 sex: BrowserField): Route = {
+      val filteredfields =
+        List(actionsTaken, race, sex).filter(_.name != "empty")
       if (filteredfields.length > 2) {
         complete((BadRequest, "More than 2 fields provided"))
       } else {
@@ -250,7 +258,7 @@ object Routes {
           val field1 = filteredfields.head
           val field2 = BrowserField("raceApplicant1",
                                     List("*"),
-                                    "raceApplicant1",
+                                    "race_applicant_1",
                                     "raceApplicant1")
           (path("csv") & get) {
             complete(
@@ -279,21 +287,22 @@ object Routes {
     // TODO: Add invalidate endpoints
     pathPrefix("view") {
       // ?actions_taken=1&races=Asian
-      (extractActions & extractRaces) { (actionsTaken, races) =>
-        // /data-browser-api/view/nationwide(/csv)
-        pathPrefix("nationwide")(nationwideRoute(actionsTaken, races)) ~
-          // /data-browser-api/view/msamd/<msamd>(/csv)
-          pathPrefix("msamd" / MsaMdSegment) { msaMd =>
-            msaRoute(msaMd, actionsTaken, races)
-          } ~
-          pathPrefix("state" / StateSegment) { state =>
-            // /data-browser-api/view/state/<state>/msamd/<msamd>(/csv)
+      (extractActions & extractRaces & extractSexes) {
+        (actionsTaken, races, sexes) =>
+          // /data-browser-api/view/nationwide(/csv)
+          pathPrefix("nationwide")(nationwideRoute(actionsTaken, races, sexes)) ~
+            // /data-browser-api/view/msamd/<msamd>(/csv)
             pathPrefix("msamd" / MsaMdSegment) { msaMd =>
-              stateAndMsaRoute(state, msaMd, actionsTaken, races)
+              msaRoute(msaMd, actionsTaken, races, sexes)
             } ~
-              // /data-browser-api/view/state/<state>(/csv)
-              stateRoute(state, actionsTaken, races)
-          }
+            pathPrefix("state" / StateSegment) { state =>
+              // /data-browser-api/view/state/<state>/msamd/<msamd>(/csv)
+              pathPrefix("msamd" / MsaMdSegment) { msaMd =>
+                stateAndMsaRoute(state, msaMd, actionsTaken, races, sexes)
+              } ~
+                // /data-browser-api/view/state/<state>(/csv)
+                stateRoute(state, actionsTaken, races, sexes)
+            }
       }
     }
   }
