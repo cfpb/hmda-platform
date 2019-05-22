@@ -43,7 +43,7 @@ Age of Applicant or Borrower,Character Varying,<25 25-34 35-44 45-54 55-64 65-74
 Age of Applicant >= 62,Character Varying,Yes; No; NA
 Age of Co-Applicant or Co-Borrower,Character Varying,<25; 25-34; 35-44; 45-54; 55-64; 65-74; >74
 Age of Co-Applicant >= 62,Character Varying,Yes; No; NA
-Income,Character Varying,Integers 'NA'
+Income,Character Varying, 'NA'
 Type of Purchaser,Numeric,0 1 2 3 4 5 6 71 72 8 9
 Rate Spread,Character Varying Doubles (Double-precision floating point. For example:  3.25),'NA' 'Exempt'
 HOEPA Status,Numeric,1 2 3
@@ -54,26 +54,26 @@ Reason for Denial: 1,Numeric,1 2 3 4 5 6 7 8 9 10 1111
 Reason for Denial: 2,Character Varying,1 2 3 4 5 6 7 8 9 blank
 Reason for Denial: 3,Character Varying,1 2 3 4 5 6 7 8 9 blank
 Reason for Denial: 4,Character Varying,1 2 3 4 5 6 7 8 9 blank
-Total Loan Costs,Character Varying,Doubles 'NA' 'Exempt'
-Total Points and Fees,Character Varying,Doubles 'NA' 'Exempt'
-Origination Charges,Character Varying,Doubles 'NA' 'Exempt'
-Discount Points,Character Varying,Doubles 'NA' 'Exempt'
-Lender Credits,Character Varying,Doubles 'NA' 'Exempt'
-Interest Rate,Character Varying,Doubles 'NA' 'Exempt'
-Prepayment Penalty Term,Character Varying,Doubles 'NA' 'Exempt'
+Total Loan Costs,Character Varying, 'NA' 'Exempt'
+Total Points and Fees,Character Varying, 'NA' 'Exempt'
+Origination Charges,Character Varying, 'NA' 'Exempt'
+Discount Points,Character Varying, 'NA' 'Exempt'
+Lender Credits,Character Varying, 'NA' 'Exempt'
+Interest Rate,Character Varying, 'NA' 'Exempt'
+Prepayment Penalty Term,Character Varying, 'NA' 'Exempt'
 Debt-to-Income Ratio,Character Varying,<20% 20%- <30% 30%-<36% 50%-60% >60% Exact values between 36%-<50% NA Exempt
-Combined Loan-to-Value Ratio,Character Varying,Integers 'NA' 'Exempt'
-Loan Term,Character Varying,Integers 'NA' 'Exempt'
-Introductory Rate Period,Character Varying,Integers 'NA' 'Exempt'
+Combined Loan-to-Value Ratio,Character Varying, 'NA' 'Exempt'
+Loan Term,Character Varying, 'NA' 'Exempt'
+Introductory Rate Period,Character Varying, 'NA' 'Exempt'
 Balloon Payment,Numeric,1 2 1111
 Interest-Only Payments,Numeric,1 2 1111
 Negative Amortization,Numeric,1 2 1111
 Other Non-amortizing Features,Numeric,1 2 1111
-Property Value,Numeric,Integers
+Property Value,Numeric, 'NA' 'Exempt'
 Manufactured Home Secured Property Type,Numeric,1 2 3 1111
 Manufactured Home Land Property Interest,Numeric,1 2 3 4 5 1111
 Total Units,Character Varying,1 2 3 4 5-24 25-49 50-99 100-149 >149
-Multifamily Affordable Units,Character Varying,Integers 0-100 'NA' 'Exempt'
+Multifamily Affordable Units,Character Varying, 'NA' 'Exempt'
 Submission of Application,Numeric,1 2 3 1111
 Initially Payable to Your Institution,Numeric,1 2 3 1111
 Automated Underwriting System: 1,Numeric,1 2 3 4 5 6 1111
