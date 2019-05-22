@@ -219,7 +219,6 @@ class PostgresModifiedLarRepository(tableName: String,
                     state: String,
                     actionsTaken: Seq[Int],
                     races: Seq[String]): Source[ModifiedLarEntity, NotUsed] = {
-    println("came here in repo!!")
     val searchQuery = sql"""SELECT #$columns
                         FROM #${tableName}
                         WHERE msa_md = #${msaMd}
