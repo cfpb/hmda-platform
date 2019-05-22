@@ -4,7 +4,7 @@ import akka.stream.scaladsl.Source
 import hmda.data.browser.models.ModifiedLarEntity
 import monix.eval.Task
 import slick.basic.DatabaseConfig
-import slick.jdbc.JdbcProfile
+import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
 
 class PostgresModifiedLarRepository(tableName: String,
                                     config: DatabaseConfig[JdbcProfile])
@@ -135,7 +135,14 @@ class PostgresModifiedLarRepository(tableName: String,
     WHERE msa_md = #${msaMd}
       AND action_taken_type IN #${formatInt(actionsTaken)}
       AND race_categorization IN #${formatString(races)}
-    """.as[ModifiedLarEntity]
+    """
+      .as[ModifiedLarEntity]
+      .withStatementParameters(
+        rsType = ResultSetType.ForwardOnly,
+        rsConcurrency = ResultSetConcurrency.ReadOnly,
+        fetchSize = 1000
+      )
+      .transactionally
 
     val publisher = db.stream(searchQuery)
     Source.fromPublisher(publisher)
@@ -150,7 +157,14 @@ class PostgresModifiedLarRepository(tableName: String,
     WHERE state = '#${state}'
       AND action_taken_type IN #${formatInt(actionsTaken)}
       AND race_categorization IN #${formatString(races)}
-    """.as[ModifiedLarEntity]
+    """
+      .as[ModifiedLarEntity]
+      .withStatementParameters(
+        rsType = ResultSetType.ForwardOnly,
+        rsConcurrency = ResultSetConcurrency.ReadOnly,
+        fetchSize = 1000
+      )
+      .transactionally
 
     val publisher = db.stream(searchQuery)
     Source.fromPublisher(publisher)
@@ -195,7 +209,14 @@ class PostgresModifiedLarRepository(tableName: String,
     FROM #${tableName}
     WHERE action_taken_type IN #${formatInt(actionsTaken)}
       AND race_categorization IN #${formatString(races)}
-    """.as[ModifiedLarEntity]
+    """
+      .as[ModifiedLarEntity]
+      .withStatementParameters(
+        rsType = ResultSetType.ForwardOnly,
+        rsConcurrency = ResultSetConcurrency.ReadOnly,
+        fetchSize = 1000
+      )
+      .transactionally
 
     val publisher = db.stream(searchQuery)
     Source.fromPublisher(publisher)
@@ -225,7 +246,14 @@ class PostgresModifiedLarRepository(tableName: String,
                         AND state = '#${state}'
                         AND action_taken_type IN #${formatInt(actionsTaken)}
                         AND race_categorization IN #${formatString(races)}
-    """.as[ModifiedLarEntity]
+    """
+      .as[ModifiedLarEntity]
+      .withStatementParameters(
+        rsType = ResultSetType.ForwardOnly,
+        rsConcurrency = ResultSetConcurrency.ReadOnly,
+        fetchSize = 1000
+      )
+      .transactionally
 
     val publisher = db.stream(searchQuery)
     Source.fromPublisher(publisher)
