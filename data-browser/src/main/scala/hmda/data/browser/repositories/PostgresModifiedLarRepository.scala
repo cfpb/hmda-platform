@@ -4,7 +4,7 @@ import akka.stream.scaladsl.Source
 import hmda.data.browser.models.{ModifiedLarEntity, BrowserField}
 import monix.eval.Task
 import slick.basic.DatabaseConfig
-import slick.jdbc.JdbcProfile
+import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
 
 class PostgresModifiedLarRepository(tableName: String,
                                     config: DatabaseConfig[JdbcProfile])
@@ -75,7 +75,7 @@ class PostgresModifiedLarRepository(tableName: String,
       lender_credits,
       interest_rate,
       payment_penalty,
-      debt_to_income,
+      debt_to_incode,
       loan_value_ratio,
       loan_term,
       rate_spread_intro,
@@ -85,7 +85,7 @@ class PostgresModifiedLarRepository(tableName: String,
       other_amortization,
       property_value,
       home_security_policy,
-      land_property_interest,
+      lan_property_interest,
       total_units,
       mf_affordable,
       application_submission,
@@ -117,7 +117,6 @@ class PostgresModifiedLarRepository(tableName: String,
       race_categorization,
       sex_categorization,
       ethnicity_categorization,
-      uniq_id,
       percent_median_msa_income
     """.stripMargin
 
@@ -134,14 +133,28 @@ class PostgresModifiedLarRepository(tableName: String,
         SELECT #$columns
         FROM #${tableName}
         WHERE msa_md = #${msaMd}
-        """.as[ModifiedLarEntity]
+        """
+          .as[ModifiedLarEntity]
+          .withStatementParameters(
+            rsType = ResultSetType.ForwardOnly,
+            rsConcurrency = ResultSetConcurrency.ReadOnly,
+            fetchSize = 1000
+          )
+          .transactionally
       } else if (field2.name == "empty") {
         sql"""
         SELECT #$columns
         FROM #${tableName}
         WHERE msa_md = #${msaMd}
           AND #${field1.dbName} IN #${formatString(field1.value)}
-        """.as[ModifiedLarEntity]
+        """
+          .as[ModifiedLarEntity]
+          .withStatementParameters(
+            rsType = ResultSetType.ForwardOnly,
+            rsConcurrency = ResultSetConcurrency.ReadOnly,
+            fetchSize = 1000
+          )
+          .transactionally
       } else {
         sql"""
         SELECT #$columns
@@ -149,7 +162,14 @@ class PostgresModifiedLarRepository(tableName: String,
         WHERE msa_md = #${msaMd}
           AND #${field1.dbName} IN #${formatString(field1.value)}
           AND #${field2.dbName} IN #${formatString(field2.value)}
-        """.as[ModifiedLarEntity]
+        """
+          .as[ModifiedLarEntity]
+          .withStatementParameters(
+            rsType = ResultSetType.ForwardOnly,
+            rsConcurrency = ResultSetConcurrency.ReadOnly,
+            fetchSize = 1000
+          )
+          .transactionally
       }
     }
 
@@ -168,6 +188,12 @@ class PostgresModifiedLarRepository(tableName: String,
       FROM #${tableName}
       WHERE state = '#${state}'
       """.as[ModifiedLarEntity]
+          .withStatementParameters(
+            rsType = ResultSetType.ForwardOnly,
+            rsConcurrency = ResultSetConcurrency.ReadOnly,
+            fetchSize = 1000
+          )
+          .transactionally
       } else if (field2.name == "empty") {
         sql"""
       SELECT #$columns
@@ -175,6 +201,12 @@ class PostgresModifiedLarRepository(tableName: String,
       WHERE state = '#${state}'
         AND #${field1.dbName} IN #${formatString(field1.value)}
       """.as[ModifiedLarEntity]
+          .withStatementParameters(
+            rsType = ResultSetType.ForwardOnly,
+            rsConcurrency = ResultSetConcurrency.ReadOnly,
+            fetchSize = 1000
+          )
+          .transactionally
       } else {
         sql"""
       SELECT #$columns
@@ -183,6 +215,12 @@ class PostgresModifiedLarRepository(tableName: String,
         AND #${field1.dbName} IN #${formatString(field1.value)}
         AND #${field2.dbName} IN #${formatString(field2.value)}
       """.as[ModifiedLarEntity]
+          .withStatementParameters(
+            rsType = ResultSetType.ForwardOnly,
+            rsConcurrency = ResultSetConcurrency.ReadOnly,
+            fetchSize = 1000
+          )
+          .transactionally
       }
     }
 
@@ -271,12 +309,24 @@ class PostgresModifiedLarRepository(tableName: String,
     SELECT #$columns
     FROM #${tableName}
     """.as[ModifiedLarEntity]
+          .withStatementParameters(
+            rsType = ResultSetType.ForwardOnly,
+            rsConcurrency = ResultSetConcurrency.ReadOnly,
+            fetchSize = 1000
+          )
+          .transactionally
       } else if (field2.name == "empty") {
         sql"""
     SELECT #$columns
     FROM #${tableName}
     WHERE #${field1.dbName} IN #${formatString(field1.value)}
     """.as[ModifiedLarEntity]
+          .withStatementParameters(
+            rsType = ResultSetType.ForwardOnly,
+            rsConcurrency = ResultSetConcurrency.ReadOnly,
+            fetchSize = 1000
+          )
+          .transactionally
       } else {
         sql"""
     SELECT #$columns
@@ -284,6 +334,12 @@ class PostgresModifiedLarRepository(tableName: String,
     WHERE #${field1.dbName} IN #${formatString(field1.value)}
       AND #${field2.dbName} IN #${formatString(field2.value)}
     """.as[ModifiedLarEntity]
+          .withStatementParameters(
+            rsType = ResultSetType.ForwardOnly,
+            rsConcurrency = ResultSetConcurrency.ReadOnly,
+            fetchSize = 1000
+          )
+          .transactionally
       }
     }
 
@@ -335,6 +391,12 @@ class PostgresModifiedLarRepository(tableName: String,
                         WHERE msa_md = #${msaMd}
                         AND state = '#${state}'
     """.as[ModifiedLarEntity]
+          .withStatementParameters(
+            rsType = ResultSetType.ForwardOnly,
+            rsConcurrency = ResultSetConcurrency.ReadOnly,
+            fetchSize = 1000
+          )
+          .transactionally
       } else if (field2.name == "empty") {
         sql"""SELECT #$columns
                         FROM #${tableName}
@@ -342,6 +404,12 @@ class PostgresModifiedLarRepository(tableName: String,
                         AND state = '#${state}'
                         AND #${field1.dbName} IN #${formatString(field1.value)}
     """.as[ModifiedLarEntity]
+          .withStatementParameters(
+            rsType = ResultSetType.ForwardOnly,
+            rsConcurrency = ResultSetConcurrency.ReadOnly,
+            fetchSize = 1000
+          )
+          .transactionally
       } else {
         sql"""SELECT #$columns
                         FROM #${tableName}
@@ -350,6 +418,12 @@ class PostgresModifiedLarRepository(tableName: String,
                         AND #${field1.dbName} IN #${formatString(field1.value)}
                         AND #${field2.dbName} IN #${formatString(field2.value)}
     """.as[ModifiedLarEntity]
+          .withStatementParameters(
+            rsType = ResultSetType.ForwardOnly,
+            rsConcurrency = ResultSetConcurrency.ReadOnly,
+            fetchSize = 1000
+          )
+          .transactionally
       }
     }
 

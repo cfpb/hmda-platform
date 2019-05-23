@@ -28,6 +28,13 @@ object Routes {
             csvSource(browserService.fetchData(msaMd, state, field1, field2))
           )
         )
+      } ~ (path("pipe") & get) {
+        complete(
+          HttpEntity(
+            `text/csv(UTF-8)`,
+            pipeSource(browserService.fetchData(msaMd, state, field1, field2))
+          )
+        )
       } ~ get {
         val inputParameters = Parameters(msaMd = Some(msaMd.msaMd),
                                          state = Some(state.entryName),
@@ -53,6 +60,13 @@ object Routes {
             csvSource(browserService.fetchData(state, field1, field2))
           )
         )
+      } ~ (path("pipe") & get) {
+        complete(
+          HttpEntity(
+            `text/csv(UTF-8)`,
+            pipeSource(browserService.fetchData(state, field1, field2))
+          )
+        )
       } ~ get {
         val inputParameters =
           Parameters(msaMd = None,
@@ -75,6 +89,15 @@ object Routes {
           HttpEntity(
             `text/csv(UTF-8)`,
             csvSource(
+              browserService
+                .fetchData(field1, field2))
+          )
+        )
+      } ~ (path("pipe") & get) {
+        complete(
+          HttpEntity(
+            `text/csv(UTF-8)`,
+            pipeSource(
               browserService
                 .fetchData(field1, field2))
           )
@@ -105,6 +128,13 @@ object Routes {
             csvSource(browserService.fetchData(msaMd, field1, field2))
           )
         )
+      } ~ (path("pipe") & get) {
+        complete(
+          HttpEntity(
+            `text/csv(UTF-8)`,
+            csvSource(browserService.fetchData(msaMd, field1, field2))
+          )
+        )
       } ~ get {
         val inputParameters = Parameters(msaMd = Some(msaMd.msaMd),
                                          state = None,
@@ -120,7 +150,6 @@ object Routes {
       }
     }
 
-    // TODO: Add invalidate endpoints
     pathPrefix("view") {
       // ?actions_taken=1&races=Asian
       (extractActions & extractRaces & extractSexes) {

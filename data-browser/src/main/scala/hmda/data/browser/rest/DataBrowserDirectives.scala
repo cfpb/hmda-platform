@@ -33,6 +33,16 @@ trait DataBrowserDirectives {
       .via(csvStreamingSupport.framingRenderer)
   }
 
+  def pipeSource(
+      s: Source[ModifiedLarEntity, NotUsed]): Source[ByteString, NotUsed] = {
+    val headerPipe = Source.single(ModifiedLarEntity.headerPipe)
+    val contentPipe = s.map(_.toPipe)
+
+    (headerPipe ++ contentPipe)
+      .map(ByteString(_))
+      .via(csvStreamingSupport.framingRenderer)
+  }
+
   def extractActions: Directive1[BrowserField] =
     parameters("actions_taken".as(CsvSeq[String]) ? Nil)
       .flatMap { rawActionsTaken =>
