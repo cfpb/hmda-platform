@@ -418,6 +418,34 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
   )
   .dependsOn(common % "compile->compile;test->test")
 
+lazy val `rate-limit` = (project in file("rate-limit"))
+  .enablePlugins(JavaServerAppPackaging,
+                 sbtdocker.DockerPlugin,
+                 AkkaGrpcPlugin,
+                 AshScriptPlugin)
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps :+ guava,
+      mainClass in Compile := Some("hmda.rateLimit.RateLimitApp"),
+      assemblyMergeStrategy in assembly := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      },
+      assemblyJarName in assembly := {
+        s"${name.value}.jar"
+      }
+    ),
+    scalafmtSettings,
+    dockerSettings,
+    packageSettings
+  )
+  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(`hmda-protocol`)
+
 lazy val `data-browser` = (project in file("data-browser"))
   .enablePlugins(JavaServerAppPackaging,
                  sbtdocker.DockerPlugin,
