@@ -1,6 +1,7 @@
 package hmda.data.browser.models
 
-import io.circe.{Decoder, Encoder, HCursor}
+import io.circe.{Decoder, Encoder, HCursor, Json}
+import io.circe.syntax._
 
 case class Aggregation(count: Long,
                        sum: Double,
@@ -16,13 +17,28 @@ object Aggregation {
   }
 
   // Scala => JSON
-  implicit val encoder: Encoder[Aggregation] =
-    Encoder.forProduct4(constants.Count,
-                        constants.Sum,
-                        constants.Field1,
-                        constants.Field2)(
-      agg => (agg.count, agg.sum, agg.field1.value, agg.field2.value)
-    )
+  implicit val encoder = new Encoder[Aggregation] {
+    final def apply(agg: Aggregation): Json =
+      if (agg.field1.name == "empty") {
+        Json.obj(
+          ("count", agg.count.asJson),
+          ("sum", agg.sum.asJson)
+        )
+      } else if (agg.field2.name == "empty") {
+        Json.obj(
+          ("count", agg.count.asJson),
+          ("sum", agg.sum.asJson),
+          (agg.field1.name, (agg.field1.value.toList).asJson)
+        )
+      } else {
+        Json.obj(
+          ("count", agg.count.asJson),
+          ("sum", agg.sum.asJson),
+          (agg.field1.name, (agg.field1.value.toList).asJson),
+          (agg.field2.name, (agg.field2.value.toList).asJson)
+        )
+      }
+  }
 
   implicit val decoder: Decoder[Aggregation] = (h: HCursor) =>
     for {

@@ -128,13 +128,30 @@ class PostgresModifiedLarRepository(tableName: String,
       msaMd: Int,
       field1: BrowserField,
       field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
-    val searchQuery = sql"""
-    SELECT #$columns
-    FROM #${tableName}
-    WHERE msa_md = #${msaMd}
-      AND #${field1.dbName} IN #${formatString(field1.value)}
-      AND #${field2.dbName} IN #${formatString(field2.value)}
-    """.as[ModifiedLarEntity]
+    val searchQuery = {
+      if (field1.name == "empty") {
+        sql"""
+        SELECT #$columns
+        FROM #${tableName}
+        WHERE msa_md = #${msaMd}
+        """.as[ModifiedLarEntity]
+      } else if (field2.name == "empty") {
+        sql"""
+        SELECT #$columns
+        FROM #${tableName}
+        WHERE msa_md = #${msaMd}
+          AND #${field1.dbName} IN #${formatString(field1.value)}
+        """.as[ModifiedLarEntity]
+      } else {
+        sql"""
+        SELECT #$columns
+        FROM #${tableName}
+        WHERE msa_md = #${msaMd}
+          AND #${field1.dbName} IN #${formatString(field1.value)}
+          AND #${field2.dbName} IN #${formatString(field2.value)}
+        """.as[ModifiedLarEntity]
+      }
+    }
 
     val publisher = db.stream(searchQuery)
     Source.fromPublisher(publisher)
@@ -144,13 +161,30 @@ class PostgresModifiedLarRepository(tableName: String,
       state: String,
       field1: BrowserField,
       field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
-    val searchQuery = sql"""
-    SELECT #$columns
-    FROM #${tableName}
-    WHERE state = '#${state}'
-      AND #${field1.dbName} IN #${formatString(field1.value)}
-      AND #${field2.dbName} IN #${formatString(field2.value)}
-    """.as[ModifiedLarEntity]
+    val searchQuery = {
+      if (field1.name == "empty") {
+        sql"""
+      SELECT #$columns
+      FROM #${tableName}
+      WHERE state = '#${state}'
+      """.as[ModifiedLarEntity]
+      } else if (field2.name == "empty") {
+        sql"""
+      SELECT #$columns
+      FROM #${tableName}
+      WHERE state = '#${state}'
+        AND #${field1.dbName} IN #${formatString(field1.value)}
+      """.as[ModifiedLarEntity]
+      } else {
+        sql"""
+      SELECT #$columns
+      FROM #${tableName}
+      WHERE state = '#${state}'
+        AND #${field1.dbName} IN #${formatString(field1.value)}
+        AND #${field2.dbName} IN #${formatString(field2.value)}
+      """.as[ModifiedLarEntity]
+      }
+    }
 
     val publisher = db.stream(searchQuery)
     Source.fromPublisher(publisher)
@@ -161,8 +195,24 @@ class PostgresModifiedLarRepository(tableName: String,
                                 field1: String,
                                 field2DbName: String,
                                 field2: String): Task[Statistic] = {
-    val query =
-      sql"""SELECT
+    val query = {
+      if (field1DbName == "empty") {
+        sql"""SELECT
+              COUNT(loan_amount),
+              SUM(loan_amount)
+            FROM #${tableName}
+            WHERE msa_md = #${msaMd}
+      """.as[Statistic].head
+      } else if (field2DbName == "empty") {
+        sql"""SELECT
+              COUNT(loan_amount),
+              SUM(loan_amount)
+            FROM #${tableName}
+            WHERE msa_md = #${msaMd}
+              AND #${field1DbName} = '#${field1}'
+      """.as[Statistic].head
+      } else {
+        sql"""SELECT
               COUNT(loan_amount),
               SUM(loan_amount)
             FROM #${tableName}
@@ -170,6 +220,8 @@ class PostgresModifiedLarRepository(tableName: String,
               AND #${field1DbName} = '#${field1}'
               AND #${field2DbName} = '#${field2}'
       """.as[Statistic].head
+      }
+    }
 
     Task.deferFuture(db.run(query))
   }
@@ -179,8 +231,24 @@ class PostgresModifiedLarRepository(tableName: String,
                                 field1: String,
                                 field2DbName: String,
                                 field2: String): Task[Statistic] = {
-    val query =
-      sql"""SELECT
+    val query = {
+      if (field1DbName == "empty") {
+        sql"""SELECT
+              COUNT(loan_amount),
+              SUM(loan_amount)
+            FROM #${tableName}
+            WHERE state = '#${state}'
+      """.as[Statistic].head
+      } else if (field2DbName == "empty") {
+        sql"""SELECT
+              COUNT(loan_amount),
+              SUM(loan_amount)
+            FROM #${tableName}
+            WHERE state = '#${state}'
+              AND #${field1DbName} = '#${field1.value}'
+      """.as[Statistic].head
+      } else {
+        sql"""SELECT
               COUNT(loan_amount),
               SUM(loan_amount)
             FROM #${tableName}
@@ -188,6 +256,8 @@ class PostgresModifiedLarRepository(tableName: String,
               AND #${field1DbName} = '#${field1.value}'
               AND #${field2DbName} = '#${field2.value}'
       """.as[Statistic].head
+      }
+    }
 
     Task.deferFuture(db.run(query))
   }
@@ -195,12 +265,27 @@ class PostgresModifiedLarRepository(tableName: String,
   override def find(
       field1: BrowserField,
       field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
-    val searchQuery = sql"""
+    val searchQuery = {
+      if (field1.name == "empty") {
+        sql"""
+    SELECT #$columns
+    FROM #${tableName}
+    """.as[ModifiedLarEntity]
+      } else if (field2.name == "empty") {
+        sql"""
+    SELECT #$columns
+    FROM #${tableName}
+    WHERE #${field1.dbName} IN #${formatString(field1.value)}
+    """.as[ModifiedLarEntity]
+      } else {
+        sql"""
     SELECT #$columns
     FROM #${tableName}
     WHERE #${field1.dbName} IN #${formatString(field1.value)}
       AND #${field2.dbName} IN #${formatString(field2.value)}
     """.as[ModifiedLarEntity]
+      }
+    }
 
     val publisher = db.stream(searchQuery)
     Source.fromPublisher(publisher)
@@ -210,14 +295,30 @@ class PostgresModifiedLarRepository(tableName: String,
                                 field1: String,
                                 field2DbName: String,
                                 field2: String): Task[Statistic] = {
-    val query =
-      sql"""SELECT
+    val query = {
+      if (field1DbName == "empty") {
+        sql"""SELECT
+              COUNT(loan_amount),
+              SUM(loan_amount)
+            FROM #${tableName}
+      """.as[Statistic].head
+      } else if (field2DbName == "empty") {
+        sql"""SELECT
+              COUNT(loan_amount),
+              SUM(loan_amount)
+            FROM #${tableName}
+            WHERE #${field1DbName} = '#${field1}'
+      """.as[Statistic].head
+      } else {
+        sql"""SELECT
               COUNT(loan_amount),
               SUM(loan_amount)
             FROM #${tableName}
             WHERE #${field1DbName} = '#${field1}'
             AND #${field2DbName} = '#${field2}'
       """.as[Statistic].head
+      }
+    }
 
     Task.deferFuture(db.run(query))
   }
@@ -227,13 +328,30 @@ class PostgresModifiedLarRepository(tableName: String,
       state: String,
       field1: BrowserField,
       field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
-    val searchQuery = sql"""SELECT #$columns
+    val searchQuery = {
+      if (field1.name == "empty") {
+        sql"""SELECT #$columns
+                        FROM #${tableName}
+                        WHERE msa_md = #${msaMd}
+                        AND state = '#${state}'
+    """.as[ModifiedLarEntity]
+      } else if (field2.name == "empty") {
+        sql"""SELECT #$columns
+                        FROM #${tableName}
+                        WHERE msa_md = #${msaMd}
+                        AND state = '#${state}'
+                        AND #${field1.dbName} IN #${formatString(field1.value)}
+    """.as[ModifiedLarEntity]
+      } else {
+        sql"""SELECT #$columns
                         FROM #${tableName}
                         WHERE msa_md = #${msaMd}
                         AND state = '#${state}'
                         AND #${field1.dbName} IN #${formatString(field1.value)}
                         AND #${field2.dbName} IN #${formatString(field2.value)}
     """.as[ModifiedLarEntity]
+      }
+    }
 
     val publisher = db.stream(searchQuery)
     Source.fromPublisher(publisher)
@@ -245,7 +363,26 @@ class PostgresModifiedLarRepository(tableName: String,
                                 field1: String,
                                 field2DbName: String,
                                 field2: String): Task[Statistic] = {
-    val query = sql"""SELECT
+    val query = {
+      if (field1DbName == "empty") {
+        sql"""SELECT
+        COUNT(loan_amount),
+        SUM(loan_amount)
+      FROM #${tableName}
+      WHERE msa_md = #${msaMd}
+      AND state = '#${state}'
+      """.as[Statistic].head
+      } else if (field2DbName == "empty") {
+        sql"""SELECT
+        COUNT(loan_amount),
+        SUM(loan_amount)
+      FROM #${tableName}
+      WHERE msa_md = #${msaMd}
+      AND state = '#${state}'
+      AND #${field1DbName} = '#${field1}'
+      """.as[Statistic].head
+      } else {
+        sql"""SELECT
         COUNT(loan_amount),
         SUM(loan_amount)
       FROM #${tableName}
@@ -254,6 +391,8 @@ class PostgresModifiedLarRepository(tableName: String,
       AND #${field1DbName} = '#${field1}'
       AND #${field2DbName} = '#${field2}'
       """.as[Statistic].head
+      }
+    }
 
     Task.deferFuture(db.run(query))
   }

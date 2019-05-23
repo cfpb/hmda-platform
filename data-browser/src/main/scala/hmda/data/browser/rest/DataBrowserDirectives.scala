@@ -49,7 +49,7 @@ trait DataBrowserDirectives {
 
           // if the user provides no filters, it meas they want to see all actions
           case Right(_) =>
-            provide(BrowserField("empty", Seq(), "empty", "EMPTY"))
+            provide(BrowserField())
         }
       }
 
@@ -68,7 +68,7 @@ trait DataBrowserDirectives {
 
         // if the user provides no filters, it means they want to see all races
         case Right(_) =>
-          provide(BrowserField("empty", Seq(), "empty", "EMPTY"))
+          provide(BrowserField())
       }
     }
 
@@ -88,7 +88,7 @@ trait DataBrowserDirectives {
 
           // if the user provides no filters, it meas they want to see all actions
           case Right(_) =>
-            provide(BrowserField("empty", Seq(), "empty", "EMPTY"))
+            provide(BrowserField())
         }
       }
   }

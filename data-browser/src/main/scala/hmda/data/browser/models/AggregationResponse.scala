@@ -1,6 +1,7 @@
 package hmda.data.browser.models
 
-import io.circe.{Decoder, Encoder, HCursor}
+import io.circe.{Decoder, Encoder, HCursor, Json}
+import io.circe.syntax._
 
 case class Parameters(msaMd: Option[Int],
                       state: Option[String],
@@ -17,10 +18,27 @@ object Parameters {
     val Field2 = "field 2"
   }
 
-  implicit val encoder: Encoder[Parameters] = {
-    val c = constants
-    Encoder.forProduct4(c.MsaMd, c.State, c.Field1, c.Field2)(p =>
-      (p.msaMd, p.state, p.field1.value, p.field2.value))
+  implicit val encoder = new Encoder[Parameters] {
+    final def apply(param: Parameters): Json =
+      if (param.field1.name == "empty") {
+        Json.obj(
+          (constants.MsaMd, param.msaMd.asJson),
+          (constants.State, param.state.asJson)
+        )
+      } else if (param.field2.name == "empty") {
+        Json.obj(
+          (constants.MsaMd, param.msaMd.asJson),
+          (constants.State, param.state.asJson),
+          (param.field1.name, (param.field1.value.toList).asJson)
+        )
+      } else {
+        Json.obj(
+          (constants.MsaMd, param.msaMd.asJson),
+          (constants.State, param.state.asJson),
+          (param.field1.name, (param.field1.value.toList).asJson),
+          (param.field2.name, (param.field2.value.toList).asJson)
+        )
+      }
   }
 
   implicit val decoder: Decoder[Parameters] = (c: HCursor) => {

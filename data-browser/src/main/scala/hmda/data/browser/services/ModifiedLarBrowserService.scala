@@ -67,7 +67,19 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository,
                             field2Entry)
         stat <- optC.fold(ifEmpty = findInDbThenUpdateCache)(cachedStat =>
           Task(cachedStat))
-      } yield Aggregation(count = stat.count, sum = stat.sum, field1, field2)
+      } yield
+        Aggregation(
+          count = stat.count,
+          sum = stat.sum,
+          BrowserField(field1.name,
+                       Seq(field1Entry),
+                       field1.dbName,
+                       field1.redisName),
+          BrowserField(field2.name,
+                       Seq(field2Entry),
+                       field2.dbName,
+                       field2.redisName)
+        )
     }
 
     Task.gatherUnordered(taskList)
