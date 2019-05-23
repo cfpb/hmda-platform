@@ -28,6 +28,14 @@ object Routes {
               browserService.fetchData(msaMd, state, races, actionsTaken))
           )
         )
+      } ~ (path("pipe") & get) {
+        complete(
+          HttpEntity(
+            `text/csv(UTF-8)`,
+            pipeSource(
+              browserService.fetchData(msaMd, state, races, actionsTaken))
+          )
+        )
       } ~ get {
         val inputParameters = Parameters(msaMd = Some(msaMd.msaMd),
                                          state = Some(state.entryName),
@@ -53,6 +61,13 @@ object Routes {
             csvSource(browserService.fetchData(state, races, actionsTaken))
           )
         )
+      } ~ (path("pipe") & get) {
+        complete(
+          HttpEntity(
+            `text/csv(UTF-8)`,
+            pipeSource(browserService.fetchData(state, races, actionsTaken))
+          )
+        )
       } ~ get {
         val inputParameters =
           Parameters(msaMd = None,
@@ -75,6 +90,15 @@ object Routes {
           HttpEntity(
             `text/csv(UTF-8)`,
             csvSource(
+              browserService
+                .fetchData(races, actionsTaken))
+          )
+        )
+      } ~ (path("pipe") & get) {
+        complete(
+          HttpEntity(
+            `text/csv(UTF-8)`,
+            pipeSource(
               browserService
                 .fetchData(races, actionsTaken))
           )
@@ -104,37 +128,44 @@ object Routes {
             csvSource(browserService.fetchData(msaMd, races, actionsTaken))
           )
         )
-      } ~ get {
-        val inputParameters = Parameters(msaMd = Some(msaMd.msaMd),
-                                         state = None,
-                                         races = races.map(_.entryName),
-                                         actionsTaken =
-                                           actionsTaken.map(_.value))
+      } ~ (path("pipe") & get) {
+        complete(
+          HttpEntity(
+            `text/csv(UTF-8)`,
+            csvSource(browserService.fetchData(msaMd, races, actionsTaken))
+          )
+        )
+      } ~
+        get {
+          val inputParameters = Parameters(msaMd = Some(msaMd.msaMd),
+                                           state = None,
+                                           races = races.map(_.entryName),
+                                           actionsTaken =
+                                             actionsTaken.map(_.value))
 
-        val stats =
-          browserService
-            .fetchAggregate(msaMd, races, actionsTaken)
-            .map(aggs => AggregationResponse(inputParameters, aggs))
-            .runToFuture
-        complete(OK, stats)
-      }
+          val stats =
+            browserService
+              .fetchAggregate(msaMd, races, actionsTaken)
+              .map(aggs => AggregationResponse(inputParameters, aggs))
+              .runToFuture
+          complete(OK, stats)
+        }
 
-    // TODO: Add invalidate endpoints
     pathPrefix("view") {
       // ?actions_taken=1&races=Asian
       (extractActions & extractRaces) { (actionsTaken, races) =>
-        // /data-browser-api/view/nationwide(/csv)
+        // /data-browser/view/nationwide(/csv)
         pathPrefix("nationwide")(nationwideRoute(races, actionsTaken)) ~
-          // /data-browser-api/view/msamd/<msamd>(/csv)
+          // /data-browser/view/msamd/<msamd>(/csv)
           pathPrefix("msamd" / MsaMdSegment) { msaMd =>
             msaRoute(msaMd, races, actionsTaken)
           } ~
           pathPrefix("state" / StateSegment) { state =>
-            // /data-browser-api/view/state/<state>/msamd/<msamd>(/csv)
+            // /data-browser/view/state/<state>/msamd/<msamd>(/csv)
             pathPrefix("msamd" / MsaMdSegment) { msaMd =>
               stateAndMsaRoute(state, msaMd, races, actionsTaken)
             } ~
-              // /data-browser-api/view/state/<state>(/csv)
+              // /data-browser/view/state/<state>(/csv)
               stateRoute(state, races, actionsTaken)
           }
       }

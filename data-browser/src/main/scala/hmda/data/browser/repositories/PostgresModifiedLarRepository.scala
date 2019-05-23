@@ -4,7 +4,7 @@ import akka.stream.scaladsl.Source
 import hmda.data.browser.models.ModifiedLarEntity
 import monix.eval.Task
 import slick.basic.DatabaseConfig
-import slick.jdbc.JdbcProfile
+import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
 
 class PostgresModifiedLarRepository(tableName: String,
                                     config: DatabaseConfig[JdbcProfile])
@@ -75,7 +75,7 @@ class PostgresModifiedLarRepository(tableName: String,
       lender_credits,
       interest_rate,
       payment_penalty,
-      debt_to_income,
+      debt_to_incode,
       loan_value_ratio,
       loan_term,
       rate_spread_intro,
@@ -85,7 +85,7 @@ class PostgresModifiedLarRepository(tableName: String,
       other_amortization,
       property_value,
       home_security_policy,
-      land_property_interest,
+      lan_property_interest,
       total_units,
       mf_affordable,
       application_submission,
@@ -117,7 +117,6 @@ class PostgresModifiedLarRepository(tableName: String,
       race_categorization,
       sex_categorization,
       ethnicity_categorization,
-      uniq_id,
       percent_median_msa_income
     """.stripMargin
 
@@ -136,7 +135,14 @@ class PostgresModifiedLarRepository(tableName: String,
     WHERE msa_md = #${msaMd}
       AND action_taken_type IN #${formatInt(actionsTaken)}
       AND race_categorization IN #${formatString(races)}
-    """.as[ModifiedLarEntity]
+    """
+      .as[ModifiedLarEntity]
+      .withStatementParameters(
+        rsType = ResultSetType.ForwardOnly,
+        rsConcurrency = ResultSetConcurrency.ReadOnly,
+        fetchSize = 1000
+      )
+      .transactionally
 
     val publisher = db.stream(searchQuery)
     Source.fromPublisher(publisher)
@@ -151,7 +157,14 @@ class PostgresModifiedLarRepository(tableName: String,
     WHERE state = '#${state}'
       AND action_taken_type IN #${formatInt(actionsTaken)}
       AND race_categorization IN #${formatString(races)}
-    """.as[ModifiedLarEntity]
+    """
+      .as[ModifiedLarEntity]
+      .withStatementParameters(
+        rsType = ResultSetType.ForwardOnly,
+        rsConcurrency = ResultSetConcurrency.ReadOnly,
+        fetchSize = 1000
+      )
+      .transactionally
 
     val publisher = db.stream(searchQuery)
     Source.fromPublisher(publisher)
@@ -196,7 +209,14 @@ class PostgresModifiedLarRepository(tableName: String,
     FROM #${tableName}
     WHERE action_taken_type IN #${formatInt(actionsTaken)}
       AND race_categorization IN #${formatString(races)}
-    """.as[ModifiedLarEntity]
+    """
+      .as[ModifiedLarEntity]
+      .withStatementParameters(
+        rsType = ResultSetType.ForwardOnly,
+        rsConcurrency = ResultSetConcurrency.ReadOnly,
+        fetchSize = 1000
+      )
+      .transactionally
 
     val publisher = db.stream(searchQuery)
     Source.fromPublisher(publisher)
@@ -226,7 +246,14 @@ class PostgresModifiedLarRepository(tableName: String,
                         AND state = '#${state}'
                         AND action_taken_type IN #${formatInt(actionsTaken)}
                         AND race_categorization IN #${formatString(races)}
-    """.as[ModifiedLarEntity]
+    """
+      .as[ModifiedLarEntity]
+      .withStatementParameters(
+        rsType = ResultSetType.ForwardOnly,
+        rsConcurrency = ResultSetConcurrency.ReadOnly,
+        fetchSize = 1000
+      )
+      .transactionally
 
     val publisher = db.stream(searchQuery)
     Source.fromPublisher(publisher)
