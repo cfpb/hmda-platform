@@ -117,8 +117,8 @@ object ModifiedLarApp extends App {
             // TODO: Make configurable
             // retry the Future 10 times using a spacing of 30 seconds if there is a failure before giving up
             akka.pattern.retry(() =>
-                                 processKafkaRecord(msg.record.value()).map(_ =>
-                                   msg.committableOffset),
+                                 processKafkaRecord(msg.record.value().trim)
+                                   .map(_ => msg.committableOffset),
                                10,
                                30.seconds)
           }
