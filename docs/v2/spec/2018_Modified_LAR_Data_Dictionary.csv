@@ -11,28 +11,28 @@ Action Taken,Numeric,1 2 3 4 5 6 7 8
 State,Character Varying,Two-Letter State Code
 County,Character Varying,State-County FIPS code NA
 Census Tract,Character Varying,11 digit census tract number NA
-Ethnicity of Applicant or Borrower: 1,Character Varying,1 11 12 13 14 2 3 4 blank
-Ethnicity of Applicant or Borrower: 2,Character Varying,1 11 12 13 14 2 blank
-Ethnicity of Applicant or Borrower: 3,Character Varying,1 11 12 13 14 2 blank
-Ethnicity of Applicant or Borrower: 4,Character Varying,1 11 12 13 14 2 blank
-Ethnicity of Applicant or Borrower: 5,Character Varying,1 11 12 13 14 2 blank
-Ethnicity of Co-Applicant or Co-Borrower: 1,Character Varying,1 11 12 13 14 2 3 4 5 blank
-Ethnicity of Co-Applicant or Co-Borrower: 2,Character Varying,1 11 12 13 14 2 blank
-Ethnicity of Co-Applicant or Co-Borrower: 3,Character Varying,1 11 12 13 14 2 blank
-Ethnicity of Co-Applicant or Co-Borrower: 4,Character Varying,1 11 12 13 14 2 blank
-Ethnicity of Co-Applicant or Co-Borrower: 5,Character Varying,1 11 12 13 14 2 blank
+Ethnicity of Applicant or Borrower: 1,Character Varying,1 11 12 13 14 2 3 4 
+Ethnicity of Applicant or Borrower: 2,Character Varying,1 11 12 13 14 2 
+Ethnicity of Applicant or Borrower: 3,Character Varying,1 11 12 13 14 2 
+Ethnicity of Applicant or Borrower: 4,Character Varying,1 11 12 13 14 2 
+Ethnicity of Applicant or Borrower: 5,Character Varying,1 11 12 13 14 2 
+Ethnicity of Co-Applicant or Co-Borrower: 1,Character Varying,1 11 12 13 14 2 3 4 5 
+Ethnicity of Co-Applicant or Co-Borrower: 2,Character Varying,1 11 12 13 14 2 
+Ethnicity of Co-Applicant or Co-Borrower: 3,Character Varying,1 11 12 13 14 2 
+Ethnicity of Co-Applicant or Co-Borrower: 4,Character Varying,1 11 12 13 14 2 
+Ethnicity of Co-Applicant or Co-Borrower: 5,Character Varying,1 11 12 13 14 2 
 Ethnicity of Applicant or Borrower Collected on the Basis of Visual Observation or Surname,Numeric,1 2 3
 Ethnicity of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,Numeric,1 2 3 4
-Race of Applicant or Borrower: 1,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 6 7 blank
-Race of Applicant or Borrower: 2,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 blank
-Race of Applicant or Borrower: 3,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 blank
-Race of Applicant or Borrower: 4,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 blank
-Race of Applicant or Borrower: 5,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 blank
-Race of Co-Applicant or Co-Borrower: 1,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 6 7 8 blank
-Race of Co-Applicant or Co-Borrower: 2,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 blank
-Race of Co-Applicant or Co-Borrower: 3,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 blank
-Race of Co-Applicant or Co-Borrower: 4,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 blank
-Race of Co-Applicant or Co-Borrower: 5,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 blank
+Race of Applicant or Borrower: 1,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 6 7 
+Race of Applicant or Borrower: 2,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 
+Race of Applicant or Borrower: 3,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 
+Race of Applicant or Borrower: 4,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 
+Race of Applicant or Borrower: 5,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 
+Race of Co-Applicant or Co-Borrower: 1,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 6 7 8 
+Race of Co-Applicant or Co-Borrower: 2,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 
+Race of Co-Applicant or Co-Borrower: 3,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 
+Race of Co-Applicant or Co-Borrower: 4,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 
+Race of Co-Applicant or Co-Borrower: 5,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 
 Race of Applicant or Borrower Collected on the Basis of Visual Observation or Surname,Numeric,1 2 3
 Race of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,Numeric,1 2 3 4
 Sex of Applicant or Borrower,Numeric,1 2 3 4 6
@@ -51,9 +51,9 @@ Lien Status,Numeric,1 2
 Applicant or Borrower - Name and Version of Credit Scoring Model,Numeric,1 2 3 4 5 6 7 8 9 1111
 Co-Applicant or Co-Borrower - Name and Version of Credit Scoring Model,Numeric,1 2 3 4 5 6 7 8 9 10 1111
 Reason for Denial: 1,Numeric,1 2 3 4 5 6 7 8 9 10 1111
-Reason for Denial: 2,Character Varying,1 2 3 4 5 6 7 8 9 blank
-Reason for Denial: 3,Character Varying,1 2 3 4 5 6 7 8 9 blank
-Reason for Denial: 4,Character Varying,1 2 3 4 5 6 7 8 9 blank
+Reason for Denial: 2,Character Varying,1 2 3 4 5 6 7 8 9 
+Reason for Denial: 3,Character Varying,1 2 3 4 5 6 7 8 9 
+Reason for Denial: 4,Character Varying,1 2 3 4 5 6 7 8 9 
 Total Loan Costs,Character Varying, NA Exempt
 Total Points and Fees,Character Varying, NA Exempt
 Origination Charges,Character Varying, NA Exempt
@@ -77,10 +77,10 @@ Multifamily Affordable Units,Character Varying, NA Exempt
 Submission of Application,Numeric,1 2 3 1111
 Initially Payable to Your Institution,Numeric,1 2 3 1111
 Automated Underwriting System: 1,Numeric,1 2 3 4 5 6 1111
-Automated Underwriting System: 2,Numeric,1 2 3 4 5 null 
-Automated Underwriting System: 3,Numeric,1 2 3 4 5 null 
-Automated Underwriting System: 4,Numeric,1 2 3 4 5 null
-Automated Underwriting System: 5,Numeric,1 2 3 4 5 null
+Automated Underwriting System: 2,Numeric,1 2 3 4 5  
+Automated Underwriting System: 3,Numeric,1 2 3 4 5  
+Automated Underwriting System: 4,Numeric,1 2 3 4 5 
+Automated Underwriting System: 5,Numeric,1 2 3 4 5 
 Reverse Mortgage,Numeric,1 2 1111
 Open-End Line of Credit,Numeric,1 2 1111
 Business or Commercial Purpose,Numeric,1 2 1111
