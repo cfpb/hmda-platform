@@ -1,5 +1,5 @@
 ﻿Data Field Number,Field Name,Codes,Descriptions,Notes
-3,Loan Type,1,"Conventional (not insured or guaranteed by FHA, VA, RHS, or FSA)",
+3,Loan Type,1,Conventional (not insured or guaranteed by FHA, VA, RHS, or FSA),
 3,Loan Type,2,Federal Housing Administration insured (FHA),
 3,Loan Type,3,Veterans Affairs guaranteed (VA),
 3,Loan Type,4,USDA Rural Housing Service or Farm Service Agency guaranteed (RHS or FSA),
@@ -30,17 +30,17 @@
 13,Ethnicity of Applicant or Borrower,13,Cuban,
 13,Ethnicity of Applicant or Borrower,14,Other Hispanic or Latino,
 13,Ethnicity of Applicant or Borrower,2,Not Hispanic or Latino,
-13,Ethnicity of Applicant or Borrower,3,"Information not provided by applicant in mail, internet, or telephone application.",Code 3 only valid for ethnicity of Applicant or Borrower: 1.
-13,Ethnicity of Applicant or Borrower,4,Not applicable.,Code 4 only valid for Ethnicity of Applicant or Borrower: 1.
+13,Ethnicity of Applicant or Borrower,3,Information not provided by applicant in mail, internet, or telephone application, Code 3 only valid for ethnicity of Applicant or Borrower: 1
+13,Ethnicity of Applicant or Borrower,4,Not applicable,Code 4 only valid for Ethnicity of Applicant or Borrower: 1
 18,Ethnicity of Co-Applicant or Co-Borrower,1,Hispanic or Latino,
 18,Ethnicity of Co-Applicant or Co-Borrower,11,Mexican,
 18,Ethnicity of Co-Applicant or Co-Borrower,12,Puerto Rican,
 18,Ethnicity of Co-Applicant or Co-Borrower,13,Cuban,
 18,Ethnicity of Co-Applicant or Co-Borrower,14,Other Hispanic or Latino,
 18,Ethnicity of Co-Applicant or Co-Borrower,2,Not Hispanic or Latino,
-18,Ethnicity of Co-Applicant or Co-Borrower,3,"Information not provided by applicant in mail, internet, or telephone application. ",Note: Code 3 only valid for ethnicity of Co-Applicant or Co-Borrower: 1.
-18,Ethnicity of Co-Applicant or Co-Borrower,4,Not applicable. ,Note: Code 4 only valid for Ethnicity of Co-Applicant or Co-Borrower: 1.
-18,Ethnicity of Co-Applicant or Co-Borrower,5,No co-applicant. ,Note: Code 5 only valid for Ethnicity of Co-Applicant or Co-Borrower: 1.
+18,Ethnicity of Co-Applicant or Co-Borrower,3,Information not provided by applicant in mail, internet, or telephone application , Code 3 only valid for ethnicity of Co-Applicant or Co-Borrower: 1
+18,Ethnicity of Co-Applicant or Co-Borrower,4,Not applicable ,Code 4 only valid for Ethnicity of Co-Applicant or Co-Borrower: 1
+18,Ethnicity of Co-Applicant or Co-Borrower,5,No co-applicant ,Code 5 only valid for Ethnicity of Co-Applicant or Co-Borrower: 1
 23,Ethnicity of Applicant or Borrower Collected on the Basis of Visual Observation or Surname,1,Collected on the basis of visual observation or surname,
 23,Ethnicity of Applicant or Borrower Collected on the Basis of Visual Observation or Surname,2,Not collected on the basis of visual observation or surname,
 23,Ethnicity of Applicant or Borrower Collected on the Basis of Visual Observation or Surname,3,Not applicable,
@@ -64,8 +64,8 @@
 25,Race of Applicant or Borrower,43,Samoan,
 25,Race of Applicant or Borrower,44,Other Pacific Islander,
 25,Race of Applicant or Borrower,5,White,
-25,Race of Applicant or Borrower,6,"Information not provided by applicant in mail, internet, or telephone application. ",Note: Code 6 is only valid for Race of Applicant or Borrower: 1. 
-25,Race of Applicant or Borrower,7,Not applicable. ,Note: Code 7 is only valid for Race of Applicant or Borrower: 1. 
+25,Race of Applicant or Borrower,6,Information not provided by applicant in mail, internet, or telephone application ,Code 6 is only valid for Race of Applicant or Borrower: 1
+25,Race of Applicant or Borrower,7,Not applicable ,Code 7 is only valid for Race of Applicant or Borrower: 1
 30,Race of Co-Applicant or Co-Borrower,1,American Indian or Alaska Native,
 30,Race of Co-Applicant or Co-Borrower,2,Asian,
 30,Race of Co-Applicant or Co-Borrower,21,Asian Indian,
@@ -82,26 +82,26 @@
 30,Race of Co-Applicant or Co-Borrower,43,Samoan,
 30,Race of Co-Applicant or Co-Borrower,44,Other Pacific Islander,
 30,Race of Co-Applicant or Co-Borrower,5,White,
-30,Race of Co-Applicant or Co-Borrower,6,"Information not provided by applicant in mail, internet, or telephone application. ",Note: Code 6 is only valid for Race of Co-Applicant or Co-Borrower: 1
-30,Race of Co-Applicant or Co-Borrower,7,Not applicable. ,Note: Code 7 is only valid for Race of Co-Applicant or Co-Borrower: 1
-30,Race of Co-Applicant or Co-Borrower,8,No co-applicant. ,Note: Code 8 is only valid for Race of Co-Applicant or Co-Borrower: 1
+30,Race of Co-Applicant or Co-Borrower,6,Information not provided by applicant in mail, internet, or telephone application ,Code 6 is only valid for Race of Co-Applicant or Co-Borrower: 1
+30,Race of Co-Applicant or Co-Borrower,7,Not applicable ,Code 7 is only valid for Race of Co-Applicant or Co-Borrower: 1
+30,Race of Co-Applicant or Co-Borrower,8,No co-applicant ,Code 8 is only valid for Race of Co-Applicant or Co-Borrower: 1
 35,Race of Applicant or Borrower Collected on the Basis of Visual Observation or Surname,1,Collected on the basis of visual observation or surname,
 35,Race of Applicant or Borrower Collected on the Basis of Visual Observation or Surname,2,Not collected on the basis of visual observation or surname,
 35,Race of Applicant or Borrower Collected on the Basis of Visual Observation or Surname,3,Not applicable,
 36,Race of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,1,Collected on the basis of visual observation or surname,
 36,Race of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,2,Not collected on the basis of visual observation or surname,
 36,Race of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,3,Not applicable ,
-36,Race of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,4,No co-applicant. ,
+36,Race of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,4,No co-applicant ,
 37,Sex of Applicant or Borrower,1,Male ,
 37,Sex of Applicant or Borrower,2,Female,
-37,Sex of Applicant or Borrower,3,"Information not provided by applicant in mail, internet, or telephone application.",
+37,Sex of Applicant or Borrower,3,Information not provided by applicant in mail, internet, or telephone application,
 37,Sex of Applicant or Borrower,4,Not applicable ,
 37,Sex of Applicant or Borrower,6,Applicant selected both male and female,
 38,Sex of Co-Applicant or Co-Borrower,1,Male ,
 38,Sex of Co-Applicant or Co-Borrower,2,Female,
-38,Sex of Co-Applicant or Co-Borrower,3,"Information not provided by applicant in mail, internet, or telephone application.",
+38,Sex of Co-Applicant or Co-Borrower,3,Information not provided by applicant in mail, internet, or telephone application,
 38,Sex of Co-Applicant or Co-Borrower,4,Not applicable,
-38,Sex of Co-Applicant or Co-Borrower,5,No co-applicant. ,
+38,Sex of Co-Applicant or Co-Borrower,5,No co-applicant ,
 38,Sex of Co-Applicant or Co-Borrower,6,Co-applicant selected both male and female,
 39,Sex of Applicant or Borrower Collected on the Basis of Visual Observation or Surname,1,Collected on the basis of visual observation or surname,
 39,Sex of Applicant or Borrower Collected on the Basis of Visual Observation or Surname,2,Not collected on the basis of visual observation or surname,
@@ -109,7 +109,7 @@
 40,Sex of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,1,Collected on the basis of visual observation or surname,
 40,Sex of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,2,Not collected on the basis of visual observation or surname,
 40,Sex of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,3,Not applicable,
-40,Sex of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,4,No co-applicant. ,
+40,Sex of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,4,No co-applicant ,
 41,Age of Applicant or Borrower,<25,Age is less than 25,
 41,Age of Applicant or Borrower,25-34,Age is between 25 and 34,
 41,Age of Applicant or Borrower,35-44,Age is between 35 and 44,
@@ -139,8 +139,8 @@
 46,Type of Purchaser,3,Freddie Mac,
 46,Type of Purchaser,4,Farmer Mac,
 46,Type of Purchaser,5,Private securitizer,
-46,Type of Purchaser,6,"Commercial bank, savings bank, or savings association",
-46,Type of Purchaser,71,"Credit union, mortgage company, or finance company",
+46,Type of Purchaser,6,Commercial bank, savings bank, or savings association,
+46,Type of Purchaser,71,Credit union, mortgage company, or finance company,
 46,Type of Purchaser,72,Life insurance company,
 46,Type of Purchaser,8,Affiliate institution,
 46,Type of Purchaser,9,Other type of purchaser,
@@ -149,39 +149,39 @@
 48,HOEPA Status,3,Not applicable,
 49,Lien Status,1,Secured by a first lien,
 49,Lien Status,2,Secured by a subordinate lien,
-50,"Applicant or Borrower, Name and Version of Credit Scoring Model",1,Equifax Beacon 5.0,
-50,"Applicant or Borrower, Name and Version of Credit Scoring Model",2,Experian Fair Isaac,
-50,"Applicant or Borrower, Name and Version of Credit Scoring Model",3,FICO Risk Score Classic 04,
-50,"Applicant or Borrower, Name and Version of Credit Scoring Model",4,FICO Risk Score Classic 98,
-50,"Applicant or Borrower, Name and Version of Credit Scoring Model",5,Vantage Score 2.0,
-50,"Applicant or Borrower, Name and Version of Credit Scoring Model",6,Vantage Score 3.0,
-50,"Applicant or Borrower, Name and Version of Credit Scoring Model",7,More than one credit scoring model,
-50,"Applicant or Borrower, Name and Version of Credit Scoring Model",8,Other credit scoring model,
-50,"Applicant or Borrower, Name and Version of Credit Scoring Model",9,Not applicable,
-50,"Applicant or Borrower, Name and Version of Credit Scoring Model",1111,Exempt,
-51,"Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model",1,Equifax Beacon 5.0,
-51,"Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model",2,Experian Fair Isaac,
-51,"Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model",3,FICO Risk Score Classic 04,
-51,"Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model",4,FICO Risk Score Classic 98,
-51,"Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model",5,Vantage Score 2.0,
-51,"Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model",6,Vantage Score 3.0,
-51,"Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model",7,More than one credit scoring model,
-51,"Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model",8,Other credit scoring model,
-51,"Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model",9,Not applicable ,
-51,"Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model",10,No co-applicant,
-51,"Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model",1111,Exempt,
+50,Applicant or Borrower, Name and Version of Credit Scoring Model,1,Equifax Beacon 5.0,
+50,Applicant or Borrower, Name and Version of Credit Scoring Model,2,Experian Fair Isaac,
+50,Applicant or Borrower, Name and Version of Credit Scoring Model,3,FICO Risk Score Classic 04,
+50,Applicant or Borrower, Name and Version of Credit Scoring Model,4,FICO Risk Score Classic 98,
+50,Applicant or Borrower, Name and Version of Credit Scoring Model,5,Vantage Score 2.0,
+50,Applicant or Borrower, Name and Version of Credit Scoring Model,6,Vantage Score 3.0,
+50,Applicant or Borrower, Name and Version of Credit Scoring Model,7,More than one credit scoring model,
+50,Applicant or Borrower, Name and Version of Credit Scoring Model,8,Other credit scoring model,
+50,Applicant or Borrower, Name and Version of Credit Scoring Model,9,Not applicable,
+50,Applicant or Borrower, Name and Version of Credit Scoring Model,1111,Exempt,
+51,Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model,1,Equifax Beacon 5.0,
+51,Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model,2,Experian Fair Isaac,
+51,Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model,3,FICO Risk Score Classic 04,
+51,Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model,4,FICO Risk Score Classic 98,
+51,Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model,5,Vantage Score 2.0,
+51,Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model,6,Vantage Score 3.0,
+51,Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model,7,More than one credit scoring model,
+51,Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model,8,Other credit scoring model,
+51,Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model,9,Not applicable ,
+51,Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model,10,No co-applicant,
+51,Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model,1111,Exempt,
 52,Reason for Denial,1,Debt-to-income ratio,
 52,Reason for Denial,2,Employment history,
 52,Reason for Denial,3,Credit history,
 52,Reason for Denial,4,Collateral,
-52,Reason for Denial,5,"Insufficient cash (downpayment, closing costs)",
+52,Reason for Denial,5,Insufficient cash (downpayment, closing costs),
 52,Reason for Denial,6,Unverifiable information,
 52,Reason for Denial,7,Credit application incomplete,
 52,Reason for Denial,8,Mortgage insruance denied,
 52,Reason for Denial,9,Other,
-52,Reason for Denial,10,Not applicable. ,Note: Code 10 is only valid for Reason for Denial: 1
-52,Reason for Denial,1111,Exempt. ,Note: Code 1111 is only valid for Reason for Denial: 1. 
-63,Debt-to-Income Ratio,Exact values between 36% and 50%,Published with modification. ,
+52,Reason for Denial,10,Not applicable , Code 10 is only valid for Reason for Denial: 1
+52,Reason for Denial,1111,Exempt , Code 1111 is only valid for Reason for Denial: 1 
+63,Debt-to-Income Ratio,Exact values between 36% and 50%,Published with modification ,
 63,Debt-to-Income Ratio,<20%,Debt-to-income ratio is less than 20%,
 63,Debt-to-Income Ratio,20%-<30%,Debt-to-income ratio is between 20% and is less than 30%,
 63,Debt-to-Income Ratio,30%-<36%,Debt-to-income ratio is between 30% and is less than 36%,
@@ -232,9 +232,9 @@
 78,Automated Underwriting System,2,Loan Prospector (LP) or Loan Product Advisor,
 78,Automated Underwriting System,3,Technology Open to Approved Lenders (TOTAL) Scorecard,
 78,Automated Underwriting System,4,Guaranteed Underwriting System (GUS),
-78,Automated Underwriting System,5,Other. ,
-78,Automated Underwriting System,6,Not applicable ,Note: Code 6 is only valid for Automated Underwriting System: 1
-78,Automated Underwriting System,1111,Exemption taken. ,Note Code 1111 is only valid for Automated Underwriting System: 1
+78,Automated Underwriting System,5,Other ,
+78,Automated Underwriting System,6,Not applicable , Code 6 is only valid for Automated Underwriting System: 1
+78,Automated Underwriting System,1111,Exemption taken , Code 1111 is only valid for Automated Underwriting System: 1
 83,Reverse Mortgage,1,Reverse mortgage,
 83,Reverse Mortgage,2,Not a reverse mortgage,
 83,Reverse Mortgage,1111,Exempt,
