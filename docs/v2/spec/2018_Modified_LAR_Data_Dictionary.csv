@@ -62,7 +62,7 @@ Lender Credits,Character Varying, NA Exempt
 Interest Rate,Character Varying, NA Exempt
 Prepayment Penalty Term,Character Varying, NA Exempt
 Debt-to-Income Ratio,Character Varying,<20% 20%-<30% 30%-<36% 50%-60% >60% Exact values between 36%-<50% NA Exempt
-Combined Loan-to-Value Ratio,Character Varying, 'NA' 'Exempt'
+Combined Loan-to-Value Ratio,Character Varying, NA Exempt
 Loan Term,Character Varying, NA Exempt
 Introductory Rate Period,Character Varying, NA Exempt
 Balloon Payment,Numeric,1 2 1111
