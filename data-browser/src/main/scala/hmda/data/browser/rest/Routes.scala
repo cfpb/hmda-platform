@@ -1,6 +1,6 @@
 package hmda.data.browser.rest
 
-import akka.http.scaladsl.model.ContentTypes.`text/csv(UTF-8)`
+import akka.http.scaladsl.model.ContentTypes._
 import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.model.StatusCodes.OK
 import akka.http.scaladsl.server.Directives._
@@ -31,7 +31,7 @@ object Routes {
       } ~ (path("pipe") & get) {
         complete(
           HttpEntity(
-            `text/csv(UTF-8)`,
+            `text/plain(UTF-8)`,
             pipeSource(browserService.fetchData(msaMd, state, field1, field2))
           )
         )
@@ -63,7 +63,7 @@ object Routes {
       } ~ (path("pipe") & get) {
         complete(
           HttpEntity(
-            `text/csv(UTF-8)`,
+            `text/plain(UTF-8)`,
             pipeSource(browserService.fetchData(state, field1, field2))
           )
         )
@@ -96,7 +96,7 @@ object Routes {
       } ~ (path("pipe") & get) {
         complete(
           HttpEntity(
-            `text/csv(UTF-8)`,
+            `text/plain(UTF-8)`,
             pipeSource(
               browserService
                 .fetchData(field1, field2))
@@ -131,7 +131,7 @@ object Routes {
       } ~ (path("pipe") & get) {
         complete(
           HttpEntity(
-            `text/csv(UTF-8)`,
+            `text/plain(UTF-8)`,
             csvSource(browserService.fetchData(msaMd, field1, field2))
           )
         )
