@@ -12,7 +12,7 @@ Data Field Name,Data Field Type,Valid Values
  Metropolitan Statistical Area/Metropolitan Division,Character Varying, MSA Code NA
  State Code,Character Varying,2 digit FIPS State Code NA
  County Code,Character Varying,3 digit FIPS County Code NA
- Census Tract,Character Varying, 11 digit census tract number NA
+ Census Tract,Character Varying, 6 digit census tract number NA
  Applicant Ethnicity,Numeric,1 2 3 4
  Co-applicant Ethnicity,Numeric,1 2 3 4 5
  Applicant Race: 1,Numeric,1 2 3 4 5 6 7
