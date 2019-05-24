@@ -43,10 +43,7 @@ object MedianAgeProcessing {
       .filter(col("total_units") isin ("1", "2", "3", "4"))
       .filter(col("loan_purpose") === 1)
       .filter(col("loan_type") isin (2, 3, 4))
-      .groupBy(col("msa_md"),
-               col("msa_md_name"),
-               col("state"),
-               col("median_age_calculated"))
+      .groupBy(col("msa_md"), col("msa_md_name"), col("median_age_calculated"))
       .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
     includeZeroAndNonZero(dispA,
                           title,
@@ -66,10 +63,7 @@ object MedianAgeProcessing {
       .filter(col("total_units") isin ("1", "2", "3", "4"))
       .filter(col("loan_purpose") === lit(1))
       .filter(col("loan_type") === lit(1))
-      .groupBy(col("msa_md"),
-               col("msa_md_name"),
-               col("state"),
-               col("median_age_calculated"))
+      .groupBy(col("msa_md"), col("msa_md_name"), col("median_age_calculated"))
       .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
     includeZeroAndNonZero(dispB, title, "Conventional (B)", allUniqueMsaMdTract)
       .as[DataMedAge]
@@ -85,10 +79,7 @@ object MedianAgeProcessing {
       .filter(col("action_taken_type").isin(actionsTaken: _*))
       .filter(col("total_units") isin ("1", "2", "3", "4"))
       .filter(col("loan_purpose") isin (31, 32))
-      .groupBy(col("msa_md"),
-               col("msa_md_name"),
-               col("state"),
-               col("median_age_calculated"))
+      .groupBy(col("msa_md"), col("msa_md_name"), col("median_age_calculated"))
       .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
     includeZeroAndNonZero(dispC, title, "Refinancings (C)", allUniqueMsaMdTract)
       .as[DataMedAge]
@@ -104,10 +95,7 @@ object MedianAgeProcessing {
       .filter(col("action_taken_type").isin(actionsTaken: _*))
       .filter(col("total_units") isin ("1", "2", "3", "4"))
       .filter(col("loan_purpose") === lit(2))
-      .groupBy(col("msa_md"),
-               col("msa_md_name"),
-               col("state"),
-               col("median_age_calculated"))
+      .groupBy(col("msa_md"), col("msa_md_name"), col("median_age_calculated"))
       .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
     includeZeroAndNonZero(dispD,
                           title,
@@ -128,10 +116,7 @@ object MedianAgeProcessing {
       .filter(col("total_units") =!= lit("2"))
       .filter(col("total_units") =!= lit("3"))
       .filter(col("total_units") =!= lit("4"))
-      .groupBy(col("msa_md"),
-               col("msa_md_name"),
-               col("state"),
-               col("median_age_calculated"))
+      .groupBy(col("msa_md"), col("msa_md_name"), col("median_age_calculated"))
       .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
     includeZeroAndNonZero(dispE,
                           title,
@@ -152,10 +137,7 @@ object MedianAgeProcessing {
       .filter(col("loan_purpose") isin (1, 2, 31, 32))
       .filter(col("loan_type") isin (1, 2, 3, 4)) //should match A - D
       .filter(col("occupancy_type") isin (2, 3))
-      .groupBy(col("msa_md"),
-               col("msa_md_name"),
-               col("state"),
-               col("median_age_calculated"))
+      .groupBy(col("msa_md"), col("msa_md_name"), col("median_age_calculated"))
       .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
     includeZeroAndNonZero(dispF,
                           title,
@@ -176,10 +158,7 @@ object MedianAgeProcessing {
       .filter(col("loan_purpose") isin (1, 2, 31, 32))
       .filter(col("loan_type") isin (1, 2, 3, 4)) //should match A - D
       .filter(col("construction_method") isin ("2"))
-      .groupBy(col("msa_md"),
-               col("msa_md_name"),
-               col("state"),
-               col("median_age_calculated"))
+      .groupBy(col("msa_md"), col("msa_md_name"), col("median_age_calculated"))
       .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
     includeZeroAndNonZero(
       dispG,
@@ -191,10 +170,7 @@ object MedianAgeProcessing {
 
   def allUniqueMsaMdTract(cachedRecordsDf: DataFrame) =
     cachedRecordsDf
-      .select(col("msa_md"),
-              col("msa_md_name"),
-              col("state"),
-              col("median_age_calculated"))
+      .select(col("msa_md"), col("msa_md_name"), col("median_age_calculated"))
       .dropDuplicates()
       .cache()
 
