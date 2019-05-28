@@ -11,7 +11,9 @@ spec:
     "spark.streaming.receiver.maxRate": "1"
     "spark.streaming.backpressure.initialRate": "1"
     "spark.streaming.backpressure.enabled": "true"
-  image: "omnipresent/hmda-spark-reporting:only9"
+  image: "omnipresent/aggregate-only9-2"
+#  image: "omnipresent/aggregate-orig"
+#  image: "omnipresent/fix-median-race"
   imagePullPolicy: Always
   mainClass: com.hmda.reports.AggregateReports
   mainApplicationFile: "local:///opt/spark/cfpb/hmda/jars/hmda-spark-reporting.jar"
@@ -26,7 +28,7 @@ spec:
   driver:
     cores: 1
     coreLimit: "4000m"
-    memory: "12g"
+    memory: "5g"
     labels:
       version: 2.4.0
     serviceAccount: spark-operator-spark
@@ -55,7 +57,7 @@ spec:
   executor:
     cores: 1
     instances: 1
-    memory: "12g"
+    memory: "5g"
     labels:
       version: 2.4.0
     configMaps:
