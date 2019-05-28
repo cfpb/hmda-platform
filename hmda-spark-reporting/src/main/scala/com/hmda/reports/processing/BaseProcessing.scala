@@ -410,7 +410,7 @@ object BaseProcessing {
   def buildSortedMedAge(unsortedMedAge: MedianAge): MedianAge = {
     if (unsortedMedAge.medianAge == "2011 - Present")
       MedianAge(unsortedMedAge.medianAge, unsortedMedAge.loanCategories, "(A)")
-    else if (unsortedMedAge.medianAge == "2010 - 2010")
+    else if (unsortedMedAge.medianAge == "2000 - 2010")
       MedianAge(unsortedMedAge.medianAge, unsortedMedAge.loanCategories, "(B)")
     else if (unsortedMedAge.medianAge == "1990 - 1999")
       MedianAge(unsortedMedAge.medianAge, unsortedMedAge.loanCategories, "(C)")
@@ -419,7 +419,7 @@ object BaseProcessing {
     else if (unsortedMedAge.medianAge == "1970 - 1979")
       MedianAge(unsortedMedAge.medianAge, unsortedMedAge.loanCategories, "(E)")
     else if (unsortedMedAge.medianAge == "1969 or Earlier")
-      MedianAge(unsortedMedAge.medianAge, unsortedMedAge.loanCategories, "(F")
+      MedianAge(unsortedMedAge.medianAge, unsortedMedAge.loanCategories, "(F)")
     else
       MedianAge(unsortedMedAge.medianAge, unsortedMedAge.loanCategories, "(G)")
   }
