@@ -77,11 +77,7 @@ object IncomeRaceEthnicityProcessing {
 
   def allUniqueCombinations(cachedRecordsDf: DataFrame) =
     cachedRecordsDf
-      .select(col("msa_md"),
-              col("msa_md_name"),
-              col("state"),
-              col("race"),
-              col("ethnicity"))
+      .select(col("msa_md"), col("msa_md_name"), col("race"), col("ethnicity"))
       .dropDuplicates()
       .cache()
 
@@ -125,11 +121,7 @@ object IncomeRaceEthnicityProcessing {
     val dispA = prepare(input)
       .filter(col("action_taken_type").isin(actionsTaken: _*))
       .filter(col("percent_median_msa_income") === "<50%")
-      .groupBy(col("msa_md"),
-               col("msa_md_name"),
-               col("state"),
-               col("race"),
-               col("ethnicity"))
+      .groupBy(col("msa_md"), col("msa_md_name"), col("race"), col("ethnicity"))
       .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
     includeZeroAndNonZero(dispA,
                           title,
@@ -147,11 +139,7 @@ object IncomeRaceEthnicityProcessing {
     val dispB = prepare(input)
       .filter(col("action_taken_type").isin(actionsTaken: _*))
       .filter(col("percent_median_msa_income") === "50-79%")
-      .groupBy(col("msa_md"),
-               col("msa_md_name"),
-               col("state"),
-               col("race"),
-               col("ethnicity"))
+      .groupBy(col("msa_md"), col("msa_md_name"), col("race"), col("ethnicity"))
       .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
     includeZeroAndNonZero(dispB,
                           title,
@@ -169,11 +157,7 @@ object IncomeRaceEthnicityProcessing {
     val dispC = prepare(input)
       .filter(col("action_taken_type").isin(actionsTaken: _*))
       .filter(col("percent_median_msa_income") === "80-99%")
-      .groupBy(col("msa_md"),
-               col("msa_md_name"),
-               col("state"),
-               col("race"),
-               col("ethnicity"))
+      .groupBy(col("msa_md"), col("msa_md_name"), col("race"), col("ethnicity"))
       .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
     includeZeroAndNonZero(dispC,
                           title,
@@ -191,11 +175,7 @@ object IncomeRaceEthnicityProcessing {
     val dispD = prepare(input)
       .filter(col("action_taken_type").isin(actionsTaken: _*))
       .filter(col("percent_median_msa_income") === "100-119%")
-      .groupBy(col("msa_md"),
-               col("msa_md_name"),
-               col("state"),
-               col("race"),
-               col("ethnicity"))
+      .groupBy(col("msa_md"), col("msa_md_name"), col("race"), col("ethnicity"))
       .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
     includeZeroAndNonZero(dispD,
                           title,
@@ -213,11 +193,7 @@ object IncomeRaceEthnicityProcessing {
     val dispE = prepare(input)
       .filter(col("action_taken_type").isin(actionsTaken: _*))
       .filter(col("percent_median_msa_income") === ">120%")
-      .groupBy(col("msa_md"),
-               col("msa_md_name"),
-               col("state"),
-               col("race"),
-               col("ethnicity"))
+      .groupBy(col("msa_md"), col("msa_md_name"), col("race"), col("ethnicity"))
       .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
     includeZeroAndNonZero(dispE,
                           title,
@@ -369,6 +345,7 @@ object IncomeRaceEthnicityProcessing {
                                               "unsorted"))
                         }
                         .toList
+                        .sorted
                     }
                     BorrowerEthnicity("Ethnicity", ethnicities)
                   }
@@ -382,10 +359,7 @@ object IncomeRaceEthnicityProcessing {
 
           }
           val msa =
-            Msa(msa_md.toString(),
-                msa_md_name,
-                state,
-                Census.states.getOrElse(state, State("", "")).name)
+            Msa(msa_md.toString(), msa_md_name, "", "")
           ReportByApplicantIncome(
             "5",
             "Aggregate",
