@@ -7,7 +7,12 @@ import akka.NotUsed
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings}
+import akka.stream.alpakka.s3.{
+  MemoryBufferType,
+  MultipartUploadResult,
+  S3Attributes,
+  S3Settings
+}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
@@ -17,7 +22,11 @@ import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.query.DbConfiguration.dbConfig
 import hmda.regulator.query.RegulatorComponent
-import hmda.regulator.query.panel.{InstitutionAltEntity, InstitutionEmailEntity, InstitutionEntity}
+import hmda.regulator.query.panel.{
+  InstitutionAltEntity,
+  InstitutionEmailEntity,
+  InstitutionEntity
+}
 import hmda.regulator.scheduler.schedules.Schedules.PanelScheduler
 
 import scala.concurrent.Future
@@ -66,15 +75,14 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
 
       val s3Settings =
         S3Settings(
-        MemoryBufferType,
-        None,
-        awsCredentialsProvider,
-        awsRegionProvider,
-        false,
-        None,
-        ListBucketVersion2
-      )
-
+          MemoryBufferType,
+          None,
+          awsCredentialsProvider,
+          awsRegionProvider,
+          false,
+          None,
+          ListBucketVersion2
+        )
 
       val now = LocalDateTime.now().minusDays(1)
 
@@ -82,7 +90,8 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
 
       val fileName = s"$formattedDate" + s"$year" + "_panel" + ".txt"
       val s3Sink =
-        S3.multipartUpload(bucket, s"$environment/panel/$fileName").withAttributes(S3Attributes.settings(s3Settings))
+        S3.multipartUpload(bucket, s"$environment/panel/$fileName")
+          .withAttributes(S3Attributes.settings(s3Settings))
 
       val allResults: Future[Seq[InstitutionEntity]] =
         institutionRepository.findActiveFilers(bankFilterList)

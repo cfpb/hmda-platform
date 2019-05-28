@@ -1,11 +1,12 @@
 package hmda.data.browser.models
 
-import io.circe.{Decoder, Encoder, HCursor}
+import io.circe.{Decoder, Encoder, HCursor, Json}
+import io.circe.syntax._
 
 case class Parameters(msaMd: Option[Int],
                       state: Option[String],
-                      races: Seq[String],
-                      actionsTaken: Seq[Int])
+                      field1: BrowserField,
+                      field2: BrowserField)
 case class AggregationResponse(parameters: Parameters,
                                aggregations: Seq[Aggregation])
 
@@ -13,14 +14,31 @@ object Parameters {
   private object constants {
     val MsaMd = "msamd"
     val State = "state"
-    val Races = "races"
-    val ActionsTaken = "actions_taken"
+    val Field1 = "field 1"
+    val Field2 = "field 2"
   }
 
-  implicit val encoder: Encoder[Parameters] = {
-    val c = constants
-    Encoder.forProduct4(c.MsaMd, c.State, c.Races, c.ActionsTaken)(p =>
-      (p.msaMd, p.state, p.races, p.actionsTaken))
+  implicit val encoder = new Encoder[Parameters] {
+    final def apply(param: Parameters): Json =
+      if (param.field1.name == "empty") {
+        Json.obj(
+          (constants.MsaMd, param.msaMd.asJson),
+          (constants.State, param.state.asJson)
+        )
+      } else if (param.field2.name == "empty") {
+        Json.obj(
+          (constants.MsaMd, param.msaMd.asJson),
+          (constants.State, param.state.asJson),
+          (param.field1.name, (param.field1.value.toList).asJson)
+        )
+      } else {
+        Json.obj(
+          (constants.MsaMd, param.msaMd.asJson),
+          (constants.State, param.state.asJson),
+          (param.field1.name, (param.field1.value.toList).asJson),
+          (param.field2.name, (param.field2.value.toList).asJson)
+        )
+      }
   }
 
   implicit val decoder: Decoder[Parameters] = (c: HCursor) => {
@@ -28,9 +46,13 @@ object Parameters {
     for {
       msaMd <- c.downField(cons.MsaMd).as[Option[Int]]
       state <- c.downField(cons.State).as[Option[String]]
-      races <- c.downField(cons.Races).as[Seq[String]]
-      actionsTaken <- c.downField(cons.ActionsTaken).as[Seq[Int]]
-    } yield Parameters(msaMd, state, races, actionsTaken)
+      field1 <- c.downField(cons.Field1).as[Seq[String]]
+      field2 <- c.downField(cons.Field2).as[Seq[String]]
+    } yield
+      Parameters(msaMd,
+                 state,
+                 BrowserField("", field1, "", ""),
+                 BrowserField("", field2, "", ""))
   }
 }
 

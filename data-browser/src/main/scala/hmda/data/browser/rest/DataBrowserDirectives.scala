@@ -14,6 +14,7 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import hmda.data.browser.models.ActionTaken._
 import hmda.data.browser.models.Race._
+import hmda.data.browser.models.Sex._
 import hmda.data.browser.models._
 import io.circe.generic.auto._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -42,36 +43,65 @@ trait DataBrowserDirectives {
       .via(csvStreamingSupport.framingRenderer)
   }
 
-  def extractActions: Directive1[Seq[ActionTaken]] =
-    parameters("actions_taken".as(CsvSeq[Int]) ? Nil)
+  def extractActions: Directive1[BrowserField] =
+    parameters("actions_taken".as(CsvSeq[String]) ? Nil)
       .flatMap { rawActionsTaken =>
         validateActionsTaken(rawActionsTaken) match {
           case Left(invalidActions) =>
             complete((BadRequest, InvalidActions(invalidActions)))
 
           case Right(actionsTaken) if actionsTaken.nonEmpty =>
-            provide(actionsTaken)
+            provide(
+              BrowserField("actions_taken",
+                           actionsTaken.map(_.entryName),
+                           "action_taken_type",
+                           "ACTION"))
 
           // if the user provides no filters, it meas they want to see all actions
           case Right(_) =>
-            provide(ActionTaken.values)
+            provide(BrowserField())
         }
       }
 
-  def extractRaces: Directive1[Seq[Race]] =
+  def extractRaces: Directive1[BrowserField] =
     parameters("races".as(CsvSeq[String]) ? Nil).flatMap { rawRaces =>
       validateRaces(rawRaces) match {
         case Left(invalidRaces) =>
           complete((BadRequest, InvalidRaces(invalidRaces)))
 
         case Right(races) if races.nonEmpty =>
-          provide(races)
+          provide(
+            BrowserField("races",
+                         races.map(_.entryName),
+                         "race_categorization",
+                         "RACE"))
 
         // if the user provides no filters, it means they want to see all races
         case Right(_) =>
-          provide(Race.values)
+          provide(BrowserField())
       }
     }
+
+  def extractSexes: Directive1[BrowserField] = {
+    parameters("sexes".as(CsvSeq[String]) ? Nil)
+      .flatMap { rawSexes =>
+        validateSexes(rawSexes) match {
+          case Left(invalidSexes) =>
+            complete((BadRequest, InvalidActions(invalidSexes)))
+
+          case Right(sexes) if sexes.nonEmpty =>
+            provide(
+              BrowserField("sexes",
+                           sexes.map(_.entryName),
+                           "sex_categorization",
+                           "SEX"))
+
+          // if the user provides no filters, it meas they want to see all actions
+          case Right(_) =>
+            provide(BrowserField())
+        }
+      }
+  }
 
   val StateSegment: PathMatcher1[State] =
     Segment.flatMap(State.withNameInsensitiveOption)
