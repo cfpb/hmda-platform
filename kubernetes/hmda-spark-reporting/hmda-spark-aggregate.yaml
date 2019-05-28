@@ -12,8 +12,6 @@ spec:
     "spark.streaming.backpressure.initialRate": "1"
     "spark.streaming.backpressure.enabled": "true"
   image: "omnipresent/aggregate-only9-2"
-#  image: "omnipresent/aggregate-orig"
-#  image: "omnipresent/fix-median-race"
   imagePullPolicy: Always
   mainClass: com.hmda.reports.AggregateReports
   mainApplicationFile: "local:///opt/spark/cfpb/hmda/jars/hmda-spark-reporting.jar"
