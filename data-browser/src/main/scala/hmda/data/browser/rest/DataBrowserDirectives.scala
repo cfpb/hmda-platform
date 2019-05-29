@@ -47,6 +47,7 @@ trait DataBrowserDirectives {
   def extractActions: Directive1[BrowserField] =
     parameters("actions_taken".as(CsvSeq[String]) ? Nil)
       .flatMap { rawActionsTaken =>
+        println("entered here in actions_taken: " + rawActionsTaken)
         validateActionsTaken(rawActionsTaken) match {
           case Left(invalidActions) =>
             complete((BadRequest, InvalidActions(invalidActions)))
@@ -66,6 +67,7 @@ trait DataBrowserDirectives {
 
   def extractRaces: Directive1[BrowserField] =
     parameters("races".as(CsvSeq[String]) ? Nil).flatMap { rawRaces =>
+      println("entered here in races: " + rawRaces)
       validateRaces(rawRaces) match {
         case Left(invalidRaces) =>
           complete((BadRequest, InvalidRaces(invalidRaces)))
@@ -84,22 +86,27 @@ trait DataBrowserDirectives {
     }
 
   def extractLoanType: Directive1[BrowserField] =
-    parameters("loantypes".as(CsvSeq[String]) ? Nil).flatMap {rawLoanTypes =>
-      validateLoanType(rawLoanTypes) match {
-        case Left(invalidLoanTypes) =>
-          complete((BadRequest, InvalidLoanTypes(invalidLoanTypes)))
+    parameters("loan_types".as(CsvSeq[String]) ? Nil)
+      .flatMap { rawLoanTypes =>
+        validateLoanType(rawLoanTypes) match {
+          case Left(invalidLoanTypes) =>
+            complete((BadRequest, InvalidLoanTypes(invalidLoanTypes)))
 
-        case Right(loanTypes) if loanTypes.nonEmpty =>
-          provide(BrowserField("loanTypes",
-            loanTypes.map(_.entryName),
-            "loan_type",
-            "LOAN_TYPE"))
+          case Right(loanTypes) if loanTypes.nonEmpty =>
+            provide(
+              BrowserField("loan_types",
+                           loanTypes.map(_.entryName),
+                           "loan_type",
+                           "LOAN_TYPES"))
+          case Right(_) =>
+            provide(BrowserField())
+        }
       }
-    }
 
   def extractSexes: Directive1[BrowserField] = {
     parameters("sexes".as(CsvSeq[String]) ? Nil)
       .flatMap { rawSexes =>
+        println("entered here in sexes: " + rawSexes)
         validateSexes(rawSexes) match {
           case Left(invalidSexes) =>
             complete((BadRequest, InvalidSexes(invalidSexes)))
