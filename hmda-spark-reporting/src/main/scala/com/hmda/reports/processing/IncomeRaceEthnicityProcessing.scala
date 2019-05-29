@@ -28,14 +28,12 @@ object IncomeRaceEthnicityProcessing {
 
   def defaultData(msa_md: Long,
                   msa_md_name: String,
-                  state: String,
                   incomeBracket: String,
                   title: String): List[IncomeData] = {
     def fill(race: String, ethnicity: String) = {
       IncomeData(
         msa_md = msa_md,
         msa_md_name = msa_md_name,
-        state = state,
         incomeBracket = incomeBracket,
         title = title,
         loan_amount = 0,
@@ -56,14 +54,12 @@ object IncomeRaceEthnicityProcessing {
         data =>
           IncomeGrouping(data.msa_md,
                          data.msa_md_name,
-                         data.state,
                          data.incomeBracket,
                          data.title))
       .flatMapGroups {
-        case (IncomeGrouping(msa_md, msa_md_name, state, dispName, title),
-              elements) =>
+        case (IncomeGrouping(msa_md, msa_md_name, dispName, title), elements) =>
           val defaultMap =
-            defaultData(msa_md, msa_md_name, state, dispName, title)
+            defaultData(msa_md, msa_md_name, dispName, title)
               .map(d => (d.race, d.ethnicity) -> d)
               .toMap
           elements
@@ -289,9 +285,9 @@ object IncomeRaceEthnicityProcessing {
 
     input
       .filter(data => (data.race != null && data.ethnicity != null))
-      .groupBy(data => (data.msa_md, data.msa_md_name, data.state))
+      .groupBy(data => (data.msa_md, data.msa_md_name))
       .map {
-        case ((msa_md, msa_md_name, state), dataForMsa: List[IncomeData]) => {
+        case ((msa_md, msa_md_name), dataForMsa: List[IncomeData]) => {
           val totalGrouping: List[ApplicantIncome] = {
             dataForMsa
               .groupBy(_.incomeBracket)

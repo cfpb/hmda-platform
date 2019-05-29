@@ -97,13 +97,11 @@ case class GroupingRaceEthnicity(msa_md: Long,
 
 case class IncomeGrouping(msa_md: Long,
                           msa_md_name: String,
-                          state: String,
                           dispositionName: String,
                           title: String)
 
 case class IncomeData(msa_md: Long,
                       msa_md_name: String,
-                      state: String,
                       incomeBracket: String,
                       title: String,
                       race: String,
