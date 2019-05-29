@@ -19,9 +19,9 @@ package object SexCategorization {
       "Joint"
     } else if (sex == Female && (coSex == Male || coSex == MaleAndFemale)) {
       "Joint"
-    }  else if (sex == MaleAndFemale) {
+    } else if (sex == MaleAndFemale) {
       "Joint"
-    }else {
+    } else {
       "Sex Not Available"
     }
   }
