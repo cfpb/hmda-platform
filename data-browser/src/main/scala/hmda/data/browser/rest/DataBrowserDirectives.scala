@@ -15,6 +15,7 @@ import akka.util.ByteString
 import hmda.data.browser.models.ActionTaken._
 import hmda.data.browser.models.Race._
 import hmda.data.browser.models.Sex._
+import hmda.data.browser.models.LoanType._
 import hmda.data.browser.models._
 import io.circe.generic.auto._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -82,12 +83,26 @@ trait DataBrowserDirectives {
       }
     }
 
+  def extractLoanType: Directive1[BrowserField] =
+    parameters("loantypes".as(CsvSeq[String]) ? Nil).flatMap {rawLoanTypes =>
+      validateLoanType(rawLoanTypes) match {
+        case Left(invalidLoanTypes) =>
+          complete((BadRequest, InvalidLoanTypes(invalidLoanTypes)))
+
+        case Right(loanTypes) if loanTypes.nonEmpty =>
+          provide(BrowserField("loanTypes",
+            loanTypes.map(_.entryName),
+            "loan_type",
+            "LOAN_TYPE"))
+      }
+    }
+
   def extractSexes: Directive1[BrowserField] = {
     parameters("sexes".as(CsvSeq[String]) ? Nil)
       .flatMap { rawSexes =>
         validateSexes(rawSexes) match {
           case Left(invalidSexes) =>
-            complete((BadRequest, InvalidActions(invalidSexes)))
+            complete((BadRequest, InvalidSexes(invalidSexes)))
 
           case Right(sexes) if sexes.nonEmpty =>
             provide(
