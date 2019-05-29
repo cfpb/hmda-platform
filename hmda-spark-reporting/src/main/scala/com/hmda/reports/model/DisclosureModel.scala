@@ -2,7 +2,6 @@ package com.hmda.reports.model
 
 case class DataMedAge(msa_md: Long,
                       msa_md_name: String,
-                      state: String,
                       loan_amount: Double,
                       count: Long,
                       dispositionName: String,
@@ -95,7 +94,20 @@ case class StateMapping(county: String = "NA",
                         countyCode: Int = 0)
 
 case class MedianAge(medianAge: String = "",
-                     loanCategories: List[DispositionMedAge])
+                     loanCategories: List[DispositionMedAge],
+                     ageForSorting: String)
+object MedianAge {
+  implicit val ordering: Ordering[MedianAge] =
+    new Ordering[MedianAge] {
+      override def compare(x: MedianAge, y: MedianAge): Int = {
+        def extractDispositionLetter(full: String): Char =
+          full.takeRight(2).head
+        val xName = extractDispositionLetter(x.ageForSorting)
+        val yName = extractDispositionLetter(y.ageForSorting)
+        xName compare yName
+      }
+    }
+}
 case class OutAggregateMedAge(table: String,
                               `type`: String,
                               description: String,
@@ -107,6 +119,7 @@ case class OutAggregateMedAge(table: String,
 
 case class AgeBuckets(medianAgeRange: String)
 case class Grouping(msa_md: Long, msa_md_name: String, state: String)
+case class GroupingMedAge(msa_md: Long, msa_md_name: String)
 
 case class ReportedInstitutions(msa_md: String,
                                 msa_md_name: String,
