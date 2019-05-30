@@ -94,7 +94,7 @@ object DisclosureReports {
 
     Consumer
       .committableSource(consumerSettings,
-                         Subscriptions.topics(disclosureTopic))
+                         Subscriptions.topics(HmdaTopics.disclosureTopic))
       // async boundary begin
       .async
       .mapAsync(1) { msg =>

@@ -93,7 +93,8 @@ object AggregateReports {
         .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
     Consumer
-      .committableSource(consumerSettings, Subscriptions.topics(adTopic))
+      .committableSource(consumerSettings,
+                         Subscriptions.topics(HmdaTopics.adTopic))
       // async boundary begin
       .async
       .mapAsync(1) { msg =>
