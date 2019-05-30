@@ -1,11 +1,16 @@
 package hmda.messages.pubsub
 
+import com.typesafe.config.ConfigFactory
+
 object HmdaTopics {
-  val institutionTopic = "institution"
-  val signTopic = "hmda-sign"
-  val modifiedLarTopic = "hmda-modified-lar"
-  val irsTopic = "hmda-irs"
-  val analyticsTopic = "hmda-analytics"
-  val disclosureTopic = "hmda-spark-disclosure"
-  val adTopic = "hmda-spark-ad"
+
+  val config = ConfigFactory.load()
+
+  val institutionTopic = config.getString("hmda.kafka.topics.institutionTopic")
+  val signTopic = config.getString("hmda.kafka.topics.signTopic")
+  val modifiedLarTopic = config.getString("hmda.kafka.topics.modifiedLarTopic")
+  val irsTopic = config.getString("hmda.kafka.topics.irsTopic")
+  val analyticsTopic = config.getString("hmda.kafka.topics.analyticsTopic")
+  val disclosureTopic = config.getString("hmda.kafka.topics.disclosureTopic")
+  val adTopic = config.getString("hmda.kafka.topics.adTopic")
 }

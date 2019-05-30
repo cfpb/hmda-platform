@@ -26,6 +26,7 @@ import hmda.publication.KafkaUtils.kafkaHosts
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.LoggerFactory
+import hmda.messages.pubsub.HmdaTopics
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.HmdaQuery.{readRawData, readSubmission}
 import hmda.util.BankFilterUtils._
@@ -79,7 +80,7 @@ object HmdaAnalyticsApp
                      new StringDeserializer,
                      new StringDeserializer)
       .withBootstrapServers(kafkaHosts)
-      .withGroupId("hmda-analytics")
+      .withGroupId(HmdaTopics.analyticsTopic)
       .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
   Consumer

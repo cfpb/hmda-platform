@@ -11,6 +11,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Keep, Sink, Source}
 import com.typesafe.config.ConfigFactory
 import hmda.messages.institution.InstitutionEvents.InstitutionKafkaEvent
+import hmda.messages.pubsub.HmdaTopics
 import hmda.serialization.kafka.{
   InstitutionKafkaEventsDeserializer,
   InstitutionKafkaEventsSerializer
@@ -111,7 +112,7 @@ object KafkaUtils {
                        new StringDeserializer,
                        new InstitutionKafkaEventsDeserializer)
         .withBootstrapServers(kafkaHosts)
-        .withGroupId("institution")
+        .withGroupId(HmdaTopics.institutionTopic)
         .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
     Consumer

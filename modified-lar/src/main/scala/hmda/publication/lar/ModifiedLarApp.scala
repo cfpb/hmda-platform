@@ -18,6 +18,7 @@ import hmda.model.filing.submission.SubmissionId
 import hmda.publication.KafkaUtils._
 import hmda.publication.lar.publication._
 import hmda.publication.lar.services._
+import hmda.messages.pubsub.HmdaTopics
 import hmda.query.repository.ModifiedLarRepository
 import hmda.util.BankFilterUtils._
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -103,7 +104,7 @@ object ModifiedLarApp extends App {
                          new StringDeserializer,
                          new StringDeserializer)
           .withBootstrapServers(kafkaHosts)
-          .withGroupId("modified-lar")
+          .withGroupId(HmdaTopics.modifiedLarTopic)
           .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
       val (kafkaControl: Consumer.Control, streamCompleted: Future[Done]) =
