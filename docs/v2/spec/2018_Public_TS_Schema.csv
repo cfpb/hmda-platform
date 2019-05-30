@@ -1,13 +1,13 @@
 ﻿Field Name,Field Data Type,Valid Values,Descriptions and Examples
-Record Identifier - Value is 1,Numeric,1,
+Record Identifier - Value is 1,Integer,1,
 Financial Institution Name,Character Varying,,Example: Ficus Bank
-Calendar Year ,Numeric,,Example: 2018
-Calendar Quarter,Numeric,4,Description: 4. Annual submissions for covered loans and applications with respect to which final action was taken during the period between January 1st (01/01) and December 31st (12/31)
+Calendar Year ,Integer,,Example: 2018
+Calendar Quarter,Integer,4,Description: 4. Annual submissions for covered loans and applications with respect to which final action was taken during the period between January 1st (01/01) and December 31st (12/31)
 Contact Person's Office Street Address ,Character Varying,,Example: 4321 Random Blvd Ste 201
 Contact Person's Office City,Character Varying,,Example: Somecity
 Contact Person's Office State,Character Varying,,Example: ST
 Contact Person's Office Zip Code,Character Varying,,Example: 12345-1010
-Federal Agency,Numeric,1 2 3 5 7 9,Descriptions: 1. Office of the Comptroller of the Currency (OCC) 2. Federal Reserve System (FRS) 3. Federal Deposit Insurance Corporation (FDIC) 5. National Credit Union Administration (NCUA) 7. United States Department of Housing and Urban Development (HUD) 9. Consumer Financial Protection Bureau (CFPB)
-Total Number of Entries Contained in Submission,Numeric,,Example: 5000
+Federal Agency,Integer,1 2 3 5 7 9,Descriptions: 1. Office of the Comptroller of the Currency (OCC) 2. Federal Reserve System (FRS) 3. Federal Deposit Insurance Corporation (FDIC) 5. National Credit Union Administration (NCUA) 7. United States Department of Housing and Urban Development (HUD) 9. Consumer Financial Protection Bureau (CFPB)
+Total Number of Entries Contained in Submission,Integer,,Example: 5000
 Federal Taxpayer Identification Number,Character Varying,,Example 99-9999999
-Legal Entity Identifier (LEI),Character Varying ,20 Character LEI,Example: 12121212121212121212
+Legal Entity Identifier (LEI),Character Varying ,,Example: 12121212121212121212
