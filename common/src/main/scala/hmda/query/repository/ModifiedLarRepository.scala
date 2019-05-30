@@ -258,7 +258,7 @@ class ModifiedLarRepository(tableName: String,
             ${input.mlar.ethnicityCategorization},
             ${input.mlar.raceCategorization},
             ${input.mlar.sexCategorization},
-            ${input.mlar.incomeCategorization},
+            ${incomeCategorization(input.mlar.income, input.census.medianIncome)},
             ${input.mlar.dwellingCategorization},
             ${input.mlar.loanProductTypeCategorization}
           )
@@ -266,6 +266,30 @@ class ModifiedLarRepository(tableName: String,
 
   private def safeConvertToInt(s: String): Option[Int] =
     Try(s.toInt).toOption
+
+  private def incomeCategorization(larIncome: String,
+                                   censusMedianIncome: Int): String = {
+    if (larIncome == "NA")
+      "NA"
+    else {
+      val income = larIncome.toDouble
+      val fifty = censusMedianIncome * .5
+      val eighty = censusMedianIncome * .8
+      val ninety = censusMedianIncome * .9
+      val oneTwenty = censusMedianIncome * 1.2
+      if (income < fifty) {
+        "<50%"
+      } else if (income > fifty && income < eighty) {
+        "50-79%"
+      } else if (income > eighty && income < ninety) {
+        "80-99%"
+      } else if (income > ninety && income < oneTwenty) {
+        "100-119%"
+      } else {
+        ">120%"
+      }
+    }
+  }
 
   private def medianAgeCalculated(filingYear: Int, medianAge: Int): String = {
     val medianYear = filingYear - medianAge
