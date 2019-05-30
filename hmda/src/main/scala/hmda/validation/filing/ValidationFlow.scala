@@ -18,7 +18,7 @@ import hmda.parser.filing.ts.TsCsvParser
 import hmda.validation._
 import hmda.validation.context.ValidationContext
 import hmda.util.streams.FlowUtils._
-import hmda.validation.engine.{LarEngine, TsEngine, TsLarEngine}
+import hmda.validation.engine.{LarEngine2018, TsEngine, TsLarEngine}
 import scala.collection.immutable._
 
 import scala.concurrent.Future
@@ -111,19 +111,21 @@ object ValidationFlow {
         def errors =
           checkType match {
             case "all" =>
-              LarEngine.checkAll(lar, lar.loan.ULI, ctx, LarValidationError)
+              LarEngine2018.checkAll(lar, lar.loan.ULI, ctx, LarValidationError)
             case "syntactical" =>
-              LarEngine
+              LarEngine2018
                 .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
             case "validity" =>
-              LarEngine.checkValidity(lar, lar.loan.ULI, LarValidationError)
+              LarEngine2018.checkValidity(lar, lar.loan.ULI, LarValidationError)
             case "syntactical-validity" =>
-              LarEngine
+              LarEngine2018
                 .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
                 .combine(
-                  LarEngine.checkValidity(lar, lar.loan.ULI, LarValidationError)
+                  LarEngine2018.checkValidity(lar,
+                                              lar.loan.ULI,
+                                              LarValidationError)
                 )
-            case "quality" => LarEngine.checkQuality(lar, lar.loan.ULI)
+            case "quality" => LarEngine2018.checkQuality(lar, lar.loan.ULI)
           }
         (lar, errors)
       }
@@ -165,9 +167,9 @@ object ValidationFlow {
         val futValidation: Future[HmdaValidation[LoanApplicationRegister]] =
           checkType match {
             case "syntactical-validity" =>
-              LarEngine.checkValidityAsync(lar, lar.loan.ULI)
+              LarEngine2018.checkValidityAsync(lar, lar.loan.ULI)
             case "quality" =>
-              LarEngine.checkQualityAsync(lar, lar.loan.ULI)
+              LarEngine2018.checkQualityAsync(lar, lar.loan.ULI)
           }
         futValidation.map(validation => (lar, validation))
       }

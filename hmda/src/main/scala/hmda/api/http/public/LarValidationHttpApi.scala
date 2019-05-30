@@ -19,7 +19,7 @@ import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.validation.LarValidationError
 import hmda.validation.HmdaValidation
 import hmda.validation.context.ValidationContext
-import hmda.validation.engine.LarEngine._
+import hmda.validation.engine.LarEngine2018._
 
 import scala.concurrent.ExecutionContext
 
