@@ -558,18 +558,18 @@ object AggregateProcessing {
         .runWith(Sink.ignore)
 
     val result = for {
-//      _ <- persistJson(aggregateTable1)
-//      _ <- persistJson2(aggregateTable2)
-//      _ <- persistJson9(aggregateTable9)
-//      _ <- persistJsonI(aggregateTableI.toList)
-//      _ <- persistJsonRaceSex(
-//        jsonFormationRaceThenGender(
-//          RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
-//                                                          spark)))
-//      _ <- persistJsonEthnicitySex(
-//        jsonTransformationReportByEthnicityThenGender(
-//          RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
-//                                                          spark)))
+      _ <- persistJson(aggregateTable1)
+      _ <- persistJson2(aggregateTable2)
+      _ <- persistJson9(aggregateTable9)
+      _ <- persistJsonI(aggregateTableI.toList)
+      _ <- persistJsonRaceSex(
+        jsonFormationRaceThenGender(
+          RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
+                                                          spark)))
+      _ <- persistJsonEthnicitySex(
+        jsonTransformationReportByEthnicityThenGender(
+          RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
+                                                          spark)))
       _ <- persistIncomeRaceEthnicity(
         IncomeRaceEthnicityProcessing.jsonFormationApplicantIncome(
           IncomeRaceEthnicityProcessing
