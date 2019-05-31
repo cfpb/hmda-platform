@@ -101,11 +101,13 @@ object IncomeRaceEthnicityProcessing {
 
   def buildDisposition(input: List[IncomeData],
                        dispositionName: String): IncomeDisposition =
-    input.foldLeft(IncomeDisposition(dispositionName, 0, 0)) {
-      case (IncomeDisposition(name, curCount, curValue), next) =>
-        IncomeDisposition(name,
+    input.foldLeft(IncomeDisposition(dispositionName, 0, 0, dispositionName)) {
+      case (IncomeDisposition(name, curCount, curValue, nameForSorting),
+            next) =>
+        IncomeDisposition(name.split("-")(0).trim,
                           curCount + next.count,
-                          curValue + next.loan_amount)
+                          curValue + next.loan_amount,
+                          nameForSorting)
     }
 
   def dispositionA(input: DataFrame,
@@ -201,13 +203,13 @@ object IncomeRaceEthnicityProcessing {
   def outputCollectionTableIncome(cachedRecordsDf: DataFrame,
                                   spark: SparkSession): List[IncomeData] = {
     val actionsTakenTable1 = Map(
-      "Applications Received" -> List(1, 2, 3, 4, 5),
-      "Loans Originated" -> List(1),
-      "Applications Approved but not Accepted" -> List(2),
-      "Applications Denied by Financial Institution" -> List(3),
-      "Applications Withdrawn by Applicant" -> List(4),
-      "File Closed for Incompleteness" -> List(5),
-      "Purchased Loans" -> List(6)
+      "Applications Received - (A)" -> List(1, 2, 3, 4, 5),
+      "Loans Originated - (B)" -> List(1),
+      "Applications Approved but not Accepted - (C)" -> List(2),
+      "Applications Denied by Financial Institution - (D)" -> List(3),
+      "Applications Withdrawn by Applicant - (E)" -> List(4),
+      "File Closed for Incompleteness - (F)" -> List(5),
+      "Purchased Loans - (G)" -> List(6)
     )
 
     val outputATable1: Dataset[IncomeData] = actionsTakenTable1
@@ -310,6 +312,7 @@ object IncomeRaceEthnicityProcessing {
                                 }
                               }
                               .toList
+                              .sorted
                             BaseProcessing.buildSortedIncomeRace(
                               IncomeRace(eachRace, dispositions, "unsorted"))
                         }
@@ -335,6 +338,7 @@ object IncomeRaceEthnicityProcessing {
                                 }
                               }
                               .toList
+                              .sorted
                             BaseProcessing.buildSortedIncomeEthnicity(
                               IncomeEthnicity(eachEthnicity,
                                               dispositions,
@@ -346,12 +350,15 @@ object IncomeRaceEthnicityProcessing {
                     BorrowerEthnicity("Ethnicity", ethnicities)
                   }
 
-                  ApplicantIncome(eachIncome,
-                                  BorrowerCharacteristics(borrowerRace,
-                                                          borrowerEthnicity))
+                  BaseProcessing.buildSortedApplicantIncome(
+                    ApplicantIncome(eachIncome,
+                                    BorrowerCharacteristics(borrowerRace,
+                                                            borrowerEthnicity),
+                                    "unsorted"))
                 }
               }
               .toList
+              .sorted
 
           }
           val msa =

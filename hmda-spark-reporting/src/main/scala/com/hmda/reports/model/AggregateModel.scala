@@ -116,7 +116,20 @@ case class ReportByApplicantIncome(table: String,
                                    msa: Msa,
                                    applicantIncomes: List[ApplicantIncome])
 case class ApplicantIncome(applicantIncome: String,
-                           borrowerCharacteristics: BorrowerCharacteristics)
+                           borrowerCharacteristics: BorrowerCharacteristics,
+                           applicantIncomeSorting: String)
+object ApplicantIncome {
+  implicit val ordering: Ordering[ApplicantIncome] =
+    new Ordering[ApplicantIncome] {
+      override def compare(x: ApplicantIncome, y: ApplicantIncome): Int = {
+        def extractDispositionLetter(full: String): Char =
+          full.takeRight(2).head
+        val xName = extractDispositionLetter(x.applicantIncomeSorting)
+        val yName = extractDispositionLetter(y.applicantIncomeSorting)
+        xName compare yName
+      }
+    }
+}
 case class BorrowerCharacteristics(race: BorrowerRace,
                                    ethnicity: BorrowerEthnicity)
 case class BorrowerRace(characteristic: String, races: List[IncomeRace])
@@ -152,4 +165,20 @@ object IncomeEthnicity {
       }
     }
 }
-case class IncomeDisposition(name: String, count: Long, value: Double)
+case class IncomeDisposition(name: String,
+                             count: Long,
+                             value: Double,
+                             nameForSorting: String)
+
+object IncomeDisposition {
+  implicit val ordering: Ordering[IncomeDisposition] =
+    new Ordering[IncomeDisposition] {
+      override def compare(x: IncomeDisposition, y: IncomeDisposition): Int = {
+        def extractDispositionLetter(full: String): Char =
+          full.takeRight(2).head
+        val xName = extractDispositionLetter(x.nameForSorting)
+        val yName = extractDispositionLetter(y.nameForSorting)
+        xName compare yName
+      }
+    }
+}

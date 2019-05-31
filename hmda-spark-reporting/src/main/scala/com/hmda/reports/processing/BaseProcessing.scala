@@ -489,6 +489,30 @@ object BaseProcessing {
                 "(E)")
   }
 
+  def buildSortedApplicantIncome(
+      unsortedApplicantIncome: ApplicantIncome): ApplicantIncome = {
+    if (unsortedApplicantIncome.applicantIncome == "LESS THAN 50% OF MSA/MD MEDIAN")
+      ApplicantIncome(unsortedApplicantIncome.applicantIncome,
+                      unsortedApplicantIncome.borrowerCharacteristics,
+                      "(A)")
+    else if (unsortedApplicantIncome.applicantIncome == "50-79% OF MSA/MD MEDIAN")
+      ApplicantIncome(unsortedApplicantIncome.applicantIncome,
+                      unsortedApplicantIncome.borrowerCharacteristics,
+                      "(B)")
+    else if (unsortedApplicantIncome.applicantIncome == "80-99% OF MSA/MD MEDIAN")
+      ApplicantIncome(unsortedApplicantIncome.applicantIncome,
+                      unsortedApplicantIncome.borrowerCharacteristics,
+                      "(C)")
+    else if (unsortedApplicantIncome.applicantIncome == "100-119% OF MSA/MD MEDIAN")
+      ApplicantIncome(unsortedApplicantIncome.applicantIncome,
+                      unsortedApplicantIncome.borrowerCharacteristics,
+                      "(D)")
+    else
+      ApplicantIncome(unsortedApplicantIncome.applicantIncome,
+                      unsortedApplicantIncome.borrowerCharacteristics,
+                      "(E)")
+  }
+
   def buildSortedIncomeEthnicity(
       unsortedEthnicity: IncomeEthnicity): IncomeEthnicity = {
     if (unsortedEthnicity.ethnicityName == "Hispanic or Latino")
