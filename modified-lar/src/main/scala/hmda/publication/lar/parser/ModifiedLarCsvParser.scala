@@ -139,7 +139,6 @@ object ModifiedLarCsvParser {
       assignEthnicityCategorization(lar),
       RaceCategorization.assignRaceCategorization(lar),
       SexCategorization.assignSexCategorization(lar),
-      IncomeCategorization.assignIncomeCategorization(lar, censusRecords),
       DwellingCategorization.assignDwellingCategorization(lar),
       LoanProductTypeCategorization.assignLoanProductTypeCategorization(lar)
     )
