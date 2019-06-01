@@ -19,6 +19,7 @@ import hmda.data.browser.models.LoanType._
 import hmda.data.browser.models.LoanPurpose._
 import hmda.data.browser.models.LienStatus._
 import hmda.data.browser.models.ConstructionMethod._
+import hmda.data.browser.models.DwellingCategory._
 import hmda.data.browser.models._
 import io.circe.generic.auto._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -101,6 +102,26 @@ trait DataBrowserDirectives {
                            constructionMethods.map(_.entryName),
                            "construction_method",
                            "CONSTRUCTION_METHODS"))
+          case Right(_) =>
+            provide(BrowserField())
+        }
+      }
+
+  def extractDwellingCategories: Directive1[BrowserField] =
+    parameters("dwelling_categories".as(CsvSeq[String]) ? Nil)
+      .flatMap { rawDwellingCategories =>
+        validateDwellingCategories(rawDwellingCategories) match {
+          case Left(invalidDwellingCategories) =>
+            complete(
+              (BadRequest,
+               InvalidDwellingCategories(invalidDwellingCategories)))
+
+          case Right(dwellingCategories) if dwellingCategories.nonEmpty =>
+            provide(
+              BrowserField("dwelling_categories",
+                           dwellingCategories.map(_.entryName),
+                           "dwelling_category",
+                           "DWELLING_CATEGORIES"))
           case Right(_) =>
             provide(BrowserField())
         }
