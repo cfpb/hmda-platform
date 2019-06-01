@@ -16,6 +16,7 @@ import hmda.data.browser.models.ActionTaken._
 import hmda.data.browser.models.Race._
 import hmda.data.browser.models.Sex._
 import hmda.data.browser.models.LoanType._
+import hmda.data.browser.models.LoanPurpose._
 import hmda.data.browser.models._
 import io.circe.generic.auto._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -47,7 +48,6 @@ trait DataBrowserDirectives {
   def extractActions: Directive1[BrowserField] =
     parameters("actions_taken".as(CsvSeq[String]) ? Nil)
       .flatMap { rawActionsTaken =>
-        println("entered here in actions_taken: " + rawActionsTaken)
         validateActionsTaken(rawActionsTaken) match {
           case Left(invalidActions) =>
             complete((BadRequest, InvalidActions(invalidActions)))
@@ -67,7 +67,6 @@ trait DataBrowserDirectives {
 
   def extractRaces: Directive1[BrowserField] =
     parameters("races".as(CsvSeq[String]) ? Nil).flatMap { rawRaces =>
-      println("entered here in races: " + rawRaces)
       validateRaces(rawRaces) match {
         case Left(invalidRaces) =>
           complete((BadRequest, InvalidRaces(invalidRaces)))
@@ -84,6 +83,24 @@ trait DataBrowserDirectives {
           provide(BrowserField())
       }
     }
+
+  def extractLoanPurpose: Directive1[BrowserField] =
+    parameters("loan_purposes".as(CsvSeq[String]) ? Nil)
+      .flatMap { rawLoanPurposes =>
+        validateLoanPurpose(rawLoanPurposes) match {
+          case Left(invalidLoanPurposes) =>
+            complete((BadRequest, InvalidLoanPurposes(invalidLoanPurposes)))
+
+          case Right(loanPurposes) if loanPurposes.nonEmpty =>
+            provide(
+              BrowserField("loan_purposes",
+                           loanPurposes.map(_.entryName),
+                           "loan_purpose",
+                           "LOAN_purposes"))
+          case Right(_) =>
+            provide(BrowserField())
+        }
+      }
 
   def extractLoanType: Directive1[BrowserField] =
     parameters("loan_types".as(CsvSeq[String]) ? Nil)
@@ -106,7 +123,6 @@ trait DataBrowserDirectives {
   def extractSexes: Directive1[BrowserField] = {
     parameters("sexes".as(CsvSeq[String]) ? Nil)
       .flatMap { rawSexes =>
-        println("entered here in sexes: " + rawSexes)
         validateSexes(rawSexes) match {
           case Left(invalidSexes) =>
             complete((BadRequest, InvalidSexes(invalidSexes)))

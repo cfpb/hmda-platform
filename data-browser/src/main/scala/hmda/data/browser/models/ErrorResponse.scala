@@ -14,6 +14,11 @@ final case class InvalidLoanTypes(invalidLoanTypes: Seq[String],
                                   errorType: String = "invalid-loan-types")
     extends ErrorResponse
 
+final case class InvalidLoanPurposes(
+    invalidLoanPurposes: Seq[String],
+    errorType: String = "invalid-loan-purposes")
+    extends ErrorResponse
+
 final case class InvalidSexes(invalidLoanTypes: Seq[String],
                               errorType: String = "invalid-sexes")
     extends ErrorResponse

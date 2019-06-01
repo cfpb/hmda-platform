@@ -152,10 +152,10 @@ object Routes {
 
     pathPrefix("view") {
       // ?actions_taken=1&races=Asian
-      (extractActions & extractRaces & extractSexes & extractLoanType) {
-        (actionsTaken, races, sexes, loanTypes) =>
+      (extractActions & extractRaces & extractSexes & extractLoanType & extractLoanPurpose) {
+        (actionsTaken, races, sexes, loanTypes, loanPurposes) =>
           val filteredfields =
-            List(actionsTaken, races, sexes, loanTypes).filter(
+            List(actionsTaken, races, sexes, loanTypes, loanPurposes).filter(
               _.name != "empty")
           if (filteredfields.length > 2) {
             complete((BadRequest, "More than 2 fields provided"))
