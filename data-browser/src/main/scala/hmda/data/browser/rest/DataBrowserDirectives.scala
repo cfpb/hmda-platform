@@ -18,6 +18,7 @@ import hmda.data.browser.models.Sex._
 import hmda.data.browser.models.LoanType._
 import hmda.data.browser.models.LoanPurpose._
 import hmda.data.browser.models.LienStatus._
+import hmda.data.browser.models.ConstructionMethod._
 import hmda.data.browser.models._
 import io.circe.generic.auto._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -84,6 +85,26 @@ trait DataBrowserDirectives {
           provide(BrowserField())
       }
     }
+
+  def extractConstructionMethod: Directive1[BrowserField] =
+    parameters("construction_methods".as(CsvSeq[String]) ? Nil)
+      .flatMap { rawConstructionMethods =>
+        validateConstructionMethods(rawConstructionMethods) match {
+          case Left(invalidConstructionMethods) =>
+            complete(
+              (BadRequest,
+               InvalidConstructionMethods(invalidConstructionMethods)))
+
+          case Right(constructionMethods) if constructionMethods.nonEmpty =>
+            provide(
+              BrowserField("construction_methods",
+                           constructionMethods.map(_.entryName),
+                           "construction_method",
+                           "CONSTRUCTION_METHODS"))
+          case Right(_) =>
+            provide(BrowserField())
+        }
+      }
 
   def extractLienStatus: Directive1[BrowserField] =
     parameters("lien_statuses".as(CsvSeq[String]) ? Nil)
