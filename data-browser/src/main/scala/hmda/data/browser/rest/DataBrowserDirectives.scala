@@ -17,6 +17,7 @@ import hmda.data.browser.models.Race._
 import hmda.data.browser.models.Sex._
 import hmda.data.browser.models.LoanType._
 import hmda.data.browser.models.LoanPurpose._
+import hmda.data.browser.models.LienStatus._
 import hmda.data.browser.models._
 import io.circe.generic.auto._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -84,6 +85,24 @@ trait DataBrowserDirectives {
       }
     }
 
+  def extractLienStatus: Directive1[BrowserField] =
+    parameters("lien_statuses".as(CsvSeq[String]) ? Nil)
+      .flatMap { rawLienStatuses =>
+        validateLienStatus(rawLienStatuses) match {
+          case Left(invalidLienStatuses) =>
+            complete((BadRequest, InvalidLienStatuses(invalidLienStatuses)))
+
+          case Right(lienStatuses) if lienStatuses.nonEmpty =>
+            provide(
+              BrowserField("lien_statuses",
+                           lienStatuses.map(_.entryName),
+                           "lien_status",
+                           "LIEN_STATUSES"))
+          case Right(_) =>
+            provide(BrowserField())
+        }
+      }
+
   def extractLoanPurpose: Directive1[BrowserField] =
     parameters("loan_purposes".as(CsvSeq[String]) ? Nil)
       .flatMap { rawLoanPurposes =>
@@ -96,7 +115,7 @@ trait DataBrowserDirectives {
               BrowserField("loan_purposes",
                            loanPurposes.map(_.entryName),
                            "loan_purpose",
-                           "LOAN_purposes"))
+                           "LOAN_PURPOSES"))
           case Right(_) =>
             provide(BrowserField())
         }
