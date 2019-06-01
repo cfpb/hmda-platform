@@ -99,7 +99,6 @@ case class ModifiedLoanApplicationRegister(
     ethnicityCategorization: String,
     raceCategorization: String,
     sexCategorization: String,
-    incomeCategorization: String,
     dwellingCategorization: String,
     loanProductTypeCategorization: String
 ) extends PipeDelimited {

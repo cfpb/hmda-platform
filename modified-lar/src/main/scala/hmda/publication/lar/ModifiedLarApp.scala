@@ -104,7 +104,7 @@ object ModifiedLarApp extends App {
                          new StringDeserializer)
           .withBootstrapServers(kafkaHosts)
           .withGroupId("modified-lar")
-          .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+          .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest")
 
       val (kafkaControl: Consumer.Control, streamCompleted: Future[Done]) =
         Consumer
@@ -119,8 +119,8 @@ object ModifiedLarApp extends App {
             akka.pattern.retry(() =>
                                  processKafkaRecord(msg.record.value().trim)
                                    .map(_ => msg.committableOffset),
-                               10,
-                               30.seconds)
+                               1,
+                               90.seconds)
           }
           .mapAsync(parallelism * 2)(
             (offset: ConsumerMessage.CommittableOffset) =>

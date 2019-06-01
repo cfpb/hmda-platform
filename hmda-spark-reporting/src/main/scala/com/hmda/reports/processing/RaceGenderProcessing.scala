@@ -39,13 +39,11 @@ object RaceGenderProcessing {
                          "Joint")
 
   def defaultData(msa_md: Long,
-                  msa_md_name: String,
-                  state: String): List[DataRaceEthnicity] = {
+                  msa_md_name: String): List[DataRaceEthnicity] = {
     def fill(race: String, sex: String, ethnicity: String, title: String) =
       DataRaceEthnicity(
         msa_md = msa_md,
         msa_md_name = msa_md_name,
-        state = state,
         title = title,
         loan_amount = 0,
         count = 0,
@@ -64,10 +62,10 @@ object RaceGenderProcessing {
   def transformationAddDefaultData(ds: Dataset[DataRaceEthnicity],
                                    spark: SparkSession) = {
     import spark.implicits._
-    ds.groupByKey(data => Grouping(data.msa_md, data.msa_md_name, data.state))
+    ds.groupByKey(data => Grouping(data.msa_md, data.msa_md_name))
       .flatMapGroups {
-        case (Grouping(msa_md, msa_md_name, state), elements) =>
-          val defaultMap = defaultData(msa_md, msa_md_name, state)
+        case (Grouping(msa_md, msa_md_name), elements) =>
+          val defaultMap = defaultData(msa_md, msa_md_name)
             .map(d => (d.race, d.sex, d.ethnicity, d.title) -> d)
             .toMap
 
@@ -84,7 +82,6 @@ object RaceGenderProcessing {
     cachedRecordsDf
       .select(col("msa_md"),
               col("msa_md_name"),
-              col("state"),
               col("race"),
               col("sex"),
               col("ethnicity"))
@@ -121,7 +118,6 @@ object RaceGenderProcessing {
       .filter(col("action_taken_type").isin(actionsTaken: _*))
       .groupBy(col("msa_md"),
                col("msa_md_name"),
-               col("state"),
                col("race"),
                col("sex"),
                col("ethnicity"))
