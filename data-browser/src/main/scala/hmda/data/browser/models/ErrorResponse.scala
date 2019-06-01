@@ -24,6 +24,11 @@ final case class InvalidLienStatuses(
     errorType: String = "invalid-lien-statuses")
     extends ErrorResponse
 
+final case class InvalidLoanProducts(
+                                      invalidateLoanProducts: Seq[String],
+                                      errorType: String = "invalid-loan-products")
+  extends ErrorResponse
+
 final case class InvalidDwellingCategories(
     invalidDwellingCategories: Seq[String],
     errorType: String = "invalid-dwelling-categories")

@@ -20,6 +20,7 @@ import hmda.data.browser.models.LoanPurpose._
 import hmda.data.browser.models.LienStatus._
 import hmda.data.browser.models.ConstructionMethod._
 import hmda.data.browser.models.DwellingCategory._
+import hmda.data.browser.models.LoanProduct._
 import hmda.data.browser.models._
 import io.circe.generic.auto._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -140,6 +141,24 @@ trait DataBrowserDirectives {
                            lienStatuses.map(_.entryName),
                            "lien_status",
                            "LIEN_STATUSES"))
+          case Right(_) =>
+            provide(BrowserField())
+        }
+      }
+
+  def extractLoanProduct: Directive1[BrowserField] =
+    parameters("loan_products".as(CsvSeq[String]) ? Nil)
+      .flatMap { rawLoanProducts =>
+        validateLoanProducts(rawLoanProducts) match {
+          case Left(invalidLoanProducts) =>
+            complete((BadRequest, InvalidLoanProducts(invalidLoanProducts)))
+
+          case Right(loanProducts) if loanProducts.nonEmpty =>
+            provide(
+              BrowserField("loan_products",
+                loanProducts.map(_.entryName),
+                "loan_product_type",
+                "LOAN_PRODUCTS"))
           case Right(_) =>
             provide(BrowserField())
         }
