@@ -19,12 +19,12 @@ import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.validation.TsValidationError
 import hmda.validation.HmdaValidation
 import hmda.validation.context.ValidationContext
-import hmda.validation.engine.TsEngine._
+import hmda.validation.engine._
 
 import scala.concurrent.ExecutionContext
 
 trait TsValidationHttpApi
-    extends HmdaTimeDirectives
+  extends HmdaTimeDirectives
     with FilingValidationHttpApi {
 
   implicit val system: ActorSystem
@@ -52,16 +52,16 @@ trait TsValidationHttpApi
         }
     }
 
-  //ts/validate
+  //ts/validate/<year>
   val validateTsRoute =
-    path("validate") {
+    path("validate" / IntNumber) {year =>
       parameters('check.as[String] ? "all") { checkType =>
         timedPost { _ =>
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             entity(as[TsValidateRequest]) { req =>
               TsCsvParser(req.ts) match {
                 case Right(ts) =>
-                  validate(ts, checkType, ValidationContext(None))
+                  validate(ts, checkType, ValidationContext(None), year)
                 case Left(errors) =>
                   completeWithParsingErrors(errors)
               }
@@ -73,7 +73,11 @@ trait TsValidationHttpApi
 
   private def validate(ts: TransmittalSheet,
                        chekType: String,
-                       ctx: ValidationContext): Route = {
+                       ctx: ValidationContext,
+                       year: Int): Route = {
+    val ctx = ValidationContext(filingYear = Some(year))
+    val validationEngine = selectTsEngine(year)
+    import validationEngine._
     val validation: HmdaValidation[TransmittalSheet] = chekType match {
       case "all" => checkAll(ts, ts.LEI, ctx, TsValidationError)
       case "syntactical" =>

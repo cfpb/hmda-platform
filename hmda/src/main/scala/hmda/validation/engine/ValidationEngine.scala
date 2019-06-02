@@ -9,7 +9,7 @@ import hmda.validation.rules.{AsyncEditCheck, EditCheck}
 
 import scala.concurrent.Future
 
-trait ValidationEngine[A] extends ValidationApi[A] {
+private[engine] trait ValidationEngine[A] extends ValidationApi[A] {
 
   def syntacticalChecks(ctx: ValidationContext): Vector[EditCheck[A]] =
     Vector.empty

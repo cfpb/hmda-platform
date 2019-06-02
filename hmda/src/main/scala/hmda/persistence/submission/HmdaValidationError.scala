@@ -587,9 +587,10 @@ object HmdaValidationError
       ctx: TypedActorContext[SubmissionProcessingCommand],
       submissionId: SubmissionId
   ): Source[HmdaRowValidatedError, NotUsed] = {
+    val year = submissionId.period.toInt
     uploadConsumerRawStr(ctx, submissionId)
       .drop(1)
-      .via(validateAsyncLarFlow(editCheck))
+      .via(validateAsyncLarFlow(editCheck, year))
       .filter(_.isLeft)
       .map(_.left.get)
       .zip(Source.fromIterator(() => Iterator.from(2)))
