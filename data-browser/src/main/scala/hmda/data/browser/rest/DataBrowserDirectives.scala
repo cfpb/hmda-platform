@@ -156,9 +156,9 @@ trait DataBrowserDirectives {
           case Right(loanProducts) if loanProducts.nonEmpty =>
             provide(
               BrowserField("loan_products",
-                loanProducts.map(_.entryName),
-                "loan_product_type",
-                "LOAN_PRODUCTS"))
+                           loanProducts.map(_.entryName),
+                           "loan_product_type",
+                           "LOAN_PRODUCTS"))
           case Right(_) =>
             provide(BrowserField())
         }
