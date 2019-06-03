@@ -76,14 +76,13 @@ trait DataBrowserDirectives {
         case Left(invalidTotalUnits) =>
           complete((BadRequest, InvalidTotalUnits(invalidTotalUnits)))
 
-        case Right(races) if races.nonEmpty =>
+        case Right(totalUnits) if totalUnits.nonEmpty =>
           provide(
             BrowserField("total_units",
-              races.map(_.entryName),
+              totalUnits.map(_.entryName),
               "total_units",
               "TOTAL_UNITS"))
 
-        // if the user provides no filters, it means they want to see all races
         case Right(_) =>
           provide(BrowserField())
       }

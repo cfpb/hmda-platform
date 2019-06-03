@@ -7,7 +7,7 @@ final case class InvalidRaces(invalidRaces: Seq[String],
                               errorType: String = "invalid-races")
     extends ErrorResponse
 final case class InvalidActions(invalidActions: Seq[String],
-                                errorType: String = "invalid-actions")
+                                errorType: String = "invalid-action-taken-type")
     extends ErrorResponse
 
 final case class InvalidLoanTypes(invalidLoanTypes: Seq[String],
