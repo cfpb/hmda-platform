@@ -272,11 +272,13 @@ class ModifiedLarRepository(tableName: String,
     if (larIncome == "NA")
       "NA"
     else {
-      val income = larIncome.toDouble
+      //income in the lar is rounded to 1000
+      val income = larIncome.toDouble * 1000
       val fifty = censusMedianIncome * .5
       val eighty = censusMedianIncome * .8
       val ninety = censusMedianIncome * .9
       val oneTwenty = censusMedianIncome * 1.2
+
       if (income < fifty) {
         "<50%"
       } else if (income > fifty && income < eighty) {
