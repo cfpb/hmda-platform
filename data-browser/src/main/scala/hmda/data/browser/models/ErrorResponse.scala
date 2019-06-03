@@ -42,3 +42,8 @@ final case class InvalidConstructionMethods(
 final case class InvalidSexes(invalidLoanTypes: Seq[String],
                               errorType: String = "invalid-sexes")
     extends ErrorResponse
+
+
+final case class InvalidTotalUnits(invalidTotalUnits: Seq[String],
+                              errorType: String = "invalid-total-units")
+  extends ErrorResponse

@@ -21,6 +21,7 @@ import hmda.data.browser.models.LienStatus._
 import hmda.data.browser.models.ConstructionMethod._
 import hmda.data.browser.models.DwellingCategory._
 import hmda.data.browser.models.LoanProduct._
+import hmda.data.browser.models.TotalUnits._
 import hmda.data.browser.models._
 import io.circe.generic.auto._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -68,6 +69,25 @@ trait DataBrowserDirectives {
             provide(BrowserField())
         }
       }
+
+  def extractTotalUnits: Directive1[BrowserField] =
+    parameters("total_units".as(CsvSeq[String]) ? Nil).flatMap { rawTotalUnits =>
+      validateTotalUnits(rawTotalUnits) match {
+        case Left(invalidTotalUnits) =>
+          complete((BadRequest, InvalidTotalUnits(invalidTotalUnits)))
+
+        case Right(races) if races.nonEmpty =>
+          provide(
+            BrowserField("total_units",
+              races.map(_.entryName),
+              "total_units",
+              "TOTAL_UNITS"))
+
+        // if the user provides no filters, it means they want to see all races
+        case Right(_) =>
+          provide(BrowserField())
+      }
+    }
 
   def extractRaces: Directive1[BrowserField] =
     parameters("races".as(CsvSeq[String]) ? Nil).flatMap { rawRaces =>
