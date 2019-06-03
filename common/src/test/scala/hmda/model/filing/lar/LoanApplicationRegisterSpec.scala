@@ -13,7 +13,7 @@ class LoanApplicationRegisterSpec
   val config = ConfigFactory.load()
   val currentYear = config.getString("hmda.filing.current")
   val numberOfFields = config.getInt(
-    s"hmda.filing.$currentYear.ts.length")
+    s"hmda.filing.$currentYear.lar.length")
 
   forAll(larGen) { lar =>
     val values = lar.toCSV.split('|')
