@@ -10,10 +10,10 @@
         <appender-ref ref="STDOUT" />
     </appender>
 
-    <root level="${PLATFORM_LOG_LEVEL:-INFO}">
+    <root level="INFO">
         <appender-ref ref="ASYNC" />
     </root>
     <logger name="org.apache.zookeeper" level="${ZOOKEEPER_LOG_LEVEL:-WARN}"/>
     <logger name="org.apache.kafka" level="${KAFKA_LOG_LEVEL:-INFO}" />
-    <logger name="org.apache.cassandra" level="${CASSANDRA_LOG_LEVEL:-INFO}" />
+    <logger name="org.apache.cassandra" level="INFO" />
 </configuration>
