@@ -117,6 +117,8 @@ spec:
                   key: census.port
             - name: KAFKA_LOG_LEVEL
               value: INFO
+            - name: KAFKA_MODIFIED_LAR_TOPIC
+              value: .Values.kafka.modifiedLarTopic
             - name: IS_GENERATE_MLAR_S3_FIES
               valueFrom:
                 configMapKeyRef:

@@ -28,6 +28,8 @@ spec:
               cpu: "4"
               memory: "2200Mi"
           env:
+            - name: KAFKA_IRS_TOPIC
+              value: .Values.kafka.irsTopic
             - name: CASSANDRA_CLUSTER_HOSTS
               valueFrom:
                 configMapKeyRef:

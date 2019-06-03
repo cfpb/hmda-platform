@@ -15,6 +15,9 @@ service:
   targetPort: 9092
   name: http-inst-api
 
+kafka:
+  institutionsTopic: institution
+
 ambassador:
   name: institutions-api-ambassador
   service:
