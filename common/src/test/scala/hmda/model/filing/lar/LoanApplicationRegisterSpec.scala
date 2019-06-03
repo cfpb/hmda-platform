@@ -11,7 +11,9 @@ class LoanApplicationRegisterSpec
     with MustMatchers {
 
   val config = ConfigFactory.load()
-  val numberOfFields = config.getInt("hmda.filing.lar.length")
+  val currentYear = config.getString("hmda.filing.current")
+  val numberOfFields = config.getInt(
+    s"hmda.filing.$currentYear.ts.length")
 
   forAll(larGen) { lar =>
     val values = lar.toCSV.split('|')
