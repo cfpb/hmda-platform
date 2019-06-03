@@ -24,7 +24,7 @@ import hmda.validation.engine._
 import scala.concurrent.ExecutionContext
 
 trait TsValidationHttpApi
-  extends HmdaTimeDirectives
+    extends HmdaTimeDirectives
     with FilingValidationHttpApi {
 
   implicit val system: ActorSystem
@@ -54,7 +54,7 @@ trait TsValidationHttpApi
 
   //ts/validate/<year>
   val validateTsRoute =
-    path("validate" / IntNumber) {year =>
+    path("validate" / IntNumber) { year =>
       parameters('check.as[String] ? "all") { checkType =>
         timedPost { _ =>
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {

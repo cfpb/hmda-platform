@@ -12,8 +12,10 @@ object EditDescriptionLookup {
                              affectedFields: List[String])
 
   val config = ConfigFactory.load()
-  val editDescriptionFileName2018 = config.getString("hmda.filing.2018.edits.descriptions.filename")
-  val editDescriptionFileName2019 = config.getString("hmda.filing.2019.edits.descriptions.filename")
+  val editDescriptionFileName2018 =
+    config.getString("hmda.filing.2018.edits.descriptions.filename")
+  val editDescriptionFileName2019 =
+    config.getString("hmda.filing.2019.edits.descriptions.filename")
 
   def fileForYear(period: String): hmda.Iterable[String] = {
     period match {
@@ -21,11 +23,14 @@ object EditDescriptionLookup {
       case "2019" => fileLines(s"/$editDescriptionFileName2019")
       case _ =>
         val currentYear = config.getString("hmda.filing.current")
-        fileLines(config.getString(s"hmda.filing.$currentYear.edits.descriptions.filename"))
+        fileLines(
+          config.getString(
+            s"hmda.filing.$currentYear.edits.descriptions.filename"))
     }
   }
 
-  def editDescriptionList(period: String): immutable.Iterable[EditDescription] = {
+  def editDescriptionList(
+      period: String): immutable.Iterable[EditDescription] = {
     val lines = fileForYear(period)
     lines
       .drop(1)

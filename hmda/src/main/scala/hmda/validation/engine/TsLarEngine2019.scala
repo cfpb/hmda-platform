@@ -6,7 +6,7 @@ import hmda.validation.rules.lar.quality.Q600
 import hmda.validation.rules.lar.syntactical.{S304, S305}
 
 private[engine] object TsLarEngine2019
-  extends ValidationEngine[TransmittalLar] {
+    extends ValidationEngine[TransmittalLar] {
 
   override def syntacticalChecks(ctx: ValidationContext) = Vector(
     S304,

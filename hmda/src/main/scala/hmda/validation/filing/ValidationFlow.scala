@@ -9,7 +9,11 @@ import hmda.model.filing.EditDescriptionLookup.config
 import hmda.model.filing.{EditDescriptionLookup, PipeDelimited}
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
-import hmda.model.validation.{LarValidationError, TsValidationError, ValidationError}
+import hmda.model.validation.{
+  LarValidationError,
+  TsValidationError,
+  ValidationError
+}
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
 import hmda.validation._
@@ -29,7 +33,7 @@ object ValidationFlow {
   }
 
   def validateHmdaFile(checkType: String, ctx: ValidationContext)
-  : Flow[ByteString, HmdaValidated[PipeDelimited], NotUsed] = {
+    : Flow[ByteString, HmdaValidated[PipeDelimited], NotUsed] = {
     Flow.fromGraph(GraphDSL.create() { implicit b =>
       import GraphDSL.Implicits._
 
@@ -44,9 +48,10 @@ object ValidationFlow {
   }
 
   def validateTsFlow(checkType: String, validationContext: ValidationContext)
-  : Flow[ByteString, HmdaValidated[TransmittalSheet], NotUsed] = {
+    : Flow[ByteString, HmdaValidated[TransmittalSheet], NotUsed] = {
     val currentYear = config.getInt("hmda.filing.current")
-    val validationEngine = selectTsEngine(validationContext.filingYear.getOrElse(currentYear))
+    val validationEngine = selectTsEngine(
+      validationContext.filingYear.getOrElse(currentYear))
     Flow[ByteString]
       .via(framing("\n"))
       .map(_.utf8String)
@@ -59,14 +64,14 @@ object ValidationFlow {
         val errors = checkType match {
           case "all" =>
             validationEngine.checkAll(ts,
-              ts.LEI,
-              validationContext,
-              TsValidationError)
+                                      ts.LEI,
+                                      validationContext,
+                                      TsValidationError)
           case "syntactical" =>
             validationEngine.checkSyntactical(ts,
-              ts.LEI,
-              validationContext,
-              TsValidationError)
+                                              ts.LEI,
+                                              validationContext,
+                                              TsValidationError)
           case "validity" =>
             validationEngine.checkValidity(ts, ts.LEI, TsValidationError)
         }
@@ -84,20 +89,21 @@ object ValidationFlow {
   def validateTsLarEdits(tsLar: TransmittalLar,
                          checkType: String,
                          validationContext: ValidationContext)
-  : Either[List[ValidationError], TransmittalLar] = {
+    : Either[List[ValidationError], TransmittalLar] = {
     val currentYear = config.getInt("hmda.filing.current")
-    val validationEngine = selectTsLarEngine(validationContext.filingYear.getOrElse(currentYear))
+    val validationEngine = selectTsLarEngine(
+      validationContext.filingYear.getOrElse(currentYear))
     val errors = checkType match {
       case "all" =>
         validationEngine.checkAll(tsLar,
-          tsLar.ts.LEI,
-          validationContext,
-          TsValidationError)
+                                  tsLar.ts.LEI,
+                                  validationContext,
+                                  TsValidationError)
       case "syntactical-validity" =>
         validationEngine.checkSyntactical(tsLar,
-          tsLar.ts.LEI,
-          validationContext,
-          TsValidationError)
+                                          tsLar.ts.LEI,
+                                          validationContext,
+                                          TsValidationError)
       case "quality" =>
         validationEngine.checkQuality(tsLar, tsLar.ts.LEI)
     }
@@ -109,32 +115,33 @@ object ValidationFlow {
   }
 
   def validateLarFlow(checkType: String, ctx: ValidationContext)
-  : Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
+    : Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
     val currentYear = config.getInt("hmda.filing.current")
-    val validationEngine = selectLarEngine(ctx.filingYear.getOrElse(currentYear))
+    val validationEngine = selectLarEngine(
+      ctx.filingYear.getOrElse(currentYear))
     collectLar
       .map { lar =>
         def errors =
           checkType match {
             case "all" =>
               validationEngine.checkAll(lar,
-                lar.loan.ULI,
-                ctx,
-                LarValidationError)
+                                        lar.loan.ULI,
+                                        ctx,
+                                        LarValidationError)
             case "syntactical" =>
               validationEngine
                 .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
             case "validity" =>
               validationEngine.checkValidity(lar,
-                lar.loan.ULI,
-                LarValidationError)
+                                             lar.loan.ULI,
+                                             LarValidationError)
             case "syntactical-validity" =>
               validationEngine
                 .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
                 .combine(
                   validationEngine.checkValidity(lar,
-                    lar.loan.ULI,
-                    LarValidationError)
+                                                 lar.loan.ULI,
+                                                 LarValidationError)
                 )
             case "quality" => validationEngine.checkQuality(lar, lar.loan.ULI)
           }
@@ -150,8 +157,8 @@ object ValidationFlow {
   }
 
   def addLarFieldInformation(
-                              lar: LoanApplicationRegister,
-                              errors: List[ValidationError]): List[ValidationError] = {
+      lar: LoanApplicationRegister,
+      errors: List[ValidationError]): List[ValidationError] = {
     errors.map(error => {
       val affectedFields = EditDescriptionLookup.lookupFields(error.editName)
       val fieldMap =
@@ -161,8 +168,8 @@ object ValidationFlow {
   }
 
   def addTsFieldInformation(
-                             ts: TransmittalSheet,
-                             errors: List[ValidationError]): List[ValidationError] = {
+      ts: TransmittalSheet,
+      errors: List[ValidationError]): List[ValidationError] = {
     errors.map(error => {
       val affectedFields = EditDescriptionLookup.lookupFields(error.editName)
       val fieldMap =
@@ -171,8 +178,9 @@ object ValidationFlow {
     })
   }
 
-  def validateAsyncLarFlow[as: AS, mat: MAT, ec: EC](checkType: String, year: Int)
-  : Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
+  def validateAsyncLarFlow[as: AS, mat: MAT, ec: EC](checkType: String,
+                                                     year: Int)
+    : Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
     val validationEngine = selectLarEngine(year)
     collectLar
       .mapAsync(1) { lar =>

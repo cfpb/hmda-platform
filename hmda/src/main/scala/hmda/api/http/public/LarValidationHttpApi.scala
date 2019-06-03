@@ -24,7 +24,7 @@ import hmda.validation.engine._
 import scala.concurrent.ExecutionContext
 
 trait LarValidationHttpApi
-  extends HmdaTimeDirectives
+    extends HmdaTimeDirectives
     with FilingValidationHttpApi {
 
   implicit val system: ActorSystem

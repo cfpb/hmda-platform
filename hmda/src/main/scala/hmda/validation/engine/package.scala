@@ -1,4 +1,3 @@
-
 package hmda.validation
 
 import hmda.model.filing.lar.LoanApplicationRegister

@@ -69,24 +69,23 @@ trait EditsHttpApi extends HmdaTimeDirectives {
 
             onComplete(fEdits) {
               case Success(edits) =>
-                val syntactical = SyntacticalEditSummaryResponse(
-                  edits.syntactical.map{editSummary =>
-                    toEditSummaryResponse(editSummary, period)
+                val syntactical =
+                  SyntacticalEditSummaryResponse(edits.syntactical.map {
+                    editSummary =>
+                      toEditSummaryResponse(editSummary, period)
                   }.toSeq)
-                val validity = ValidityEditSummaryResponse(
-                  edits.validity.map{editSummary =>
+                val validity = ValidityEditSummaryResponse(edits.validity.map {
+                  editSummary =>
                     toEditSummaryResponse(editSummary, period)
-                  }.toSeq)
-                val quality = QualityEditSummaryResponse(
-                  edits.quality.map{editSummary =>
-                    toEditSummaryResponse(editSummary,period)
-                  }.toSeq,
-                  edits.qualityVerified)
-                val `macro` = MacroEditSummaryResponse(
-                  edits.`macro`.map{editSummary =>
-                    toEditSummaryResponse(editSummary,period)
-                  }.toSeq,
-                  edits.macroVerified)
+                }.toSeq)
+                val quality = QualityEditSummaryResponse(edits.quality.map {
+                  editSummary =>
+                    toEditSummaryResponse(editSummary, period)
+                }.toSeq, edits.qualityVerified)
+                val `macro` = MacroEditSummaryResponse(edits.`macro`.map {
+                  editSummary =>
+                    toEditSummaryResponse(editSummary, period)
+                }.toSeq, edits.macroVerified)
                 val editsSummaryResponse =
                   EditsSummaryResponse(
                     syntactical,
@@ -172,7 +171,8 @@ trait EditsHttpApi extends HmdaTimeDirectives {
     }
   }
 
-  private def toEditSummaryResponse(e: EditSummary, period: String): EditSummaryResponse = {
+  private def toEditSummaryResponse(e: EditSummary,
+                                    period: String): EditSummaryResponse = {
     EditSummaryResponse(e.editName, lookupDescription(e.editName, period))
   }
 
