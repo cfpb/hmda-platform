@@ -22,6 +22,7 @@ import hmda.data.browser.models.ConstructionMethod._
 import hmda.data.browser.models.DwellingCategory._
 import hmda.data.browser.models.LoanProduct._
 import hmda.data.browser.models.TotalUnits._
+import hmda.data.browser.models.Ethnicity._
 import hmda.data.browser.models._
 import io.circe.generic.auto._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -69,6 +70,24 @@ trait DataBrowserDirectives {
             provide(BrowserField())
         }
       }
+
+  def extractEthnicities: Directive1[BrowserField] =
+    parameters("ethnicities".as(CsvSeq[String]) ? Nil).flatMap { rawEthnicities =>
+      validEthnicities(rawEthnicities) match {
+        case Left(invalidEthnicities) =>
+          complete((BadRequest, InvalidEthnicities(invalidEthnicities)))
+
+        case Right(ethnicities) if ethnicities.nonEmpty =>
+          provide(
+            BrowserField("ethnicities",
+              ethnicities.map(_.entryName),
+              "ethnicities",
+              "ETHNICITIES"))
+
+        case Right(_) =>
+          provide(BrowserField())
+      }
+    }
 
   def extractTotalUnits: Directive1[BrowserField] =
     parameters("total_units".as(CsvSeq[String]) ? Nil).flatMap { rawTotalUnits =>
