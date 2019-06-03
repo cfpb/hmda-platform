@@ -2,7 +2,6 @@ package com.hmda.reports.model
 
 case class DataRaceEthnicity(msa_md: Long,
                              msa_md_name: String,
-                             state: String,
                              title: String,
                              race: String,
                              sex: String,

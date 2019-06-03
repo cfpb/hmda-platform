@@ -111,9 +111,11 @@ object AggregateProcessing {
                     }
                     .toList
                     .sorted
-                  MedianAge(medianAge, dispositions)
+                  BaseProcessing.buildSortedMedAge(
+                    MedianAge(medianAge, dispositions, "unsorted"))
               }
               .toList
+              .sorted
             medianAges
         }
         .toList
@@ -239,10 +241,9 @@ object AggregateProcessing {
         input: List[DataRaceEthnicity]): List[ReportByEthnicityThenGender] = {
       val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
       input
-        .groupBy(data => (data.msa_md, data.msa_md_name, data.state))
+        .groupBy(data => (data.msa_md, data.msa_md_name))
         .map {
-          case ((msa_md, msa_md_name, state),
-                dataForMsa: List[DataRaceEthnicity]) =>
+          case ((msa_md, msa_md_name), dataForMsa: List[DataRaceEthnicity]) =>
             val totalGrouping: List[Ethnicity] = dataForMsa
               .groupBy(_.ethnicity)
               .map {
@@ -294,10 +295,7 @@ object AggregateProcessing {
               }
               .toList
               .sorted
-            val msa = Msa(msa_md.toString(),
-                          msa_md_name,
-                          state,
-                          Census.states.getOrElse(state, State("", "")).name)
+            val msa = Msa(msa_md.toString(), msa_md_name, "", "")
             ReportByEthnicityThenGender(
               "4",
               "Aggregate",
@@ -315,10 +313,9 @@ object AggregateProcessing {
         input: List[DataRaceEthnicity]): List[ReportByRaceThenGender] = {
       val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
       input
-        .groupBy(data => (data.msa_md, data.msa_md_name, data.state))
+        .groupBy(data => (data.msa_md, data.msa_md_name))
         .map {
-          case ((msa_md, msa_md_name, state),
-                dataForMsa: List[DataRaceEthnicity]) =>
+          case ((msa_md, msa_md_name), dataForMsa: List[DataRaceEthnicity]) =>
             val totalGrouping: List[Race] = dataForMsa
               .groupBy(_.race)
               .map {
@@ -369,10 +366,7 @@ object AggregateProcessing {
               }
               .toList
               .sorted
-            val msa = Msa(msa_md.toString(),
-                          msa_md_name,
-                          state,
-                          Census.states.getOrElse(state, State("", "")).name)
+            val msa = Msa(msa_md.toString(), msa_md_name, "", "")
             ReportByRaceThenGender(
               "3",
               "Aggregate",
@@ -495,11 +489,7 @@ object AggregateProcessing {
         .groupBy(d => d.msa_md)
         .map {
           case (key, values) =>
-            val msaMd = Msa(
-              key.toString(),
-              values.head.msa_md_name,
-              values.head.state,
-              Census.states.getOrElse(values.head.state, State("", "")).name)
+            val msaMd = Msa(key.toString(), values.head.msa_md_name, "", "")
             jsonFormationTable9(msaMd, values)
         }
         .toList

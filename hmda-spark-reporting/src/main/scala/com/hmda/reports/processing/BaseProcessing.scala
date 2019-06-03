@@ -407,6 +407,23 @@ object BaseProcessing {
       IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(G)")
   }
 
+  def buildSortedMedAge(unsortedMedAge: MedianAge): MedianAge = {
+    if (unsortedMedAge.medianAge == "2011 - Present")
+      MedianAge(unsortedMedAge.medianAge, unsortedMedAge.loanCategories, "(A)")
+    else if (unsortedMedAge.medianAge == "2000 - 2010")
+      MedianAge(unsortedMedAge.medianAge, unsortedMedAge.loanCategories, "(B)")
+    else if (unsortedMedAge.medianAge == "1990 - 1999")
+      MedianAge(unsortedMedAge.medianAge, unsortedMedAge.loanCategories, "(C)")
+    else if (unsortedMedAge.medianAge == "1980 - 1989")
+      MedianAge(unsortedMedAge.medianAge, unsortedMedAge.loanCategories, "(D)")
+    else if (unsortedMedAge.medianAge == "1970 - 1979")
+      MedianAge(unsortedMedAge.medianAge, unsortedMedAge.loanCategories, "(E)")
+    else if (unsortedMedAge.medianAge == "1969 or Earlier")
+      MedianAge(unsortedMedAge.medianAge, unsortedMedAge.loanCategories, "(F)")
+    else
+      MedianAge(unsortedMedAge.medianAge, unsortedMedAge.loanCategories, "(G)")
+  }
+
   def buildSortedRace(unsortedRace: Race): Race = {
     if (unsortedRace.race == "White")
       Race(unsortedRace.race,
