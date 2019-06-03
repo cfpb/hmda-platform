@@ -10,13 +10,13 @@ object DwellingCategory extends Enum[DwellingCategory] {
   val values: immutable.IndexedSeq[DwellingCategory] = findValues
 
   case object SingleFamilySiteBuilt
-      extends DwellingCategory("Single Family (1-4 Units)-Site-Built")
+      extends DwellingCategory("Single Family (1-4 Units):Site-Built")
   case object MultiFamilySiteBuilt
-      extends DwellingCategory("Multifamily-Site-Built")
+      extends DwellingCategory("Multifamily:Site-Built")
   case object SingleFamilyManufactured
-      extends DwellingCategory("Single Family (1-4 Units)-Manufactured")
+      extends DwellingCategory("Single Family (1-4 Units):Manufactured")
   case object MultiFamilyManufactured
-      extends DwellingCategory("Multifamily-Manufactured")
+      extends DwellingCategory("Multifamily:Manufactured")
 
   def validateDwellingCategories(rawDwellingCategories: Seq[String])
     : Either[Seq[String], Seq[DwellingCategory]] = {

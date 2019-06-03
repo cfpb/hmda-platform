@@ -8,21 +8,21 @@ package object LoanProductTypeCategorization {
   def assignLoanProductTypeCategorization(
       lar: LoanApplicationRegister): String = {
     if (lar.loan.loanType == Conventional && lar.lienStatus == SecuredByFirstLien)
-      "Conventional, First Lien"
+      "Conventional:First Lien"
     else if (lar.loan.loanType == FHAInsured && lar.lienStatus == SecuredByFirstLien)
-      "FHA, First Lien"
+      "FHA:First Lien"
     else if (lar.loan.loanType == VAGuaranteed && lar.lienStatus == SecuredByFirstLien)
-      "VA, First Lien"
+      "VA:First Lien"
     else if (lar.loan.loanType == RHSOrFSAGuaranteed && lar.lienStatus == SecuredByFirstLien)
-      "FSA/RHS, First Lien"
+      "FSA/RHS:First Lien"
     else if (lar.loan.loanType == Conventional && lar.lienStatus == SecuredBySubordinateLien)
-      "Conventional, Subordinate Lien"
+      "Conventional:Subordinate Lien"
     else if (lar.loan.loanType == FHAInsured && lar.lienStatus == SecuredBySubordinateLien)
-      "FHA, Subordinate Lien"
+      "FHA:Subordinate Lien"
     else if (lar.loan.loanType == VAGuaranteed && lar.lienStatus == SecuredBySubordinateLien)
-      "VA, Subordinate Lien"
+      "VA:Subordinate Lien"
     else if (lar.loan.loanType == RHSOrFSAGuaranteed && lar.lienStatus == SecuredBySubordinateLien)
-      "FSA/RHS, Subordinate Lien"
+      "FSA/RHS:Subordinate Lien"
     else
       "N/A"
   }
