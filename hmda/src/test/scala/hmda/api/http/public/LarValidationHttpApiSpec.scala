@@ -25,7 +25,7 @@ import hmda.parser.filing.lar.LarCsvParser
 import hmda.util.http.FileUploadUtils
 
 class LarValidationHttpApiSpec
-  extends WordSpec
+    extends WordSpec
     with MustMatchers
     with ScalatestRouteTest
     with LarValidationHttpApi

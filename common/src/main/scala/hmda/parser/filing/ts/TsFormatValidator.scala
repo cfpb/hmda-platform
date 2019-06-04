@@ -6,7 +6,10 @@ import com.typesafe.config.ConfigFactory
 import hmda.model.filing.EditDescriptionLookup.config
 import hmda.model.filing.ts.{Address, Contact, TransmittalSheet}
 import hmda.model.institution.Agency
-import hmda.parser.ParserErrorModel.{IncorrectNumberOfFields, ParserValidationError}
+import hmda.parser.ParserErrorModel.{
+  IncorrectNumberOfFields,
+  ParserValidationError
+}
 import hmda.parser.filing.ts.TsParserErrorModel._
 
 import scala.util.{Failure, Success, Try}
@@ -16,8 +19,7 @@ sealed trait TsFormatValidator {
   val config = ConfigFactory.load()
 
   val currentYear = config.getString("hmda.filing.current")
-  val numberOfFields = config.getInt(
-    s"hmda.filing.$currentYear.ts.length")
+  val numberOfFields = config.getInt(s"hmda.filing.$currentYear.ts.length")
 
   type TsParserValidationResult[A] = ValidatedNel[ParserValidationError, A]
 

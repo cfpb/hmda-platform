@@ -20,8 +20,7 @@ class LarFormatValidatorSpec
   val config = ConfigFactory.load()
 
   val currentYear = config.getString("hmda.filing.current")
-  val numberOfFields = config.getInt(
-    s"hmda.filing.$currentYear.lar.length")
+  val numberOfFields = config.getInt(s"hmda.filing.$currentYear.lar.length")
 
   property("Loan Application Register must have the correct number of fields") {
     val values = List("a", "b", "c")

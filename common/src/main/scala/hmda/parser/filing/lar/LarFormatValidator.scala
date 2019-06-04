@@ -14,8 +14,7 @@ sealed trait LarFormatValidator extends LarParser {
   val config = ConfigFactory.load()
 
   val currentYear = config.getString("hmda.filing.current")
-  val numberOfFields = config.getInt(
-    s"hmda.filing.$currentYear.lar.length")
+  val numberOfFields = config.getInt(s"hmda.filing.$currentYear.lar.length")
 
   def validateLar(values: Seq[String],
                   rawLine: String = "",

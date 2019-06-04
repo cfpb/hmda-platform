@@ -19,8 +19,7 @@ class TsFormatValidatorSpec
   val config = ConfigFactory.load()
 
   val currentYear = config.getString("hmda.filing.current")
-  val numberOfFields = config.getInt(
-    s"hmda.filing.$currentYear.ts.length")
+  val numberOfFields = config.getInt(s"hmda.filing.$currentYear.ts.length")
 
   property("Transmittal Sheet must be valid") {
     forAll(tsGen) { ts =>
