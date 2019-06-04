@@ -39,9 +39,9 @@ Sex of Applicant or Borrower,Numeric,1 2 3 4 6
 Sex of Co-Applicant or Co-Borrower,Numeric,1 2 3 4 5 6
 Sex of Applicant or Borrower Collected on the Basis of Visual Observation or Surname,Numeric,1 2 3
 Sex of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,Numeric,1 2 3 4
-Age of Applicant or Borrower,Character Varying,<25 25-34 35-44 45-54 55-64 65-74 >74
+Age of Applicant or Borrower,Character Varying,<25 25-34 35-44 45-54 55-64 65-74 >74 8888
 Age of Applicant >= 62,Character Varying,Yes No NA
-Age of Co-Applicant or Co-Borrower,Character Varying,<25 25-34 35-44 45-54 55-64 65-74 >74
+Age of Co-Applicant or Co-Borrower,Character Varying,<25 25-34 35-44 45-54 55-64 65-74 >74 8888 9999
 Age of Co-Applicant >= 62,Character Varying,Yes No NA
 Income,Character Varying, NA
 Type of Purchaser,Numeric,0 1 2 3 4 5 6 71 72 8 9
