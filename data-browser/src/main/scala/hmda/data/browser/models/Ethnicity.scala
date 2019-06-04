@@ -4,7 +4,7 @@ import enumeratum._
 import scala.collection.immutable
 
 sealed abstract class Ethnicity(override val entryName: String)
-  extends EnumEntry
+    extends EnumEntry
 
 object Ethnicity extends Enum[Ethnicity] {
   val values: immutable.IndexedSeq[Ethnicity] = findValues
@@ -16,7 +16,7 @@ object Ethnicity extends Enum[Ethnicity] {
   case object Joint extends Ethnicity("Joint")
 
   def validEthnicities(
-                            rawEthnicities: Seq[String]): Either[Seq[String], Seq[Ethnicity]] = {
+      rawEthnicities: Seq[String]): Either[Seq[String], Seq[Ethnicity]] = {
     val potentialEthnicities =
       rawEthnicities.map(ethnicity =>
         (ethnicity, Ethnicity.withNameInsensitiveOption(ethnicity)))

@@ -72,39 +72,41 @@ trait DataBrowserDirectives {
       }
 
   def extractEthnicities: Directive1[BrowserField] =
-    parameters("ethnicities".as(CsvSeq[String]) ? Nil).flatMap { rawEthnicities =>
-      validEthnicities(rawEthnicities) match {
-        case Left(invalidEthnicities) =>
-          complete((BadRequest, InvalidEthnicities(invalidEthnicities)))
+    parameters("ethnicities".as(CsvSeq[String]) ? Nil).flatMap {
+      rawEthnicities =>
+        validEthnicities(rawEthnicities) match {
+          case Left(invalidEthnicities) =>
+            complete((BadRequest, InvalidEthnicities(invalidEthnicities)))
 
-        case Right(ethnicities) if ethnicities.nonEmpty =>
-          provide(
-            BrowserField("ethnicities",
-              ethnicities.map(_.entryName),
-              "ethnicities",
-              "ETHNICITIES"))
+          case Right(ethnicities) if ethnicities.nonEmpty =>
+            provide(
+              BrowserField("ethnicities",
+                           ethnicities.map(_.entryName),
+                           "ethnicity_categorization",
+                           "ETHNICITIES"))
 
-        case Right(_) =>
-          provide(BrowserField())
-      }
+          case Right(_) =>
+            provide(BrowserField())
+        }
     }
 
   def extractTotalUnits: Directive1[BrowserField] =
-    parameters("total_units".as(CsvSeq[String]) ? Nil).flatMap { rawTotalUnits =>
-      validateTotalUnits(rawTotalUnits) match {
-        case Left(invalidTotalUnits) =>
-          complete((BadRequest, InvalidTotalUnits(invalidTotalUnits)))
+    parameters("total_units".as(CsvSeq[String]) ? Nil).flatMap {
+      rawTotalUnits =>
+        validateTotalUnits(rawTotalUnits) match {
+          case Left(invalidTotalUnits) =>
+            complete((BadRequest, InvalidTotalUnits(invalidTotalUnits)))
 
-        case Right(totalUnits) if totalUnits.nonEmpty =>
-          provide(
-            BrowserField("total_units",
-              totalUnits.map(_.entryName),
-              "total_units",
-              "TOTAL_UNITS"))
+          case Right(totalUnits) if totalUnits.nonEmpty =>
+            provide(
+              BrowserField("total_units",
+                           totalUnits.map(_.entryName),
+                           "total_units",
+                           "TOTAL_UNITS"))
 
-        case Right(_) =>
-          provide(BrowserField())
-      }
+          case Right(_) =>
+            provide(BrowserField())
+        }
     }
 
   def extractRaces: Directive1[BrowserField] =
