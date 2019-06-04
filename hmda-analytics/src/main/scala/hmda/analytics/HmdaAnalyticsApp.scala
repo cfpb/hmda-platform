@@ -16,7 +16,6 @@ import hmda.analytics.query.{
   SubmissionHistoryComponent,
   TransmittalSheetComponent
 }
-import hmda.messages.pubsub.HmdaTopics.{analyticsTopic, signTopic}
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.submission.SubmissionId
 import hmda.model.filing.ts.TransmittalSheet
@@ -27,6 +26,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.LoggerFactory
 import hmda.messages.pubsub.HmdaTopics
+import hmda.messages.pubsub.HmdaGroups
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.HmdaQuery.{readRawData, readSubmission}
 import hmda.util.BankFilterUtils._
@@ -80,12 +80,13 @@ object HmdaAnalyticsApp
                      new StringDeserializer,
                      new StringDeserializer)
       .withBootstrapServers(kafkaHosts)
-      .withGroupId(HmdaTopics.analyticsTopic)
+      .withGroupId(HmdaGroups.analyticsGroup)
       .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
   Consumer
     .committableSource(consumerSettings,
-                       Subscriptions.topics(signTopic, analyticsTopic))
+                       Subscriptions.topics(HmdaTopics.signTopic,
+                                            HmdaTopics.analyticsTopic))
     .mapAsync(parallelism) { msg =>
       log.info(s"Processing: $msg")
       processData(msg.record.value()).map(_ => msg.committableOffset)

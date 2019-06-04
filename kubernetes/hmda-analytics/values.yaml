@@ -13,7 +13,9 @@ nameOverride: ""
 fullnameOverride: ""
 
 kafka:
+  analyticsGroup: analytics-group
   analyticsTopic: hmda-analytics
+  signTopic: hmda-sign
 
 ingress:
   enabled: false

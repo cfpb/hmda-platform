@@ -12,6 +12,7 @@ import akka.stream.scaladsl.{Keep, Sink, Source}
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.messages.pubsub.HmdaTopics
+import hmda.messages.pubsub.HmdaGroups
 import hmda.model.filing.submission.SubmissionId
 import hmda.publication.KafkaUtils._
 import hmda.publication.lar.publication.{IrsPublisher, PublishIrs}
@@ -61,7 +62,7 @@ object IrsPublisherApp extends App {
                      new StringDeserializer,
                      new StringDeserializer)
       .withBootstrapServers(kafkaHosts)
-      .withGroupId(HmdaTopics.irsTopic)
+      .withGroupId(HmdaGroups.irsGroup)
       .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
   Consumer

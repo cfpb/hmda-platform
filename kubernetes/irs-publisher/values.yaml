@@ -13,7 +13,9 @@ nameOverride: ""
 fullnameOverride: ""
 
 kafka:
+  irsGroup: irs-group
   irsTopic: hmda-irs
+  signTopic: hmda-sign
 
 ingress:
   enabled: false

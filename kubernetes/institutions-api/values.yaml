@@ -16,6 +16,7 @@ service:
   name: http-inst-api
 
 kafka:
+  institutionsGroup: institution-group
   institutionsTopic: institution
 
 ambassador:

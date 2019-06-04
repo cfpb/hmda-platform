@@ -20,6 +20,7 @@ import hmda.messages.institution.InstitutionEvents.{
 }
 import hmda.publication.KafkaUtils.kafkaHosts
 import hmda.messages.pubsub.HmdaTopics
+import hmda.messages.pubsub.HmdaGroups
 import hmda.serialization.kafka.InstitutionKafkaEventsDeserializer
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -61,7 +62,7 @@ object HmdaInstitutionApi extends App {
                      new StringDeserializer,
                      new InstitutionKafkaEventsDeserializer)
       .withBootstrapServers(kafkaHosts)
-      .withGroupId(HmdaTopics.institutionTopic)
+      .withGroupId(HmdaGroups.institutionsGroup)
       .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
   Consumer

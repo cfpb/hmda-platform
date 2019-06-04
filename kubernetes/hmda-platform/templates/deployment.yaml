@@ -54,17 +54,17 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: KAFKA_MODIFIED_LAR_TOPIC
-        value: .Values.kafka.modifiedLarTopic
+          value: .Values.kafka.modifiedLarTopic
         - name: KAFKA_INSTITUTIONS_TOPIC
-        value: .Values.kafka.institutionsTopic
+          value: .Values.kafka.institutionsTopic
         - name: KAFKA_ANALYTICS_TOPIC
-        value: .Values.kafka.analyticsTopic
+          value: .Values.kafka.analyticsTopic
         - name: KAFKA_IRS_TOPIC
-        value: .Values.kafka.irsTopic
+          value: .Values.kafka.irsTopic
         - name: KAFKA_SIGN_TOPIC
-        value: .Values.kafka.signTopic
+          value: .Values.kafka.signTopic
         - name: KAFKA_DISCLOSURE_TOPIC
-        value: .Values.kafka.disclosureTopic
+          value: .Values.kafka.disclosureTopic
         - name: COMMIT_ID
           value: {{ .Values.image.commitId }}
         - name: HMDA_RUNTIME_MODE
