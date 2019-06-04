@@ -175,8 +175,8 @@ object Routes {
                  constructionMethods,
                  dwellingCategories,
                  loanProducts,
-                  totalUnits,
-              ethnicities).filter(_.name != "empty")
+                 totalUnits,
+                 ethnicities).filter(_.name != "empty")
           if (filteredfields.length > 2) {
             complete((BadRequest, "More than 2 fields provided"))
           } else if (filteredfields.length == 2) {

@@ -43,11 +43,10 @@ final case class InvalidSexes(invalidLoanTypes: Seq[String],
                               errorType: String = "invalid-sexes")
     extends ErrorResponse
 
-
 final case class InvalidTotalUnits(invalidTotalUnits: Seq[String],
-                              errorType: String = "invalid-total-units")
-  extends ErrorResponse
+                                   errorType: String = "invalid-total-units")
+    extends ErrorResponse
 
 final case class InvalidEthnicities(invalidTotalUnits: Seq[String],
-                                   errorType: String = "invalid-ethnicities")
-  extends ErrorResponse
+                                    errorType: String = "invalid-ethnicities")
+    extends ErrorResponse

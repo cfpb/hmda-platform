@@ -4,7 +4,8 @@ import enumeratum._
 
 import scala.collection.immutable
 
-sealed abstract class TotalUnits(override val entryName: String) extends EnumEntry
+sealed abstract class TotalUnits(override val entryName: String)
+    extends EnumEntry
 
 object TotalUnits extends Enum[TotalUnits] {
   val values: immutable.IndexedSeq[TotalUnits] = findValues
@@ -19,9 +20,11 @@ object TotalUnits extends Enum[TotalUnits] {
   case object HundredToFortyNine extends TotalUnits("100-149")
   case object GtHundredFortyNine extends TotalUnits(">149")
 
-  def validateTotalUnits(rawTotalUnits: Seq[String]): Either[Seq[String], Seq[TotalUnits]] = {
+  def validateTotalUnits(
+      rawTotalUnits: Seq[String]): Either[Seq[String], Seq[TotalUnits]] = {
     val potentialTotalUnits =
-      rawTotalUnits.map(totalUnits => (totalUnits, TotalUnits.withNameInsensitiveOption(totalUnits)))
+      rawTotalUnits.map(totalUnits =>
+        (totalUnits, TotalUnits.withNameInsensitiveOption(totalUnits)))
     val isValidTotalUnit = potentialTotalUnits.map(_._2).forall(_.isDefined)
 
     if (isValidTotalUnit) Right(potentialTotalUnits.flatMap(_._2))
