@@ -28,14 +28,12 @@ object IncomeRaceEthnicityProcessing {
 
   def defaultData(msa_md: Long,
                   msa_md_name: String,
-                  state: String,
                   incomeBracket: String,
                   title: String): List[IncomeData] = {
     def fill(race: String, ethnicity: String) = {
       IncomeData(
         msa_md = msa_md,
         msa_md_name = msa_md_name,
-        state = state,
         incomeBracket = incomeBracket,
         title = title,
         loan_amount = 0,
@@ -56,14 +54,12 @@ object IncomeRaceEthnicityProcessing {
         data =>
           IncomeGrouping(data.msa_md,
                          data.msa_md_name,
-                         data.state,
                          data.incomeBracket,
                          data.title))
       .flatMapGroups {
-        case (IncomeGrouping(msa_md, msa_md_name, state, dispName, title),
-              elements) =>
+        case (IncomeGrouping(msa_md, msa_md_name, dispName, title), elements) =>
           val defaultMap =
-            defaultData(msa_md, msa_md_name, state, dispName, title)
+            defaultData(msa_md, msa_md_name, dispName, title)
               .map(d => (d.race, d.ethnicity) -> d)
               .toMap
           elements
@@ -77,11 +73,7 @@ object IncomeRaceEthnicityProcessing {
 
   def allUniqueCombinations(cachedRecordsDf: DataFrame) =
     cachedRecordsDf
-      .select(col("msa_md"),
-              col("msa_md_name"),
-              col("state"),
-              col("race"),
-              col("ethnicity"))
+      .select(col("msa_md"), col("msa_md_name"), col("race"), col("ethnicity"))
       .dropDuplicates()
       .cache()
 
@@ -109,11 +101,13 @@ object IncomeRaceEthnicityProcessing {
 
   def buildDisposition(input: List[IncomeData],
                        dispositionName: String): IncomeDisposition =
-    input.foldLeft(IncomeDisposition(dispositionName, 0, 0)) {
-      case (IncomeDisposition(name, curCount, curValue), next) =>
-        IncomeDisposition(name,
+    input.foldLeft(IncomeDisposition(dispositionName, 0, 0, dispositionName)) {
+      case (IncomeDisposition(name, curCount, curValue, nameForSorting),
+            next) =>
+        IncomeDisposition(name.split("-")(0).trim,
                           curCount + next.count,
-                          curValue + next.loan_amount)
+                          curValue + next.loan_amount,
+                          nameForSorting)
     }
 
   def dispositionA(input: DataFrame,
@@ -125,11 +119,7 @@ object IncomeRaceEthnicityProcessing {
     val dispA = prepare(input)
       .filter(col("action_taken_type").isin(actionsTaken: _*))
       .filter(col("percent_median_msa_income") === "<50%")
-      .groupBy(col("msa_md"),
-               col("msa_md_name"),
-               col("state"),
-               col("race"),
-               col("ethnicity"))
+      .groupBy(col("msa_md"), col("msa_md_name"), col("race"), col("ethnicity"))
       .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
     includeZeroAndNonZero(dispA,
                           title,
@@ -147,11 +137,7 @@ object IncomeRaceEthnicityProcessing {
     val dispB = prepare(input)
       .filter(col("action_taken_type").isin(actionsTaken: _*))
       .filter(col("percent_median_msa_income") === "50-79%")
-      .groupBy(col("msa_md"),
-               col("msa_md_name"),
-               col("state"),
-               col("race"),
-               col("ethnicity"))
+      .groupBy(col("msa_md"), col("msa_md_name"), col("race"), col("ethnicity"))
       .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
     includeZeroAndNonZero(dispB,
                           title,
@@ -169,11 +155,7 @@ object IncomeRaceEthnicityProcessing {
     val dispC = prepare(input)
       .filter(col("action_taken_type").isin(actionsTaken: _*))
       .filter(col("percent_median_msa_income") === "80-99%")
-      .groupBy(col("msa_md"),
-               col("msa_md_name"),
-               col("state"),
-               col("race"),
-               col("ethnicity"))
+      .groupBy(col("msa_md"), col("msa_md_name"), col("race"), col("ethnicity"))
       .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
     includeZeroAndNonZero(dispC,
                           title,
@@ -191,11 +173,7 @@ object IncomeRaceEthnicityProcessing {
     val dispD = prepare(input)
       .filter(col("action_taken_type").isin(actionsTaken: _*))
       .filter(col("percent_median_msa_income") === "100-119%")
-      .groupBy(col("msa_md"),
-               col("msa_md_name"),
-               col("state"),
-               col("race"),
-               col("ethnicity"))
+      .groupBy(col("msa_md"), col("msa_md_name"), col("race"), col("ethnicity"))
       .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
     includeZeroAndNonZero(dispD,
                           title,
@@ -213,11 +191,7 @@ object IncomeRaceEthnicityProcessing {
     val dispE = prepare(input)
       .filter(col("action_taken_type").isin(actionsTaken: _*))
       .filter(col("percent_median_msa_income") === ">120%")
-      .groupBy(col("msa_md"),
-               col("msa_md_name"),
-               col("state"),
-               col("race"),
-               col("ethnicity"))
+      .groupBy(col("msa_md"), col("msa_md_name"), col("race"), col("ethnicity"))
       .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
     includeZeroAndNonZero(dispE,
                           title,
@@ -229,13 +203,13 @@ object IncomeRaceEthnicityProcessing {
   def outputCollectionTableIncome(cachedRecordsDf: DataFrame,
                                   spark: SparkSession): List[IncomeData] = {
     val actionsTakenTable1 = Map(
-      "Applications Received" -> List(1, 2, 3, 4, 5),
-      "Loans Originated" -> List(1),
-      "Applications Approved but not Accepted" -> List(2),
-      "Applications Denied by Financial Institution" -> List(3),
-      "Applications Withdrawn by Applicant" -> List(4),
-      "File Closed for Incompleteness" -> List(5),
-      "Purchased Loans" -> List(6)
+      "Applications Received - (A)" -> List(1, 2, 3, 4, 5),
+      "Loans Originated - (B)" -> List(1),
+      "Applications Approved but not Accepted - (C)" -> List(2),
+      "Applications Denied by Financial Institution - (D)" -> List(3),
+      "Applications Withdrawn by Applicant - (E)" -> List(4),
+      "File Closed for Incompleteness - (F)" -> List(5),
+      "Purchased Loans - (G)" -> List(6)
     )
 
     val outputATable1: Dataset[IncomeData] = actionsTakenTable1
@@ -313,9 +287,9 @@ object IncomeRaceEthnicityProcessing {
 
     input
       .filter(data => (data.race != null && data.ethnicity != null))
-      .groupBy(data => (data.msa_md, data.msa_md_name, data.state))
+      .groupBy(data => (data.msa_md, data.msa_md_name))
       .map {
-        case ((msa_md, msa_md_name, state), dataForMsa: List[IncomeData]) => {
+        case ((msa_md, msa_md_name), dataForMsa: List[IncomeData]) => {
           val totalGrouping: List[ApplicantIncome] = {
             dataForMsa
               .groupBy(_.incomeBracket)
@@ -338,6 +312,7 @@ object IncomeRaceEthnicityProcessing {
                                 }
                               }
                               .toList
+                              .sorted
                             BaseProcessing.buildSortedIncomeRace(
                               IncomeRace(eachRace, dispositions, "unsorted"))
                         }
@@ -363,29 +338,31 @@ object IncomeRaceEthnicityProcessing {
                                 }
                               }
                               .toList
+                              .sorted
                             BaseProcessing.buildSortedIncomeEthnicity(
                               IncomeEthnicity(eachEthnicity,
                                               dispositions,
                                               "unsorted"))
                         }
                         .toList
+                        .sorted
                     }
                     BorrowerEthnicity("Ethnicity", ethnicities)
                   }
 
-                  ApplicantIncome(eachIncome,
-                                  BorrowerCharacteristics(borrowerRace,
-                                                          borrowerEthnicity))
+                  BaseProcessing.buildSortedApplicantIncome(
+                    ApplicantIncome(eachIncome,
+                                    BorrowerCharacteristics(borrowerRace,
+                                                            borrowerEthnicity),
+                                    "unsorted"))
                 }
               }
               .toList
+              .sorted
 
           }
           val msa =
-            Msa(msa_md.toString(),
-                msa_md_name,
-                state,
-                Census.states.getOrElse(state, State("", "")).name)
+            Msa(msa_md.toString(), msa_md_name, "", "")
           ReportByApplicantIncome(
             "5",
             "Aggregate",
