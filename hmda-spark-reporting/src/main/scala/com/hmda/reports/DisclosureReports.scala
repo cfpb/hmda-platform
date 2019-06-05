@@ -20,7 +20,7 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.IntegerType
-import hmda.messages.pubsub.HmdaTopics.disclosureTopic
+import hmda.messages.pubsub.HmdaTopics
 
 import scala.concurrent.duration._
 import scala.concurrent._
@@ -89,12 +89,12 @@ object DisclosureReports {
                        new StringDeserializer,
                        new StringDeserializer)
         .withBootstrapServers(sys.env("KAFKA_HOSTS"))
-        .withGroupId("hmda-spark-disclosure")
+        .withGroupId(HmdaTopics.disclosureTopic)
         .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
     Consumer
       .committableSource(consumerSettings,
-                         Subscriptions.topics(disclosureTopic))
+                         Subscriptions.topics(HmdaTopics.disclosureTopic))
       // async boundary begin
       .async
       .mapAsync(1) { msg =>

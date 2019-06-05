@@ -35,6 +35,10 @@ spec:
               cpu: "6"
               memory: "3200Mi"
           env:
+            - name: KAFKA_INSTITUTIONS_TOPIC
+              value: .Values.kafka.institutionsTopic
+            - name: KAFKA_INSTITUTIONS_GROUP
+              value: .Values.kafka.institutionsGroup
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:

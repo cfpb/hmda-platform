@@ -12,6 +12,11 @@ image:
 nameOverride: ""
 fullnameOverride: ""
 
+kafka:
+  modifiedLarGroup: modified-lar-group
+  modifiedLarTopic: hmda-modified-lar
+  signTopic: hmda-sign
+
 ingress:
   enabled: false
   annotations: {}

@@ -31,6 +31,14 @@ spec:
               mountPath: /etc/localtime          
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+            - name: KAFKA_ANALYTICS_TOPIC
+              value: .Values.kafka.analyticsTopic
+            - name: KAFKA_SIGN_TOPIC
+              value: .Values.kafka.signTopic
+            - name: KAFKA_ANALYTICS_GROUP
+              value: .Values.kafka.analyticsGroup
+            - name: KAFKA_SIGN_GROUP
+              value: .Values.kafka.signGroup
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:

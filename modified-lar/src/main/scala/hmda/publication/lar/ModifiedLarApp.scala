@@ -12,12 +12,13 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl._
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hmda.messages.pubsub.HmdaTopics._
+import hmda.messages.pubsub.HmdaGroups
 import hmda.model.census.Census
 import hmda.model.filing.submission.SubmissionId
 import hmda.publication.KafkaUtils._
 import hmda.publication.lar.publication._
 import hmda.publication.lar.services._
+import hmda.messages.pubsub.HmdaTopics
 import hmda.query.repository.ModifiedLarRepository
 import hmda.util.BankFilterUtils._
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -103,13 +104,14 @@ object ModifiedLarApp extends App {
                          new StringDeserializer,
                          new StringDeserializer)
           .withBootstrapServers(kafkaHosts)
-          .withGroupId("modified-lar")
+          .withGroupId(HmdaGroups.modifiedLarGroup)
           .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest")
 
       val (kafkaControl: Consumer.Control, streamCompleted: Future[Done]) =
         Consumer
           .committableSource(consumerSettings,
-                             Subscriptions.topics(signTopic, modifiedLarTopic))
+                             Subscriptions.topics(HmdaTopics.signTopic,
+                                                  HmdaTopics.modifiedLarTopic))
           .mapAsync(parallelism) { msg =>
             log.info(s"Received a message - key: ${msg.record
               .key()}, value: ${msg.record.value()}")

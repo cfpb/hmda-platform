@@ -20,7 +20,7 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.IntegerType
-import hmda.messages.pubsub.HmdaTopics.adTopic
+import hmda.messages.pubsub.HmdaTopics
 
 import scala.concurrent.duration._
 import scala.concurrent._
@@ -89,11 +89,12 @@ object AggregateReports {
                        new StringDeserializer,
                        new StringDeserializer)
         .withBootstrapServers(sys.env("KAFKA_HOSTS"))
-        .withGroupId("hmda-spark-aggregate")
+        .withGroupId(HmdaTopics.adTopic)
         .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
     Consumer
-      .committableSource(consumerSettings, Subscriptions.topics(adTopic))
+      .committableSource(consumerSettings,
+                         Subscriptions.topics(HmdaTopics.adTopic))
       // async boundary begin
       .async
       .mapAsync(1) { msg =>
