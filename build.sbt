@@ -37,7 +37,7 @@ lazy val akkaDeps = Seq(
   akkaCors,
   akkaKafkaStreams,
   embeddedKafka,
-  "com.lightbend.akka" %% "akka-stream-alpakka-s3" % "1.0.0",
+  alpakkaS3,
   akkaQuartzScheduler,
   phantomDSL,
   phantomJDK8
