@@ -19,7 +19,7 @@ import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.validation.LarValidationError
 import hmda.validation.HmdaValidation
 import hmda.validation.context.ValidationContext
-import hmda.validation.engine.LarEngine2018._
+import hmda.validation.engine._
 
 import scala.concurrent.ExecutionContext
 
@@ -53,15 +53,15 @@ trait LarValidationHttpApi
         }
     }
 
-  //lar/validate
+  //lar/validate/<year>
   val validateLarRoute =
-    path("validate") {
+    path("validate" / IntNumber) { year =>
       parameters('check.as[String] ? "all") { checkType =>
         timedPost { _ =>
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             entity(as[LarValidateRequest]) { req =>
               LarCsvParser(req.lar) match {
-                case Right(lar) => validate(lar, checkType)
+                case Right(lar) => validate(lar, checkType, year)
                 case Left(errors) =>
                   completeWithParsingErrors(errors)
               }
@@ -72,8 +72,11 @@ trait LarValidationHttpApi
     }
 
   private def validate(lar: LoanApplicationRegister,
-                       checkType: String): Route = {
-    val ctx = ValidationContext(None)
+                       checkType: String,
+                       year: Int): Route = {
+    val ctx = ValidationContext(filingYear = Some(year))
+    val validationEngine = selectLarEngine(year)
+    import validationEngine._
     val validation: HmdaValidation[LoanApplicationRegister] = checkType match {
       case "all" => checkAll(lar, lar.loan.ULI, ctx, LarValidationError)
       case "syntactical" =>

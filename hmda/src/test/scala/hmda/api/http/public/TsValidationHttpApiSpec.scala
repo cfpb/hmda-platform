@@ -84,21 +84,22 @@ class TsValidationHttpApiSpec
     }
 
     "return all errors when TS is invalid" in {
-      Post("/ts/validate", TsValidateRequest(invalidCsv)) ~> tsRoutes ~> check {
+      Post("/ts/validate/2018", TsValidateRequest(invalidCsv)) ~> tsRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[SingleValidationErrorResult].syntactical.errors.size mustBe 1
         responseAs[SingleValidationErrorResult].validity.errors.size mustBe 1
       }
     }
+
     "filter syntactical TS errors" in {
-      Post("/ts/validate?check=syntactical", TsValidateRequest(invalidCsv)) ~> tsRoutes ~> check {
+      Post("/ts/validate/2018?check=syntactical", TsValidateRequest(invalidCsv)) ~> tsRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[SingleValidationErrorResult].syntactical.errors.size mustBe 1
         responseAs[SingleValidationErrorResult].validity.errors.size mustBe 0
       }
     }
     "filter validity TS errors" in {
-      Post("/ts/validate?check=validity", TsValidateRequest(invalidCsv)) ~> tsRoutes ~> check {
+      Post("/ts/validate/2019?check=validity", TsValidateRequest(invalidCsv)) ~> tsRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[SingleValidationErrorResult].syntactical.errors.size mustBe 0
         responseAs[SingleValidationErrorResult].validity.errors.size mustBe 1
