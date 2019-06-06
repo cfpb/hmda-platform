@@ -3,7 +3,7 @@ package hmda.validation.engine
 import org.scalatest.{MustMatchers, PropSpec}
 import org.scalatest.prop.PropertyChecks
 import hmda.model.filing.ts.TsGenerators._
-import TsEngine._
+import TsEngine2018._
 import hmda.model.validation.{
   SyntacticalValidationError,
   TsValidationError,
@@ -11,7 +11,7 @@ import hmda.model.validation.{
 }
 import hmda.validation.context.ValidationContext
 
-class TsEngineSpec extends PropSpec with PropertyChecks with MustMatchers {
+class TsEngine2018Spec extends PropSpec with PropertyChecks with MustMatchers {
 
   property("Ts Validation Engine must pass all checks") {
     forAll(tsGen) { ts =>

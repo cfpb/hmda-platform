@@ -92,7 +92,7 @@ class LarValidationHttpApiSpec
     }
 
     "validate a lar" in {
-      Post("/lar/validate", LarValidateRequest(validLar)) ~> larRoutes ~> check {
+      Post("/lar/validate/2019", LarValidateRequest(validLar)) ~> larRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[LoanApplicationRegister] mustBe LarCsvParser(validLar)
           .getOrElse(LoanApplicationRegister())
@@ -100,7 +100,7 @@ class LarValidationHttpApiSpec
     }
 
     "fail edits V600 and V623" in {
-      Post("/lar/validate", LarValidateRequest(invalidLar)) ~> larRoutes ~> check {
+      Post("/lar/validate/2019", LarValidateRequest(invalidLar)) ~> larRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[SingleValidationErrorResult] mustBe SingleValidationErrorResult(
           validity = ValidationErrorSummary(Seq("V600", "V623")))

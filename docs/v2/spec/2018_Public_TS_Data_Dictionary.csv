@@ -1,0 +1,13 @@
+﻿Field Name,Field Data Type,Valid Values,Notes
+Record Identifier - Value is 1,Integer,1,
+Financial Institution Name,Character Varying,,
+Calendar Year,Integer,,
+Calendar Quarter,Integer,4,Annual submissions for covered loans and applications with respect to which final action was taken during the period between January 1st (01/01) and December 31st (12/31).
+Contact Person's Office Street Address,Character Varying,,
+Contact Person's Office City,Character Varying,,
+Contact Person's Office State,Character Varying,,
+Contact Person's Office Zip Code,Character Varying,,
+Federal Agency,Integer,1 2 3 5 7 9,
+Total Number of Entries Contained in Submission,Integer,,
+Federal Taxpayer Identification Number,Character Varying,,
+Legal Entity Identifier (LEI),Character Varying,,

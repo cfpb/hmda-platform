@@ -198,6 +198,7 @@ CREATE INDEX modifiedlar2018_lei_idx ON hmda_user.modifiedlar2018 USING btree (l
 
 -- Completed on 2019-06-05 11:44:50 EDT
 
+
 --
 -- PostgreSQL database dump complete
 --

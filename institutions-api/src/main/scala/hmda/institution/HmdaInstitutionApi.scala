@@ -19,7 +19,8 @@ import hmda.messages.institution.InstitutionEvents.{
   InstitutionModified
 }
 import hmda.publication.KafkaUtils.kafkaHosts
-import hmda.messages.pubsub.HmdaTopics._
+import hmda.messages.pubsub.HmdaTopics
+import hmda.messages.pubsub.HmdaGroups
 import hmda.serialization.kafka.InstitutionKafkaEventsDeserializer
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -61,11 +62,12 @@ object HmdaInstitutionApi extends App {
                      new StringDeserializer,
                      new InstitutionKafkaEventsDeserializer)
       .withBootstrapServers(kafkaHosts)
-      .withGroupId("institution")
+      .withGroupId(HmdaGroups.institutionsGroup)
       .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
   Consumer
-    .committableSource(consumerSettings, Subscriptions.topics(institutionTopic))
+    .committableSource(consumerSettings,
+                       Subscriptions.topics(HmdaTopics.institutionTopic))
     .map { msg =>
       processData(msg.record.value()).map(_ => msg.committableOffset)
     }

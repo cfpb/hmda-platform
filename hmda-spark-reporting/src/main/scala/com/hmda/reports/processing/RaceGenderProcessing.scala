@@ -11,14 +11,15 @@ import org.apache.spark.sql.functions._
 object RaceGenderProcessing {
 
   val races = List(
-    "White",
-    "Black or African American",
-    "American Indian or Alaska Native",
     "Asian",
-    "Joint",
-    "2 or more minority races",
-    "Race Not Available",
+    "Native Hawaiian or Other Pacific Islander",
     "Free Form Text Only",
+    "Race Not Available",
+    "American Indian or Alaska Native",
+    "Black or African American",
+    "2 or more minority races",
+    "White",
+    "Joint"
   )
 
   val actionsTaken = Map(

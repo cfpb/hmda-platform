@@ -389,22 +389,24 @@ object BaseProcessing {
       )
 
   def buildSortedIncomeRace(unsortedRace: IncomeRace): IncomeRace = {
-    if (unsortedRace.race == "White")
+    if (unsortedRace.race == "American Indian or Alaska Native")
       IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(A)")
-    else if (unsortedRace.race == "Black or African American")
-      IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(B)")
-    else if (unsortedRace.race == "American Indian or Alaska Native")
-      IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(C)")
     else if (unsortedRace.race == "Asian")
+      IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(B)")
+    else if (unsortedRace.race == "Black or African American")
+      IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(C)")
+    else if (unsortedRace.race == "Native Hawaiian or Other Pacific Islander")
       IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(D)")
-    else if (unsortedRace.race == "Joint")
+    else if (unsortedRace.race == "White")
       IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(E)")
     else if (unsortedRace.race == "2 or more minority races")
       IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(F)")
-    else if (unsortedRace.race == "Race Not Available")
+    else if (unsortedRace.race == "Joint")
       IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(H)")
+    else if (unsortedRace.race == "Free Form Text Only")
+      IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(I)")
     else
-      IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(G)")
+      IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(J)")
   }
 
   def buildSortedMedAge(unsortedMedAge: MedianAge): MedianAge = {
@@ -425,27 +427,27 @@ object BaseProcessing {
   }
 
   def buildSortedRace(unsortedRace: Race): Race = {
-    if (unsortedRace.race == "White")
+    if (unsortedRace.race == "American Indian or Alaska Native")
       Race(unsortedRace.race,
            unsortedRace.dispositions,
            unsortedRace.gender,
            "(A)")
-    else if (unsortedRace.race == "Black or African American")
-      Race(unsortedRace.race,
-           unsortedRace.dispositions,
-           unsortedRace.gender,
-           "(B)")
-    else if (unsortedRace.race == "American Indian or Alaska Native")
-      Race(unsortedRace.race,
-           unsortedRace.dispositions,
-           unsortedRace.gender,
-           "(C)")
     else if (unsortedRace.race == "Asian")
       Race(unsortedRace.race,
            unsortedRace.dispositions,
            unsortedRace.gender,
+           "(B)")
+    else if (unsortedRace.race == "Black or African American")
+      Race(unsortedRace.race,
+           unsortedRace.dispositions,
+           unsortedRace.gender,
+           "(C)")
+    else if (unsortedRace.race == "Native Hawaiian or Other Pacific Islander")
+      Race(unsortedRace.race,
+           unsortedRace.dispositions,
+           unsortedRace.gender,
            "(D)")
-    else if (unsortedRace.race == "Joint")
+    else if (unsortedRace.race == "White")
       Race(unsortedRace.race,
            unsortedRace.dispositions,
            unsortedRace.gender,
@@ -455,16 +457,21 @@ object BaseProcessing {
            unsortedRace.dispositions,
            unsortedRace.gender,
            "(F)")
-    else if (unsortedRace.race == "Race Not Available")
+    else if (unsortedRace.race == "Joint")
       Race(unsortedRace.race,
            unsortedRace.dispositions,
            unsortedRace.gender,
            "(H)")
+    else if (unsortedRace.race == "Free Form Text Only")
+      Race(unsortedRace.race,
+           unsortedRace.dispositions,
+           unsortedRace.gender,
+           "(I)")
     else
       Race(unsortedRace.race,
            unsortedRace.dispositions,
            unsortedRace.gender,
-           "(G)")
+           "(J)")
   }
 
   def buildSortedGender(unsortedGender: Gender): Gender = {
@@ -504,6 +511,30 @@ object BaseProcessing {
                 unsortedEthnicity.dispositions,
                 unsortedEthnicity.gender,
                 "(E)")
+  }
+
+  def buildSortedApplicantIncome(
+      unsortedApplicantIncome: ApplicantIncome): ApplicantIncome = {
+    if (unsortedApplicantIncome.applicantIncome == "LESS THAN 50% OF MSA/MD MEDIAN")
+      ApplicantIncome(unsortedApplicantIncome.applicantIncome,
+                      unsortedApplicantIncome.borrowerCharacteristics,
+                      "(A)")
+    else if (unsortedApplicantIncome.applicantIncome == "50-79% OF MSA/MD MEDIAN")
+      ApplicantIncome(unsortedApplicantIncome.applicantIncome,
+                      unsortedApplicantIncome.borrowerCharacteristics,
+                      "(B)")
+    else if (unsortedApplicantIncome.applicantIncome == "80-99% OF MSA/MD MEDIAN")
+      ApplicantIncome(unsortedApplicantIncome.applicantIncome,
+                      unsortedApplicantIncome.borrowerCharacteristics,
+                      "(C)")
+    else if (unsortedApplicantIncome.applicantIncome == "100-119% OF MSA/MD MEDIAN")
+      ApplicantIncome(unsortedApplicantIncome.applicantIncome,
+                      unsortedApplicantIncome.borrowerCharacteristics,
+                      "(D)")
+    else
+      ApplicantIncome(unsortedApplicantIncome.applicantIncome,
+                      unsortedApplicantIncome.borrowerCharacteristics,
+                      "(E)")
   }
 
   def buildSortedIncomeEthnicity(

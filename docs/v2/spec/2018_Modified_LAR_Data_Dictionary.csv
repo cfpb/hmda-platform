@@ -1,86 +1,86 @@
-Field Name,Field Data Type,Valid Values
-Record Identifier,Numeric,2
-Legal Entity Identifier (LEI),Character Varying,20 Character LEI
-Loan Type,Numeric,1 2 3 4
-Loan Purpose,Numeric,1 2 31 32 4 5
-Preapproval,Numeric,1 2
-Construction Method,Numeric,1 2
-Occupancy Type,Numeric,1 2 3
-Loan Amount,Numeric,
-Action Taken,Numeric,1 2 3 4 5 6 7 8
-State,Character Varying,Two-Letter State Code
-County,Character Varying,State-County FIPS code NA
-Census Tract,Character Varying,11 digit census tract number NA
-Ethnicity of Applicant or Borrower: 1,Character Varying,1 11 12 13 14 2 3 4 
-Ethnicity of Applicant or Borrower: 2,Character Varying,1 11 12 13 14 2 
-Ethnicity of Applicant or Borrower: 3,Character Varying,1 11 12 13 14 2 
-Ethnicity of Applicant or Borrower: 4,Character Varying,1 11 12 13 14 2 
-Ethnicity of Applicant or Borrower: 5,Character Varying,1 11 12 13 14 2 
-Ethnicity of Co-Applicant or Co-Borrower: 1,Character Varying,1 11 12 13 14 2 3 4 5 
-Ethnicity of Co-Applicant or Co-Borrower: 2,Character Varying,1 11 12 13 14 2 
-Ethnicity of Co-Applicant or Co-Borrower: 3,Character Varying,1 11 12 13 14 2 
-Ethnicity of Co-Applicant or Co-Borrower: 4,Character Varying,1 11 12 13 14 2 
-Ethnicity of Co-Applicant or Co-Borrower: 5,Character Varying,1 11 12 13 14 2 
-Ethnicity of Applicant or Borrower Collected on the Basis of Visual Observation or Surname,Numeric,1 2 3
-Ethnicity of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,Numeric,1 2 3 4
-Race of Applicant or Borrower: 1,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 6 7 
-Race of Applicant or Borrower: 2,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 
-Race of Applicant or Borrower: 3,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 
-Race of Applicant or Borrower: 4,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 
-Race of Applicant or Borrower: 5,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 
-Race of Co-Applicant or Co-Borrower: 1,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 6 7 8 
-Race of Co-Applicant or Co-Borrower: 2,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 
-Race of Co-Applicant or Co-Borrower: 3,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 
-Race of Co-Applicant or Co-Borrower: 4,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 
-Race of Co-Applicant or Co-Borrower: 5,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 
-Race of Applicant or Borrower Collected on the Basis of Visual Observation or Surname,Numeric,1 2 3
-Race of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,Numeric,1 2 3 4
-Sex of Applicant or Borrower,Numeric,1 2 3 4 6
-Sex of Co-Applicant or Co-Borrower,Numeric,1 2 3 4 5 6
-Sex of Applicant or Borrower Collected on the Basis of Visual Observation or Surname,Numeric,1 2 3
-Sex of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,Numeric,1 2 3 4
-Age of Applicant or Borrower,Character Varying,<25 25-34 35-44 45-54 55-64 65-74 >74
-Age of Applicant >= 62,Character Varying,Yes No NA
-Age of Co-Applicant or Co-Borrower,Character Varying,<25 25-34 35-44 45-54 55-64 65-74 >74
-Age of Co-Applicant >= 62,Character Varying,Yes No NA
-Income,Character Varying, NA
-Type of Purchaser,Numeric,0 1 2 3 4 5 6 71 72 8 9
-Rate Spread,Character Varying,NA Exempt
-HOEPA Status,Numeric,1 2 3
-Lien Status,Numeric,1 2
-Applicant or Borrower - Name and Version of Credit Scoring Model,Numeric,1 2 3 4 5 6 7 8 9 1111
-Co-Applicant or Co-Borrower - Name and Version of Credit Scoring Model,Numeric,1 2 3 4 5 6 7 8 9 10 1111
-Reason for Denial: 1,Numeric,1 2 3 4 5 6 7 8 9 10 1111
-Reason for Denial: 2,Character Varying,1 2 3 4 5 6 7 8 9 
-Reason for Denial: 3,Character Varying,1 2 3 4 5 6 7 8 9 
-Reason for Denial: 4,Character Varying,1 2 3 4 5 6 7 8 9 
-Total Loan Costs,Character Varying, NA Exempt
-Total Points and Fees,Character Varying, NA Exempt
-Origination Charges,Character Varying, NA Exempt
-Discount Points,Character Varying, NA Exempt
-Lender Credits,Character Varying, NA Exempt
-Interest Rate,Character Varying, NA Exempt
-Prepayment Penalty Term,Character Varying, NA Exempt
-Debt-to-Income Ratio,Character Varying,<20% 20%-<30% 30%-<36% 50%-60% >60% Exact values between 36%-<50% NA Exempt
-Combined Loan-to-Value Ratio,Character Varying, NA Exempt
-Loan Term,Character Varying, NA Exempt
-Introductory Rate Period,Character Varying, NA Exempt
-Balloon Payment,Numeric,1 2 1111
-Interest-Only Payments,Numeric,1 2 1111
-Negative Amortization,Numeric,1 2 1111
-Other Non-amortizing Features,Numeric,1 2 1111
-Property Value,Numeric, NA Exempt
-Manufactured Home Secured Property Type,Numeric,1 2 3 1111
-Manufactured Home Land Property Interest,Numeric,1 2 3 4 5 1111
-Total Units,Character Varying,1 2 3 4 5-24 25-49 50-99 100-149 >149
-Multifamily Affordable Units,Character Varying, NA Exempt
-Submission of Application,Numeric,1 2 3 1111
-Initially Payable to Your Institution,Numeric,1 2 3 1111
-Automated Underwriting System: 1,Numeric,1 2 3 4 5 6 1111
-Automated Underwriting System: 2,Numeric,1 2 3 4 5  
-Automated Underwriting System: 3,Numeric,1 2 3 4 5  
-Automated Underwriting System: 4,Numeric,1 2 3 4 5 
-Automated Underwriting System: 5,Numeric,1 2 3 4 5 
-Reverse Mortgage,Numeric,1 2 1111
-Open-End Line of Credit,Numeric,1 2 1111
-Business or Commercial Purpose,Numeric,1 2 1111
+Field Name,Field Data Type,Valid Values,Notes
+Record Identifier,Numeric,2,
+Legal Entity Identifier (LEI),Character Varying,,
+Loan Type,Numeric,1 2 3 4,
+Loan Purpose,Numeric,1 2 31 32 4 5,
+Preapproval,Numeric,1 2,
+Construction Method,Numeric,1 2,
+Occupancy Type,Numeric,1 2 3,
+Loan Amount,Numeric,,
+Action Taken,Numeric,1 2 3 4 5 6 7 8,
+State,Character Varying,NA,Two-Letter State Code
+County,Character Varying,NA Exempt,State-County FIPS code
+Census Tract,Character Varying,NA,11 digit census tract number 
+Ethnicity of Applicant or Borrower: 1,Character Varying,1 11 12 13 14 2 3 4,
+Ethnicity of Applicant or Borrower: 2,Character Varying,1 11 12 13 14 2,
+Ethnicity of Applicant or Borrower: 3,Character Varying,1 11 12 13 14 2,
+Ethnicity of Applicant or Borrower: 4,Character Varying,1 11 12 13 14 2,
+Ethnicity of Applicant or Borrower: 5,Character Varying,1 11 12 13 14 2,
+Ethnicity of Co-Applicant or Co-Borrower: 1,Character Varying,1 11 12 13 14 2 3 4 5,
+Ethnicity of Co-Applicant or Co-Borrower: 2,Character Varying,1 11 12 13 14 2,
+Ethnicity of Co-Applicant or Co-Borrower: 3,Character Varying,1 11 12 13 14 2,
+Ethnicity of Co-Applicant or Co-Borrower: 4,Character Varying,1 11 12 13 14 2,
+Ethnicity of Co-Applicant or Co-Borrower: 5,Character Varying,1 11 12 13 14 2,
+Ethnicity of Applicant or Borrower Collected on the Basis of Visual Observation or Surname,Numeric,1 2 3,
+Ethnicity of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,Numeric,1 2 3 4,
+Race of Applicant or Borrower: 1,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 6 7,
+Race of Applicant or Borrower: 2,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5,
+Race of Applicant or Borrower: 3,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5,
+Race of Applicant or Borrower: 4,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5,
+Race of Applicant or Borrower: 5,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5,
+Race of Co-Applicant or Co-Borrower: 1,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5 6 7 8,
+Race of Co-Applicant or Co-Borrower: 2,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5,
+Race of Co-Applicant or Co-Borrower: 3,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5,
+Race of Co-Applicant or Co-Borrower: 4,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5,
+Race of Co-Applicant or Co-Borrower: 5,Character Varying,1 2 21 22 23 24 25 26 27 3 4 41 42 43 44 5,
+Race of Applicant or Borrower Collected on the Basis of Visual Observation or Surname,Numeric,1 2 3,
+Race of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,Numeric,1 2 3 4,
+Sex of Applicant or Borrower,Numeric,1 2 3 4 6,
+Sex of Co-Applicant or Co-Borrower,Numeric,1 2 3 4 5 6,
+Sex of Applicant or Borrower Collected on the Basis of Visual Observation or Surname,Numeric,1 2 3,
+Sex of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,Numeric,1 2 3 4,
+Age of Applicant or Borrower,Character Varying,<25 25-34 35-44 45-54 55-64 65-74 >74 8888,
+Age of Applicant >= 62,Character Varying,Yes No NA,
+Age of Co-Applicant or Co-Borrower,Character Varying,<25 25-34 35-44 45-54 55-64 65-74 >74 8888 9999,
+Age of Co-Applicant >= 62,Character Varying,Yes No NA,
+Income,Character Varying,NA,
+Type of Purchaser,Numeric,0 1 2 3 4 5 6 71 72 8 9,
+Rate Spread,Character Varying,NA Exempt,
+HOEPA Status,Numeric,1 2 3,
+Lien Status,Numeric,1 2,
+Applicant or Borrower - Name and Version of Credit Scoring Model,Numeric,1 2 3 4 5 6 7 8 9 1111,
+Co-Applicant or Co-Borrower - Name and Version of Credit Scoring Model,Numeric,1 2 3 4 5 6 7 8 9 10 1111,
+Reason for Denial: 1,Numeric,1 2 3 4 5 6 7 8 9 10 1111,
+Reason for Denial: 2,Character Varying,1 2 3 4 5 6 7 8 9,
+Reason for Denial: 3,Character Varying,1 2 3 4 5 6 7 8 9,
+Reason for Denial: 4,Character Varying,1 2 3 4 5 6 7 8 9,
+Total Loan Costs,Character Varying,NA Exempt,
+Total Points and Fees,Character Varying,NA Exempt,
+Origination Charges,Character Varying,NA Exempt,
+Discount Points,Character Varying,NA Exempt,
+Lender Credits,Character Varying,NA Exempt,
+Interest Rate,Character Varying,NA Exempt,
+Prepayment Penalty Term,Character Varying,NA Exempt,
+Debt-to-Income Ratio,Character Varying,<20% 20%-<30% 30%-<36% 50%-60% >60% Exact values between 36%-<50% NA Exempt,
+Combined Loan-to-Value Ratio,Character Varying,NA Exempt,
+Loan Term,Character Varying,NA Exempt,
+Introductory Rate Period,Character Varying,NA Exempt,
+Balloon Payment,Numeric,1 2 1111,
+Interest-Only Payments,Numeric,1 2 1111,
+Negative Amortization,Numeric,1 2 1111,
+Other Non-Amortizing Features,Numeric,1 2 1111,
+Property Value,Numeric,NA Exempt,
+Manufactured Home Secured Property Type,Numeric,1 2 3 1111,
+Manufactured Home Land Property Interest,Numeric,1 2 3 4 5 1111,
+Total Units,Character Varying,1 2 3 4 5-24 25-49 50-99 100-149 >149,
+Multifamily Affordable Units,Character Varying,NA Exempt,
+Submission of Application,Numeric,1 2 3 1111,
+Initially Payable to Your Institution,Numeric,1 2 3 1111,
+Automated Underwriting System: 1,Numeric,1 2 3 4 5 6 1111,
+Automated Underwriting System: 2,Numeric,1 2 3 4 5,
+Automated Underwriting System: 3,Numeric,1 2 3 4 5,
+Automated Underwriting System: 4,Numeric,1 2 3 4 5,
+Automated Underwriting System: 5,Numeric,1 2 3 4 5,
+Reverse Mortgage,Numeric,1 2 1111,
+Open-End Line of Credit,Numeric,1 2 1111,
+Business or Commercial Purpose,Numeric,1 2 1111,

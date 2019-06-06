@@ -22,6 +22,14 @@ hmda:
   actorSystemName: hmda2
   runtimeMode: kubernetes
 
+kafka:
+  institutionsTopic: institution
+  modifiedLarTopic: hmda-modified-lar
+  irsTopic: hmda-irs
+  analyticsTopic: hmda-analytics
+  signTopic: hmda-sign
+  disclosureTopic: hmda-spark-disclosure
+
 service:
   type: NodePort
   account:
