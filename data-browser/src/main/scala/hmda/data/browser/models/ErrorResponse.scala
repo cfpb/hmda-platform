@@ -50,3 +50,11 @@ final case class InvalidTotalUnits(invalidTotalUnits: Seq[String],
 final case class InvalidEthnicities(invalidTotalUnits: Seq[String],
                                     errorType: String = "invalid-ethnicities")
     extends ErrorResponse
+
+final case class InvalidMsaMds(invalidMsaMds: Seq[String],
+                                    errorType: String = "invalid-msamds")
+  extends ErrorResponse
+
+final case class InvalidStates(invalidStates: Seq[String],
+                               errorType: String = "invalid-states")
+  extends ErrorResponse

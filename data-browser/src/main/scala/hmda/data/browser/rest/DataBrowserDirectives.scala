@@ -261,6 +261,47 @@ trait DataBrowserDirectives {
       }
   }
 
+  def extractStates: Directive1[BrowserField] =
+    parameters("states".as(CsvSeq[String]) ? Nil)
+      .flatMap { rawStates =>
+        validateActionsTaken(rawStates) match {
+          case Left(invalidStates) =>
+            complete((BadRequest, InvalidStates(invalidStates)))
+
+          case Right(states) if states.nonEmpty =>
+            provide(
+              BrowserField("states",
+                states.map(_.entryName),
+                "state",
+                "ACTION"))
+
+          // if the user provides no filters, it meas they want to see all actions
+          case Right(_) =>
+            provide(BrowserField())
+        }
+      }
+
+
+  def extractMsaMd: Directive1[BrowserField] =
+    parameters("msamds".as(CsvSeq[String]) ? Nil)
+      .flatMap { rawMsaMds =>
+        validateActionsTaken(rawMsaMds) match {
+          case Left(invalidActions) =>
+            complete((BadRequest, InvalidMsaMds(invalidActions)))
+
+          case Right(msaMds) if msaMds.nonEmpty =>
+            provide(
+              BrowserField("msamds",
+                msaMds.map(_.entryName),
+                "msa_md",
+                "ACTION"))
+
+          // if the user provides no filters, it meas they want to see all actions
+          case Right(_) =>
+            provide(BrowserField())
+        }
+      }
+
   val StateSegment: PathMatcher1[State] =
     Segment.flatMap(State.withNameInsensitiveOption)
 

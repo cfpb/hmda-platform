@@ -179,7 +179,9 @@ object Routes {
                  ethnicities).filter(_.name != "empty")
           if (filteredfields.length > 4) {
             complete((BadRequest, "More than 4 fields provided"))
-          } else if (filteredfields.length == 2) {
+          } else if (filteredfields.length == 4) {
+            println("These are the fields!!!!")
+            println(filteredfields)
             val sortedFields = filteredfields.sortBy(_.name)
             val field1 = sortedFields.head
             val field2 = sortedFields.last
@@ -217,6 +219,7 @@ object Routes {
           } else {
             val field1 = BrowserField()
             val field2 = BrowserField()
+            println("CAME HERE in the ELSE: " + filteredfields.length)
             // /data-browser-api/view/nationwide(/csv)
             pathPrefix("nationwide")(nationwideRoute(field1, field2)) ~
               // /data-browser-api/view/msamd/<msamd>(/csv)
