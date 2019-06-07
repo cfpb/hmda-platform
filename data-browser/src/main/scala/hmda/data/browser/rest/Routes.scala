@@ -177,8 +177,8 @@ object Routes {
                  loanProducts,
                  totalUnits,
                  ethnicities).filter(_.name != "empty")
-          if (filteredfields.length > 2) {
-            complete((BadRequest, "More than 2 fields provided"))
+          if (filteredfields.length > 4) {
+            complete((BadRequest, "More than 4 fields provided"))
           } else if (filteredfields.length == 2) {
             val sortedFields = filteredfields.sortBy(_.name)
             val field1 = sortedFields.head
