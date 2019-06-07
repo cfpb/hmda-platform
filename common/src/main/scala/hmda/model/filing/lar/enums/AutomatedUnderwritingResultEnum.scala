@@ -124,6 +124,48 @@ case object AutomatedUnderwritingResultNotApplicable
   override val description: String = "Not applicable"
 }
 
+case object AutomatedUnderwritingResultAcceptEligible
+  extends AutomatedUnderwritingResultEnum {
+  override val code: Int = 18
+  override val description: String = "Accept/Eligible"
+}
+
+case object AutomatedUnderwritingResultAcceptIneligible
+  extends AutomatedUnderwritingResultEnum {
+  override val code: Int = 19
+  override val description: String = "Accept/Ineligible"
+}
+
+case object AutomatedUnderwritingResultAcceptUnableToDetermine
+  extends AutomatedUnderwritingResultEnum {
+  override val code: Int = 20
+  override val description: String = "Accept/Unable to Determine"
+}
+
+case object AutomatedUnderwritingResultCautionEligible
+  extends AutomatedUnderwritingResultEnum {
+  override val code: Int = 21
+  override val description: String = "Caution/Eligible"
+}
+
+case object AutomatedUnderwritingResultCautionIneligible
+  extends AutomatedUnderwritingResultEnum {
+  override val code: Int = 22
+  override val description: String = "Caution/Ineligible"
+}
+
+case object AutomatedUnderwritingReferUnableToDetermine
+  extends AutomatedUnderwritingResultEnum {
+  override val code: Int = 23
+  override val description: String = "Refer/Unable to Determine"
+}
+
+case object AutomatedUnderwritingCautionUnableToDetermine
+  extends AutomatedUnderwritingResultEnum {
+  override val code: Int = 24
+  override val description: String = "Caution/Unable to Determine"
+}
+
 case object AUSResultExempt extends AutomatedUnderwritingResultEnum {
   override def code: Int = 1111
   override def description: String = "Exempt AUSResult"
