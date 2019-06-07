@@ -52,9 +52,9 @@ final case class InvalidEthnicities(invalidTotalUnits: Seq[String],
     extends ErrorResponse
 
 final case class InvalidMsaMds(invalidMsaMds: Seq[String],
-                                    errorType: String = "invalid-msamds")
-  extends ErrorResponse
+                               errorType: String = "invalid-msamds")
+    extends ErrorResponse
 
 final case class InvalidStates(invalidStates: Seq[String],
                                errorType: String = "invalid-states")
-  extends ErrorResponse
+    extends ErrorResponse

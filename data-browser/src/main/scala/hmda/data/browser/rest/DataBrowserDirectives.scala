@@ -271,16 +271,15 @@ trait DataBrowserDirectives {
           case Right(states) if states.nonEmpty =>
             provide(
               BrowserField("states",
-                states.map(_.entryName),
-                "state",
-                "ACTION"))
+                           states.map(_.entryName),
+                           "state",
+                           "ACTION"))
 
           // if the user provides no filters, it meas they want to see all actions
           case Right(_) =>
             provide(BrowserField())
         }
       }
-
 
   def extractMsaMd: Directive1[BrowserField] =
     parameters("msamds".as(CsvSeq[String]) ? Nil)
@@ -292,9 +291,9 @@ trait DataBrowserDirectives {
           case Right(msaMds) if msaMds.nonEmpty =>
             provide(
               BrowserField("msamds",
-                msaMds.map(_.entryName),
-                "msa_md",
-                "ACTION"))
+                           msaMds.map(_.entryName),
+                           "msa_md",
+                           "ACTION"))
 
           // if the user provides no filters, it meas they want to see all actions
           case Right(_) =>
