@@ -10,7 +10,7 @@ import hmda.validation.rules.EditCheck
 object Q632_2019 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q632_2019"
 
-  val results = List(Accept, Refer)
+  val results = List(ApproveEligible,ApproveIneligible,ReferEligilbe,ReferIneligible,Accept, Refer,OtherAutomatedUnderwritingResult)
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
 
