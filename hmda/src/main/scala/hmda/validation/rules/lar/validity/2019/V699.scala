@@ -1,4 +1,4 @@
-package hmda.validation.rules.lar.validity
+package hmda.validation.rules.lar.validity.nineteen
 
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
@@ -27,7 +27,14 @@ object V699 extends EditCheck[LoanApplicationRegister] {
       Refer,
       Eligible,
       UnableToDetermineOrUnknown,
-      OtherAutomatedUnderwritingResult
+      OtherAutomatedUnderwritingResult,
+      AcceptEligible,
+      AcceptIneligible,
+      AcceptUnableToDetermine,
+      ReferWithCautionEligible,
+      ReferWithCautionIneligible,
+      ReferUnableToDetermine,
+      ReferWithCautionUnableToDetermine
     )
     when(lar.AUS.aus1 is equalTo(OtherAUS)) {
       lar.ausResult.ausResult1 is containedIn(validAUSResults)

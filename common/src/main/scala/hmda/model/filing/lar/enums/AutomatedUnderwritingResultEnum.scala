@@ -26,6 +26,13 @@ object AutomatedUnderwritingResultEnum
       case 15   => UnableToDetermineOrUnknown
       case 16   => OtherAutomatedUnderwritingResult
       case 17   => AutomatedUnderwritingResultNotApplicable
+      case 18   => AcceptEligible
+      case 19   => AcceptIneligible
+      case 20   => AcceptUnableToDetermine
+      case 21   => ReferWithCautionEligible
+      case 22   => ReferWithCautionIneligible
+      case 23   => ReferUnableToDetermine
+      case 24   => ReferWithCautionUnableToDetermine
       case 1111 => AUSResultExempt
       case _    => InvalidAutomatedUnderwritingResultCode
     }
@@ -122,6 +129,42 @@ case object AutomatedUnderwritingResultNotApplicable
     extends AutomatedUnderwritingResultEnum {
   override val code: Int = 17
   override val description: String = "Not applicable"
+}
+
+case object AcceptEligible extends AutomatedUnderwritingResultEnum {
+  override def code: Int = 18
+  override def description: String = "Accept/Eligible"
+}
+
+case object AcceptIneligible extends AutomatedUnderwritingResultEnum {
+  override def code: Int = 19
+  override def description: String = "Accept/Ineligible"
+}
+
+case object AcceptUnableToDetermine extends AutomatedUnderwritingResultEnum {
+  override def code: Int = 20
+  override def description: String = "Accept/Unable to Determine"
+}
+
+case object ReferWithCautionEligible extends AutomatedUnderwritingResultEnum {
+  override def code: Int = 21
+  override def description: String = "Refer with Caution/Eligible"
+}
+
+case object ReferWithCautionIneligible extends AutomatedUnderwritingResultEnum {
+  override def code: Int = 22
+  override def description: String = "Refer with Caution/Ineligible"
+}
+
+case object ReferUnableToDetermine extends AutomatedUnderwritingResultEnum {
+  override def code: Int = 23
+  override def description: String = "Refer/Unable to Determine"
+}
+
+case object ReferWithCautionUnableToDetermine
+    extends AutomatedUnderwritingResultEnum {
+  override def code: Int = 24
+  override def description: String = "Refer with Caution/Unable to Determine"
 }
 
 case object AUSResultExempt extends AutomatedUnderwritingResultEnum {

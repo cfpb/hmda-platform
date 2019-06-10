@@ -1,4 +1,4 @@
-package hmda.validation.rules.lar.validity
+package hmda.validation.rules.lar.validity.eighteen
 
 import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister
@@ -23,11 +23,16 @@ class V648_2Spec extends LarEditCheckSpec {
 
       val sexN = applicableLar.coApplicant.sex
         .copy(sexObservedEnum = NotVisualOrSurnameSex)
+      val sexNotApp = applicableLar.coApplicant.sex
+        .copy(sexObservedEnum = SexObservedNotApplicable)
       val sexNotProvided = applicableLar.coApplicant.sex
         .copy(sexObservedEnum = InvalidSexObservedCode)
       lar
         .copy(coApplicant = applicableLar.coApplicant.copy(sex = sexN))
         .mustPass
+      lar
+        .copy(coApplicant = applicableLar.coApplicant.copy(sex = sexNotApp))
+        .mustFail
       lar
         .copy(
           coApplicant = applicableLar.coApplicant.copy(sex = sexNotProvided))
