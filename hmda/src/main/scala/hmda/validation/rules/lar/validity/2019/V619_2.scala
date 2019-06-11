@@ -1,4 +1,4 @@
-package hmda.validation.rules.lar.validity
+package hmda.validation.rules.lar.validity.nineteen
 
 import com.typesafe.config.ConfigFactory
 import hmda.model.filing.lar.LoanApplicationRegister
@@ -14,7 +14,7 @@ object V619_2 extends EditCheck[LoanApplicationRegister] {
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
     val config = ConfigFactory.load()
-    val year = config.getInt("edits.V619.year").toString
+    val year = "2019"
 
     lar.action.actionTakenDate.toString.slice(0, 4) is equalTo(year)
   }

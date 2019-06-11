@@ -1,6 +1,5 @@
-package hmda.validation.rules.lar.validity
+package hmda.validation.rules.lar.validity.eighteen
 
-import com.typesafe.config.ConfigFactory
 import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.rules.EditCheck
@@ -11,8 +10,7 @@ class V619_2Spec extends LarEditCheckSpec {
 
   property("Action taken date must be in the current year") {
     forAll(larGen) { lar =>
-      val config = ConfigFactory.load()
-      val year = config.getInt("edits.V619.year")
+      val year = 2018
       val badActionYear = (year - 1) * 1000 + 110
       val goodActionYear = year * 10000 + 101
 
