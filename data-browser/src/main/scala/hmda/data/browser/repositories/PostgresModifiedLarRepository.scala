@@ -1,14 +1,15 @@
 package hmda.data.browser.repositories
 import akka.NotUsed
 import akka.stream.scaladsl.Source
-import hmda.data.browser.models.{ModifiedLarEntity, BrowserField}
+import hmda.data.browser.models.{BrowserField, ModifiedLarEntity}
 import monix.eval.Task
 import slick.basic.DatabaseConfig
 import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
+import slick.util.SQLBuilder
 
 class PostgresModifiedLarRepository(tableName: String,
                                     config: DatabaseConfig[JdbcProfile])
-    extends ModifiedLarRepository {
+  extends ModifiedLarRepository {
   import config._
   import config.profile.api._
 
@@ -75,7 +76,7 @@ class PostgresModifiedLarRepository(tableName: String,
       lender_credits,
       interest_rate,
       payment_penalty,
-      debt_to_incode,
+      debt_to_income,
       loan_value_ratio,
       loan_term,
       rate_spread_intro,
@@ -85,7 +86,7 @@ class PostgresModifiedLarRepository(tableName: String,
       other_amortization,
       property_value,
       home_security_policy,
-      lan_property_interest,
+      land_property_interest,
       total_units,
       mf_affordable,
       application_submission,
@@ -123,54 +124,54 @@ class PostgresModifiedLarRepository(tableName: String,
   def formatString(strs: Seq[String]): String =
     strs.map(each => s"\'$each\'").mkString(start = "(", sep = ",", end = ")")
 
+  def eq(fieldName: String, value: String): String =
+    s"$fieldName = $value"
+
+  def in(fieldName: String, values: Seq[String]): String =
+    s"$fieldName IN ${formatString(values)}"
+
+  def whereAndOpt(expression: String, remainingExpressions: String*): String = {
+    val primary = s"WHERE $expression"
+    if (remainingExpressions.isEmpty) primary
+    else {
+      val secondaries =
+        remainingExpressions.map(expr => s"AND $expr").mkString(sep = " ")
+      s"$primary $secondaries"
+    }
+  }
+
   override def find(
-      msaMd: Int,
-      field1: BrowserField,
-      field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
+                     msaMd: Int,
+                     field1: BrowserField,
+                     field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
     val searchQuery = {
-      if (field1.name == "empty") {
-        sql"""
-        SELECT #$columns
-        FROM #${tableName}
-        WHERE msa_md = #${msaMd}
-        """
-          .as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
-      } else if (field2.name == "empty") {
-        sql"""
-        SELECT #$columns
-        FROM #${tableName}
-        WHERE msa_md = #${msaMd}
-          AND #${field1.dbName} IN #${formatString(field1.value)}
-        """
-          .as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
-      } else {
-        sql"""
-        SELECT #$columns
-        FROM #${tableName}
-        WHERE msa_md = #${msaMd}
-          AND #${field1.dbName} IN #${formatString(field1.value)}
-          AND #${field2.dbName} IN #${formatString(field2.value)}
-        """
-          .as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
+      val remaining: List[String] = {
+        val insertA =
+          if (field1.name != "empty") Option(in(field1.dbName, field1.value))
+          else None
+
+        val insertB =
+          if (field2.name != "empty") Option(in(field2.dbName, field2.value))
+          else None
+
+        List(insertA.toList, insertB.toList).flatten
       }
+
+      val filterCriteria =
+        whereAndOpt(eq("msa_md", msaMd.toString), remaining: _*)
+
+      sql"""
+      SELECT #$columns
+      FROM #${tableName}
+      #$filterCriteria
+      """
+        .as[ModifiedLarEntity]
+        .withStatementParameters(
+          rsType = ResultSetType.ForwardOnly,
+          rsConcurrency = ResultSetConcurrency.ReadOnly,
+          fetchSize = 1000
+        )
+        .transactionally
     }
 
     val publisher = db.stream(searchQuery)
@@ -178,9 +179,9 @@ class PostgresModifiedLarRepository(tableName: String,
   }
 
   override def find(
-      state: String,
-      field1: BrowserField,
-      field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
+                     state: String,
+                     field1: BrowserField,
+                     field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
     val searchQuery = {
       if (field1.name == "empty") {
         sql"""
@@ -261,7 +262,12 @@ class PostgresModifiedLarRepository(tableName: String,
       }
     }
 
-    Task.deferFuture(db.run(query))
+    // Slick shifts the execution context of the computation to its own pool (without shifting it back) and we need to
+    // explicitly shift it back to Monix's default scheduler so we don't end up taking up resources on the thread pool
+    // belonging to Slick since Monix Tasks don't shift async boundaries on every single call (which is what makes them
+    // so performant) (taskA productL taskB) or (taskA <* taskB) means execute both taskA and taskB but take the result
+    // of taskA (left computation hence productL)
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
   override def findAndAggregate(state: String,
@@ -301,8 +307,8 @@ class PostgresModifiedLarRepository(tableName: String,
   }
 
   override def find(
-      field1: BrowserField,
-      field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
+                     field1: BrowserField,
+                     field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
     val searchQuery = {
       if (field1.name == "empty") {
         sql"""
@@ -376,14 +382,14 @@ class PostgresModifiedLarRepository(tableName: String,
       }
     }
 
-    Task.deferFuture(db.run(query))
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
   override def find(
-      msaMd: Int,
-      state: String,
-      field1: BrowserField,
-      field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
+                     msaMd: Int,
+                     state: String,
+                     field1: BrowserField,
+                     field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
     val searchQuery = {
       if (field1.name == "empty") {
         sql"""SELECT #$columns
@@ -468,6 +474,6 @@ class PostgresModifiedLarRepository(tableName: String,
       }
     }
 
-    Task.deferFuture(db.run(query))
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 }
