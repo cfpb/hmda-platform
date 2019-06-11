@@ -45,7 +45,7 @@ object ModifiedLarPublisher {
 
   val config = ConfigFactory.load()
 
-  val filingYear = config.getInt("hmda.filing.year") // resides in common
+  val filingYear = config.getInt("hmda.lar.modified.year")
   val accessKeyId = config.getString("aws.access-key-id")
   val secretAccess = config.getString("aws.secret-access-key ")
   val region = config.getString("aws.region")
