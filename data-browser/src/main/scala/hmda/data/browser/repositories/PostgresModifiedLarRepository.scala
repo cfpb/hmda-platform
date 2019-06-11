@@ -1,4 +1,5 @@
 package hmda.data.browser.repositories
+
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.data.browser.models.{BrowserField, ModifiedLarEntity}
@@ -9,6 +10,7 @@ import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
 class PostgresModifiedLarRepository(tableName: String,
                                     config: DatabaseConfig[JdbcProfile])
   extends ModifiedLarRepository {
+
   import config._
   import config.profile.api._
 
@@ -142,292 +144,48 @@ class PostgresModifiedLarRepository(tableName: String,
   }
 
   override def find(
-                     msaMd: Int,
-                     field1: BrowserField,
-                     field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
-    val searchQuery = {
-      val remaining: List[String] = {
-        val insertA =
-          if (field1.name != "empty") Option(in(field1.dbName, field1.value))
-          else None
+                     browserFields: List[BrowserField]): Source[ModifiedLarEntity, NotUsed] = {
+    val queries = browserFields
+      .filter(_.values.nonEmpty)
+      .map(field => in(field.dbName, field.values))
+    val filterCriteria = queries match {
+      case Nil          => ""
+      case head :: tail => whereAndOpt(head, tail: _*)
+    }
 
-        val insertB =
-          if (field2.name != "empty") Option(in(field2.dbName, field2.value))
-          else None
-
-        List(insertA.toList, insertB.toList).flatten
-      }
-
-      val filterCriteria =
-        whereAndOpt(eq("msa_md", msaMd.toString), remaining: _*)
-
-      sql"""
+    val searchQuery = sql"""
       SELECT #$columns
       FROM #${tableName}
       #$filterCriteria
       """
-        .as[ModifiedLarEntity]
-        .withStatementParameters(
-          rsType = ResultSetType.ForwardOnly,
-          rsConcurrency = ResultSetConcurrency.ReadOnly,
-          fetchSize = 1000
-        )
-        .transactionally
-    }
+      .as[ModifiedLarEntity]
+      .withStatementParameters(
+        rsType = ResultSetType.ForwardOnly,
+        rsConcurrency = ResultSetConcurrency.ReadOnly,
+        fetchSize = 1000
+      )
+      .transactionally
 
     val publisher = db.stream(searchQuery)
     Source.fromPublisher(publisher)
   }
 
-  override def find(
-                     state: String,
-                     field1: BrowserField,
-                     field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
-    val searchQuery = {
-      val remaining: List[String] = {
-        val insertA =
-          if (field1.name != "empty") Option(in(field1.dbName, field1.value))
-          else None
-
-        val insertB =
-          if (field2.name != "empty") Option(in(field2.dbName, field2.value))
-          else None
-
-        List(insertA.toList, insertB.toList).flatten
-      }
-
-      val filterCriteria =
-        whereAndOpt(eq("state", s"$state"), remaining: _*)
-
-      sql"""
-      SELECT #$columns
-      FROM #${tableName}
-      #$filterCriteria
-      """
-        .as[ModifiedLarEntity]
-        .withStatementParameters(
-          rsType = ResultSetType.ForwardOnly,
-          rsConcurrency = ResultSetConcurrency.ReadOnly,
-          fetchSize = 1000
-        )
-        .transactionally
+  override def findAndAggregate(
+                                 browserFields: List[BrowserField]): Task[Statistic] = {
+    val queries = browserFields
+      .filter(_.values.nonEmpty)
+      .map(field => in(field.dbName, field.values))
+    val filterCriteria = queries match {
+      case Nil          => ""
+      case head :: tail => whereAndOpt(head, tail: _*)
     }
-
-    val publisher = db.stream(searchQuery)
-    Source.fromPublisher(publisher)
-  }
-
-  override def findAndAggregate(msaMd: Int,
-                                field1DbName: String,
-                                field1: String,
-                                field2DbName: String,
-                                field2: String): Task[Statistic] = {
-    val query = {
-      val remaining: List[String] = {
-        val insertA =
-          if (field1DbName != "empty") Option(eq(field1DbName, field1))
-          else None
-        val insertB =
-          if (field2DbName != "empty") Option(eq(field2DbName, field2))
-          else None
-        List(insertA.toList, insertB.toList).flatten
-      }
-
-      val filterCriteria =
-        whereAndOpt(eq("msa_md", msaMd.toString), remaining: _*)
-
-      sql"""
-      SELECT
-        COUNT(loan_amount),
-        SUM(loan_amount)
-      FROM #${tableName}
-      #$filterCriteria
-      """.as[Statistic].head
-    }
-
-    // Slick shifts the execution context of the computation to its own pool (without shifting it back) and we need to
-    // explicitly shift it back to Monix's default scheduler so we don't end up taking up resources on the thread pool
-    // belonging to Slick since Monix Tasks don't shift async boundaries on every single call (which is what makes them
-    // so performant) (taskA productL taskB) or (taskA <* taskB) means execute both taskA and taskB but take the result
-    // of taskA (left computation hence productL)
-    Task.deferFuture(db.run(query)).guarantee(Task.shift)
-  }
-
-  override def findAndAggregate(state: String,
-                                field1DbName: String,
-                                field1: String,
-                                field2DbName: String,
-                                field2: String): Task[Statistic] = {
-    val query = {
-      val remaining: List[String] = {
-        val insertA =
-          if (field1DbName != "empty") Option(eq(field1DbName, field1))
-          else None
-        val insertB =
-          if (field2DbName != "empty") Option(eq(field2DbName, field2))
-          else None
-        List(insertA.toList, insertB.toList).flatten
-      }
-
-      val filterCriteria =
-        whereAndOpt(eq("state", state), remaining: _*)
-
-      sql"""
-      SELECT
-        COUNT(loan_amount),
-        SUM(loan_amount)
-      FROM #${tableName}
-      #$filterCriteria
-      """.as[Statistic].head
-    }
-
-    Task.deferFuture(db.run(query)).guarantee(Task.shift)
-  }
-
-  override def find(
-                     field1: BrowserField,
-                     field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
-    val searchQuery = {
-      val remaining: List[String] = {
-        val insertA =
-          if (field1.name != "empty") Option(in(field1.dbName, field1.value))
-          else None
-
-        val insertB =
-          if (field2.name != "empty") Option(in(field2.dbName, field2.value))
-          else None
-
-        List(insertA.toList, insertB.toList).flatten
-      }
-
-      val filterCriteria = remaining match {
-        case Nil          => ""
-        case head :: tail => whereAndOpt(head, tail: _*)
-      }
-
-      sql"""
-      SELECT #$columns
-      FROM #${tableName}
-      #$filterCriteria
-      """
-        .as[ModifiedLarEntity]
-        .withStatementParameters(
-          rsType = ResultSetType.ForwardOnly,
-          rsConcurrency = ResultSetConcurrency.ReadOnly,
-          fetchSize = 1000
-        )
-        .transactionally
-    }
-
-    val publisher = db.stream(searchQuery)
-    Source.fromPublisher(publisher)
-  }
-
-  override def findAndAggregate(field1DbName: String,
-                                field1: String,
-                                field2DbName: String,
-                                field2: String): Task[Statistic] = {
-    val query = {
-      val remaining: List[String] = {
-        val insertA =
-          if (field1DbName != "empty") Option(eq(field1DbName, field1))
-          else None
-        val insertB =
-          if (field2DbName != "empty") Option(eq(field2DbName, field2))
-          else None
-        List(insertA.toList, insertB.toList).flatten
-      }
-
-      val filterCriteria = remaining match {
-        case Nil          => ""
-        case head :: tail => whereAndOpt(head, tail: _*)
-      }
-
-      sql"""
-      SELECT
-        COUNT(loan_amount),
-        SUM(loan_amount)
-      FROM #${tableName}
-      #$filterCriteria
-      """.as[Statistic].head
-    }
-
-    Task.deferFuture(db.run(query)).guarantee(Task.shift)
-  }
-
-  override def find(
-                     msaMd: Int,
-                     state: String,
-                     field1: BrowserField,
-                     field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
-    val searchQuery = {
-      val remaining: List[String] = {
-        val insertA =
-          if (field1.name != "empty") Option(in(field1.dbName, field1.value))
-          else None
-
-        val insertB =
-          if (field2.name != "empty") Option(in(field2.dbName, field2.value))
-          else None
-
-        List(insertA.toList, insertB.toList).flatten
-      }
-
-      val filterCriteria =
-        whereAndOpt(
-          eq("state", s"$state"),
-          eq("msa_md", msaMd.toString) :: remaining: _*,
-        )
-
-      sql"""
-      SELECT #$columns
-      FROM #${tableName}
-      #$filterCriteria
-      """
-        .as[ModifiedLarEntity]
-        .withStatementParameters(
-          rsType = ResultSetType.ForwardOnly,
-          rsConcurrency = ResultSetConcurrency.ReadOnly,
-          fetchSize = 1000
-        )
-        .transactionally
-    }
-
-    val publisher = db.stream(searchQuery)
-    Source.fromPublisher(publisher)
-  }
-
-  override def findAndAggregate(msaMd: Int,
-                                state: String,
-                                field1DbName: String,
-                                field1: String,
-                                field2DbName: String,
-                                field2: String): Task[Statistic] = {
-    val query = {
-      val remaining: List[String] = {
-        val insertA =
-          if (field1DbName != "empty") Option(eq(field1DbName, field1))
-          else None
-        val insertB =
-          if (field2DbName != "empty") Option(eq(field2DbName, field2))
-          else None
-        List(insertA.toList, insertB.toList).flatten
-      }
-
-      val filterCriteria =
-        whereAndOpt(
-          eq("state", s"$state"),
-          eq("msa_md", msaMd.toString) :: remaining: _*,
-        )
-
-      sql"""
-      SELECT
-        COUNT(loan_amount),
-        SUM(loan_amount)
-      FROM #${tableName}
-      #$filterCriteria
-      """.as[Statistic].head
-    }
+    val query = sql"""
+        SELECT
+          COUNT(loan_amount),
+          SUM(loan_amount)
+        FROM #${tableName}
+        #$filterCriteria
+        """.as[Statistic].head
 
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }

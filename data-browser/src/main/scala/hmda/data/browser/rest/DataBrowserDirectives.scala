@@ -23,6 +23,7 @@ import hmda.data.browser.models.DwellingCategory._
 import hmda.data.browser.models.LoanProduct._
 import hmda.data.browser.models.TotalUnits._
 import hmda.data.browser.models.Ethnicity._
+import hmda.data.browser.models.State._
 import hmda.data.browser.models._
 import io.circe.generic.auto._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -32,7 +33,7 @@ trait DataBrowserDirectives {
     EntityStreamingSupport.csv()
 
   def csvSource(
-      s: Source[ModifiedLarEntity, NotUsed]): Source[ByteString, NotUsed] = {
+                 s: Source[ModifiedLarEntity, NotUsed]): Source[ByteString, NotUsed] = {
     val header = Source.single(ModifiedLarEntity.header)
     val content = s.map(_.toCsv)
 
@@ -42,7 +43,7 @@ trait DataBrowserDirectives {
   }
 
   def pipeSource(
-      s: Source[ModifiedLarEntity, NotUsed]): Source[ByteString, NotUsed] = {
+                  s: Source[ModifiedLarEntity, NotUsed]): Source[ByteString, NotUsed] = {
     val headerPipe = Source.single(ModifiedLarEntity.headerPipe)
     val contentPipe = s.map(_.toPipe)
 
@@ -51,7 +52,33 @@ trait DataBrowserDirectives {
       .via(csvStreamingSupport.framingRenderer)
   }
 
-  def extractActions: Directive1[BrowserField] =
+  private def extractMsaMds: Directive1[BrowserField] =
+    parameters("msamds".as(CsvSeq[Int]) ? Nil)
+      .flatMap { xs =>
+        provide(
+          BrowserField(name = "msamd",
+            xs.map(_.toString),
+            dbName = "msa_md",
+            redisName = "MSAMD"))
+      }
+
+  private def extractStates: Directive1[BrowserField] =
+    parameters("states".as(CsvSeq[String]) ? Nil)
+      .flatMap { rawStates =>
+        validateStates(rawStates) match {
+          case Left(invalidStates) =>
+            complete((BadRequest, InvalidStates(invalidStates)))
+
+          case Right(states) =>
+            provide(
+              BrowserField(name = "state",
+                values = states.map(_.entryName),
+                dbName = "state",
+                redisName = "STATE"))
+        }
+      }
+
+  private def extractActions: Directive1[BrowserField] =
     parameters("actions_taken".as(CsvSeq[String]) ? Nil)
       .flatMap { rawActionsTaken =>
         validateActionsTaken(rawActionsTaken) match {
@@ -61,9 +88,9 @@ trait DataBrowserDirectives {
           case Right(actionsTaken) if actionsTaken.nonEmpty =>
             provide(
               BrowserField("actions_taken",
-                           actionsTaken.map(_.entryName),
-                           "action_taken_type",
-                           "ACTION"))
+                actionsTaken.map(_.entryName),
+                "action_taken_type",
+                "ACTION"))
 
           // if the user provides no filters, it meas they want to see all actions
           case Right(_) =>
@@ -71,7 +98,7 @@ trait DataBrowserDirectives {
         }
       }
 
-  def extractEthnicities: Directive1[BrowserField] =
+  private def extractEthnicities: Directive1[BrowserField] =
     parameters("ethnicities".as(CsvSeq[String]) ? Nil).flatMap {
       rawEthnicities =>
         validEthnicities(rawEthnicities) match {
@@ -81,16 +108,16 @@ trait DataBrowserDirectives {
           case Right(ethnicities) if ethnicities.nonEmpty =>
             provide(
               BrowserField("ethnicities",
-                           ethnicities.map(_.entryName),
-                           "ethnicity_categorization",
-                           "ETHNICITIES"))
+                ethnicities.map(_.entryName),
+                "ethnicity_categorization",
+                "ETHNICITIES"))
 
           case Right(_) =>
             provide(BrowserField())
         }
     }
 
-  def extractTotalUnits: Directive1[BrowserField] =
+  private def extractTotalUnits: Directive1[BrowserField] =
     parameters("total_units".as(CsvSeq[String]) ? Nil).flatMap {
       rawTotalUnits =>
         validateTotalUnits(rawTotalUnits) match {
@@ -100,16 +127,16 @@ trait DataBrowserDirectives {
           case Right(totalUnits) if totalUnits.nonEmpty =>
             provide(
               BrowserField("total_units",
-                           totalUnits.map(_.entryName),
-                           "total_units",
-                           "TOTAL_UNITS"))
+                totalUnits.map(_.entryName),
+                "total_units",
+                "TOTAL_UNITS"))
 
           case Right(_) =>
             provide(BrowserField())
         }
     }
 
-  def extractRaces: Directive1[BrowserField] =
+  private def extractRaces: Directive1[BrowserField] =
     parameters("races".as(CsvSeq[String]) ? Nil).flatMap { rawRaces =>
       validateRaces(rawRaces) match {
         case Left(invalidRaces) =>
@@ -118,9 +145,9 @@ trait DataBrowserDirectives {
         case Right(races) if races.nonEmpty =>
           provide(
             BrowserField("races",
-                         races.map(_.entryName),
-                         "race_categorization",
-                         "RACE"))
+              races.map(_.entryName),
+              "race_categorization",
+              "RACE"))
 
         // if the user provides no filters, it means they want to see all races
         case Right(_) =>
@@ -128,47 +155,47 @@ trait DataBrowserDirectives {
       }
     }
 
-  def extractConstructionMethod: Directive1[BrowserField] =
+  private def extractConstructionMethod: Directive1[BrowserField] =
     parameters("construction_methods".as(CsvSeq[String]) ? Nil)
       .flatMap { rawConstructionMethods =>
         validateConstructionMethods(rawConstructionMethods) match {
           case Left(invalidConstructionMethods) =>
             complete(
               (BadRequest,
-               InvalidConstructionMethods(invalidConstructionMethods)))
+                InvalidConstructionMethods(invalidConstructionMethods)))
 
           case Right(constructionMethods) if constructionMethods.nonEmpty =>
             provide(
               BrowserField("construction_methods",
-                           constructionMethods.map(_.entryName),
-                           "construction_method",
-                           "CONSTRUCTION_METHODS"))
+                constructionMethods.map(_.entryName),
+                "construction_method",
+                "CONSTRUCTION_METHODS"))
           case Right(_) =>
             provide(BrowserField())
         }
       }
 
-  def extractDwellingCategories: Directive1[BrowserField] =
+  private def extractDwellingCategories: Directive1[BrowserField] =
     parameters("dwelling_categories".as(CsvSeq[String]) ? Nil)
       .flatMap { rawDwellingCategories =>
         validateDwellingCategories(rawDwellingCategories) match {
           case Left(invalidDwellingCategories) =>
             complete(
               (BadRequest,
-               InvalidDwellingCategories(invalidDwellingCategories)))
+                InvalidDwellingCategories(invalidDwellingCategories)))
 
           case Right(dwellingCategories) if dwellingCategories.nonEmpty =>
             provide(
               BrowserField("dwelling_categories",
-                           dwellingCategories.map(_.entryName),
-                           "dwelling_category",
-                           "DWELLING_CATEGORIES"))
+                dwellingCategories.map(_.entryName),
+                "dwelling_category",
+                "DWELLING_CATEGORIES"))
           case Right(_) =>
             provide(BrowserField())
         }
       }
 
-  def extractLienStatus: Directive1[BrowserField] =
+  private def extractLienStatus: Directive1[BrowserField] =
     parameters("lien_statuses".as(CsvSeq[String]) ? Nil)
       .flatMap { rawLienStatuses =>
         validateLienStatus(rawLienStatuses) match {
@@ -178,15 +205,15 @@ trait DataBrowserDirectives {
           case Right(lienStatuses) if lienStatuses.nonEmpty =>
             provide(
               BrowserField("lien_statuses",
-                           lienStatuses.map(_.entryName),
-                           "lien_status",
-                           "LIEN_STATUSES"))
+                lienStatuses.map(_.entryName),
+                "lien_status",
+                "LIEN_STATUSES"))
           case Right(_) =>
             provide(BrowserField())
         }
       }
 
-  def extractLoanProduct: Directive1[BrowserField] =
+  private def extractLoanProduct: Directive1[BrowserField] =
     parameters("loan_products".as(CsvSeq[String]) ? Nil)
       .flatMap { rawLoanProducts =>
         validateLoanProducts(rawLoanProducts) match {
@@ -196,15 +223,15 @@ trait DataBrowserDirectives {
           case Right(loanProducts) if loanProducts.nonEmpty =>
             provide(
               BrowserField("loan_products",
-                           loanProducts.map(_.entryName),
-                           "loan_product_type",
-                           "LOAN_PRODUCTS"))
+                loanProducts.map(_.entryName),
+                "loan_product_type",
+                "LOAN_PRODUCTS"))
           case Right(_) =>
             provide(BrowserField())
         }
       }
 
-  def extractLoanPurpose: Directive1[BrowserField] =
+  private def extractLoanPurpose: Directive1[BrowserField] =
     parameters("loan_purposes".as(CsvSeq[String]) ? Nil)
       .flatMap { rawLoanPurposes =>
         validateLoanPurpose(rawLoanPurposes) match {
@@ -214,15 +241,15 @@ trait DataBrowserDirectives {
           case Right(loanPurposes) if loanPurposes.nonEmpty =>
             provide(
               BrowserField("loan_purposes",
-                           loanPurposes.map(_.entryName),
-                           "loan_purpose",
-                           "LOAN_PURPOSES"))
+                loanPurposes.map(_.entryName),
+                "loan_purpose",
+                "LOAN_PURPOSES"))
           case Right(_) =>
             provide(BrowserField())
         }
       }
 
-  def extractLoanType: Directive1[BrowserField] =
+  private def extractLoanType: Directive1[BrowserField] =
     parameters("loan_types".as(CsvSeq[String]) ? Nil)
       .flatMap { rawLoanTypes =>
         validateLoanType(rawLoanTypes) match {
@@ -232,15 +259,15 @@ trait DataBrowserDirectives {
           case Right(loanTypes) if loanTypes.nonEmpty =>
             provide(
               BrowserField("loan_types",
-                           loanTypes.map(_.entryName),
-                           "loan_type",
-                           "LOAN_TYPES"))
+                loanTypes.map(_.entryName),
+                "loan_type",
+                "LOAN_TYPES"))
           case Right(_) =>
             provide(BrowserField())
         }
       }
 
-  def extractSexes: Directive1[BrowserField] = {
+  private def extractSexes: Directive1[BrowserField] = {
     parameters("sexes".as(CsvSeq[String]) ? Nil)
       .flatMap { rawSexes =>
         validateSexes(rawSexes) match {
@@ -250,9 +277,9 @@ trait DataBrowserDirectives {
           case Right(sexes) if sexes.nonEmpty =>
             provide(
               BrowserField("sexes",
-                           sexes.map(_.entryName),
-                           "sex_categorization",
-                           "SEX"))
+                sexes.map(_.entryName),
+                "sex_categorization",
+                "SEX"))
 
           // if the user provides no filters, it meas they want to see all actions
           case Right(_) =>
@@ -261,50 +288,57 @@ trait DataBrowserDirectives {
       }
   }
 
-  def extractStates: Directive1[BrowserField] =
-    parameters("states".as(CsvSeq[String]) ? Nil)
-      .flatMap { rawStates =>
-        validateActionsTaken(rawStates) match {
-          case Left(invalidStates) =>
-            complete((BadRequest, InvalidStates(invalidStates)))
+  def extractBrowserFields(innerRoute: List[BrowserField] => Route): Route = {
+    (extractActions & extractRaces & extractSexes &
+      extractLoanType & extractLoanPurpose & extractLienStatus &
+      extractConstructionMethod & extractDwellingCategories & extractLoanProduct & extractTotalUnits & extractEthnicities) {
+      (actionsTaken,
+       races,
+       sexes,
+       loanTypes,
+       loanPurposes,
+       lienStatuses,
+       constructionMethods,
+       dwellingCategories,
+       loanProducts,
+       totalUnits,
+       ethnicities) =>
+        val filteredfields =
+          List(actionsTaken,
+            races,
+            sexes,
+            loanTypes,
+            loanPurposes,
+            lienStatuses,
+            constructionMethods,
+            dwellingCategories,
+            loanProducts,
+            totalUnits,
+            ethnicities).filter(_.name != "empty")
 
-          case Right(states) if states.nonEmpty =>
-            provide(
-              BrowserField("states",
-                           states.map(_.entryName),
-                           "state",
-                           "ACTION"))
+        innerRoute(filteredfields)
+    }
+  }
 
-          // if the user provides no filters, it meas they want to see all actions
-          case Right(_) =>
-            provide(BrowserField())
-        }
-      }
+  def extractMsaAndStateBrowserFields(
+                                       innerRoute: (BrowserField, BrowserField) => Route): Route =
+    (extractMsaMds & extractStates) { (msaMds, states) =>
+      if (msaMds.values.nonEmpty || states.values.nonEmpty)
+        innerRoute(msaMds, states)
+      else complete(BadRequest, ProvideStatesOrMsaMds())
+    }
 
-  def extractMsaMd: Directive1[BrowserField] =
-    parameters("msamds".as(CsvSeq[String]) ? Nil)
-      .flatMap { rawMsaMds =>
-        validateActionsTaken(rawMsaMds) match {
-          case Left(invalidActions) =>
-            complete((BadRequest, InvalidMsaMds(invalidActions)))
+  def extractBrowserFieldsForAggregation(
+                                          innerRoute: List[BrowserField] => Route): Route =
+    extractBrowserFields { browserFields =>
+      if (browserFields.nonEmpty)
+        innerRoute(browserFields)
+      else complete(BadRequest, NotEnoughFilterCriterias())
+    }
 
-          case Right(msaMds) if msaMds.nonEmpty =>
-            provide(
-              BrowserField("msamds",
-                           msaMds.map(_.entryName),
-                           "msa_md",
-                           "ACTION"))
-
-          // if the user provides no filters, it meas they want to see all actions
-          case Right(_) =>
-            provide(BrowserField())
-        }
-      }
-
-  val StateSegment: PathMatcher1[State] =
-    Segment.flatMap(State.withNameInsensitiveOption)
-
-  val MsaMdSegment: PathMatcher1[MsaMd] = IntNumber.map(MsaMd)
+  def extractBrowserFieldsForCsv(
+                                  innerRoute: List[BrowserField] => Route): Route =
+    extractBrowserFields(innerRoute)
 }
 
 object DataBrowserDirectives extends DataBrowserDirectives
