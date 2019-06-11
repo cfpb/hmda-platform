@@ -5,7 +5,6 @@ import hmda.data.browser.models.{BrowserField, ModifiedLarEntity}
 import monix.eval.Task
 import slick.basic.DatabaseConfig
 import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
-import slick.util.SQLBuilder
 
 class PostgresModifiedLarRepository(tableName: String,
                                     config: DatabaseConfig[JdbcProfile])
@@ -121,14 +120,16 @@ class PostgresModifiedLarRepository(tableName: String,
       percent_median_msa_income
     """.stripMargin
 
-  def formatString(strs: Seq[String]): String =
+  def escape(str: String): String = str.replace("'", "")
+
+  def formatSeq(strs: Seq[String]): String =
     strs.map(each => s"\'$each\'").mkString(start = "(", sep = ",", end = ")")
 
   def eq(fieldName: String, value: String): String =
-    s"$fieldName = $value"
+    s"${escape(fieldName)} = '${escape(value)}'"
 
   def in(fieldName: String, values: Seq[String]): String =
-    s"$fieldName IN ${formatString(values)}"
+    s"${escape(fieldName)} IN ${formatSeq(values.map(escape))}"
 
   def whereAndOpt(expression: String, remainingExpressions: String*): String = {
     val primary = s"WHERE $expression"
@@ -183,46 +184,33 @@ class PostgresModifiedLarRepository(tableName: String,
                      field1: BrowserField,
                      field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
     val searchQuery = {
-      if (field1.name == "empty") {
-        sql"""
-      SELECT #$columns
-      FROM #${tableName}
-      WHERE state = '#${state}'
-      """.as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
-      } else if (field2.name == "empty") {
-        sql"""
-      SELECT #$columns
-      FROM #${tableName}
-      WHERE state = '#${state}'
-        AND #${field1.dbName} IN #${formatString(field1.value)}
-      """.as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
-      } else {
-        sql"""
-      SELECT #$columns
-      FROM #${tableName}
-      WHERE state = '#${state}'
-        AND #${field1.dbName} IN #${formatString(field1.value)}
-        AND #${field2.dbName} IN #${formatString(field2.value)}
-      """.as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
+      val remaining: List[String] = {
+        val insertA =
+          if (field1.name != "empty") Option(in(field1.dbName, field1.value))
+          else None
+
+        val insertB =
+          if (field2.name != "empty") Option(in(field2.dbName, field2.value))
+          else None
+
+        List(insertA.toList, insertB.toList).flatten
       }
+
+      val filterCriteria =
+        whereAndOpt(eq("state", s"$state"), remaining: _*)
+
+      sql"""
+      SELECT #$columns
+      FROM #${tableName}
+      #$filterCriteria
+      """
+        .as[ModifiedLarEntity]
+        .withStatementParameters(
+          rsType = ResultSetType.ForwardOnly,
+          rsConcurrency = ResultSetConcurrency.ReadOnly,
+          fetchSize = 1000
+        )
+        .transactionally
     }
 
     val publisher = db.stream(searchQuery)
@@ -235,31 +223,26 @@ class PostgresModifiedLarRepository(tableName: String,
                                 field2DbName: String,
                                 field2: String): Task[Statistic] = {
     val query = {
-      if (field1DbName == "empty") {
-        sql"""SELECT
-              COUNT(loan_amount),
-              SUM(loan_amount)
-            FROM #${tableName}
-            WHERE msa_md = #${msaMd}
-      """.as[Statistic].head
-      } else if (field2DbName == "empty") {
-        sql"""SELECT
-              COUNT(loan_amount),
-              SUM(loan_amount)
-            FROM #${tableName}
-            WHERE msa_md = #${msaMd}
-              AND #${field1DbName} = '#${field1}'
-      """.as[Statistic].head
-      } else {
-        sql"""SELECT
-              COUNT(loan_amount),
-              SUM(loan_amount)
-            FROM #${tableName}
-            WHERE msa_md = #${msaMd}
-              AND #${field1DbName} = '#${field1}'
-              AND #${field2DbName} = '#${field2}'
-      """.as[Statistic].head
+      val remaining: List[String] = {
+        val insertA =
+          if (field1DbName != "empty") Option(eq(field1DbName, field1))
+          else None
+        val insertB =
+          if (field2DbName != "empty") Option(eq(field2DbName, field2))
+          else None
+        List(insertA.toList, insertB.toList).flatten
       }
+
+      val filterCriteria =
+        whereAndOpt(eq("msa_md", msaMd.toString), remaining: _*)
+
+      sql"""
+      SELECT
+        COUNT(loan_amount),
+        SUM(loan_amount)
+      FROM #${tableName}
+      #$filterCriteria
+      """.as[Statistic].head
     }
 
     // Slick shifts the execution context of the computation to its own pool (without shifting it back) and we need to
@@ -276,77 +259,64 @@ class PostgresModifiedLarRepository(tableName: String,
                                 field2DbName: String,
                                 field2: String): Task[Statistic] = {
     val query = {
-      if (field1DbName == "empty") {
-        sql"""SELECT
-              COUNT(loan_amount),
-              SUM(loan_amount)
-            FROM #${tableName}
-            WHERE state = '#${state}'
-      """.as[Statistic].head
-      } else if (field2DbName == "empty") {
-        sql"""SELECT
-              COUNT(loan_amount),
-              SUM(loan_amount)
-            FROM #${tableName}
-            WHERE state = '#${state}'
-              AND #${field1DbName} = '#${field1.value}'
-      """.as[Statistic].head
-      } else {
-        sql"""SELECT
-              COUNT(loan_amount),
-              SUM(loan_amount)
-            FROM #${tableName}
-            WHERE state = '#${state}'
-              AND #${field1DbName} = '#${field1.value}'
-              AND #${field2DbName} = '#${field2.value}'
-      """.as[Statistic].head
+      val remaining: List[String] = {
+        val insertA =
+          if (field1DbName != "empty") Option(eq(field1DbName, field1))
+          else None
+        val insertB =
+          if (field2DbName != "empty") Option(eq(field2DbName, field2))
+          else None
+        List(insertA.toList, insertB.toList).flatten
       }
+
+      val filterCriteria =
+        whereAndOpt(eq("state", state), remaining: _*)
+
+      sql"""
+      SELECT
+        COUNT(loan_amount),
+        SUM(loan_amount)
+      FROM #${tableName}
+      #$filterCriteria
+      """.as[Statistic].head
     }
 
-    Task.deferFuture(db.run(query))
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
   override def find(
                      field1: BrowserField,
                      field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
     val searchQuery = {
-      if (field1.name == "empty") {
-        sql"""
-    SELECT #$columns
-    FROM #${tableName}
-    """.as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
-      } else if (field2.name == "empty") {
-        sql"""
-    SELECT #$columns
-    FROM #${tableName}
-    WHERE #${field1.dbName} IN #${formatString(field1.value)}
-    """.as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
-      } else {
-        sql"""
-    SELECT #$columns
-    FROM #${tableName}
-    WHERE #${field1.dbName} IN #${formatString(field1.value)}
-      AND #${field2.dbName} IN #${formatString(field2.value)}
-    """.as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
+      val remaining: List[String] = {
+        val insertA =
+          if (field1.name != "empty") Option(in(field1.dbName, field1.value))
+          else None
+
+        val insertB =
+          if (field2.name != "empty") Option(in(field2.dbName, field2.value))
+          else None
+
+        List(insertA.toList, insertB.toList).flatten
       }
+
+      val filterCriteria = remaining match {
+        case Nil          => ""
+        case head :: tail => whereAndOpt(head, tail: _*)
+      }
+
+      sql"""
+      SELECT #$columns
+      FROM #${tableName}
+      #$filterCriteria
+      """
+        .as[ModifiedLarEntity]
+        .withStatementParameters(
+          rsType = ResultSetType.ForwardOnly,
+          rsConcurrency = ResultSetConcurrency.ReadOnly,
+          fetchSize = 1000
+        )
+        .transactionally
     }
 
     val publisher = db.stream(searchQuery)
@@ -358,28 +328,28 @@ class PostgresModifiedLarRepository(tableName: String,
                                 field2DbName: String,
                                 field2: String): Task[Statistic] = {
     val query = {
-      if (field1DbName == "empty") {
-        sql"""SELECT
-              COUNT(loan_amount),
-              SUM(loan_amount)
-            FROM #${tableName}
-      """.as[Statistic].head
-      } else if (field2DbName == "empty") {
-        sql"""SELECT
-              COUNT(loan_amount),
-              SUM(loan_amount)
-            FROM #${tableName}
-            WHERE #${field1DbName} = '#${field1}'
-      """.as[Statistic].head
-      } else {
-        sql"""SELECT
-              COUNT(loan_amount),
-              SUM(loan_amount)
-            FROM #${tableName}
-            WHERE #${field1DbName} = '#${field1}'
-            AND #${field2DbName} = '#${field2}'
-      """.as[Statistic].head
+      val remaining: List[String] = {
+        val insertA =
+          if (field1DbName != "empty") Option(eq(field1DbName, field1))
+          else None
+        val insertB =
+          if (field2DbName != "empty") Option(eq(field2DbName, field2))
+          else None
+        List(insertA.toList, insertB.toList).flatten
       }
+
+      val filterCriteria = remaining match {
+        case Nil          => ""
+        case head :: tail => whereAndOpt(head, tail: _*)
+      }
+
+      sql"""
+      SELECT
+        COUNT(loan_amount),
+        SUM(loan_amount)
+      FROM #${tableName}
+      #$filterCriteria
+      """.as[Statistic].head
     }
 
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
@@ -391,46 +361,36 @@ class PostgresModifiedLarRepository(tableName: String,
                      field1: BrowserField,
                      field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
     val searchQuery = {
-      if (field1.name == "empty") {
-        sql"""SELECT #$columns
-                        FROM #${tableName}
-                        WHERE msa_md = #${msaMd}
-                        AND state = '#${state}'
-    """.as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
-      } else if (field2.name == "empty") {
-        sql"""SELECT #$columns
-                        FROM #${tableName}
-                        WHERE msa_md = #${msaMd}
-                        AND state = '#${state}'
-                        AND #${field1.dbName} IN #${formatString(field1.value)}
-    """.as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
-      } else {
-        sql"""SELECT #$columns
-                        FROM #${tableName}
-                        WHERE msa_md = #${msaMd}
-                        AND state = '#${state}'
-                        AND #${field1.dbName} IN #${formatString(field1.value)}
-                        AND #${field2.dbName} IN #${formatString(field2.value)}
-    """.as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
+      val remaining: List[String] = {
+        val insertA =
+          if (field1.name != "empty") Option(in(field1.dbName, field1.value))
+          else None
+
+        val insertB =
+          if (field2.name != "empty") Option(in(field2.dbName, field2.value))
+          else None
+
+        List(insertA.toList, insertB.toList).flatten
       }
+
+      val filterCriteria =
+        whereAndOpt(
+          eq("state", s"$state"),
+          eq("msa_md", msaMd.toString) :: remaining: _*,
+        )
+
+      sql"""
+      SELECT #$columns
+      FROM #${tableName}
+      #$filterCriteria
+      """
+        .as[ModifiedLarEntity]
+        .withStatementParameters(
+          rsType = ResultSetType.ForwardOnly,
+          rsConcurrency = ResultSetConcurrency.ReadOnly,
+          fetchSize = 1000
+        )
+        .transactionally
     }
 
     val publisher = db.stream(searchQuery)
@@ -444,34 +404,29 @@ class PostgresModifiedLarRepository(tableName: String,
                                 field2DbName: String,
                                 field2: String): Task[Statistic] = {
     val query = {
-      if (field1DbName == "empty") {
-        sql"""SELECT
-        COUNT(loan_amount),
-        SUM(loan_amount)
-      FROM #${tableName}
-      WHERE msa_md = #${msaMd}
-      AND state = '#${state}'
-      """.as[Statistic].head
-      } else if (field2DbName == "empty") {
-        sql"""SELECT
-        COUNT(loan_amount),
-        SUM(loan_amount)
-      FROM #${tableName}
-      WHERE msa_md = #${msaMd}
-      AND state = '#${state}'
-      AND #${field1DbName} = '#${field1}'
-      """.as[Statistic].head
-      } else {
-        sql"""SELECT
-        COUNT(loan_amount),
-        SUM(loan_amount)
-      FROM #${tableName}
-      WHERE msa_md = #${msaMd}
-      AND state = '#${state}'
-      AND #${field1DbName} = '#${field1}'
-      AND #${field2DbName} = '#${field2}'
-      """.as[Statistic].head
+      val remaining: List[String] = {
+        val insertA =
+          if (field1DbName != "empty") Option(eq(field1DbName, field1))
+          else None
+        val insertB =
+          if (field2DbName != "empty") Option(eq(field2DbName, field2))
+          else None
+        List(insertA.toList, insertB.toList).flatten
       }
+
+      val filterCriteria =
+        whereAndOpt(
+          eq("state", s"$state"),
+          eq("msa_md", msaMd.toString) :: remaining: _*,
+        )
+
+      sql"""
+      SELECT
+        COUNT(loan_amount),
+        SUM(loan_amount)
+      FROM #${tableName}
+      #$filterCriteria
+      """.as[Statistic].head
     }
 
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
