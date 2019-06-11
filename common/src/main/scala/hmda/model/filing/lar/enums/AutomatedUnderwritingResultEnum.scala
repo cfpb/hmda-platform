@@ -3,7 +3,7 @@ package hmda.model.filing.lar.enums
 sealed trait AutomatedUnderwritingResultEnum extends LarEnum
 
 object AutomatedUnderwritingResultEnum
-    extends LarCodeEnum[AutomatedUnderwritingResultEnum] {
+  extends LarCodeEnum[AutomatedUnderwritingResultEnum] {
   override val values = (0 to 17).toList
 
   override def valueOf(code: Int): AutomatedUnderwritingResultEnum = {
@@ -26,6 +26,13 @@ object AutomatedUnderwritingResultEnum
       case 15   => UnableToDetermineOrUnknown
       case 16   => OtherAutomatedUnderwritingResult
       case 17   => AutomatedUnderwritingResultNotApplicable
+      case 18   => AcceptEligible
+      case 19   => AcceptIneligible
+      case 20   => AcceptUnableToDetermine
+      case 21   => ReferWithCautionEligible
+      case 22   => ReferWithCautionIneligible
+      case 23   => ReferUnableToDetermine
+      case 24   => ReferWithCautionUnableToDetermine
       case 1111 => AUSResultExempt
       case _    => InvalidAutomatedUnderwritingResultCode
     }
@@ -113,57 +120,51 @@ case object UnableToDetermineOrUnknown extends AutomatedUnderwritingResultEnum {
 }
 
 case object OtherAutomatedUnderwritingResult
-    extends AutomatedUnderwritingResultEnum {
+  extends AutomatedUnderwritingResultEnum {
   override val code: Int = 16
   override val description: String = "Other"
 }
 
 case object AutomatedUnderwritingResultNotApplicable
-    extends AutomatedUnderwritingResultEnum {
+  extends AutomatedUnderwritingResultEnum {
   override val code: Int = 17
   override val description: String = "Not applicable"
 }
 
-case object AutomatedUnderwritingResultAcceptEligible
-  extends AutomatedUnderwritingResultEnum {
-  override val code: Int = 18
-  override val description: String = "Accept/Eligible"
+case object AcceptEligible extends AutomatedUnderwritingResultEnum {
+  override def code: Int = 18
+  override def description: String = "Accept/Eligible"
 }
 
-case object AutomatedUnderwritingResultAcceptIneligible
-  extends AutomatedUnderwritingResultEnum {
-  override val code: Int = 19
-  override val description: String = "Accept/Ineligible"
+case object AcceptIneligible extends AutomatedUnderwritingResultEnum {
+  override def code: Int = 19
+  override def description: String = "Accept/Ineligible"
 }
 
-case object AutomatedUnderwritingResultAcceptUnableToDetermine
-  extends AutomatedUnderwritingResultEnum {
-  override val code: Int = 20
-  override val description: String = "Accept/Unable to Determine"
+case object AcceptUnableToDetermine extends AutomatedUnderwritingResultEnum {
+  override def code: Int = 20
+  override def description: String = "Accept/Unable to Determine"
 }
 
-case object AutomatedUnderwritingResultCautionEligible
-  extends AutomatedUnderwritingResultEnum {
-  override val code: Int = 21
-  override val description: String = "Caution/Eligible"
+case object ReferWithCautionEligible extends AutomatedUnderwritingResultEnum {
+  override def code: Int = 21
+  override def description: String = "Refer with Caution/Eligible"
 }
 
-case object AutomatedUnderwritingResultCautionIneligible
-  extends AutomatedUnderwritingResultEnum {
-  override val code: Int = 22
-  override val description: String = "Caution/Ineligible"
+case object ReferWithCautionIneligible extends AutomatedUnderwritingResultEnum {
+  override def code: Int = 22
+  override def description: String = "Refer with Caution/Ineligible"
 }
 
-case object AutomatedUnderwritingReferUnableToDetermine
-  extends AutomatedUnderwritingResultEnum {
-  override val code: Int = 23
-  override val description: String = "Refer/Unable to Determine"
+case object ReferUnableToDetermine extends AutomatedUnderwritingResultEnum {
+  override def code: Int = 23
+  override def description: String = "Refer/Unable to Determine"
 }
 
-case object AutomatedUnderwritingCautionUnableToDetermine
+case object ReferWithCautionUnableToDetermine
   extends AutomatedUnderwritingResultEnum {
-  override val code: Int = 24
-  override val description: String = "Caution/Unable to Determine"
+  override def code: Int = 24
+  override def description: String = "Refer with Caution/Unable to Determine"
 }
 
 case object AUSResultExempt extends AutomatedUnderwritingResultEnum {
@@ -172,7 +173,7 @@ case object AUSResultExempt extends AutomatedUnderwritingResultEnum {
 }
 
 case object InvalidAutomatedUnderwritingResultCode
-    extends AutomatedUnderwritingResultEnum {
+  extends AutomatedUnderwritingResultEnum {
   override def code: Int = -1
   override def description: String = "Invalid Code"
 }

@@ -17,8 +17,8 @@ object Q632_2019 extends EditCheck[LoanApplicationRegister] {
     Accept,
     Refer,
     OtherAutomatedUnderwritingResult,
-    AutomatedUnderwritingResultAcceptEligible,
-    AutomatedUnderwritingResultAcceptIneligible)
+    AcceptEligible,
+    AcceptIneligible)
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
 

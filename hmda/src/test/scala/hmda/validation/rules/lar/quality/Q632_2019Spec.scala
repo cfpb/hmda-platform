@@ -45,7 +45,7 @@ class Q632_2019Spec extends LarEditCheckSpec {
                                             ausResult2 = Accept,
                                             ausResult3 = EmptyAUSResultValue,
                                             ausResult4 = Refer,
-                                            ausResult5 = AutomatedUnderwritingResultAcceptEligible))
+                                            ausResult5 = AcceptEligible))
         .mustPass
     }
   }
