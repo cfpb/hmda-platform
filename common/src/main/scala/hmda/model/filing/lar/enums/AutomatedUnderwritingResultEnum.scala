@@ -3,7 +3,7 @@ package hmda.model.filing.lar.enums
 sealed trait AutomatedUnderwritingResultEnum extends LarEnum
 
 object AutomatedUnderwritingResultEnum
-  extends LarCodeEnum[AutomatedUnderwritingResultEnum] {
+    extends LarCodeEnum[AutomatedUnderwritingResultEnum] {
   override val values = (0 to 17).toList
 
   override def valueOf(code: Int): AutomatedUnderwritingResultEnum = {
@@ -120,13 +120,13 @@ case object UnableToDetermineOrUnknown extends AutomatedUnderwritingResultEnum {
 }
 
 case object OtherAutomatedUnderwritingResult
-  extends AutomatedUnderwritingResultEnum {
+    extends AutomatedUnderwritingResultEnum {
   override val code: Int = 16
   override val description: String = "Other"
 }
 
 case object AutomatedUnderwritingResultNotApplicable
-  extends AutomatedUnderwritingResultEnum {
+    extends AutomatedUnderwritingResultEnum {
   override val code: Int = 17
   override val description: String = "Not applicable"
 }
@@ -162,7 +162,7 @@ case object ReferUnableToDetermine extends AutomatedUnderwritingResultEnum {
 }
 
 case object ReferWithCautionUnableToDetermine
-  extends AutomatedUnderwritingResultEnum {
+    extends AutomatedUnderwritingResultEnum {
   override def code: Int = 24
   override def description: String = "Refer with Caution/Unable to Determine"
 }
@@ -173,7 +173,7 @@ case object AUSResultExempt extends AutomatedUnderwritingResultEnum {
 }
 
 case object InvalidAutomatedUnderwritingResultCode
-  extends AutomatedUnderwritingResultEnum {
+    extends AutomatedUnderwritingResultEnum {
   override def code: Int = -1
   override def description: String = "Invalid Code"
 }
