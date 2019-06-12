@@ -11,7 +11,7 @@ case class AggregationResponse(parameters: Parameters,
                                aggregations: Seq[Aggregation])
 
 object Parameters {
-  def fromBrowserFields(browserFields: List[BrowserField]): Parameters =
+  def fromBrowserFields(browserFields: List[QueryField]): Parameters =
     Parameters(browserFields.map(field =>
       FieldInfo(field.name, field.values.mkString(","))))
 

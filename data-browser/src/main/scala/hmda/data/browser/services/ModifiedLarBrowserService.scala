@@ -8,8 +8,7 @@ import hmda.data.browser.repositories.{
 }
 import monix.eval.Task
 
-class ModifiedLarBrowserService(repo: ModifiedLarRepository,
-                                cache: ModifiedLarAggregateCache)
+class ModifiedLarBrowserService(repo: ModifiedLarRepository)
     extends BrowserService {
 
   //  /**
@@ -188,7 +187,7 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository,
   //  }
 
   override def fetchData(
-      browserFields: List[BrowserField]): Source[ModifiedLarEntity, NotUsed] =
+      browserFields: List[QueryField]): Source[ModifiedLarEntity, NotUsed] =
     repo.find(browserFields)
 
   private def generateCombinations[T](x: List[List[T]]): List[List[T]] = {
@@ -198,30 +197,30 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository,
     }
   }
 
-  def permuteBrowserFields(
-      input: List[BrowserField]): List[List[BrowserField]] = {
-    val singleElementBrowserFields: List[List[BrowserField]] =
+  def permuteQueryFields(input: List[QueryField]): List[List[QueryField]] = {
+    val singleElementBrowserFields: List[List[QueryField]] =
       input.map {
-        case BrowserField(name, values, dbName, redisName) =>
+        case QueryField(name, values, dbName) =>
           values
-            .map(value => BrowserField(name, value :: Nil, dbName, redisName))
+            .map(value => QueryField(name, value :: Nil, dbName))
             .toList
       }
     generateCombinations(singleElementBrowserFields)
   }
 
   override def fetchAggregate(
-      fields: List[BrowserField]): Task[Seq[Aggregation]] = {
-    val optState: Option[BrowserField] =
+      fields: List[QueryField]): Task[Seq[Aggregation]] = {
+    val optState: Option[QueryField] =
       fields.filter(_.values.nonEmpty).find(_.name == "state")
-    val optMsaMd: Option[BrowserField] =
+    val optMsaMd: Option[QueryField] =
       fields.filter(_.values.nonEmpty).find(_.name == "msamd")
     val rest = fields.filterNot(_.name == "state").filterNot(_.name == "msamd")
-    val browserFieldCombinations = permuteBrowserFields(rest).map(eachList =>
+
+    val queryFieldCombinations = permuteQueryFields(rest).map(eachList =>
       optState.toList ++ optMsaMd.toList ++ eachList)
 
     Task.gatherUnordered {
-      browserFieldCombinations.map { eachCombination =>
+      queryFieldCombinations.map { eachCombination =>
         println(eachCombination)
         val fieldInfos =
           eachCombination.map(field =>

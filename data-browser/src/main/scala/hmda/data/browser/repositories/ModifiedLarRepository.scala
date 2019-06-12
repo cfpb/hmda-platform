@@ -6,7 +6,6 @@ import hmda.data.browser.models._
 import monix.eval.Task
 
 trait ModifiedLarRepository {
-  def find(
-      browserFields: List[BrowserField]): Source[ModifiedLarEntity, NotUsed]
-  def findAndAggregate(browserFields: List[BrowserField]): Task[Statistic]
+  def find(browserFields: List[QueryField]): Source[ModifiedLarEntity, NotUsed]
+  def findAndAggregate(browserFields: List[QueryField]): Task[Statistic]
 }

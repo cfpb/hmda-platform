@@ -18,41 +18,78 @@ object Routes {
 
     pathPrefix("view") {
       pathPrefix("nationwide") {
-        extractBrowserFieldsForCsv { browserFields =>
+        extractFieldsForRawQueries { queryFields =>
+          // GET /view/nationwide/csv
           (path("csv") & get) {
             complete(
               HttpEntity(
                 `text/plain(UTF-8)`,
-                csvSource(browserService.fetchData(browserFields))
+                csvSource(browserService.fetchData(queryFields))
               )
             )
+          } ~
+            // GET /view/nationwide/pipe
+            (path("pipe") & get) {
+              complete(
+                HttpEntity(
+                  `text/plain(UTF-8)`,
+                  pipeSource(browserService.fetchData(queryFields))
+                )
+              )
+            }
+        } ~
+          // GET /view/nationwide/aggregations
+          (path("aggregations") & get) {
+            extractFieldsForAggregation { queryFields =>
+              val allFields = queryFields
+              complete(
+                browserService
+                  .fetchAggregate(allFields)
+                  .map(aggs =>
+                    AggregationResponse(Parameters.fromBrowserFields(allFields),
+                                        aggs))
+                  .runToFuture)
+            }
+          }
+      } ~
+        // GET /view/aggregations
+        (path("aggregations") & get) {
+          extractMsaAndStateBrowserFields { mandatoryFields =>
+            extractFieldsForAggregation { remainingQueryFields =>
+              val allFields = mandatoryFields ++ remainingQueryFields
+              complete(
+                browserService
+                  .fetchAggregate(allFields)
+                  .map(aggs =>
+                    AggregationResponse(Parameters.fromBrowserFields(allFields),
+                                        aggs))
+                  .runToFuture
+              )
+            }
+          }
+        } ~
+        // GET /view/csv
+        (path("csv") & get) {
+          extractMsaAndStateBrowserFields { mandatoryFields =>
+            extractFieldsForRawQueries { remainingQueryFields =>
+              complete(
+                HttpEntity(`text/plain(UTF-8)`,
+                           csvSource(browserService.fetchData(
+                             mandatoryFields ++ remainingQueryFields))))
+            }
+          }
+        } ~
+        // GET /view/pipe
+        (path("pipe") & get) {
+          extractMsaAndStateBrowserFields { mandatoryFields =>
+            extractFieldsForRawQueries { remainingQueryFields =>
+              complete(
+                HttpEntity(`text/plain(UTF-8)`,
+                           pipeSource(browserService.fetchData(
+                             mandatoryFields ++ remainingQueryFields))))
+            }
           }
         }
-      } ~ pathPrefix("aggregations") {
-        extractMsaAndStateBrowserFields { (states, msaMds) =>
-          extractBrowserFieldsForAggregation { browserFields =>
-            val allFields = states :: msaMds :: browserFields
-            complete(
-              browserService
-                .fetchAggregate(allFields)
-                .map(aggs =>
-                  AggregationResponse(Parameters.fromBrowserFields(allFields),
-                                      aggs))
-                .runToFuture
-            )
-          }
-        }
-      } ~ (path("csv") & get) {
-        extractMsaAndStateBrowserFields { (states, msaMds) =>
-          extractBrowserFieldsForCsv { browserFields =>
-            complete(
-              HttpEntity(
-                `text/plain(UTF-8)`,
-                csvSource(
-                  browserService.fetchData(states :: msaMds :: browserFields))))
-          }
-        }
-      }
     }
   }
 }

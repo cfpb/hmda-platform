@@ -2,7 +2,7 @@ package hmda.data.browser.repositories
 
 import akka.NotUsed
 import akka.stream.scaladsl.Source
-import hmda.data.browser.models.{BrowserField, ModifiedLarEntity}
+import hmda.data.browser.models.{QueryField, ModifiedLarEntity}
 import monix.eval.Task
 import slick.basic.DatabaseConfig
 import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
@@ -77,7 +77,7 @@ class PostgresModifiedLarRepository(tableName: String,
       lender_credits,
       interest_rate,
       payment_penalty,
-      debt_to_income,
+      debt_to_incode,
       loan_value_ratio,
       loan_term,
       rate_spread_intro,
@@ -87,7 +87,7 @@ class PostgresModifiedLarRepository(tableName: String,
       other_amortization,
       property_value,
       home_security_policy,
-      land_property_interest,
+      lan_property_interest,
       total_units,
       mf_affordable,
       application_submission,
@@ -144,10 +144,9 @@ class PostgresModifiedLarRepository(tableName: String,
   }
 
   override def find(
-      browserFields: List[BrowserField]): Source[ModifiedLarEntity, NotUsed] = {
-    val queries = browserFields
-      .filter(_.values.nonEmpty)
-      .map(field => in(field.dbName, field.values))
+      browserFields: List[QueryField]): Source[ModifiedLarEntity, NotUsed] = {
+    val queries = browserFields.map(field => in(field.dbName, field.values))
+
     val filterCriteria = queries match {
       case Nil          => ""
       case head :: tail => whereAndOpt(head, tail: _*)
@@ -171,10 +170,9 @@ class PostgresModifiedLarRepository(tableName: String,
   }
 
   override def findAndAggregate(
-      browserFields: List[BrowserField]): Task[Statistic] = {
-    val queries = browserFields
-      .filter(_.values.nonEmpty)
-      .map(field => in(field.dbName, field.values))
+      browserFields: List[QueryField]): Task[Statistic] = {
+    val queries = browserFields.map(field => in(field.dbName, field.values))
+
     val filterCriteria = queries match {
       case Nil          => ""
       case head :: tail => whereAndOpt(head, tail: _*)
