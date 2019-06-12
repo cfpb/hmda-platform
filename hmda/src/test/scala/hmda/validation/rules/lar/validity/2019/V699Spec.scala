@@ -1,29 +1,10 @@
-package hmda.validation.rules.lar.validity
+package hmda.validation.rules.lar.validity.nineteen
 
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 import hmda.model.filing.lar.LarGenerators._
-import hmda.model.filing.lar.enums.{
-  Accept,
-  ApproveEligible,
-  ApproveIneligible,
-  Caution,
-  Eligible,
-  EmptyAUSResultValue,
-  Error,
-  Incomplete,
-  Ineligible,
-  Invalid,
-  OtherAUS,
-  OtherAutomatedUnderwritingResult,
-  OutOfScope,
-  Refer,
-  ReferEligilbe,
-  ReferIneligible,
-  ReferWithCaution,
-  UnableToDetermineOrUnknown
-}
+import hmda.model.filing.lar.enums._
 
 class V699Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = V699
@@ -46,7 +27,14 @@ class V699Spec extends LarEditCheckSpec {
         Refer,
         Eligible,
         UnableToDetermineOrUnknown,
-        OtherAutomatedUnderwritingResult
+        OtherAutomatedUnderwritingResult,
+        AcceptEligible,
+        AcceptIneligible,
+        AcceptUnableToDetermine,
+        ReferWithCautionEligible,
+        ReferWithCautionIneligible,
+        ReferUnableToDetermine,
+        ReferWithCautionUnableToDetermine
       )
 
       whenever(

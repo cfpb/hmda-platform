@@ -1,4 +1,4 @@
-package hmda.validation.rules.lar.validity
+package hmda.validation.rules.lar.validity.nineteen
 
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
@@ -14,7 +14,8 @@ object V644_2 extends EditCheck[LoanApplicationRegister] {
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
     when(lar.applicant.sex.sexEnum is equalTo(MaleAndFemale)) {
-      lar.applicant.sex.sexObservedEnum is equalTo(NotVisualOrSurnameSex)
+      lar.applicant.sex.sexObservedEnum is oneOf(NotVisualOrSurnameSex,
+                                                 SexObservedNotApplicable)
     }
   }
 }
