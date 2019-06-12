@@ -9,7 +9,7 @@ import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
 
 class PostgresModifiedLarRepository(tableName: String,
                                     config: DatabaseConfig[JdbcProfile])
-  extends ModifiedLarRepository {
+    extends ModifiedLarRepository {
 
   import config._
   import config.profile.api._
@@ -144,7 +144,7 @@ class PostgresModifiedLarRepository(tableName: String,
   }
 
   override def find(
-                     browserFields: List[BrowserField]): Source[ModifiedLarEntity, NotUsed] = {
+      browserFields: List[BrowserField]): Source[ModifiedLarEntity, NotUsed] = {
     val queries = browserFields
       .filter(_.values.nonEmpty)
       .map(field => in(field.dbName, field.values))
@@ -171,7 +171,7 @@ class PostgresModifiedLarRepository(tableName: String,
   }
 
   override def findAndAggregate(
-                                 browserFields: List[BrowserField]): Task[Statistic] = {
+      browserFields: List[BrowserField]): Task[Statistic] = {
     val queries = browserFields
       .filter(_.values.nonEmpty)
       .map(field => in(field.dbName, field.values))

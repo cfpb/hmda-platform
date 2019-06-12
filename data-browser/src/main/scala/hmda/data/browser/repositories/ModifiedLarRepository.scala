@@ -7,6 +7,6 @@ import monix.eval.Task
 
 trait ModifiedLarRepository {
   def find(
-            browserFields: List[BrowserField]): Source[ModifiedLarEntity, NotUsed]
+      browserFields: List[BrowserField]): Source[ModifiedLarEntity, NotUsed]
   def findAndAggregate(browserFields: List[BrowserField]): Task[Statistic]
 }

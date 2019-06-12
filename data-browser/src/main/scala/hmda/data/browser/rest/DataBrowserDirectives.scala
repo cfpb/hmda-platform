@@ -33,7 +33,7 @@ trait DataBrowserDirectives {
     EntityStreamingSupport.csv()
 
   def csvSource(
-                 s: Source[ModifiedLarEntity, NotUsed]): Source[ByteString, NotUsed] = {
+      s: Source[ModifiedLarEntity, NotUsed]): Source[ByteString, NotUsed] = {
     val header = Source.single(ModifiedLarEntity.header)
     val content = s.map(_.toCsv)
 
@@ -43,7 +43,7 @@ trait DataBrowserDirectives {
   }
 
   def pipeSource(
-                  s: Source[ModifiedLarEntity, NotUsed]): Source[ByteString, NotUsed] = {
+      s: Source[ModifiedLarEntity, NotUsed]): Source[ByteString, NotUsed] = {
     val headerPipe = Source.single(ModifiedLarEntity.headerPipe)
     val contentPipe = s.map(_.toPipe)
 
@@ -57,9 +57,9 @@ trait DataBrowserDirectives {
       .flatMap { xs =>
         provide(
           BrowserField(name = "msamd",
-            xs.map(_.toString),
-            dbName = "msa_md",
-            redisName = "MSAMD"))
+                       xs.map(_.toString),
+                       dbName = "msa_md",
+                       redisName = "MSAMD"))
       }
 
   private def extractStates: Directive1[BrowserField] =
@@ -72,9 +72,9 @@ trait DataBrowserDirectives {
           case Right(states) =>
             provide(
               BrowserField(name = "state",
-                values = states.map(_.entryName),
-                dbName = "state",
-                redisName = "STATE"))
+                           values = states.map(_.entryName),
+                           dbName = "state",
+                           redisName = "STATE"))
         }
       }
 
@@ -88,9 +88,9 @@ trait DataBrowserDirectives {
           case Right(actionsTaken) if actionsTaken.nonEmpty =>
             provide(
               BrowserField("actions_taken",
-                actionsTaken.map(_.entryName),
-                "action_taken_type",
-                "ACTION"))
+                           actionsTaken.map(_.entryName),
+                           "action_taken_type",
+                           "ACTION"))
 
           // if the user provides no filters, it meas they want to see all actions
           case Right(_) =>
@@ -108,9 +108,9 @@ trait DataBrowserDirectives {
           case Right(ethnicities) if ethnicities.nonEmpty =>
             provide(
               BrowserField("ethnicities",
-                ethnicities.map(_.entryName),
-                "ethnicity_categorization",
-                "ETHNICITIES"))
+                           ethnicities.map(_.entryName),
+                           "ethnicity_categorization",
+                           "ETHNICITIES"))
 
           case Right(_) =>
             provide(BrowserField())
@@ -127,9 +127,9 @@ trait DataBrowserDirectives {
           case Right(totalUnits) if totalUnits.nonEmpty =>
             provide(
               BrowserField("total_units",
-                totalUnits.map(_.entryName),
-                "total_units",
-                "TOTAL_UNITS"))
+                           totalUnits.map(_.entryName),
+                           "total_units",
+                           "TOTAL_UNITS"))
 
           case Right(_) =>
             provide(BrowserField())
@@ -145,9 +145,9 @@ trait DataBrowserDirectives {
         case Right(races) if races.nonEmpty =>
           provide(
             BrowserField("races",
-              races.map(_.entryName),
-              "race_categorization",
-              "RACE"))
+                         races.map(_.entryName),
+                         "race_categorization",
+                         "RACE"))
 
         // if the user provides no filters, it means they want to see all races
         case Right(_) =>
@@ -162,14 +162,14 @@ trait DataBrowserDirectives {
           case Left(invalidConstructionMethods) =>
             complete(
               (BadRequest,
-                InvalidConstructionMethods(invalidConstructionMethods)))
+               InvalidConstructionMethods(invalidConstructionMethods)))
 
           case Right(constructionMethods) if constructionMethods.nonEmpty =>
             provide(
               BrowserField("construction_methods",
-                constructionMethods.map(_.entryName),
-                "construction_method",
-                "CONSTRUCTION_METHODS"))
+                           constructionMethods.map(_.entryName),
+                           "construction_method",
+                           "CONSTRUCTION_METHODS"))
           case Right(_) =>
             provide(BrowserField())
         }
@@ -182,14 +182,14 @@ trait DataBrowserDirectives {
           case Left(invalidDwellingCategories) =>
             complete(
               (BadRequest,
-                InvalidDwellingCategories(invalidDwellingCategories)))
+               InvalidDwellingCategories(invalidDwellingCategories)))
 
           case Right(dwellingCategories) if dwellingCategories.nonEmpty =>
             provide(
               BrowserField("dwelling_categories",
-                dwellingCategories.map(_.entryName),
-                "dwelling_category",
-                "DWELLING_CATEGORIES"))
+                           dwellingCategories.map(_.entryName),
+                           "dwelling_category",
+                           "DWELLING_CATEGORIES"))
           case Right(_) =>
             provide(BrowserField())
         }
@@ -205,9 +205,9 @@ trait DataBrowserDirectives {
           case Right(lienStatuses) if lienStatuses.nonEmpty =>
             provide(
               BrowserField("lien_statuses",
-                lienStatuses.map(_.entryName),
-                "lien_status",
-                "LIEN_STATUSES"))
+                           lienStatuses.map(_.entryName),
+                           "lien_status",
+                           "LIEN_STATUSES"))
           case Right(_) =>
             provide(BrowserField())
         }
@@ -223,9 +223,9 @@ trait DataBrowserDirectives {
           case Right(loanProducts) if loanProducts.nonEmpty =>
             provide(
               BrowserField("loan_products",
-                loanProducts.map(_.entryName),
-                "loan_product_type",
-                "LOAN_PRODUCTS"))
+                           loanProducts.map(_.entryName),
+                           "loan_product_type",
+                           "LOAN_PRODUCTS"))
           case Right(_) =>
             provide(BrowserField())
         }
@@ -241,9 +241,9 @@ trait DataBrowserDirectives {
           case Right(loanPurposes) if loanPurposes.nonEmpty =>
             provide(
               BrowserField("loan_purposes",
-                loanPurposes.map(_.entryName),
-                "loan_purpose",
-                "LOAN_PURPOSES"))
+                           loanPurposes.map(_.entryName),
+                           "loan_purpose",
+                           "LOAN_PURPOSES"))
           case Right(_) =>
             provide(BrowserField())
         }
@@ -259,9 +259,9 @@ trait DataBrowserDirectives {
           case Right(loanTypes) if loanTypes.nonEmpty =>
             provide(
               BrowserField("loan_types",
-                loanTypes.map(_.entryName),
-                "loan_type",
-                "LOAN_TYPES"))
+                           loanTypes.map(_.entryName),
+                           "loan_type",
+                           "LOAN_TYPES"))
           case Right(_) =>
             provide(BrowserField())
         }
@@ -277,9 +277,9 @@ trait DataBrowserDirectives {
           case Right(sexes) if sexes.nonEmpty =>
             provide(
               BrowserField("sexes",
-                sexes.map(_.entryName),
-                "sex_categorization",
-                "SEX"))
+                           sexes.map(_.entryName),
+                           "sex_categorization",
+                           "SEX"))
 
           // if the user provides no filters, it meas they want to see all actions
           case Right(_) =>
@@ -305,23 +305,23 @@ trait DataBrowserDirectives {
        ethnicities) =>
         val filteredfields =
           List(actionsTaken,
-            races,
-            sexes,
-            loanTypes,
-            loanPurposes,
-            lienStatuses,
-            constructionMethods,
-            dwellingCategories,
-            loanProducts,
-            totalUnits,
-            ethnicities).filter(_.name != "empty")
+               races,
+               sexes,
+               loanTypes,
+               loanPurposes,
+               lienStatuses,
+               constructionMethods,
+               dwellingCategories,
+               loanProducts,
+               totalUnits,
+               ethnicities).filter(_.name != "empty")
 
         innerRoute(filteredfields)
     }
   }
 
   def extractMsaAndStateBrowserFields(
-                                       innerRoute: (BrowserField, BrowserField) => Route): Route =
+      innerRoute: (BrowserField, BrowserField) => Route): Route =
     (extractMsaMds & extractStates) { (msaMds, states) =>
       if (msaMds.values.nonEmpty || states.values.nonEmpty)
         innerRoute(msaMds, states)
@@ -329,7 +329,7 @@ trait DataBrowserDirectives {
     }
 
   def extractBrowserFieldsForAggregation(
-                                          innerRoute: List[BrowserField] => Route): Route =
+      innerRoute: List[BrowserField] => Route): Route =
     extractBrowserFields { browserFields =>
       if (browserFields.nonEmpty)
         innerRoute(browserFields)
@@ -337,7 +337,7 @@ trait DataBrowserDirectives {
     }
 
   def extractBrowserFieldsForCsv(
-                                  innerRoute: List[BrowserField] => Route): Route =
+      innerRoute: List[BrowserField] => Route): Route =
     extractBrowserFields(innerRoute)
 }
 

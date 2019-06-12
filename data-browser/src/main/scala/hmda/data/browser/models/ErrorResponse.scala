@@ -6,68 +6,68 @@ sealed trait ErrorResponse {
 
 final case class InvalidRaces(invalidRaces: Seq[String],
                               errorType: String = "invalid-races")
-  extends ErrorResponse
+    extends ErrorResponse
 
 final case class InvalidActions(invalidActions: Seq[String],
                                 errorType: String = "invalid-action-taken-type")
-  extends ErrorResponse
+    extends ErrorResponse
 
 final case class InvalidMsaMds(invalidMsaMds: Seq[String],
                                errorType: String = "invalid-msamds",
                                msg: String = "")
-  extends ErrorResponse
+    extends ErrorResponse
 
 final case class InvalidStates(invalidStates: Seq[String],
                                errorType: String = "invalid-states")
-  extends ErrorResponse
+    extends ErrorResponse
 
 final case class ProvideStatesOrMsaMds(
-                                        errorType: String = "provide-atleast-msamds-or-states")
-  extends ErrorResponse
+    errorType: String = "provide-atleast-msamds-or-states")
+    extends ErrorResponse
 
 final case class NotEnoughFilterCriterias(
-                                           errorType: String = "provide-atleast-one-filter-criterias",
-                                           msg: String =
-                                           "Provide at least 2 filter criterias to perform aggregations (eg. actions_taken, races, genders, etc.)")
-  extends ErrorResponse
+    errorType: String = "provide-atleast-one-filter-criterias",
+    msg: String =
+      "Provide at least 2 filter criterias to perform aggregations (eg. actions_taken, races, genders, etc.)")
+    extends ErrorResponse
 
 final case class InvalidLoanTypes(invalidLoanTypes: Seq[String],
                                   errorType: String = "invalid-loan-types")
-  extends ErrorResponse
+    extends ErrorResponse
 
 final case class InvalidLoanPurposes(
-                                      invalidLoanPurposes: Seq[String],
-                                      errorType: String = "invalid-loan-purposes")
-  extends ErrorResponse
+    invalidLoanPurposes: Seq[String],
+    errorType: String = "invalid-loan-purposes")
+    extends ErrorResponse
 
 final case class InvalidLienStatuses(
-                                      invalidLienStatuses: Seq[String],
-                                      errorType: String = "invalid-lien-statuses")
-  extends ErrorResponse
+    invalidLienStatuses: Seq[String],
+    errorType: String = "invalid-lien-statuses")
+    extends ErrorResponse
 
 final case class InvalidLoanProducts(
-                                      invalidateLoanProducts: Seq[String],
-                                      errorType: String = "invalid-loan-products")
-  extends ErrorResponse
+    invalidateLoanProducts: Seq[String],
+    errorType: String = "invalid-loan-products")
+    extends ErrorResponse
 
 final case class InvalidDwellingCategories(
-                                            invalidDwellingCategories: Seq[String],
-                                            errorType: String = "invalid-dwelling-categories")
-  extends ErrorResponse
+    invalidDwellingCategories: Seq[String],
+    errorType: String = "invalid-dwelling-categories")
+    extends ErrorResponse
 
 final case class InvalidConstructionMethods(
-                                             invalidConstructionMethods: Seq[String],
-                                             errorType: String = "invalid-construction-methods")
-  extends ErrorResponse
+    invalidConstructionMethods: Seq[String],
+    errorType: String = "invalid-construction-methods")
+    extends ErrorResponse
 
 final case class InvalidSexes(invalidLoanTypes: Seq[String],
                               errorType: String = "invalid-sexes")
-  extends ErrorResponse
+    extends ErrorResponse
 
 final case class InvalidTotalUnits(invalidTotalUnits: Seq[String],
                                    errorType: String = "invalid-total-units")
-  extends ErrorResponse
+    extends ErrorResponse
 
 final case class InvalidEthnicities(invalidTotalUnits: Seq[String],
                                     errorType: String = "invalid-ethnicities")
-  extends ErrorResponse
+    extends ErrorResponse

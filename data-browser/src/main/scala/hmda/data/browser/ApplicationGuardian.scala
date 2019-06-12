@@ -13,7 +13,7 @@ import hmda.data.browser.repositories.{
   RedisModifiedLarAggregateCache
 }
 import hmda.data.browser.rest.Routes
-import hmda.data.browser.services.BrowserService
+import hmda.data.browser.services.{BrowserService, ModifiedLarBrowserService}
 import io.lettuce.core.RedisClient
 import monix.execution.{Scheduler => MonixScheduler}
 import slick.basic.DatabaseConfig

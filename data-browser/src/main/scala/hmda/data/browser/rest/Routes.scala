@@ -14,7 +14,7 @@ import monix.execution.{Scheduler => MonixScheduler}
 
 object Routes {
   def apply(browserService: BrowserService)(
-    implicit scheduler: MonixScheduler): Route = {
+      implicit scheduler: MonixScheduler): Route = {
 
     pathPrefix("view") {
       pathPrefix("nationwide") {
@@ -37,7 +37,7 @@ object Routes {
                 .fetchAggregate(allFields)
                 .map(aggs =>
                   AggregationResponse(Parameters.fromBrowserFields(allFields),
-                    aggs))
+                                      aggs))
                 .runToFuture
             )
           }
