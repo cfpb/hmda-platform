@@ -11,7 +11,7 @@ import io.circe.syntax._
 import scala.concurrent.duration.FiniteDuration
 
 class RedisModifiedLarAggregateCache(
-    redisClient: RedisAsyncCommands[String, String],
+    redisClient: Task[RedisAsyncCommands[String, String]],
     timeToLive: FiniteDuration)
     extends ModifiedLarAggregateCache {
   private val Prefix = "MLAR"
@@ -19,13 +19,18 @@ class RedisModifiedLarAggregateCache(
   private val MsaMd = "MSAMD"
   private val State = "STATE"
 
-  private def findAndParse(key: String): Task[Option[Statistic]] =
-    Task
-      .deferFuture(redisClient.get(key).toScala)
-      .map(Option(_))
-      .map(optResponse =>
-        optResponse.flatMap(stringResponse =>
-          decode[Statistic](stringResponse).toOption))
+  private def findAndParse(key: String): Task[Option[Statistic]] = {
+    redisClient
+      .flatMap { redisClient =>
+        Task
+          .deferFuture(redisClient.get(key).toScala)
+          .map(Option(_))
+          .map(optResponse =>
+            optResponse.flatMap(stringResponse =>
+              decode[Statistic](stringResponse).toOption))
+      }
+      .onErrorFallbackTo(Task.now(None))
+  }
 
   override def find(msaMd: Int,
                     field1Name: String,
@@ -61,11 +66,12 @@ class RedisModifiedLarAggregateCache(
   }
 
   private def updateAndSetTTL(key: String, value: Statistic): Task[Statistic] =
-    for {
+    (for {
+      redisClient <- redisClient
       _ <- Task.deferFuture(redisClient.set(key, value.asJson.noSpaces).toScala)
       _ <- Task.deferFuture(
         redisClient.pexpire(key, timeToLive.toMillis).toScala)
-    } yield value
+    } yield value).onErrorFallbackTo(Task.now(value))
 
   override def update(msaMd: Int,
                       field1Name: String,
@@ -109,9 +115,13 @@ class RedisModifiedLarAggregateCache(
   }
 
   private def invalidateKey(key: String): Task[Unit] =
-    Task
-      .deferFuture(redisClient.pexpire(key, timeToLive.toMillis).toScala)
-      .map(_ => Task.unit)
+    redisClient
+      .flatMap { redisClient =>
+        Task
+          .deferFuture(redisClient.pexpire(key, timeToLive.toMillis).toScala)
+          .map(_ => ())
+      }
+      .onErrorFallbackTo(Task.unit)
 
   override def invalidate(msaMd: Int,
                           field1Name: String,

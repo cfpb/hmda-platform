@@ -69,4 +69,15 @@ object State extends Enum[State] {
   case object FM extends State
   case object MH extends State
   case object PW extends State
+
+  def validateStates(states: Seq[String]): Either[Seq[String], Seq[State]] = {
+    val potentialStates =
+      states.map(state => (state, State.withNameInsensitiveOption(state)))
+    val isValidState = potentialStates.map(_._2).forall(_.isDefined)
+    if (isValidState) Right(potentialStates.flatMap(_._2))
+    else
+      Left(potentialStates.collect {
+        case (input, None) => input
+      })
+  }
 }

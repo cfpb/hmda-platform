@@ -1,7 +1,8 @@
 package hmda.data.browser.repositories
+
 import akka.NotUsed
 import akka.stream.scaladsl.Source
-import hmda.data.browser.models.{ModifiedLarEntity, BrowserField}
+import hmda.data.browser.models.{QueryField, ModifiedLarEntity}
 import monix.eval.Task
 import slick.basic.DatabaseConfig
 import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
@@ -9,6 +10,7 @@ import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
 class PostgresModifiedLarRepository(tableName: String,
                                     config: DatabaseConfig[JdbcProfile])
     extends ModifiedLarRepository {
+
   import config._
   import config.profile.api._
 
@@ -120,354 +122,69 @@ class PostgresModifiedLarRepository(tableName: String,
       percent_median_msa_income
     """.stripMargin
 
-  def formatString(strs: Seq[String]): String =
+  def escape(str: String): String = str.replace("'", "")
+
+  def formatSeq(strs: Seq[String]): String =
     strs.map(each => s"\'$each\'").mkString(start = "(", sep = ",", end = ")")
 
-  override def find(
-      msaMd: Int,
-      field1: BrowserField,
-      field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
-    val searchQuery = {
-      if (field1.name == "empty") {
-        sql"""
-        SELECT #$columns
-        FROM #${tableName}
-        WHERE msa_md = #${msaMd}
-        """
-          .as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
-      } else if (field2.name == "empty") {
-        sql"""
-        SELECT #$columns
-        FROM #${tableName}
-        WHERE msa_md = #${msaMd}
-          AND #${field1.dbName} IN #${formatString(field1.value)}
-        """
-          .as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
-      } else {
-        sql"""
-        SELECT #$columns
-        FROM #${tableName}
-        WHERE msa_md = #${msaMd}
-          AND #${field1.dbName} IN #${formatString(field1.value)}
-          AND #${field2.dbName} IN #${formatString(field2.value)}
-        """
-          .as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
-      }
-    }
+  def eq(fieldName: String, value: String): String =
+    s"${escape(fieldName)} = '${escape(value)}'"
 
-    val publisher = db.stream(searchQuery)
-    Source.fromPublisher(publisher)
+  def in(fieldName: String, values: Seq[String]): String =
+    s"${escape(fieldName)} IN ${formatSeq(values.map(escape))}"
+
+  def whereAndOpt(expression: String, remainingExpressions: String*): String = {
+    val primary = s"WHERE $expression"
+    if (remainingExpressions.isEmpty) primary
+    else {
+      val secondaries =
+        remainingExpressions.map(expr => s"AND $expr").mkString(sep = " ")
+      s"$primary $secondaries"
+    }
   }
 
   override def find(
-      state: String,
-      field1: BrowserField,
-      field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
-    val searchQuery = {
-      if (field1.name == "empty") {
-        sql"""
+      browserFields: List[QueryField]): Source[ModifiedLarEntity, NotUsed] = {
+    val queries = browserFields.map(field => in(field.dbName, field.values))
+
+    val filterCriteria = queries match {
+      case Nil          => ""
+      case head :: tail => whereAndOpt(head, tail: _*)
+    }
+
+    val searchQuery = sql"""
       SELECT #$columns
       FROM #${tableName}
-      WHERE state = '#${state}'
-      """.as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
-      } else if (field2.name == "empty") {
-        sql"""
-      SELECT #$columns
-      FROM #${tableName}
-      WHERE state = '#${state}'
-        AND #${field1.dbName} IN #${formatString(field1.value)}
-      """.as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
-      } else {
-        sql"""
-      SELECT #$columns
-      FROM #${tableName}
-      WHERE state = '#${state}'
-        AND #${field1.dbName} IN #${formatString(field1.value)}
-        AND #${field2.dbName} IN #${formatString(field2.value)}
-      """.as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
-      }
-    }
+      #$filterCriteria
+      """
+      .as[ModifiedLarEntity]
+      .withStatementParameters(
+        rsType = ResultSetType.ForwardOnly,
+        rsConcurrency = ResultSetConcurrency.ReadOnly,
+        fetchSize = 1000
+      )
+      .transactionally
 
     val publisher = db.stream(searchQuery)
     Source.fromPublisher(publisher)
   }
 
-  override def findAndAggregate(msaMd: Int,
-                                field1DbName: String,
-                                field1: String,
-                                field2DbName: String,
-                                field2: String): Task[Statistic] = {
-    val query = {
-      if (field1DbName == "empty") {
-        sql"""SELECT
-              COUNT(loan_amount),
-              SUM(loan_amount)
-            FROM #${tableName}
-            WHERE msa_md = #${msaMd}
-      """.as[Statistic].head
-      } else if (field2DbName == "empty") {
-        sql"""SELECT
-              COUNT(loan_amount),
-              SUM(loan_amount)
-            FROM #${tableName}
-            WHERE msa_md = #${msaMd}
-              AND #${field1DbName} = '#${field1}'
-      """.as[Statistic].head
-      } else {
-        sql"""SELECT
-              COUNT(loan_amount),
-              SUM(loan_amount)
-            FROM #${tableName}
-            WHERE msa_md = #${msaMd}
-              AND #${field1DbName} = '#${field1}'
-              AND #${field2DbName} = '#${field2}'
-      """.as[Statistic].head
-      }
+  override def findAndAggregate(
+      browserFields: List[QueryField]): Task[Statistic] = {
+    val queries = browserFields.map(field => in(field.dbName, field.values))
+
+    val filterCriteria = queries match {
+      case Nil          => ""
+      case head :: tail => whereAndOpt(head, tail: _*)
     }
+    val query = sql"""
+        SELECT
+          COUNT(loan_amount),
+          SUM(loan_amount)
+        FROM #${tableName}
+        #$filterCriteria
+        """.as[Statistic].head
 
-    Task.deferFuture(db.run(query))
-  }
-
-  override def findAndAggregate(state: String,
-                                field1DbName: String,
-                                field1: String,
-                                field2DbName: String,
-                                field2: String): Task[Statistic] = {
-    val query = {
-      if (field1DbName == "empty") {
-        sql"""SELECT
-              COUNT(loan_amount),
-              SUM(loan_amount)
-            FROM #${tableName}
-            WHERE state = '#${state}'
-      """.as[Statistic].head
-      } else if (field2DbName == "empty") {
-        sql"""SELECT
-              COUNT(loan_amount),
-              SUM(loan_amount)
-            FROM #${tableName}
-            WHERE state = '#${state}'
-              AND #${field1DbName} = '#${field1.value}'
-      """.as[Statistic].head
-      } else {
-        sql"""SELECT
-              COUNT(loan_amount),
-              SUM(loan_amount)
-            FROM #${tableName}
-            WHERE state = '#${state}'
-              AND #${field1DbName} = '#${field1.value}'
-              AND #${field2DbName} = '#${field2.value}'
-      """.as[Statistic].head
-      }
-    }
-
-    Task.deferFuture(db.run(query))
-  }
-
-  override def find(
-      field1: BrowserField,
-      field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
-    val searchQuery = {
-      if (field1.name == "empty") {
-        sql"""
-    SELECT #$columns
-    FROM #${tableName}
-    """.as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
-      } else if (field2.name == "empty") {
-        sql"""
-    SELECT #$columns
-    FROM #${tableName}
-    WHERE #${field1.dbName} IN #${formatString(field1.value)}
-    """.as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
-      } else {
-        sql"""
-    SELECT #$columns
-    FROM #${tableName}
-    WHERE #${field1.dbName} IN #${formatString(field1.value)}
-      AND #${field2.dbName} IN #${formatString(field2.value)}
-    """.as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
-      }
-    }
-
-    val publisher = db.stream(searchQuery)
-    Source.fromPublisher(publisher)
-  }
-
-  override def findAndAggregate(field1DbName: String,
-                                field1: String,
-                                field2DbName: String,
-                                field2: String): Task[Statistic] = {
-    val query = {
-      if (field1DbName == "empty") {
-        sql"""SELECT
-              COUNT(loan_amount),
-              SUM(loan_amount)
-            FROM #${tableName}
-      """.as[Statistic].head
-      } else if (field2DbName == "empty") {
-        sql"""SELECT
-              COUNT(loan_amount),
-              SUM(loan_amount)
-            FROM #${tableName}
-            WHERE #${field1DbName} = '#${field1}'
-      """.as[Statistic].head
-      } else {
-        sql"""SELECT
-              COUNT(loan_amount),
-              SUM(loan_amount)
-            FROM #${tableName}
-            WHERE #${field1DbName} = '#${field1}'
-            AND #${field2DbName} = '#${field2}'
-      """.as[Statistic].head
-      }
-    }
-
-    Task.deferFuture(db.run(query))
-  }
-
-  override def find(
-      msaMd: Int,
-      state: String,
-      field1: BrowserField,
-      field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
-    val searchQuery = {
-      if (field1.name == "empty") {
-        sql"""SELECT #$columns
-                        FROM #${tableName}
-                        WHERE msa_md = #${msaMd}
-                        AND state = '#${state}'
-    """.as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
-      } else if (field2.name == "empty") {
-        sql"""SELECT #$columns
-                        FROM #${tableName}
-                        WHERE msa_md = #${msaMd}
-                        AND state = '#${state}'
-                        AND #${field1.dbName} IN #${formatString(field1.value)}
-    """.as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
-      } else {
-        sql"""SELECT #$columns
-                        FROM #${tableName}
-                        WHERE msa_md = #${msaMd}
-                        AND state = '#${state}'
-                        AND #${field1.dbName} IN #${formatString(field1.value)}
-                        AND #${field2.dbName} IN #${formatString(field2.value)}
-    """.as[ModifiedLarEntity]
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally
-      }
-    }
-
-    val publisher = db.stream(searchQuery)
-    Source.fromPublisher(publisher)
-  }
-
-  override def findAndAggregate(msaMd: Int,
-                                state: String,
-                                field1DbName: String,
-                                field1: String,
-                                field2DbName: String,
-                                field2: String): Task[Statistic] = {
-    val query = {
-      if (field1DbName == "empty") {
-        sql"""SELECT
-        COUNT(loan_amount),
-        SUM(loan_amount)
-      FROM #${tableName}
-      WHERE msa_md = #${msaMd}
-      AND state = '#${state}'
-      """.as[Statistic].head
-      } else if (field2DbName == "empty") {
-        sql"""SELECT
-        COUNT(loan_amount),
-        SUM(loan_amount)
-      FROM #${tableName}
-      WHERE msa_md = #${msaMd}
-      AND state = '#${state}'
-      AND #${field1DbName} = '#${field1}'
-      """.as[Statistic].head
-      } else {
-        sql"""SELECT
-        COUNT(loan_amount),
-        SUM(loan_amount)
-      FROM #${tableName}
-      WHERE msa_md = #${msaMd}
-      AND state = '#${state}'
-      AND #${field1DbName} = '#${field1}'
-      AND #${field2DbName} = '#${field2}'
-      """.as[Statistic].head
-      }
-    }
-
-    Task.deferFuture(db.run(query))
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 }

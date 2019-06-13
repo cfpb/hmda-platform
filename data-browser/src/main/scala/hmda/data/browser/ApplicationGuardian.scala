@@ -41,11 +41,11 @@ object ApplicationGuardian {
                                         databaseConfig)
 
     val cacheConfig = RedisClient.create(settings.redis.url).connect().async()
-    val cache: ModifiedLarAggregateCache =
-      new RedisModifiedLarAggregateCache(cacheConfig, settings.redis.ttl)
+//    val cache: ModifiedLarAggregateCache =
+//      new RedisModifiedLarAggregateCache(cacheConfig, settings.redis.ttl)
 
     val service: BrowserService =
-      new ModifiedLarBrowserService(repository, cache)
+      new ModifiedLarBrowserService(repository)
 
     Http()
       .bindAndHandle(Routes(service),
