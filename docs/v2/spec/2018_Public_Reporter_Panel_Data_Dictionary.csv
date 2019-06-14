@@ -1,4 +1,4 @@
-﻿Field Name,Field Data Type,Valid Values,Notes
+Field Name,Field Data Type,Valid Values,Notes
 Legal Entity Identifier (LEI),Character Varying,,
 Activity Year,Integer,,
 Agency Code,Integer,1 2 3 5 7 9,
@@ -10,7 +10,7 @@ Respondent State,Character Varying,,
 Repondent City,Character Varying,,
 Parent RSSD,Integer,,
 Parent Name,Character Varying,,
-Assets,Integer ,,
+Assets,Integer,,
 Other Lender Code,Integer,0 1 2 3 5,
 Top Holder ID RSSD,Integer,,
 Top Holder Name,Character Varying,,
