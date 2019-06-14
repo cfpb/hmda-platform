@@ -23,7 +23,10 @@ class InstitutionQueryHttpApiSpec
     with InstitutionQueryHttpApi
     with InstitutionSetup {
 
-  override val institutionRepository = new InstitutionRepository(dbConfig)
+  override val institutionRepository2018 = new InstitutionRepository2018(
+    dbConfig)
+  override val institutionRepository2019 = new InstitutionRepository2019(
+    dbConfig)
 
   override val ec: ExecutionContext = system.dispatcher
   override val log: LoggingAdapter = NoLogging
@@ -41,10 +44,10 @@ class InstitutionQueryHttpApiSpec
 
   "Institution Query HTTP API" must {
     "search by LEI" in {
-      Get("/institutions/XXX") ~> institutionPublicRoutes ~> check {
+      Get("/institutions/XXX/year/2018") ~> institutionPublicRoutes ~> check {
         status mustBe StatusCodes.NotFound
       }
-      Get(s"/institutions/AAA") ~> institutionPublicRoutes ~> check {
+      Get(s"/institutions/AAA/year/2018") ~> institutionPublicRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[Institution] mustBe InstitutionConverter.convert(
           instA,
@@ -54,10 +57,10 @@ class InstitutionQueryHttpApiSpec
     }
 
     "search by email domain" in {
-      Get("/institutions?domain=xxx.com") ~> institutionPublicRoutes ~> check {
+      Get("/institutions/year/2018?domain=xxx.com") ~> institutionPublicRoutes ~> check {
         status mustBe StatusCodes.NotFound
       }
-      Get("/institutions?domain=bbb.com") ~> institutionPublicRoutes ~> check {
+      Get("/institutions/year/2018?domain=bbb.com") ~> institutionPublicRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[InstitutionsResponse].institutions.size mustBe 2
       }
@@ -65,7 +68,7 @@ class InstitutionQueryHttpApiSpec
 
     "search by fields values" in {
       Get(
-        "/institutions?domain=aaa.com&lei=AAA&respondentName=RespA&taxId=taxIdA") ~> institutionPublicRoutes ~> check {
+        "/institutions/year/2018?domain=aaa.com&lei=AAA&respondentName=RespA&taxId=taxIdA") ~> institutionPublicRoutes ~> check {
         status mustBe StatusCodes.OK
         val institutions = responseAs[InstitutionsResponse].institutions
         institutions.size mustBe 1
@@ -75,7 +78,7 @@ class InstitutionQueryHttpApiSpec
         institutions.head.emailDomains mustBe List("aaa.com", "bbb.com")
       }
       Get(
-        "/institutions?domain=xxx.com&lei=XXX&respondentName=RespX&taxId=taxIdX") ~> institutionPublicRoutes ~> check {
+        "/institutions/year/2018?domain=xxx.com&lei=XXX&respondentName=RespX&taxId=taxIdX") ~> institutionPublicRoutes ~> check {
         status mustBe StatusCodes.NotFound
       }
     }

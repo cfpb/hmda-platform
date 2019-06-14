@@ -38,7 +38,8 @@ class HmdaInstitutionQueryApi
   val createSchema = config.getBoolean("hmda.institution.createSchema")
 
   if (createSchema) {
-    institutionRepository.createSchema()
+    institutionRepository2018.createSchema()
+    institutionRepository2019.createSchema()
     institutionEmailsRepository.createSchema()
   }
 
