@@ -12,9 +12,9 @@ import io.circe.syntax._
 import scala.concurrent.duration.FiniteDuration
 
 class RedisModifiedLarAggregateCache(
-                                      redisClient: Task[RedisAsyncCommands[String, String]],
-                                      timeToLive: FiniteDuration)
-  extends ModifiedLarAggregateCache {
+    redisClient: Task[RedisAsyncCommands[String, String]],
+    timeToLive: FiniteDuration)
+    extends ModifiedLarAggregateCache {
   private val Prefix = "AGG"
 
   private def findAndParse(key: String): Task[Option[Statistic]] = {

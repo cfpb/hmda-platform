@@ -36,7 +36,7 @@ object ApplicationGuardian {
     val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
     val repository: ModifiedLarRepository =
       new PostgresModifiedLarRepository(settings.database.tableName,
-        databaseConfig)
+                                        databaseConfig)
 
     // We make the creation of the Redis client effectful because it can fail and we would like to operate
     // the service even if the cache is down (we provide fallbacks in case we receive connection errors)
@@ -69,8 +69,8 @@ object ApplicationGuardian {
 
     Http()
       .bindAndHandle(Routes(service),
-        settings.server.host,
-        settings.server.port)
+                     settings.server.host,
+                     settings.server.port)
       .onComplete {
         case Success(value)     => ctx.self ! Ready(settings.server.port)
         case Failure(exception) => ctx.self ! Error(exception.getMessage)
