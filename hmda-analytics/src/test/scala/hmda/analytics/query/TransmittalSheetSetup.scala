@@ -12,7 +12,7 @@ import scala.concurrent.Await
 trait TransmittalSheetSetup extends TransmittalSheetComponent {
 
   implicit val transmittalSheetRepository = new TransmittalSheetRepository(
-    dbConfig)
+    dbConfig, "transmittalsheet2018")
 
   val db = transmittalSheetRepository.db
 

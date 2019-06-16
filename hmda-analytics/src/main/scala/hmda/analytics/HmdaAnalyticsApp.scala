@@ -68,12 +68,12 @@ object HmdaAnalyticsApp
     bankFilter.getString("bank-filter-list").toUpperCase.split(",")
   val parallelism = config.getInt("hmda.analytics.parallelism")
 
-  val transmittalSheetRepository = new TransmittalSheetRepository(dbConfig)
-  val larRepository =
-    new LarRepository(tableName = "loanapplicationregister2018", dbConfig)
-  val submissionHistoryRepository =
-    new SubmissionHistoryRepository(tableName = "submission_history", dbConfig)
-  val db = transmittalSheetRepository.db
+  val transmittalSheetRepository2018 =
+    new TransmittalSheetRepository(dbConfig, "transmittalsheet2018")
+  val transmittalSheetRepository2019 =
+    new TransmittalSheetRepository(dbConfig, "transmittalsheet2019")
+  val larRepository = new LarRepository(dbConfig)
+  val submissionHistoryRepository = new SubmissionHistoryRepository(dbConfig)
 
   val consumerSettings: ConsumerSettings[String, String] =
     ConsumerSettings(kafkaConfig,
@@ -128,8 +128,12 @@ object HmdaAnalyticsApp
         .map(ts => TransmittalSheetConverter(ts, submissionIdVar))
         .mapAsync(1) { ts =>
           for {
+            delete <- submissionId.period.toInt match {
+              case 2018 => transmittalSheetRepository2018.deleteByLei(ts.lei)
+              case 2019 => transmittalSheetRepository2019.deleteByLei(ts.lei)
+              case _    => transmittalSheetRepository2019.deleteByLei(ts.lei)
 
-            delete <- transmittalSheetRepository.deleteByLei(ts.lei)
+            }
 
           } yield delete
         }
@@ -152,7 +156,7 @@ object HmdaAnalyticsApp
             signdate <- signDate
             submissionHistory <- submissionHistoryRepository.insert(
               ts.lei,
-              ts.submissionId,
+              submissionId,
               signdate)
           } yield submissionHistory
         }
@@ -172,7 +176,12 @@ object HmdaAnalyticsApp
         .map(ts => TransmittalSheetConverter(ts, submissionIdVar))
         .mapAsync(1) { ts =>
           for {
-            insertorupdate <- transmittalSheetRepository.insert(ts)
+            insertorupdate <- submissionId.period.toInt match {
+              case 2018 => transmittalSheetRepository2018.insert(ts)
+              case 2019 => transmittalSheetRepository2019.insert(ts)
+              case _    => transmittalSheetRepository2019.insert(ts)
+            }
+
           } yield insertorupdate
         }
         .runWith(Sink.ignore)
@@ -191,7 +200,7 @@ object HmdaAnalyticsApp
         .filter(lar => lar.larIdentifier.LEI != "")
         .map(lar => LarConverter(lar))
         .mapAsync(1) { lar =>
-          larRepository.deleteByLei(lar.lei)
+          larRepository.deleteByLei(submissionId, lar.lei)
         }
         .runWith(Sink.ignore)
 
@@ -208,7 +217,7 @@ object HmdaAnalyticsApp
         .filter(lar => lar.larIdentifier.LEI != "")
         .map(lar => LarConverter(lar))
         .mapAsync(1) { lar =>
-          larRepository.insert(lar)
+          larRepository.insert(submissionId, lar)
         }
         .runWith(Sink.ignore)
 
