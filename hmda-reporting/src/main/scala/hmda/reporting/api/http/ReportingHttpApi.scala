@@ -67,7 +67,7 @@ trait ReportingHttpApi extends InstitutionComponent {
     } ~ path("filers" / IntNumber / Segment / "msaMds") { (year, lei) =>
       extractUri { uri =>
         val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
-        val repo = new ModifiedLarRepository("modifiedlar2018", databaseConfig)
+        val repo = new ModifiedLarRepository(databaseConfig)
         val resultset = for {
           msaMdsResult <- repo.msaMds(lei, year)
           institutionResult <- institutionRepository.findByLei(lei)

@@ -1,20 +1,26 @@
 package hmda.query.repository
 
-import hmda.model.modifiedlar.{
-  EnrichedModifiedLoanApplicationRegister,
-  ModifiedLoanApplicationRegister
-}
+import hmda.model.filing.submission.SubmissionId
+import hmda.model.modifiedlar.{EnrichedModifiedLoanApplicationRegister, ModifiedLoanApplicationRegister}
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
 import scala.concurrent.Future
 import scala.util.Try
 
-class ModifiedLarRepository(tableName: String,
-                            databaseConfig: DatabaseConfig[JdbcProfile]) {
+class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
   import databaseConfig.profile.api._
 
   private val db = databaseConfig.db
+
+  def fetchYearTable(year: Int): String = {
+    year match {
+      case 2018 => "modifiedlar2018"
+      case 2019 => "modifiedlar2019"
+      case _ => "modifiedlar2019"
+    }
+  }
+
 
   /**
     * Deletes entries in the Modified LAR table by their LEI
@@ -24,18 +30,21 @@ class ModifiedLarRepository(tableName: String,
   def msaMds(lei: String, filingYear: Int): Future[Vector[(String, String)]] =
     db.run {
       sql"""SELECT DISTINCT msa_md, msa_md_name
-                         FROM modifiedlar2018 WHERE lei = ${lei.toUpperCase} AND filing_year = ${filingYear}"""
+                         FROM #${fetchYearTable(filingYear)} WHERE lei = ${lei.toUpperCase} AND filing_year = ${filingYear}"""
         .as[(String, String)]
     }
 
   /**
     * Deletes entries in the Modified LAR table by their LEI
-    * @param lei
+    * @param submissionId
     * @return the number of rows removed
     */
-  def deleteByLei(lei: String, filingYear: Int): Future[Int] =
+  def deleteByLei(submissionId: SubmissionId): Future[Int] = {
+
     db.run(
-      sqlu"DELETE FROM #${tableName} WHERE UPPER(lei) = ${lei.toUpperCase} and filing_year = $filingYear")
+      sqlu"DELETE FROM #${fetchYearTable(submissionId.period.toInt)} WHERE UPPER(lei) = ${submissionId.lei.toUpperCase} and filing_year = ${submissionId.period.toInt}")
+  }
+
 
   /**
     * Inserts Modified Loan Application Register data that has been enhanced with Census information via the tract map
@@ -44,9 +53,8 @@ class ModifiedLarRepository(tableName: String,
     * @return
     */
   def insert(input: EnrichedModifiedLoanApplicationRegister,
-             submissionId: String,
-             filingYear: Int): Future[Int] =
-    db.run(sqlu"""INSERT INTO #${tableName}(
+             submissionId: SubmissionId): Future[Int] =
+    db.run(sqlu"""INSERT INTO #${fetchYearTable(submissionId.period.toInt)}(
             id,
             lei,
             loan_type,
@@ -250,10 +258,10 @@ class ModifiedLarRepository(tableName: String,
             ${input.census.msaMd},
             ${input.census.name},
             ${submissionId},
-            ${filingYear},
+            ${submissionId.period.toInt},
             ${input.mlar.conformingLoanLimit},
             ${input.census.medianAge},
-            ${medianAgeCalculated(filingYear, input.census.medianAge)},
+            ${medianAgeCalculated(submissionId.period.toInt, input.census.medianAge)},
             ${input.census.tracttoMsaIncomePercent},
             ${input.mlar.ethnicityCategorization},
             ${input.mlar.raceCategorization},
