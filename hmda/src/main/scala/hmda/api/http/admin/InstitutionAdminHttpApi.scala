@@ -154,7 +154,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
   val institutionReadPath =
     path("institutions" / Segment / "year" / Segment) { (lei, period) =>
       val institutionPersistence = {
-        if (period == "2017") {
+        if (period == "2018") {
           sharding.entityRefFor(InstitutionPersistence.typeKey,
                                 s"${InstitutionPersistence.name}-$lei")
         } else {
