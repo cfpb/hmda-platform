@@ -1,7 +1,10 @@
 package hmda.query.repository
 
 import hmda.model.filing.submission.SubmissionId
-import hmda.model.modifiedlar.{EnrichedModifiedLoanApplicationRegister, ModifiedLoanApplicationRegister}
+import hmda.model.modifiedlar.{
+  EnrichedModifiedLoanApplicationRegister,
+  ModifiedLoanApplicationRegister
+}
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
@@ -17,10 +20,9 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
     year match {
       case 2018 => "modifiedlar2018"
       case 2019 => "modifiedlar2019"
-      case _ => "modifiedlar2019"
+      case _    => "modifiedlar2019"
     }
   }
-
 
   /**
     * Deletes entries in the Modified LAR table by their LEI
@@ -45,7 +47,6 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
       sqlu"DELETE FROM #${fetchYearTable(submissionId.period.toInt)} WHERE UPPER(lei) = ${submissionId.lei.toUpperCase} and filing_year = ${submissionId.period.toInt}")
   }
 
-
   /**
     * Inserts Modified Loan Application Register data that has been enhanced with Census information via the tract map
     * @param input
@@ -54,7 +55,7 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
     */
   def insert(input: EnrichedModifiedLoanApplicationRegister,
              submissionId: SubmissionId): Future[Int] =
-    db.run(sqlu"""INSERT INTO #${fetchYearTable(submissionId.period.toInt)}(
+    db.run(sqlu"""INSERT INTO #${fetchYearTable(submissionId.period.toInt)} (
             id,
             lei,
             loan_type,
@@ -257,11 +258,12 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
             ${input.census.oneToFourFamilyUnits},
             ${input.census.msaMd},
             ${input.census.name},
-            ${submissionId},
+            ${submissionId.toString},
             ${submissionId.period.toInt},
             ${input.mlar.conformingLoanLimit},
             ${input.census.medianAge},
-            ${medianAgeCalculated(submissionId.period.toInt, input.census.medianAge)},
+            ${medianAgeCalculated(submissionId.period.toInt,
+                                  input.census.medianAge)},
             ${input.census.tracttoMsaIncomePercent},
             ${input.mlar.ethnicityCategorization},
             ${input.mlar.raceCategorization},
