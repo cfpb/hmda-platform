@@ -38,10 +38,17 @@ trait InstitutionHttpApi extends HmdaTimeDirectives {
   //institutions/<lei>
   def institutionReadPath(oAuth2Authorization: OAuth2Authorization): Route =
     oAuth2Authorization.authorizeToken { _ =>
-      path("institutions" / Segment) { lei =>
-        val institutionPersistence =
-          sharding.entityRefFor(InstitutionPersistence.typeKey,
-                                s"${InstitutionPersistence.name}-$lei")
+      path("institutions" / Segment / "year" / Segment) { (lei, period) =>
+        val institutionPersistence = {
+          if (period == "2018") {
+            sharding.entityRefFor(InstitutionPersistence.typeKey,
+                                  s"${InstitutionPersistence.name}-$lei")
+          } else {
+            sharding.entityRefFor(
+              InstitutionPersistence.typeKey,
+              s"${InstitutionPersistence.name}-$lei-$period")
+          }
+        }
 
         val iDetails
           : Future[Option[InstitutionDetail]] = institutionPersistence ? (ref =>

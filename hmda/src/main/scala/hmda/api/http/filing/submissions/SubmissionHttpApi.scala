@@ -63,9 +63,16 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
         oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             timedPost { uri =>
-              val institutionPersistence =
-                sharding.entityRefFor(InstitutionPersistence.typeKey,
-                                      s"${InstitutionPersistence.name}-$lei")
+              val institutionPersistence = {
+                if (period == "2018") {
+                  sharding.entityRefFor(InstitutionPersistence.typeKey,
+                                        s"${InstitutionPersistence.name}-$lei")
+                } else {
+                  sharding.entityRefFor(
+                    InstitutionPersistence.typeKey,
+                    s"${InstitutionPersistence.name}-$lei-$period")
+                }
+              }
 
               val fInstitution
                 : Future[Option[Institution]] = institutionPersistence ? (

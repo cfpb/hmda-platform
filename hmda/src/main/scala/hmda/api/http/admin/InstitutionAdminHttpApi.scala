@@ -50,9 +50,17 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
     oAuth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
       path("institutions") {
         entity(as[Institution]) { institution =>
-          val institutionPersistence = sharding.entityRefFor(
-            InstitutionPersistence.typeKey,
-            s"${InstitutionPersistence.name}-${institution.LEI}")
+          val institutionPersistence = {
+            if (institution.activityYear == 2018) {
+              sharding.entityRefFor(
+                InstitutionPersistence.typeKey,
+                s"${InstitutionPersistence.name}-${institution.LEI}")
+            } else {
+              sharding.entityRefFor(
+                InstitutionPersistence.typeKey,
+                s"${InstitutionPersistence.name}-${institution.LEI}-${institution.activityYear}")
+            }
+          }
 
           timedPost { uri =>
             respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
@@ -120,11 +128,14 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
             timedDelete { uri =>
               val fDeleted
                 : Future[InstitutionEvent] = institutionPersistence ? (
-                  ref => DeleteInstitution(institution.LEI, ref)
+                  ref =>
+                    DeleteInstitution(institution.LEI,
+                                      institution.activityYear,
+                                      ref)
               )
 
               onComplete(fDeleted) {
-                case Success(InstitutionDeleted(lei)) =>
+                case Success(InstitutionDeleted(lei, year)) =>
                   complete(ToResponseMarshallable(
                     StatusCodes.Accepted -> InstitutionDeletedResponse(lei)))
                 case Success(InstitutionNotExists(lei)) =>
@@ -141,10 +152,16 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
     }
 
   val institutionReadPath =
-    path("institutions" / Segment) { lei =>
-      val institutionPersistence =
-        sharding.entityRefFor(InstitutionPersistence.typeKey,
-                              s"${InstitutionPersistence.name}-$lei")
+    path("institutions" / Segment / "year" / Segment) { (lei, period) =>
+      val institutionPersistence = {
+        if (period == "2017") {
+          sharding.entityRefFor(InstitutionPersistence.typeKey,
+                                s"${InstitutionPersistence.name}-$lei")
+        } else {
+          sharding.entityRefFor(InstitutionPersistence.typeKey,
+                                s"${InstitutionPersistence.name}-$lei-$period")
+        }
+      }
 
       timedGet { uri =>
         val fInstitution

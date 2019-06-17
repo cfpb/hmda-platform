@@ -73,7 +73,6 @@ object InstitutionDBProjection extends InstitutionEmailComponent {
         } else if (year == 2019) {
           institutionRepository2019.deleteById(lei)
         }
-        deleteEmails(lei)
     }
     event
   }
