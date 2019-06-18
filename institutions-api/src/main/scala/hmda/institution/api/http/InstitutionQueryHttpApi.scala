@@ -100,6 +100,24 @@ trait InstitutionQueryHttpApi
       }
     }
 
+  val institutionByDomainDefaultPath =
+    path("institutions") {
+      timedGet { uri =>
+        parameter('domain.as[String]) { domain =>
+          val f = findByEmail(domain, "2018")
+          completeInstitutionsFuture(f, uri)
+        } ~
+          parameters('domain.as[String],
+                     'lei.as[String],
+                     'respondentName.as[String],
+                     'taxId.as[String]) {
+            (domain, lei, respondentName, taxId) =>
+              val f = findByFields(lei, respondentName, taxId, domain, "2018")
+              completeInstitutionsFuture(f, uri)
+          }
+      }
+    }
+
   private def completeInstitutionsFuture(f: Future[Seq[Institution]],
                                          uri: Uri): Route = {
     onComplete(f) {
