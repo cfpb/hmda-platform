@@ -171,7 +171,7 @@ case class LarPartSix(payable: Int = 0,
   }
 }
 
-case class LarEntityImpl(larPartOne: LarPartOne,
+case class LarEntityImpl2018(larPartOne: LarPartOne,
                          larPartTwo: LarPartTwo,
                          larPartThree: LarPartThree,
                          larPartFour: LarPartFour,

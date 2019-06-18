@@ -3,7 +3,7 @@ package hmda.regulator.query
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.regulator.query.lar.{LarEntityImpl, _}
-import hmda.regulator.query.panel.{InstitutionEmailEntity, InstitutionEntity}
+import hmda.regulator.query.panel.{InstitutionEmailEntity, InstitutionEntity2018}
 import slick.basic.DatabasePublisher
 import slick.jdbc.{ResultSetConcurrency, ResultSetType}
 import hmda.query.ts.TransmittalSheetEntity
@@ -16,8 +16,8 @@ trait RegulatorComponent {
 
   import dbConfig.profile.api._
 
-  class InstitutionsTable(tag: Tag)
-      extends Table[InstitutionEntity](tag, "institutions2018") {
+  class InstitutionsTable2018(tag: Tag)
+      extends Table[InstitutionEntity2018](tag, "institutions2018") {
     def lei = column[String]("lei", O.PrimaryKey)
     def activityYear = column[Int]("activity_year")
     def agency = column[Int]("agency")
@@ -53,33 +53,33 @@ trait RegulatorComponent {
        otherLenderCode,
        topHolderIdRssd,
        topHolderName,
-       hmdaFiler) <> (InstitutionEntity.tupled, InstitutionEntity.unapply)
+       hmdaFiler) <> (InstitutionEntity2018.tupled, InstitutionEntity2018.unapply)
   }
-  val institutionsTable = TableQuery[InstitutionsTable]
+  val institutionsTable2018 = TableQuery[InstitutionsTable2018]
 
-  class InstitutionRepository(val config: DatabaseConfig[JdbcProfile])
-      extends TableRepository[InstitutionsTable, String] {
+  class InstitutionRepository2018(val config: DatabaseConfig[JdbcProfile])
+      extends TableRepository[InstitutionsTable2018, String] {
 
-    override val table: config.profile.api.TableQuery[InstitutionsTable] =
-      institutionsTable
+    override val table: config.profile.api.TableQuery[InstitutionsTable2018] =
+      institutionsTable2018
 
-    override def getId(row: InstitutionsTable): config.profile.api.Rep[Id] =
+    override def getId(row: InstitutionsTable2018): config.profile.api.Rep[Id] =
       row.lei
 
     def createSchema() = db.run(table.schema.create)
     def dropSchema() = db.run(table.schema.drop)
 
-    def insert(institution: InstitutionEntity): Future[Int] = {
+    def insert(institution: InstitutionEntity2018): Future[Int] = {
       db.run(table += institution)
     }
 
-    def findByLei(lei: String): Future[Seq[InstitutionEntity]] = {
+    def findByLei(lei: String): Future[Seq[InstitutionEntity2018]] = {
       db.run(table.filter(_.lei === lei).result)
     }
 
     //(x => (x.isX && x.name == "xyz"))
     def findActiveFilers(
-        bankIgnoreList: Array[String]): Future[Seq[InstitutionEntity]] = {
+        bankIgnoreList: Array[String]): Future[Seq[InstitutionEntity2018]] = {
       db.run(
         table
           .filter(_.hmdaFiler === true)
@@ -87,7 +87,7 @@ trait RegulatorComponent {
           .result)
     }
 
-    def getAllInstitutions(): Future[Seq[InstitutionEntity]] = {
+    def getAllInstitutions(): Future[Seq[InstitutionEntity2018]] = {
       db.run(table.result)
     }
 
@@ -110,7 +110,7 @@ trait RegulatorComponent {
       (id, lei, emailDomain) <> (InstitutionEmailEntity.tupled, InstitutionEmailEntity.unapply)
 
     def institutionFK =
-      foreignKey("INST_FK", lei, institutionsTable)(
+      foreignKey("INST_FK", lei, institutionsTable2018)(
         _.lei,
         onUpdate = ForeignKeyAction.Restrict,
         onDelete = ForeignKeyAction.Cascade)
@@ -215,7 +215,7 @@ trait RegulatorComponent {
   }
 
   class LarTable(tag: Tag)
-      extends Table[LarEntityImpl](tag, "loanapplicationregister2018") {
+      extends Table[LarEntityImpl2018](tag, "loanapplicationregister2018") {
 
     def id = column[Int]("id")
     def lei = column[String]("lei")

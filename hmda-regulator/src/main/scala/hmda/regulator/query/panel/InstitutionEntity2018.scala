@@ -1,6 +1,6 @@
 package hmda.regulator.query.panel
 
-case class InstitutionEntity(
+case class InstitutionEntity2018(
     lei: String = "",
     activityYear: Int = 0,
     agency: Int = -1,

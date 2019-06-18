@@ -7,12 +7,7 @@ import akka.NotUsed
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{
-  MemoryBufferType,
-  MultipartUploadResult,
-  S3Attributes,
-  S3Settings
-}
+import akka.stream.alpakka.s3.{MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
@@ -22,12 +17,8 @@ import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.query.DbConfiguration.dbConfig
 import hmda.regulator.query.RegulatorComponent
-import hmda.regulator.query.panel.{
-  InstitutionAltEntity,
-  InstitutionEmailEntity,
-  InstitutionEntity
-}
-import hmda.regulator.scheduler.schedules.Schedules.PanelScheduler
+import hmda.regulator.query.panel.{InstitutionAltEntity, InstitutionEmailEntity, InstitutionEntity2018}
+import hmda.regulator.scheduler.schedules.Schedules.{PanelScheduler2018, PanelScheduler2019}
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -37,87 +28,98 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
   implicit val ec = context.system.dispatcher
   implicit val materializer = ActorMaterializer()
   private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
-  def institutionRepository = new InstitutionRepository(dbConfig)
+  def institutionRepository2018 = new InstitutionRepository2018(dbConfig)
   def emailRepository = new InstitutionEmailsRepository(dbConfig)
+  val bankFilter =
+    ConfigFactory.load("application.conf").getConfig("filter")
+  val bankFilterList =
+    bankFilter.getString("bank-filter-list").toUpperCase.split(",")
 
   override def preStart() = {
-    QuartzSchedulerExtension(context.system)
-      .schedule("PanelScheduler", self, PanelScheduler)
+    QuartzSchedulerExtension(context.system).schedule("PanelScheduler2018", self, PanelScheduler2018)
+    QuartzSchedulerExtension(context.system).schedule("PanelScheduler2019", self., PanelScheduler2019)
 
   }
 
   override def postStop() = {
-    QuartzSchedulerExtension(context.system).cancelJob("PanelScheduler")
+    QuartzSchedulerExtension(context.system).cancelJob("PanelScheduler2018")
+    QuartzSchedulerExtension(context.system).cancelJob("PanelScheduler2019")
+
   }
 
   override def receive: Receive = {
 
-    case PanelScheduler =>
-      val awsConfig = ConfigFactory.load("application.conf").getConfig("aws")
-      val accessKeyId = awsConfig.getString("access-key-id")
-      val secretAccess = awsConfig.getString("secret-access-key ")
-      val region = awsConfig.getString("region")
-      val bucket = awsConfig.getString("public-bucket")
-      val environment = awsConfig.getString("environment")
-      val year = awsConfig.getString("year")
+    case PanelScheduler2018 =>
+      val allResults: Future[Seq[InstitutionEntity2018]] =
+        institutionRepository2018.findActiveFilers(bankFilterList)
+      panelSync("2018",allResults)
 
-      val bankFilter =
-        ConfigFactory.load("application.conf").getConfig("filter")
-      val bankFilterList =
-        bankFilter.getString("bank-filter-list").toUpperCase.split(",")
-
-      val awsCredentialsProvider = new AWSStaticCredentialsProvider(
-        new BasicAWSCredentials(accessKeyId, secretAccess))
-
-      val awsRegionProvider = new AwsRegionProvider {
-        override def getRegion: String = region
-      }
-
-      val s3Settings =
-        S3Settings(
-          MemoryBufferType,
-          None,
-          awsCredentialsProvider,
-          awsRegionProvider,
-          false,
-          None,
-          ListBucketVersion2
-        )
-
-      val now = LocalDateTime.now().minusDays(1)
-
-      val formattedDate = fullDate.format(now)
-
-      val fileName = s"$formattedDate" + s"$year" + "_panel" + ".txt"
-      val s3Sink =
-        S3.multipartUpload(bucket, s"$environment/panel/$fileName")
-          .withAttributes(S3Attributes.settings(s3Settings))
-
-      val allResults: Future[Seq[InstitutionEntity]] =
+    case PanelScheduler2019 =>
+      val allResults: Future[Seq[InstitutionEntity2018]] =
         institutionRepository.findActiveFilers(bankFilterList)
-
-      val results: Future[MultipartUploadResult] = Source
-        .fromFuture(allResults)
-        .map(seek => seek.toList)
-        .mapConcat(identity)
-        .mapAsync(1)(institution => appendEmailDomains(institution))
-        .map(institution => institution.toPSV + "\n")
-        .map(s => ByteString(s))
-        .runWith(s3Sink)
-
-      results onComplete {
-        case Success(result) => {
-          log.info(
-            "Pushing to S3: " + s"$bucket/$environment/panel/$fileName" + ".")
-        }
-        case Failure(t) =>
-          println("An error has occurred getting Panel Data: " + t.getMessage)
-      }
+      panelSync("2019",allResults)
 
   }
 
+  private def panelSync (year: String, allResults: Future[Seq[InstitutionEntity2018]]) = {
+    val awsConfig = ConfigFactory.load("application.conf").getConfig("aws")
+    val accessKeyId = awsConfig.getString("access-key-id")
+    val secretAccess = awsConfig.getString("secret-access-key ")
+    val region = awsConfig.getString("region")
+    val bucket = awsConfig.getString("public-bucket")
+    val environment = awsConfig.getString("environment")
+    val year = awsConfig.getString("year")
+
+    val awsCredentialsProvider = new AWSStaticCredentialsProvider(
+      new BasicAWSCredentials(accessKeyId, secretAccess))
+
+    val awsRegionProvider = new AwsRegionProvider {
+      override def getRegion: String = region
+    }
+
+    val s3Settings =
+      S3Settings(
+        MemoryBufferType,
+        None,
+        awsCredentialsProvider,
+        awsRegionProvider,
+        false,
+        None,
+        ListBucketVersion2
+      )
+
+    val now = LocalDateTime.now().minusDays(1)
+
+    val formattedDate = fullDate.format(now)
+
+    val fileName = s"$formattedDate" + year + "_panel" + ".txt"
+    val s3Sink =
+      S3.multipartUpload(bucket, s"$environment/panel/$fileName")
+        .withAttributes(S3Attributes.settings(s3Settings))
+
+
+
+    val results: Future[MultipartUploadResult] = Source
+      .fromFuture(allResults)
+      .map(seek => seek.toList)
+      .mapConcat(identity)
+      .mapAsync(1)(institution => appendEmailDomains(institution))
+      .map(institution => institution.toPSV + "\n")
+      .map(s => ByteString(s))
+      .runWith(s3Sink)
+
+    results onComplete {
+      case Success(result) => {
+        log.info(
+          "Pushing to S3: " + s"$bucket/$environment/panel/$fileName" + ".")
+      }
+      case Failure(t) =>
+        println("An error has occurred getting Panel Data: " + t.getMessage)
+    }
+  }
+
   def appendEmailDomains(
-      institution: InstitutionEntity): Future[InstitutionAltEntity] = {
+      institution: InstitutionEntity2018): Future[InstitutionAltEntity] = {
 
     val emails: Future[Seq[InstitutionEmailEntity]] =
       emailRepository.findByLei(institution.lei)
