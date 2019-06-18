@@ -1,0 +1,1 @@
+CREATE SCHEMA hmda_beta_user AUTHORIZATION hmda_user;
