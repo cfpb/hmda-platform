@@ -165,9 +165,9 @@ This documentation describes de public HMDA Platform HTTP API
     
 ### Validation
 
-* `/ts/validate`
+* `/ts/validate/<year>`
     
-    * `POST` - Returns a `JSON` representation of a TS, or a list of edits if the TS fails to validate
+    * `POST` - Returns a `JSON` representation of a TS, or a list of edits if the TS fails to validate for the `<year>` passed in (2019 validations are work-in-progress).
     
     Example body, in `JSON` format:
     
@@ -373,9 +373,9 @@ This documentation describes de public HMDA Platform HTTP API
 
 ### Validation
 
-* `/lar/validate`
+* `/lar/validate/<year>`
     
-    * `POST` - Returns a `JSON` representation of a LAR, or a list of edits if the LAR fails to validate
+    * `POST` - Returns a `JSON` representation of a LAR, or a list of edits if the LAR fails to validate for the `<year>` passed in (2019 validations are work-in-progress)
     
     Example body, in `JSON` format:
     
