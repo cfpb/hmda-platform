@@ -35,6 +35,34 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
   val bankFilterList =
     bankFilter.getString("bank-filter-list").toUpperCase.split(",")
 
+
+  val awsConfig = ConfigFactory.load("application.conf").getConfig("aws")
+  val accessKeyId = awsConfig.getString("access-key-id")
+  val secretAccess = awsConfig.getString("secret-access-key ")
+  val region = awsConfig.getString("region")
+  val bucket = awsConfig.getString("public-bucket")
+  val environment = awsConfig.getString("environment")
+  val year = awsConfig.getString("year")
+
+  val awsCredentialsProvider = new AWSStaticCredentialsProvider(
+    new BasicAWSCredentials(accessKeyId, secretAccess))
+
+  val awsRegionProvider = new AwsRegionProvider {
+    override def getRegion: String = region
+  }
+
+  val s3Settings =
+    S3Settings(
+      MemoryBufferType,
+      None,
+      awsCredentialsProvider,
+      awsRegionProvider,
+      false,
+      None,
+      ListBucketVersion2
+    )
+
+
   override def preStart() = {
     QuartzSchedulerExtension(context.system).schedule("PanelScheduler2018", self, PanelScheduler2018)
     QuartzSchedulerExtension(context.system).schedule("PanelScheduler2019", self., PanelScheduler2019)
@@ -48,57 +76,53 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
   }
 
   override def receive: Receive = {
-
     case PanelScheduler2018 =>
-      val allResults: Future[Seq[InstitutionEntity2018]] =
-        institutionRepository2018.findActiveFilers(bankFilterList)
-      panelSync("2018",allResults)
+      panelSync2018
 
     case PanelScheduler2019 =>
-      val allResults: Future[Seq[InstitutionEntity2018]] =
-        institutionRepository.findActiveFilers(bankFilterList)
-      panelSync("2019",allResults)
+      panelSync2019
 
   }
 
-  private def panelSync (year: String, allResults: Future[Seq[InstitutionEntity2018]]) = {
-    val awsConfig = ConfigFactory.load("application.conf").getConfig("aws")
-    val accessKeyId = awsConfig.getString("access-key-id")
-    val secretAccess = awsConfig.getString("secret-access-key ")
-    val region = awsConfig.getString("region")
-    val bucket = awsConfig.getString("public-bucket")
-    val environment = awsConfig.getString("environment")
-    val year = awsConfig.getString("year")
+  private def panelSync2018  = {
 
-    val awsCredentialsProvider = new AWSStaticCredentialsProvider(
-      new BasicAWSCredentials(accessKeyId, secretAccess))
-
-    val awsRegionProvider = new AwsRegionProvider {
-      override def getRegion: String = region
-    }
-
-    val s3Settings =
-      S3Settings(
-        MemoryBufferType,
-        None,
-        awsCredentialsProvider,
-        awsRegionProvider,
-        false,
-        None,
-        ListBucketVersion2
-      )
-
+    val allResults: Future[Seq[InstitutionEntity2018]] =
+      institutionRepository2018.findActiveFilers(bankFilterList)
     val now = LocalDateTime.now().minusDays(1)
-
     val formattedDate = fullDate.format(now)
-
-    val fileName = s"$formattedDate" + year + "_panel" + ".txt"
+    val fileName = s"$formattedDate" + "2018" + "_panel" + ".txt"
     val s3Sink =
       S3.multipartUpload(bucket, s"$environment/panel/$fileName")
         .withAttributes(S3Attributes.settings(s3Settings))
+    val results: Future[MultipartUploadResult] = Source
+      .fromFuture(allResults)
+      .map(seek => seek.toList)
+      .mapConcat(identity)
+      .mapAsync(1)(institution => appendEmailDomains(institution))
+      .map(institution => institution.toPSV + "\n")
+      .map(s => ByteString(s))
+      .runWith(s3Sink)
 
+    results onComplete {
+      case Success(result) => {
+        log.info(
+          "Pushing to S3: " + s"$bucket/$environment/panel/$fileName" + ".")
+      }
+      case Failure(t) =>
+        println("An error has occurred getting Panel Data: " + t.getMessage)
+    }
+  }
 
+  private def panelSync2019  = {
 
+    val allResults: Future[Seq[InstitutionEntity2018]] =
+      institutionRepository2018.findActiveFilers(bankFilterList)
+    val now = LocalDateTime.now().minusDays(1)
+    val formattedDate = fullDate.format(now)
+    val fileName = s"$formattedDate" + "2019" + "_panel" + ".txt"
+    val s3Sink =
+      S3.multipartUpload(bucket, s"$environment/panel/$fileName")
+        .withAttributes(S3Attributes.settings(s3Settings))
     val results: Future[MultipartUploadResult] = Source
       .fromFuture(allResults)
       .map(seek => seek.toList)
