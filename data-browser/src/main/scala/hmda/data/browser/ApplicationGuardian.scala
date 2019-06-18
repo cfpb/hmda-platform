@@ -6,15 +6,12 @@ import akka.actor.typed.scaladsl.adapter._
 import akka.actor.{ActorSystem => UntypedActorSystem}
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
-import hmda.data.browser.repositories.{
-  ModifiedLarAggregateCache,
-  ModifiedLarRepository,
-  PostgresModifiedLarRepository,
-  RedisModifiedLarAggregateCache
-}
+import hmda.data.browser.repositories._
 import hmda.data.browser.rest.Routes
 import hmda.data.browser.services.{BrowserService, ModifiedLarBrowserService}
-import io.lettuce.core.RedisClient
+import io.lettuce.core.api.async.RedisAsyncCommands
+import io.lettuce.core.{ClientOptions, RedisClient}
+import monix.eval.Task
 import monix.execution.{Scheduler => MonixScheduler}
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
@@ -22,6 +19,7 @@ import slick.jdbc.JdbcProfile
 import scala.util.{Failure, Success}
 
 object ApplicationGuardian {
+
   sealed trait Protocol
   private case class Ready(port: Int) extends Protocol
   private case class Error(errorMessage: String) extends Protocol
@@ -40,9 +38,31 @@ object ApplicationGuardian {
       new PostgresModifiedLarRepository(settings.database.tableName,
                                         databaseConfig)
 
-    val cacheConfig = RedisClient.create(settings.redis.url).connect().async()
+    // We make the creation of the Redis client effectful because it can fail and we would like to operate
+    // the service even if the cache is down (we provide fallbacks in case we receive connection errors)
+    val redisClientTask: Task[RedisAsyncCommands[String, String]] = {
+      val client = RedisClient.create(settings.redis.url)
+      Task.eval {
+        client.setOptions(
+          ClientOptions
+            .builder()
+            .autoReconnect(true)
+            .disconnectedBehavior(
+              ClientOptions.DisconnectedBehavior.REJECT_COMMANDS)
+            .cancelCommandsOnReconnectFailure(true)
+            .build()
+        )
+
+        client
+          .connect()
+          .async()
+      }.memoizeOnSuccess
+      // we memoizeOnSuccess because if we manage to create the client, we do not want to recompute it because the
+      // client creation process is expensive and the client is able to recover internally when Redis comes back
+    }
+
     val cache: ModifiedLarAggregateCache =
-      new RedisModifiedLarAggregateCache(cacheConfig, settings.redis.ttl)
+      new RedisModifiedLarAggregateCache(redisClientTask, settings.redis.ttl)
 
     val service: BrowserService =
       new ModifiedLarBrowserService(repository, cache)

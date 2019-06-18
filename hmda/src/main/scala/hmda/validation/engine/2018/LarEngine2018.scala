@@ -2,7 +2,8 @@ package hmda.validation.engine
 
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.context.ValidationContext
-import hmda.validation.rules.lar.quality._
+import hmda.validation.rules.lar.quality._2018.Q632
+import hmda.validation.rules.lar.quality.common._
 import hmda.validation.rules.lar.syntactical.{S300, S301}
 import hmda.validation.rules.lar.validity._
 import hmda.validation.rules.lar.validity.eighteen
@@ -40,7 +41,7 @@ private[engine] object LarEngine2018
     V617,
     V618,
     V619_1,
-    V619_2,
+    eighteen.V619_2,
     V619_3,
     V620,
     V621,

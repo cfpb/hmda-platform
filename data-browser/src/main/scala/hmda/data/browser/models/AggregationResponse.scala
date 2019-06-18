@@ -1,58 +1,47 @@
 package hmda.data.browser.models
 
-import io.circe.{Decoder, Encoder, HCursor, Json}
-import io.circe.syntax._
+import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, Json}
+import cats.instances.list._
+import cats.instances.either._
+import cats.syntax.traverse._
 
-case class Parameters(msaMd: Option[Int],
-                      state: Option[String],
-                      field1: BrowserField,
-                      field2: BrowserField)
+case class Parameters(inputs: Seq[FieldInfo])
+
 case class AggregationResponse(parameters: Parameters,
                                aggregations: Seq[Aggregation])
 
 object Parameters {
-  private object constants {
-    val MsaMd = "msamd"
-    val State = "state"
-    val Field1 = "field 1"
-    val Field2 = "field 2"
+  def fromBrowserFields(browserFields: List[QueryField]): Parameters =
+    Parameters(browserFields.map(field =>
+      FieldInfo(field.name, field.values.mkString(","))))
+
+  implicit val encoder: Encoder[Parameters] = (param: Parameters) => {
+    val kvs = param.inputs.map {
+      case FieldInfo(name, value) => name -> Json.fromString(value)
+    }
+    Json.obj(kvs: _*)
   }
 
-  implicit val encoder = new Encoder[Parameters] {
-    final def apply(param: Parameters): Json =
-      if (param.field1.name == "empty") {
-        Json.obj(
-          (constants.MsaMd, param.msaMd.asJson),
-          (constants.State, param.state.asJson)
-        )
-      } else if (param.field2.name == "empty") {
-        Json.obj(
-          (constants.MsaMd, param.msaMd.asJson),
-          (constants.State, param.state.asJson),
-          (param.field1.name, (param.field1.value.toList).asJson)
-        )
-      } else {
-        Json.obj(
-          (constants.MsaMd, param.msaMd.asJson),
-          (constants.State, param.state.asJson),
-          (param.field1.name, (param.field1.value.toList).asJson),
-          (param.field2.name, (param.field2.value.toList).asJson)
-        )
-      }
-  }
+  implicit val decoder: Decoder[Parameters] = { cursor: HCursor =>
+    cursor.keys match {
+      case None =>
+        Left(
+          DecodingFailure(
+            "Could not obtain keys for the Parameters JSON object",
+            Nil))
+      case Some(keys) =>
+        val fieldKeys = keys.toList
+        val fieldInfos: Either[DecodingFailure, List[FieldInfo]] = fieldKeys
+          .map(
+            key =>
+              cursor
+                .downField(key)
+                .as[String]
+                .map(value => FieldInfo(key, value)))
+          .sequence
 
-  implicit val decoder: Decoder[Parameters] = (c: HCursor) => {
-    val cons = constants
-    for {
-      msaMd <- c.downField(cons.MsaMd).as[Option[Int]]
-      state <- c.downField(cons.State).as[Option[String]]
-      field1 <- c.downField(cons.Field1).as[Seq[String]]
-      field2 <- c.downField(cons.Field2).as[Seq[String]]
-    } yield
-      Parameters(msaMd,
-                 state,
-                 BrowserField("", field1, "", ""),
-                 BrowserField("", field2, "", ""))
+        fieldInfos.map(Parameters(_))
+    }
   }
 }
 
