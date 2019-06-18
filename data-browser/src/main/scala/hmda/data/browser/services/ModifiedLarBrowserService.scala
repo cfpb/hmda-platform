@@ -53,7 +53,7 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository,
       queryFieldCombinations.map { eachCombination =>
         val fieldInfos = eachCombination.map(field =>
           FieldInfo(field.name, field.values.mkString(",")))
-
+        println("This is the combination: " + eachCombination)
         cache
           .find(eachCombination)
           .flatMap {
