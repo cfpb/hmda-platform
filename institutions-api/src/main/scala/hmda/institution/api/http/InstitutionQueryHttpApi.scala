@@ -17,6 +17,7 @@ import hmda.query.DbConfiguration._
 import hmda.api.http.codec.institution.InstitutionCodec._
 import hmda.institution.api.http.model.InstitutionsResponse
 import hmda.model.institution.Institution
+import hmda.utls._
 import io.circe.generic.auto._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -42,7 +43,7 @@ trait InstitutionQueryHttpApi
   val institutionByIdPath =
     path("institutions" / Segment / "year" / Segment) { (lei, year) =>
       timedGet { uri =>
-        if (!validateYear(year)) {
+        if (!isValidYear(year.toInt)) {
           complete(
             ErrorResponse(500, s"Invalid Year Provided: $year", uri.path))
         } else {
@@ -80,7 +81,7 @@ trait InstitutionQueryHttpApi
   val institutionByDomainPath =
     path("institutions" / "year" / Segment) { (year) =>
       timedGet { uri =>
-        if (!validateYear(year)) {
+        if (!isValidYear(year.toInt)) {
           complete(
             ErrorResponse(500, s"Invalid Year Provided: $year", uri.path))
         } else {
@@ -136,15 +137,11 @@ trait InstitutionQueryHttpApi
     }
   }
 
-  def validateYear(input: String): Boolean = {
-    (input == "2018") || (input == "2019")
-  }
-
   def institutionPublicRoutes: Route =
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          institutionByIdPath ~ institutionByDomainPath
+          institutionByIdPath ~ institutionByDomainPath ~ institutionByDomainDefaultPath
         }
       }
     }

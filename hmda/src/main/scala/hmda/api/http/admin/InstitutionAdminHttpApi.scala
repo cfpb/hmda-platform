@@ -30,6 +30,7 @@ import hmda.messages.institution.InstitutionCommands.{
 }
 import hmda.messages.institution.InstitutionEvents._
 import hmda.util.http.FilingResponseUtils._
+import hmda.utils.YearUtils._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -164,22 +165,28 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
       }
 
       timedGet { uri =>
-        val fInstitution
-          : Future[Option[Institution]] = institutionPersistence ? (
-            ref => GetInstitution(ref)
-        )
+        if (!isValidYear(period.toInt)) {
+          complete(
+            ErrorResponse(500, s"Invalid Year Provided: $period", uri.path))
+        } else {
+          val fInstitution
+            : Future[Option[Institution]] = institutionPersistence ? (
+              ref => GetInstitution(ref)
+          )
 
-        onComplete(fInstitution) {
-          case Success(Some(i)) =>
-            complete(ToResponseMarshallable(i))
-          case Success(None) =>
-            complete(ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
-          case Failure(error) =>
-            val errorResponse =
-              ErrorResponse(500, error.getLocalizedMessage, uri.path)
-            complete(
-              ToResponseMarshallable(
-                StatusCodes.InternalServerError -> errorResponse))
+          onComplete(fInstitution) {
+            case Success(Some(i)) =>
+              complete(ToResponseMarshallable(i))
+            case Success(None) =>
+              complete(
+                ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
+            case Failure(error) =>
+              val errorResponse =
+                ErrorResponse(500, error.getLocalizedMessage, uri.path)
+              complete(
+                ToResponseMarshallable(
+                  StatusCodes.InternalServerError -> errorResponse))
+          }
         }
       }
     }
