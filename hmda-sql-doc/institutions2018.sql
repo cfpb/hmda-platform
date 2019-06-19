@@ -1,107 +1,65 @@
-CREATE DATABASE hmda
-  WITH OWNER = hmda_user
-       ENCODING = 'UTF8'
-       TABLESPACE = pg_default
-       LC_COLLATE = 'en_US.utf8'
-       LC_CTYPE = 'en_US.utf8'
-       CONNECTION LIMIT = -1;
+--
+-- PostgreSQL database dump
+--
 
-CREATE TABLE public.institutions2018
-(
-  lei character varying NOT NULL,
-  activity_year integer NOT NULL,
-  agency integer NOT NULL,
-  institution_type integer NOT NULL,
-  id2017 character varying NOT NULL,
-  tax_id character varying NOT NULL,
-  rssd integer NOT NULL,
-  respondent_name character varying NOT NULL,
-  respondent_state character varying NOT NULL,
-  respondent_city character varying NOT NULL,
-  parent_id_rssd integer NOT NULL,
-  parent_name character varying NOT NULL,
-  assets integer NOT NULL,
-  other_lender_code integer NOT NULL,
-  topholder_id_rssd integer NOT NULL,
-  topholder_name character varying NOT NULL,
-  hmda_filer boolean NOT NULL,
-  CONSTRAINT institutions2018_pkey PRIMARY KEY (lei)
-)
-WITH (
-  OIDS=FALSE
-);
-ALTER TABLE public.institutions2018
-  OWNER TO postgres;
+-- Dumped from database version 10.6
+-- Dumped by pg_dump version 10.5
 
-CREATE SEQUENCE institutions_emails_2018_id_seq START 1;
+-- Started on 2019-06-19 00:36:09 EDT
 
-CREATE TABLE public.institutions_emails_2018
-(
-  id integer NOT NULL DEFAULT nextval('institutions_emails_2018_id_seq'::regclass),
-  lei character varying NOT NULL REFERENCES institutions2018 (lei),
-  email_domain character varying NOT NULL,
-  CONSTRAINT institutions_emails_2018_pkey PRIMARY KEY (id )
-)
-WITH (
-  OIDS=FALSE
-);
-ALTER TABLE public.institutions_emails_2018
-  OWNER TO postgres;
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+SET row_security = off;
 
+SET default_tablespace = '';
 
-INSERT INTO institutions2018 VALUES(
-  '54930084UKLVMY22DS16',
-  2019,
-  1,
-  17,
-  '12345',
-  '99-00000000',
-  12345,
-  'xvavjuitZa',
-  'NC',
-  'Raleigh',
-  1520162208,
-  'Parent Name',
-  450,
-  1406639146,
-  442825905,
-  'TopHolder Name',
-   true);
+SET default_with_oids = false;
 
+--
+-- TOC entry 278 (class 1259 OID 20216)
+-- Name: institutions2018; Type: TABLE; Schema: hmda_user; Owner: hmda_user
+--
 
-INSERT INTO institutions2018 VALUES(
-  '74930084UKLVMY22DS16',
-  2019,
-  1,
-  17,
-  '12345',
-  '99-00000000',
-  12345,
-  'xvavjuitZa',
-  'NC',
-  'Raleigh',
-  1520162208,
-  'Parent Name',
-  450,
-  1406639146,
-  442825905,
-  'TopHolder Name',
-   true);
-
-INSERT INTO institutions_emails_2018 VALUES(
-  1,
-  '54930084UKLVMY22DS16',
-  'aaa.com'
+CREATE TABLE hmda_user.institutions2018 (
+    lei character varying NOT NULL,
+    activity_year integer NOT NULL,
+    agency integer NOT NULL,
+    institution_type integer NOT NULL,
+    id2017 character varying NOT NULL,
+    tax_id character varying NOT NULL,
+    rssd integer NOT NULL,
+    respondent_name character varying NOT NULL,
+    respondent_state character varying NOT NULL,
+    respondent_city character varying NOT NULL,
+    parent_id_rssd integer NOT NULL,
+    parent_name character varying NOT NULL,
+    assets integer NOT NULL,
+    other_lender_code integer NOT NULL,
+    topholder_id_rssd integer NOT NULL,
+    topholder_name character varying NOT NULL,
+    hmda_filer boolean DEFAULT false NOT NULL
 );
 
-INSERT INTO institutions_emails_2018 VALUES(
-  2,
-  '54930084UKLVMY22DS16',
-  'bbb.com'
-);
 
-INSERT INTO institutions_emails_2018 VALUES(
-  3,
-  '74930084UKLVMY22DS16',
-  'bbb.com'
-);
+ALTER TABLE hmda_user.institutions2018 OWNER TO hmda_user;
+
+--
+-- TOC entry 5485 (class 2606 OID 20223)
+-- Name: institutions2018 institutions2018_pkey; Type: CONSTRAINT; Schema: hmda_user; Owner: hmda_user
+--
+
+ALTER TABLE ONLY hmda_user.institutions2018
+    ADD CONSTRAINT institutions2018_pkey PRIMARY KEY (lei);
+
+
+-- Completed on 2019-06-19 00:36:09 EDT
+
+--
+-- PostgreSQL database dump complete
+--
