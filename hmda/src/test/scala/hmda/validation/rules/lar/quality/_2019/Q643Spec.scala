@@ -1,16 +1,15 @@
-package hmda.validation.rules.lar.quality.common
+package hmda.validation.rules.lar.quality._2019
 
 import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
-import hmda.validation.rules.lar.quality.common.Q643
 
 class Q643Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = Q643
 
-  property("AUS Result should be valid for the corresponding AUS") {
+  property("[2019] AUS Result should be valid for the corresponding AUS") {
     forAll(larGen) { lar =>
       lar
         .copy(
@@ -44,6 +43,17 @@ class Q643Spec extends LarEditCheckSpec {
           ausResult = appLar.ausResult.copy(
             ausResult1 = EmptyAUSResultValue,
             ausResult2 = ApproveEligible,
+            ausResult3 = EmptyAUSResultValue,
+            ausResult4 = OutOfScope,
+            ausResult5 = EmptyAUSResultValue
+          ))
+        .mustPass
+
+      appLar
+        .copy(
+          ausResult = appLar.ausResult.copy(
+            ausResult1 = EmptyAUSResultValue,
+            ausResult2 = OtherAutomatedUnderwritingResult,
             ausResult3 = EmptyAUSResultValue,
             ausResult4 = OutOfScope,
             ausResult5 = EmptyAUSResultValue
