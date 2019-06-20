@@ -28,7 +28,7 @@ volumes: [
 
     stage('Build Scala Code and Generate Dockerfile') {
       container('sbt') {
-        sh "sbt -batch data-browser/docker:stage"
+        sh "env JAVA_OPTS=\"-Xms256m -Xmx4096m -Xss8m\" sbt -batch data-browser/docker:stage"
       }
     }
 

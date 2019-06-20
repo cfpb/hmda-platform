@@ -1,5 +1,6 @@
 package hmda.analytics.query
 
+import hmda.model.filing.submission.SubmissionId
 import hmda.query.DbConfiguration.dbConfig
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
@@ -9,15 +10,24 @@ import scala.concurrent.Future
 trait LarComponent {
   import dbConfig.profile.api._
 
-  class LarRepository(tableName: String, config: DatabaseConfig[JdbcProfile]) {
-    def deleteByLei(lei: String): Future[Int] =
-      config.db.run {
-        sqlu"DELETE FROM #${tableName} WHERE UPPER(lei) = ${lei.toUpperCase}"
-      }
+  class LarRepository(config: DatabaseConfig[JdbcProfile]) {
 
-    def insert(le: LarEntity): Future[Int] =
+    def fetchYearTable(year: Int): String = {
+      year match {
+        case 2018 => "loanapplicationregister2018"
+        case 2019 => "loanapplicationregister2019"
+      }
+    }
+
+    def deleteByLei(submissionId: SubmissionId, lei: String): Future[Int] = {
       config.db.run {
-        sqlu"""INSERT INTO #${tableName}
+        sqlu"DELETE FROM #${fetchYearTable(submissionId.period.toInt)} WHERE UPPER(lei) = ${lei.toUpperCase}"
+      }
+    }
+
+    def insert(submissionId: SubmissionId, le: LarEntity): Future[Int] =
+      config.db.run {
+        sqlu"""INSERT INTO #${fetchYearTable(submissionId.period.toInt)}
         VALUES (
           ${le.id},
           ${le.lei.toUpperCase},

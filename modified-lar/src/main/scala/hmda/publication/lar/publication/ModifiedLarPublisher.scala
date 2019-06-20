@@ -45,7 +45,7 @@ object ModifiedLarPublisher {
 
   val config = ConfigFactory.load()
 
-  val filingYear = config.getInt("hmda.filing.year") // resides in common
+  val filingYear = config.getInt("hmda.lar.modified.year")
   val accessKeyId = config.getString("aws.access-key-id")
   val secretAccess = config.getString("aws.secret-access-key ")
   val region = config.getString("aws.region")
@@ -108,7 +108,7 @@ object ModifiedLarPublisher {
             .withAttributes(S3Attributes.settings(s3Settings))
 
           def removeLei: Future[Int] =
-            modifiedLarRepo.deleteByLei(submissionId.lei, filingYear)
+            modifiedLarRepo.deleteByLei(submissionId)
 
           val mlarSource: Source[ModifiedLoanApplicationRegister, NotUsed] =
             readRawData(submissionId)
@@ -135,7 +135,7 @@ object ModifiedLarPublisher {
               )
               .mapAsync(parallelism)(enriched =>
                 modifiedLarRepo
-                  .insert(enriched, submissionId.toString, filingYear))
+                  .insert(enriched, submissionId))
               .toMat(Sink.ignore)(Keep.right)
 
           //generate S3 files and write to PG

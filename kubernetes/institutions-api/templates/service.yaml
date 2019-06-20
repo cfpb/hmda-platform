@@ -49,4 +49,4 @@ spec:
     port: {{ .Values.ambassador.port }}
     targetPort: {{ .Values.ambassador.port }}
   selector:
-service: {{ .Values.ambassador.name }}
+    service: {{ .Values.ambassador.name }}

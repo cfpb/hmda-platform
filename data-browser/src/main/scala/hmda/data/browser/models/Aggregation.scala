@@ -1,56 +1,59 @@
 package hmda.data.browser.models
 
-import io.circe.{Decoder, Encoder, HCursor, Json}
-import io.circe.syntax._
+import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, Json}
+import cats.instances.either._
+import cats.instances.list._
+import cats.syntax.traverse._
 
-case class Aggregation(count: Long,
-                       sum: Double,
-                       field1: BrowserField,
-                       field2: BrowserField)
+case class FieldInfo(name: String, value: String)
+case class Aggregation(count: Long, sum: Double, fields: List[FieldInfo])
 
 object Aggregation {
   private object constants {
     val Count = "count"
     val Sum = "sum"
-    val Field1 = "field 1"
-    val Field2 = "field 2"
   }
 
   // Scala => JSON
-  implicit val encoder = new Encoder[Aggregation] {
-    final def apply(agg: Aggregation): Json =
-      if (agg.field1.name == "empty") {
-        Json.obj(
-          ("count", agg.count.asJson),
-          ("sum", agg.sum.asJson)
-        )
-      } else if (agg.field2.name == "empty") {
-        Json.obj(
-          ("count", agg.count.asJson),
-          ("sum", agg.sum.asJson),
-          (agg.field1.name, (agg.field1.value.toList).asJson)
-        )
-      } else {
-        Json.obj(
-          ("count", agg.count.asJson),
-          ("sum", agg.sum.asJson),
-          (agg.field1.name, (agg.field1.value.toList).asJson),
-          (agg.field2.name, (agg.field2.value.toList).asJson)
-        )
-      }
+  implicit val encoder: Encoder[Aggregation] = (agg: Aggregation) => {
+    val jsonKVs: List[(String, Json)] = List(
+      constants.Count -> Json.fromLong(agg.count),
+      constants.Sum -> Json.fromDoubleOrNull(agg.sum)
+    ) ++ agg.fields.map(field => field.name -> Json.fromString(field.value))
+
+    Json.obj(jsonKVs: _*)
   }
 
-  implicit val decoder: Decoder[Aggregation] = (h: HCursor) =>
-    for {
-      count <- h.downField(constants.Count).as[Long]
-      sum <- h.downField(constants.Sum).as[Double]
-      field1 <- h
-        .downField(constants.Field1)
-        .as[String]
-        .map(x => BrowserField("", Seq(x), "", ""))
-      field2 <- h
-        .downField(constants.Field2)
-        .as[String]
-        .map(x => BrowserField("", Seq(x), "", ""))
-    } yield Aggregation(count, sum, field1, field2)
+  implicit val decoder: Decoder[Aggregation] = { cursor: HCursor =>
+    cursor.keys match {
+      case None =>
+        Left(
+          DecodingFailure(
+            "Could not obtain keys for the Aggregation JSON object",
+            Nil))
+      case Some(keys) =>
+        val fieldKeys = keys.toList
+          .filterNot(_ == constants.Count)
+          .filterNot(_ == constants.Sum)
+        val fieldInfos: Either[DecodingFailure, List[FieldInfo]] = fieldKeys
+          .map(
+            key =>
+              cursor
+                .downField(key)
+                .as[String]
+                .map(value => FieldInfo(key, value)))
+          .sequence
+
+        val countAndSum: Either[DecodingFailure, (Long, Double)] = for {
+          count <- cursor.downField(constants.Count).as[Long]
+          sum <- cursor.downField(constants.Sum).as[Double]
+        } yield (count, sum)
+
+        for {
+          countAndSum <- countAndSum
+          (count, sum) = countAndSum
+          fields <- fieldInfos
+        } yield Aggregation(count, sum, fields)
+    }
+  }
 }

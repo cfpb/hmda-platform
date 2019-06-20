@@ -11,8 +11,8 @@ trait TransmittalSheetComponent {
 
   import dbConfig.profile.api._
 
-  class TransmittalSheetTable(tag: Tag)
-      extends Table[TransmittalSheetEntity](tag, "transmittalsheet2018") {
+  class TransmittalSheetTable(tag: Tag, tableName: String)
+      extends Table[TransmittalSheetEntity](tag, tableName) {
 
     def lei = column[String]("lei", O.PrimaryKey)
     def id = column[Int]("id")
@@ -52,13 +52,20 @@ trait TransmittalSheetComponent {
       ) <> (TransmittalSheetEntity.tupled, TransmittalSheetEntity.unapply)
   }
 
-  val transmittalSheetTable = TableQuery[TransmittalSheetTable]
+  //only used for setup - TransmittalSheetSetup
+  val transmittalSheetTable = TableQuery[TransmittalSheetTable]((tag: Tag) =>
+    new TransmittalSheetTable(tag, "transmittalsheet2019"))
 
-  class TransmittalSheetRepository(val config: DatabaseConfig[JdbcProfile])
+  class TransmittalSheetRepository(val config: DatabaseConfig[JdbcProfile],
+                                   val tableName: String)
       extends TableRepository[TransmittalSheetTable, String] {
 
+    def getTableQuery(tableName: String) =
+      TableQuery[TransmittalSheetTable]((tag: Tag) =>
+        new TransmittalSheetTable(tag, tableName))
+
     override val table: config.profile.api.TableQuery[TransmittalSheetTable] =
-      transmittalSheetTable
+      getTableQuery(tableName)
 
     override def getId(row: TransmittalSheetTable): config.profile.api.Rep[Id] =
       row.lei
