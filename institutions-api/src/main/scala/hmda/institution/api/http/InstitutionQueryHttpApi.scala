@@ -17,7 +17,7 @@ import hmda.query.DbConfiguration._
 import hmda.api.http.codec.institution.InstitutionCodec._
 import hmda.institution.api.http.model.InstitutionsResponse
 import hmda.model.institution.Institution
-import hmda.utls._
+import hmda.utils.YearUtils._
 import io.circe.generic.auto._
 
 import scala.concurrent.{ExecutionContext, Future}
