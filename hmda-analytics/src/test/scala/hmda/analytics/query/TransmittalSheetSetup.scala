@@ -13,7 +13,6 @@ trait TransmittalSheetSetup extends TransmittalSheetComponent {
 
   implicit val transmittalSheetRepository =
     new TransmittalSheetRepository(dbConfig, "transmittalsheet2019")
-
   val db = transmittalSheetRepository.db
 
   val duration = 5.seconds
