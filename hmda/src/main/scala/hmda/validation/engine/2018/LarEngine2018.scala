@@ -207,7 +207,7 @@ private[engine] object LarEngine2018
     V694_3,
     V695,
     V696_1,
-    V696_2,
+    eighteen.V696_2,
     V696_3,
     eighteen.V699,
     V700_1,
