@@ -1,11 +1,8 @@
 package scala.hmda.validation.rules.lar.validity
 
 import hmda.model.filing.lar.LarGenerators.larGen
-import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.lar.enums.{
-  EmptyAUSResultValue,
-  OtherAutomatedUnderwritingResult
-}
+import hmda.model.filing.lar._2018.LoanApplicationRegister
+import hmda.model.filing.lar.enums.{EmptyAUSResultValue, OtherAutomatedUnderwritingResult}
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 import hmda.validation.rules.lar.validity.V703_1

@@ -1,8 +1,9 @@
 package hmda.analytics.query
 
-import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.filing.ts.TsGenerators._
+import hmda.model.filing.ts._2018.TransmittalSheet
 import hmda.query.ts._
+import hmda.query.ts._2018.{TransmittalSheetConverter, TransmittalSheetEntity}
 
 class TransmittalSheetComponentSpec extends TransmittalSheetAsyncSetup {
 

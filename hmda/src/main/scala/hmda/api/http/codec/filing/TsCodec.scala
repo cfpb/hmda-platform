@@ -1,5 +1,6 @@
 package hmda.api.http.codec.filing
 
+import hmda.model.filing.ts._2018.{Address, Contact, TransmittalSheet}
 import hmda.model.filing.ts.{Address, Contact, TransmittalSheet}
 import hmda.model.institution.Agency
 import io.circe.Decoder.Result

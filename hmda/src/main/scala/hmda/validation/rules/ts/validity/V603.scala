@@ -1,6 +1,6 @@
 package hmda.validation.rules.ts.validity
 
-import hmda.model.filing.ts.TransmittalSheet
+import hmda.model.filing.ts._2018.TransmittalSheet
 import hmda.validation.dsl.PredicateRegEx._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.dsl.ValidationResult

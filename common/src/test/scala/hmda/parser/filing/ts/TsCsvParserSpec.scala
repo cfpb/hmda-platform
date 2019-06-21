@@ -4,6 +4,7 @@ import hmda.model.filing.ts.TsGenerators._
 import hmda.parser.ParserErrorModel.IncorrectNumberOfFields
 import hmda.parser.filing.ts.TsParserErrorModel.{InvalidAgencyCode, InvalidId}
 import hmda.parser.filing.ts.TsValidationUtils._
+import hmda.parser.filing.ts._2018.TsCsvParser
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{MustMatchers, PropSpec}
 

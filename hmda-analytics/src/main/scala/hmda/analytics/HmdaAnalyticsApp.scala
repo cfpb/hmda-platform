@@ -9,26 +9,21 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Keep, Sink, Source}
 import akka.util.{ByteString, Timeout}
 import com.typesafe.config.ConfigFactory
-import hmda.query.ts.TransmittalSheetConverter
-import hmda.analytics.query.{
-  LarComponent,
-  LarConverter,
-  SubmissionHistoryComponent,
-  TransmittalSheetComponent
-}
-import hmda.model.filing.lar.LoanApplicationRegister
+import hmda.analytics.query.{LarComponent, LarConverter, SubmissionHistoryComponent, TransmittalSheetComponent}
 import hmda.model.filing.submission.SubmissionId
-import hmda.model.filing.ts.TransmittalSheet
-import hmda.parser.filing.lar.LarCsvParser
-import hmda.parser.filing.ts.TsCsvParser
 import hmda.publication.KafkaUtils.kafkaHosts
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.LoggerFactory
 import hmda.messages.pubsub.HmdaTopics
 import hmda.messages.pubsub.HmdaGroups
+import hmda.model.filing.lar._2018.LoanApplicationRegister
+import hmda.model.filing.ts._2018.TransmittalSheet
+import hmda.parser.filing.lar._2018.LarCsvParser
+import hmda.parser.filing.ts._2018.TsCsvParser
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.HmdaQuery.{readRawData, readSubmission}
+import hmda.query.ts._2018.TransmittalSheetConverter
 import hmda.util.BankFilterUtils._
 import hmda.util.streams.FlowUtils.framing
 

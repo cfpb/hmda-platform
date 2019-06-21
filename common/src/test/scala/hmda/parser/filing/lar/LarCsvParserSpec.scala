@@ -2,6 +2,7 @@ package hmda.parser.filing.lar
 
 import hmda.model.filing.lar.LarGenerators._
 import hmda.parser.ParserErrorModel.IncorrectNumberOfFields
+import hmda.parser.filing.lar._2018.LarCsvParser
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{MustMatchers, PropSpec}
 

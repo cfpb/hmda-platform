@@ -1,9 +1,9 @@
 package hmda.validation.rules.lar.validity
 
-import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 import hmda.model.filing.lar.LarGenerators._
+import hmda.model.filing.lar._2018.LoanApplicationRegister
 import hmda.model.filing.lar.enums.OtherDenialReason
 
 class V671_1Spec extends LarEditCheckSpec {

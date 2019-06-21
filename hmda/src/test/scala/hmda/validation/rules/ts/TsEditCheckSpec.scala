@@ -1,10 +1,10 @@
 package hmda.validation.rules.ts
 
-import hmda.model.filing.ts.TransmittalSheet
+import hmda.model.filing.ts._2018.TransmittalSheet
 import org.scalatest.{MustMatchers, PropSpec}
 import org.scalatest.prop.PropertyChecks
 import hmda.validation.rules.EditCheck
-import hmda.validation.dsl.{ValidationSuccess, ValidationFailure}
+import hmda.validation.dsl.{ValidationFailure, ValidationSuccess}
 
 abstract class TsEditCheckSpec
     extends PropSpec

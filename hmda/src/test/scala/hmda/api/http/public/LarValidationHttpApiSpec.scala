@@ -4,24 +4,19 @@ import akka.event.{LoggingAdapter, NoLogging}
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
-import hmda.api.http.model.public.{
-  LarValidateRequest,
-  LarValidateResponse,
-  SingleValidationErrorResult,
-  ValidationErrorSummary
-}
+import hmda.api.http.model.public.{LarValidateRequest, LarValidateResponse, SingleValidationErrorResult, ValidationErrorSummary}
 import org.scalatest.{MustMatchers, WordSpec}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.ts.TsGenerators._
-import hmda.model.filing.lar.LoanApplicationRegister
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import hmda.api.http.codec.filing.LarCodec._
-import hmda.model.filing.ts.TransmittalSheet
-import hmda.parser.filing.lar.LarCsvParser
+import hmda.model.filing.lar._2018.LoanApplicationRegister
+import hmda.model.filing.ts._2018.TransmittalSheet
+import hmda.parser.filing.lar._2018.LarCsvParser
 import hmda.util.http.FileUploadUtils
 
 class LarValidationHttpApiSpec

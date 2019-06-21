@@ -1,10 +1,7 @@
 package hmda.validation.rules.lar.validity
 
-import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.lar.enums.{
-  ManufacturedHomeLandNotApplicable,
-  ManufacturedHomeLoanPropertyInterestExempt
-}
+import hmda.model.filing.lar._2018.LoanApplicationRegister
+import hmda.model.filing.lar.enums.{ManufacturedHomeLandNotApplicable, ManufacturedHomeLoanPropertyInterestExempt}
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.dsl.ValidationResult

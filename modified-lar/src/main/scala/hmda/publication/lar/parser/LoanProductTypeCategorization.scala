@@ -1,6 +1,6 @@
 package hmda.publication.lar
 
-import hmda.model.filing.lar.LoanApplicationRegister
+import hmda.model.filing.lar._2018.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
 
 package object LoanProductTypeCategorization {

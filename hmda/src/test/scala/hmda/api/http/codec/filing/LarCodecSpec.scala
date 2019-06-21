@@ -3,6 +3,7 @@ package hmda.api.http.codec.filing
 import hmda.api.http.codec.filing.LarCodec._
 import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar._
+import hmda.model.filing.lar._2018.LoanApplicationRegister
 import io.circe.syntax._
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{MustMatchers, PropSpec}

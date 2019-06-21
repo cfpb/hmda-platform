@@ -1,5 +1,6 @@
 package hmda.serialization.filing.ts
 
+import hmda.model.filing.ts._2018.{Address, Contact, TransmittalSheet}
 import hmda.model.filing.ts.{Address, Contact, TransmittalSheet}
 import hmda.model.institution.Agency
 import hmda.persistence.serialization.transmittalsheet.{

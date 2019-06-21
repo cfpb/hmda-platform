@@ -1,7 +1,7 @@
 package hmda.validation.rules.lar.quality.common
 
 import com.typesafe.config.ConfigFactory
-import hmda.model.filing.lar.LoanApplicationRegister
+import hmda.model.filing.lar._2018.LoanApplicationRegister
 import hmda.model.filing.lar.enums.VAGuaranteed
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._

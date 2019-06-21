@@ -7,13 +7,10 @@ import akka.stream.testkit.scaladsl.TestSink
 import akka.util.ByteString
 import hmda.model.filing.PipeDelimited
 import hmda.model.filing.lar.LarGenerators._
-import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.ts.TransmittalSheet
+import hmda.model.filing.lar._2018.LoanApplicationRegister
 import hmda.model.filing.ts.TsGenerators._
-import hmda.parser.ParserErrorModel.{
-  IncorrectNumberOfFields,
-  ParserValidationError
-}
+import hmda.model.filing.ts._2018.TransmittalSheet
+import hmda.parser.ParserErrorModel.{IncorrectNumberOfFields, ParserValidationError}
 import hmda.parser.filing.ParserFlow._
 import org.scalatest.{MustMatchers, WordSpec}
 

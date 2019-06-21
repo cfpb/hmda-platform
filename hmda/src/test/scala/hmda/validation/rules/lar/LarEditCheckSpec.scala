@@ -1,6 +1,6 @@
 package hmda.validation.rules.lar
 
-import hmda.model.filing.lar.LoanApplicationRegister
+import hmda.model.filing.lar._2018.LoanApplicationRegister
 import hmda.validation.dsl.{ValidationFailure, ValidationSuccess}
 import hmda.validation.rules.EditCheck
 import org.scalatest.{MustMatchers, PropSpec}

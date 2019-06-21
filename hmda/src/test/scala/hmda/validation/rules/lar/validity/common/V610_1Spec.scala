@@ -1,9 +1,9 @@
 package hmda.validation.rules.lar.validity
 
-import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 import hmda.model.filing.lar.LarGenerators._
+import hmda.model.filing.lar._2018.LoanApplicationRegister
 
 class V610_1Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = V610_1

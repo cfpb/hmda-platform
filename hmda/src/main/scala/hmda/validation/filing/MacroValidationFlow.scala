@@ -3,13 +3,9 @@ package hmda.validation.filing
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import com.typesafe.config.ConfigFactory
-import hmda.model.filing.lar.LoanApplicationRegister
+import hmda.model.filing.lar._2018.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
-import hmda.model.validation.{
-  EmptyMacroValidationError,
-  MacroValidationError,
-  ValidationError
-}
+import hmda.model.validation.{EmptyMacroValidationError, MacroValidationError, ValidationError}
 import hmda.util.SourceUtils._
 import hmda.validation.{AS, EC, MAT}
 

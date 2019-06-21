@@ -1,9 +1,10 @@
 package hmda.validation.rules.lar.validity
 
-import hmda.model.filing.lar.{LarAction, LoanApplicationRegister}
+import hmda.model.filing.lar.LarAction
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 import hmda.model.filing.lar.LarGenerators._
+import hmda.model.filing.lar._2018.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
 
 class V613_3Spec extends LarEditCheckSpec {

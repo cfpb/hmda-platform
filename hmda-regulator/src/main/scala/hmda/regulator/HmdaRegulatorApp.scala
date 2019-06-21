@@ -48,13 +48,18 @@ object HmdaRegulatorApp extends App {
     )
   panelActorSystem.actorOf(Props[PanelScheduler], "PanelScheduler")
 
-//  val larActorSystem =
-//    ActorSystem("larTask2018", ConfigFactory.parseString(larTimer2018))
-//  larActorSystem.actorOf(Props[LarScheduler2018], "LarScheduler2018")
-//
-//
-//
-//  val tsActorSystem = ActorSystem("tsTask2018", ConfigFactory.parseString(tsTimer2018))
-//  tsActorSystem.actorOf(Props[TsScheduler2018], "TsScheduler2018")
+  val larActorSystem =
+    ActorSystem("larTask", ConfigFactory.parseString(larTimer2018)
+      .withValue(larTimer2019(0),ConfigValueFactory
+        .fromAnyRef(larTimer2019(1)))
+      .withFallback(config))
+  larActorSystem.actorOf(Props[LarScheduler], "LarScheduler")
+
+
+  val tsActorSystem = ActorSystem("tsTask", ConfigFactory.parseString(tsTimer2018)
+    .withValue(tsTimer2019(0),ConfigValueFactory
+      .fromAnyRef(tsTimer2019(1)))
+    .withFallback(config))
+  tsActorSystem.actorOf(Props[TsScheduler], "TsScheduler")
 
 }

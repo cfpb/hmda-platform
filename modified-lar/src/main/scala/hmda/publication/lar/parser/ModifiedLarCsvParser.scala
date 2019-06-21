@@ -4,11 +4,12 @@ import hmda.model.filing.lar._
 import Math._
 
 import hmda.model.modifiedlar.ModifiedLoanApplicationRegister
-import hmda.parser.filing.lar.LarCsvParser
 import hmda.publication.{ConformingLoanLimit, StateBoundries}
 import hmda.model.census.CountyLoanLimit
 import hmda.census.records.CensusRecords
 import hmda.census.records.CountyLoanLimitRecords
+import hmda.model.filing.lar._2018.LoanApplicationRegister
+import hmda.parser.filing.lar._2018.LarCsvParser
 import hmda.publication.lar._
 import hmda.publication.EthnicityCategorization._
 

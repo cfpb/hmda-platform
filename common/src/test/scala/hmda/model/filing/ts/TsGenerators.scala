@@ -1,6 +1,7 @@
 package hmda.model.filing.ts
 
 import hmda.generators.CommonGenerators._
+import hmda.model.filing.ts._2018.{Address, Contact, TransmittalSheet}
 import hmda.model.institution.InstitutionGenerators._
 import org.scalacheck.Gen
 

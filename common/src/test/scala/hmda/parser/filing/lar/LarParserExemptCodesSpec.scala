@@ -1,5 +1,6 @@
 package hmda.parser.filing.lar
 
+import hmda.parser.filing.lar._2018.LarCsvParser
 import org.scalatest.{MustMatchers, WordSpec}
 
 class LarParserExemptCodesSpec extends WordSpec with MustMatchers {

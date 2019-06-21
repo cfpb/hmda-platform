@@ -1,8 +1,8 @@
 package hmda.validation.engine
 
-import hmda.model.filing.ts.TransmittalSheet
+import hmda.model.filing.ts._2019.TransmittalSheet
 import hmda.validation.context.ValidationContext
-import hmda.validation.rules.ts.syntactical.{S300, S302, S303}
+import hmda.validation.rules.ts.syntactical._2019.{S300,S302, S303}
 import hmda.validation.rules.ts.validity._
 
 private[engine] object TsEngine2019 extends ValidationEngine[TransmittalSheet] {

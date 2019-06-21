@@ -1,6 +1,7 @@
 package hmda.serialization.filing.lar
 
 import hmda.model.filing.lar._
+import hmda.model.filing.lar._2018.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
 import hmda.persistence.serialization.loanapplicationregister._
 

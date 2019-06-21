@@ -6,12 +6,13 @@ import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import hmda.model.filing.lar.{LarAction, LoanApplicationRegister}
-import hmda.parser.filing.lar.LarCsvParser
 import MacroValidationFlow._
 import hmda.util.SourceUtils._
 import hmda.model.filing.lar.enums._
 import hmda.model.validation.{EmptyMacroValidationError, MacroValidationError}
 import hmda.model.filing.lar.LarGenerators._
+import hmda.model.filing.lar._2018.LoanApplicationRegister
+import hmda.parser.filing.lar._2018.LarCsvParser
 
 import scala.concurrent.Future
 

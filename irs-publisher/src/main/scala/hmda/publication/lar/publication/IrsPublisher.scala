@@ -9,12 +9,7 @@ import akka.http.scaladsl.model.HttpRequest
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{
-  MemoryBufferType,
-  MultipartUploadResult,
-  S3Attributes,
-  S3Settings
-}
+import akka.stream.alpakka.s3.{MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings}
 import akka.stream.scaladsl.{Sink, Source}
 import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
 import akka.util.ByteString
@@ -23,9 +18,9 @@ import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.config.ConfigFactory
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.model.census.Census
-import hmda.model.filing.lar.LoanApplicationRegister
+import hmda.model.filing.lar._2018.LoanApplicationRegister
 import hmda.model.filing.submission.SubmissionId
-import hmda.parser.filing.lar.LarCsvParser
+import hmda.parser.filing.lar._2018.LarCsvParser
 import hmda.publication.lar.model.{Msa, MsaMap, MsaSummary}
 import hmda.query.HmdaQuery._
 import hmda.util.streams.FlowUtils.framing

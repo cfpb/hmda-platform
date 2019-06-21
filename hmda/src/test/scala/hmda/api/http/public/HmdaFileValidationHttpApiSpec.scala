@@ -6,7 +6,6 @@ import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import akka.util.Timeout
 import hmda.api.http.model.public.ValidatedResponse
 import hmda.model.filing.lar.LarGenerators.larNGen
-import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.filing.ts.TsGenerators.tsGen
 import org.scalatest.{MustMatchers, WordSpec}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -17,6 +16,7 @@ import hmda.util.http.FileUploadUtils
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import akka.testkit._
+import hmda.model.filing.ts._2018.TransmittalSheet
 
 class HmdaFileValidationHttpApiSpec
     extends WordSpec

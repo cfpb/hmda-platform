@@ -14,32 +14,24 @@ import akka.http.scaladsl.server.Directives._
 import akka.stream.scaladsl.Sink
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.messages.filing.FilingCommands.{
-  GetFiling,
-  GetLatestSubmission,
-  GetSubmissionSummary
-}
+import hmda.messages.filing.FilingCommands.{GetFiling, GetLatestSubmission, GetSubmissionSummary}
 import hmda.messages.institution.InstitutionCommands.GetInstitution
 import hmda.messages.submission.SubmissionCommands.CreateSubmission
 import hmda.messages.submission.SubmissionEvents.SubmissionCreated
 import hmda.model.filing.Filing
-import hmda.model.filing.submission.{
-  Submission,
-  SubmissionId,
-  SubmissionSummary
-}
+import hmda.model.filing.submission.{Submission, SubmissionId, SubmissionSummary}
 import hmda.model.institution.Institution
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.SubmissionPersistence
 import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import hmda.auth.OAuth2Authorization
-import hmda.model.filing.ts.TransmittalSheet
-import hmda.parser.filing.ts.TsCsvParser
 import hmda.persistence.submission.HmdaProcessingUtils._
 import hmda.api.http.codec.filing.TsCodec._
 import hmda.api.http.model.ErrorResponse
 import hmda.api.http.codec.ErrorResponseCodec._
+import hmda.model.filing.ts._2018.TransmittalSheet
+import hmda.parser.filing.ts._2018.TsCsvParser
 import io.circe.generic.auto._
 import hmda.util.http.FilingResponseUtils._
 import hmda.util.streams.FlowUtils.framing

@@ -1,6 +1,6 @@
 package hmda.validation.rules.lar.quality.common
 
-import hmda.model.filing.ts.TransmittalLar
+import hmda.model.filing.ts._2018.TransmittalLar
 import hmda.validation.dsl.PredicateCommon.equalTo
 import hmda.validation.dsl.ValidationResult
 import hmda.validation.rules.EditCheck

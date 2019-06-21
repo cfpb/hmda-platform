@@ -1,8 +1,8 @@
 package hmda.publication
 
-import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
 import hmda.model.census.CountyLoanLimit
+import hmda.model.filing.lar._2018.LoanApplicationRegister
 
 case class LoanLimitInfo(
     totalUnits: Int,

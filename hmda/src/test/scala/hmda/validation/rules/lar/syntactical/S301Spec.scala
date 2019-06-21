@@ -1,8 +1,8 @@
 package hmda.validation.rules.lar.syntactical
 
-import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.filing.lar.LarGenerators._
+import hmda.model.filing.lar._2018.LoanApplicationRegister
+import hmda.model.filing.ts._2018.TransmittalSheet
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec

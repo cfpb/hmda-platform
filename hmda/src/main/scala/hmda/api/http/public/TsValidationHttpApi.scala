@@ -8,15 +8,15 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.headers.RawHeader
-import hmda.parser.filing.ts.TsCsvParser
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.public.TsValidateRequest
 import hmda.api.http.codec.filing.TsCodec._
 import hmda.api.http.directives.HmdaTimeDirectives
 import io.circe.generic.auto._
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
-import hmda.model.filing.ts.TransmittalSheet
+import hmda.model.filing.ts._2018.TransmittalSheet
 import hmda.model.validation.TsValidationError
+import hmda.parser.filing.ts._2018.TsCsvParser
 import hmda.validation.HmdaValidation
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._

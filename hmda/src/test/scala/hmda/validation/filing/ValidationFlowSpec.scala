@@ -6,15 +6,16 @@ import org.scalatest.{MustMatchers, WordSpec}
 import ValidationFlow._
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import hmda.model.filing.ts.TransmittalSheet
-import hmda.parser.filing.ts.TsCsvParser
 import hmda.validation.context.ValidationContext
 import akka.stream.testkit.scaladsl.TestSink
 import hmda.model.filing.PipeDelimited
-import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.parser.filing.lar.LarCsvParser
+import hmda.model.filing.lar._2018.LoanApplicationRegister
+import hmda.model.filing.ts._2018.TransmittalSheet
 import hmda.validation.Seq
 import hmda.model.validation._
+import hmda.parser.filing.lar._2018.LarCsvParser
+import hmda.parser.filing.ts._2018.TsCsvParser
+
 import scala.collection.immutable._
 
 class ValidationFlowSpec extends WordSpec with MustMatchers {

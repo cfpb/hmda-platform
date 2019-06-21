@@ -1,6 +1,7 @@
 package hmda.api.http.codec.filing
 
 import hmda.model.filing.lar._
+import hmda.model.filing.lar._2018.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
 import io.circe.Decoder.Result
 import io.circe._

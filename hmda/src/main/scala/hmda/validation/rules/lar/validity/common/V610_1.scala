@@ -1,6 +1,6 @@
 package hmda.validation.rules.lar.validity
 
-import hmda.model.filing.lar.LoanApplicationRegister
+import hmda.model.filing.lar._2018.LoanApplicationRegister
 import hmda.validation.dsl.ValidationResult
 import hmda.validation.rules.EditCheck
 import hmda.validation.dsl.PredicateCommon._

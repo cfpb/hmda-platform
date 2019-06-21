@@ -16,20 +16,25 @@ import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.query.DbConfiguration.dbConfig
-import hmda.regulator.query.RegulatorComponent
-import hmda.regulator.query.panel.{InstitutionAltEntity, InstitutionEmailEntity, InstitutionEntity2018}
+import hmda.regulator.query.{RegulatorComponent2018, RegulatorComponent2019}
+import hmda.regulator.query.panel._
+import hmda.regulator.query.panel._2018.{InstitutionAltEntity2018, InstitutionEmailEntity2018, InstitutionEntity2018}
+import hmda.regulator.query.panel._2019.{InstitutionAltEntity2019, InstitutionEntity2019}
 import hmda.regulator.scheduler.schedules.Schedules.{PanelScheduler2018, PanelScheduler2019}
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class PanelScheduler extends HmdaActor with RegulatorComponent {
+class PanelScheduler extends HmdaActor with RegulatorComponent2018 with RegulatorComponent2019 {
 
   implicit val ec = context.system.dispatcher
   implicit val materializer = ActorMaterializer()
   private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   def institutionRepository2018 = new InstitutionRepository2018(dbConfig)
-  def emailRepository = new InstitutionEmailsRepository(dbConfig)
+  def institutionRepository2019 = new InstitutionRepository2019(dbConfig)
+  def emailRepository2018 = new InstitutionEmailsRepository2018(dbConfig)
+  def emailRepository2019 = new InstitutionEmailsRepository2019(dbConfig)
+
   val bankFilter =
     ConfigFactory.load("application.conf").getConfig("filter")
   val bankFilterList =
@@ -90,7 +95,7 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
       institutionRepository2018.findActiveFilers(bankFilterList)
     val now = LocalDateTime.now().minusDays(1)
     val formattedDate = fullDate.format(now)
-    val fileName = s"$formattedDate" + "2018" + "_panel" + ".txt"
+    val fileName = s"$formattedDate" + "2018_panel.txt"
     val s3Sink =
       S3.multipartUpload(bucket, s"$environment/panel/$fileName")
         .withAttributes(S3Attributes.settings(s3Settings))
@@ -98,7 +103,7 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
       .fromFuture(allResults)
       .map(seek => seek.toList)
       .mapConcat(identity)
-      .mapAsync(1)(institution => appendEmailDomains(institution))
+      .mapAsync(1)(institution => appendEmailDomains2018(institution))
       .map(institution => institution.toPSV + "\n")
       .map(s => ByteString(s))
       .runWith(s3Sink)
@@ -109,17 +114,17 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
           "Pushing to S3: " + s"$bucket/$environment/panel/$fileName" + ".")
       }
       case Failure(t) =>
-        println("An error has occurred getting Panel Data: " + t.getMessage)
+        println("An error has occurred getting Panel Data 2018: " + t.getMessage)
     }
   }
 
   private def panelSync2019  = {
 
-    val allResults: Future[Seq[InstitutionEntity2018]] =
-      institutionRepository2018.findActiveFilers(bankFilterList)
+    val allResults: Future[Seq[InstitutionEntity2019]] =
+      institutionRepository2019.findActiveFilers(bankFilterList)
     val now = LocalDateTime.now().minusDays(1)
     val formattedDate = fullDate.format(now)
-    val fileName = s"$formattedDate" + "2019" + "_panel" + ".txt"
+    val fileName = s"$formattedDate" + "2019_panel.txt"
     val s3Sink =
       S3.multipartUpload(bucket, s"$environment/panel/$fileName")
         .withAttributes(S3Attributes.settings(s3Settings))
@@ -127,7 +132,7 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
       .fromFuture(allResults)
       .map(seek => seek.toList)
       .mapConcat(identity)
-      .mapAsync(1)(institution => appendEmailDomains(institution))
+      .mapAsync(1)(institution => appendEmailDomains2019(institution))
       .map(institution => institution.toPSV + "\n")
       .map(s => ByteString(s))
       .runWith(s3Sink)
@@ -138,19 +143,19 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
           "Pushing to S3: " + s"$bucket/$environment/panel/$fileName" + ".")
       }
       case Failure(t) =>
-        println("An error has occurred getting Panel Data: " + t.getMessage)
+        println("An error has occurred getting Panel Data 2019: " + t.getMessage)
     }
   }
 
-  def appendEmailDomains(
-      institution: InstitutionEntity2018): Future[InstitutionAltEntity] = {
+  def appendEmailDomains2018(
+      institution: InstitutionEntity2018): Future[InstitutionAltEntity2018] = {
 
-    val emails: Future[Seq[InstitutionEmailEntity]] =
-      emailRepository.findByLei(institution.lei)
+    val emails: Future[Seq[InstitutionEmailEntity2018]] =
+      emailRepository2018.findByLei(institution.lei)
 
     emails.map(
       emailList =>
-        InstitutionAltEntity(
+        InstitutionAltEntity2018(
           lei = institution.lei,
           activityYear = institution.activityYear,
           agency = institution.agency,
@@ -170,5 +175,35 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
           hmdaFiler = institution.hmdaFiler,
           emailDomains = emailList.map(email => email.emailDomain).mkString(",")
       ))
+  }
+
+  def appendEmailDomains2019(
+                              institution: InstitutionEntity2019): Future[InstitutionAltEntity2019] = {
+
+    val emails: Future[Seq[InstitutionEmailEntity2018]] =
+      emailRepository2019.findByLei(institution.lei)
+
+    emails.map(
+      emailList =>
+        InstitutionAltEntity2019(
+          lei = institution.lei,
+          activityYear = institution.activityYear,
+          agency = institution.agency,
+          institutionType = institution.institutionType,
+          id2017 = institution.id2017,
+          taxId = institution.taxId,
+          rssd = institution.rssd,
+          respondentName = institution.respondentName,
+          respondentState = institution.respondentState,
+          respondentCity = institution.respondentCity,
+          parentIdRssd = institution.parentIdRssd,
+          parentName = institution.parentName,
+          assets = institution.assets,
+          otherLenderCode = institution.otherLenderCode,
+          topHolderIdRssd = institution.topHolderIdRssd,
+          topHolderName = institution.topHolderName,
+          hmdaFiler = institution.hmdaFiler,
+          emailDomains = emailList.map(email => email.emailDomain).mkString(",")
+        ))
   }
 }

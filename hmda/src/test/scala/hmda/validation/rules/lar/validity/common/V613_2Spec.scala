@@ -4,12 +4,8 @@ import hmda.model.filing.lar.{LarAction, LoanApplicationRegister}
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 import hmda.model.filing.lar.LarGenerators._
-import hmda.model.filing.lar.enums.{
-  LoanOriginated,
-  PreapprovalRequestApprovedButNotAccepted,
-  PreapprovalRequestDenied,
-  PreapprovalRequested
-}
+import hmda.model.filing.lar._2018.LoanApplicationRegister
+import hmda.model.filing.lar.enums.{LoanOriginated, PreapprovalRequestApprovedButNotAccepted, PreapprovalRequestDenied, PreapprovalRequested}
 
 class V613_2Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = V613_2

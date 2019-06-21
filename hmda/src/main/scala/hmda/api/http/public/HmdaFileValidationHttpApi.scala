@@ -12,8 +12,6 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.stream.scaladsl.{Broadcast, Concat, Flow, GraphDSL, Sink, Source}
 import hmda.api.http.model.public.{Validated, ValidatedResponse}
-import hmda.parser.filing.lar.LarCsvParser
-import hmda.parser.filing.ts.TsCsvParser
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.directives.HmdaTimeDirectives
 import io.circe.generic.auto._
@@ -22,6 +20,8 @@ import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 import hmda.util.streams.FlowUtils._
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import hmda.parser.filing.lar._2018.LarCsvParser
+import hmda.parser.filing.ts._2018.TsCsvParser
 
 trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
 

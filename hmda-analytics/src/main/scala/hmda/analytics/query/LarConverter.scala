@@ -1,6 +1,6 @@
 package hmda.analytics.query
 
-import hmda.model.filing.lar.LoanApplicationRegister
+import hmda.model.filing.lar._2018.LoanApplicationRegister
 
 object LarConverter {
 

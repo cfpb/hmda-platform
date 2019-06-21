@@ -16,24 +16,12 @@ import hmda.api.http.filing.FileUploadUtils
 import hmda.messages.filing.FilingCommands.CreateFiling
 import hmda.messages.filing.FilingEvents.FilingEvent
 import hmda.messages.institution.InstitutionCommands.CreateInstitution
-import hmda.messages.institution.InstitutionEvents.{
-  InstitutionCreated,
-  InstitutionEvent
-}
+import hmda.messages.institution.InstitutionEvents.{InstitutionCreated, InstitutionEvent}
 import hmda.messages.submission.SubmissionCommands.CreateSubmission
-import hmda.messages.submission.SubmissionEvents.{
-  SubmissionCreated,
-  SubmissionEvent
-}
+import hmda.messages.submission.SubmissionEvents.{SubmissionCreated, SubmissionEvent}
 import hmda.model.filing.Filing
 import hmda.model.filing.FilingGenerator.filingGen
-import hmda.model.filing.submission.{
-  Created,
-  Submission,
-  SubmissionId,
-  Uploaded
-}
-import hmda.model.filing.ts.TransmittalSheet
+import hmda.model.filing.submission.{Created, Submission, SubmissionId, Uploaded}
 import hmda.model.institution.Institution
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
@@ -46,15 +34,12 @@ import hmda.model.submission.SubmissionGenerator.submissionGen
 import hmda.persistence.AkkaCassandraPersistenceSpec
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
-import hmda.persistence.submission.{
-  HmdaRawData,
-  SubmissionManager,
-  SubmissionPersistence
-}
+import hmda.persistence.submission.{HmdaRawData, SubmissionManager, SubmissionPersistence}
 import hmda.model.filing.ts.TsGenerators._
 import hmda.model.filing.lar.LarGenerators._
 import org.keycloak.adapters.KeycloakDeploymentBuilder
 import akka.testkit._
+import hmda.model.filing.ts._2018.TransmittalSheet
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._

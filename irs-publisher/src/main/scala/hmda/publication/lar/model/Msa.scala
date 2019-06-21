@@ -1,6 +1,7 @@
 package hmda.publication.lar.model
 
 import hmda.model.filing.lar._
+import hmda.model.filing.lar._2018.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
 
 import scala.language.implicitConversions

@@ -1,6 +1,7 @@
 package hmda.parser.filing.lar
 
 import hmda.model.filing.lar._
+import hmda.model.filing.lar._2018.LoanApplicationRegister
 import org.scalacheck.Gen
 
 object LarValidationUtils {

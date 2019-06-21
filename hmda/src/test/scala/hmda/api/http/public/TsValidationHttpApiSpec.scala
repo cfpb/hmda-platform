@@ -4,20 +4,17 @@ import akka.event.{LoggingAdapter, NoLogging}
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
-import hmda.api.http.model.public.{
-  SingleValidationErrorResult,
-  TsValidateRequest,
-  TsValidateResponse
-}
+import hmda.api.http.model.public.{SingleValidationErrorResult, TsValidateRequest, TsValidateResponse}
 import org.scalatest.{MustMatchers, WordSpec}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.model.filing.ts.{Address, Contact, TransmittalSheet}
+import hmda.model.filing.ts.{Contact, TransmittalSheet}
 import hmda.model.institution.Agency
 import io.circe.generic.auto._
 import hmda.api.http.codec.filing.TsCodec._
+import hmda.model.filing.ts._2018.{Address, Contact, TransmittalSheet}
 
 class TsValidationHttpApiSpec
     extends WordSpec

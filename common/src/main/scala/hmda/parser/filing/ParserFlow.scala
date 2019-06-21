@@ -5,10 +5,10 @@ import akka.stream.FlowShape
 import akka.stream.scaladsl.{Broadcast, Concat, Flow, GraphDSL}
 import akka.util.ByteString
 import hmda.model.filing.PipeDelimited
-import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.ts.TransmittalSheet
-import hmda.parser.filing.lar.LarCsvParser
-import hmda.parser.filing.ts.TsCsvParser
+import hmda.model.filing.lar._2018.LoanApplicationRegister
+import hmda.model.filing.ts._2018.TransmittalSheet
+import hmda.parser.filing.lar._2018.LarCsvParser
+import hmda.parser.filing.ts._2018.TsCsvParser
 import hmda.util.streams.FlowUtils.framing
 
 object ParserFlow {

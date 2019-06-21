@@ -4,8 +4,10 @@ import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
+
 import scala.concurrent.Future
 import hmda.query.ts._
+import hmda.query.ts._2018.TransmittalSheetEntity
 
 trait TransmittalSheetComponent {
 

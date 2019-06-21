@@ -1,10 +1,11 @@
 package hmda.analytics.query
 
-import hmda.model.filing.ts.TransmittalSheet
 import hmda.query.DbConfiguration.dbConfig
 import slick.dbio.DBIOAction
 import hmda.model.filing.ts.TsGenerators._
+import hmda.model.filing.ts._2018.TransmittalSheet
 import hmda.query.ts._
+import hmda.query.ts._2018.TransmittalSheetConverter
 
 import scala.concurrent.duration._
 import scala.concurrent.Await

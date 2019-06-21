@@ -5,6 +5,7 @@ import java.util.Date
 
 import hmda.generators.CommonGenerators._
 import hmda.model.census.Census
+import hmda.model.filing.lar._2018.LoanApplicationRegister
 import hmda.model.filing.lar.enums.LarEnumGenerators._
 import org.scalacheck.Gen
 

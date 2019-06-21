@@ -1,6 +1,7 @@
 package hmda.publication.lar
 
-import hmda.model.filing.lar.{LoanApplicationRegister, Race}
+import hmda.model.filing.lar.Race
+import hmda.model.filing.lar._2018.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
 
 object RaceCategorization {

@@ -1,10 +1,10 @@
 package hmda.validation.rules.lar.quality.common
 
 import com.typesafe.config.ConfigFactory
-import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 import hmda.model.filing.lar.LarGenerators._
+import hmda.model.filing.lar._2018.LoanApplicationRegister
 import hmda.model.filing.lar.enums.SecuredBySubordinateLien
 import hmda.validation.rules.lar.quality.common.Q607
 
