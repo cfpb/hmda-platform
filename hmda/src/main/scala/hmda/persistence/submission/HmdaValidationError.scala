@@ -54,7 +54,7 @@ import hmda.persistence.submission.HmdaProcessingUtils.{
 import hmda.publication.KafkaUtils._
 import hmda.util.streams.FlowUtils.framing
 import hmda.validation.context.ValidationContext
-import hmda.validation.filing.MacroValidationFlow._
+import hmda.validation.filing.MacroValidationFlow2018._
 import hmda.validation.filing.ValidationFlow._
 import hmda.validation.{AS, EC, MAT}
 
@@ -576,7 +576,7 @@ object HmdaValidationError
       }
 
     for {
-      macroEdits <- macroValidation(larSource)
+      macroEdits <- macroValidation2018(larSource)
     } yield {
       macroEdits
     }

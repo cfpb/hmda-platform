@@ -16,7 +16,7 @@ import hmda.validation.{AS, EC, MAT}
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-object MacroValidationFlow {
+object MacroValidationFlow2019 {
 
   type LarPredicate = LoanApplicationRegister => Boolean
 
@@ -27,6 +27,7 @@ object MacroValidationFlow {
   final val q638Name = "Q638"
   final val q639Name = "Q639"
   final val q640Name = "Q640"
+  final val q646Name = "Q646"
 
   val config = ConfigFactory.load()
   final val q634Threshold = config.getInt("edits.Q634.threshold")
@@ -39,7 +40,7 @@ object MacroValidationFlow {
   final val q640Ratio = config.getDouble("edits.Q640.ratio")
   final val q640Income = config.getInt("edits.Q640.income")
 
-  def macroValidation[as: AS, mat: MAT, ec: EC](
+  def macroValidation2019[as: AS, mat: MAT, ec: EC](
       source: Source[LoanApplicationRegister, NotUsed]
   ): Future[List[ValidationError]] = {
     def fTotal: Future[Int] = count(source)
@@ -67,6 +68,7 @@ object MacroValidationFlow {
                         q640Ratio,
                         q640Name,
                         incomeLessThan10)
+      q646 <- macroEditAny(source, q646Name, exemptionTaken)
     } yield {
       List(q634, q635, q636, q637, q638, q639, q640).filter(e =>
         e != EmptyMacroValidationError())
@@ -87,6 +89,20 @@ object MacroValidationFlow {
     } yield {
       val ratio = editCount.toDouble / total.toDouble
       if (ratio > editRatio) MacroValidationError(editName)
+      else EmptyMacroValidationError()
+    }
+  }
+
+  def macroEditAny[as: AS, mat: MAT, ec: EC](
+      source: Source[LoanApplicationRegister, NotUsed],
+      editName: String,
+      predicate: LarPredicate): Future[ValidationError] = {
+    for {
+      editCount <- count(
+        source
+          .filter(predicate))
+    } yield {
+      if (editCount != 0) MacroValidationError(editName)
       else EmptyMacroValidationError()
     }
   }
@@ -219,5 +235,17 @@ object MacroValidationFlow {
       })
     )
   }
+
+  //Q646
+  def exemptionTaken: LarPredicate =
+    (lar: LoanApplicationRegister) => {
+      lar.applicationSubmission == ApplicationSubmissionExempt || lar.ausResult.ausResult1 == AUSResultExempt || lar.ausResult.ausResult2 == AUSResultExempt || lar.ausResult.ausResult3 == AUSResultExempt || lar.ausResult.ausResult4 == AUSResultExempt ||
+      lar.ausResult.ausResult5 == AUSResultExempt || lar.AUS.aus1 == AUSExempt || lar.AUS.aus2 == AUSExempt || lar.AUS.aus3 == AUSExempt || lar.AUS.aus4 == AUSExempt || lar.AUS.aus5 == AUSExempt ||
+      lar.nonAmortizingFeatures.balloonPayment == BalloonPaymentExempt || lar.businessOrCommercialPurpose == ExemptBusinessOrCommercialPurpose || lar.applicant.creditScoreType == CreditScoreExempt || lar.coApplicant.creditScoreType == CreditScoreExempt ||
+      lar.denial.denialReason1 == ExemptDenialReason || lar.denial.denialReason2 == ExemptDenialReason || lar.denial.denialReason3 == ExemptDenialReason || lar.denial.denialReason4 == ExemptDenialReason ||
+      lar.nonAmortizingFeatures.interestOnlyPayments == InterestOnlyPaymentExempt || lar.lineOfCredit == ExemptLineOfCredit || lar.property.manufacturedHomeLandPropertyInterest == ManufacturedHomeLoanPropertyInterestExempt ||
+      lar.property.manufacturedHomeSecuredProperty == ManufacturedHomeSecuredExempt || lar.reverseMortgage == ExemptMortgageType || lar.nonAmortizingFeatures.negativeAmortization == NegativeAmortizationExempt || lar.nonAmortizingFeatures.otherNonAmortizingFeatures == OtherNonAmortizingFeaturesExempt ||
+      lar.payableToInstitution == PayableToInstitutionExempt
+    }
 
 }

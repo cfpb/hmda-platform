@@ -7,7 +7,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import hmda.model.filing.lar.{LarAction, LoanApplicationRegister}
 import hmda.parser.filing.lar.LarCsvParser
-import MacroValidationFlow._
+import MacroValidationFlow2018._
 import hmda.util.SourceUtils._
 import hmda.model.filing.lar.enums._
 import hmda.model.validation.{EmptyMacroValidationError, MacroValidationError}
@@ -15,7 +15,7 @@ import hmda.model.filing.lar.LarGenerators._
 
 import scala.concurrent.Future
 
-class MacroValidationFlowSpec
+class MacroValidationFlow2018Spec
     extends AsyncWordSpec
     with MustMatchers
     with BeforeAndAfterAll {
@@ -240,7 +240,7 @@ class MacroValidationFlowSpec
 
       val failSource = q635Fail concat q636Fail
 
-      macroValidation(failSource).map(
+      macroValidation2018(failSource).map(
         xs =>
           xs mustBe List(
             MacroValidationError(q635Name),
