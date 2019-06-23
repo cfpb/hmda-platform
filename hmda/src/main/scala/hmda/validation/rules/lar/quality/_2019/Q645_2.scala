@@ -12,8 +12,6 @@ object Q645_2 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "Q645"
 
-  val results = List(Accept, Caution, Ineligible, Incomplete, Invalid)
-
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
     when(lar.loan.loanPurpose is equalTo(HomePurchase)) {
       lar.loan.amount is greaterThanOrEqual(1000)
