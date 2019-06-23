@@ -47,10 +47,17 @@ object FilingPersistence
         case CreateFiling(filing, replyTo) =>
           Effect.persist(FilingCreated(filing)).thenRun { _ =>
             log.debug(s"Filing created: ${filing.lei}-${filing.period}")
-            val institutionPersistence =
-              sharding.entityRefFor(
-                InstitutionPersistence.typeKey,
-                s"${InstitutionPersistence.name}-${filing.lei}")
+            val institutionPersistence = {
+              if (filing.period == "2018") {
+                sharding.entityRefFor(
+                  InstitutionPersistence.typeKey,
+                  s"${InstitutionPersistence.name}-${filing.lei}")
+              } else {
+                sharding.entityRefFor(
+                  InstitutionPersistence.typeKey,
+                  s"${InstitutionPersistence.name}-${filing.lei}-${filing.period}")
+              }
+            }
             institutionPersistence ! AddFiling(filing, None)
             replyTo ! FilingCreated(filing)
           }

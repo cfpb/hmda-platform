@@ -35,10 +35,11 @@ class HmdaInstitutionQueryApi
 
   override implicit val timeout: Timeout = Timeout(duration)
 
-  val createSchema = config.getBoolean("hmda.institution.createSchema")
+  val createSchema = config.getString("hmda.institution.createSchema").toBoolean
 
   if (createSchema) {
-    institutionRepository.createSchema()
+    institutionRepository2018.createSchema()
+    institutionRepository2019.createSchema()
     institutionEmailsRepository.createSchema()
   }
 

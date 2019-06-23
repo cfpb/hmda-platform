@@ -48,14 +48,16 @@ object InstitutionEventsProtobufConverter {
   def institutionDeletedToProtobuf(
       evt: InstitutionDeleted): InstitutionDeletedMessage = {
     InstitutionDeletedMessage(
-      lei = evt.LEI
+      lei = evt.LEI,
+      year = evt.year
     )
   }
 
   def institutionDeletedFromProtobuf(
       msg: InstitutionDeletedMessage): InstitutionDeleted = {
     InstitutionDeleted(
-      LEI = msg.lei
+      LEI = msg.lei,
+      year = msg.year
     )
   }
 

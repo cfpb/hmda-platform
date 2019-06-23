@@ -623,10 +623,17 @@ object HmdaValidationError
       sharding: ClusterSharding,
       ctx: TypedActorContext[SubmissionProcessingCommand],
       submissionId: SubmissionId): Future[ValidationContext] = {
-    val institutionPersistence =
-      sharding.entityRefFor(
-        InstitutionPersistence.typeKey,
-        s"${InstitutionPersistence.name}-${submissionId.lei}")
+    val institutionPersistence = {
+      if (year == 2018) {
+        sharding.entityRefFor(
+          InstitutionPersistence.typeKey,
+          s"${InstitutionPersistence.name}-${submissionId.lei}")
+      } else {
+        sharding.entityRefFor(
+          InstitutionPersistence.typeKey,
+          s"${InstitutionPersistence.name}-${submissionId.lei}-$year")
+      }
+    }
 
     val fInstitution: Future[Option[Institution]] = institutionPersistence ? (
         ref => GetInstitution(ref))

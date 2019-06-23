@@ -44,7 +44,7 @@ class InstitutionEventsProtobufConverterSpec
   property("InstitutionDeleted must convert to and from protobuf") {
     forAll(institutionGen) { institution =>
       val lei = institution.LEI
-      val deleted = InstitutionDeleted(lei)
+      val deleted = InstitutionDeleted(lei, institution.activityYear)
       val protobuf = institutionDeletedToProtobuf(deleted).toByteArray
       institutionDeletedFromProtobuf(
         InstitutionDeletedMessage.parseFrom(protobuf)) mustBe deleted

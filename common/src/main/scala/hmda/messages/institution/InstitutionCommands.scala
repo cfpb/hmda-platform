@@ -21,6 +21,7 @@ object InstitutionCommands {
       extends InstitutionCommand
 
   final case class DeleteInstitution(LEI: String,
+                                     activityYear: Int,
                                      replyTo: ActorRef[InstitutionEvent])
       extends InstitutionCommand
 

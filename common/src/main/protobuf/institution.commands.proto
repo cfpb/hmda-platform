@@ -18,7 +18,8 @@ message ModifyInstitutionMessage {
 
 message DeleteInstitutionMessage {
     string lei = 1;
-    string replyTo = 2;
+    int32 activityYear = 2;
+    string replyTo = 3;
 }
 
 message AddFilingMessage {

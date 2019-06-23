@@ -25,6 +25,7 @@ import hmda.api.http.model.ErrorResponse
 import io.circe.generic.auto._
 import hmda.api.http.codec.ErrorResponseCodec._
 import hmda.auth.OAuth2Authorization
+import hmda.utils.YearUtils._
 
 trait InstitutionHttpApi extends HmdaTimeDirectives {
 
@@ -38,10 +39,17 @@ trait InstitutionHttpApi extends HmdaTimeDirectives {
   //institutions/<lei>
   def institutionReadPath(oAuth2Authorization: OAuth2Authorization): Route =
     oAuth2Authorization.authorizeToken { _ =>
-      path("institutions" / Segment) { lei =>
-        val institutionPersistence =
-          sharding.entityRefFor(InstitutionPersistence.typeKey,
-                                s"${InstitutionPersistence.name}-$lei")
+      path("institutions" / Segment / "year" / Segment) { (lei, period) =>
+        val institutionPersistence = {
+          if (period == "2018") {
+            sharding.entityRefFor(InstitutionPersistence.typeKey,
+                                  s"${InstitutionPersistence.name}-$lei")
+          } else {
+            sharding.entityRefFor(
+              InstitutionPersistence.typeKey,
+              s"${InstitutionPersistence.name}-$lei-$period")
+          }
+        }
 
         val iDetails
           : Future[Option[InstitutionDetail]] = institutionPersistence ? (ref =>
@@ -52,21 +60,26 @@ trait InstitutionHttpApi extends HmdaTimeDirectives {
         } yield i
 
         timedGet { uri =>
-          onComplete(filingDetailsF) {
-            case Success(Some(institutionDetails)) =>
-              complete(ToResponseMarshallable(institutionDetails))
-            case Success(None) =>
-              val errorResponse =
-                ErrorResponse(404,
-                              s"Institution: $lei does not exist",
-                              uri.path)
-              complete(
-                ToResponseMarshallable(StatusCodes.NotFound -> errorResponse)
-              )
-            case Failure(error) =>
-              failedResponse(StatusCodes.InternalServerError, uri, error)
-          }
+          if (!isValidYear(period.toInt)) {
+            complete(
+              ErrorResponse(500, s"Invalid Year Provided: $period", uri.path))
+          } else {
+            onComplete(filingDetailsF) {
+              case Success(Some(institutionDetails)) =>
+                complete(ToResponseMarshallable(institutionDetails))
+              case Success(None) =>
+                val errorResponse =
+                  ErrorResponse(404,
+                                s"Institution: $lei does not exist",
+                                uri.path)
+                complete(
+                  ToResponseMarshallable(StatusCodes.NotFound -> errorResponse)
+                )
+              case Failure(error) =>
+                failedResponse(StatusCodes.InternalServerError, uri, error)
+            }
 
+          }
         }
       }
     }

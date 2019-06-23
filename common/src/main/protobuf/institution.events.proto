@@ -20,6 +20,7 @@ message FilingAddedMessage {
 
 message InstitutionDeletedMessage {
     string lei = 1;
+    int32 year =2;
 }
 
 message InstitutionNotExistsMessage {

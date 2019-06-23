@@ -100,8 +100,8 @@ class InstitutionHttpApiSpec
 
   override def afterAll(): Unit = super.afterAll()
 
-  val url = s"/institutions/${sampleInstitution.LEI}"
-  val badUrl = s"/institutions/xxxx"
+  val url = s"/institutions/${sampleInstitution.LEI}/year/2018"
+  val badUrl = s"/institutions/xxxx/year/2018"
 
   "Institutions" must {
     "return NotFound when institution does not exist" in {
