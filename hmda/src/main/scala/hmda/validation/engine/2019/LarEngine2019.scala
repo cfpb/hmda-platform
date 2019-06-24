@@ -2,6 +2,7 @@ package hmda.validation.engine
 
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.context.ValidationContext
+import hmda.validation.rules.lar.quality._2019.Q633
 import hmda.validation.rules.lar.quality._2019.Q643
 import hmda.validation.rules.lar.quality._2019.Q632
 import hmda.validation.rules.lar.quality.common._
