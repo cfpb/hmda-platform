@@ -2,11 +2,7 @@ package hmda.validation.rules.lar.quality.common
 
 import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.lar.enums.{
-  DirectOwnership,
-  ManufacturedHome,
-  ManufacturedHomeLandNotApplicable
-}
+import hmda.model.filing.lar.enums.{DirectOwnership, ManufacturedHome, ManufacturedHomeLandNotApplicable}
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 import hmda.validation.rules.lar.quality.common.Q619
