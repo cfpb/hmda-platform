@@ -1,4 +1,4 @@
-Field Name,Field Data Type,Valid Values,Notes
+﻿Field Name,Field Data Type,Valid Values,Notes
 Record Identifier,Integer,2,
 Legal Entity Identifier (LEI),Character Varying,,
 Loan Type,Integer,1 2 3 4,
@@ -8,8 +8,8 @@ Construction Method,Integer,1 2,
 Occupancy Type,Integer,1 2 3,
 Loan Amount,Numeric,,
 Action Taken,Integer,1 2 3 4 5 6 7 8,
-State,Character Varying,NA,Two-Letter State Code
-County,Character Varying,NA Exempt,State-County FIPS code
+State,Character Varying,NA,two-letter state code
+County,Character Varying,NA Exempt,state-county FIPS code
 Census Tract,Character Varying,NA,11 digit census tract number 
 Ethnicity of Applicant or Borrower: 1,Character Varying,1 11 12 13 14 2 3 4,
 Ethnicity of Applicant or Borrower: 2,Character Varying,1 11 12 13 14 2,
