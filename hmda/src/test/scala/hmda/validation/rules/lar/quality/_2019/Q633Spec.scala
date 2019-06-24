@@ -6,11 +6,10 @@ import hmda.model.filing.lar.enums._
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 
-class Q632Spec extends LarEditCheckSpec {
-  override def check: EditCheck[LoanApplicationRegister] = Q632
+class Q633Spec extends LarEditCheckSpec {
+  override def check: EditCheck[LoanApplicationRegister] = Q633
 
-  property(
-    "An invalid Automated Underwriting System data field was reported. Please review the information below and update your file, if needed:") {
+  property("AUS Result should be valid for the corresponding AUS") {
     forAll(larGen) { lar =>
       lar
         .copy(
@@ -23,9 +22,9 @@ class Q632Spec extends LarEditCheckSpec {
 
       val appLar = lar.copy(
         AUS = lar.AUS.copy(aus1 = EmptyAUSValue,
-                           aus2 = TechnologyOpenToApprovedLenders,
+                           aus2 = GuaranteedUnderwritingSystem,
                            aus3 = EmptyAUSValue,
-                           aus4 = TechnologyOpenToApprovedLenders,
+                           aus4 = GuaranteedUnderwritingSystem,
                            aus5 = EmptyAUSValue))
 
       appLar
@@ -41,12 +40,13 @@ class Q632Spec extends LarEditCheckSpec {
 
       appLar
         .copy(
-          ausResult = appLar.ausResult.copy(ausResult1 =
-                                              OtherAutomatedUnderwritingResult,
-                                            ausResult2 = Accept,
-                                            ausResult3 = EmptyAUSResultValue,
-                                            ausResult4 = Refer,
-                                            ausResult5 = AcceptEligible))
+          ausResult = appLar.ausResult.copy(
+            ausResult1 = EmptyAUSResultValue,
+            ausResult2 = ReferIneligible,
+            ausResult3 = EmptyAUSResultValue,
+            ausResult4 = OtherAutomatedUnderwritingResult,
+            ausResult5 = EmptyAUSResultValue
+          ))
         .mustPass
     }
   }
