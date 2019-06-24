@@ -106,7 +106,10 @@ object HmdaValidationError
         log.info(s"Syntactical / Validity validation started for $submissionId")
 
         val fValidationContext =
-          validationContext(submissionId.period.toInt, sharding, ctx, submissionId)
+          validationContext(submissionId.period.toInt,
+                            sharding,
+                            ctx,
+                            submissionId)
 
         val fSyntacticalValidity = for {
           validationContext <- fValidationContext

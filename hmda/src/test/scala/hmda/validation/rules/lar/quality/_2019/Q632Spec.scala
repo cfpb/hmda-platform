@@ -9,7 +9,8 @@ import hmda.validation.rules.lar.LarEditCheckSpec
 class Q632Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = Q632
 
-  property("An invalid Automated Underwriting System data field was reported. Please review the information below and update your file, if needed:") {
+  property(
+    "An invalid Automated Underwriting System data field was reported. Please review the information below and update your file, if needed:") {
     forAll(larGen) { lar =>
       lar
         .copy(
@@ -40,7 +41,8 @@ class Q632Spec extends LarEditCheckSpec {
 
       appLar
         .copy(
-          ausResult = appLar.ausResult.copy(ausResult1 = OtherAutomatedUnderwritingResult,
+          ausResult = appLar.ausResult.copy(ausResult1 =
+                                              OtherAutomatedUnderwritingResult,
                                             ausResult2 = Accept,
                                             ausResult3 = EmptyAUSResultValue,
                                             ausResult4 = Refer,

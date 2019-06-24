@@ -10,7 +10,11 @@ import hmda.model.filing.lar.enums._
 import hmda.model.filing.submission.SubmissionId
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.institution.HUD
-import hmda.model.validation.{EmptyMacroValidationError, MacroValidationError, ValidationError}
+import hmda.model.validation.{
+  EmptyMacroValidationError,
+  MacroValidationError,
+  ValidationError
+}
 import hmda.util.SourceUtils._
 import hmda.validation.{AS, EC, MAT}
 
@@ -47,9 +51,12 @@ object MacroValidationFlow {
   type MacroCheck =
     Source[LoanApplicationRegister, NotUsed] => Future[ValidationError]
 
-  def selectedValidations(totalCount: Int, year: Int, tsSource: Source[TransmittalSheet, NotUsed])(implicit system: ActorSystem,
-                                           mat: ActorMaterializer,
-                                           ec: ExecutionContext): List[MacroCheck] =
+  def selectedValidations(totalCount: Int,
+                          year: Int,
+                          tsSource: Source[TransmittalSheet, NotUsed])(
+      implicit system: ActorSystem,
+      mat: ActorMaterializer,
+      ec: ExecutionContext): List[MacroCheck] =
     year match {
       case 2018 =>
         List(
@@ -76,16 +83,16 @@ object MacroValidationFlow {
 
     }
 
-
   def macroValidation[as: AS, mat: MAT, ec: EC](
-                                                 larSource: Source[LoanApplicationRegister, NotUsed],
-                                                 tsSource: Source[TransmittalSheet, NotUsed],
-                                                 submissionId: SubmissionId
-                                               ): Future[List[ValidationError]] = {
+      larSource: Source[LoanApplicationRegister, NotUsed],
+      tsSource: Source[TransmittalSheet, NotUsed],
+      submissionId: SubmissionId
+  ): Future[List[ValidationError]] = {
     val fTotal: Future[Int] = count(larSource)
 
     fTotal.flatMap { totalCount =>
-      val validations: List[MacroCheck] = selectedValidations(totalCount, submissionId.period.toInt, tsSource)
+      val validations: List[MacroCheck] =
+        selectedValidations(totalCount, submissionId.period.toInt, tsSource)
       val fErrors: Future[List[ValidationError]] =
         Future.sequence(validations.map(eachFn => eachFn(larSource)))
       fErrors.map(errors =>
@@ -94,11 +101,11 @@ object MacroValidationFlow {
   }
 
   def macroEdit[as: AS, mat: MAT, ec: EC](
-                                           source: Source[LoanApplicationRegister, NotUsed],
-                                           totalCount: Int,
-                                           editRatio: Double,
-                                           editName: String,
-                                           predicate: LarPredicate): Future[ValidationError] = {
+      source: Source[LoanApplicationRegister, NotUsed],
+      totalCount: Int,
+      editRatio: Double,
+      editName: String,
+      predicate: LarPredicate): Future[ValidationError] = {
     for {
       editCount <- count(
         source
@@ -111,9 +118,9 @@ object MacroValidationFlow {
   }
 
   def macroEditAny[as: AS, mat: MAT, ec: EC](
-                                              source: Source[LoanApplicationRegister, NotUsed],
-                                              editName: String,
-                                              predicate: LarPredicate): Future[ValidationError] = {
+      source: Source[LoanApplicationRegister, NotUsed],
+      editName: String,
+      predicate: LarPredicate): Future[ValidationError] = {
     for {
       editCount <- count(
         source
@@ -125,8 +132,8 @@ object MacroValidationFlow {
   }
 
   def Q634[as: AS, mat: MAT, ec: EC](
-                                      source: Source[LoanApplicationRegister, NotUsed]
-                                    ): Future[ValidationError] = {
+      source: Source[LoanApplicationRegister, NotUsed]
+  ): Future[ValidationError] = {
 
     val countPredicateF = count(source.filter(homePurchaseLoanOriginated))
     val countComparisonF = count(source.filter(loanOriginated))
@@ -148,35 +155,35 @@ object MacroValidationFlow {
   }
 
   def Q635[as: AS, mat: MAT, ec: EC](totalCount: Int)(
-    source: Source[LoanApplicationRegister, NotUsed])
-  : Future[ValidationError] =
+      source: Source[LoanApplicationRegister, NotUsed])
+    : Future[ValidationError] =
     macroEdit(source,
-      totalCount,
-      q635Ratio,
-      q635Name,
-      applicationApprovedButNotAccepted)
+              totalCount,
+              q635Ratio,
+              q635Name,
+              applicationApprovedButNotAccepted)
 
   def Q636[as: AS, mat: MAT, ec: EC](totalCount: Int)(
-    source: Source[LoanApplicationRegister, NotUsed])
-  : Future[ValidationError] =
+      source: Source[LoanApplicationRegister, NotUsed])
+    : Future[ValidationError] =
     macroEdit(source,
-      totalCount,
-      q636Ratio,
-      q636Name,
-      applicationWithdrawnByApplicant)
+              totalCount,
+              q636Ratio,
+              q636Name,
+              applicationWithdrawnByApplicant)
 
   def Q637[as: AS, mat: MAT, ec: EC](totalCount: Int)(
-    source: Source[LoanApplicationRegister, NotUsed])
-  : Future[ValidationError] =
+      source: Source[LoanApplicationRegister, NotUsed])
+    : Future[ValidationError] =
     macroEdit(source,
-      totalCount,
-      q637Ratio,
-      q637Name,
-      fileClosedForIncompleteness)
+              totalCount,
+              q637Ratio,
+              q637Name,
+              fileClosedForIncompleteness)
 
   def Q638[as: AS, mat: MAT, ec: EC](
-                                      source: Source[LoanApplicationRegister, NotUsed])
-  : Future[ValidationError] = {
+      source: Source[LoanApplicationRegister, NotUsed])
+    : Future[ValidationError] = {
 
     val countPredicateF = count(source.filter(loanOriginated))
     val countComparisonF = count(source.filter(notRequested))
@@ -194,8 +201,8 @@ object MacroValidationFlow {
   }
 
   def Q639[as: AS, mat: MAT, ec: EC](
-                                      source: Source[LoanApplicationRegister, NotUsed]
-                                    ): Future[ValidationError] = {
+      source: Source[LoanApplicationRegister, NotUsed]
+  ): Future[ValidationError] = {
 
     for {
       countRequested <- count(source.filter(preapprovalRequested))
@@ -213,13 +220,15 @@ object MacroValidationFlow {
   }
 
   def Q640[as: AS, mat: MAT, ec: EC](
-                                      source: Source[LoanApplicationRegister, NotUsed])
-  : Future[ValidationError] =
+      source: Source[LoanApplicationRegister, NotUsed])
+    : Future[ValidationError] =
     q640Total(source).flatMap(count =>
       macroEdit(source, count, q640Ratio, q640Name, incomeLessThan10))
 
-  def Q647[as: AS, mat: MAT, ec: EC](tsSource: Source[TransmittalSheet, NotUsed])(larSource: Source[LoanApplicationRegister, NotUsed])
-  : Future[ValidationError] = {
+  def Q647[as: AS, mat: MAT, ec: EC](
+      tsSource: Source[TransmittalSheet, NotUsed])(
+      larSource: Source[LoanApplicationRegister, NotUsed])
+    : Future[ValidationError] = {
     val countPredicateT = count(tsSource.filter(isAgencyCodeSeven))
     val countPredicateL = count(larSource.filter(exemptionTaken))
     for {
@@ -228,25 +237,22 @@ object MacroValidationFlow {
     } yield {
       if (countPredicateAgencyCode == 0) {
         EmptyMacroValidationError()
-      }
-      else if (countPredicateExemptions > 0) {
+      } else if (countPredicateExemptions > 0) {
         MacroValidationError(q647Name)
-      }
-      else {
+      } else {
         EmptyMacroValidationError()
       }
     }
   }
 
-
-  def Q646[as: AS, mat: MAT, ec: EC](source: Source[LoanApplicationRegister, NotUsed])
-  : Future[ValidationError] =
+  def Q646[as: AS, mat: MAT, ec: EC](
+      source: Source[LoanApplicationRegister, NotUsed])
+    : Future[ValidationError] =
     macroEditAny(source, q646Name, exemptionTaken)
 
   //Q646
   def isAgencyCodeSeven: TsPredicate =
-    (ts: TransmittalSheet) =>
-      ts.agency == HUD
+    (ts: TransmittalSheet) => ts.agency == HUD
 
   //Q634
   def homePurchaseLoanOriginated: LarPredicate =
@@ -306,13 +312,13 @@ object MacroValidationFlow {
     }
 
   def q640Total[as: AS, mat: MAT, ec: EC](
-                                           source: Source[LoanApplicationRegister, NotUsed]): Future[Int] = {
+      source: Source[LoanApplicationRegister, NotUsed]): Future[Int] = {
     count(
       source.filter(lar =>
         Try(lar.income.toInt) match {
           case Success(_) => true
           case Failure(_) => false
-        })
+      })
     )
   }
 
@@ -320,12 +326,12 @@ object MacroValidationFlow {
   def exemptionTaken: LarPredicate =
     (lar: LoanApplicationRegister) => {
       lar.applicationSubmission == ApplicationSubmissionExempt || lar.ausResult.ausResult1 == AUSResultExempt || lar.ausResult.ausResult2 == AUSResultExempt || lar.ausResult.ausResult3 == AUSResultExempt || lar.ausResult.ausResult4 == AUSResultExempt ||
-        lar.ausResult.ausResult5 == AUSResultExempt || lar.AUS.aus1 == AUSExempt || lar.AUS.aus2 == AUSExempt || lar.AUS.aus3 == AUSExempt || lar.AUS.aus4 == AUSExempt || lar.AUS.aus5 == AUSExempt ||
-        lar.nonAmortizingFeatures.balloonPayment == BalloonPaymentExempt || lar.businessOrCommercialPurpose == ExemptBusinessOrCommercialPurpose || lar.applicant.creditScoreType == CreditScoreExempt || lar.coApplicant.creditScoreType == CreditScoreExempt ||
-        lar.denial.denialReason1 == ExemptDenialReason || lar.denial.denialReason2 == ExemptDenialReason || lar.denial.denialReason3 == ExemptDenialReason || lar.denial.denialReason4 == ExemptDenialReason ||
-        lar.nonAmortizingFeatures.interestOnlyPayments == InterestOnlyPaymentExempt || lar.lineOfCredit == ExemptLineOfCredit || lar.property.manufacturedHomeLandPropertyInterest == ManufacturedHomeLoanPropertyInterestExempt ||
-        lar.property.manufacturedHomeSecuredProperty == ManufacturedHomeSecuredExempt || lar.reverseMortgage == ExemptMortgageType || lar.nonAmortizingFeatures.negativeAmortization == NegativeAmortizationExempt || lar.nonAmortizingFeatures.otherNonAmortizingFeatures == OtherNonAmortizingFeaturesExempt ||
-        lar.payableToInstitution == PayableToInstitutionExempt
+      lar.ausResult.ausResult5 == AUSResultExempt || lar.AUS.aus1 == AUSExempt || lar.AUS.aus2 == AUSExempt || lar.AUS.aus3 == AUSExempt || lar.AUS.aus4 == AUSExempt || lar.AUS.aus5 == AUSExempt ||
+      lar.nonAmortizingFeatures.balloonPayment == BalloonPaymentExempt || lar.businessOrCommercialPurpose == ExemptBusinessOrCommercialPurpose || lar.applicant.creditScoreType == CreditScoreExempt || lar.coApplicant.creditScoreType == CreditScoreExempt ||
+      lar.denial.denialReason1 == ExemptDenialReason || lar.denial.denialReason2 == ExemptDenialReason || lar.denial.denialReason3 == ExemptDenialReason || lar.denial.denialReason4 == ExemptDenialReason ||
+      lar.nonAmortizingFeatures.interestOnlyPayments == InterestOnlyPaymentExempt || lar.lineOfCredit == ExemptLineOfCredit || lar.property.manufacturedHomeLandPropertyInterest == ManufacturedHomeLoanPropertyInterestExempt ||
+      lar.property.manufacturedHomeSecuredProperty == ManufacturedHomeSecuredExempt || lar.reverseMortgage == ExemptMortgageType || lar.nonAmortizingFeatures.negativeAmortization == NegativeAmortizationExempt || lar.nonAmortizingFeatures.otherNonAmortizingFeatures == OtherNonAmortizingFeaturesExempt ||
+      lar.payableToInstitution == PayableToInstitutionExempt
     }
 
 }

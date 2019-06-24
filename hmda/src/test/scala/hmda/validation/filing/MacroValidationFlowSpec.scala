@@ -12,6 +12,9 @@ import hmda.util.SourceUtils._
 import hmda.model.filing.lar.enums._
 import hmda.model.validation.{EmptyMacroValidationError, MacroValidationError}
 import hmda.model.filing.lar.LarGenerators._
+import hmda.model.filing.submission.SubmissionId
+import hmda.model.filing.ts.TransmittalSheet
+import hmda.parser.filing.ts.TsCsvParser
 
 import scala.concurrent.Future
 
@@ -37,10 +40,19 @@ class MacroValidationFlowSpec
     .map(x => LarCsvParser(x).getOrElse(LoanApplicationRegister()))
     .toList
 
+  val ts = fileSource
+    .getLines()
+    .take(1)
+    .map(x => TsCsvParser(x).getOrElse(TransmittalSheet()))
+    .toList
+
   val total = lars.size
 
   val source: Source[LoanApplicationRegister, NotUsed] = Source
     .fromIterator(() => lars.toIterator)
+
+  val tsSource: Source[TransmittalSheet, NotUsed] = Source
+    .fromIterator(() => ts.toIterator)
 
   def fTotal: Future[Int] = count(source)
 
@@ -80,15 +92,14 @@ class MacroValidationFlowSpec
     }
 
     "pass Q635" in {
-      fTotal.flatMap {totalCount =>
+      fTotal.flatMap { totalCount =>
         macroEdit(loanOriginatedSource,
-          totalCount,
-          q635Ratio,
-          q635Name,
-          applicationApprovedButNotAccepted).map(e =>
+                  totalCount,
+                  q635Ratio,
+                  q635Name,
+                  applicationApprovedButNotAccepted).map(e =>
           e mustBe EmptyMacroValidationError())
       }
-
 
     }
 
@@ -102,23 +113,23 @@ class MacroValidationFlowSpec
 
       val q635Source = loanOriginatedSource.drop(totalFailing) concat q635Fail
       count(q635Source).map(t => t mustBe total)
-      fTotal.flatMap{totalCount =>
+      fTotal.flatMap { totalCount =>
         macroEdit(q635Source,
-          totalCount,
-          q635Ratio,
-          q635Name,
-          applicationApprovedButNotAccepted).map(e =>
+                  totalCount,
+                  q635Ratio,
+                  q635Name,
+                  applicationApprovedButNotAccepted).map(e =>
           e mustBe MacroValidationError(q635Name))
       }
     }
 
     "pass Q636" in {
-      fTotal.flatMap{totalCount =>
+      fTotal.flatMap { totalCount =>
         macroEdit(loanOriginatedSource,
-          totalCount,
-          q636Ratio,
-          q636Name,
-          applicationWithdrawnByApplicant).map(e =>
+                  totalCount,
+                  q636Ratio,
+                  q636Name,
+                  applicationWithdrawnByApplicant).map(e =>
           e mustBe EmptyMacroValidationError())
       }
 
@@ -134,23 +145,23 @@ class MacroValidationFlowSpec
 
       val q636Source = loanOriginatedSource.drop(totalFailing) concat q636Fail
       count(q636Source).map(t => t mustBe total)
-      fTotal.flatMap {totalCount =>
+      fTotal.flatMap { totalCount =>
         macroEdit(q636Source,
-          totalCount,
-          q636Ratio,
-          q636Name,
-          applicationWithdrawnByApplicant).map(e =>
+                  totalCount,
+                  q636Ratio,
+                  q636Name,
+                  applicationWithdrawnByApplicant).map(e =>
           e mustBe MacroValidationError(q636Name))
       }
     }
 
     "pass Q637" in {
-      fTotal.flatMap{totalCount =>
+      fTotal.flatMap { totalCount =>
         macroEdit(loanOriginatedSource,
-          totalCount,
-          q637Ratio,
-          q637Name,
-          fileClosedForIncompleteness).map(e =>
+                  totalCount,
+                  q637Ratio,
+                  q637Name,
+                  fileClosedForIncompleteness).map(e =>
           e mustBe EmptyMacroValidationError())
       }
 
@@ -166,12 +177,12 @@ class MacroValidationFlowSpec
 
       val q637Source = loanOriginatedSource.drop(totalFailing) concat q637Fail
       count(q637Source).map(t => t mustBe total)
-      fTotal.flatMap {totalCount =>
+      fTotal.flatMap { totalCount =>
         macroEdit(q637Source,
-          totalCount,
-          q637Ratio,
-          q637Name,
-          fileClosedForIncompleteness).map(e =>
+                  totalCount,
+                  q637Ratio,
+                  q637Name,
+                  fileClosedForIncompleteness).map(e =>
           e mustBe MacroValidationError(q637Name))
       }
     }
@@ -219,12 +230,13 @@ class MacroValidationFlowSpec
     }
 
     "pass Q640" in {
-      fTotal.flatMap{totalCount =>
+      fTotal.flatMap { totalCount =>
         macroEdit(incomeGreaterThan10,
-          totalCount,
-          q640Ratio,
-          q640Name,
-          incomeLessThan10).map(e => e mustBe EmptyMacroValidationError())
+                  totalCount,
+                  q640Ratio,
+                  q640Name,
+                  incomeLessThan10).map(e =>
+          e mustBe EmptyMacroValidationError())
       }
 
     }
@@ -238,9 +250,9 @@ class MacroValidationFlowSpec
 
       val q640Source = source.drop(totalFailing) concat q640Fail
       count(q640Source).map(t => t mustBe total)
-      fTotal.flatMap{totalCount =>
-        macroEdit(q640Source, totalCount, q640Ratio, q640Name, incomeLessThan10).map(
-          e => e mustBe MacroValidationError(q640Name))
+      fTotal.flatMap { totalCount =>
+        macroEdit(q640Source, totalCount, q640Ratio, q640Name, incomeLessThan10)
+          .map(e => e mustBe MacroValidationError(q640Name))
       }
 
     }
@@ -261,13 +273,14 @@ class MacroValidationFlowSpec
       }
 
       val failSource = q635Fail concat q636Fail
-      macroValidation(failSource).map(
-        xs =>
-          xs mustBe List(
-            MacroValidationError(q635Name),
-            MacroValidationError(q636Name),
-            MacroValidationError(q638Name)
-        ))
+      macroValidation(failSource, tsSource, SubmissionId("somelei-2018-33"))
+        .map(
+          xs =>
+            xs mustBe List(
+              MacroValidationError(q635Name),
+              MacroValidationError(q636Name),
+              MacroValidationError(q638Name)
+          ))
 
     }
 
