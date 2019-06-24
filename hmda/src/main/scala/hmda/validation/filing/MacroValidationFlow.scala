@@ -27,6 +27,7 @@ object MacroValidationFlow {
   final val q638Name = "Q638"
   final val q639Name = "Q639"
   final val q640Name = "Q640"
+  final val q646Name = "Q646"
 
   val config = ConfigFactory.load()
   final val q634Threshold = config.getInt("edits.Q634.threshold")
@@ -100,6 +101,20 @@ object MacroValidationFlow {
     } yield {
       val ratio = editCount.toDouble / totalCount.toDouble
       if (ratio > editRatio) MacroValidationError(editName)
+      else EmptyMacroValidationError()
+    }
+  }
+
+  def macroEditAny[as: AS, mat: MAT, ec: EC](
+                                              source: Source[LoanApplicationRegister, NotUsed],
+                                              editName: String,
+                                              predicate: LarPredicate): Future[ValidationError] = {
+    for {
+      editCount <- count(
+        source
+          .filter(predicate))
+    } yield {
+      if (editCount != 0) MacroValidationError(editName)
       else EmptyMacroValidationError()
     }
   }
@@ -198,6 +213,10 @@ object MacroValidationFlow {
     q640Total(source).flatMap(count =>
       macroEdit(source, count, q640Ratio, q640Name, incomeLessThan10))
 
+  def Q646[as: AS, mat: MAT, ec: EC](source: Source[LoanApplicationRegister, NotUsed])
+  : Future[ValidationError] =
+    macroEditAny(source, q646Name, exemptionTaken)
+
   //Q634
   def homePurchaseLoanOriginated: LarPredicate =
     (lar: LoanApplicationRegister) =>
@@ -265,5 +284,17 @@ object MacroValidationFlow {
         })
     )
   }
+
+  //Q646
+  def exemptionTaken: LarPredicate =
+    (lar: LoanApplicationRegister) => {
+      lar.applicationSubmission == ApplicationSubmissionExempt || lar.ausResult.ausResult1 == AUSResultExempt || lar.ausResult.ausResult2 == AUSResultExempt || lar.ausResult.ausResult3 == AUSResultExempt || lar.ausResult.ausResult4 == AUSResultExempt ||
+        lar.ausResult.ausResult5 == AUSResultExempt || lar.AUS.aus1 == AUSExempt || lar.AUS.aus2 == AUSExempt || lar.AUS.aus3 == AUSExempt || lar.AUS.aus4 == AUSExempt || lar.AUS.aus5 == AUSExempt ||
+        lar.nonAmortizingFeatures.balloonPayment == BalloonPaymentExempt || lar.businessOrCommercialPurpose == ExemptBusinessOrCommercialPurpose || lar.applicant.creditScoreType == CreditScoreExempt || lar.coApplicant.creditScoreType == CreditScoreExempt ||
+        lar.denial.denialReason1 == ExemptDenialReason || lar.denial.denialReason2 == ExemptDenialReason || lar.denial.denialReason3 == ExemptDenialReason || lar.denial.denialReason4 == ExemptDenialReason ||
+        lar.nonAmortizingFeatures.interestOnlyPayments == InterestOnlyPaymentExempt || lar.lineOfCredit == ExemptLineOfCredit || lar.property.manufacturedHomeLandPropertyInterest == ManufacturedHomeLoanPropertyInterestExempt ||
+        lar.property.manufacturedHomeSecuredProperty == ManufacturedHomeSecuredExempt || lar.reverseMortgage == ExemptMortgageType || lar.nonAmortizingFeatures.negativeAmortization == NegativeAmortizationExempt || lar.nonAmortizingFeatures.otherNonAmortizingFeatures == OtherNonAmortizingFeaturesExempt ||
+        lar.payableToInstitution == PayableToInstitutionExempt
+    }
 
 }
