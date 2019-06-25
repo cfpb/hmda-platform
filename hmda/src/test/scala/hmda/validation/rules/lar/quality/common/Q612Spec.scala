@@ -2,7 +2,12 @@ package hmda.validation.rules.lar.quality.common
 
 import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.lar.enums.{FannieMae, FreddieMac, HighCostMortgage, NotHighCostMortgage}
+import hmda.model.filing.lar.enums.{
+  FannieMae,
+  FreddieMac,
+  HighCostMortgage,
+  NotHighCostMortgage
+}
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 import hmda.validation.rules.lar.quality.common.Q612
