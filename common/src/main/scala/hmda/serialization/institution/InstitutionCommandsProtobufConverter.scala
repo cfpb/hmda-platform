@@ -91,6 +91,7 @@ object InstitutionCommandsProtobufConverter {
   ): DeleteInstitutionMessage = {
     DeleteInstitutionMessage(
       cmd.LEI,
+      cmd.activityYear,
       resolver.toSerializationFormat(cmd.replyTo)
     )
   }
@@ -101,7 +102,7 @@ object InstitutionCommandsProtobufConverter {
   ): DeleteInstitution = {
     val msg = DeleteInstitutionMessage.parseFrom(bytes)
     val actorRef = resolver.resolveActorRef(msg.replyTo)
-    DeleteInstitution(msg.lei, actorRef)
+    DeleteInstitution(msg.lei, msg.activityYear, actorRef)
   }
 
   def addFilingFromProtobuf(bytes: Array[Byte],

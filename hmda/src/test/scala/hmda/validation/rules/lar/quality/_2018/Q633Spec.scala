@@ -1,11 +1,10 @@
-package hmda.validation.rules.lar.quality.common
+package hmda.validation.rules.lar.quality._2018
 
 import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
-import hmda.validation.rules.lar.quality.common.Q633
 
 class Q633Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = Q633

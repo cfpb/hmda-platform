@@ -108,7 +108,7 @@ object ModifiedLarPublisher {
             .withAttributes(S3Attributes.settings(s3Settings))
 
           def removeLei: Future[Int] =
-            modifiedLarRepo.deleteByLei(submissionId.lei, filingYear)
+            modifiedLarRepo.deleteByLei(submissionId)
 
           val mlarSource: Source[ModifiedLoanApplicationRegister, NotUsed] =
             readRawData(submissionId)
@@ -135,7 +135,7 @@ object ModifiedLarPublisher {
               )
               .mapAsync(parallelism)(enriched =>
                 modifiedLarRepo
-                  .insert(enriched, submissionId.toString, filingYear))
+                  .insert(enriched, submissionId))
               .toMat(Sink.ignore)(Keep.right)
 
           //generate S3 files and write to PG

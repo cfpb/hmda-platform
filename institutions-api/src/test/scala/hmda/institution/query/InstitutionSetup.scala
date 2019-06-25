@@ -7,9 +7,12 @@ import slick.dbio.DBIOAction
 import scala.concurrent.duration._
 import scala.concurrent.Await
 
-trait InstitutionSetup extends InstitutionComponent {
+trait InstitutionSetup extends InstitutionEmailComponent {
 
-  implicit val institutionRepository = new InstitutionRepository(dbConfig)
+  implicit val institutionRepository2018 = new InstitutionRepository2018(
+    dbConfig)
+  implicit val institutionRepository2019 = new InstitutionRepository2019(
+    dbConfig)
   implicit val emailRepository = new InstitutionEmailsRepository(dbConfig)
   val db = emailRepository.db
 
@@ -37,8 +40,9 @@ trait InstitutionSetup extends InstitutionComponent {
     import dbConfig.profile.api._
     val setup = db.run(
       DBIOAction.seq(
-        institutionsTable.schema.create,
-        institutionsTable ++= Seq(
+        institutionsTable2018.schema.create,
+        institutionsTable2019.schema.create,
+        institutionsTable2018 ++= Seq(
           instA,
           instB,
           instE
@@ -56,7 +60,8 @@ trait InstitutionSetup extends InstitutionComponent {
 
   def tearDown() = {
     Await.result(emailRepository.dropSchema(), duration)
-    Await.result(institutionRepository.dropSchema(), duration)
+    Await.result(institutionRepository2018.dropSchema(), duration)
+    Await.result(institutionRepository2019.dropSchema(), duration)
   }
 
 }
