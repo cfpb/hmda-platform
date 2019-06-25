@@ -1,4 +1,4 @@
-package hmda.regulator.query
+package hmda.regulator.query.component
 
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
@@ -53,13 +53,13 @@ trait RegulatorComponent2018 {
        topHolderName,
        hmdaFiler) <> (InstitutionEntity.tupled, InstitutionEntity.unapply)
   }
-  val institutionsTable = TableQuery[InstitutionsTable]
+  val institutionsTable2018 = TableQuery[InstitutionsTable]
 
   class InstitutionRepository2018(val config: DatabaseConfig[JdbcProfile])
       extends TableRepository[InstitutionsTable, String] {
 
     override val table: config.profile.api.TableQuery[InstitutionsTable] =
-      institutionsTable
+      institutionsTable2018
 
     override def getId(row: InstitutionsTable): config.profile.api.Rep[Id] =
       row.lei
@@ -108,17 +108,17 @@ trait RegulatorComponent2018 {
       (id, lei, emailDomain) <> (InstitutionEmailEntity.tupled, InstitutionEmailEntity.unapply)
 
     def institutionFK =
-      foreignKey("INST_FK", lei, institutionsTable)(
+      foreignKey("INST_FK", lei, institutionsTable2018)(
         _.lei,
         onUpdate = ForeignKeyAction.Restrict,
         onDelete = ForeignKeyAction.Cascade)
   }
 
-  val institutionEmailsTable = TableQuery[InstitutionEmailsTable]
+  val institutionEmailsTable2018 = TableQuery[InstitutionEmailsTable]
 
   class InstitutionEmailsRepository2018(val config: DatabaseConfig[JdbcProfile])
       extends TableRepository[InstitutionEmailsTable, Int] {
-    val table = institutionEmailsTable
+    val table = institutionEmailsTable2018
     def getId(table: InstitutionEmailsTable) = table.id
     def deleteById(id: Int) = db.run(filterById(id).delete)
 
@@ -175,13 +175,13 @@ trait RegulatorComponent2018 {
       ) <> (TransmittalSheetEntity.tupled, TransmittalSheetEntity.unapply)
   }
 
-  val transmittalSheetTable = TableQuery[TransmittalSheetTable]
+  val transmittalSheetTable2018 = TableQuery[TransmittalSheetTable]
 
   class TransmittalSheetRepository2018(val config: DatabaseConfig[JdbcProfile])
       extends TableRepository[TransmittalSheetTable, String] {
 
     override val table: config.profile.api.TableQuery[TransmittalSheetTable] =
-      transmittalSheetTable
+      transmittalSheetTable2018
 
     override def getId(row: TransmittalSheetTable): config.profile.api.Rep[Id] =
       row.lei
@@ -467,13 +467,13 @@ trait RegulatorComponent2018 {
 
   }
 
-  val larTable = TableQuery[LarTable]
+  val larTable2018 = TableQuery[LarTable]
 
   class LarRepository2018(val config: DatabaseConfig[JdbcProfile])
       extends TableRepository[LarTable, String] {
 
     override val table: config.profile.api.TableQuery[LarTable] =
-      larTable
+      larTable2018
 
     override def getId(row: LarTable): config.profile.api.Rep[Id] =
       row.lei
