@@ -71,7 +71,6 @@ object HmdaValidationError
 
   val config = ConfigFactory.load()
   val futureTimeout = config.getInt("hmda.actor.timeout")
-  val processingYear = config.getInt("hmda.filing.year")
 
   implicit val timeout: Timeout = Timeout(futureTimeout.seconds)
 
@@ -107,7 +106,10 @@ object HmdaValidationError
         log.info(s"Syntactical / Validity validation started for $submissionId")
 
         val fValidationContext =
-          validationContext(processingYear, sharding, ctx, submissionId)
+          validationContext(submissionId.period.toInt,
+                            sharding,
+                            ctx,
+                            submissionId)
 
         val fSyntacticalValidity = for {
           validationContext <- fValidationContext
@@ -574,9 +576,18 @@ object HmdaValidationError
       .collect {
         case Right(lar) => lar
       }
+    val tsSource = uploadConsumerRawStr(ctx, submissionId)
+      .take(1)
+      .via(framing("\n"))
+      .map(_.utf8String)
+      .map(_.trim)
+      .map(s => TsCsvParser(s))
+      .collect {
+        case Right(ts) => ts
+      }
 
     for {
-      macroEdits <- macroValidation(larSource)
+      macroEdits <- macroValidation(larSource, tsSource, submissionId)
     } yield {
       macroEdits
     }

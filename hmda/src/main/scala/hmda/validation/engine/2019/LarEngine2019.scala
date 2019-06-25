@@ -3,8 +3,7 @@ package hmda.validation.engine
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.lar.quality._2019.Q644
-import hmda.validation.rules.lar.quality._2019.Q643
-import hmda.validation.rules.lar.quality._2019.Q632
+import hmda.validation.rules.lar.quality._2019.{Q633, Q643, Q632}
 import hmda.validation.rules.lar.quality.common._
 import hmda.validation.rules.lar.syntactical.{S300, S301}
 import hmda.validation.rules.lar.validity._
