@@ -2,17 +2,15 @@ package hmda.regulator.query
 
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
+import hmda.query.ts.TransmittalSheetEntity
 import hmda.regulator.query.lar.{LarEntityImpl, _}
 import hmda.regulator.query.panel.{InstitutionEmailEntity, InstitutionEntity}
-import slick.basic.DatabasePublisher
-import slick.jdbc.{ResultSetConcurrency, ResultSetType}
-import hmda.query.ts.TransmittalSheetEntity
-import slick.basic.DatabaseConfig
-import slick.jdbc.JdbcProfile
+import slick.basic.{DatabaseConfig, DatabasePublisher}
+import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
 
 import scala.concurrent.Future
 
-trait RegulatorComponent {
+trait RegulatorComponent2018 {
 
   import dbConfig.profile.api._
 
@@ -57,7 +55,7 @@ trait RegulatorComponent {
   }
   val institutionsTable = TableQuery[InstitutionsTable]
 
-  class InstitutionRepository(val config: DatabaseConfig[JdbcProfile])
+  class InstitutionRepository2018(val config: DatabaseConfig[JdbcProfile])
       extends TableRepository[InstitutionsTable, String] {
 
     override val table: config.profile.api.TableQuery[InstitutionsTable] =
@@ -118,7 +116,7 @@ trait RegulatorComponent {
 
   val institutionEmailsTable = TableQuery[InstitutionEmailsTable]
 
-  class InstitutionEmailsRepository(val config: DatabaseConfig[JdbcProfile])
+  class InstitutionEmailsRepository2018(val config: DatabaseConfig[JdbcProfile])
       extends TableRepository[InstitutionEmailsTable, Int] {
     val table = institutionEmailsTable
     def getId(table: InstitutionEmailsTable) = table.id
@@ -179,7 +177,7 @@ trait RegulatorComponent {
 
   val transmittalSheetTable = TableQuery[TransmittalSheetTable]
 
-  class TransmittalSheetRepository(val config: DatabaseConfig[JdbcProfile])
+  class TransmittalSheetRepository2018(val config: DatabaseConfig[JdbcProfile])
       extends TableRepository[TransmittalSheetTable, String] {
 
     override val table: config.profile.api.TableQuery[TransmittalSheetTable] =
@@ -471,7 +469,7 @@ trait RegulatorComponent {
 
   val larTable = TableQuery[LarTable]
 
-  class LarRepository(val config: DatabaseConfig[JdbcProfile])
+  class LarRepository2018(val config: DatabaseConfig[JdbcProfile])
       extends TableRepository[LarTable, String] {
 
     override val table: config.profile.api.TableQuery[LarTable] =
