@@ -2,6 +2,7 @@ package hmda.validation.engine
 
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.context.ValidationContext
+import hmda.validation.rules.lar.quality._2019.{Q645_1, Q645_2}
 import hmda.validation.rules.lar.quality._2019.Q644
 import hmda.validation.rules.lar.quality._2019.{Q633, Q643, Q632}
 import hmda.validation.rules.lar.quality.common._
@@ -274,6 +275,8 @@ private[engine] object LarEngine2019
     Q642_1,
     Q642_2,
     Q643,
-    Q644
+    Q644,
+    Q645_1,
+    Q645_2
   )
 }
