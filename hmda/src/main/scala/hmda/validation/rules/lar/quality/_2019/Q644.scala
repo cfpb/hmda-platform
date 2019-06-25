@@ -1,4 +1,4 @@
-package hmda.validation.rules.lar.quality.common
+package hmda.validation.rules.lar.quality._2019
 
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
@@ -10,7 +10,13 @@ import hmda.validation.rules.EditCheck
 object Q644 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q644"
 
-  val results = List(Accept, Caution, Ineligible, Incomplete, Invalid)
+  val results = List(Accept,
+                     Caution,
+                     Ineligible,
+                     Incomplete,
+                     Invalid,
+                     Refer,
+                     OtherAutomatedUnderwritingResult)
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
     when(lar.AUS.aus1 is equalTo(LoanProspector)) {
