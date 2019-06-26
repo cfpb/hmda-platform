@@ -8,9 +8,9 @@ Construction Method,Integer,1 2,
 Occupancy Type,Integer,1 2 3,
 Loan Amount,Numeric,,"Loan amounts are rounded to the midpoint of the nearest $10,000 interval for which the reported value falls (For example a reported value of $117834 would be disclosed as $115000 as the midpoint between values $110000 and $120000)."
 Action Taken,Integer,1 2 3 4 5 6 7 8,
-State,Character Varying,NA,two-letter state code
-County,Character Varying,NA Exempt,state-county FIPS code
-Census Tract,Character Varying,NA,11 digit census tract number 
+State,Character Varying,NA,"two-letter state code"
+County,Character Varying,NA Exempt,"state-county FIPS code"
+Census Tract,Character Varying,NA,"11 digit census tract number"
 Ethnicity of Applicant or Borrower: 1,Character Varying,1 11 12 13 14 2 3 4,
 Ethnicity of Applicant or Borrower: 2,Character Varying,1 11 12 13 14 2,
 Ethnicity of Applicant or Borrower: 3,Character Varying,1 11 12 13 14 2,
@@ -61,7 +61,7 @@ Discount Points,Character Varying,NA Exempt,
 Lender Credits,Character Varying,NA Exempt,
 Interest Rate,Character Varying,NA Exempt,
 Prepayment Penalty Term,Character Varying,NA Exempt,
-Debt-to-Income Ratio,Character Varying,<20% 20%-<30% 30%-<36% 50%-60% >60% NA Exempt,Exact values are reported between 36% and 49%.
+Debt-to-Income Ratio,Character Varying,<20% 20%-<30% 30%-<36% 50%-60% >60% NA Exempt,"Exact values are reported between 36% and 49%."
 Combined Loan-to-Value Ratio,Character Varying,NA Exempt,
 Loan Term,Character Varying,NA Exempt,
 Introductory Rate Period,Character Varying,NA Exempt,
@@ -73,7 +73,7 @@ Property Value,Character Varying,NA Exempt,"Property values are rounded to the m
 Manufactured Home Secured Property Type,Integer,1 2 3 1111,
 Manufactured Home Land Property Interest,Integer,1 2 3 4 5 1111,
 Total Units,Character Varying,1 2 3 4 5-24 25-49 50-99 100-149 >149,
-Multifamily Affordable Units,Character Varying,NA Exempt,Listed as a percentage of total units.
+Multifamily Affordable Units,Character Varying,NA Exempt,"Listed as a percentage of total units."
 Submission of Application,Integer,1 2 3 1111,
 Initially Payable to Your Institution,Integer,1 2 3 1111,
 Automated Underwriting System: 1,Integer,1 2 3 4 5 6 1111,
@@ -85,10 +85,10 @@ Reverse Mortgage,Integer,1 2 1111,
 Open-End Line of Credit,Integer,1 2 1111,
 Business or Commercial Purpose,Integer,1 2 1111,
 Conforming Loan Limit Flag,Character Varying,C NC U NA,"Indicates whether a loan is Conforming (C), Nonconforming (NC), Undetermined (U), or Not Applicable (NA) based on the conforming loan limits determined by FHFA."
-Metropolitan Statistical Area/Metropolitan Division (MSA/MD),Integer,,Field derived from Census data.
-Population,Character Varying,,Field derived from Census data.
-Minority Population %,Character Varying,,Field derived from Census data.
-FFIEC Median Family Income,Character Varying,,Field derived from Census data.
-Tract to MSA/MD Median Family Income %,Character Varying,,Field derived from Census data.
-Number of Owner Occupied Units,Character Varying,,Field derived from Census data.
-Number of 1-to-4 Family Units,Character Varying,,Field derived from Census data.
+Metropolitan Statistical Area/Metropolitan Division (MSA/MD),Integer,,"Field derived from Census data."
+Population,Character Varying,,"Field derived from Census data."
+Minority Population %,Character Varying,,"Field derived from Census data."
+FFIEC Median Family Income,Character Varying,,"Field derived from Census data."
+Tract to MSA/MD Median Family Income %,Character Varying,,"Field derived from Census data."
+Number of Owner Occupied Units,Character Varying,,"Field derived from Census data."
+Number of 1-to-4 Family Units,Character Varying,,"Field derived from Census data."
