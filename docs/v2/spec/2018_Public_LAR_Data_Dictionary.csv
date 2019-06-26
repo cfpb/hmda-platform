@@ -1,4 +1,4 @@
-Field Name,Field Data Type,Valid Values,Notes
+﻿Field Name,Field Data Type,Valid Values,Notes
 Record Identifier,Integer,2,
 Legal Entity Identifier (LEI),Character Varying,,
 Loan Type,Integer,1 2 3 4,
@@ -84,3 +84,11 @@ Automated Underwriting System: 5,Integer,1 2 3 4 5,
 Reverse Mortgage,Integer,1 2 1111,
 Open-End Line of Credit,Integer,1 2 1111,
 Business or Commercial Purpose,Integer,1 2 1111,
+Conforming Loan Limit Flag,Character Varying,C NC U NA,"Indicates whether a loan is Conforming (C), Nonconforming (NC), Undetermined (U), or Not Applicable (NA) based on the conforming loan limits determined by FHFA."
+Metropolitan Statistical Area/Metropolitan Division (MSA/MD),Integer,,"Field derived from Census data."
+Population,Character Varying,,"Field derived from Census data."
+Minority Population %,Character Varying,,"Field derived from Census data."
+FFIEC Median Family Income,Character Varying,,"Field derived from Census data."
+Tract to MSA/MD Median Family Income %,Character Varying,,"Field derived from Census data."
+Number of Owner Occupied Units,Character Varying,,"Field derived from Census data."
+Number of 1-to-4 Family Units,Character Varying,,"Field derived from Census data."
