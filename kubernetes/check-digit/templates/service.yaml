@@ -37,6 +37,7 @@ metadata:
       prefix: /v2/public/uli/
       rewrite: /uli/
       service: {{ template "check-digit.fullname" .}}:{{ .Values.service.port }}
+      timeout_ms: 60000
 spec:
   clusterIP: None
   ports:
