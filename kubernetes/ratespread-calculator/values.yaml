@@ -64,15 +64,15 @@ aws:
 
 
 service:
-  type: NodePort
+  type: ClusterIP
   account:
     name: hmda-service-account
   name: ratespread-calculator
 
-ambassador:
-  port: 80
-  service:
-    type: NodePort
+#ambassador:
+#  port: 80
+#  service:
+#    type: NodePort
 
 ratespread:
   name: ratespread
