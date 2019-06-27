@@ -57,15 +57,15 @@ postgresql:
   ssl: require
 
 service:
-  type: NodePort
+  type: ClusterIP
   account:
     name: hmda-data-browser-api
   name: hmda-data-browser-api
 
-ambassador:
-  port: 80
-  service:
-    type: NodePort
+#ambassador:
+#  port: 80
+#  service:
+#    type: NodePort
 
 databrowser:
   name: databrowser
