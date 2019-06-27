@@ -27,10 +27,11 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
   val sampleInstitution =
     institutionGen
       .suchThat(i => i.LEI != "")
+      .suchThat(i => i.activityYear == 2018)
       .sample
       .getOrElse(Institution.empty.copy(LEI = ""))
   val modified =
-    sampleInstitution.copy(emailDomains = List("sample@bank.com"))
+    sampleInstitution.copy(emailDomains = List("bank.com"))
 
   "An institution" must {
     "be created and read back" in {
@@ -90,8 +91,10 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
       institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))
 
       institutionPersistence ! DeleteInstitution(modified.LEI,
+                                                 modified.activityYear,
                                                  institutionProbe.ref)
-      institutionProbe.expectMessage(InstitutionDeleted(modified.LEI))
+      institutionProbe.expectMessage(
+        InstitutionDeleted(modified.LEI, modified.activityYear))
 
       institutionPersistence ! GetInstitution(maybeInstitutionProbe.ref)
       maybeInstitutionProbe.expectMessage(None)
@@ -102,6 +105,7 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
         system.spawn(InstitutionPersistence.behavior("XXXXX"), actorName)
 
       institutionPersistence ! DeleteInstitution(modified.LEI,
+                                                 modified.activityYear,
                                                  institutionProbe.ref)
       institutionProbe.expectMessage(InstitutionNotExists(modified.LEI))
     }
@@ -139,8 +143,10 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
                               s"${InstitutionPersistence.name}-ABC12345")
 
       institutionPersistence ! DeleteInstitution(modified.LEI,
+                                                 modified.activityYear,
                                                  institutionProbe.ref)
-      institutionProbe.expectMessage(InstitutionDeleted(modified.LEI))
+      institutionProbe.expectMessage(
+        InstitutionDeleted(modified.LEI, modified.activityYear))
 
       institutionPersistence ! GetInstitution(maybeInstitutionProbe.ref)
       maybeInstitutionProbe.expectMessage(None)

@@ -6,9 +6,9 @@ This documentation describes de public HMDA Platform HTTP API
 
 ### Search
 
-* `/institutions?domain=<domain>`
+* `/institutions/period/<period>?domain=<domain>`
 
-   * `GET` - Returns a list of institutions filtered by their email domain. If none are found, an HTTP 404 error code (not found) is returned
+   * `GET` - Returns a list of institutions filtered by their email domain and period (year). If none are found, an HTTP 404 error code (not found) is returned
 
    Example response, with HTTP code 200:
    
@@ -44,10 +44,11 @@ This documentation describes de public HMDA Platform HTTP API
      ]
    } 
    ```
+   * `/institutions/?domain=<domain>` - defaults to the year 2018
 
-* `/institutions?domain=<domain>&lei=<lei>&respondentName=<respondentName>&taxId=<taxId>`
+* `/institutions/<period>?domain=<domain>&lei=<lei>&respondentName=<respondentName>&taxId=<taxId>`
 
-   * `GET` - Returns a list of institutions filtered by field values. If none are found, an HTTP 404 error code (not found) is returned
+   * `GET` - Returns a list of institutions filtered by field values and period (year). If none are found, an HTTP 404 error code (not found) is returned
 
    Example response, with HTTP code 200:
    
@@ -84,11 +85,11 @@ This documentation describes de public HMDA Platform HTTP API
    } 
    ```
    
-* `/institutions/<institutionID>`
+* `/institutions/<institutionID>/period/<period>`
 
     * `GET`
 
-    Retrieves the details of an institution. If not found, returns HTTP code 404
+    Retrieves the details of an institution by LEI and period (year). If not found, returns HTTP code 404
 
     Example Response with HTTP code 200, in `JSON` format:
     

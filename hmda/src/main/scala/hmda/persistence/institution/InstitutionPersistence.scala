@@ -67,7 +67,9 @@ object InstitutionPersistence
             }
           }
         case ModifyInstitution(i, replyTo) =>
-          if (state.institution.map(i => i.LEI).contains(i.LEI)) {
+          if (state.institution
+                .map(i => (i.LEI, i.activityYear))
+                .contains((i.LEI, i.activityYear))) {
             Effect.persist(InstitutionModified(i)).thenRun { _ =>
               log.debug(s"Institution Modified: ${i.toString}")
               val event = InstitutionModified(i)
@@ -83,11 +85,13 @@ object InstitutionPersistence
               replyTo ! InstitutionNotExists(i.LEI)
             }
           }
-        case DeleteInstitution(lei, replyTo) =>
-          if (state.institution.map(i => i.LEI).contains(lei)) {
-            Effect.persist(InstitutionDeleted(lei)).thenRun { _ =>
+        case DeleteInstitution(lei, activityYear, replyTo) =>
+          if (state.institution
+                .map(i => (i.LEI, i.activityYear))
+                .contains((lei, activityYear))) {
+            Effect.persist(InstitutionDeleted(lei, activityYear)).thenRun { _ =>
               log.debug(s"Institution Deleted: $lei")
-              val event = InstitutionDeleted(lei)
+              val event = InstitutionDeleted(lei, activityYear)
               publishInstitutionEvent(
                 lei,
                 InstitutionKafkaEvent("InstitutionDeleted", event))
@@ -127,11 +131,11 @@ object InstitutionPersistence
 
   override val eventHandler
     : (InstitutionState, InstitutionEvent) => InstitutionState = {
-    case (state, InstitutionCreated(i))   => state.copy(Some(i))
-    case (state, InstitutionModified(i))  => modifyInstitution(i, state)
-    case (state, InstitutionDeleted(_))   => state.copy(None)
-    case (state, evt @ FilingAdded(_))    => state.update(evt)
-    case (state, InstitutionNotExists(_)) => state
+    case (state, InstitutionCreated(i))         => state.copy(Some(i))
+    case (state, InstitutionModified(i))        => modifyInstitution(i, state)
+    case (state, InstitutionDeleted(lei, year)) => state.copy(None)
+    case (state, evt @ FilingAdded(_))          => state.update(evt)
+    case (state, InstitutionNotExists(_))       => state
   }
 
   def startShardRegion(sharding: ClusterSharding)

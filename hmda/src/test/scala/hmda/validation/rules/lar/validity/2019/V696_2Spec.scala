@@ -1,4 +1,4 @@
-package hmda.validation.rules.lar.validity
+package hmda.validation.rules.lar.validity.nineteen
 
 import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister

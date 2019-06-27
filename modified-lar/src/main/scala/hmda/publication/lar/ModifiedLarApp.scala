@@ -92,7 +92,7 @@ object ModifiedLarApp extends App {
     case Success(tractMap) =>
       // database configuration is located in `common` project
       val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
-      val repo = new ModifiedLarRepository("modifiedlar2018", databaseConfig)
+      val repo = new ModifiedLarRepository(databaseConfig)
       val modifiedLarPublisher =
         system.spawn(ModifiedLarPublisher.behavior(tractMap, repo),
                      ModifiedLarPublisher.name)

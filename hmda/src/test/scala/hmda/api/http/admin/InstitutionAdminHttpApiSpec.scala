@@ -54,7 +54,10 @@ class InstitutionAdminHttpApiSpec
 
   val lei = Random.alphanumeric.take(10).mkString
   val sampleInstitution =
-    institutionGen.sample.getOrElse(Institution.empty).copy(LEI = lei)
+    institutionGen.sample
+      .getOrElse(Institution.empty)
+      .copy(LEI = lei)
+      .copy(activityYear = 2018)
 
   val modified =
     sampleInstitution.copy(emailDomains = List("email@bank.com"))
@@ -103,7 +106,7 @@ class InstitutionAdminHttpApiSpec
     }
 
     "Get an institution" in {
-      Get(s"/institutions/${sampleInstitution.LEI}") ~> institutionAdminRoutes(
+      Get(s"/institutions/${sampleInstitution.LEI}/year/2018") ~> institutionAdminRoutes(
         oAuth2Authorization) ~> check {
         status mustBe StatusCodes.OK
         responseAs[Institution] mustBe sampleInstitution
@@ -111,7 +114,7 @@ class InstitutionAdminHttpApiSpec
     }
 
     "Return a 404 on a wrongpath to get an institution " in {
-      Get(s"/wrongpath/${sampleInstitution.LEI}") ~> Route.seal(
+      Get(s"/wrongpath/${sampleInstitution.LEI}/year/2018") ~> Route.seal(
         institutionAdminRoutes(oAuth2Authorization)) ~> check {
         status mustBe StatusCodes.NotFound
       }
