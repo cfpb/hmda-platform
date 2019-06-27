@@ -66,15 +66,15 @@ filter:
     bankfilterlist: BANK1LEIFORTEST12345,BANK3LEIFORTEST12345,BANK4LEIFORTEST12345,999999LE3ZOZXUS7W648,28133080042813308004,B90YWS6AFX2LGWOXJ1LD
 
 service:
-  type: NodePort
+  type: ClusterIP
   account:
     name: hmda-service-account
   name: hmda-reporting
 
-ambassador:
-  port: 80
-  service:
-    type: NodePort
+#ambassador:
+#  port: 80
+#  service:
+#    type: NodePort
 
 reporting:
   name: reporting
