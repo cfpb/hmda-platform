@@ -24,15 +24,12 @@ metadata:
       apiVersion: ambassador/v0
       kind: Mapping
       name: hmda_databrowser_mapping
+      ambassador_id: ambassador-default-1
       prefix: /v2/data-browser-api/
       service: {{ .Values.service.name }}:{{ .Values.databrowser.port }}
       rate_limits:
         - descriptor: hmda-reporting
 spec:
-  type: {{ .Values.ambassador.service.type }}
+  clusterIP: None  
   ports:
-  - name: ambassador-hmda-data-browser-api
-    port: {{ .Values.ambassador.port }}
-    targetPort: {{ .Values.ambassador.port }}
-  selector:
-    service: ambassador-hmda-data-browser-api
+    - port: {{ .Values.databrowser.port }}
