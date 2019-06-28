@@ -31,7 +31,6 @@ import Delimiter.fileEnding
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import hmda.dataBrowser.services._
 import monix.eval.Task
-import cats.implicits._
 import hmda.dataBrowser.Settings
 import enumeratum._
 
@@ -159,10 +158,14 @@ trait DataBrowserDirectives extends Settings {
 
   private def extractYears: Directive1[Option[QueryField]] =
     parameters("years".as(CsvSeq[Int]) ? Nil).flatMap {
-      case Nil => {
+      case Nil =>
         import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-        complete((BadRequest, "must provide year parameter"))
-      }
+        complete((BadRequest, "must provide years parameter"))
+
+      case xs if xs.exists(year => (year < 2017) || (year > 2019)) =>
+        import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+        complete((BadRequest, s"must provide years in the range of 2017-2019, you have provided (${xs.mkString(", ")})"))
+
       case xs => provide(Option(QueryField(name = "year", xs.map(_.toString), dbName = "filing_year", isAllSelected = false)))
     }
 
