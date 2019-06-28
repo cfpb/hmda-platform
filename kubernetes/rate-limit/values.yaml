@@ -19,7 +19,7 @@ ambassador:
   name: ambassador-rate-limit
   port: 60080
   service:
-    type: NodePort
+    type: ClusterIP
 
 ingress:
   enabled: false
