@@ -6,7 +6,7 @@ metadata:
 spec:
   selector:
     app: hmda-reporting
-  type: NodePort
+  type: ClusterIP
   ports:
   - name: {{ .Values.reporting.name }}
     protocol: {{ .Values.reporting.protocol }}
@@ -24,15 +24,12 @@ metadata:
       apiVersion: ambassador/v0
       kind: Mapping
       name: hmda_reporting_mapping
+      ambassador_id: ambassador-default-1
       prefix: /v2/reporting/
       service: {{ .Values.service.name }}:{{ .Values.reporting.port }}
       rate_limits:
         - descriptor: hmda-reporting
 spec:
-  type: {{ .Values.ambassador.service.type }}
+  clusterIP: None  
   ports:
-  - name: ambassador-hmda-reporting
-    port: {{ .Values.ambassador.port }}
-    targetPort: {{ .Values.ambassador.port }}
-  selector:
-    service: ambassador-hmda-reporting
+    - port: {{ .Values.reporting.port }}

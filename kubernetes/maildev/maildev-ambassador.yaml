@@ -11,12 +11,8 @@ metadata:
       name: maildev_mapping
       prefix: /mail/
       rewrite: /
-      service: maildev
+      service: maildev:80
 spec:
-  type: NodePort
+  clusterIP: None
   ports:
-  - name: maildev-ambassador
-    port: 80
-    targetPort: 80
-  selector:
-    service: maildev-ambassador
+    - port: 80

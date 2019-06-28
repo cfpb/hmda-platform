@@ -10,7 +10,7 @@ image:
   pullPolicy: IfNotPresent
 
 service:
-  type: NodePort
+  type: ClusterIP
   port: 9092
   targetPort: 9092
   name: http-inst-api
@@ -19,11 +19,11 @@ kafka:
   institutionsGroup: institution-group
   institutionsTopic: institution
 
-ambassador:
-  name: institutions-api-ambassador
-  service:
-    type: NodePort
-  port: 80
+#ambassador:
+#  name: institutions-api-ambassador
+#  service:
+#    type: NodePort
+#  port: 80
 
 ingress:
   enabled: false
