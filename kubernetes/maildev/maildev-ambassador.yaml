@@ -15,4 +15,4 @@ metadata:
 spec:
   clusterIP: None
   ports:
-    - ports: 80
+    - port: 80
