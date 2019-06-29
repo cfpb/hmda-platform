@@ -61,6 +61,18 @@ trait DataBrowserDirectives {
             QueryField(name = "msamd", xs.map(_.toString), dbName = "msa_md")))
       }
 
+  private def extractYears: Directive1[Option[QueryField]] =
+    parameters("years".as(CsvSeq[Int]) ? Nil)
+      .flatMap {
+        case Nil => provide(None)
+        case xs =>
+          provide(
+            Option(
+              QueryField(name = "year",
+                         xs.map(_.toString),
+                         dbName = "filing_year")))
+      }
+
   private def extractStates: Directive1[Option[QueryField]] =
     parameters("states".as(CsvSeq[String]) ? Nil)
       .flatMap { rawStates =>
@@ -321,12 +333,12 @@ trait DataBrowserDirectives {
     }
   }
 
-  def extractMsaAndStateBrowserFields(
+  def extractYearsAndMsaAndStateBrowserFields(
       innerRoute: List[QueryField] => Route): Route =
-    (extractMsaMds & extractStates) { (msaMds, states) =>
-      if (msaMds.nonEmpty || states.nonEmpty)
-        innerRoute(List(msaMds, states).flatten)
-      else complete(BadRequest, ProvideStatesOrMsaMds())
+    (extractYears & extractMsaMds & extractStates) { (years, msaMds, states) =>
+      if (years.nonEmpty && (msaMds.nonEmpty || states.nonEmpty))
+        innerRoute(List(years, msaMds, states).flatten)
+      else complete(BadRequest, ProvideYearAndStatesOrMsaMds())
     }
 
   def extractFieldsForAggregation(

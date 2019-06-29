@@ -54,7 +54,7 @@ object Routes {
       } ~
         // GET /view/aggregations
         (path("aggregations") & get) {
-          extractMsaAndStateBrowserFields { mandatoryFields =>
+          extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
             extractFieldsForAggregation { remainingQueryFields =>
               val allFields = mandatoryFields ++ remainingQueryFields
               complete(
@@ -70,7 +70,7 @@ object Routes {
         } ~
         // GET /view/csv
         (path("csv") & get) {
-          extractMsaAndStateBrowserFields { mandatoryFields =>
+          extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
             extractFieldsForRawQueries { remainingQueryFields =>
               complete(
                 HttpEntity(`text/plain(UTF-8)`,
@@ -81,7 +81,7 @@ object Routes {
         } ~
         // GET /view/pipe
         (path("pipe") & get) {
-          extractMsaAndStateBrowserFields { mandatoryFields =>
+          extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
             extractFieldsForRawQueries { remainingQueryFields =>
               complete(
                 HttpEntity(`text/plain(UTF-8)`,

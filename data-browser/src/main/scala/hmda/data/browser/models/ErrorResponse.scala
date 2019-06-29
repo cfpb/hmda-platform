@@ -31,9 +31,9 @@ final case class InvalidStates(
       s"valid states are ${State.values.map(_.entryName).mkString(", ")}")
     extends ErrorResponse
 
-final case class ProvideStatesOrMsaMds(
+final case class ProvideYearAndStatesOrMsaMds(
     errorType: String = "provide-atleast-msamds-or-states",
-    message: String = "Provide either states or msamds or both")
+    message: String = "Provide year and either states or msamds or both")
     extends ErrorResponse
 
 final case class NotEnoughFilterCriterias(
