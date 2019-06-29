@@ -27,6 +27,21 @@ import hmda.util.streams.FlowUtils._
 
 import scala.util.{Failure, Success, Try}
 
+import akka.actor.{ActorSystem, Props}
+import akka.event.Logging
+import akka.pattern.pipe
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.server.Route
+import akka.stream.ActorMaterializer
+import com.typesafe.config.ConfigFactory
+import hmda.api.http.HttpServer
+import hmda.api.http.routes.BaseHttpApi
+import akka.http.scaladsl.server.Directives._
+import akka.util.Timeout
+
+import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
+
 trait ULIHttpApi extends HmdaTimeDirectives {
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -134,27 +149,29 @@ trait ULIHttpApi extends HmdaTimeDirectives {
             }
           } ~
           path("validate" / "csv") {
-            timedPost { _ =>
-              respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-                fileUpload("file") {
-                  case (_, byteSource) =>
-                    val headerSource =
-                      Source.fromIterator(() =>
-                        List("uli,isValid\n").toIterator)
-                    val validated = processUliFile(byteSource)
-                      .map(u => u.toCSV)
-                      .map(l => l + "\n")
-                      .map(s => ByteString(s))
+            toStrictEntity(15.seconds) {
+              timedPost { _ =>
+                respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+                  fileUpload("file") {
+                    case (_, byteSource) =>
+                      val headerSource =
+                        Source.fromIterator(() =>
+                          List("uli,isValid\n").toIterator)
+                      val validated = processUliFile(byteSource)
+                        .map(u => u.toCSV)
+                        .map(l => l + "\n")
+                        .map(s => ByteString(s))
 
-                    val csv =
-                      headerSource.map(s => ByteString(s)).concat(validated)
-                    complete(
-                      HttpEntity.Chunked.fromData(
-                        `text/csv`.toContentType(HttpCharsets.`UTF-8`),
-                        csv))
+                      val csv =
+                        headerSource.map(s => ByteString(s)).concat(validated)
+                      complete(
+                        HttpEntity.Chunked.fromData(
+                          `text/csv`.toContentType(HttpCharsets.`UTF-8`),
+                          csv))
 
-                  case _ =>
-                    complete(ToResponseMarshallable(StatusCodes.BadRequest))
+                    case _ =>
+                      complete(ToResponseMarshallable(StatusCodes.BadRequest))
+                  }
                 }
               }
             }
