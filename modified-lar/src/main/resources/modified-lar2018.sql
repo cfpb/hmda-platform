@@ -194,7 +194,18 @@ ALTER TABLE ONLY hmda_user.modifiedlar2018
 --
 
 CREATE INDEX modifiedlar2018_lei_idx ON hmda_user.modifiedlar2018 USING btree (lei);
-
+CREATE INDEX modifiedlar2018_sex_categorization_idx ON hmda_user.modifiedlar2018 USING btree (sex_categorization);
+CREATE INDEX modifiedlar2018_race_categorization_idx ON hmda_user.modifiedlar2018 USING btree (race_categorization);
+CREATE INDEX modifiedlar2018_ethnicity_categorization_idx ON hmda_user.modifiedlar USING btree (ethnicity_categorization);
+CREATE INDEX modifiedlar2018_loan_product_type_idx ON hmda_user.modifiedlar2018 USING btree (loan_product_type);
+CREATE INDEX modifiedlar2018_msa_md_idx ON hmda_user.modifiedlar2018 USING btree (msa_md);
+CREATE INDEX modifiedlar2018_state_idx ON hmda_user.modifiedlar2018 USING btree (state);
+CREATE INDEX modifiedlar2018_action_taken_type_idx ON hmda_user.modifiedlar2018 USING btree (action_taken_type);
+CREATE INDEX modifiedlar2018_construction_method_idx ON hmda_user.modifiedlar2018 USING btree (construction_method);
+CREATE INDEX modifiedlar2018_dwelling_category_idx ON hmda_user.modifiedlar2018 USING btree (dwelling_category);
+CREATE INDEX modifiedlar2018_lien_status_idx ON hmda_user.modifiedlar2018 USING btree (lien_status);
+CREATE INDEX modifiedlar2018_loan_purpose_idx ON hmda_user.modifiedlar2018 USING btree (loan_purpose);
+CREATE INDEX modifiedlar2018_loan_type_idx ON hmda_user.modifiedlar2018 USING btree (loan_type);
 
 -- Completed on 2019-06-05 11:44:50 EDT
 
