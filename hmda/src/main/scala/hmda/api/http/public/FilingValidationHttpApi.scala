@@ -14,7 +14,7 @@ import hmda.api.http.model.public.{
 }
 import hmda.model.validation._
 import hmda.parser.ParserErrorModel.ParserValidationError
-import hmda.model.filing.EditDescriptionLookup._
+import hmda.model.filing.EditDescriptionLookup
 
 trait FilingValidationHttpApi {
 
@@ -35,8 +35,9 @@ trait FilingValidationHttpApi {
         .getOrElse(errorType, List())
         .map(
           e =>
-            ValidationSingleErrorSummary(e.editName,
-                                         lookupDescription(e.editName, period)))
+            ValidationSingleErrorSummary(
+              e.editName,
+              EditDescriptionLookup.lookupDescription(e.editName, period)))
     }
 
     SingleValidationErrorResult(
