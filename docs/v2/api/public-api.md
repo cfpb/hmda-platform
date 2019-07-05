@@ -396,18 +396,27 @@ This documentation describes de public HMDA Platform HTTP API
             "errors": []
         },
         "validity": {
-            "errors": [
-                "V619-1",
-                "V619-2",
-                "V619-3",
-                "V676-3",
-                "V676-5",
-                "V677-2"
+             "errors": [
+                {
+                    "edit": "V614-3",
+                    "description": "If Reverse Mortgage equals 1, then Preapproval must equal 2."
+                },
+                {
+                    "edit": "V614-4",
+                    "description": "If Open-End Line of Credit equals 1, then Preapproval must equal 2."
+                },
+                {
+                    "edit": "V615-2",
+                    "description": "If Manufactured Home Land Property Interest equals 1, 2, 3 or 4, then Construction Method must equal 2."
+                }
             ]
         },
         "quality": {
             "errors": [
-                "Q617"
+                {
+                    "edit": "Q608",
+                    "description": "If Action Taken equals 1, then the Action Taken Date generally should occur after the Application Date."
+                }
             ]
         }
     }
