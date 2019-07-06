@@ -2,11 +2,10 @@ package hmda.validation.engine
 
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.context.ValidationContext
-import hmda.validation.rules.lar.quality._2018.{Q632, Q633, Q643, Q644}
+import hmda.validation.rules.lar.quality._2018._
 import hmda.validation.rules.lar.quality.common._
 import hmda.validation.rules.lar.syntactical.{S300, S301}
-import hmda.validation.rules.lar.validity._
-import hmda.validation.rules.lar.validity.eighteen
+import hmda.validation.rules.lar.validity.{eighteen, _}
 
 private[engine] object LarEngine2018
     extends ValidationEngine[LoanApplicationRegister] {
