@@ -3,7 +3,11 @@ package hmda.validation.rules.lar.quality._2019
 import hmda.census.records.CensusRecords
 import hmda.model.census.{Census, State}
 import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.validation.dsl.{ValidationFailure, ValidationResult, ValidationSuccess}
+import hmda.validation.dsl.{
+  ValidationFailure,
+  ValidationResult,
+  ValidationSuccess
+}
 import hmda.validation.rules.EditCheck
 
 object Q604 extends EditCheck[LoanApplicationRegister] {
