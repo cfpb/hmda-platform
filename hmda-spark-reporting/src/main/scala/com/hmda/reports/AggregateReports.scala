@@ -44,6 +44,11 @@ object AggregateReports {
     val AWS_SECRET_KEY = sys.env("SECRET_KEY").trim()
     val AWS_BUCKET = sys.env("AWS_ENV").trim()
 
+    val numPartitions = "" //sys.env("NUM_PARTITIONS").trim()
+    val partitionColumn = "" //sys.env("PARTITION_COLUMN").trim()
+    val lowerBound = "" //sys.env("LOWER_BOUND").trim()
+    val upperBound = "" //sys.env("UPPER_BOUND").trim()
+
     val awsCredentialsProvider = new AWSStaticCredentialsProvider(
       new BasicAWSCredentials(AWS_ACCESS_KEY, AWS_SECRET_KEY))
     val region = "us-east-1"
@@ -98,11 +103,16 @@ object AggregateReports {
       // async boundary begin
       .async
       .mapAsync(1) { msg =>
-        (processorRef ? ProcessAggregateKafkaRecord(lookupMap = lookupMap,
-                                                    jdbcUrl = JDBC_URL,
-                                                    bucket = AWS_BUCKET,
-                                                    year = "2018"))
-          .map(_ => msg.committableOffset)
+        (processorRef ? ProcessAggregateKafkaRecord(
+          lookupMap = lookupMap,
+          jdbcUrl = JDBC_URL,
+          bucket = AWS_BUCKET,
+//          numPartitions = numPartitions,
+//          partitionColumn = partitionColumn,
+//          lowerBound = lowerBound,
+//          upperBound = upperBound,
+          year = "2018"
+        )).map(_ => msg.committableOffset)
       }
       .async
       // async boundary end

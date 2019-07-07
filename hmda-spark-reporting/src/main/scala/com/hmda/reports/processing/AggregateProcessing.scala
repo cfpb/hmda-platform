@@ -48,6 +48,10 @@ object AggregateProcessing {
       lookupMap: Map[(Int, Int), StateMapping],
       jdbcUrl: String,
       bucket: String,
+      //numPartitions: String,
+      //partitionColumn: String,
+      //lowerBound: String,
+      //upperBound: String,
       year: String)
   case object Finished
 
@@ -70,9 +74,13 @@ object AggregateProcessing {
         .format("jdbc")
         .option("driver", "org.postgresql.Driver")
         .option("url", jdbcUrl)
+        .option("numPartitions", 1000)
+        .option("partitionColumn", "msa_md")
+        .option("lowerBound", 0)
+        .option("upperBound", 99999)
         .option(
           "dbtable",
-          s"(select * from modifiedlar2018 where filing_year = $year) as mlar")
+          s"(select * from modifiedlar2018prod where filing_year = $year) as mlar")
         .load()
         .withColumnRenamed("race_categorization", "race")
         .withColumnRenamed("ethnicity_categorization", "ethnicity")
