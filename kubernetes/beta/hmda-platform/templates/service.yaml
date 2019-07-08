@@ -33,7 +33,7 @@ metadata:
 spec:
   selector:
     app: hmda-platform
-  type: NodePort
+  type: ClusterIP
   ports:
   - name: {{ .Values.filing.name }}
     protocol: {{ .Values.filing.protocol }}
@@ -67,7 +67,7 @@ metadata:
       apiVersion: ambassador/v0
       kind: Mapping
       name: hmda_admin_mapping
-      ambassador_id: ambassador-default-1
+      ambassador_id: ambassador-beta-2
       prefix: /v2/admin/
       service: {{ .Values.service.name }}:{{ .Values.admin.port }}
 spec:
@@ -87,7 +87,7 @@ metadata:
       apiVersion: ambassador/v0
       kind: Mapping
       name: hmda_filing_mapping
-      ambassador_id: ambassador-default-1
+      ambassador_id: ambassador-beta-2
       prefix: /v2/filing/
       service: {{ .Values.service.name }}:{{ .Values.filing.port }}
       timeout_ms: 60000
@@ -108,7 +108,7 @@ metadata:
       apiVersion: ambassador/v0
       kind: Mapping
       name: hmda_public_mapping
-      ambassador_id: ambassador-default-1
+      ambassador_id: ambassador-beta-2
       prefix: /v2/public/
       service: {{ .Values.service.name }}:{{ .Values.public.port }}
 spec:
@@ -128,7 +128,7 @@ metadata:
       apiVersion: ambassador/v0
       kind: Mapping
       name: hmda_cluster_mapping
-      ambassador_id: ambassador-default-1
+      ambassador_id: ambassador-beta-2
       prefix: /v2/cluster/
       rewrite: /cluster/members
       service: {{ .Values.service.name }}:{{ .Values.cluster.port }}
@@ -149,7 +149,7 @@ metadata:
       apiVersion: ambassador/v0
       kind: Mapping
       name: hmda_ws_mapping
-      ambassador_id: ambassador-default-1
+      ambassador_id: ambassador-beta-2
       prefix: /v2/ws/status/
       service: {{ .Values.service.name }}:{{ .Values.websockets.port }}
       use_websocket: true
