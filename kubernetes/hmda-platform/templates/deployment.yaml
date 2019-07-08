@@ -23,16 +23,7 @@ spec:
         actorSystemName: {{ .Values.hmda.actorSystemName }}
     spec:
       affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: app
-                operator: In
-                values:
-                - "hmda-platform"
-                - "keycloak"
-            topologyKey: kubernetes.io/hostname
+{{ toYaml .Values.affinity | indent 8 }}
       volumes:
         - name: tz-config
           hostPath:
@@ -45,7 +36,7 @@ spec:
           - name: tz-config
             mountPath: /etc/localtime
         resources:
-          {{ toYaml .Values.resources | indent 12 }}
+{{ toYaml .Values.resources | indent 12 }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: KAFKA_MODIFIED_LAR_TOPIC
