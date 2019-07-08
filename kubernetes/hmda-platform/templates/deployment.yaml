@@ -45,12 +45,7 @@ spec:
           - name: tz-config
             mountPath: /etc/localtime
         resources:
-          limits:
-            memory: "6200Mi"
-            cpu: "6"
-          requests:
-            memory: "6200Mi"
-            cpu: "2"
+          {{ toYaml .Values.resources | indent 12 }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: KAFKA_MODIFIED_LAR_TOPIC

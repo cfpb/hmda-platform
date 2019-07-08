@@ -67,7 +67,7 @@ volumes: [
                     sh """
                         helm upgrade --install --force \
                         --namespace=default \
-                        --values=kubernetes/census-api/values.yaml \
+                        --values=kubernetes/census-api/values-dev.yaml \
                         --set image.tag=latest \
                         --set image.pullPolicy=Always \
                         census-api \
