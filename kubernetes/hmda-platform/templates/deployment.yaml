@@ -88,6 +88,11 @@ spec:
             configMapKeyRef:
               name: cassandra-configmap
               key: cassandra-keyspace
+        - name: CASSANDRA_SNAPSHOT_KEYSPACE
+          valueFrom:
+            configMapKeyRef:
+              name: cassandra-configmap
+              key: cassandra-keyspace-snapshot
         - name: CASSANDRA_CLUSTER_USERNAME
           valueFrom:
             secretKeyRef:
