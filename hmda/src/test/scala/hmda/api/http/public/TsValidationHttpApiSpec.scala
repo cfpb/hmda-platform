@@ -50,6 +50,10 @@ class TsValidationHttpApiSpec
   val invalidCsv =
     "0|Bank 0|2018|4|Jane|111-111-1111|janesmith@bank.com|123 Main St|Washington|DC|20001|9|100|99-999999|10Bx939c5543TqA1144M"
 
+  val invalidCsv_2019 =
+    "0|Bank 0|2019|4|Jane|111-111-1111|janesmith@bank.com|123 Main St|Washington|DC|20001|9|100|99-999999|10Bx939c5543TqA1144M"
+
+
   "TS HTTP Service" must {
     "return OPTIONS" in {
       Options("/ts/parse") ~> tsRoutes ~> check {
@@ -80,6 +84,14 @@ class TsValidationHttpApiSpec
         status mustBe StatusCodes.BadRequest
         responseAs[TsValidateResponse].errorMessages mustBe List(
           "An incorrect number of data fields were reported: 18 data fields were found, when 15 data fields were expected.")
+      }
+    }
+
+    "return all errors when TS is invalid - 2019" in {
+      Post("/ts/validate/2019", TsValidateRequest(invalidCsv_2019)) ~> tsRoutes ~> check {
+        status mustBe StatusCodes.OK
+        responseAs[SingleValidationErrorResult].syntactical.errors.size mustBe 1
+        responseAs[SingleValidationErrorResult].validity.errors.size mustBe 1
       }
     }
 
