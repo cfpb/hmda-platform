@@ -134,9 +134,6 @@ class PostgresModifiedLarRepository(tableName: String,
     s"${escape(fieldName)} IN ${formatSeq(values.map(escape))}"
 
   def whereAndOpt(expression: String, remainingExpressions: String*): String = {
-    println("came inside whereAndOpt with expression: " + expression)
-    println(
-      "came inside whereAndOpt with remainingExpressions: " + remainingExpressions)
     val primary = s"WHERE $expression"
     if (remainingExpressions.isEmpty) primary
     else {
