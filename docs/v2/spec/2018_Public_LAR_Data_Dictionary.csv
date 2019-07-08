@@ -1,4 +1,4 @@
-﻿Field Name,Field Data Type,Valid Values,Notes
+Field Name,Field Data Type,Valid Values,Notes
 Record Identifier,Integer,2,
 Legal Entity Identifier (LEI),Character Varying,,
 Loan Type,Integer,1 2 3 4,
@@ -92,3 +92,6 @@ FFIEC Median Family Income,Character Varying,,"Field derived from Census data."
 Tract to MSA/MD Median Family Income %,Character Varying,,"Field derived from Census data."
 Number of Owner Occupied Units,Character Varying,,"Field derived from Census data."
 Number of 1-to-4 Family Units,Character Varying,,"Field derived from Census data."
+Race Categorization,Character Varying,”2 or more minority races, American Indian or Alaska Native, Asian, Black or African American, Free Form Text Only, Joint, Native Hawaiian or Other Pacific Islander, Race Not Available, White”,”Field derived from LAR applicant/borrower and co-applicant/co-borrower race fields.”
+Sex Categorization,Character Varying,”Female, Joint, Male, Sex Not Available”,”Field derived from LAR applicant/borrower and co-applicant/co-borrower sex fields.”
+Ethnicity Categorization,Character Varying,”Ethnicity Not Available, Free Form Text Only, Hispanic or Latino, Joint, Not Hispanic or Latino”,”Field derived from LAR applicant/borrower and co-applicant/co-borrower ethnicity fields.”
