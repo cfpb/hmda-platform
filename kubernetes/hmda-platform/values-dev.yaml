@@ -110,14 +110,4 @@ nodeSelector: {}
 
 tolerations: []
 
-affinity: 
-  podAntiAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-    - labelSelector:
-        matchExpressions:
-        - key: app
-          operator: In
-          values:
-          - "hmda-platform"
-          - "keycloak"
-      topologyKey: kubernetes.io/hostname
+affinity: {}
