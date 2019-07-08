@@ -24,7 +24,7 @@ metadata:
       apiVersion: ambassador/v0
       kind: Mapping
       name: hmda_databrowser_mapping
-      ambassador_id: ambassador-default-1
+      ambassador_id: ambassador-beta-2
       prefix: /v2/data-browser-api/
       service: {{ .Values.service.name }}:{{ .Values.databrowser.port }}
       timeout_ms: 60000
