@@ -2,6 +2,7 @@ package hmda.data.browser.rest
 
 import akka.http.scaladsl.model.ContentTypes._
 import akka.http.scaladsl.model.HttpEntity
+import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.RouteDirectives.complete
@@ -20,22 +21,36 @@ object Routes {
       pathPrefix("nationwide") {
         extractFieldsForRawQueries { queryFields =>
           // GET /view/nationwide/csv
-          (path("csv") & get) {
-            complete(
-              HttpEntity(
-                `text/plain(UTF-8)`,
-                csvSource(browserService.fetchData(queryFields))
-              )
-            )
-          } ~
-            // GET /view/nationwide/pipe
-            (path("pipe") & get) {
+          val filename = "nationwide" + queryFields
+            .map(mc => mc.name + "_" + mc.values.mkString("-"))
+            .mkString("_")
+          respondWithHeader(
+            RawHeader("Content-Disposition",
+                      s"""attachment; filename="${filename}.csv"""")) {
+            (path("csv") & get) {
               complete(
                 HttpEntity(
                   `text/plain(UTF-8)`,
-                  pipeSource(browserService.fetchData(queryFields))
+                  csvSource(browserService.fetchData(queryFields))
                 )
               )
+            }
+          } ~
+            // GET /view/nationwide/pipe
+            (path("pipe") & get) {
+              val filename = "nationwide" + queryFields
+                .map(mc => mc.name + "_" + mc.values.mkString("-"))
+                .mkString("_")
+              respondWithHeader(
+                RawHeader("Content-Disposition",
+                          s"""attachment; filename="${filename}.txt"""")) {
+                complete(
+                  HttpEntity(
+                    `text/plain(UTF-8)`,
+                    pipeSource(browserService.fetchData(queryFields))
+                  )
+                )
+              }
             }
         } ~
           // GET /view/nationwide/aggregations
@@ -71,22 +86,36 @@ object Routes {
         // GET /view/csv
         (path("csv") & get) {
           extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
-            extractFieldsForRawQueries { remainingQueryFields =>
-              complete(
-                HttpEntity(`text/plain(UTF-8)`,
-                           csvSource(browserService.fetchData(
-                             mandatoryFields ++ remainingQueryFields))))
+            val filename = mandatoryFields
+              .map(mc => mc.name + "_" + mc.values.mkString("-"))
+              .mkString("_")
+            respondWithHeader(
+              RawHeader("Content-Disposition",
+                        s"""attachment; filename="${filename}.csv"""")) {
+              extractFieldsForRawQueries { remainingQueryFields =>
+                complete(
+                  HttpEntity(`text/plain(UTF-8)`,
+                             csvSource(browserService.fetchData(
+                               mandatoryFields ++ remainingQueryFields))))
+              }
             }
           }
         } ~
         // GET /view/pipe
         (path("pipe") & get) {
           extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
-            extractFieldsForRawQueries { remainingQueryFields =>
-              complete(
-                HttpEntity(`text/plain(UTF-8)`,
-                           pipeSource(browserService.fetchData(
-                             mandatoryFields ++ remainingQueryFields))))
+            val filename = mandatoryFields
+              .map(mc => mc.name + "_" + mc.values.mkString("-"))
+              .mkString("_")
+            respondWithHeader(
+              RawHeader("Content-Disposition",
+                        s"""attachment; filename="${filename}.txt"""")) {
+              extractFieldsForRawQueries { remainingQueryFields =>
+                complete(
+                  HttpEntity(`text/plain(UTF-8)`,
+                             pipeSource(browserService.fetchData(
+                               mandatoryFields ++ remainingQueryFields))))
+              }
             }
           }
         }

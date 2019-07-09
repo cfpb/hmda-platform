@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgresql-configmap
+data:
+  postgres.ssl: require
+  postgres.user:  hmda
+  postgres.database: hmda
+

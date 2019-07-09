@@ -9,10 +9,12 @@ import io.circe.generic.auto._
 import hmda.api.http.model.public.{
   LarValidateResponse,
   SingleValidationErrorResult,
-  ValidationErrorSummary
+  ValidationErrorSummary,
+  ValidationSingleErrorSummary
 }
 import hmda.model.validation._
 import hmda.parser.ParserErrorModel.ParserValidationError
+import hmda.model.filing.EditDescriptionLookup
 
 trait FilingValidationHttpApi {
 
@@ -24,11 +26,18 @@ trait FilingValidationHttpApi {
     )
   }
 
-  def aggregateErrors(
-      errors: List[ValidationError]): SingleValidationErrorResult = {
+  def aggregateErrors(errors: List[ValidationError],
+                      period: String): SingleValidationErrorResult = {
     val groupedErrors = errors.groupBy(_.validationErrorType)
-    def allOfType(errorType: ValidationErrorType): Seq[String] = {
-      groupedErrors.getOrElse(errorType, List()).map(e => e.editName)
+    def allOfType(
+        errorType: ValidationErrorType): Seq[ValidationSingleErrorSummary] = {
+      groupedErrors
+        .getOrElse(errorType, List())
+        .map(
+          e =>
+            ValidationSingleErrorSummary(
+              e.editName,
+              EditDescriptionLookup.lookupDescription(e.editName, period)))
     }
 
     SingleValidationErrorResult(

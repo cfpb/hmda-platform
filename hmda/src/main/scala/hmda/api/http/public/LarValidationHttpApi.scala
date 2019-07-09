@@ -90,7 +90,7 @@ trait LarValidationHttpApi
     maybeErrors match {
       case Right(l) => complete(l)
       case Left(errors) =>
-        complete(ToResponseMarshallable(aggregateErrors(errors)))
+        complete(ToResponseMarshallable(aggregateErrors(errors, year.toString)))
     }
   }
 
