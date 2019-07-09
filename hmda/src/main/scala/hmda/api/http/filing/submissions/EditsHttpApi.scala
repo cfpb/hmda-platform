@@ -35,7 +35,7 @@ import hmda.messages.submission.EditDetailsEvents.{
 }
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowValidatedError
 import io.circe.generic.auto._
-import hmda.model.filing.EditDescriptionLookup._
+import hmda.model.filing.EditDescriptionLookup
 import hmda.query.HmdaQuery._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -173,7 +173,9 @@ trait EditsHttpApi extends HmdaTimeDirectives {
 
   private def toEditSummaryResponse(e: EditSummary,
                                     period: String): EditSummaryResponse = {
-    EditSummaryResponse(e.editName, lookupDescription(e.editName, period))
+    EditSummaryResponse(
+      e.editName,
+      EditDescriptionLookup.lookupDescription(e.editName, period))
   }
 
   private def editDetails(

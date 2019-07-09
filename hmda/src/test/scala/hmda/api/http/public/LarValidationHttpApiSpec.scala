@@ -8,7 +8,8 @@ import hmda.api.http.model.public.{
   LarValidateRequest,
   LarValidateResponse,
   SingleValidationErrorResult,
-  ValidationErrorSummary
+  ValidationErrorSummary,
+  ValidationSingleErrorSummary
 }
 import org.scalatest.{MustMatchers, WordSpec}
 
@@ -103,10 +104,15 @@ class LarValidationHttpApiSpec
     }
 
     "fail edits V600 and V623" in {
-      Post("/lar/validate/2019", LarValidateRequest(invalidLar)) ~> larRoutes ~> check {
+      Post("/lar/validate/2018", LarValidateRequest(invalidLar)) ~> larRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[SingleValidationErrorResult] mustBe SingleValidationErrorResult(
-          validity = ValidationErrorSummary(Seq("V600", "V619-2")))
+          validity = ValidationErrorSummary(
+            Seq(
+              ValidationSingleErrorSummary(
+                "V600",
+                "The required format for LEI is alphanumeric with 20 characters, and it cannot be left blank.")
+            )))
       }
     }
   }
