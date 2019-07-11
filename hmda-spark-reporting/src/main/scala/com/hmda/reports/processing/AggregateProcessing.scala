@@ -80,7 +80,8 @@ object AggregateProcessing {
         .option("upperBound", 99999)
         .option(
           "dbtable",
-          s"(select * from modifiedlar2018prod where filing_year = $year) as mlar")
+          s"(select * from modifiedlar2018prod where filing_year = $year and lei not in ('BANK1LEIFORTEST12345','BANK3LEIFORTEST12345','BANK4LEIFORTEST12345','999999LE3ZOZXUS7W648','28133080042813308004','B90YWS6AFX2LGWOXJ1LD')) as mlar"
+        )
         .load()
         .withColumnRenamed("race_categorization", "race")
         .withColumnRenamed("ethnicity_categorization", "ethnicity")
@@ -556,18 +557,18 @@ object AggregateProcessing {
         .runWith(Sink.ignore)
 
     val result = for {
-      _ <- persistJson(aggregateTable1)
-      _ <- persistJson2(aggregateTable2)
-      _ <- persistJson9(aggregateTable9)
-      _ <- persistJsonI(aggregateTableI.toList)
-      _ <- persistJsonRaceSex(
-        jsonFormationRaceThenGender(
-          RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
-                                                          spark)))
-      _ <- persistJsonEthnicitySex(
-        jsonTransformationReportByEthnicityThenGender(
-          RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
-                                                          spark)))
+//      _ <- persistJson(aggregateTable1)
+//      _ <- persistJson2(aggregateTable2)
+//      _ <- persistJson9(aggregateTable9)
+//      _ <- persistJsonI(aggregateTableI.toList)
+//      _ <- persistJsonRaceSex(
+//        jsonFormationRaceThenGender(
+//          RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
+//                                                          spark)))
+//      _ <- persistJsonEthnicitySex(
+//        jsonTransformationReportByEthnicityThenGender(
+//          RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
+//                                                          spark)))
       _ <- persistIncomeRaceEthnicity(
         IncomeRaceEthnicityProcessing.jsonFormationApplicantIncome(
           IncomeRaceEthnicityProcessing
