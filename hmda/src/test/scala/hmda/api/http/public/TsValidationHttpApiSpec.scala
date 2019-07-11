@@ -53,7 +53,6 @@ class TsValidationHttpApiSpec
   val invalidCsv_2019 =
     "0|Bank 0|2019|4|Jane|111-111-1111|janesmith@bank.com|123 Main St|Washington|DC|20001|9|100|99-999999|10Bx939c5543TqA1144M"
 
-
   "TS HTTP Service" must {
     "return OPTIONS" in {
       Options("/ts/parse") ~> tsRoutes ~> check {
