@@ -75,6 +75,16 @@ spec:
                 secretKeyRef:
                   name: cassandra-credentials
                   key: cassandra.username
+            - name: CASSANDRA_JOURNAL_KEYSPACE
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-keyspace
+            - name: CASSANDRA_SNAPSHOT_KEYSPACE
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-keyspace-snapshot
             - name: CASSANDRA_CLUSTER_PASSWORD
               valueFrom:
                 secretKeyRef:

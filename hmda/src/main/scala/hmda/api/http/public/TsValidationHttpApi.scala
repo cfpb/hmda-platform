@@ -91,7 +91,7 @@ trait TsValidationHttpApi
     maybeErrors match {
       case Right(t) => complete(t)
       case Left(errors) =>
-        complete(ToResponseMarshallable(aggregateErrors(errors)))
+        complete(ToResponseMarshallable(aggregateErrors(errors, year.toString)))
     }
   }
 

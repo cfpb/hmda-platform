@@ -58,7 +58,7 @@ volumes: [
         container('helm') {
           sh """
             helm upgrade --install --force --namespace=default \
-            --values=kubernetes/modified-lar/values.yaml \
+            --values=kubernetes/modified-lar/values-dev.yaml \
             --set image.tag=latest \
             --set image.pullPolicy=Always \
             modified-lar \

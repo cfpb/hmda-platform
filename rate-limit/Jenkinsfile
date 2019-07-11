@@ -58,7 +58,7 @@ volumes: [
         container('helm') {
           sh """
             helm upgrade --install --force --namespace=default \
-            --values=kubernetes/rate-limit/values.yaml \
+            --values=kubernetes/rate-limit/values-dev.yaml \
             --set image.tag=latest \
             --set image.pullPolicy=Always \
             rate-limit \

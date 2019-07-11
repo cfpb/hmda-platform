@@ -23,16 +23,7 @@ spec:
         actorSystemName: {{ .Values.hmda.actorSystemName }}
     spec:
       affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: app
-                operator: In
-                values:
-                - "hmda-platform"
-                - "keycloak"
-            topologyKey: kubernetes.io/hostname
+{{ toYaml .Values.affinity | indent 8 }}
       volumes:
         - name: tz-config
           hostPath:
@@ -45,12 +36,7 @@ spec:
           - name: tz-config
             mountPath: /etc/localtime
         resources:
-          limits:
-            memory: "6200Mi"
-            cpu: "6"
-          requests:
-            memory: "6200Mi"
-            cpu: "2"
+{{ toYaml .Values.resources | indent 12 }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: KAFKA_MODIFIED_LAR_TOPIC
@@ -83,6 +69,16 @@ spec:
             configMapKeyRef:
               name: cassandra-configmap
               key: cassandra-hosts
+        - name: CASSANDRA_JOURNAL_KEYSPACE
+          valueFrom:
+            configMapKeyRef:
+              name: cassandra-configmap
+              key: cassandra-keyspace
+        - name: CASSANDRA_SNAPSHOT_KEYSPACE
+          valueFrom:
+            configMapKeyRef:
+              name: cassandra-configmap
+              key: cassandra-keyspace-snapshot
         - name: CASSANDRA_CLUSTER_USERNAME
           valueFrom:
             secretKeyRef:
