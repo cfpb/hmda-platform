@@ -61,7 +61,7 @@ volumes: [
         container('helm') {
           sh """
             helm upgrade --install --force --namespace=default \
-            --values=kubernetes/data-browser/values.yaml \
+            --values=kubernetes/data-browser/values-dev.yaml \
             --set image.tag=latest \
             --set image.pullPolicy=Always \
             hmda-data-browser-api \

@@ -64,7 +64,7 @@ volumes: [
           }
           sh """
             helm upgrade --install --force --namespace=default \
-            --values=kubernetes/hmda-analytics/values.yaml \
+            --values=kubernetes/hmda-analytics/values-dev.yaml \
             --set image.tag=latest \
             --set image.pullPolicy=Always \
             hmda-analytics \

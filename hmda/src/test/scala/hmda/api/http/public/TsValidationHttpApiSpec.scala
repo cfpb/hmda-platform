@@ -86,16 +86,16 @@ class TsValidationHttpApiSpec
       }
     }
 
-    "return all errors when TS is invalid - 2019" in {
-      Post("/ts/validate/2019", TsValidateRequest(invalidCsv_2019)) ~> tsRoutes ~> check {
+    "return all errors when TS is invalid - 2018" in {
+      Post("/ts/validate/2018", TsValidateRequest(invalidCsv)) ~> tsRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[SingleValidationErrorResult].syntactical.errors.size mustBe 1
         responseAs[SingleValidationErrorResult].validity.errors.size mustBe 1
       }
     }
 
-    "return all errors when TS is invalid" in {
-      Post("/ts/validate/2018", TsValidateRequest(invalidCsv)) ~> tsRoutes ~> check {
+    "return all errors when TS is invalid - 2019" in {
+      Post("/ts/validate/2019", TsValidateRequest(invalidCsv_2019)) ~> tsRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[SingleValidationErrorResult].syntactical.errors.size mustBe 1
         responseAs[SingleValidationErrorResult].validity.errors.size mustBe 1

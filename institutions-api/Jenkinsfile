@@ -59,7 +59,7 @@ volumes: [
           sh """
             helm upgrade --install --force \
             --namespace=default \
-            --values=kubernetes/institutions-api/values.yaml \
+            --values=kubernetes/institutions-api/values-dev.yaml \
             --set image.tag=latest \
             --set postgresql.enabled=false \
             --set image.pullPolicy=Always \

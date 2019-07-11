@@ -61,7 +61,7 @@ volumes: [
         container('helm') {
           sh """
             helm upgrade --install --force --namespace=default \
-            --values=kubernetes/hmda-reporting/values.yaml \
+            --values=kubernetes/hmda-reporting/values-dev.yaml \
             --set image.tag=latest \
             --set image.pullPolicy=Always \
             hmda-reporting \
