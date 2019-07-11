@@ -12,8 +12,11 @@ import hmda.data.browser.rest.DataBrowserDirectives._
 import hmda.data.browser.services.BrowserService
 import io.circe.generic.auto._
 import monix.execution.{Scheduler => MonixScheduler}
+import org.slf4j.LoggerFactory
 
 object Routes {
+
+  val log = LoggerFactory.getLogger("data-browser-api")
   def apply(browserService: BrowserService)(
       implicit scheduler: MonixScheduler): Route = {
 
@@ -28,6 +31,7 @@ object Routes {
             RawHeader("Content-Disposition",
                       s"""attachment; filename="${filename}.csv"""")) {
             (path("csv") & get) {
+              log.info("Nationwide [CSV]: " + queryFields)
               complete(
                 HttpEntity(
                   `text/plain(UTF-8)`,
@@ -38,6 +42,7 @@ object Routes {
           } ~
             // GET /view/nationwide/pipe
             (path("pipe") & get) {
+              log.info("Nationwide [Pipe]: " + queryFields)
               val filename = "nationwide" + queryFields
                 .map(mc => mc.name + "_" + mc.values.mkString("-"))
                 .mkString("_")
@@ -56,6 +61,7 @@ object Routes {
           // GET /view/nationwide/aggregations
           (path("aggregations") & get) {
             extractFieldsForAggregation { queryFields =>
+              log.info("Nationwide [Aggregations]: " + queryFields)
               val allFields = queryFields
               complete(
                 browserService
@@ -72,6 +78,7 @@ object Routes {
           extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
             extractFieldsForAggregation { remainingQueryFields =>
               val allFields = mandatoryFields ++ remainingQueryFields
+              log.info("Aggregations: " + allFields)
               complete(
                 browserService
                   .fetchAggregate(allFields)
@@ -93,10 +100,11 @@ object Routes {
               RawHeader("Content-Disposition",
                         s"""attachment; filename="${filename}.csv"""")) {
               extractFieldsForRawQueries { remainingQueryFields =>
+                val allFields = mandatoryFields ++ remainingQueryFields
+                log.info("CSV: " + allFields)
                 complete(
                   HttpEntity(`text/plain(UTF-8)`,
-                             csvSource(browserService.fetchData(
-                               mandatoryFields ++ remainingQueryFields))))
+                             csvSource(browserService.fetchData(allFields))))
               }
             }
           }
@@ -111,10 +119,11 @@ object Routes {
               RawHeader("Content-Disposition",
                         s"""attachment; filename="${filename}.txt"""")) {
               extractFieldsForRawQueries { remainingQueryFields =>
+                val allFields = mandatoryFields ++ remainingQueryFields
+                log.info("Pipe: " + allFields)
                 complete(
                   HttpEntity(`text/plain(UTF-8)`,
-                             pipeSource(browserService.fetchData(
-                               mandatoryFields ++ remainingQueryFields))))
+                             pipeSource(browserService.fetchData(allFields))))
               }
             }
           }
