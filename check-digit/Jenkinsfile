@@ -60,7 +60,7 @@ volumes: [
         container('helm') {
           sh """
             helm upgrade --install --force --namespace=default \
-            --values=kubernetes/check-digit/values.yaml \
+            --values=kubernetes/check-digit/values-dev.yaml \
             --set image.tag=latest \
             --set image.pullPolicy=Always \
             check-digit \

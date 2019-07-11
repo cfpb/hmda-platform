@@ -100,24 +100,14 @@ ingress:
 
 resources:
   limits:
-    cpu: "6"
-    memory: 6200Mi
+    cpu: "2"
+    memory: 3100Mi
   requests:
-   cpu: "2"
-   memory: 6200Mi
+   cpu: "1"
+   memory: 3100Mi
 
 nodeSelector: {}
 
 tolerations: []
 
-affinity: 
-  podAntiAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-    - labelSelector:
-        matchExpressions:
-        - key: app
-          operator: In
-          values:
-          - "hmda-platform"
-          - "keycloak"
-      topologyKey: kubernetes.io/hostname
+affinity: {}

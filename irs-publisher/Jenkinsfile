@@ -58,7 +58,7 @@ volumes: [
         container('helm') {
           sh """
             helm upgrade --install --force --namespace=default \
-            --values=kubernetes/irs-publisher/values.yaml \
+            --values=kubernetes/irs-publisher/values-dev.yaml \
             --set image.tag=latest \
             --set image.pullPolicy=Always \
             irs-publisher \
