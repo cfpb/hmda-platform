@@ -13,7 +13,9 @@ object V696_2 extends EditCheck[LoanApplicationRegister] {
   override def parent: String = "V696"
 
   val ausOtherList =
-    List(AUSResultExempt, InvalidAutomatedUnderwritingResultCode)
+    List(AUSResultExempt,
+         InvalidAutomatedUnderwritingResultCode,
+         AutomatedUnderwritingResultNotApplicable)
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
     lar.ausResult.ausResult1 not oneOf(
