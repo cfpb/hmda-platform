@@ -78,6 +78,8 @@ spec:
                   key: aws-access-key-id
             - name: BROWSER_LOG_LEVEL
               value: INFO
+            - name: DATABROWSER_PG_TABLE
+              value: modifiedlar2018_beta
             - name: REDIS_HOSTNAME
               value: hmda-redis-beta-master
             - name: AWS_SECRET_ACCESS_KEY

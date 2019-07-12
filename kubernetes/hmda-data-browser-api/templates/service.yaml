@@ -27,7 +27,7 @@ metadata:
       ambassador_id: ambassador-default-1
       prefix: /v2/data-browser-api/
       service: {{ .Values.service.name }}:{{ .Values.databrowser.port }}
-      timeout_ms: 60000
+      timeout_ms: 3800000
       rate_limits:
         - descriptor: hmda-reporting
 spec:
