@@ -39,6 +39,7 @@ object Routes {
                     `text/plain(UTF-8)`,
                     csvSource(browserService.fetchData(allFields))
                   )
+                )
               }
             }
           } ~
@@ -69,8 +70,7 @@ object Routes {
               extractFieldsForAggregation { queryFields =>
                 val allFields = mandatoryFields ++ queryFields
                 log.info("Nationwide [Aggregations]: " + allFields)
-                complete(
-                  browserService
+                complete(browserService
                   .fetchAggregate(allFields)
                   .map(aggs =>
                     AggregationResponse(Parameters.fromBrowserFields(allFields),
