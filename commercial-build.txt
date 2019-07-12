@@ -86,6 +86,7 @@ lazy val packageSettings = Seq(
   scriptClasspath := Seq((assemblyJarName in assembly).value)
 )
 
+//hmda root
 lazy val `hmda-root` = (project in file("."))
   .settings(hmdaBuildSettings: _*)
   .aggregate(common,
