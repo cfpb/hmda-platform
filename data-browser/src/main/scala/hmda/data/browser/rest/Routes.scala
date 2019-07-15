@@ -16,7 +16,7 @@ import monix.execution.{Scheduler => MonixScheduler}
 
 object Routes {
   def apply(browserService: BrowserService, settings: Settings)(
-    implicit scheduler: MonixScheduler): Route = {
+      implicit scheduler: MonixScheduler): Route = {
 
     val routeConf = settings.routes
     val Csv = "csv"
@@ -64,7 +64,7 @@ object Routes {
                   .fetchAggregate(allFields)
                   .map(aggs =>
                     AggregationResponse(Parameters.fromBrowserFields(allFields),
-                      aggs))
+                                        aggs))
                   .runToFuture)
             }
           }
@@ -79,7 +79,7 @@ object Routes {
                   .fetchAggregate(allFields)
                   .map(aggs =>
                     AggregationResponse(Parameters.fromBrowserFields(allFields),
-                      aggs))
+                                        aggs))
                   .runToFuture
               )
             }
@@ -92,8 +92,8 @@ object Routes {
               contentDisposition(mandatoryFields ++ remainingQueryFields) {
                 complete(
                   HttpEntity(`text/plain(UTF-8)`,
-                    csvSource(browserService.fetchData(
-                      mandatoryFields ++ remainingQueryFields))))
+                             csvSource(browserService.fetchData(
+                               mandatoryFields ++ remainingQueryFields))))
               }
             }
           }
@@ -105,8 +105,8 @@ object Routes {
               contentDisposition(mandatoryFields ++ remainingQueryFields) {
                 complete(
                   HttpEntity(`text/plain(UTF-8)`,
-                    pipeSource(browserService.fetchData(
-                      mandatoryFields ++ remainingQueryFields))))
+                             pipeSource(browserService.fetchData(
+                               mandatoryFields ++ remainingQueryFields))))
               }
             }
           }

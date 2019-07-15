@@ -1,7 +1,10 @@
 package hmda.data.browser.rest
 
 import akka.NotUsed
-import akka.http.scaladsl.common.{CsvEntityStreamingSupport, EntityStreamingSupport}
+import akka.http.scaladsl.common.{
+  CsvEntityStreamingSupport,
+  EntityStreamingSupport
+}
 import akka.http.scaladsl.model.StatusCodes.BadRequest
 import akka.http.scaladsl.model.headers.ContentDispositionTypes.attachment
 import akka.http.scaladsl.model.headers.`Content-Disposition`
@@ -32,7 +35,7 @@ trait DataBrowserDirectives {
     EntityStreamingSupport.csv()
 
   def csvSource(
-                 s: Source[ModifiedLarEntity, NotUsed]): Source[ByteString, NotUsed] = {
+      s: Source[ModifiedLarEntity, NotUsed]): Source[ByteString, NotUsed] = {
     val header = Source.single(ModifiedLarEntity.header)
     val content = s.map(_.toCsv)
 
@@ -45,12 +48,11 @@ trait DataBrowserDirectives {
     val filename =
       queries.map(q => q.name + "_" + q.values.mkString("-")).mkString("_")
     respondWithHeader(
-      `Content-Disposition`(attachment,
-        Map("filename" -> filename)))(route)
+      `Content-Disposition`(attachment, Map("filename" -> filename)))(route)
   }
 
   def pipeSource(
-                  s: Source[ModifiedLarEntity, NotUsed]): Source[ByteString, NotUsed] = {
+      s: Source[ModifiedLarEntity, NotUsed]): Source[ByteString, NotUsed] = {
     val headerPipe = Source.single(ModifiedLarEntity.headerPipe)
     val contentPipe = s.map(_.toPipe)
 
@@ -76,8 +78,8 @@ trait DataBrowserDirectives {
           provide(
             Option(
               QueryField(name = "year",
-                xs.map(_.toString),
-                dbName = "filing_year")))
+                         xs.map(_.toString),
+                         dbName = "filing_year")))
       }
 
   private def extractStates: Directive1[Option[QueryField]] =
@@ -91,8 +93,8 @@ trait DataBrowserDirectives {
             provide(
               Option(
                 QueryField(name = "state",
-                  values = states.map(_.entryName),
-                  dbName = "state")))
+                           values = states.map(_.entryName),
+                           dbName = "state")))
 
           case Right(_) =>
             provide(None)
@@ -178,7 +180,7 @@ trait DataBrowserDirectives {
           case Left(invalidConstructionMethods) =>
             complete(
               (BadRequest,
-                InvalidConstructionMethods(invalidConstructionMethods)))
+               InvalidConstructionMethods(invalidConstructionMethods)))
 
           case Right(constructionMethods) if constructionMethods.nonEmpty =>
             provide(
@@ -199,7 +201,7 @@ trait DataBrowserDirectives {
           case Left(invalidDwellingCategories) =>
             complete(
               (BadRequest,
-                InvalidDwellingCategories(invalidDwellingCategories)))
+               InvalidDwellingCategories(invalidDwellingCategories)))
 
           case Right(dwellingCategories) if dwellingCategories.nonEmpty =>
             provide(
@@ -222,8 +224,8 @@ trait DataBrowserDirectives {
             provide(
               Option(
                 QueryField("lien_statuses",
-                  lienStatuses.map(_.entryName),
-                  "lien_status")))
+                           lienStatuses.map(_.entryName),
+                           "lien_status")))
 
           case Right(_) =>
             provide(None)
@@ -241,8 +243,8 @@ trait DataBrowserDirectives {
             provide(
               Option(
                 QueryField("loan_products",
-                  loanProducts.map(_.entryName),
-                  "loan_product_type")))
+                           loanProducts.map(_.entryName),
+                           "loan_product_type")))
 
           case Right(_) =>
             provide(None)
@@ -260,8 +262,8 @@ trait DataBrowserDirectives {
             provide(
               Option(
                 QueryField("loan_purposes",
-                  loanPurposes.map(_.entryName),
-                  "loan_purpose")))
+                           loanPurposes.map(_.entryName),
+                           "loan_purpose")))
 
           case Right(_) =>
             provide(None)
@@ -279,8 +281,8 @@ trait DataBrowserDirectives {
             provide(
               Option(
                 QueryField("loan_types",
-                  loanTypes.map(_.entryName),
-                  "loan_type"))
+                           loanTypes.map(_.entryName),
+                           "loan_type"))
             )
           case Right(_) =>
             provide(None)
@@ -298,8 +300,8 @@ trait DataBrowserDirectives {
             provide(
               Some(
                 QueryField("sexes",
-                  sexes.map(_.entryName),
-                  "sex_categorization")))
+                           sexes.map(_.entryName),
+                           "sex_categorization")))
 
           case Right(_) =>
             provide(None)
@@ -308,7 +310,7 @@ trait DataBrowserDirectives {
   }
 
   def extractNonMandatoryQueryFields(
-                                      innerRoute: List[QueryField] => Route): Route = {
+      innerRoute: List[QueryField] => Route): Route = {
     (extractActions & extractRaces & extractSexes &
       extractLoanType & extractLoanPurpose & extractLienStatus &
       extractConstructionMethod & extractDwellingCategories & extractLoanProduct & extractTotalUnits & extractEthnicities) {
@@ -325,23 +327,23 @@ trait DataBrowserDirectives {
        ethnicities) =>
         val filteredfields =
           List(actionsTaken,
-            races,
-            sexes,
-            loanTypes,
-            loanPurposes,
-            lienStatuses,
-            constructionMethods,
-            dwellingCategories,
-            loanProducts,
-            totalUnits,
-            ethnicities).flatten
+               races,
+               sexes,
+               loanTypes,
+               loanPurposes,
+               lienStatuses,
+               constructionMethods,
+               dwellingCategories,
+               loanProducts,
+               totalUnits,
+               ethnicities).flatten
 
         innerRoute(filteredfields)
     }
   }
 
   def extractYearsAndMsaAndStateBrowserFields(
-                                               innerRoute: List[QueryField] => Route): Route =
+      innerRoute: List[QueryField] => Route): Route =
     (extractYears & extractMsaMds & extractStates) { (years, msaMds, states) =>
       if (years.nonEmpty && (msaMds.nonEmpty || states.nonEmpty))
         innerRoute(List(years, msaMds, states).flatten)
@@ -349,7 +351,7 @@ trait DataBrowserDirectives {
     }
 
   def extractFieldsForAggregation(
-                                   innerRoute: List[QueryField] => Route): Route =
+      innerRoute: List[QueryField] => Route): Route =
     extractNonMandatoryQueryFields { browserFields =>
       if (browserFields.nonEmpty) innerRoute(browserFields)
       else complete(BadRequest, NotEnoughFilterCriterias())
