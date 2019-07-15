@@ -31,13 +31,16 @@ object Routes {
             RawHeader("Content-Disposition",
                       s"""attachment; filename="${filename}.csv"""")) {
             (path("csv") & get) {
-              log.info("Nationwide [CSV]: " + queryFields)
-              complete(
-                HttpEntity(
-                  `text/plain(UTF-8)`,
-                  csvSource(browserService.fetchData(queryFields))
+              extractNationwideMandatoryYears { mandatoryFields =>
+                val allFields = queryFields ++ mandatoryFields
+                log.info("Nationwide [CSV]: " + allFields)
+                complete(
+                  HttpEntity(
+                    `text/plain(UTF-8)`,
+                    csvSource(browserService.fetchData(allFields))
+                  )
                 )
-              )
+              }
             }
           } ~
             // GET /view/nationwide/pipe
@@ -46,30 +49,34 @@ object Routes {
               val filename = "nationwide" + queryFields
                 .map(mc => mc.name + "_" + mc.values.mkString("-"))
                 .mkString("_")
-              respondWithHeader(
-                RawHeader("Content-Disposition",
-                          s"""attachment; filename="${filename}.txt"""")) {
-                complete(
-                  HttpEntity(
-                    `text/plain(UTF-8)`,
-                    pipeSource(browserService.fetchData(queryFields))
+              extractNationwideMandatoryYears { mandatoryFields =>
+                val allFields = queryFields ++ mandatoryFields
+                respondWithHeader(
+                  RawHeader("Content-Disposition",
+                            s"""attachment; filename="${filename}.txt"""")) {
+                  complete(
+                    HttpEntity(
+                      `text/plain(UTF-8)`,
+                      pipeSource(browserService.fetchData(allFields))
+                    )
                   )
-                )
+                }
               }
             }
         } ~
           // GET /view/nationwide/aggregations
           (path("aggregations") & get) {
-            extractFieldsForAggregation { queryFields =>
-              log.info("Nationwide [Aggregations]: " + queryFields)
-              val allFields = queryFields
-              complete(
-                browserService
+            extractNationwideMandatoryYears { mandatoryFields =>
+              extractFieldsForAggregation { queryFields =>
+                val allFields = mandatoryFields ++ queryFields
+                log.info("Nationwide [Aggregations]: " + allFields)
+                complete(browserService
                   .fetchAggregate(allFields)
                   .map(aggs =>
                     AggregationResponse(Parameters.fromBrowserFields(allFields),
                                         aggs))
                   .runToFuture)
+              }
             }
           }
       } ~

@@ -36,6 +36,10 @@ final case class ProvideYearAndStatesOrMsaMds(
     message: String = "Provide year and either states or msamds or both")
     extends ErrorResponse
 
+final case class ProvideYear(errorType: String = "provide-years",
+                             message: String = "Provide years for Nationwide")
+    extends ErrorResponse
+
 final case class NotEnoughFilterCriterias(
     errorType: String = "provide-atleast-one-filter-criteria",
     message: String =

@@ -341,6 +341,14 @@ trait DataBrowserDirectives {
       else complete(BadRequest, ProvideYearAndStatesOrMsaMds())
     }
 
+  def extractNationwideMandatoryYears(
+      innerRoute: List[QueryField] => Route): Route =
+    (extractYears) { (years) =>
+      if (years.nonEmpty)
+        innerRoute(List(years).flatten)
+      else complete(BadRequest, ProvideYear())
+    }
+
   def extractFieldsForAggregation(
       innerRoute: List[QueryField] => Route): Route =
     extractNonMandatoryQueryFields { browserFields =>
