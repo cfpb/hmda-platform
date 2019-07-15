@@ -67,8 +67,10 @@ object ApplicationGuardian {
     val service: BrowserService =
       new ModifiedLarBrowserService(repository, cache)
 
+    val routes = Routes(service, settings)
+
     Http()
-      .bindAndHandle(Routes(service),
+      .bindAndHandle(routes,
                      settings.server.host,
                      settings.server.port)
       .onComplete {
