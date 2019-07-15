@@ -71,7 +71,7 @@ databrowser:
   name: databrowser
   loglevel: INFO
   nationwideRouteCSV: https://s3.amazonaws.com/cfpb-hmda-public/prod/data-browser/nationwide_all.csv
-  nationwideRoutePipe: https://s3.amazonaws.com/cfpb-hmda-public/prod/data-browser/nationwide-all.txt
+  nationwideRoutePipe: https://s3.amazonaws.com/cfpb-hmda-public/prod/data-browser/nationwide_all.txt
   table: modifiedlar2018prod
   redis: my-release-redis-master
   protocol: TCP
