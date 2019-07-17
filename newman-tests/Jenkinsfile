@@ -1,17 +1,20 @@
 pipeline {
-  agent any
+  agent {
+node {
+    env.NODEJS_HOME = "${tool 'Node 6.x'}"
+    // on linux / mac
+    env.PATH="${env.NODEJS_HOME}/bin:${env.PATH}"
+    // on windows
+    env.PATH="${env.NODEJS_HOME};${env.PATH}"
+    sh 'npm --version'
+}}
 
-  tools {nodejs "node"}
+  tools {nodejs "NodeJS"}
 
     stages {
         stage('Build') {
             steps {
-            echo 'Building..'
-            script {
-            env.NODEJS_HOME = "${tool 'node'}"
-            env.PATH="${env.NODEJS_HOME}/bin:${env.PATH}"
-            }
-            sh 'node -version'
+                sh 'node -version'
             }
         }
         stage('Test') {
