@@ -63,6 +63,8 @@ volumes: [
                       """
         }
 
+        sh "more commercial.credentials"
+
         //HMDA utilizes commercial lightbend plugins (Telemetry) to collect metrics.
         //In order to not break the publicly released docker images and clone of this repository, by default we use build files that
         //do not include lightbend's commercial jars.

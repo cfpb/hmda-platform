@@ -12,7 +12,7 @@ metadata:
       ambassador_id: [ "ambassador-default-1", "ambassador-beta-2" ]
       prefix: /auth/
       rewrite: /auth/
-      service: keycloak-http
+      service: keycloak-http.default.svc.cluster.local
       timeout_ms: 20000
 spec:
   clusterIP : None

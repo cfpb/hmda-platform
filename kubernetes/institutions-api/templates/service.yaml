@@ -23,8 +23,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    service: institution-api-ambassador
-  name: institution-api-ambassador
+    service: institutions-api-ambassador
+  name: institutions-api-ambassador
   annotations:
     getambassador.io/config: |
       apiVersion: ambassador/v0

@@ -13,14 +13,11 @@ import hmda.data.browser.rest.DataBrowserDirectives._
 import hmda.data.browser.services.BrowserService
 import io.circe.generic.auto._
 import monix.execution.{Scheduler => MonixScheduler}
-import org.slf4j.LoggerFactory
 
 object Routes {
   def apply(browserService: BrowserService, settings: Settings)(
-      implicit scheduler: MonixScheduler): Route = {
+    implicit scheduler: MonixScheduler): Route = {
 
-
-    val log = LoggerFactory.getLogger("data-browser-api")
     val routeConf = settings.routes
     val Csv = "csv"
     val Pipe = "pipe"
@@ -67,7 +64,7 @@ object Routes {
                   .fetchAggregate(allFields)
                   .map(aggs =>
                     AggregationResponse(Parameters.fromBrowserFields(allFields),
-                                        aggs))
+                      aggs))
                   .runToFuture)
             }
           }
@@ -82,7 +79,7 @@ object Routes {
                   .fetchAggregate(allFields)
                   .map(aggs =>
                     AggregationResponse(Parameters.fromBrowserFields(allFields),
-                                        aggs))
+                      aggs))
                   .runToFuture
               )
             }
@@ -95,8 +92,8 @@ object Routes {
               contentDisposition(mandatoryFields ++ remainingQueryFields) {
                 complete(
                   HttpEntity(`text/plain(UTF-8)`,
-                             csvSource(browserService.fetchData(
-                               mandatoryFields ++ remainingQueryFields))))
+                    csvSource(browserService.fetchData(
+                      mandatoryFields ++ remainingQueryFields))))
               }
             }
           }
@@ -108,8 +105,8 @@ object Routes {
               contentDisposition(mandatoryFields ++ remainingQueryFields) {
                 complete(
                   HttpEntity(`text/plain(UTF-8)`,
-                             pipeSource(browserService.fetchData(
-                               mandatoryFields ++ remainingQueryFields))))
+                    pipeSource(browserService.fetchData(
+                      mandatoryFields ++ remainingQueryFields))))
               }
             }
           }
