@@ -13,11 +13,13 @@ import hmda.data.browser.rest.DataBrowserDirectives._
 import hmda.data.browser.services.BrowserService
 import io.circe.generic.auto._
 import monix.execution.{Scheduler => MonixScheduler}
+import org.slf4j.LoggerFactory
 
 object Routes {
   def apply(browserService: BrowserService, settings: Settings)(
-    implicit scheduler: MonixScheduler): Route = {
+      implicit scheduler: MonixScheduler): Route = {
 
+    val log = LoggerFactory.getLogger("data-browser-api")
     val routeConf = settings.routes
     val Csv = "csv"
     val Pipe = "pipe"
@@ -29,42 +31,53 @@ object Routes {
           // GET /view/nationwide/csv
           contentDisposition(queryFields) {
             (path(Csv) & get) {
-              if (queryFields.isEmpty)
-                redirect(Uri(routeConf.nationwideCsv), Found)
-              else
-                complete(
-                  HttpEntity(
-                    `text/plain(UTF-8)`,
-                    csvSource(browserService.fetchData(queryFields))
-                  )
-                )
-            }
-          } ~
-            // GET /view/nationwide/pipe
-            (path(Pipe) & get) {
-              contentDisposition(queryFields) {
+              extractNationwideMandatoryYears { mandatoryFields =>
+                val allFields = queryFields ++ mandatoryFields
+                log.info("Nationwide [CSV]: " + allFields)
                 if (queryFields.isEmpty)
-                  redirect(Uri(routeConf.nationwidePipe), Found)
+                  redirect(Uri(routeConf.nationwideCsv), Found)
                 else
                   complete(
                     HttpEntity(
                       `text/plain(UTF-8)`,
-                      pipeSource(browserService.fetchData(queryFields))
+                      csvSource(browserService.fetchData(queryFields))
                     )
                   )
               }
+
+            }
+          } ~
+            // GET /view/nationwide/pipe
+            (path(Pipe) & get) {
+              extractNationwideMandatoryYears{mandatoryFields =>
+                val allFields = queryFields ++ mandatoryFields
+                log.info("Nationwide [Pipe]: " + allFields)
+                contentDisposition(queryFields) {
+                  if (queryFields.isEmpty)
+                    redirect(Uri(routeConf.nationwidePipe), Found)
+                  else
+                    complete(
+                      HttpEntity(
+                        `text/plain(UTF-8)`,
+                        pipeSource(browserService.fetchData(queryFields))
+                      )
+                    )
+                }
+              }
+
             }
         } ~
           // GET /view/nationwide/aggregations
           (path(Aggregations) & get) {
             extractFieldsForAggregation { queryFields =>
               val allFields = queryFields
+              log.info("Nationwide [Aggregations]: " + allFields)
               complete(
                 browserService
                   .fetchAggregate(allFields)
                   .map(aggs =>
                     AggregationResponse(Parameters.fromBrowserFields(allFields),
-                      aggs))
+                                        aggs))
                   .runToFuture)
             }
           }
@@ -74,12 +87,13 @@ object Routes {
           extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
             extractFieldsForAggregation { remainingQueryFields =>
               val allFields = mandatoryFields ++ remainingQueryFields
+              log.info("Aggregations: " + allFields)
               complete(
                 browserService
                   .fetchAggregate(allFields)
                   .map(aggs =>
                     AggregationResponse(Parameters.fromBrowserFields(allFields),
-                      aggs))
+                                        aggs))
                   .runToFuture
               )
             }
@@ -89,11 +103,13 @@ object Routes {
         (path(Csv) & get) {
           extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
             extractFieldsForRawQueries { remainingQueryFields =>
-              contentDisposition(mandatoryFields ++ remainingQueryFields) {
+              val allFields = mandatoryFields ++ remainingQueryFields
+              log.info("CSV: " + allFields)
+              contentDisposition(allFields) {
                 complete(
                   HttpEntity(`text/plain(UTF-8)`,
-                    csvSource(browserService.fetchData(
-                      mandatoryFields ++ remainingQueryFields))))
+                             csvSource(browserService.fetchData(
+                               allFields))))
               }
             }
           }
@@ -102,11 +118,13 @@ object Routes {
         (path(Pipe) & get) {
           extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
             extractFieldsForRawQueries { remainingQueryFields =>
-              contentDisposition(mandatoryFields ++ remainingQueryFields) {
+              val allFields = mandatoryFields ++ remainingQueryFields
+              log.info("CSV: " + allFields)
+              contentDisposition(allFields) {
                 complete(
                   HttpEntity(`text/plain(UTF-8)`,
-                    pipeSource(browserService.fetchData(
-                      mandatoryFields ++ remainingQueryFields))))
+                             pipeSource(browserService.fetchData(
+                               allFields))))
               }
             }
           }
