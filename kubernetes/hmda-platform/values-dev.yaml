@@ -36,7 +36,7 @@ kafka:
 service:
   type: ClusterIP
   account:
-    name: hmda-service-account
+    name: hmda-service-account-default
   name: hmda-platform
 
 #ambassador:
