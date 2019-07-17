@@ -13,11 +13,14 @@ import hmda.data.browser.rest.DataBrowserDirectives._
 import hmda.data.browser.services.BrowserService
 import io.circe.generic.auto._
 import monix.execution.{Scheduler => MonixScheduler}
+import org.slf4j.LoggerFactory
 
 object Routes {
   def apply(browserService: BrowserService, settings: Settings)(
       implicit scheduler: MonixScheduler): Route = {
 
+
+    val log = LoggerFactory.getLogger("data-browser-api")
     val routeConf = settings.routes
     val Csv = "csv"
     val Pipe = "pipe"
