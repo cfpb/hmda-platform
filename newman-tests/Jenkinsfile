@@ -6,11 +6,12 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                echo 'Building..'
-                env.NODEJS_HOME = "${tool nodejs}"
-                env.PATH="${env.NODEJS_HOME}:${env.PATH}"
-                echo ${env.PATH}
-                sh 'node -version'
+            echo 'Building..'
+            script {
+            env.NODEJS_HOME = "${tool 'node'}"
+            env.PATH="${env.NODEJS_HOME}/bin:${env.PATH}"
+            }
+            sh 'node -version'
             }
         }
         stage('Test') {
