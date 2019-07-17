@@ -31,9 +31,13 @@ class Settings(config: Config) {
   }
 
   object routes {
-    val nationwideCsv: String = config.getString("server.routes.nationwide-csv")
-    val nationwidePipe: String =
-      config.getString("server.routes.nationwide-pipe")
+    val s3Url: String = config.getString("server.s3.url") + config.getString(
+      "server.s3.public-bucket") + "/" + config
+      .getString("server.s3.environment") + "/"
+    val nationwideCsv: String = s3Url + config.getString(
+      "server.s3.routes.nationwide-csv")
+    val nationwidePipe: String = s3Url + config.getString(
+      "server.s3.routes.nationwide-pipe")
   }
 
 }

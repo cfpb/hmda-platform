@@ -49,7 +49,7 @@ object Routes {
           } ~
             // GET /view/nationwide/pipe
             (path(Pipe) & get) {
-              extractNationwideMandatoryYears{mandatoryFields =>
+              extractNationwideMandatoryYears { mandatoryFields =>
                 val allFields = queryFields ++ mandatoryFields
                 log.info("Nationwide [Pipe]: " + allFields)
                 contentDisposition(queryFields) {
@@ -108,8 +108,7 @@ object Routes {
               contentDisposition(allFields) {
                 complete(
                   HttpEntity(`text/plain(UTF-8)`,
-                             csvSource(browserService.fetchData(
-                               allFields))))
+                             csvSource(browserService.fetchData(allFields))))
               }
             }
           }
@@ -123,8 +122,7 @@ object Routes {
               contentDisposition(allFields) {
                 complete(
                   HttpEntity(`text/plain(UTF-8)`,
-                             pipeSource(browserService.fetchData(
-                               allFields))))
+                             pipeSource(browserService.fetchData(allFields))))
               }
             }
           }

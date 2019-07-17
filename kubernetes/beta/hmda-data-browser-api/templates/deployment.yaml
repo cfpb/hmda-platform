@@ -86,11 +86,18 @@ spec:
               value: {{.Values.databrowser.table}}
             - name: REDIS_HOSTNAME
               value: {{.Values.databrowser.redis}}
-            - name: AWS_SECRET_ACCESS_KEY
+            - name: AWS_ENVIRONMENT
               valueFrom:
-                secretKeyRef:
-                  name: aws-credentials
-                  key: aws-secret-access-key
+                configMapKeyRef:
+                  name: s3-configmap
+                  key: aws-environment
+            - name: S3_PUBLIC_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: s3-configmap
+                  key: s3-public-bucket
+            - name: S3_URL
+              value: {{.Values.databrowser.s3-url}}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
