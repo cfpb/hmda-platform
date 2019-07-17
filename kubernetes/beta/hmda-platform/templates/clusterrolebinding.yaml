@@ -5,7 +5,7 @@ metadata:
   namespace: beta
 subjects:
   - kind: ServiceAccount
-    name: hmda-service-account
+    name: {{.Values.service.account.name}}
     namespace: beta
 roleRef:
   kind: ClusterRole

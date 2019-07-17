@@ -56,6 +56,12 @@ spec:
         - name: HMDA_RUNTIME_MODE
           value: {{ .Values.hmda.runtimeMode }}
         - name: KUBERNETES_HMDA_POD_NAMESPACE
+          value: {{.Values.hmda.podNamespace}}
+        - name: KUBERNETES_HMDA_SERVICE_NAME
+          value: {{.Values.hmda.apiNamespace}}
+        - name: KUBERNETES_HMDA_SERVICE_NAMESPACE
+          value: {{.Values.hmda.serviceNamespace}}
+        - name: KUBERNETES_HMDA_POD_NAMESPACE
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace

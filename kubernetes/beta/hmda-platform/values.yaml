@@ -21,6 +21,9 @@ image:
 hmda:
   actorSystemName: hmda2
   runtimeMode: kubernetes
+  podNamespace: beta
+  apiNamespace: hmda-api-beta
+  serviceNamespace: beta.svc.cluster.local
 
 kafka:
   institutionsTopic: institution
@@ -33,7 +36,7 @@ kafka:
 service:
   type: ClusterIP
   account:
-    name: hmda-service-account
+    name: hmda-service-account-beta
   name: hmda-platform
 
 #ambassador:
