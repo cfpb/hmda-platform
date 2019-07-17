@@ -48,10 +48,10 @@ class RedisModifiedLarAggregateCache(
       .onErrorFallbackTo(Task.unit)
 
   private def key(queryFields: List[QueryField]): String = {
-    // ensure we get a stable sorting order so we form keys and values correctly in Redis
+    // ensure we get a stable sorting order so we form keys correctly in Redis
     val sortedQueryFields = queryFields.sortBy(_.name)
     val redisKey = sortedQueryFields
-      .map(field => s"${field.name}:${field.values.sorted.mkString("|")}")
+      .map(field => s"${field.name}:${field.values.mkString("|")}")
       .mkString(":")
     s"$Prefix:$redisKey"
   }
