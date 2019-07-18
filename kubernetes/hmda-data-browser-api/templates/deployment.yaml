@@ -97,7 +97,7 @@ spec:
                   name: s3-configmap
                   key: s3-public-bucket
             - name: S3_URL
-              value: {{.Values.databrowser.s3-url}}
+              value: {{.Values.databrowser.s3Url}}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
