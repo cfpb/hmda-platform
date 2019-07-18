@@ -12,6 +12,17 @@ volumes: [
      def gitBranch = repo.GIT_BRANCH
      def shortGitCommit = "${gitCommit[0..10]}"
 
+    sh "git remote add upstream https://github.com/cfpb/hmda-help.git"
+    sh "git fetch upstream master"
+
+    //Get list of changed files and end job if files changed aren't in relevant folders
+    folders=[]
+    def output = sh(returnStdout: true, script: "echo \$(git --no-pager diff upstream/master --name-only)").split().each{folders = folders + it.split('/')[0]}
+    if !(gitBranch == 'master' || folders.contains('auth') || folders.contains('common')) {
+        currentBuild.result = 'SUCCESS'
+        return
+    } 
+
      stage('Build and package Java Code') {
        container('maven') {
          sh "mvn -B -f ./auth/ clean package"
