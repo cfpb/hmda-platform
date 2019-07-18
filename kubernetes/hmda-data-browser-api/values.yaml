@@ -74,6 +74,6 @@ databrowser:
   nationwideRouteCSV: data-browser/nationwide_all.csv
   nationwideRoutePipe: data-browser/nationwide_all.txt
   table: modifiedlar2018prod
-  redis: hmda-redis-beta-master
+  redis: hmda-redis-master
   protocol: TCP
   port: 8070
