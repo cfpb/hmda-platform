@@ -6,27 +6,29 @@ import akka.http.scaladsl.common.{
   EntityStreamingSupport
 }
 import akka.http.scaladsl.model.StatusCodes.BadRequest
+import akka.http.scaladsl.model.headers.ContentDispositionTypes.attachment
+import akka.http.scaladsl.model.headers.`Content-Disposition`
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 import akka.http.scaladsl.server.directives.RouteDirectives.complete
 import akka.http.scaladsl.unmarshalling.PredefinedFromStringUnmarshallers._
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.data.browser.models.ActionTaken._
-import hmda.data.browser.models.Race._
-import hmda.data.browser.models.Sex._
-import hmda.data.browser.models.LoanType._
-import hmda.data.browser.models.LoanPurpose._
-import hmda.data.browser.models.LienStatus._
 import hmda.data.browser.models.ConstructionMethod._
 import hmda.data.browser.models.DwellingCategory._
-import hmda.data.browser.models.LoanProduct._
-import hmda.data.browser.models.TotalUnits._
 import hmda.data.browser.models.Ethnicity._
+import hmda.data.browser.models.LienStatus._
+import hmda.data.browser.models.LoanProduct._
+import hmda.data.browser.models.LoanPurpose._
+import hmda.data.browser.models.LoanType._
+import hmda.data.browser.models.Race._
+import hmda.data.browser.models.Sex._
 import hmda.data.browser.models.State._
+import hmda.data.browser.models.TotalUnits._
 import hmda.data.browser.models._
 import io.circe.generic.auto._
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 
 trait DataBrowserDirectives {
   private implicit val csvStreamingSupport: CsvEntityStreamingSupport =
@@ -40,6 +42,13 @@ trait DataBrowserDirectives {
     (header ++ content)
       .map(ByteString(_))
       .via(csvStreamingSupport.framingRenderer)
+  }
+
+  def contentDisposition(queries: List[QueryField])(route: Route): Route = {
+    val filename =
+      queries.map(q => q.name + "_" + q.values.mkString("-")).mkString("_")
+    respondWithHeader(
+      `Content-Disposition`(attachment, Map("filename" -> filename)))(route)
   }
 
   def pipeSource(

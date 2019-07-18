@@ -67,10 +67,10 @@ object ApplicationGuardian {
     val service: BrowserService =
       new ModifiedLarBrowserService(repository, cache)
 
+    val routes = Routes(service, settings)
+
     Http()
-      .bindAndHandle(Routes(service),
-                     settings.server.host,
-                     settings.server.port)
+      .bindAndHandle(routes, settings.server.host, settings.server.port)
       .onComplete {
         case Success(value)     => ctx.self ! Ready(settings.server.port)
         case Failure(exception) => ctx.self ! Error(exception.getMessage)

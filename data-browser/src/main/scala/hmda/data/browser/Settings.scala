@@ -29,6 +29,17 @@ class Settings(config: Config) {
     val url = s"redis://$host:$port"
     val ttl = getDuration("redis.ttl")
   }
+
+  object routes {
+    val s3Url: String = config.getString("server.s3.url") + config.getString(
+      "server.s3.public-bucket") + "/" + config
+      .getString("server.s3.environment") + "/"
+    val nationwideCsv: String = s3Url + config.getString(
+      "server.s3.routes.nationwide-csv")
+    val nationwidePipe: String = s3Url + config.getString(
+      "server.s3.routes.nationwide-pipe")
+  }
+
 }
 
 object Settings {

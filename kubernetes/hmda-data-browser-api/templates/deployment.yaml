@@ -77,16 +77,27 @@ spec:
                   name: aws-credentials
                   key: aws-access-key-id
             - name: BROWSER_LOG_LEVEL
-              value: INFO
+              value: {{.Values.databrowser.loglevel}}
+            - name: ROUTE_NATIONWIDE_CSV
+              value: {{.Values.databrowser.nationwideRouteCSV}}
+            - name: ROUTE_NATIONWIDE_PIPE
+              value: {{.Values.databrowser.nationwideRoutePipe}}
             - name: DATABROWSER_PG_TABLE
-              value: modifiedlar2018prod
+              value: {{.Values.databrowser.table}}
             - name: REDIS_HOSTNAME
-              value: my-release-redis-master
-            - name: AWS_SECRET_ACCESS_KEY
+              value: {{.Values.databrowser.redis}}
+            - name: AWS_ENVIRONMENT
               valueFrom:
-                secretKeyRef:
-                  name: aws-credentials
-                  key: aws-secret-access-key
+                configMapKeyRef:
+                  name: s3-configmap
+                  key: aws-environment
+            - name: S3_PUBLIC_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: s3-configmap
+                  key: s3-public-bucket
+            - name: S3_URL
+              value: {{.Values.databrowser.s3Url}}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}

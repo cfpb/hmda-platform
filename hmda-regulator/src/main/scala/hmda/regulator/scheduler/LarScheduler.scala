@@ -7,7 +7,12 @@ import akka.NotUsed
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings}
+import akka.stream.alpakka.s3.{
+  MemoryBufferType,
+  MultipartUploadResult,
+  S3Attributes,
+  S3Settings
+}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
@@ -16,9 +21,15 @@ import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.query.DbConfiguration.dbConfig
-import hmda.regulator.query.component.{RegulatorComponent2018, RegulatorComponent2019}
+import hmda.regulator.query.component.{
+  RegulatorComponent2018,
+  RegulatorComponent2019
+}
 import hmda.regulator.query.lar.LarEntityImpl
-import hmda.regulator.scheduler.schedules.Schedules.{LarScheduler2018, LarScheduler2019}
+import hmda.regulator.scheduler.schedules.Schedules.{
+  LarScheduler2018,
+  LarScheduler2019
+}
 import slick.basic.DatabasePublisher
 
 import scala.concurrent.Future

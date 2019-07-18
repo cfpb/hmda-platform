@@ -1,12 +1,13 @@
 package hmda.data.browser.rest
 
 import akka.http.scaladsl.model.ContentTypes._
-import akka.http.scaladsl.model.HttpEntity
-import akka.http.scaladsl.model.headers.RawHeader
+import akka.http.scaladsl.model.StatusCodes.Found
+import akka.http.scaladsl.model.{HttpEntity, Uri}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.RouteDirectives.complete
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import hmda.data.browser.Settings
 import hmda.data.browser.models._
 import hmda.data.browser.rest.DataBrowserDirectives._
 import hmda.data.browser.services.BrowserService
@@ -15,73 +16,74 @@ import monix.execution.{Scheduler => MonixScheduler}
 import org.slf4j.LoggerFactory
 
 object Routes {
-
-  val log = LoggerFactory.getLogger("data-browser-api")
-  def apply(browserService: BrowserService)(
+  def apply(browserService: BrowserService, settings: Settings)(
       implicit scheduler: MonixScheduler): Route = {
+
+    val log = LoggerFactory.getLogger("data-browser-api")
+    val routeConf = settings.routes
+    val Csv = "csv"
+    val Pipe = "pipe"
+    val Aggregations = "aggregations"
 
     pathPrefix("view") {
       pathPrefix("nationwide") {
         extractFieldsForRawQueries { queryFields =>
           // GET /view/nationwide/csv
-          val filename = "nationwide" + queryFields
-            .map(mc => mc.name + "_" + mc.values.mkString("-"))
-            .mkString("_")
-          respondWithHeader(
-            RawHeader("Content-Disposition",
-                      s"""attachment; filename="${filename}.csv"""")) {
-            (path("csv") & get) {
+          contentDisposition(queryFields) {
+            (path(Csv) & get) {
               extractNationwideMandatoryYears { mandatoryFields =>
                 val allFields = queryFields ++ mandatoryFields
                 log.info("Nationwide [CSV]: " + allFields)
-                complete(
-                  HttpEntity(
-                    `text/plain(UTF-8)`,
-                    csvSource(browserService.fetchData(allFields))
-                  )
-                )
-              }
-            }
-          } ~
-            // GET /view/nationwide/pipe
-            (path("pipe") & get) {
-              log.info("Nationwide [Pipe]: " + queryFields)
-              val filename = "nationwide" + queryFields
-                .map(mc => mc.name + "_" + mc.values.mkString("-"))
-                .mkString("_")
-              extractNationwideMandatoryYears { mandatoryFields =>
-                val allFields = queryFields ++ mandatoryFields
-                respondWithHeader(
-                  RawHeader("Content-Disposition",
-                            s"""attachment; filename="${filename}.txt"""")) {
+                if (queryFields.isEmpty)
+                  redirect(Uri(routeConf.nationwideCsv), Found)
+                else
                   complete(
                     HttpEntity(
                       `text/plain(UTF-8)`,
-                      pipeSource(browserService.fetchData(allFields))
+                      csvSource(browserService.fetchData(queryFields))
                     )
                   )
+              }
+
+            }
+          } ~
+            // GET /view/nationwide/pipe
+            (path(Pipe) & get) {
+              extractNationwideMandatoryYears { mandatoryFields =>
+                val allFields = queryFields ++ mandatoryFields
+                log.info("Nationwide [Pipe]: " + allFields)
+                contentDisposition(queryFields) {
+                  if (queryFields.isEmpty)
+                    redirect(Uri(routeConf.nationwidePipe), Found)
+                  else
+                    complete(
+                      HttpEntity(
+                        `text/plain(UTF-8)`,
+                        pipeSource(browserService.fetchData(queryFields))
+                      )
+                    )
                 }
               }
+
             }
         } ~
           // GET /view/nationwide/aggregations
-          (path("aggregations") & get) {
-            extractNationwideMandatoryYears { mandatoryFields =>
-              extractFieldsForAggregation { queryFields =>
-                val allFields = mandatoryFields ++ queryFields
-                log.info("Nationwide [Aggregations]: " + allFields)
-                complete(browserService
+          (path(Aggregations) & get) {
+            extractFieldsForAggregation { queryFields =>
+              val allFields = queryFields
+              log.info("Nationwide [Aggregations]: " + allFields)
+              complete(
+                browserService
                   .fetchAggregate(allFields)
                   .map(aggs =>
                     AggregationResponse(Parameters.fromBrowserFields(allFields),
                                         aggs))
                   .runToFuture)
-              }
             }
           }
       } ~
         // GET /view/aggregations
-        (path("aggregations") & get) {
+        (path(Aggregations) & get) {
           extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
             extractFieldsForAggregation { remainingQueryFields =>
               val allFields = mandatoryFields ++ remainingQueryFields
@@ -98,17 +100,12 @@ object Routes {
           }
         } ~
         // GET /view/csv
-        (path("csv") & get) {
+        (path(Csv) & get) {
           extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
-            val filename = mandatoryFields
-              .map(mc => mc.name + "_" + mc.values.mkString("-"))
-              .mkString("_")
-            respondWithHeader(
-              RawHeader("Content-Disposition",
-                        s"""attachment; filename="${filename}.csv"""")) {
-              extractFieldsForRawQueries { remainingQueryFields =>
-                val allFields = mandatoryFields ++ remainingQueryFields
-                log.info("CSV: " + allFields)
+            extractFieldsForRawQueries { remainingQueryFields =>
+              val allFields = mandatoryFields ++ remainingQueryFields
+              log.info("CSV: " + allFields)
+              contentDisposition(allFields) {
                 complete(
                   HttpEntity(`text/plain(UTF-8)`,
                              csvSource(browserService.fetchData(allFields))))
@@ -117,17 +114,12 @@ object Routes {
           }
         } ~
         // GET /view/pipe
-        (path("pipe") & get) {
+        (path(Pipe) & get) {
           extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
-            val filename = mandatoryFields
-              .map(mc => mc.name + "_" + mc.values.mkString("-"))
-              .mkString("_")
-            respondWithHeader(
-              RawHeader("Content-Disposition",
-                        s"""attachment; filename="${filename}.txt"""")) {
-              extractFieldsForRawQueries { remainingQueryFields =>
-                val allFields = mandatoryFields ++ remainingQueryFields
-                log.info("Pipe: " + allFields)
+            extractFieldsForRawQueries { remainingQueryFields =>
+              val allFields = mandatoryFields ++ remainingQueryFields
+              log.info("CSV: " + allFields)
+              contentDisposition(allFields) {
                 complete(
                   HttpEntity(`text/plain(UTF-8)`,
                              pipeSource(browserService.fetchData(allFields))))
