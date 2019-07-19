@@ -1,5 +1,7 @@
 # 2018 LAR Data Dictionary
 Field names linked to codesheet below. 
+
+
 Field Name|Field Data Type|Valid Values|Notes
 |----|-------------|----|----|
 Record Identifier|Integer|2|
