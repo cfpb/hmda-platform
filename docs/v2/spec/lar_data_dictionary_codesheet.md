@@ -111,6 +111,8 @@ Code | Description|
 3 | Veterans Affairs guaranteed (VA)
 4 | USDA Rural Housing Service or Farm Service Agency guaranteed (RHS or FSA)
 
+[Return to table](#2018-lar-data-dictionary)
+
 ## Loan Purpose
 Code | Description|
 |----|-------------|
@@ -121,17 +123,23 @@ Code | Description|
 4 | Other purpose
 5 | Not applicable
 
+[Return to table](#2018-lar-data-dictionary)
+
 ## Preapproval
 Code | Description|
 |----|-------------|
 1 | Preapproval requested	
 2 | Preapproval not requested
 
+[Return to table](#2018-lar-data-dictionary)
+
 ## Construction Method
 Code | Description|
 |----|-------------|
 1 | Site-built	
-2 | Manufactured Home	
+2 | Manufactured Home
+
+[Return to table](#2018-lar-data-dictionary)	
 
 ## Occupancy Type
 Code | Description|
@@ -139,6 +147,8 @@ Code | Description|
 1 | Principal residence	
 2 | Second residence	
 3 | Investment property	
+
+[Return to table](#2018-lar-data-dictionary)
 
 ## Action Taken
 Code | Description|
@@ -150,7 +160,9 @@ Code | Description|
 5 |	File closed for incompleteness	
 6 |	Purchased loan	
 7 |	Preapproval request denied	
-8 |	Preapproval request approved but not accepted	
+8 |	Preapproval request approved but not accepted
+
+[Return to table](#2018-lar-data-dictionary)	
 
 ## Ethnicity of Applicant or Borrower
 Code | Description|
@@ -166,6 +178,8 @@ Code | Description|
 
 *Code 3 only valid for Ethnicity of Applicant or Borrower: 1
 **Code 4 only valid for Ethnicity of Applicant or Borrower: 1
+
+[Return to table](#2018-lar-data-dictionary)
 
 ## Ethnicity of Co-Applicant or Co-Borrower
 Code | Description|
@@ -183,12 +197,16 @@ Code | Description|
 **Code 4 only valid for Ethnicity of Co-Applicant or Co-Borrower: 1 
 ***Code 5 only valid for Ethnicity of Co-Applicant or Co-Borrower: 1 
 
+[Return to table](#2018-lar-data-dictionary)
+
 ## Ethnicity of Applicant or Borrower Collected on the Basis of Visual Observation or Surname
 Code | Description|
 |----|-------------|
 1 | Collected on the basis of visual observation or surname	
 2 |	Not collected on the basis of visual observation or surname	
 3 |	Not applicable	
+
+[Return to table](#2018-lar-data-dictionary)
 
 ## Ethnicity of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname
 Code | Description|
@@ -197,6 +215,8 @@ Code | Description|
 2 | Not collected on the basis of visual observation or surname	
 3 |	Not applicable	
 4 |	No co-applicant	
+
+[Return to table](#2018-lar-data-dictionary)
 
 ## Race of Applicant or Borrower
 Code | Description|
@@ -221,6 +241,8 @@ Code | Description|
 7 | Not applicable**	
 *Code 6 is only valid for Race of Applicant or Borrower: 1
 **Code 7 is only valid for Race of Applicant or Borrower: 1
+
+[Return to table](#2018-lar-data-dictionary)
 
 ## Race of Co-Applicant or Co-Borrower
 Code | Description|
@@ -248,6 +270,8 @@ Code | Description|
 **Code 7 is only valid for Race of Co-Applicant or Co-Borrower: 1
 ***Code 8 is only valid for Race of Co-Applicant or Co-Borrower: 1
 
+[Return to table](#2018-lar-data-dictionary)
+
 ## Race of Applicant or Borrower Collected on the Basis of Visual Observation or Surname
 Code | Description|
 |----|-------------|
@@ -255,13 +279,17 @@ Code | Description|
 2 | Not collected on the basis of visual observation or surname	
 3 | Not applicable	
 
+[Return to table](#2018-lar-data-dictionary)
+
 ## Race of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname
 Code | Description|
 |----|-------------|
 1 | Collected on the basis of visual observation or surname	
 2 | Not collected on the basis of visual observation or surname	
 3 | Not applicable	
-4 | No co-applicant	
+4 | No co-applicant
+
+[Return to table](#2018-lar-data-dictionary)	
 
 ## Sex of Applicant or Borrower
 Code | Description|
@@ -270,7 +298,9 @@ Code | Description|
 2 | Female	
 3 | Information not provided by applicant in mail internet or telephone application	
 4 | Not applicable	
-6 | Applicant selected both male and female	
+6 | Applicant selected both male and female
+
+[Return to table](#2018-lar-data-dictionary)	
 
 ## Sex of Co-Applicant or Co-Borrower
 Code | Description|
@@ -282,6 +312,8 @@ Code | Description|
 5 | No co-applicant
 6 | Applicant selected both male and female
 
+[Return to table](#2018-lar-data-dictionary)
+
 ## Sex of Applicant or Borrower Collected on the Basis of Visual Observation or Surname
 Code | Description|
 |----|-------------|
@@ -289,12 +321,16 @@ Code | Description|
 2 | Not collected on the basis of visual observation or surname	
 3 | Not applicable
 
+[Return to table](#2018-lar-data-dictionary)
+
 ## Sex of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname
 Code | Description|
 |----|-------------|
 1 | Collected on the basis of visual observation or surname	
 2 | Not collected on the basis of visual observation or surname	
 3 | Not applicable
+
+[Return to table](#2018-lar-data-dictionary)
 
 ## Age of Applicant or Borrower
 Code | Description|
@@ -308,12 +344,16 @@ Code | Description|
 >74	| Age is greater than 74	
 8888 | Not applicable
 
+[Return to table](#2018-lar-data-dictionary)
+
 ## Age of Applicant or Borrower Greater Than or Equal To 62
 Code | Description|
 |----|-------------|
 Yes | Age or Applicant or Borrower is greater than or equal to 62	
 No | Age or Applicant or Borrower is less than 62	
 NA | Age or Applicant or Borrower is indicated as 8888
+
+[Return to table](#2018-lar-data-dictionary)
 
 ## Age of Co-Applicant or Co-Borrower
 Code | Description|
@@ -328,12 +368,16 @@ Code | Description|
 8888 | Not applicable
 9999 | No co-applicant	
 
+[Return to table](#2018-lar-data-dictionary)
+
 ## Age of Co-Applicant or Co-Borrower Greater Than or Equal To 62
 Code | Description|
 |----|-------------|
 Yes | Age or Co-Applicant or Co-Borrower is greater than or equal to 62	
 No | Age or Co-Applicant or Co-Borrower is less than 62	
 NA | Age or Co-Applicant or Co-Borrower is indicated as 8888 or 9999
+
+[Return to table](#2018-lar-data-dictionary)
 
 ## Type of Purchaser
 Code | Description|
@@ -350,6 +394,8 @@ Code | Description|
 8 | Affiliate institution	
 9 | Other type of purchaser	
 
+[Return to table](#2018-lar-data-dictionary)
+
 ## HOEPA Status
 Code | Description|
 |----|-------------|
@@ -357,11 +403,15 @@ Code | Description|
 2 | Not a high-cost mortgage	
 3 | Not applicable
 
+[Return to table](#2018-lar-data-dictionary)
+
 ## Lien Status
 Code | Description|
 |----|-------------|
 1 | Secured by a first lien	
 2 | Secured by a subordinate lien	
+
+[Return to table](#2018-lar-data-dictionary)
 
 ## Applicant or Borrower Name and Version of Credit Scoring Model
 Code | Description|
@@ -376,6 +426,8 @@ Code | Description|
 8 | Other credit scoring model	
 9 | Not applicable	
 1111 | Exempt	
+
+[Return to table](#2018-lar-data-dictionary)
 
 ## Co-Applicant or Co-Borrower Name and Version of Credit Scoring Model
 Code | Description|
@@ -392,6 +444,8 @@ Code | Description|
 10 | No co-applicant	
 1111 | Exempt
 
+[Return to table](#2018-lar-data-dictionary)
+
 ## Reason for Denial
 Code | Description|
 |----|-------------|
@@ -407,6 +461,8 @@ Code | Description|
 10 | Not applicable	Code 10 is only valid for Reason for Denial: 1
 1111 | ExemptCode 1111 is only valid for Reason for Denial: 1 
 
+[Return to table](#2018-lar-data-dictionary)
+
 ## Debt-to-Income Ratio*
 Code | Description|
 |----|-------------|
@@ -419,12 +475,16 @@ NA | Not applicable
 Exempt | Exemption taken	
 *Exact values between 36% and 50% are published with modification	
 
+[Return to table](#2018-lar-data-dictionary)
+
 ## Balloon Payment
 Code | Description|
 |----|-------------|
 1 | Balloon payment	
 2 | No balloon payment	
 1111 | Exempt	
+
+[Return to table](#2018-lar-data-dictionary)
 
 ## Interest-Only Payments
 Code | Description|
@@ -433,6 +493,8 @@ Code | Description|
 2 | No interest-only payments	
 1111 | Exempt	
 
+[Return to table](#2018-lar-data-dictionary)
+
 ## Negative Amortization
 Code | Description|
 |----|-------------|
@@ -440,12 +502,16 @@ Code | Description|
 2 | No negative amortization	
 1111 | Exempt	
 
+[Return to table](#2018-lar-data-dictionary)
+
 ## Other Non-Amortizing Features
 Code | Description|
 |----|-------------|
 1 | Other non-fully amortizing features	
 2 | No other non-fully amortizing features	
-1111 | Exempt	
+1111 | Exempt
+
+[Return to table](#2018-lar-data-dictionary)	
 
 ## Manufactured Home Secured Property Type
 Code | Description|
@@ -454,6 +520,8 @@ Code | Description|
 2 | Manufactured home and not land	
 3 | Not applicable	
 1111 | Exempt	
+
+[Return to table](#2018-lar-data-dictionary)
 
 ## Manufactured Home Land Property Interest
 Code | Description|
@@ -464,6 +532,8 @@ Code | Description|
 4 | Unpaid leasehold	
 5 | Not applicable	
 1111 | Exempt
+
+[Return to table](#2018-lar-data-dictionary)
 
 ## Total Units
 Code | Description|
@@ -478,6 +548,8 @@ Code | Description|
 100-149 | Total units between 100 and 149
 >149 | Total units over 149
 
+[Return to table](#2018-lar-data-dictionary)
+
 ## Submission of Application
 Code | Description|
 |----|-------------|
@@ -486,6 +558,8 @@ Code | Description|
 3 | Not applicable
 1111 | Exempt
 
+[Return to table](#2018-lar-data-dictionary)
+
 ## Initially Payable
 Code | Description|
 |----|-------------|
@@ -493,6 +567,8 @@ Code | Description|
 2 | Not initially payable to your institution
 3 | Not applicable
 1111 | Exempt
+
+[Return to table](#2018-lar-data-dictionary)
 
 ## Automated Underwriting System
 Code | Description|
@@ -505,12 +581,16 @@ Code | Description|
 6 | Not applicable
 1111 | Exemption taken
 
+[Return to table](#2018-lar-data-dictionary)
+
 ## Reverse Mortgage
 Code | Description|
 |----|-------------|
 1 | Reverse mortgage
 2 | Not a reverse mortgage
 1111 | Exempt
+
+[Return to table](#2018-lar-data-dictionary)
 
 ## Open-End Line of Credit
 Code | Description|
@@ -519,12 +599,16 @@ Code | Description|
 2 | Not an open-end line of credit
 1111 | Exempt
 
+[Return to table](#2018-lar-data-dictionary)
+
 ## Business or Commercial Purpose
 Code | Description|
 |----|-------------|
 1 | Primarily for a business or commercial purpose
 2 | Not primarily for a business or commercial purpose
 1111 | Exempt
+
+[Return to table](#2018-lar-data-dictionary)
 
 ## Conforming Loan Limit Flag
 Code | Description|
@@ -533,3 +617,5 @@ C  | Conforming
 NC | Nonconforming
 U | Undetermined
 NA | Not Applicable
+
+[Return to table](#2018-lar-data-dictionary)
