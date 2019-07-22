@@ -27,6 +27,17 @@ volumes: [
 
     println "DOCKER_TAG: ${env.DOCKER_TAG}, TAG_NAME: ${env.TAG_NAME}, gitbranch: ${gitBranch}, isDeployPR: ${isDeployPR}"
 
+    sh "git remote add upstream https://github.com/cfpb/hmda-help.git"
+    sh "git fetch upstream master"
+
+    //Get list of changed files and end job if files changed aren't in relevant folders
+    folders=[]
+    def output = sh(returnStdout: true, script: "echo \$(git --no-pager diff upstream/master --name-only)").split().each{folders = folders + it.split('/')[0]}
+    if (!(gitBranch == 'master' || folders.contains('hmda') || folders.contains('common'))) {
+        currentBuild.result = 'SUCCESS'
+        return
+    } 
+
     stage('Build Scala Code, Generate Dockerfile, Publish to docker hub') {
 
       container('sbt') {
