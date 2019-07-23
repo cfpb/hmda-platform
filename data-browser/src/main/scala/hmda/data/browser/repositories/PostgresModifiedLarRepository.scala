@@ -156,6 +156,7 @@ class PostgresModifiedLarRepository(tableName: String,
       SELECT #$columns
       FROM #${tableName}
       #$filterCriteria
+      NULL AS ''
       """
       .as[ModifiedLarEntity]
       .withStatementParameters(
