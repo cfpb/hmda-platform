@@ -9,6 +9,9 @@ image:
   tag: latest
   pullPolicy: IfNotPresent
 
+hmda:
+  rateLimit: 10
+
 grpc:
   type: ClusterIP
   port: 60080

@@ -26,6 +26,9 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          env:
+          - name: LIMIT_PER_SECOND
+            value: {{.Values.hmda.hmda.rateLimit}}
           volumeMounts:
             - name: tz-config
               mountPath: /etc/localtime          
