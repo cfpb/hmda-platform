@@ -1,58 +1,37 @@
 # Newman Jenkins API Testing
 
-## Introduction
 
-For more information on Newman CLI integration , checkout the [Newman Command Line Intergration](https://www.getpostman.com/docs/v6/postman/collection_runs/command_line_integration_with_Newman).
+## Build Node Docker Image:
 
-## Newman CLI
-
-This repo serves as a template for implementing a CLI interface for testing API endpoints via a postman collections JSON file. With this method, scripts can be created inside `Jenkinsfiles` to test `HMDA-Platform` API endpoints either periodically as standalone Jenkins job or during the build processes of the individual HMDA-Platform micro-services.
-
-## Jenkins Job Testing
-
-By created a `MultiPlatform Project` in Jenkins where the the target `HMDA-Platform` microservies exits, users can reference the `HMDA-Devops` repo and branch for their test cases in the folder `newman-tests`.
-
-# Example Source Control Declaration:
-
-![Example Source Control Declaration:](img/source_branch_example.png?raw=true "Example Source Control Declaration")
+* From the newman-tests directory build and push the following image to generate a docker container that can execute newman test scripts:
 
 
-# Jenkinsfile Path
+`docker build  . -t <docker-host>/<image-name>:<image-tag> -f <path to Dockerfile>`
 
-Ensure the path to the `Jenkinsfile` is properly defined (starting from the root of the repo).
-
-![Example Jenkinsfile Declaration:](img/jenkinsfile_path_example.png?raw=true "Example Jenkinsfile Declaration")
+`docker push  <docker-host>/<image-name>:<image-tag>`
 
 
-# Jenkinsfile Example
+* From the kubernetes/newman directory create a K8 cron job that references this image 
 
-The following script serves as a template of how to define your standalone test Jenkins jobs. Please note you should be able to include the `stage` section of this example to your respective `Jenkinsfile`.
-
-You will have to ensure the workspace is true for the target workspace:
-
- - Node is available in the operating environment
- - The workspace has access to the Newman test JSON Jenkinsfiles
- - You have permission to access the target API endpoints from this Jenkins environment
+`kubectl config use-context <dev-context>`
 
 ```
-podTemplate(label: 'buildNode', containers: [
-    containerTemplate(name: 'node', image: 'node:8', ttyEnabled: true, command: 'cat')
-]) {
-    node('buildNode') {
-    checkout scm
-         stage('Setup NPM and Newman') {
-             container('node') {
-                sh "npm update"
-                sh "npm install -g newman"
-                sh "cd newman-tests/hmda-checkDigit && newman run hmda-checkDigit-api-test.json -d hmda-checkDigit-api-config.json"
-              }
-         }
-     }}
-
+helm install  --name=hmda --namespace=newman 
+--set env.HOST_FILING=<complete filing API host/endpoint>
+ --set env.HOST_ADMIN=<complete admin API host/endpoint>
+ --set env.HOST_PUBLIC=<complete public API host/endpoint>
+ --set env.USERNAME_NM=<authorized username>
+--set env.PASSWORD_NM=<authorized user password> .
 ```
 
-## Newman Test and Configuration JSON
 
-Please refer to the following Wiki pages for test configuration.
+## Sample script executed by cronjob
 
-[Newman Postman Collection Test Configuration](NewmanTests.md).
+```
+authToken=$(./scripts/authTokenGen.sh $USERNAME_NM $PASSWORD_NM) &&
+ ./node_modules/.bin/newman run hmda-filing/hmda-filing-api-test.json -d hmda-filing/hmda-filing-api-config.json 
+--env-var host_filing=$HOST_FILING
+ --env-var host_admin_api=$HOST_ADMIN 
+--env-var host_public=$HOST_PUBLIC 
+--env-var authToken= $authToken
+```
