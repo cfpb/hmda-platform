@@ -19,7 +19,7 @@ jobs:
       value:
     - name: PASSWORD_NM
       value:
-    schedule: "*/5 * * * *"
+    schedule: "*/2 * * * *"
     command: ["/bin/sh"]
     args:
       -  "-c"
