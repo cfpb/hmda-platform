@@ -96,7 +96,7 @@ Submission ID,Character Varying,,
 Filing Year,Integer,[2018],
 Conforming Loan Limit Flag,Character Varying,"[C, NC, U, NA]","Indicates whether a loan is Conforming (C), Nonconforming (NC), Undetermined (U), or Not Applicable (NA) based on the conforming loan limits determined by FHFA."
 Median Age of Homes,Integer,,
-Median Age of Homes Categorization ,Character Varying,"[1969 or Earlier, 1970-1979, 1980-1989, 1990-1999, 2000-2010, 2011-Present, Age Unknown]",Field Derived from Median Age of Homes Field. 
+Median Age of Homes Categorization,Character Varying,"[1969 or Earlier, 1970-1979, 1980-1989, 1990-1999, 2000-2010, 2011-Present, Age Unknown]",Field Derived from Median Age of Homes Field. 
 Percent Median MSA Income,Integer,,Field derived from Census data.
 Ethnicity Categorization,Character Varying,"[Ethnicity Not Available, Free Form Text Only, Hispanic or Latino, Joint, Not Hispanic or Latino]",Field derived from LAR applicant/borrower and co-applicant/co-borrower ethnicity fields.
 Race Categorization,Character Varying,"[2 or more minority races, American Indian or Alaska Native, Asian, Black or African American, Free Form Text Only, Joint, Native Hawaiian or Other Pacific Islander, Race Not Available, White]",Field derived from LAR applicant/borrower and co-applicant/co-borrower race fields.
