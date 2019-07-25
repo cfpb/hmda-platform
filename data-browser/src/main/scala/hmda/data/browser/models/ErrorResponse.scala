@@ -36,6 +36,11 @@ final case class ProvideYearAndStatesOrMsaMds(
     message: String = "Provide year and either states or msamds or both")
     extends ErrorResponse
 
+final case class NoMandatoryFieldsInCount(
+    errorType: String = "no-filters",
+    message: String = "Filter criterias are not applicable in /count endpoint")
+    extends ErrorResponse
+
 final case class ProvideYear(errorType: String = "provide-years",
                              message: String = "Provide years for Nationwide")
     extends ErrorResponse

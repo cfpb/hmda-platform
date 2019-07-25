@@ -26,62 +26,74 @@ object Routes {
     val Aggregations = "aggregations"
 
     pathPrefix("view") {
-      pathPrefix("nationwide") {
-        extractFieldsForRawQueries { queryFields =>
-          // GET /view/nationwide/csv
-          contentDisposition(queryFields) {
-            (path(Csv) & get) {
-              extractNationwideMandatoryYears { mandatoryFields =>
-                val allFields = queryFields ++ mandatoryFields
-                log.info("Nationwide [CSV]: " + allFields)
-                if (queryFields.isEmpty)
-                  redirect(Uri(routeConf.nationwideCsv), Found)
-                else
-                  complete(
-                    HttpEntity(
-                      `text/plain(UTF-8)`,
-                      csvSource(browserService.fetchData(queryFields))
-                    )
-                  )
-              }
-
-            }
-          } ~
-            // GET /view/nationwide/pipe
-            (path(Pipe) & get) {
-              extractNationwideMandatoryYears { mandatoryFields =>
-                val allFields = queryFields ++ mandatoryFields
-                log.info("Nationwide [Pipe]: " + allFields)
-                contentDisposition(queryFields) {
+      pathPrefix("count") {
+        extractCountFields { countFields =>
+          log.info("Counts: " + countFields)
+          complete(
+            browserService
+              .fetchAggregate(countFields)
+              .map(aggs =>
+                AggregationResponse(Parameters.fromBrowserFields(countFields),
+                                    aggs))
+              .runToFuture
+          )
+        }
+      } ~
+        pathPrefix("nationwide") {
+          extractFieldsForRawQueries { queryFields =>
+            // GET /view/nationwide/csv
+            contentDisposition(queryFields) {
+              (path(Csv) & get) {
+                extractNationwideMandatoryYears { mandatoryFields =>
+                  val allFields = queryFields ++ mandatoryFields
+                  log.info("Nationwide [CSV]: " + allFields)
                   if (queryFields.isEmpty)
-                    redirect(Uri(routeConf.nationwidePipe), Found)
+                    redirect(Uri(routeConf.nationwideCsv), Found)
                   else
                     complete(
                       HttpEntity(
                         `text/plain(UTF-8)`,
-                        pipeSource(browserService.fetchData(queryFields))
+                        csvSource(browserService.fetchData(queryFields))
                       )
                     )
                 }
-              }
 
-            }
-        } ~
-          // GET /view/nationwide/aggregations
-          (path(Aggregations) & get) {
-            extractFieldsForAggregation { queryFields =>
-              val allFields = queryFields
-              log.info("Nationwide [Aggregations]: " + allFields)
-              complete(
-                browserService
+              }
+            } ~
+              // GET /view/nationwide/pipe
+              (path(Pipe) & get) {
+                extractNationwideMandatoryYears { mandatoryFields =>
+                  val allFields = queryFields ++ mandatoryFields
+                  log.info("Nationwide [Pipe]: " + allFields)
+                  contentDisposition(queryFields) {
+                    if (queryFields.isEmpty)
+                      redirect(Uri(routeConf.nationwidePipe), Found)
+                    else
+                      complete(
+                        HttpEntity(
+                          `text/plain(UTF-8)`,
+                          pipeSource(browserService.fetchData(queryFields))
+                        )
+                      )
+                  }
+                }
+
+              }
+          } ~
+            // GET /view/nationwide/aggregations
+            (path(Aggregations) & get) {
+              extractFieldsForAggregation { queryFields =>
+                val allFields = queryFields
+                log.info("Nationwide [Aggregations]: " + allFields)
+                complete(browserService
                   .fetchAggregate(allFields)
                   .map(aggs =>
                     AggregationResponse(Parameters.fromBrowserFields(allFields),
                                         aggs))
                   .runToFuture)
+              }
             }
-          }
-      } ~
+        } ~
         // GET /view/aggregations
         (path(Aggregations) & get) {
           extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
