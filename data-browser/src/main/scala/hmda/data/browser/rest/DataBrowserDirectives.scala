@@ -48,7 +48,8 @@ trait DataBrowserDirectives {
     val filename =
       queries.map(q => q.name + "_" + q.values.mkString("-")).mkString("_")
     respondWithHeader(
-      `Content-Disposition`(attachment, Map("filename" -> filename)))(route)
+      `Content-Disposition`(attachment,
+                            Map("filename" -> (filename + ".csv"))))(route)
   }
 
   def pipeSource(
