@@ -89,7 +89,7 @@ final case class InvalidConstructionMethods(
     extends ErrorResponse
 
 final case class InvalidSexes(
-    invalidLoanTypes: Seq[String],
+    invalidSexes: Seq[String],
     errorType: String = "invalid-sexes",
     message: String =
       s"valid sexes are ${Sex.values.map(_.entryName).mkString(", ")}")
