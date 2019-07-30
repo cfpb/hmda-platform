@@ -1,0 +1,171 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ template "hmda-platform.name" . }}
+  name: {{ template "hmda-platform.fullname" . }}
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: {{ template "hmda-platform.name" . }}
+      release: {{ .Release.Name }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: {{ template "hmda-platform.name" . }}
+        release: {{ .Release.Name }}
+        actorSystemName: {{ .Values.hmda.actorSystemName }}
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - "hmda-platform"
+                - "keycloak"
+            topologyKey: kubernetes.io/hostname
+      volumes:
+        - name: tz-config
+          hostPath:
+            path: /usr/share/zoneinfo/America/New_York
+      serviceAccountName: {{ .Values.service.account.name }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        volumeMounts:
+          - name: tz-config
+            mountPath: /etc/localtime
+        resources:
+          limits:
+            memory: "6200Mi"
+            cpu: "6"
+          requests:
+            memory: "6200Mi"
+            cpu: "2"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: KAFKA_MODIFIED_LAR_TOPIC
+          value: {{.Values.kafka.modifiedLarTopic}}
+        - name: KAFKA_INSTITUTIONS_TOPIC
+          value: {{.Values.kafka.institutionsTopic}}
+        - name: KAFKA_ANALYTICS_TOPIC
+          value: {{.Values.kafka.analyticsTopic}}
+        - name: KAFKA_IRS_TOPIC
+          value: {{.Values.kafka.irsTopic}}
+        - name: KAFKA_SIGN_TOPIC
+          value: {{.Values.kafka.signTopic}}
+        - name: KAFKA_DISCLOSURE_TOPIC
+          value: {{.Values.kafka.disclosureTopic}}
+        - name: COMMIT_ID
+          value: {{ .Values.image.commitId }}
+        - name: HMDA_RUNTIME_MODE
+          value: {{ .Values.hmda.runtimeMode }}
+        - name: KUBERNETES_HMDA_POD_NAMESPACE
+          value: {{.Values.hmda.podNamespace}}
+        - name: KUBERNETES_HMDA_SERVICE_NAME
+          value: {{.Values.hmda.apiNamespace}}
+        - name: KUBERNETES_HMDA_SERVICE_NAMESPACE
+          value: {{.Values.hmda.serviceNamespace}}
+        - name: KUBERNETES_HMDA_POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: HOST_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        - name: CASSANDRA_CLUSTER_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              name: cassandra-configmap
+              key: cassandra-hosts
+        - name: CASSANDRA_CLUSTER_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: cassandra-credentials
+              key: cassandra.username
+        - name: CASSANDRA_CLUSTER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cassandra-credentials
+              key: cassandra.password
+        - name: KEYCLOAK_AUTH_URL
+          valueFrom:
+            configMapKeyRef:
+              name: http-configmap
+              key: auth.url
+        - name: KAFKA_CLUSTER_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              name: kafka-configmap
+              key: kafka.hosts
+        - name: HTTP_CENSUS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: http-configmap
+              key: census.host
+        - name: HTTP_CENSUS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: http-configmap
+              key: census.port
+        - name: PG_HOST
+          valueFrom:
+            secretKeyRef:
+              name: inst-postgres-credentials
+              key: host
+        - name: PG_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: postgresql-configmap
+              key: postgres.database
+        - name: PG_USER
+          valueFrom:
+            secretKeyRef:
+              name: inst-postgres-credentials
+              key: username
+        - name: PG_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: inst-postgres-credentials
+              key: password
+        - name: PG_SSL
+          valueFrom:
+            configMapKeyRef:
+              name: postgresql-configmap
+              key: postgres.ssl
+        - name: JDBC_URL
+          valueFrom:
+            secretKeyRef:
+              name: inst-postgres-credentials
+              key: url
+#        livenessProbe:
+#          tcpSocket:
+#            port: {{ .Values.bootstrap.port }}
+#        readinessProbe:
+#          httpGet:
+#            path: /ready
+#            port: {{ .Values.bootstrap.name }}
+        ports:
+        # akka remoting
+        - name: {{ .Values.remoting.name }}
+          containerPort: {{ .Values.remoting.port }}
+          protocol: {{ .Values.remoting.protocol }}
+        # akka-management bootstrap
+        - name: {{ .Values.bootstrap.name }}
+          containerPort: {{ .Values.bootstrap.port }}
+          protocol: {{ .Values.bootstrap.protocol }}
+        # external http
+        - name: {{ .Values.cluster.name }}
+          containerPort: {{ .Values.cluster.port }}
+          protocol: {{ .Values.cluster.protocol }}

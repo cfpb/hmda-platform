@@ -6,9 +6,9 @@ This documentation describes de public HMDA Platform HTTP API
 
 ### Search
 
-* `/institutions?domain=<domain>`
+* `/institutions/period/<period>?domain=<domain>`
 
-   * `GET` - Returns a list of institutions filtered by their email domain. If none are found, an HTTP 404 error code (not found) is returned
+   * `GET` - Returns a list of institutions filtered by their email domain and period (year). If none are found, an HTTP 404 error code (not found) is returned
 
    Example response, with HTTP code 200:
    
@@ -44,10 +44,11 @@ This documentation describes de public HMDA Platform HTTP API
      ]
    } 
    ```
+   * `/institutions/?domain=<domain>` - defaults to the year 2018
 
-* `/institutions?domain=<domain>&lei=<lei>&respondentName=<respondentName>&taxId=<taxId>`
+* `/institutions/<period>?domain=<domain>&lei=<lei>&respondentName=<respondentName>&taxId=<taxId>`
 
-   * `GET` - Returns a list of institutions filtered by field values. If none are found, an HTTP 404 error code (not found) is returned
+   * `GET` - Returns a list of institutions filtered by field values and period (year). If none are found, an HTTP 404 error code (not found) is returned
 
    Example response, with HTTP code 200:
    
@@ -84,11 +85,11 @@ This documentation describes de public HMDA Platform HTTP API
    } 
    ```
    
-* `/institutions/<institutionID>`
+* `/institutions/<institutionID>/period/<period>`
 
     * `GET`
 
-    Retrieves the details of an institution. If not found, returns HTTP code 404
+    Retrieves the details of an institution by LEI and period (year). If not found, returns HTTP code 404
 
     Example Response with HTTP code 200, in `JSON` format:
     
@@ -165,9 +166,9 @@ This documentation describes de public HMDA Platform HTTP API
     
 ### Validation
 
-* `/ts/validate`
+* `/ts/validate/<year>`
     
-    * `POST` - Returns a `JSON` representation of a TS, or a list of edits if the TS fails to validate
+    * `POST` - Returns a `JSON` representation of a TS, or a list of edits if the TS fails to validate for the `<year>` passed in (2019 validations are work-in-progress).
     
     Example body, in `JSON` format:
     
@@ -373,9 +374,9 @@ This documentation describes de public HMDA Platform HTTP API
 
 ### Validation
 
-* `/lar/validate`
+* `/lar/validate/<year>`
     
-    * `POST` - Returns a `JSON` representation of a LAR, or a list of edits if the LAR fails to validate
+    * `POST` - Returns a `JSON` representation of a LAR, or a list of edits if the LAR fails to validate for the `<year>` passed in (2019 validations are work-in-progress)
     
     Example body, in `JSON` format:
     
@@ -395,18 +396,27 @@ This documentation describes de public HMDA Platform HTTP API
             "errors": []
         },
         "validity": {
-            "errors": [
-                "V619-1",
-                "V619-2",
-                "V619-3",
-                "V676-3",
-                "V676-5",
-                "V677-2"
+             "errors": [
+                {
+                    "edit": "V614-3",
+                    "description": "If Reverse Mortgage equals 1, then Preapproval must equal 2."
+                },
+                {
+                    "edit": "V614-4",
+                    "description": "If Open-End Line of Credit equals 1, then Preapproval must equal 2."
+                },
+                {
+                    "edit": "V615-2",
+                    "description": "If Manufactured Home Land Property Interest equals 1, 2, 3 or 4, then Construction Method must equal 2."
+                }
             ]
         },
         "quality": {
             "errors": [
-                "Q617"
+                {
+                    "edit": "Q608",
+                    "description": "If Action Taken equals 1, then the Action Taken Date generally should occur after the Application Date."
+                }
             ]
         }
     }

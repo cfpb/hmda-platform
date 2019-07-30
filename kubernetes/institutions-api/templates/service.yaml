@@ -23,13 +23,14 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    service: {{ .Values.ambassador.name }}
-  name: {{ .Values.ambassador.name }}
+    service: institutions-api-ambassador
+  name: institutions-api-ambassador
   annotations:
     getambassador.io/config: |
       apiVersion: ambassador/v0
       kind: Mapping
       name: institution_api_mapping
+      ambassador_id: ambassador-default-1
       method: GET
       prefix: /v2/public/institutions/
       rewrite: /institutions/
@@ -38,15 +39,12 @@ metadata:
       apiVersion: ambassador/v0
       kind: Mapping
       name: institution_api_search_mapping
+      ambassador_id: ambassador-default-1
       method: GET
       prefix: /v2/public/institutions?
       rewrite: /institutions?
       service: {{ template "institutions-api.fullname" .}}:{{ .Values.service.port }}
 spec:
-  type: {{ .Values.ambassador.service.type }}
+  clusterIP: None  
   ports:
-  - name: {{ .Values.ambassador.name }}
-    port: {{ .Values.ambassador.port }}
-    targetPort: {{ .Values.ambassador.port }}
-  selector:
-service: {{ .Values.ambassador.name }}
+    - port: {{ .Values.service.port }}

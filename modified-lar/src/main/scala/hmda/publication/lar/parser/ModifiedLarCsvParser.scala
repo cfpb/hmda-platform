@@ -5,11 +5,43 @@ import Math._
 
 import hmda.model.modifiedlar.ModifiedLoanApplicationRegister
 import hmda.parser.filing.lar.LarCsvParser
+import hmda.publication.{ConformingLoanLimit, StateBoundries}
+import hmda.model.census.CountyLoanLimit
+import hmda.census.records.CensusRecords
+import hmda.census.records.CountyLoanLimitRecords
+import hmda.publication.lar._
+import hmda.publication.EthnicityCategorization._
 
 object ModifiedLarCsvParser {
 
+  val censusRecords = CensusRecords.parseCensusFile
+  val countyLoanLimits: Seq[CountyLoanLimit] =
+    CountyLoanLimitRecords.parseCountyLoanLimitFile()
+  val countyLoanLimitsByCounty: Map[String, CountyLoanLimit] =
+    countyLoanLimits
+      .map(county => county.stateCode + county.countyCode -> county)
+      .toMap
+  val countyLoanLimitsByState =
+    countyLoanLimits.groupBy(county => county.stateAbbrv).mapValues {
+      countyList =>
+        val oneUnit = countyList.map(county => county.oneUnitLimit)
+        val twoUnit = countyList.map(county => county.twoUnitLimit)
+        val threeUnit = countyList.map(county => county.threeUnitLimit)
+        val fourUnit = countyList.map(county => county.fourUnitLimit)
+        StateBoundries(
+          oneUnitMax = oneUnit.max,
+          oneUnitMin = oneUnit.min,
+          twoUnitMax = twoUnit.max,
+          twoUnitMin = twoUnit.min,
+          threeUnitMax = threeUnit.max,
+          threeUnitMin = threeUnit.min,
+          fourUnitMax = fourUnit.max,
+          fourUnitMin = fourUnit.min
+        )
+    }
+
   def apply(s: String): ModifiedLoanApplicationRegister = {
-    convert(LarCsvParser(s).getOrElse(LoanApplicationRegister()))
+    convert(LarCsvParser(s, true).getOrElse(LoanApplicationRegister()))
   }
 
   private def convert(
@@ -100,7 +132,15 @@ object ModifiedLarCsvParser {
       convertEmptyField(lar.AUS.aus5.code),
       lar.reverseMortgage.code,
       lar.lineOfCredit.code,
-      lar.businessOrCommercialPurpose.code
+      lar.businessOrCommercialPurpose.code,
+      ConformingLoanLimit.assignLoanLimit(lar,
+                                          countyLoanLimitsByCounty,
+                                          countyLoanLimitsByState),
+      assignEthnicityCategorization(lar),
+      RaceCategorization.assignRaceCategorization(lar),
+      SexCategorization.assignSexCategorization(lar),
+      DwellingCategorization.assignDwellingCategorization(lar),
+      LoanProductTypeCategorization.assignLoanProductTypeCategorization(lar)
     )
   }
 

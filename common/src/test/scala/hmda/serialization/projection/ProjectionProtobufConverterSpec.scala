@@ -6,7 +6,11 @@ import akka.actor.typed.ActorRefResolver
 import akka.actor.typed.scaladsl.adapter._
 import akka.persistence.query.TimeBasedUUID
 import com.datastax.driver.core.utils.UUIDs
-import hmda.messages.projection.CommonProjectionMessages.{GetOffset, OffsetSaved, SaveOffset}
+import hmda.messages.projection.CommonProjectionMessages.{
+  GetOffset,
+  OffsetSaved,
+  SaveOffset
+}
 import hmda.serialization.projection.ProjectionProtobufConverter._
 import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
 

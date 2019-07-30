@@ -1,8 +1,17 @@
 import Dependencies._
 import BuildSettings._
 import com.lucidchart.sbt.scalafmt.ScalafmtCorePlugin.autoImport._
+import sbtassembly.AssemblyPlugin.autoImport.assemblyMergeStrategy
 
 lazy val commonDeps = Seq(logback, scalaTest, scalaCheck)
+
+lazy val sparkDeps =
+  Seq(sparkCore,
+      sparkSql,
+      sparkStreaming,
+      sparkKafka,
+      postgres,
+      "com.typesafe.akka" %% "akka-stream-kafka" % "1.0.1")
 
 lazy val authDeps = Seq(
   keycloakAdapter,
@@ -44,6 +53,7 @@ lazy val akkaPersistenceDeps =
 
 lazy val akkaHttpDeps = Seq(akkaHttp, akkaHttp2, akkaHttpTestkit, akkaHttpCirce)
 lazy val circeDeps = Seq(circe, circeGeneric, circeParser)
+lazy val enumeratumDeps = Seq(enumeratum, enumeratumCirce)
 
 lazy val slickDeps = Seq(slick, slickHikaryCP, postgres, h2)
 
@@ -53,8 +63,8 @@ lazy val scalafmtSettings = Seq(
 )
 
 lazy val dockerSettings = Seq(
-  Docker / maintainer := "Juan Marin Otero",
-  dockerBaseImage := "openjdk:jre-alpine",
+  Docker / maintainer := "Hmda-Ops",
+  dockerBaseImage := "openjdk:8-jre-alpine3.9",
   dockerRepository := Some("hmda")
 )
 
@@ -77,15 +87,18 @@ lazy val packageSettings = Seq(
 
 lazy val `hmda-root` = (project in file("."))
   .settings(hmdaBuildSettings: _*)
-  .aggregate(common,
-             `hmda-platform`,
-             `check-digit`,
-             `institutions-api`,
-             `modified-lar`,
-             `hmda-analytics`,
-             `census-api`,
-             `hmda-regulator`,
-             `hmda-reporting`)
+  .aggregate(
+    common,
+    `hmda-platform`,
+    `check-digit`,
+    `institutions-api`,
+    `modified-lar`,
+    `hmda-analytics`,
+    `census-api`,
+    `hmda-regulator`,
+    `hmda-reporting`,
+    `hmda-spark-reporting`
+  )
 
 lazy val common = (project in file("common"))
   .settings(hmdaBuildSettings: _*)
@@ -97,6 +110,41 @@ lazy val common = (project in file("common"))
       libraryDependencies ++= commonDeps ++ authDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps
     )
   )
+
+lazy val `hmda-spark-reporting` = (project in file("hmda-spark-reporting"))
+  .enablePlugins(sbtdocker.DockerPlugin, AshScriptPlugin)
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      mainClass in assembly := Some("com.hmda.reports.DisclosureReports"),
+      assemblyJarName in assembly := "hmda-reports.jar",
+      assemblyMergeStrategy in assembly := {
+        case PathList("javax", "servlet", xs @ _*)        => MergeStrategy.last
+        case PathList("javax", "activation", xs @ _*)     => MergeStrategy.last
+        case PathList("org", "apache", xs @ _*)           => MergeStrategy.last
+        case PathList("com", "google", xs @ _*)           => MergeStrategy.last
+        case PathList("com", "esotericsoftware", xs @ _*) => MergeStrategy.last
+        case PathList("com", "codahale", xs @ _*)         => MergeStrategy.last
+        case PathList("com", "yammer", xs @ _*)           => MergeStrategy.last
+        case "META-INF/io.netty.versions.properties"      => MergeStrategy.concat
+        case "META-INF/ECLIPSEF.RSA"                      => MergeStrategy.last
+        case "META-INF/mailcap"                           => MergeStrategy.last
+        case "META-INF/mimetypes.default"                 => MergeStrategy.last
+        case "plugin.properties"                          => MergeStrategy.last
+        case "log4j.properties"                           => MergeStrategy.last
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      }
+    ),
+    Seq(
+      libraryDependencies ++= sparkDeps ++ circeDeps ++ akkaDeps
+    ),
+    scalafmtSettings,
+    dockerSettings,
+    packageSettings
+  )
+  .dependsOn(common % "compile->compile;test->test")
 
 lazy val `hmda-platform` = (project in file("hmda"))
   .enablePlugins(JavaServerAppPackaging,
@@ -122,8 +170,6 @@ lazy val `hmda-platform` = (project in file("hmda"))
   )
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(`hmda-protocol` % "compile->compile;test->test")
-  .dependsOn(`check-digit` % "compile->compile;test->test")
-  .dependsOn(`census-api` % "compile->compile;test->test")
 
 lazy val `check-digit` = (project in file("check-digit"))
   .enablePlugins(JavaServerAppPackaging,
@@ -213,6 +259,33 @@ lazy val `census-api` = (project in file("census-api"))
   .settings(
     Seq(
       mainClass in Compile := Some("hmda.census.HmdaCensus"),
+      assemblyMergeStrategy in assembly := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      },
+      assemblyJarName in assembly := {
+        s"${name.value}.jar"
+      }
+    ),
+    scalafmtSettings,
+    dockerSettings,
+    packageSettings
+  )
+  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(`hmda-protocol`)
+
+lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
+  .enablePlugins(JavaServerAppPackaging,
+                 sbtdocker.DockerPlugin,
+                 AshScriptPlugin,
+                 AkkaGrpcPlugin)
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      mainClass in Compile := Some("hmda.calculator.HmdaRateSpread"),
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
@@ -327,6 +400,60 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
   .settings(
     Seq(
       mainClass in Compile := Some("hmda.analytics.HmdaAnalyticsApp"),
+      assemblyMergeStrategy in assembly := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      },
+      assemblyJarName in assembly := {
+        s"${name.value}.jar"
+      }
+    ),
+    scalafmtSettings,
+    dockerSettings,
+    packageSettings
+  )
+  .dependsOn(common % "compile->compile;test->test")
+
+lazy val `rate-limit` = (project in file("rate-limit"))
+  .enablePlugins(JavaServerAppPackaging,
+                 sbtdocker.DockerPlugin,
+                 AkkaGrpcPlugin,
+                 AshScriptPlugin)
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps :+ guava,
+      mainClass in Compile := Some("hmda.rateLimit.RateLimitApp"),
+      assemblyMergeStrategy in assembly := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      },
+      assemblyJarName in assembly := {
+        s"${name.value}.jar"
+      }
+    ),
+    scalafmtSettings,
+    dockerSettings,
+    packageSettings
+  )
+  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(`hmda-protocol`)
+
+lazy val `data-browser` = (project in file("data-browser"))
+  .enablePlugins(JavaServerAppPackaging,
+                 sbtdocker.DockerPlugin,
+                 AshScriptPlugin)
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
+        enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat

@@ -35,6 +35,12 @@ spec:
               cpu: "6"
               memory: "3200Mi"
           env:
+            - name: KAFKA_INSTITUTIONS_TOPIC
+              value: {{.Values.kafka.institutionsTopic}}
+            - name: KAFKA_INSTITUTIONS_GROUP
+              value: {{.Values.kafka.institutionsGroup}}
+            - name: CURRENT_YEAR
+              value: {{.Values.currentYear}}
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:
@@ -61,12 +67,22 @@ spec:
                   name: postgresql-configmap
                   key: postgres.ssl
             - name: INSTITUTION_PG_CREATE_SCHEMA
-              value: {{ .Values.postgresql.createSchema }}
+              value: "{{ .Values.postgresql.createSchema }}"
             - name: KAFKA_CLUSTER_HOSTS
               valueFrom:
                 configMapKeyRef:
                   name: kafka-configmap
                   key: kafka.hosts
+            - name: CASSANDRA_JOURNAL_KEYSPACE
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-keyspace
+            - name: CASSANDRA_SNAPSHOT_KEYSPACE
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-keyspace-snapshot
             - name: CASSANDRA_CLUSTER_HOSTS
               valueFrom:
                 configMapKeyRef:

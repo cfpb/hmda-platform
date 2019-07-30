@@ -11,10 +11,12 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Keep, Sink, Source}
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hmda.messages.pubsub.HmdaTopics._
+import hmda.messages.pubsub.HmdaTopics
+import hmda.messages.pubsub.HmdaGroups
 import hmda.model.filing.submission.SubmissionId
 import hmda.publication.KafkaUtils._
 import hmda.publication.lar.publication.{IrsPublisher, PublishIrs}
+import hmda.util.BankFilterUtils._
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.LoggerFactory
@@ -60,12 +62,13 @@ object IrsPublisherApp extends App {
                      new StringDeserializer,
                      new StringDeserializer)
       .withBootstrapServers(kafkaHosts)
-      .withGroupId("irs-publisher")
+      .withGroupId(HmdaGroups.irsGroup)
       .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
   Consumer
     .committableSource(consumerSettings,
-                       Subscriptions.topics(signTopic, irsTopic))
+                       Subscriptions.topics(HmdaTopics.signTopic,
+                                            HmdaTopics.irsTopic))
     .mapAsync(parallelism) { msg =>
       processData(msg.record.value()).map(_ => msg.committableOffset)
     }
@@ -78,8 +81,7 @@ object IrsPublisherApp extends App {
     Source
       .single(msg)
       .filter(msg =>
-        !bankFilterList.exists(bankLEI =>
-          bankLEI.equalsIgnoreCase(SubmissionId(msg).lei)))
+        filterBankWithLogging(SubmissionId(msg).lei, bankFilterList))
       .map { msg =>
         val submissionId = SubmissionId(msg)
         irsPublisher.toUntyped ? PublishIrs(submissionId)

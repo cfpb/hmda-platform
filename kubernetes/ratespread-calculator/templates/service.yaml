@@ -1,0 +1,33 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Values.service.name }}
+spec:
+  selector:
+    app: ratespread-calculator
+  type: ClusterIP
+  ports:
+  - name: {{ .Values.ratespread.name }}
+    protocol: {{ .Values.ratespread.protocol }}
+    port: {{ .Values.ratespread.port }}
+    targetPort: {{ .Values.ratespread.port }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: ambassador-ratespread-calculator
+  name: ambassador-ratespread-calculator
+  annotations:
+    getambassador.io/config: |
+      apiVersion: ambassador/v0
+      kind: Mapping
+      name: hmda_ratespread_mapping
+      ambassador_id: ambassador-default-1
+      prefix: /public/
+      service: {{ .Values.service.name }}:{{ .Values.ratespread.port }}
+spec:
+  clusterIP: None  
+  ports:
+    - port: {{ .Values.ratespread.port }}

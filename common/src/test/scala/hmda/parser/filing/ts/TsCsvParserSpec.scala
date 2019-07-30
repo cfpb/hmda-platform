@@ -1,6 +1,7 @@
 package hmda.parser.filing.ts
 
 import hmda.model.filing.ts.TsGenerators._
+import hmda.parser.ParserErrorModel.IncorrectNumberOfFields
 import hmda.parser.filing.ts.TsParserErrorModel.{InvalidAgencyCode, InvalidId}
 import hmda.parser.filing.ts.TsValidationUtils._
 import org.scalatest.prop.PropertyChecks
@@ -16,7 +17,15 @@ class TsCsvParserSpec extends PropSpec with PropertyChecks with MustMatchers {
   }
 
   property(
-    "Transmittal Seet CSV Parser must report parsing errors for invalid TS") {
+    "Transmittal Sheet CSV Parser must report parsing errors for | in the end") {
+    forAll(tsGen) { ts =>
+      val csv = ts.toCSV + "|"
+      TsCsvParser(csv) mustBe Left(List(IncorrectNumberOfFields(16, 15)))
+    }
+  }
+
+  property(
+    "Transmittal Sheet CSV Parser must report parsing errors for invalid TS") {
     forAll(tsGen) { ts =>
       val badId = badValue()
       val badAgencyCode = badValue()
@@ -26,4 +35,5 @@ class TsCsvParserSpec extends PropSpec with PropertyChecks with MustMatchers {
       TsCsvParser(csv) mustBe Left(List(InvalidId, InvalidAgencyCode))
     }
   }
+
 }

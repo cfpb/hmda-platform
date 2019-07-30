@@ -156,6 +156,7 @@ For more details, please refer to the [Marathon Documentation](https://mesospher
 
 * [HMDA Platform Public API Documentation](api/public-api.md)
 * [HMDA Platform ULI API Documentation](api/uli.md)
+* [HMDA Platform Filers API Documentation](api/filers-api.md)
 
 ### Development
 

@@ -1,0 +1,96 @@
+podTemplate(label: 'buildSbtPod', containers: [
+  containerTemplate(name: 'sbt', image: 'jenkinsxio/builder-scala', ttyEnabled: true, command: 'cat'),
+  containerTemplate(name: 'docker', image: 'docker', ttyEnabled: true, command: 'cat'),
+  containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm', ttyEnabled: true, command: 'cat')
+],
+volumes: [
+  hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
+]) {
+   node('buildSbtPod') {
+    def repo = checkout scm
+    def gitBranch = repo.GIT_BRANCH
+    def commitId = sh(returnStdout: true, script: 'git rev-parse HEAD')
+    def gitCommit = repo.GIT_COMMIT
+    def shortCommit = repo.GIT_COMMIT[0..7]
+    def isDeployPR = sh(returnStdout: true, script: "git log -1").contains("[deploy pr]")
+    def gitTagged = env.TAG_NAME != null
+
+    if (gitBranch == "master") {
+      env.DOCKER_TAG = "latest"
+    } else if (gitTagged) {
+      env.DOCKER_TAG = env.TAG_NAME
+    } else {
+      env.DOCKER_TAG = env.BRANCH_NAME
+    }
+
+    println "DOCKER_TAG: ${env.DOCKER_TAG}, TAG_NAME: ${env.TAG_NAME}, gitbranch: ${gitBranch}, isDeployPR: ${isDeployPR}"
+    
+    sh "git remote add upstream https://github.com/cfpb/hmda-platform.git"
+    sh "git fetch upstream master"
+
+    //Get list of changed files and end job if files changed aren't in relevant folders
+    folders=[]
+    def output = sh(returnStdout: true, script: "echo \$(git --no-pager diff upstream/master --name-only)").split().each{folders = folders + it.split('/')[0]}
+    if (!(gitBranch == 'master' || folders.contains('ratespread-calculator') || folders.contains('common'))) {
+        currentBuild.result = 'SUCCESS'
+        return
+    } 
+
+    stage('Build Scala Code and Generate Dockerfile') {
+      container('sbt') {
+        sh "sbt -batch ratespread-calculator/docker:stage"
+      }
+    }
+
+    stage('Build And Publish Docker Image') {
+      container('docker') {
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub',
+          usernameVariable: 'DOCKER_HUB_USER', passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
+          withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'hmda-platform-jenkins-service',
+            usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
+            withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
+              sh "docker build --rm -t=${env.DOCKER_HUB_USER}/ratespread-calculator ratespread-calculator/target/docker/stage"
+              if (gitTagged || gitBranch == "master" || isDeployPR) {
+                sh """
+                  docker tag ${env.DOCKER_HUB_USER}/ratespread-calculator ${env.DOCKER_HUB_USER}/ratespread-calculator:${env.DOCKER_TAG}
+                  docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} 
+                  docker push ${env.DOCKER_HUB_USER}/ratespread-calculator:${env.DOCKER_TAG}
+                  docker tag ${env.DOCKER_HUB_USER}/ratespread-calculator:${env.DOCKER_TAG} ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/ratespread-calculator:${env.DOCKER_TAG}
+                  docker login ${DOCKER_REGISTRY_URL} -u ${env.DTR_USER} -p ${env.DTR_PASSWORD} 
+                  docker push ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/ratespread-calculator:${env.DOCKER_TAG}
+                """
+              }
+            }
+          }
+        }
+      }
+    }
+
+    stage('Deploy') {
+      if (env.BRANCH_NAME == 'master' || isDeployPR) {
+        container('helm') {
+          sh """
+            helm upgrade --install --force --namespace=default \
+            --values=kubernetes/ratespread-calculator/values-dev.yaml \
+            --set image.tag=latest \
+            --set image.pullPolicy=Always \
+            ratespread-calculator \
+            kubernetes/ratespread-calculator
+          """
+        }
+      }
+    }
+
+    stage('Docker Clean Up') {
+      container('docker') {
+        sh """
+          docker images
+          docker image prune -f
+          docker images
+          docker ps -a
+        """
+      }
+    } 
+
+  }
+}

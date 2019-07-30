@@ -3,13 +3,13 @@ package hmda.persistence.institution
 import akka.Done
 import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ActorContext, ActorRef, Behavior}
+import akka.actor.typed.{TypedActorContext, ActorRef, Behavior}
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.actor.typed.scaladsl.adapter._
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
-import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
+import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
+import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
 import akka.stream.ActorMaterializer
 import hmda.messages.institution.InstitutionCommands._
 import hmda.messages.institution.InstitutionEvents._
@@ -18,7 +18,7 @@ import hmda.model.institution.{Institution, InstitutionDetail}
 import hmda.publication.KafkaUtils._
 import hmda.persistence.HmdaTypedPersistentActor
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 object InstitutionPersistence
     extends HmdaTypedPersistentActor[InstitutionCommand,
@@ -30,9 +30,9 @@ object InstitutionPersistence
   override def behavior(entityId: String): Behavior[InstitutionCommand] = {
     Behaviors.setup { ctx =>
       ctx.log.info(s"Started Institution: $entityId")
-      PersistentBehavior[InstitutionCommand,
-                         InstitutionEvent,
-                         InstitutionState](
+      EventSourcedBehavior[InstitutionCommand,
+                           InstitutionEvent,
+                           InstitutionState](
         persistenceId = PersistenceId(entityId),
         emptyState = InstitutionState(None),
         commandHandler = commandHandler(ctx),
@@ -42,7 +42,7 @@ object InstitutionPersistence
     }
   }
 
-  override def commandHandler(ctx: ActorContext[InstitutionCommand])
+  override def commandHandler(ctx: TypedActorContext[InstitutionCommand])
     : CommandHandler[InstitutionCommand, InstitutionEvent, InstitutionState] = {
     val log = ctx.asScala.log
     implicit val system: ActorSystem = ctx.asScala.system.toUntyped
@@ -67,7 +67,9 @@ object InstitutionPersistence
             }
           }
         case ModifyInstitution(i, replyTo) =>
-          if (state.institution.map(i => i.LEI).contains(i.LEI)) {
+          if (state.institution
+                .map(i => (i.LEI, i.activityYear))
+                .contains((i.LEI, i.activityYear))) {
             Effect.persist(InstitutionModified(i)).thenRun { _ =>
               log.debug(s"Institution Modified: ${i.toString}")
               val event = InstitutionModified(i)
@@ -83,11 +85,13 @@ object InstitutionPersistence
               replyTo ! InstitutionNotExists(i.LEI)
             }
           }
-        case DeleteInstitution(lei, replyTo) =>
-          if (state.institution.map(i => i.LEI).contains(lei)) {
-            Effect.persist(InstitutionDeleted(lei)).thenRun { _ =>
+        case DeleteInstitution(lei, activityYear, replyTo) =>
+          if (state.institution
+                .map(i => (i.LEI, i.activityYear))
+                .contains((lei, activityYear))) {
+            Effect.persist(InstitutionDeleted(lei, activityYear)).thenRun { _ =>
               log.debug(s"Institution Deleted: $lei")
-              val event = InstitutionDeleted(lei)
+              val event = InstitutionDeleted(lei, activityYear)
               publishInstitutionEvent(
                 lei,
                 InstitutionKafkaEvent("InstitutionDeleted", event))
@@ -127,11 +131,11 @@ object InstitutionPersistence
 
   override val eventHandler
     : (InstitutionState, InstitutionEvent) => InstitutionState = {
-    case (state, InstitutionCreated(i))   => state.copy(Some(i))
-    case (state, InstitutionModified(i))  => modifyInstitution(i, state)
-    case (state, InstitutionDeleted(_))   => state.copy(None)
-    case (state, evt @ FilingAdded(_))    => state.update(evt)
-    case (state, InstitutionNotExists(_)) => state
+    case (state, InstitutionCreated(i))         => state.copy(Some(i))
+    case (state, InstitutionModified(i))        => modifyInstitution(i, state)
+    case (state, InstitutionDeleted(lei, year)) => state.copy(None)
+    case (state, evt @ FilingAdded(_))          => state.update(evt)
+    case (state, InstitutionNotExists(_))       => state
   }
 
   def startShardRegion(sharding: ClusterSharding)

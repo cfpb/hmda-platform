@@ -8,6 +8,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
+import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Route
 import hmda.model.institution.Institution
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -29,6 +30,7 @@ import hmda.messages.institution.InstitutionCommands.{
 }
 import hmda.messages.institution.InstitutionEvents._
 import hmda.util.http.FilingResponseUtils._
+import hmda.utils.YearUtils._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -49,35 +51,46 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
     oAuth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
       path("institutions") {
         entity(as[Institution]) { institution =>
-          val institutionPersistence = sharding.entityRefFor(
-            InstitutionPersistence.typeKey,
-            s"${InstitutionPersistence.name}-${institution.LEI}")
+          val institutionPersistence = {
+            if (institution.activityYear == 2018) {
+              sharding.entityRefFor(
+                InstitutionPersistence.typeKey,
+                s"${InstitutionPersistence.name}-${institution.LEI}")
+            } else {
+              sharding.entityRefFor(
+                InstitutionPersistence.typeKey,
+                s"${InstitutionPersistence.name}-${institution.LEI}-${institution.activityYear}")
+            }
+          }
 
           timedPost { uri =>
-            val fInstitution
-              : Future[Option[Institution]] = institutionPersistence ? (
-                ref => GetInstitution(ref)
-            )
-            onComplete(fInstitution) {
-              case Success(Some(_)) =>
-                entityAlreadyExists(
-                  StatusCodes.BadRequest,
-                  uri,
-                  s"Institution ${institution.LEI} already exists")
-              case Success(None) =>
-                val fCreated
-                  : Future[InstitutionCreated] = institutionPersistence ? (
-                    ref => CreateInstitution(institution, ref))
-                onComplete(fCreated) {
-                  case Success(InstitutionCreated(i)) =>
-                    complete(ToResponseMarshallable(StatusCodes.Created -> i))
-                  case Failure(error) =>
-                    failedResponse(StatusCodes.InternalServerError, uri, error)
-                }
-              case Failure(error) =>
-                failedResponse(StatusCodes.InternalServerError, uri, error)
+            respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+              val fInstitution
+                : Future[Option[Institution]] = institutionPersistence ? (
+                  ref => GetInstitution(ref)
+              )
+              onComplete(fInstitution) {
+                case Success(Some(_)) =>
+                  entityAlreadyExists(
+                    StatusCodes.BadRequest,
+                    uri,
+                    s"Institution ${institution.LEI} already exists")
+                case Success(None) =>
+                  val fCreated
+                    : Future[InstitutionCreated] = institutionPersistence ? (
+                      ref => CreateInstitution(institution, ref))
+                  onComplete(fCreated) {
+                    case Success(InstitutionCreated(i)) =>
+                      complete(ToResponseMarshallable(StatusCodes.Created -> i))
+                    case Failure(error) =>
+                      failedResponse(StatusCodes.InternalServerError,
+                                     uri,
+                                     error)
+                  }
+                case Failure(error) =>
+                  failedResponse(StatusCodes.InternalServerError, uri, error)
+              }
             }
-
           } ~
             timedPut { uri =>
               val originalInst
@@ -116,11 +129,14 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
             timedDelete { uri =>
               val fDeleted
                 : Future[InstitutionEvent] = institutionPersistence ? (
-                  ref => DeleteInstitution(institution.LEI, ref)
+                  ref =>
+                    DeleteInstitution(institution.LEI,
+                                      institution.activityYear,
+                                      ref)
               )
 
               onComplete(fDeleted) {
-                case Success(InstitutionDeleted(lei)) =>
+                case Success(InstitutionDeleted(lei, year)) =>
                   complete(ToResponseMarshallable(
                     StatusCodes.Accepted -> InstitutionDeletedResponse(lei)))
                 case Success(InstitutionNotExists(lei)) =>
@@ -137,28 +153,40 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
     }
 
   val institutionReadPath =
-    path("institutions" / Segment) { lei =>
-      val institutionPersistence =
-        sharding.entityRefFor(InstitutionPersistence.typeKey,
-                              s"${InstitutionPersistence.name}-$lei")
+    path("institutions" / Segment / "year" / Segment) { (lei, period) =>
+      val institutionPersistence = {
+        if (period == "2018") {
+          sharding.entityRefFor(InstitutionPersistence.typeKey,
+                                s"${InstitutionPersistence.name}-$lei")
+        } else {
+          sharding.entityRefFor(InstitutionPersistence.typeKey,
+                                s"${InstitutionPersistence.name}-$lei-$period")
+        }
+      }
 
       timedGet { uri =>
-        val fInstitution
-          : Future[Option[Institution]] = institutionPersistence ? (
-            ref => GetInstitution(ref)
-        )
+        if (!isValidYear(period.toInt)) {
+          complete(
+            ErrorResponse(500, s"Invalid Year Provided: $period", uri.path))
+        } else {
+          val fInstitution
+            : Future[Option[Institution]] = institutionPersistence ? (
+              ref => GetInstitution(ref)
+          )
 
-        onComplete(fInstitution) {
-          case Success(Some(i)) =>
-            complete(ToResponseMarshallable(i))
-          case Success(None) =>
-            complete(ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
-          case Failure(error) =>
-            val errorResponse =
-              ErrorResponse(500, error.getLocalizedMessage, uri.path)
-            complete(
-              ToResponseMarshallable(
-                StatusCodes.InternalServerError -> errorResponse))
+          onComplete(fInstitution) {
+            case Success(Some(i)) =>
+              complete(ToResponseMarshallable(i))
+            case Success(None) =>
+              complete(
+                ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
+            case Failure(error) =>
+              val errorResponse =
+                ErrorResponse(500, error.getLocalizedMessage, uri.path)
+              complete(
+                ToResponseMarshallable(
+                  StatusCodes.InternalServerError -> errorResponse))
+          }
         }
       }
     }

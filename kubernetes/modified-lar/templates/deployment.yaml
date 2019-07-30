@@ -75,6 +75,16 @@ spec:
                 secretKeyRef:
                   name: cassandra-credentials
                   key: cassandra.username
+            - name: CASSANDRA_JOURNAL_KEYSPACE
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-keyspace
+            - name: CASSANDRA_SNAPSHOT_KEYSPACE
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-keyspace-snapshot
             - name: CASSANDRA_CLUSTER_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -115,6 +125,26 @@ spec:
                 configMapKeyRef:
                   name: http-configmap
                   key: census.port
+            - name: KAFKA_LOG_LEVEL
+              value: INFO
+            - name: KAFKA_MODIFIED_LAR_TOPIC
+              value: .Values.kafka.modifiedLarTopic
+            - name: KAFKA_SIGN_TOPIC
+              value: .Values.kafka.signTopic
+            - name: KAFKA_MODIFIED_LAR_GROUP
+              value: .Values.kafka.modifiedLarGroup
+            - name: KAFKA_SIGN_GROUP
+              value: .Values.kafka.signGroup
+            - name: IS_GENERATE_MLAR_S3_FIES
+              valueFrom:
+                configMapKeyRef:
+                  name: mlar-options-configmap
+                  key: generateMlarS3File
+            - name: IS_CREATE_DISPOSITION_KAFKA_RECORD
+              valueFrom:
+                configMapKeyRef:
+                  name: mlar-options-configmap
+                  key: createDispositionKafkaRecord
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}

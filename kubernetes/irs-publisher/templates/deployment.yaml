@@ -28,6 +28,24 @@ spec:
               cpu: "4"
               memory: "2200Mi"
           env:
+            - name: KAFKA_IRS_TOPIC
+              value: .Values.kafka.irsTopic
+            - name: KAFKA_SIGN_TOPIC
+              value: .Values.kafka.signTopic
+            - name: KAFKA_IRS_GROUP
+              value: .Values.kafka.irsGroup
+            - name: KAFKA_SIGN_GROUP
+              value: .Values.kafka.signGroup
+            - name: CASSANDRA_JOURNAL_KEYSPACE
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-keyspace
+            - name: CASSANDRA_SNAPSHOT_KEYSPACE
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-keyspace-snapshot
             - name: CASSANDRA_CLUSTER_HOSTS
               valueFrom:
                 configMapKeyRef:

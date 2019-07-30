@@ -96,8 +96,8 @@ This endpoint deals with institution events. The identifier for each entity is t
     ```
 
 
-* `/institutions/<id>`
+* `/institutions/<id>/period/<period>`
 
-    * `GET` Retrieves an institution by its identifier, the LEI (Legal Entity Identifier)
+    * `GET` Retrieves an institution by its identifier, the LEI (Legal Entity Identifier) and period (Year)
 
     The response is the institution in `JSON` format (see above for examples).

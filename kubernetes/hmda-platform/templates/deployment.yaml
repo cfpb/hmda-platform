@@ -23,16 +23,7 @@ spec:
         actorSystemName: {{ .Values.hmda.actorSystemName }}
     spec:
       affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: app
-                operator: In
-                values:
-                - "hmda-platform"
-                - "keycloak"
-            topologyKey: kubernetes.io/hostname
+{{ toYaml .Values.affinity | indent 8 }}
       volumes:
         - name: tz-config
           hostPath:
@@ -45,18 +36,31 @@ spec:
           - name: tz-config
             mountPath: /etc/localtime
         resources:
-          limits:
-            memory: "6200Mi"
-            cpu: "6"
-          requests:
-            memory: "6200Mi"
-            cpu: "2"
+{{ toYaml .Values.resources | indent 12 }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
+        - name: KAFKA_MODIFIED_LAR_TOPIC
+          value: .Values.kafka.modifiedLarTopic
+        - name: KAFKA_INSTITUTIONS_TOPIC
+          value: .Values.kafka.institutionsTopic
+        - name: KAFKA_ANALYTICS_TOPIC
+          value: .Values.kafka.analyticsTopic
+        - name: KAFKA_IRS_TOPIC
+          value: .Values.kafka.irsTopic
+        - name: KAFKA_SIGN_TOPIC
+          value: .Values.kafka.signTopic
+        - name: KAFKA_DISCLOSURE_TOPIC
+          value: .Values.kafka.disclosureTopic
         - name: COMMIT_ID
           value: {{ .Values.image.commitId }}
         - name: HMDA_RUNTIME_MODE
           value: {{ .Values.hmda.runtimeMode }}
+        - name: KUBERNETES_HMDA_POD_NAMESPACE
+          value: {{.Values.hmda.podNamespace}}
+        - name: KUBERNETES_HMDA_SERVICE_NAME
+          value: {{.Values.hmda.apiNamespace}}
+        - name: KUBERNETES_HMDA_SERVICE_NAMESPACE
+          value: {{.Values.hmda.serviceNamespace}}
         - name: KUBERNETES_HMDA_POD_NAMESPACE
           valueFrom:
             fieldRef:
@@ -71,6 +75,16 @@ spec:
             configMapKeyRef:
               name: cassandra-configmap
               key: cassandra-hosts
+        - name: CASSANDRA_JOURNAL_KEYSPACE
+          valueFrom:
+            configMapKeyRef:
+              name: cassandra-configmap
+              key: cassandra-keyspace
+        - name: CASSANDRA_SNAPSHOT_KEYSPACE
+          valueFrom:
+            configMapKeyRef:
+              name: cassandra-configmap
+              key: cassandra-keyspace-snapshot
         - name: CASSANDRA_CLUSTER_USERNAME
           valueFrom:
             secretKeyRef:

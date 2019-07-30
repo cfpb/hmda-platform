@@ -94,12 +94,17 @@ case class ModifiedLoanApplicationRegister(
     AUS5: String,
     reverseMortgage: Int,
     openEndLineOfCredit: Int,
-    businessOrCommercialPurpose: Int
+    businessOrCommercialPurpose: Int,
+    conformingLoanLimit: String,
+    ethnicityCategorization: String,
+    raceCategorization: String,
+    sexCategorization: String,
+    dwellingCategorization: String,
+    loanProductTypeCategorization: String
 ) extends PipeDelimited {
 
   override def toCSV: String = {
-
-    s"$id|$lei|$loanType|$loanPurpose|$preapproval|$constructionMethod|$occupancy|" +
+    (s"$id|$lei|$loanType|$loanPurpose|$preapproval|$constructionMethod|$occupancy|" +
       BigDecimal.valueOf(loanAmount).bigDecimal.toPlainString +
       s"|" +
       s"$actionTakenType|$state|$county|$tract|$ethnicity1|" +
@@ -124,7 +129,9 @@ case class ModifiedLoanApplicationRegister(
       s"|" +
       s"$homeSecuredPropertyType|$homeLandPropertyType|$totalUnits|$multifamilyAffordableUnits|$applicationSubmission|" +
       s"$initiallyPayableToInstitution|$AUS1|$AUS2|$AUS3|$AUS4|$AUS5|" +
-      s"$reverseMortgage|$openEndLineOfCredit|$businessOrCommercialPurpose"
+      s"$reverseMortgage|$openEndLineOfCredit|$businessOrCommercialPurpose")
+      .replaceAll("(\r\n)|\r|\n", "")
+
   }
 
 }

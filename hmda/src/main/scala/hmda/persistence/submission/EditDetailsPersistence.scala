@@ -1,10 +1,10 @@
 package hmda.persistence.submission
 
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ActorContext, ActorRef, Behavior}
+import akka.actor.typed.{TypedActorContext, ActorRef, Behavior}
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
-import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
+import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
+import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
 import hmda.persistence.HmdaTypedPersistentActor
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
@@ -29,7 +29,7 @@ object EditDetailsPersistence
   override def behavior(
       entityId: String): Behavior[EditDetailsPersistenceCommand] = {
     Behaviors.setup { ctx =>
-      PersistentBehavior(
+      EventSourcedBehavior(
         persistenceId = PersistenceId(entityId),
         emptyState = EditDetailsPersistenceState(),
         commandHandler = commandHandler(ctx),
@@ -38,7 +38,8 @@ object EditDetailsPersistence
     }
   }
 
-  override def commandHandler(ctx: ActorContext[EditDetailsPersistenceCommand])
+  override def commandHandler(
+      ctx: TypedActorContext[EditDetailsPersistenceCommand])
     : CommandHandler[EditDetailsPersistenceCommand,
                      EditDetailsPersistenceEvent,
                      EditDetailsPersistenceState] = { (state, cmd) =>

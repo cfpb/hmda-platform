@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: http-configmap
+data:
+  census.host: census-api.default.svc.cluster.local	
+  census.port: "9093"
+  auth.url: ""

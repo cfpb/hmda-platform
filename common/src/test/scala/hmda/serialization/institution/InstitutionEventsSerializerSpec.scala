@@ -1,6 +1,11 @@
 package hmda.serialization.institution
 
-import hmda.messages.institution.InstitutionEvents.{InstitutionCreated, InstitutionDeleted, InstitutionModified, InstitutionNotExists}
+import hmda.messages.institution.InstitutionEvents.{
+  InstitutionCreated,
+  InstitutionDeleted,
+  InstitutionModified,
+  InstitutionNotExists
+}
 import hmda.model.institution.InstitutionGenerators._
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{MustMatchers, PropSpec}
@@ -32,7 +37,8 @@ class InstitutionEventsSerializerSpec
 
   property("InstitutionDeleted must serialize to and from binary") {
     forAll(institutionGen) { institution =>
-      val deleted = InstitutionDeleted(institution.LEI)
+      val deleted =
+        InstitutionDeleted(institution.LEI, institution.activityYear)
       val bytesDeleted = serializer.toBinary(deleted)
       serializer.fromBinary(bytesDeleted, serializer.InstitutionDeletedManifest) mustBe deleted
     }

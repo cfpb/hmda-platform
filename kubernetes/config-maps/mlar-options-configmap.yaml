@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mlar-options-configmap
+data:
+  generateMlarS3File: false
+  createDispositionKafkaRecord: false

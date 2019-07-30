@@ -8,6 +8,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives.{encodeResponse, handleRejections}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.model.headers.RawHeader
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -80,37 +81,41 @@ trait SignHttpApi extends HmdaTimeDirectives {
             }
           } ~
             timedPost { uri =>
-              entity(as[EditsSign]) { editsSign =>
-                if (editsSign.signed) {
-                  val submissionSignPersistence = sharding
-                    .entityRefFor(HmdaValidationError.typeKey,
-                                  s"${HmdaValidationError.name}-$submissionId")
+              respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+                entity(as[EditsSign]) { editsSign =>
+                  if (editsSign.signed) {
+                    val submissionSignPersistence = sharding
+                      .entityRefFor(
+                        HmdaValidationError.typeKey,
+                        s"${HmdaValidationError.name}-$submissionId")
 
-                  val fSigned
-                    : Future[SubmissionSignedEvent] = submissionSignPersistence ? (
-                      ref => SignSubmission(submissionId, ref))
+                    val fSigned
+                      : Future[SubmissionSignedEvent] = submissionSignPersistence ? (
+                        ref => SignSubmission(submissionId, ref))
 
-                  onComplete(fSigned) {
-                    case Success(submissionSignedEvent) =>
-                      submissionSignedEvent match {
-                        case signed @ SubmissionSigned(_, _, status) =>
-                          val signedResponse = SignedResponse(signed.timestamp,
-                                                              signed.receipt,
-                                                              status)
-                          complete(ToResponseMarshallable(signedResponse))
-                        case SubmissionNotReadyToBeSigned(id) =>
-                          badRequest(
-                            id,
-                            uri,
-                            s"Submission $id is not ready to be signed")
-                      }
-                    case Failure(e) =>
-                      failedResponse(StatusCodes.InternalServerError, uri, e)
+                    onComplete(fSigned) {
+                      case Success(submissionSignedEvent) =>
+                        submissionSignedEvent match {
+                          case signed @ SubmissionSigned(_, _, status) =>
+                            val signedResponse =
+                              SignedResponse(signed.timestamp,
+                                             signed.receipt,
+                                             status)
+                            complete(ToResponseMarshallable(signedResponse))
+                          case SubmissionNotReadyToBeSigned(id) =>
+                            badRequest(
+                              id,
+                              uri,
+                              s"Submission $id is not ready to be signed")
+                        }
+                      case Failure(e) =>
+                        failedResponse(StatusCodes.InternalServerError, uri, e)
+                    }
+                  } else {
+                    badRequest(submissionId,
+                               uri,
+                               "Illegal argument: signed = false")
                   }
-                } else {
-                  badRequest(submissionId,
-                             uri,
-                             "Illegal argument: signed = false")
                 }
               }
             }

@@ -27,6 +27,17 @@ volumes: [
 
     println "DOCKER_TAG: ${env.DOCKER_TAG}, TAG_NAME: ${env.TAG_NAME}, gitbranch: ${gitBranch}, isDeployPR: ${isDeployPR}"
 
+    sh "git remote add upstream https://github.com/cfpb/hmda-help.git"
+    sh "git fetch upstream master"
+
+    //Get list of changed files and end job if files changed aren't in relevant folders
+    folders=[]
+    def output = sh(returnStdout: true, script: "echo \$(git --no-pager diff upstream/master --name-only)").split().each{folders = folders + it.split('/')[0]}
+    if (!(gitBranch == 'master' || folders.contains('hmda') || folders.contains('common'))) {
+        currentBuild.result = 'SUCCESS'
+        return
+    } 
+
     stage('Build Scala Code, Generate Dockerfile, Publish to docker hub') {
 
       container('sbt') {
@@ -37,7 +48,7 @@ volumes: [
         //Push to Dockerhub
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub',
                   usernameVariable: 'DOCKER_HUB_USER', passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
-            if (gitTagged || gitBranch == "master") {
+            if (gitTagged || gitBranch == "master" || isDeployPR) {
                 sh "docker build --rm -t=${env.DOCKER_HUB_USER}/hmda-platform:public hmda/target/docker/stage"
                 sh """
                   docker tag ${env.DOCKER_HUB_USER}/hmda-platform:public ${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
@@ -62,6 +73,8 @@ volumes: [
                         password = ${env.LIGHTBEND_PASSWORD}
                       """
         }
+
+        sh "more commercial.credentials"
 
         //HMDA utilizes commercial lightbend plugins (Telemetry) to collect metrics.
         //In order to not break the publicly released docker images and clone of this repository, by default we use build files that
@@ -110,7 +123,7 @@ volumes: [
               sh """
                 helm upgrade --install --force \
                 --namespace=default \
-                --values=kubernetes/hmda-platform/values.yaml \
+                --values=kubernetes/hmda-platform/values-dev.yaml \
                 --set image.repository=${DOCKER_REGISTRY_URL}/hmda/hmda-platform \
                 --set commitId=$shortCommit \
                 --set image.tag=${env.DOCKER_TAG} \
@@ -135,4 +148,3 @@ volumes: [
     }
 
   }
-}

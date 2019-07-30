@@ -7,6 +7,7 @@ import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.model.headers.RawHeader
 import hmda.parser.filing.ts.TsCsvParser
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.public.TsValidateRequest
@@ -18,7 +19,7 @@ import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.validation.TsValidationError
 import hmda.validation.HmdaValidation
 import hmda.validation.context.ValidationContext
-import hmda.validation.engine.TsEngine._
+import hmda.validation.engine._
 
 import scala.concurrent.ExecutionContext
 
@@ -36,11 +37,13 @@ trait TsValidationHttpApi
   val parseTsRoute =
     path("parse") {
       timedPost { _ =>
-        entity(as[TsValidateRequest]) { req =>
-          TsCsvParser(req.ts) match {
-            case Right(ts) => complete(ToResponseMarshallable(ts))
-            case Left(errors) =>
-              completeWithParsingErrors(errors)
+        respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+          entity(as[TsValidateRequest]) { req =>
+            TsCsvParser(req.ts) match {
+              case Right(ts) => complete(ToResponseMarshallable(ts))
+              case Left(errors) =>
+                completeWithParsingErrors(errors)
+            }
           }
         }
       } ~
@@ -49,16 +52,19 @@ trait TsValidationHttpApi
         }
     }
 
-  //ts/validate
+  //ts/validate/<year>
   val validateTsRoute =
-    path("validate") {
+    path("validate" / IntNumber) { year =>
       parameters('check.as[String] ? "all") { checkType =>
         timedPost { _ =>
-          entity(as[TsValidateRequest]) { req =>
-            TsCsvParser(req.ts) match {
-              case Right(ts) => validate(ts, checkType, ValidationContext(None))
-              case Left(errors) =>
-                completeWithParsingErrors(errors)
+          respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+            entity(as[TsValidateRequest]) { req =>
+              TsCsvParser(req.ts) match {
+                case Right(ts) =>
+                  validate(ts, checkType, ValidationContext(None), year)
+                case Left(errors) =>
+                  completeWithParsingErrors(errors)
+              }
             }
           }
         }
@@ -67,7 +73,11 @@ trait TsValidationHttpApi
 
   private def validate(ts: TransmittalSheet,
                        chekType: String,
-                       ctx: ValidationContext): Route = {
+                       ctx: ValidationContext,
+                       year: Int): Route = {
+    val ctx = ValidationContext(filingYear = Some(year))
+    val validationEngine = selectTsEngine(year)
+    import validationEngine._
     val validation: HmdaValidation[TransmittalSheet] = chekType match {
       case "all" => checkAll(ts, ts.LEI, ctx, TsValidationError)
       case "syntactical" =>
@@ -81,7 +91,7 @@ trait TsValidationHttpApi
     maybeErrors match {
       case Right(t) => complete(t)
       case Left(errors) =>
-        complete(ToResponseMarshallable(aggregateErrors(errors)))
+        complete(ToResponseMarshallable(aggregateErrors(errors, year.toString)))
     }
   }
 

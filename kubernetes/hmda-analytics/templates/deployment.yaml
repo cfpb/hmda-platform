@@ -31,6 +31,14 @@ spec:
               mountPath: /etc/localtime          
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+            - name: KAFKA_ANALYTICS_TOPIC
+              value: .Values.kafka.analyticsTopic
+            - name: KAFKA_SIGN_TOPIC
+              value: .Values.kafka.signTopic
+            - name: KAFKA_ANALYTICS_GROUP
+              value: .Values.kafka.analyticsGroup
+            - name: KAFKA_SIGN_GROUP
+              value: .Values.kafka.signGroup
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:
@@ -71,6 +79,16 @@ spec:
                 configMapKeyRef:
                   name: cassandra-configmap
                   key: cassandra-hosts
+            - name: CASSANDRA_JOURNAL_KEYSPACE
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-keyspace
+            - name: CASSANDRA_SNAPSHOT_KEYSPACE
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-keyspace-snapshot
             - name: CASSANDRA_CLUSTER_USERNAME
               valueFrom:
                 secretKeyRef:

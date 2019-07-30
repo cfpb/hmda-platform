@@ -67,16 +67,13 @@ metadata:
       apiVersion: ambassador/v0
       kind: Mapping
       name: hmda_admin_mapping
+      ambassador_id: ambassador-default-1
       prefix: /v2/admin/
       service: {{ .Values.service.name }}:{{ .Values.admin.port }}
 spec:
-  type: {{ .Values.ambassador.service.type }}
+  clusterIP: None  
   ports:
-  - name: ambassador-hmda-admin
-    port: {{ .Values.ambassador.port }}
-    targetPort: {{ .Values.ambassador.port }}
-  selector:
-    service: ambassador-hmda-admin
+    - port: {{ .Values.admin.port }}
 
 ---
 apiVersion: v1
@@ -90,18 +87,14 @@ metadata:
       apiVersion: ambassador/v0
       kind: Mapping
       name: hmda_filing_mapping
+      ambassador_id: ambassador-default-1
       prefix: /v2/filing/
       service: {{ .Values.service.name }}:{{ .Values.filing.port }}
       timeout_ms: 60000
 spec:
-  type: {{ .Values.ambassador.service.type }}
+  clusterIP: None  
   ports:
-  - name: ambassador-hmda-filing
-    port: {{ .Values.ambassador.port }}
-    targetPort: {{ .Values.ambassador.port }}
-  selector:
-    service: ambassador-hmda-filing
-
+    - port: {{ .Values.filing.port }}
 
 ---
 apiVersion: v1
@@ -115,16 +108,13 @@ metadata:
       apiVersion: ambassador/v0
       kind: Mapping
       name: hmda_public_mapping
+      ambassador_id: ambassador-default-1
       prefix: /v2/public/
       service: {{ .Values.service.name }}:{{ .Values.public.port }}
 spec:
-  type: {{ .Values.ambassador.service.type }}
+  clusterIP: None  
   ports:
-  - name: ambassador-hmda-public
-    port: {{ .Values.ambassador.port }}
-    targetPort: {{ .Values.ambassador.port }}
-  selector:
-    service: ambassador-hmda-public
+    - port: {{ .Values.public.port }}
 
 ---
 apiVersion: v1
@@ -138,17 +128,14 @@ metadata:
       apiVersion: ambassador/v0
       kind: Mapping
       name: hmda_cluster_mapping
+      ambassador_id: ambassador-default-1
       prefix: /v2/cluster/
       rewrite: /cluster/members
       service: {{ .Values.service.name }}:{{ .Values.cluster.port }}
 spec:
-  type: {{ .Values.ambassador.service.type }}
+  clusterIP: None  
   ports:
-  - name: ambassador-hmda-cluster
-    port: {{ .Values.ambassador.port }}
-    targetPort: {{ .Values.ambassador.port }}
-  selector:
-    service: ambassador-hmda-cluster
+    - port: {{ .Values.cluster.port }}
 
 ---
 apiVersion: v1
@@ -162,14 +149,11 @@ metadata:
       apiVersion: ambassador/v0
       kind: Mapping
       name: hmda_ws_mapping
+      ambassador_id: ambassador-default-1
       prefix: /v2/ws/status/
       service: {{ .Values.service.name }}:{{ .Values.websockets.port }}
       use_websocket: true
 spec:
-  type: {{ .Values.ambassador.service.type }}
+  clusterIP: None  
   ports:
-  - name: ambassador-hmda-ws
-    port: {{ .Values.ambassador.port }}
-    targetPort: {{ .Values.ambassador.port }}
-  selector:
-    service: ambassador-hmda-ws
+    - port: {{ .Values.websockets.port }}

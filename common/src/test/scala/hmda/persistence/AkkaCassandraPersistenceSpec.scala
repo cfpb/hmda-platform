@@ -7,10 +7,10 @@ import akka.actor
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{ActorContext, ActorRef, ActorSystem, Behavior}
+import akka.actor.typed.{TypedActorContext, ActorRef, ActorSystem, Behavior}
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
-import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
+import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
+import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 import hmda.persistence.util.CassandraUtil
 import org.scalacheck.Gen
 import org.scalatest.{BeforeAndAfterAll, WordSpec}
@@ -67,7 +67,7 @@ abstract class AkkaCassandraPersistenceSpec
 
     def behavior: Behavior[Command] =
       Behaviors.setup { ctx =>
-        PersistentBehavior[Command, Event, AwaitState](
+        EventSourcedBehavior[Command, Event, AwaitState](
           persistenceId = PersistenceId(s"await-persistence-id"),
           emptyState = AwaitState(),
           commandHandler = commandHandler(ctx),
@@ -75,7 +75,7 @@ abstract class AkkaCassandraPersistenceSpec
         )
       }
 
-    def commandHandler(ctx: ActorContext[Command])
+    def commandHandler(ctx: TypedActorContext[Command])
       : CommandHandler[Command, Event, AwaitState] = { (_, cmd) =>
       val log = ctx.asScala.log
       cmd match {

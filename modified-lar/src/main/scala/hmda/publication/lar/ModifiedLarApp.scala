@@ -6,19 +6,21 @@ import akka.actor.typed.ActorRef
 import akka.actor.typed.scaladsl.adapter._
 import akka.http.scaladsl.Http
 import akka.kafka.scaladsl.Consumer
-import akka.kafka.{ConsumerSettings, Subscriptions}
+import akka.kafka.{ConsumerMessage, ConsumerSettings, Subscriptions}
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl._
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hmda.messages.pubsub.HmdaTopics._
+import hmda.messages.pubsub.HmdaGroups
 import hmda.model.census.Census
 import hmda.model.filing.submission.SubmissionId
 import hmda.publication.KafkaUtils._
 import hmda.publication.lar.publication._
 import hmda.publication.lar.services._
+import hmda.messages.pubsub.HmdaTopics
 import hmda.query.repository.ModifiedLarRepository
+import hmda.util.BankFilterUtils._
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.LoggerFactory
@@ -71,8 +73,7 @@ object ModifiedLarApp extends App {
       untypedSubmissionId: String)(implicit scheduler: Scheduler,
                                    timeout: Timeout): Future[Done] = {
     val submissionId = SubmissionId(untypedSubmissionId)
-    if (bankFilterList.exists(
-          bankLEI => bankLEI.equalsIgnoreCase(submissionId.lei)))
+    if (!filterBankWithLogging(submissionId.lei, bankFilterList))
       Future.successful(Done.done())
     else {
       val futRes: Future[PersistModifiedLarResult] =
@@ -91,7 +92,7 @@ object ModifiedLarApp extends App {
     case Success(tractMap) =>
       // database configuration is located in `common` project
       val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
-      val repo = new ModifiedLarRepository("modifiedlar2018", databaseConfig)
+      val repo = new ModifiedLarRepository(databaseConfig)
       val modifiedLarPublisher =
         system.spawn(ModifiedLarPublisher.behavior(tractMap, repo),
                      ModifiedLarPublisher.name)
@@ -103,13 +104,14 @@ object ModifiedLarApp extends App {
                          new StringDeserializer,
                          new StringDeserializer)
           .withBootstrapServers(kafkaHosts)
-          .withGroupId("modified-lar")
-          .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+          .withGroupId(HmdaGroups.modifiedLarGroup)
+          .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest")
 
       val (kafkaControl: Consumer.Control, streamCompleted: Future[Done]) =
         Consumer
           .committableSource(consumerSettings,
-                             Subscriptions.topics(signTopic, modifiedLarTopic))
+                             Subscriptions.topics(HmdaTopics.signTopic,
+                                                  HmdaTopics.modifiedLarTopic))
           .mapAsync(parallelism) { msg =>
             log.info(s"Received a message - key: ${msg.record
               .key()}, value: ${msg.record.value()}")
@@ -117,12 +119,14 @@ object ModifiedLarApp extends App {
             // TODO: Make configurable
             // retry the Future 10 times using a spacing of 30 seconds if there is a failure before giving up
             akka.pattern.retry(() =>
-                                 processKafkaRecord(msg.record.value()).map(_ =>
-                                   msg.committableOffset),
-                               10,
-                               30.seconds)
+                                 processKafkaRecord(msg.record.value().trim)
+                                   .map(_ => msg.committableOffset),
+                               1,
+                               90.seconds)
           }
-          .mapAsync(parallelism * 2)(offset => offset.commitScaladsl())
+          .mapAsync(parallelism * 2)(
+            (offset: ConsumerMessage.CommittableOffset) =>
+              offset.commitScaladsl())
           .toMat(Sink.ignore)(Keep.both)
           .run()
 

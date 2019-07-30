@@ -9,15 +9,17 @@ metadata:
       apiVersion: ambassador/v0
       kind: Mapping
       name: keycloak_https_mapping
+      ambassador_id: [ "ambassador-default-1", "ambassador-beta-2" ]
       prefix: /auth/
       rewrite: /auth/
-      service: keycloak-http
+      service: keycloak-http.default.svc.cluster.local
       timeout_ms: 20000
 spec:
-  type: NodePort
+  clusterIP : None
   ports:
   - name: keycloak-ambassador
     port: 8443
     targetPort: 8443
   selector:
-    service: keycloak-ambassador
+    app: keycloak
+    release: keycloak

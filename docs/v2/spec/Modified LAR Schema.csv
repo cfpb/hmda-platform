@@ -61,7 +61,7 @@ Data Field Number, Data Field Name, Data Field Type, Field Type Description, Val
 60, Lender Credits, Alphanumeric, Double or NA or Blank or Exempt, , "Example: 1500.24 (or) NA. If no points were paid, leave this data field blank", Lender Credits,
 61, Interest Rate, Alphanumeric, Double or NA or Exempt, , Example: 4.125 (or) NA, Interest Rate,
 62, Prepayment Penalty Term, Alphanumeric, Integer or NA or Exempt, , Example: 24 (or) NA, Prepayment Penalty Term,
-63, Debt-to-Income Ratio, Alphanumeric, String, <20%; 20%- <30%; 30%-<36%; 50%-60%; >60%; Exact values between 36-<50; NA; Exempt, Disclose exact values between 36% - <50% otherwise bin the values into one of the defined bins. Report NA if field is NA. Report Exempt if field is exempt., Debt-to-Income Ratio,
+63, Debt-to-Income Ratio, Alphanumeric, String, <20%; 20%-<30%; 30%-<36%; 50%-60%; >60%; Exact values between 36-<50; NA; Exempt, Disclose exact values between 36% - <50% otherwise bin the values into one of the defined bins. Report NA if field is NA. Report Exempt if field is exempt., Debt-to-Income Ratio,
 64, Combined Loan-to-Value Ratio, Alphanumeric, Double or NA or Exempt, , Example: 80.05 (or) NA, Combined Loan-to-Value Ratio,
 65, Loan Term, Alphanumeric, Integer or NA or Exempt, , Example: 360 (or) NA, Loan Term,
 66, Introductory Rate Period, Alphanumeric, Integer or NA or Exempt, , Example: 24 (or) NA, Introductory Rate Period,

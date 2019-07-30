@@ -1,8 +1,8 @@
 package hmda.regulator
 
 import akka.actor.{ActorSystem, Props}
-import com.typesafe.config.ConfigFactory
-import hmda.regulator.scheduler.{LarScheduler, PanelScheduler, TsScheduler}
+import com.typesafe.config.{ConfigFactory, ConfigValueFactory}
+import hmda.regulator.scheduler._
 import org.slf4j.LoggerFactory
 object HmdaRegulatorApp extends App {
 
@@ -22,24 +22,50 @@ object HmdaRegulatorApp extends App {
 
   val config = ConfigFactory.load()
 
-  val panelTimer = config.getString("akka.PanelScheduler")
-  val larTimer = config.getString("akka.LarScheduler")
-  val tsTimer = config.getString("akka.TsScheduler")
+  val panelTimer2018 = config.getString("akka.PanelScheduler2018")
+  val larTimer2018 = config.getString("akka.LarScheduler2018")
+  val tsTimer2018 = config.getString("akka.TsScheduler2018")
 
-  log.info("Panel Timer: " + panelTimer)
-  log.info("larTimer: " + larTimer)
-  log.info("tsTimer: " + tsTimer)
+  val panelTimer2019 = config.getString("akka.PanelScheduler2019").split(",")
+  val larTimer2019 = config.getString("akka.LarScheduler2019").split(",")
+  val tsTimer2019 = config.getString("akka.TsScheduler2019").split(",")
+
+  log.info("Panel Timer 2018: " + panelTimer2018)
+  log.info("larTimer 2018: " + larTimer2018)
+  log.info("tsTimer 2018: " + tsTimer2018)
+
+  log.info("Panel Timer 2019: " + panelTimer2019)
+  log.info("larTimer 2019: " + larTimer2019)
+  log.info("tsTimer 2019: " + tsTimer2019)
 
   val panelActorSystem =
-    ActorSystem("panelTask",
-                ConfigFactory.parseString(panelTimer).withFallback(config))
+    ActorSystem(
+      "panelTask",
+      ConfigFactory
+        .parseString(panelTimer2018)
+        .withValue(panelTimer2019(0),
+                   ConfigValueFactory.fromAnyRef(panelTimer2019(1)))
+        .withFallback(config)
+    )
   panelActorSystem.actorOf(Props[PanelScheduler], "PanelScheduler")
 
   val larActorSystem =
-    ActorSystem("larTask", ConfigFactory.parseString(larTimer))
+    ActorSystem("larTask",
+                ConfigFactory
+                  .parseString(larTimer2018)
+                  .withValue(larTimer2019(0),
+                             ConfigValueFactory
+                               .fromAnyRef(larTimer2019(1)))
+                  .withFallback(config))
   larActorSystem.actorOf(Props[LarScheduler], "LarScheduler")
 
-  val tsActorSystem = ActorSystem("tsTask", ConfigFactory.parseString(tsTimer))
+  val tsActorSystem = ActorSystem("tsTask",
+                                  ConfigFactory
+                                    .parseString(tsTimer2018)
+                                    .withValue(tsTimer2019(0),
+                                               ConfigValueFactory
+                                                 .fromAnyRef(tsTimer2019(1)))
+                                    .withFallback(config))
   tsActorSystem.actorOf(Props[TsScheduler], "TsScheduler")
 
 }

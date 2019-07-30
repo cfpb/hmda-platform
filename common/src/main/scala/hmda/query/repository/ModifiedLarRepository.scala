@@ -1,17 +1,28 @@
 package hmda.query.repository
 
-import hmda.model.modifiedlar.EnrichedModifiedLoanApplicationRegister
+import hmda.model.filing.submission.SubmissionId
+import hmda.model.modifiedlar.{
+  EnrichedModifiedLoanApplicationRegister,
+  ModifiedLoanApplicationRegister
+}
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
 import scala.concurrent.Future
 import scala.util.Try
 
-class ModifiedLarRepository(tableName: String,
-                            databaseConfig: DatabaseConfig[JdbcProfile]) {
+class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
   import databaseConfig.profile.api._
 
   private val db = databaseConfig.db
+
+  def fetchYearTable(year: Int): String = {
+    year match {
+      case 2018 => "modifiedlar2018"
+      case 2019 => "modifiedlar2019"
+      case _    => "modifiedlar2019"
+    }
+  }
 
   /**
     * Deletes entries in the Modified LAR table by their LEI
@@ -21,18 +32,20 @@ class ModifiedLarRepository(tableName: String,
   def msaMds(lei: String, filingYear: Int): Future[Vector[(String, String)]] =
     db.run {
       sql"""SELECT DISTINCT msa_md, msa_md_name
-                         FROM modifiedlar2018 WHERE UPPER(lei) = ${lei.toUpperCase} AND filing_year = ${filingYear}"""
+                         FROM #${fetchYearTable(filingYear)} WHERE lei = ${lei.toUpperCase} AND filing_year = ${filingYear}"""
         .as[(String, String)]
     }
 
   /**
     * Deletes entries in the Modified LAR table by their LEI
-    * @param lei
+    * @param submissionId
     * @return the number of rows removed
     */
-  def deleteByLei(lei: String, filingYear: Int): Future[Int] =
+  def deleteByLei(submissionId: SubmissionId): Future[Int] = {
+
     db.run(
-      sqlu"DELETE FROM #${tableName} WHERE UPPER(lei) = ${lei.toUpperCase} and filing_year = $filingYear")
+      sqlu"DELETE FROM #${fetchYearTable(submissionId.period.toInt)} WHERE UPPER(lei) = ${submissionId.lei.toUpperCase} and filing_year = ${submissionId.period.toInt}")
+  }
 
   /**
     * Inserts Modified Loan Application Register data that has been enhanced with Census information via the tract map
@@ -41,9 +54,8 @@ class ModifiedLarRepository(tableName: String,
     * @return
     */
   def insert(input: EnrichedModifiedLoanApplicationRegister,
-             submissionId: String,
-             filingYear: Int): Future[Int] =
-    db.run(sqlu"""INSERT INTO #${tableName}(
+             submissionId: SubmissionId): Future[Int] =
+    db.run(sqlu"""INSERT INTO #${fetchYearTable(submissionId.period.toInt)} (
             id,
             lei,
             loan_type,
@@ -138,11 +150,23 @@ class ModifiedLarRepository(tableName: String,
             msa_md,
             msa_md_name,
             submission_id,
-            filing_year
-          )
+            filing_year,
+            conforming_loan_limit,
+            median_age,
+            median_age_calculated,
+            median_income_percentage,
+            ethnicity_categorization,
+            race_categorization,
+            sex_categorization,
+            percent_median_msa_income,
+            dwelling_category,
+            loan_product_type
+            )
+
+
           VALUES (
             ${input.mlar.id},
-            ${input.mlar.lei.toUpperCase},
+            ${input.mlar.lei},
             ${input.mlar.loanType},
             ${input.mlar.loanPurpose},
             ${input.mlar.preapproval},
@@ -234,11 +258,69 @@ class ModifiedLarRepository(tableName: String,
             ${input.census.oneToFourFamilyUnits},
             ${input.census.msaMd},
             ${input.census.name},
-            ${submissionId},
-            ${filingYear}
+            ${submissionId.toString},
+            ${submissionId.period.toInt},
+            ${input.mlar.conformingLoanLimit},
+            ${input.census.medianAge},
+            ${medianAgeCalculated(submissionId.period.toInt,
+                                  input.census.medianAge)},
+            ${input.census.tracttoMsaIncomePercent},
+            ${input.mlar.ethnicityCategorization},
+            ${input.mlar.raceCategorization},
+            ${input.mlar.sexCategorization},
+            ${incomeCategorization(input.mlar.income, input.census.medianIncome)},
+            ${input.mlar.dwellingCategorization},
+            ${input.mlar.loanProductTypeCategorization}
           )
           """)
 
   private def safeConvertToInt(s: String): Option[Int] =
     Try(s.toInt).toOption
+
+  private def incomeCategorization(larIncome: String,
+                                   censusMedianIncome: Int): String = {
+    if (larIncome == "NA")
+      "NA"
+    else {
+      //income in the lar is rounded to 1000
+      val income = larIncome.toDouble * 1000
+      val fifty = censusMedianIncome * .5
+      val eighty = censusMedianIncome * .8
+      val ninety = censusMedianIncome * .9
+      val oneTwenty = censusMedianIncome * 1.2
+
+      if (income < fifty) {
+        "<50%"
+      } else if (income > fifty && income < eighty) {
+        "50-79%"
+      } else if (income > eighty && income < ninety) {
+        "80-99%"
+      } else if (income > ninety && income < oneTwenty) {
+        "100-119%"
+      } else {
+        ">120%"
+      }
+    }
+  }
+
+  private def medianAgeCalculated(filingYear: Int, medianAge: Int): String = {
+    val medianYear = filingYear - medianAge
+    if (medianAge == -1)
+      "Age Unknown"
+    else if (medianYear <= 1969)
+      "1969 or Earlier"
+    else if (medianYear >= 1970 && medianYear <= 1979)
+      "1970 - 1979"
+    else if (medianYear >= 1980 && medianYear <= 1989)
+      "1980 - 1989"
+    else if (medianYear >= 1990 && medianYear <= 1999)
+      "1990 - 1999"
+    else if (medianYear >= 2000 && medianYear <= 2010)
+      "2000 - 2010"
+    else if (medianYear >= 2011)
+      "2011 - Present"
+    else
+      "Age Unknown"
+  }
+
 }

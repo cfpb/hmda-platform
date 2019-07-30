@@ -5,6 +5,7 @@ import akka.stream.FlowShape
 import akka.stream.scaladsl.{Broadcast, Concat, Flow, GraphDSL}
 import akka.util.ByteString
 import cats.Semigroup
+import hmda.model.filing.EditDescriptionLookup.config
 import hmda.model.filing.{EditDescriptionLookup, PipeDelimited}
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
@@ -18,9 +19,9 @@ import hmda.parser.filing.ts.TsCsvParser
 import hmda.validation._
 import hmda.validation.context.ValidationContext
 import hmda.util.streams.FlowUtils._
-import hmda.validation.engine.{LarEngine, TsEngine, TsLarEngine}
-import scala.collection.immutable._
+import hmda.validation.engine._
 
+import scala.collection.immutable._
 import scala.concurrent.Future
 
 object ValidationFlow {
@@ -48,6 +49,9 @@ object ValidationFlow {
 
   def validateTsFlow(checkType: String, validationContext: ValidationContext)
     : Flow[ByteString, HmdaValidated[TransmittalSheet], NotUsed] = {
+    val currentYear = config.getInt("hmda.filing.current")
+    val validationEngine = selectTsEngine(
+      validationContext.filingYear.getOrElse(currentYear))
     Flow[ByteString]
       .via(framing("\n"))
       .map(_.utf8String)
@@ -59,14 +63,17 @@ object ValidationFlow {
       .map { ts =>
         val errors = checkType match {
           case "all" =>
-            TsEngine.checkAll(ts, ts.LEI, validationContext, TsValidationError)
-          case "syntactical" =>
-            TsEngine.checkSyntactical(ts,
+            validationEngine.checkAll(ts,
                                       ts.LEI,
                                       validationContext,
                                       TsValidationError)
+          case "syntactical" =>
+            validationEngine.checkSyntactical(ts,
+                                              ts.LEI,
+                                              validationContext,
+                                              TsValidationError)
           case "validity" =>
-            TsEngine.checkValidity(ts, ts.LEI, TsValidationError)
+            validationEngine.checkValidity(ts, ts.LEI, TsValidationError)
         }
         (ts, errors)
       }
@@ -83,19 +90,22 @@ object ValidationFlow {
                          checkType: String,
                          validationContext: ValidationContext)
     : Either[List[ValidationError], TransmittalLar] = {
+    val currentYear = config.getInt("hmda.filing.current")
+    val validationEngine = selectTsLarEngine(
+      validationContext.filingYear.getOrElse(currentYear))
     val errors = checkType match {
       case "all" =>
-        TsLarEngine.checkAll(tsLar,
-                             tsLar.ts.LEI,
-                             validationContext,
-                             TsValidationError)
+        validationEngine.checkAll(tsLar,
+                                  tsLar.ts.LEI,
+                                  validationContext,
+                                  TsValidationError)
       case "syntactical-validity" =>
-        TsLarEngine.checkSyntactical(tsLar,
-                                     tsLar.ts.LEI,
-                                     validationContext,
-                                     TsValidationError)
+        validationEngine.checkSyntactical(tsLar,
+                                          tsLar.ts.LEI,
+                                          validationContext,
+                                          TsValidationError)
       case "quality" =>
-        TsLarEngine.checkQuality(tsLar, tsLar.ts.LEI)
+        validationEngine.checkQuality(tsLar, tsLar.ts.LEI)
     }
     errors
       .leftMap(xs => {
@@ -106,24 +116,34 @@ object ValidationFlow {
 
   def validateLarFlow(checkType: String, ctx: ValidationContext)
     : Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
+    val currentYear = config.getInt("hmda.filing.current")
+    val validationEngine = selectLarEngine(
+      ctx.filingYear.getOrElse(currentYear))
     collectLar
       .map { lar =>
         def errors =
           checkType match {
             case "all" =>
-              LarEngine.checkAll(lar, lar.loan.ULI, ctx, LarValidationError)
+              validationEngine.checkAll(lar,
+                                        lar.loan.ULI,
+                                        ctx,
+                                        LarValidationError)
             case "syntactical" =>
-              LarEngine
+              validationEngine
                 .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
             case "validity" =>
-              LarEngine.checkValidity(lar, lar.loan.ULI, LarValidationError)
+              validationEngine.checkValidity(lar,
+                                             lar.loan.ULI,
+                                             LarValidationError)
             case "syntactical-validity" =>
-              LarEngine
+              validationEngine
                 .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
                 .combine(
-                  LarEngine.checkValidity(lar, lar.loan.ULI, LarValidationError)
+                  validationEngine.checkValidity(lar,
+                                                 lar.loan.ULI,
+                                                 LarValidationError)
                 )
-            case "quality" => LarEngine.checkQuality(lar, lar.loan.ULI)
+            case "quality" => validationEngine.checkQuality(lar, lar.loan.ULI)
           }
         (lar, errors)
       }
@@ -158,16 +178,18 @@ object ValidationFlow {
     })
   }
 
-  def validateAsyncLarFlow[as: AS, mat: MAT, ec: EC](checkType: String)
+  def validateAsyncLarFlow[as: AS, mat: MAT, ec: EC](checkType: String,
+                                                     year: Int)
     : Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
+    val validationEngine = selectLarEngine(year)
     collectLar
       .mapAsync(1) { lar =>
         val futValidation: Future[HmdaValidation[LoanApplicationRegister]] =
           checkType match {
             case "syntactical-validity" =>
-              LarEngine.checkValidityAsync(lar, lar.loan.ULI)
+              validationEngine.checkValidityAsync(lar, lar.loan.ULI)
             case "quality" =>
-              LarEngine.checkQualityAsync(lar, lar.loan.ULI)
+              validationEngine.checkQualityAsync(lar, lar.loan.ULI)
           }
         futValidation.map(validation => (lar, validation))
       }

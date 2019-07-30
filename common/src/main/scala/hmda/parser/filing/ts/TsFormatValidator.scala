@@ -3,6 +3,7 @@ package hmda.parser.filing.ts
 import cats.data.ValidatedNel
 import cats.implicits._
 import com.typesafe.config.ConfigFactory
+import hmda.model.filing.EditDescriptionLookup
 import hmda.model.filing.ts.{Address, Contact, TransmittalSheet}
 import hmda.model.institution.Agency
 import hmda.parser.ParserErrorModel.{
@@ -17,13 +18,15 @@ sealed trait TsFormatValidator {
 
   val config = ConfigFactory.load()
 
-  val numberOfFields = config.getInt("hmda.filing.ts.length")
+  val currentYear = config.getString("hmda.filing.current")
+  val numberOfFields = config.getInt(s"hmda.filing.$currentYear.ts.length")
 
   type TsParserValidationResult[A] = ValidatedNel[ParserValidationError, A]
 
   def validateTs(
-      values: Seq[String]): TsParserValidationResult[TransmittalSheet] = {
-    if (values.lengthCompare(numberOfFields) != 0) {
+      values: Seq[String],
+      rawLine: String = ""): TsParserValidationResult[TransmittalSheet] = {
+    if (values.lengthCompare(numberOfFields) != 0 || rawLine.trim.endsWith("|")) {
       IncorrectNumberOfFields(values.length, numberOfFields).invalidNel
     } else {
       val id = values.headOption.getOrElse("")
