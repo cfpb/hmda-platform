@@ -12,6 +12,7 @@ object Sex extends Enum[Sex] {
   case object Female extends Sex("Female")
   case object Male extends Sex("Male")
   case object Joint extends Sex("Joint")
+  case object SexNotApplicable extends Sex("Sex Not Available")
 
   def validateSexes(rawSexes: Seq[String]): Either[Seq[String], Seq[Sex]] = {
     val potentialSexes =
