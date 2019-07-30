@@ -6,59 +6,59 @@ Field Name|Field Data Type|Valid Values|Notes
 |----|-------------|----|----|
 Record Identifier|Integer|2|
 Legal Entity Identifier (LEI)|Character Varying||
-[Loan Type](#loan-type)|Integer|1, 2, 3, 4|
-[Loan Purpose](#loan-purpose)|Integer|1, 2, 31, 32, 4, 5|
-[Preapproval](#preapproval)|Integer|1, 2|
-[Construction Method](#construction-method)|Integer|1, 2|
-[Occupancy Type](#occupancy-type)|Integer|1, 2, 3|
-Loan Amount|Numeric||"Loan amounts are rounded to the midpoint of the nearest $10|000 interval for which the reported value falls (For example a reported value of $117834 would be disclosed as $115000 as the midpoint between values $110000 and $120000)."
-[Action Taken](#action-taken)|Integer|1, 2, 3, 4, 5, 6, 7, 8|
+Loan Type|Integer|1, 2, 3, 4|
+Loan Purpose|Integer|1, 2, 31, 32, 4, 5|
+Preapproval|Integer|1, 2|
+Construction Method|Integer|1, 2|
+Occupancy Type|Integer|1, 2, 3|
+Loan Amount|Numeric||Loan amounts are rounded to the midpoint of the nearest $10|000 interval for which the reported value falls (For example a reported value of $117834 would be disclosed as $115000 as the midpoint between values $110000 and $120000).
+Action Taken|Integer|1, 2, 3, 4, 5, 6, 7, 8|
 State|Character Varying|NA|two-letter state code
 County|Character Varying|NA Exempt|state-county FIPS code
 Census Tract|Character Varying|NA|11 digit census tract number
-[Ethnicity of Applicant or Borrower: 1](#ethnicity-of-applicant-or-borrower)|Character Varying|1, 11, 12, 13, 14, 2, 3, 4|
-[Ethnicity of Applicant or Borrower: 2](#ethnicity-of-applicant-or-borrower)|Character Varying|1, 11, 12, 13, 14, 2|
-[Ethnicity of Applicant or Borrower: 3](#ethnicity-of-applicant-or-borrower)|Character Varying|1, 11, 12, 13, 14, 2|
-[Ethnicity of Applicant or Borrower: 4](#ethnicity-of-applicant-or-borrower)|Character Varying|1, 11, 12, 13, 14, 2|
-[Ethnicity of Applicant or Borrower: 5](#ethnicity-of-applicant-or-borrower)|Character Varying|1, 11, 12, 13, 14, 2|
-[Ethnicity of Co-Applicant or Co-Borrower: 1](#ethnicity-of-co-applicant-or-co-borrower)|Character Varying|1, 11, 12, 13, 14, 2, 3, 4, 5|
-[Ethnicity of Co-Applicant or Co-Borrower: 2](#ethnicity-of-co-applicant-or-co-borrower)|Character Varying|1, 11, 12, 13, 14, 2|
-[Ethnicity of Co-Applicant or Co-Borrower: 3](#ethnicity-of-co-applicant-or-co-borrower)|Character Varying|1, 11, 12, 13, 14, 2|
-[Ethnicity of Co-Applicant or Co-Borrower: 4](#ethnicity-of-co-applicant-or-co-borrower)|Character Varying|1, 11, 12, 13, 14, 2|
-[Ethnicity of Co-Applicant or Co-Borrower: 5](#ethnicity-of-co-applicant-or-co-borrower)|Character Varying|1, 11, 12, 13, 14, 2|
-[Ethnicity of Applicant or Borrower Collected on the Basis of Visual Observation or Surname](#ethnicity-of-applicant-or-borrower-collected-on-the-basis-of-visual-observation or-surname)|Integer|1, 2, 3|
-[Ethnicity of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname](#ethnicity-of-co-applicant-or-co-borrower-collected-on-the-basis-of-visual-observation or-surname)|Integer|1, 2, 3, 4|
-[Race of Applicant or Borrower: 1](#race-of-applicant-or-borrower)|Character Varying|1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7|
-[Race of Applicant or Borrower: 2](#race-of-applicant-or-borrower)|Character Varying|1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5|
-[Race of Applicant or Borrower: 3](#race-of-applicant-or-borrower)|Character Varying|1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5|
-[Race of Applicant or Borrower: 4](#race-of-applicant-or-borrower)|Character Varying|1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5|
-[Race of Applicant or Borrower: 5](#race-of-applicant-or-borrower)|Character Varying|1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5|
-[Race of Co-Applicant or Co-Borrower: 1](#race-of-co-applicant-or-co-borrower)|Character Varying|1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8|
-[Race of Co-Applicant or Co-Borrower: 2](#race-of-co-applicant-or-co-borrower)|Character Varying|1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5|
-[Race of Co-Applicant or Co-Borrower: 3](#race-of-co-applicant-or-co-borrower)|Character Varying|1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5|
-[Race of Co-Applicant or Co-Borrower: 4](#race-of-co-applicant-or-co-borrower)|Character Varying|1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5|
-[Race of Co-Applicant or Co-Borrower: 5](#race-of-co-applicant-or-co-borrower)|Character Varying|1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5|
-[Race of Applicant or Borrower Collected on the Basis of Visual Observation or Surname](#race-of-applicant-or-borrower-collected-on-the-basis-of-visual-observation-or-surname)|Integer|1, 2, 3|
-[Race of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname](#race-of-co-applicant-or-co-borrower-collected-on-the-basis-of-visual-observation-or-surname)|Integer|1, 2, 3, 4|
-[Sex of Applicant or Borrower](#sex-of-applicant-or-borrower)|Integer|1, 2, 3, 4, 6|
-[Sex of Co-Applicant or Co-Borrower](#sex-of-co-applicant-or-co-borrower)|Integer|1, 2, 3, 4, 5, 6|
-[Sex of Applicant or Borrower Collected on the Basis of Visual Observation or Surname](#sex-of-applicant-or-borrower-collected-on-the-basis-of-visual-observation-or-surname)|Integer|1, 2, 3|
-[Sex of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname](#sex-of-co-applicant-or-co-borrower-collected-on-the-basis-of-visual-observation-or-surname)|Integer|1, 2, 3, 4|
-[Age of Applicant or Borrower](#age-of-applicant-or-borrower)|Character Varying|<25, 25-34, 35-44, 45-54, 55-64, 65-74, >74, 8888|
-[Age of Applicant or Borrower Greater Than or Equal To 62](#age-of-applicant-or-borrower-greater-than-or-equal-to-62)|Character Varying|Yes, No, NA|
-[Age of Co-Applicant or Co-Borrower](#age-of-co-applicant-or-co-borrower)|Character Varying|<25, 25-34, 35-44, 45-54, 55-64, 65-74, >74, 8888, 9999|
-[Age of Co-Applicant or Co-Borrower Greater Than or Equal To 62](#age-of-co-applicant-or-co-borrower-greater-than-or-equal-to-62)|Character Varying|Yes, No, NA|
+Ethnicity of Applicant or Borrower: 1|Character Varying|1, 11, 12, 13, 14, 2, 3, 4|
+Ethnicity of Applicant or Borrower: 2|Character Varying|1, 11, 12, 13, 14, 2|
+Ethnicity of Applicant or Borrower: 3|Character Varying|1, 11, 12, 13, 14, 2|
+Ethnicity of Applicant or Borrower: 4|Character Varying|1, 11, 12, 13, 14, 2|
+Ethnicity of Applicant or Borrower: 5|Character Varying|1, 11, 12, 13, 14, 2|
+Ethnicity of Co-Applicant or Co-Borrower: 1|Character Varying|1, 11, 12, 13, 14, 2, 3, 4, 5|
+Ethnicity of Co-Applicant or Co-Borrower: 2|Character Varying|1, 11, 12, 13, 14, 2|
+Ethnicity of Co-Applicant or Co-Borrower: 3|Character Varying|1, 11, 12, 13, 14, 2|
+Ethnicity of Co-Applicant or Co-Borrower: 4|Character Varying|1, 11, 12, 13, 14, 2|
+Ethnicity of Co-Applicant or Co-Borrower: 5|Character Varying|1, 11, 12, 13, 14, 2|
+Ethnicity of Applicant or Borrower Collected on the Basis of Visual Observation or Surname|Integer|1, 2, 3|
+Ethnicity of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname|Integer|1, 2, 3, 4|
+Race of Applicant or Borrower: 1|Character Varying|1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7|
+Race of Applicant or Borrower: 2|Character Varying|1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5|
+Race of Applicant or Borrower: 3|Character Varying|1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5|
+Race of Applicant or Borrower: 4|Character Varying|1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5|
+Race of Applicant or Borrower: 5|Character Varying|1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5|
+Race of Co-Applicant or Co-Borrower: 1|Character Varying|1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8|
+Race of Co-Applicant or Co-Borrower: 2|Character Varying|1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5|
+Race of Co-Applicant or Co-Borrower: 3|Character Varying|1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5|
+Race of Co-Applicant or Co-Borrower: 4|Character Varying|1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5|
+Race of Co-Applicant or Co-Borrower: 5|Character Varying|1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5|
+Race of Applicant or Borrower Collected on the Basis of Visual Observation or Surname|Integer|1, 2, 3|
+Race of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname|Integer|1, 2, 3, 4|
+Sex of Applicant or Borrower|Integer|1, 2, 3, 4, 6|
+Sex of Co-Applicant or Co-Borrower|Integer|1, 2, 3, 4, 5, 6|
+Sex of Applicant or Borrower Collected on the Basis of Visual Observation or Surname|Integer|1, 2, 3|
+Sex of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname|Integer|1, 2, 3, 4|
+Age of Applicant or Borrower|Character Varying|<25, 25-34, 35-44, 45-54, 55-64, 65-74, >74, 8888|
+Age of Applicant or Borrower Greater Than or Equal To 62|Character Varying|Yes, No, NA|
+Age of Co-Applicant or Co-Borrower|Character Varying|<25, 25-34, 35-44, 45-54, 55-64, 65-74, >74, 8888, 9999|
+Age of Co-Applicant or Co-Borrower Greater Than or Equal To 62|Character Varying|Yes, No, NA|
 Income|Character Varying|NA|
-[Type of Purchaser](#type-of-purchaser)|Integer|0, 1, 2, 3, 4, 5, 6, 71, 72, 8, 9|
+Type of Purchaser|Integer|0, 1, 2, 3, 4, 5, 6, 71, 72, 8, 9|
 Rate Spread|Character Varying|NA, Exempt|
-[HOEPA Status](#hoepa-status)|Integer|1, 2, 3|
-[Lien Status](#lien-status)|Integer|1, 2|
-[Applicant or Borrower - Name and Version of Credit Scoring Model](#applicant-or-borrower-name-and-version-of-credit-scoring-model)|Integer|1, 2, 3, 4, 5, 6, 7, 8, 9, 1111|
-[Co-Applicant or Co-Borrower - Name and Version of Credit Scoring Model](#co-applicant-or-co-borrower-name-and-version-of-credit-scoring-model)|Integer|1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1111|
-[Reason for Denial: 1](#reason-for-denial)|Integer|1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1111|
-[Reason for Denial: 2](#reason-for-denial)|Integer|1, 2, 3, 4, 5, 6, 7, 8, 9|
-[Reason for Denial: 3](#reason-for-denial)|Integer|1, 2, 3, 4, 5, 6, 7, 8, 9|
-[Reason for Denial: 4](#reason-for-denial)|Integer|1, 2, 3, 4, 5, 6, 7, 8, 9|
+HOEPA Status|Integer|1, 2, 3|
+Lien Status|Integer|1, 2|
+Applicant or Borrower - Name and Version of Credit Scoring Model|Integer|1, 2, 3, 4, 5, 6, 7, 8, 9, 1111|
+Co-Applicant or Co-Borrower - Name and Version of Credit Scoring Model|Integer|1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1111|
+Reason for Denial: 1|Integer|1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1111|
+Reason for Denial: 2|Integer|1, 2, 3, 4, 5, 6, 7, 8, 9|
+Reason for Denial: 3|Integer|1, 2, 3, 4, 5, 6, 7, 8, 9|
+Reason for Denial: 4|Integer|1, 2, 3, 4, 5, 6, 7, 8, 9|
 Total Loan Costs|Character Varying|NA, Exempt|
 Total Points and Fees|Character Varying|NA, Exempt|
 Origination Charges|Character Varying|NA, Exempt|
@@ -66,30 +66,30 @@ Discount Points|Character Varying|NA, Exempt|
 Lender Credits|Character Varying|NA, Exempt|
 Interest Rate|Character Varying|NA, Exempt|
 Prepayment Penalty Term|Character Varying|NA Exempt|
-[Debt-to-Income Ratio](#debt-to-income-ratio)|Character Varying|<20%, 20%-<30%, 30%-<36%, 50%-60%, >60%, NA, Exempt|Exact values are reported between 36% and 49%.
+Debt-to-Income Ratio|Character Varying|<20%, 20%-<30%, 30%-<36%, 50%-60%, >60%, NA, Exempt|Exact values are reported between 36% and 49%.
 Combined Loan-to-Value Ratio|Character Varying|NA, Exempt|
 Loan Term|Character Varying|NA, Exempt|
 Introductory Rate Period|Character Varying|NA, Exempt|
-[Balloon Payment](#balloon-payment)|Integer|1, 2, 1111|
-[Interest-Only Payments](#interest-only-payments)|Integer|1, 2, 1111|
-[Negative Amortization](#negative-amortization)|Integer|1, 2, 1111|
-[Other Non-Amortizing Features](#other-non-amortizing-features)|Integer|1, 2, 1111|
+Balloon Payment|Integer|1, 2, 1111|
+Interest-Only Payments|Integer|1, 2, 1111|
+Negative Amortization|Integer|1, 2, 1111|
+Other Non-Amortizing Features|Integer|1, 2, 1111|
 Property Value|Character Varying|NA, Exempt|"Property values are rounded to the midpoint of the nearest $10|000 interval for which the reported value falls (For example a reported value of $117834 would be disclosed as $115000 as the midpoint between values $110000 and $120000)."
-[Manufactured Home Secured Property Type](#manufactured-home-secured-property-type)|Integer|1, 2, 3, 1111|
-[Manufactured Home Land Property Interest](#manufactured-home-land-property-interest)|Integer|1, 2, 3, 4, 5, 1111|
-[Total Units](#total-units)|Character Varying|1, 2, 3, 4, 5-24, 25-49, 50-99, 100-149, >149|
+Manufactured Home Secured Property Type|Integer|1, 2, 3, 1111|
+Manufactured Home Land Property Interest|Integer|1, 2, 3, 4, 5, 1111|
+Total Units|Character Varying|1, 2, 3, 4, 5-24, 25-49, 50-99, 100-149, >149|
 Multifamily Affordable Units|Character Varying|NA Exempt|Listed as a percentage of total units.
-[Submission of Application](#submission-of-application)|Integer|1, 2, 3, 1111|
-[Initially Payable to Your Institution](#initially-payable)|Integer|1, 2, 3, 1111|
-[Automated Underwriting System: 1](#automated-underwriting-system)|Integer|1, 2, 3, 4, 5, 6, 1111|
-[Automated Underwriting System: 2](#automated-underwriting-system)|Integer|1, 2, 3, 4, 5|
-[Automated Underwriting System: 3](#automated-underwriting-system)|Integer|1, 2, 3, 4, 5|
-[Automated Underwriting System: 4](#automated-underwriting-system)|Integer|1, 2, 3, 4, 5|
-[Automated Underwriting System: 5](#automated-underwriting-system)|Integer|1, 2, 3, 4, 5|
-[Reverse Mortgage](#reverse-mortgage)|Integer|1, 2, 1111|
-[Open-End Line of Credit](#open-end-line-of-credit)|Integer|1, 2, 1111|
-[Business or Commercial Purpose](#business-or-commercial-purpose)|Integer|1, 2, 1111|
-[Conforming Loan Limit Flag](#conforming-loan-limit-flag)|Character Varying|C, NC, U, NA|Indicates whether a loan is Conforming, Nonconforming, Undetermined, or Not Applicable (NA) based on the conforming loan limits determined by FHFA.
+Submission of Application|Integer|1, 2, 3, 1111|
+Initially Payable to Your Institution|Integer|1, 2, 3, 1111|
+Automated Underwriting System: 1|Integer|1, 2, 3, 4, 5, 6, 1111|
+Automated Underwriting System: 2|Integer|1, 2, 3, 4, 5|
+Automated Underwriting System: 3|Integer|1, 2, 3, 4, 5|
+Automated Underwriting System: 4|Integer|1, 2, 3, 4, 5|
+Automated Underwriting System: 5|Integer|1, 2, 3, 4, 5|
+Reverse Mortgage|Integer|1, 2, 1111|
+Open-End Line of Credit|Integer|1, 2, 1111|
+Business or Commercial Purpose|Integer|1, 2, 1111|
+Conforming Loan Limit Flag|Character Varying|C, NC, U, NA|Indicates whether a loan is Conforming, Nonconforming, Undetermined, or Not Applicable (NA) based on the conforming loan limits determined by FHFA.
 Metropolitan Statistical Area/Metropolitan Division (MSA/MD)|Integer||Field derived from Census data.
 Population|Character Varying||Field derived from Census data.
 Minority Population %|Character Varying||Field derived from Census data.
