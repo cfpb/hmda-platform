@@ -17,7 +17,7 @@ object ULI {
   }
 
   def generateULI(loanId: String): String = {
-    loanId + checkDigit(loanId).toString
+    loanId + checkDigit(loanId).toString.trim()
   }
 
   def validateULI(uli: String): Boolean = {
@@ -35,12 +35,12 @@ object ULI {
   }
 
   def uliIsValidLength(uli: String): Boolean = {
-    val count = uli.count(_.toString != "")
+    val count = uli.count(_.toString.trim() != "")
     count >= 23 && count <= 45
   }
 
   def loanIdIsValidLength(loanId: String): Boolean = {
-    val count = loanId.count(_.toString != "")
+    val count = loanId.count(_.toString.trim() != "")
     count >= 21 && count <= 43
   }
 
