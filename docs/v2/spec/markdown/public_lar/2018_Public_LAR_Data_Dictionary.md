@@ -11,7 +11,7 @@ Loan Purpose|Integer|1, 2, 31, 32, 4, 5|
 Preapproval|Integer|1, 2|
 Construction Method|Integer|1, 2|
 Occupancy Type|Integer|1, 2, 3|
-Loan Amount|Numeric||Loan amounts are rounded to the midpoint of the nearest $10|000 interval for which the reported value falls (For example a reported value of $117834 would be disclosed as $115000 as the midpoint between values $110000 and $120000).
+Loan Amount|Numeric||Loan amounts are rounded to the midpoint of the nearest $10,000 interval for which the reported value falls (For example a reported value of $117834 would be disclosed as $115000 as the midpoint between values $110000 and $120000).
 Action Taken|Integer|1, 2, 3, 4, 5, 6, 7, 8|
 State|Character Varying|NA|two-letter state code
 County|Character Varying|NA Exempt|state-county FIPS code
@@ -74,7 +74,7 @@ Balloon Payment|Integer|1, 2, 1111|
 Interest-Only Payments|Integer|1, 2, 1111|
 Negative Amortization|Integer|1, 2, 1111|
 Other Non-Amortizing Features|Integer|1, 2, 1111|
-Property Value|Character Varying|NA, Exempt|"Property values are rounded to the midpoint of the nearest $10|000 interval for which the reported value falls (For example a reported value of $117834 would be disclosed as $115000 as the midpoint between values $110000 and $120000)."
+Property Value|Character Varying|NA, Exempt|"Property values are rounded to the midpoint of the nearest $10,000 interval for which the reported value falls (For example a reported value of $117834 would be disclosed as $115000 as the midpoint between values $110000 and $120000)."
 Manufactured Home Secured Property Type|Integer|1, 2, 3, 1111|
 Manufactured Home Land Property Interest|Integer|1, 2, 3, 4, 5, 1111|
 Total Units|Character Varying|1, 2, 3, 4, 5-24, 25-49, 50-99, 100-149, >149|
