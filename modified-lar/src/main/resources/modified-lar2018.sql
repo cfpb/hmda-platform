@@ -125,7 +125,6 @@ CREATE TABLE hmda_user.modifiedlar2018 (
     owner_occupied_units character varying,
     one_to_four_fam_units character varying,
     msa_md integer,
-    loan_flag character varying,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     submission_id character varying,
     msa_md_name character varying,
