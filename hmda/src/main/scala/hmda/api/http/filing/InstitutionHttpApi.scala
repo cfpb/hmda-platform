@@ -78,6 +78,7 @@ trait InstitutionHttpApi extends HmdaTimeDirectives {
               case Failure(error) =>
                 failedResponse(StatusCodes.InternalServerError, uri, error)
             }
+
           }
         }
       }
