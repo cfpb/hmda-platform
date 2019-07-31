@@ -28,4 +28,14 @@ case class TransmittalSheetEntity(
       s"$totalLines|$taxId|$lei"
 
   }
+
+  def toPublicPSV: String = {
+    s"$year|$quarter|$lei|$taxId|$agency|" +
+      s"$name|$city|$state|$zipCode|$totalLines"
+  }
+
+  def toPublicCSV: String = {
+    s"$year,$quarter,$lei,$taxId,$agency," +
+      s"$name,$city,$state,$zipCode,$totalLines"
+  }
 }

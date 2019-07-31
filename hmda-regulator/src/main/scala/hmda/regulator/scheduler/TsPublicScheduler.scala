@@ -3,7 +3,6 @@ package hmda.regulator.scheduler
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-import akka.NotUsed
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3._
@@ -18,35 +17,25 @@ import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.ts._
-import hmda.regulator.query.component.{
-  RegulatorComponent2018,
-  RegulatorComponent2019
-}
-import hmda.regulator.scheduler.schedules.Schedules.{
-  TsScheduler2018,
-  TsScheduler2019
-}
+import hmda.regulator.query.component.RegulatorComponent2018
+import hmda.regulator.scheduler.schedules.Schedules.TsPublicScheduler2018
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class TsScheduler
-    extends HmdaActor
-    with RegulatorComponent2018
-    with RegulatorComponent2019 {
+class TsPublicScheduler extends HmdaActor with RegulatorComponent2018 {
 
   implicit val ec = context.system.dispatcher
   implicit val materializer = ActorMaterializer()
   private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   def tsRepository2018 = new TransmittalSheetRepository2018(dbConfig)
-  def tsRepository2019 = new TransmittalSheetRepository2019(dbConfig)
 
-  val awsConfig = ConfigFactory.load("application.conf").getConfig("aws")
-  val accessKeyId = awsConfig.getString("access-key-id")
-  val secretAccess = awsConfig.getString("secret-access-key ")
-  val region = awsConfig.getString("region")
-  val bucket = awsConfig.getString("private-s3-bucket")
-  val environment = awsConfig.getString("environment")
+  val awsConfig = ConfigFactory.load("application.conf").getConfig("public-aws")
+  val accessKeyId = awsConfig.getString("public-access-key-id")
+  val secretAccess = awsConfig.getString("public-secret-access-key ")
+  val region = awsConfig.getString("public-region")
+  val bucket = awsConfig.getString("public-s3-bucket")
+  val environment = awsConfig.getString("public-environment")
   val year = awsConfig.getString("year")
   val bankFilter =
     ConfigFactory.load("application.conf").getConfig("filter")
@@ -71,75 +60,72 @@ class TsScheduler
 
   override def preStart() = {
     QuartzSchedulerExtension(context.system)
-      .schedule("TsScheduler2018", self, TsScheduler2018)
-
-    QuartzSchedulerExtension(context.system)
-      .schedule("TsScheduler2019", self, TsScheduler2019)
+      .schedule("TsPublicScheduler2018", self, TsPublicScheduler2018)
 
   }
 
   override def postStop() = {
-    QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2018")
-    QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2019")
+    QuartzSchedulerExtension(context.system).cancelJob("TsPublicScheduler2018")
 
   }
 
   override def receive: Receive = {
 
-    case TsScheduler2018 =>
+    case TsPublicScheduler2018 =>
+      println("test timer public ts")
+
       val now = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDate.format(now)
-      val fileName = s"$formattedDate" + "2018_ts.txt"
-      val s3Sink =
-        S3.multipartUpload(bucket, s"$environment/ts/$fileName")
+      val fileNameCSV = s"$formattedDate" + "2018_public_ts.csv"
+      val fileNamePSV = s"$formattedDate" + "2018_public_ts.txt"
+
+      val s3SinkCSV =
+        S3.multipartUpload(bucket, s"$environment/ts/$fileNameCSV")
+          .withAttributes(S3Attributes.settings(s3Settings))
+
+      val s3SinkPSV =
+        S3.multipartUpload(bucket, s"$environment/ts/$fileNamePSV")
           .withAttributes(S3Attributes.settings(s3Settings))
 
       val allResults: Future[Seq[TransmittalSheetEntity]] =
         tsRepository2018.getAllSheets(bankFilterList)
 
-      val results: Future[MultipartUploadResult] = Source
+      //SYNC CSV
+      val resultsCSV: Future[MultipartUploadResult] = Source
         .fromFuture(allResults)
         .map(seek => seek.toList)
         .mapConcat(identity)
-        .map(transmittalSheet => transmittalSheet.toPSV + "\n")
+        .map(transmittalSheet => transmittalSheet.toPublicCSV + "\n")
         .map(s => ByteString(s))
-        .runWith(s3Sink)
+        .runWith(s3SinkCSV)
 
-      results onComplete {
+      resultsCSV onComplete {
         case Success(result) => {
           log.info(
-            "Pushing to S3: " + s"$bucket/$environment/ts/$fileName" + ".")
+            "Pushing to S3: " + s"$bucket/$environment/ts/$fileNameCSV" + ".")
         }
         case Failure(t) =>
-          println("An error has occurred getting TS Data 2018: " + t.getMessage)
+          println(
+            "An error has occurred getting Public CSV  TS Data 2018: " + t.getMessage)
       }
 
-    case TsScheduler2019 =>
-      val now = LocalDateTime.now().minusDays(1)
-      val formattedDate = fullDate.format(now)
-      val fileName = s"$formattedDate" + "2019_ts.txt"
-      val s3Sink =
-        S3.multipartUpload(bucket, s"$environment/ts/$fileName")
-          .withAttributes(S3Attributes.settings(s3Settings))
-
-      val allResults: Future[Seq[TransmittalSheetEntity]] =
-        tsRepository2019.getAllSheets(bankFilterList)
-
-      val results: Future[MultipartUploadResult] = Source
+      //SYNC PSV
+      val resultsPSV: Future[MultipartUploadResult] = Source
         .fromFuture(allResults)
         .map(seek => seek.toList)
         .mapConcat(identity)
-        .map(transmittalSheet => transmittalSheet.toPSV + "\n")
+        .map(transmittalSheet => transmittalSheet.toPublicPSV + "\n")
         .map(s => ByteString(s))
-        .runWith(s3Sink)
+        .runWith(s3SinkPSV)
 
-      results onComplete {
+      resultsPSV onComplete {
         case Success(result) => {
           log.info(
-            "Pushing to S3: " + s"$bucket/$environment/ts/$fileName" + ".")
+            "Pushing to S3: " + s"$bucket/$environment/ts/$fileNamePSV" + ".")
         }
         case Failure(t) =>
-          println("An error has occurred getting TS Data 2019: " + t.getMessage)
+          println(
+            "An error has occurred gettingPublic PSV TS Data 2018: " + t.getMessage)
       }
   }
 }

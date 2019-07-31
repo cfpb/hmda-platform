@@ -29,6 +29,14 @@ case class LarPartOne(id: Int = 0,
       s"|$actionTakenType|$actionTakenDate|$street|$city|$state|" +
       s"$zip|$county|$tract|"
   }
+
+  def toPublicPSV: String = {
+    s"$lei|"
+  }
+
+  def toPublicCSV: String = {
+    s"$lei,"
+  }
 }
 case class LarPartTwo(ethnicityApplicant1: String = "",
                       ethnicityApplicant2: String = "",
@@ -56,6 +64,14 @@ case class LarPartTwo(ethnicityApplicant1: String = "",
       s"$ethnicityCoApplicant2|$ethnicityCoApplicant3|$ethnicityCoApplicant4|$ethnicityCoApplicant5|" +
       s"$otherHispanicCoApplicant|$ethnicityObservedApplicant|$ethnicityObservedCoApplicant|$raceApplicant1" +
       s"|$raceApplicant2|$raceApplicant3|$raceApplicant4|$raceApplicant5|"
+  }
+
+  def toPublicPSV: String = {
+    s"$raceApplicant1|"
+  }
+
+  def toPublicCSV: String = {
+    s"$raceApplicant1,"
   }
 }
 
@@ -88,6 +104,14 @@ case class LarPartThree(otherNativeRaceApplicant: String = "",
       s"$raceObservedCoApplicant|$sexApplicant|$sexCoApplicant|$observedSexApplicant|$observedSexCoApplicant|" +
       s"$ageApplicant|$ageCoApplicant|$income|"
   }
+
+  def toPublicPSV: String = {
+    s"$sexApplicant|"
+  }
+
+  def toPublicCSV: String = {
+    s"$sexApplicant,"
+  }
 }
 
 case class LarPartFour(purchaserType: Int = 0,
@@ -115,6 +139,14 @@ case class LarPartFour(purchaserType: Int = 0,
       s"$creditScoreTypeCoApplicant|$creditScoreModelCoApplicant|" +
       s"$denialReason1|$denialReason2|$denialReason3|$denialReason4|" +
       s"$otherDenialReason|$totalLoanCosts|$totalPoints|$originationCharges|"
+  }
+
+  def toPublicPSV: String = {
+    s"$purchaserType|"
+  }
+
+  def toPublicCSV: String = {
+    s"$purchaserType,"
   }
 }
 
@@ -144,6 +176,14 @@ case class LarPartFive(discountPoints: String = "",
       s"$homeSecurityPolicy|$landPropertyInterest|$totalUnits|$mfAffordable|$applicationSubmission|"
   }
 
+  def toPublicPSV: String = {
+    s"$discountPoints|"
+  }
+
+  def toPublicCSV: String = {
+    s"$discountPoints,"
+  }
+
 }
 
 case class LarPartSix(payable: Int = 0,
@@ -169,6 +209,14 @@ case class LarPartSix(payable: Int = 0,
       s"$nmls|$aus1|$aus2|$aus3|$aus4|$aus5|$otheraus|$aus1Result|$aus2Result|$aus3Result|$aus4Result|$aus5Result|" +
       s"$otherAusResult|$reverseMortgage|$lineOfCredits|$businessOrCommercial"
   }
+
+  def toPublicPSV: String = {
+    s"$aus1"
+  }
+
+  def toPublicCSV: String = {
+    s"$aus1"
+  }
 }
 
 case class LarEntityImpl(larPartOne: LarPartOne,
@@ -185,4 +233,20 @@ case class LarEntityImpl(larPartOne: LarPartOne,
       larPartFour.toPSV +
       larPartFive.toPSV +
       larPartSix.toPSV).replaceAll("(\r\n)|\r|\n", "")
+
+  def toPublicPSV: String =
+    (larPartOne.toPublicPSV +
+      larPartTwo.toPublicPSV +
+      larPartThree.toPublicPSV +
+      larPartFour.toPublicPSV +
+      larPartFive.toPublicPSV +
+      larPartSix.toPublicPSV).replaceAll("(\r\n)|\r|\n", "")
+
+  def toPublicCSV: String =
+    (larPartOne.toPublicCSV +
+      larPartTwo.toPublicCSV +
+      larPartThree.toPublicCSV +
+      larPartFour.toPublicCSV +
+      larPartFive.toPublicCSV +
+      larPartSix.toPublicCSV).replaceAll("(\r\n)|\r|\n", "")
 }
