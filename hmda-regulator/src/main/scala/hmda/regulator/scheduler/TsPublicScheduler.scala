@@ -75,12 +75,11 @@ class TsPublicScheduler extends HmdaActor with RegulatorComponent2018 {
       println("test timer public ts")
 
       val now = LocalDateTime.now().minusDays(1)
-      val formattedDate = fullDate.format(now)
-      val fileNameCSV = s"$formattedDate" + "2018_public_ts.csv"
-      val fileNamePSV = s"$formattedDate" + "2018_public_ts.txt"
+
+      val fileNamePSV = "2018_ts_test.txt"
 
       val s3SinkCSV =
-        S3.multipartUpload(bucket, s"$environment/ts/$fileNameCSV")
+        S3.multipartUpload(bucket, s"$environment/ts/$fileNamePSV")
           .withAttributes(S3Attributes.settings(s3Settings))
 
       val s3SinkPSV =
@@ -89,25 +88,6 @@ class TsPublicScheduler extends HmdaActor with RegulatorComponent2018 {
 
       val allResults: Future[Seq[TransmittalSheetEntity]] =
         tsRepository2018.getAllSheets(bankFilterList)
-
-      //SYNC CSV
-      val resultsCSV: Future[MultipartUploadResult] = Source
-        .fromFuture(allResults)
-        .map(seek => seek.toList)
-        .mapConcat(identity)
-        .map(transmittalSheet => transmittalSheet.toPublicCSV + "\n")
-        .map(s => ByteString(s))
-        .runWith(s3SinkCSV)
-
-      resultsCSV onComplete {
-        case Success(result) => {
-          log.info(
-            "Pushing to S3: " + s"$bucket/$environment/ts/$fileNameCSV" + ".")
-        }
-        case Failure(t) =>
-          println(
-            "An error has occurred getting Public CSV  TS Data 2018: " + t.getMessage)
-      }
 
       //SYNC PSV
       val resultsPSV: Future[MultipartUploadResult] = Source

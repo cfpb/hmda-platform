@@ -89,9 +89,7 @@ class PanelPublicScheduler extends HmdaActor with RegulatorComponent2018 {
     val allResults: Future[Seq[InstitutionEntity]] =
       institutionRepository2018.findActiveFilers(bankFilterList)
     val now = LocalDateTime.now().minusDays(1)
-    val formattedDate = fullDate.format(now)
-    val fileNameCSV = s"$formattedDate" + "2018_public_panel.csv"
-    val fileNamePSV = s"$formattedDate" + "2018_public_panel.txt"
+    val fileNamePSV = "2018_panel_test.txt"
 
     //PSV Sync
     val s3SinkPSV =
@@ -111,30 +109,6 @@ class PanelPublicScheduler extends HmdaActor with RegulatorComponent2018 {
       case Success(result) => {
         log.info(
           "Pushing to S3: " + s"$bucket/$environment/panel/$fileNamePSV" + ".")
-      }
-      case Failure(t) =>
-        println(
-          "An error has occurred getting Panel Public Data 2018: " + t.getMessage)
-    }
-
-    //CSV Sync
-    val s3SinkCSV =
-      S3.multipartUpload(bucket, s"$environment/panel/$fileNameCSV")
-        .withAttributes(S3Attributes.settings(s3Settings))
-
-    val resultsCSV: Future[MultipartUploadResult] = Source
-      .fromFuture(allResults)
-      .map(seek => seek.toList)
-      .mapConcat(identity)
-      .mapAsync(1)(institution => appendEmailDomains2018(institution))
-      .map(institution => institution.toPublicCSV + "\n")
-      .map(s => ByteString(s))
-      .runWith(s3SinkCSV)
-
-    resultsCSV onComplete {
-      case Success(result) => {
-        log.info(
-          "Pushing to S3: " + s"$bucket/$environment/panel/$fileNameCSV" + ".")
       }
       case Failure(t) =>
         println(

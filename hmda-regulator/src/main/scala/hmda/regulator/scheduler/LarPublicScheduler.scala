@@ -18,7 +18,7 @@ import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.query.DbConfiguration.dbConfig
 import hmda.regulator.query.component.RegulatorComponent2018
-import hmda.regulator.query.lar.LarEntityImpl
+import hmda.regulator.query.lar.{LarEntityImpl, ModifiedLarEntityImpl}
 import hmda.regulator.scheduler.schedules.Schedules.LarPublicScheduler2018
 import slick.basic.DatabasePublisher
 
@@ -31,7 +31,7 @@ class LarPublicScheduler extends HmdaActor with RegulatorComponent2018 {
   implicit val materializer = ActorMaterializer()
   private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
 
-  def larRepository2018 = new LarRepository2018(dbConfig)
+  def mlarRepository2018 = new ModifiedLarRepository2018(dbConfig)
 
   val awsConfig = ConfigFactory.load("application.conf").getConfig("public-aws")
   val accessKeyId = awsConfig.getString("public-access-key-id")
@@ -75,14 +75,12 @@ class LarPublicScheduler extends HmdaActor with RegulatorComponent2018 {
     case LarPublicScheduler2018 =>
       println("test timer public lar")
       val now = LocalDateTime.now().minusDays(1)
-      val formattedDate = fullDate.format(now)
-      val fileNamePSV = s"$formattedDate" + "2018_public_lar.csv"
-      val fileNameCSV = s"$formattedDate" + "2018_public_lar.txt"
+      val fileNamePSV = "2018_lar_test.txt"
 
-      val allResultsPublisher: DatabasePublisher[LarEntityImpl] =
-        larRepository2018.getAllLARs(bankFilterList)
+      val allResultsPublisher: DatabasePublisher[ModifiedLarEntityImpl] =
+        mlarRepository2018.getAllLARs(bankFilterList)
 
-      val allResultsSource: Source[LarEntityImpl, NotUsed] =
+      val allResultsSource: Source[ModifiedLarEntityImpl, NotUsed] =
         Source.fromPublisher(allResultsPublisher)
 
       //PSV Sync
@@ -91,7 +89,7 @@ class LarPublicScheduler extends HmdaActor with RegulatorComponent2018 {
         .withAttributes(S3Attributes.settings(s3Settings))
 
       var resultsPSV: Future[MultipartUploadResult] = allResultsSource
-        .map(larEntity => larEntity.toPublicPSV + "\n")
+        .map(mlarEntity => mlarEntity.toPublicPSV + "\n")
         .map(s => ByteString(s))
         .runWith(s3SinkPSV)
 
@@ -99,26 +97,6 @@ class LarPublicScheduler extends HmdaActor with RegulatorComponent2018 {
         case Success(result) => {
           log.info(
             "Pushing to S3: " + s"$bucket/$environment/lar/$fileNamePSV" + ".")
-        }
-        case Failure(t) =>
-          log.info(
-            "An error has occurred getting Public LAR Data in Future: " + t.getMessage)
-      }
-
-      //CSV Sync
-      val s3SinkCSV = S3
-        .multipartUpload(bucket, s"$environment/lar/$fileNameCSV")
-        .withAttributes(S3Attributes.settings(s3Settings))
-
-      var results: Future[MultipartUploadResult] = allResultsSource
-        .map(larEntity => larEntity.toPublicCSV + "\n")
-        .map(s => ByteString(s))
-        .runWith(s3SinkCSV)
-
-      results onComplete {
-        case Success(result) => {
-          log.info(
-            "Pushing to S3: " + s"$bucket/$environment/lar/$fileNameCSV" + ".")
         }
         case Failure(t) =>
           log.info(
