@@ -40,6 +40,8 @@ trait InstitutionQueryHttpApi
   implicit val institutionEmailsRepository = new InstitutionEmailsRepository(
     dbConfig)
 
+  val currentYear = config.getString("hmda.filing.current")
+
   val institutionByIdPath =
     path("institutions" / Segment / "year" / Segment) { (lei, year) =>
       timedGet { uri =>
@@ -105,7 +107,7 @@ trait InstitutionQueryHttpApi
     path("institutions") {
       timedGet { uri =>
         parameter('domain.as[String]) { domain =>
-          val f = findByEmail(domain, "2018")
+          val f = findByEmail(domain, currentYear)
           completeInstitutionsFuture(f, uri)
         } ~
           parameters('domain.as[String],
@@ -113,7 +115,8 @@ trait InstitutionQueryHttpApi
                      'respondentName.as[String],
                      'taxId.as[String]) {
             (domain, lei, respondentName, taxId) =>
-              val f = findByFields(lei, respondentName, taxId, domain, "2018")
+              val f =
+                findByFields(lei, respondentName, taxId, domain, currentYear)
               completeInstitutionsFuture(f, uri)
           }
       }

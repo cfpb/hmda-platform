@@ -48,7 +48,8 @@ trait DataBrowserDirectives {
     val filename =
       queries.map(q => q.name + "_" + q.values.mkString("-")).mkString("_")
     respondWithHeader(
-      `Content-Disposition`(attachment, Map("filename" -> filename)))(route)
+      `Content-Disposition`(attachment,
+                            Map("filename" -> (filename + ".csv"))))(route)
   }
 
   def pipeSource(
@@ -342,6 +343,20 @@ trait DataBrowserDirectives {
     }
   }
 
+  def extractCountFields(innerRoute: List[QueryField] => Route): Route =
+    extractNonMandatoryQueryFields { nonMandatoryFields =>
+      if (nonMandatoryFields.nonEmpty) {
+        complete(BadRequest, NoMandatoryFieldsInCount())
+      } else {
+        (extractYears & extractMsaMds & extractStates) {
+          (years, msaMds, states) =>
+            if (years.nonEmpty && (msaMds.nonEmpty || states.nonEmpty))
+              innerRoute(List(years, msaMds, states).flatten)
+            else complete(BadRequest, ProvideYearAndStatesOrMsaMds())
+        }
+      }
+    }
+
   def extractYearsAndMsaAndStateBrowserFields(
       innerRoute: List[QueryField] => Route): Route =
     (extractYears & extractMsaMds & extractStates) { (years, msaMds, states) =>
@@ -361,6 +376,14 @@ trait DataBrowserDirectives {
   def extractFieldsForAggregation(
       innerRoute: List[QueryField] => Route): Route =
     extractNonMandatoryQueryFields { browserFields =>
+      innerRoute(browserFields)
+      if (browserFields.nonEmpty) innerRoute(browserFields)
+      else complete(BadRequest, NotEnoughFilterCriterias())
+    }
+
+  def extractFieldsForCount(innerRoute: List[QueryField] => Route): Route =
+    extractNonMandatoryQueryFields { browserFields =>
+      innerRoute(browserFields)
       if (browserFields.nonEmpty) innerRoute(browserFields)
       else complete(BadRequest, NotEnoughFilterCriterias())
     }

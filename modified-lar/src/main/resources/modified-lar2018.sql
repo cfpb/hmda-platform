@@ -206,6 +206,7 @@ CREATE INDEX modifiedlar2018_dwelling_category_idx ON hmda_user.modifiedlar2018 
 CREATE INDEX modifiedlar2018_lien_status_idx ON hmda_user.modifiedlar2018 USING btree (lien_status);
 CREATE INDEX modifiedlar2018_loan_purpose_idx ON hmda_user.modifiedlar2018 USING btree (loan_purpose);
 CREATE INDEX modifiedlar2018_loan_type_idx ON hmda_user.modifiedlar2018 USING btree (loan_type);
+CREATE INDEX modifiedlar2018_filing_year_idx ON hmda_user.modifiedlar2018 USING btree (filing_year);
 
 -- Completed on 2019-06-05 11:44:50 EDT
 
