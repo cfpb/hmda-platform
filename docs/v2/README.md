@@ -123,7 +123,7 @@ sbt:hmda-platform> docker:publishLocal
 ```
 This task will create a `Docker` image. To run a container with the `HMDA Platform` filing application as a single node cluster:
 
-`docker run -e CASSANDRA_CLUSTER_HOST=localhost --rm -ti -p 8080:8080 -p 8081:8081 -p 8082:8082 -p 19999:19999 hmda/hmda-platform` 
+`docker run -e CASSANDRA_CLUSTER_HOSTS=localhost --rm -ti -p 8080:8080 -p 8081:8081 -p 8082:8082 -p 19999:19999 hmda/hmda-platform` 
 
 The same approach can be followed to build and run Docker containers for the other microservices that form the HMDA Platform. 
 
