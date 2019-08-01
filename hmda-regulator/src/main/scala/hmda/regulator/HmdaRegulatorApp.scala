@@ -46,35 +46,35 @@ object HmdaRegulatorApp extends App {
   log.info("LAR Public 2018: " + larPublicTimer2018)
   log.info("TS Public 2018: " + tsPublicTimer2018)
 
-//  val panelActorSystem =
-//    ActorSystem(
-//      "panelTask",
-//      ConfigFactory
-//        .parseString(panelTimer2018)
-//        .withValue(panelTimer2019(0),
-//                   ConfigValueFactory.fromAnyRef(panelTimer2019(1)))
-//        .withFallback(config)
-//    )
-//  panelActorSystem.actorOf(Props[PanelScheduler], "PanelScheduler")
-//
-//  val larActorSystem =
-//    ActorSystem("larTask",
-//                ConfigFactory
-//                  .parseString(larTimer2018)
-//                  .withValue(larTimer2019(0),
-//                             ConfigValueFactory
-//                               .fromAnyRef(larTimer2019(1)))
-//                  .withFallback(config))
-//  larActorSystem.actorOf(Props[LarScheduler], "LarScheduler")
-//
-//  val tsActorSystem = ActorSystem("tsTask",
-//                                  ConfigFactory
-//                                    .parseString(tsTimer2018)
-//                                    .withValue(tsTimer2019(0),
-//                                               ConfigValueFactory
-//                                                 .fromAnyRef(tsTimer2019(1)))
-//                                    .withFallback(config))
-//  tsActorSystem.actorOf(Props[TsScheduler], "TsScheduler")
+  val panelActorSystem =
+    ActorSystem(
+      "panelTask",
+      ConfigFactory
+        .parseString(panelTimer2018)
+        .withValue(panelTimer2019(0),
+                   ConfigValueFactory.fromAnyRef(panelTimer2019(1)))
+        .withFallback(config)
+    )
+  panelActorSystem.actorOf(Props[PanelScheduler], "PanelScheduler")
+
+  val larActorSystem =
+    ActorSystem("larTask",
+                ConfigFactory
+                  .parseString(larTimer2018)
+                  .withValue(larTimer2019(0),
+                             ConfigValueFactory
+                               .fromAnyRef(larTimer2019(1)))
+                  .withFallback(config))
+  larActorSystem.actorOf(Props[LarScheduler], "LarScheduler")
+
+  val tsActorSystem = ActorSystem("tsTask",
+                                  ConfigFactory
+                                    .parseString(tsTimer2018)
+                                    .withValue(tsTimer2019(0),
+                                               ConfigValueFactory
+                                                 .fromAnyRef(tsTimer2019(1)))
+                                    .withFallback(config))
+  tsActorSystem.actorOf(Props[TsScheduler], "TsScheduler")
 
   //Public Data Actor Systems
 

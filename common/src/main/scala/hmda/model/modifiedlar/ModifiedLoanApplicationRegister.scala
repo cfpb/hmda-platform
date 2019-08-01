@@ -101,7 +101,8 @@ case class ModifiedLoanApplicationRegister(
     sexCategorization: String,
     dwellingCategorization: String,
     loanProductTypeCategorization: String
-) extends PipeDelimited {
+) extends PipeDelimited
+    with ColumnDataFormatter {
 
   override def toCSV: String = {
     (s"$id|$lei|$loanType|$loanPurpose|$preapproval|$constructionMethod|$occupancy|" +
@@ -120,12 +121,11 @@ case class ModifiedLoanApplicationRegister(
       s"$age|$ageGreaterThanOrEqual62|$coAge|$coAgeGreaterThanOrEqual62|$income|" +
       s"$purchaserType|$rateSpread|$hoepaStatus|" +
       s"$lienStatus|$applicantCredisScoreModel|$coApplicantCreditScoreModel|" +
-      ColumnDataFormatter.controlCharacterFilter(
-        s"$denial1|$denial2|$denial3|$denial4") +
+      controlCharacterFilter(s"$denial1|$denial2|$denial3|$denial4") +
       s"|$totalLoanCosts|$totalPointsAndFees|$originationCharges|$discountPoints|$lenderCredits|$interestRate|" +
       s"$prepaymentPenalty|$debtToIncomeRatio|$loanToValueRatio|$loanTerm|" +
       s"$introductoryRatePeriod|$balloonPayment|$interestOnlyPayment|$negativeAmortization|$otherNonAmortizingFeatures|" +
-      ColumnDataFormatter.toBigDecimalString(propertyValue) +
+      toBigDecimalString(propertyValue) +
       s"|" +
       s"$homeSecuredPropertyType|$homeLandPropertyType|$totalUnits|$multifamilyAffordableUnits|$applicationSubmission|" +
       s"$initiallyPayableToInstitution|$AUS1|$AUS2|$AUS3|$AUS4|$AUS5|" +

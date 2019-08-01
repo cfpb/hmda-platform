@@ -167,12 +167,13 @@ case class LarPartFive(discountPoints: String = "",
                        landPropertyInterest: Int = 0,
                        totalUnits: Int = 0,
                        mfAffordable: String = "",
-                       applicationSubmission: Int = 0) {
+                       applicationSubmission: Int = 0)
+    extends ColumnDataFormatter {
 
   def toPSV: String = {
     s"$discountPoints|$lenderCredits|$interestRate|$paymentPenalty|$debtToIncome|$loanValueRatio|$loanTerm|" +
       s"$rateSpreadIntro|$baloonPayment|$insertOnlyPayment|$amortization|$otherAmortization|" +
-      ColumnDataFormatter.toBigDecimalString(propertyValue) + "|" +
+      toBigDecimalString(propertyValue) + "|" +
       s"$homeSecurityPolicy|$landPropertyInterest|$totalUnits|$mfAffordable|$applicationSubmission|"
   }
 

@@ -22,22 +22,19 @@ case class ModifiedLarPartOne(
     loanType: Option[Int] = Some(0),
     loanPurpose: Option[Int] = Some(0),
     lienStatus: Option[Int] = Some(0)
-) {
+) extends ColumnDataFormatter {
   def isEmpty: Boolean = lei == ""
 
   def toPublicPSV: String = {
-    s"$filingYear|$lei|$msaMd|$state|$county|" +
-      s"$tract|$conformingLoanLimit|$loanFlag|$ethnicityCategorization|" +
-      s"|$raceCategorization|$sexCategorization|$actionTakenType|$purchaserType|" +
-      s"$preapproval|$loanType|$loanPurpose|$lienStatus|"
+    s"${extractOpt(filingYear)}|$lei|${extractOpt(msaMd)}|${extractOpt(state)}|${extractOpt(county)}|" +
+      s"${extractOpt(tract)}|${extractOpt(conformingLoanLimit)}|${extractOpt(
+        loanFlag)}|${extractOpt(ethnicityCategorization)}|" +
+      s"|${extractOpt(raceCategorization)}|${extractOpt(sexCategorization)}|${extractOpt(
+        actionTakenType)}|${extractOpt(purchaserType)}|" +
+      s"${extractOpt(preapproval)}|${extractOpt(loanType)}|${extractOpt(
+        loanPurpose)}|${extractOpt(lienStatus)}|"
   }
 
-  def toPublicCSV: String = {
-    s"$filingYear,$lei,$msaMd,$state,$county," +
-      s"$tract,$conformingLoanLimit,$loanFlag,$ethnicityCategorization," +
-      s",$raceCategorization,$sexCategorization,$actionTakenType,$purchaserType," +
-      s"$preapproval,$loanType,$loanPurpose,$lienStatus,"
-  }
 }
 case class ModifiedLarPartTwo(reverseMortgage: Option[Int] = Some(0),
                               lineOfCredits: Option[Int] = Some(0),
@@ -56,64 +53,56 @@ case class ModifiedLarPartTwo(reverseMortgage: Option[Int] = Some(0),
                               paymentPenalty: Option[String] = Some(""),
                               rateSpreadIntro: Option[String] = Some(""),
                               amortization: Option[Int] = Some(0),
-                              insertOnlyPayment: Option[Int] = Some(0)) {
+                              insertOnlyPayment: Option[Int] = Some(0))
+    extends ColumnDataFormatter {
 
   def toPublicPSV: String = {
-    s"$reverseMortgage|$lineOfCredits|$businessOrCommercial|" +
+    s"${extractOpt(reverseMortgage)}|${extractOpt(lineOfCredits)}|${extractOpt(businessOrCommercial)}|" +
       BigDecimal.valueOf(loanAmount).bigDecimal.toPlainString +
-      s"|$loanValueRatio|$interestRate|$rateSpread|$hoepaStatus|" +
-      s"$totalLoanCosts|$totalPoints|$originationCharges|$discountPoints|" +
-      s"$lenderCredits|$loanTerm|$paymentPenalty|$rateSpreadIntro" +
-      s"|$amortization|$insertOnlyPayment|"
-  }
-
-  def toPublicCSV: String = {
-    s"$reverseMortgage,$lineOfCredits,$businessOrCommercial," +
-      BigDecimal.valueOf(loanAmount).bigDecimal.toPlainString +
-      s",$loanValueRatio,$interestRate,$rateSpread,$hoepaStatus," +
-      s"$totalLoanCosts,$totalPoints,$originationCharges,$discountPoints," +
-      s"$lenderCredits,$loanTerm,$paymentPenalty,$rateSpreadIntro" +
-      s",$amortization,$insertOnlyPayment,"
+      s"|${extractOpt(loanValueRatio)}|${extractOpt(interestRate)}|${extractOpt(
+        rateSpread)}|${extractOpt(hoepaStatus)}|" +
+      s"${extractOpt(totalLoanCosts)}|${extractOpt(totalPoints)}|${extractOpt(
+        originationCharges)}|${extractOpt(discountPoints)}|" +
+      s"${extractOpt(lenderCredits)}|${extractOpt(loanTerm)}|${extractOpt(
+        paymentPenalty)}|${extractOpt(rateSpreadIntro)}" +
+      s"|${extractOpt(amortization)}|${extractOpt(insertOnlyPayment)}|"
   }
 
 }
 
-case class ModifiedLarPartThree(
-    baloonPayment: Option[Int] = Some(0),
-    otherAmortization: Option[Int] = Some(0),
-    propertyValue: String = "",
-    constructionMethod: Option[String] = Some(""),
-    occupancyType: Option[Int] = Some(0),
-    homeSecurityPolicy: Option[Int] = Some(0),
-    landPropertyInterest: Option[Int] = Some(0),
-    totalUnits: Option[String] = Some(""),
-    mfAffordable: Option[String] = Some(""),
-    income: Option[String] = Some(""),
-    debtToIncome: Option[String] = Some(""),
-    creditScoreTypeApplicant: Option[Int] = Some(0),
-    creditScoreTypeCoApplicant: Option[Int] = Some(0),
-    ethnicityApplicant1: Option[String] = Some(""),
-    ethnicityApplicant2: Option[String] = Some(""),
-    ethnicityApplicant3: Option[String] = Some(""),
-    ethnicityApplicant4: Option[String] = Some("")) {
+case class ModifiedLarPartThree(baloonPayment: Option[Int] = Some(0),
+                                otherAmortization: Option[Int] = Some(0),
+                                propertyValue: String = "",
+                                constructionMethod: Option[String] = Some(""),
+                                occupancyType: Option[Int] = Some(0),
+                                homeSecurityPolicy: Option[Int] = Some(0),
+                                landPropertyInterest: Option[Int] = Some(0),
+                                totalUnits: Option[String] = Some(""),
+                                mfAffordable: Option[String] = Some(""),
+                                income: Option[String] = Some(""),
+                                debtToIncome: Option[String] = Some(""),
+                                creditScoreTypeApplicant: Option[Int] = Some(0),
+                                creditScoreTypeCoApplicant: Option[Int] = Some(
+                                  0),
+                                ethnicityApplicant1: Option[String] = Some(""),
+                                ethnicityApplicant2: Option[String] = Some(""),
+                                ethnicityApplicant3: Option[String] = Some(""),
+                                ethnicityApplicant4: Option[String] = Some(""))
+    extends ColumnDataFormatter {
 
   def toPublicPSV: String = {
-    s"$baloonPayment|" +
-      s"$otherAmortization|" +
-      ColumnDataFormatter.toBigDecimalString(propertyValue) + "|" +
-      s"$constructionMethod|$occupancyType|" +
-      s"$homeSecurityPolicy|$landPropertyInterest|$totalUnits|$mfAffordable|" +
-      s"$income|$debtToIncome|$creditScoreTypeApplicant|" +
-      s"$creditScoreTypeCoApplicant|$ethnicityApplicant1|$ethnicityApplicant2|$ethnicityApplicant3|$ethnicityApplicant4|"
+    s"${extractOpt(baloonPayment)}|" +
+      s"${extractOpt(otherAmortization)}|" +
+      toBigDecimalString(propertyValue) + "|" +
+      s"${extractOpt(constructionMethod)}|${extractOpt(occupancyType)}|" +
+      s"${extractOpt(homeSecurityPolicy)}${extractOpt(landPropertyInterest)}|${extractOpt(
+        totalUnits)}|${extractOpt(mfAffordable)}|" +
+      s"${extractOpt(income)}|${extractOpt(debtToIncome)}|${extractOpt(creditScoreTypeApplicant)}|" +
+      s"${extractOpt(creditScoreTypeCoApplicant)}|${extractOpt(
+        ethnicityApplicant1)}|${extractOpt(ethnicityApplicant2)}" +
+      s"|${extractOpt(ethnicityApplicant3)}|${extractOpt(ethnicityApplicant4)}|"
   }
 
-  def toPublicCSV: String = {
-    s"$baloonPayment," +
-      s"$otherAmortization,$propertyValue,$constructionMethod,$occupancyType," +
-      s"$homeSecurityPolicy,$landPropertyInterest,$totalUnits,$mfAffordable," +
-      s"$income,$debtToIncome,$creditScoreTypeApplicant," +
-      s"$creditScoreTypeCoApplicant,$ethnicityApplicant1,$ethnicityApplicant2,$ethnicityApplicant3,$ethnicityApplicant4,"
-  }
 }
 
 case class ModifiedLarPartFour(
@@ -133,23 +122,20 @@ case class ModifiedLarPartFour(
     raceCoApplicant1: Option[String] = Some(""),
     raceCoApplicant2: Option[String] = Some(""),
     raceCoApplicant3: Option[String] = Some(""),
-    raceCoApplicant4: Option[String] = Some("")) {
+    raceCoApplicant4: Option[String] = Some(""))
+    extends ColumnDataFormatter {
 
   def toPublicPSV: String = {
-    s"$ethnicityApplicant5|$ethnicityCoApplicant1|$ethnicityCoApplicant2|$ethnicityCoApplicant3|" +
-      s"$ethnicityCoApplicant4|$ethnicityCoApplicant5|$ethnicityObservedApplicant|$ethnicityObservedCoApplicant|" +
-      s"$raceApplicant1|$raceApplicant2|" +
-      s"$raceApplicant3|$raceApplicant4|$raceApplicant5|$raceCoApplicant1|" +
-      s"$raceCoApplicant2|$raceCoApplicant3|$raceCoApplicant4|"
+    s"${extractOpt(ethnicityApplicant5)}|${extractOpt(ethnicityCoApplicant1)}|${extractOpt(
+      ethnicityCoApplicant2)}|${extractOpt(ethnicityCoApplicant3)}|" +
+      s"${extractOpt(ethnicityCoApplicant4)}|${extractOpt(ethnicityCoApplicant5)}|${extractOpt(
+        ethnicityObservedApplicant)}|${extractOpt(ethnicityObservedCoApplicant)}|" +
+      s"${extractOpt(raceApplicant1)}|${extractOpt(raceApplicant2)}|" +
+      s"${extractOpt(raceApplicant3)}|${extractOpt(raceApplicant4)}|${extractOpt(
+        raceApplicant5)}|${extractOpt(raceCoApplicant1)}|" +
+      s"${extractOpt(raceCoApplicant2)}|${extractOpt(raceCoApplicant3)}|${extractOpt(raceCoApplicant4)}|"
   }
 
-  def toPublicCSV: String = {
-    s"$ethnicityApplicant5,$ethnicityCoApplicant1,$ethnicityCoApplicant2,$ethnicityCoApplicant3," +
-      s"$ethnicityCoApplicant4,$ethnicityCoApplicant5,$ethnicityObservedApplicant,$ethnicityObservedCoApplicant," +
-      s"$raceApplicant1,$raceApplicant2," +
-      s"$raceApplicant3,$raceApplicant4,$raceApplicant5,$raceCoApplicant1," +
-      s"$raceCoApplicant2,$raceCoApplicant3,$raceCoApplicant4,"
-  }
 }
 
 case class ModifiedLarPartFive(
@@ -169,19 +155,19 @@ case class ModifiedLarPartFive(
     aus1: Option[Int] = Some(0),
     aus2: Option[Int] = Some(0),
     aus3: Option[Int] = Some(0),
-    aus4: Option[Int] = Some(0)) {
+    aus4: Option[Int] = Some(0))
+    extends ColumnDataFormatter {
 
   def toPublicPSV: String = {
-    s"$raceCoApplicant5|$raceObservedApplicant|$raceObservedCoApplicant|$sexApplicant|$sexCoApplicant|$observedSexApplicant|$observedSexCoApplicant|" +
-      s"$ageApplicant|$ageCoApplicant|$applicantAgeGreaterThan62|$coapplicantAgeGreaterThan62|$applicationSubmission|" +
-      s"$payable|$aus1|$aus2|$aus3|$aus4|"
+    s"${extractOpt(raceCoApplicant5)}|${extractOpt(raceObservedApplicant)}|${extractOpt(
+      raceObservedCoApplicant)}|${extractOpt(sexApplicant)}|${extractOpt(
+      sexCoApplicant)}|${extractOpt(observedSexApplicant)}|${extractOpt(observedSexCoApplicant)}|" +
+      s"${extractOpt(ageApplicant)}|${extractOpt(ageCoApplicant)}|${extractOpt(applicantAgeGreaterThan62)}|${extractOpt(
+        coapplicantAgeGreaterThan62)}|${extractOpt(applicationSubmission)}|" +
+      s"${extractOpt(payable)}|${extractOpt(aus1)}|${extractOpt(aus2)}|${extractOpt(
+        aus3)})}|${extractOpt(aus4)}|"
   }
 
-  def toPublicCSV: String = {
-    s"$raceCoApplicant5,$raceObservedApplicant,$raceObservedCoApplicant,$sexApplicant,$sexCoApplicant,$observedSexApplicant,$observedSexCoApplicant," +
-      s"$ageApplicant,$ageCoApplicant,$applicantAgeGreaterThan62,$coapplicantAgeGreaterThan62,$applicationSubmission," +
-      s"$payable,$aus1,$aus2,$aus3,$aus4,"
-  }
 }
 
 case class ModifiedLarPartSix(aus5: Option[Int] = Some(0),
@@ -196,21 +182,18 @@ case class ModifiedLarPartSix(aus5: Option[Int] = Some(0),
                               medianIncomePercentage: Option[Int] = Some(0),
                               ownerOccupiedUnits: Option[String] = Some(""),
                               oneToFourFamUnits: Option[String] = Some(""),
-                              medianAge: Option[Int] = Some(0)) {
+                              medianAge: Option[Int] = Some(0))
+    extends ColumnDataFormatter {
 
   def toPublicPSV: String = {
-    s"$aus5|" +
-      s"$denialReason1|$denialReason2|$denialReason3|$denialReason4|$population|" +
-      s"$aus5|$minorityPopulationPercent|$ffiecMedFamIncome|$medianIncomePercentage|" +
-      s"$ownerOccupiedUnits|$oneToFourFamUnits|$medianAge"
+    s"${extractOpt(aus5)}|" +
+      s"${extractOpt(denialReason1)}|${extractOpt(denialReason2)}|${extractOpt(
+        denialReason3)}|${extractOpt(denialReason4)}|${extractOpt(population)}|" +
+      s"${extractOpt(aus5)}|${extractOpt(minorityPopulationPercent)}|${extractOpt(
+        ffiecMedFamIncome)}|${extractOpt(medianIncomePercentage)}|" +
+      s"${extractOpt(ownerOccupiedUnits)}|${extractOpt(oneToFourFamUnits)}|${extractOpt(medianAge)}"
   }
 
-  def toPublicCSV: String = {
-    s"$aus5," +
-      s"$denialReason1,$denialReason2,$denialReason3,$denialReason4,$population," +
-      s"$aus5,$minorityPopulationPercent,$ffiecMedFamIncome,$medianIncomePercentage," +
-      s"$ownerOccupiedUnits,$oneToFourFamUnits,$medianAge"
-  }
 }
 
 case class ModifiedLarPartSeven(tractToMsamd: Option[String] = Some(""),
@@ -220,10 +203,12 @@ case class ModifiedLarPartSeven(tractToMsamd: Option[String] = Some(""),
                                 msaMDName: Option[String] = Some(""),
                                 id: Int = 0,
                                 uniqId: Int = 0,
-                                createdAt: Timestamp) {
+                                createdAt: Timestamp)
+    extends ColumnDataFormatter {
 
   def toPrivatePSV: String = {
-    s"|$tractToMsamd|$medianAgeCalculated|$percentMedianMsaIncome|$msaMDName|$id"
+    s"|${extractOpt(tractToMsamd)}|${extractOpt(medianAgeCalculated)}|${extractOpt(
+      percentMedianMsaIncome)}|${extractOpt(msaMDName)}|$id"
   }
 }
 
@@ -252,11 +237,4 @@ case class ModifiedLarEntityImpl(mlarPartOne: ModifiedLarPartOne,
       mlarPartFive.toPublicPSV +
       mlarPartSix.toPublicPSV).replaceAll("(\r\n)|\r|\n", "")
 
-  def toPublicCSV: String =
-    (mlarPartOne.toPublicCSV +
-      mlarPartTwo.toPublicCSV +
-      mlarPartThree.toPublicCSV +
-      mlarPartFour.toPublicCSV +
-      mlarPartFive.toPublicCSV +
-      mlarPartSix.toPublicCSV).replaceAll("(\r\n)|\r|\n", "")
 }
