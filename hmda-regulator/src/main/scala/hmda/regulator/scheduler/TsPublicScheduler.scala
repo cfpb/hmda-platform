@@ -76,7 +76,7 @@ class TsPublicScheduler extends HmdaActor with RegulatorComponent2018 {
 
       val now = LocalDateTime.now().minusDays(1)
 
-      val fileNamePSV = "2018_ts_test.txt"
+      val fileNamePSV = "2018_ts.txt"
 
       val s3SinkCSV =
         S3.multipartUpload(bucket, s"$environment/ts/$fileNamePSV")

@@ -75,7 +75,7 @@ class LarPublicScheduler extends HmdaActor with RegulatorComponent2018 {
     case LarPublicScheduler2018 =>
       println("test timer public lar")
       val now = LocalDateTime.now().minusDays(1)
-      val fileNamePSV = "2018_lar_test.txt"
+      val fileNamePSV = "2018_lar.txt"
 
       val allResultsPublisher: DatabasePublisher[ModifiedLarEntityImpl] =
         mlarRepository2018.getAllLARs(bankFilterList)

@@ -89,7 +89,7 @@ class PanelPublicScheduler extends HmdaActor with RegulatorComponent2018 {
     val allResults: Future[Seq[InstitutionEntity]] =
       institutionRepository2018.findActiveFilers(bankFilterList)
     val now = LocalDateTime.now().minusDays(1)
-    val fileNamePSV = "2018_panel_test.txt"
+    val fileNamePSV = "2018_panel.txt"
 
     //PSV Sync
     val s3SinkPSV =
