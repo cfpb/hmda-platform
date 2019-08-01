@@ -15,7 +15,7 @@ service:
   targetPort: 9092
   name: http-inst-api
 
-currentYear: 2018
+currentYear: 2019
 
 kafka:
   institutionsGroup: institution-group
