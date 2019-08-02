@@ -315,7 +315,7 @@ trait RegulatorComponent2018 {
     def propertyValue = column[String]("property_value")
     def homeSecurityPolicy = column[Int]("home_security_policy")
     def landPropertyInterest = column[Int]("lan_property_interest")
-    def totalUnits = column[Int]("total_units")
+    def totalUnits = column[Int]("total_uits")
     def mfAffordable = column[String]("mf_affordable")
     def applicationSubmission = column[Int]("application_submission")
     def payable = column[Int]("payable")
