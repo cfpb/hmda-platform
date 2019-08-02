@@ -76,7 +76,7 @@ object AggregateProcessing {
         .option("upperBound", 99999)
         .option(
           "dbtable",
-          s"(select * from modifiedlar2018prod where filing_year = $year and state <> 'NA' and lei not in ('BANK1LEIFORTEST12345','BANK3LEIFORTEST12345','BANK4LEIFORTEST12345','999999LE3ZOZXUS7W648','28133080042813308004','B90YWS6AFX2LGWOXJ1LD')) as mlar"
+          s"(select * from modifiedlar2018prod where filing_year = $year and state <> 'NA' and county <> 'NA' and lei not in ('BANK1LEIFORTEST12345','BANK3LEIFORTEST12345','BANK4LEIFORTEST12345','999999LE3ZOZXUS7W648','28133080042813308004','B90YWS6AFX2LGWOXJ1LD')) as mlar"
         )
         .load()
         .withColumnRenamed("race_categorization", "race")
@@ -136,8 +136,9 @@ object AggregateProcessing {
       )
     }
 
-    def jsonFormationAggregateTable1(msaMd: Msa,
-                                     input: List[Data]): OutAggregate1 = {
+    def jsonFormationAggregateTable1(
+        msaMd: Msa,
+        input: List[AggregateData]): OutAggregate1 = {
       val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
 
       val tracts = input
@@ -182,8 +183,9 @@ object AggregateProcessing {
       )
     }
 
-    def jsonFormationAggregateTable2(msaMd: Msa,
-                                     input: List[Data]): OutAggregate2 = {
+    def jsonFormationAggregateTable2(
+        msaMd: Msa,
+        input: List[AggregateData]): OutAggregate2 = {
       val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
 
       val tracts = input
@@ -464,11 +466,7 @@ object AggregateProcessing {
         .groupBy(d => d.msa_md)
         .map {
           case (key, values) =>
-            val msaMd = Msa(
-              key.toString,
-              values.head.msa_md_name,
-              values.head.state,
-              Census.states.getOrElse(values.head.state, State("", "")).name)
+            val msaMd = Msa(key.toString, values.head.msa_md_name, "", "")
             jsonFormationAggregateTable1(msaMd, values)
         }
         .toList
@@ -479,11 +477,7 @@ object AggregateProcessing {
         .groupBy(d => d.msa_md)
         .map {
           case (key, values) =>
-            val msaMd = Msa(
-              key.toString,
-              values.head.msa_md_name,
-              values.head.state,
-              Census.states.getOrElse(values.head.state, State("", "")).name)
+            val msaMd = Msa(key.toString, values.head.msa_md_name, "", "")
             jsonFormationAggregateTable2(msaMd, values)
         }
         .toList

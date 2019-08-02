@@ -216,7 +216,7 @@ object DisclosureProcessing {
 
     def disclosuresTable1: List[OutDisclosure1] =
       BaseProcessing
-        .outputCollectionTable1(cachedRecordsDf, spark)
+        .outputCollectionTable1Disclosure(cachedRecordsDf, spark)
         .groupBy(d => d.msa_md)
         .map {
           case (key, values) =>
@@ -231,7 +231,7 @@ object DisclosureProcessing {
 
     def disclosuresTable2: List[OutDisclosure2] =
       BaseProcessing
-        .outputCollectionTable2(cachedRecordsDf, spark)
+        .outputCollectionTable2Disclosure(cachedRecordsDf, spark)
         .groupBy(d => d.msa_md)
         .map {
           case (key, values) =>
