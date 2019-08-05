@@ -29,10 +29,10 @@ SET default_with_oids = false;
 
 --
 -- TOC entry 282 (class 1259 OID 22057)
--- Name: modifiedlar2018; Type: TABLE; Schema: hmda_user; Owner: hmda_user
+-- Name: modifiedlar2019; Type: TABLE; Schema: hmda_user; Owner: hmda_user
 --
 
-CREATE TABLE hmda_user.modifiedlar2018 (
+CREATE TABLE hmda_user.modifiedlar2019 (
     id integer NOT NULL,
     lei character varying NOT NULL,
     loan_type integer,
@@ -125,7 +125,6 @@ CREATE TABLE hmda_user.modifiedlar2018 (
     owner_occupied_units character varying,
     one_to_four_fam_units character varying,
     msa_md integer,
-    loan_flag character varying,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     submission_id character varying,
     msa_md_name character varying,
@@ -137,21 +136,20 @@ CREATE TABLE hmda_user.modifiedlar2018 (
     race_categorization character varying,
     sex_categorization character varying,
     ethnicity_categorization character varying,
-    uniq_id integer NOT NULL,
     percent_median_msa_income character varying,
     dwelling_category character varying,
     loan_product_type character varying
 );
 
 
-ALTER TABLE hmda_user.modifiedlar2018 OWNER TO hmda_user;
+ALTER TABLE hmda_user.modifiedlar2019 OWNER TO hmda_user;
 
 --
 -- TOC entry 285 (class 1259 OID 25533)
--- Name: modifiedlar2018_uniq_id_seq; Type: SEQUENCE; Schema: hmda_user; Owner: hmda_user
+-- Name: modifiedlar2019_uniq_id_seq; Type: SEQUENCE; Schema: hmda_user; Owner: hmda_user
 --
 
-CREATE SEQUENCE hmda_user.modifiedlar2018_uniq_id_seq
+CREATE SEQUENCE hmda_user.modifiedlar2019_uniq_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -160,40 +158,40 @@ CREATE SEQUENCE hmda_user.modifiedlar2018_uniq_id_seq
     CACHE 1;
 
 
-ALTER TABLE hmda_user.modifiedlar2018_uniq_id_seq OWNER TO hmda_user;
+ALTER TABLE hmda_user.modifiedlar2019_uniq_id_seq OWNER TO hmda_user;
 
 --
 -- TOC entry 5570 (class 0 OID 0)
 -- Dependencies: 285
--- Name: modifiedlar2018_uniq_id_seq; Type: SEQUENCE OWNED BY; Schema: hmda_user; Owner: hmda_user
+-- Name: modifiedlar2019_uniq_id_seq; Type: SEQUENCE OWNED BY; Schema: hmda_user; Owner: hmda_user
 --
 
-ALTER SEQUENCE hmda_user.modifiedlar2018_uniq_id_seq OWNED BY hmda_user.modifiedlar2018.uniq_id;
+ALTER SEQUENCE hmda_user.modifiedlar2019_uniq_id_seq OWNED BY hmda_user.modifiedlar2019.uniq_id;
 
 
 --
 -- TOC entry 5433 (class 2604 OID 57438)
--- Name: modifiedlar2018 uniq_id; Type: DEFAULT; Schema: hmda_user; Owner: hmda_user
+-- Name: modifiedlar2019 uniq_id; Type: DEFAULT; Schema: hmda_user; Owner: hmda_user
 --
 
-ALTER TABLE ONLY hmda_user.modifiedlar2018 ALTER COLUMN uniq_id SET DEFAULT nextval('hmda_user.modifiedlar2018_uniq_id_seq'::regclass);
+ALTER TABLE ONLY hmda_user.modifiedlar2019 ALTER COLUMN uniq_id SET DEFAULT nextval('hmda_user.modifiedlar2019_uniq_id_seq'::regclass);
 
 
 --
 -- TOC entry 5436 (class 2606 OID 25537)
--- Name: modifiedlar2018 modifiedlar2018_pkey; Type: CONSTRAINT; Schema: hmda_user; Owner: hmda_user
+-- Name: modifiedlar2019 modifiedlar2019_pkey; Type: CONSTRAINT; Schema: hmda_user; Owner: hmda_user
 --
 
-ALTER TABLE ONLY hmda_user.modifiedlar2018
-    ADD CONSTRAINT modifiedlar2018_pkey PRIMARY KEY (uniq_id);
+ALTER TABLE ONLY hmda_user.modifiedlar2019
+    ADD CONSTRAINT modifiedlar2019_pkey PRIMARY KEY (uniq_id);
 
 
 --
 -- TOC entry 5434 (class 1259 OID 58733)
--- Name: modifiedlar2018_lei_idx; Type: INDEX; Schema: hmda_user; Owner: hmda_user
+-- Name: modifiedlar2019_lei_idx; Type: INDEX; Schema: hmda_user; Owner: hmda_user
 --
 
-CREATE INDEX modifiedlar2018_lei_idx ON hmda_user.modifiedlar2018 USING btree (lei);
+CREATE INDEX modifiedlar2019_lei_idx ON hmda_user.modifiedlar2019 USING btree (lei);
 
 
 -- Completed on 2019-06-05 11:44:50 EDT
