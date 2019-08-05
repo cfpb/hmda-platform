@@ -338,8 +338,9 @@ trait DataBrowserDirectives {
                loanProducts,
                totalUnits,
                ethnicities).flatten
-
-        innerRoute(filteredfields)
+        if (filteredfields.size > 2)
+          complete(BadRequest, TooManyFilterCriterias())
+        else innerRoute(filteredfields)
     }
   }
 

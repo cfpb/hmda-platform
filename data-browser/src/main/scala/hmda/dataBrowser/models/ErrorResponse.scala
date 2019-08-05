@@ -45,6 +45,12 @@ final case class ProvideYear(errorType: String = "provide-years",
                              message: String = "Provide years for Nationwide")
     extends ErrorResponse
 
+final case class TooManyFilterCriterias(
+    errorType: String = "provide-two-or-less-filter-criteria",
+    message: String =
+      "Provide two or less filter criterias to perform aggregations (eg. actions_taken, races, genders, etc.)")
+    extends ErrorResponse
+
 final case class NotEnoughFilterCriterias(
     errorType: String = "provide-atleast-one-filter-criteria",
     message: String =
