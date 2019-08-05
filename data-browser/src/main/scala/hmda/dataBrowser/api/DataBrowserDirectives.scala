@@ -107,7 +107,7 @@ trait DataBrowserDirectives {
       .flatMap { rawActionsTaken =>
         val name = "actions_taken"
         val dbName = "action_taken_type"
-        areAllOptionsSelected(rawActionsTaken)
+//        areAllOptionsSelected(rawActionsTaken)
         validateActionsTaken(rawActionsTaken) match {
           case Left(invalidActions) =>
             complete((BadRequest, InvalidActions(invalidActions)))
@@ -362,9 +362,9 @@ trait DataBrowserDirectives {
   def extractYearsAndMsaAndStateBrowserFields(
       innerRoute: List[QueryField] => Route): Route =
     (extractYears & extractMsaMds & extractStates) { (years, msaMds, states) =>
-      if (msaMds.nonEmpty && states.nonEmpty)
-        complete(BadRequest, OnlyStatesOrMsaMds)
-      if (years.nonEmpty)
+      if ((msaMds.nonEmpty && states.nonEmpty) || (msaMds.isEmpty && states.isEmpty))
+        complete(BadRequest, OnlyStatesOrMsaMds())
+      else if (years.nonEmpty)
         innerRoute(List(years, msaMds, states).flatten)
       else complete(BadRequest, ProvideYearAndStatesOrMsaMds())
     }
