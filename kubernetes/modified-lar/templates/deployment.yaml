@@ -128,13 +128,11 @@ spec:
             - name: KAFKA_LOG_LEVEL
               value: INFO
             - name: KAFKA_MODIFIED_LAR_TOPIC
-              value: .Values.kafka.modifiedLarTopic
+              value: {{.Values.kafka.modifiedLarTopic}}
             - name: KAFKA_SIGN_TOPIC
-              value: .Values.kafka.signTopic
+              value: {{.Values.kafka.signTopic}}
             - name: KAFKA_MODIFIED_LAR_GROUP
-              value: .Values.kafka.modifiedLarGroup
-            - name: KAFKA_SIGN_GROUP
-              value: .Values.kafka.signGroup
+              value: {{.Values.kafka.modifiedLarGroup}}
             - name: IS_GENERATE_MLAR_S3_FIES
               valueFrom:
                 configMapKeyRef:

@@ -32,13 +32,11 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: KAFKA_ANALYTICS_TOPIC
-              value: .Values.kafka.analyticsTopic
+              value: {{.Values.kafka.analyticsTopic}}
             - name: KAFKA_SIGN_TOPIC
-              value: .Values.kafka.signTopic
+              value: {{.Values.kafka.signTopic}}
             - name: KAFKA_ANALYTICS_GROUP
-              value: .Values.kafka.analyticsGroup
-            - name: KAFKA_SIGN_GROUP
-              value: .Values.kafka.signGroup
+              value: {{.Values.kafka.analyticsGroup}}
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:
