@@ -31,9 +31,15 @@ final case class InvalidStates(
       s"valid states are ${State.values.map(_.entryName).mkString(", ")}")
     extends ErrorResponse
 
+final case class OnlyStatesOrMsaMds(
+      errorType: String = "provide-only-msamds-or-states",
+      message: String = "Provide only states or msamds but not both")
+  extends ErrorResponse
+
+
 final case class ProvideYearAndStatesOrMsaMds(
     errorType: String = "provide-atleast-msamds-or-states",
-    message: String = "Provide year and either states or msamds or both")
+    message: String = "Provide year and either states or msamds (but not both) ")
     extends ErrorResponse
 
 final case class NoMandatoryFieldsInCount(
