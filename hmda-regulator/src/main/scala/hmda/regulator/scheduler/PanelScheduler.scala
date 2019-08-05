@@ -60,7 +60,7 @@ class PanelScheduler
   val accessKeyId = awsConfig.getString("access-key-id")
   val secretAccess = awsConfig.getString("secret-access-key ")
   val region = awsConfig.getString("region")
-  val bucket = awsConfig.getString("public-bucket")
+  val bucket = awsConfig.getString("private-s3-bucket")
   val environment = awsConfig.getString("environment")
   val year = awsConfig.getString("year")
 
@@ -99,11 +99,11 @@ class PanelScheduler
   override def receive: Receive = {
     case PanelScheduler2018 =>
       println("Panel test 2018")
-    // panelSync2018
+    panelSync2018
 
     case PanelScheduler2019 =>
       println("Panel test 2019")
-    // panelSync2019
+    panelSync2019
 
   }
 

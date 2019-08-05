@@ -1,6 +1,10 @@
 package hmda.util.conversion
 
-final case object ColumnDataFormatter {
+trait ColumnDataFormatter {
+
+  def extractOpt(option: Option[Any]): Any = {
+    option.getOrElse("")
+  }
 
   def controlCharacterFilter(value: String): String = {
     if (!value.isEmpty) {

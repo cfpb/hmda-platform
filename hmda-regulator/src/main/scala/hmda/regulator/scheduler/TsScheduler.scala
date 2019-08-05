@@ -6,13 +6,9 @@ import java.time.format.DateTimeFormatter
 import akka.NotUsed
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
+import akka.stream.alpakka.s3._
+import akka.stream.scaladsl._
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{
-  MemoryBufferType,
-  MultipartUploadResult,
-  S3Attributes,
-  S3Settings
-}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
@@ -49,7 +45,7 @@ class TsScheduler
   val accessKeyId = awsConfig.getString("access-key-id")
   val secretAccess = awsConfig.getString("secret-access-key ")
   val region = awsConfig.getString("region")
-  val bucket = awsConfig.getString("public-bucket")
+  val bucket = awsConfig.getString("private-s3-bucket")
   val environment = awsConfig.getString("environment")
   val year = awsConfig.getString("year")
   val bankFilter =
