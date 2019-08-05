@@ -72,7 +72,9 @@ volumes: [
           sh """
             helm upgrade --install --force --namespace=default \
             --values=kubernetes/hmda-data-browser-api/values-dev.yaml \
-            --set image.tag=latest \
+            --set image.repository=${DOCKER_REGISTRY_URL}/hmda/hmda-data-browser-api \
+            --set commitId=$shortCommit \
+            --set image.tag=${env.DOCKER_TAG} \
             --set image.pullPolicy=Always \
             hmda-data-browser-api \
             kubernetes/hmda-data-browser-api

@@ -98,6 +98,16 @@ spec:
                   key: s3-public-bucket
             - name: S3_URL
               value: {{.Values.databrowser.s3Url}}
+            - name: COMMIT_ID
+              value: {{ .Values.image.commitId }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.databrowser.port }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.databrowser.port }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
