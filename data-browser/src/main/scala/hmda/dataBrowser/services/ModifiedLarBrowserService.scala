@@ -25,9 +25,9 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository,
   def permuteQueryFields(input: List[QueryField]): List[List[QueryField]] = {
     val singleElementBrowserFields: List[List[QueryField]] =
       input.map {
-        case QueryField(name, values, dbName) =>
+        case QueryField(name, values, dbName, isAllSelected) =>
           values
-            .map(value => QueryField(name, value :: Nil, dbName))
+            .map(value => QueryField(name, value :: Nil, dbName, isAllSelected))
             .toList
       }
     generateCombinations(singleElementBrowserFields)

@@ -1,3 +1,6 @@
 package hmda.dataBrowser.models
 
-case class QueryField(name: String, values: Seq[String], dbName: String)
+case class QueryField(name: String = "",
+                      values: Seq[String] = List.empty,
+                      dbName: String = "",
+                      isAllSelected: Boolean = false)

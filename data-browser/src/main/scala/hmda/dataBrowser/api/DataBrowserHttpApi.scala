@@ -87,11 +87,15 @@ trait DataBrowserHttpApi extends Settings {
               contentDisposition(queryFields) {
                 (path(Csv) & get) {
                   extractNationwideMandatoryYears { mandatoryFields =>
-                    val allFields = queryFields ++ mandatoryFields
+                    //remove filters that have all options selected
+                    val allFields = (queryFields ++ mandatoryFields).filterNot {
+                      eachQueryField =>
+                        eachQueryField.isAllSelected
+                    }
                     log.info("Nationwide [CSV]: " + allFields)
-                    if (queryFields.isEmpty)
+                    if (allFields.size == 1 && allFields.head.name == "year") {
                       redirect(Uri(S3Routes.nationwideCsv), Found)
-                    else
+                    } else
                       complete(
                         HttpEntity(
                           `text/plain(UTF-8)`,
@@ -105,10 +109,14 @@ trait DataBrowserHttpApi extends Settings {
                 // GET /view/nationwide/pipe
                 (path(Pipe) & get) {
                   extractNationwideMandatoryYears { mandatoryFields =>
-                    val allFields = queryFields ++ mandatoryFields
+                    //remove filters that have all options selected
+                    val allFields = (queryFields ++ mandatoryFields).filterNot {
+                      eachQueryField =>
+                        eachQueryField.isAllSelected
+                    }
                     log.info("Nationwide [Pipe]: " + allFields)
                     contentDisposition(queryFields) {
-                      if (queryFields.isEmpty)
+                      if (allFields.size == 1 && allFields.head.name == "year")
                         redirect(Uri(S3Routes.nationwidePipe), Found)
                       else
                         complete(
@@ -184,4 +192,5 @@ trait DataBrowserHttpApi extends Settings {
           }
       }
     }
+
 }
