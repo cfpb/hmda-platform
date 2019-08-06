@@ -58,15 +58,15 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Status code is 404\",function () {",
-              "      pm.response.to.have.status(404);",
+              "pm.test(\"Status code is 200\",function () {",
+              "      pm.response.to.have.status(200);",
               "});",
               ""            ]
           }
         }
       ],
       "request": {
-        "url": "http://{{host-data-browser-api}}",
+        "url": "{{db-api}}",
         "method": "GET",
         "header": [
           {
@@ -104,7 +104,7 @@
         }
       ],
       "request": {
-        "url":  "http://{{host-data-browser-api}}/view/aggregations?{{test-data-1}}",
+        "url":  "{{db-api}}/view/aggregations?{{test-data-1}}",
         "method": "GET",
         "header": [
           {
@@ -133,7 +133,7 @@
         }
       ],
       "request": {
-        "url": "http://{{host-data-browser-api}}/view/csv?{{test-data-2}}",
+        "url": "{{db-api}}/view/csv?{{test-data-2}}",
         "method": "GET",
         "header": [
           {
@@ -162,7 +162,7 @@
         }
       ],
       "request": {
-        "url": "http://{{host-data-browser-api}}/view/pipe?{{test-data-3}}",
+        "url": "{{db-api}}/view/pipe?{{test-data-3}}",
         "method": "GET",
         "header": [
           {
@@ -172,102 +172,6 @@
         ],
         "body": {},
         "description": "Data Browser PIPE Check"
-      },
-      "response": []
-    },
-    {
-      "name": "Data Browser Nationwide Aggregation End Point Check",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status code is 200\",function () {",
-              "      pm.response.to.have.status(200);",
-              "});",
-              "",
-              "pm.test(\"GET Aggregation\", function () {",
-              "let actualResponse = pm.response.json()",
-              "let testData = pm.iterationData.get(\"testData\")",
-              "let testDataChunk = testData[testNumber-1]",
-							"console.log('Full response: ' + JSON.stringify(actualResponse))",
-              "console.log(JSON.stringify(actualResponse['parameters']))",
-							"console.log(JSON.stringify(testDataChunk.expectedResponse))",
-              "pm.expect(actualResponse['parameters']).to.eql(testDataChunk.expectedResponse)",
-              "});"            ]
-          }
-        }
-      ],
-      "request": {
-        "url": "http://{{host-data-browser-api}}/view/nationwide/aggregations?{{test-data-4}}",
-        "method": "GET",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {},
-        "description": "Data Browser Nationwide Aggregation Check"
-      },
-      "response": []
-    },
-    {
-      "name": "Data Browser Nationwide CSV End Point Check",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status code is 200\",function () {",
-              "      pm.response.to.have.status(200);",
-              "});",
-              ""            ]
-          }
-        }
-      ],
-      "request": {
-        "url": "http://{{host-data-browser-api}}/view/nationwide/csv?{{test-data-5}}",
-        "method": "GET",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {},
-        "description": "Data Browser Nationwide CSV Check"
-      },
-      "response": []
-    },
-    {
-      "name": "Data Browser Nationwide PIPE End Point Check",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status code is 200\",function () {",
-              "      pm.response.to.have.status(200);",
-              "});",
-              ""            ]
-          }
-        }
-      ],
-      "request": {
-        "url": "http://{{host-data-browser-api}}/view/nationwide/pipe?{{test-data-6}}",
-        "method": "GET",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {},
-        "description": "Data Browser Nationwide Aggregation Check"
       },
       "response": []
     },
@@ -288,7 +192,7 @@
         }
       ],
       "request": {
-        "url": "http://{{host-data-browser-api}}/view/aggregations?&years={{test-years}}",
+        "url": "{{db-api}}/view/aggregations?&years={{test-years}}",
         "method": "GET",
         "header": [
           {
@@ -317,7 +221,7 @@
         }
       ],
       "request": {
-        "url": "http://{{host-data-browser-api}}/view/csv?states=CA",
+        "url": "{{db-api}}/view/csv?states=CA",
         "method": "GET",
         "header": [
           {
@@ -354,7 +258,7 @@
         }
       ],
       "request": {
-        "url": "http://{{host-data-browser-api}}/view/pipe",
+        "url": "{{db-api}}/view/pipe",
         "method": "GET",
         "header": [
           {
@@ -391,7 +295,7 @@
         }
       ],
       "request": {
-        "url": "http://{{host-data-browser-api}}/view/csv",
+        "url": "{{db-api}}/view/csv",
         "method": "GET",
         "header": [
           {
@@ -428,44 +332,7 @@
         }
       ],
       "request": {
-        "url": "http://{{host-data-browser-api}}/view/aggregations?&{{test-data-7}}",
-        "method": "GET",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {},
-        "description": "[ERROR TEST] Data Browser Aggregation Check - No filters"
-      },
-      "response": []
-    },
-    {
-      "name": "[ERROR TEST] Data Browser Nationwide Aggregation End Point Check - No filters",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status code is 400\",function () {",
-              "      pm.response.to.have.status(400);",
-              "});",
-              "" ,
-              "pm.test(\"GET Aggregation Test\", function () {",
-              "let actualResponse = pm.response.json()",
-              "let testData = pm.iterationData.get(\"testData\")",
-              "let testDataChunk = testData[testNumber-1]",
-              "console.log(JSON.stringify(actualResponse))",
-              "console.log(JSON.stringify(testDataChunk.expectedResponse))",
-              "pm.expect(actualResponse).to.eql(testDataChunk.expectedResponse)",
-              "});"          ]
-          }
-        }
-      ],
-      "request": {
-        "url": "http://{{host-data-browser-api}}/view/nationwide/aggregations?&{{test-data-7}}",
+        "url": "{{db-api}}/view/aggregations?&{{test-data-4}}",
         "method": "GET",
         "header": [
           {
@@ -478,6 +345,5 @@
       },
       "response": []
     }
-
   ]
 }
