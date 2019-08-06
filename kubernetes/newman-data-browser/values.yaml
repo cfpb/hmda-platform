@@ -1,0 +1,29 @@
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+jobs:
+  # data browser integration tests
+  - name: newmen-data-browser
+    image:
+      repository: patrickhshi/newman-dev
+      tag: test
+      imagePullPolicy: Always
+    # optional env vars
+    env:
+    - name: HOST_DATA_BROWSER
+      value:
+    schedule: "*/5 * * * *"
+    command: ["/bin/sh"]
+    args:
+      -  "-c"
+      - NODE_OPTIONS="--max_old_space_size=4096" ./node_modules/.bin/newman run data-browser/data-browser-api-test.json -d data-browser/data-browser-api-config.json --env-var db-api=$HOST_DATA_BROWSER  --timeout-script 500000
+    resources:
+      limits:
+        cpu: 50m
+        memory: 4096Mi
+      requests:
+        cpu: 50m
+        memory: 4096Mi
+    failedJobsHistoryLimit: 1
+    successfulJobsHistoryLimit: 3
+    concurrencyPolicy: Forbid
+    restartPolicy: Never
