@@ -5,7 +5,7 @@ jobs:
   - name: newmen-data-browser
     image:
       repository: patrickhshi/newman-dev
-      tag: test
+      tag: data-browser
       imagePullPolicy: Always
     # optional env vars
     env:
@@ -15,14 +15,14 @@ jobs:
     command: ["/bin/sh"]
     args:
       -  "-c"
-      - NODE_OPTIONS="--max_old_space_size=4096" ./node_modules/.bin/newman run data-browser/data-browser-api-test.json -d data-browser/data-browser-api-config.json --env-var db-api=$HOST_DATA_BROWSER  --timeout-script 500000
+      - NODE_OPTIONS="--max_old_space_size=2048" ./node_modules/.bin/newman run data-browser/data-browser-api-test.json -d data-browser/data-browser-api-config.json --env-var db-api=$HOST_DATA_BROWSER  --timeout-script 500000
     resources:
       limits:
         cpu: 50m
-        memory: 4096Mi
+        memory: 2048Mi
       requests:
         cpu: 50m
-        memory: 4096Mi
+        memory: 2048Mi
     failedJobsHistoryLimit: 1
     successfulJobsHistoryLimit: 3
     concurrencyPolicy: Forbid

@@ -2,8 +2,8 @@
   {
     "test-data-1": "years=2018&states=NY&actions_taken=5,6",
     "test-data-2": "years=2018&states=AK&ethnicity=Not%20Hispanic%20or%20Latino",
-    "test-data-3": "years=2018&msamds=34980&lien_statuses=1",
-    "test-data-4": "years=2017,2018&states=CA,DC",
+    "test-data-3": "years=2018&msamds=11640&lien_statuses=1",
+    "test-data-4": "years=2018&states=AK",
 
 
 
@@ -47,16 +47,14 @@
         "testName": "data browser pipe end point check, no year, state or msamd",
         "testNumber": 6,
         "expectedResponse": {
-            "errorType": "provide-atleast-msamds-or-states",
-            "message": "Provide year and either states or msamds or both"
+          "errorType":"provide-only-msamds-or-states","message":"Provide only states or msamds but not both"
         }
       },
       {
         "testName": "data browser pipe end point check, no year, state or msamd",
         "testNumber": 7,
         "expectedResponse": {
-            "errorType": "provide-atleast-msamds-or-states",
-            "message": "Provide year and either states or msamds or both"
+          "errorType":"provide-only-msamds-or-states","message":"Provide only states or msamds but not both"
         }
       },
       {
