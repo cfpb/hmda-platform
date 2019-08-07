@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hmda-redis-claim
+  namespace: beta
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ebs-gp2
+  resources:
+    requests:
+      storage: 10Gi
