@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-ambassador
+  namespace: jenkins-system
+  annotations:
+    getambassador.io/config: |
+      apiVersion: ambassador/v0
+      kind: Mapping
+      name: jenkins_mapping
+      ambassador_id: ambassador-jenkins-3
+      method: GET
+      prefix: /
+      service: jenkins.jenkins-system:80
+spec:
+  selector:
+    app: jenkins-ambassador
+  ports:
+    - protocol: TCP
+      port: 80
