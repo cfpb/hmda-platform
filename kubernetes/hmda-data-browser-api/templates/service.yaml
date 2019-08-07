@@ -28,8 +28,14 @@ metadata:
       prefix: /v2/data-browser-api/
       service: {{ .Values.service.name }}:{{ .Values.databrowser.port }}
       timeout_ms: 3800000
+      idle_timeout_ms: 3800000
+      connect_timeout_ms: 3800000
       rate_limits:
         - descriptor: hmda-reporting
+      retry_policy:
+        retry_on: "5xx"
+        num_retries: 20
+
 spec:
   clusterIP: None  
   ports:
