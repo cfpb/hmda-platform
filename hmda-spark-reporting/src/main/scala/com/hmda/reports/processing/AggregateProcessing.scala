@@ -76,7 +76,7 @@ object AggregateProcessing {
         .option("upperBound", 99999)
         .option(
           "dbtable",
-          s"(select * from modifiedlar2018prod where filing_year = $year and lei not in ('BANK1LEIFORTEST12345','BANK3LEIFORTEST12345','BANK4LEIFORTEST12345','999999LE3ZOZXUS7W648','28133080042813308004','B90YWS6AFX2LGWOXJ1LD')) as mlar"
+          s"(select * from modifiedlar2018_snapshot where filing_year = $year and lei not in ('BANK1LEIFORTEST12345','BANK3LEIFORTEST12345','BANK4LEIFORTEST12345','999999LE3ZOZXUS7W648','28133080042813308004','B90YWS6AFX2LGWOXJ1LD')) as mlar"
         )
         .load()
         .withColumnRenamed("race_categorization", "race")
@@ -91,7 +91,7 @@ object AggregateProcessing {
         .option("url", jdbcUrl)
         .option(
           "dbtable",
-          s"(select lei as institution_lei, respondent_name from institutions2018 where hmda_filer = true) as institutions2018")
+          s"(select lei as institution_lei, respondent_name from institutions2018 where hmda_filer = true) as institutions2018_snapshot")
         .load()
         .cache()
 
@@ -390,9 +390,9 @@ object AggregateProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(
-            s"$bucket/reports/aggregate/$year/${input.msa.id}/1.json",
+            s"$bucket/reports/aggregate/2018_for_publication/${input.msa.id}/1.json",
             data,
-            "cfpb-hmda-public",
+            "cfpb-hmda-export",
             s3Settings)(mat, ec)
         }
         .runWith(Sink.ignore)
@@ -402,7 +402,7 @@ object AggregateProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(
-            s"$bucket/reports/aggregate/$year/${input.msa.id}/2.json",
+            s"$bucket/reports/aggregate/2018_for_publication/${input.msa.id}/2.json",
             data,
             "cfpb-hmda-public",
             s3Settings)(mat, ec)
@@ -414,7 +414,7 @@ object AggregateProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(
-            s"$bucket/reports/aggregate/$year/${input.msa.id}/9.json",
+            s"$bucket/reports/aggregate/2018_for_publication/${input.msa.id}/9.json",
             data,
             "cfpb-hmda-public",
             s3Settings)(mat, ec)
@@ -426,7 +426,7 @@ object AggregateProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(
-            s"$bucket/reports/aggregate/2018/${input.msa.id}/i.json",
+            s"$bucket/reports/aggregate/2018_for_publication/${input.msa.id}/i.json",
             data,
             "cfpb-hmda-public",
             s3Settings)(mat, ec)
@@ -439,7 +439,7 @@ object AggregateProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(
-            s"dev/reports/aggregate/2018/${input.msa.id}/4.json",
+            s"prod/reports/aggregate/2018_for_publication/${input.msa.id}/4.json",
             data,
             "cfpb-hmda-public",
             s3Settings)(mat, ec)
@@ -451,7 +451,7 @@ object AggregateProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(
-            s"dev/reports/aggregate/2018/${input.msa.id}/3.json",
+            s"prod/reports/aggregate/2018/${input.msa.id}/3.json",
             data,
             "cfpb-hmda-public",
             s3Settings)(mat, ec)
@@ -545,9 +545,9 @@ object AggregateProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(
-            s"$bucket/reports/aggregate/2018/${input.msa.id}/5.json",
+            s"$bucket/reports/aggregate/2018_for_publication/${input.msa.id}/5.json",
             data,
-            "cfpb-hmda-public",
+            "cfpb-hmda-export",
             s3Settings)(mat, ec)
         }
         .runWith(Sink.ignore)

@@ -42,7 +42,7 @@ object AggregateReports {
     val JDBC_URL = sys.env("JDBC_URL").trim()
     val AWS_ACCESS_KEY = sys.env("ACCESS_KEY").trim()
     val AWS_SECRET_KEY = sys.env("SECRET_KEY").trim()
-    val AWS_BUCKET = sys.env("AWS_ENV").trim()
+    val AWS_BUCKET = "prod"
 
     val awsCredentialsProvider = new AWSStaticCredentialsProvider(
       new BasicAWSCredentials(AWS_ACCESS_KEY, AWS_SECRET_KEY))
