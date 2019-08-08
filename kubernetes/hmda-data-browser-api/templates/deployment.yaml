@@ -77,13 +77,13 @@ spec:
                   name: aws-credentials
                   key: aws-access-key-id
             - name: BROWSER_LOG_LEVEL
-              value: {{.Values.databrowser.loglevel}}
+              value: DEBUG
             - name: ROUTE_NATIONWIDE_CSV
               value: {{.Values.databrowser.nationwideRouteCSV}}
             - name: ROUTE_NATIONWIDE_PIPE
               value: {{.Values.databrowser.nationwideRoutePipe}}
             - name: DATABROWSER_PG_TABLE
-              value: {{.Values.databrowser.table}}
+              value: modifiedlar2018prod
             - name: REDIS_HOSTNAME
               value: {{.Values.databrowser.redis}}
             - name: AWS_ENVIRONMENT
