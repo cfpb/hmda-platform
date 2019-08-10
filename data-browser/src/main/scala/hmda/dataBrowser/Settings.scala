@@ -39,7 +39,7 @@ trait Settings {
       "server.s3.routes.nationwide-csv")
     val nationwidePipe: String = url + config.getString(
       "server.s3.routes.nationwide-pipe")
-    val filteredQueries: String = url + config.getString(
-      "server.s3.routes.queries")
+    val filteredQueries: String =
+      config.getString("server.s3.routes.filtered-queries")
   }
 }

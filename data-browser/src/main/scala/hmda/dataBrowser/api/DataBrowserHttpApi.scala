@@ -1,28 +1,32 @@
 package hmda.dataBrowser.api
 
-import akka.http.scaladsl.model.ContentTypes._
-import akka.http.scaladsl.model.StatusCodes.Found
-import akka.http.scaladsl.model.{HttpEntity, Uri}
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.directives.RouteDirectives.complete
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.dataBrowser.models._
-import hmda.dataBrowser.api.DataBrowserDirectives._
-import hmda.dataBrowser.services.ModifiedLarBrowserService
-import io.circe.generic.auto._
-import monix.execution.Scheduler.Implicits.global
 import akka.event.LoggingAdapter
-import hmda.dataBrowser.repositories.RedisModifiedLarAggregateCache
-import hmda.dataBrowser.repositories.ModifiedLarAggregateCache
-import hmda.dataBrowser.repositories.ModifiedLarRepository
-import hmda.dataBrowser.repositories.PostgresModifiedLarRepository
+import akka.http.scaladsl.model.ContentTypes._
+import akka.http.scaladsl.model.{HttpEntity, StatusCodes, Uri}
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.directives.RouteDirectives.complete
+import akka.stream.ActorMaterializer
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import hmda.dataBrowser.Settings
+import hmda.dataBrowser.api.DataBrowserDirectives._
+import hmda.dataBrowser.models._
+import hmda.dataBrowser.repositories.{
+  ModifiedLarAggregateCache,
+  ModifiedLarRepository,
+  PostgresModifiedLarRepository,
+  RedisModifiedLarAggregateCache
+}
+import hmda.dataBrowser.services._
+import io.circe.generic.auto._
 import io.lettuce.core.api.async.RedisAsyncCommands
 import io.lettuce.core.{ClientOptions, RedisClient}
-import hmda.dataBrowser.Settings
 import monix.eval.Task
+import monix.execution.Scheduler.Implicits.global
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
-import hmda.dataBrowser.services.BrowserService
+
+import scala.util.{Failure, Success}
 
 trait DataBrowserHttpApi extends Settings {
 
@@ -30,6 +34,7 @@ trait DataBrowserHttpApi extends Settings {
   val Pipe = "pipe"
   val Aggregations = "aggregations"
   val log: LoggingAdapter
+  implicit val materializer: ActorMaterializer
 
   val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
   val repository: ModifiedLarRepository =
@@ -61,21 +66,41 @@ trait DataBrowserHttpApi extends Settings {
   val cache: ModifiedLarAggregateCache =
     new RedisModifiedLarAggregateCache(redisClientTask, redis.ttl)
 
-  val service: BrowserService =
+  val query: QueryService =
     new ModifiedLarBrowserService(repository, cache)
 
-  val dataBrowserRoutes =
+  val fileCache: FileService = new S3FileService
+
+  def serveData(queries: List[QueryField],
+                delimiter: Delimiter,
+                errorMessage: String): Route =
+    onComplete(
+      obtainDataSource(fileCache, query)(queries, delimiter).runToFuture) {
+      case Failure(ex) =>
+        log.error(ex, errorMessage)
+        complete(StatusCodes.InternalServerError)
+
+      case Success(Left(byteSource)) =>
+        complete(
+          HttpEntity(`text/plain(UTF-8)`, byteSource)
+        )
+
+      case Success(Right(url)) =>
+        redirect(Uri(url), StatusCodes.PermanentRedirect)
+    }
+
+  val dataBrowserRoutes: Route =
     encodeResponse {
       pathPrefix("view") {
         pathPrefix("count") {
           extractCountFields { countFields =>
             log.info("Counts: " + countFields)
             complete(
-              service
+              query
                 .fetchAggregate(countFields)
                 .map(aggs =>
                   AggregationResponse(Parameters.fromBrowserFields(countFields),
-                    aggs))
+                                      aggs))
                 .runToFuture
             )
           }
@@ -83,7 +108,7 @@ trait DataBrowserHttpApi extends Settings {
           pathPrefix("nationwide") {
             extractFieldsForRawQueries { queryFields =>
               // GET /view/nationwide/csv
-              contentDisposition(queryFields) {
+              contentDispositionHeader(queryFields, Commas) {
                 (path(Csv) & get) {
                   extractNationwideMandatoryYears { mandatoryFields =>
                     //remove filters that have all options selected
@@ -91,18 +116,11 @@ trait DataBrowserHttpApi extends Settings {
                       eachQueryField =>
                         eachQueryField.isAllSelected
                     }
-                    log.info("Nationwide [CSV]: " + allFields)
-                    if (allFields.size == 1 && allFields.head.name == "year") {
-                      redirect(Uri(s3.nationwideCsv), Found)
-                    } else
-                      complete(
-                        HttpEntity(
-                          `text/plain(UTF-8)`,
-                          csvSource(service.fetchData(queryFields))
-                        )
-                      )
+                    serveData(
+                      allFields,
+                      Commas,
+                      s"Failed to perform nationwide CSV query with the following queries: $allFields")
                   }
-
                 }
               } ~
                 // GET /view/nationwide/pipe
@@ -114,16 +132,11 @@ trait DataBrowserHttpApi extends Settings {
                         eachQueryField.isAllSelected
                     }
                     log.info("Nationwide [Pipe]: " + allFields)
-                    contentDisposition(queryFields) {
-                      if (allFields.size == 1 && allFields.head.name == "year")
-                        redirect(Uri(s3.nationwidePipe), Found)
-                      else
-                        complete(
-                          HttpEntity(
-                            `text/plain(UTF-8)`,
-                            pipeSource(service.fetchData(queryFields))
-                          )
-                        )
+                    contentDispositionHeader(allFields, Pipes) {
+                      serveData(
+                        allFields,
+                        Pipes,
+                        s"Failed to perform nationwide PSV query with the following queries: $allFields")
                     }
                   }
 
@@ -135,7 +148,7 @@ trait DataBrowserHttpApi extends Settings {
                   val allFields = queryFields
                   log.info("Nationwide [Aggregations]: " + allFields)
                   complete(
-                    service
+                    query
                       .fetchAggregate(allFields)
                       .map(aggs =>
                         AggregationResponse(
@@ -152,7 +165,7 @@ trait DataBrowserHttpApi extends Settings {
                 val allFields = mandatoryFields ++ remainingQueryFields
                 log.info("Aggregations: " + allFields)
                 complete(
-                  service
+                  query
                     .fetchAggregate(allFields)
                     .map(aggs =>
                       AggregationResponse(
@@ -169,9 +182,11 @@ trait DataBrowserHttpApi extends Settings {
               extractFieldsForRawQueries { remainingQueryFields =>
                 val allFields = mandatoryFields ++ remainingQueryFields
                 log.info("CSV: " + allFields)
-                contentDisposition(allFields) {
-                  complete(HttpEntity(`text/plain(UTF-8)`,
-                    csvSource(service.fetchData(allFields))))
+                contentDispositionHeader(allFields, Commas) {
+                  serveData(
+                    allFields,
+                    Commas,
+                    s"Failed to fetch data for /view/csv with the following queries: $allFields")
                 }
               }
             }
@@ -182,9 +197,11 @@ trait DataBrowserHttpApi extends Settings {
               extractFieldsForRawQueries { remainingQueryFields =>
                 val allFields = mandatoryFields ++ remainingQueryFields
                 log.info("CSV: " + allFields)
-                contentDisposition(allFields) {
-                  complete(HttpEntity(`text/plain(UTF-8)`,
-                    pipeSource(service.fetchData(allFields))))
+                contentDispositionHeader(allFields, Pipes) {
+                  serveData(
+                    allFields,
+                    Commas,
+                    s"Failed to fetch data for /view/pipe with the following queries: $allFields")
                 }
               }
             }

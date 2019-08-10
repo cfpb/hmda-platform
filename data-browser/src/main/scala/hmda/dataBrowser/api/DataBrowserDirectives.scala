@@ -28,11 +28,54 @@ import hmda.dataBrowser.models.Sex._
 import hmda.dataBrowser.models.State._
 import hmda.dataBrowser.models.TotalUnits._
 import hmda.dataBrowser.models._
+import Delimiter.fileEnding
+import hmda.dataBrowser.services._
 import io.circe.generic.auto._
+import monix.eval.Task
 
 trait DataBrowserDirectives {
   private implicit val csvStreamingSupport: CsvEntityStreamingSupport =
     EntityStreamingSupport.csv()
+
+  /**
+    * This is an effectful function that calls out to S3 to check if data is cached or runs a query against the
+    * SQL database and then persists the data in S3
+    *
+    * The Left part of the Either indicates that the data isn't in S3 so this is a cache miss
+    * The Right part of the Either indicates a cache hit so the data is present in S3
+    *
+    *
+    * @param cache the file service responsible for caching raw data
+    * @param db the query service responsible for fetching raw data from the database
+    * @param queries a list of query parameters
+    * @param delimiter either commas or pipes
+    * @return
+    */
+  def obtainDataSource(cache: FileService, db: QueryService)(
+      queries: List[QueryField],
+      delimiter: Delimiter)
+    : Task[Either[Source[ByteString, NotUsed], String]] = {
+    val serializedData: Source[ByteString, NotUsed] = {
+      val databaseData: Source[ModifiedLarEntity, NotUsed] =
+        db.fetchData(queries)
+      delimiter match {
+        case Commas => csvSource(databaseData)
+        case Pipes  => pipeSource(databaseData)
+      }
+    }
+
+    cache
+      .retrieveDataUrl(queries, delimiter)
+      .flatMap {
+        case Some(url) =>
+          Task.now(Right(url))
+        case None =>
+          cache
+            .persistData(queries, delimiter, serializedData)
+            .map(_ => Left(serializedData))
+      }
+      .onErrorFallbackTo(Task.now(Left(serializedData)))
+  }
 
   def csvSource(
       s: Source[ModifiedLarEntity, NotUsed]): Source[ByteString, NotUsed] = {
@@ -44,12 +87,14 @@ trait DataBrowserDirectives {
       .via(csvStreamingSupport.framingRenderer)
   }
 
-  def contentDisposition(queries: List[QueryField])(route: Route): Route = {
+  def contentDispositionHeader(queries: List[QueryField], delimiter: Delimiter)(
+      route: Route): Route = {
     val filename =
       queries.map(q => q.name + "_" + q.values.mkString("-")).mkString("_")
     respondWithHeader(
-      `Content-Disposition`(attachment,
-                            Map("filename" -> (filename + ".csv"))))(route)
+      `Content-Disposition`(
+        attachment,
+        Map("filename" -> (filename + fileEnding(delimiter)))))(route)
   }
 
   def pipeSource(
