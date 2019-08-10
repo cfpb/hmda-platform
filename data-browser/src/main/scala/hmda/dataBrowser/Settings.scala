@@ -32,14 +32,21 @@ trait Settings {
   object s3 {
     val environment: String = config.getString("server.s3.environment")
     val bucket: String = config.getString("server.s3.public-bucket")
-    val url: String = config.getString("server.s3.url") + config.getString(
-      "server.s3.public-bucket") + "/" + config
-      .getString("server.s3.environment") + "/"
-    val nationwideCsv: String = url + config.getString(
-      "server.s3.routes.nationwide-csv")
-    val nationwidePipe: String = url + config.getString(
-      "server.s3.routes.nationwide-pipe")
+    val url: String = config.getString("server.s3.url")
     val filteredQueries: String =
       config.getString("server.s3.routes.filtered-queries")
   }
+//  object s3 {
+//    val environment: String = config.getString("server.s3.environment")
+//    val bucket: String = config.getString("server.s3.public-bucket")
+//    val url: String = config.getString("server.s3.url") + config.getString(
+//      "server.s3.public-bucket") + "/" + config
+//      .getString("server.s3.environment") + "/"
+//    val nationwideCsv: String = url + config.getString(
+//      "server.s3.routes.nationwide-csv")
+//    val nationwidePipe: String = url + config.getString(
+//      "server.s3.routes.nationwide-pipe")
+//    val filteredQueries: String =
+//      config.getString("server.s3.routes.filtered-queries")
+//  }
 }
