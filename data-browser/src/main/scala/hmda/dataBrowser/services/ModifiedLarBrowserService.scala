@@ -10,10 +10,10 @@ import monix.eval.Task
 
 class ModifiedLarBrowserService(repo: ModifiedLarRepository,
                                 cache: ModifiedLarAggregateCache)
-    extends BrowserService {
+  extends BrowserService {
   override def fetchData(
-      browserFields: List[QueryField]): Source[ModifiedLarEntity, NotUsed] =
-    repo.find(browserFields)
+                          queries: List[QueryField]): Source[ModifiedLarEntity, NotUsed] =
+    repo.find(queries)
 
   private def generateCombinations[T](x: List[List[T]]): List[List[T]] = {
     x match {
@@ -34,7 +34,7 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository,
   }
 
   override def fetchAggregate(
-      fields: List[QueryField]): Task[Seq[Aggregation]] = {
+                               fields: List[QueryField]): Task[Seq[Aggregation]] = {
     val optState: Option[QueryField] =
       fields.filter(_.values.nonEmpty).find(_.name == "state")
     val optMsaMd: Option[QueryField] =

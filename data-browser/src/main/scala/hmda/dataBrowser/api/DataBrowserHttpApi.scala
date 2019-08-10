@@ -6,7 +6,6 @@ import akka.http.scaladsl.model.{HttpEntity, Uri}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.directives.RouteDirectives.complete
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.dataBrowser.S3Routes
 import hmda.dataBrowser.models._
 import hmda.dataBrowser.api.DataBrowserDirectives._
 import hmda.dataBrowser.services.ModifiedLarBrowserService
@@ -34,12 +33,12 @@ trait DataBrowserHttpApi extends Settings {
 
   val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
   val repository: ModifiedLarRepository =
-    new PostgresModifiedLarRepository(Database.tableName, databaseConfig)
+    new PostgresModifiedLarRepository(database.tableName, databaseConfig)
 
   // We make the creation of the Redis client effectful because it can fail and we would like to operate
   // the service even if the cache is down (we provide fallbacks in case we receive connection errors)
   val redisClientTask: Task[RedisAsyncCommands[String, String]] = {
-    val client = RedisClient.create(Redis.url)
+    val client = RedisClient.create(redis.url)
     Task.eval {
       client.setOptions(
         ClientOptions
@@ -60,7 +59,7 @@ trait DataBrowserHttpApi extends Settings {
   }
 
   val cache: ModifiedLarAggregateCache =
-    new RedisModifiedLarAggregateCache(redisClientTask, Redis.ttl)
+    new RedisModifiedLarAggregateCache(redisClientTask, redis.ttl)
 
   val service: BrowserService =
     new ModifiedLarBrowserService(repository, cache)
@@ -76,7 +75,7 @@ trait DataBrowserHttpApi extends Settings {
                 .fetchAggregate(countFields)
                 .map(aggs =>
                   AggregationResponse(Parameters.fromBrowserFields(countFields),
-                                      aggs))
+                    aggs))
                 .runToFuture
             )
           }
@@ -94,7 +93,7 @@ trait DataBrowserHttpApi extends Settings {
                     }
                     log.info("Nationwide [CSV]: " + allFields)
                     if (allFields.size == 1 && allFields.head.name == "year") {
-                      redirect(Uri(S3Routes.nationwideCsv), Found)
+                      redirect(Uri(s3.nationwideCsv), Found)
                     } else
                       complete(
                         HttpEntity(
@@ -117,7 +116,7 @@ trait DataBrowserHttpApi extends Settings {
                     log.info("Nationwide [Pipe]: " + allFields)
                     contentDisposition(queryFields) {
                       if (allFields.size == 1 && allFields.head.name == "year")
-                        redirect(Uri(S3Routes.nationwidePipe), Found)
+                        redirect(Uri(s3.nationwidePipe), Found)
                       else
                         complete(
                           HttpEntity(
@@ -172,7 +171,7 @@ trait DataBrowserHttpApi extends Settings {
                 log.info("CSV: " + allFields)
                 contentDisposition(allFields) {
                   complete(HttpEntity(`text/plain(UTF-8)`,
-                                      csvSource(service.fetchData(allFields))))
+                    csvSource(service.fetchData(allFields))))
                 }
               }
             }
@@ -185,7 +184,7 @@ trait DataBrowserHttpApi extends Settings {
                 log.info("CSV: " + allFields)
                 contentDisposition(allFields) {
                   complete(HttpEntity(`text/plain(UTF-8)`,
-                                      pipeSource(service.fetchData(allFields))))
+                    pipeSource(service.fetchData(allFields))))
                 }
               }
             }

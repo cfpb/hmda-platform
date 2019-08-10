@@ -19,7 +19,7 @@ object DataBrowserApi {
 }
 
 class DataBrowserApi
-    extends HttpServer
+  extends HttpServer
     with BaseHttpApi
     with DataBrowserHttpApi {
 
@@ -28,13 +28,13 @@ class DataBrowserApi
   override implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
 
-  val duration = config.getInt("server.ask-timeout").seconds
+  val duration: FiniteDuration = server.askTimeout
 
   implicit val timeout: Timeout = Timeout(duration)
 
   override val name: String = "hmda-data-broswer"
-  override val host: String = config.getString("server.bindings.address")
-  override val port: Int = config.getInt("server.bindings.port")
+  override val host: String = server.host
+  override val port: Int = server.port
 
   override val paths: Route = routes(s"$name") ~ dataBrowserRoutes
 

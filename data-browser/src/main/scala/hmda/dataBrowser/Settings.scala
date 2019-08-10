@@ -5,28 +5,41 @@ import com.typesafe.config.{Config, ConfigFactory}
 import scala.concurrent.duration._
 
 trait Settings {
-  val config: Config = ConfigFactory.load()
+  private val config: Config = ConfigFactory.load()
 
   private def getDuration(key: String): FiniteDuration = {
     val duration = config.getDuration(key)
     FiniteDuration(duration.toMillis, MILLISECONDS)
   }
 
-  object Server {
+  object server {
     val host: String = config.getString("server.bindings.address")
     val port: Int = config.getInt("server.bindings.port")
     val askTimeout: FiniteDuration = getDuration("server.ask-timeout")
   }
 
-  object Database {
+  object database {
     val tableName: String = config.getString("dbconfig.table")
   }
 
-  object Redis {
+  object redis {
     private val host: String = config.getString("redis.hostname")
     private val port: Int = config.getInt("redis.port")
     val url = s"redis://$host:$port"
-    val ttl = getDuration("redis.ttl")
+    val ttl: FiniteDuration = getDuration("redis.ttl")
   }
 
+  object s3 {
+    val environment: String = config.getString("server.s3.environment")
+    val bucket: String = config.getString("server.s3.public-bucket")
+    val url: String = config.getString("server.s3.url") + config.getString(
+      "server.s3.public-bucket") + "/" + config
+      .getString("server.s3.environment") + "/"
+    val nationwideCsv: String = url + config.getString(
+      "server.s3.routes.nationwide-csv")
+    val nationwidePipe: String = url + config.getString(
+      "server.s3.routes.nationwide-pipe")
+    val filteredQueries: String = url + config.getString(
+      "server.s3.routes.queries")
+  }
 }
