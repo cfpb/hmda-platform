@@ -10,11 +10,11 @@
         <appender-ref ref="STDOUT" />
     </appender>
 
-    <root level="${BROWSER_LOG_LEVEL:-INFO}">
+    <root level="${BROWSER_LOG_LEVEL:-DEBUG}">
         <appender-ref ref="ASYNC" />
     </root>
-    <logger name="logger.slick.session" level="${BROWSER_LOG_LEVEL:-INFO}"/>
-    <logger name="slick.jdbc.DriverDataSource" level="${BROWSER_LOG_LEVEL:-INFO}"/>
-    <logger name="slick.basic.BasicBackend.stream" level="${BROWSER_LOG_LEVEL:-INFO}"/>
-    <logger name="slick.basic.BasicBackend.action" level="${BROWSER_LOG_LEVEL:-INFO}"/>
+    <logger name="logger.slick.session" level="${BROWSER_LOG_LEVEL:-DEBUG}"/>
+    <logger name="slick.jdbc.DriverDataSource" level="${BROWSER_LOG_LEVEL:-DEBUG}"/>
+    <logger name="slick.basic.BasicBackend.stream" level="${BROWSER_LOG_LEVEL:-DEBUG}"/>
+    <logger name="slick.basic.BasicBackend.action" level="${BROWSER_LOG_LEVEL:-DEBUG}"/>
 </configuration>
