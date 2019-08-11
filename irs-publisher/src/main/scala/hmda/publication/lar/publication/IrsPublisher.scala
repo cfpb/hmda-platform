@@ -128,7 +128,7 @@ object IrsPublisher {
                 .via(framing("\n"))
                 .map(_.utf8String)
                 .map(_.trim)
-                .map(s => LarCsvParser(s).getOrElse(LoanApplicationRegister()))
+                .map(s => LarCsvParser(s, true).getOrElse(LoanApplicationRegister()))
                 .mapAsyncUnordered(1)(lar =>
                   getCensus(lar.geography.tract)
                     .map(msa => (lar, msa))) // order does not matter
