@@ -42,7 +42,7 @@ object AggregateReports {
     val JDBC_URL = sys.env("JDBC_URL").trim()
     val AWS_ACCESS_KEY = sys.env("ACCESS_KEY").trim()
     val AWS_SECRET_KEY = sys.env("SECRET_KEY").trim()
-    val AWS_BUCKET = "prod"
+    val AWS_BUCKET = sys.env("AWS_ENV").trim()
 
     val awsCredentialsProvider = new AWSStaticCredentialsProvider(
       new BasicAWSCredentials(AWS_ACCESS_KEY, AWS_SECRET_KEY))
@@ -86,15 +86,15 @@ object AggregateReports {
 
     val consumerSettings: ConsumerSettings[String, String] =
       ConsumerSettings(system.settings.config.getConfig("akka.kafka.consumer"),
-                       new StringDeserializer,
-                       new StringDeserializer)
+        new StringDeserializer,
+        new StringDeserializer)
         .withBootstrapServers(sys.env("KAFKA_HOSTS"))
         .withGroupId(HmdaTopics.adTopic)
         .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
     Consumer
       .committableSource(consumerSettings,
-                         Subscriptions.topics(HmdaTopics.adTopic))
+        Subscriptions.topics(HmdaTopics.adTopic))
       // async boundary begin
       .async
       .mapAsync(1) { msg =>
