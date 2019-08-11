@@ -175,7 +175,12 @@ trait DataBrowserHttpApi extends Settings {
           (path(Csv) & get) {
             extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
               extractFieldsForRawQueries { remainingQueryFields =>
-                val allFields = mandatoryFields ++ remainingQueryFields
+                //remove filters that have all options selected
+                val allFields =
+                  (mandatoryFields ++ remainingQueryFields).filterNot {
+                    eachQueryField =>
+                      eachQueryField.isAllSelected
+                  }
                 log.info("CSV: " + allFields)
                 contentDispositionHeader(allFields, Commas) {
                   serveData(
@@ -190,7 +195,12 @@ trait DataBrowserHttpApi extends Settings {
           (path(Pipe) & get) {
             extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
               extractFieldsForRawQueries { remainingQueryFields =>
-                val allFields = mandatoryFields ++ remainingQueryFields
+                //remove filters that have all options selected
+                val allFields =
+                  (mandatoryFields ++ remainingQueryFields).filterNot {
+                    eachQueryField =>
+                      eachQueryField.isAllSelected
+                  }
                 log.info("CSV: " + allFields)
                 contentDispositionHeader(allFields, Pipes) {
                   serveData(

@@ -206,6 +206,13 @@ CREATE INDEX modifiedlar2018_loan_purpose_idx ON hmda_user.modifiedlar2018 USING
 CREATE INDEX modifiedlar2018_loan_type_idx ON hmda_user.modifiedlar2018 USING btree (loan_type);
 CREATE INDEX modifiedlar2018_filing_year_idx ON hmda_user.modifiedlar2018 USING btree (filing_year);
 
+CREATE INDEX modifiedlar2018_msamd_filing_year_idx ON hmda_user.modifiedlar2018 USING btree (msa_md, filing_year);
+CREATE INDEX modifiedlar2018_state_filing_year_idx ON hmda_user.modifiedlar2018 USING btree (state, filing_year);
+CREATE INDEX modifiedlar2018_total_units_year_idx ON hmda_user.modifiedlar2018 USING btree (total_units);
+CREATE INDEX modifiedlar2018_median_age_year_idx ON hmda_user.modifiedlar2018 USING btree (median_age_calculated);
+
+
+
 -- Completed on 2019-06-05 11:44:50 EDT
 
 
