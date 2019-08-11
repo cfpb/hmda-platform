@@ -11,14 +11,19 @@ import akka.stream.alpakka.s3.headers.CannedAcl
 import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.{Sink, Source}
 import akka.util.ByteString
+import cats.implicits._
 import hmda.dataBrowser.Settings
+import hmda.dataBrowser.models.Delimiter.fileEnding
 import hmda.dataBrowser.models.{Delimiter, QueryField}
-import Delimiter.fileEnding
 import monix.eval.Task
+import org.slf4j.LoggerFactory
 
 class S3FileService(implicit mat: ActorMaterializer)
     extends FileService
     with Settings {
+
+  private final val log = LoggerFactory.getLogger(getClass)
+
   override def persistData(
       queries: List[QueryField],
       delimiter: Delimiter,
@@ -34,10 +39,6 @@ class S3FileService(implicit mat: ActorMaterializer)
     // Note: this is the correct format to set the content-disposition
     val contentDispositionMetadata =
       Map("Content-Disposition" -> s"attachment; filename=$friendlyName")
-
-    println("Inside persistData: friendlyName: " + friendlyName)
-    println("Inside persistData: bucketname: " + s3.bucket)
-    println("Inside persistData: keyname: " + key)
     val sink = S3.multipartUploadWithHeaders(
       bucket = s3.bucket,
       key = key,
@@ -48,16 +49,16 @@ class S3FileService(implicit mat: ActorMaterializer)
     )
     Task
       .deferFuture {
-        val result = dataSource.runWith(sink)
-        result.onComplete {
-          case scala.util.Success(_) =>
-          case scala.util.Failure(ex) =>
-            println(ex)
-        }(scala.concurrent.ExecutionContext.global)
-
-        result
+        dataSource.runWith(sink)
       }
-      .map(_ => ())
+      .onErrorHandleWith { error =>
+        // Note: (this *> that) comes from using cats.implicits and it means execute `this` and discard results then run `that`
+        Task.eval(log.error(
+          s"Failed to write data to the S3 bucket (Extended info: ${error.toString})",
+          error)) *> Task
+          .raiseError(error)
+      }
+      .void
   }
 
   override def retrieveData(
@@ -94,12 +95,14 @@ class S3FileService(implicit mat: ActorMaterializer)
 
   override def retrieveDataUrl(queries: List[QueryField],
                                delimiter: Delimiter): Task[Option[String]] = {
-
     val key = s3Key(queries, delimiter)
-    println("inside retrievedata: " + key)
-    println("inside retrievedata: " + s3.bucket)
     Task
       .deferFuture(S3.getObjectMetadata(s3.bucket, key).runWith(Sink.head))
+      .onErrorHandleWith { error =>
+        Task.eval(log.error(
+          s"Failed to retrieve object metadata to the S3 bucket (Extended info: ${error.toString})",
+          error)) *> Task.raiseError(error)
+      }
       .map(opt => opt.map(_ => s"${s3.url}/$key"))
   }
 }

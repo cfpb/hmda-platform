@@ -11,12 +11,7 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.dataBrowser.Settings
 import hmda.dataBrowser.api.DataBrowserDirectives._
 import hmda.dataBrowser.models._
-import hmda.dataBrowser.repositories.{
-  ModifiedLarAggregateCache,
-  ModifiedLarRepository,
-  PostgresModifiedLarRepository,
-  RedisModifiedLarAggregateCache
-}
+import hmda.dataBrowser.repositories._
 import hmda.dataBrowser.services._
 import io.circe.generic.auto._
 import io.lettuce.core.api.async.RedisAsyncCommands
