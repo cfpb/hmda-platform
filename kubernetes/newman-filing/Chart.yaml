@@ -1,0 +1,11 @@
+name: helm-cronjobs
+description: A chart for cron jobs
+version: 0.1.2
+keywords:
+  - cron
+home: "https://github.com/bambash"
+sources:
+  - "https://github.com/bambash"
+maintainers:
+  - name: bambash
+    email: bambash256@gmail.com
