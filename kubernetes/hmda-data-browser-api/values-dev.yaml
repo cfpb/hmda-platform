@@ -74,7 +74,7 @@ databrowser:
   s3Url: https://s3.amazonaws.com/
   nationwideRouteCSV: data-browser/nationwide_all.csv
   nationwideRoutePipe: data-browser/nationwide_all.txt
-  table: modifiedlar2018prod
+  table: modifiedlar2018_snapshot
   redis: hmda-redis-db-master
   protocol: TCP
   port: 8070
