@@ -7,6 +7,13 @@ case class DataMedAge(msa_md: Long,
                       dispositionName: String,
                       title: String,
                       median_age_calculated: String = "")
+case class AggregateData(tract: String,
+                         msa_md: Long,
+                         msa_md_name: String,
+                         loan_amount: Double,
+                         count: Long,
+                         dispositionName: String,
+                         title: String)
 case class Data(tract: String,
                 msa_md: Long,
                 msa_md_name: String,
