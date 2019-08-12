@@ -4,8 +4,8 @@ jobs:
   # third cron
   - name: newmen-tests
     image:
-      repository: patrickhshi/newman-dev
-      tag: test
+      repository: hmda/newman-tests
+      tag: dev
       imagePullPolicy: Always
     # optional env vars
     env:

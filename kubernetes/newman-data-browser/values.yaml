@@ -4,8 +4,8 @@ jobs:
   # data browser integration tests
   - name: newmen-data-browser
     image:
-      repository: patrickhshi/newman-dev
-      tag: data-browser
+      repository: hmda/newman-tests
+      tag: dev
       imagePullPolicy: Always
     # optional env vars
     env:
