@@ -32,6 +32,7 @@ import Delimiter.fileEnding
 import hmda.dataBrowser.services._
 import io.circe.generic.auto._
 import monix.eval.Task
+import cats.implicits._
 
 trait DataBrowserDirectives {
   private implicit val csvStreamingSupport: CsvEntityStreamingSupport =
@@ -44,10 +45,9 @@ trait DataBrowserDirectives {
     * The Left part of the Either indicates that the data isn't in S3 so this is a cache miss
     * The Right part of the Either indicates a cache hit so the data is present in S3
     *
-    *
-    * @param cache the file service responsible for caching raw data
-    * @param db the query service responsible for fetching raw data from the database
-    * @param queries a list of query parameters
+    * @param cache     the file service responsible for caching raw data
+    * @param db        the query service responsible for fetching raw data from the database
+    * @param queries   a list of query parameters
     * @param delimiter either commas or pipes
     * @return
     */
@@ -70,9 +70,10 @@ trait DataBrowserDirectives {
         case Some(url) =>
           Task.now(Right(url))
         case None =>
+          // upload the data to S3 in the background and emit the Source immediately
           cache
             .persistData(queries, delimiter, serializedData)
-            .map(_ => Left(serializedData))
+            .forkAndForget *> Task(Left(serializedData))
       }
       .onErrorFallbackTo(Task.now(Left(serializedData)))
   }

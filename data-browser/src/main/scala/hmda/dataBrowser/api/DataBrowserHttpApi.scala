@@ -103,14 +103,14 @@ trait DataBrowserHttpApi extends Settings {
           pathPrefix("nationwide") {
             extractFieldsForRawQueries { queryFields =>
               // GET /view/nationwide/csv
-              contentDispositionHeader(queryFields, Commas) {
-                (path(Csv) & get) {
-                  extractNationwideMandatoryYears { mandatoryFields =>
-                    //remove filters that have all options selected
-                    val allFields = (queryFields ++ mandatoryFields).filterNot {
-                      eachQueryField =>
-                        eachQueryField.isAllSelected
-                    }
+              (path(Csv) & get) {
+                extractNationwideMandatoryYears { mandatoryFields =>
+                  //remove filters that have all options selected
+                  val allFields = (queryFields ++ mandatoryFields).filterNot {
+                    eachQueryField =>
+                      eachQueryField.isAllSelected
+                  }
+                  contentDispositionHeader(allFields, Commas) {
                     serveData(
                       allFields,
                       Commas,
@@ -175,12 +175,7 @@ trait DataBrowserHttpApi extends Settings {
           (path(Csv) & get) {
             extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
               extractFieldsForRawQueries { remainingQueryFields =>
-                //remove filters that have all options selected
-                val allFields =
-                  (mandatoryFields ++ remainingQueryFields).filterNot {
-                    eachQueryField =>
-                      eachQueryField.isAllSelected
-                  }
+                val allFields = mandatoryFields ++ remainingQueryFields
                 log.info("CSV: " + allFields)
                 contentDispositionHeader(allFields, Commas) {
                   serveData(
@@ -195,12 +190,7 @@ trait DataBrowserHttpApi extends Settings {
           (path(Pipe) & get) {
             extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
               extractFieldsForRawQueries { remainingQueryFields =>
-                //remove filters that have all options selected
-                val allFields =
-                  (mandatoryFields ++ remainingQueryFields).filterNot {
-                    eachQueryField =>
-                      eachQueryField.isAllSelected
-                  }
+                val allFields = mandatoryFields ++ remainingQueryFields
                 log.info("CSV: " + allFields)
                 contentDispositionHeader(allFields, Pipes) {
                   serveData(
