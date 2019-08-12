@@ -17,7 +17,7 @@ object Race extends Enum[Race] {
   case object AmericanIndianOrAlaskaNative
       extends Race("American Indian or Alaska Native")
   case object BlackOrAfricanAmerican extends Race("Black or African American")
-  case object TwoOrMoreMinorityRaces extends Race("2 Or More Minority Races")
+  case object TwoOrMoreMinorityRaces extends Race("2 or more minority races")
   case object White extends Race("White")
   case object Joint extends Race("Joint")
 
