@@ -641,8 +641,7 @@ trait RegulatorComponent2018 {
        mlarPartThreeProjection,
        mlarPartFourProjection,
        mlarPartFiveProjection,
-       mlarPartSixProjection,
-       mlarPartSevenProjection) <> ((ModifiedLarEntityImpl.apply _).tupled, ModifiedLarEntityImpl.unapply)
+       mlarPartSixProjection) <> ((ModifiedLarEntityImpl.apply _).tupled, ModifiedLarEntityImpl.unapply)
 
     def mlarPartOneProjection =
       (filingYear,
@@ -753,15 +752,6 @@ trait RegulatorComponent2018 {
        ownerOccupiedUnits,
        oneToFourFamUnits,
        medianAge) <> ((ModifiedLarPartSix.apply _).tupled, ModifiedLarPartSix.unapply)
-
-    def mlarPartSevenProjection =
-      (tractToMsamd,
-       medianAgeCalculated,
-       percentMedianMsaIncome,
-       msaMDName,
-       id,
-       uniqID,
-       createdAt) <> ((ModifiedLarPartSeven.apply _).tupled, ModifiedLarPartSeven.unapply)
 
   }
 

@@ -196,38 +196,12 @@ case class ModifiedLarPartSix(aus5: Option[Int] = Some(0),
 
 }
 
-case class ModifiedLarPartSeven(tractToMsamd: Option[String] = Some(""),
-                                medianAgeCalculated: Option[String] = Some(""),
-                                percentMedianMsaIncome: Option[String] = Some(
-                                  ""),
-                                msaMDName: Option[String] = Some(""),
-                                id: Int = 0,
-                                uniqId: Int = 0,
-                                createdAt: Timestamp)
-    extends ColumnDataFormatter {
-
-  def toPrivatePSV: String = {
-    s"|${extractOpt(tractToMsamd)}|${extractOpt(medianAgeCalculated)}|${extractOpt(
-      percentMedianMsaIncome)}|${extractOpt(msaMDName)}|$id"
-  }
-}
-
 case class ModifiedLarEntityImpl(mlarPartOne: ModifiedLarPartOne,
                                  mlarPartTwo: ModifiedLarPartTwo,
                                  mlarPartThree: ModifiedLarPartThree,
                                  mlarPartFour: ModifiedLarPartFour,
                                  mlarPartFive: ModifiedLarPartFive,
-                                 mlarPartSix: ModifiedLarPartSix,
-                                 mlarPartSeven: ModifiedLarPartSeven) {
-
-  def toPrivatePSV: String =
-    (mlarPartOne.toPublicPSV +
-      mlarPartTwo.toPublicPSV +
-      mlarPartThree.toPublicPSV +
-      mlarPartFour.toPublicPSV +
-      mlarPartFive.toPublicPSV +
-      mlarPartSix.toPublicPSV +
-      mlarPartSeven.toPrivatePSV).replaceAll("(\r\n)|\r|\n", "")
+                                 mlarPartSix: ModifiedLarPartSix) {
 
   def toPublicPSV: String =
     (mlarPartOne.toPublicPSV +

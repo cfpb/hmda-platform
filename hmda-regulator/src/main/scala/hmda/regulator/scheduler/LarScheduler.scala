@@ -105,7 +105,7 @@ class LarScheduler
         Source.fromPublisher(allResultsPublisher)
 
       var results: Future[MultipartUploadResult] = allResultsSource
-        .map(larEntity => larEntity.toPSV + "\n")
+        .map(larEntity => larEntity.toRegulatorPSV + "\n")
         .map(s => ByteString(s))
         .runWith(s3Sink)
 
@@ -133,7 +133,7 @@ class LarScheduler
         Source.fromPublisher(allResultsPublisher)
 
       var results: Future[MultipartUploadResult] = allResultsSource
-        .map(larEntity => larEntity.toPSV + "\n")
+        .map(larEntity => larEntity.toRegulatorPSV + "\n")
         .map(s => ByteString(s))
         .runWith(s3Sink)
 
