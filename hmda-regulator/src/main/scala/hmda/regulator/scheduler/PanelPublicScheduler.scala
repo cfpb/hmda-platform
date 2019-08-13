@@ -16,6 +16,7 @@ import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.query.DbConfiguration.dbConfig
+import hmda.regulator.helper.PanelHeader
 import hmda.regulator.query.component.RegulatorComponent2018
 import hmda.regulator.query.panel.{
   InstitutionAltEntity,
@@ -27,7 +28,10 @@ import hmda.regulator.scheduler.schedules.Schedules.PanelPublicScheduler2018
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class PanelPublicScheduler extends HmdaActor with RegulatorComponent2018 {
+class PanelPublicScheduler
+    extends HmdaActor
+    with RegulatorComponent2018
+    with PanelHeader {
 
   implicit val ec = context.system.dispatcher
   implicit val materializer = ActorMaterializer()
@@ -101,7 +105,11 @@ class PanelPublicScheduler extends HmdaActor with RegulatorComponent2018 {
       .map(seek => seek.toList)
       .mapConcat(identity)
       .mapAsync(1)(institution => appendEmailDomains2018(institution))
-      .map(institution => institution.toPublicPSV + "\n")
+      .zipWithIndex
+      .map(panelEntity =>
+        if (panelEntity._2 == 0)
+          PanelHeader.concat(panelEntity._1.toPublicPSV) + "\n"
+        else panelEntity._1.toPublicPSV)
       .map(s => ByteString(s))
       .runWith(s3SinkPSV)
 

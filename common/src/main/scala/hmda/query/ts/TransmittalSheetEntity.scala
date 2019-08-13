@@ -33,9 +33,4 @@ case class TransmittalSheetEntity(
     s"$year|$quarter|$lei|$taxId|$agency|" +
       s"$name|$city|$state|$zipCode|$totalLines"
   }
-
-  def toPublicCSV: String = {
-    s"$year,$quarter,$lei,$taxId,$agency," +
-      s"$name,$city,$state,$zipCode,$totalLines"
-  }
 }

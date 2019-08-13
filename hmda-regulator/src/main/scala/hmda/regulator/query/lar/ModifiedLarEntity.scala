@@ -220,15 +220,6 @@ case class ModifiedLarEntityImpl(mlarPartOne: ModifiedLarPartOne,
                                  mlarPartSix: ModifiedLarPartSix,
                                  mlarPartSeven: ModifiedLarPartSeven) {
 
-  def toPrivatePSV: String =
-    (mlarPartOne.toPublicPSV +
-      mlarPartTwo.toPublicPSV +
-      mlarPartThree.toPublicPSV +
-      mlarPartFour.toPublicPSV +
-      mlarPartFive.toPublicPSV +
-      mlarPartSix.toPublicPSV +
-      mlarPartSeven.toPrivatePSV).replaceAll("(\r\n)|\r|\n", "")
-
   def toPublicPSV: String =
     (mlarPartOne.toPublicPSV +
       mlarPartTwo.toPublicPSV +

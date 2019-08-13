@@ -17,13 +17,17 @@ import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.ts._
+import hmda.regulator.helper.TSHeader
 import hmda.regulator.query.component.RegulatorComponent2018
 import hmda.regulator.scheduler.schedules.Schedules.TsPublicScheduler2018
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class TsPublicScheduler extends HmdaActor with RegulatorComponent2018 {
+class TsPublicScheduler
+    extends HmdaActor
+    with RegulatorComponent2018
+    with TSHeader {
 
   implicit val ec = context.system.dispatcher
   implicit val materializer = ActorMaterializer()
@@ -78,10 +82,6 @@ class TsPublicScheduler extends HmdaActor with RegulatorComponent2018 {
 
       val fileNamePSV = "2018_ts.txt"
 
-      val s3SinkCSV =
-        S3.multipartUpload(bucket, s"$environment/ts/$fileNamePSV")
-          .withAttributes(S3Attributes.settings(s3Settings))
-
       val s3SinkPSV =
         S3.multipartUpload(bucket, s"$environment/ts/$fileNamePSV")
           .withAttributes(S3Attributes.settings(s3Settings))
@@ -94,7 +94,11 @@ class TsPublicScheduler extends HmdaActor with RegulatorComponent2018 {
         .fromFuture(allResults)
         .map(seek => seek.toList)
         .mapConcat(identity)
-        .map(transmittalSheet => transmittalSheet.toPublicPSV + "\n")
+        .zipWithIndex
+        .map(transmittalSheet =>
+          if (transmittalSheet._2 == 0)
+            TSHeader.concat(transmittalSheet._1.toPublicPSV) + "\n"
+          else transmittalSheet._1.toPublicPSV)
         .map(s => ByteString(s))
         .runWith(s3SinkPSV)
 
