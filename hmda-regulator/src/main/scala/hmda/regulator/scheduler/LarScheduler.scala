@@ -31,11 +31,13 @@ import hmda.regulator.scheduler.schedules.Schedules.{
   LarScheduler2019
 }
 import slick.basic.DatabasePublisher
+import akka.http.scaladsl.Http
+import hmda.model.census.Census
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class LarScheduler
+class LarScheduler(indexTractMap: Map[String, Census])
     extends HmdaActor
     with RegulatorComponent2018
     with RegulatorComponent2019 {
@@ -91,12 +93,12 @@ class LarScheduler
 
   override def receive: Receive = {
 
-    case LarScheduler2018 =>
+    case LarScheduler2019 =>
       val now = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDate.format(now)
       val fileName = s"$formattedDate" + "2018_lar.txt"
       val s3Sink = S3
-        .multipartUpload(bucket, s"$environment/lar/$fileName")
+        .multipartUpload(bucket, s"$environment/lar/conformingLoan/$fileName")
         .withAttributes(S3Attributes.settings(s3Settings))
 
       val allResultsPublisher: DatabasePublisher[LarEntityImpl] =
@@ -105,14 +107,14 @@ class LarScheduler
         Source.fromPublisher(allResultsPublisher)
 
       var results: Future[MultipartUploadResult] = allResultsSource
-        .map(larEntity => larEntity.toPSV + "\n")
+        .map(larEntity => larEntity.toPSV(indexTractMap) + "\n")
         .map(s => ByteString(s))
         .runWith(s3Sink)
 
       results onComplete {
         case Success(result) => {
           log.info(
-            "Pushing to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
+            "Pushing to S3: " + s"$bucket/$environment/lar/conformingLoan/$fileName" + ".")
         }
         case Failure(t) =>
           log.info(
@@ -124,7 +126,7 @@ class LarScheduler
       val formattedDate = fullDate.format(now)
       val fileName = s"$formattedDate" + "2019_lar.txt"
       val s3Sink = S3
-        .multipartUpload(bucket, s"$environment/lar/$fileName")
+        .multipartUpload(bucket, s"$environment/lar/conformingLoan/$fileName")
         .withAttributes(S3Attributes.settings(s3Settings))
 
       val allResultsPublisher: DatabasePublisher[LarEntityImpl] =
@@ -133,14 +135,14 @@ class LarScheduler
         Source.fromPublisher(allResultsPublisher)
 
       var results: Future[MultipartUploadResult] = allResultsSource
-        .map(larEntity => larEntity.toPSV + "\n")
+        .map(larEntity => larEntity.toPSV(indexTractMap) + "\n")
         .map(s => ByteString(s))
         .runWith(s3Sink)
 
       results onComplete {
         case Success(result) => {
           log.info(
-            "Pushing to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
+            "Pushing to S3: " + s"$bucket/$environment/lar/conformingLoan/$fileName" + ".")
         }
         case Failure(t) =>
           log.info(

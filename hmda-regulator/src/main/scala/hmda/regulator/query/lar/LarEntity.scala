@@ -1,6 +1,9 @@
 package hmda.regulator.query.lar
 
 import hmda.util.conversion.ColumnDataFormatter
+import hmda.regulator.scheduler.ConformingLoanLimit
+import hmda.model.filing.lar.enums.LienStatusEnum
+import hmda.model.census.Census
 
 case class LarPartOne(id: Int = 0,
                       lei: String = "",
@@ -227,13 +230,21 @@ case class LarEntityImpl(larPartOne: LarPartOne,
                          larPartFive: LarPartFive,
                          larPartSix: LarPartSix) {
 
-  def toPSV: String =
+  def toPSV(indexTractMap: Map[String, Census]): String = {
+    val census = indexTractMap.getOrElse(larPartOne.tract, Census())
     (larPartOne.toPSV +
       larPartTwo.toPSV +
       larPartThree.toPSV +
       larPartFour.toPSV +
       larPartFive.toPSV +
-      larPartSix.toPSV).replaceAll("(\r\n)|\r|\n", "")
+      larPartSix.toPSV + "|" + ConformingLoanLimit.assignLoanLimit(
+      larPartFive.totalUnits,
+      larPartOne.loanAmount,
+      larPartFour.lienStatus,
+      larPartOne.county,
+      larPartOne.state) + "|" + census.population + "|" + census.minorityPopulationPercent + "|" + census.medianIncome + "|" + census.tracttoMsaIncomePercent + "|" + census.occupiedUnits + "|" + census.oneToFourFamilyUnits + "|" + census.medianAge)
+      .replaceAll("(\r\n)|\r|\n", "")
+  }
 
   def toPublicPSV: String =
     (larPartOne.toPublicPSV +

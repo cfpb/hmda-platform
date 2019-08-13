@@ -215,7 +215,7 @@ trait RegulatorComponent2018 {
   }
 
   class LarTable(tag: Tag)
-      extends Table[LarEntityImpl](tag, "loanapplicationregister2018") {
+      extends Table[LarEntityImpl](tag, "loanapplicationregister2018_snapshot") {
 
     def id = column[Int]("id")
     def lei = column[String]("lei")

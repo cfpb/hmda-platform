@@ -4,6 +4,20 @@ import akka.actor.{ActorSystem, Props}
 import com.typesafe.config.{ConfigFactory, ConfigValueFactory}
 import hmda.regulator.scheduler._
 import org.slf4j.LoggerFactory
+import hmda.model.census.Census
+import akka.http.scaladsl.Http
+import scala.concurrent.{ExecutionContextExecutor, Future}
+import scala.util.{Failure, Success}
+import hmda.publication.lar.publication._
+import hmda.publication.lar.services.CensusRecordsRetriever
+import akka.stream.ActorMaterializer
+import hmda.publication.lar._
+import hmda.publication.lar.services._
+import akka.util.Timeout
+import scala.concurrent.duration._
+
+import hmda.publication.lar.services._
+
 object HmdaRegulatorApp extends App {
 
   val log = LoggerFactory.getLogger("hmda")
@@ -65,7 +79,24 @@ object HmdaRegulatorApp extends App {
                              ConfigValueFactory
                                .fromAnyRef(larTimer2019(1)))
                   .withFallback(config))
-  larActorSystem.actorOf(Props[LarScheduler], "LarScheduler")
+  implicit val system: ActorSystem = ActorSystem()
+  implicit val materializer: ActorMaterializer = ActorMaterializer()
+  implicit val ec: ExecutionContextExecutor = system.dispatcher
+  implicit val timeout: Timeout = Timeout(1.hour)
+  val censusUrl = "http://census-api.default.svc.cluster.local:9093"
+  val censusDownloader =
+    CensusRecordsRetriever(Http(), censusUrl)
+  val censusTractMap: Future[Map[String, Census]] =
+    censusDownloader.downloadCensusMap(Tract)
+  censusTractMap.onComplete {
+    case Success(tractMap) =>
+      larActorSystem.actorOf(Props(new LarScheduler(tractMap)), "LarScheduler")
+    case Failure(exception) =>
+      log.error(
+        "Failed to download maps from Census API, cannot proceed, shutting down",
+        exception)
+      larActorSystem.terminate()
+  }
 
   val tsActorSystem = ActorSystem("tsTask",
                                   ConfigFactory
