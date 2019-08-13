@@ -189,7 +189,7 @@ case class ModifiedLarPartSix(aus5: Option[Int] = Some(0),
     s"${extractOpt(aus5)}|" +
       s"${extractOpt(denialReason1)}|${extractOpt(denialReason2)}|${extractOpt(
         denialReason3)}|${extractOpt(denialReason4)}|${extractOpt(population)}|" +
-      s"${extractOpt(aus5)}|${extractOpt(minorityPopulationPercent)}|${extractOpt(
+      s"${extractOpt(minorityPopulationPercent)}|${extractOpt(
         ffiecMedFamIncome)}|${extractOpt(medianIncomePercentage)}|" +
       s"${extractOpt(ownerOccupiedUnits)}|${extractOpt(oneToFourFamUnits)}|${extractOpt(medianAge)}"
   }
