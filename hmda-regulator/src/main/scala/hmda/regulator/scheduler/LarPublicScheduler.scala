@@ -44,7 +44,7 @@ class LarPublicScheduler
   val region = awsConfig.getString("public-region")
   val bucket = awsConfig.getString("public-s3-bucket")
   val environment = awsConfig.getString("public-environment")
-  val year = awsConfig.getString("year")
+  val year = awsConfig.getString("public-year")
   val awsCredentialsProvider = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess))
 

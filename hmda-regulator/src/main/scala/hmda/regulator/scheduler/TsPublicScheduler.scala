@@ -40,7 +40,7 @@ class TsPublicScheduler
   val region = awsConfig.getString("public-region")
   val bucket = awsConfig.getString("public-s3-bucket")
   val environment = awsConfig.getString("public-environment")
-  val year = awsConfig.getString("year")
+  val year = awsConfig.getString("public-year")
   val bankFilter =
     ConfigFactory.load("application.conf").getConfig("filter")
   val bankFilterList =

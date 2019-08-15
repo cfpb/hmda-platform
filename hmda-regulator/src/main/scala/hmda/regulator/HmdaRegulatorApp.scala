@@ -26,9 +26,9 @@ object HmdaRegulatorApp extends App {
   val larTimer2018 = config.getString("akka.LarScheduler2018")
   val tsTimer2018 = config.getString("akka.TsScheduler2018")
 
-//  val panelTimer2019 = config.getString("akka.PanelScheduler2019").split(",")
-//  val larTimer2019 = config.getString("akka.LarScheduler2019").split(",")
-//  val tsTimer2019 = config.getString("akka.TsScheduler2019").split(",")
+  val panelTimer2019 = config.getString("akka.PanelScheduler2019").split(",")
+  val larTimer2019 = config.getString("akka.LarScheduler2019").split(",")
+  val tsTimer2019 = config.getString("akka.TsScheduler2019").split(",")
 
   val panelPublicTimer2018 = config.getString("akka.PanelPublicScheduler2018")
   val larPublicTimer2018 = config.getString("akka.LarPublicScheduler2018")
@@ -38,49 +38,46 @@ object HmdaRegulatorApp extends App {
   log.info("LAR Timer 2018: " + larTimer2018)
   log.info("TS Timer 2018: " + tsTimer2018)
 
-//  log.info("Panel Timer 2019: " + panelTimer2019)
-//  log.info("LAR Timer 2019: " + larTimer2019)
-//  log.info("TS Timer 2019: " + tsTimer2019)
+  log.info("Panel Timer 2019: " + panelTimer2019)
+  log.info("LAR Timer 2019: " + larTimer2019)
+  log.info("TS Timer 2019: " + tsTimer2019)
 
   log.info("Panel Public Timer 2018: " + panelPublicTimer2018)
   log.info("LAR Public 2018: " + larPublicTimer2018)
   log.info("TS Public 2018: " + tsPublicTimer2018)
-//
-//  val panelActorSystem =
-//    ActorSystem(
-//      "panelTask",
-//      ConfigFactory
-//        .parseString(panelTimer2018)
-//        // .withValue(panelTimer2019(0),ConfigValueFactory.fromAnyRef(panelTimer2019(1)))
-//        .withFallback(config)
-//    )
-//  panelActorSystem.actorOf(Props[PanelScheduler], "PanelScheduler")
-//
-//  val larActorSystem =
-//    ActorSystem("larTask",
-//                ConfigFactory
-//                  .parseString(larTimer2018)
-//                  //.withValue(larTimer2019(0), ConfigValueFactory.fromAnyRef(larTimer2019(1)))
-//                  .withFallback(config))
-//  larActorSystem.actorOf(Props[LarScheduler], "LarScheduler")
-//
-//  val tsActorSystem =
-//    ActorSystem("tsTask",
-//                ConfigFactory
-//                  .parseString(tsTimer2018)
-//                  //.withValue(tsTimer2019(0), ConfigValueFactory.fromAnyRef(tsTimer2019(1)))
-//                  .withFallback(config))
-//  tsActorSystem.actorOf(Props[TsScheduler], "TsScheduler")
 
-  //Public Data Actor Systems
+  val panelActorSystem =
+    ActorSystem(
+      "panelTask",
+      ConfigFactory
+        .parseString(panelTimer2018)
+        .withValue(panelTimer2019(0),ConfigValueFactory.fromAnyRef(panelTimer2019(1)))
+        .withFallback(config)
+    )
+  panelActorSystem.actorOf(Props[PanelScheduler], "PanelScheduler")
+
+  val larActorSystem =
+    ActorSystem("larTask",
+                ConfigFactory
+                  .parseString(larTimer2018)
+                  .withValue(larTimer2019(0), ConfigValueFactory.fromAnyRef(larTimer2019(1)))
+                  .withFallback(config))
+  larActorSystem.actorOf(Props[LarScheduler], "LarScheduler")
+
+  val tsActorSystem =
+    ActorSystem("tsTask",
+                ConfigFactory
+                  .parseString(tsTimer2018)
+                  .withValue(tsTimer2019(0), ConfigValueFactory.fromAnyRef(tsTimer2019(1)))
+                  .withFallback(config))
+  tsActorSystem.actorOf(Props[TsScheduler], "TsScheduler")
 
   val panelPublicActorSystem =
     ActorSystem(
       "panelPublicTask",
       ConfigFactory.parseString(panelPublicTimer2018).withFallback(config))
 
-  panelPublicActorSystem.actorOf(Props[PanelPublicScheduler],
-                                 "PanelPublicScheduler")
+  panelPublicActorSystem.actorOf(Props[PanelPublicScheduler], "PanelPublicScheduler")
 
   val larPublicActorSystem =
     ActorSystem(
