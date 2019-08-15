@@ -98,7 +98,7 @@ class TsPublicScheduler
         .map(transmittalSheet =>
           if (transmittalSheet._2 == 0)
             TSHeader.concat(transmittalSheet._1.toPublicPSV) + "\n"
-          else transmittalSheet._1.toPublicPSV)
+          else transmittalSheet._1.toPublicPSV + "\n")
         .map(s => ByteString(s))
         .runWith(s3SinkPSV)
 

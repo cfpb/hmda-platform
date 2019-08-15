@@ -99,7 +99,7 @@ class LarPublicScheduler
             mlarEntity =>
               if (mlarEntity._2 == 0)
                 MLARHeader.concat(mlarEntity._1.toPublicPSV) + "\n"
-              else mlarEntity._1.toPublicPSV)
+              else mlarEntity._1.toPublicPSV + "\n")
           .map(s => ByteString(s))
           .runWith(s3SinkPSV)
 

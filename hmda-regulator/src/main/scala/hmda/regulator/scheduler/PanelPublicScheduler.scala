@@ -109,7 +109,7 @@ class PanelPublicScheduler
       .map(panelEntity =>
         if (panelEntity._2 == 0)
           PanelHeader.concat(panelEntity._1.toPublicPSV) + "\n"
-        else panelEntity._1.toPublicPSV)
+        else panelEntity._1.toPublicPSV + "\n")
       .map(s => ByteString(s))
       .runWith(s3SinkPSV)
 
