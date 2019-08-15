@@ -86,15 +86,15 @@ object AggregateReports {
 
     val consumerSettings: ConsumerSettings[String, String] =
       ConsumerSettings(system.settings.config.getConfig("akka.kafka.consumer"),
-        new StringDeserializer,
-        new StringDeserializer)
+                       new StringDeserializer,
+                       new StringDeserializer)
         .withBootstrapServers(sys.env("KAFKA_HOSTS"))
         .withGroupId(HmdaTopics.adTopic)
         .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
     Consumer
       .committableSource(consumerSettings,
-        Subscriptions.topics(HmdaTopics.adTopic))
+                         Subscriptions.topics(HmdaTopics.adTopic))
       // async boundary begin
       .async
       .mapAsync(1) { msg =>

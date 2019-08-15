@@ -11,7 +11,7 @@ lazy val sparkDeps =
       sparkStreaming,
       sparkKafka,
       postgres,
-      "com.typesafe.akka" %% "akka-stream-kafka" % "1.0.1")
+      akkaKafkaStreams)
 
 lazy val authDeps = Seq(
   keycloakAdapter,
@@ -34,6 +34,7 @@ lazy val akkaDeps = Seq(
   akkaClusterHttpManagement,
   akkaClusterHttpManagement,
   akkaTestkitTyped,
+  akkaStreamsTestKit,
   akkaCors,
   akkaKafkaStreams,
   embeddedKafka,
@@ -51,7 +52,8 @@ lazy val akkaPersistenceDeps =
       akkaPersistenceCassandra,
       cassandraLauncher)
 
-lazy val akkaHttpDeps = Seq(akkaHttp, akkaHttp2, akkaHttpTestkit, akkaHttpCirce)
+lazy val akkaHttpDeps =
+  Seq(akkaHttp, akkaHttp2, akkaHttpTestkit, akkaStreamsTestKit, akkaHttpCirce)
 lazy val circeDeps = Seq(circe, circeGeneric, circeParser)
 lazy val enumeratumDeps = Seq(enumeratum, enumeratumCirce)
 

@@ -17,7 +17,10 @@ import hmda.serialization.kafka.{
   InstitutionKafkaEventsSerializer
 }
 import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
+import org.apache.kafka.clients.producer.{
+  Producer => KafkaProducer,
+  ProducerRecord
+}
 import org.apache.kafka.common.serialization.{
   StringDeserializer,
   StringSerializer
