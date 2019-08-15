@@ -1,11 +1,15 @@
 package hmda.persistence.filing
 
-import akka.actor.typed.{TypedActorContext, ActorRef, Behavior}
+import akka.actor.typed.{ActorRef, Behavior, TypedActorContext}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityTypeKey}
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
+import akka.persistence.typed.scaladsl.{
+  Effect,
+  EventSourcedBehavior,
+  RetentionCriteria
+}
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
 import hmda.messages.filing.FilingCommands._
 import hmda.messages.filing.FilingEvents.{
@@ -14,14 +18,13 @@ import hmda.messages.filing.FilingEvents.{
   SubmissionAdded,
   SubmissionUpdated
 }
-
 import hmda.messages.institution.InstitutionCommands.AddFiling
 import hmda.model.filing.FilingDetails
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.persistence.institution.InstitutionPersistence
 
 object FilingPersistence
-    extends HmdaTypedPersistentActor[FilingCommand, FilingEvent, FilingState] {
+  extends HmdaTypedPersistentActor[FilingCommand, FilingEvent, FilingState] {
 
   override final val name = "Filing"
 
@@ -35,11 +38,12 @@ object FilingPersistence
         emptyState = FilingState(),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
-      ).snapshotEvery(1000)
+      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000,
+        keepNSnapshots = 10))
     }
 
   override def commandHandler(ctx: TypedActorContext[FilingCommand])
-    : CommandHandler[FilingCommand, FilingEvent, FilingState] = {
+  : CommandHandler[FilingCommand, FilingEvent, FilingState] = {
     (state, cmd) =>
       val log = ctx.asScala.log
       val sharding = ClusterSharding(ctx.asScala.system)
@@ -135,7 +139,7 @@ object FilingPersistence
   }
 
   def startShardRegion(
-      sharding: ClusterSharding): ActorRef[ShardingEnvelope[FilingCommand]] = {
+                        sharding: ClusterSharding): ActorRef[ShardingEnvelope[FilingCommand]] = {
     super.startShardRegion(sharding)
   }
 

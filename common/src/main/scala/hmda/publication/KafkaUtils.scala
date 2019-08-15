@@ -17,7 +17,10 @@ import hmda.serialization.kafka.{
   InstitutionKafkaEventsSerializer
 }
 import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
+import org.apache.kafka.clients.producer.{
+  Producer => KafkaProducer,
+  ProducerRecord
+}
 import org.apache.kafka.common.serialization.{
   StringDeserializer,
   StringSerializer
@@ -43,13 +46,13 @@ object KafkaUtils {
   def produceInstitutionRecord(topic: String,
                                key: String,
                                value: InstitutionKafkaEvent)(
-      implicit system: ActorSystem,
-      materializer: ActorMaterializer): Future[Done] = {
+                                implicit system: ActorSystem,
+                                materializer: ActorMaterializer): Future[Done] = {
 
     val producerSettings =
       ProducerSettings(system,
-                       new StringSerializer,
-                       new InstitutionKafkaEventsSerializer)
+        new StringSerializer,
+        new InstitutionKafkaEventsSerializer)
         .withBootstrapServers(kafkaHosts)
 
     Source
@@ -59,8 +62,8 @@ object KafkaUtils {
   }
 
   def produceRecord(topic: String, key: String, value: String)(
-      implicit system: ActorSystem,
-      materializer: ActorMaterializer): Future[Done] = {
+    implicit system: ActorSystem,
+    materializer: ActorMaterializer): Future[Done] = {
 
     val producerSettings =
       ProducerSettings(system, new StringSerializer, new StringSerializer)
@@ -74,9 +77,9 @@ object KafkaUtils {
   }
 
   def consumeRecords(topic: String, f: Future[Done], parallelism: Int)(
-      implicit system: ActorSystem,
-      materializer: ActorMaterializer,
-      ec: ExecutionContext) = {
+    implicit system: ActorSystem,
+    materializer: ActorMaterializer,
+    ec: ExecutionContext) = {
 
     val config = system.settings.config.getConfig("akka.kafka.consumer")
 
@@ -101,16 +104,16 @@ object KafkaUtils {
   def consumeInstitutionRecords(topic: String,
                                 f: Future[Done],
                                 parallelism: Int)(
-      implicit system: ActorSystem,
-      materializer: ActorMaterializer,
-      ec: ExecutionContext) = {
+                                 implicit system: ActorSystem,
+                                 materializer: ActorMaterializer,
+                                 ec: ExecutionContext) = {
 
     val config = system.settings.config.getConfig("akka.kafka.consumer")
 
     val consumerSettings: ConsumerSettings[String, InstitutionKafkaEvent] =
       ConsumerSettings(config,
-                       new StringDeserializer,
-                       new InstitutionKafkaEventsDeserializer)
+        new StringDeserializer,
+        new InstitutionKafkaEventsDeserializer)
         .withBootstrapServers(kafkaHosts)
         .withGroupId(HmdaGroups.analyticsGroup)
         .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
