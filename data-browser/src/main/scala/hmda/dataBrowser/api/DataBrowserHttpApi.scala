@@ -110,6 +110,7 @@ trait DataBrowserHttpApi extends Settings {
                     eachQueryField =>
                       eachQueryField.isAllSelected
                   }
+                  log.info("Nationwide [CSV]: " + allFields)
                   contentDispositionHeader(allFields, Commas) {
                     serveData(
                       allFields,
@@ -175,7 +176,11 @@ trait DataBrowserHttpApi extends Settings {
           (path(Csv) & get) {
             extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
               extractFieldsForRawQueries { remainingQueryFields =>
-                val allFields = mandatoryFields ++ remainingQueryFields
+                val allFields =
+                  (mandatoryFields ++ remainingQueryFields).filterNot {
+                    eachQueryField =>
+                      eachQueryField.isAllSelected
+                  }
                 log.info("CSV: " + allFields)
                 contentDispositionHeader(allFields, Commas) {
                   serveData(
@@ -190,8 +195,12 @@ trait DataBrowserHttpApi extends Settings {
           (path(Pipe) & get) {
             extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
               extractFieldsForRawQueries { remainingQueryFields =>
-                val allFields = mandatoryFields ++ remainingQueryFields
-                log.info("CSV: " + allFields)
+                val allFields =
+                  (mandatoryFields ++ remainingQueryFields).filterNot {
+                    eachQueryField =>
+                      eachQueryField.isAllSelected
+                  }
+                log.info("Pipe: " + allFields)
                 contentDispositionHeader(allFields, Pipes) {
                   serveData(
                     allFields,
