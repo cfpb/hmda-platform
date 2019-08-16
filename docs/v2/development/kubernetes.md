@@ -127,14 +127,14 @@ helm upgrade --install --force \
 census-api \
 kubernetes/census-api
 ```
-### Install hmda-regulator
+### Install hmda-data-publisher
 ```bash
 helm upgrade --install --force --namespace=default \
---values=kubernetes/hmda-regulator/values.yaml \
+--values=kubernetes/hmda-data-publisher/values.yaml \
 --set image.tag=latest \
 --set image.pullPolicy=Always \
-hmda-regulator \
-kubernetes/hmda-regulator
+hmda-data-publisher \
+kubernetes/hmda-data-publisher
 ```
 ### Install hmda-analytics
 ```bash
