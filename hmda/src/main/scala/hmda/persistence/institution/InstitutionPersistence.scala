@@ -3,12 +3,16 @@ package hmda.persistence.institution
 import akka.Done
 import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{TypedActorContext, ActorRef, Behavior}
+import akka.actor.typed.{ActorRef, Behavior, TypedActorContext}
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.actor.typed.scaladsl.adapter._
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
+import akka.persistence.typed.scaladsl.{
+  Effect,
+  EventSourcedBehavior,
+  RetentionCriteria
+}
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
 import akka.stream.ActorMaterializer
 import hmda.messages.institution.InstitutionCommands._
@@ -37,7 +41,8 @@ object InstitutionPersistence
         emptyState = InstitutionState(None),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
-      ).snapshotEvery(1000)
+      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000,
+                                                       keepNSnapshots = 10))
         .withTagger(_ => Set(name.toLowerCase()))
     }
   }

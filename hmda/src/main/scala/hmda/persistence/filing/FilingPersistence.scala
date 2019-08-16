@@ -1,11 +1,15 @@
 package hmda.persistence.filing
 
-import akka.actor.typed.{TypedActorContext, ActorRef, Behavior}
+import akka.actor.typed.{ActorRef, Behavior, TypedActorContext}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityTypeKey}
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
+import akka.persistence.typed.scaladsl.{
+  Effect,
+  EventSourcedBehavior,
+  RetentionCriteria
+}
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
 import hmda.messages.filing.FilingCommands._
 import hmda.messages.filing.FilingEvents.{
@@ -14,7 +18,6 @@ import hmda.messages.filing.FilingEvents.{
   SubmissionAdded,
   SubmissionUpdated
 }
-
 import hmda.messages.institution.InstitutionCommands.AddFiling
 import hmda.model.filing.FilingDetails
 import hmda.persistence.HmdaTypedPersistentActor
@@ -35,7 +38,8 @@ object FilingPersistence
         emptyState = FilingState(),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
-      ).snapshotEvery(1000)
+      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000,
+                                                      keepNSnapshots = 10))
     }
 
   override def commandHandler(ctx: TypedActorContext[FilingCommand])

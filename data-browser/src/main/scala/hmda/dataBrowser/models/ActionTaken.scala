@@ -25,7 +25,8 @@ object ActionTaken extends Enum[ActionTaken] {
         (action, ActionTaken.withNameInsensitiveOption(action)))
     val isActionsValid = potentialActions.map(_._2).forall(_.isDefined)
 
-    if (isActionsValid) Right(potentialActions.flatMap(_._2))
+    if (isActionsValid)
+      Right(potentialActions.flatMap(_._2))
     else
       Left(
         potentialActions.collect {

@@ -2,7 +2,7 @@ package hmda.persistence.submission
 
 import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{TypedActorContext, ActorRef, Behavior}
+import akka.actor.typed.{ActorRef, Behavior, TypedActorContext}
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.stream.ActorMaterializer
@@ -17,7 +17,11 @@ import hmda.model.filing.submission.{Parsed, ParsedWithErrors}
 import hmda.persistence.HmdaTypedPersistentActor
 import akka.actor.typed.scaladsl.adapter._
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
+import akka.persistence.typed.scaladsl.{
+  Effect,
+  EventSourcedBehavior,
+  RetentionCriteria
+}
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
 import com.typesafe.config.ConfigFactory
 import hmda.model.filing.submissions.PaginatedResource
@@ -54,7 +58,8 @@ object HmdaParserError
         emptyState = HmdaParserErrorState(),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
-      ).snapshotEvery(1000)
+      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000,
+                                                      keepNSnapshots = 10))
     }
 
   override def commandHandler(

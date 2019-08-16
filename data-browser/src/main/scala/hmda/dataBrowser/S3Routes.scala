@@ -12,4 +12,6 @@ object S3Routes {
     "server.s3.routes.nationwide-csv")
   val nationwidePipe: String = s3Url + config.getString(
     "server.s3.routes.nationwide-pipe")
+  val filteredQueries: String = s3Url + config.getString(
+    "server.s3.routes.queries")
 }
