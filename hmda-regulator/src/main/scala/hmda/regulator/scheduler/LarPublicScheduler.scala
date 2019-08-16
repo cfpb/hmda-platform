@@ -9,6 +9,7 @@ import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3._
 import akka.stream.scaladsl._
 import akka.stream.alpakka.s3.scaladsl.S3
+import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
@@ -17,6 +18,7 @@ import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.query.DbConfiguration.dbConfig
+import hmda.regulator.helper.ModifiedLarHeader
 import hmda.regulator.query.component.RegulatorComponent2018
 import hmda.regulator.query.lar.{LarEntityImpl, ModifiedLarEntityImpl}
 import hmda.regulator.scheduler.schedules.Schedules.LarPublicScheduler2018
@@ -25,7 +27,10 @@ import slick.basic.DatabasePublisher
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class LarPublicScheduler extends HmdaActor with RegulatorComponent2018 {
+class LarPublicScheduler
+    extends HmdaActor
+    with RegulatorComponent2018
+    with ModifiedLarHeader {
 
   implicit val ec = context.system.dispatcher
   implicit val materializer = ActorMaterializer()
@@ -39,7 +44,7 @@ class LarPublicScheduler extends HmdaActor with RegulatorComponent2018 {
   val region = awsConfig.getString("public-region")
   val bucket = awsConfig.getString("public-s3-bucket")
   val environment = awsConfig.getString("public-environment")
-  val year = awsConfig.getString("year")
+  val year = awsConfig.getString("public-year")
   val awsCredentialsProvider = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess))
 
@@ -88,10 +93,15 @@ class LarPublicScheduler extends HmdaActor with RegulatorComponent2018 {
         .multipartUpload(bucket, s"$environment/lar/$fileNamePSV")
         .withAttributes(S3Attributes.settings(s3Settings))
 
-      var resultsPSV: Future[MultipartUploadResult] = allResultsSource
-        .map(mlarEntity => mlarEntity.toPublicPSV + "\n")
-        .map(s => ByteString(s))
-        .runWith(s3SinkPSV)
+      var resultsPSV: Future[MultipartUploadResult] =
+        allResultsSource.zipWithIndex
+          .map(
+            mlarEntity =>
+              if (mlarEntity._2 == 0)
+                MLARHeader.concat(mlarEntity._1.toPublicPSV) + "\n"
+              else mlarEntity._1.toPublicPSV + "\n")
+          .map(s => ByteString(s))
+          .runWith(s3SinkPSV)
 
       resultsPSV onComplete {
         case Success(result) => {

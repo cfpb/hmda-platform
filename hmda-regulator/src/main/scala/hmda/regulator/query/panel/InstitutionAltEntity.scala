@@ -39,13 +39,4 @@ case class InstitutionAltEntity(
       s"$assets|$otherLenderCode|$topHolderIdRssd|$topHolderName"
 
   }
-
-  def toPublicCSV: String = {
-    s"$lei,$activityYear,$agency," +
-      s"$institutionType,$id2017,$taxId," +
-      s"$rssd,$respondentName,$respondentState," +
-      s"$respondentCity,$parentIdRssd,$parentName," +
-      s"$assets,$otherLenderCode,$topHolderIdRssd,$topHolderName"
-
-  }
 }
