@@ -35,7 +35,6 @@ class PanelPublicScheduler
 
   implicit val ec = context.system.dispatcher
   implicit val materializer = ActorMaterializer()
-  private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   def institutionRepository2018 = new InstitutionRepository2018(dbConfig)
   def emailRepository2018 = new InstitutionEmailsRepository2018(dbConfig)
 

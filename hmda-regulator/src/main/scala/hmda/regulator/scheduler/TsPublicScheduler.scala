@@ -31,7 +31,6 @@ class TsPublicScheduler
 
   implicit val ec = context.system.dispatcher
   implicit val materializer = ActorMaterializer()
-  private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   def tsRepository2018 = new TransmittalSheetRepository2018(dbConfig)
 
   val awsConfig = ConfigFactory.load("application.conf").getConfig("public-aws")

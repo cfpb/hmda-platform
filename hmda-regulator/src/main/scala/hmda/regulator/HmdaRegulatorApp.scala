@@ -51,7 +51,8 @@ object HmdaRegulatorApp extends App {
       "panelTask",
       ConfigFactory
         .parseString(panelTimer2018)
-        .withValue(panelTimer2019(0),ConfigValueFactory.fromAnyRef(panelTimer2019(1)))
+        .withValue(panelTimer2019(0),
+                   ConfigValueFactory.fromAnyRef(panelTimer2019(1)))
         .withFallback(config)
     )
   panelActorSystem.actorOf(Props[PanelScheduler], "PanelScheduler")
@@ -60,7 +61,8 @@ object HmdaRegulatorApp extends App {
     ActorSystem("larTask",
                 ConfigFactory
                   .parseString(larTimer2018)
-                  .withValue(larTimer2019(0), ConfigValueFactory.fromAnyRef(larTimer2019(1)))
+                  .withValue(larTimer2019(0),
+                             ConfigValueFactory.fromAnyRef(larTimer2019(1)))
                   .withFallback(config))
   larActorSystem.actorOf(Props[LarScheduler], "LarScheduler")
 
@@ -68,7 +70,8 @@ object HmdaRegulatorApp extends App {
     ActorSystem("tsTask",
                 ConfigFactory
                   .parseString(tsTimer2018)
-                  .withValue(tsTimer2019(0), ConfigValueFactory.fromAnyRef(tsTimer2019(1)))
+                  .withValue(tsTimer2019(0),
+                             ConfigValueFactory.fromAnyRef(tsTimer2019(1)))
                   .withFallback(config))
   tsActorSystem.actorOf(Props[TsScheduler], "TsScheduler")
 
@@ -77,7 +80,8 @@ object HmdaRegulatorApp extends App {
       "panelPublicTask",
       ConfigFactory.parseString(panelPublicTimer2018).withFallback(config))
 
-  panelPublicActorSystem.actorOf(Props[PanelPublicScheduler], "PanelPublicScheduler")
+  panelPublicActorSystem.actorOf(Props[PanelPublicScheduler],
+                                 "PanelPublicScheduler")
 
   val larPublicActorSystem =
     ActorSystem(

@@ -41,7 +41,8 @@ class TsScheduler
   def tsRepository2018 = new TransmittalSheetRepository2018(dbConfig)
   def tsRepository2019 = new TransmittalSheetRepository2019(dbConfig)
 
-  val awsConfig = ConfigFactory.load("application.conf").getConfig("private-aws")
+  val awsConfig =
+    ConfigFactory.load("application.conf").getConfig("private-aws")
   val accessKeyId = awsConfig.getString("private-access-key-id")
   val secretAccess = awsConfig.getString("private-secret-access-key ")
   val region = awsConfig.getString("private-region")

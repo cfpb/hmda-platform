@@ -47,7 +47,8 @@ class LarScheduler
   def larRepository2018 = new LarRepository2018(dbConfig)
   def larRepository2019 = new LarRepository2019(dbConfig)
 
-  val awsConfig = ConfigFactory.load("application.conf").getConfig("private-aws")
+  val awsConfig =
+    ConfigFactory.load("application.conf").getConfig("private-aws")
   val accessKeyId = awsConfig.getString("private-access-key-id")
   val secretAccess = awsConfig.getString("private-secret-access-key ")
   val region = awsConfig.getString("private-region")
