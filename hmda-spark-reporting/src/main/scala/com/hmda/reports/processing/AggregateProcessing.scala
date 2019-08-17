@@ -76,7 +76,7 @@ object AggregateProcessing {
         .option("upperBound", 99999)
         .option(
           "dbtable",
-          s"(select * from modifiedlar2018prod where filing_year = $year and state <> 'NA' and county <> 'NA' and lei not in ('BANK1LEIFORTEST12345','BANK3LEIFORTEST12345','BANK4LEIFORTEST12345','999999LE3ZOZXUS7W648','28133080042813308004','B90YWS6AFX2LGWOXJ1LD')) as mlar"
+          s"(select * from modifiedlar2018_snapshot where filing_year = $year and state <> 'NA' and county <> 'NA' and lei not in ('BANK1LEIFORTEST12345','BANK3LEIFORTEST12345','BANK4LEIFORTEST12345','999999LE3ZOZXUS7W648','28133080042813308004','B90YWS6AFX2LGWOXJ1LD')) as mlar"
         )
         .load()
         .withColumnRenamed("race_categorization", "race")
@@ -392,7 +392,7 @@ object AggregateProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(
-            s"$bucket/reports/aggregate/$year/${input.msa.id}/1.json",
+            s"/dev/reports/aggregate/2018/for_production/${input.msa.id}/1.json",
             data,
             "cfpb-hmda-public",
             s3Settings)(mat, ec)
@@ -404,7 +404,7 @@ object AggregateProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(
-            s"$bucket/reports/aggregate/$year/${input.msa.id}/2.json",
+            s"/dev/reports/aggregate/2018/for_production/${input.msa.id}/2.json",
             data,
             "cfpb-hmda-public",
             s3Settings)(mat, ec)

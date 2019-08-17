@@ -11,7 +11,7 @@ spec:
     "spark.streaming.receiver.maxRate": "1"
     "spark.streaming.backpressure.initialRate": "1"
     "spark.streaming.backpressure.enabled": "true"
-  image: "hmda/hmda-spark-reporting:check1and2"
+  image: "hmda/hmda-spark-reporting:rerun1and2"
   imagePullPolicy: Always
   mainClass: com.hmda.reports.AggregateReports
   mainApplicationFile: "local:///opt/spark/cfpb/hmda/jars/hmda-spark-reporting.jar"
@@ -54,9 +54,9 @@ spec:
       - name: "test-volume"
         mountPath: "/tmp"
   executor:
-    cores: 3
-    instances: 3
-    memory: "8g"
+    cores: 2
+    instances: 2
+    memory: "12g"
     javaOptions: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
     labels:
       version: 2.4.0
