@@ -132,7 +132,11 @@ class PostgresModifiedLarRepository(tableName: String,
     if (remainingExpressions.isEmpty) primary
     else {
       val secondaries =
-        remainingExpressions.map(expr => s"AND $expr").mkString(sep = " ")
+        remainingExpressions
+          .filterNot(_ == "filing_year IN ('2018')")
+          .map(expr => s"AND $expr")
+          .mkString(sep = " ")
+      println("SECONDARIES!!!!!!!!: " + secondaries)
       s"$primary $secondaries"
     }
   }
@@ -146,6 +150,7 @@ class PostgresModifiedLarRepository(tableName: String,
       case head :: tail => whereAndOpt(head, tail: _*)
     }
 
+    println("filterCriteria: " + filterCriteria)
     val searchQuery = sql"""
       SELECT #${columns}
       FROM #${tableName}
@@ -167,9 +172,12 @@ class PostgresModifiedLarRepository(tableName: String,
       browserFields: List[QueryField]): Task[Statistic] = {
     val queries = browserFields.map(field => in(field.dbName, field.values))
     val filterCriteria = queries match {
-      case Nil          => ""
-      case head :: tail => whereAndOpt(head, tail: _*)
+      case Nil => ""
+      case head :: tail =>
+        println("This is tail: " + tail)
+        whereAndOpt(head, tail: _*)
     }
+    println("filterCriteria!!!!!!!!!!!!!!!!!!!!!: " + filterCriteria)
     val query = sql"""
         SELECT
           COUNT(loan_amount),
