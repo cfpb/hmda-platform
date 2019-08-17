@@ -136,7 +136,6 @@ class PostgresModifiedLarRepository(tableName: String,
           .filterNot(_ == "filing_year IN ('2018')")
           .map(expr => s"AND $expr")
           .mkString(sep = " ")
-      println("SECONDARIES!!!!!!!!: " + secondaries)
       s"$primary $secondaries"
     }
   }
@@ -177,7 +176,6 @@ class PostgresModifiedLarRepository(tableName: String,
         println("This is tail: " + tail)
         whereAndOpt(head, tail: _*)
     }
-    println("filterCriteria!!!!!!!!!!!!!!!!!!!!!: " + filterCriteria)
     val query = sql"""
         SELECT
           COUNT(loan_amount),
