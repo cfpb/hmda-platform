@@ -392,7 +392,7 @@ object AggregateProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(
-            s"/dev/reports/aggregate/2018/for_production/${input.msa.id}/1.json",
+            s"dev/reports/aggregate/2018/for_production/${input.msa.id}/1.json",
             data,
             "cfpb-hmda-public",
             s3Settings)(mat, ec)
@@ -404,7 +404,7 @@ object AggregateProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(
-            s"/dev/reports/aggregate/2018/for_production/${input.msa.id}/2.json",
+            s"dev/reports/aggregate/2018/for_production/${input.msa.id}/2.json",
             data,
             "cfpb-hmda-public",
             s3Settings)(mat, ec)
