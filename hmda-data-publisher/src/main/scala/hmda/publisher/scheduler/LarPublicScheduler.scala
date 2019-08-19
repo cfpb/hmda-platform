@@ -90,7 +90,7 @@ class LarPublicScheduler
 
       //PSV Sync
       val s3SinkPSV = S3
-        .multipartUpload(bucket, s"$environment/lar/$fileNamePSV")
+        .multipartUpload(bucket, s"$environment/dynamic-data/2018/$fileNamePSV")
         .withAttributes(S3Attributes.settings(s3Settings))
 
       var resultsPSV: Future[MultipartUploadResult] =
