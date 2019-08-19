@@ -70,7 +70,7 @@ service:
 
 databrowser:
   name: databrowser
-  loglevel: DEBUG
+  loglevel: INFO
   s3Url: https://cfpb-hmda-public.s3.amazonaws.com
   nationwideRouteCSV: data-browser/nationwide_all.csv
   nationwideRoutePipe: data-browser/nationwide_all.txt
