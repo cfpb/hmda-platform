@@ -106,21 +106,51 @@ spec:
               secretKeyRef:
                 name: inst-postgres-credentials
                 key: url
-          - name: TS_SCHEDULE
+          - name: TS_PRIVATE_SCHEDULE_2018
             valueFrom:
               configMapKeyRef:
                 name: schedule-configmap
-                key: publisher.ts
-          - name: LAR_SCHEDULE
+                key: publisher.ts.private.2018
+          - name: LAR_PRIVATE_SCHEDULE_2018
             valueFrom:
               configMapKeyRef:
                 name: schedule-configmap
-                key: publisher.lar
-          - name: PANEL_SCHEDULE
+                key: publisher.lar.private.2018
+          - name: PANEL_PRIVATE_SCHEDULE_2018
             valueFrom:
               configMapKeyRef:
                 name: schedule-configmap
-                key: publisher.panel
+                key: publisher.panel.private.2018
+          - name: TS_PRIVATE_SCHEDULE_2019
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.ts.private.2019
+          - name: LAR_PRIVATE_SCHEDULE_2019
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.lar.private.2019
+          - name: PANEL_PRIVATE_SCHEDULE_2019
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.panel.private.2019
+          - name: TS_PUBLIC_SCHEDULE_2018
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.ts.public.2018
+          - name: LAR_PUBLIC_SCHEDULE_2018
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.lar.public.2018
+          - name: PANEL_PUBLIC_SCHEDULE_2018
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.panel.public.2018
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
