@@ -10,6 +10,7 @@ import akka.stream.ActorMaterializer
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.dataBrowser.Settings
 import hmda.dataBrowser.api.DataBrowserDirectives._
+import hmda.dataBrowser.models.HealthCheckStatus.Up
 import hmda.dataBrowser.models._
 import hmda.dataBrowser.repositories._
 import hmda.dataBrowser.services._
@@ -66,6 +67,9 @@ trait DataBrowserHttpApi extends Settings {
 
   val fileCache: FileService = new S3FileService
 
+  val healthCheck: HealthCheckService =
+    new HealthCheckService(repository, cache, fileCache)
+
   def serveData(queries: List[QueryField],
                 delimiter: Delimiter,
                 errorMessage: String): Route =
@@ -110,7 +114,6 @@ trait DataBrowserHttpApi extends Settings {
                     eachQueryField =>
                       eachQueryField.isAllSelected
                   }
-                  log.info("Nationwide [CSV]: " + allFields)
                   contentDispositionHeader(allFields, Commas) {
                     serveData(
                       allFields,
@@ -176,11 +179,7 @@ trait DataBrowserHttpApi extends Settings {
           (path(Csv) & get) {
             extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
               extractFieldsForRawQueries { remainingQueryFields =>
-                val allFields =
-                  (mandatoryFields ++ remainingQueryFields).filterNot {
-                    eachQueryField =>
-                      eachQueryField.isAllSelected
-                  }
+                val allFields = mandatoryFields ++ remainingQueryFields
                 log.info("CSV: " + allFields)
                 contentDispositionHeader(allFields, Commas) {
                   serveData(
@@ -195,12 +194,8 @@ trait DataBrowserHttpApi extends Settings {
           (path(Pipe) & get) {
             extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
               extractFieldsForRawQueries { remainingQueryFields =>
-                val allFields =
-                  (mandatoryFields ++ remainingQueryFields).filterNot {
-                    eachQueryField =>
-                      eachQueryField.isAllSelected
-                  }
-                log.info("Pipe: " + allFields)
+                val allFields = mandatoryFields ++ remainingQueryFields
+                log.info("CSV: " + allFields)
                 contentDispositionHeader(allFields, Pipes) {
                   serveData(
                     allFields,
@@ -210,7 +205,20 @@ trait DataBrowserHttpApi extends Settings {
               }
             }
           }
-      }
+      } ~
+        pathPrefix("health") {
+          onComplete(healthCheck.healthCheckStatus.runToFuture) {
+            case Success(hs @ HealthCheckResponse(Up, Up, Up)) =>
+              complete(StatusCodes.OK, hs)
+
+            case Success(hs) =>
+              complete(StatusCodes.ServiceUnavailable, hs)
+
+            case Failure(ex) =>
+              log.error(ex, "Failed to perform a health check")
+              complete(StatusCodes.InternalServerError)
+          }
+        }
     }
 
 }
