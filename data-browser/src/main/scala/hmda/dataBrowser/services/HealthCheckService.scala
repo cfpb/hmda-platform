@@ -12,15 +12,22 @@ import hmda.dataBrowser.models.{
   QueryField
 }
 import hmda.dataBrowser.repositories.{
-  ModifiedLarAggregateCache,
-  ModifiedLarRepository
+  PostgresModifiedLarRepository,
+  RedisModifiedLarAggregateCache
 }
 import monix.eval.Task
 
+/**
+  * This is a specific health check service
+  * @param database
+  * @param cache
+  * @param storage
+  * @param mat
+  */
 class HealthCheckService(
-    database: ModifiedLarRepository,
-    cache: ModifiedLarAggregateCache,
-    storage: FileService)(implicit mat: ActorMaterializer) {
+    database: PostgresModifiedLarRepository,
+    cache: RedisModifiedLarAggregateCache,
+    storage: S3FileService)(implicit mat: ActorMaterializer) {
   private def health[A](task: Task[A]): Task[HealthCheckStatus] =
     task.as(Up).onErrorFallbackTo(Task.pure(Down))
 
@@ -36,14 +43,10 @@ class HealthCheckService(
       )
 
     def databaseQuery: Task[HealthCheckStatus] =
-      health {
-        Task.deferFuture(database.find(exampleQuery).runWith(Sink.headOption))
-      }
+      health(database.healthCheck)
 
     def cacheQuery: Task[HealthCheckStatus] =
-      health {
-        cache.find(exampleQuery)
-      }
+      health(cache.healthCheck)
 
     def storageQuery: Task[HealthCheckStatus] =
       health {

@@ -33,7 +33,7 @@ trait DataBrowserHttpApi extends Settings {
   implicit val materializer: ActorMaterializer
 
   val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
-  val repository: ModifiedLarRepository =
+  val repository =
     new PostgresModifiedLarRepository(database.tableName, databaseConfig)
 
   // We make the creation of the Redis client effectful because it can fail and we would like to operate
@@ -59,13 +59,13 @@ trait DataBrowserHttpApi extends Settings {
     // client creation process is expensive and the client is able to recover internally when Redis comes back
   }
 
-  val cache: ModifiedLarAggregateCache =
+  val cache =
     new RedisModifiedLarAggregateCache(redisClientTask, redis.ttl)
 
   val query: QueryService =
     new ModifiedLarBrowserService(repository, cache)
 
-  val fileCache: FileService = new S3FileService
+  val fileCache = new S3FileService
 
   val healthCheck: HealthCheckService =
     new HealthCheckService(repository, cache, fileCache)

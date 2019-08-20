@@ -45,7 +45,7 @@ class S3FileService(implicit mat: ActorMaterializer)
       contentType = ContentTypes.`text/csv(UTF-8)`,
       s3Headers = S3Headers()
         .withCustomHeaders(contentDispositionMetadata)
-//        .withCannedAcl(CannedAcl.PublicRead)
+        .withCannedAcl(CannedAcl.PublicRead)
     )
     Task
       .deferFuture {
@@ -105,4 +105,7 @@ class S3FileService(implicit mat: ActorMaterializer)
       }
       .map(opt => opt.map(_ => s"${s3.url}/$key"))
   }
+
+  def healthCheck: Task[Unit] =
+    Task.deferFuture(S3.checkIfBucketExists(s3.bucket)).void
 }
