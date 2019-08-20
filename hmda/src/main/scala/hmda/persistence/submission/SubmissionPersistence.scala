@@ -2,12 +2,16 @@ package hmda.persistence.submission
 
 import java.time.Instant
 
-import akka.actor.typed.{TypedActorContext, ActorRef, Behavior}
+import akka.actor.typed.{ActorRef, Behavior, TypedActorContext}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
+import akka.persistence.typed.scaladsl.{
+  Effect,
+  EventSourcedBehavior,
+  RetentionCriteria
+}
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
 import hmda.messages.filing.FilingCommands.{AddSubmission, UpdateSubmission}
 import hmda.messages.submission.SubmissionCommands._
@@ -40,7 +44,8 @@ object SubmissionPersistence
         emptyState = SubmissionState(None),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
-      ).snapshotEvery(1000)
+      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000,
+                                                      keepNSnapshots = 10))
     }
 
   override def commandHandler(ctx: TypedActorContext[SubmissionCommand])

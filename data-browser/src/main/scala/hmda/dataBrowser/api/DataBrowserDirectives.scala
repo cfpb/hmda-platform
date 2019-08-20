@@ -28,11 +28,55 @@ import hmda.dataBrowser.models.Sex._
 import hmda.dataBrowser.models.State._
 import hmda.dataBrowser.models.TotalUnits._
 import hmda.dataBrowser.models._
+import Delimiter.fileEnding
+import hmda.dataBrowser.services._
 import io.circe.generic.auto._
+import monix.eval.Task
+import cats.implicits._
 
 trait DataBrowserDirectives {
   private implicit val csvStreamingSupport: CsvEntityStreamingSupport =
     EntityStreamingSupport.csv()
+
+  /**
+    * This is an effectful function that calls out to S3 to check if data is cached or runs a query against the
+    * SQL database and then persists the data in S3
+    *
+    * The Left part of the Either indicates that the data isn't in S3 so this is a cache miss
+    * The Right part of the Either indicates a cache hit so the data is present in S3
+    *
+    * @param cache     the file service responsible for caching raw data
+    * @param db        the query service responsible for fetching raw data from the database
+    * @param queries   a list of query parameters
+    * @param delimiter either commas or pipes
+    * @return
+    */
+  def obtainDataSource(cache: FileService, db: QueryService)(
+      queries: List[QueryField],
+      delimiter: Delimiter)
+    : Task[Either[Source[ByteString, NotUsed], String]] = {
+    val serializedData: Source[ByteString, NotUsed] = {
+      val databaseData: Source[ModifiedLarEntity, NotUsed] =
+        db.fetchData(queries)
+      delimiter match {
+        case Commas => csvSource(databaseData)
+        case Pipes  => pipeSource(databaseData)
+      }
+    }
+
+    cache
+      .retrieveDataUrl(queries, delimiter)
+      .flatMap {
+        case Some(url) =>
+          Task.now(Right(url))
+        case None =>
+          // upload the data to S3 in the background and emit the Source immediately
+          cache
+            .persistData(queries, delimiter, serializedData)
+            .forkAndForget *> Task(Left(serializedData))
+      }
+      .onErrorFallbackTo(Task.now(Left(serializedData)))
+  }
 
   def csvSource(
       s: Source[ModifiedLarEntity, NotUsed]): Source[ByteString, NotUsed] = {
@@ -44,12 +88,14 @@ trait DataBrowserDirectives {
       .via(csvStreamingSupport.framingRenderer)
   }
 
-  def contentDisposition(queries: List[QueryField])(route: Route): Route = {
+  def contentDispositionHeader(queries: List[QueryField], delimiter: Delimiter)(
+      route: Route): Route = {
     val filename =
       queries.map(q => q.name + "_" + q.values.mkString("-")).mkString("_")
     respondWithHeader(
-      `Content-Disposition`(attachment,
-                            Map("filename" -> (filename + ".csv"))))(route)
+      `Content-Disposition`(
+        attachment,
+        Map("filename" -> (filename + fileEnding(delimiter)))))(route)
   }
 
   def pipeSource(
@@ -67,8 +113,12 @@ trait DataBrowserDirectives {
       .flatMap {
         case Nil => provide(None)
         case xs =>
-          provide(Option(
-            QueryField(name = "msamd", xs.map(_.toString), dbName = "msa_md")))
+          provide(
+            Option(
+              QueryField(name = "msamd",
+                         xs.map(_.toString),
+                         dbName = "msa_md",
+                         isAllSelected = false)))
       }
 
   private def extractYears: Directive1[Option[QueryField]] =
@@ -80,7 +130,8 @@ trait DataBrowserDirectives {
             Option(
               QueryField(name = "year",
                          xs.map(_.toString),
-                         dbName = "filing_year")))
+                         dbName = "filing_year",
+                         isAllSelected = false)))
       }
 
   private def extractStates: Directive1[Option[QueryField]] =
@@ -95,7 +146,8 @@ trait DataBrowserDirectives {
               Option(
                 QueryField(name = "state",
                            values = states.map(_.entryName),
-                           dbName = "state")))
+                           dbName = "state",
+                           isAllSelected = false)))
 
           case Right(_) =>
             provide(None)
@@ -111,9 +163,22 @@ trait DataBrowserDirectives {
           case Left(invalidActions) =>
             complete((BadRequest, InvalidActions(invalidActions)))
 
-          case Right(actionsTaken) if actionsTaken.nonEmpty =>
+          case Right(actionsTaken)
+              if actionsTaken.nonEmpty && actionsTaken.size == ActionTaken.values.size =>
             provide(
-              Option(QueryField(name, actionsTaken.map(_.entryName), dbName)))
+              Option(
+                QueryField(name,
+                           actionsTaken.map(_.entryName),
+                           dbName,
+                           isAllSelected = true)))
+          case Right(actionsTaken)
+              if (actionsTaken.nonEmpty && actionsTaken.size != ActionTaken.values.size) =>
+            provide(
+              Option(
+                QueryField(name,
+                           actionsTaken.map(_.entryName),
+                           dbName,
+                           isAllSelected = false)))
 
           case Right(_) =>
             provide(None)
@@ -129,10 +194,23 @@ trait DataBrowserDirectives {
           case Left(invalidEthnicities) =>
             complete((BadRequest, InvalidEthnicities(invalidEthnicities)))
 
-          case Right(ethnicities) if ethnicities.nonEmpty =>
+          case Right(ethnicities)
+              if ethnicities.nonEmpty && ethnicities.size == Ethnicity.values.size =>
             provide(
-              Option(QueryField(name, ethnicities.map(_.entryName), dbName)))
+              Option(
+                QueryField(name,
+                           ethnicities.map(_.entryName),
+                           dbName,
+                           isAllSelected = true)))
 
+          case Right(ethnicities)
+              if ethnicities.nonEmpty && ethnicities.size != Ethnicity.values.size =>
+            provide(
+              Option(
+                QueryField(name,
+                           ethnicities.map(_.entryName),
+                           dbName,
+                           isAllSelected = false)))
           case Right(_) =>
             provide(None)
         }
@@ -147,9 +225,23 @@ trait DataBrowserDirectives {
           case Left(invalidTotalUnits) =>
             complete((BadRequest, InvalidTotalUnits(invalidTotalUnits)))
 
-          case Right(totalUnits) if totalUnits.nonEmpty =>
+          case Right(totalUnits)
+              if totalUnits.nonEmpty && totalUnits.size == TotalUnits.values.size =>
             provide(
-              Option(QueryField(name, totalUnits.map(_.entryName), dbName)))
+              Option(
+                QueryField(name,
+                           totalUnits.map(_.entryName),
+                           dbName,
+                           isAllSelected = true)))
+
+          case Right(totalUnits)
+              if totalUnits.nonEmpty && totalUnits.size != TotalUnits.values.size =>
+            provide(
+              Option(
+                QueryField(name,
+                           totalUnits.map(_.entryName),
+                           dbName,
+                           isAllSelected = false)))
 
           case Right(_) =>
             provide(None)
@@ -164,9 +256,21 @@ trait DataBrowserDirectives {
         case Left(invalidRaces) =>
           complete((BadRequest, InvalidRaces(invalidRaces)))
 
-        case Right(races) if races.nonEmpty =>
-          provide(Option(QueryField(name, races.map(_.entryName), dbName)))
+        case Right(races) if races.nonEmpty && races.size == Race.values.size =>
+          provide(
+            Option(
+              QueryField(name,
+                         races.map(_.entryName),
+                         dbName,
+                         isAllSelected = true)))
 
+        case Right(races) if races.nonEmpty && races.size != Race.values.size =>
+          provide(
+            Option(
+              QueryField(name,
+                         races.map(_.entryName),
+                         dbName,
+                         isAllSelected = false)))
         case Right(_) =>
           provide(None)
       }
@@ -183,11 +287,23 @@ trait DataBrowserDirectives {
               (BadRequest,
                InvalidConstructionMethods(invalidConstructionMethods)))
 
-          case Right(constructionMethods) if constructionMethods.nonEmpty =>
+          case Right(constructionMethods)
+              if constructionMethods.nonEmpty && constructionMethods.size == ConstructionMethod.values.size =>
             provide(
               Option(
-                QueryField(name, constructionMethods.map(_.entryName), dbName)))
+                QueryField(name,
+                           constructionMethods.map(_.entryName),
+                           dbName,
+                           isAllSelected = true)))
 
+          case Right(constructionMethods)
+              if constructionMethods.nonEmpty && constructionMethods.size != ConstructionMethod.values.size =>
+            provide(
+              Option(
+                QueryField(name,
+                           constructionMethods.map(_.entryName),
+                           dbName,
+                           isAllSelected = false)))
           case Right(_) =>
             provide(None)
         }
@@ -204,11 +320,23 @@ trait DataBrowserDirectives {
               (BadRequest,
                InvalidDwellingCategories(invalidDwellingCategories)))
 
-          case Right(dwellingCategories) if dwellingCategories.nonEmpty =>
+          case Right(dwellingCategories)
+              if dwellingCategories.nonEmpty && dwellingCategories.size == DwellingCategory.values.size =>
             provide(
               Option(
-                QueryField(name, dwellingCategories.map(_.entryName), dbName)))
+                QueryField(name,
+                           dwellingCategories.map(_.entryName),
+                           dbName,
+                           isAllSelected = true)))
 
+          case Right(dwellingCategories)
+              if dwellingCategories.nonEmpty && dwellingCategories.size != DwellingCategory.values.size =>
+            provide(
+              Option(
+                QueryField(name,
+                           dwellingCategories.map(_.entryName),
+                           dbName,
+                           isAllSelected = false)))
           case Right(_) =>
             provide(None)
         }
@@ -221,12 +349,23 @@ trait DataBrowserDirectives {
           case Left(invalidLienStatuses) =>
             complete((BadRequest, InvalidLienStatuses(invalidLienStatuses)))
 
-          case Right(lienStatuses) if lienStatuses.nonEmpty =>
+          case Right(lienStatuses)
+              if lienStatuses.nonEmpty && lienStatuses.size == LienStatus.values.size =>
             provide(
               Option(
                 QueryField("lien_statuses",
                            lienStatuses.map(_.entryName),
-                           "lien_status")))
+                           "lien_status",
+                           isAllSelected = true)))
+
+          case Right(lienStatuses)
+              if lienStatuses.nonEmpty && lienStatuses.size != LienStatus.values.size =>
+            provide(
+              Option(
+                QueryField("lien_statuses",
+                           lienStatuses.map(_.entryName),
+                           "lien_status",
+                           isAllSelected = false)))
 
           case Right(_) =>
             provide(None)
@@ -240,12 +379,23 @@ trait DataBrowserDirectives {
           case Left(invalidLoanProducts) =>
             complete((BadRequest, InvalidLoanProducts(invalidLoanProducts)))
 
-          case Right(loanProducts) if loanProducts.nonEmpty =>
+          case Right(loanProducts)
+              if loanProducts.nonEmpty && loanProducts.size == LoanProduct.values.size =>
             provide(
               Option(
                 QueryField("loan_products",
                            loanProducts.map(_.entryName),
-                           "loan_product_type")))
+                           "loan_product_type",
+                           isAllSelected = true)))
+
+          case Right(loanProducts)
+              if loanProducts.nonEmpty && loanProducts.size != LoanProduct.values.size =>
+            provide(
+              Option(
+                QueryField("loan_products",
+                           loanProducts.map(_.entryName),
+                           "loan_product_type",
+                           isAllSelected = false)))
 
           case Right(_) =>
             provide(None)
@@ -259,12 +409,23 @@ trait DataBrowserDirectives {
           case Left(invalidLoanPurposes) =>
             complete((BadRequest, InvalidLoanPurposes(invalidLoanPurposes)))
 
-          case Right(loanPurposes) if loanPurposes.nonEmpty =>
+          case Right(loanPurposes)
+              if loanPurposes.nonEmpty && loanPurposes.size == LoanPurpose.values.size =>
             provide(
               Option(
                 QueryField("loan_purposes",
                            loanPurposes.map(_.entryName),
-                           "loan_purpose")))
+                           "loan_purpose",
+                           isAllSelected = true)))
+
+          case Right(loanPurposes)
+              if loanPurposes.nonEmpty && loanPurposes.size != LoanPurpose.values.size =>
+            provide(
+              Option(
+                QueryField("loan_purposes",
+                           loanPurposes.map(_.entryName),
+                           "loan_purpose",
+                           isAllSelected = false)))
 
           case Right(_) =>
             provide(None)
@@ -278,13 +439,24 @@ trait DataBrowserDirectives {
           case Left(invalidLoanTypes) =>
             complete((BadRequest, InvalidLoanTypes(invalidLoanTypes)))
 
-          case Right(loanTypes) if loanTypes.nonEmpty =>
+          case Right(loanTypes)
+              if loanTypes.nonEmpty && loanTypes.size == LoanType.values.size =>
             provide(
               Option(
                 QueryField("loan_types",
                            loanTypes.map(_.entryName),
-                           "loan_type"))
-            )
+                           "loan_type",
+                           isAllSelected = true)))
+
+          case Right(loanTypes)
+              if loanTypes.nonEmpty && loanTypes.size != LoanType.values.size =>
+            provide(
+              Option(
+                QueryField("loan_types",
+                           loanTypes.map(_.entryName),
+                           "loan_type",
+                           isAllSelected = false)))
+
           case Right(_) =>
             provide(None)
         }
@@ -297,12 +469,23 @@ trait DataBrowserDirectives {
           case Left(invalidSexes) =>
             complete((BadRequest, InvalidSexes(invalidSexes)))
 
-          case Right(sexes) if sexes.nonEmpty =>
+          case Right(sexes)
+              if sexes.nonEmpty && sexes.size == Sex.values.size =>
             provide(
               Some(
                 QueryField("sexes",
                            sexes.map(_.entryName),
-                           "sex_categorization")))
+                           "sex_categorization",
+                           isAllSelected = true)))
+
+          case Right(sexes)
+              if sexes.nonEmpty && sexes.size != Sex.values.size =>
+            provide(
+              Some(
+                QueryField("sexes",
+                           sexes.map(_.entryName),
+                           "sex_categorization",
+                           isAllSelected = false)))
 
           case Right(_) =>
             provide(None)
@@ -338,8 +521,9 @@ trait DataBrowserDirectives {
                loanProducts,
                totalUnits,
                ethnicities).flatten
-
-        innerRoute(filteredfields)
+        if (filteredfields.size > 2)
+          complete(BadRequest, TooManyFilterCriterias())
+        else innerRoute(filteredfields)
     }
   }
 
@@ -360,7 +544,9 @@ trait DataBrowserDirectives {
   def extractYearsAndMsaAndStateBrowserFields(
       innerRoute: List[QueryField] => Route): Route =
     (extractYears & extractMsaMds & extractStates) { (years, msaMds, states) =>
-      if (years.nonEmpty && (msaMds.nonEmpty || states.nonEmpty))
+      if ((msaMds.nonEmpty && states.nonEmpty) || (msaMds.isEmpty && states.isEmpty))
+        complete(BadRequest, OnlyStatesOrMsaMds())
+      else if (years.nonEmpty)
         innerRoute(List(years, msaMds, states).flatten)
       else complete(BadRequest, ProvideYearAndStatesOrMsaMds())
     }

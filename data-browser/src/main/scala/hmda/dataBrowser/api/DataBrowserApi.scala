@@ -23,18 +23,19 @@ class DataBrowserApi
     with BaseHttpApi
     with DataBrowserHttpApi {
 
-  override implicit val system: ActorSystem = context.system
-  override implicit val materializer: ActorMaterializer = ActorMaterializer()
+  override implicit lazy val system: ActorSystem = context.system
+  override implicit lazy val materializer: ActorMaterializer =
+    ActorMaterializer()
   override implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
 
-  val duration = config.getInt("server.ask-timeout").seconds
+  val duration: FiniteDuration = server.askTimeout
 
   implicit val timeout: Timeout = Timeout(duration)
 
-  override val name: String = "hmda-data-broswer"
-  override val host: String = config.getString("server.bindings.address")
-  override val port: Int = config.getInt("server.bindings.port")
+  override val name: String = "hmda-data-browser"
+  override val host: String = server.host
+  override val port: Int = server.port
 
   override val paths: Route = routes(s"$name") ~ dataBrowserRoutes
 

@@ -1,7 +1,6 @@
 package hmda
 
 import akka.{actor => untyped}
-import akka.management.AkkaManagement
 import akka.management.cluster.bootstrap.ClusterBootstrap
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
@@ -10,6 +9,7 @@ import hmda.validation.HmdaValidation
 import org.slf4j.LoggerFactory
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.typed.Cluster
+import akka.management.scaladsl.AkkaManagement
 import hmda.api.HmdaApi
 import hmda.persistence.submission.repositories.SyntacticalDb
 import hmda.persistence.util.CassandraUtil

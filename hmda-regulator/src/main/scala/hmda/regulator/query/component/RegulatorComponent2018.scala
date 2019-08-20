@@ -612,6 +612,8 @@ trait RegulatorComponent2018 {
     def msaMd = column[Option[Int]]("msa_md")
     def conformingLoanLimit = column[Option[String]]("conforming_loan_limit")
     def loanFlag = column[Option[String]]("loan_flag")
+    def dwellingCategory = column[Option[String]]("dwelling_category")
+    def loanProductType = column[Option[String]]("loan_product_type")
     def ethnicityCategorization =
       column[Option[String]]("ethnicity_categorization")
     def raceCategorization = column[Option[String]]("race_categorization")
@@ -633,7 +635,6 @@ trait RegulatorComponent2018 {
     def percentMedianMsaIncome =
       column[Option[String]]("percent_median_msa_income")
     def msaMDName = column[Option[String]]("msa_md_name")
-    def uniqID = column[Int]("uniq_id")
     def createdAt = column[Timestamp]("created_at")
     def * =
       (mlarPartOneProjection,
@@ -652,6 +653,8 @@ trait RegulatorComponent2018 {
        tract,
        conformingLoanLimit,
        loanFlag,
+       loanProductType,
+       dwellingCategory,
        ethnicityCategorization,
        raceCategorization,
        sexCategorization,
@@ -752,7 +755,6 @@ trait RegulatorComponent2018 {
        ownerOccupiedUnits,
        oneToFourFamUnits,
        medianAge) <> ((ModifiedLarPartSix.apply _).tupled, ModifiedLarPartSix.unapply)
-
   }
 
   val mlarTable2018 = TableQuery[ModifiedLarTable]

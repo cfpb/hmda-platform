@@ -31,9 +31,14 @@ final case class InvalidStates(
       s"valid states are ${State.values.map(_.entryName).mkString(", ")}")
     extends ErrorResponse
 
+final case class OnlyStatesOrMsaMds(
+    errorType: String = "provide-only-msamds-or-states",
+    message: String = "Provide only states or msamds but not both")
+    extends ErrorResponse
+
 final case class ProvideYearAndStatesOrMsaMds(
     errorType: String = "provide-atleast-msamds-or-states",
-    message: String = "Provide year and either states or msamds or both")
+    message: String = "Provide year and either states or msamds (but not both) ")
     extends ErrorResponse
 
 final case class NoMandatoryFieldsInCount(
@@ -43,6 +48,12 @@ final case class NoMandatoryFieldsInCount(
 
 final case class ProvideYear(errorType: String = "provide-years",
                              message: String = "Provide years for Nationwide")
+    extends ErrorResponse
+
+final case class TooManyFilterCriterias(
+    errorType: String = "provide-two-or-less-filter-criteria",
+    message: String =
+      "Provide two or less filter criterias to perform aggregations (eg. actions_taken, races, genders, etc.)")
     extends ErrorResponse
 
 final case class NotEnoughFilterCriterias(

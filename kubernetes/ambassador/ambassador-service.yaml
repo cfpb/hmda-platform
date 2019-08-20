@@ -11,7 +11,7 @@ metadata:
       apiVersion: ambassador/v0
       kind:  Module
       name:  ambassador
-      cofig:
+      config:
         ambassador_id: ambassador-default-1  
 spec:
   type: NodePort

@@ -56,13 +56,14 @@ class PanelScheduler
   val bankFilterList =
     bankFilter.getString("bank-filter-list").toUpperCase.split(",")
 
-  val awsConfig = ConfigFactory.load("application.conf").getConfig("aws")
-  val accessKeyId = awsConfig.getString("access-key-id")
-  val secretAccess = awsConfig.getString("secret-access-key ")
-  val region = awsConfig.getString("region")
+  val awsConfig =
+    ConfigFactory.load("application.conf").getConfig("private-aws")
+  val accessKeyId = awsConfig.getString("private-access-key-id")
+  val secretAccess = awsConfig.getString("private-secret-access-key ")
+  val region = awsConfig.getString("private-region")
   val bucket = awsConfig.getString("private-s3-bucket")
-  val environment = awsConfig.getString("environment")
-  val year = awsConfig.getString("year")
+  val environment = awsConfig.getString("private-environment")
+  val year = awsConfig.getString("private-year")
 
   val awsCredentialsProvider = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess))

@@ -13,6 +13,8 @@ case class ModifiedLarPartOne(
     tract: Option[String] = Some(""),
     conformingLoanLimit: Option[String] = Some(""),
     loanFlag: Option[String] = Some(""),
+    loanProductType: Option[String] = Some(""),
+    dwellingCategory: Option[String] = Some(""),
     ethnicityCategorization: Option[String] = Some(""),
     raceCategorization: Option[String] = Some(""),
     sexCategorization: Option[String] = Some(""),
@@ -28,8 +30,8 @@ case class ModifiedLarPartOne(
   def toPublicPSV: String = {
     s"${extractOpt(filingYear)}|$lei|${extractOpt(msaMd)}|${extractOpt(state)}|${extractOpt(county)}|" +
       s"${extractOpt(tract)}|${extractOpt(conformingLoanLimit)}|${extractOpt(
-        loanFlag)}|${extractOpt(ethnicityCategorization)}|" +
-      s"|${extractOpt(raceCategorization)}|${extractOpt(sexCategorization)}|${extractOpt(
+        loanProductType)}|${extractOpt(dwellingCategory)}|${extractOpt(ethnicityCategorization)}|" +
+      s"${extractOpt(raceCategorization)}|${extractOpt(sexCategorization)}|${extractOpt(
         actionTakenType)}|${extractOpt(purchaserType)}|" +
       s"${extractOpt(preapproval)}|${extractOpt(loanType)}|${extractOpt(
         loanPurpose)}|${extractOpt(lienStatus)}|"
@@ -95,7 +97,7 @@ case class ModifiedLarPartThree(baloonPayment: Option[Int] = Some(0),
       s"${extractOpt(otherAmortization)}|" +
       toBigDecimalString(propertyValue) + "|" +
       s"${extractOpt(constructionMethod)}|${extractOpt(occupancyType)}|" +
-      s"${extractOpt(homeSecurityPolicy)}${extractOpt(landPropertyInterest)}|${extractOpt(
+      s"${extractOpt(homeSecurityPolicy)}|${extractOpt(landPropertyInterest)}|${extractOpt(
         totalUnits)}|${extractOpt(mfAffordable)}|" +
       s"${extractOpt(income)}|${extractOpt(debtToIncome)}|${extractOpt(creditScoreTypeApplicant)}|" +
       s"${extractOpt(creditScoreTypeCoApplicant)}|${extractOpt(
@@ -165,7 +167,7 @@ case class ModifiedLarPartFive(
       s"${extractOpt(ageApplicant)}|${extractOpt(ageCoApplicant)}|${extractOpt(applicantAgeGreaterThan62)}|${extractOpt(
         coapplicantAgeGreaterThan62)}|${extractOpt(applicationSubmission)}|" +
       s"${extractOpt(payable)}|${extractOpt(aus1)}|${extractOpt(aus2)}|${extractOpt(
-        aus3)})}|${extractOpt(aus4)}|"
+        aus3)}|${extractOpt(aus4)}|"
   }
 
 }
@@ -189,8 +191,7 @@ case class ModifiedLarPartSix(aus5: Option[Int] = Some(0),
     s"${extractOpt(aus5)}|" +
       s"${extractOpt(denialReason1)}|${extractOpt(denialReason2)}|${extractOpt(
         denialReason3)}|${extractOpt(denialReason4)}|${extractOpt(population)}|" +
-      s"${extractOpt(aus5)}|${extractOpt(minorityPopulationPercent)}|${extractOpt(
-        ffiecMedFamIncome)}|${extractOpt(medianIncomePercentage)}|" +
+      s"${extractOpt(minorityPopulationPercent)}|${extractOpt(ffiecMedFamIncome)}|${extractOpt(medianIncomePercentage)}|" +
       s"${extractOpt(ownerOccupiedUnits)}|${extractOpt(oneToFourFamUnits)}|${extractOpt(medianAge)}"
   }
 

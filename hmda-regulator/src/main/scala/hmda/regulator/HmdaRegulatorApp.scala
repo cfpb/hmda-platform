@@ -62,26 +62,24 @@ object HmdaRegulatorApp extends App {
                 ConfigFactory
                   .parseString(larTimer2018)
                   .withValue(larTimer2019(0),
-                             ConfigValueFactory
-                               .fromAnyRef(larTimer2019(1)))
+                             ConfigValueFactory.fromAnyRef(larTimer2019(1)))
                   .withFallback(config))
   larActorSystem.actorOf(Props[LarScheduler], "LarScheduler")
 
-  val tsActorSystem = ActorSystem("tsTask",
-                                  ConfigFactory
-                                    .parseString(tsTimer2018)
-                                    .withValue(tsTimer2019(0),
-                                               ConfigValueFactory
-                                                 .fromAnyRef(tsTimer2019(1)))
-                                    .withFallback(config))
+  val tsActorSystem =
+    ActorSystem("tsTask",
+                ConfigFactory
+                  .parseString(tsTimer2018)
+                  .withValue(tsTimer2019(0),
+                             ConfigValueFactory.fromAnyRef(tsTimer2019(1)))
+                  .withFallback(config))
   tsActorSystem.actorOf(Props[TsScheduler], "TsScheduler")
-
-  //Public Data Actor Systems
 
   val panelPublicActorSystem =
     ActorSystem(
       "panelPublicTask",
       ConfigFactory.parseString(panelPublicTimer2018).withFallback(config))
+
   panelPublicActorSystem.actorOf(Props[PanelPublicScheduler],
                                  "PanelPublicScheduler")
 
@@ -89,12 +87,14 @@ object HmdaRegulatorApp extends App {
     ActorSystem(
       "larPublicTask",
       ConfigFactory.parseString(larPublicTimer2018).withFallback(config))
+
   larPublicActorSystem.actorOf(Props[LarPublicScheduler], "LarPublicScheduler")
 
   val tsPublicActorSystem =
     ActorSystem(
       "tsPublicTask",
       ConfigFactory.parseString(tsPublicTimer2018).withFallback(config))
+
   tsPublicActorSystem.actorOf(Props[TsPublicScheduler], "TsPublicScheduler")
 
 }

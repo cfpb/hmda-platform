@@ -32,7 +32,7 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
   def msaMds(lei: String, filingYear: Int): Future[Vector[(String, String)]] =
     db.run {
       sql"""SELECT DISTINCT msa_md, msa_md_name
-                         FROM #${fetchYearTable(filingYear)} WHERE lei = ${lei.toUpperCase} AND filing_year = ${filingYear}"""
+                         FROM #${fetchYearTable(filingYear)} WHERE lei = ${lei.toUpperCase} AND filing_year = ${filingYear} AND msa_md <> 0"""
         .as[(String, String)]
     }
 

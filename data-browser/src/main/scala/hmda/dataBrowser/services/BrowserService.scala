@@ -6,7 +6,7 @@ import hmda.dataBrowser.models._
 
 import monix.eval.Task
 
-trait BrowserService {
+trait QueryService {
   def fetchAggregate(fields: List[QueryField]): Task[Seq[Aggregation]]
   def fetchData(fields: List[QueryField]): Source[ModifiedLarEntity, NotUsed]
 }
