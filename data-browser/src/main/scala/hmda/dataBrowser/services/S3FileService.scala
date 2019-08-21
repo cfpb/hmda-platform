@@ -45,7 +45,6 @@ class S3FileService(implicit mat: ActorMaterializer)
       contentType = ContentTypes.`text/csv(UTF-8)`,
       s3Headers = S3Headers()
         .withCustomHeaders(contentDispositionMetadata)
-        .withCannedAcl(CannedAcl.PublicRead)
     )
     Task
       .deferFuture {
