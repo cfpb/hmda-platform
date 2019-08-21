@@ -1,0 +1,167 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ template "hmda-data-publisher.fullname" . }}
+  labels:
+    app: {{ template "hmda-data-publisher.name" . }}
+    chart: {{ template "hmda-data-publisher.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "hmda-data-publisher.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "hmda-data-publisher.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      volumes:
+        - name: tz-config
+          hostPath:
+            path: /usr/share/zoneinfo/America/New_York
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          volumeMounts:
+            - name: tz-config
+              mountPath: /etc/localtime
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: CASSANDRA_CLUSTER_HOSTS
+            valueFrom:
+              configMapKeyRef:
+                name: cassandra-configmap
+                key: cassandra-hosts
+          - name: CASSANDRA_CLUSTER_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: cassandra-credentials
+                key: cassandra.username
+          - name: CASSANDRA_CLUSTER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: cassandra-credentials
+                key: cassandra.password
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: aws-credentials
+                key: aws-access-key-id
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: aws-credentials
+                key: aws-secret-access-key
+          - name: AWS_ENVIRONMENT
+            valueFrom:
+              configMapKeyRef:
+                name: s3-configmap
+                key: aws-environment
+          - name: S3_PRIVATE_BUCKET
+            valueFrom:
+              configMapKeyRef:
+                name: s3-configmap
+                key: s3-private-bucket
+          - name: BANK_FILTER_LIST
+            valueFrom:
+              configMapKeyRef:
+                name: bank-filter-configmap
+                key: bank-filter-list
+          - name: AWS_REGION
+            valueFrom:
+              configMapKeyRef:
+                name: s3-configmap
+                key: aws-region
+          - name: PG_HOST
+            valueFrom:
+              secretKeyRef:
+                name: inst-postgres-credentials
+                key: host
+          - name: PG_DATABASE
+            valueFrom:
+              configMapKeyRef:
+                name: postgresql-configmap
+                key: postgres.database
+          - name: PG_USER
+            valueFrom:
+              secretKeyRef:
+                name: inst-postgres-credentials
+                key: username
+          - name: PG_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: inst-postgres-credentials
+                key: password
+          - name: PG_SSL
+            valueFrom:
+              configMapKeyRef:
+                name: postgresql-configmap
+                key: postgres.ssl
+          - name: JDBC_URL
+            valueFrom:
+              secretKeyRef:
+                name: inst-postgres-credentials
+                key: url
+          - name: TS_PRIVATE_SCHEDULE_2018
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.ts.private.2018
+          - name: LAR_PRIVATE_SCHEDULE_2018
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.lar.private.2018
+          - name: PANEL_PRIVATE_SCHEDULE_2018
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.panel.private.2018
+          - name: TS_PRIVATE_SCHEDULE_2019
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.ts.private.2019
+          - name: LAR_PRIVATE_SCHEDULE_2019
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.lar.private.2019
+          - name: PANEL_PRIVATE_SCHEDULE_2019
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.panel.private.2019
+          - name: TS_PUBLIC_SCHEDULE_2018
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.ts.public.2018
+          - name: LAR_PUBLIC_SCHEDULE_2018
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.lar.public.2018
+          - name: PANEL_PUBLIC_SCHEDULE_2018
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.panel.public.2018
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
