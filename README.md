@@ -45,3 +45,5 @@ Related projects
   - https://github.com/cfpb/hmda-data-browser
   - https://github.com/cfpb/hmda-platform-larft
   - https://github.com/cfpb/hmda-test-files
+  - https://github.com/cfpb/hmda-documentation
+  - https://github.com/cfpb/hmda-census
