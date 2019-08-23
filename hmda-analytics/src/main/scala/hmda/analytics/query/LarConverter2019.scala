@@ -1,11 +1,15 @@
 package hmda.analytics.query
 
 import hmda.model.filing.lar.LoanApplicationRegister
+import hmda.parser.derivedFields._
 
-object LarConverter {
+object LarConverter2019 {
 
-  def apply(lar: LoanApplicationRegister): LarEntity = {
-    LarEntity(
+  def apply(
+      lar: LoanApplicationRegister,
+      countyLoanLimitsByCounty: Map[String, CountyLoanLimit],
+      countyLoanLimitsByState: Map[String, CountyLoanLimit]): LarEntity2019 = {
+    LarEntity2019(
       lar.larIdentifier.id,
       lar.larIdentifier.LEI,
       lar.loan.ULI,
@@ -115,7 +119,15 @@ object LarConverter {
       lar.ausResult.otherAusResult,
       lar.reverseMortgage.code,
       lar.lineOfCredit.code,
-      lar.businessOrCommercialPurpose.code
+      lar.businessOrCommercialPurpose.code,
+      ConformingLoanLimit.assignLoanLimit(lar,
+                                          countyLoanLimitsByCounty,
+                                          countyLoanLimitsByState),
+      EthnicityCategorization.assignEthnicityCategorization(lar),
+      RaceCategorization.assignRaceCategorization(lar),
+      SexCategorization.assignSexCategorization(lar),
+      DwellingCategorization.assignDwellingCategorization(lar),
+      LoanProductTypeCategorization.assignLoanProductTypeCategorization(lar)
     )
   }
 

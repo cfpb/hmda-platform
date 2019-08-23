@@ -11,8 +11,10 @@ import akka.util.{ByteString, Timeout}
 import com.typesafe.config.ConfigFactory
 import hmda.query.ts.TransmittalSheetConverter
 import hmda.analytics.query.{
-  LarComponent,
-  LarConverter,
+  LarComponent2018,
+  LarComponent2019,
+  LarConverter2018,
+  LarConverter2019,
   SubmissionHistoryComponent,
   TransmittalSheetComponent
 }
@@ -31,6 +33,11 @@ import hmda.query.DbConfiguration.dbConfig
 import hmda.query.HmdaQuery.{readRawData, readSubmission}
 import hmda.util.BankFilterUtils._
 import hmda.util.streams.FlowUtils.framing
+import hmda.census.records._
+import hmda.model.census.Census
+import hmda.parser.derivedFields._
+import hmda.model.census.CountyLoanLimit
+import Math._
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -38,7 +45,8 @@ import scala.concurrent.duration._
 object HmdaAnalyticsApp
     extends App
     with TransmittalSheetComponent
-    with LarComponent
+    with LarComponent2018
+    with LarComponent2019
     with SubmissionHistoryComponent {
 
   val log = LoggerFactory.getLogger("hmda")
@@ -72,8 +80,38 @@ object HmdaAnalyticsApp
     new TransmittalSheetRepository(dbConfig, "transmittalsheet2018")
   val transmittalSheetRepository2019 =
     new TransmittalSheetRepository(dbConfig, "transmittalsheet2019")
-  val larRepository = new LarRepository(dbConfig)
+  val larRepository2018 = new LarRepository2018(dbConfig)
+  val larRepository2019 = new LarRepository2019(dbConfig)
   val submissionHistoryRepository = new SubmissionHistoryRepository(dbConfig)
+
+  val censusTractMap: Map[String, Census] =
+    CensusRecords.indexedTract
+
+  val censusRecords = CensusRecords.parseCensusFile
+  val countyLoanLimits: Seq[CountyLoanLimit] =
+    CountyLoanLimitRecords.parseCountyLoanLimitFile()
+  val countyLoanLimitsByCounty: Map[String, CountyLoanLimit] =
+    countyLoanLimits
+      .map(county => county.stateCode + county.countyCode -> county)
+      .toMap
+  val countyLoanLimitsByState =
+    countyLoanLimits.groupBy(county => county.stateAbbrv).mapValues {
+      countyList =>
+        val oneUnit = countyList.map(county => county.oneUnitLimit)
+        val twoUnit = countyList.map(county => county.twoUnitLimit)
+        val threeUnit = countyList.map(county => county.threeUnitLimit)
+        val fourUnit = countyList.map(county => county.fourUnitLimit)
+        StateBoundries(
+          oneUnitMax = oneUnit.max,
+          oneUnitMin = oneUnit.min,
+          twoUnitMax = twoUnit.max,
+          twoUnitMin = twoUnit.min,
+          threeUnitMax = threeUnit.max,
+          threeUnitMin = threeUnit.min,
+          fourUnitMax = fourUnit.max,
+          fourUnitMin = fourUnit.min
+        )
+    }
 
   val consumerSettings: ConsumerSettings[String, String] =
     ConsumerSettings(kafkaConfig,
@@ -198,9 +236,23 @@ object HmdaAnalyticsApp
         .map(s => LarCsvParser(s, true))
         .map(_.getOrElse(LoanApplicationRegister()))
         .filter(lar => lar.larIdentifier.LEI != "")
-        .map(lar => LarConverter(lar))
+        .map { lar =>
+          for {
+            larEntity <- submissionId.period.toInt match {
+              case 2018 => LarConverter2018(lar)
+              case 2019 => LarConverter2019(lar)
+              case _    => LarConverter2019(lar)
+            }
+          } yield larEntity
+        }
         .mapAsync(1) { lar =>
-          larRepository.deleteByLei(submissionId, lar.lei)
+          for {
+            delete <- submissionId.period.toInt match {
+              case 2018 => larRepository2018.deleteByLei(submissionId, lar.lei)
+              case 2019 => larRepository2019.deleteByLei(submissionId, lar.lei)
+              case _    => larRepository2019.deleteByLei(submissionId, lar.lei)
+            }
+          } yield delete
         }
         .runWith(Sink.ignore)
 
@@ -215,9 +267,29 @@ object HmdaAnalyticsApp
         .map(s => LarCsvParser(s, true))
         .map(_.getOrElse(LoanApplicationRegister()))
         .filter(lar => lar.larIdentifier.LEI != "")
-        .map(lar => LarConverter(lar))
+        .map { lar =>
+          for {
+            larEntity <- submissionId.period.toInt match {
+              case 2018 => LarConverter2018(lar)
+              case 2019 =>
+                LarConverter2019(lar,
+                                 countyLoanLimitsByCounty,
+                                 countyLoanLimitsByState)
+              case _ =>
+                LarConverter2019(lar,
+                                 countyLoanLimitsByCounty,
+                                 countyLoanLimitsByState)
+            }
+          } yield larEntity
+        }
         .mapAsync(1) { lar =>
-          larRepository.insert(submissionId, lar)
+          for {
+            insertorupdate <- submissionId.period.toInt match {
+              case 2018 => larRepository2018.insert(submissionId, lar.lei)
+              case 2019 => larRepository2019.insert(submissionId, lar.lei)
+              case _    => larRepository2019.insert(submissionId, lar.lei)
+            }
+          } yield insertorupdate
         }
         .runWith(Sink.ignore)
 

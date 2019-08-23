@@ -26,6 +26,7 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.LoggerFactory
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
+import hmda.census.records._
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContextExecutor, Future}
@@ -52,11 +53,6 @@ object ModifiedLarApp extends App {
   implicit val ec: ExecutionContextExecutor = system.dispatcher
   implicit val scheduler: Scheduler = system.scheduler
   implicit val timeout: Timeout = Timeout(1.hour)
-  val config = ConfigFactory.load()
-  val censusUrl = "http://" + config.getString("hmda.census.http.host") + ":" + config
-    .getString("hmda.census.http.port")
-  val censusDownloader =
-    CensusRecordsRetriever(Http(), censusUrl)
 
   val kafkaConfig = config.getConfig("akka.kafka.consumer")
   val bankFilterConfig = config.getConfig("filter")
@@ -64,9 +60,8 @@ object ModifiedLarApp extends App {
     bankFilterConfig.getString("bank-filter-list").toUpperCase.split(",")
   val parallelism = config.getInt("hmda.lar.modified.parallelism")
 
-  // NOTE: Modified LAR has a hard dependency on Census API and cannot function without it
-  val censusTractMap: Future[Map[String, Census]] =
-    censusDownloader.downloadCensusMap(Tract)
+  val censusTractMap: Map[String, Census] =
+    CensusRecords.indexedTract
 
   def submitForPersistence(
       modifiedLarPublisher: ActorRef[PersistToS3AndPostgres])(
@@ -88,68 +83,59 @@ object ModifiedLarApp extends App {
     }
   }
 
-  censusTractMap.onComplete {
-    case Success(tractMap) =>
-      // database configuration is located in `common` project
-      val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
-      val repo = new ModifiedLarRepository(databaseConfig)
-      val modifiedLarPublisher =
-        system.spawn(ModifiedLarPublisher.behavior(tractMap, repo),
-                     ModifiedLarPublisher.name)
-      val processKafkaRecord: String => Future[Done] =
-        submitForPersistence(modifiedLarPublisher)
+  // database configuration is located in `common` project
+  val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
+  val repo = new ModifiedLarRepository(databaseConfig)
+  val modifiedLarPublisher =
+    system.spawn(ModifiedLarPublisher.behavior(censusTractMap, repo),
+                 ModifiedLarPublisher.name)
+  val processKafkaRecord: String => Future[Done] =
+    submitForPersistence(modifiedLarPublisher)
 
-      val consumerSettings: ConsumerSettings[String, String] =
-        ConsumerSettings(kafkaConfig,
-                         new StringDeserializer,
-                         new StringDeserializer)
-          .withBootstrapServers(kafkaHosts)
-          .withGroupId(HmdaGroups.modifiedLarGroup)
-          .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest")
+  val consumerSettings: ConsumerSettings[String, String] =
+    ConsumerSettings(kafkaConfig,
+                     new StringDeserializer,
+                     new StringDeserializer)
+      .withBootstrapServers(kafkaHosts)
+      .withGroupId(HmdaGroups.modifiedLarGroup)
+      .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest")
 
-      val (kafkaControl: Consumer.Control, streamCompleted: Future[Done]) =
-        Consumer
-          .committableSource(consumerSettings,
-                             Subscriptions.topics(HmdaTopics.signTopic,
-                                                  HmdaTopics.modifiedLarTopic))
-          .mapAsync(parallelism) { msg =>
-            log.info(s"Received a message - key: ${msg.record
-              .key()}, value: ${msg.record.value()}")
+  val (kafkaControl: Consumer.Control, streamCompleted: Future[Done]) =
+    Consumer
+      .committableSource(consumerSettings,
+                         Subscriptions.topics(HmdaTopics.signTopic,
+                                              HmdaTopics.modifiedLarTopic))
+      .mapAsync(parallelism) { msg =>
+        log.info(s"Received a message - key: ${msg.record
+          .key()}, value: ${msg.record.value()}")
 
-            // TODO: Make configurable
-            // retry the Future 10 times using a spacing of 30 seconds if there is a failure before giving up
-            akka.pattern.retry(() =>
-                                 processKafkaRecord(msg.record.value().trim)
-                                   .map(_ => msg.committableOffset),
-                               1,
-                               90.seconds)
-          }
-          .mapAsync(parallelism * 2)(
-            (offset: ConsumerMessage.CommittableOffset) =>
-              offset.commitScaladsl())
-          .toMat(Sink.ignore)(Keep.both)
-          .run()
-
-      streamCompleted.onComplete {
-        case Failure(exception) =>
-          log.error("Kafka consumer infinite stream failed", exception)
-          kafkaControl
-            .shutdown()
-            .flatMap(_ => system.terminate())
-            .foreach(_ => sys.exit(1)) // The Cassandra connection stays up and prevents the app from shutting down even when the Kafka stream is not active, so we explicitly shut the application down
-
-        case Success(res) =>
-          log.error(
-            "Kafka consumer infinite stream completed, an infinite stream should not complete")
-          system
-            .terminate()
-            .foreach(_ => sys.exit(2))
+        // TODO: Make configurable
+        // retry the Future 10 times using a spacing of 30 seconds if there is a failure before giving up
+        akka.pattern.retry(() =>
+                             processKafkaRecord(msg.record.value().trim)
+                               .map(_ => msg.committableOffset),
+                           1,
+                           90.seconds)
       }
+      .mapAsync(parallelism * 2)((offset: ConsumerMessage.CommittableOffset) =>
+        offset.commitScaladsl())
+      .toMat(Sink.ignore)(Keep.both)
+      .run()
 
+  streamCompleted.onComplete {
     case Failure(exception) =>
+      log.error("Kafka consumer infinite stream failed", exception)
+      kafkaControl
+        .shutdown()
+        .flatMap(_ => system.terminate())
+        .foreach(_ => sys.exit(1)) // The Cassandra connection stays up and prevents the app from shutting down even when the Kafka stream is not active, so we explicitly shut the application down
+
+    case Success(res) =>
       log.error(
-        "Failed to download maps from Census API, cannot proceed, shutting down",
-        exception)
-      system.terminate()
+        "Kafka consumer infinite stream completed, an infinite stream should not complete")
+      system
+        .terminate()
+        .foreach(_ => sys.exit(2))
   }
+
 }

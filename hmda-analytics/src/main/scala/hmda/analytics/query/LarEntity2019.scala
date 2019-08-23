@@ -1,6 +1,6 @@
 package hmda.analytics.query
 
-case class LarEntity(
+case class LarEntity2019(
     id: Int = 0,
     lei: String = "",
     uli: String = "",
@@ -110,7 +110,13 @@ case class LarEntity(
     otherAusResult: String = "",
     reverseMortgage: Int = 0,
     lineOfCredits: Int = 0,
-    businessOrCommercial: Int = 0
+    businessOrCommercial: Int = 0,
+    conformingLoanLimit: String = "",
+    ethnicityCategorization: String = "",
+    raceCategorization: String = "",
+    sexCategorization: String = "",
+    dwellingCategorization: String = "",
+    loanProductTypeCategorization: String = ""
 ) {
   def isEmpty: Boolean = lei == ""
 }
