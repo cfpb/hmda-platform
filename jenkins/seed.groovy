@@ -26,6 +26,7 @@ projects.each { project ->
     multibranchPipelineJob(project.name) {
         branchSources {
             github {
+                id('hmda')
                 repoOwner('cfpb')
                 repository(project.repo)
                 scanCredentialsId('github')
