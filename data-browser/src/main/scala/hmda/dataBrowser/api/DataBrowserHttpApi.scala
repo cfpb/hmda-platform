@@ -1,8 +1,5 @@
 package hmda.dataBrowser.api
 
-import java.math.BigInteger
-import java.security.MessageDigest
-
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.ContentTypes._
 import akka.http.scaladsl.model.{HttpEntity, StatusCodes, Uri}
@@ -225,4 +222,4 @@ trait DataBrowserHttpApi extends Settings {
         }
 
     }
-filing}
+}

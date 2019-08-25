@@ -47,8 +47,6 @@ class S3FileService(implicit mat: ActorMaterializer)
         .withCustomHeaders(contentDispositionMetadata)
     )
 
-    println("key: " + key + " friendlyName: " + friendlyName)
-
     Task
       .deferFuture {
         dataSource.runWith(sink)
