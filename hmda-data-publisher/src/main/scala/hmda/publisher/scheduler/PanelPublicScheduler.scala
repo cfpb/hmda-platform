@@ -88,7 +88,6 @@ class PanelPublicScheduler
 
   private def panelPublicSync2018 = {
     println("test timer public panel")
-
     val allResults: Future[Seq[InstitutionEntity]] =
       institutionRepository2018.findActiveFilers(bankFilterList)
     val now = LocalDateTime.now().minusDays(1)
@@ -96,7 +95,7 @@ class PanelPublicScheduler
 
     //PSV Sync
     val s3SinkPSV =
-      S3.multipartUpload(bucket, s"$environment/panel/$fileNamePSV")
+      S3.multipartUpload(bucket, s"$environment/dynamic-data/2018/$fileNamePSV")
         .withAttributes(S3Attributes.settings(s3Settings))
 
     val resultsPSV: Future[MultipartUploadResult] = Source
