@@ -118,17 +118,6 @@ trait DataBrowserHttpApi extends Settings {
                       eachQueryField.isAllSelected
                   }
                   log.info("Nationwide [CSV]: " + allFields)
-                  println(
-                    "fileName: " + allFields
-                      .map(q => q.copy(values = q.values.sorted))
-                      .sortBy(_.dbName)
-                      .map(q => s"${q.name}_${q.values.mkString("-")}")
-                      .mkString("_") + " key: " + md5HashString(
-                      allFields
-                        .map(q => q.copy(values = q.values.sorted))
-                        .sortBy(_.dbName)
-                        .map(q => s"${q.name}_${q.values.mkString("-")}")
-                        .mkString("_")))
                   contentDispositionHeader(allFields, Commas) {
                     serveData(
                       allFields,
@@ -236,11 +225,4 @@ trait DataBrowserHttpApi extends Settings {
         }
 
     }
-  def md5HashString(s: String): String = {
-    val md = MessageDigest.getInstance("MD5")
-    val digest = md.digest(s.getBytes)
-    val bigInt = new BigInteger(1, digest)
-    val hashedString = bigInt.toString(16)
-    hashedString
-  }
-}
+filing}
