@@ -1,5 +1,0 @@
-apiVersion: v1
-appVersion: "2.7.2"
-description: HMDA Regulator Service
-name: hmda-regulator
-version: 2.7.2

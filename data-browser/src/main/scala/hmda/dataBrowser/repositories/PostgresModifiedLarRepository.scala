@@ -6,6 +6,7 @@ import hmda.dataBrowser.models.{QueryField, ModifiedLarEntity}
 import monix.eval.Task
 import slick.basic.DatabaseConfig
 import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
+import cats.implicits._
 
 class PostgresModifiedLarRepository(tableName: String,
                                     config: DatabaseConfig[JdbcProfile])
@@ -132,7 +133,10 @@ class PostgresModifiedLarRepository(tableName: String,
     if (remainingExpressions.isEmpty) primary
     else {
       val secondaries =
-        remainingExpressions.map(expr => s"AND $expr").mkString(sep = " ")
+        remainingExpressions
+          .filterNot(_ == "filing_year IN ('2018')")
+          .map(expr => s"AND $expr")
+          .mkString(sep = " ")
       s"$primary $secondaries"
     }
   }
@@ -180,4 +184,7 @@ class PostgresModifiedLarRepository(tableName: String,
 
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
+
+  def healthCheck: Task[Unit] =
+    Task.deferFuture(db.run(sql"SELECT 1".as[Int])).guarantee(Task.shift).void
 }

@@ -8,6 +8,7 @@ import scala.compat.java8.FutureConverters._
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.syntax._
+import cats.implicits._
 
 import scala.concurrent.duration.FiniteDuration
 
@@ -71,4 +72,9 @@ class RedisModifiedLarAggregateCache(
     val redisKey = key(queryFields)
     invalidateKey(redisKey)
   }
+
+  def healthCheck: Task[Unit] =
+    redisClient
+      .flatMap(client => Task.deferFuture(client.ping().toScala))
+      .void
 }

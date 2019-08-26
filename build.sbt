@@ -97,7 +97,7 @@ lazy val `hmda-root` = (project in file("."))
     `modified-lar`,
     `hmda-analytics`,
     `census-api`,
-    `hmda-regulator`,
+    `hmda-data-publisher`,
     `hmda-reporting`,
     `hmda-spark-reporting`
   )
@@ -225,7 +225,7 @@ lazy val `institutions-api` = (project in file("institutions-api"))
   )
   .dependsOn(common % "compile->compile;test->test")
 
-lazy val `hmda-regulator` = (project in file("hmda-regulator"))
+lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
   .enablePlugins(JavaServerAppPackaging,
                  sbtdocker.DockerPlugin,
                  AshScriptPlugin,
@@ -233,7 +233,7 @@ lazy val `hmda-regulator` = (project in file("hmda-regulator"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      mainClass in Compile := Some("hmda.regulator.HmdaRegulatorApp"),
+      mainClass in Compile := Some("hmda.publisher.HmdaDataPublisherApp"),
       assemblyJarName in assembly := {
         s"${name.value}.jar"
       },

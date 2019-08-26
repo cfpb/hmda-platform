@@ -3,6 +3,16 @@ kind: ConfigMap
 metadata:
   name: schedule-configmap
 data:
-  regulator.ts: "\"0 10 06 * * ?\""
-  regulator.panel: "\"0 20 06 * * ?\""
-  regulator.lar: "\"0 55 05 * * ?\""
+  publisher.lar.private.2018": "\"0 55 13 ? * WED *\""
+  publisher.lar.private.2019": "0 45 19 ? APR THU *"
+  publisher.lar.public.2018": "\"0 0 16 ? * SUN *\""
+  publisher.panel.private.2018": "\"0 0 14 ? * SUN *\""
+  publisher.panel.private.2019": "0 45 19 ? APR THU *"
+  publisher.panel.public.2018": "\"0 0 17 ? * SUN *\""
+  publisher.ts.private.2018": "\"0 0 15 ? * SUN *\""
+  publisher.ts.private.2019": "0 45 19 ? APR THU *"
+  publisher.ts.public.2018": "\"0 0 18 ? * SUN *\""
+  regulator.lar": "0 0 16 ? * SUN *"
+  regulator.panel": "0 0 17 ? * SUN *"
+  regulator.ts": "0 0 18 ? * SUN *"
+      
