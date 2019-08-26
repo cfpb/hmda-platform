@@ -2,13 +2,14 @@ package hmda.analytics.query
 
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.parser.derivedFields._
+import hmda.model.census.CountyLoanLimit
 
 object LarConverter2019 {
 
   def apply(
       lar: LoanApplicationRegister,
       countyLoanLimitsByCounty: Map[String, CountyLoanLimit],
-      countyLoanLimitsByState: Map[String, CountyLoanLimit]): LarEntity2019 = {
+      countyLoanLimitsByState: Map[String, StateBoundries]): LarEntity2019 = {
     LarEntity2019(
       lar.larIdentifier.id,
       lar.larIdentifier.LEI,

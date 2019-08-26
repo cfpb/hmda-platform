@@ -37,7 +37,6 @@ import hmda.census.records._
 import hmda.model.census.Census
 import hmda.parser.derivedFields._
 import hmda.model.census.CountyLoanLimit
-import Math._
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -94,7 +93,7 @@ object HmdaAnalyticsApp
     countyLoanLimits
       .map(county => county.stateCode + county.countyCode -> county)
       .toMap
-  val countyLoanLimitsByState =
+  val countyLoanLimitsByState: Map[String, StateBoundries] =
     countyLoanLimits.groupBy(county => county.stateAbbrv).mapValues {
       countyList =>
         val oneUnit = countyList.map(county => county.oneUnitLimit)
@@ -216,8 +215,10 @@ object HmdaAnalyticsApp
           for {
             insertorupdate <- submissionId.period.toInt match {
               case 2018 => transmittalSheetRepository2018.insert(ts)
-              case 2019 => transmittalSheetRepository2019.insert(ts)
-              case _    => transmittalSheetRepository2019.insert(ts)
+              case 2019 =>
+                transmittalSheetRepository2019.insert(ts)
+              case _ =>
+                transmittalSheetRepository2019.insert(ts)
             }
 
           } yield insertorupdate
@@ -236,21 +237,12 @@ object HmdaAnalyticsApp
         .map(s => LarCsvParser(s, true))
         .map(_.getOrElse(LoanApplicationRegister()))
         .filter(lar => lar.larIdentifier.LEI != "")
-        .map { lar =>
-          for {
-            larEntity <- submissionId.period.toInt match {
-              case 2018 => LarConverter2018(lar)
-              case 2019 => LarConverter2019(lar)
-              case _    => LarConverter2019(lar)
-            }
-          } yield larEntity
-        }
         .mapAsync(1) { lar =>
           for {
             delete <- submissionId.period.toInt match {
-              case 2018 => larRepository2018.deleteByLei(submissionId, lar.lei)
-              case 2019 => larRepository2019.deleteByLei(submissionId, lar.lei)
-              case _    => larRepository2019.deleteByLei(submissionId, lar.lei)
+              case 2018 => larRepository2018.deleteByLei(lar.larIdentifier.LEI)
+              case 2019 => larRepository2019.deleteByLei(lar.larIdentifier.LEI)
+              case _    => larRepository2019.deleteByLei(lar.larIdentifier.LEI)
             }
           } yield delete
         }
@@ -267,27 +259,24 @@ object HmdaAnalyticsApp
         .map(s => LarCsvParser(s, true))
         .map(_.getOrElse(LoanApplicationRegister()))
         .filter(lar => lar.larIdentifier.LEI != "")
-        .map { lar =>
-          for {
-            larEntity <- submissionId.period.toInt match {
-              case 2018 => LarConverter2018(lar)
-              case 2019 =>
-                LarConverter2019(lar,
-                                 countyLoanLimitsByCounty,
-                                 countyLoanLimitsByState)
-              case _ =>
-                LarConverter2019(lar,
-                                 countyLoanLimitsByCounty,
-                                 countyLoanLimitsByState)
-            }
-          } yield larEntity
-        }
         .mapAsync(1) { lar =>
           for {
             insertorupdate <- submissionId.period.toInt match {
-              case 2018 => larRepository2018.insert(submissionId, lar.lei)
-              case 2019 => larRepository2019.insert(submissionId, lar.lei)
-              case _    => larRepository2019.insert(submissionId, lar.lei)
+              case 2018 => {
+                larRepository2018.insert(LarConverter2018(lar))
+              }
+              case 2019 => {
+                larRepository2019.insert(
+                  LarConverter2019(lar,
+                                   countyLoanLimitsByCounty,
+                                   countyLoanLimitsByState))
+              }
+              case _ => {
+                larRepository2019.insert(
+                  LarConverter2019(lar,
+                                   countyLoanLimitsByCounty,
+                                   countyLoanLimitsByState))
+              }
             }
           } yield insertorupdate
         }

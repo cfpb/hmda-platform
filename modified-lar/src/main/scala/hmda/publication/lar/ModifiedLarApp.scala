@@ -4,20 +4,17 @@ import akka.Done
 import akka.actor.{ActorSystem, Scheduler}
 import akka.actor.typed.ActorRef
 import akka.actor.typed.scaladsl.adapter._
-import akka.http.scaladsl.Http
 import akka.kafka.scaladsl.Consumer
 import akka.kafka.{ConsumerMessage, ConsumerSettings, Subscriptions}
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl._
 import akka.util.Timeout
-import com.typesafe.config.ConfigFactory
 import hmda.messages.pubsub.HmdaGroups
 import hmda.model.census.Census
 import hmda.model.filing.submission.SubmissionId
 import hmda.publication.KafkaUtils._
 import hmda.publication.lar.publication._
-import hmda.publication.lar.services._
 import hmda.messages.pubsub.HmdaTopics
 import hmda.query.repository.ModifiedLarRepository
 import hmda.util.BankFilterUtils._

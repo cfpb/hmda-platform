@@ -1,6 +1,5 @@
 package hmda.analytics.query
 
-import hmda.model.filing.submission.SubmissionId
 import hmda.query.DbConfiguration.dbConfig
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
