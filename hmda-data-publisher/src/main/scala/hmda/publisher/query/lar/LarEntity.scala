@@ -22,7 +22,7 @@ case class LarPartOne(id: Int = 0,
                       tract: String = "") {
   def isEmpty: Boolean = lei == ""
 
-  def toPSV: String = {
+  def toRegulatorPSV: String = {
     s"$id|$lei|$uli|$applicationDate|$loanType|" +
       s"$loanPurpose|$preapproval|$constructionMethod|$occupancyType|" +
       BigDecimal.valueOf(loanAmount).bigDecimal.toPlainString +
@@ -30,13 +30,6 @@ case class LarPartOne(id: Int = 0,
       s"$zip|$county|$tract|"
   }
 
-  def toPublicPSV: String = {
-    s"$lei|"
-  }
-
-  def toPublicCSV: String = {
-    s"$lei,"
-  }
 }
 case class LarPartTwo(ethnicityApplicant1: String = "",
                       ethnicityApplicant2: String = "",
@@ -58,7 +51,7 @@ case class LarPartTwo(ethnicityApplicant1: String = "",
                       raceApplicant4: String = "",
                       raceApplicant5: String = "") {
 
-  def toPSV: String = {
+  def toRegulatorPSV: String = {
     s"$ethnicityApplicant1|$ethnicityApplicant2|$ethnicityApplicant3|" +
       s"$ethnicityApplicant4|$ethnicityApplicant5|$otherHispanicApplicant|$ethnicityCoApplicant1|" +
       s"$ethnicityCoApplicant2|$ethnicityCoApplicant3|$ethnicityCoApplicant4|$ethnicityCoApplicant5|" +
@@ -66,13 +59,6 @@ case class LarPartTwo(ethnicityApplicant1: String = "",
       s"|$raceApplicant2|$raceApplicant3|$raceApplicant4|$raceApplicant5|"
   }
 
-  def toPublicPSV: String = {
-    s"$raceApplicant1|"
-  }
-
-  def toPublicCSV: String = {
-    s"$raceApplicant1,"
-  }
 }
 
 case class LarPartThree(otherNativeRaceApplicant: String = "",
@@ -96,7 +82,7 @@ case class LarPartThree(otherNativeRaceApplicant: String = "",
                         ageCoApplicant: Int = 0,
                         income: String = "") {
 
-  def toPSV: String = {
+  def toRegulatorPSV: String = {
     s"$otherNativeRaceApplicant|" +
       s"$otherAsianRaceApplicant|$otherPacificRaceApplicant|$raceCoApplicant1|$raceCoApplicant2|" +
       s"$raceCoApplicant3|$raceCoApplicant4|$raceCoApplicant5|$otherNativeRaceCoApplicant|" +
@@ -105,13 +91,6 @@ case class LarPartThree(otherNativeRaceApplicant: String = "",
       s"$ageApplicant|$ageCoApplicant|$income|"
   }
 
-  def toPublicPSV: String = {
-    s"$sexApplicant|"
-  }
-
-  def toPublicCSV: String = {
-    s"$sexApplicant,"
-  }
 }
 
 case class LarPartFour(purchaserType: Int = 0,
@@ -133,7 +112,7 @@ case class LarPartFour(purchaserType: Int = 0,
                        totalPoints: String = "",
                        originationCharges: String = "") {
 
-  def toPSV: String = {
+  def toRegulatorPSV: String = {
     s"$purchaserType|$rateSpread|$hoepaStatus|$lienStatus|" +
       s"$creditScoreApplicant|$creditScoreCoApplicant|$creditScoreTypeApplicant|$creditScoreModelApplicant|" +
       s"$creditScoreTypeCoApplicant|$creditScoreModelCoApplicant|" +
@@ -141,13 +120,6 @@ case class LarPartFour(purchaserType: Int = 0,
       s"$otherDenialReason|$totalLoanCosts|$totalPoints|$originationCharges|"
   }
 
-  def toPublicPSV: String = {
-    s"$purchaserType|"
-  }
-
-  def toPublicCSV: String = {
-    s"$purchaserType,"
-  }
 }
 
 case class LarPartFive(discountPoints: String = "",
@@ -170,19 +142,11 @@ case class LarPartFive(discountPoints: String = "",
                        applicationSubmission: Int = 0)
     extends ColumnDataFormatter {
 
-  def toPSV: String = {
+  def toRegulatorPSV: String = {
     s"$discountPoints|$lenderCredits|$interestRate|$paymentPenalty|$debtToIncome|$loanValueRatio|$loanTerm|" +
       s"$rateSpreadIntro|$baloonPayment|$insertOnlyPayment|$amortization|$otherAmortization|" +
       toBigDecimalString(propertyValue) + "|" +
       s"$homeSecurityPolicy|$landPropertyInterest|$totalUnits|$mfAffordable|$applicationSubmission|"
-  }
-
-  def toPublicPSV: String = {
-    s"$discountPoints|"
-  }
-
-  def toPublicCSV: String = {
-    s"$discountPoints,"
   }
 
 }
@@ -205,18 +169,10 @@ case class LarPartSix(payable: Int = 0,
                       lineOfCredits: Int = 0,
                       businessOrCommercial: Int = 0) {
 
-  def toPSV: String = {
+  def toRegulatorPSV: String = {
     s"$payable|" +
       s"$nmls|$aus1|$aus2|$aus3|$aus4|$aus5|$otheraus|$aus1Result|$aus2Result|$aus3Result|$aus4Result|$aus5Result|" +
       s"$otherAusResult|$reverseMortgage|$lineOfCredits|$businessOrCommercial"
-  }
-
-  def toPublicPSV: String = {
-    s"$aus1"
-  }
-
-  def toPublicCSV: String = {
-    s"$aus1"
   }
 }
 
@@ -227,27 +183,11 @@ case class LarEntityImpl(larPartOne: LarPartOne,
                          larPartFive: LarPartFive,
                          larPartSix: LarPartSix) {
 
-  def toPSV: String =
-    (larPartOne.toPSV +
-      larPartTwo.toPSV +
-      larPartThree.toPSV +
-      larPartFour.toPSV +
-      larPartFive.toPSV +
-      larPartSix.toPSV).replaceAll("(\r\n)|\r|\n", "")
-
-  def toPublicPSV: String =
-    (larPartOne.toPublicPSV +
-      larPartTwo.toPublicPSV +
-      larPartThree.toPublicPSV +
-      larPartFour.toPublicPSV +
-      larPartFive.toPublicPSV +
-      larPartSix.toPublicPSV).replaceAll("(\r\n)|\r|\n", "")
-
-  def toPublicCSV: String =
-    (larPartOne.toPublicCSV +
-      larPartTwo.toPublicCSV +
-      larPartThree.toPublicCSV +
-      larPartFour.toPublicCSV +
-      larPartFive.toPublicCSV +
-      larPartSix.toPublicCSV).replaceAll("(\r\n)|\r|\n", "")
+  def toRegulatorPSV: String =
+    (larPartOne.toRegulatorPSV +
+      larPartTwo.toRegulatorPSV +
+      larPartThree.toRegulatorPSV +
+      larPartFour.toRegulatorPSV +
+      larPartFive.toRegulatorPSV +
+      larPartSix.toRegulatorPSV).replaceAll("(\r\n)|\r|\n", "")
 }
