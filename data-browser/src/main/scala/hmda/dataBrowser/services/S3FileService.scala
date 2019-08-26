@@ -46,6 +46,7 @@ class S3FileService(implicit mat: ActorMaterializer)
       s3Headers = S3Headers()
         .withCustomHeaders(contentDispositionMetadata)
     )
+
     Task
       .deferFuture {
         dataSource.runWith(sink)
