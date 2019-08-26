@@ -1,7 +1,6 @@
 package hmda.publisher.scheduler
 
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
@@ -82,7 +81,8 @@ class TsPublicScheduler
       val fileNamePSV = "2018_ts.txt"
 
       val s3SinkPSV =
-        S3.multipartUpload(bucket, s"$environment/dynamic-data/2018/$fileNamePSV")
+        S3.multipartUpload(bucket,
+                           s"$environment/dynamic-data/2018/$fileNamePSV")
           .withAttributes(S3Attributes.settings(s3Settings))
 
       val allResults: Future[Seq[TransmittalSheetEntity]] =

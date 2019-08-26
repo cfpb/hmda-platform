@@ -23,10 +23,10 @@ sealed trait TsFormatValidator {
 
   type TsParserValidationResult[A] = ValidatedNel[ParserValidationError, A]
 
-  def validateTs(
-      values: Seq[String],
-      rawLine: String = "",
-      fromCassandra: Boolean = false): TsParserValidationResult[TransmittalSheet] = {
+  def validateTs(values: Seq[String],
+                 rawLine: String = "",
+                 fromCassandra: Boolean = false)
+    : TsParserValidationResult[TransmittalSheet] = {
     if (values.lengthCompare(numberOfFields) != 0 || (rawLine.trim.endsWith("|") && (!fromCassandra))) {
       IncorrectNumberOfFields(values.length, numberOfFields).invalidNel
     } else {

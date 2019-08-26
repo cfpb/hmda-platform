@@ -5,7 +5,7 @@ import java.sql.Timestamp
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
-import hmda.publisher.query.lar.{LarEntityImpl, _}
+import hmda.publisher.query.lar.{LarEntityImpl2018, _}
 import hmda.publisher.query.panel.{InstitutionEmailEntity, InstitutionEntity}
 import slick.basic.{DatabaseConfig, DatabasePublisher}
 import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
@@ -215,7 +215,7 @@ trait PublisherComponent2018 {
   }
 
   class LarTable(tag: Tag)
-      extends Table[LarEntityImpl](tag, "loanapplicationregister2018") {
+      extends Table[LarEntityImpl2018](tag, "loanapplicationregister2018") {
 
     def id = column[Int]("id")
     def lei = column[String]("lei")
@@ -341,7 +341,7 @@ trait PublisherComponent2018 {
        larPartThreeProjection,
        larPartFourProjection,
        larPartFiveProjection,
-       larPartSixProjection) <> ((LarEntityImpl.apply _).tupled, LarEntityImpl.unapply)
+       larPartSixProjection) <> ((LarEntityImpl2018.apply _).tupled, LarEntityImpl2018.unapply)
 
     def larPartOneProjection =
       (id,
@@ -361,7 +361,7 @@ trait PublisherComponent2018 {
        state,
        zip,
        county,
-       tract) <> ((LarPartOne.apply _).tupled, LarPartOne.unapply)
+       tract) <> ((LarPartOne2018.apply _).tupled, LarPartOne2018.unapply)
 
     def larPartTwoProjection =
       (ethnicityApplicant1,
@@ -382,7 +382,7 @@ trait PublisherComponent2018 {
        raceApplicant2,
        raceApplicant3,
        raceApplicant4,
-       raceApplicant5) <> ((LarPartTwo.apply _).tupled, LarPartTwo.unapply)
+       raceApplicant5) <> ((LarPartTwo2018.apply _).tupled, LarPartTwo2018.unapply)
 
     def larPartThreeProjection =
       (otherNativeRaceApplicant,
@@ -404,7 +404,7 @@ trait PublisherComponent2018 {
        observedSexCoApplicant,
        ageApplicant,
        ageCoApplicant,
-       income) <> ((LarPartThree.apply _).tupled, LarPartThree.unapply)
+       income) <> ((LarPartThree2018.apply _).tupled, LarPartThree2018.unapply)
 
     def larPartFourProjection =
       (purchaserType,
@@ -425,7 +425,7 @@ trait PublisherComponent2018 {
        totalLoanCosts,
        totalPoints,
        originationCharges,
-      ) <> ((LarPartFour.apply _).tupled, LarPartFour.unapply)
+      ) <> ((LarPartFour2018.apply _).tupled, LarPartFour2018.unapply)
 
     def larPartFiveProjection =
       (discountPoints,
@@ -445,7 +445,7 @@ trait PublisherComponent2018 {
        landPropertyInterest,
        totalUnits,
        mfAffordable,
-       applicationSubmission) <> ((LarPartFive.apply _).tupled, LarPartFive.unapply)
+       applicationSubmission) <> ((LarPartFive2018.apply _).tupled, LarPartFive2018.unapply)
 
     def larPartSixProjection =
       (payable,
@@ -464,7 +464,7 @@ trait PublisherComponent2018 {
        otherAusResult,
        reverseMortgage,
        lineOfCredits,
-       businessOrCommercial) <> ((LarPartSix.apply _).tupled, LarPartSix.unapply)
+       businessOrCommercial) <> ((LarPartSix2018.apply _).tupled, LarPartSix2018.unapply)
 
   }
 
@@ -482,11 +482,11 @@ trait PublisherComponent2018 {
     def createSchema() = db.run(table.schema.create)
     def dropSchema() = db.run(table.schema.drop)
 
-    def insert(ts: LarEntityImpl): Future[Int] = {
+    def insert(ts: LarEntityImpl2018): Future[Int] = {
       db.run(table += ts)
     }
 
-    def findByLei(lei: String): Future[Seq[LarEntityImpl]] = {
+    def findByLei(lei: String): Future[Seq[LarEntityImpl2018]] = {
       db.run(table.filter(_.lei === lei).result)
     }
 
@@ -497,7 +497,7 @@ trait PublisherComponent2018 {
       db.run(table.size.result)
     }
     def getAllLARs(
-        bankIgnoreList: Array[String]): DatabasePublisher[LarEntityImpl] = {
+        bankIgnoreList: Array[String]): DatabasePublisher[LarEntityImpl2018] = {
       db.stream(
         table
           .filterNot(_.lei.toUpperCase inSet bankIgnoreList)

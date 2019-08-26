@@ -1,15 +1,12 @@
 package hmda.publisher.scheduler
 
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-
 import akka.NotUsed
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3._
 import akka.stream.scaladsl._
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.scaladsl.{Flow, Sink, Source}
+import akka.stream.scaladsl.Source
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
@@ -20,7 +17,7 @@ import hmda.actor.HmdaActor
 import hmda.query.DbConfiguration.dbConfig
 import hmda.publisher.helper.ModifiedLarHeader
 import hmda.publisher.query.component.PublisherComponent2018
-import hmda.publisher.query.lar.{LarEntityImpl, ModifiedLarEntityImpl}
+import hmda.publisher.query.lar.ModifiedLarEntityImpl
 import hmda.publisher.scheduler.schedules.Schedules.LarPublicScheduler2018
 import slick.basic.DatabasePublisher
 
@@ -34,7 +31,6 @@ class LarPublicScheduler
 
   implicit val ec = context.system.dispatcher
   implicit val materializer = ActorMaterializer()
-  private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
 
   def mlarRepository2018 = new ModifiedLarRepository2018(dbConfig)
 
@@ -79,7 +75,6 @@ class LarPublicScheduler
 
     case LarPublicScheduler2018 =>
       println("test timer public lar")
-      val now = LocalDateTime.now().minusDays(1)
       val fileNamePSV = "2018_lar.txt"
 
       val allResultsPublisher: DatabasePublisher[ModifiedLarEntityImpl] =
@@ -93,7 +88,7 @@ class LarPublicScheduler
         .multipartUpload(bucket, s"$environment/dynamic-data/2018/$fileNamePSV")
         .withAttributes(S3Attributes.settings(s3Settings))
 
-      var resultsPSV: Future[MultipartUploadResult] =
+      val resultsPSV: Future[MultipartUploadResult] =
         allResultsSource.zipWithIndex
           .map(
             mlarEntity =>

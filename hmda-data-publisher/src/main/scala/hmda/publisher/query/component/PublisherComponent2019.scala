@@ -3,7 +3,7 @@ package hmda.publisher.query.component
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
-import hmda.publisher.query.lar.{LarEntityImpl, _}
+import hmda.publisher.query.lar.{LarEntityImpl2019, _}
 import hmda.publisher.query.panel.{InstitutionEmailEntity, InstitutionEntity}
 import slick.basic.{DatabaseConfig, DatabasePublisher}
 import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
@@ -213,7 +213,7 @@ trait PublisherComponent2019 {
   }
 
   class LarTable(tag: Tag)
-      extends Table[LarEntityImpl](tag, "loanapplicationregister2019") {
+      extends Table[LarEntityImpl2019](tag, "loanapplicationregister2019") {
 
     def id = column[Int]("id")
     def lei = column[String]("lei")
@@ -333,6 +333,13 @@ trait PublisherComponent2019 {
     def reverseMortgage = column[Int]("reverse_mortgage")
     def lineOfCredits = column[Int]("line_of_credits")
     def businessOrCommercial = column[Int]("business_or_commercial")
+    def conformingLoanLimit = column[String]("conforming_loan_limit")
+    def ethnicityCategorization = column[String]("ethnicity_categorization")
+    def raceCategorization = column[String]("race_categorization")
+    def sexCategorization = column[String]("sex_categorization")
+    def dwellingCategorization = column[String]("dwelling_categorization")
+    def loanProductTypeCategorization =
+      column[String]("loan_product_type_categorization")
 
     def * =
       (larPartOneProjection,
@@ -340,7 +347,8 @@ trait PublisherComponent2019 {
        larPartThreeProjection,
        larPartFourProjection,
        larPartFiveProjection,
-       larPartSixProjection) <> ((LarEntityImpl.apply _).tupled, LarEntityImpl.unapply)
+       larPartSixProjection,
+       larPartSevenProjection) <> ((LarEntityImpl2019.apply _).tupled, LarEntityImpl2019.unapply)
 
     def larPartOneProjection =
       (id,
@@ -360,7 +368,7 @@ trait PublisherComponent2019 {
        state,
        zip,
        county,
-       tract) <> ((LarPartOne.apply _).tupled, LarPartOne.unapply)
+       tract) <> ((LarPartOne2019.apply _).tupled, LarPartOne2019.unapply)
 
     def larPartTwoProjection =
       (ethnicityApplicant1,
@@ -381,7 +389,7 @@ trait PublisherComponent2019 {
        raceApplicant2,
        raceApplicant3,
        raceApplicant4,
-       raceApplicant5) <> ((LarPartTwo.apply _).tupled, LarPartTwo.unapply)
+       raceApplicant5) <> ((LarPartTwo2019.apply _).tupled, LarPartTwo2019.unapply)
 
     def larPartThreeProjection =
       (otherNativeRaceApplicant,
@@ -403,7 +411,7 @@ trait PublisherComponent2019 {
        observedSexCoApplicant,
        ageApplicant,
        ageCoApplicant,
-       income) <> ((LarPartThree.apply _).tupled, LarPartThree.unapply)
+       income) <> ((LarPartThree2019.apply _).tupled, LarPartThree2019.unapply)
 
     def larPartFourProjection =
       (purchaserType,
@@ -424,7 +432,7 @@ trait PublisherComponent2019 {
        totalLoanCosts,
        totalPoints,
        originationCharges,
-      ) <> ((LarPartFour.apply _).tupled, LarPartFour.unapply)
+      ) <> ((LarPartFour2019.apply _).tupled, LarPartFour2019.unapply)
 
     def larPartFiveProjection =
       (discountPoints,
@@ -444,7 +452,7 @@ trait PublisherComponent2019 {
        landPropertyInterest,
        totalUnits,
        mfAffordable,
-       applicationSubmission) <> ((LarPartFive.apply _).tupled, LarPartFive.unapply)
+       applicationSubmission) <> ((LarPartFive2019.apply _).tupled, LarPartFive2019.unapply)
 
     def larPartSixProjection =
       (payable,
@@ -463,7 +471,15 @@ trait PublisherComponent2019 {
        otherAusResult,
        reverseMortgage,
        lineOfCredits,
-       businessOrCommercial) <> ((LarPartSix.apply _).tupled, LarPartSix.unapply)
+       businessOrCommercial) <> ((LarPartSix2019.apply _).tupled, LarPartSix2019.unapply)
+
+    def larPartSevenProjection =
+      (conformingLoanLimit,
+       ethnicityCategorization,
+       raceCategorization,
+       sexCategorization,
+       dwellingCategorization,
+       loanProductTypeCategorization) <> ((LarPartSeven2019.apply _).tupled, LarPartSeven2019.unapply)
 
   }
 
@@ -481,11 +497,11 @@ trait PublisherComponent2019 {
     def createSchema() = db.run(table.schema.create)
     def dropSchema() = db.run(table.schema.drop)
 
-    def insert(ts: LarEntityImpl): Future[Int] = {
+    def insert(ts: LarEntityImpl2019): Future[Int] = {
       db.run(table += ts)
     }
 
-    def findByLei(lei: String): Future[Seq[LarEntityImpl]] = {
+    def findByLei(lei: String): Future[Seq[LarEntityImpl2019]] = {
       db.run(table.filter(_.lei === lei).result)
     }
 
@@ -496,7 +512,7 @@ trait PublisherComponent2019 {
       db.run(table.size.result)
     }
     def getAllLARs(
-        bankIgnoreList: Array[String]): DatabasePublisher[LarEntityImpl] = {
+        bankIgnoreList: Array[String]): DatabasePublisher[LarEntityImpl2019] = {
       db.stream(
         table
           .filterNot(_.lei.toUpperCase inSet bankIgnoreList)
