@@ -28,7 +28,6 @@ object HmdaDataPublisherApp extends App {
   val larTimer2019 = config.getString("akka.LarScheduler2019").split(",")
   val tsTimer2019 = config.getString("akka.TsScheduler2019").split(",")
 
-  val panelPublicTimer2018 = config.getString("akka.PanelPublicScheduler2018")
   val larPublicTimer2018 = config.getString("akka.LarPublicScheduler2018")
   val tsPublicTimer2018 = config.getString("akka.TsPublicScheduler2018")
 
@@ -40,7 +39,6 @@ object HmdaDataPublisherApp extends App {
   log.info("LAR Timer 2019: " + larTimer2019)
   log.info("TS Timer 2019: " + tsTimer2019)
 
-  log.info("Panel Public Timer 2018: " + panelPublicTimer2018)
   log.info("LAR Public 2018: " + larPublicTimer2018)
   log.info("TS Public 2018: " + tsPublicTimer2018)
 
@@ -73,13 +71,6 @@ object HmdaDataPublisherApp extends App {
                   .withFallback(config))
   tsActorSystem.actorOf(Props[TsScheduler], "TsScheduler")
 
-  val panelPublicActorSystem =
-    ActorSystem(
-      "panelPublicTask",
-      ConfigFactory.parseString(panelPublicTimer2018).withFallback(config))
-
-  panelPublicActorSystem.actorOf(Props[PanelPublicScheduler],
-                                 "PanelPublicScheduler")
 
   val larPublicActorSystem =
     ActorSystem(
