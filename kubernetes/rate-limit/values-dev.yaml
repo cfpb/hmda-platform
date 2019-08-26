@@ -1,26 +1,37 @@
-# Default values for hmda-reporting
+# Default values for check-digit.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
 
 image:
-  repository: hmda/hmda-data-browser-api
-  tag: v2.7.2
+  repository: hmda/rate-limit
+  tag: latest
   pullPolicy: IfNotPresent
-  commitId:
 
-nameOverride: ""
-fullnameOverride: ""
+hmda:
+  rateLimit: 10
+
+grpc:
+  type: ClusterIP
+  port: 60080
+  targetPort: 60080
+  name: rate-limit
+
+ambassador:
+  name: ambassador-rate-limit
+  port: 60080
+  service:
+    type: ClusterIP
 
 ingress:
   enabled: false
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-  path: /
+  ContainerPort: 60080
   hosts:
-    - chart-example.local
+    - rate-limit.local
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
@@ -28,10 +39,10 @@ ingress:
 
 resources:
   limits:
-    memory: "3200Mi"
-    cpu: "4"
+    memory: "1000Mi"
+    cpu: "1"
   requests:
-    memory: "3200Mi"
+    memory: "1000Mi"
     cpu: "1"
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
@@ -49,32 +60,3 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
-
-postgresql:
-  postgresDatabase: hmda
-  postgresUser: hmda
-  enabled: false
-  createSchema: false
-  ssl: require
-
-service:
-  type: ClusterIP
-  account:
-    name: hmda-data-browser-api
-  name: hmda-data-browser-api
-
-#ambassador:
-#  port: 80
-#  service:
-#    type: NodePort
-
-databrowser:
-  name: databrowser
-  loglevel: INFO
-  s3Url: https://cfpb-hmda-public.s3.amazonaws.com
-  nationwideRouteCSV: data-browser/nationwide_all.csv
-  nationwideRoutePipe: data-browser/nationwide_all.txt
-  table: modifiedlar2018_snapshot
-  redis: hmda-redis-master
-  protocol: TCP
-  port: 8070
