@@ -25,8 +25,9 @@ sealed trait TsFormatValidator {
 
   def validateTs(
       values: Seq[String],
-      rawLine: String = ""): TsParserValidationResult[TransmittalSheet] = {
-    if (values.lengthCompare(numberOfFields) != 0 || rawLine.trim.endsWith("|")) {
+      rawLine: String = "",
+      fromCassandra: Boolean = false): TsParserValidationResult[TransmittalSheet] = {
+    if (values.lengthCompare(numberOfFields) != 0 || (rawLine.trim.endsWith("|") && (!fromCassandra))) {
       IncorrectNumberOfFields(values.length, numberOfFields).invalidNel
     } else {
       val id = values.headOption.getOrElse("")
