@@ -133,7 +133,10 @@ class PostgresModifiedLarRepository(tableName: String,
     if (remainingExpressions.isEmpty) primary
     else {
       val secondaries =
-        remainingExpressions.map(expr => s"AND $expr").mkString(sep = " ")
+        remainingExpressions
+          .filterNot(_ == "filing_year IN ('2018')")
+          .map(expr => s"AND $expr")
+          .mkString(sep = " ")
       s"$primary $secondaries"
     }
   }

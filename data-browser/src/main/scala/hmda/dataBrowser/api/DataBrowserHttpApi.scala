@@ -114,6 +114,7 @@ trait DataBrowserHttpApi extends Settings {
                     eachQueryField =>
                       eachQueryField.isAllSelected
                   }
+                  log.info("Nationwide [CSV]: " + allFields)
                   contentDispositionHeader(allFields, Commas) {
                     serveData(
                       allFields,
@@ -219,6 +220,6 @@ trait DataBrowserHttpApi extends Settings {
               complete(StatusCodes.InternalServerError)
           }
         }
-    }
 
+    }
 }
