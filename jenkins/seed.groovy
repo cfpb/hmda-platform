@@ -4,6 +4,7 @@ projects = [
     [name: "check-digit", repo: "hmda-platform", jenkinsfilePath: "check-digit/Jenkinsfile"],
     [name: "hmda-analytics", repo: "hmda-platform", jenkinsfilePath: "hmda-analytics/Jenkinsfile"],
     [name: "hmda-data-browser-api", repo: "hmda-platform", jenkinsfilePath: "data-browser/Jenkinsfile"],
+    [name: "hmda-documentation", repo: "hmda-documentation", jenkinsfilePath: "Jenkinsfile"],
     [name: "hmda-data-browser-ui", repo: "hmda-data-browser", jenkinsfilePath: "Jenkinsfile"],
     [name: "hmda-help", repo: "hmda-help", jenkinsfilePath: "Jenkinsfile"],
     [name: "hmda-homepage", repo: "hmda-homepage", jenkinsfilePath: "Jenkinsfile"],
