@@ -153,7 +153,7 @@
       },
       {
         "testName": "filing psv upload test",
-        "sourceFile": "hmda-filing/clean_10_row.txt",
+        "sourceFile": "dev/hmda-filing/clean_10_row.txt",
         "expectedResponse": {
           "id": {
             "lei": "BANK1LEIFORTEST12345",
