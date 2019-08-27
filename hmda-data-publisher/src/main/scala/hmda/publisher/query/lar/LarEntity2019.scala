@@ -181,7 +181,14 @@ case class LarPartSeven2019(conformingLoanLimit: String = "",
                             raceCategorization: String = "",
                             sexCategorization: String = "",
                             dwellingCategorization: String = "",
-                            loanProductTypeCategorization: String = "")
+                            loanProductTypeCategorization: String = "",
+                            tractPopulation: Int = 0,
+                            tractMinorityPopulationPercent: Double = 0.0,
+                            tractMedianIncome: Int = 0,
+                            tractOccupiedUnits: Int = 0,
+                            tractOneToFourFamilyUnits: Int = 0,
+                            tractMedianAge: Int = 0,
+                            tractToMsaIncomePercent: Double = 0.0)
 
 case class LarEntityImpl2019(larPartOne: LarPartOne2019,
                              larPartTwo: LarPartTwo2019,

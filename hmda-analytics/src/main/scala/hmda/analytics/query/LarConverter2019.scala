@@ -3,13 +3,46 @@ package hmda.analytics.query
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.parser.derivedFields._
 import hmda.model.census.CountyLoanLimit
+import hmda.census.records._
+import hmda.model.census.Census
 
 object LarConverter2019 {
+
+  val censusTractMap: Map[String, Census] =
+    CensusRecords.indexedTract
+
+  val censusRecords = CensusRecords.parseCensusFile
+  val countyLoanLimits: Seq[CountyLoanLimit] =
+    CountyLoanLimitRecords.parseCountyLoanLimitFile()
+  val countyLoanLimitsByCounty: Map[String, CountyLoanLimit] =
+    countyLoanLimits
+      .map(county => county.stateCode + county.countyCode -> county)
+      .toMap
+  val countyLoanLimitsByState: Map[String, StateBoundries] =
+    countyLoanLimits.groupBy(county => county.stateAbbrv).mapValues {
+      countyList =>
+        val oneUnit = countyList.map(county => county.oneUnitLimit)
+        val twoUnit = countyList.map(county => county.twoUnitLimit)
+        val threeUnit = countyList.map(county => county.threeUnitLimit)
+        val fourUnit = countyList.map(county => county.fourUnitLimit)
+        StateBoundries(
+          oneUnitMax = oneUnit.max,
+          oneUnitMin = oneUnit.min,
+          twoUnitMax = twoUnit.max,
+          twoUnitMin = twoUnit.min,
+          threeUnitMax = threeUnit.max,
+          threeUnitMin = threeUnit.min,
+          fourUnitMax = fourUnit.max,
+          fourUnitMin = fourUnit.min
+        )
+    }
 
   def apply(
       lar: LoanApplicationRegister,
       countyLoanLimitsByCounty: Map[String, CountyLoanLimit],
-      countyLoanLimitsByState: Map[String, StateBoundries]): LarEntity2019 = {
+      countyLoanLimitsByState: Map[String, StateBoundries]
+  ): LarEntity2019 = {
+    val census = censusTractMap.getOrElse(lar.geography.tract, Census())
     LarEntity2019(
       lar.larIdentifier.id,
       lar.larIdentifier.LEI,
@@ -128,7 +161,14 @@ object LarConverter2019 {
       RaceCategorization.assignRaceCategorization(lar),
       SexCategorization.assignSexCategorization(lar),
       DwellingCategorization.assignDwellingCategorization(lar),
-      LoanProductTypeCategorization.assignLoanProductTypeCategorization(lar)
+      LoanProductTypeCategorization.assignLoanProductTypeCategorization(lar),
+      census.population,
+      census.minorityPopulationPercent,
+      census.medianIncome,
+      census.occupiedUnits,
+      census.oneToFourFamilyUnits,
+      census.medianAge,
+      census.tracttoMsaIncomePercent
     )
   }
 

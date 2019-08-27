@@ -340,6 +340,16 @@ trait PublisherComponent2019 {
     def dwellingCategorization = column[String]("dwelling_categorization")
     def loanProductTypeCategorization =
       column[String]("loan_product_type_categorization")
+    def tractPopulation = column[Int]("tract_population")
+    def tractMinorityPopulationPercent =
+      column[Double]("tract_minority_population_percent")
+    def tractMedianIncome = column[Int]("ffiec_msa_md_median_family_income")
+    def tractOccupiedUnits = column[Int]("tract_owner_occupied_units")
+    def tractOneToFourFamilyUnits =
+      column[Int]("tract_one_to_four_family_homes")
+    def tractMedianAge = column[Int]("tract_median_age_of_housing_units")
+    def tractToMsaIncomePercent =
+      column[Double]("tract_to_msa_income_percentage")
 
     def * =
       (larPartOneProjection,
@@ -479,7 +489,14 @@ trait PublisherComponent2019 {
        raceCategorization,
        sexCategorization,
        dwellingCategorization,
-       loanProductTypeCategorization) <> ((LarPartSeven2019.apply _).tupled, LarPartSeven2019.unapply)
+       loanProductTypeCategorization,
+       tractPopulation,
+       tractMinorityPopulationPercent,
+       tractMedianIncome,
+       tractOccupiedUnits,
+       tractOneToFourFamilyUnits,
+       tractMedianAge,
+       tractToMsaIncomePercent) <> ((LarPartSeven2019.apply _).tupled, LarPartSeven2019.unapply)
 
   }
 

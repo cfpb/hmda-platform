@@ -138,7 +138,14 @@ trait LarComponent2019 {
           ${le.raceCategorization},
           ${le.sexCategorization},
           ${le.dwellingCategorization},
-          ${le.loanProductTypeCategorization}
+          ${le.loanProductTypeCategorization},
+          ${le.tractPopulation},
+          ${le.tractMinorityPopulationPercent},
+          ${le.tractMedianIncome},
+          ${le.tractOccupiedUnits},
+          ${le.tractOneToFourFamilyUnits},
+          ${le.tractMedianAge},
+          ${le.tractToMsaIncomePercent},
         )
         """
       }

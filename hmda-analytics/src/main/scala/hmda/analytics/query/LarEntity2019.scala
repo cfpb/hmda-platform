@@ -116,7 +116,14 @@ case class LarEntity2019(
     raceCategorization: String = "",
     sexCategorization: String = "",
     dwellingCategorization: String = "",
-    loanProductTypeCategorization: String = ""
+    loanProductTypeCategorization: String = "",
+    tractPopulation: Int = 0,
+    tractMinorityPopulationPercent: Double = 0.0,
+    tractMedianIncome: Int = 0,
+    tractOccupiedUnits: Int = 0,
+    tractOneToFourFamilyUnits: Int = 0,
+    tractMedianAge: Int = 0,
+    tractToMsaIncomePercent: Double = 0.0
 ) {
   def isEmpty: Boolean = lei == ""
 }
