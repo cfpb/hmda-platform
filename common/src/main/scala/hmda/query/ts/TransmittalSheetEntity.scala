@@ -20,7 +20,7 @@ case class TransmittalSheetEntity(
 ) {
   def isEmpty: Boolean = lei == ""
 
-  def toPSV: String = {
+  def toRegulatorPSV: String = {
     s"$id|$institutionName|$year|" +
       s"$quarter|$name|$phone|" +
       s"$email|$street|$city|" +

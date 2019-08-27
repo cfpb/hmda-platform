@@ -130,7 +130,7 @@ class TsScheduler
         .fromFuture(allResults)
         .map(seek => seek.toList)
         .mapConcat(identity)
-        .map(transmittalSheet => transmittalSheet.toPSV + "\n")
+        .map(transmittalSheet => transmittalSheet.toRegulatorPSV + "\n")
         .map(s => ByteString(s))
         .runWith(s3Sink)
 
