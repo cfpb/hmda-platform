@@ -10,7 +10,7 @@ image:
   pullPolicy: IfNotPresent
 
 hmda:
-  rateLimit: 10
+  rateLimit: 3
 
 grpc:
   type: ClusterIP
