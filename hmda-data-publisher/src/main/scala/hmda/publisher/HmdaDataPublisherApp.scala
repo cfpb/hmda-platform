@@ -71,7 +71,6 @@ object HmdaDataPublisherApp extends App {
                   .withFallback(config))
   tsActorSystem.actorOf(Props[TsScheduler], "TsScheduler")
 
-
   val larPublicActorSystem =
     ActorSystem(
       "larPublicTask",
