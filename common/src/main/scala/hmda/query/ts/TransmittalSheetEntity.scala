@@ -31,6 +31,6 @@ case class TransmittalSheetEntity(
 
   def toPublicPSV: String = {
     s"$year|$quarter|$lei|$taxId|$agency|" +
-      s"$institutionName|$city|$state|$zipCode|$totalLines"
+      s"$institutionName|$state|$city|$zipCode|$totalLines"
   }
 }
