@@ -6,7 +6,7 @@ class: home
 
 <hgroup>
   <h1>The HMDA Platform API <code>v1</code></h1>
-  <p class="usa-font-lead">The HMDA Platform API is <strong><abbr title="Cross-Origin Resource Sharing">CORS</abbr></strong> enabled and requires <strong>no authentication</strong>. The API helps to prepare and test your HMDA data by allowing you to calculate rate spread, check a single LAR for formatting errors, generate/validate a check digit, and more.</p>
+  <p class="usa-font-lead">The HMDA Platform API V1 is <strong><abbr title="Cross-Origin Resource Sharing">CORS</abbr></strong> enabled and requires <strong>no authentication</strong>. The API helps to prepare and test your HMDA data by allowing you to calculate rate spread, check a single LAR for formatting errors, generate/validate a check digit, and more.</p>
 </hgroup>
 
 ---
