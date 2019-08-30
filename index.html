@@ -1,0 +1,453 @@
+
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>API Documentation</title>
+
+    <style>
+      .highlight table td { padding: 5px; }
+.highlight table pre { margin: 0; }
+.highlight .gh {
+  color: #999999;
+}
+.highlight .sr {
+  color: #f6aa11;
+}
+.highlight .go {
+  color: #888888;
+}
+.highlight .gp {
+  color: #555555;
+}
+.highlight .gs {
+}
+.highlight .gu {
+  color: #aaaaaa;
+}
+.highlight .nb {
+  color: #f6aa11;
+}
+.highlight .cm {
+  color: #75715e;
+}
+.highlight .cp {
+  color: #75715e;
+}
+.highlight .c1 {
+  color: #75715e;
+}
+.highlight .cs {
+  color: #75715e;
+}
+.highlight .c, .highlight .cd {
+  color: #75715e;
+}
+.highlight .err {
+  color: #960050;
+}
+.highlight .gr {
+  color: #960050;
+}
+.highlight .gt {
+  color: #960050;
+}
+.highlight .gd {
+  color: #49483e;
+}
+.highlight .gi {
+  color: #49483e;
+}
+.highlight .ge {
+  color: #49483e;
+}
+.highlight .kc {
+  color: #66d9ef;
+}
+.highlight .kd {
+  color: #66d9ef;
+}
+.highlight .kr {
+  color: #66d9ef;
+}
+.highlight .no {
+  color: #66d9ef;
+}
+.highlight .kt {
+  color: #66d9ef;
+}
+.highlight .mf {
+  color: #ae81ff;
+}
+.highlight .mh {
+  color: #ae81ff;
+}
+.highlight .il {
+  color: #ae81ff;
+}
+.highlight .mi {
+  color: #ae81ff;
+}
+.highlight .mo {
+  color: #ae81ff;
+}
+.highlight .m, .highlight .mb, .highlight .mx {
+  color: #ae81ff;
+}
+.highlight .sc {
+  color: #ae81ff;
+}
+.highlight .se {
+  color: #ae81ff;
+}
+.highlight .ss {
+  color: #ae81ff;
+}
+.highlight .sd {
+  color: #e6db74;
+}
+.highlight .s2 {
+  color: #e6db74;
+}
+.highlight .sb {
+  color: #e6db74;
+}
+.highlight .sh {
+  color: #e6db74;
+}
+.highlight .si {
+  color: #e6db74;
+}
+.highlight .sx {
+  color: #e6db74;
+}
+.highlight .s1 {
+  color: #e6db74;
+}
+.highlight .s {
+  color: #e6db74;
+}
+.highlight .na {
+  color: #a6e22e;
+}
+.highlight .nc {
+  color: #a6e22e;
+}
+.highlight .nd {
+  color: #a6e22e;
+}
+.highlight .ne {
+  color: #a6e22e;
+}
+.highlight .nf {
+  color: #a6e22e;
+}
+.highlight .vc {
+  color: #ffffff;
+}
+.highlight .nn {
+  color: #ffffff;
+}
+.highlight .nl {
+  color: #ffffff;
+}
+.highlight .ni {
+  color: #ffffff;
+}
+.highlight .bp {
+  color: #ffffff;
+}
+.highlight .vg {
+  color: #ffffff;
+}
+.highlight .vi {
+  color: #ffffff;
+}
+.highlight .nv {
+  color: #ffffff;
+}
+.highlight .w {
+  color: #ffffff;
+}
+.highlight {
+  color: #ffffff;
+}
+.highlight .n, .highlight .py, .highlight .nx {
+  color: #ffffff;
+}
+.highlight .ow {
+  color: #f92672;
+}
+.highlight .nt {
+  color: #f92672;
+}
+.highlight .k, .highlight .kv {
+  color: #f92672;
+}
+.highlight .kn {
+  color: #f92672;
+}
+.highlight .kp {
+  color: #f92672;
+}
+.highlight .o {
+  color: #f92672;
+}
+    </style>
+    <link href="stylesheets/screen.css" rel="stylesheet" media="screen" />
+    <link href="stylesheets/print.css" rel="stylesheet" media="print" />
+      <script src="javascripts/all_nosearch.js"></script>
+  </head>
+
+  <body class="index" data-languages="[]">
+    <a href="#" id="nav-button">
+      <span>
+        NAV
+        <img src="images/navbar.png" alt="Navbar" />
+      </span>
+    </a>
+    <div class="toc-wrapper">
+
+      <img src="images/ffiec-logo.png" class="logo" alt="Ffiec logo" />
+      <ul id="toc" class="toc-list-h1">
+          <li>
+            <a href="#data-browser-api" class="toc-h1 toc-link" data-title="Data Browser API">Data Browser API</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#end-points" class="toc-h2 toc-link" data-title="End Points">End Points</a>
+                  </li>
+                  <li>
+                    <a href="#filters" class="toc-h2 toc-link" data-title="Filters">Filters</a>
+                  </li>
+                  <li>
+                    <a href="#aggregation-example" class="toc-h2 toc-link" data-title="Aggregation Example">Aggregation Example</a>
+                  </li>
+                  <li>
+                    <a href="#csv-example" class="toc-h2 toc-link" data-title="CSV Example">CSV Example</a>
+                  </li>
+                  <li>
+                    <a href="#errors" class="toc-h2 toc-link" data-title="Errors">Errors</a>
+                  </li>
+              </ul>
+          </li>
+      </ul>
+    </div>
+    <div class="page-wrapper">
+
+
+
+      <div class="dark-box"></div>
+
+      <div class="banner-inner"><img src="images/favicon-57.png" alt="U.S. flag"><p>An official website of the United States government</p></div>
+
+      <div class="content">
+        <h1 id='data-browser-api'>Data Browser API</h1>
+<p>The data browser api enables developers to interact with HMDA data. The API will return the data in JSON or CSV.</p>
+
+<p><em>Note:</em> depending on the query, files might take a while to generate and may not open using conventional spread sheet applications.</p>
+<h2 id='end-points'>End Points</h2>
+<p>Use <code>data-browser-api/view/</code> for the end points bellow. Each end point could be called on nationwide data or on specific states/msamds. If <code>nationwide</code> is not specified, state(s) or msamds <strong>must</strong> be selected. A call made with the nationwide end point will discard any state(s) or msamds if present. For state, use 2 character state name. For msamd use a 5 digit integer.</p>
+
+<ul>
+<li><strong>Aggregations</strong></li>
+</ul>
+
+<p>The <code>aggregation</code> end point can be used to generated JSON reports.</p>
+
+<ul>
+<li><strong>CSV</strong></li>
+</ul>
+
+<p>The <code>csv</code> end point can be used to generate CSV reports. The file will be streamed.</p>
+<h2 id='filters'>Filters</h2>
+<p>Data request could be filtered based on the following parameters. Multiple options are acceptable.</p>
+
+<table><thead>
+<tr>
+<th>Variable Name</th>
+<th>Options</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>actions_taken</td>
+<td>1,2,3,4,5,6,7,8</td>
+</tr>
+<tr>
+<td>construction_methods</td>
+<td>1,2</td>
+</tr>
+<tr>
+<td>dwelling_categories</td>
+<td>Single Family (1-4 Units):Site-Built<br>Multifamily:Site-Built<br>Single Family (1-4 Units):Manufactured<br>Multifamily:Manufactured</td>
+</tr>
+<tr>
+<td>ethnicities</td>
+<td>Hispanic or Latino<br>Not Hispanic or Latino<br>Joint<br>Ethnicity Not Available<br>Free Form Text Only</td>
+</tr>
+<tr>
+<td>lien_statuses</td>
+<td>1,2</td>
+</tr>
+<tr>
+<td>loan_products</td>
+<td>Conventional:First Lien<br>FHA:First Lien<br>VA:First Lien<br>FSA/RHS:First Lien<br>Conventional:Subordinate Lien<br>FHA:Subordinate Lien<br>VA:Subordinate Lien<br>FSA/RHS:Subordinate Lien</td>
+</tr>
+<tr>
+<td>loan_purposes</td>
+<td>1,2,31,32,4,5</td>
+</tr>
+<tr>
+<td>loan_types</td>
+<td>1,2,3,4</td>
+</tr>
+<tr>
+<td>races</td>
+<td>Asian<br>Native Hawaiian or Other Pacific Islander<br>Free Form Text Only<br>Race Not Available<br>American Indian or Alaska Native<br>Black or African American<br>2 or more minority races<br>White<br>Joint</td>
+</tr>
+<tr>
+<td>sexes</td>
+<td>Male<br>Female<br>Joint<br>Sex Not Available</td>
+</tr>
+<tr>
+<td>total_units</td>
+<td>1,2,3,4,5-24,25-49,50-99,100-149,&gt;149</td>
+</tr>
+</tbody></table>
+<h2 id='aggregation-example'>Aggregation Example</h2><pre class="highlight shell tab-shell"><code>  curl <span class="s2">"https://ffiec.cfpb.gov/v2/data-browser-api/view/aggregations?states=MD&amp;years=2018&amp;actions_taken=5,6&amp;races=White,Asian,Joint"</span>
+</code></pre>
+<blockquote>
+<p>The above command returns JSON structured like this:</p>
+</blockquote>
+<pre class="highlight json tab-json"><code><span class="w">  </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"parameters"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="s2">"year"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2018"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"state"</span><span class="p">:</span><span class="w"> </span><span class="s2">"MD"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"actions_taken"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5,6"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"races"</span><span class="p">:</span><span class="w"> </span><span class="s2">"White,Asian,Joint"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="s2">"aggregations"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="s2">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">243</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"sum"</span><span class="p">:</span><span class="w"> </span><span class="mf">9.4325</span><span class="err">E</span><span class="mi">7</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"actions_taken"</span><span class="p">:</span><span class="w"> </span><span class="s2">"6"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"races"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Joint"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"state"</span><span class="p">:</span><span class="w"> </span><span class="s2">"MD"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"year"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2018"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="s2">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">716</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"sum"</span><span class="p">:</span><span class="w"> </span><span class="mf">2.5435</span><span class="err">E</span><span class="mi">8</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"actions_taken"</span><span class="p">:</span><span class="w"> </span><span class="s2">"6"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"races"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Asian"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"state"</span><span class="p">:</span><span class="w"> </span><span class="s2">"MD"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"year"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2018"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="s2">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">7505</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"sum"</span><span class="p">:</span><span class="w"> </span><span class="mf">2.323145</span><span class="err">E</span><span class="mi">9</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"actions_taken"</span><span class="p">:</span><span class="w"> </span><span class="s2">"6"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"races"</span><span class="p">:</span><span class="w"> </span><span class="s2">"White"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"state"</span><span class="p">:</span><span class="w"> </span><span class="s2">"MD"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"year"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2018"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="s2">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">165</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"sum"</span><span class="p">:</span><span class="w"> </span><span class="mf">4.7595</span><span class="err">E</span><span class="mi">7</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"actions_taken"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"races"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Joint"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"state"</span><span class="p">:</span><span class="w"> </span><span class="s2">"MD"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"year"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2018"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="s2">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">679</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"sum"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.90835</span><span class="err">E</span><span class="mi">8</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"actions_taken"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"races"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Asian"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"state"</span><span class="p">:</span><span class="w"> </span><span class="s2">"MD"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"year"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2018"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="s2">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">5237</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"sum"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.241115</span><span class="err">E</span><span class="mi">9</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"actions_taken"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"races"</span><span class="p">:</span><span class="w"> </span><span class="s2">"White"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"state"</span><span class="p">:</span><span class="w"> </span><span class="s2">"MD"</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"year"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2018"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+<p><code>GET</code> JSON with the following parameters</p>
+
+<table><thead>
+<tr>
+<th>var</th>
+<th>value</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>years</td>
+<td>2018</td>
+</tr>
+<tr>
+<td>states</td>
+<td>MD</td>
+</tr>
+<tr>
+<td>actions_taken</td>
+<td>5,6</td>
+</tr>
+<tr>
+<td>races</td>
+<td>White, Asian, Joint</td>
+</tr>
+</tbody></table>
+<h2 id='csv-example'>CSV Example</h2><pre class="highlight shell tab-shell"><code>  curl -L <span class="s2">"https://ffiec.cfpb.gov/v2/data-browser-api/view/csv?states=CA,MD,DC&amp;years=2018&amp;actions_taken=5"</span>
+</code></pre>
+<blockquote>
+<p>The above command returns a stream to a CSV file structured like this:</p>
+</blockquote>
+
+<p><code>GET</code> CSV file with the following parameters</p>
+
+<table><thead>
+<tr>
+<th>var</th>
+<th>value</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>states</td>
+<td>CA, MD, DC</td>
+</tr>
+<tr>
+<td>years</td>
+<td>2018</td>
+</tr>
+<tr>
+<td>action_taken</td>
+<td>5</td>
+</tr>
+</tbody></table>
+<h2 id='errors'>Errors</h2><pre class="highlight shell tab-shell"><code>curl <span class="s2">"https://ffiec.cfpb.gov/v2/data-browser-api/view/csv"</span>
+</code></pre>
+<blockquote>
+<p>The above command returns JSON structured like this:</p>
+</blockquote>
+<pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+    </span><span class="s2">"errorType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"provide-atleast-msamds-or-states"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Provide year and either states or msamds or both"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+<p>Incorrect calls will result in an error. For example the following call will result in an error since there is no state(s)/msamds and years provided.</p>
+
+<p><br></p>
+
+      </div>
+      <div class="dark-box">
+      </div>
+    </div>
+  </body>
+</html>
