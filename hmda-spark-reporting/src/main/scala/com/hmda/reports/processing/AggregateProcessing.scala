@@ -428,7 +428,7 @@ object AggregateProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(
-            s"dev/reports/aggregate/2018/${input.msa.id}/i.json",
+            s"prod/reports/aggregate/2018/${input.msa.id}/i.json",
             data,
             "cfpb-hmda-public",
             s3Settings)(mat, ec)
@@ -516,10 +516,7 @@ object AggregateProcessing {
     def aggregateTableI = reportedInstitutions.groupBy(d => d.msa_md).map {
       case (key, values) =>
         val msaMd: Msa =
-          Msa(key.toString(),
-              values.head.msa_md_name,
-              values.head.state,
-              Census.states.getOrElse(values.head.state, State("", "")).name)
+          Msa(key.toString(), values.head.msa_md_name, "", "")
         val institutions: Set[String] =
           values.map(d => d.reported_institutions.head.toUpperCase)
         OutReportedInstitutions(
