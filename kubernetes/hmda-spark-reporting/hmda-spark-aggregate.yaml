@@ -56,7 +56,7 @@ spec:
   executor:
     cores: 2
     instances: 2
-    memory: "8g"
+    memory: "9g"
     javaOptions: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
     labels:
       version: 2.4.0
