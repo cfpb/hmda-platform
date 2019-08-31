@@ -130,7 +130,6 @@ case class GroupingMedAge(msa_md: Long, msa_md_name: String)
 
 case class ReportedInstitutions(msa_md: String,
                                 msa_md_name: String,
-                                state: String,
                                 reported_institutions: List[String])
 case class OutReportedInstitutions(table: String,
                                    `type`: String,
