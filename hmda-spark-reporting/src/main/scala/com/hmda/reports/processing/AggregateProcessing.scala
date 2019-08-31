@@ -428,7 +428,7 @@ object AggregateProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(
-            s"$bucket/reports/aggregate/2018/${input.msa.id}/i.json",
+            s"dev/reports/aggregate/2018/${input.msa.id}/i.json",
             data,
             "cfpb-hmda-public",
             s3Settings)(mat, ec)
@@ -505,7 +505,7 @@ object AggregateProcessing {
               clonedRenamed
                 .col("institution_lei") === clonedDf.col("mlar_lei"),
               "inner")
-        .groupBy(col("msa_md"), col("msa_md_name"), col("state"))
+        .groupBy(col("msa_md"), col("msa_md_name"))
         .agg(collect_set(col("respondent_name")) as "reported_institutions")
         .as[ReportedInstitutions]
         .collect
@@ -549,20 +549,20 @@ object AggregateProcessing {
     val result = for {
       _ <- persistJson(aggregateTable1)
       _ <- persistJson2(aggregateTable2)
-//      _ <- persistJson9(aggregateTable9)
-//      _ <- persistJsonI(aggregateTableI.toList)
-//      _ <- persistJsonRaceSex(
-//        jsonFormationRaceThenGender(
-//          RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
-//                                                          spark)))
-//      _ <- persistJsonEthnicitySex(
-//        jsonTransformationReportByEthnicityThenGender(
-//          RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
-//                                                          spark)))
-//      _ <- persistIncomeRaceEthnicity(
-//        IncomeRaceEthnicityProcessing.jsonFormationApplicantIncome(
-//          IncomeRaceEthnicityProcessing
-//            .outputCollectionTableIncome(cachedRecordsDf, spark)))
+      _ <- persistJson9(aggregateTable9)
+      _ <- persistJsonI(aggregateTableI.toList)
+      _ <- persistJsonRaceSex(
+        jsonFormationRaceThenGender(
+          RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
+                                                          spark)))
+      _ <- persistJsonEthnicitySex(
+        jsonTransformationReportByEthnicityThenGender(
+          RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
+                                                          spark)))
+      _ <- persistIncomeRaceEthnicity(
+        IncomeRaceEthnicityProcessing.jsonFormationApplicantIncome(
+          IncomeRaceEthnicityProcessing
+            .outputCollectionTableIncome(cachedRecordsDf, spark)))
     } yield ()
 
     result.onComplete {
