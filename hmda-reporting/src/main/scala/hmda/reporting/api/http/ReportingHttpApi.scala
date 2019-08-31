@@ -7,14 +7,21 @@ import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{
+  cors,
+  corsRejectionHandler
+}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.model.institution.{HmdaFiler, HmdaFilerResponse, MsaMd, MsaMdResponse}
+import hmda.model.institution.{
+  HmdaFiler,
+  HmdaFilerResponse,
+  MsaMd,
+  MsaMdResponse
+}
 import hmda.query.repository.ModifiedLarRepository
 import hmda.reporting.repository.InstitutionComponent
 import hmda.util.http.FilingResponseUtils.entityNotPresentResponse
 import io.circe.generic.auto._
-import org.slf4j.LoggerFactory
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
@@ -34,10 +41,8 @@ trait ReportingHttpApi extends InstitutionComponent {
   val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
   val repo = new ModifiedLarRepository(databaseConfig)
   val institutionRepository: InstitutionRepository
-  val log = LoggerFactory.getLogger("hmda")
   val filerListRoute: Route = {
     path("filers" / IntNumber) { filingYear =>
-      log.info("Fileres ")
       get {
 
         val futFilerSet =
@@ -61,7 +66,6 @@ trait ReportingHttpApi extends InstitutionComponent {
       }
     } ~ path("filers" / IntNumber / Segment / "msaMds") { (year, lei) =>
       extractUri { uri =>
-        log.info("msaMds endpoint with lei: " + lei)
         val resultset = for {
           msaMdsResult <- repo.msaMds(lei, year)
           institutionResult <- institutionRepository.findByLei(lei)
@@ -79,7 +83,6 @@ trait ReportingHttpApi extends InstitutionComponent {
           case Success(leiMsaMds) =>
             complete(leiMsaMds)
           case Failure(error) =>
-            log.error("Errored in the /msaMds endpoint with: " + error)
             entityNotPresentResponse("institution", lei, uri)
         }
       }
