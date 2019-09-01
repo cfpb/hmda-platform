@@ -76,7 +76,7 @@ object AggregateProcessing {
         .option("upperBound", 99999)
         .option(
           "dbtable",
-          s"(select * from modifiedlar2018_snapshot where filing_year = $year and msa_md = 31084 and state <> 'NA' and county <> 'NA' and lei not in ('BANK1LEIFORTEST12345','BANK3LEIFORTEST12345','BANK4LEIFORTEST12345','999999LE3ZOZXUS7W648','28133080042813308004','B90YWS6AFX2LGWOXJ1LD')) as mlar"
+          s"(select * from modifiedlar2018_snapshot where filing_year = $year and state <> 'NA' and county <> 'NA' and lei not in ('BANK1LEIFORTEST12345','BANK3LEIFORTEST12345','BANK4LEIFORTEST12345','999999LE3ZOZXUS7W648','28133080042813308004','B90YWS6AFX2LGWOXJ1LD')) as mlar"
         )
         .load()
         .withColumnRenamed("race_categorization", "race")
@@ -91,7 +91,7 @@ object AggregateProcessing {
         .option("url", jdbcUrl)
         .option(
           "dbtable",
-          s"(select lei as institution_lei, respondent_name from institutions2018 where hmda_filer = true) as institutions2018")
+          s"(select lei as institution_lei, respondent_name from institutions2018_snapshot where hmda_filer = true) as institutions2018")
         .load()
         .cache()
 
@@ -514,11 +514,12 @@ object AggregateProcessing {
 
     val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
     def aggregateTableI = reportedInstitutions.groupBy(d => d.msa_md).map {
-      case (key, values) =>
+      case (msa, institutions) =>
         val msaMd: Msa =
-          Msa(key.toString(), values.head.msa_md_name, "", "")
-        val institutions: Set[String] =
-          values.map(d => d.reported_institutions.head.toUpperCase)
+          Msa(msa.toString(), institutions.head.msa_md_name, "", "")
+        val reportedInstitutions: Set[String] =
+          institutions.flatMap(i => i.reported_institutions).map(_.toUpperCase)
+        println(reportedInstitutions)
         OutReportedInstitutions(
           "I",
           "Aggregate",
@@ -526,7 +527,7 @@ object AggregateProcessing {
           year,
           dateFormat.format(new java.util.Date()),
           msaMd,
-          institutions
+          reportedInstitutions
         )
     }
 
@@ -544,22 +545,22 @@ object AggregateProcessing {
         .runWith(Sink.ignore)
 
     val result = for {
-//      _ <- persistJson(aggregateTable1)
-//      _ <- persistJson2(aggregateTable2)
-//      _ <- persistJson9(aggregateTable9)
+      _ <- persistJson(aggregateTable1)
+      _ <- persistJson2(aggregateTable2)
+      _ <- persistJson9(aggregateTable9)
       _ <- persistJsonI(aggregateTableI.toList)
-//      _ <- persistJsonRaceSex(
-//        jsonFormationRaceThenGender(
-//          RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
-//                                                          spark)))
-//      _ <- persistJsonEthnicitySex(
-//        jsonTransformationReportByEthnicityThenGender(
-//          RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
-//                                                          spark)))
-//      _ <- persistIncomeRaceEthnicity(
-//        IncomeRaceEthnicityProcessing.jsonFormationApplicantIncome(
-//          IncomeRaceEthnicityProcessing
-//            .outputCollectionTableIncome(cachedRecordsDf, spark)))
+      _ <- persistJsonRaceSex(
+        jsonFormationRaceThenGender(
+          RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
+                                                          spark)))
+      _ <- persistJsonEthnicitySex(
+        jsonTransformationReportByEthnicityThenGender(
+          RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
+                                                          spark)))
+      _ <- persistIncomeRaceEthnicity(
+        IncomeRaceEthnicityProcessing.jsonFormationApplicantIncome(
+          IncomeRaceEthnicityProcessing
+            .outputCollectionTableIncome(cachedRecordsDf, spark)))
     } yield ()
 
     result.onComplete {
