@@ -19,7 +19,7 @@ object Version {
   val httpcomponents = "4.5.6"
   val alpakkaS3 = "1.1.1"
   val alpakkaKafka = "1.0.4"
-  val embeddedKafka = "2.0.0"
+  val embeddedKafka = "2.3.0"
   val akkaQuartzScheduler = "1.6.1-akka-2.5.x"
   val phantom = "2.31.0"
   val cinnamonMetrics = "2.11.3"
