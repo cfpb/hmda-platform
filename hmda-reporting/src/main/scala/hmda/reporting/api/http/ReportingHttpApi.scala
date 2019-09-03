@@ -38,9 +38,9 @@ trait ReportingHttpApi extends InstitutionComponent {
   val bankFilter = config.getConfig("filter")
   val bankFilterList =
     bankFilter.getString("bank-filter-list").toUpperCase.split(",")
-
+  val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
+  val repo = new ModifiedLarRepository(databaseConfig)
   val institutionRepository: InstitutionRepository
-
   val filerListRoute: Route = {
     path("filers" / IntNumber) { filingYear =>
       get {
@@ -66,8 +66,6 @@ trait ReportingHttpApi extends InstitutionComponent {
       }
     } ~ path("filers" / IntNumber / Segment / "msaMds") { (year, lei) =>
       extractUri { uri =>
-        val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
-        val repo = new ModifiedLarRepository(databaseConfig)
         val resultset = for {
           msaMdsResult <- repo.msaMds(lei, year)
           institutionResult <- institutionRepository.findByLei(lei)

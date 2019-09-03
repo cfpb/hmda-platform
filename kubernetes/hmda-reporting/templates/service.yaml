@@ -27,6 +27,7 @@ metadata:
       ambassador_id: ambassador-default-1
       prefix: /v2/reporting/
       service: {{ .Values.service.name }}:{{ .Values.reporting.port }}
+      timeout_ms: 180000
       rate_limits:
         - descriptor: hmda-reporting
 spec:
