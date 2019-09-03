@@ -701,7 +701,7 @@ object BaseProcessing {
 
   def allUniqueMsaMdTract(cachedRecordsDf: DataFrame) =
     cachedRecordsDf
-      .select(col("tract"), col("msa_md"), col("msa_md_name"), col("state"))
+      .select(col("tract"), col("msa_md"), col("msa_md_name"))
       .dropDuplicates()
       .cache()
 

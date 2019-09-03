@@ -11,7 +11,7 @@ spec:
     "spark.streaming.receiver.maxRate": "1"
     "spark.streaming.backpressure.initialRate": "1"
     "spark.streaming.backpressure.enabled": "true"
-  image: "omnipresent/hmda-spark-reporting"
+  image: "hmda/hmda-spark-reporting:regenerate"
   imagePullPolicy: Always
   mainClass: com.hmda.reports.DisclosureReports
   mainApplicationFile: "local:///opt/spark/cfpb/hmda/jars/hmda-spark-reporting.jar"
@@ -26,7 +26,7 @@ spec:
   driver:
     cores: 2
     coreLimit: "4000m"
-    memory: "12g"
+    memory: "4g"
     labels:
       version: 2.4.0
 #    affinity:
@@ -66,7 +66,7 @@ spec:
   executor:
     cores: 2
     instances: 4
-    memory: "12g"
+    memory: "8g"
     labels:
       version: 2.4.0
 #    affinity:
