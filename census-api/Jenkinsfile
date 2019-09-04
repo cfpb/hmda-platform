@@ -32,7 +32,7 @@ volumes: [
         //Get list of changed files and end job if files changed aren't in relevant folders
         folders=[]
         def output = sh(returnStdout: true, script: "echo \$(git --no-pager diff upstream/master --name-only)").split().each{folders = folders + it.split('/')[0]}
-        if (!(gitBranch == 'master' || folders.contains('census-api') || folders.contains('common'))) {
+        if (!(gitBranch == 'master' || folders.contains('census-api') || folders.contains('common') || gitTagged)) {
             currentBuild.result = 'SUCCESS'
             return
         }  
