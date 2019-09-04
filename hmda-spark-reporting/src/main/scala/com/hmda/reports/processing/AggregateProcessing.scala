@@ -68,7 +68,7 @@ object AggregateProcessing {
     def cachedRecordsDf: DataFrame =
       spark.read
         .format("jdbc")
-        .option("driver", "org.postgresql.Driver")
+        .option("profile", "slick.jdbc.PostgresProfile")
         .option("url", jdbcUrl)
         .option("numPartitions", 1000)
         .option("partitionColumn", "msa_md")
@@ -87,7 +87,7 @@ object AggregateProcessing {
     val cachedRecordsInstitions2018: DataFrame =
       spark.read
         .format("jdbc")
-        .option("driver", "org.postgresql.Driver")
+        .option("profile", "slick.jdbc.PostgresProfile")
         .option("url", jdbcUrl)
         .option(
           "dbtable",

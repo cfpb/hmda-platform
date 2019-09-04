@@ -193,7 +193,7 @@ object DisclosureProcessing {
     def leiDetails: Institution =
       spark.read
         .format("jdbc")
-        .option("driver", "org.postgresql.Driver")
+        .option("profile", "slick.jdbc.PostgresProfile")
         .option("url", jdbcUrl)
         .option(
           "dbtable",
@@ -206,7 +206,7 @@ object DisclosureProcessing {
     def cachedRecordsDf: DataFrame =
       spark.read
         .format("jdbc")
-        .option("driver", "org.postgresql.Driver")
+        .option("profile", "slick.jdbc.PostgresProfile")
         .option("url", jdbcUrl)
         .option(
           "dbtable",
