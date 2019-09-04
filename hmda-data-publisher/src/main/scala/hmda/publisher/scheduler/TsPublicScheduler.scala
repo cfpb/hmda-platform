@@ -82,7 +82,8 @@ class TsPublicScheduler
       val fileNamePSV = "2018_ts.txt"
 
       val s3SinkPSV =
-        S3.multipartUpload(bucket, s"$environment/dynamic-data/2018/$fileNamePSV")
+        S3.multipartUpload(bucket,
+                           s"$environment/dynamic-data/2018/$fileNamePSV")
           .withAttributes(S3Attributes.settings(s3Settings))
 
       val allResults: Future[Seq[TransmittalSheetEntity]] =
@@ -108,7 +109,7 @@ class TsPublicScheduler
         }
         case Failure(t) =>
           println(
-            "An error has occurred gettingPublic PSV TS Data 2018: " + t.getMessage)
+            " An error has occurred getting Public PSV TS Data 2018: " + t.getMessage)
       }
   }
 }
