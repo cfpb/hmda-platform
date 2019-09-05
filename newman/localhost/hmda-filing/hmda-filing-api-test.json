@@ -109,7 +109,7 @@
         }
       ],
       "request": {
-        "url": "http://{{host-filing-api}}",
+        "url": "http://{{host_filing_api}}",
         "method": "GET",
         "header": [
           {
@@ -271,7 +271,7 @@
         }
       ],
       "request": {
-        "url": "http://{{host-filing-api}}/institutions/{{test-lei}}/filings/{{filing-year}}",
+        "url": "http://{{host_filing_api}}/institutions/{{test-lei}}/filings/{{filing-year}}",
         "method": "POST",
         "header": [
           {
@@ -310,7 +310,7 @@
         }
       ],
       "request": {
-        "url": "http://{{host-filing-api}}/institutions/{{test-lei}}/filings/{{filing-year}}/submissions",
+        "url": "http://{{host_filing_api}}/institutions/{{test-lei}}/filings/{{filing-year}}/submissions",
         "method": "POST",
         "header": [
           {
@@ -350,14 +350,9 @@
         }
       ],
       "request": {
-        "url": "http://{{host-filing-api}}/institutions/{{test-lei}}/filings/{{filing-year}}/submissions/{{sequenceNumber}}",
+        "url": "http://{{host_filing_api}}/institutions/{{test-lei}}/filings/{{filing-year}}/submissions/{{sequenceNumber}}",
         "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
+
         "body": {
           "mode": "formdata",
           "formdata": [
@@ -397,7 +392,7 @@
 				}
 			],
 			"request": {
-				"url": "http://{{host-filing-api}}/institutions/{{test-lei}}/filings/{{filing-year}}/submissions/latest",
+				"url": "http://{{host_filing_api}}/institutions/{{test-lei}}/filings/{{filing-year}}/submissions/latest",
 				"method": "GET",
 				"header": [
 					{
@@ -432,7 +427,7 @@
 	        }
 	      ],
 	      "request": {
-					"url": "http://{{host-filing-api}}/institutions/{{test-lei}}/filings/{{filing-year}}/submissions/{{sequenceNumber}}/edits/quality",
+					"url": "http://{{host_filing_api}}/institutions/{{test-lei}}/filings/{{filing-year}}/submissions/{{sequenceNumber}}/edits/quality",
 	        "method": "POST",
 	        "header": [
 	          {
@@ -470,7 +465,7 @@
 		        }
 		      ],
 		      "request": {
-						"url": "http://{{host-filing-api}}/institutions/{{test-lei}}/filings/{{filing-year}}/submissions/{{sequenceNumber}}/edits/macro",
+						"url": "http://{{host_filing_api}}/institutions/{{test-lei}}/filings/{{filing-year}}/submissions/{{sequenceNumber}}/edits/macro",
 		        "method": "POST",
 		        "header": [
 		          {
@@ -509,7 +504,7 @@
         }
       ],
       "request": {
-				"url": "http://{{host-filing-api}}/institutions/{{test-lei}}/filings/{{filing-year}}/submissions/{{sequenceNumber}}/sign",
+				"url": "http://{{host_filing_api}}/institutions/{{test-lei}}/filings/{{filing-year}}/submissions/{{sequenceNumber}}/sign",
         "method": "POST",
         "header": [
           {
