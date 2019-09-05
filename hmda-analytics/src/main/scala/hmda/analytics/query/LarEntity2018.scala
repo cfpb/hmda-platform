@@ -1,6 +1,6 @@
 package hmda.analytics.query
 
-case class LarEntity(
+case class LarEntity2018(
     id: Int = 0,
     lei: String = "",
     uli: String = "",

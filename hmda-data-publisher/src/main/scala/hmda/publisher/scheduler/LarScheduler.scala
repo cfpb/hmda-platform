@@ -25,7 +25,7 @@ import hmda.publisher.query.component.{
   PublisherComponent2018,
   PublisherComponent2019
 }
-import hmda.publisher.query.lar.LarEntityImpl
+import hmda.publisher.query.lar.{LarEntityImpl2018, LarEntityImpl2019}
 import hmda.publisher.scheduler.schedules.Schedules.{
   LarScheduler2018,
   LarScheduler2019
@@ -100,9 +100,9 @@ class LarScheduler
         .multipartUpload(bucket, s"$environment/lar/$fileName")
         .withAttributes(S3Attributes.settings(s3Settings))
 
-      val allResultsPublisher: DatabasePublisher[LarEntityImpl] =
+      val allResultsPublisher: DatabasePublisher[LarEntityImpl2018] =
         larRepository2018.getAllLARs(bankFilterList)
-      val allResultsSource: Source[LarEntityImpl, NotUsed] =
+      val allResultsSource: Source[LarEntityImpl2018, NotUsed] =
         Source.fromPublisher(allResultsPublisher)
 
       var results: Future[MultipartUploadResult] = allResultsSource
@@ -128,9 +128,9 @@ class LarScheduler
         .multipartUpload(bucket, s"$environment/lar/$fileName")
         .withAttributes(S3Attributes.settings(s3Settings))
 
-      val allResultsPublisher: DatabasePublisher[LarEntityImpl] =
+      val allResultsPublisher: DatabasePublisher[LarEntityImpl2019] =
         larRepository2019.getAllLARs(bankFilterList)
-      val allResultsSource: Source[LarEntityImpl, NotUsed] =
+      val allResultsSource: Source[LarEntityImpl2019, NotUsed] =
         Source.fromPublisher(allResultsPublisher)
 
       var results: Future[MultipartUploadResult] = allResultsSource

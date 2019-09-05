@@ -1,4 +1,4 @@
-package hmda.publication.lar
+package hmda.parser.derivedFields
 
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
