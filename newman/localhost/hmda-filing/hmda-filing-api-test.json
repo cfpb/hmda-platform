@@ -352,7 +352,6 @@
       "request": {
         "url": "http://{{host_filing_api}}/institutions/{{test-lei}}/filings/{{filing-year}}/submissions/{{sequenceNumber}}",
         "method": "POST",
-
         "body": {
           "mode": "formdata",
           "formdata": [
