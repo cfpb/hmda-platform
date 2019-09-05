@@ -210,7 +210,7 @@ object DisclosureProcessing {
         .option("url", jdbcUrl)
         .option(
           "dbtable",
-          s"(select * from modifiedlar2018prod where lei = '$lei' and filing_year = $year) as mlar")
+          s"(select * from modifiedlar2018 where lei = '$lei' and filing_year = $year) as mlar")
         .load()
         .cache()
 
