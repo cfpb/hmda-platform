@@ -13,7 +13,6 @@ import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import akka.pattern.ask
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.RetentionCriteria
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 import akka.stream.ActorMaterializer
@@ -40,7 +39,11 @@ import hmda.model.filing.submission._
 import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
 import hmda.model.institution.Institution
 import hmda.model.processing.state.HmdaValidationErrorState
-import hmda.model.validation.{MacroValidationError, ValidationError}
+import hmda.model.validation.{
+  MacroValidationError,
+  SyntacticalValidationError,
+  ValidationError
+}
 import hmda.parser.filing.ParserFlow._
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
@@ -57,6 +60,7 @@ import hmda.util.streams.FlowUtils.framing
 import hmda.validation.context.ValidationContext
 import hmda.validation.filing.MacroValidationFlow._
 import hmda.validation.filing.ValidationFlow._
+import hmda.validation.rules.lar.syntactical.S305
 import hmda.validation.{AS, EC, MAT}
 
 import scala.concurrent.duration._
@@ -64,9 +68,9 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 object HmdaValidationError
-    extends HmdaTypedPersistentActor[SubmissionProcessingCommand,
-                                     SubmissionProcessingEvent,
-                                     HmdaValidationErrorState] {
+  extends HmdaTypedPersistentActor[SubmissionProcessingCommand,
+    SubmissionProcessingEvent,
+    HmdaValidationErrorState] {
 
   override val name: String = "HmdaValidationError"
 
@@ -76,24 +80,23 @@ object HmdaValidationError
   implicit val timeout: Timeout = Timeout(futureTimeout.seconds)
 
   override def behavior(
-      entityId: String): Behavior[SubmissionProcessingCommand] =
+                         entityId: String): Behavior[SubmissionProcessingCommand] =
     Behaviors.setup { ctx =>
       EventSourcedBehavior[SubmissionProcessingCommand,
-                           SubmissionProcessingEvent,
-                           HmdaValidationErrorState](
+        SubmissionProcessingEvent,
+        HmdaValidationErrorState](
         persistenceId = PersistenceId(s"$entityId"),
         emptyState = HmdaValidationErrorState(),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
-      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000,
-                                                      keepNSnapshots = 10))
+      ).snapshotEvery(1000)
     }
 
   override def commandHandler(
-      ctx: TypedActorContext[SubmissionProcessingCommand])
-    : CommandHandler[SubmissionProcessingCommand,
-                     SubmissionProcessingEvent,
-                     HmdaValidationErrorState] = { (state, cmd) =>
+                               ctx: TypedActorContext[SubmissionProcessingCommand])
+  : CommandHandler[SubmissionProcessingCommand,
+    SubmissionProcessingEvent,
+    HmdaValidationErrorState] = { (state, cmd) =>
     val log = ctx.asScala.log
     implicit val system: ActorSystem = ctx.asScala.system.toUntyped
     implicit val materializer: ActorMaterializer = ActorMaterializer()
@@ -109,9 +112,9 @@ object HmdaValidationError
 
         val fValidationContext =
           validationContext(submissionId.period.toInt,
-                            sharding,
-                            ctx,
-                            submissionId)
+            sharding,
+            ctx,
+            submissionId)
 
         val fSyntacticalValidity = for {
           validationContext <- fValidationContext
@@ -122,9 +125,9 @@ object HmdaValidationError
             .run()
 
           tsLarErrors <- validateTsLar(ctx,
-                                       submissionId,
-                                       "syntactical-validity",
-                                       validationContext)
+            submissionId,
+            "syntactical-validity",
+            validationContext)
           _ = log.info(s"Starting validateLar - Syntactical for $submissionId")
           larSyntacticalValidityErrors <- validateLar(
             "syntactical-validity",
@@ -134,8 +137,8 @@ object HmdaValidationError
           _ = log.info(
             s"Starting validateAsycLar - Syntactical for $submissionId")
           larAsyncErrors <- validateAsyncLar("syntactical-validity",
-                                             ctx,
-                                             submissionId).runWith(Sink.ignore)
+            ctx,
+            submissionId).runWith(Sink.ignore)
           _ = log.info(
             s"Finished validateAsycLar - Syntactical for $submissionId")
         } yield
@@ -179,8 +182,8 @@ object HmdaValidationError
           _ = log.info(s"Finished ValidateLar Quality for $submissionId")
           _ = log.info(s"Started validateAsyncLar - Quality for $submissionId")
           larAsyncErrorsQuality <- validateAsyncLar("quality",
-                                                    ctx,
-                                                    submissionId)
+            ctx,
+            submissionId)
             .runWith(Sink.ignore)
           _ = log.info(s"Finished ValidateAsyncLar Quality for $submissionId")
         } yield (larErrors, larAsyncErrorsQuality)
@@ -242,12 +245,12 @@ object HmdaValidationError
         Effect.persist(MacroCompleted(submissionId, updatedStatus.code))
 
       case PersistHmdaRowValidatedError(submissionId,
-                                        rowNumber,
-                                        validationErrors,
-                                        maybeReplyTo) =>
+      rowNumber,
+      validationErrors,
+      maybeReplyTo) =>
         val editDetailPersistence = sharding
           .entityRefFor(EditDetailsPersistence.typeKey,
-                        s"${EditDetailsPersistence.name}-$submissionId")
+            s"${EditDetailsPersistence.name}-$submissionId")
 
         if (validationErrors.nonEmpty) {
           Effect
@@ -261,7 +264,7 @@ object HmdaValidationError
 
               for {
                 _ <- persistEditDetails(editDetailPersistence,
-                                        hmdaRowValidatedError)
+                  hmdaRowValidatedError)
               } yield {
                 maybeReplyTo match {
                   case Some(replyTo) =>
@@ -286,12 +289,12 @@ object HmdaValidationError
 
       case VerifyQuality(submissionId, verified, replyTo) =>
         if (List(Quality.code, QualityErrors.code, Macro.code, MacroErrors.code)
-              .contains(state.statusCode) || !verified) {
+          .contains(state.statusCode) || !verified) {
           Effect
             .persist(
               QualityVerified(submissionId,
-                              verified,
-                              SubmissionStatus.valueOf(state.statusCode)))
+                verified,
+                SubmissionStatus.valueOf(state.statusCode)))
             .thenRun { validationState =>
               val updatedStatus =
                 SubmissionStatus.valueOf(validationState.statusCode)
@@ -305,12 +308,12 @@ object HmdaValidationError
 
       case VerifyMacro(submissionId, verified, replyTo) =>
         if (List(Macro.code, MacroErrors.code)
-              .contains(state.statusCode) || !verified) {
+          .contains(state.statusCode) || !verified) {
           Effect
             .persist(
               MacroVerified(submissionId,
-                            verified,
-                            SubmissionStatus.valueOf(state.statusCode)))
+                verified,
+                SubmissionStatus.valueOf(state.statusCode)))
             .thenRun { validationState =>
               val updatedStatus =
                 SubmissionStatus.valueOf(validationState.statusCode)
@@ -327,7 +330,7 @@ object HmdaValidationError
           val timestamp = Instant.now().toEpochMilli
           val signed = SubmissionSigned(submissionId, timestamp, Signed)
           if ((state.qualityVerified && state.macroVerified) || state
-                .noEditsFound()) {
+            .noEditsFound()) {
             Effect.persist(signed).thenRun { _ =>
               log.info(
                 s"Submission $submissionId signed at ${Instant.ofEpochMilli(timestamp)}")
@@ -363,8 +366,8 @@ object HmdaValidationError
   }
 
   override def eventHandler
-    : (HmdaValidationErrorState,
-       SubmissionProcessingEvent) => HmdaValidationErrorState = {
+  : (HmdaValidationErrorState,
+    SubmissionProcessingEvent) => HmdaValidationErrorState = {
     case (state, error @ HmdaRowValidatedError(_, _)) =>
       state.updateErrors(error)
     case (state, error @ HmdaMacroValidatedError(_)) =>
@@ -385,15 +388,15 @@ object HmdaValidationError
   }
 
   def startShardRegion(sharding: ClusterSharding)
-    : ActorRef[ShardingEnvelope[SubmissionProcessingCommand]] = {
+  : ActorRef[ShardingEnvelope[SubmissionProcessingCommand]] = {
     super.startShardRegion(sharding)
   }
 
   private def validateTs[as: AS](
-      ctx: TypedActorContext[SubmissionProcessingCommand],
-      submissionId: SubmissionId,
-      validationContext: ValidationContext)
-    : Source[HmdaRowValidatedError, NotUsed] = {
+                                  ctx: TypedActorContext[SubmissionProcessingCommand],
+                                  submissionId: SubmissionId,
+                                  validationContext: ValidationContext)
+  : Source[HmdaRowValidatedError, NotUsed] = {
     uploadConsumerRawStr(ctx, submissionId)
       .take(1)
       .via(validateTsFlow("all", validationContext))
@@ -406,17 +409,17 @@ object HmdaValidationError
         ActorFlow.ask(ctx.asScala.self)(
           (el, replyTo: ActorRef[HmdaRowValidatedError]) =>
             PersistHmdaRowValidatedError(submissionId,
-                                         el.rowNumber,
-                                         el.validationErrors,
-                                         Some(replyTo))
+              el.rowNumber,
+              el.validationErrors,
+              Some(replyTo))
         ))
   }
 
   private def validateTsLar[as: AS, mat: MAT, ec: EC](
-      ctx: TypedActorContext[SubmissionProcessingCommand],
-      submissionId: SubmissionId,
-      editType: String,
-      validationContext: ValidationContext): Future[List[ValidationError]] = {
+                                                       ctx: TypedActorContext[SubmissionProcessingCommand],
+                                                       submissionId: SubmissionId,
+                                                       editType: String,
+                                                       validationContext: ValidationContext): Future[List[ValidationError]] = {
     implicit val scheduler: Scheduler = ctx.asScala.system.scheduler
     val log = ctx.asScala.log
     val appDb = HmdaPlatform.appDb
@@ -445,7 +448,15 @@ object HmdaValidationError
         .named("headerResult[Syntactical]-" + submissionId)
         .run()
 
-    def persistElements: Future[Int] =
+    case class DistinctElementsResult(totalCount: Int,
+                                      duplicates: Vector[String],
+                                      checkType: DistinctCheckType)
+    sealed trait DistinctCheckType
+    case object RawLine extends DistinctCheckType
+    case object ULI extends DistinctCheckType
+
+    def checkForDistinctElements(
+                                  checkType: DistinctCheckType): Future[DistinctElementsResult] = {
       uploadConsumerRawStr(ctx, submissionId)
         .drop(1) // header
         .via(framing("\n"))
@@ -455,41 +466,73 @@ object HmdaValidationError
         .collect {
           case (Right(parsed), line) => (parsed, line)
         }
-        .map { x =>
-          (md5HashString(x._1.loan.ULI.toUpperCase),
-           md5HashString(x._2.toUpperCase))
+        .mapAsync(1) {
+          case (lar, rawLine) =>
+            checkType match {
+              case RawLine =>
+                // persistsIfNotExists returns true when a record is persisted
+                // used for syntactical validity checks
+                appDb.distinctCountRepository
+                  .persistsIfNotExists(submissionId.toString,
+                    md5HashString(rawLine),
+                    260.minutes)
+                  .map(checkResult => (rawLine, checkResult))
+
+              case ULI =>
+                // used for quality checks
+                appDb.distinctCountRepository
+                  .persistsIfNotExists(submissionId.toString + "uli",
+                    md5HashString(lar.loan.ULI.toUpperCase),
+                    260.minutes)
+                  .map(persisted => (rawLine, persisted))
+            }
         }
-        .mapAsync(1) { x =>
-          for {
-            line <- appDb.distinctCountRepository.persist(submissionId.toString,
-                                                          x._2,
-                                                          260.minutes)
-            uli <- appDb.distinctCountRepository.persist(
-              submissionId.toString + "uli",
-              x._1,
-              260.minutes)
-          } yield (line)
-        }
-        .toMat(Sink.fold(0)((acc, _) => acc + 1))(Keep.right)
-        .named("persistElements[Syntactical]-" + submissionId)
+        .toMat(Sink.fold(DistinctElementsResult(totalCount = 0,
+          duplicates = Vector.empty,
+          checkType)) {
+          // duplicate
+          case (acc, (rawLine, persisted)) if !persisted =>
+            acc.copy(acc.totalCount + 1, acc.duplicates :+ rawLine)
+          // no duplicate
+          case (acc, _) => acc.copy(acc.totalCount + 1)
+        })(Keep.right)
+        .named("checkForDistinctElements[Syntactical]-" + submissionId)
         .run()
+    }
 
     def validateAndPersistErrors(
-        tsLar: TransmittalLar,
-        checkType: String,
-        vc: ValidationContext): Future[List[ValidationError]] = {
+                                  tsLar: TransmittalLar,
+                                  checkType: String,
+                                  vc: ValidationContext): Future[List[ValidationError]] = {
+
+      // see addTsFieldInformation in ValidationFlow which does something similar
+      def enrichErrorInformation(
+                                  tsLar: TransmittalLar,
+                                  validationError: ValidationError): ValidationError = {
+        val s305 = S305.name
+        validationError match {
+          case s @ SyntacticalValidationError(_, `s305`, _, fields) =>
+            s.copyWithFields(fields ++ tsLar.duplicateLines.map(dupLine =>
+              "Line occurs multiple times" -> dupLine))
+
+          case rest =>
+            rest
+        }
+      }
+
       log.info(
         s"ValidateTsLar counts ${checkType} - ${submissionId}: TS Total Lines ${tsLar.ts.totalLines} Lars Count ${tsLar.larsCount} ${tsLar.larsDistinctCount} Distinct ULI Count ${tsLar.distinctUliCount}")
       validateTsLarEdits(tsLar, checkType, validationContext) match {
 
         case Left(errors: Seq[ValidationError]) =>
+          val enrichedErrors = errors.map(enrichErrorInformation(tsLar, _))
           val persisted: Future[HmdaRowValidatedError] = ctx.asScala.self ? (
-              (ref: ActorRef[HmdaRowValidatedError]) =>
-                PersistHmdaRowValidatedError(submissionId,
-                                             1,
-                                             errors,
-                                             Some(ref)))
-          persisted.map(_ => errors)
+            (ref: ActorRef[HmdaRowValidatedError]) =>
+              PersistHmdaRowValidatedError(submissionId,
+                1,
+                enrichedErrors,
+                Some(ref)))
+          persisted.map(_ => enrichedErrors)
 
         case Right(_) =>
           Future.successful(Nil)
@@ -500,26 +543,39 @@ object HmdaValidationError
       case "syntactical-validity" =>
         for {
           header <- headerResultTest
-          count <- persistElements
+          distinctResult <- checkForDistinctElements(RawLine)
           distinctCount <- appDb.distinctCountRepository.count(
             submissionId.toString) //S304 and //S305
           res <- validateAndPersistErrors(
-            TransmittalLar(header, count, distinctCount, -1),
+            TransmittalLar(
+              ts = header,
+              larsCount = distinctResult.totalCount,
+              larsDistinctCount = distinctCount,
+              distinctUliCount = -1,
+              duplicateLines = distinctResult.duplicates.toList,
+            ),
             editType,
-            validationContext)
+            validationContext
+          )
         } yield res
       case "quality" =>
         for {
           header <- headerResultTest
+          distinctResult <- checkForDistinctElements(ULI)
           distinctUliCount <- appDb.distinctCountRepository.count(
             submissionId.toString + "uli") //Q600
           _ <- appDb.distinctCountRepository.remove(submissionId.toString)
           _ <- appDb.distinctCountRepository.remove(
             submissionId.toString + "uli")
           res <- validateAndPersistErrors(
-            TransmittalLar(header, -1, -1, distinctUliCount),
+            TransmittalLar(ts = header,
+              larsCount = -1,
+              larsDistinctCount = -1,
+              distinctUliCount = distinctUliCount,
+              duplicateUlis = distinctResult.duplicates.toList),
             editType,
-            validationContext)
+            validationContext
+          )
         } yield res
     }
   }
@@ -528,9 +584,9 @@ object HmdaValidationError
                           ctx: TypedActorContext[SubmissionProcessingCommand],
                           submissionId: SubmissionId,
                           validationContext: ValidationContext)(
-      implicit actorSystem: ActorSystem,
-      materializer: ActorMaterializer,
-      executionContext: ExecutionContext): Future[Unit] = {
+                           implicit actorSystem: ActorSystem,
+                           materializer: ActorMaterializer,
+                           executionContext: ExecutionContext): Future[Unit] = {
 
     def qualityChecks: Future[List[ValidationError]] =
       if (editCheck == "quality") {
@@ -552,9 +608,9 @@ object HmdaValidationError
           ActorFlow.ask(ctx.asScala.self)(
             (el, replyTo: ActorRef[HmdaRowValidatedError]) =>
               PersistHmdaRowValidatedError(submissionId,
-                                           el.rowNumber,
-                                           el.validationErrors,
-                                           Some(replyTo))
+                el.rowNumber,
+                el.validationErrors,
+                Some(replyTo))
           ))
         .named("errorPersisting" + submissionId)
         .runWith(Sink.ignore)
@@ -566,9 +622,9 @@ object HmdaValidationError
   }
 
   private def validateMacro[as: AS, mat: MAT, ec: EC](
-      ctx: TypedActorContext[SubmissionProcessingCommand],
-      submissionId: SubmissionId
-  ): Future[List[ValidationError]] = {
+                                                       ctx: TypedActorContext[SubmissionProcessingCommand],
+                                                       submissionId: SubmissionId
+                                                     ): Future[List[ValidationError]] = {
     val larSource = uploadConsumerRawStr(ctx, submissionId)
       .drop(1)
       .via(framing("\n"))
@@ -596,10 +652,10 @@ object HmdaValidationError
   }
 
   private def validateAsyncLar[as: AS, mat: MAT, ec: EC](
-      editCheck: String,
-      ctx: TypedActorContext[SubmissionProcessingCommand],
-      submissionId: SubmissionId
-  ): Source[HmdaRowValidatedError, NotUsed] = {
+                                                          editCheck: String,
+                                                          ctx: TypedActorContext[SubmissionProcessingCommand],
+                                                          submissionId: SubmissionId
+                                                        ): Source[HmdaRowValidatedError, NotUsed] = {
     val year = submissionId.period.toInt
     uploadConsumerRawStr(ctx, submissionId)
       .drop(1)
@@ -609,19 +665,19 @@ object HmdaValidationError
       .zip(Source.fromIterator(() => Iterator.from(2)))
       .via(ActorFlow.ask(ctx.asScala.self) {
         case ((message: Seq[ValidationError], index: Int),
-              replyTo: ActorRef[HmdaRowValidatedError]) =>
+        replyTo: ActorRef[HmdaRowValidatedError]) =>
           PersistHmdaRowValidatedError(submissionId,
-                                       index,
-                                       message,
-                                       Some(replyTo))
+            index,
+            message,
+            Some(replyTo))
       })
   }
 
   private def maybeTs(ctx: TypedActorContext[SubmissionProcessingCommand],
                       submissionId: SubmissionId)(
-      implicit system: ActorSystem,
-      materializer: ActorMaterializer,
-      ec: ExecutionContext): Future[Option[TransmittalSheet]] = {
+                       implicit system: ActorSystem,
+                       materializer: ActorMaterializer,
+                       ec: ExecutionContext): Future[Option[TransmittalSheet]] = {
     uploadConsumerRawStr(ctx, submissionId)
       .take(1)
       .via(parseTsFlow)
@@ -632,10 +688,10 @@ object HmdaValidationError
   }
 
   private def validationContext[as: AS, mat: MAT, ec: EC](
-      year: Int,
-      sharding: ClusterSharding,
-      ctx: TypedActorContext[SubmissionProcessingCommand],
-      submissionId: SubmissionId): Future[ValidationContext] = {
+                                                           year: Int,
+                                                           sharding: ClusterSharding,
+                                                           ctx: TypedActorContext[SubmissionProcessingCommand],
+                                                           submissionId: SubmissionId): Future[ValidationContext] = {
     val institutionPersistence = {
       if (year == 2018) {
         sharding.entityRefFor(
@@ -649,7 +705,7 @@ object HmdaValidationError
     }
 
     val fInstitution: Future[Option[Institution]] = institutionPersistence ? (
-        ref => GetInstitution(ref))
+      ref => GetInstitution(ref))
 
     for {
       ts <- maybeTs(ctx, submissionId)
@@ -660,23 +716,23 @@ object HmdaValidationError
   }
 
   private def uploadConsumerRawStr[as: AS](
-      ctx: TypedActorContext[SubmissionProcessingCommand],
-      submissionId: SubmissionId): Source[ByteString, NotUsed] = {
+                                            ctx: TypedActorContext[SubmissionProcessingCommand],
+                                            submissionId: SubmissionId): Source[ByteString, NotUsed] = {
     readRawData(submissionId)
       .map(line => line.data)
       .map(ByteString(_))
   }
 
   private def persistEditDetails[ec: EC](
-      editDetailPersistence: EntityRef[EditDetailsPersistenceCommand],
-      hmdaRowValidatedError: HmdaRowValidatedError)
-    : Future[Iterable[EditDetailsPersistenceEvent]] = {
+                                          editDetailPersistence: EntityRef[EditDetailsPersistenceCommand],
+                                          hmdaRowValidatedError: HmdaRowValidatedError)
+  : Future[Iterable[EditDetailsPersistenceEvent]] = {
 
     val details = validatedRowToEditDetails(hmdaRowValidatedError)
 
     val fDetails = details.map { detail =>
       val fDetailEvent
-        : Future[EditDetailsPersistenceEvent] = editDetailPersistence ? (ref =>
+      : Future[EditDetailsPersistenceEvent] = editDetailPersistence ? (ref =>
         PersistEditDetails(detail, Some(ref)))
       fDetailEvent
     }
@@ -686,22 +742,22 @@ object HmdaValidationError
   }
 
   private def publishSignEvent(submissionId: SubmissionId)(
-      implicit system: ActorSystem,
-      materializer: ActorMaterializer): Future[Done] = {
+    implicit system: ActorSystem,
+    materializer: ActorMaterializer): Future[Done] = {
     produceRecord(signTopic, submissionId.lei, submissionId.toString)
 
   }
 
   private def setHmdaFilerFlag[as: AS, mat: MAT, ec: EC](
-      institutionID: String,
-      sharding: ClusterSharding): Unit = {
+                                                          institutionID: String,
+                                                          sharding: ClusterSharding): Unit = {
 
     val institutionPersistence =
       sharding.entityRefFor(InstitutionPersistence.typeKey,
-                            s"${InstitutionPersistence.name}-$institutionID")
+        s"${InstitutionPersistence.name}-$institutionID")
 
     val fInstitution: Future[Option[Institution]] = institutionPersistence ? (
-        ref => GetInstitution(ref))
+      ref => GetInstitution(ref))
 
     for {
       maybeInst <- fInstitution
