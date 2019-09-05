@@ -4,5 +4,4 @@ case class TransmittalLar(ts: TransmittalSheet,
                           larsCount: Int = 0,
                           larsDistinctCount: Long = 0L,
                           distinctUliCount: Long = 0L,
-                          duplicateLines: List[String] = Nil,
-                          duplicateUlis: List[String] = Nil)
+                          duplicateLineNumbers: List[Int] = Nil)

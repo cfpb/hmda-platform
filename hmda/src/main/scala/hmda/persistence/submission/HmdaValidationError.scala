@@ -13,8 +13,9 @@ import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import akka.pattern.ask
 import akka.persistence.typed.PersistenceId
+import akka.persistence.typed.scaladsl.RetentionCriteria
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
-import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
+import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Sink, Source, _}
 import akka.stream.typed.scaladsl.ActorFlow
@@ -33,7 +34,7 @@ import hmda.model.filing.submission._
 import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
 import hmda.model.institution.Institution
 import hmda.model.processing.state.HmdaValidationErrorState
-import hmda.model.validation.{MacroValidationError, SyntacticalValidationError, ValidationError}
+import hmda.model.validation.{MacroValidationError, QualityValidationError, SyntacticalValidationError, ValidationError}
 import hmda.parser.filing.ParserFlow._
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
@@ -46,6 +47,7 @@ import hmda.util.streams.FlowUtils.framing
 import hmda.validation.context.ValidationContext
 import hmda.validation.filing.MacroValidationFlow._
 import hmda.validation.filing.ValidationFlow._
+import hmda.validation.rules.lar.quality.common.Q600
 import hmda.validation.rules.lar.syntactical.S305
 import hmda.validation.{AS, EC, MAT}
 
@@ -436,7 +438,7 @@ object HmdaValidationError
         .run()
 
     case class DistinctElementsResult(totalCount: Int,
-                                      duplicates: Vector[String],
+                                      duplicateLineNumbers: Vector[Int],
                                       checkType: DistinctCheckType)
     sealed trait DistinctCheckType
     case object RawLine extends DistinctCheckType
@@ -449,12 +451,15 @@ object HmdaValidationError
         .via(framing("\n"))
         .map(_.utf8String)
         .map(_.trim)
-        .map(line => (LarCsvParser(line), line))
+        .zip(Source.fromIterator(() => Iterator.from(2))) // rows start from #1 but we dropped the header line so we start at #2
+        .map {
+        case (line, rowNumber) => (LarCsvParser(line), line, rowNumber)
+      }
         .collect {
-          case (Right(parsed), line) => (parsed, line)
+          case (Right(parsed), line, rowNumber) => (parsed, line, rowNumber)
         }
         .mapAsync(1) {
-          case (lar, rawLine) =>
+          case (lar, rawLine, rowNumber) =>
             checkType match {
               case RawLine =>
                 // persistsIfNotExists returns true when a record is persisted
@@ -463,7 +468,7 @@ object HmdaValidationError
                   .persistsIfNotExists(submissionId.toString,
                     md5HashString(rawLine),
                     260.minutes)
-                  .map(checkResult => (rawLine, checkResult))
+                  .map(persisted => (persisted, rowNumber))
 
               case ULI =>
                 // used for quality checks
@@ -471,19 +476,20 @@ object HmdaValidationError
                   .persistsIfNotExists(submissionId.toString + "uli",
                     md5HashString(lar.loan.ULI.toUpperCase),
                     260.minutes)
-                  .map(persisted => (rawLine, persisted))
+                  .map(persisted => (persisted, rowNumber))
             }
         }
-        .toMat(Sink.fold(DistinctElementsResult(totalCount = 0,
-          duplicates = Vector.empty,
-          checkType)) {
+        .toMat(Sink.fold(
+          DistinctElementsResult(totalCount = 0,
+            duplicateLineNumbers = Vector.empty,
+            checkType)) {
           // duplicate
-          case (acc, (rawLine, persisted)) if !persisted =>
-            acc.copy(acc.totalCount + 1, acc.duplicates :+ rawLine)
+          case (acc, (persisted, rowNumber)) if !persisted =>
+            acc.copy(acc.totalCount + 1, acc.duplicateLineNumbers :+ rowNumber)
           // no duplicate
           case (acc, _) => acc.copy(acc.totalCount + 1)
         })(Keep.right)
-        .named("checkForDistinctElements[Syntactical]-" + submissionId)
+        .named(s"checkForDistinctElements[$checkType]-" + submissionId)
         .run()
     }
 
@@ -497,10 +503,17 @@ object HmdaValidationError
                                   tsLar: TransmittalLar,
                                   validationError: ValidationError): ValidationError = {
         val s305 = S305.name
+        val q600 = Q600.name
         validationError match {
           case s @ SyntacticalValidationError(_, `s305`, _, fields) =>
-            s.copyWithFields(fields ++ tsLar.duplicateLines.map(dupLine =>
-              "Line occurs multiple times" -> dupLine))
+            s.copyWithFields(
+              fields + ("The following row numbers occur multiple times" -> tsLar.duplicateLineNumbers
+                .mkString(start = "Rows: ", sep = ",", end = "")))
+
+          case q @ QualityValidationError(uli, `q600`, fields) =>
+            q.copyWithFields(
+              fields + ("The following row numbers have the same ULI" -> tsLar.duplicateLineNumbers
+                .mkString(start = "Rows: ", sep = ",", end = "")))
 
           case rest =>
             rest
@@ -539,7 +552,7 @@ object HmdaValidationError
               larsCount = distinctResult.totalCount,
               larsDistinctCount = distinctCount,
               distinctUliCount = -1,
-              duplicateLines = distinctResult.duplicates.toList,
+              duplicateLineNumbers = distinctResult.duplicateLineNumbers.toList,
             ),
             editType,
             validationContext
@@ -559,7 +572,8 @@ object HmdaValidationError
               larsCount = -1,
               larsDistinctCount = -1,
               distinctUliCount = distinctUliCount,
-              duplicateUlis = distinctResult.duplicates.toList),
+              duplicateLineNumbers =
+                distinctResult.duplicateLineNumbers.toList),
             editType,
             validationContext
           )
@@ -586,11 +600,11 @@ object HmdaValidationError
       uploadConsumerRawStr(ctx, submissionId)
         .drop(1)
         .via(validateLarFlow(editCheck, validationContext))
-        .zip(Source.fromIterator(() => Iterator.from(2)))
+        .zip(Source.fromIterator(() => Iterator.from(2))) // rows start from #1 but we dropped the header line so we start at #2
         .collect {
-          case (Left(errors), rowNumber) =>
-            PersistHmdaRowValidatedError(submissionId, rowNumber, errors, None)
-        }
+        case (Left(errors), rowNumber) =>
+          PersistHmdaRowValidatedError(submissionId, rowNumber, errors, None)
+      }
         .via(
           ActorFlow.ask(ctx.asScala.self)(
             (el, replyTo: ActorRef[HmdaRowValidatedError]) =>
