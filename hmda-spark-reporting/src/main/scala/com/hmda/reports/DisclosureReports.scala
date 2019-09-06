@@ -1,5 +1,6 @@
 package com.hmda.reports
 
+import akka.Done
 import akka.actor.ActorSystem
 import akka.kafka.scaladsl.Consumer
 import akka.kafka.scaladsl.Consumer.DrainingControl
@@ -92,7 +93,7 @@ object DisclosureReports {
         .withGroupId(HmdaTopics.disclosureTopic)
         .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
-    Consumer
+    val drainingControl: DrainingControl[Done] = Consumer
       .committableSource(consumerSettings,
                          Subscriptions.topics(HmdaTopics.disclosureTopic))
       // async boundary begin
@@ -108,8 +109,21 @@ object DisclosureReports {
       .async
       // async boundary end
       .mapAsync(1)(offset => offset.commitScaladsl())
-      .toMat(Sink.seq)(Keep.both)
+      .toMat(Sink.ignore)(Keep.both)
       .mapMaterializedValue(DrainingControl.apply)
       .run()
+
+    val processComplete = Source
+      .tick(initialDelay = 26.minutes, interval = 26.minutes, drainingControl)
+      .mapAsync(1) { drainingControl =>
+        drainingControl.shutdown()
+      }
+      .take(1)
+      .runWith(Sink.ignore)
+
+    processComplete.onComplete { _ =>
+      system.terminate()
+      spark.stop()
+    }
   }
 }

@@ -4,14 +4,14 @@ metadata:
   name: disclosure-scheduled
   namespace: default
 spec:
-  schedule: "@every 2m"
+  schedule: "@every 30m"
   concurrencyPolicy: Allow
   successfulRunHistoryLimit: 1
   failedRunHistoryLimit: 3
   template:
     type: Scala
     mode: cluster
-    image: "hmda/hmda-spark-reporting:g1cfe572fd"
+    image: "hmda/hmda-spark-reporting:gead783482"
     imagePullPolicy: Always
     mainClass: com.hmda.reports.DisclosureReports
     mainApplicationFile: "local:///opt/spark/cfpb/hmda/jars/hmda-spark-reporting.jar"
@@ -19,8 +19,9 @@ spec:
     restartPolicy:
       type: Never
     driver:
-      cores: 0.5
-      memory: 512m
+      cores: 2
+      coreLimit: "4000m"
+      memory: "3g"
       labels:
         version: 2.4.0
       serviceAccount: spark-operator-spark
@@ -44,9 +45,9 @@ spec:
           name: aws-env
           key: aws-env
     executor:
-      cores: 1
-      instances: 1
-      memory: 512m
+      cores: 2
+      instances: 2
+      memory: "6g"
       labels:
         version: 2.4.0
       configMaps:
