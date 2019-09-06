@@ -8,15 +8,25 @@ metadata:
   annotations:
     getambassador.io/config: |
       ---
-      apiVersion: ambassador/v0
-      kind:  Module
-      name:  ambassador
-      config:
-        ambassador_id: ambassador-beta-2 
+      apiVersion: ambassador/v1
+      kind:  TLSContext
+      name:  tls
+      secret: tls-cert
+      hosts: ["*"]
+      alpn_protocols: h2[, http/1.1]
+      ambassador_id: ambassador-beta-2
 spec:
   type: NodePort
   ports:
-   - port: 80
-     nodePort: 30200
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+    nodePort: 30200
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 8443
+    nodePort: 30243  
   selector:
     service: ambassador

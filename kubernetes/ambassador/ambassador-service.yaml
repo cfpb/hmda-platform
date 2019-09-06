@@ -2,21 +2,30 @@ apiVersion: v1
 kind: Service
 metadata:
   name: ambassador
-  namespace: default
   labels:
     app: ambassador
   annotations:
     getambassador.io/config: |
       ---
-      apiVersion: ambassador/v0
-      kind:  Module
-      name:  ambassador
-      config:
-        ambassador_id: ambassador-default-1  
+      apiVersion: ambassador/v1
+      kind:  TLSContext
+      name:  tls
+      secret: tls-cert
+      hosts: ["*"]
+      alpn_protocols: h2[, http/1.1]
+      ambassador_id: ambassador-default-1
 spec:
   type: NodePort
   ports:
-   - port: 80
-     nodePort: 30100
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+    nodePort: 30100
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 8443
+    nodePort: 30143  
   selector:
     service: ambassador

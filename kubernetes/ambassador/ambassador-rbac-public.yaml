@@ -5,15 +5,6 @@ metadata:
   labels:
     service: ambassador-admin
   name: ambassador-admin
-  namespace: default
-  annotations:
-    getambassador.io/config: |
-      ---
-      apiVersion: ambassador/v0
-      kind: Module
-      name: ambassador
-      config:
-        ambassador_id: ambassador-default-1
 spec:
   type: NodePort
   ports:
@@ -28,32 +19,32 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
   name: ambassador
-  namespace: default
 rules:
 - apiGroups: [""]
-  resources:
-  - services
+  resources: [ "endpoints", "namespaces", "secrets", "services" ]
   verbs: ["get", "list", "watch"]
-- apiGroups: [""]
-  resources:
-  - configmaps
-  verbs: ["create", "update", "patch", "get", "list", "watch"]
-- apiGroups: [""]
-  resources:
-  - secrets
+- apiGroups: [ "getambassador.io" ]
+  resources: [ "*" ]
   verbs: ["get", "list", "watch"]
+- apiGroups: [ "apiextensions.k8s.io" ]
+  resources: [ "customresourcedefinitions" ]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [ "networking.internal.knative.dev" ]
+  resources: [ "clusteringresses", "ingresses" ]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [ "networking.internal.knative.dev" ]
+  resources: [ "ingresses/status", "clusteringresses/status" ]
+  verbs: ["update"]
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: ambassador
-  namespace: default
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
   name: ambassador
-  namespace: default
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -63,24 +54,217 @@ subjects:
   name: ambassador
   namespace: default
 ---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: authservices.getambassador.io
+spec:
+  group: getambassador.io
+  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+  scope: Namespaced
+  names:
+    plural: authservices
+    singular: authservice
+    kind: AuthService
+    categories:
+    - ambassador-crds
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: consulresolvers.getambassador.io
+spec:
+  group: getambassador.io
+  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+  scope: Namespaced
+  names:
+    plural: consulresolvers
+    singular: consulresolver
+    kind: ConsulResolver
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: kubernetesendpointresolvers.getambassador.io
+spec:
+  group: getambassador.io
+  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+  scope: Namespaced
+  names:
+    plural: kubernetesendpointresolvers
+    singular: kubernetesendpointresolver
+    kind: KubernetesEndpointResolver
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: kubernetesserviceresolvers.getambassador.io
+spec:
+  group: getambassador.io
+  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+  scope: Namespaced
+  names:
+    plural: kubernetesserviceresolvers
+    singular: kubernetesserviceresolver
+    kind: KubernetesServiceResolver
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: mappings.getambassador.io
+spec:
+  group: getambassador.io
+  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+  scope: Namespaced
+  names:
+    plural: mappings
+    singular: mapping
+    kind: Mapping
+    categories:
+    - ambassador-crds
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: modules.getambassador.io
+spec:
+  group: getambassador.io
+  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+  scope: Namespaced
+  names:
+    plural: modules
+    singular: module
+    kind: Module
+    categories:
+    - ambassador-crds
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: ratelimitservices.getambassador.io
+spec:
+  group: getambassador.io
+  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+  scope: Namespaced
+  names:
+    plural: ratelimitservices
+    singular: ratelimitservice
+    kind: RateLimitService
+    categories:
+    - ambassador-crds
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: tcpmappings.getambassador.io
+spec:
+  group: getambassador.io
+  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+  scope: Namespaced
+  names:
+    plural: tcpmappings
+    singular: tcpmapping
+    kind: TCPMapping
+    categories:
+    - ambassador-crds
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: tlscontexts.getambassador.io
+spec:
+  group: getambassador.io
+  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+  scope: Namespaced
+  names:
+    plural: tlscontexts
+    singular: tlscontext
+    kind: TLSContext
+    categories:
+    - ambassador-crds
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: tracingservices.getambassador.io
+spec:
+  group: getambassador.io
+  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+  scope: Namespaced
+  names:
+    plural: tracingservices
+    singular: tracingservice
+    kind: TracingService
+    categories:
+    - ambassador-crds
+---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: ambassador
-  namespace: default
 spec:
   replicas: 1
   template:
     metadata:
       annotations:
         sidecar.istio.io/inject: "false"
+        "consul.hashicorp.com/connect-inject": "false"
       labels:
         service: ambassador
     spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  service: ambassador
+              topologyKey: kubernetes.io/hostname
       serviceAccountName: ambassador
       containers:
       - name: ambassador
-        image: quay.io/datawire/ambassador:0.40.2
+        image: quay.io/datawire/ambassador:0.77.0
         resources:
           limits:
             cpu: 1
@@ -92,9 +276,20 @@ spec:
         - name: AMBASSADOR_NAMESPACE
           valueFrom:
             fieldRef:
-              fieldPath: metadata.namespace 
+              fieldPath: metadata.namespace
+        - name: AMBASSADOR_SINGLE_NAMESPACE
+          value: "true"
+        - name: SCOUT_DISABLE
+          value: "1"
         - name: AMBASSADOR_ID
-          value: ambassador-default-1               
+          value: ambassador-default-1
+        ports:
+        - name: http
+          containerPort: 8080
+        - name: https
+          containerPort: 8443
+        - name: admin
+          containerPort: 8877
         livenessProbe:
           httpGet:
             path: /ambassador/v0/check_alive
@@ -107,12 +302,12 @@ spec:
             port: 8877
           initialDelaySeconds: 30
           periodSeconds: 3
-#       - name: statsd
-#        image: quay.io/datawire/statsd:0.39.0
       restartPolicy: Always
+      securityContext:
+        runAsUser: 8888
       nodeSelector:
         kubernetes.dcos.io/node-type: public
       tolerations:
       - key: "node-type.kubernetes.dcos.io/public"
         operator: "Exists"
-        effect: "NoSchedule"
+        effect: "NoSchedule"        
