@@ -14,12 +14,12 @@ import hmda.util.streams.FlowUtils.framing
 object ParserFlow {
 
   def parseHmdaFile
-    : Flow[ByteString, ParseValidated[PipeDelimited], NotUsed] = {
+    : Flow[ByteString, (ParseValidated[PipeDelimited], String), NotUsed] = {
     Flow.fromGraph(GraphDSL.create() { implicit b =>
       import GraphDSL.Implicits._
 
       val bcast = b.add(Broadcast[ByteString](2))
-      val concat = b.add(Concat[ParseValidated[PipeDelimited]](2))
+      val concat = b.add(Concat[(ParseValidated[PipeDelimited], String)](2))
 
       bcast.take(1) ~> parseTsFlow ~> concat.in(0)
       bcast.drop(1) ~> parseLarFlow ~> concat.in(1)
@@ -29,20 +29,21 @@ object ParserFlow {
   }
 
   def parseTsFlow
-    : Flow[ByteString, ParseValidated[TransmittalSheet], NotUsed] = {
+    : Flow[ByteString, (ParseValidated[TransmittalSheet], String), NotUsed] = {
     Flow[ByteString]
       .via(framing("\n"))
       .map(_.utf8String)
       .map(_.trim)
-      .map(l => TsCsvParser(l))
+      .map(l => (TsCsvParser(l), "Transmittal Sheet"))
   }
 
-  def parseLarFlow
-    : Flow[ByteString, ParseValidated[LoanApplicationRegister], NotUsed] = {
+  def parseLarFlow: Flow[ByteString,
+                         (ParseValidated[LoanApplicationRegister], String),
+                         NotUsed] = {
     Flow[ByteString]
       .via(framing("\n"))
       .map(_.utf8String)
       .map(_.trim)
-      .map(l => LarCsvParser(l))
+      .map(l => (LarCsvParser(l), l))
   }
 }

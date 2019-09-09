@@ -83,8 +83,9 @@ object HmdaParserError
           .via(parseHmdaFile)
           .zip(Source.fromIterator(() => Iterator.from(1)))
           .collect {
-            case (Left(errors), rowNumber) =>
+            case ((Left(errors), line), rowNumber) =>
               PersistHmdaRowParsedError(rowNumber,
+                                        estimateULI(line),
                                         errors.map(_.errorMessage),
                                         None)
           }
@@ -92,6 +93,7 @@ object HmdaParserError
             ActorFlow.ask(ctx.asScala.self)(
               (el, replyTo: ActorRef[HmdaRowParsedError]) =>
                 PersistHmdaRowParsedError(el.rowNumber,
+                                          el.estimatedULI,
                                           el.errors,
                                           Some(replyTo))))
           .runWith(Sink.ignore)
@@ -104,15 +106,20 @@ object HmdaParserError
 
         Effect.none
 
-      case PersistHmdaRowParsedError(rowNumber, errors, maybeReplyTo) =>
-        Effect.persist(HmdaRowParsedError(rowNumber, errors)).thenRun { _ =>
-          log.debug(s"Persisted error: $rowNumber, $errors")
-          maybeReplyTo match {
-            case Some(replyTo) =>
-              replyTo ! HmdaRowParsedError(rowNumber, errors)
-            case None => //do nothing
+      case PersistHmdaRowParsedError(rowNumber,
+                                     estimatedULI,
+                                     errors,
+                                     maybeReplyTo) =>
+        Effect
+          .persist(HmdaRowParsedError(rowNumber, estimatedULI, errors))
+          .thenRun { _ =>
+            log.debug(s"Persisted error: $rowNumber, $estimatedULI, $errors")
+            maybeReplyTo match {
+              case Some(replyTo) =>
+                replyTo ! HmdaRowParsedError(rowNumber, estimatedULI, errors)
+              case None => //do nothing
+            }
           }
-        }
 
       case GetParsedWithErrorCount(replyTo) =>
         replyTo ! HmdaRowParsedCount(state.totalErrors)
@@ -149,7 +156,7 @@ object HmdaParserError
   override def eventHandler: (
       HmdaParserErrorState,
       SubmissionProcessingEvent) => HmdaParserErrorState = {
-    case (state, error @ HmdaRowParsedError(_, _)) =>
+    case (state, error @ HmdaRowParsedError(_, _, _)) =>
       state.update(error)
     case (state, _) => state
   }
@@ -157,6 +164,15 @@ object HmdaParserError
   def startShardRegion(sharding: ClusterSharding)
     : ActorRef[ShardingEnvelope[SubmissionProcessingCommand]] = {
     super.startShardRegion(sharding)
+  }
+
+  def estimateULI(line: String): String = {
+    val larItems = line.split('|')
+    if (larItems.length >= 3) {
+      larItems(2)
+    } else {
+      "could not find ULI"
+    }
   }
 
 }

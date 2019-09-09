@@ -55,6 +55,7 @@ object SubmissionProcessingCommandsProtobufConverter {
       refResolver: ActorRefResolver): PersistHmdaRowParsedErrorMessage = {
     PersistHmdaRowParsedErrorMessage(
       cmd.rowNumber,
+      cmd.estimatedULI,
       cmd.errors,
       cmd.maybeReplyTo match {
         case None      => ""
@@ -68,6 +69,7 @@ object SubmissionProcessingCommandsProtobufConverter {
       refResolver: ActorRefResolver): PersistHmdaRowParsedError = {
     PersistHmdaRowParsedError(
       msg.rowNumber,
+      msg.estimatedULI,
       msg.errors.toList,
       if (msg.maybeReplyTo == "") None
       else Some(refResolver.resolveActorRef(msg.maybeReplyTo))

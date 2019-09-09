@@ -8,6 +8,7 @@ import "validation.proto";
 
 message HmdaRowParsedErrorMessage {
     int32 rowNumber = 1;
+    string estimatedULI = 3;
     repeated string errors = 2;
 }
 
