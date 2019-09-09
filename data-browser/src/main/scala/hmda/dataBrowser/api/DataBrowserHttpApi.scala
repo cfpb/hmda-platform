@@ -85,7 +85,7 @@ trait DataBrowserHttpApi extends Settings {
         )
 
       case Success(Right(url)) =>
-        redirect(Uri(url), StatusCodes.PermanentRedirect)
+        redirect(Uri(url), StatusCodes.MovedPermanently)
     }
 
   val dataBrowserRoutes: Route =

@@ -1,7 +1,5 @@
 package hmda.publisher.query.lar
 
-import java.sql.Timestamp
-
 import hmda.util.conversion.ColumnDataFormatter
 
 case class ModifiedLarPartOne(

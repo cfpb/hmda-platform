@@ -1,33 +1,27 @@
 package hmda.analytics.query
 
-import hmda.model.filing.submission.SubmissionId
 import hmda.query.DbConfiguration.dbConfig
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
 import scala.concurrent.Future
 
-trait LarComponent {
+trait LarComponent2019 {
   import dbConfig.profile.api._
 
-  class LarRepository(config: DatabaseConfig[JdbcProfile]) {
+  class LarRepository2019(config: DatabaseConfig[JdbcProfile]) {
 
-    def fetchYearTable(year: Int): String = {
-      year match {
-        case 2018 => "loanapplicationregister2018"
-        case 2019 => "loanapplicationregister2019"
+    val larTable = "loanapplicationregister2019"
+
+    def deleteByLei(lei: String): Future[Int] = {
+      config.db.run {
+        sqlu"DELETE FROM #${larTable} WHERE UPPER(lei) = ${lei.toUpperCase}"
       }
     }
 
-    def deleteByLei(submissionId: SubmissionId, lei: String): Future[Int] = {
+    def insert(le: LarEntity2019): Future[Int] =
       config.db.run {
-        sqlu"DELETE FROM #${fetchYearTable(submissionId.period.toInt)} WHERE UPPER(lei) = ${lei.toUpperCase}"
-      }
-    }
-
-    def insert(submissionId: SubmissionId, le: LarEntity): Future[Int] =
-      config.db.run {
-        sqlu"""INSERT INTO #${fetchYearTable(submissionId.period.toInt)}
+        sqlu"""INSERT INTO #${larTable}
         VALUES (
           ${le.id},
           ${le.lei.toUpperCase},
@@ -138,7 +132,20 @@ trait LarComponent {
           ${le.otherAusResult},
           ${le.reverseMortgage},
           ${le.lineOfCredits},
-          ${le.businessOrCommercial}
+          ${le.businessOrCommercial},
+          ${le.conformingLoanLimit},
+          ${le.ethnicityCategorization},
+          ${le.raceCategorization},
+          ${le.sexCategorization},
+          ${le.dwellingCategorization},
+          ${le.loanProductTypeCategorization},
+          ${le.tractPopulation},
+          ${le.tractMinorityPopulationPercent},
+          ${le.tractMedianIncome},
+          ${le.tractOccupiedUnits},
+          ${le.tractOneToFourFamilyUnits},
+          ${le.tractMedianAge},
+          ${le.tractToMsaIncomePercent},
         )
         """
       }
