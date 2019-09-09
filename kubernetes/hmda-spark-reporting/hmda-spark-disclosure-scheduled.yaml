@@ -1,0 +1,71 @@
+apiVersion: "sparkoperator.k8s.io/v1beta1"
+kind: ScheduledSparkApplication
+metadata:
+  name: disclosure-scheduled
+  namespace: default
+spec:
+  schedule: "@every 30m"
+  concurrencyPolicy: Allow
+  successfulRunHistoryLimit: 1
+  failedRunHistoryLimit: 3
+  template:
+    type: Scala
+    mode: cluster
+    image: "hmda/hmda-spark-reporting"
+    imagePullPolicy: Always
+    mainClass: com.hmda.reports.DisclosureReports
+    mainApplicationFile: "local:///opt/spark/cfpb/hmda/jars/hmda-spark-reporting.jar"
+    sparkVersion: "2.4.0"
+    restartPolicy:
+      type: Never
+    driver:
+      cores: 2
+      coreLimit: "4000m"
+      memory: "3g"
+      labels:
+        version: 2.4.0
+      serviceAccount: spark-operator-spark
+      configMaps:
+        - name: kafka-configmap
+          path: /mnt/kafka-config-maps
+      envSecretKeyRefs:
+        JDBC_URL:
+          name: inst-postgres-credentials
+          key: url
+        ACCESS_KEY:
+          name: aws-credentials
+          key: aws-access-key-id
+        SECRET_KEY:
+          name: aws-credentials
+          key: aws-secret-access-key
+        KAFKA_HOSTS:
+          name: kafka-hosts
+          key: kafka-hosts
+        AWS_ENV:
+          name: aws-env
+          key: aws-env
+    executor:
+      cores: 2
+      instances: 2
+      memory: "6g"
+      labels:
+        version: 2.4.0
+      configMaps:
+        - name: kafka-configmap
+          path: /mnt/kafka-config-maps
+      envSecretKeyRefs:
+        JDBC_URL:
+          name: inst-postgres-credentials
+          key: url
+        ACCESS_KEY:
+          name: aws-credentials
+          key: aws-access-key-id
+        SECRET_KEY:
+          name: aws-credentials
+          key: aws-secret-access-key
+        AWS_ENV:
+          name: aws-env
+          key: aws-env
+        KAFKA_HOSTS:
+          name: kafka-hosts
+          key: kafka-hosts
