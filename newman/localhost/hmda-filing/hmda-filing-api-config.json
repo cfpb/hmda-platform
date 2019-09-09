@@ -1,7 +1,7 @@
 [
   {
     "host-admin-api": "localhost:8081",
-    "host-filing-api": "localhost:8080",
+    "host_filing_api": "localhost:8080",
     "host-public-api": "localhost:8082",
     "test-lei": "BANK1LEIFORTEST12345",
     "filing-year": "2018",
