@@ -30,7 +30,7 @@ metadata:
   annotations:
     getambassador.io/config: |
       ---
-      apiVersion: ambassador/v0
+      apiVersion: ambassador/v1
       kind: Mapping
       name: check_digit_mapping
       ambassador_id: ambassador-default-1
