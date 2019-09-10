@@ -2,10 +2,15 @@ package hmda.calculator.scheduler
 
 import akka.NotUsed
 import akka.stream.ActorMaterializer
-import akka.stream.alpakka.s3.impl.ListBucketVersion2
-import akka.stream.alpakka.s3.scaladsl.S3Client
-import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
-import akka.stream.scaladsl.{Flow, Framing, Sink}
+import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
+import akka.stream.alpakka.s3.scaladsl.S3
+import akka.stream.alpakka.s3.{
+  MemoryBufferType,
+  ObjectMetadata,
+  S3Attributes,
+  S3Settings
+}
+import akka.stream.scaladsl.{Flow, Framing, Sink, Source}
 import akka.util.ByteString
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.regions.AwsRegionProvider
@@ -54,7 +59,7 @@ class APORScheduler extends HmdaActor {
         override def getRegion: String = region
       }
 
-      val s3Settings = new S3Settings(
+      val s3Settings = S3Settings(
         MemoryBufferType,
         None,
         awsCredentialsProvider,
@@ -63,10 +68,9 @@ class APORScheduler extends HmdaActor {
         None,
         ListBucketVersion2
       )
-      val s3Client = new S3Client(s3Settings)(context.system, materializer)
 
-      loadAPOR(s3Client, bucket, fixedBucketKey, FixedRate)
-      loadAPOR(s3Client, bucket, variableBucketKey, VariableRate)
+      loadAPOR(s3Settings, bucket, fixedBucketKey, FixedRate)
+      loadAPOR(s3Settings, bucket, variableBucketKey, VariableRate)
   }
 
   def framing: Flow[ByteString, ByteString, NotUsed] = {
@@ -75,19 +79,26 @@ class APORScheduler extends HmdaActor {
                       allowTruncation = true)
   }
 
-  def loadAPOR(s3Client: S3Client,
+  def loadAPOR(s3Settings: S3Settings,
                bucket: String,
                bucketKey: String,
                rateType: RateType) {
 
-    val s3FixedSource = s3Client.download(bucket, bucketKey)
-    s3FixedSource._1
+    val s3FixedSource
+      : Source[Option[(Source[ByteString, NotUsed], ObjectMetadata)], NotUsed] =
+      S3.download(bucket, bucketKey)
+        .withAttributes(S3Attributes.settings(s3Settings))
+
+    s3FixedSource
+      .flatMapConcat(_.get._1)
       .via(framing)
       .drop(1)
       .map(s => s.utf8String)
       .map(s => APORCsvParser(s))
       .map(apor => AporListEntity.AporOperation(apor, rateType))
       .runWith(Sink.ignore)
-    log.info("Loaded APOR data from S3 for: " + rateType)
+
+    log.info(
+      "Loaded APOR data from S3 for: " + rateType + " from:  " + bucket + "/" + bucketKey)
   }
 }
