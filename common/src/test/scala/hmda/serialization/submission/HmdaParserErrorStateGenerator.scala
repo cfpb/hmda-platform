@@ -12,8 +12,9 @@ object HmdaParserErrorStateGenerator {
   implicit def hmdaRowParsedErrorGen: Gen[HmdaRowParsedError] =
     for {
       rowNumber <- Gen.choose(0, Int.MaxValue)
+      estimatedULI <- Gen.alphaStr
       errors <- Gen.listOf(Gen.alphaStr)
-    } yield HmdaRowParsedError(rowNumber, errors)
+    } yield HmdaRowParsedError(rowNumber, estimatedULI, errors)
 
   implicit def hmdaRowParsedCountGen: Gen[HmdaRowParsedCount] =
     for {
