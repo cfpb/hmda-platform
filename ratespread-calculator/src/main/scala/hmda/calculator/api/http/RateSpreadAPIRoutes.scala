@@ -46,6 +46,9 @@ trait RateSpreadAPIRoutes extends HmdaTimeDirectives {
             Try(APORCommands.getRateSpreadResponse(rateSpreadBody))
           rateSpreadResponse match {
             case Success(response) =>
+
+              println("API Rate Spread Request Received: "+response.rateSpread)
+              
               complete(ToResponseMarshallable(response))
             case Failure(error) =>
               failedResponse(StatusCodes.BadRequest, uri, error)
@@ -66,8 +69,12 @@ trait RateSpreadAPIRoutes extends HmdaTimeDirectives {
 
               val csv =
                 headerSource.map(s => ByteString(s)).concat(rateSpreadValues)
+
+              println("CSV Rate Spread Request Received.")
+
               complete(HttpEntity.Chunked
                 .fromData(`text/csv`.toContentType(HttpCharsets.`UTF-8`), csv))
+
             case _ =>
               complete(ToResponseMarshallable(StatusCodes.BadRequest))
           }
