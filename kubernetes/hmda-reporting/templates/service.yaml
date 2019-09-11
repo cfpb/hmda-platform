@@ -21,15 +21,20 @@ metadata:
   name: ambassador-hmda-reporting
   annotations:
     getambassador.io/config: |
-      apiVersion: ambassador/v0
+      apiVersion: ambassador/v1
       kind: Mapping
       name: hmda_reporting_mapping
       ambassador_id: ambassador-default-1
       prefix: /v2/reporting/
       service: {{ .Values.service.name }}:{{ .Values.reporting.port }}
       timeout_ms: 180000
-      rate_limits:
-        - descriptor: hmda-reporting
+      retry_policy:
+        num_retries: 10
+        retry_on: 5xx
+      labels:
+        ambassador:
+         - string_request_label:
+           - hmda-reporting
 spec:
   clusterIP: None  
   ports:
