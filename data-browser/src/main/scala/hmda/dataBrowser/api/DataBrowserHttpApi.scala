@@ -32,7 +32,7 @@ trait DataBrowserHttpApi extends Settings {
   val log: LoggingAdapter
   implicit val materializer: ActorMaterializer
 
-  val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
+  val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("databrowser_db")
   val repository =
     new PostgresModifiedLarRepository(database.tableName, databaseConfig)
 
