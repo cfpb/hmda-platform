@@ -27,7 +27,7 @@ metadata:
   name: institutions-api-ambassador
   annotations:
     getambassador.io/config: |
-      apiVersion: ambassador/v0
+      apiVersion: ambassador/v1
       kind: Mapping
       name: institution_api_mapping
       ambassador_id: ambassador-default-1
@@ -36,7 +36,7 @@ metadata:
       rewrite: /institutions/
       service: {{ template "institutions-api.fullname" .}}:{{ .Values.service.port }}
       ---
-      apiVersion: ambassador/v0
+      apiVersion: ambassador/v1
       kind: Mapping
       name: institution_api_search_mapping
       ambassador_id: ambassador-default-1

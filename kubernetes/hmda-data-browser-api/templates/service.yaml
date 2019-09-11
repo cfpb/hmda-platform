@@ -31,8 +31,10 @@ metadata:
       retry_policy:
         num_retries: 10
         retry_on: 5xx
-      rate_limits:
-        - descriptor: hmda-reporting
+      labels:
+        ambassador:
+         - string_request_label:
+           - hmda-reporting
 spec:
   clusterIP: None  
   ports:

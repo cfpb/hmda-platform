@@ -6,7 +6,7 @@ metadata:
   name: maildev-ambassador
   annotations:
     getambassador.io/config: |
-      apiVersion: ambassador/v0
+      apiVersion: ambassador/v1
       kind: Mapping
       name: maildev_mapping
       prefix: /mail/
