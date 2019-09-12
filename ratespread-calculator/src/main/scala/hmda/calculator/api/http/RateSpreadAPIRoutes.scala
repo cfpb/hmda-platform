@@ -44,7 +44,7 @@ trait RateSpreadAPIRoutes extends HmdaTimeDirectives {
     handleRejections(corsRejectionHandler) {
       cors() {
         path("rateSpread") {
-          extractUri { uri =>
+          timedPost { uri =>
             entity(as[RateSpreadBody]) { rateSpreadBody =>
               val rateSpreadResponse =
                 Try(APORCommands.getRateSpreadResponse(rateSpreadBody))
