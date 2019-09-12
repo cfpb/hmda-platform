@@ -27,6 +27,7 @@ import hmda.api.http.model.filing.submissions._
 import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import hmda.api.http.codec.filing.submission.EditDetailsSummaryCodec._
 import hmda.auth.OAuth2Authorization
+import hmda.messages.institution.InstitutionCommands.GetInstitution
 import hmda.messages.submission.EditDetailsCommands.GetEditRowCount
 import hmda.messages.submission.EditDetailsEvents.{
   EditDetailsAdded,
@@ -36,6 +37,8 @@ import hmda.messages.submission.EditDetailsEvents.{
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowValidatedError
 import io.circe.generic.auto._
 import hmda.model.filing.EditDescriptionLookup
+import hmda.model.institution.Institution
+import hmda.persistence.institution.InstitutionPersistence
 import hmda.query.HmdaQuery._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -127,6 +130,29 @@ trait EditsHttpApi extends HmdaTimeDirectives {
           timedGet { uri =>
             parameters('page.as[Int] ? 1) { page =>
               val submissionId = SubmissionId(lei, period, seqNr)
+
+              val institutionPersistence = {
+                if (period == 2018) {
+                  sharding.entityRefFor(
+                    InstitutionPersistence.typeKey,
+                    s"${InstitutionPersistence.name}-${submissionId.lei}")
+                } else {
+                  sharding.entityRefFor(
+                    InstitutionPersistence.typeKey,
+                    s"${InstitutionPersistence.name}-${submissionId.lei}-$period")
+                }
+              }
+
+              val fInstitution
+                : Future[Option[Institution]] = institutionPersistence ? (ref =>
+                GetInstitution(ref))
+
+              for {
+                institution <- fInstitution
+              } yield {
+                println("THIS is the TAXID !!!!!!! " + institution.get.taxId)
+              }
+
               val persistenceId =
                 s"${EditDetailsPersistence.name}-$submissionId"
               val editDetailsPersistence = sharding
