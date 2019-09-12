@@ -171,7 +171,7 @@ object HmdaParserError
     if (larItems.length >= 3) {
       larItems(2)
     } else {
-      "could not find ULI"
+      "The ULI could not be identified."
     }
   }
 
