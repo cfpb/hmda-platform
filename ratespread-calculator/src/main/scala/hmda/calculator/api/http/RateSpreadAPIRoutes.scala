@@ -30,6 +30,9 @@ import io.circe.generic.auto._
 
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
+import akka.event.LoggingAdapter
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+
 
 trait RateSpreadAPIRoutes extends HmdaTimeDirectives {
   implicit val system: ActorSystem
@@ -38,7 +41,8 @@ trait RateSpreadAPIRoutes extends HmdaTimeDirectives {
   implicit val timeout: Timeout
   val log: LoggingAdapter
 
-  val rateSpreadRoutes = encodeResponse {
+  val rateSpreadRoutes = encodeResponse { handleRejections(corsRejectionHandler) {
+    cors() {
     path("rateSpread") {
       extractUri { uri =>
         entity(as[RateSpreadBody]) { rateSpreadBody =>
@@ -46,9 +50,9 @@ trait RateSpreadAPIRoutes extends HmdaTimeDirectives {
             Try(APORCommands.getRateSpreadResponse(rateSpreadBody))
           rateSpreadResponse match {
             case Success(response) =>
+              log.info(
+                "API Rate Spread Request Received: " + response.rateSpread)
 
-              println("API Rate Spread Request Received: "+response.rateSpread)
-              
               complete(ToResponseMarshallable(response))
             case Failure(error) =>
               failedResponse(StatusCodes.BadRequest, uri, error)
@@ -70,7 +74,7 @@ trait RateSpreadAPIRoutes extends HmdaTimeDirectives {
               val csv =
                 headerSource.map(s => ByteString(s)).concat(rateSpreadValues)
 
-              println("CSV Rate Spread Request Received.")
+              log.info("CSV Rate Spread Request Received.")
 
               complete(HttpEntity.Chunked
                 .fromData(`text/csv`.toContentType(HttpCharsets.`UTF-8`), csv))
@@ -80,7 +84,7 @@ trait RateSpreadAPIRoutes extends HmdaTimeDirectives {
           }
         }
       }
-  }
+  }}}
 
   private def processRateSpreadRow(byteSource: Source[ByteString, Any]) = {
     byteSource
