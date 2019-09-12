@@ -54,6 +54,8 @@ trait RateSpreadAPIRoutes extends HmdaTimeDirectives {
                     "API Rate Spread Request: " + rateSpreadBody.toString + "\n" + " RateSpread Result: " + response.rateSpread)
                   complete(ToResponseMarshallable(response))
                 case Failure(error) =>
+                  log.info(
+                    "API Rate Spread Request Failed: " + rateSpreadBody.toString + "\n" + " Error Message: " + error.toString)
                   failedResponse(StatusCodes.BadRequest, uri, error)
               }
             }
