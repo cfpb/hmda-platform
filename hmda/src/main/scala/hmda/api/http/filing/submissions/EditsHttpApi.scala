@@ -128,11 +128,13 @@ trait EditsHttpApi extends HmdaTimeDirectives {
       (lei, period, seqNr, editName) =>
         oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
           timedGet { uri =>
+            println("here!")
             parameters('page.as[Int] ? 1) { page =>
               val submissionId = SubmissionId(lei, period, seqNr)
-
+              println("wow came here" + period)
               val institutionPersistence = {
-                if (period == 2018) {
+                if (period.toInt == 2018) {
+                  println("here")
                   sharding.entityRefFor(
                     InstitutionPersistence.typeKey,
                     s"${InstitutionPersistence.name}-${submissionId.lei}")
@@ -147,10 +149,17 @@ trait EditsHttpApi extends HmdaTimeDirectives {
                 : Future[Option[Institution]] = institutionPersistence ? (ref =>
                 GetInstitution(ref))
 
-              for {
+              val i = for {
                 institution <- fInstitution
-              } yield {
-                println("THIS is the TAXID !!!!!!! " + institution.get.taxId)
+              } yield (institution)
+
+              onComplete(i) {
+                case Success(i) =>
+                  println("Instition is: " + i.get.taxId)
+                  entityNotPresentResponse("institution", lei, uri)
+                case Failure(error) =>
+                  println("error")
+                  failedResponse(StatusCodes.InternalServerError, uri, error)
               }
 
               val persistenceId =
@@ -206,7 +215,8 @@ trait EditsHttpApi extends HmdaTimeDirectives {
 
   private def editDetails(
       persistenceId: String,
-      summary: EditDetailsSummary): Future[EditDetailsSummary] = {
+      summary: EditDetailsSummary,
+      institution: Institution = Institution.empty): Future[EditDetailsSummary] = {
     val editDetails = eventEnvelopeByPersistenceId(persistenceId)
       .map(envelope => envelope.event.asInstanceOf[EditDetailsPersistenceEvent])
       .collect {

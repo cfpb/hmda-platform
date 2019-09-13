@@ -13,7 +13,6 @@ case class TransmittalSheet(
     totalLines: Int = 0,
     taxId: String = "",
     LEI: String = "",
-    someValue: String = "test"
 ) extends PipeDelimited
     with HmdaFileRow {
   override def toCSV: String = {
