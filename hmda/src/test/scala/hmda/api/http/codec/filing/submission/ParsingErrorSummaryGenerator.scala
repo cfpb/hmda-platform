@@ -21,6 +21,7 @@ object ParsingErrorSummaryGenerator {
   implicit def hmdaRowParserErrorGen: Gen[HmdaRowParsedError] =
     for {
       rowNumber <- Gen.choose(1, 100)
+      estimatedULI <- Gen.alphaStr
       errorMessages <- Gen.listOf(Gen.alphaStr)
-    } yield HmdaRowParsedError(rowNumber, errorMessages)
+    } yield HmdaRowParsedError(rowNumber, estimatedULI, errorMessages)
 }

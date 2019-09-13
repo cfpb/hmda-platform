@@ -49,9 +49,11 @@ class HmdaParserErrorSpec extends AkkaCassandraPersistenceSpec {
       val e1 = List(InvalidId)
       val e2 = List(InvalidLoanTerm, InvalidOccupancy)
       hmdaParserError ! PersistHmdaRowParsedError(1,
+                                                  "testULI",
                                                   e1.map(_.errorMessage),
                                                   None)
       hmdaParserError ! PersistHmdaRowParsedError(2,
+                                                  "testULI",
                                                   e2.map(_.errorMessage),
                                                   None)
       hmdaParserError ! GetParsedWithErrorCount(errorsProbe.ref)
@@ -59,9 +61,10 @@ class HmdaParserErrorSpec extends AkkaCassandraPersistenceSpec {
 
       hmdaParserError ! GetParsingErrors(1, stateProbe.ref)
       stateProbe.expectMessage(
-        HmdaParserErrorState(Seq(HmdaRowParsedError(1, e1.map(_.errorMessage))),
-                             Seq(HmdaRowParsedError(2, e2.map(_.errorMessage))),
-                             2))
+        HmdaParserErrorState(
+          Seq(HmdaRowParsedError(1, "testULI", e1.map(_.errorMessage))),
+          Seq(HmdaRowParsedError(2, "testULI", e2.map(_.errorMessage))),
+          2))
     }
   }
 }

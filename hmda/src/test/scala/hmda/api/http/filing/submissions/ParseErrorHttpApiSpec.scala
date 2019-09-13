@@ -138,6 +138,7 @@ class ParseErrorHttpApiSpec
     for (i <- 1 to 100) {
       val errorList = List(InvalidId)
       hmdaParserError ! PersistHmdaRowParsedError(i,
+                                                  "testULI",
                                                   errorList.map(_.errorMessage),
                                                   None)
     }

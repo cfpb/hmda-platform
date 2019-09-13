@@ -682,6 +682,7 @@ object HmdaValidationError
     uploadConsumerRawStr(ctx, submissionId)
       .take(1)
       .via(parseTsFlow)
+      .map(_._1)
       .map(_.getOrElse(TransmittalSheet()))
       .named("maybeTs" + submissionId)
       .runWith(Sink.seq)
