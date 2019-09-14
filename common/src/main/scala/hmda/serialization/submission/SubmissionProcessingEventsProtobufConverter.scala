@@ -25,6 +25,7 @@ object SubmissionProcessingEventsProtobufConverter {
       hmdaRowParsedError: HmdaRowParsedError): HmdaRowParsedErrorMessage = {
     HmdaRowParsedErrorMessage(
       hmdaRowParsedError.rowNumber,
+      hmdaRowParsedError.estimatedULI,
       hmdaRowParsedError.errorMessages
     )
   }
@@ -34,6 +35,7 @@ object SubmissionProcessingEventsProtobufConverter {
     : HmdaRowParsedError = {
     HmdaRowParsedError(
       hmdaRowParsedErrorMessage.rowNumber,
+      hmdaRowParsedErrorMessage.estimatedULI,
       hmdaRowParsedErrorMessage.errors.toList
     )
   }

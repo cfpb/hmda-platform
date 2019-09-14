@@ -30,6 +30,8 @@ import io.circe.generic.auto._
 
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
+import akka.event.LoggingAdapter
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
 trait RateSpreadAPIRoutes extends HmdaTimeDirectives {
   implicit val system: ActorSystem
@@ -39,40 +41,56 @@ trait RateSpreadAPIRoutes extends HmdaTimeDirectives {
   val log: LoggingAdapter
 
   val rateSpreadRoutes = encodeResponse {
-    path("rateSpread") {
-      extractUri { uri =>
-        entity(as[RateSpreadBody]) { rateSpreadBody =>
-          val rateSpreadResponse =
-            Try(APORCommands.getRateSpreadResponse(rateSpreadBody))
-          rateSpreadResponse match {
-            case Success(response) =>
-              complete(ToResponseMarshallable(response))
-            case Failure(error) =>
-              failedResponse(StatusCodes.BadRequest, uri, error)
+    handleRejections(corsRejectionHandler) {
+      cors() {
+        path("rateSpread") {
+          timedPost { uri =>
+            entity(as[RateSpreadBody]) { rateSpreadBody =>
+              val rateSpreadResponse =
+                Try(APORCommands.getRateSpreadResponse(rateSpreadBody))
+              rateSpreadResponse match {
+                case Success(response) =>
+                  log.info(
+                    "API Rate Spread Request: " + rateSpreadBody.toString + "\n" + " RateSpread Result: " + response.rateSpread)
+                  complete(ToResponseMarshallable(response))
+                case Failure(error) =>
+                  log.info(
+                    "API Rate Spread Request Failed: " + rateSpreadBody.toString + "\n" + " Error Message: " + error.toString)
+                  failedResponse(StatusCodes.BadRequest, uri, error)
+              }
+            }
           }
-        }
-      }
-    } ~
-      pathPrefix("rateSpread") {
-        path("csv") {
-          fileUpload("file") {
-            case (_, byteSource) =>
-              val headerSource =
-                Source.fromIterator(() =>
-                  List("action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,rate_spread\n").toIterator)
-              val rateSpreadValues = processRateSpreadRow(byteSource)
-                .map(rateSpread => rateSpread + "\n")
-                .map(s => ByteString(s))
+        } ~
+          pathPrefix("rateSpread") {
+            path("csv") {
+              fileUpload("file") {
+                case (_, byteSource) =>
+                  val headerSource =
+                    Source.fromIterator(() =>
+                      List("action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,rate_spread\n").toIterator)
+                  val rateSpreadValues = processRateSpreadRow(byteSource)
+                    .map(rateSpread => rateSpread + "\n")
+                    .map(s => ByteString(s))
 
-              val csv =
-                headerSource.map(s => ByteString(s)).concat(rateSpreadValues)
-              complete(HttpEntity.Chunked
-                .fromData(`text/csv`.toContentType(HttpCharsets.`UTF-8`), csv))
-            case _ =>
-              complete(ToResponseMarshallable(StatusCodes.BadRequest))
+                  val csv =
+                    headerSource
+                      .map(s => ByteString(s))
+                      .concat(rateSpreadValues)
+
+                  log.info("CSV Rate Spread Request Received.")
+
+                  complete(
+                    HttpEntity.Chunked
+                      .fromData(`text/csv`.toContentType(HttpCharsets.`UTF-8`),
+                                csv))
+
+                case _ =>
+                  complete(ToResponseMarshallable(StatusCodes.BadRequest))
+              }
+            }
           }
-        }
       }
+    }
   }
 
   private def processRateSpreadRow(byteSource: Source[ByteString, Any]) = {

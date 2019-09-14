@@ -50,12 +50,14 @@ class SubmissionProcessingCommandsProtobufConverterSpec
 
   property("Persist Parser Errors must serialize to protobuf and back") {
     val rowNumberGen = Gen.choose(0, Int.MaxValue)
+    val estimatedULIGen = Gen.alphaStr
     val errorListGen = Gen.listOf(Gen.alphaStr)
     implicit def persistParsedErrorGen: Gen[PersistHmdaRowParsedError] = {
       for {
         rowNumber <- rowNumberGen
+        estimatedULI <- estimatedULIGen
         errors <- errorListGen
-      } yield PersistHmdaRowParsedError(rowNumber, errors, None)
+      } yield PersistHmdaRowParsedError(rowNumber, estimatedULI, errors, None)
     }
 
     forAll(persistParsedErrorGen) { cmd =>

@@ -108,7 +108,7 @@ class TsPublicScheduler
         }
         case Failure(t) =>
           println(
-            "An error has occurred gettingPublic PSV TS Data 2018: " + t.getMessage)
+            " An error has occurred getting Public PSV TS Data 2018: " + t.getMessage)
       }
   }
 }

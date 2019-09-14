@@ -96,7 +96,6 @@ lazy val `hmda-root` = (project in file("."))
     `institutions-api`,
     `modified-lar`,
     `hmda-analytics`,
-    `census-api`,
     `hmda-data-publisher`,
     `hmda-reporting`,
     `hmda-spark-reporting`
@@ -251,33 +250,6 @@ lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
   )
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(`hmda-protocol` % "compile->compile;test->test")
-
-lazy val `census-api` = (project in file("census-api"))
-  .enablePlugins(JavaServerAppPackaging,
-                 sbtdocker.DockerPlugin,
-                 AshScriptPlugin,
-                 AkkaGrpcPlugin)
-  .settings(hmdaBuildSettings: _*)
-  .settings(
-    Seq(
-      mainClass in Compile := Some("hmda.census.HmdaCensus"),
-      assemblyMergeStrategy in assembly := {
-        case "application.conf"                      => MergeStrategy.concat
-        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
-        case x =>
-          val oldStrategy = (assemblyMergeStrategy in assembly).value
-          oldStrategy(x)
-      },
-      assemblyJarName in assembly := {
-        s"${name.value}.jar"
-      }
-    ),
-    scalafmtSettings,
-    dockerSettings,
-    packageSettings
-  )
-  .dependsOn(common % "compile->compile;test->test")
-  .dependsOn(`hmda-protocol`)
 
 lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
   .enablePlugins(JavaServerAppPackaging,

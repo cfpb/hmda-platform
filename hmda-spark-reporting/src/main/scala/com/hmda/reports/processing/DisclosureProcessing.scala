@@ -193,7 +193,7 @@ object DisclosureProcessing {
     def leiDetails: Institution =
       spark.read
         .format("jdbc")
-        .option("driver", "org.postgresql.Driver")
+        .option("profile", "slick.jdbc.PostgresProfile")
         .option("url", jdbcUrl)
         .option(
           "dbtable",
@@ -206,7 +206,7 @@ object DisclosureProcessing {
     def cachedRecordsDf: DataFrame =
       spark.read
         .format("jdbc")
-        .option("driver", "org.postgresql.Driver")
+        .option("profile", "slick.jdbc.PostgresProfile")
         .option("url", jdbcUrl)
         .option(
           "dbtable",
@@ -220,11 +220,7 @@ object DisclosureProcessing {
         .groupBy(d => d.msa_md)
         .map {
           case (key, values) =>
-            val msaMd = Msa(
-              key.toString,
-              values.head.msa_md_name,
-              values.head.state,
-              Census.states.getOrElse(values.head.state, State("", "")).name)
+            val msaMd = Msa(key.toString, values.head.msa_md_name, "", "")
             jsonFormationTable1(msaMd, values, leiDetails)
         }
         .toList
@@ -235,11 +231,7 @@ object DisclosureProcessing {
         .groupBy(d => d.msa_md)
         .map {
           case (key, values) =>
-            val msaMd = Msa(
-              key.toString,
-              values.head.msa_md_name,
-              values.head.state,
-              Census.states.getOrElse(values.head.state, State("", "")).name)
+            val msaMd = Msa(key.toString, values.head.msa_md_name, "", "")
             jsonFormationTable2(msaMd, values, leiDetails)
         }
         .toList

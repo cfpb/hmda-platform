@@ -8,11 +8,11 @@ import scala.concurrent.duration.FiniteDuration
 case class SyntacticalCheck(submissionId: String, hashedInfo: String)
 
 abstract class SyntacticalRepository
-    extends Table[SyntacticalRepository, SyntacticalCheck]
+  extends Table[SyntacticalRepository, SyntacticalCheck]
     with RootConnector {
 
   /**
-    CREATE TABLE distinct_count_storage (submissionId text, hashedInfo text, PRIMARY KEY (submissionId, hashedInfo));
+  CREATE TABLE distinct_count_storage (submissionId text, hashedInfo text, PRIMARY KEY (submissionId, hashedInfo));
     */
   object submissionId extends StringColumn with PartitionKey
   object hashedInfo extends StringColumn with ClusteringOrder
@@ -37,6 +37,19 @@ abstract class SyntacticalRepository
       .consistencyLevel_=(ConsistencyLevel.QUORUM)
       .future()
       .map(_ => SyntacticalCheck(submissionId, hashedInfo))
+
+  // returns true if the record was persisted and false if it was not
+  def persistsIfNotExists(submissionId: String,
+                          hashedInfo: String,
+                          timeout: FiniteDuration): Future[Boolean] =
+    insert
+      .value(_.submissionId, submissionId)
+      .value(_.hashedInfo, hashedInfo)
+      .ttl(timeout)
+      .consistencyLevel_=(ConsistencyLevel.QUORUM)
+      .ifNotExists()
+      .future()
+      .map(rs => rs.wasApplied())
 
   def remove(submissionId: String): Future[Unit] =
     delete

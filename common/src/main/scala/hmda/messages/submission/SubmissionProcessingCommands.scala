@@ -24,6 +24,7 @@ object SubmissionProcessingCommands {
 
   case class PersistHmdaRowParsedError(
       rowNumber: Int,
+      estimatedULI: String,
       errors: List[String],
       maybeReplyTo: Option[ActorRef[HmdaRowParsedError]])
       extends SubmissionProcessingCommand

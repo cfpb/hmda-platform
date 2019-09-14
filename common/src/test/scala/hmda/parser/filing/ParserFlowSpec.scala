@@ -51,6 +51,7 @@ class ParserFlowSpec extends WordSpec with MustMatchers {
       tsSource
         .map(ByteString(_))
         .via(parseTsFlow)
+        .map(_._1)
         .map(_.getOrElse(TransmittalSheet()))
         .runWith(TestSink.probe[PipeDelimited])
         .request(1)
@@ -61,6 +62,7 @@ class ParserFlowSpec extends WordSpec with MustMatchers {
       badTsSource
         .map(ByteString(_))
         .via(parseTsFlow)
+        .map(_._1)
         .map(_.left.get)
         .runWith(TestSink.probe[List[ParserValidationError]])
         .request(1)
@@ -71,6 +73,7 @@ class ParserFlowSpec extends WordSpec with MustMatchers {
       larSource
         .map(ByteString(_))
         .via(parseLarFlow)
+        .map(_._1)
         .map(_.getOrElse(LoanApplicationRegister()))
         .runWith(TestSink.probe[PipeDelimited])
         .request(larCsv.size)
@@ -81,6 +84,7 @@ class ParserFlowSpec extends WordSpec with MustMatchers {
       badLarSource
         .map(ByteString(_))
         .via(parseLarFlow)
+        .map(_._1)
         .map(_.left.get)
         .runWith(TestSink.probe[List[ParserValidationError]])
         .request(badLarList.size)
@@ -92,6 +96,7 @@ class ParserFlowSpec extends WordSpec with MustMatchers {
       hmdaFileSource
         .map(ByteString(_))
         .via(parseHmdaFile)
+        .map(_._1)
         .map(_.right.get)
         .runWith(TestSink.probe[PipeDelimited])
         .request(hmdaFile.size)
@@ -102,6 +107,7 @@ class ParserFlowSpec extends WordSpec with MustMatchers {
       badHmdaFileSource
         .map(ByteString(_))
         .via(parseHmdaFile)
+        .map(_._1)
         .filter(x => x.isLeft)
         .collect {
           case Left(errors) => errors

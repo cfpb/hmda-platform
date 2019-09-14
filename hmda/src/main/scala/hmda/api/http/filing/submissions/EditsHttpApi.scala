@@ -230,7 +230,7 @@ trait EditsHttpApi extends HmdaTimeDirectives {
   }
 
   private val csvHeaderSource =
-    Source.fromIterator(() => Iterator("editType,editId,ULI\n"))
+    Source.fromIterator(() => Iterator("editType,editId,ULI,editDescription\n"))
 
   private def validationErrorEventStream(
       submissionId: SubmissionId): Source[String, NotUsed] = {
@@ -239,9 +239,17 @@ trait EditsHttpApi extends HmdaTimeDirectives {
       .collect {
         case evt @ HmdaRowValidatedError(_, _) => evt
       }
-      .mapConcat(e =>
-        e.validationErrors.map(e =>
-          EditsCsvResponse(e.validationErrorType.toString, e.editName, e.uli)))
+      .mapConcat(
+        e =>
+          e.validationErrors.map(
+            e =>
+              EditsCsvResponse(
+                e.validationErrorType.toString,
+                e.editName,
+                e.uli,
+                EditDescriptionLookup.lookupDescription(e.editName,
+                                                        submissionId.period)
+            )))
       .map(_.toCsv)
   }
 

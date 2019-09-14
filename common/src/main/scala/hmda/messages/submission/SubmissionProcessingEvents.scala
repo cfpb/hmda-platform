@@ -7,7 +7,9 @@ import hmda.model.validation.{MacroValidationError, ValidationError}
 object SubmissionProcessingEvents {
   sealed trait SubmissionProcessingEvent extends Event
 
-  case class HmdaRowParsedError(rowNumber: Int, errorMessages: List[String])
+  case class HmdaRowParsedError(rowNumber: Int,
+                                estimatedULI: String,
+                                errorMessages: List[String])
       extends SubmissionProcessingEvent
 
   case class HmdaRowValidatedError(rowNumber: Int,

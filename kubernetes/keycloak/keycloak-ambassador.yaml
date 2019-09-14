@@ -6,7 +6,7 @@ metadata:
   name: keycloak-ambassador
   annotations:
     getambassador.io/config: |
-      apiVersion: ambassador/v0
+      apiVersion: ambassador/v1
       kind: Mapping
       name: keycloak_https_mapping
       ambassador_id: [ "ambassador-default-1", "ambassador-beta-2" ]
