@@ -13,9 +13,3 @@ object IfInstitutionPresentIn {
   }
 
 }
-
-object somethingelse {
-  def apply(s: String)(constructor: Institution => Integer): String = {
-    "test"
-  }
-}

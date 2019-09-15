@@ -27,7 +27,6 @@ import hmda.api.http.model.filing.submissions._
 import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import hmda.api.http.codec.filing.submission.EditDetailsSummaryCodec._
 import hmda.auth.OAuth2Authorization
-import hmda.messages.institution.InstitutionCommands.GetInstitution
 import hmda.messages.submission.EditDetailsCommands.GetEditRowCount
 import hmda.messages.submission.EditDetailsEvents.{
   EditDetailsAdded,
@@ -37,8 +36,6 @@ import hmda.messages.submission.EditDetailsEvents.{
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowValidatedError
 import io.circe.generic.auto._
 import hmda.model.filing.EditDescriptionLookup
-import hmda.model.institution.Institution
-import hmda.persistence.institution.InstitutionPersistence
 import hmda.query.HmdaQuery._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -64,10 +61,10 @@ trait EditsHttpApi extends HmdaTimeDirectives {
             val submissionId = SubmissionId(lei, period, seqNr)
             val hmdaValidationError = sharding
               .entityRefFor(HmdaValidationError.typeKey,
-                            s"${HmdaValidationError.name}-$submissionId")
+                s"${HmdaValidationError.name}-$submissionId")
 
             val fEdits
-              : Future[HmdaValidationErrorState] = hmdaValidationError ? (ref =>
+            : Future[HmdaValidationErrorState] = hmdaValidationError ? (ref =>
               GetHmdaValidationErrorState(submissionId, ref))
 
             onComplete(fEdits) {
@@ -128,57 +125,25 @@ trait EditsHttpApi extends HmdaTimeDirectives {
       (lei, period, seqNr, editName) =>
         oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
           timedGet { uri =>
-            println("here!")
             parameters('page.as[Int] ? 1) { page =>
               val submissionId = SubmissionId(lei, period, seqNr)
-              println("wow came here" + period)
-              val institutionPersistence = {
-                if (period.toInt == 2018) {
-                  println("here")
-                  sharding.entityRefFor(
-                    InstitutionPersistence.typeKey,
-                    s"${InstitutionPersistence.name}-${submissionId.lei}")
-                } else {
-                  sharding.entityRefFor(
-                    InstitutionPersistence.typeKey,
-                    s"${InstitutionPersistence.name}-${submissionId.lei}-$period")
-                }
-              }
-
-              val fInstitution
-                : Future[Option[Institution]] = institutionPersistence ? (ref =>
-                GetInstitution(ref))
-
-              val i = for {
-                institution <- fInstitution
-              } yield (institution)
-
-              onComplete(i) {
-                case Success(i) =>
-                  println("Instition is: " + i.get.taxId)
-                  entityNotPresentResponse("institution", lei, uri)
-                case Failure(error) =>
-                  println("error")
-                  failedResponse(StatusCodes.InternalServerError, uri, error)
-              }
-
               val persistenceId =
                 s"${EditDetailsPersistence.name}-$submissionId"
               val editDetailsPersistence = sharding
                 .entityRefFor(EditDetailsPersistence.typeKey,
-                              s"${EditDetailsPersistence.name}-$submissionId")
+                  s"${EditDetailsPersistence.name}-$submissionId")
 
               val fEditRowCount
-                : Future[EditDetailsRowCounted] = editDetailsPersistence ? (
-                  ref => GetEditRowCount(editName, ref))
+              : Future[EditDetailsRowCounted] = editDetailsPersistence ? (
+                ref => GetEditRowCount(editName, ref))
 
               val fDetails: Future[EditDetailsSummary] = for {
                 editRowCount <- fEditRowCount
                 s = EditDetailsSummary(editName,
-                                       Nil,
-                                       uri.path.toString(),
-                                       page,
-                                       editRowCount.count)
+                  Nil,
+                  uri.path.toString(),
+                  page,
+                  editRowCount.count)
                 summary <- editDetails(persistenceId, s)
               } yield summary
 
@@ -214,9 +179,8 @@ trait EditsHttpApi extends HmdaTimeDirectives {
   }
 
   private def editDetails(
-      persistenceId: String,
-      summary: EditDetailsSummary,
-      institution: Institution = Institution.empty): Future[EditDetailsSummary] = {
+                           persistenceId: String,
+                           summary: EditDetailsSummary): Future[EditDetailsSummary] = {
     val editDetails = eventEnvelopeByPersistenceId(persistenceId)
       .map(envelope => envelope.event.asInstanceOf[EditDetailsPersistenceEvent])
       .collect {
@@ -233,7 +197,7 @@ trait EditsHttpApi extends HmdaTimeDirectives {
     Source.fromIterator(() => Iterator("editType,editId,ULI,editDescription\n"))
 
   private def validationErrorEventStream(
-      submissionId: SubmissionId): Source[String, NotUsed] = {
+                                          submissionId: SubmissionId): Source[String, NotUsed] = {
     val persistenceId = s"${HmdaValidationError.name}-$submissionId"
     eventsByPersistenceId(persistenceId)
       .collect {
@@ -248,8 +212,8 @@ trait EditsHttpApi extends HmdaTimeDirectives {
                 e.editName,
                 e.uli,
                 EditDescriptionLookup.lookupDescription(e.editName,
-                                                        submissionId.period)
-            )))
+                  submissionId.period)
+              )))
       .map(_.toCsv)
   }
 
