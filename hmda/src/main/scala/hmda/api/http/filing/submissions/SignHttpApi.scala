@@ -49,7 +49,7 @@ trait SignHttpApi extends HmdaTimeDirectives {
     path(
       "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "sign") {
       (lei, period, seqNr) =>
-        oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+        oAuth2Authorization.authorizeTokenWithLei(lei) { t =>
           val submissionId = SubmissionId(lei, period, seqNr)
           timedGet { uri =>
             val submissionPersistence =
@@ -70,7 +70,8 @@ trait SignHttpApi extends HmdaTimeDirectives {
                 if (submission.isEmpty) {
                   submissionNotAvailable(submissionId, uri)
                 } else {
-                  val signed = SignedResponse(submission.end,
+                  val signed = SignedResponse(t.email,
+                                              submission.end,
                                               submission.receipt,
                                               submission.status)
                   complete(ToResponseMarshallable(signed))
@@ -98,7 +99,8 @@ trait SignHttpApi extends HmdaTimeDirectives {
                         submissionSignedEvent match {
                           case signed @ SubmissionSigned(_, _, status) =>
                             val signedResponse =
-                              SignedResponse(signed.timestamp,
+                              SignedResponse(t.email,
+                                             signed.timestamp,
                                              signed.receipt,
                                              status)
                             complete(ToResponseMarshallable(signedResponse))
