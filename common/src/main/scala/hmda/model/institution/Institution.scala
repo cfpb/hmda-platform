@@ -1,5 +1,7 @@
 package hmda.model.institution
 
+import hmda.model.filing.Institution.InstitutionFieldMapping
+
 object Institution {
   def empty: Institution = Institution(
     2018,
@@ -43,5 +45,11 @@ case class Institution(
         .getOrElse("")}|" +
       s"${parent.idRssd}|${parent.name.getOrElse("")}|$assets|${otherLenderCode}|" +
       s"${topHolder.idRssd}|${topHolder.name.getOrElse("")}|$hmdaFiler"
+  }
+
+  def valueOf(field: String): String = {
+    InstitutionFieldMapping
+      .mapping(this)
+      .getOrElse(field, s"error: field name mismatch for $field")
   }
 }

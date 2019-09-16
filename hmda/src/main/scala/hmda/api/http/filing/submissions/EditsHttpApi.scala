@@ -61,10 +61,10 @@ trait EditsHttpApi extends HmdaTimeDirectives {
             val submissionId = SubmissionId(lei, period, seqNr)
             val hmdaValidationError = sharding
               .entityRefFor(HmdaValidationError.typeKey,
-                            s"${HmdaValidationError.name}-$submissionId")
+                s"${HmdaValidationError.name}-$submissionId")
 
             val fEdits
-              : Future[HmdaValidationErrorState] = hmdaValidationError ? (ref =>
+            : Future[HmdaValidationErrorState] = hmdaValidationError ? (ref =>
               GetHmdaValidationErrorState(submissionId, ref))
 
             onComplete(fEdits) {
@@ -131,19 +131,19 @@ trait EditsHttpApi extends HmdaTimeDirectives {
                 s"${EditDetailsPersistence.name}-$submissionId"
               val editDetailsPersistence = sharding
                 .entityRefFor(EditDetailsPersistence.typeKey,
-                              s"${EditDetailsPersistence.name}-$submissionId")
+                  s"${EditDetailsPersistence.name}-$submissionId")
 
               val fEditRowCount
-                : Future[EditDetailsRowCounted] = editDetailsPersistence ? (
-                  ref => GetEditRowCount(editName, ref))
+              : Future[EditDetailsRowCounted] = editDetailsPersistence ? (
+                ref => GetEditRowCount(editName, ref))
 
               val fDetails: Future[EditDetailsSummary] = for {
                 editRowCount <- fEditRowCount
                 s = EditDetailsSummary(editName,
-                                       Nil,
-                                       uri.path.toString(),
-                                       page,
-                                       editRowCount.count)
+                  Nil,
+                  uri.path.toString(),
+                  page,
+                  editRowCount.count)
                 summary <- editDetails(persistenceId, s)
               } yield summary
 
@@ -179,8 +179,8 @@ trait EditsHttpApi extends HmdaTimeDirectives {
   }
 
   private def editDetails(
-      persistenceId: String,
-      summary: EditDetailsSummary): Future[EditDetailsSummary] = {
+                           persistenceId: String,
+                           summary: EditDetailsSummary): Future[EditDetailsSummary] = {
     val editDetails = eventEnvelopeByPersistenceId(persistenceId)
       .map(envelope => envelope.event.asInstanceOf[EditDetailsPersistenceEvent])
       .collect {
@@ -197,7 +197,7 @@ trait EditsHttpApi extends HmdaTimeDirectives {
     Source.fromIterator(() => Iterator("editType,editId,ULI,editDescription\n"))
 
   private def validationErrorEventStream(
-      submissionId: SubmissionId): Source[String, NotUsed] = {
+                                          submissionId: SubmissionId): Source[String, NotUsed] = {
     val persistenceId = s"${HmdaValidationError.name}-$submissionId"
     eventsByPersistenceId(persistenceId)
       .collect {
@@ -212,8 +212,8 @@ trait EditsHttpApi extends HmdaTimeDirectives {
                 e.editName,
                 e.uli,
                 EditDescriptionLookup.lookupDescription(e.editName,
-                                                        submissionId.period)
-            )))
+                  submissionId.period)
+              )))
       .map(_.toCsv)
   }
 

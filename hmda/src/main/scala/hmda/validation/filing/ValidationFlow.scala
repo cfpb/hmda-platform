@@ -9,6 +9,7 @@ import hmda.model.filing.EditDescriptionLookup.config
 import hmda.model.filing.{EditDescriptionLookup, PipeDelimited}
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
+import hmda.model.institution.Institution
 import hmda.model.validation.{
   LarValidationError,
   TsValidationError,
@@ -80,7 +81,9 @@ object ValidationFlow {
       .map { x =>
         x._2
           .leftMap(xs => {
-            addTsFieldInformation(x._1, xs.toList)
+            addTsFieldInformation(x._1,
+                                  xs.toList,
+                                  validationContext.institution)
           })
           .toEither
       }
@@ -167,13 +170,25 @@ object ValidationFlow {
     })
   }
 
-  def addTsFieldInformation(
-      ts: TransmittalSheet,
-      errors: List[ValidationError]): List[ValidationError] = {
+  def addTsFieldInformation(ts: TransmittalSheet,
+                            errors: List[ValidationError],
+                            institution: Option[Institution] = Option(
+                              Institution.empty)): List[ValidationError] = {
     errors.map(error => {
       val affectedFields = EditDescriptionLookup.lookupFields(error.editName)
       val fieldMap =
-        ListMap(affectedFields.map(field => (field, ts.valueOf(field))): _*)
+        error.editName match {
+          case "S303" =>
+            ListMap(
+              affectedFields.map(field =>
+                (field,
+                 "Provided: " + ts.valueOf(field) + ", Expected: " + institution
+                   .getOrElse(Institution.empty)
+                   .valueOf(field))): _*)
+          case _ =>
+            ListMap(affectedFields.map(field => (field, ts.valueOf(field))): _*)
+        }
+
       error.copyWithFields(fieldMap)
     })
   }
