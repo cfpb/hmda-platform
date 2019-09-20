@@ -89,7 +89,7 @@ object SubmissionProcessingCommands {
                          replyTo: ActorRef[SubmissionProcessingEvent])
       extends SubmissionProcessingCommand
 
-  case class SignSubmission(submissionId: SubmissionId,
+  case class SignSubmission(submissionId: SubmissionId, email: String,
                             replyTo: ActorRef[SubmissionSignedEvent])
       extends SubmissionProcessingCommand
 

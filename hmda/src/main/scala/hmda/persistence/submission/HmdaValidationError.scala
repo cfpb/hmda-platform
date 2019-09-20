@@ -314,7 +314,7 @@ object HmdaValidationError
           Effect.none
         }
 
-      case SignSubmission(submissionId, replyTo) =>
+      case SignSubmission(submissionId, email, replyTo) =>
         if (state.statusCode == Verified.code) {
           val timestamp = Instant.now().toEpochMilli
           val signed = SubmissionSigned(submissionId, timestamp, Signed)
@@ -330,7 +330,7 @@ object HmdaValidationError
                 signed.timestamp,
                 s"${signed.submissionId}-${signed.timestamp}",
                 log)
-              publishSignEvent(submissionId).map(signed =>
+              publishSignEvent(submissionId, email).map(signed =>
                 log.info(s"Published signed event for $submissionId"))
               setHmdaFilerFlag(submissionId.lei, sharding)
               replyTo ! signed
@@ -743,11 +743,11 @@ object HmdaValidationError
 
   }
 
-  private def publishSignEvent(submissionId: SubmissionId)(
+  private def publishSignEvent(submissionId: SubmissionId, email: String)(
     implicit system: ActorSystem,
     materializer: ActorMaterializer): Future[Done] = {
     produceRecord(signTopic, submissionId.lei, submissionId.toString)
-
+    produceRecord(emailTopic, submissionId.toString, email)
   }
 
   private def setHmdaFilerFlag[as: AS, mat: MAT, ec: EC](

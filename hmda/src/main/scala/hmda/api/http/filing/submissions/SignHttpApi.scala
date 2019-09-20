@@ -92,7 +92,7 @@ trait SignHttpApi extends HmdaTimeDirectives {
 
                     val fSigned
                       : Future[SubmissionSignedEvent] = submissionSignPersistence ? (
-                        ref => SignSubmission(submissionId, ref))
+                        ref => SignSubmission(submissionId, t.email, ref))
 
                     onComplete(fSigned) {
                       case Success(submissionSignedEvent) =>
