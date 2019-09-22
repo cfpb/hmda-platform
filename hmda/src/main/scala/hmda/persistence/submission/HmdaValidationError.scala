@@ -13,9 +13,8 @@ import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import akka.pattern.ask
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.RetentionCriteria
-import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
-import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
+import akka.persistence.typed.scaladsl._
+import akka.persistence.typed.scaladsl.EventSourcedBehavior._
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Sink, Source, _}
 import akka.stream.typed.scaladsl.ActorFlow
@@ -259,23 +258,23 @@ object HmdaValidationError
         if (validationErrors.nonEmpty) {
           Effect
             .persist(HmdaRowValidatedError(rowNumber, validationErrors))
-            .thenRun { _ =>
+            .thenRun { (x: HmdaValidationErrorState) =>
               log.debug(
                 s"Persisted: ${HmdaRowValidatedError(rowNumber, validationErrors)}")
 
               val hmdaRowValidatedError =
                 HmdaRowValidatedError(rowNumber, validationErrors)
 
-              for {
-                _ <- persistEditDetails(editDetailPersistence,
-                  hmdaRowValidatedError)
-              } yield {
-                maybeReplyTo match {
-                  case Some(replyTo) =>
-                    replyTo ! hmdaRowValidatedError
-                  case None => //Do nothing
+              persistEditDetails(editDetailPersistence, hmdaRowValidatedError)
+                .onComplete {
+                  case Success(_) =>
+                    maybeReplyTo.foreach(_ ! hmdaRowValidatedError)
+
+                  case Failure(exception) =>
+                    log.error(
+                      "persistEditDetails failed in HmdaValidationError",
+                      exception)
                 }
-              }
             }
         } else {
           Effect.none
@@ -364,7 +363,8 @@ object HmdaValidationError
         Effect.none
 
       case GetVerificationStatus(replyTo) =>
-        replyTo ! VerificationStatus(qualityVerified = state.qualityVerified, macroVerified = state.macroVerified)
+        replyTo ! VerificationStatus(qualityVerified = state.qualityVerified,
+          macroVerified = state.macroVerified)
         Effect.none
 
       case _ =>
