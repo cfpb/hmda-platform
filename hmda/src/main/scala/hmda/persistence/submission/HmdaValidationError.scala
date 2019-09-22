@@ -364,8 +364,7 @@ object HmdaValidationError
         Effect.none
 
       case GetVerificationStatus(replyTo) =>
-        replyTo ! VerificationStatus(state.qualityVerified,
-          state.qualityVerified)
+        replyTo ! VerificationStatus(qualityVerified = state.qualityVerified, macroVerified = state.macroVerified)
         Effect.none
 
       case _ =>
