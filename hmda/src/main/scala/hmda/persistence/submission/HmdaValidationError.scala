@@ -23,10 +23,16 @@ import akka.util.{ByteString, Timeout}
 import akka.{Done, NotUsed}
 import com.typesafe.config.ConfigFactory
 import hmda.HmdaPlatform
-import hmda.messages.institution.InstitutionCommands.{GetInstitution, ModifyInstitution}
+import hmda.messages.institution.InstitutionCommands.{
+  GetInstitution,
+  ModifyInstitution
+}
 import hmda.messages.institution.InstitutionEvents.InstitutionEvent
 import hmda.messages.pubsub.HmdaTopics._
-import hmda.messages.submission.EditDetailsCommands.{EditDetailsPersistenceCommand, PersistEditDetails}
+import hmda.messages.submission.EditDetailsCommands.{
+  EditDetailsPersistenceCommand,
+  PersistEditDetails
+}
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents._
@@ -34,14 +40,23 @@ import hmda.model.filing.submission._
 import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
 import hmda.model.institution.Institution
 import hmda.model.processing.state.HmdaValidationErrorState
-import hmda.model.validation.{MacroValidationError, QualityValidationError, SyntacticalValidationError, ValidationError}
+import hmda.model.validation.{
+  MacroValidationError,
+  QualityValidationError,
+  SyntacticalValidationError,
+  ValidationError
+}
 import hmda.parser.filing.ParserFlow._
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.EditDetailsConverter._
-import hmda.persistence.submission.HmdaProcessingUtils.{readRawData, updateSubmissionReceipt, updateSubmissionStatus}
+import hmda.persistence.submission.HmdaProcessingUtils.{
+  readRawData,
+  updateSubmissionReceipt,
+  updateSubmissionStatus
+}
 import hmda.publication.KafkaUtils._
 import hmda.util.streams.FlowUtils.framing
 import hmda.validation.context.ValidationContext
@@ -348,6 +363,11 @@ object HmdaValidationError
         replyTo ! state
         Effect.none
 
+      case GetVerificationStatus(replyTo) =>
+        replyTo ! VerificationStatus(state.qualityVerified,
+          state.qualityVerified)
+        Effect.none
+
       case _ =>
         Effect.none
     }
@@ -453,8 +473,8 @@ object HmdaValidationError
         .map(_.trim)
         .zip(Source.fromIterator(() => Iterator.from(2))) // rows start from #1 but we dropped the header line so we start at #2
         .map {
-        case (line, rowNumber) => (LarCsvParser(line), line, rowNumber)
-      }
+          case (line, rowNumber) => (LarCsvParser(line), line, rowNumber)
+        }
         .collect {
           case (Right(parsed), line, rowNumber) => (parsed, line, rowNumber)
         }
@@ -602,9 +622,9 @@ object HmdaValidationError
         .via(validateLarFlow(editCheck, validationContext))
         .zip(Source.fromIterator(() => Iterator.from(2))) // rows start from #1 but we dropped the header line so we start at #2
         .collect {
-        case (Left(errors), rowNumber) =>
-          PersistHmdaRowValidatedError(submissionId, rowNumber, errors, None)
-      }
+          case (Left(errors), rowNumber) =>
+            PersistHmdaRowValidatedError(submissionId, rowNumber, errors, None)
+        }
         .via(
           ActorFlow.ask(ctx.asScala.self)(
             (el, replyTo: ActorRef[HmdaRowValidatedError]) =>

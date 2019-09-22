@@ -10,9 +10,7 @@ object SubmissionStatusCodec {
       Json.obj(
         ("code", Json.fromInt(a.code)),
         ("message", Json.fromString(a.message)),
-        ("description", Json.fromString(a.description)),
-        ("qualityVerified", Json.fromBoolean(a.qualityVerified)),
-        ("macroVerified", Json.fromBoolean(a.macroVerified))
+        ("description", Json.fromString(a.description))
       )
 
   implicit val submissionStatusDecoder: Decoder[SubmissionStatus] =

@@ -6,9 +6,8 @@ import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, StatusCodes}
-import akka.http.scaladsl.server.Directives.{encodeResponse, handleRejections}
-import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Sink, Source}
 import akka.util.{ByteString, Timeout}
@@ -17,14 +16,20 @@ import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{
   corsRejectionHandler
 }
 import hmda.api.http.directives.HmdaTimeDirectives
-import hmda.messages.submission.SubmissionProcessingCommands.GetHmdaValidationErrorState
-import hmda.model.filing.submission.{SubmissionId, SubmissionStatus}
+import hmda.messages.submission.SubmissionProcessingCommands.{
+  GetHmdaValidationErrorState,
+  GetVerificationStatus
+}
+import hmda.model.filing.submission.{
+  SubmissionId,
+  SubmissionStatus,
+  VerificationStatus
+}
 import hmda.model.processing.state.{EditSummary, HmdaValidationErrorState}
 import hmda.persistence.submission.{EditDetailsPersistence, HmdaValidationError}
 import hmda.util.http.FilingResponseUtils._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.filing.submissions._
-import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import hmda.api.http.codec.filing.submission.EditDetailsSummaryCodec._
 import hmda.auth.OAuth2Authorization
 import hmda.messages.submission.EditDetailsCommands.GetEditRowCount
@@ -34,10 +39,8 @@ import hmda.messages.submission.EditDetailsEvents.{
   EditDetailsRowCounted
 }
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowValidatedError
-import io.circe.generic.auto._
 import hmda.model.filing.EditDescriptionLookup
 import hmda.query.HmdaQuery._
-
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.matching.Regex
 import scala.util.{Failure, Success}
@@ -67,8 +70,17 @@ trait EditsHttpApi extends HmdaTimeDirectives {
             : Future[HmdaValidationErrorState] = hmdaValidationError ? (ref =>
               GetHmdaValidationErrorState(submissionId, ref))
 
-            onComplete(fEdits) {
-              case Success(edits) =>
+            val fVerification
+            : Future[VerificationStatus] = hmdaValidationError ? (ref =>
+              GetVerificationStatus(ref))
+
+            val fEditsAndVer = for {
+              edits <- fEdits
+              ver <- fVerification
+            } yield (edits, ver)
+
+            onComplete(fEditsAndVer) {
+              case Success((edits, ver)) =>
                 val syntactical =
                   SyntacticalEditSummaryResponse(edits.syntactical.map {
                     editSummary =>
@@ -92,8 +104,13 @@ trait EditsHttpApi extends HmdaTimeDirectives {
                     validity,
                     quality,
                     `macro`,
-                    SubmissionStatus.valueOf(edits.statusCode))
-                complete(ToResponseMarshallable(editsSummaryResponse))
+                    SubmissionStatusResponse(
+                      submissionStatus =
+                        SubmissionStatus.valueOf(edits.statusCode),
+                      verification = ver
+                    )
+                  )
+                complete(editsSummaryResponse)
               case Failure(e) =>
                 failedResponse(StatusCodes.InternalServerError, uri, e)
             }
@@ -149,7 +166,7 @@ trait EditsHttpApi extends HmdaTimeDirectives {
 
               onComplete(fDetails) {
                 case Success(summary) =>
-                  complete(ToResponseMarshallable(summary))
+                  complete(summary)
                 case Failure(e) =>
                   failedResponse(StatusCodes.InternalServerError, uri, e)
               }
