@@ -39,7 +39,6 @@ import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.{HmdaParserError, SubmissionPersistence}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.api.http.codec.filing.submission.ParsingErrorSummaryCodec._
 import hmda.auth.{KeycloakTokenVerifier, OAuth2Authorization}
 import hmda.messages.submission.SubmissionProcessingEvents.{
   HmdaRowParsedCount,
@@ -52,7 +51,7 @@ import scala.concurrent.duration._
 import scala.util.Random
 
 class ParseErrorHttpApiSpec
-    extends AkkaCassandraPersistenceSpec
+  extends AkkaCassandraPersistenceSpec
     with MustMatchers
     with ParseErrorHttpApi
     with ScalatestRouteTest {
@@ -114,7 +113,7 @@ class ParseErrorHttpApiSpec
         InstitutionPersistence.typeKey,
         s"${InstitutionPersistence.name}-${sampleInstitution.LEI}")
     institutionPersistence ! CreateInstitution(sampleInstitution,
-                                               institutionProbe.ref)
+      institutionProbe.ref)
     institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))
 
     val filingPersistence =
@@ -129,7 +128,7 @@ class ParseErrorHttpApiSpec
         SubmissionPersistence.typeKey,
         s"${SubmissionPersistence.name}-${sampleSubmission.id.toString}")
     submissionPersistence ! CreateSubmission(sampleSubmission.id,
-                                             submissionProbe.ref)
+      submissionProbe.ref)
     submissionProbe.expectMessageType[SubmissionCreated]
 
     val hmdaParserError = sharding.entityRefFor(
@@ -138,9 +137,9 @@ class ParseErrorHttpApiSpec
     for (i <- 1 to 100) {
       val errorList = List(InvalidId)
       hmdaParserError ! PersistHmdaRowParsedError(i,
-                                                  "testULI",
-                                                  errorList.map(_.errorMessage),
-                                                  None)
+        "testULI",
+        errorList.map(_.errorMessage),
+        None)
     }
 
     hmdaParserError ! GetParsedWithErrorCount(errorsProbe.ref)

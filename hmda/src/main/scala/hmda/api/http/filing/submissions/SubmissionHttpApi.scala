@@ -4,43 +4,33 @@ import akka.actor.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.{HttpResponse, StatusCodes, Uri}
 import akka.http.scaladsl.model.headers.RawHeader
+import akka.http.scaladsl.model.{StatusCodes, Uri}
+import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
-import akka.util.{ByteString, Timeout}
-import hmda.api.http.directives.HmdaTimeDirectives
-import akka.http.scaladsl.server.Directives._
 import akka.stream.scaladsl.Sink
+import akka.util.{ByteString, Timeout}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.messages.filing.FilingCommands.{
-  GetFiling,
-  GetLatestSubmission,
-  GetSubmissionSummary
-}
+import hmda.api.http.directives.HmdaTimeDirectives
+import hmda.api.http.model.ErrorResponse
+import hmda.api.http.model.filing.submissions.SubmissionResponse
+import hmda.auth.OAuth2Authorization
+import hmda.messages.filing.FilingCommands._
 import hmda.messages.institution.InstitutionCommands.GetInstitution
 import hmda.messages.submission.SubmissionCommands.CreateSubmission
 import hmda.messages.submission.SubmissionEvents.SubmissionCreated
+import hmda.messages.submission.SubmissionProcessingCommands.GetVerificationStatus
 import hmda.model.filing.Filing
-import hmda.model.filing.submission.{
-  Submission,
-  SubmissionId,
-  SubmissionSummary
-}
+import hmda.model.filing.submission._
+import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.institution.Institution
+import hmda.parser.filing.ts.TsCsvParser
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
-import hmda.persistence.submission.SubmissionPersistence
-import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
-import hmda.auth.OAuth2Authorization
-import hmda.model.filing.ts.TransmittalSheet
-import hmda.parser.filing.ts.TsCsvParser
 import hmda.persistence.submission.HmdaProcessingUtils._
-import hmda.api.http.codec.filing.TsCodec._
-import hmda.api.http.model.ErrorResponse
-import hmda.api.http.codec.ErrorResponseCodec._
-import io.circe.generic.auto._
+import hmda.persistence.submission._
 import hmda.util.http.FilingResponseUtils._
 import hmda.util.streams.FlowUtils.framing
 
@@ -66,7 +56,7 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
               val institutionPersistence = {
                 if (period == "2018") {
                   sharding.entityRefFor(InstitutionPersistence.typeKey,
-                                        s"${InstitutionPersistence.name}-$lei")
+                    s"${InstitutionPersistence.name}-$lei")
                 } else {
                   sharding.entityRefFor(
                     InstitutionPersistence.typeKey,
@@ -75,19 +65,19 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
               }
 
               val fInstitution
-                : Future[Option[Institution]] = institutionPersistence ? (
-                  ref => GetInstitution(ref)
-              )
+              : Future[Option[Institution]] = institutionPersistence ? (
+                ref => GetInstitution(ref)
+                )
 
               val filingPersistence =
                 sharding.entityRefFor(FilingPersistence.typeKey,
-                                      s"${FilingPersistence.name}-$lei-$period")
+                  s"${FilingPersistence.name}-$lei-$period")
 
               val filingF: Future[Option[Filing]] = filingPersistence ? (ref =>
                 GetFiling(ref))
 
               val latestSubmissionF
-                : Future[Option[Submission]] = filingPersistence ? (ref =>
+              : Future[Option[Submission]] = filingPersistence ? (ref =>
                 GetLatestSubmission(ref))
 
               val fCheck = for {
@@ -111,8 +101,8 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
                         case Some(submission) =>
                           val submissionId =
                             SubmissionId(lei,
-                                         period,
-                                         submission.id.sequenceNumber + 1)
+                              period,
+                              submission.id.sequenceNumber + 1)
                           createSubmission(uri, submissionId)
                       }
                   }
@@ -135,10 +125,10 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
 
             val filingPersistence =
               sharding.entityRefFor(FilingPersistence.typeKey,
-                                    s"${FilingPersistence.name}-$lei-$period")
+                s"${FilingPersistence.name}-$lei-$period")
 
             val fSummary: Future[Option[Submission]] = filingPersistence ? (
-                ref => GetSubmissionSummary(submissionId, ref))
+              ref => GetSubmissionSummary(submissionId, ref))
 
             val fTs: Future[Option[TransmittalSheet]] =
               readRawData(submissionId)
@@ -163,7 +153,7 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
             onComplete(fCheck) {
               case Success(check) =>
                 check match {
-                  case (SubmissionSummary(None, _)) =>
+                  case SubmissionSummary(None, _) =>
                     val errorResponse = ErrorResponse(
                       404,
                       s"Submission ${submissionId.toString} not available",
@@ -171,14 +161,12 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
                     complete(
                       ToResponseMarshallable(
                         StatusCodes.NotFound -> errorResponse))
-                  case (SubmissionSummary(_, None)) =>
+                  case SubmissionSummary(_, None) =>
                     val errorResponse =
                       ErrorResponse(404,
-                                    s"Transmittal Sheet not found",
-                                    uri.path)
-                    complete(
-                      ToResponseMarshallable(
-                        StatusCodes.NotFound -> errorResponse))
+                        s"Transmittal Sheet not found",
+                        uri.path)
+                    complete(StatusCodes.NotFound -> errorResponse)
                   case _ =>
                     complete(ToResponseMarshallable(check))
                 }
@@ -199,17 +187,33 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
             timedGet { uri =>
               val filingPersistence =
                 sharding.entityRefFor(FilingPersistence.typeKey,
-                                      s"${FilingPersistence.name}-$lei-$period")
+                  s"${FilingPersistence.name}-$lei-$period")
 
               val fLatest: Future[Option[Submission]] = filingPersistence ? (
-                  ref => GetLatestSubmission(ref))
+                ref => GetLatestSubmission(ref))
 
-              onComplete(fLatest) {
+              val fResponse = fLatest.flatMap {
+                case Some(s) =>
+                  val entity =
+                    sharding.entityRefFor(
+                      HmdaValidationError.typeKey,
+                      s"${HmdaValidationError.name}-${s.id}")
+                  val fStatus: Future[VerificationStatus] = entity ? (reply =>
+                    GetVerificationStatus(reply))
+                  fStatus.map(v => Option(SubmissionResponse(s, v)))
+
+                case None =>
+                  Future.successful(None)
+              }
+
+              onComplete(fResponse) {
                 case Success(maybeLatest) =>
                   maybeLatest match {
                     case Some(latest) =>
-                      complete(ToResponseMarshallable(latest))
-                    case None => complete(HttpResponse(StatusCodes.NotFound))
+                      complete(latest)
+
+                    case None =>
+                      complete(StatusCodes.NotFound)
                   }
                 case Failure(error) =>
                   failedResponse(StatusCodes.InternalServerError, uri, error)
@@ -240,8 +244,7 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
 
     onComplete(createdF) {
       case Success(created) =>
-        complete(
-          ToResponseMarshallable(StatusCodes.Created -> created.submission))
+        complete(StatusCodes.Created -> created.submission)
       case Failure(error) =>
         failedResponse(StatusCodes.InternalServerError, uri, error)
     }

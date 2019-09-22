@@ -11,7 +11,6 @@ import hmda.query.DbConfiguration._
 
 import scala.concurrent.ExecutionContext
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.api.http.codec.institution.InstitutionCodec._
 import hmda.institution.api.http.model.InstitutionsResponse
 import io.circe.generic.auto._
 

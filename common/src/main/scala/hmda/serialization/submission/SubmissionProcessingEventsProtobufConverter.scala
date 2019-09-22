@@ -22,7 +22,7 @@ import hmda.serialization.validation.ValidationProtobufConverter._
 object SubmissionProcessingEventsProtobufConverter {
 
   def hmdaRowParsedErrorToProtobuf(
-      hmdaRowParsedError: HmdaRowParsedError): HmdaRowParsedErrorMessage = {
+                                    hmdaRowParsedError: HmdaRowParsedError): HmdaRowParsedErrorMessage = {
     HmdaRowParsedErrorMessage(
       hmdaRowParsedError.rowNumber,
       hmdaRowParsedError.estimatedULI,
@@ -31,8 +31,8 @@ object SubmissionProcessingEventsProtobufConverter {
   }
 
   def hmdaRowParsedErrorFromProtobuf(
-      hmdaRowParsedErrorMessage: HmdaRowParsedErrorMessage)
-    : HmdaRowParsedError = {
+                                      hmdaRowParsedErrorMessage: HmdaRowParsedErrorMessage)
+  : HmdaRowParsedError = {
     HmdaRowParsedError(
       hmdaRowParsedErrorMessage.rowNumber,
       hmdaRowParsedErrorMessage.estimatedULI,
@@ -41,22 +41,22 @@ object SubmissionProcessingEventsProtobufConverter {
   }
 
   def hmdaRowParsedCountToProtobuf(
-      hmdaRowParsedCount: HmdaRowParsedCount): HmdaRowParsedCountMessage = {
+                                    hmdaRowParsedCount: HmdaRowParsedCount): HmdaRowParsedCountMessage = {
     HmdaRowParsedCountMessage(
       hmdaRowParsedCount.count
     )
   }
 
   def hmdaRowParsedCountFromProtobuf(
-      hmdaRowParsedCountMessage: HmdaRowParsedCountMessage)
-    : HmdaRowParsedCount = {
+                                      hmdaRowParsedCountMessage: HmdaRowParsedCountMessage)
+  : HmdaRowParsedCount = {
     HmdaRowParsedCount(
       hmdaRowParsedCountMessage.count
     )
   }
 
   def hmdaParserErrorStateToProtobuf(hmdaParserErrorState: HmdaParserErrorState)
-    : HmdaParserErrorStateMessage = {
+  : HmdaParserErrorStateMessage = {
     HmdaParserErrorStateMessage(
       hmdaParserErrorState.transmittalSheetErrors.map(x =>
         hmdaRowParsedErrorToProtobuf(x)),
@@ -66,13 +66,15 @@ object SubmissionProcessingEventsProtobufConverter {
   }
 
   def hmdaParserErrorStateFromProtobuf(
-      hmdaParserErrorStateMessage: HmdaParserErrorStateMessage)
-    : HmdaParserErrorState = {
+                                        hmdaParserErrorStateMessage: HmdaParserErrorStateMessage)
+  : HmdaParserErrorState = {
     HmdaParserErrorState(
-      hmdaParserErrorStateMessage.transmittalSheetErrors.map(x =>
-        hmdaRowParsedErrorFromProtobuf(x)),
-      hmdaParserErrorStateMessage.larErrors.map(x =>
-        hmdaRowParsedErrorFromProtobuf(x)),
+      hmdaParserErrorStateMessage.transmittalSheetErrors
+        .map(x => hmdaRowParsedErrorFromProtobuf(x))
+        .toList,
+      hmdaParserErrorStateMessage.larErrors
+        .map(x => hmdaRowParsedErrorFromProtobuf(x))
+        .toList,
       hmdaParserErrorStateMessage.totalErrors
     )
   }
@@ -94,7 +96,7 @@ object SubmissionProcessingEventsProtobufConverter {
   }
 
   def hmdaValidationErrorStateToProtobuf(
-      cmd: HmdaValidationErrorState): HmdaValidationErrorStateMessage = {
+                                          cmd: HmdaValidationErrorState): HmdaValidationErrorStateMessage = {
     HmdaValidationErrorStateMessage(
       cmd.statusCode,
       cmd.syntactical.map(s => editSummaryToProtobuf(s)).toSeq,
@@ -107,7 +109,7 @@ object SubmissionProcessingEventsProtobufConverter {
   }
 
   def hmdaValidationErrorStateFromProtobuf(
-      msg: HmdaValidationErrorStateMessage): HmdaValidationErrorState = {
+                                            msg: HmdaValidationErrorStateMessage): HmdaValidationErrorState = {
     HmdaValidationErrorState(
       msg.statusCode,
       msg.syntactical.map(m => editSummaryFromProtobuf(m)).toSet,
@@ -120,7 +122,7 @@ object SubmissionProcessingEventsProtobufConverter {
   }
 
   def qualityVerifiedToProtobuf(
-      evt: QualityVerified): QualityVerifiedMessage = {
+                                 evt: QualityVerified): QualityVerifiedMessage = {
     QualityVerifiedMessage(
       submissionIdToProtobuf(evt.submissionId),
       evt.verified,
@@ -129,11 +131,11 @@ object SubmissionProcessingEventsProtobufConverter {
   }
 
   def qualityVerifiedFromProtobuf(
-      msg: QualityVerifiedMessage): QualityVerified = {
+                                   msg: QualityVerifiedMessage): QualityVerified = {
     QualityVerified(submissionIdFromProtobuf(
-                      msg.submissionId.getOrElse(SubmissionIdMessage())),
-                    msg.verified,
-                    SubmissionStatus.valueOf(msg.statusCode))
+      msg.submissionId.getOrElse(SubmissionIdMessage())),
+      msg.verified,
+      SubmissionStatus.valueOf(msg.statusCode))
   }
 
   def macroVerifiedToProtobuf(evt: MacroVerified): MacroVerifiedMessage = {
@@ -146,20 +148,20 @@ object SubmissionProcessingEventsProtobufConverter {
 
   def macroVerifiedFromProtobuf(msg: MacroVerifiedMessage): MacroVerified = {
     MacroVerified(submissionIdFromProtobuf(
-                    msg.submissionId.getOrElse(SubmissionIdMessage())),
-                  msg.verified,
-                  SubmissionStatus.valueOf(msg.statusCode))
+      msg.submissionId.getOrElse(SubmissionIdMessage())),
+      msg.verified,
+      SubmissionStatus.valueOf(msg.statusCode))
   }
 
   def notReadyToBeVerifiedToProtobuf(
-      evt: NotReadyToBeVerified): NotReadyToBeVerifiedMessage = {
+                                      evt: NotReadyToBeVerified): NotReadyToBeVerifiedMessage = {
     NotReadyToBeVerifiedMessage(
       submissionIdToProtobuf(evt.submissionId)
     )
   }
 
   def notReadyToBeVerifiedFromProtobuf(
-      msg: NotReadyToBeVerifiedMessage): NotReadyToBeVerified = {
+                                        msg: NotReadyToBeVerifiedMessage): NotReadyToBeVerified = {
     NotReadyToBeVerified(
       submissionIdFromProtobuf(
         msg.submissionId.getOrElse(SubmissionIdMessage()))
@@ -167,7 +169,7 @@ object SubmissionProcessingEventsProtobufConverter {
   }
 
   def syntacticalValidityCompletedToProtobuf(evt: SyntacticalValidityCompleted)
-    : SyntacticalValidityCompletedMessage = {
+  : SyntacticalValidityCompletedMessage = {
     SyntacticalValidityCompletedMessage(
       submissionIdToProtobuf(evt.submissionId),
       evt.statusCode
@@ -175,8 +177,8 @@ object SubmissionProcessingEventsProtobufConverter {
   }
 
   def syntacticalValidityCompletedFromProtobuf(
-      msg: SyntacticalValidityCompletedMessage)
-    : SyntacticalValidityCompleted = {
+                                                msg: SyntacticalValidityCompletedMessage)
+  : SyntacticalValidityCompleted = {
     SyntacticalValidityCompleted(
       submissionIdFromProtobuf(
         msg.submissionId.getOrElse(SubmissionIdMessage())),
@@ -185,7 +187,7 @@ object SubmissionProcessingEventsProtobufConverter {
   }
 
   def qualityCompletedToProtobuf(
-      evt: QualityCompleted): QualityCompletedMessage = {
+                                  evt: QualityCompleted): QualityCompletedMessage = {
     QualityCompletedMessage(
       submissionIdToProtobuf(evt.submissionId),
       evt.statusCode
@@ -193,7 +195,7 @@ object SubmissionProcessingEventsProtobufConverter {
   }
 
   def qualityCompletedFromProtobuf(
-      msg: QualityCompletedMessage): QualityCompleted = {
+                                    msg: QualityCompletedMessage): QualityCompleted = {
     QualityCompleted(
       submissionIdFromProtobuf(
         msg.submissionId.getOrElse(SubmissionIdMessage())),
@@ -217,7 +219,7 @@ object SubmissionProcessingEventsProtobufConverter {
   }
 
   def submissionSignedToProtobuf(
-      evt: SubmissionSigned): SubmissionSignedMessage = {
+                                  evt: SubmissionSigned): SubmissionSignedMessage = {
     SubmissionSignedMessage(
       submissionIdToProtobuf(evt.submissionId),
       evt.timestamp,
@@ -226,7 +228,7 @@ object SubmissionProcessingEventsProtobufConverter {
   }
 
   def submissionSignedFromProtobuf(
-      msg: SubmissionSignedMessage): SubmissionSigned = {
+                                    msg: SubmissionSignedMessage): SubmissionSigned = {
     SubmissionSigned(
       submissionIdFromProtobuf(
         msg.submissionId.getOrElse(SubmissionIdMessage())),
@@ -236,15 +238,15 @@ object SubmissionProcessingEventsProtobufConverter {
   }
 
   def submissionNotReadyToBeSignedToProtobuf(cmd: SubmissionNotReadyToBeSigned)
-    : SubmissionNotReadyToBeSignedMessage = {
+  : SubmissionNotReadyToBeSignedMessage = {
     SubmissionNotReadyToBeSignedMessage(
       submissionIdToProtobuf(cmd.submissionId)
     )
   }
 
   def submissionNotReadyToBeSignedFromProtobuf(
-      msg: SubmissionNotReadyToBeSignedMessage)
-    : SubmissionNotReadyToBeSigned = {
+                                                msg: SubmissionNotReadyToBeSignedMessage)
+  : SubmissionNotReadyToBeSigned = {
     SubmissionNotReadyToBeSigned(
       submissionIdFromProtobuf(
         msg.submissionId.getOrElse(SubmissionIdMessage()))
@@ -252,15 +254,15 @@ object SubmissionProcessingEventsProtobufConverter {
   }
 
   def hmdaMacroValidatedErrorToProtobuf(
-      evt: HmdaMacroValidatedError
-  ): HmdaMacroValidatedErrorMessage = {
+                                         evt: HmdaMacroValidatedError
+                                       ): HmdaMacroValidatedErrorMessage = {
     HmdaMacroValidatedErrorMessage(
       Some(validationErrorToProtobuf(evt.error))
     )
   }
 
   def hmdaMacroValidatedErrorFromProtobuf(
-      msg: HmdaMacroValidatedErrorMessage): HmdaMacroValidatedError = {
+                                           msg: HmdaMacroValidatedErrorMessage): HmdaMacroValidatedError = {
     HmdaMacroValidatedError(
       validationErrorFromProtobuf(
         msg.validationError.getOrElse(ValidationErrorMessage()))

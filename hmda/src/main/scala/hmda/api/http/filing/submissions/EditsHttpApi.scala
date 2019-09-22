@@ -4,7 +4,6 @@ import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
@@ -30,14 +29,9 @@ import hmda.persistence.submission.{EditDetailsPersistence, HmdaValidationError}
 import hmda.util.http.FilingResponseUtils._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.filing.submissions._
-import hmda.api.http.codec.filing.submission.EditDetailsSummaryCodec._
 import hmda.auth.OAuth2Authorization
 import hmda.messages.submission.EditDetailsCommands.GetEditRowCount
-import hmda.messages.submission.EditDetailsEvents.{
-  EditDetailsAdded,
-  EditDetailsPersistenceEvent,
-  EditDetailsRowCounted
-}
+import hmda.messages.submission.EditDetailsEvents._
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowValidatedError
 import hmda.model.filing.EditDescriptionLookup
 import hmda.query.HmdaQuery._

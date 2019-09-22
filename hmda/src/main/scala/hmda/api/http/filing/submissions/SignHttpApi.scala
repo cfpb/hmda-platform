@@ -3,33 +3,22 @@ package hmda.api.http.filing.submissions
 import akka.actor.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Directives.{encodeResponse, handleRejections}
-import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.headers.RawHeader
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
-import io.circe.generic.auto._
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{
-  cors,
-  corsRejectionHandler
-}
 import hmda.api.http.directives.HmdaTimeDirectives
-import hmda.api.http.model.filing.submissions.{EditsSign, SignedResponse}
+import hmda.api.http.model.filing.submissions._
 import hmda.auth.OAuth2Authorization
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.messages.submission.SubmissionProcessingCommands.SignSubmission
-import hmda.messages.submission.SubmissionProcessingEvents.{
-  SubmissionNotReadyToBeSigned,
-  SubmissionSigned,
-  SubmissionSignedEvent
-}
-import hmda.model.filing.submission.{Submission, SubmissionId}
-import hmda.persistence.submission.{HmdaValidationError, SubmissionPersistence}
+import hmda.messages.submission.SubmissionProcessingEvents._
+import hmda.model.filing.submission._
+import hmda.persistence.submission._
 import hmda.util.http.FilingResponseUtils._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -49,7 +38,7 @@ trait SignHttpApi extends HmdaTimeDirectives {
     path(
       "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "sign") {
       (lei, period, seqNr) =>
-        oAuth2Authorization.authorizeTokenWithLei(lei) { t =>
+        oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
           val submissionId = SubmissionId(lei, period, seqNr)
           timedGet { uri =>
             val submissionPersistence =
@@ -58,7 +47,7 @@ trait SignHttpApi extends HmdaTimeDirectives {
                 s"${SubmissionPersistence.name}-$submissionId")
 
             val fSubmission
-              : Future[Option[Submission]] = submissionPersistence ? (ref =>
+            : Future[Option[Submission]] = submissionPersistence ? (ref =>
               GetSubmission(ref))
 
             val fDetails = for {
@@ -70,11 +59,10 @@ trait SignHttpApi extends HmdaTimeDirectives {
                 if (submission.isEmpty) {
                   submissionNotAvailable(submissionId, uri)
                 } else {
-                  val signed = SignedResponse(t.email,
-                                              submission.end,
-                                              submission.receipt,
-                                              submission.status)
-                  complete(ToResponseMarshallable(signed))
+                  val signed = SignedResponse(submission.end,
+                    submission.receipt,
+                    submission.status)
+                  complete(signed)
                 }
 
               case Failure(e) =>
@@ -91,19 +79,18 @@ trait SignHttpApi extends HmdaTimeDirectives {
                         s"${HmdaValidationError.name}-$submissionId")
 
                     val fSigned
-                      : Future[SubmissionSignedEvent] = submissionSignPersistence ? (
-                        ref => SignSubmission(submissionId, ref))
+                    : Future[SubmissionSignedEvent] = submissionSignPersistence ? (
+                      ref => SignSubmission(submissionId, ref))
 
                     onComplete(fSigned) {
                       case Success(submissionSignedEvent) =>
                         submissionSignedEvent match {
                           case signed @ SubmissionSigned(_, _, status) =>
                             val signedResponse =
-                              SignedResponse(t.email,
-                                             signed.timestamp,
-                                             signed.receipt,
-                                             status)
-                            complete(ToResponseMarshallable(signedResponse))
+                              SignedResponse(signed.timestamp,
+                                signed.receipt,
+                                status)
+                            complete(signedResponse)
                           case SubmissionNotReadyToBeSigned(id) =>
                             badRequest(
                               id,
@@ -115,8 +102,8 @@ trait SignHttpApi extends HmdaTimeDirectives {
                     }
                   } else {
                     badRequest(submissionId,
-                               uri,
-                               "Illegal argument: signed = false")
+                      uri,
+                      "Illegal argument: signed = false")
                   }
                 }
               }

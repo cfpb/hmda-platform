@@ -3,6 +3,8 @@ package hmda.messages.submission
 import hmda.messages.CommonMessages.Event
 import hmda.model.filing.submission.{SubmissionId, SubmissionStatus}
 import hmda.model.validation.{MacroValidationError, ValidationError}
+import io.circe._
+import io.circe.generic.semiauto._
 
 object SubmissionProcessingEvents {
   sealed trait SubmissionProcessingEvent extends Event
@@ -10,50 +12,55 @@ object SubmissionProcessingEvents {
   case class HmdaRowParsedError(rowNumber: Int,
                                 estimatedULI: String,
                                 errorMessages: List[String])
-      extends SubmissionProcessingEvent
+    extends SubmissionProcessingEvent
+
+  object HmdaRowParsedError {
+    implicit val codec: Codec[HmdaRowParsedError] =
+      deriveCodec[HmdaRowParsedError]
+  }
 
   case class HmdaRowValidatedError(rowNumber: Int,
                                    validationErrors: List[ValidationError])
-      extends SubmissionProcessingEvent
+    extends SubmissionProcessingEvent
 
   case class HmdaMacroValidatedError(error: MacroValidationError)
-      extends SubmissionProcessingEvent
+    extends SubmissionProcessingEvent
 
   case class HmdaRowParsedCount(count: Int) extends SubmissionProcessingEvent
 
   case class SyntacticalValidityCompleted(submissionId: SubmissionId,
                                           statusCode: Int)
-      extends SubmissionProcessingEvent
+    extends SubmissionProcessingEvent
 
   case class QualityCompleted(submissionId: SubmissionId, statusCode: Int)
-      extends SubmissionProcessingEvent
+    extends SubmissionProcessingEvent
 
   case class MacroCompleted(submissionId: SubmissionId, statusCode: Int)
-      extends SubmissionProcessingEvent
+    extends SubmissionProcessingEvent
 
   case class QualityVerified(submissionId: SubmissionId,
                              verified: Boolean,
                              status: SubmissionStatus)
-      extends SubmissionProcessingEvent
+    extends SubmissionProcessingEvent
 
   case class MacroVerified(submissionId: SubmissionId,
                            verified: Boolean,
                            status: SubmissionStatus)
-      extends SubmissionProcessingEvent
+    extends SubmissionProcessingEvent
 
   case class NotReadyToBeVerified(submissionId: SubmissionId)
-      extends SubmissionProcessingEvent
+    extends SubmissionProcessingEvent
 
   sealed trait SubmissionSignedEvent extends SubmissionProcessingEvent
 
   case class SubmissionSigned(submissionId: SubmissionId,
                               timestamp: Long,
                               status: SubmissionStatus)
-      extends SubmissionSignedEvent {
+    extends SubmissionSignedEvent {
     def receipt: String = s"$submissionId-$timestamp"
   }
 
   case class SubmissionNotReadyToBeSigned(submissionId: SubmissionId)
-      extends SubmissionSignedEvent
+    extends SubmissionSignedEvent
 
 }

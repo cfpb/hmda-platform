@@ -1,5 +1,7 @@
 package hmda.model.institution
 
+import io.circe._
+
 sealed trait Agency {
   val code: Int
 
@@ -26,6 +28,18 @@ object Agency {
       case _  => throw new Exception("Invalid Agency Code")
     }
   }
+
+  implicit val agencyEncoder: Encoder[Agency] = (a: Agency) =>
+    Json.obj(
+      ("agency", Json.fromInt(a.code))
+    )
+
+  implicit val agencyDecoder: Decoder[Agency] = (c: HCursor) =>
+    for {
+      code <- c.downField("agency").as[Int]
+    } yield {
+      Agency.valueOf(code)
+    }
 }
 
 case object OCC extends Agency {

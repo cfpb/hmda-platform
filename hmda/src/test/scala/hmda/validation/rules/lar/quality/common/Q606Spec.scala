@@ -4,7 +4,6 @@ import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 import hmda.model.filing.lar.LarGenerators._
-import hmda.validation.rules.lar.quality.common.Q606
 
 class Q606Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = Q606

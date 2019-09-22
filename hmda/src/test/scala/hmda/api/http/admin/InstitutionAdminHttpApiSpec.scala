@@ -14,7 +14,6 @@ import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import hmda.model.institution.Institution
 import org.scalatest.MustMatchers
 import hmda.model.institution.InstitutionGenerators._
-import hmda.api.http.codec.institution.InstitutionCodec._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.persistence.institution.InstitutionPersistence
 import akka.testkit._

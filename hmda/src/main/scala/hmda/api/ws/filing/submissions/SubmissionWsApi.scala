@@ -11,7 +11,6 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
 import akka.stream.scaladsl.{Flow, Source}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
-import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import com.typesafe.config.ConfigFactory
 import hmda.api.ws.model.{
   KeepAliveWsResponse,

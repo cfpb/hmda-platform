@@ -1,6 +1,8 @@
 package hmda.api.http.model.filing.submissions
 
 import hmda.model.filing.submissions.WithPagination
+import io.circe.Codec
+import io.circe.generic.semiauto._
 
 trait PaginatedResponse extends WithPagination {
 
@@ -59,13 +61,17 @@ trait PaginatedResponse extends WithPagination {
 }
 
 case class PaginationLinks(
-    href: String,
-    self: String,
-    first: String,
-    prev: String,
-    next: String,
-    last: String
-)
+                            href: String,
+                            self: String,
+                            first: String,
+                            prev: String,
+                            next: String,
+                            last: String
+                          )
+
+object PaginationLinks {
+  implicit val codec: Codec[PaginationLinks] = deriveCodec[PaginationLinks]
+}
 
 object PaginatedResponse {
   def staticPath(configurablePath: String): String = {

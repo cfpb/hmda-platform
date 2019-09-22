@@ -3,7 +3,6 @@ package hmda.api.http.filing.submissions
 import akka.actor.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.StatusCodes
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
@@ -31,10 +30,7 @@ import hmda.messages.submission.SubmissionProcessingEvents.{
   SubmissionProcessingEvent
 }
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
-import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import hmda.auth.OAuth2Authorization
-import io.circe.generic.auto._
-
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.matching.Regex
 import scala.util.{Failure, Success}
@@ -66,7 +62,7 @@ trait VerifyHttpApi extends HmdaTimeDirectives {
                     s"${SubmissionPersistence.name}-${submissionId.toString}")
 
                 val fSubmission
-                  : Future[Option[Submission]] = submissionPersistence ? (ref =>
+                : Future[Option[Submission]] = submissionPersistence ? (ref =>
                   GetSubmission(ref))
 
                 val validationPersistence = sharding.entityRefFor(
@@ -74,17 +70,17 @@ trait VerifyHttpApi extends HmdaTimeDirectives {
                   s"${HmdaValidationError.name}-$submissionId")
 
                 val fVerified
-                  : Future[SubmissionProcessingEvent] = validationPersistence ? {
+                : Future[SubmissionProcessingEvent] = validationPersistence ? {
                   ref =>
                     editType match {
                       case "quality" =>
                         VerifyQuality(submissionId,
-                                      editsVerification.verified,
-                                      ref)
+                          editsVerification.verified,
+                          ref)
                       case "macro" =>
                         VerifyMacro(submissionId,
-                                    editsVerification.verified,
-                                    ref)
+                          editsVerification.verified,
+                          ref)
                     }
                 }
 
@@ -109,17 +105,17 @@ trait VerifyHttpApi extends HmdaTimeDirectives {
                           case QualityVerified(_, verified, status) =>
                             val response =
                               EditsVerificationResponse(verified, status)
-                            complete(ToResponseMarshallable(response))
+                            complete(response)
 
                           case MacroVerified(_, verified, status) =>
                             val response =
                               EditsVerificationResponse(verified, status)
-                            complete(ToResponseMarshallable(response))
+                            complete(response)
 
                           case _ =>
                             badRequest(submissionId,
-                                       uri,
-                                       "Incorrect response event")
+                              uri,
+                              "Incorrect response event")
                         }
                     }
                   case Failure(e) =>

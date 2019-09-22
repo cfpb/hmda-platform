@@ -12,7 +12,6 @@ import com.typesafe.config.ConfigFactory
 import hmda.api.http.FlowUtils
 import hmda.parser.institution.InstitutionCsvParser
 import org.slf4j.LoggerFactory
-import hmda.api.http.codec.institution.InstitutionCodec._
 import io.circe.syntax._
 
 import scala.concurrent.ExecutionContext

@@ -19,10 +19,6 @@ import hmda.model.filing.{Filing, FilingDetails, InProgress}
 import hmda.persistence.filing.FilingPersistence
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.ErrorResponse
-import io.circe.generic.auto._
-import hmda.api.http.codec.filing.FilingStatusCodec._
-import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
-import hmda.api.http.codec.ErrorResponseCodec._
 import hmda.auth.OAuth2Authorization
 import hmda.messages.filing.FilingEvents.FilingCreated
 import hmda.messages.institution.InstitutionCommands.GetInstitution
@@ -50,7 +46,7 @@ trait FilingHttpApi extends HmdaTimeDirectives {
         val institutionPersistence = {
           if (period == "2018") {
             sharding.entityRefFor(InstitutionPersistence.typeKey,
-                                  s"${InstitutionPersistence.name}-$lei")
+              s"${InstitutionPersistence.name}-$lei")
           } else {
             sharding.entityRefFor(
               InstitutionPersistence.typeKey,
@@ -60,15 +56,15 @@ trait FilingHttpApi extends HmdaTimeDirectives {
 
         val filingPersistence =
           sharding.entityRefFor(FilingPersistence.typeKey,
-                                s"${FilingPersistence.name}-$lei-$period")
+            s"${FilingPersistence.name}-$lei-$period")
 
         val fInstitution
-          : Future[Option[Institution]] = institutionPersistence ? (
-            ref => GetInstitution(ref)
-        )
+        : Future[Option[Institution]] = institutionPersistence ? (
+          ref => GetInstitution(ref)
+          )
 
         val fDetails: Future[Option[FilingDetails]] = filingPersistence ? (
-            ref => GetFilingDetails(ref))
+          ref => GetFilingDetails(ref))
 
         val filingDetailsF = for {
           i <- fInstitution
@@ -87,8 +83,8 @@ trait FilingHttpApi extends HmdaTimeDirectives {
                 case Success((Some(_), Some(_))) =>
                   val errorResponse =
                     ErrorResponse(400,
-                                  s"Filing $lei-$period already exists",
-                                  uri.path)
+                      s"Filing $lei-$period already exists",
+                      uri.path)
                   complete(ToResponseMarshallable(
                     StatusCodes.BadRequest -> errorResponse))
                 case Success((Some(_), None)) =>
@@ -102,16 +98,15 @@ trait FilingHttpApi extends HmdaTimeDirectives {
                     0L
                   )
                   val fFiling: Future[FilingCreated] = filingPersistence ? (
-                      ref => CreateFiling(filing, ref))
+                    ref => CreateFiling(filing, ref))
                   onComplete(fFiling) {
                     case Success(created) =>
                       val filingDetails = FilingDetails(created.filing, Nil)
-                      complete(ToResponseMarshallable(
-                        StatusCodes.Created -> filingDetails))
+                      complete(StatusCodes.Created -> filingDetails)
                     case Failure(error) =>
                       failedResponse(StatusCodes.InternalServerError,
-                                     uri,
-                                     error)
+                        uri,
+                        error)
                   }
                 case Failure(error) =>
                   failedResponse(StatusCodes.InternalServerError, uri, error)
@@ -127,7 +122,7 @@ trait FilingHttpApi extends HmdaTimeDirectives {
               respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
                 onComplete(filingDetailsF) {
                   case Success((Some(_), Some(filingDetails))) =>
-                    complete(ToResponseMarshallable(filingDetails))
+                    complete(filingDetails)
                   case Success((None, _)) =>
                     entityNotPresentResponse("institution", lei, uri)
                   case Success((Some(i), None)) =>

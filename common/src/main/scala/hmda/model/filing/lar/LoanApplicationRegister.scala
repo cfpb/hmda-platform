@@ -2,35 +2,37 @@ package hmda.model.filing.lar
 
 import hmda.model.filing.lar.enums._
 import hmda.model.filing.{HmdaFileRow, PipeDelimited}
+import io.circe._
+import io.circe.syntax._
 
 case class LoanApplicationRegister(
-    larIdentifier: LarIdentifier = LarIdentifier(),
-    loan: Loan = Loan(),
-    action: LarAction = LarAction(),
-    geography: Geography = Geography(),
-    applicant: Applicant = Applicant(),
-    coApplicant: Applicant = Applicant(),
-    income: String = "",
-    purchaserType: PurchaserEnum = InvalidPurchaserCode,
-    hoepaStatus: HOEPAStatusEnum = InvalidHoepaStatusCode,
-    lienStatus: LienStatusEnum = InvalidLienStatusCode,
-    denial: Denial = Denial(),
-    loanDisclosure: LoanDisclosure = LoanDisclosure(),
-    nonAmortizingFeatures: NonAmortizingFeatures = NonAmortizingFeatures(),
-    property: Property = Property(),
-    applicationSubmission: ApplicationSubmissionEnum =
-      InvalidApplicationSubmissionCode,
-    payableToInstitution: PayableToInstitutionEnum =
-      InvalidPayableToInstitutionCode,
-    AUS: AutomatedUnderwritingSystem = AutomatedUnderwritingSystem(),
-    ausResult: AutomatedUnderwritingSystemResult =
-      AutomatedUnderwritingSystemResult(),
-    reverseMortgage: MortgageTypeEnum = InvalidMortgageTypeCode,
-    lineOfCredit: LineOfCreditEnum = InvalidLineOfCreditCode,
-    businessOrCommercialPurpose: BusinessOrCommercialBusinessEnum =
-      InvalidBusinessOrCommercialBusinessCode
-) extends PipeDelimited
-    with HmdaFileRow {
+                                    larIdentifier: LarIdentifier = LarIdentifier(),
+                                    loan: Loan = Loan(),
+                                    action: LarAction = LarAction(),
+                                    geography: Geography = Geography(),
+                                    applicant: Applicant = Applicant(),
+                                    coApplicant: Applicant = Applicant(),
+                                    income: String = "",
+                                    purchaserType: PurchaserEnum = InvalidPurchaserCode,
+                                    hoepaStatus: HOEPAStatusEnum = InvalidHoepaStatusCode,
+                                    lienStatus: LienStatusEnum = InvalidLienStatusCode,
+                                    denial: Denial = Denial(),
+                                    loanDisclosure: LoanDisclosure = LoanDisclosure(),
+                                    nonAmortizingFeatures: NonAmortizingFeatures = NonAmortizingFeatures(),
+                                    property: Property = Property(),
+                                    applicationSubmission: ApplicationSubmissionEnum =
+                                    InvalidApplicationSubmissionCode,
+                                    payableToInstitution: PayableToInstitutionEnum =
+                                    InvalidPayableToInstitutionCode,
+                                    AUS: AutomatedUnderwritingSystem = AutomatedUnderwritingSystem(),
+                                    ausResult: AutomatedUnderwritingSystemResult =
+                                    AutomatedUnderwritingSystemResult(),
+                                    reverseMortgage: MortgageTypeEnum = InvalidMortgageTypeCode,
+                                    lineOfCredit: LineOfCreditEnum = InvalidLineOfCreditCode,
+                                    businessOrCommercialPurpose: BusinessOrCommercialBusinessEnum =
+                                    InvalidBusinessOrCommercialBusinessCode
+                                  ) extends PipeDelimited
+  with HmdaFileRow {
 
   override def toCSV: String = {
 
@@ -63,4 +65,90 @@ case class LoanApplicationRegister(
       .mapping(this)
       .getOrElse(field, s"error: field name mismatch for $field")
   }
+}
+
+object LoanApplicationRegister {
+  implicit val larEncoder: Encoder[LoanApplicationRegister] =
+    (a: LoanApplicationRegister) =>
+      Json.obj(
+        ("larIdentifier", a.larIdentifier.asJson),
+        ("loan", a.loan.asJson),
+        ("larAction", a.action.asJson),
+        ("geography", a.geography.asJson),
+        ("applicant", a.applicant.asJson),
+        ("coApplicant", a.coApplicant.asJson),
+        ("income", Json.fromString(a.income)),
+        ("purchaserType", a.purchaserType.asInstanceOf[LarEnum].asJson),
+        ("hoepaStatus", a.hoepaStatus.asInstanceOf[LarEnum].asJson),
+        ("lienStatus", a.lienStatus.asInstanceOf[LarEnum].asJson),
+        ("denial", a.denial.asJson),
+        ("loanDisclosure", a.loanDisclosure.asJson),
+        ("nonAmortizingFeatures", a.nonAmortizingFeatures.asJson),
+        ("property", a.property.asJson),
+        ("applicationSubmission",
+          a.applicationSubmission.asInstanceOf[LarEnum].asJson),
+        ("payableToInstitution",
+          a.payableToInstitution.asInstanceOf[LarEnum].asJson),
+        ("AUS", a.AUS.asJson),
+        ("ausResult", a.ausResult.asJson),
+        ("reverseMortgage", a.reverseMortgage.asInstanceOf[LarEnum].asJson),
+        ("lineOfCredit", a.lineOfCredit.asInstanceOf[LarEnum].asJson),
+        ("businessOrCommercialPurpose",
+          a.businessOrCommercialPurpose.asInstanceOf[LarEnum].asJson)
+      )
+
+  implicit val larDecoder: Decoder[LoanApplicationRegister] =
+    (c: HCursor) =>
+      for {
+        larIdentifier <- c.downField("larIdentifier").as[LarIdentifier]
+        loan <- c.downField("loan").as[Loan]
+        larAction <- c.downField("larAction").as[LarAction]
+        geography <- c.downField("geography").as[Geography]
+        applicant <- c.downField("applicant").as[Applicant]
+        coApplicant <- c.downField("coApplicant").as[Applicant]
+        income <- c.downField("income").as[String]
+        purchaserType <- c.downField("purchaserType").as[Int]
+        hoepaStatus <- c.downField("hoepaStatus").as[Int]
+        lienStatus <- c.downField("lienStatus").as[Int]
+        denial <- c.downField("denial").as[Denial]
+        loanDisclosure <- c.downField("loanDisclosure").as[LoanDisclosure]
+        nonAmortizingFeatures <- c
+          .downField("nonAmortizingFeatures")
+          .as[NonAmortizingFeatures]
+        property <- c.downField("property").as[Property]
+        applicationSubmission <- c.downField("applicationSubmission").as[Int]
+        payableToInstitution <- c.downField("payableToInstitution").as[Int]
+        aus <- c.downField("AUS").as[AutomatedUnderwritingSystem]
+        ausResult <- c
+          .downField("ausResult")
+          .as[AutomatedUnderwritingSystemResult]
+        reverseMortgage <- c.downField("reverseMortgage").as[Int]
+        lineOfCredit <- c.downField("lineOfCredit").as[Int]
+        businessOrCommercialPurpose <- c
+          .downField("businessOrCommercialPurpose")
+          .as[Int]
+      } yield
+        LoanApplicationRegister(
+          larIdentifier,
+          loan,
+          larAction,
+          geography,
+          applicant,
+          coApplicant,
+          income,
+          PurchaserEnum.valueOf(purchaserType),
+          HOEPAStatusEnum.valueOf(hoepaStatus),
+          LienStatusEnum.valueOf(lienStatus),
+          denial,
+          loanDisclosure,
+          nonAmortizingFeatures,
+          property,
+          ApplicationSubmissionEnum.valueOf(applicationSubmission),
+          PayableToInstitutionEnum.valueOf(payableToInstitution),
+          aus,
+          ausResult,
+          MortgageTypeEnum.valueOf(reverseMortgage),
+          LineOfCreditEnum.valueOf(lineOfCredit),
+          BusinessOrCommercialBusinessEnum.valueOf(businessOrCommercialPurpose)
+        )
 }
