@@ -1,13 +1,9 @@
 package hmda.api.http.codec.filing.submission
 
-import hmda.api.http.model.filing.submissions.{
-  EditDetailsSummary,
-  PaginatedResponse,
-  PaginationLinks
-}
-import hmda.model.edits.{EditDetailsRow, FieldDetails}
+import hmda.api.http.model.filing.submissions.{ EditDetailsSummary, PaginatedResponse, PaginationLinks }
+import hmda.model.edits.{ EditDetailsRow, FieldDetails }
 import io.circe.Decoder.Result
-import io.circe.{Decoder, Encoder, HCursor, Json}
+import io.circe.{ Decoder, Encoder, HCursor, Json }
 import io.circe.syntax._
 import io.circe.generic.auto._
 
@@ -28,12 +24,12 @@ object EditDetailsSummaryCodec {
     new Decoder[EditDetailsSummary] {
       override def apply(c: HCursor): Result[EditDetailsSummary] =
         for {
-          edit <- c.downField("edit").as[String]
-          rows <- c.downField("rows").as[Seq[EditDetailsRow]]
+          edit  <- c.downField("edit").as[String]
+          rows  <- c.downField("rows").as[Seq[EditDetailsRow]]
           total <- c.downField("total").as[Int]
           links <- c.downField("_links").as[PaginationLinks]
         } yield {
-          val path = PaginatedResponse.staticPath(links.href)
+          val path        = PaginatedResponse.staticPath(links.href)
           val currentPage = PaginatedResponse.currentPage(links.self)
           EditDetailsSummary(
             edit,
@@ -65,7 +61,7 @@ object EditDetailsSummaryCodec {
     new Decoder[EditDetailsRow] {
       override def apply(c: HCursor): Result[EditDetailsRow] =
         for {
-          id <- c.downField("id").as[String]
+          id     <- c.downField("id").as[String]
           fields <- c.downField("fields").as[Seq[FieldDetails]]
         } yield EditDetailsRow(id, fields)
     }
@@ -74,7 +70,7 @@ object EditDetailsSummaryCodec {
     new Decoder[FieldDetails] {
       override def apply(c: HCursor): Result[FieldDetails] =
         for {
-          name <- c.downField("name").as[String]
+          name  <- c.downField("name").as[String]
           value <- c.downField("value").as[String]
         } yield FieldDetails(name, value)
     }

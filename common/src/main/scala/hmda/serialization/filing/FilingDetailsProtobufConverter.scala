@@ -8,23 +8,18 @@ import hmda.serialization.submission.SubmissionProtobufConverter._
 
 object FilingDetailsProtobufConverter {
 
-  def filingDetailsToProtobuf(
-      filingDetails: FilingDetails): FilingDetailsMessage = {
+  def filingDetailsToProtobuf(filingDetails: FilingDetails): FilingDetailsMessage =
     FilingDetailsMessage(
       if (filingDetails.filing.isEmpty) None
       else Some(filingToProtobuf(filingDetails.filing)),
       filingDetails.submissions.map(s => submissionToProtobuf(s))
     )
-  }
 
-  def filingDetailsFromProtobuf(
-      filingDetailsMessage: FilingDetailsMessage): FilingDetails = {
+  def filingDetailsFromProtobuf(filingDetailsMessage: FilingDetailsMessage): FilingDetails =
     FilingDetails(
-      filing = filingFromProtobuf(
-        filingDetailsMessage.filing.getOrElse(FilingMessage())),
+      filing = filingFromProtobuf(filingDetailsMessage.filing.getOrElse(FilingMessage())),
       submissions = filingDetailsMessage.submissions
         .map(s => submissionFromProtobuf(s))
         .toList
     )
-  }
 }

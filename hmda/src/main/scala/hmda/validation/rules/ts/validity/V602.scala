@@ -9,7 +9,6 @@ import hmda.validation.dsl.PredicateSyntax._
 object V602 extends EditCheck[TransmittalSheet] {
   override def name: String = "V602"
 
-  override def apply(ts: TransmittalSheet): ValidationResult = {
+  override def apply(ts: TransmittalSheet): ValidationResult =
     ts.quarter is equalTo(4)
-  }
 }

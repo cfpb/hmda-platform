@@ -23,9 +23,7 @@ import hmda.validation.engine._
 
 import scala.concurrent.ExecutionContext
 
-trait LarValidationHttpApi
-    extends HmdaTimeDirectives
-    with FilingValidationHttpApi {
+trait LarValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpApi {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -71,10 +69,8 @@ trait LarValidationHttpApi
       }
     }
 
-  private def validate(lar: LoanApplicationRegister,
-                       checkType: String,
-                       year: Int): Route = {
-    val ctx = ValidationContext(filingYear = Some(year))
+  private def validate(lar: LoanApplicationRegister, checkType: String, year: Int): Route = {
+    val ctx              = ValidationContext(filingYear = Some(year))
     val validationEngine = selectLarEngine(year)
     import validationEngine._
     val validation: HmdaValidation[LoanApplicationRegister] = checkType match {
@@ -94,7 +90,7 @@ trait LarValidationHttpApi
     }
   }
 
-  def larRoutes: Route = {
+  def larRoutes: Route =
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
@@ -104,6 +100,5 @@ trait LarValidationHttpApi
         }
       }
     }
-  }
 
 }

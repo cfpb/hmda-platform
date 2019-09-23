@@ -1,6 +1,6 @@
 package hmda.persistence
 
-import akka.actor.typed.{Behavior, PostStop, PreRestart}
+import akka.actor.typed.{ Behavior, PostStop, PreRestart }
 import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import com.typesafe.config.ConfigFactory

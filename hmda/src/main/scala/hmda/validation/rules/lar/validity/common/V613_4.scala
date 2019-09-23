@@ -12,15 +12,12 @@ object V613_4 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V613"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.action.preapproval is equalTo(PreapprovalRequested)) {
       (lar.action.actionTakenType is equalTo(LoanOriginated)) or
-        (lar.action.actionTakenType is equalTo(
-          ApplicationApprovedButNotAccepted)) or
+        (lar.action.actionTakenType is equalTo(ApplicationApprovedButNotAccepted)) or
         (lar.action.actionTakenType is equalTo(PreapprovalRequestDenied)) or
-        (lar.action.actionTakenType is equalTo(
-          PreapprovalRequestApprovedButNotAccepted))
+        (lar.action.actionTakenType is equalTo(PreapprovalRequestApprovedButNotAccepted))
     }
-  }
 
 }

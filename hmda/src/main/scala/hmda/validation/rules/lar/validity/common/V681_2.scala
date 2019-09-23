@@ -12,12 +12,8 @@ object V681_2 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V681"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    when(
-      lar.action.actionTakenType is oneOf(ApplicationWithdrawnByApplicant,
-                                          FileClosedForIncompleteness,
-                                          PurchasedLoan)) {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
+    when(lar.action.actionTakenType is oneOf(ApplicationWithdrawnByApplicant, FileClosedForIncompleteness, PurchasedLoan)) {
       lar.loan.combinedLoanToValueRatio is oneOf("NA", "Exempt")
     }
-  }
 }

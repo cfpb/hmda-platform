@@ -9,11 +9,10 @@ import hmda.validation.dsl.PredicateSyntax._
 object V601 extends EditCheck[TransmittalSheet] {
   override def name: String = "V601"
 
-  override def apply(ts: TransmittalSheet): ValidationResult = {
+  override def apply(ts: TransmittalSheet): ValidationResult =
     (ts.institutionName not empty) and
       (ts.contact.name not empty) and
       (ts.contact.email not empty) and
       (ts.contact.address.street not empty) and
       (ts.contact.address.city not empty)
-  }
 }

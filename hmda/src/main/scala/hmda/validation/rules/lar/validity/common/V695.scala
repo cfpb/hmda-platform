@@ -9,7 +9,6 @@ import hmda.validation.rules.EditCheck
 object V695 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V695"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     lar.larIdentifier.NMLSRIdentifier not empty
-  }
 }

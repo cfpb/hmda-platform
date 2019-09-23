@@ -12,13 +12,7 @@ object V612_1 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V612"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    lar.loan.loanPurpose is oneOf(HomePurchase,
-                                  HomeImprovement,
-                                  Refinancing,
-                                  CashOutRefinancing,
-                                  OtherPurpose,
-                                  LoanPurposeNotApplicable)
-  }
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
+    lar.loan.loanPurpose is oneOf(HomePurchase, HomeImprovement, Refinancing, CashOutRefinancing, OtherPurpose, LoanPurposeNotApplicable)
 
 }

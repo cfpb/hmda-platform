@@ -12,9 +12,8 @@ object V674_2 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V674"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.reverseMortgage is equalTo(ReverseMortgage)) {
       lar.loanDisclosure.originationCharges is oneOf("NA", "Exempt")
     }
-  }
 }

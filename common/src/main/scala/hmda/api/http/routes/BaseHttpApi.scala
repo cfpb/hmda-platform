@@ -23,8 +23,8 @@ trait BaseHttpApi extends HmdaTimeDirectives {
     pathSingleSlash {
       timedGet { _ =>
         complete {
-          val now = Instant.now.toString
-          val host = InetAddress.getLocalHost.getHostName
+          val now    = Instant.now.toString
+          val host   = InetAddress.getLocalHost.getHostName
           val status = HmdaServiceStatus("OK", name, now, host)
           log.debug(status.toString)
           ToResponseMarshallable(status)

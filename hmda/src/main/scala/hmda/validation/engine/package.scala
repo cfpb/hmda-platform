@@ -1,7 +1,7 @@
 package hmda.validation
 
 import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
+import hmda.model.filing.ts.{ TransmittalLar, TransmittalSheet }
 
 package object engine {
   def selectTsEngine(year: Int): ValidationEngine[TransmittalSheet] =

@@ -12,73 +12,59 @@ import hmda.serialization.institution.InstitutionProtobufConverter._
 
 object InstitutionCommandsProtobufConverter {
 
-  def createInstitutionToProtobuf(
-      cmd: CreateInstitution,
-      resolver: ActorRefResolver): CreateInstitutionMessage = {
+  def createInstitutionToProtobuf(cmd: CreateInstitution, resolver: ActorRefResolver): CreateInstitutionMessage =
     CreateInstitutionMessage(
       institution = Some(institutionToProtobuf(cmd.i)),
       replyTo = resolver.toSerializationFormat(cmd.replyTo)
     )
-  }
 
-  def createInstitutionFromProtobuf(
-      bytes: Array[Byte],
-      resolver: ActorRefResolver): CreateInstitution = {
-    val msg = CreateInstitutionMessage.parseFrom(bytes)
-    val institution = institutionFromProtobuf(
-      msg.institution.getOrElse(InstitutionMessage()))
-    val actorRef = resolver.resolveActorRef(msg.replyTo)
+  def createInstitutionFromProtobuf(bytes: Array[Byte], resolver: ActorRefResolver): CreateInstitution = {
+    val msg         = CreateInstitutionMessage.parseFrom(bytes)
+    val institution = institutionFromProtobuf(msg.institution.getOrElse(InstitutionMessage()))
+    val actorRef    = resolver.resolveActorRef(msg.replyTo)
     CreateInstitution(institution, actorRef)
   }
 
   def modifyInstitutionToProtobuf(
-      cmd: ModifyInstitution,
-      resolver: ActorRefResolver
-  ): ModifyInstitutionMessage = {
+    cmd: ModifyInstitution,
+    resolver: ActorRefResolver
+  ): ModifyInstitutionMessage =
     ModifyInstitutionMessage(
       institution = Some(institutionToProtobuf(cmd.i)),
       replyTo = resolver.toSerializationFormat(cmd.replyTo)
     )
-  }
 
   def modifyInstitutionFromProtobuf(
-      bytes: Array[Byte],
-      resolver: ActorRefResolver
+    bytes: Array[Byte],
+    resolver: ActorRefResolver
   ): ModifyInstitution = {
-    val msg = ModifyInstitutionMessage.parseFrom(bytes)
-    val institution = institutionFromProtobuf(
-      msg.institution.getOrElse(InstitutionMessage()))
-    val actorRef = resolver.resolveActorRef[InstitutionEvent](msg.replyTo)
+    val msg         = ModifyInstitutionMessage.parseFrom(bytes)
+    val institution = institutionFromProtobuf(msg.institution.getOrElse(InstitutionMessage()))
+    val actorRef    = resolver.resolveActorRef[InstitutionEvent](msg.replyTo)
     ModifyInstitution(institution, actorRef)
   }
 
   def getInstitutionToProtobuf(
-      cmd: GetInstitution,
-      resolver: ActorRefResolver
-  ): GetInstitutionMessage = {
+    cmd: GetInstitution,
+    resolver: ActorRefResolver
+  ): GetInstitutionMessage =
     GetInstitutionMessage(
       resolver.toSerializationFormat(cmd.replyTo)
     )
-  }
 
   def getInstitutionFromProtobuf(
-      bytes: Array[Byte],
-      resolver: ActorRefResolver
+    bytes: Array[Byte],
+    resolver: ActorRefResolver
   ): GetInstitution = {
-    val msg = GetInstitutionMessage.parseFrom(bytes)
+    val msg      = GetInstitutionMessage.parseFrom(bytes)
     val actorRef = resolver.resolveActorRef(msg.replyTo)
     GetInstitution(actorRef)
   }
 
-  def getInstitutionDetailsToProtobuf(
-      cmd: GetInstitutionDetails,
-      resolver: ActorRefResolver): GetInstitutionDetailsMessage = {
+  def getInstitutionDetailsToProtobuf(cmd: GetInstitutionDetails, resolver: ActorRefResolver): GetInstitutionDetailsMessage =
     GetInstitutionDetailsMessage(resolver.toSerializationFormat(cmd.replyTo))
-  }
 
-  def getInstitutionDetailsFromProtobuf(
-      bytes: Array[Byte],
-      resolver: ActorRefResolver): GetInstitutionDetails = {
+  def getInstitutionDetailsFromProtobuf(bytes: Array[Byte], resolver: ActorRefResolver): GetInstitutionDetails = {
     val msg = GetInstitutionDetailsMessage.parseFrom(bytes)
     val actorRef =
       resolver.resolveActorRef[Option[InstitutionDetail]](msg.replyTo)
@@ -86,27 +72,25 @@ object InstitutionCommandsProtobufConverter {
   }
 
   def deleteInstitutionToProtobuf(
-      cmd: DeleteInstitution,
-      resolver: ActorRefResolver
-  ): DeleteInstitutionMessage = {
+    cmd: DeleteInstitution,
+    resolver: ActorRefResolver
+  ): DeleteInstitutionMessage =
     DeleteInstitutionMessage(
       cmd.LEI,
       cmd.activityYear,
       resolver.toSerializationFormat(cmd.replyTo)
     )
-  }
 
   def deleteInstitutionFromProtobuf(
-      bytes: Array[Byte],
-      resolver: ActorRefResolver
+    bytes: Array[Byte],
+    resolver: ActorRefResolver
   ): DeleteInstitution = {
-    val msg = DeleteInstitutionMessage.parseFrom(bytes)
+    val msg      = DeleteInstitutionMessage.parseFrom(bytes)
     val actorRef = resolver.resolveActorRef(msg.replyTo)
     DeleteInstitution(msg.lei, msg.activityYear, actorRef)
   }
 
-  def addFilingFromProtobuf(bytes: Array[Byte],
-                            refResolver: ActorRefResolver): AddFiling = {
+  def addFilingFromProtobuf(bytes: Array[Byte], refResolver: ActorRefResolver): AddFiling = {
     val msg = AddFilingMessage.parseFrom(bytes)
     AddFiling(
       filingFromProtobuf(msg.filing.getOrElse(FilingMessage())),
@@ -115,8 +99,7 @@ object InstitutionCommandsProtobufConverter {
     )
   }
 
-  def addFilingToProtobuf(cmd: AddFiling,
-                          refResolver: ActorRefResolver): AddFilingMessage = {
+  def addFilingToProtobuf(cmd: AddFiling, refResolver: ActorRefResolver): AddFilingMessage = {
     val filing = cmd.filing
     AddFilingMessage(
       if (filing.isEmpty) None

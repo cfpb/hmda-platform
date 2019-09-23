@@ -10,12 +10,13 @@ import hmda.validation.rules.EditCheck
 object V710 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V710"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(
       lar.applicant.creditScore is equalTo(1111) or
         (lar.applicant.creditScoreType is equalTo(CreditScoreExempt)) or
         (lar.coApplicant.creditScore is equalTo(1111)) or
-        (lar.coApplicant.creditScoreType is equalTo(CreditScoreExempt))) {
+        (lar.coApplicant.creditScoreType is equalTo(CreditScoreExempt))
+    ) {
 
       lar.applicant.creditScore is equalTo(1111) and
         (lar.applicant.creditScoreType is equalTo(CreditScoreExempt)) and
@@ -24,5 +25,4 @@ object V710 extends EditCheck[LoanApplicationRegister] {
         (lar.applicant.otherCreditScoreModel is empty) and
         (lar.coApplicant.otherCreditScoreModel is empty)
     }
-  }
 }

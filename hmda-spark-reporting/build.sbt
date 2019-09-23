@@ -6,7 +6,7 @@ version := "0.1"
 
 dockerfile in docker := {
   // The assembly task generates a fat JAR file
-  val artifact: File = assembly.value
+  val artifact: File     = assembly.value
   val artifactTargetPath = s"/opt/spark/cfpb/hmda/jars/${name.value}.jar"
 
   new Dockerfile {

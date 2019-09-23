@@ -15,9 +15,7 @@ object Q628 extends EditCheck[LoanApplicationRegister] {
     val config = ConfigFactory.load()
     val amount = config.getInt("edits.Q628.amount")
 
-    when(
-      lar.loan.loanPurpose is equalTo(HomePurchase) and (lar.property.totalUnits is lessThanOrEqual(
-        4))) {
+    when(lar.loan.loanPurpose is equalTo(HomePurchase) and (lar.property.totalUnits is lessThanOrEqual(4))) {
       lar.loan.amount is greaterThan(amount)
     }
   }

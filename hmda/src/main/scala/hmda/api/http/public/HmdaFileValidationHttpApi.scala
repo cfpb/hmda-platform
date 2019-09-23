@@ -4,14 +4,14 @@ import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, StatusCodes}
+import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, StatusCodes }
 import akka.http.scaladsl.server.Route
-import akka.stream.{ActorMaterializer, FlowShape}
-import akka.util.{ByteString, Timeout}
+import akka.stream.{ ActorMaterializer, FlowShape }
+import akka.util.{ ByteString, Timeout }
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.headers.RawHeader
-import akka.stream.scaladsl.{Broadcast, Concat, Flow, GraphDSL, Sink, Source}
-import hmda.api.http.model.public.{Validated, ValidatedResponse}
+import akka.stream.scaladsl.{ Broadcast, Concat, Flow, GraphDSL, Sink, Source }
+import hmda.api.http.model.public.{ Validated, ValidatedResponse }
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -19,7 +19,7 @@ import hmda.api.http.directives.HmdaTimeDirectives
 import io.circe.generic.auto._
 
 import scala.concurrent.ExecutionContext
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 import hmda.util.streams.FlowUtils._
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
@@ -42,9 +42,7 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
             case Success(parsed) =>
               complete(ToResponseMarshallable(ValidatedResponse(parsed)))
             case Failure(error) =>
-              complete(
-                ToResponseMarshallable(
-                  StatusCodes.BadRequest -> error.getLocalizedMessage))
+              complete(ToResponseMarshallable(StatusCodes.BadRequest -> error.getLocalizedMessage))
           }
         case _ =>
           complete(ToResponseMarshallable(StatusCodes.BadRequest))
@@ -59,8 +57,7 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
             fileUpload("file") {
               case (_, byteSource) =>
                 val headerSource =
-                  Source.fromIterator(() =>
-                    List("lineNumber|errors\n").toIterator)
+                  Source.fromIterator(() => List("lineNumber|errors\n").toIterator)
                 val errors = byteSource
                   .via(processHmdaFile)
                   .map(v => s"${v.lineNumber}|${v.errors}\n")
@@ -74,13 +71,9 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
 
                 onComplete(csvF) {
                   case Success(csv) =>
-                    complete(
-                      ToResponseMarshallable(
-                        HttpEntity(ContentTypes.`text/csv(UTF-8)`,
-                                   csv.mkString("\n"))))
+                    complete(ToResponseMarshallable(HttpEntity(ContentTypes.`text/csv(UTF-8)`, csv.mkString("\n"))))
                   case Failure(error) =>
-                    complete(ToResponseMarshallable(
-                      StatusCodes.BadRequest -> error.getLocalizedMessage))
+                    complete(ToResponseMarshallable(StatusCodes.BadRequest -> error.getLocalizedMessage))
                 }
 
               case _ =>
@@ -93,7 +86,7 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
           }
       }
 
-  def hmdaFileRoutes: Route = {
+  def hmdaFileRoutes: Route =
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
@@ -103,13 +96,12 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
         }
       }
     }
-  }
 
-  private def processHmdaFile: Flow[ByteString, Validated, NotUsed] = {
+  private def processHmdaFile: Flow[ByteString, Validated, NotUsed] =
     Flow.fromGraph(GraphDSL.create() { implicit b =>
       import GraphDSL.Implicits._
 
-      val bcast = b.add(Broadcast[ByteString](2))
+      val bcast  = b.add(Broadcast[ByteString](2))
       val concat = b.add(Concat[Validated](2))
 
       bcast ~> processTsSource ~> concat.in(0)
@@ -117,9 +109,8 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
 
       FlowShape(bcast.in, concat.out)
     })
-  }
 
-  private def processTsSource: Flow[ByteString, Validated, NotUsed] = {
+  private def processTsSource: Flow[ByteString, Validated, NotUsed] =
     Flow[ByteString]
       .via(framing("\n"))
       .map(_.utf8String)
@@ -136,9 +127,8 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
           Validated(i, errors.map(e => e.errorMessage).mkString(","))
       }
       .filter(x => x.errors != "OK")
-  }
 
-  private def processLarSource: Flow[ByteString, Validated, NotUsed] = {
+  private def processLarSource: Flow[ByteString, Validated, NotUsed] =
     Flow[ByteString]
       .via(framing("\n"))
       .map(_.utf8String)
@@ -155,6 +145,5 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
           Validated(i, errors.map(e => e.errorMessage).mkString(","))
       }
       .filter(x => x.errors != "OK")
-  }
 
 }

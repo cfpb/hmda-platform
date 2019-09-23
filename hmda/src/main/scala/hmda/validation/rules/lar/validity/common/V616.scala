@@ -10,9 +10,6 @@ import hmda.validation.rules.EditCheck
 object V616 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V616"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    lar.loan.occupancy is oneOf(PrincipalResidence,
-                                SecondResidence,
-                                InvestmentProperty)
-  }
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
+    lar.loan.occupancy is oneOf(PrincipalResidence, SecondResidence, InvestmentProperty)
 }

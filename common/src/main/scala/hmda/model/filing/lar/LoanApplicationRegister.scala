@@ -1,39 +1,34 @@
 package hmda.model.filing.lar
 
 import hmda.model.filing.lar.enums._
-import hmda.model.filing.{HmdaFileRow, PipeDelimited}
+import hmda.model.filing.{ HmdaFileRow, PipeDelimited }
 
 case class LoanApplicationRegister(
-    larIdentifier: LarIdentifier = LarIdentifier(),
-    loan: Loan = Loan(),
-    action: LarAction = LarAction(),
-    geography: Geography = Geography(),
-    applicant: Applicant = Applicant(),
-    coApplicant: Applicant = Applicant(),
-    income: String = "",
-    purchaserType: PurchaserEnum = InvalidPurchaserCode,
-    hoepaStatus: HOEPAStatusEnum = InvalidHoepaStatusCode,
-    lienStatus: LienStatusEnum = InvalidLienStatusCode,
-    denial: Denial = Denial(),
-    loanDisclosure: LoanDisclosure = LoanDisclosure(),
-    nonAmortizingFeatures: NonAmortizingFeatures = NonAmortizingFeatures(),
-    property: Property = Property(),
-    applicationSubmission: ApplicationSubmissionEnum =
-      InvalidApplicationSubmissionCode,
-    payableToInstitution: PayableToInstitutionEnum =
-      InvalidPayableToInstitutionCode,
-    AUS: AutomatedUnderwritingSystem = AutomatedUnderwritingSystem(),
-    ausResult: AutomatedUnderwritingSystemResult =
-      AutomatedUnderwritingSystemResult(),
-    reverseMortgage: MortgageTypeEnum = InvalidMortgageTypeCode,
-    lineOfCredit: LineOfCreditEnum = InvalidLineOfCreditCode,
-    businessOrCommercialPurpose: BusinessOrCommercialBusinessEnum =
-      InvalidBusinessOrCommercialBusinessCode
+  larIdentifier: LarIdentifier = LarIdentifier(),
+  loan: Loan = Loan(),
+  action: LarAction = LarAction(),
+  geography: Geography = Geography(),
+  applicant: Applicant = Applicant(),
+  coApplicant: Applicant = Applicant(),
+  income: String = "",
+  purchaserType: PurchaserEnum = InvalidPurchaserCode,
+  hoepaStatus: HOEPAStatusEnum = InvalidHoepaStatusCode,
+  lienStatus: LienStatusEnum = InvalidLienStatusCode,
+  denial: Denial = Denial(),
+  loanDisclosure: LoanDisclosure = LoanDisclosure(),
+  nonAmortizingFeatures: NonAmortizingFeatures = NonAmortizingFeatures(),
+  property: Property = Property(),
+  applicationSubmission: ApplicationSubmissionEnum = InvalidApplicationSubmissionCode,
+  payableToInstitution: PayableToInstitutionEnum = InvalidPayableToInstitutionCode,
+  AUS: AutomatedUnderwritingSystem = AutomatedUnderwritingSystem(),
+  ausResult: AutomatedUnderwritingSystemResult = AutomatedUnderwritingSystemResult(),
+  reverseMortgage: MortgageTypeEnum = InvalidMortgageTypeCode,
+  lineOfCredit: LineOfCreditEnum = InvalidLineOfCreditCode,
+  businessOrCommercialPurpose: BusinessOrCommercialBusinessEnum = InvalidBusinessOrCommercialBusinessCode
 ) extends PipeDelimited
     with HmdaFileRow {
 
-  override def toCSV: String = {
-
+  override def toCSV: String =
     s"${larIdentifier.id}|${larIdentifier.LEI}|${loan.ULI}|${loan.applicationDate}|${loan.loanType.code}|${loan.loanPurpose.code}|${action.preapproval.code}|" +
       s"${loan.constructionMethod.code}|${loan.occupancy.code}|${loan.amount}|${action.actionTakenType.code}|${action.actionTakenDate}|" +
       s"${geography.toCSV}|" +
@@ -56,11 +51,8 @@ case class LoanApplicationRegister(
       s"${property.propertyValue}|${property.manufacturedHomeSecuredProperty.code}|${property.manufacturedHomeLandPropertyInterest.code}|${property.totalUnits}|${property.multiFamilyAffordableUnits}|${applicationSubmission.code}|" +
       s"${payableToInstitution.code}|${larIdentifier.NMLSRIdentifier}|${AUS.toCSV}|${ausResult.toCSV}|${reverseMortgage.code}|${lineOfCredit.code}|${businessOrCommercialPurpose.code}"
 
-  }
-
-  override def valueOf(field: String): String = {
+  override def valueOf(field: String): String =
     LarFieldMapping
       .mapping(this)
       .getOrElse(field, s"error: field name mismatch for $field")
-  }
 }

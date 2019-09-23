@@ -12,9 +12,6 @@ object V658_1 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V658"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    lar.hoepaStatus is oneOf(HighCostMortgage,
-                             NotHighCostMortgage,
-                             HOEPStatusANotApplicable)
-  }
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
+    lar.hoepaStatus is oneOf(HighCostMortgage, NotHighCostMortgage, HOEPStatusANotApplicable)
 }

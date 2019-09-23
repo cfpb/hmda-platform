@@ -17,34 +17,30 @@ trait PaginatedResponse extends WithPagination {
     pageQuery(lastPage)
   )
 
-  def count: Int = {
+  def count: Int =
     if (validPage) {
       if (currentPage == lastPage) lastPageCount
       else pageSize
     } else 0
-  }
 
   def fromIndex: Int = calculateStartIndex(total, currentPage)
-  def toIndex: Int = calculateEndIndex(total, currentPage)
+  def toIndex: Int   = calculateEndIndex(total, currentPage)
 
   private def validPage: Boolean = currentPage >= 1 && currentPage <= lastPage
 
   private def configurablePath: String = s"$path{rel}"
 
-  private def lastPage: Int = {
+  private def lastPage: Int =
     if (total % pageSize == 0) fullPages
     else fullPages + 1
-  }
 
-  private def prevPage: Int = {
+  private def prevPage: Int =
     if (currentPage < 2) 1
     else currentPage - 1
-  }
 
-  private def nextPage: Int = {
+  private def nextPage: Int =
     if (currentPage >= lastPage - 1) lastPage
     else currentPage + 1
-  }
 
   private def fullPages: Int = total / pageSize
 
@@ -59,12 +55,12 @@ trait PaginatedResponse extends WithPagination {
 }
 
 case class PaginationLinks(
-    href: String,
-    self: String,
-    first: String,
-    prev: String,
-    next: String,
-    last: String
+  href: String,
+  self: String,
+  first: String,
+  prev: String,
+  next: String,
+  last: String
 )
 
 object PaginatedResponse {

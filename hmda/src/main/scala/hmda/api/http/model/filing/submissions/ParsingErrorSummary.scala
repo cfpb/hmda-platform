@@ -1,7 +1,7 @@
 package hmda.api.http.model.filing.submissions
 
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowParsedError
-import hmda.model.filing.submission.{ParsedWithErrors, SubmissionStatus}
+import hmda.model.filing.submission.{ ParsedWithErrors, SubmissionStatus }
 
 case class ParsingErrorSummary(transmittalSheetErrors: Seq[String] = Nil,
                                larErrors: Seq[HmdaRowParsedError] = Nil,

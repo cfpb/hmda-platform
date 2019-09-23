@@ -5,7 +5,7 @@ sealed trait EthnicityEnum extends LarEnum
 object EthnicityEnum extends LarCodeEnum[EthnicityEnum] {
   override val values = List(0, 1, 11, 12, 13, 14, 2, 3, 4, 5)
 
-  override def valueOf(code: Int): EthnicityEnum = {
+  override def valueOf(code: Int): EthnicityEnum =
     code match {
       case 0  => EmptyEthnicityValue
       case 1  => HispanicOrLatino
@@ -19,41 +19,40 @@ object EthnicityEnum extends LarCodeEnum[EthnicityEnum] {
       case 5  => EthnicityNoCoApplicant
       case _  => InvalidEthnicityCode
     }
-  }
 }
 
 case object EmptyEthnicityValue extends EthnicityEnum {
-  override def code: Int = 0
+  override def code: Int           = 0
   override def description: String = "Empty Value"
 }
 
 case object HispanicOrLatino extends EthnicityEnum {
-  override val code: Int = 1
+  override val code: Int           = 1
   override val description: String = "Hispanic or Latino"
 }
 
 case object Mexican extends EthnicityEnum {
-  override val code: Int = 11
+  override val code: Int           = 11
   override val description: String = "Mexican"
 }
 
 case object PuertoRican extends EthnicityEnum {
-  override val code: Int = 12
+  override val code: Int           = 12
   override val description: String = "Puerto Rican"
 }
 
 case object Cuban extends EthnicityEnum {
-  override val code: Int = 13
+  override val code: Int           = 13
   override val description: String = "Cuban"
 }
 
 case object OtherHispanicOrLatino extends EthnicityEnum {
-  override val code: Int = 14
+  override val code: Int           = 14
   override val description: String = "Other Hispanic or Latino"
 }
 
 case object NotHispanicOrLatino extends EthnicityEnum {
-  override val code: Int = 2
+  override val code: Int           = 2
   override val description: String = "Not Hispanic or Latino"
 }
 
@@ -64,16 +63,16 @@ case object InformationNotProvided extends EthnicityEnum {
 }
 
 case object EthnicityNotApplicable extends EthnicityEnum {
-  override val code: Int = 4
+  override val code: Int           = 4
   override val description: String = "Not Applicable"
 }
 
 case object EthnicityNoCoApplicant extends EthnicityEnum {
-  override val code: Int = 5
+  override val code: Int           = 5
   override val description: String = "No co-applicant"
 }
 
 case object InvalidEthnicityCode extends EthnicityEnum {
-  override def code: Int = -1
+  override def code: Int           = -1
   override def description: String = "Invalid Code"
 }

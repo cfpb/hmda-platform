@@ -18,8 +18,7 @@ class InstitutionDetailSerializer extends SerializerWithStringManifest {
     case evt: InstitutionDetail =>
       institutionDetailToProtobuf(evt).toByteArray
     case _ =>
-      throw new IllegalArgumentException(
-        s"Cannot serialize object of type [${o.getClass.getName}]")
+      throw new IllegalArgumentException(s"Cannot serialize object of type [${o.getClass.getName}]")
   }
 
   override def fromBinary(bytes: Array[Byte], manifest: String): AnyRef =
@@ -27,8 +26,7 @@ class InstitutionDetailSerializer extends SerializerWithStringManifest {
       case InstitutionDetailManifest =>
         institutionDetailFromProtobuf(InstitutionDetailMessage.parseFrom(bytes))
       case _ =>
-        throw new NotSerializableException(
-          s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
+        throw new NotSerializableException(s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
     }
 
 }

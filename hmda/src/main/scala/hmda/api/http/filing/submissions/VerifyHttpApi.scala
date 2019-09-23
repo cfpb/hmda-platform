@@ -11,18 +11,12 @@ import hmda.api.http.directives.HmdaTimeDirectives
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Route
-import hmda.api.http.model.filing.submissions.{
-  EditsVerification,
-  EditsVerificationResponse
-}
+import hmda.api.http.model.filing.submissions.{ EditsVerification, EditsVerificationResponse }
 import hmda.messages.submission.SubmissionCommands.GetSubmission
-import hmda.model.filing.submission.{Submission, SubmissionId}
-import hmda.persistence.submission.{HmdaValidationError, SubmissionPersistence}
+import hmda.model.filing.submission.{ Submission, SubmissionId }
+import hmda.persistence.submission.{ HmdaValidationError, SubmissionPersistence }
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.messages.submission.SubmissionProcessingCommands.{
-  VerifyMacro,
-  VerifyQuality
-}
+import hmda.messages.submission.SubmissionProcessingCommands.{ VerifyMacro, VerifyQuality }
 import hmda.util.http.FilingResponseUtils._
 import hmda.messages.submission.SubmissionProcessingEvents.{
   MacroVerified,
@@ -35,9 +29,9 @@ import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import hmda.auth.OAuth2Authorization
 import io.circe.generic.auto._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.matching.Regex
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
 trait VerifyHttpApi extends HmdaTimeDirectives {
 
@@ -51,8 +45,7 @@ trait VerifyHttpApi extends HmdaTimeDirectives {
   //institutions/<lei>/filings/<period>/submissions/<submissionId>/edits/<quality|macro>
   private val editTypeRegex = new Regex("quality|macro")
   def verifyPath(oAuth2Authorization: OAuth2Authorization): Route =
-    path(
-      "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "edits" / editTypeRegex) {
+    path("institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "edits" / editTypeRegex) {
       (lei, period, seqNr, editType) =>
         oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
           timedPost { uri =>
@@ -61,36 +54,24 @@ trait VerifyHttpApi extends HmdaTimeDirectives {
                 val submissionId = SubmissionId(lei, period, seqNr)
 
                 val submissionPersistence =
-                  sharding.entityRefFor(
-                    SubmissionPersistence.typeKey,
-                    s"${SubmissionPersistence.name}-${submissionId.toString}")
+                  sharding.entityRefFor(SubmissionPersistence.typeKey, s"${SubmissionPersistence.name}-${submissionId.toString}")
 
-                val fSubmission
-                  : Future[Option[Submission]] = submissionPersistence ? (ref =>
-                  GetSubmission(ref))
+                val fSubmission: Future[Option[Submission]] = submissionPersistence ? (ref => GetSubmission(ref))
 
-                val validationPersistence = sharding.entityRefFor(
-                  HmdaValidationError.typeKey,
-                  s"${HmdaValidationError.name}-$submissionId")
+                val validationPersistence = sharding.entityRefFor(HmdaValidationError.typeKey, s"${HmdaValidationError.name}-$submissionId")
 
-                val fVerified
-                  : Future[SubmissionProcessingEvent] = validationPersistence ? {
-                  ref =>
-                    editType match {
-                      case "quality" =>
-                        VerifyQuality(submissionId,
-                                      editsVerification.verified,
-                                      ref)
-                      case "macro" =>
-                        VerifyMacro(submissionId,
-                                    editsVerification.verified,
-                                    ref)
-                    }
+                val fVerified: Future[SubmissionProcessingEvent] = validationPersistence ? { ref =>
+                  editType match {
+                    case "quality" =>
+                      VerifyQuality(submissionId, editsVerification.verified, ref)
+                    case "macro" =>
+                      VerifyMacro(submissionId, editsVerification.verified, ref)
+                  }
                 }
 
                 val fVerification = for {
                   submission <- fSubmission
-                  verified <- fVerified
+                  verified   <- fVerified
                 } yield (submission, verified)
 
                 onComplete(fVerification) {
@@ -101,10 +82,7 @@ trait VerifyHttpApi extends HmdaTimeDirectives {
                       case (Some(s), verifiedStatus) =>
                         verifiedStatus match {
                           case NotReadyToBeVerified(_) =>
-                            badRequest(
-                              submissionId,
-                              uri,
-                              s"Submission $submissionId is not ready to be verified")
+                            badRequest(submissionId, uri, s"Submission $submissionId is not ready to be verified")
 
                           case QualityVerified(_, verified, status) =>
                             val response =
@@ -117,9 +95,7 @@ trait VerifyHttpApi extends HmdaTimeDirectives {
                             complete(ToResponseMarshallable(response))
 
                           case _ =>
-                            badRequest(submissionId,
-                                       uri,
-                                       "Incorrect response event")
+                            badRequest(submissionId, uri, "Incorrect response event")
                         }
                     }
                   case Failure(e) =>
@@ -131,7 +107,7 @@ trait VerifyHttpApi extends HmdaTimeDirectives {
         }
     }
 
-  def verifyRoutes(oAuth2Authorization: OAuth2Authorization): Route = {
+  def verifyRoutes(oAuth2Authorization: OAuth2Authorization): Route =
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
@@ -139,6 +115,5 @@ trait VerifyHttpApi extends HmdaTimeDirectives {
         }
       }
     }
-  }
 
 }

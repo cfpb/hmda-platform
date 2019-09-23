@@ -8,8 +8,7 @@ import hmda.serialization.submission.SubmissionProtobufConverter._
 
 object HmdaRawDataCommandsProtobufConverter {
 
-  def addLineToProtobuf(cmd: AddLine,
-                        refResolver: ActorRefResolver): AddLineMessage = {
+  def addLineToProtobuf(cmd: AddLine, refResolver: ActorRefResolver): AddLineMessage =
     AddLineMessage(
       submissionIdToProtobuf(cmd.submissionId),
       cmd.timestamp,
@@ -19,18 +18,14 @@ object HmdaRawDataCommandsProtobufConverter {
         case Some(ref) => refResolver.toSerializationFormat(ref)
       }
     )
-  }
 
-  def addLineFromProtobuf(msg: AddLineMessage,
-                          refResolver: ActorRefResolver): AddLine = {
+  def addLineFromProtobuf(msg: AddLineMessage, refResolver: ActorRefResolver): AddLine =
     AddLine(
-      submissionIdFromProtobuf(
-        msg.submissionId.getOrElse(SubmissionIdMessage())),
+      submissionIdFromProtobuf(msg.submissionId.getOrElse(SubmissionIdMessage())),
       msg.timestamp,
       msg.data,
       if (msg.maybeReplyTo == "") None
       else Some(refResolver.resolveActorRef(msg.maybeReplyTo))
     )
-  }
 
 }

@@ -1,14 +1,11 @@
 package hmda.serialization.submission
 
 import hmda.model.filing.submission._
-import hmda.persistence.serialization.submission.{
-  SubmissionIdMessage,
-  SubmissionMessage
-}
+import hmda.persistence.serialization.submission.{ SubmissionIdMessage, SubmissionMessage }
 
 object SubmissionProtobufConverter {
 
-  def submissionToProtobuf(submission: Submission): SubmissionMessage = {
+  def submissionToProtobuf(submission: Submission): SubmissionMessage =
     SubmissionMessage(
       submissionIdToProtobuf(submission.id),
       submission.status.code,
@@ -17,23 +14,18 @@ object SubmissionProtobufConverter {
       submission.fileName,
       submission.receipt
     )
-  }
 
-  def submissionFromProtobuf(
-      submissionMessage: SubmissionMessage): Submission = {
+  def submissionFromProtobuf(submissionMessage: SubmissionMessage): Submission =
     Submission(
-      submissionIdFromProtobuf(
-        submissionMessage.submissionId.getOrElse(SubmissionIdMessage())),
+      submissionIdFromProtobuf(submissionMessage.submissionId.getOrElse(SubmissionIdMessage())),
       submissionStatusFromProtobuf(submissionMessage.status),
       submissionMessage.start,
       submissionMessage.end,
       submissionMessage.fileName,
       submissionMessage.receipt
     )
-  }
 
-  def submissionIdToProtobuf(
-      submissionId: SubmissionId): Option[SubmissionIdMessage] = {
+  def submissionIdToProtobuf(submissionId: SubmissionId): Option[SubmissionIdMessage] =
     if (submissionId.isEmpty) None
     else {
       Some(
@@ -44,18 +36,15 @@ object SubmissionProtobufConverter {
         )
       )
     }
-  }
 
-  def submissionIdFromProtobuf(
-      submissionIdMessage: SubmissionIdMessage): SubmissionId = {
+  def submissionIdFromProtobuf(submissionIdMessage: SubmissionIdMessage): SubmissionId =
     SubmissionId(
       submissionIdMessage.lei,
       submissionIdMessage.period,
       submissionIdMessage.sequenceNumber
     )
-  }
 
-  private def submissionStatusFromProtobuf(code: Int): SubmissionStatus = {
+  private def submissionStatusFromProtobuf(code: Int): SubmissionStatus =
     code match {
       case 1  => Created
       case 2  => Uploading
@@ -74,6 +63,5 @@ object SubmissionProtobufConverter {
       case 15 => Signed
       case -1 => Failed
     }
-  }
 
 }

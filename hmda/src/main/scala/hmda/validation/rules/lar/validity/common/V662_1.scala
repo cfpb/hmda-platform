@@ -24,11 +24,10 @@ object V662_1 extends EditCheck[LoanApplicationRegister] {
     CreditScoreNotApplicable
   )
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.applicant.creditScoreType is containedIn(creditList)) {
       lar.applicant.otherCreditScoreModel is empty
     } and when(lar.applicant.otherCreditScoreModel is empty) {
       lar.applicant.creditScoreType is containedIn(creditList)
     }
-  }
 }

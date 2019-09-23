@@ -10,7 +10,6 @@ import hmda.validation.rules.EditCheck
 object V604 extends EditCheck[TransmittalSheet] {
   override def name: String = "V604"
 
-  override def apply(ts: TransmittalSheet): ValidationResult = {
+  override def apply(ts: TransmittalSheet): ValidationResult =
     ts.contact.address.state is containedIn(Census.states.keys.toList)
-  }
 }

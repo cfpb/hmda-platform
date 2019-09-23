@@ -14,11 +14,9 @@ object Q625 extends EditCheck[LoanApplicationRegister] {
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
     val config = ConfigFactory.load()
     val amount = config.getInt("edits.Q625.amount")
-    val units = config.getInt("edits.Q625.units")
+    val units  = config.getInt("edits.Q625.units")
 
-    when(
-      lar.loan.loanType is equalTo(VAGuaranteed) and (lar.property.totalUnits is lessThanOrEqual(
-        units))) {
+    when(lar.loan.loanType is equalTo(VAGuaranteed) and (lar.property.totalUnits is lessThanOrEqual(units))) {
       lar.loan.amount is lessThanOrEqual(amount)
     }
   }

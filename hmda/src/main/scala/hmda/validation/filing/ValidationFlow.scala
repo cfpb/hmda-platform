@@ -2,18 +2,14 @@ package hmda.validation.filing
 
 import akka.NotUsed
 import akka.stream.FlowShape
-import akka.stream.scaladsl.{Broadcast, Concat, Flow, GraphDSL}
+import akka.stream.scaladsl.{ Broadcast, Concat, Flow, GraphDSL }
 import akka.util.ByteString
 import cats.Semigroup
 import hmda.model.filing.EditDescriptionLookup.config
-import hmda.model.filing.{EditDescriptionLookup, PipeDelimited}
+import hmda.model.filing.{ EditDescriptionLookup, PipeDelimited }
 import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
-import hmda.model.validation.{
-  LarValidationError,
-  TsValidationError,
-  ValidationError
-}
+import hmda.model.filing.ts.{ TransmittalLar, TransmittalSheet }
+import hmda.model.validation.{ LarValidationError, TsValidationError, ValidationError }
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
 import hmda.validation._
@@ -27,17 +23,15 @@ import scala.concurrent.Future
 object ValidationFlow {
 
   implicit val larSemigroup = new Semigroup[LoanApplicationRegister] {
-    override def combine(x: LoanApplicationRegister,
-                         y: LoanApplicationRegister): LoanApplicationRegister =
+    override def combine(x: LoanApplicationRegister, y: LoanApplicationRegister): LoanApplicationRegister =
       x
   }
 
-  def validateHmdaFile(checkType: String, ctx: ValidationContext)
-    : Flow[ByteString, HmdaValidated[PipeDelimited], NotUsed] = {
+  def validateHmdaFile(checkType: String, ctx: ValidationContext): Flow[ByteString, HmdaValidated[PipeDelimited], NotUsed] =
     Flow.fromGraph(GraphDSL.create() { implicit b =>
       import GraphDSL.Implicits._
 
-      val bcast = b.add(Broadcast[ByteString](2))
+      val bcast  = b.add(Broadcast[ByteString](2))
       val concat = b.add(Concat[HmdaValidated[PipeDelimited]](2))
 
       bcast.take(1) ~> validateTsFlow(checkType, ctx) ~> concat.in(0)
@@ -45,13 +39,11 @@ object ValidationFlow {
 
       FlowShape(bcast.in, concat.out)
     })
-  }
 
-  def validateTsFlow(checkType: String, validationContext: ValidationContext)
-    : Flow[ByteString, HmdaValidated[TransmittalSheet], NotUsed] = {
-    val currentYear = config.getInt("hmda.filing.current")
-    val validationEngine = selectTsEngine(
-      validationContext.filingYear.getOrElse(currentYear))
+  def validateTsFlow(checkType: String,
+                     validationContext: ValidationContext): Flow[ByteString, HmdaValidated[TransmittalSheet], NotUsed] = {
+    val currentYear      = config.getInt("hmda.filing.current")
+    val validationEngine = selectTsEngine(validationContext.filingYear.getOrElse(currentYear))
     Flow[ByteString]
       .via(framing("\n"))
       .map(_.utf8String)
@@ -63,15 +55,9 @@ object ValidationFlow {
       .map { ts =>
         val errors = checkType match {
           case "all" =>
-            validationEngine.checkAll(ts,
-                                      ts.LEI,
-                                      validationContext,
-                                      TsValidationError)
+            validationEngine.checkAll(ts, ts.LEI, validationContext, TsValidationError)
           case "syntactical" =>
-            validationEngine.checkSyntactical(ts,
-                                              ts.LEI,
-                                              validationContext,
-                                              TsValidationError)
+            validationEngine.checkSyntactical(ts, ts.LEI, validationContext, TsValidationError)
           case "validity" =>
             validationEngine.checkValidity(ts, ts.LEI, TsValidationError)
         }
@@ -88,22 +74,14 @@ object ValidationFlow {
 
   def validateTsLarEdits(tsLar: TransmittalLar,
                          checkType: String,
-                         validationContext: ValidationContext)
-    : Either[List[ValidationError], TransmittalLar] = {
-    val currentYear = config.getInt("hmda.filing.current")
-    val validationEngine = selectTsLarEngine(
-      validationContext.filingYear.getOrElse(currentYear))
+                         validationContext: ValidationContext): Either[List[ValidationError], TransmittalLar] = {
+    val currentYear      = config.getInt("hmda.filing.current")
+    val validationEngine = selectTsLarEngine(validationContext.filingYear.getOrElse(currentYear))
     val errors = checkType match {
       case "all" =>
-        validationEngine.checkAll(tsLar,
-                                  tsLar.ts.LEI,
-                                  validationContext,
-                                  TsValidationError)
+        validationEngine.checkAll(tsLar, tsLar.ts.LEI, validationContext, TsValidationError)
       case "syntactical-validity" =>
-        validationEngine.checkSyntactical(tsLar,
-                                          tsLar.ts.LEI,
-                                          validationContext,
-                                          TsValidationError)
+        validationEngine.checkSyntactical(tsLar, tsLar.ts.LEI, validationContext, TsValidationError)
       case "quality" =>
         validationEngine.checkQuality(tsLar, tsLar.ts.LEI)
     }
@@ -114,73 +92,55 @@ object ValidationFlow {
       .toEither
   }
 
-  def validateLarFlow(checkType: String, ctx: ValidationContext)
-    : Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
-    val currentYear = config.getInt("hmda.filing.current")
-    val validationEngine = selectLarEngine(
-      ctx.filingYear.getOrElse(currentYear))
-    collectLar
-      .map { lar =>
-        def errors =
-          checkType match {
-            case "all" =>
-              validationEngine.checkAll(lar,
-                                        lar.loan.ULI,
-                                        ctx,
-                                        LarValidationError)
-            case "syntactical" =>
-              validationEngine
-                .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
-            case "validity" =>
-              validationEngine.checkValidity(lar,
-                                             lar.loan.ULI,
-                                             LarValidationError)
-            case "syntactical-validity" =>
-              validationEngine
-                .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
-                .combine(
-                  validationEngine.checkValidity(lar,
-                                                 lar.loan.ULI,
-                                                 LarValidationError)
-                )
-            case "quality" => validationEngine.checkQuality(lar, lar.loan.ULI)
-          }
-        (lar, errors)
-      }
-      .map { x =>
-        x._2
-          .leftMap(xs => {
-            addLarFieldInformation(x._1, xs.toList)
-          })
-          .toEither
-      }
+  def validateLarFlow(checkType: String, ctx: ValidationContext): Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
+    val currentYear      = config.getInt("hmda.filing.current")
+    val validationEngine = selectLarEngine(ctx.filingYear.getOrElse(currentYear))
+    collectLar.map { lar =>
+      def errors =
+        checkType match {
+          case "all" =>
+            validationEngine.checkAll(lar, lar.loan.ULI, ctx, LarValidationError)
+          case "syntactical" =>
+            validationEngine
+              .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
+          case "validity" =>
+            validationEngine.checkValidity(lar, lar.loan.ULI, LarValidationError)
+          case "syntactical-validity" =>
+            validationEngine
+              .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
+              .combine(
+                validationEngine.checkValidity(lar, lar.loan.ULI, LarValidationError)
+              )
+          case "quality" => validationEngine.checkQuality(lar, lar.loan.ULI)
+        }
+      (lar, errors)
+    }.map { x =>
+      x._2
+        .leftMap(xs => {
+          addLarFieldInformation(x._1, xs.toList)
+        })
+        .toEither
+    }
   }
 
-  def addLarFieldInformation(
-      lar: LoanApplicationRegister,
-      errors: List[ValidationError]): List[ValidationError] = {
+  def addLarFieldInformation(lar: LoanApplicationRegister, errors: List[ValidationError]): List[ValidationError] =
     errors.map(error => {
       val affectedFields = EditDescriptionLookup.lookupFields(error.editName)
       val fieldMap =
         ListMap(affectedFields.map(field => (field, lar.valueOf(field))): _*)
       error.copyWithFields(fieldMap)
     })
-  }
 
-  def addTsFieldInformation(
-      ts: TransmittalSheet,
-      errors: List[ValidationError]): List[ValidationError] = {
+  def addTsFieldInformation(ts: TransmittalSheet, errors: List[ValidationError]): List[ValidationError] =
     errors.map(error => {
       val affectedFields = EditDescriptionLookup.lookupFields(error.editName)
       val fieldMap =
         ListMap(affectedFields.map(field => (field, ts.valueOf(field))): _*)
       error.copyWithFields(fieldMap)
     })
-  }
 
   def validateAsyncLarFlow[as: AS, mat: MAT, ec: EC](checkType: String,
-                                                     year: Int)
-    : Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
+                                                     year: Int): Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
     val validationEngine = selectLarEngine(year)
     collectLar
       .mapAsync(1) { lar =>
@@ -193,13 +153,12 @@ object ValidationFlow {
           }
         futValidation.map(validation => (lar, validation))
       }
-      .map {
-        x: (LoanApplicationRegister, HmdaValidation[LoanApplicationRegister]) =>
-          x._2.leftMap(xs => xs.toList).toEither
+      .map { x: (LoanApplicationRegister, HmdaValidation[LoanApplicationRegister]) =>
+        x._2.leftMap(xs => xs.toList).toEither
       }
   }
 
-  private def collectLar = {
+  private def collectLar =
     Flow[ByteString]
       .via(framing("\n"))
       .map(_.utf8String)
@@ -208,6 +167,5 @@ object ValidationFlow {
       .collect {
         case Right(lar) => lar
       }
-  }
 
 }

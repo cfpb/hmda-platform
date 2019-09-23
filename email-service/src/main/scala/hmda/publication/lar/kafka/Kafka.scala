@@ -1,13 +1,13 @@
 package hmda.publication.lar.kafka
 
-import akka.{Done, NotUsed}
+import akka.{ Done, NotUsed }
 import akka.actor.ActorSystem
 import akka.kafka.ConsumerMessage.CommittableMessage
 import akka.kafka.scaladsl._
-import akka.kafka.{CommitterSettings, ConsumerSettings, Subscriptions}
+import akka.kafka.{ CommitterSettings, ConsumerSettings, Subscriptions }
 import akka.stream.scaladsl._
 import cats.implicits._
-import hmda.publication.lar.email.{Email, EmailService}
+import hmda.publication.lar.email.{ Email, EmailService }
 import monix.eval.Task
 import monix.execution.Scheduler
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -20,8 +20,7 @@ object Kafka {
   def pullEmails(system: ActorSystem,
                  bootstrapServers: String,
                  topic: String,
-                 applicationGroupId: String)
-  : Source[CommittableMessage[String, String], Consumer.Control] = {
+                 applicationGroupId: String): Source[CommittableMessage[String, String], Consumer.Control] = {
     val settings =
       ConsumerSettings(system, new StringDeserializer, new StringDeserializer)
         .withBootstrapServers(bootstrapServers)
@@ -32,9 +31,7 @@ object Kafka {
   }
   Committer
 
-  private def retryBackoff[A](source: Task[A],
-                              maxRetries: Int,
-                              firstDelay: FiniteDuration): Task[A] =
+  private def retryBackoff[A](source: Task[A], maxRetries: Int, firstDelay: FiniteDuration): Task[A] =
     source.onErrorHandleWith {
       case ex: Exception =>
         if (maxRetries > 0)
@@ -44,30 +41,22 @@ object Kafka {
           Task.raiseError(ex)
     }
 
-  def sendEmails(emailService: EmailService,
-                 emailContent: String,
-                 parallelism: Int = 2,
-                 timesToRetry: Int = 4)(
-                  implicit s: Scheduler
-                ): Flow[CommittableMessage[String, String],
-    (Either[Throwable, Unit], CommittableMessage[String, String]),
-    NotUsed] =
+  def sendEmails(emailService: EmailService, emailContent: String, parallelism: Int = 2, timesToRetry: Int = 4)(
+    implicit s: Scheduler
+  ): Flow[CommittableMessage[String, String], (Either[Throwable, Unit], CommittableMessage[String, String]), NotUsed] =
     Flow[CommittableMessage[String, String]]
       .mapAsync(parallelism) { kafkaMessage =>
         // TODO: determine what needs to be done with the key (submission ID)
-        val subject = kafkaMessage.record.key()
+        val subject   = kafkaMessage.record.key()
         val toAddress = kafkaMessage.record.value()
-        val email = Email(toAddress, subject, emailContent)
+        val email     = Email(toAddress, subject, emailContent)
         val response =
           retryBackoff(emailService.send(email), timesToRetry, 1.second)
         response.tupleRight(kafkaMessage).runToFuture
       }
 
-  def commitMessages(commitSettings: CommitterSettings)
-  : Sink[(Either[Throwable, Unit], CommittableMessage[String, String]),
-    Future[Done]] =
-    Flow[(Either[Throwable, Unit], CommittableMessage[String, String])]
-      .map { case (_, commit) => commit.committableOffset }
+  def commitMessages(commitSettings: CommitterSettings): Sink[(Either[Throwable, Unit], CommittableMessage[String, String]), Future[Done]] =
+    Flow[(Either[Throwable, Unit], CommittableMessage[String, String])].map { case (_, commit) => commit.committableOffset }
       .via(Committer.flow(commitSettings))
       .toMat(Sink.ignore)(Keep.right)
 }

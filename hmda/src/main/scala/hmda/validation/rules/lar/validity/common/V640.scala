@@ -10,9 +10,8 @@ import hmda.validation.rules.EditCheck
 object V640 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V640"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.coApplicant.race.race1 is equalTo(RaceNotApplicable)) {
       lar.coApplicant.race.raceObserved is equalTo(RaceObservedNotApplicable)
     }
-  }
 }

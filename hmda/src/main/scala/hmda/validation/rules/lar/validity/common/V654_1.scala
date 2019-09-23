@@ -13,9 +13,7 @@ object V654_1 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V654"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    ((lar.income is numeric) and (Try(lar.income.toInt).isSuccess is equalTo(
-      true))) or
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
+    ((lar.income is numeric) and (Try(lar.income.toInt).isSuccess is equalTo(true))) or
       (lar.income is equalTo("NA"))
-  }
 }

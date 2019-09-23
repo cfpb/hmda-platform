@@ -1,6 +1,6 @@
 package hmda.api.grpc
 
-import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
+import akka.http.scaladsl.model.{ HttpRequest, HttpResponse }
 import hmda.api.HmdaServer
 
 import scala.concurrent.Future

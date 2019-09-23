@@ -9,7 +9,6 @@ import hmda.validation.rules.EditCheck
 object V603 extends EditCheck[TransmittalSheet] {
   override def name: String = "V603"
 
-  override def apply(ts: TransmittalSheet): ValidationResult = {
+  override def apply(ts: TransmittalSheet): ValidationResult =
     ts.contact.phone is validPhoneNumber
-  }
 }
