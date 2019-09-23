@@ -175,7 +175,8 @@ lazy val `hmda-platform` = (project in file("hmda"))
 lazy val `check-digit` = (project in file("check-digit"))
   .enablePlugins(JavaServerAppPackaging,
                  sbtdocker.DockerPlugin,
-                 AshScriptPlugin)
+                 AshScriptPlugin,
+                 AkkaGrpcPlugin)
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
