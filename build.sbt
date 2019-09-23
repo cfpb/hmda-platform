@@ -252,7 +252,8 @@ lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
 lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
   .enablePlugins(JavaServerAppPackaging,
                  sbtdocker.DockerPlugin,
-                 AshScriptPlugin)
+                 AshScriptPlugin,
+                 AkkaGrpcPlugin)
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
