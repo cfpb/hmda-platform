@@ -12,7 +12,7 @@ import monix.execution.Scheduler
 
 import scala.util.{ Failure, Success }
 
-object EmailReceiptApp2 {
+object EmailReceiptApp {
 
   def main(args: Array[String]): Unit = {
     implicit val system: ActorSystem    = ActorSystem("email-service")

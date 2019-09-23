@@ -22,6 +22,9 @@ class SESEmailService(emailClient: AmazonSimpleEmailService, fromAddress: String
           .withDestination(new Destination().withToAddresses(recipientAddress))
           .withSource(fromAddress)
       }
-    }.attempt.map(_.void)
+    }.attempt.map { either =>
+      println(s"message send status: $either")
+      either: Either[Throwable, SendEmailResult]
+    }.map(_.void)
   }
 }
