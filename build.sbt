@@ -175,8 +175,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
 lazy val `check-digit` = (project in file("check-digit"))
   .enablePlugins(JavaServerAppPackaging,
                  sbtdocker.DockerPlugin,
-                 AshScriptPlugin,
-                 AkkaGrpcPlugin)
+                 AshScriptPlugin)
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -227,8 +226,7 @@ lazy val `institutions-api` = (project in file("institutions-api"))
 lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
   .enablePlugins(JavaServerAppPackaging,
                  sbtdocker.DockerPlugin,
-                 AshScriptPlugin,
-                 AkkaGrpcPlugin)
+                 AshScriptPlugin)
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -254,8 +252,7 @@ lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
 lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
   .enablePlugins(JavaServerAppPackaging,
                  sbtdocker.DockerPlugin,
-                 AshScriptPlugin,
-                 AkkaGrpcPlugin)
+                 AshScriptPlugin)
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -394,7 +391,6 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
 lazy val `rate-limit` = (project in file("rate-limit"))
   .enablePlugins(JavaServerAppPackaging,
                  sbtdocker.DockerPlugin,
-                 AkkaGrpcPlugin,
                  AshScriptPlugin)
   .settings(hmdaBuildSettings: _*)
   .settings(
