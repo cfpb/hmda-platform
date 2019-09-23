@@ -462,7 +462,8 @@ lazy val `email-service` = (project in file("email-service"))
       },
       assemblyJarName in assembly := {
         s"${name.value}.jar"
-      }
+      },
+      libraryDependencies ++= monix :: akkaKafkaStreams :: awsSesSdk :: logback :: Nil
     ),
     scalafmtSettings,
     dockerSettings,

@@ -99,5 +99,6 @@ message VerifyMacroMessage {
 message SignSubmissionMessage {
     SubmissionIdMessage submissionId = 1;
     string replyTo = 2;
+    string email = 3;
 }
 

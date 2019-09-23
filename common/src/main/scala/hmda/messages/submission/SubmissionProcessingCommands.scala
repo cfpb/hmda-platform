@@ -89,8 +89,9 @@ object SubmissionProcessingCommands {
                          replyTo: ActorRef[SubmissionProcessingEvent])
       extends SubmissionProcessingCommand
 
-  case class SignSubmission(submissionId: SubmissionId, email: String,
-                            replyTo: ActorRef[SubmissionSignedEvent])
+  case class SignSubmission(submissionId: SubmissionId,
+                            replyTo: ActorRef[SubmissionSignedEvent],
+                            email: String)
       extends SubmissionProcessingCommand
 
   case object HmdaParserStop extends SubmissionProcessingCommand

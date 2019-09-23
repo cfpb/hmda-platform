@@ -350,7 +350,8 @@ object SubmissionProcessingCommandsProtobufConverter {
     SignSubmission(
       submissionIdFromProtobuf(
         msg.submissionId.getOrElse(SubmissionIdMessage())),
-      refResolver.resolveActorRef(msg.replyTo)
+      refResolver.resolveActorRef(msg.replyTo),
+      msg.email
     )
   }
 
