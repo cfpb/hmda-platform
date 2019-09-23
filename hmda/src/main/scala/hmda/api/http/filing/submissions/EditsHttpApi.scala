@@ -169,8 +169,8 @@ trait EditsHttpApi extends HmdaTimeDirectives {
                 e.editName,
                 e.uli,
                 EditDescriptionLookup.lookupDescription(e.editName, submissionId.period)
-            )
-        )
+              )
+          )
       )
       .map(_.toCsv)
   }
