@@ -32,10 +32,13 @@ object InstitutionDBProjection extends InstitutionEmailComponent {
     dbConfig)
   implicit val institutionRepository2019 = new InstitutionRepository2019(
     dbConfig)
+  implicit val institutionRepository2019Beta = new InstitutionRepository2019(dbConfig)
   implicit val institutionEmailsRepository = new InstitutionEmailsRepository(
     dbConfig)
 
   implicit val ec: ExecutionContext = ExecutionContext.global
+
+  val isBeta = config.getString("hmda.institution.isBeta").toBoolean
 
   val behavior: Behavior[InstitutionProjectionCommand] =
     Behaviors.setup { ctx =>
@@ -71,7 +74,12 @@ object InstitutionDBProjection extends InstitutionEmailComponent {
         if (year == 2018) {
           institutionRepository2018.deleteById(lei)
         } else if (year == 2019) {
-          institutionRepository2019.deleteById(lei)
+          if (isBeta) {
+            institutionRepository2019Beta.deleteById(lei)
+          }
+          else {
+            institutionRepository2019.deleteById(lei)
+          }
         }
     }
     event
@@ -83,8 +91,13 @@ object InstitutionDBProjection extends InstitutionEmailComponent {
         institutionRepository2018.insertOrUpdate(
           InstitutionConverter.convert(inst))
       } else {
-        institutionRepository2019.insertOrUpdate(
-          InstitutionConverter.convert(inst))
+        if (isBeta) {
+          institutionRepository2019Beta.insertOrUpdate(InstitutionConverter.convert(inst))
+        }
+        else {
+          institutionRepository2019.insertOrUpdate(
+            InstitutionConverter.convert(inst))
+        }
       }
     }
     val emails = InstitutionConverter.emailsFromInstitution(inst).toList
