@@ -4,6 +4,7 @@ metadata:
   labels: 
     service: keycloak-ambassador
   name: keycloak-ambassador
+  namespace: beta
   annotations:
     getambassador.io/config: |
       apiVersion: ambassador/v1
