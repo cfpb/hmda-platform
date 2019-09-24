@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pgtables-configmap
+data:
+  pgtable.tsTableName2018: "hmda_beta_user.transmittalsheet2018"
+  pgtable.larTableName2018: "hmda_beta_user.loanapplicationregister2018"
+  pgtable.historyTableName: "hmda_beta_user.submission_history"
+  pgtable.tsTableName2019: "hmda_beta_user.transmittalsheet2019"
+  pgtable.larTableName2019: "hmda_beta_user.loanapplicationregister2019"

@@ -153,7 +153,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
   .dependsOn(`hmda-protocol` % "compile->compile;test->test")
 
 lazy val `check-digit` = (project in file("check-digit"))
-  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin, AkkaGrpcPlugin)
+  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin)
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -198,7 +198,7 @@ lazy val `institutions-api` = (project in file("institutions-api"))
   .dependsOn(common % "compile->compile;test->test")
 
 lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
-  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin, AkkaGrpcPlugin)
+  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin)
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -221,7 +221,7 @@ lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
   .dependsOn(`hmda-protocol` % "compile->compile;test->test")
 
 lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
-  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin, AkkaGrpcPlugin)
+  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin)
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -342,7 +342,7 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
   .dependsOn(common % "compile->compile;test->test")
 
 lazy val `rate-limit` = (project in file("rate-limit"))
-  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AkkaGrpcPlugin, AshScriptPlugin)
+  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin)
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
