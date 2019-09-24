@@ -27,10 +27,10 @@ hmda:
 
 kafka:
   institutionsTopic: beta-institution
-  modifiedLarTopic: hmda-modified-lar
-  irsTopic: hmda-irs
-  analyticsTopic: hmda-analytics
-  signTopic: hmda-sign
+  modifiedLarTopic: beta-hmda-modified-lar
+  irsTopic: beta-hmda-irs
+  analyticsTopic: beta-hmda-analytics
+  signTopic: beta-hmda-sign
   disclosureTopic: hmda-spark-disclosure
 
 service:
