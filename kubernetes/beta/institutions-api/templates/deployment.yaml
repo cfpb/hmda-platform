@@ -39,6 +39,8 @@ spec:
               value: {{.Values.kafka.institutionsTopic}}
             - name: KAFKA_INSTITUTIONS_GROUP
               value: {{.Values.kafka.institutionsGroup}}
+            - name: INSTITUTION_IS_BETA
+              value: true
             - name: CURRENT_YEAR
               value: "{{.Values.currentYear}}"
             - name: PG_HOST
