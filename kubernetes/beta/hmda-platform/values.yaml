@@ -31,7 +31,6 @@ kafka:
   irsTopic: beta-hmda-irs
   analyticsTopic: beta-hmda-analytics
   signTopic: beta-hmda-sign
-  disclosureTopic: hmda-spark-disclosure
 
 service:
   type: ClusterIP
