@@ -75,13 +75,20 @@ object HmdaAnalyticsApp
     bankFilter.getString("bank-filter-list").toUpperCase.split(",")
   val parallelism = config.getInt("hmda.analytics.parallelism")
 
+  val tsTableName2018 = config.getString("hmda.analytics.2018.tsTableName")
+  val larTableName2018 = config.getString("hmda.analytics.2018.larTableName")
+  //submission_history table remains same regardless of the year. There is a sign_date column and submission_id column which would show which year the filing was for
+  val histTableName = config.getString("hmda.analytics.2018.historyTableName")
+  val tsTableName2019 = config.getString("hmda.analytics.2019.tsTableName")
+  val larTableName2019 = config.getString("hmda.analytics.2019.larTableName")
+
   val transmittalSheetRepository2018 =
-    new TransmittalSheetRepository(dbConfig, "transmittalsheet2018")
+    new TransmittalSheetRepository(dbConfig, tsTableName2018)
   val transmittalSheetRepository2019 =
-    new TransmittalSheetRepository(dbConfig, "transmittalsheet2019")
-  val larRepository2018 = new LarRepository2018(dbConfig)
-  val larRepository2019 = new LarRepository2019(dbConfig)
-  val submissionHistoryRepository = new SubmissionHistoryRepository(dbConfig)
+    new TransmittalSheetRepository(dbConfig, tsTableName2019)
+  val larRepository2018 = new LarRepository2018(dbConfig, larTableName2018)
+  val larRepository2019 = new LarRepository2019(dbConfig, larTableName2019)
+  val submissionHistoryRepository = new SubmissionHistoryRepository(dbConfig, histTableName)
 
   val censusTractMap: Map[String, Census] =
     CensusRecords.indexedTract
