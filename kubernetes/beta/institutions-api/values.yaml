@@ -19,7 +19,7 @@ currentYear: 2018
 
 kafka:
   institutionsGroup: institution-group
-  institutionsTopic: institution
+  institutionsTopic: beta-institution
 
 #ambassador:
 #  name: institutions-api-ambassador
