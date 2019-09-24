@@ -11,12 +11,12 @@ trait SubmissionHistoryComponent {
 
   import dbConfig.profile.api._
 
-  class SubmissionHistoryRepository(config: DatabaseConfig[JdbcProfile]) {
+  class SubmissionHistoryRepository(config: DatabaseConfig[JdbcProfile], tableName: String) {
     def fetchYearTable(year: Int): String = {
       year match {
         case 2018 => "submission_history"
-        case 2019 => "submission_history2019"
-        case _    => "submission_history2019"
+        case 2019 => tableName
+        case _    => tableName
       }
     }
     def insert(lei: String,

@@ -1,0 +1,133 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ include "hmda-analytics.fullname" . }}
+  labels:
+    app: {{ include "hmda-analytics.name" . }}
+    chart: {{ include "hmda-analytics.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "hmda-analytics.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "hmda-analytics.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      volumes:
+        - name: tz-config
+          hostPath:
+            path: /usr/share/zoneinfo/America/New_York    
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          volumeMounts:
+            - name: tz-config
+              mountPath: /etc/localtime          
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: KAFKA_ANALYTICS_TOPIC
+              value: {{.Values.kafka.analyticsTopic}}
+            - name: KAFKA_SIGN_TOPIC
+              value: {{.Values.kafka.signTopic}}
+            - name: KAFKA_ANALYTICS_GROUP
+              value: {{.Values.kafka.analyticsGroup}}
+            - name: TS_TABLE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: pgtables-configmap
+                  key: pgtable.tsTableName
+            - name: LAR_TABLE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: pgtables-configmap
+                  key: pgtable.larTableName
+            - name: HIST_TABLE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: pgtables-configmap
+                  key: pgtable.historyTableName
+            - name: PG_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: host
+            - name: PG_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: postgresql-configmap
+                  key: postgres.database
+            - name: PG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: username
+            - name: PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: password
+            - name: PG_SSL
+              valueFrom:
+                configMapKeyRef:
+                  name: postgresql-configmap
+                  key: postgres.ssl
+            - name: JDBC_URL
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: url
+            - name: BANK_FILTER_LIST
+              valueFrom:
+                configMapKeyRef:
+                  name: bank-filter-configmap
+                  key: bank-filter-list
+            - name: CASSANDRA_CLUSTER_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-hosts
+            - name: CASSANDRA_JOURNAL_KEYSPACE
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-keyspace
+            - name: CASSANDRA_SNAPSHOT_KEYSPACE
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-keyspace-snapshot
+            - name: CASSANDRA_CLUSTER_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: cassandra-credentials
+                  key: cassandra.username
+            - name: CASSANDRA_CLUSTER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cassandra-credentials
+                  key: cassandra.password
+            - name: KAFKA_CLUSTER_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-configmap
+                  key: kafka.hosts
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}

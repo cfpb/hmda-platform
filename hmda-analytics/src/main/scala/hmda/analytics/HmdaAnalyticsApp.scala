@@ -75,13 +75,17 @@ object HmdaAnalyticsApp
     bankFilter.getString("bank-filter-list").toUpperCase.split(",")
   val parallelism = config.getInt("hmda.analytics.parallelism")
 
+  val tsTableName = config.getString("hmda.analytics.tsTableName")
+  val larTableName = config.getString("hmda.analytics.larTableName")
+  val histTableName = config.getString("hmda.analytics.historyTableName")
+
   val transmittalSheetRepository2018 =
     new TransmittalSheetRepository(dbConfig, "transmittalsheet2018")
   val transmittalSheetRepository2019 =
-    new TransmittalSheetRepository(dbConfig, "transmittalsheet2019")
+    new TransmittalSheetRepository(dbConfig, tsTableName)
   val larRepository2018 = new LarRepository2018(dbConfig)
-  val larRepository2019 = new LarRepository2019(dbConfig)
-  val submissionHistoryRepository = new SubmissionHistoryRepository(dbConfig)
+  val larRepository2019 = new LarRepository2019(dbConfig, larTableName)
+  val submissionHistoryRepository = new SubmissionHistoryRepository(dbConfig, histTableName)
 
   val censusTractMap: Map[String, Census] =
     CensusRecords.indexedTract
