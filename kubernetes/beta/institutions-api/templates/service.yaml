@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "institutions-api.fullname" . }}
+  labels:
+    app: {{ template "institutions-api.name" . }}
+    chart: {{ template "institutions-api.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
+      protocol: {{ .Values.service.protocol }}
+      name: {{ .Values.service.name }}
+  selector:
+    app: {{ template "institutions-api.name" . }}
+    release: {{ .Release.Name }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: institutions-api-ambassador
+  name: institutions-api-ambassador
+  annotations:
+    getambassador.io/config: |
+      apiVersion: ambassador/v1
+      kind: Mapping
+      name: institution_api_mapping
+      ambassador_id: ambassador-default-1
+      method: GET
+      prefix: /v2/public/institutions/
+      rewrite: /institutions/
+      service: {{ template "institutions-api.fullname" .}}:{{ .Values.service.port }}
+      ---
+      apiVersion: ambassador/v1
+      kind: Mapping
+      name: institution_api_search_mapping
+      ambassador_id: ambassador-default-1
+      method: GET
+      prefix: /v2/public/institutions?
+      rewrite: /institutions?
+      service: {{ template "institutions-api.fullname" .}}:{{ .Values.service.port }}
+spec:
+  clusterIP: None  
+  ports:
+    - port: {{ .Values.service.port }}
