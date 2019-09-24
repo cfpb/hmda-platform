@@ -7,12 +7,7 @@ import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
 import com.typesafe.config.ConfigFactory
 import hmda.institution.api.http.InstitutionConverter
 import hmda.institution.query._
-import hmda.messages.institution.InstitutionEvents.{
-  InstitutionCreated,
-  InstitutionDeleted,
-  InstitutionEvent,
-  InstitutionModified
-}
+import hmda.messages.institution.InstitutionEvents.{InstitutionCreated, InstitutionDeleted, InstitutionEvent, InstitutionModified}
 import hmda.model.institution.Institution
 import hmda.query.DbConfiguration._
 
@@ -30,9 +25,10 @@ object InstitutionDBProjection extends InstitutionEmailComponent {
 
   implicit val institutionRepository2018 = new InstitutionRepository2018(
     dbConfig)
+  implicit val institutionRepository2018Beta = new InstitutionRepository2018Beta(dbConfig)
   implicit val institutionRepository2019 = new InstitutionRepository2019(
     dbConfig)
-  implicit val institutionRepository2019Beta = new InstitutionRepository2019(dbConfig)
+  implicit val institutionRepository2019Beta = new InstitutionRepository2019Beta(dbConfig)
   implicit val institutionEmailsRepository = new InstitutionEmailsRepository(
     dbConfig)
 
@@ -72,7 +68,13 @@ object InstitutionDBProjection extends InstitutionEmailComponent {
         updateTables(i)
       case InstitutionDeleted(lei, year) =>
         if (year == 2018) {
-          institutionRepository2018.deleteById(lei)
+          if (isBeta) {
+            institutionRepository2018Beta.deleteById(lei)
+          }
+          else {
+            institutionRepository2018.deleteById(lei)
+          }
+
         } else if (year == 2019) {
           if (isBeta) {
             institutionRepository2019Beta.deleteById(lei)
@@ -88,8 +90,15 @@ object InstitutionDBProjection extends InstitutionEmailComponent {
   private def updateTables(inst: Institution): Future[List[Int]] = {
     val insertResult = {
       if (inst.activityYear == 2018) {
-        institutionRepository2018.insertOrUpdate(
-          InstitutionConverter.convert(inst))
+        if (isBeta) {
+          institutionRepository2018.insertOrUpdate(
+            InstitutionConverter.convert(inst))
+        }
+        else {
+          institutionRepository2018Beta.insertOrUpdate(
+            InstitutionConverter.convert(inst))
+        }
+
       } else {
         if (isBeta) {
           institutionRepository2019Beta.insertOrUpdate(InstitutionConverter.convert(inst))
