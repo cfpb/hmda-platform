@@ -14,7 +14,7 @@ trait SubmissionHistoryComponent {
   class SubmissionHistoryRepository(config: DatabaseConfig[JdbcProfile], tableName: String) {
     def fetchYearTable(year: Int): String = {
       year match {
-        case 2018 => "submission_history"
+        case 2018 => tableName
         case 2019 => tableName
         case _    => tableName
       }

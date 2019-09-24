@@ -37,16 +37,26 @@ spec:
               value: {{.Values.kafka.signTopic}}
             - name: KAFKA_ANALYTICS_GROUP
               value: {{.Values.kafka.analyticsGroup}}
-            - name: TS_TABLE_NAME
+            - name: TS_TABLE_NAME_2019
               valueFrom:
                 configMapKeyRef:
                   name: pgtables-configmap
-                  key: pgtable.tsTableName
-            - name: LAR_TABLE_NAME
+                  key: pgtable.tsTableName2019
+            - name: LAR_TABLE_NAME_2019
               valueFrom:
                 configMapKeyRef:
                   name: pgtables-configmap
-                  key: pgtable.larTableName
+                  key: pgtable.larTableName2019
+            - name: TS_TABLE_NAME_2018
+              valueFrom:
+                configMapKeyRef:
+                  name: pgtables-configmap
+                  key: pgtable.tsTableName2018
+            - name: LAR_TABLE_NAME_2018
+              valueFrom:
+                configMapKeyRef:
+                  name: pgtables-configmap
+                  key: pgtable.larTableName2018
             - name: HIST_TABLE_NAME
               valueFrom:
                 configMapKeyRef:
