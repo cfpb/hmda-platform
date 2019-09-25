@@ -30,17 +30,13 @@ spec:
             - name: tz-config
               mountPath: /etc/localtime
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          resources:
-            limits:
-              cpu: "6"
-              memory: "3200Mi"
           env:
             - name: KAFKA_INSTITUTIONS_TOPIC
               value: {{.Values.kafka.institutionsTopic}}
             - name: KAFKA_INSTITUTIONS_GROUP
               value: {{.Values.kafka.institutionsGroup}}
             - name: INSTITUTION_IS_BETA
-              value: true
+              value: "true"
             - name: CURRENT_YEAR
               value: "{{.Values.currentYear}}"
             - name: PG_HOST

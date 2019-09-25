@@ -33,10 +33,10 @@ trait InstitutionQueryHttpApi
   implicit val timeout: Timeout
   val log: LoggingAdapter
 
-  implicit val institutionRepository2018 = new InstitutionRepository2018(
-    dbConfig)
-  implicit val institutionRepository2019 = new InstitutionRepository2019(
-    dbConfig)
+  implicit val institutionRepository2018 =
+    new InstitutionRepository2018(dbConfig, "")
+  implicit val institutionRepository2019 =
+    new InstitutionRepository2019(dbConfig, "")
   implicit val institutionEmailsRepository = new InstitutionEmailsRepository(
     dbConfig)
 
