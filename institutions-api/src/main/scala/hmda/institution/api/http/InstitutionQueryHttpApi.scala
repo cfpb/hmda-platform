@@ -34,9 +34,9 @@ trait InstitutionQueryHttpApi
   val log: LoggingAdapter
 
   implicit val institutionRepository2018 =
-    new InstitutionRepository2018(dbConfig, "")
+    new InstitutionRepository2018(dbConfig, "institutions2018")
   implicit val institutionRepository2019 =
-    new InstitutionRepository2019(dbConfig, "")
+    new InstitutionRepository2019(dbConfig, "institutions2019")
   implicit val institutionEmailsRepository = new InstitutionEmailsRepository(
     dbConfig)
 
