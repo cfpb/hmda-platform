@@ -53,7 +53,7 @@ import hmda.validation.{AS, EC, MAT}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 object HmdaValidationError
   extends HmdaTypedPersistentActor[SubmissionProcessingCommand,
@@ -160,14 +160,16 @@ object HmdaValidationError
 
       case StartQuality(submissionId) =>
         log.info(s"Quality validation started for $submissionId")
-
+        val period = Try {
+          submissionId.period.toInt
+        }.fold(_ => 2018, identity)
         val fQuality = for {
 
           larErrors <- validateLar(
             "quality",
             ctx,
             submissionId,
-            ValidationContext())(system, materializer, blockingEc)
+            ValidationContext(filingYear = Some(period)))(system, materializer, blockingEc)
           _ = log.info(s"Finished ValidateLar Quality for $submissionId")
           _ = log.info(s"Started validateAsyncLar - Quality for $submissionId")
           larAsyncErrorsQuality <- validateAsyncLar("quality",
@@ -453,8 +455,8 @@ object HmdaValidationError
         .map(_.trim)
         .zip(Source.fromIterator(() => Iterator.from(2))) // rows start from #1 but we dropped the header line so we start at #2
         .map {
-        case (line, rowNumber) => (LarCsvParser(line), line, rowNumber)
-      }
+          case (line, rowNumber) => (LarCsvParser(line), line, rowNumber)
+        }
         .collect {
           case (Right(parsed), line, rowNumber) => (parsed, line, rowNumber)
         }
@@ -602,9 +604,9 @@ object HmdaValidationError
         .via(validateLarFlow(editCheck, validationContext))
         .zip(Source.fromIterator(() => Iterator.from(2))) // rows start from #1 but we dropped the header line so we start at #2
         .collect {
-        case (Left(errors), rowNumber) =>
-          PersistHmdaRowValidatedError(submissionId, rowNumber, errors, None)
-      }
+          case (Left(errors), rowNumber) =>
+            PersistHmdaRowValidatedError(submissionId, rowNumber, errors, None)
+        }
         .via(
           ActorFlow.ask(ctx.asScala.self)(
             (el, replyTo: ActorRef[HmdaRowValidatedError]) =>

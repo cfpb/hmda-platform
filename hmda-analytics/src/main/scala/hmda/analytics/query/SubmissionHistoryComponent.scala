@@ -11,7 +11,8 @@ trait SubmissionHistoryComponent {
 
   import dbConfig.profile.api._
 
-  class SubmissionHistoryRepository(config: DatabaseConfig[JdbcProfile], tableName: String) {
+  class SubmissionHistoryRepository(config: DatabaseConfig[JdbcProfile],
+                                    tableName: String) {
     def fetchYearTable(year: Int): String = {
       tableName
     }
