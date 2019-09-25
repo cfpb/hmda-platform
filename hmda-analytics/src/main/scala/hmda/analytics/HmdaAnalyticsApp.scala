@@ -75,6 +75,12 @@ object HmdaAnalyticsApp
     bankFilter.getString("bank-filter-list").toUpperCase.split(",")
   val parallelism = config.getInt("hmda.analytics.parallelism")
 
+  /**
+   * Note: hmda-analytics microservice reads the JDBC_URL env var from inst-postgres-credentials secret.
+   * In beta namespace this environment variable has currentSchema=hmda_beta_user appended to it to change the schema
+   * to BETA
+   */
+
   val tsTableName2018 = config.getString("hmda.analytics.2018.tsTableName")
   val larTableName2018 = config.getString("hmda.analytics.2018.larTableName")
   //submission_history table remains same regardless of the year. There is a sign_date column and submission_id column which would show which year the filing was for

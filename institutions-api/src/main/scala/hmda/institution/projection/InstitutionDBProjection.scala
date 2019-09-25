@@ -29,8 +29,9 @@ object InstitutionDBProjection extends InstitutionEmailComponent {
   val name = "InstitutionDBProjector"
 
   /**
-   * Note: institutions-api microservice reads the JDBC_URL from inst-postgres-credentials secret.
+   * Note: institutions-api microservice reads the JDBC_URL env var from inst-postgres-credentials secret.
    * In beta namespace this environment variable has currentSchema=hmda_beta_user appended to it to change the schema
+   * to BETA
    */
 
   implicit val institutionRepository2018 =
