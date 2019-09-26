@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: s3-configmap
-data:
-  aws-environment: dev
-  s3-private-bucket: cfpb-hmda-export
-  s3-public-bucket: cfpb-hmda-public
-  aws-region: us-east-1

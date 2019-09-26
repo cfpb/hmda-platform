@@ -9,7 +9,8 @@ import scala.concurrent.Future
 trait LarComponent2018 {
   import dbConfig.profile.api._
 
-  class LarRepository2018(config: DatabaseConfig[JdbcProfile], tableName: String) {
+  class LarRepository2018(config: DatabaseConfig[JdbcProfile],
+                          tableName: String) {
 
     val larTable = tableName
 

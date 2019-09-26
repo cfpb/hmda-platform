@@ -137,6 +137,19 @@ CREATE TABLE hmda_user.loanapplicationregister2019 (
     reverse_mortgage integer,
     line_of_credits integer,
     business_or_commercial integer,
+    conforming_loan_limit character varying,
+    ethnicity_categorization character varying,
+    race_categorization character varying,
+    sex_categorization character varying,
+    dwelling_categorization character varying,
+    loan_product_type_categorization character varying,
+    tract_population integer,
+    tract_minority_population_percent float,
+    ffiec_msa_md_median_family_income integer,
+    tract_owner_occupied_units integer,
+    tract_one_to_four_family_homes integer,
+    tract_median_age_of_housing_units integer,
+    tract_to_msa_income_percentage float,
     created_at timestamp without time zone DEFAULT now()
 );
 

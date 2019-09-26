@@ -9,7 +9,8 @@ import scala.concurrent.Future
 trait LarComponent2019 {
   import dbConfig.profile.api._
 
-  class LarRepository2019(config: DatabaseConfig[JdbcProfile], tableName: String) {
+  class LarRepository2019(config: DatabaseConfig[JdbcProfile],
+                          tableName: String) {
 
     val larTable = tableName
 
@@ -145,7 +146,7 @@ trait LarComponent2019 {
           ${le.tractOccupiedUnits},
           ${le.tractOneToFourFamilyUnits},
           ${le.tractMedianAge},
-          ${le.tractToMsaIncomePercent},
+          ${le.tractToMsaIncomePercent}
         )
         """
       }

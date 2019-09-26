@@ -18,7 +18,7 @@ service:
 currentYear: 2018
 
 kafka:
-  institutionsGroup: institution-group
+  institutionsGroup: beta-institution-group
   institutionsTopic: beta-institution
 
 #ambassador:

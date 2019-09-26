@@ -53,7 +53,7 @@ import hmda.validation.{ AS, EC, MAT }
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.{ Failure, Success }
+import scala.util.{ Failure, Success, Try }
 
 object HmdaValidationError
     extends HmdaTypedPersistentActor[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaValidationErrorState] {
@@ -139,12 +139,18 @@ object HmdaValidationError
 
       case StartQuality(submissionId) =>
         log.info(s"Quality validation started for $submissionId")
-
+        val period = Try {
+          submissionId.period.toInt
+        }.fold(_ => 2018, identity)
         val fQuality = for {
 
-          larErrors <- validateLar("quality", ctx, submissionId, ValidationContext())(system, materializer, blockingEc)
-          _         = log.info(s"Finished ValidateLar Quality for $submissionId")
-          _         = log.info(s"Started validateAsyncLar - Quality for $submissionId")
+          larErrors <- validateLar("quality", ctx, submissionId, ValidationContext(filingYear = Some(period)))(
+                        system,
+                        materializer,
+                        blockingEc
+                      )
+          _ = log.info(s"Finished ValidateLar Quality for $submissionId")
+          _ = log.info(s"Started validateAsyncLar - Quality for $submissionId")
           larAsyncErrorsQuality <- validateAsyncLar("quality", ctx, submissionId)
                                     .runWith(Sink.ignore)
           _ = log.info(s"Finished ValidateAsyncLar Quality for $submissionId")
@@ -272,7 +278,7 @@ object HmdaValidationError
           Effect.none
         }
 
-      case SignSubmission(submissionId, replyTo, email) =>
+      case SignSubmission(submissionId, replyTo) =>
         if (state.statusCode == Verified.code) {
           val timestamp = Instant.now().toEpochMilli
           val signed    = SubmissionSigned(submissionId, timestamp, Signed)
@@ -282,7 +288,7 @@ object HmdaValidationError
               log.info(s"Submission $submissionId signed at ${Instant.ofEpochMilli(timestamp)}")
               updateSubmissionStatus(sharding, submissionId, Signed, log)
               updateSubmissionReceipt(sharding, submissionId, signed.timestamp, s"${signed.submissionId}-${signed.timestamp}", log)
-              publishSignEvent(submissionId, email).map(signed => log.info(s"Published signed event for $submissionId"))
+              publishSignEvent(submissionId).map(signed => log.info(s"Published signed event for $submissionId"))
               setHmdaFilerFlag(submissionId.lei, sharding)
               replyTo ! signed
             }
@@ -655,13 +661,8 @@ object HmdaValidationError
 
   }
 
-  private def publishSignEvent(
-    submissionId: SubmissionId,
-    email: String
-  )(implicit system: ActorSystem, materializer: ActorMaterializer): Future[Done] = {
+  private def publishSignEvent(submissionId: SubmissionId)(implicit system: ActorSystem, materializer: ActorMaterializer): Future[Done] =
     produceRecord(signTopic, submissionId.lei, submissionId.toString)
-    produceRecord(emailTopic, submissionId.toString, email)
-  }
 
   private def setHmdaFilerFlag[as: AS, mat: MAT, ec: EC](institutionID: String, sharding: ClusterSharding): Unit = {
 
