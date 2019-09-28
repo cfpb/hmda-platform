@@ -1,21 +1,21 @@
 package hmda.persistence.institution
 
 import akka.Done
-import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{ActorRef, Behavior, TypedActorContext}
+import akka.actor.typed.{ ActorRef, ActorSystem, Behavior, TypedActorContext }
 import akka.cluster.sharding.typed.ShardingEnvelope
 import hmda.HmdaPlatform.institutionKafkaProducer
-import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
+import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
-import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
-import akka.stream.ActorMaterializer
+import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
+import akka.stream.{ ActorMaterializer, Materializer }
+import com.typesafe.config.Config
 import hmda.messages.institution.InstitutionCommands._
 import hmda.messages.institution.InstitutionEvents._
 import hmda.messages.pubsub.HmdaTopics._
-import hmda.model.institution.{Institution, InstitutionDetail}
+import hmda.model.institution.{ Institution, InstitutionDetail }
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.publication.KafkaUtils._
 
@@ -29,7 +29,7 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
     Behaviors.setup { ctx =>
       ctx.log.info(s"Started Institution: $entityId")
       EventSourcedBehavior[InstitutionCommand, InstitutionEvent, InstitutionState](
-        persistenceId = PersistenceId(entityId),
+        persistenceId = PersistenceId.ofUniqueId(entityId),
         emptyState = InstitutionState(None),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
@@ -40,9 +40,11 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
   override def commandHandler(
                                ctx: TypedActorContext[InstitutionCommand]
                              ): CommandHandler[InstitutionCommand, InstitutionEvent, InstitutionState] = {
-    val log                                      = ctx.asScala.log
-    implicit val system: ActorSystem             = ctx.asScala.system.toClassic
-    implicit val materializer: ActorMaterializer = ActorMaterializer()
+    val log                                 = ctx.asScala.log
+    implicit val system: ActorSystem[_]     = ctx.asScala.system
+    implicit val materializer: Materializer = Materializer(system)
+    val config                              = system.settings.config
+
     (state, cmd) =>
       cmd match {
         case CreateInstitution(i, replyTo) =>
@@ -50,7 +52,7 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
             Effect.persist(InstitutionCreated(i)).thenRun { _ =>
               log.debug(s"Institution Created: ${i.toString}")
               val event = InstitutionCreated(i)
-              publishInstitutionEvent(i.LEI, InstitutionKafkaEvent("InstitutionCreated", event))
+              publishInstitutionEvent(i.LEI, InstitutionKafkaEvent("InstitutionCreated", event), config)
               replyTo ! event
             }
           } else {
@@ -67,13 +69,12 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
             Effect.persist(InstitutionModified(i)).thenRun { _ =>
               log.debug(s"Institution Modified: ${i.toString}")
               val event = InstitutionModified(i)
-              publishInstitutionEvent(i.LEI, InstitutionKafkaEvent("InstitutionModified", event))
+              publishInstitutionEvent(i.LEI, InstitutionKafkaEvent("InstitutionModified", event), config)
               replyTo ! event
             }
           } else {
             Effect.none.thenRun { _ =>
-              log
-                .warning(s"Institution with LEI: ${i.LEI} does not exist")
+              log.warn(s"Institution with LEI: ${i.LEI} does not exist")
               replyTo ! InstitutionNotExists(i.LEI)
             }
           }
@@ -84,13 +85,12 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
             Effect.persist(InstitutionDeleted(lei, activityYear)).thenRun { _ =>
               log.debug(s"Institution Deleted: $lei")
               val event = InstitutionDeleted(lei, activityYear)
-              publishInstitutionEvent(lei, InstitutionKafkaEvent("InstitutionDeleted", event))
+              publishInstitutionEvent(lei, InstitutionKafkaEvent("InstitutionDeleted", event), config)
               replyTo ! event
             }
           } else {
             Effect.none.thenRun { _ =>
-              log
-                .warning(s"Institution with LEI: $lei does not exist")
+              log.warn(s"Institution with LEI: $lei does not exist")
               replyTo ! InstitutionNotExists(lei)
             }
           }
@@ -133,9 +133,10 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
 
   private def publishInstitutionEvent(
                                        institutionID: String,
-                                       event: InstitutionKafkaEvent
-                                     )(implicit system: ActorSystem, materializer: ActorMaterializer): Future[Done] =
-    produceInstitutionRecord(institutionTopic, institutionID, event, institutionKafkaProducer)
+                                       event: InstitutionKafkaEvent,
+                                       config: Config
+                                     )(implicit materializer: Materializer): Future[Done] =
+    produceInstitutionRecord(institutionTopic, institutionID, event, institutionKafkaProducer, config)
 
   private def modifyInstitution(institution: Institution, state: InstitutionState): InstitutionState =
     if (state.isEmpty) {

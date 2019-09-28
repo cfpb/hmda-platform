@@ -5,17 +5,17 @@ import java.time.Instant
 import akka.actor.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
-import akka.http.scaladsl.model.{StatusCodes, Uri}
+import akka.http.scaladsl.model.{ StatusCodes, Uri }
 import akka.http.scaladsl.model.StatusCodes
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.model.headers.RawHeader
-import hmda.api.http.directives.{CreateFilingAuthorization, HmdaTimeDirectives, QuarterlyFilingAuthorization}
+import hmda.api.http.directives.{ CreateFilingAuthorization, HmdaTimeDirectives, QuarterlyFilingAuthorization }
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
-import hmda.messages.filing.FilingCommands.{CreateFiling, GetFilingDetails}
-import hmda.model.filing.{Filing, FilingDetails, InProgress}
+import hmda.messages.filing.FilingCommands.{ CreateFiling, GetFilingDetails }
+import hmda.model.filing.{ Filing, FilingDetails, InProgress }
 import hmda.persistence.filing.FilingPersistence._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.ErrorResponse
@@ -28,10 +28,10 @@ import hmda.util.http.FilingResponseUtils._
 import hmda.api.http.PathMatchers._
 import hmda.api.http.model.filing.submissions.FilingDetailsSummary
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.{ Failure, Success }
 
-trait FilingHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization with CreateFilingAuthorization {
+trait FilingHttpApi extends QuarterlyFilingAuthorization with CreateFilingAuthorization {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -55,15 +55,11 @@ trait FilingHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
         oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
           pathEndOrSingleSlash {
             // POST/institutions/<lei>/filings/<year>
-            timedPost { uri =>
+            extractUri { uri =>
               createFilingForInstitution(lei, year, None, uri)
             } ~
               // GET/institutions/<lei>/filings/<year>
-              timedGet { uri =>
-                parameter('page.as[Int] ? 1) { pageNumber =>
-                  getFilingForInstitution(lei, year, None, uri, pageNumber)
-                }
-              }
+              extractUri(uri => parameter('page.as[Int] ? 1)(pageNumber => getFilingForInstitution(lei, year, None, uri, pageNumber)))
           }
         }
       } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter) { (lei, period, quarter) =>
@@ -71,14 +67,12 @@ trait FilingHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
           pathEndOrSingleSlash {
             quarterlyFilingAllowed(lei, period) {
               // POST/institutions/<lei>/filings/<year>/quarters/<quarter>
-              timedPost { uri =>
+              extractUri { uri =>
                 createFilingForInstitution(lei, period, Option(quarter), uri)
               } ~
                 // GET /institutions/<lei>/filings/<year>/quarters/<quarter>
-                timedGet { uri =>
-                  parameter('page.as[Int] ? 1) { pageNumber =>
-                    getFilingForInstitution(lei, period, Option(quarter), uri, pageNumber)
-                  }
+                extractUri { uri =>
+                  parameter('page.as[Int] ? 1)(pageNumber => getFilingForInstitution(lei, period, Option(quarter), uri, pageNumber))
                 }
             }
           }
@@ -95,10 +89,10 @@ trait FilingHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
     val fil = selectFiling(sharding, lei, period, quarter)
 
     val fInstitution: Future[Option[Institution]] = ins ? (ref => GetInstitution(ref))
-    val fEnriched: Future[Option[FilingDetails]] = fil ? (ref => GetFilingDetails(ref))
+    val fEnriched: Future[Option[FilingDetails]]  = fil ? (ref => GetFilingDetails(ref))
 
     for {
-      i: Option[Institution]           <- fInstitution
+      i: Option[Institution]   <- fInstitution
       d: Option[FilingDetails] <- fEnriched
     } yield (i, d)
   }
@@ -160,10 +154,9 @@ trait FilingHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
         // in order to compute the correct fromIndex and correct count
         // then we put the actual adjusted data in
         val result = summary.copy(
-          submissions =
-            filingDetails.submissions
-              .drop(summary.fromIndex)
-              .take(summary.count)
+          submissions = filingDetails.submissions
+            .drop(summary.fromIndex)
+            .take(summary.count)
         )
         complete(result)
 

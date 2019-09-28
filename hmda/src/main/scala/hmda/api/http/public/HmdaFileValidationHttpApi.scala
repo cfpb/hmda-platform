@@ -14,7 +14,7 @@ import akka.stream.scaladsl.{ Broadcast, Concat, Flow, GraphDSL, Sink, Source }
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.api.http.directives.HmdaTimeDirectives
+import hmda.api.http.directives.HmdaTimeDirectives._
 import io.circe.generic.auto._
 import hmda.api.http.model.filing.submissions.HmdaRowParsedErrorSummary
 import hmda.api.http.utils.ParserErrorUtils
@@ -24,7 +24,7 @@ import scala.util.{ Failure, Success }
 import hmda.util.streams.FlowUtils._
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
-trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
+trait HmdaFileValidationHttpApi {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -50,12 +50,10 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
         case _ =>
           complete(ToResponseMarshallable(StatusCodes.BadRequest))
       } ~
-        timedOptions { _ =>
-          complete("OPTIONS")
-        }
+        options(complete("OPTIONS"))
     } ~
       path("parse" / "csv") {
-        timedPost { _ =>
+        post {
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             fileUpload("file") {
               case (_, byteSource) =>
@@ -64,10 +62,10 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
                 val errors = byteSource
                   .via(processHmdaFile)
                   .filter(_ != None)
-                  .map(option => option match {
+                  .map {
                     case Some(error) => error.toCsv
-                    case None => ""
-                  })
+                    case None        => ""
+                  }
                   .map(s => ByteString(s))
 
                 val csvF = headerSource
@@ -88,9 +86,7 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
             }
           }
         } ~
-          timedOptions { _ =>
-            complete("OPTIONS")
-          }
+          options(complete("OPTIONS"))
       }
 
   def hmdaFileRoutes: Route =
@@ -98,7 +94,7 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
       cors() {
         encodeResponse {
           pathPrefix("hmda") {
-            parseHmdaFileRoute
+            timed(parseHmdaFileRoute)
           }
         }
       }

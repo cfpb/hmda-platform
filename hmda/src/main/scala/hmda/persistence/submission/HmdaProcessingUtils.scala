@@ -1,8 +1,7 @@
 package hmda.persistence.submission
 
 import akka.NotUsed
-import akka.actor.ActorSystem
-import akka.actor.typed.Logger
+import akka.actor.typed.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import akka.stream.scaladsl.Source
 import hmda.messages.submission.HmdaRawDataEvents.LineAdded
@@ -12,12 +11,13 @@ import hmda.messages.submission.SubmissionCommands.{ GetSubmission, ModifySubmis
 import hmda.messages.submission.SubmissionEvents.SubmissionEvent
 import hmda.messages.submission.SubmissionManagerCommands.UpdateSubmissionStatus
 import hmda.model.filing.submission.{ Submission, SubmissionId, SubmissionStatus }
+import org.slf4j.Logger
 
 import scala.concurrent.{ ExecutionContext, Future }
 
 object HmdaProcessingUtils {
 
-  def readRawData(submissionId: SubmissionId)(implicit system: ActorSystem): Source[LineAdded, NotUsed] = {
+  def readRawData(submissionId: SubmissionId)(implicit system: ActorSystem[_]): Source[LineAdded, NotUsed] = {
 
     val persistenceId = s"${HmdaRawData.name}-$submissionId"
 
@@ -41,7 +41,7 @@ object HmdaProcessingUtils {
 
     for {
       potentialSubmission <- fSubmission
-      submission = potentialSubmission.getOrElse(Submission())
+      submission          = potentialSubmission.getOrElse(Submission())
     } yield {
       if (submission.isEmpty) {
         log
@@ -52,11 +52,18 @@ object HmdaProcessingUtils {
       }
     }
   }
-  
-  def updateSubmissionStatusAndReceipt(sharding: ClusterSharding, submissionId: SubmissionId, timestamp: Long, receipt: String, modified: SubmissionStatus, log: Logger)(
-    implicit ec: ExecutionContext,
-    timeout: Timeout
-  ): Unit = {
+
+  def updateSubmissionStatusAndReceipt(
+                                        sharding: ClusterSharding,
+                                        submissionId: SubmissionId,
+                                        timestamp: Long,
+                                        receipt: String,
+                                        modified: SubmissionStatus,
+                                        log: Logger
+                                      )(
+                                        implicit ec: ExecutionContext,
+                                        timeout: Timeout
+                                      ): Unit = {
     val submissionPersistence: EntityRef[SubmissionCommand] =
       sharding.entityRefFor(SubmissionPersistence.typeKey, s"${SubmissionPersistence.name}-$submissionId")
 

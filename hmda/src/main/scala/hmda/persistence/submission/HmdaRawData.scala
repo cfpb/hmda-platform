@@ -1,14 +1,14 @@
 package hmda.persistence.submission
 
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ActorRef, Behavior, TypedActorContext}
+import akka.actor.typed.{ ActorRef, Behavior, TypedActorContext }
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
+import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
-import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
-import hmda.messages.submission.HmdaRawDataCommands.{AddLine, HmdaRawDataCommand, StopRawData}
-import hmda.messages.submission.HmdaRawDataEvents.{HmdaRawDataEvent, LineAdded}
+import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
+import hmda.messages.submission.HmdaRawDataCommands.{ AddLine, HmdaRawDataCommand, StopRawData }
+import hmda.messages.submission.HmdaRawDataEvents.{ HmdaRawDataEvent, LineAdded }
 import hmda.model.filing.submission.SubmissionId
 import hmda.model.processing.state.HmdaRawDataState
 import hmda.persistence.HmdaTypedPersistentActor
@@ -20,7 +20,7 @@ object HmdaRawData extends HmdaTypedPersistentActor[HmdaRawDataCommand, HmdaRawD
   override def behavior(entityId: String): Behavior[HmdaRawDataCommand] =
     Behaviors.setup { ctx =>
       EventSourcedBehavior[HmdaRawDataCommand, HmdaRawDataEvent, HmdaRawDataState](
-        persistenceId = PersistenceId(entityId),
+        persistenceId = PersistenceId.ofUniqueId(entityId),
         emptyState = HmdaRawDataState(),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler

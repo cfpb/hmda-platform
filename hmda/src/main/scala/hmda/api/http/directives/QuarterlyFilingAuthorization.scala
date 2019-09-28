@@ -12,13 +12,14 @@ import hmda.messages.institution.InstitutionCommands.GetInstitution
 import hmda.model.institution.Institution
 import hmda.persistence.institution.InstitutionPersistence
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import org.slf4j.Logger
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
 trait QuarterlyFilingAuthorization {
   val sharding: ClusterSharding
-  val log: LoggingAdapter
+  val log: Logger
   implicit val timeout: Timeout
   implicit val ec: ExecutionContext
 
@@ -28,7 +29,7 @@ trait QuarterlyFilingAuthorization {
     extractMatchedPath { path =>
       onComplete(response) {
         case Failure(exception) =>
-          log.error(exception, "Failed to retrieve institution when trying to check if institution can do quarterly filing")
+          log.error("Failed to retrieve institution when trying to check if institution can do quarterly filing", exception)
           complete(StatusCodes.InternalServerError)
 
         case Success(None) =>

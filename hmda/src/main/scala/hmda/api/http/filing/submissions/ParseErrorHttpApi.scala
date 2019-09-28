@@ -23,22 +23,24 @@ import hmda.api.http.model.filing.submissions._
 import hmda.api.http.PathMatchers._
 import hmda.utils.YearUtils.Period
 import hmda.api.http.utils.ParserErrorUtils._
+import HmdaTimeDirectives._
+import org.slf4j.Logger
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
-trait ParseErrorHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
+trait ParseErrorHttpApi extends QuarterlyFilingAuthorization {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
   implicit val ec: ExecutionContext
-  val log: LoggingAdapter
+  val log: Logger
   implicit val timeout: Timeout
   val sharding: ClusterSharding
 
   // GET institutions/<lei>/filings/<year>/submissions/<submissionId>/parseErrors
   // GET institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/parseErrors
-  def parseErrorPath(oauth2Authorization: OAuth2Authorization): Route = timedGet { uri =>
+  def parseErrorPath(oauth2Authorization: OAuth2Authorization): Route = (extractUri & get) { uri =>
     parameters('page.as[Int] ? 1) { page =>
       pathPrefix("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
         oauth2Authorization.authorizeTokenWithLei(lei) { _ =>
@@ -74,8 +76,8 @@ trait ParseErrorHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
             onComplete(fErrors) {
               case Success(state) =>
                 val parsingErrorSummary = ParsingErrorSummary(
-                  state.transmittalSheetErrors.map(parserErrorSummaryConvertor(_)),
-                  state.larErrors.map(parserErrorSummaryConvertor(_)),
+                  state.transmittalSheetErrors.map(parserErrorSummaryConvertor),
+                  state.larErrors.map(parserErrorSummaryConvertor),
                   uri.path.toString,
                   page,
                   state.totalErrors,
@@ -98,7 +100,7 @@ trait ParseErrorHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          parseErrorPath(oAuth2Authorization)
+          timed(parseErrorPath(oAuth2Authorization))
         }
       }
     }

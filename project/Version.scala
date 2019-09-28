@@ -18,7 +18,7 @@ object Version {
   val jboss                  = "3.3.2.Final"
   val httpcomponents         = "4.5.6"
   val alpakkaS3              = "1.1.1"
-  val alpakkaKafka           = "1.0.5"
+  val alpakkaKafka           = "2.0.2"
   val alpakkaSlick           = "1.1.1"
   val embeddedKafka          = "2.3.0"
   val akkaQuartzScheduler    = "1.6.1-akka-2.5.x"

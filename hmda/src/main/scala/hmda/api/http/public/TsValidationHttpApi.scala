@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.server.Route
-import akka.stream.ActorMaterializer
+import akka.stream.{ ActorMaterializer, Materializer }
 import akka.util.Timeout
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.headers.RawHeader
@@ -20,21 +20,24 @@ import hmda.validation.HmdaValidation
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
 import hmda.utils.YearUtils.Period
+
 import scala.concurrent.ExecutionContext
 import hmda.api.http.PathMatchers._
+import HmdaTimeDirectives._
+import org.slf4j.Logger
 
-trait TsValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpApi {
+trait TsValidationHttpApi extends FilingValidationHttpApi {
 
   implicit val system: ActorSystem
-  implicit val materializer: ActorMaterializer
-  val log: LoggingAdapter
+  implicit val materializer: Materializer
+  val log: Logger
   implicit val ec: ExecutionContext
   implicit val timeout: Timeout
 
   //ts/parse
   val parseTsRoute =
     path("parse") {
-      timedPost { _ =>
+      (extractUri & post) { _ =>
         respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
           entity(as[TsValidateRequest]) { req =>
             TsCsvParser(req.ts) match {
@@ -45,16 +48,14 @@ trait TsValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpAp
           }
         }
       } ~
-        timedOptions { _ =>
-          complete("OPTIONS")
-        }
+        (extractUri & options)(_ => complete("OPTIONS"))
     }
 
   //ts/validate/<year>
   val validateYearTsRoute =
     path("validate" / IntNumber) { year =>
       parameters('check.as[String] ? "all") { checkType =>
-        timedPost { _ =>
+        post {
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             entity(as[TsValidateRequest]) { req =>
               TsCsvParser(req.ts) match {
@@ -73,7 +74,7 @@ trait TsValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpAp
   val validateQuarterTsRoute =
     path("validate" / IntNumber / "quarter" / Quarter) { (year, quarter) =>
       parameters('check.as[String] ? "all") { checkType =>
-        timedPost { _ =>
+        post {
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             entity(as[TsValidateRequest]) { req =>
               TsCsvParser(req.ts) match {
@@ -120,7 +121,7 @@ trait TsValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpAp
       cors() {
         encodeResponse {
           pathPrefix("ts") {
-            parseTsRoute ~ validateYearTsRoute ~ validateQuarterTsRoute
+            timed(parseTsRoute ~ validateYearTsRoute ~ validateQuarterTsRoute)
           }
         }
       }

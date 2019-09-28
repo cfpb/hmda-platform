@@ -1,72 +1,134 @@
-package hmda.api.ws.filing.submissions
+package hmda.persistence.filing
 
-import java.time.Instant
+import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.{ ActorRef, Behavior, TypedActorContext }
+import akka.cluster.sharding.typed.ShardingEnvelope
+import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef, EntityTypeKey }
+import akka.persistence.typed.PersistenceId
+import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
+import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
+import hmda.messages.filing.FilingCommands._
+import hmda.messages.filing.FilingEvents.{ FilingCreated, FilingEvent, SubmissionAdded, SubmissionUpdated }
+import hmda.messages.institution.InstitutionCommands.AddFiling
+import hmda.model.filing.FilingDetails
+import hmda.persistence.HmdaTypedPersistentActor
+import hmda.persistence.institution.InstitutionPersistence
+import hmda.utils.YearUtils
 
-import akka.{ actor, NotUsed }
-import akka.event.LoggingAdapter
-import akka.http.scaladsl.model.ws.TextMessage
-import akka.http.scaladsl.model.ws.Message
-import akka.stream.ActorMaterializer
-import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.server.Directives._
-import akka.stream.scaladsl.{ Flow, Source }
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
-import com.typesafe.config.ConfigFactory
-import hmda.api.ws.model.{ KeepAliveWsResponse, ServerPing, SubmissionStatus, SubmissionStatusWSResponse }
-import io.circe.syntax._
-import io.circe.generic.auto._
-import hmda.model.filing.submission.SubmissionId
-import hmda.messages.submission.SubmissionEvents.{ SubmissionCreated, SubmissionEvent, SubmissionModified }
-import hmda.persistence.submission.SubmissionPersistence
-import hmda.query.HmdaQuery._
-import hmda.utils.YearUtils.Period
+object FilingPersistence extends HmdaTypedPersistentActor[FilingCommand, FilingEvent, FilingState] {
 
-import scala.concurrent.duration._
+  override final val name = "Filing"
 
-trait SubmissionWsApi {
+  val ShardingTypeName = EntityTypeKey[FilingCommand](name)
 
-  implicit val system: actor.ActorSystem
-  implicit val materializer: ActorMaterializer
-  val log: LoggingAdapter
-
-  val configuration    = ConfigFactory.load()
-  val keepAliveTimeout = configuration.getInt("hmda.ws.keep-alive")
-
-  def wsHandler(source: Source[String, NotUsed]): Flow[Message, Message, NotUsed] =
-    Flow[Message]
-      .mapConcat(_ => Nil) //ignore messages sent from client
-      .merge(source)
-      .map(l => TextMessage(l.toString))
-      .keepAlive(keepAliveTimeout.seconds, () => TextMessage(keepAliveResponse.asJson.noSpaces))
-
-  //institutions/<lei>/filings/<period>/submissions/<seqNr>
-  val submissionWsPath: Route = {
-    path("institutions" / Segment / "filings" / Segment / "submissions" / IntNumber) { (lei, year, seqNr) =>
-      val submissionId  = SubmissionId(lei, Period(year.toInt, None), seqNr)
-      val persistenceId = s"${SubmissionPersistence.name}-$submissionId"
-
-      val source =
-        eventEnvelopeByPersistenceId(persistenceId)
-          .map(env => env.event.asInstanceOf[SubmissionEvent])
-          .collect {
-            case SubmissionCreated(submission)  => submission
-            case SubmissionModified(submission) => submission
-          }
-          .map(s => SubmissionStatusWSResponse(s.status, SubmissionStatus.messageType).asJson.noSpaces)
-
-      handleWebSocketMessages(wsHandler(source))
+  override def behavior(filingId: String): Behavior[FilingCommand] =
+    Behaviors.setup { ctx =>
+      ctx.log.debug(s"Started Filing Persistence: s$filingId")
+      EventSourcedBehavior[FilingCommand, FilingEvent, FilingState](
+        persistenceId = PersistenceId.ofUniqueId(filingId),
+        emptyState = FilingState(),
+        commandHandler = commandHandler(ctx),
+        eventHandler = eventHandler
+      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000, keepNSnapshots = 10))
     }
+
+  override def commandHandler(ctx: TypedActorContext[FilingCommand]): CommandHandler[FilingCommand, FilingEvent, FilingState] = {
+    (state, cmd) =>
+      val log      = ctx.asScala.log
+      val sharding = ClusterSharding(ctx.asScala.system)
+      cmd match {
+        case CreateFiling(filing, replyTo) =>
+          Effect.persist(FilingCreated(filing)).thenRun { _ =>
+            log.debug(s"Filing created: ${filing.lei}-${filing.period}")
+            val institutionPersistence = {
+              if (filing.period == "2018") {
+                sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-${filing.lei}")
+              } else {
+                sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-${filing.lei}-${filing.period}")
+              }
+            }
+            institutionPersistence ! AddFiling(filing, None)
+            replyTo ! FilingCreated(filing)
+          }
+
+        case GetFiling(replyTo) =>
+          if (state.filing.isEmpty) {
+            replyTo ! None
+          } else {
+            replyTo ! Some(state.filing)
+          }
+          Effect.none
+
+        case GetFilingDetails(replyTo) =>
+          if (state.filing.isEmpty) {
+            replyTo ! None
+          } else {
+            replyTo ! Some(FilingDetails(state.filing, state.submissions))
+          }
+          Effect.none
+
+        case AddSubmission(submission, replyTo) =>
+          Effect.persist(SubmissionAdded(submission)).thenRun { _ =>
+            log.debug(s"Added submission: ${submission.toString}")
+            replyTo match {
+              case Some(ref) => ref ! submission
+              case None      => Effect.none //Do not reply
+            }
+          }
+
+        case UpdateSubmission(updated, replyTo) =>
+          if (state.submissions.map(_.id).contains(updated.id)) {
+            Effect.persist(SubmissionUpdated(updated)).thenRun { _ =>
+              log.debug(s"Updated submission: ${updated.toString}")
+              replyTo match {
+                case Some(ref) => ref ! updated
+                case None      => Effect.none //Do not reply
+              }
+            }
+          } else {
+            log.warn(s"Could not update submission wth $updated")
+            Effect.none
+          }
+
+        case GetLatestSubmission(replyTo) =>
+          val maybeSubmission = state.submissions
+            .sortWith(_.id.sequenceNumber > _.id.sequenceNumber)
+            .headOption
+          replyTo ! maybeSubmission
+          Effect.none
+
+        case GetSubmissionSummary(submissionId, replyTo) =>
+          val maybeSubmission = state.submissions
+            .filter(_.id.sequenceNumber == submissionId.sequenceNumber)
+            .headOption
+          replyTo ! maybeSubmission
+          Effect.none
+
+        case GetSubmissions(replyTo) =>
+          replyTo ! state.submissions
+          Effect.none
+
+        case FilingStop() =>
+          Effect.stop()
+
+        case _ =>
+          Effect.unhandled
+      }
   }
 
-  def submissionWsRoutes: Route =
-    handleRejections(corsRejectionHandler) {
-      cors() {
-        encodeResponse {
-          submissionWsPath
-        }
-      }
-    }
+  val eventHandler: (FilingState, FilingEvent) => FilingState = {
+    case (state, evt @ SubmissionAdded(_))   => state.update(evt)
+    case (state, evt @ FilingCreated(_))     => state.update(evt)
+    case (state, evt @ SubmissionUpdated(_)) => state.update(evt)
+    case (state, _)                          => state
+  }
 
-  private def keepAliveResponse: KeepAliveWsResponse =
-    KeepAliveWsResponse(Instant.now().toString, ServerPing.messageType)
+  def startShardRegion(sharding: ClusterSharding): ActorRef[ShardingEnvelope[FilingCommand]] =
+    super.startShardRegion(sharding, FilingStop())
+
+  def selectFiling(sharding: ClusterSharding, lei: String, year: Int, quarter: Option[String]): EntityRef[FilingCommand] = {
+    val period = YearUtils.period(year, quarter)
+    sharding.entityRefFor(FilingPersistence.typeKey, s"${FilingPersistence.name}-$lei-$period")
+  }
+
 }

@@ -1,37 +1,39 @@
 package hmda.api.http.filing.submissions
 
-import akka.actor.ActorSystem
+import akka.actor.typed.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.headers.RawHeader
-import akka.http.scaladsl.model.{StatusCodes, Uri}
-import akka.http.scaladsl.server.Directives.{encodeResponse, handleRejections, _}
+import akka.http.scaladsl.model.{ StatusCodes, Uri }
+import akka.http.scaladsl.server.Directives.{ encodeResponse, handleRejections, _ }
 import akka.http.scaladsl.server.Route
-import akka.stream.ActorMaterializer
+import akka.stream.{ ActorMaterializer, Materializer }
 import akka.util.Timeout
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{ cors, corsRejectionHandler }
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.api.http.directives.{HmdaTimeDirectives, QuarterlyFilingAuthorization}
-import hmda.api.http.model.filing.submissions.{EditsSign, SignedResponse}
+import hmda.api.http.directives.{ HmdaTimeDirectives, QuarterlyFilingAuthorization }
+import HmdaTimeDirectives._
+import hmda.api.http.model.filing.submissions.{ EditsSign, SignedResponse }
 import hmda.auth.OAuth2Authorization
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.messages.submission.SubmissionProcessingCommands.SignSubmission
-import hmda.messages.submission.SubmissionProcessingEvents.{SubmissionNotReadyToBeSigned, SubmissionSigned, SubmissionSignedEvent}
-import hmda.model.filing.submission.{Submission, SubmissionId}
+import hmda.messages.submission.SubmissionProcessingEvents.{ SubmissionNotReadyToBeSigned, SubmissionSigned, SubmissionSignedEvent }
+import hmda.model.filing.submission.{ Submission, SubmissionId }
 import hmda.persistence.submission.HmdaValidationError.selectHmdaValidationError
 import hmda.persistence.submission.SubmissionPersistence.selectSubmissionPersistence
 import hmda.util.http.FilingResponseUtils._
 import hmda.utils.YearUtils.Period
+import org.slf4j.Logger
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.{ Failure, Success }
 
-trait SignHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
+trait SignHttpApi extends QuarterlyFilingAuthorization {
 
-  implicit val system: ActorSystem
-  implicit val materializer: ActorMaterializer
-  val log: LoggingAdapter
+  implicit val system: ActorSystem[_]
+  implicit val materializer: Materializer
+  val log: Logger
   implicit val ec: ExecutionContext
   implicit val timeout: Timeout
   val sharding: ClusterSharding
@@ -41,34 +43,28 @@ trait SignHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
   def signPath(oAuth2Authorization: OAuth2Authorization): Route =
     pathPrefix("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
       pathPrefix("submissions" / IntNumber / "sign") { seqNr =>
-          timedGet { uri =>
+        (extractUri & get) { uri =>
+          oAuth2Authorization.authorizeTokenWithLei(lei)(token => getSubmissionForSigning(lei, year, None, seqNr, token.email, uri))
+        } ~ (extractUri & post) { uri =>
+          respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
-              getSubmissionForSigning(lei, year,  None, seqNr, token.email, uri)
-            }
-          } ~ timedPost { uri =>
-            respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-              oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
-                entity(as[EditsSign]) { editsSign =>
-                  signSubmission(lei, year,None, seqNr, token.email, editsSign.signed, uri)
-                }
-              }
-            }
-          }
-        }~ pathPrefix("quarter" / Segment / "submissions" / IntNumber / "sign") {(quarter, seqNr) =>
-          timedGet { uri =>
-            oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
-              getSubmissionForSigning(lei, year,  Option(quarter), seqNr, token.email, uri)
-            }
-          } ~ timedPost { uri =>
-            respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-              oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
-                entity(as[EditsSign]) { editsSign =>
-                  signSubmission(lei, year,Option(quarter), seqNr, token.email, editsSign.signed, uri)
-                }
-              }
+              entity(as[EditsSign])(editsSign => signSubmission(lei, year, None, seqNr, token.email, editsSign.signed, uri))
             }
           }
         }
+      } ~ pathPrefix("quarter" / Segment / "submissions" / IntNumber / "sign") { (quarter, seqNr) =>
+        (extractUri & get) { uri =>
+          oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
+            getSubmissionForSigning(lei, year, Option(quarter), seqNr, token.email, uri)
+          }
+        } ~ (extractUri & post) { uri =>
+          respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+            oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
+              entity(as[EditsSign])(editsSign => signSubmission(lei, year, Option(quarter), seqNr, token.email, editsSign.signed, uri))
+            }
+          }
+        }
+      }
     }
 
   private def getSubmissionForSigning(lei: String, year: Int, quarter: Option[String], seqNr: Int, email: String, uri: Uri): Route = {
@@ -89,14 +85,14 @@ trait SignHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
   }
 
   private def signSubmission(
-    lei: String,
-    year: Int,
-    quarter: Option[String],
-    seqNr: Int,
-    email: String,
-    signed: Boolean,
-    uri: Uri
-  ): Route = {
+                              lei: String,
+                              year: Int,
+                              quarter: Option[String],
+                              seqNr: Int,
+                              email: String,
+                              signed: Boolean,
+                              uri: Uri
+                            ): Route = {
     log.info(s"inside signSubmission ${lei} and ${seqNr}")
     val submissionId = SubmissionId(lei, Period(year, quarter), seqNr)
     if (!signed) badRequest(submissionId, uri, "Illegal argument: signed = false")
@@ -124,7 +120,7 @@ trait SignHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          signPath(oAuth2Authorization)
+          timed(signPath(oAuth2Authorization))
         }
       }
     }

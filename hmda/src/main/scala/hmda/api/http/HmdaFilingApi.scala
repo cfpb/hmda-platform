@@ -1,12 +1,13 @@
 package hmda.api.http
 
-import akka.actor.{ ActorSystem, Props }
+import akka.actor.Props
+import akka.actor.typed.{ ActorSystem, DispatcherSelector }
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 import akka.pattern.pipe
-import akka.stream.ActorMaterializer
+import akka.stream.{ ActorMaterializer, Materializer }
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.filing.FilingHttpApi
 import hmda.api.http.filing.InstitutionHttpApi
@@ -18,6 +19,7 @@ import hmda.api.http.filing.submissions._
 import hmda.auth.{ KeycloakTokenVerifier, OAuth2Authorization }
 import org.keycloak.adapters.KeycloakDeploymentBuilder
 import org.keycloak.representations.adapters.config.AdapterConfig
+import org.slf4j.LoggerFactory
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.duration._
@@ -28,7 +30,7 @@ object HmdaFilingApi {
 }
 
 class HmdaFilingApi
-    extends HttpServer
+  extends HttpServer
     with BaseHttpApi
     with FilingHttpApi
     with SubmissionHttpApi
@@ -42,11 +44,11 @@ class HmdaFilingApi
 
   val config = ConfigFactory.load()
 
-  override implicit val system: ActorSystem             = context.system
-  override implicit val materializer: ActorMaterializer = ActorMaterializer()
-  implicit lazy val ec: ExecutionContext = system.dispatchers.lookup("akka.blocking-upload-dispatcher")
-  val timeout: Timeout                                  = Timeout(config.getInt("hmda.http.timeout").seconds)
-  override val log                                      = Logging(system, getClass)
+  override implicit val system: ActorSystem[_]     = context.system
+  override implicit val materializer: Materializer = Materializer(system)
+  implicit lazy val ec: ExecutionContext           = system.dispatchers.lookup("akka.blocking-upload-dispatcher")
+  val timeout: Timeout                             = Timeout(config.getInt("hmda.http.timeout").seconds)
+  override val log                                 = Logging(system, getClass)
 
   val authUrl       = config.getString("keycloak.auth.server.url")
   val keycloakRealm = config.getString("keycloak.realm")
@@ -64,7 +66,7 @@ class HmdaFilingApi
     new KeycloakTokenVerifier(keycloakDeployment)
   )
 
-  val sharding = ClusterSharding(system.toTyped)
+  val sharding = ClusterSharding(system)
 
   override val name: String = filingApiName
   override val host: String = config.getString("hmda.http.filingHost")
