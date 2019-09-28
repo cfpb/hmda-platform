@@ -33,17 +33,17 @@ import org.slf4j.Logger
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.matching.Regex
 import scala.util.{ Failure, Success }
+import QuarterlyFilingAuthorization._
 
-trait VerifyHttpApi extends QuarterlyFilingAuthorization {
+object VerifyHttpApi {
+  def create(log: Logger, sharding: ClusterSharding)(implicit ec: ExecutionContext, t: Timeout): OAuth2Authorization => Route =
+    new VerifyHttpApi(log, sharding)(ec, t).verifyRoutes _
+}
 
-  implicit val system: ActorSystem
-  implicit val materializer: Materializer
-  override val log: Logger
-  implicit val ec: ExecutionContext
-  implicit val timeout: Timeout
-  val sharding: ClusterSharding
-
+private class VerifyHttpApi(log: Logger, sharding: ClusterSharding)(implicit ec: ExecutionContext, t: Timeout) {
   private val editTypeRegex = new Regex("quality|macro")
+
+  private val quarterlyFiler = quarterlyFilingAllowed(log, sharding) _
 
   // POST institutions/<lei>/filings/<year>/submissions/<submissionId>/edits/<quality|macro>
   // POST institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/edits/<quality|macro>
@@ -58,7 +58,7 @@ trait VerifyHttpApi extends QuarterlyFilingAuthorization {
               }
             } ~ path("quarter" / Quarter / "submissions" / IntNumber / "edits" / editTypeRegex) { (quarter, seqNr, editType) =>
               pathEndOrSingleSlash {
-                quarterlyFilingAllowed(lei, year) {
+                quarterlyFiler(lei, year) {
                   entity(as[EditsVerification]) { editsVerification =>
                     verify(lei, year, Option(quarter), seqNr, editType, editsVerification.verified, uri)
                   }
@@ -122,7 +122,7 @@ trait VerifyHttpApi extends QuarterlyFilingAuthorization {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          timed(verifyPath(oAuth2Authorization))
+          verifyPath(oAuth2Authorization)
         }
       }
     }

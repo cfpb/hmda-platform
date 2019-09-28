@@ -2,7 +2,7 @@ import Dependencies._
 import BuildSettings._
 import sbtassembly.AssemblyPlugin.autoImport.assemblyMergeStrategy
 
-lazy val commonDeps = Seq(logback, scalaTest, scalaCheck)
+lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson)
 
 lazy val sparkDeps =
   Seq(

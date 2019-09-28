@@ -2,7 +2,6 @@ package hmda.api.http.filing.submissions
 
 import akka.actor.typed.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{ HttpResponse, StatusCodes, Uri }
@@ -14,7 +13,8 @@ import akka.util.{ ByteString, Timeout }
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.PathMatchers._
-import hmda.api.http.directives.{ CreateFilingAuthorization, HmdaTimeDirectives, QuarterlyFilingAuthorization }
+import hmda.api.http.directives.CreateFilingAuthorization._
+import hmda.api.http.directives.QuarterlyFilingAuthorization._
 import hmda.api.http.model.ErrorResponse
 import hmda.api.http.model.filing.submissions.SubmissionResponse
 import hmda.auth.OAuth2Authorization
@@ -37,20 +37,28 @@ import hmda.util.http.FilingResponseUtils._
 import hmda.util.streams.FlowUtils.framing
 import hmda.utils.YearUtils
 import hmda.utils.YearUtils.Period
-import HmdaTimeDirectives._
 import org.slf4j.Logger
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
-trait SubmissionHttpApi extends QuarterlyFilingAuthorization with CreateFilingAuthorization {
+object SubmissionHttpApi {
+  def create(log: Logger, sharding: ClusterSharding)(
+    implicit t: Timeout,
+    ec: ExecutionContext,
+    system: ActorSystem[_],
+    mat: Materializer
+  ): OAuth2Authorization => Route = new SubmissionHttpApi(log, sharding)(t, ec, system, mat).submissionRoutes _
+}
 
-  implicit val system: ActorSystem[_]
-  implicit val materializer: Materializer
-  val log: Logger
-  implicit val ec: ExecutionContext
-  implicit val timeout: Timeout
-  val sharding: ClusterSharding
+private class SubmissionHttpApi(log: Logger, sharding: ClusterSharding)(
+  implicit t: Timeout,
+  ec: ExecutionContext,
+  system: ActorSystem[_],
+  mat: Materializer
+) {
+
+  val quarterlyFiler = quarterlyFilingAllowed(log, sharding) _
 
   def submissionCreatePath(oauth2Authorization: OAuth2Authorization): Route =
     respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
@@ -60,7 +68,7 @@ trait SubmissionHttpApi extends QuarterlyFilingAuthorization with CreateFilingAu
         } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter / "submissions") { (lei, year, quarter) =>
           oauth2Authorization.authorizeTokenWithLei(lei) { _ =>
             pathEndOrSingleSlash {
-              quarterlyFilingAllowed(lei, year) {
+              quarterlyFiler(lei, year) {
                 createSubmissionIfValid(lei, year, Option(quarter), uri)
               }
             }
@@ -138,7 +146,7 @@ trait SubmissionHttpApi extends QuarterlyFilingAuthorization with CreateFilingAu
           (lei, year, quarter, seqNr) =>
             oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
               pathEndOrSingleSlash {
-                quarterlyFilingAllowed(lei, year) {
+                quarterlyFiler(lei, year) {
                   getSubmissionSummary(lei, year, Option(quarter), seqNr, uri)
                 }
               }
@@ -196,7 +204,7 @@ trait SubmissionHttpApi extends QuarterlyFilingAuthorization with CreateFilingAu
           (lei, year, quarter) =>
             oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
               pathEndOrSingleSlash {
-                quarterlyFilingAllowed(lei, year) {
+                quarterlyFiler(lei, year) {
                   getLatestSubmission(lei, year, Option(quarter), uri)
                 }
               }
@@ -243,10 +251,8 @@ trait SubmissionHttpApi extends QuarterlyFilingAuthorization with CreateFilingAu
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          timed(
-            submissionCreatePath(oAuth2Authorization) ~ latestSubmissionPath(oAuth2Authorization) ~ submissionSummaryPath(
-              oAuth2Authorization
-            )
+          submissionCreatePath(oAuth2Authorization) ~ latestSubmissionPath(oAuth2Authorization) ~ submissionSummaryPath(
+            oAuth2Authorization
           )
         }
       }

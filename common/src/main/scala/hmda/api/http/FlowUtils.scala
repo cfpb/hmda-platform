@@ -9,7 +9,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Flow, Framing }
 import akka.util.ByteString
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ ExecutionContext, Future }
 
 trait FlowUtils {
 
@@ -26,13 +26,9 @@ trait FlowUtils {
 
   def singleConnectionFlow: Flow[HttpRequest, HttpResponse, NotUsed] =
     Flow[HttpRequest]
-      .mapAsync[HttpResponse](parallelism)(request => {
-        for {
-          response <- Http().singleRequest(request)
-        } yield response
-      })
+      .mapAsync[HttpResponse](parallelism)(Http().singleRequest(_))
 
-  def sendGetRequest(req: String, url: Uri) = {
+  def sendGetRequest(req: String, url: Uri): Future[String] = {
     val request = HttpRequest(HttpMethods.GET, uri = s"$url/$req")
     for {
       response <- Http().singleRequest(request)

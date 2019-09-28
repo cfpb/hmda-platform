@@ -9,15 +9,17 @@ import akka.http.scaladsl.server.Route
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.HmdaServiceStatus
 import io.circe.generic.auto._
-import org.slf4j.Logger
+import org.slf4j.{ Logger, LoggerFactory }
 
 import scala.concurrent.ExecutionContext
 
-trait BaseHttpApi {
-  val log: Logger
-  implicit val ec: ExecutionContext
+object BaseHttpApi {
+  private val log: Logger = LoggerFactory.getLogger(getClass)
 
-  private def rootPath(name: String): Route =
+  def routes(apiName: String)(implicit ec: ExecutionContext): Route =
+    encodeResponse(rootPath(apiName))
+
+  private def rootPath(name: String)(implicit ec: ExecutionContext): Route =
     pathSingleSlash {
       timed {
         complete {
@@ -28,10 +30,5 @@ trait BaseHttpApi {
           status
         }
       }
-    }
-
-  def routes(apiName: String): Route =
-    encodeResponse {
-      rootPath(apiName)
     }
 }

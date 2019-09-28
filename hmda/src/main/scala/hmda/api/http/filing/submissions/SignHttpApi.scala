@@ -1,19 +1,14 @@
 package hmda.api.http.filing.submissions
 
-import akka.actor.typed.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{ StatusCodes, Uri }
 import akka.http.scaladsl.server.Directives.{ encodeResponse, handleRejections, _ }
 import akka.http.scaladsl.server.Route
-import akka.stream.{ ActorMaterializer, Materializer }
 import akka.util.Timeout
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{ cors, corsRejectionHandler }
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.api.http.directives.{ HmdaTimeDirectives, QuarterlyFilingAuthorization }
-import HmdaTimeDirectives._
 import hmda.api.http.model.filing.submissions.{ EditsSign, SignedResponse }
 import hmda.auth.OAuth2Authorization
 import hmda.messages.submission.SubmissionCommands.GetSubmission
@@ -26,17 +21,15 @@ import hmda.util.http.FilingResponseUtils._
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.Future
 import scala.util.{ Failure, Success }
 
-trait SignHttpApi extends QuarterlyFilingAuthorization {
+object SignHttpApi {
+  def create(log: Logger, sharding: ClusterSharding)(implicit t: Timeout): OAuth2Authorization => Route =
+    new SignHttpApi(log, sharding)(t).signRoutes _
+}
 
-  implicit val system: ActorSystem[_]
-  implicit val materializer: Materializer
-  val log: Logger
-  implicit val ec: ExecutionContext
-  implicit val timeout: Timeout
-  val sharding: ClusterSharding
+private class SignHttpApi(log: Logger, sharding: ClusterSharding)(implicit t: Timeout) {
 
   // GET & POST institutions/<lei>/filings/<year>/submissions/<submissionId>/sign
   // GET & POST institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/sign
@@ -120,7 +113,7 @@ trait SignHttpApi extends QuarterlyFilingAuthorization {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          timed(signPath(oAuth2Authorization))
+          signPath(oAuth2Authorization)
         }
       }
     }

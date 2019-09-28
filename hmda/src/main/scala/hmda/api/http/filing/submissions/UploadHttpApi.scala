@@ -2,21 +2,19 @@ package hmda.api.http.filing.submissions
 
 import java.time.Instant
 
-import akka.actor
+import akka.NotUsed
 import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{ StatusCodes, Uri }
-import akka.http.scaladsl.server.Directives.{ complete, encodeResponse, fileUpload, handleRejections, onComplete, path, pathPrefix, _ }
+import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
 import akka.stream.scaladsl.{ Flow, Framing, Sink }
 import akka.util.{ ByteString, Timeout }
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{ cors, corsRejectionHandler }
-import com.typesafe.config.Config
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.PathMatchers._
-import hmda.api.http.directives.QuarterlyFilingAuthorization
+import hmda.api.http.directives.QuarterlyFilingAuthorization._
 import hmda.api.http.model.ErrorResponse
 import hmda.auth.OAuth2Authorization
 import hmda.messages.submission.HmdaRawDataCommands.{ AddLine, HmdaRawDataCommand }
@@ -30,25 +28,27 @@ import hmda.persistence.submission.SubmissionPersistence.selectSubmissionPersist
 import hmda.util.http.FilingResponseUtils._
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
-import hmda.api.http.directives.HmdaTimeDirectives._
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
-trait UploadHttpApi extends QuarterlyFilingAuthorization {
-  implicit val materializer: Materializer
-  implicit val ec: ExecutionContext
-  val log: Logger
-  val sharding: ClusterSharding
-  implicit val timeout: Timeout
-  val config: Config
+object UploadHttpApi {
+  def create(
+              log: Logger,
+              sharding: ClusterSharding
+            )(implicit ec: ExecutionContext, t: Timeout, mat: Materializer): OAuth2Authorization => Route =
+    new UploadHttpApi(log, sharding)(ec, t, mat).uploadRoutes _
+}
+
+private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(implicit ec: ExecutionContext, t: Timeout, mat: Materializer) {
+  private val quarterlyFiler = quarterlyFilingAllowed(log, sharding) _
 
   def uploadRoutes(oAuth2Authorization: OAuth2Authorization): Route =
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
           pathPrefix("institutions") {
-            timed(uploadHmdaFileRoute(oAuth2Authorization))
+            uploadHmdaFileRoute(oAuth2Authorization)
           }
         }
       }
@@ -56,7 +56,7 @@ trait UploadHttpApi extends QuarterlyFilingAuthorization {
 
   // POST <lei>/filings/<year>/submissions/<seqNr>
   // POST <lei>/filings/<year>/quarter/<q>/submissions/<seqNr>
-  def uploadHmdaFileRoute(oauth2Authorization: OAuth2Authorization): Route =
+  private def uploadHmdaFileRoute(oauth2Authorization: OAuth2Authorization): Route =
     respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
       (extractUri & post) { uri =>
         pathPrefix(Segment / "filings") { lei =>
@@ -64,7 +64,7 @@ trait UploadHttpApi extends QuarterlyFilingAuthorization {
             path(IntNumber / "submissions" / IntNumber) { (year, seqNr) =>
               checkAndUploadSubmission(lei, year, None, seqNr, uri)
             } ~ path(IntNumber / "quarter" / Quarter / "submissions" / IntNumber) { (year, quarter, seqNr) =>
-              quarterlyFilingAllowed(lei, year) {
+              quarterlyFiler(lei, year) {
                 checkAndUploadSubmission(lei, year, Option(quarter), seqNr, uri)
               }
             }
@@ -129,23 +129,24 @@ trait UploadHttpApi extends QuarterlyFilingAuthorization {
             val modified =
               submission.copy(status = Uploaded, fileName = fileName)
             submissionManager ! UpdateSubmissionStatus(modified)
-            complete(ToResponseMarshallable(StatusCodes.Accepted -> submission.copy(status = Uploaded)))
+            complete(StatusCodes.Accepted -> submission.copy(status = Uploaded))
+
           case Failure(error) =>
             val failed = submission.copy(status = Failed)
             submissionManager ! UpdateSubmissionStatus(failed)
             log.error(error.getLocalizedMessage)
             val errorResponse =
               ErrorResponse(400, "Invalid file format", uri.path)
-            complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+            complete(StatusCodes.BadRequest -> errorResponse)
         }
 
       case _ =>
         val errorResponse = ErrorResponse(400, "Invalid file format", uri.path)
-        complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+        complete((StatusCodes.BadRequest -> errorResponse))
     }
   }
 
-  private def uploadFile(submissionId: SubmissionId, hmdaRaw: EntityRef[HmdaRawDataCommand]) =
+  private def uploadFile(submissionId: SubmissionId, hmdaRaw: EntityRef[HmdaRawDataCommand]): Flow[String, HmdaRawDataEvent, NotUsed] =
     Flow[String]
       .mapAsync(5)(line => persistLine(hmdaRaw, submissionId, line))
 

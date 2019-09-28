@@ -44,14 +44,17 @@ object HmdaPlatform extends App {
 
   val clusterConfig = runtimeMode match {
     case "dev" => ConfigFactory.parseResources("application-dev.conf").resolve()
+
     case "dev-node" =>
       ConfigFactory.parseResources("application-dev.conf").resolve()
-    case "kubernetes" => {
+
+    case "kubernetes" =>
       log.info(s"HOSTNAME: ${System.getenv("HOSTNAME")}")
       ConfigFactory.parseResources("application-kubernetes.conf").resolve()
-    }
+
     case "dcos" =>
       ConfigFactory.parseResources("application-dcos.conf").resolve()
+
     case _ => config
   }
 

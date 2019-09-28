@@ -1,18 +1,15 @@
 package hmda.api.http.filing
 
-import akka.actor.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.Uri
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import akka.stream.{ ActorMaterializer, Materializer }
 import akka.util.Timeout
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.PathMatchers._
-import hmda.api.http.directives.QuarterlyFilingAuthorization
+import hmda.api.http.directives.QuarterlyFilingAuthorization.quarterlyFilingAllowed
 import hmda.api.http.model.ErrorResponse
 import hmda.auth.OAuth2Authorization
 import hmda.messages.filing.FilingCommands.GetFilingDetails
@@ -27,14 +24,13 @@ import org.slf4j.Logger
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
-trait InstitutionHttpApi extends QuarterlyFilingAuthorization {
+object InstitutionHttpApi {
+  def create(log: Logger, sharding: ClusterSharding)(implicit timeout: Timeout, ec: ExecutionContext): OAuth2Authorization => Route =
+    new InstitutionHttpApi(log, sharding)(timeout, ec).institutionRoutes _
+}
 
-  implicit val system: ActorSystem
-  implicit val materializer: Materializer
-  val log: Logger
-  implicit val ec: ExecutionContext
-  implicit val timeout: Timeout
-  val sharding: ClusterSharding
+private class InstitutionHttpApi(log: Logger, sharding: ClusterSharding)(implicit val timeout: Timeout, ec: ExecutionContext) {
+  private val quarterlyFiler = quarterlyFilingAllowed(log, sharding) _
 
   // GET /institutions/<lei>/year/<y>
   // GET /institutions/<lei>/year/<y>/quarter/<q>
@@ -45,7 +41,7 @@ trait InstitutionHttpApi extends QuarterlyFilingAuthorization {
           pathEndOrSingleSlash {
             obtainAllFilingDetailsRoute(lei, year, uri)
           } ~ path("quarter" / Quarter) { quarter =>
-            quarterlyFilingAllowed(lei, year) {
+            quarterlyFiler(lei, year) {
               obtainFilingDetailsRoute(lei, year, Option(quarter), uri)
             }
           }

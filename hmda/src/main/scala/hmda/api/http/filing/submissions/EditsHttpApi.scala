@@ -3,7 +3,6 @@ package hmda.api.http.filing.submissions
 import akka.NotUsed
 import akka.actor.typed.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, StatusCodes, Uri }
 import akka.http.scaladsl.server.Directives.{ encodeResponse, handleRejections, _ }
@@ -14,7 +13,7 @@ import akka.util.{ ByteString, Timeout }
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{ cors, corsRejectionHandler }
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.PathMatchers._
-import hmda.api.http.directives.{ HmdaTimeDirectives, QuarterlyFilingAuthorization }
+import hmda.api.http.directives.QuarterlyFilingAuthorization._
 import hmda.api.http.model.filing.submissions._
 import hmda.auth.OAuth2Authorization
 import hmda.messages.submission.EditDetailsCommands.GetEditRowCount
@@ -32,20 +31,28 @@ import hmda.query.HmdaQuery._
 import hmda.util.http.FilingResponseUtils._
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
-import HmdaTimeDirectives._
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.matching.Regex
 import scala.util.{ Failure, Success }
 
-trait EditsHttpApi extends QuarterlyFilingAuthorization {
+object EditsHttpApi {
+  def create(log: Logger, sharding: ClusterSharding)(
+    implicit ec: ExecutionContext,
+    t: Timeout,
+    system: ActorSystem[_],
+    mat: Materializer
+  ): OAuth2Authorization => Route = new EditsHttpApi(log, sharding)(ec, t, system, mat).editsRoutes _
+}
 
-  implicit val system: ActorSystem[_]
-  implicit val materializer: Materializer
-  val log: Logger
-  implicit val ec: ExecutionContext
-  implicit val timeout: Timeout
-  val sharding: ClusterSharding
+private class EditsHttpApi(log: Logger, sharding: ClusterSharding)(
+  implicit ec: ExecutionContext,
+  t: Timeout,
+  system: ActorSystem[_],
+  mat: Materializer
+) {
+
+  private val quarterlyFiler = quarterlyFilingAllowed(log, sharding) _
 
   //GET institutions/<lei>/filings/<year>/submissions/<submissionId>/edits
   //GET institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/edits
@@ -57,7 +64,7 @@ trait EditsHttpApi extends QuarterlyFilingAuthorization {
             getEdits(lei, year, None, seqNr, uri)
           } ~ path("filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "edits") { (year, quarter, seqNr) =>
             pathEndOrSingleSlash {
-              quarterlyFilingAllowed(lei, year) {
+              quarterlyFiler(lei, year) {
                 getEdits(lei, year, Option(quarter), seqNr, uri)
               }
             }
@@ -117,7 +124,7 @@ trait EditsHttpApi extends QuarterlyFilingAuthorization {
           csvEditSummaryStream(lei, year, None, seqNr)
         } ~ path("filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "edits" / "csv") { (year, quarter, seqNr) =>
           pathEndOrSingleSlash {
-            quarterlyFilingAllowed(lei, year) {
+            quarterlyFiler(lei, year) {
               csvEditSummaryStream(lei, year, Option(quarter), seqNr)
             }
           }
@@ -147,7 +154,7 @@ trait EditsHttpApi extends QuarterlyFilingAuthorization {
             } ~ path("filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "edits" / editNameRegex) {
               (year, quarter, seqNr, editName) =>
                 pathEndOrSingleSlash {
-                  quarterlyFilingAllowed(lei, year) {
+                  quarterlyFiler(lei, year) {
                     getEditDetails(lei, year, Option(quarter), seqNr, page, editName, uri)
                   }
                 }
@@ -181,7 +188,7 @@ trait EditsHttpApi extends QuarterlyFilingAuthorization {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          timed(editsSummaryPath(oAuth2Authorization) ~ editDetailsPath(oAuth2Authorization) ~ editsSummaryCsvPath(oAuth2Authorization))
+          editsSummaryPath(oAuth2Authorization) ~ editDetailsPath(oAuth2Authorization) ~ editsSummaryCsvPath(oAuth2Authorization)
         }
       }
     }

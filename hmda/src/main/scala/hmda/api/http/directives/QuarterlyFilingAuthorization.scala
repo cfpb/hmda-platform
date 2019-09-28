@@ -1,29 +1,25 @@
 package hmda.api.http.directives
 
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.model.StatusCodes.{ BadRequest, Forbidden }
-import akka.http.scaladsl.server._
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server._
 import akka.util.Timeout
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.ErrorResponse
 import hmda.messages.institution.InstitutionCommands.GetInstitution
 import hmda.model.institution.Institution
 import hmda.persistence.institution.InstitutionPersistence
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import org.slf4j.Logger
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
-trait QuarterlyFilingAuthorization {
-  val sharding: ClusterSharding
-  val log: Logger
-  implicit val timeout: Timeout
-  implicit val ec: ExecutionContext
-
-  def quarterlyFilingAllowed(lei: String, year: Int)(successful: Route): Route = {
+object QuarterlyFilingAuthorization {
+  def quarterlyFilingAllowed(log: Logger, sharding: ClusterSharding)(lei: String, year: Int)(
+    successful: Route
+  )(implicit ec: ExecutionContext, timeout: Timeout): Route = {
     val institution                           = InstitutionPersistence.selectInstitution(sharding, lei, year)
     val response: Future[Option[Institution]] = institution ? GetInstitution
     extractMatchedPath { path =>
