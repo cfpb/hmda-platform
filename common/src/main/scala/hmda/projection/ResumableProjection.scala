@@ -28,7 +28,7 @@ trait ResumableProjection {
   def behavior: Behavior[ProjectionCommand] =
     Behaviors.setup { ctx =>
       EventSourcedBehavior[ProjectionCommand, ProjectionEvent, ResumableProjectionState](
-        persistenceId = PersistenceId(name),
+        persistenceId = PersistenceId(entityTypeHint = "", entityId = name, separator = ""),
         emptyState = ResumableProjectionState(),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
@@ -36,8 +36,8 @@ trait ResumableProjection {
     }
 
   def commandHandler(
-    ctx: TypedActorContext[ProjectionCommand]
-  ): CommandHandler[ProjectionCommand, ProjectionEvent, ResumableProjectionState] = { (state, cmd) =>
+                      ctx: TypedActorContext[ProjectionCommand]
+                    ): CommandHandler[ProjectionCommand, ProjectionEvent, ResumableProjectionState] = { (state, cmd) =>
     val log = ctx.asScala.log
     cmd match {
       case StartStreaming =>
