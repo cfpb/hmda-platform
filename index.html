@@ -333,7 +333,7 @@
 <td>1,2,3,4,5-24,25-49,50-99,100-149,&gt;149</td>
 </tr>
 </tbody></table>
-<h2 id='data-browser-api-aggregation-example'>Aggregation Example</h2><pre class="highlight shell tab-shell"><code>  curl <span class="s2">"http://localhost:8070/data-browser-api/view/aggregations?states=MD&amp;years=2018&amp;actions_taken=5,6&amp;races=White,Asian,Joint"</span>
+<h2 id='data-browser-api-aggregation-example'>Aggregation Example</h2><pre class="highlight shell tab-shell"><code>  curl <span class="s2">"https://ffiec.cfpb.gov/v2//data-browser-api/view/aggregations?states=MD&amp;years=2018&amp;actions_taken=5,6&amp;races=White,Asian,Joint"</span>
 </code></pre>
 <blockquote>
 <p>The above command returns JSON structured like this:</p>
@@ -422,7 +422,7 @@
 <td>White, Asian, Joint</td>
 </tr>
 </tbody></table>
-<h2 id='data-browser-api-csv-example'>CSV Example</h2><pre class="highlight shell tab-shell"><code>  curl -L <span class="s2">"http://localhost:8070/data-browser-api/view/csv?states=CA,MD,DC&amp;years=2018&amp;actions_taken=5"</span>
+<h2 id='data-browser-api-csv-example'>CSV Example</h2><pre class="highlight shell tab-shell"><code>  curl -L <span class="s2">"https://ffiec.cfpb.gov/v2//data-browser-api/view/csv?states=CA,MD,DC&amp;years=2018&amp;actions_taken=5"</span>
 </code></pre>
 <blockquote>
 <p>The above command returns a stream to a CSV file structured like this:</p>
@@ -449,7 +449,7 @@
 <td>5</td>
 </tr>
 </tbody></table>
-<h2 id='data-browser-api-errors'>Errors</h2><pre class="highlight shell tab-shell"><code>curl <span class="s2">"http://localhost:8070/data-browser-api/view/csv"</span>
+<h2 id='data-browser-api-errors'>Errors</h2><pre class="highlight shell tab-shell"><code>curl <span class="s2">"https://ffiec.cfpb.gov/v2//data-browser-api/view/csv"</span>
 </code></pre>
 <blockquote>
 <p>The above command returns JSON structured like this:</p>
