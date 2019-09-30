@@ -209,45 +209,63 @@
       </span>
     </a>
     <div class="toc-wrapper">
-
-      <img src="images/ffiec-logo.png" class="logo" alt="Ffiec logo" />
+      <a href="/"><img src="images/ffiec-logo.png" class="logo" alt="Ffiec logo" /></a>
       <ul id="toc" class="toc-list-h1">
+          <li>
+            <a href="#hmda-api-documentation" class="toc-h1 toc-link" data-title="HMDA API Documentation">HMDA API Documentation</a>
+          </li>
           <li>
             <a href="#data-browser-api" class="toc-h1 toc-link" data-title="Data Browser API">Data Browser API</a>
               <ul class="toc-list-h2">
                   <li>
-                    <a href="#end-points" class="toc-h2 toc-link" data-title="End Points">End Points</a>
+                    <a href="#data-browser-api-end-points" class="toc-h2 toc-link" data-title="End Points">End Points</a>
                   </li>
                   <li>
-                    <a href="#filters" class="toc-h2 toc-link" data-title="Filters">Filters</a>
+                    <a href="#data-browser-api-filters" class="toc-h2 toc-link" data-title="Filters">Filters</a>
                   </li>
                   <li>
-                    <a href="#aggregation-example" class="toc-h2 toc-link" data-title="Aggregation Example">Aggregation Example</a>
+                    <a href="#data-browser-api-aggregation-example" class="toc-h2 toc-link" data-title="Aggregation Example">Aggregation Example</a>
                   </li>
                   <li>
-                    <a href="#csv-example" class="toc-h2 toc-link" data-title="CSV Example">CSV Example</a>
+                    <a href="#data-browser-api-csv-example" class="toc-h2 toc-link" data-title="CSV Example">CSV Example</a>
                   </li>
                   <li>
-                    <a href="#errors" class="toc-h2 toc-link" data-title="Errors">Errors</a>
+                    <a href="#data-browser-api-errors" class="toc-h2 toc-link" data-title="Errors">Errors</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
+            <a href="#rate-spread" class="toc-h1 toc-link" data-title="Rate Spread">Rate Spread</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#rate-spread-rate-spread-api" class="toc-h2 toc-link" data-title="Rate Spread API">Rate Spread API</a>
+                  </li>
+                  <li>
+                    <a href="#rate-spread-end-points" class="toc-h2 toc-link" data-title="End Points">End Points</a>
+                  </li>
+                  <li>
+                    <a href="#rate-spread-json-example" class="toc-h2 toc-link" data-title="JSON Example">JSON Example</a>
+                  </li>
+                  <li>
+                    <a href="#rate-spread-csv-file-format" class="toc-h2 toc-link" data-title="CSV File Format">CSV File Format</a>
+                  </li>
+                  <li>
+                    <a href="#rate-spread-csv-example" class="toc-h2 toc-link" data-title="CSV Example">CSV Example</a>
                   </li>
               </ul>
           </li>
       </ul>
     </div>
     <div class="page-wrapper">
-
-
-
       <div class="dark-box"></div>
-
-      <div class="banner-inner"><img src="images/favicon-57.png" alt="U.S. flag"><p>An official website of the United States government</p></div>
-
       <div class="content">
-        <h1 id='data-browser-api'>Data Browser API</h1>
+        <h1 id='hmda-api-documentation'>HMDA API Documentation</h1>
+<p>The HMDA Platform API helps to prepare and test your HMDA data by allowing you to calculate rate spread, check a single LAR for formatting errors, generate/validate a check digit, and more.</p>
+<h1 id='data-browser-api'>Data Browser API</h1>
 <p>The data browser api enables developers to interact with HMDA data. The API will return the data in JSON or CSV.</p>
 
 <p><em>Note:</em> depending on the query, files might take a while to generate and may not open using conventional spread sheet applications.</p>
-<h2 id='end-points'>End Points</h2>
+<h2 id='data-browser-api-end-points'>End Points</h2>
 <p>Use <code>data-browser-api/view/</code> for the end points bellow. Each end point could be called on nationwide data or on specific states/msamds. If <code>nationwide</code> is not specified, state(s) or msamds <strong>must</strong> be selected. A call made with the nationwide end point will discard any state(s) or msamds if present. For state, use 2 character state name. For msamd use a 5 digit integer.</p>
 
 <ul>
@@ -261,7 +279,7 @@
 </ul>
 
 <p>The <code>csv</code> end point can be used to generate CSV reports. The file will be streamed.</p>
-<h2 id='filters'>Filters</h2>
+<h2 id='data-browser-api-filters'>Filters</h2>
 <p>Data request could be filtered based on the following parameters. Multiple options are acceptable.</p>
 
 <table><thead>
@@ -315,7 +333,7 @@
 <td>1,2,3,4,5-24,25-49,50-99,100-149,&gt;149</td>
 </tr>
 </tbody></table>
-<h2 id='aggregation-example'>Aggregation Example</h2><pre class="highlight shell tab-shell"><code>  curl <span class="s2">"https://ffiec.cfpb.gov/v2/data-browser-api/view/aggregations?states=MD&amp;years=2018&amp;actions_taken=5,6&amp;races=White,Asian,Joint"</span>
+<h2 id='data-browser-api-aggregation-example'>Aggregation Example</h2><pre class="highlight shell tab-shell"><code>  curl <span class="s2">"http://localhost:8070/data-browser-api/view/aggregations?states=MD&amp;years=2018&amp;actions_taken=5,6&amp;races=White,Asian,Joint"</span>
 </code></pre>
 <blockquote>
 <p>The above command returns JSON structured like this:</p>
@@ -404,7 +422,7 @@
 <td>White, Asian, Joint</td>
 </tr>
 </tbody></table>
-<h2 id='csv-example'>CSV Example</h2><pre class="highlight shell tab-shell"><code>  curl -L <span class="s2">"https://ffiec.cfpb.gov/v2/data-browser-api/view/csv?states=CA,MD,DC&amp;years=2018&amp;actions_taken=5"</span>
+<h2 id='data-browser-api-csv-example'>CSV Example</h2><pre class="highlight shell tab-shell"><code>  curl -L <span class="s2">"http://localhost:8070/data-browser-api/view/csv?states=CA,MD,DC&amp;years=2018&amp;actions_taken=5"</span>
 </code></pre>
 <blockquote>
 <p>The above command returns a stream to a CSV file structured like this:</p>
@@ -431,7 +449,7 @@
 <td>5</td>
 </tr>
 </tbody></table>
-<h2 id='errors'>Errors</h2><pre class="highlight shell tab-shell"><code>curl <span class="s2">"https://ffiec.cfpb.gov/v2/data-browser-api/view/csv"</span>
+<h2 id='data-browser-api-errors'>Errors</h2><pre class="highlight shell tab-shell"><code>curl <span class="s2">"http://localhost:8070/data-browser-api/view/csv"</span>
 </code></pre>
 <blockquote>
 <p>The above command returns JSON structured like this:</p>
@@ -444,6 +462,135 @@
 <p>Incorrect calls will result in an error. For example the following call will result in an error since there is no state(s)/msamds and years provided.</p>
 
 <p><br></p>
+<h1 id='rate-spread'>Rate Spread</h1><h2 id='rate-spread-rate-spread-api'>Rate Spread API</h2>
+<p>The <code>/rateSpread</code> endpoint you can provide information about a loan and have the rate spread calculated via <code>POST</code>.</p>
+
+<p><strong>Note:</strong> The response is either a number representing the rate spread or &quot;NA&quot;.</p>
+<h2 id='rate-spread-end-points'>End Points</h2>
+<p>Rate spread has 2 API endpoints, one for submitting JSON and one for CSV.</p>
+
+<p><code>POST</code> <code>https://ffiec.cfpb.gov/public/rateSpread</code> <br>
+  <code>POST</code> <code>https://ffiec.cfpb.gov/public/rateSpread/csv</code></p>
+<h2 id='rate-spread-json-example'>JSON Example</h2><pre class="highlight shell tab-shell"><code>  curl -X POST <span class="s2">"https://ffiec.cfpb.gov/public/rateSpread"</span> -H <span class="s2">"Content-Type: application/json"</span> -d <span class="s1">'{ "actionTakenType": 1, "loanTerm": 30, "amortizationType": "FixedRate", "apr": 6.0, "lockInDate": "2017-11-20", "reverseMortgage": 2 }'</span>
+</code></pre>
+<blockquote>
+<p>The above command returns JSON structured like this:</p>
+</blockquote>
+<pre class="highlight json tab-json"><code><span class="w">  </span><span class="p">{</span><span class="s2">"rateSpread"</span><span class="p">:</span><span class="s2">"2.010"</span><span class="p">}</span><span class="w">
+</span></code></pre>
+<p>JSON with the following parameters</p>
+
+<table><thead>
+<tr>
+<th>var</th>
+<th>value</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>actionTakenType</td>
+<td>1</td>
+</tr>
+<tr>
+<td>loanTerm</td>
+<td>30</td>
+</tr>
+<tr>
+<td>amortizationType</td>
+<td>FixedRate</td>
+</tr>
+<tr>
+<td>apr</td>
+<td>6.0</td>
+</tr>
+<tr>
+<td>lockInDate</td>
+<td>2017-11-20</td>
+</tr>
+<tr>
+<td>reverseMortgage</td>
+<td>2</td>
+</tr>
+</tbody></table>
+<h2 id='rate-spread-csv-file-format'>CSV File Format</h2>
+<p>The contents of this file must include the following information:</p>
+
+<table><thead>
+<tr>
+<th>var</th>
+<th>type</th>
+<th>accepted values</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>action_taken_type</td>
+<td>integer</td>
+<td><code>1</code> = Originated<br><code>2</code> = Approved Not Accepted<br><code>8</code> = Pre-approval request approved but not Accepted<br><code>3</code>, <code>4</code>, <code>5</code>, <code>6</code> or <code>7</code> will result in <code>NA</code></td>
+</tr>
+<tr>
+<td>loan_term</td>
+<td>integer</td>
+<td>Range from <code>1</code> - <code>50</code></td>
+</tr>
+<tr>
+<td>amortization_type</td>
+<td>String</td>
+<td><code>FixedRate</code> or <code>VariableRate</code></td>
+</tr>
+<tr>
+<td>apr</td>
+<td>double</td>
+<td>The annual Percentage Rate on the loan, eg <code>6.0</code></td>
+</tr>
+<tr>
+<td>lock_in_date</td>
+<td>date</td>
+<td><code>YYYY-MM-DD</code></td>
+</tr>
+<tr>
+<td>reverse_mortgage</td>
+<td>integer</td>
+<td><code>2</code> = false<br><code>1</code> = true, will result in <code>NA</code></td>
+</tr>
+</tbody></table>
+<h2 id='rate-spread-csv-example'>CSV Example</h2><pre class="highlight shell tab-shell"><code>curl -X POST <span class="s2">"https://ffiec.cfpb.gov/public/rateSpread/csv"</span> -F <span class="nv">file</span><span class="o">=</span>&lt;file.csv&gt;
+</code></pre>
+<blockquote>
+<p>The above command returns the csv with an added column for rate_spread:</p>
+</blockquote>
+<pre class="highlight plaintext"><code>action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,rate_spread
+1,30,FixedRate,6.0,2017-11-20,2,2.010
+1,30,VariableRate,6.0,2017-11-20,2,2.150
+</code></pre>
+<blockquote>
+<p>The response appends the calculate <code>rate_spread</code> to each row of the original <code>CSV</code>.</p>
+</blockquote>
+
+<p>CSV File with contents:</p>
+
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>1</td>
+<td>30</td>
+<td>FixedRate</td>
+<td>6.0</td>
+<td>2017-11-20</td>
+</tr>
+<tr>
+<td>1</td>
+<td>30</td>
+<td>VariableRate</td>
+<td>6.0</td>
+<td>2017-11-20</td>
+</tr>
+</tbody></table>
 
       </div>
       <div class="dark-box">
