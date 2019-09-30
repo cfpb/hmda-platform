@@ -23,10 +23,16 @@ import akka.util.{ByteString, Timeout}
 import akka.{Done, NotUsed}
 import com.typesafe.config.ConfigFactory
 import hmda.HmdaPlatform
-import hmda.messages.institution.InstitutionCommands.{GetInstitution, ModifyInstitution}
+import hmda.messages.institution.InstitutionCommands.{
+  GetInstitution,
+  ModifyInstitution
+}
 import hmda.messages.institution.InstitutionEvents.InstitutionEvent
 import hmda.messages.pubsub.HmdaTopics._
-import hmda.messages.submission.EditDetailsCommands.{EditDetailsPersistenceCommand, PersistEditDetails}
+import hmda.messages.submission.EditDetailsCommands.{
+  EditDetailsPersistenceCommand,
+  PersistEditDetails
+}
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents._
@@ -34,14 +40,23 @@ import hmda.model.filing.submission._
 import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
 import hmda.model.institution.Institution
 import hmda.model.processing.state.HmdaValidationErrorState
-import hmda.model.validation.{MacroValidationError, QualityValidationError, SyntacticalValidationError, ValidationError}
+import hmda.model.validation.{
+  MacroValidationError,
+  QualityValidationError,
+  SyntacticalValidationError,
+  ValidationError
+}
 import hmda.parser.filing.ParserFlow._
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.EditDetailsConverter._
-import hmda.persistence.submission.HmdaProcessingUtils.{readRawData, updateSubmissionReceipt, updateSubmissionStatus}
+import hmda.persistence.submission.HmdaProcessingUtils.{
+  readRawData,
+  updateSubmissionReceipt,
+  updateSubmissionStatus
+}
 import hmda.publication.KafkaUtils._
 import hmda.util.streams.FlowUtils.framing
 import hmda.validation.context.ValidationContext
@@ -169,7 +184,9 @@ object HmdaValidationError
             "quality",
             ctx,
             submissionId,
-            ValidationContext(filingYear = Some(period)))(system, materializer, blockingEc)
+            ValidationContext(filingYear = Some(period)))(system,
+            materializer,
+            blockingEc)
           _ = log.info(s"Finished ValidateLar Quality for $submissionId")
           _ = log.info(s"Started validateAsyncLar - Quality for $submissionId")
           larAsyncErrorsQuality <- validateAsyncLar("quality",
@@ -334,7 +351,7 @@ object HmdaValidationError
                 log)
               publishSignEvent(submissionId).map(signed =>
                 log.info(s"Published signed event for $submissionId"))
-              setHmdaFilerFlag(submissionId.lei, sharding)
+              setHmdaFilerFlag(submissionId.lei, submissionId.period, sharding)
               replyTo ! signed
             }
           } else {
@@ -754,11 +771,18 @@ object HmdaValidationError
 
   private def setHmdaFilerFlag[as: AS, mat: MAT, ec: EC](
                                                           institutionID: String,
+                                                          period: String,
                                                           sharding: ClusterSharding): Unit = {
 
     val institutionPersistence =
-      sharding.entityRefFor(InstitutionPersistence.typeKey,
-        s"${InstitutionPersistence.name}-$institutionID")
+      if (period == "2018") {
+        sharding.entityRefFor(InstitutionPersistence.typeKey,
+          s"${InstitutionPersistence.name}-$institutionID")
+      } else {
+        sharding.entityRefFor(
+          InstitutionPersistence.typeKey,
+          s"${InstitutionPersistence.name}-$institutionID-$period")
+      }
 
     val fInstitution: Future[Option[Institution]] = institutionPersistence ? (
       ref => GetInstitution(ref))
