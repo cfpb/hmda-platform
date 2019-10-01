@@ -4,12 +4,13 @@ metadata:
   labels: 
     service: keycloak-ambassador
   name: keycloak-ambassador
+  namespace: beta
   annotations:
     getambassador.io/config: |
       apiVersion: ambassador/v1
       kind: Mapping
       name: keycloak_https_mapping
-      ambassador_id: ambassador-default-1
+      ambassador_id: ambassador-beta-2
       prefix: /auth/
       rewrite: /auth/
       service: keycloak-http.default.svc.cluster.local
@@ -17,7 +18,7 @@ metadata:
 spec:
   clusterIP : None
   ports:
-  - name: keycloak-ambassador
+  - name: keycloak-ambassador-beta
     port: 8443
     targetPort: 8443
   selector:
