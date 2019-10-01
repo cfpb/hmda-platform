@@ -27,7 +27,7 @@ metadata:
   name: institutions-api-ambassador
   annotations:
     getambassador.io/config: |
-      apiVersion: ambassador/v0
+      apiVersion: ambassador/v1
       kind: Mapping
       name: institution_api_mapping
       ambassador_id: ambassador-beta-2

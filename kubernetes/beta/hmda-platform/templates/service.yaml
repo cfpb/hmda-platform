@@ -64,7 +64,7 @@ metadata:
   name: ambassador-hmda-admin
   annotations:
     getambassador.io/config: |
-      apiVersion: ambassador/v0
+      apiVersion: ambassador/v1
       kind: Mapping
       name: hmda_admin_mapping
       ambassador_id: ambassador-beta-2
@@ -84,7 +84,7 @@ metadata:
   name: ambassador-hmda-filing
   annotations:
     getambassador.io/config: |
-      apiVersion: ambassador/v0
+      apiVersion: ambassador/v1
       kind: Mapping
       name: hmda_filing_mapping
       ambassador_id: ambassador-beta-2
@@ -105,7 +105,7 @@ metadata:
   name: ambassador-hmda-public
   annotations:
     getambassador.io/config: |
-      apiVersion: ambassador/v0
+      apiVersion: ambassador/v1
       kind: Mapping
       name: hmda_public_mapping
       ambassador_id: ambassador-beta-2
@@ -125,7 +125,7 @@ metadata:
   name: ambassador-hmda-cluster
   annotations:
     getambassador.io/config: |
-      apiVersion: ambassador/v0
+      apiVersion: ambassador/v1
       kind: Mapping
       name: hmda_cluster_mapping
       ambassador_id: ambassador-beta-2
@@ -146,7 +146,7 @@ metadata:
   name: ambassador-hmda-ws
   annotations:
     getambassador.io/config: |
-      apiVersion: ambassador/v0
+      apiVersion: ambassador/v1
       kind: Mapping
       name: hmda_ws_mapping
       ambassador_id: ambassador-beta-2
