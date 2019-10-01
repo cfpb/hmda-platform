@@ -277,3 +277,4 @@ Q644|If Automated Underwriting System: 1; Automated Underwriting System: 2; Auto
 Q645-1|Loan Amount should generally be greater than or equal to $500 (reported as 500).|Loan Amount
 Q645-2|If Loan Purpose equals 1, then Loan Amount should generally be greater than or equal to $1,000 (reported as 1000)|Loan Amount
 Q646|Your file indicates that at least one exemption code was used. Please verify that your institution is eligible for a partial exemption pursuant to the 2018 HMDA Rule.|
+Q647|If Federal Agency equals 7, indicating a non-depository institution, exemption codes should not be used in the Loan/Application Register. Your data indicates that at least one exemption code was used.|
