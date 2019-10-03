@@ -1,4 +1,4 @@
-package hmda.loader.institution
+package hmda.institution.loader
 
 import java.io.File
 
@@ -10,10 +10,10 @@ import akka.stream.scaladsl.{ FileIO, Sink }
 import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.FlowUtils
-import hmda.parser.institution.InstitutionCsvParser
-import org.slf4j.LoggerFactory
 import hmda.api.http.codec.institution.InstitutionCodec._
+import hmda.parser.institution.InstitutionCsvParser
 import io.circe.syntax._
+import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext
 
@@ -27,6 +27,8 @@ object InstitutionLoader extends App with FlowUtils {
 
   override def parallelism = config.getInt("hmda.loader.parallelism")
   val url                  = config.getString("hmda.loader.institution.url")
+
+  println("URL: " + url)
 
   val log = LoggerFactory.getLogger("institutions-loader")
 
