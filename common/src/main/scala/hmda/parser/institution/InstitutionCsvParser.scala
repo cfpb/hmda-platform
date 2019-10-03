@@ -52,8 +52,11 @@ object InstitutionCsvParser {
       if (hmdaFiler == "") false
       else
         hmdaFiler match {
-          case "t" => true
-          case _   => false
+          case "t"     => true
+          case "f"     => false
+          case "true"  => true
+          case "false" => false
+          case _       => false
         }
     )
 
