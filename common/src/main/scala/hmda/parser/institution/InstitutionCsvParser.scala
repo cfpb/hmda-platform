@@ -49,15 +49,13 @@ object InstitutionCsvParser {
         topHolderIdRssd,
         if (topHolderName == "") None else Some(topHolderName)
       ),
-      if (hmdaFiler == "") false
-      else
-        hmdaFiler match {
-          case "t"     => true
-          case "f"     => false
-          case "true"  => true
-          case "false" => false
-          case _       => false
-        }
+      hmdaFiler match {
+        case "t"     => true
+        case "f"     => false
+        case "true"  => true
+        case "false" => false
+        case _       => false
+      }
     )
 
   }
