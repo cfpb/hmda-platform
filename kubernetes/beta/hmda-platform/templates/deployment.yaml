@@ -46,8 +46,8 @@ spec:
             mountPath: /etc/localtime
         resources:
           limits:
-            memory: "6200Mi"
-            cpu: "6"
+            memory: "4200Mi"
+            cpu: "4"
           requests:
             memory: "6200Mi"
             cpu: "2"
