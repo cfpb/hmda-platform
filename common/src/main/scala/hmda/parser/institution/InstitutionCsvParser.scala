@@ -42,17 +42,20 @@ object InstitutionCsvParser {
         if (respondentState == "") None else Some(respondentState),
         if (respondentCity == "") None else Some(respondentCity)
       ),
-      Parent(
-        parentIdRssd,
-        if (parentName == "") None else Some(parentName)
-      ),
+      Parent(parentIdRssd, if (parentName == "") None else Some(parentName)),
       assets,
       otherLenderCode,
       TopHolder(
         topHolderIdRssd,
         if (topHolderName == "") None else Some(topHolderName)
       ),
-      if (hmdaFiler == "") false else hmdaFiler.toBoolean
+      hmdaFiler match {
+        case "t"     => true
+        case "f"     => false
+        case "true"  => true
+        case "false" => false
+        case _       => false
+      }
     )
 
   }
