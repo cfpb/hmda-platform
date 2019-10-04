@@ -4,7 +4,7 @@ sealed trait BusinessOrCommercialBusinessEnum extends LarEnum
 
 object BusinessOrCommercialBusinessEnum
     extends LarCodeEnum[BusinessOrCommercialBusinessEnum] {
-  override val values = List(1, 2)
+  override val values = List(1, 2, 1111)
 
   override def valueOf(code: Int): BusinessOrCommercialBusinessEnum = {
     code match {

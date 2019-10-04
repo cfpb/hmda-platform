@@ -84,10 +84,12 @@ object HmdaParserError
           .zip(Source.fromIterator(() => Iterator.from(1)))
           .collect {
             case ((Left(errors), line), rowNumber) =>
-              PersistHmdaRowParsedError(rowNumber,
-                                        estimateULI(line),
-                                        errors.map(_.errorMessage),
-                                        None)
+              PersistHmdaRowParsedError(
+                rowNumber,
+                estimateULI(line),
+                errors.map(x =>
+                  FieldParserError(x.fieldName, x.inputValue, x.validValues)),
+                None)
           }
           .via(
             ActorFlow.ask(ctx.asScala.self)(

@@ -3,7 +3,7 @@ package hmda.model.filing.lar.enums
 sealed trait RaceObservedEnum extends LarEnum
 
 object RaceObservedEnum extends LarCodeEnum[RaceObservedEnum] {
-  override val values = List(1, 2, 3)
+  override val values = List(1, 2, 3, 4)
 
   override def valueOf(code: Int): RaceObservedEnum = {
     code match {

@@ -8,7 +8,7 @@ import scala.concurrent.duration.FiniteDuration
 case class SyntacticalCheck(submissionId: String, hashedInfo: String)
 
 abstract class SyntacticalRepository
-  extends Table[SyntacticalRepository, SyntacticalCheck]
+    extends Table[SyntacticalRepository, SyntacticalCheck]
     with RootConnector {
 
   /**

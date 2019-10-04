@@ -1,6 +1,7 @@
 package hmda.messages.submission
 
 import hmda.messages.CommonMessages.Event
+import hmda.messages.submission.SubmissionProcessingCommands.FieldParserError
 import hmda.model.filing.submission.{SubmissionId, SubmissionStatus}
 import hmda.model.validation.{MacroValidationError, ValidationError}
 
@@ -9,7 +10,7 @@ object SubmissionProcessingEvents {
 
   case class HmdaRowParsedError(rowNumber: Int,
                                 estimatedULI: String,
-                                errorMessages: List[String])
+                                errorMessages: List[FieldParserError])
       extends SubmissionProcessingEvent
 
   case class HmdaRowValidatedError(rowNumber: Int,

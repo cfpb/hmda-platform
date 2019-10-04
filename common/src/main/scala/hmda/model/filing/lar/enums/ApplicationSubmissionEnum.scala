@@ -4,7 +4,7 @@ sealed trait ApplicationSubmissionEnum extends LarEnum
 
 object ApplicationSubmissionEnum
     extends LarCodeEnum[ApplicationSubmissionEnum] {
-  override val values = List(1, 2, 3)
+  override val values = List(1, 2, 3, 1111)
 
   override def valueOf(code: Int): ApplicationSubmissionEnum = {
     code match {

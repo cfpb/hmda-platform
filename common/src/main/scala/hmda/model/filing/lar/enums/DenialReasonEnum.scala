@@ -3,7 +3,7 @@ package hmda.model.filing.lar.enums
 sealed trait DenialReasonEnum extends LarEnum
 
 object DenialReasonEnum extends LarCodeEnum[DenialReasonEnum] {
-  val values = List(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+  val values = List(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1111)
 
   def valueOf(code: Int): DenialReasonEnum = {
     code match {

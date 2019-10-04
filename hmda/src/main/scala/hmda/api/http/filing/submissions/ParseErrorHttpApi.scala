@@ -70,8 +70,7 @@ trait ParseErrorHttpApi extends HmdaTimeDirectives {
                       onComplete(fErrors) {
                         case Success(state) =>
                           val parsingErrorSummary = ParsingErrorSummary(
-                            state.transmittalSheetErrors.flatMap(
-                              _.errorMessages),
+                            state.transmittalSheetErrors,
                             state.larErrors,
                             uri.path.toString,
                             page,

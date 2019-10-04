@@ -4,7 +4,7 @@ sealed trait AutomatedUnderwritingSystemEnum extends LarEnum
 
 object AutomatedUnderwritingSystemEnum
     extends LarCodeEnum[AutomatedUnderwritingSystemEnum] {
-  override val values = List(0, 1, 2, 3, 4, 5)
+  override val values = List(0, 1, 2, 3, 4, 5, 6, 1111)
 
   override def valueOf(code: Int): AutomatedUnderwritingSystemEnum = {
     code match {

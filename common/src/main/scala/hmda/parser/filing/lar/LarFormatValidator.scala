@@ -434,10 +434,16 @@ sealed trait LarFormatValidator extends LarParser {
         coAppCreditScoreModelOther,
         coApp = true
       ),
-      validateIntStrOrNAField(income, InvalidIncome),
-      validateLarCode(PurchaserEnum, purchaserType, InvalidPurchaserType),
-      validateLarCode(HOEPAStatusEnum, hoepaStatus, InvalidHoepaStatus),
-      validateLarCode(LienStatusEnum, lienStatus, InvalidLienStatus),
+      validateIntStrOrNAField(income, InvalidIncome(income)),
+      validateLarCode(PurchaserEnum,
+                      purchaserType,
+                      InvalidPurchaserType(purchaserType)),
+      validateLarCode(HOEPAStatusEnum,
+                      hoepaStatus,
+                      InvalidHoepaStatus(hoepaStatus)),
+      validateLarCode(LienStatusEnum,
+                      lienStatus,
+                      InvalidLienStatus(lienStatus)),
       validateDenial(denial1, denial2, denial3, denial4, denialOther),
       validateLoanDisclosure(totalLoanCosts,
                              totalPointsAndFees,
@@ -455,10 +461,10 @@ sealed trait LarFormatValidator extends LarParser {
                        multifamilyAffordableUnits),
       validateLarCode(ApplicationSubmissionEnum,
                       submissionOfApplication,
-                      InvalidApplicationSubmission),
+                      InvalidApplicationSubmission(submissionOfApplication)),
       validateLarCode(PayableToInstitutionEnum,
                       payableToInstitution,
-                      InvalidPayableToInstitution),
+                      InvalidPayableToInstitution(payableToInstitution)),
       validateAus(aus1, aus2, aus3, aus4, aus5, ausOther),
       validateAusResult(ausResult1,
                         ausResult2,
@@ -466,13 +472,15 @@ sealed trait LarFormatValidator extends LarParser {
                         ausResult4,
                         ausResult5,
                         ausResultOther),
-      validateLarCode(MortgageTypeEnum, reverseMortgage, InvalidMortgageType),
+      validateLarCode(MortgageTypeEnum,
+                      reverseMortgage,
+                      InvalidMortgageType(reverseMortgage)),
       validateLarCode(LineOfCreditEnum,
                       openEndLineOfCredit,
-                      InvalidLineOfCredit),
+                      InvalidLineOfCredit(openEndLineOfCredit)),
       validateLarCode(BusinessOrCommercialBusinessEnum,
                       businessOrCommercial,
-                      InvalidBusinessOrCommercial)
+                      InvalidBusinessOrCommercial(businessOrCommercial))
     ).mapN(LoanApplicationRegister)
   }
 
@@ -482,7 +490,7 @@ sealed trait LarFormatValidator extends LarParser {
       NMLSRIdentifier: String
   ): LarParserValidationResult[LarIdentifier] = {
     (
-      validateIntField(id, InvalidId),
+      validateIntField(id, InvalidId(id)),
       validateStr(LEI),
       validateStr(NMLSRIdentifier)
     ).mapN(LarIdentifier)
@@ -506,24 +514,33 @@ sealed trait LarFormatValidator extends LarParser {
   ): LarParserValidationResult[Loan] = {
     (
       validateStr(uli),
-      validateIntStrOrNAField(applicationDate, InvalidApplicationDate),
-      validateLarCode(LoanTypeEnum, loanType, InvalidLoanType),
-      validateLarCode(LoanPurposeEnum, loanPurpose, InvalidLoanPurpose),
+      validateIntStrOrNAField(applicationDate,
+                              InvalidApplicationDate(applicationDate)),
+      validateLarCode(LoanTypeEnum, loanType, InvalidLoanType(loanType)),
+      validateLarCode(LoanPurposeEnum,
+                      loanPurpose,
+                      InvalidLoanPurpose(loanPurpose)),
       validateLarCode(ConstructionMethodEnum,
                       constructionMethod,
-                      InvalidConstructionMethod),
-      validateLarCode(OccupancyEnum, occupancy, InvalidOccupancy),
-      validateDoubleField(amount, InvalidAmount),
-      validateIntStrOrNAOrExemptField(loanTerm, InvalidLoanTerm),
-      validateDoubleStrOrNAOrExemptField(rateSpread, InvalidRateSpread),
-      validateDoubleStrOrNAOrExemptField(interestRate, InvalidInterestRate),
-      validateIntStrOrNAOrExemptField(prepaymentPenalty,
-                                      InvalidPrepaymentPenaltyTerm),
-      validateDoubleStrOrNAOrExemptField(debtToIncome,
-                                         InvalidDebtToIncomeRatio),
-      validateDoubleStrOrNAOrExemptField(loanToValue, InvalidLoanToValueRatio),
-      validateIntStrOrNAOrExemptField(introductoryRate,
-                                      InvalidIntroductoryRatePeriod)
+                      InvalidConstructionMethod(constructionMethod)),
+      validateLarCode(OccupancyEnum, occupancy, InvalidOccupancy(occupancy)),
+      validateDoubleField(amount, InvalidAmount(amount)),
+      validateIntStrOrNAOrExemptField(loanTerm, InvalidLoanTerm(loanTerm)),
+      validateDoubleStrOrNAOrExemptField(rateSpread,
+                                         InvalidRateSpread(rateSpread)),
+      validateDoubleStrOrNAOrExemptField(interestRate,
+                                         InvalidInterestRate(interestRate)),
+      validateIntStrOrNAOrExemptField(
+        prepaymentPenalty,
+        InvalidPrepaymentPenaltyTerm(prepaymentPenalty)),
+      validateDoubleStrOrNAOrExemptField(
+        debtToIncome,
+        InvalidDebtToIncomeRatio(debtToIncome)),
+      validateDoubleStrOrNAOrExemptField(loanToValue,
+                                         InvalidLoanToValueRatio(loanToValue)),
+      validateIntStrOrNAOrExemptField(
+        introductoryRate,
+        InvalidIntroductoryRatePeriod(introductoryRate))
     ).mapN(Loan)
   }
 
@@ -532,9 +549,13 @@ sealed trait LarFormatValidator extends LarParser {
       actionTaken: String,
       actionDate: String): LarParserValidationResult[LarAction] = {
     (
-      validateLarCode(PreapprovalEnum, preapproval, InvalidPreapproval),
-      validateLarCode(ActionTakenTypeEnum, actionTaken, InvalidActionTaken),
-      validateIntField(actionDate, InvalidActionTakenDate)
+      validateLarCode(PreapprovalEnum,
+                      preapproval,
+                      InvalidPreapproval(preapproval)),
+      validateLarCode(ActionTakenTypeEnum,
+                      actionTaken,
+                      InvalidActionTaken(actionTaken)),
+      validateIntField(actionDate, InvalidActionTakenDate(actionDate))
     ).mapN(LarAction)
   }
 
@@ -563,10 +584,16 @@ sealed trait LarFormatValidator extends LarParser {
   ): LarParserValidationResult[Denial] = {
 
     (
-      validateLarCode(DenialReasonEnum, denial1, InvalidDenial),
-      validateLarCodeOrEmptyField(DenialReasonEnum, denial2, InvalidDenial),
-      validateLarCodeOrEmptyField(DenialReasonEnum, denial3, InvalidDenial),
-      validateLarCodeOrEmptyField(DenialReasonEnum, denial4, InvalidDenial),
+      validateLarCode(DenialReasonEnum, denial1, InvalidDenial(1, denial1)),
+      validateLarCodeOrEmptyField(DenialReasonEnum,
+                                  denial2,
+                                  InvalidDenial(2, denial2)),
+      validateLarCodeOrEmptyField(DenialReasonEnum,
+                                  denial3,
+                                  InvalidDenial(3, denial3)),
+      validateLarCodeOrEmptyField(DenialReasonEnum,
+                                  denial4,
+                                  InvalidDenial(4, denial4)),
       validateStr(otherDenial)
     ).mapN(Denial)
   }
@@ -579,15 +606,20 @@ sealed trait LarFormatValidator extends LarParser {
       lenderCredits: String
   ): LarParserValidationResult[LoanDisclosure] = {
     (
-      validateDoubleStrOrNAOrExemptField(totalLoanCosts, InvalidTotalLoanCosts),
-      validateDoubleStrOrNAOrExemptField(totalPointsAndFees,
-                                         InvalidPointsAndFees),
-      validateDoubleStrOrNAOrExemptField(originationCharges,
-                                         InvalidOriginationCharges),
-      validateDoubleStrOrNAOrExemptOrEmptyField(discountPoints,
-                                                InvalidDiscountPoints),
-      validateDoubleStrOrNAOrExemptOrEmptyField(lenderCredits,
-                                                InvalidLenderCredits)
+      validateDoubleStrOrNAOrExemptField(totalLoanCosts,
+                                         InvalidTotalLoanCosts(totalLoanCosts)),
+      validateDoubleStrOrNAOrExemptField(
+        totalPointsAndFees,
+        InvalidPointsAndFees(totalPointsAndFees)),
+      validateDoubleStrOrNAOrExemptField(
+        originationCharges,
+        InvalidOriginationCharges(originationCharges)),
+      validateDoubleStrOrNAOrExemptOrEmptyField(
+        discountPoints,
+        InvalidDiscountPoints(discountPoints)),
+      validateDoubleStrOrNAOrExemptOrEmptyField(
+        lenderCredits,
+        InvalidLenderCredits(lenderCredits))
     ).mapN(LoanDisclosure)
   }
 
@@ -598,16 +630,19 @@ sealed trait LarFormatValidator extends LarParser {
       otherNonAmortizingFeatures: String
   ): LarParserValidationResult[NonAmortizingFeatures] = {
     (
-      validateLarCode(BalloonPaymentEnum, ballonPayment, InvalidBalloonPayment),
+      validateLarCode(BalloonPaymentEnum,
+                      ballonPayment,
+                      InvalidBalloonPayment(ballonPayment)),
       validateLarCode(InterestOnlyPaymentsEnum,
                       interestOnlyPayment,
-                      InvalidInterestOnlyPayment),
+                      InvalidInterestOnlyPayment(interestOnlyPayment)),
       validateLarCode(NegativeAmortizationEnum,
                       negativeAmortization,
-                      InvalidNegativeAmortization),
-      validateLarCode(OtherNonAmortizingFeaturesEnum,
-                      otherNonAmortizingFeatures,
-                      InvalidOtherNonAmortizingFeatures)
+                      InvalidNegativeAmortization(negativeAmortization)),
+      validateLarCode(
+        OtherNonAmortizingFeaturesEnum,
+        otherNonAmortizingFeatures,
+        InvalidOtherNonAmortizingFeatures(otherNonAmortizingFeatures))
     ).mapN(NonAmortizingFeatures)
   }
 
@@ -619,15 +654,21 @@ sealed trait LarFormatValidator extends LarParser {
       multifamilyUnits: String
   ): LarParserValidationResult[Property] = {
     (
-      validateDoubleStrOrNAOrExemptField(propertyValue, InvalidPropertyValue),
+      validateDoubleStrOrNAOrExemptField(propertyValue,
+                                         InvalidPropertyValue(propertyValue)),
       validateLarCode(ManufacturedHomeSecuredPropertyEnum,
                       manufacturedHomeSecuredProperty,
-                      InvalidManufacturedHomeSecuredProperty),
-      validateLarCode(ManufacturedHomeLandPropertyInterestEnum,
-                      manufacturedHomeLandPropertyInterest,
-                      InvalidManufacturedHomeLandPropertyInterest),
-      validateIntField(totalUnits, InvalidTotalUnits),
-      validateIntStrOrNAOrExemptField(multifamilyUnits, InvalidMultifamilyUnits)
+                      InvalidManufacturedHomeSecuredProperty(
+                        manufacturedHomeSecuredProperty)),
+      validateLarCode(
+        ManufacturedHomeLandPropertyInterestEnum,
+        manufacturedHomeLandPropertyInterest,
+        InvalidManufacturedHomeLandPropertyInterest(
+          manufacturedHomeLandPropertyInterest)
+      ),
+      validateIntField(totalUnits, InvalidTotalUnits(totalUnits)),
+      validateIntStrOrNAOrExemptField(multifamilyUnits,
+                                      InvalidMultifamilyUnits(multifamilyUnits))
     ).mapN(Property)
 
   }
@@ -644,19 +685,19 @@ sealed trait LarFormatValidator extends LarParser {
     (
       validateLarCode(AutomatedUnderwritingSystemEnum,
                       aus1,
-                      InvalidAutomatedUnderwritingSystem),
+                      InvalidAutomatedUnderwritingSystem(1, aus1)),
       validateLarCodeOrEmptyField(AutomatedUnderwritingSystemEnum,
                                   aus2,
-                                  InvalidAutomatedUnderwritingSystem),
+                                  InvalidAutomatedUnderwritingSystem(2, aus2)),
       validateLarCodeOrEmptyField(AutomatedUnderwritingSystemEnum,
                                   aus3,
-                                  InvalidAutomatedUnderwritingSystem),
+                                  InvalidAutomatedUnderwritingSystem(3, aus3)),
       validateLarCodeOrEmptyField(AutomatedUnderwritingSystemEnum,
                                   aus4,
-                                  InvalidAutomatedUnderwritingSystem),
+                                  InvalidAutomatedUnderwritingSystem(4, aus4)),
       validateLarCodeOrEmptyField(AutomatedUnderwritingSystemEnum,
                                   aus5,
-                                  InvalidAutomatedUnderwritingSystem),
+                                  InvalidAutomatedUnderwritingSystem(5, aus5)),
       validateStr(otherAus)
     ).mapN(AutomatedUnderwritingSystem)
   }
@@ -673,19 +714,23 @@ sealed trait LarFormatValidator extends LarParser {
     (
       validateLarCode(AutomatedUnderwritingResultEnum,
                       ausResult1,
-                      InvalidAutomatedUnderwritingSystemResult),
-      validateLarCodeOrEmptyField(AutomatedUnderwritingResultEnum,
-                                  ausResult2,
-                                  InvalidAutomatedUnderwritingSystemResult),
-      validateLarCodeOrEmptyField(AutomatedUnderwritingResultEnum,
-                                  ausResult3,
-                                  InvalidAutomatedUnderwritingSystemResult),
-      validateLarCodeOrEmptyField(AutomatedUnderwritingResultEnum,
-                                  ausResult4,
-                                  InvalidAutomatedUnderwritingSystemResult),
-      validateLarCodeOrEmptyField(AutomatedUnderwritingResultEnum,
-                                  ausResult5,
-                                  InvalidAutomatedUnderwritingSystemResult),
+                      InvalidAutomatedUnderwritingSystemResult(1, ausResult1)),
+      validateLarCodeOrEmptyField(
+        AutomatedUnderwritingResultEnum,
+        ausResult2,
+        InvalidAutomatedUnderwritingSystemResult(2, ausResult2)),
+      validateLarCodeOrEmptyField(
+        AutomatedUnderwritingResultEnum,
+        ausResult3,
+        InvalidAutomatedUnderwritingSystemResult(3, ausResult3)),
+      validateLarCodeOrEmptyField(
+        AutomatedUnderwritingResultEnum,
+        ausResult4,
+        InvalidAutomatedUnderwritingSystemResult(4, ausResult4)),
+      validateLarCodeOrEmptyField(
+        AutomatedUnderwritingResultEnum,
+        ausResult5,
+        InvalidAutomatedUnderwritingSystemResult(5, ausResult5)),
       validateStr(otherAusResult)
     ).mapN(AutomatedUnderwritingSystemResult)
 

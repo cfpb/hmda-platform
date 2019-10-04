@@ -32,7 +32,9 @@ object ParsingErrorSummaryCodec {
     new Decoder[ParsingErrorSummary] {
       override def apply(c: HCursor): Result[ParsingErrorSummary] =
         for {
-          tsErrors <- c.downField("transmittalSheetErrors").as[Seq[String]]
+          tsErrors <- c
+            .downField("transmittalSheetErrors")
+            .as[Seq[HmdaRowParsedError]]
           larErrors <- c.downField("larErrors").as[Seq[HmdaRowParsedError]]
           total <- c.downField("total").as[Int]
           status <- c.downField("status").as[SubmissionStatus]

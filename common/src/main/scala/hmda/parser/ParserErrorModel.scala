@@ -14,13 +14,16 @@ object ParserErrorModel {
     s"$fieldName is not a valid value, an empty string, NA or Exempt"
 
   trait ParserValidationError {
-    def errorMessage: String
+    def fieldName: String
+    def inputValue: String
+    def validValues: String
   }
 
   case class IncorrectNumberOfFields(length: Int, expectedLength: Int)
       extends ParserValidationError {
-    override def errorMessage: String =
-      s"An incorrect number of data fields were reported: $length data fields were found, when $expectedLength data fields were expected."
+    override def fieldName: String = "Number of fields"
+    override def inputValue: String = length.toString
+    override def validValues: String = expectedLength.toString
   }
 
 }

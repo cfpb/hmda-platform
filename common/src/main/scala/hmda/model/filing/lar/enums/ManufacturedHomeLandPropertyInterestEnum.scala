@@ -4,7 +4,7 @@ sealed trait ManufacturedHomeLandPropertyInterestEnum extends LarEnum
 
 object ManufacturedHomeLandPropertyInterestEnum
     extends LarCodeEnum[ManufacturedHomeLandPropertyInterestEnum] {
-  override val values = List(1, 2, 3, 4, 5)
+  override val values = List(1, 2, 3, 4, 5, 1111)
 
   override def valueOf(code: Int): ManufacturedHomeLandPropertyInterestEnum = {
     code match {

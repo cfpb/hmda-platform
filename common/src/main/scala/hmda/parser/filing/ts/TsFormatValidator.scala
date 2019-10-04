@@ -106,20 +106,20 @@ sealed trait TsFormatValidator {
   }
 
   private def validateIdField(value: String): TsParserValidationResult[Int] = {
-    validateIntField(value, InvalidId)
+    validateIntField(value, InvalidId(value))
   }
 
   private def validateYear(value: String): TsParserValidationResult[Int] = {
-    validateIntField(value, InvalidYear)
+    validateIntField(value, InvalidYear(value))
   }
 
   private def validateQuarter(value: String): TsParserValidationResult[Int] = {
-    validateIntField(value, InvalidQuarter)
+    validateIntField(value, InvalidQuarter(value))
   }
 
   private def validateTotalLines(
       value: String): TsParserValidationResult[Int] = {
-    validateIntField(value, InvalidTotalLines)
+    validateIntField(value, InvalidTotalLines(value))
   }
 
   private def validateContact(
@@ -131,7 +131,7 @@ sealed trait TsFormatValidator {
       code: String): TsParserValidationResult[Agency] = {
     Try(Agency.valueOf(code.toInt)) match {
       case Success(c) => c.validNel
-      case Failure(_) => InvalidAgencyCode.invalidNel
+      case Failure(_) => InvalidAgencyCode(code).invalidNel
     }
   }
 

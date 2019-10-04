@@ -1,272 +1,446 @@
 package hmda.parser.filing.lar
 
 import hmda.parser.ParserErrorModel._
+import hmda.model.filing.lar.enums._
 
 object LarParserErrorModel {
 
-  case object InvalidId extends ParserValidationError {
-    override def errorMessage: String = notNumeric("id")
+  case class InvalidId(value: String) extends ParserValidationError {
+    override def fieldName: String = "Record Identifier"
+    override def inputValue: String = value
+    override def validValues: String = "2"
   }
 
-  case object InvalidApplicationDate extends ParserValidationError {
-    override def errorMessage: String = notNumeric("application date")
-  }
-
-  case object InvalidLoanType extends ParserValidationError {
-    override def errorMessage: String = notNumeric("loan type")
-  }
-
-  case object InvalidLoanPurpose extends ParserValidationError {
-    override def errorMessage: String = notNumeric("loan purpose")
-  }
-
-  case object InvalidPreapproval extends ParserValidationError {
-    override def errorMessage: String = notNumeric("preapproval")
-  }
-
-  case object InvalidConstructionMethod extends ParserValidationError {
-    override def errorMessage: String = notNumeric("construction method")
-  }
-
-  case object InvalidOccupancy extends ParserValidationError {
-    override def errorMessage: String = notNumeric("occupancy")
-  }
-
-  case object InvalidActionTaken extends ParserValidationError {
-    override def errorMessage: String = notNumeric("action taken")
-  }
-
-  case object InvalidActionTakenDate extends ParserValidationError {
-    override def errorMessage: String = notNumeric("action taken date")
-  }
-
-  case object InvalidAmount extends ParserValidationError {
-    override def errorMessage: String = notNumeric("amount")
-  }
-
-  case object InvalidLoanTerm extends ParserValidationError {
-    override def errorMessage: String = notStringOrNA("loan term")
-  }
-
-  case object InvalidApplicantEthnicity extends ParserValidationError {
-    override def errorMessage: String = notNumeric("applicant ethnicity")
-  }
-
-  case object InvalidApplicantEthnicityObserved extends ParserValidationError {
-    override def errorMessage: String =
-      notNumeric("applicant ethnicity visual observation or surname")
-  }
-
-  case object InvalidCoApplicantEthnicity extends ParserValidationError {
-    override def errorMessage: String = notNumeric("co-applicant ethnicity")
-  }
-
-  case object InvalidCoApplicantEthnicityObserved
+  case class InvalidApplicationDate(value: String)
       extends ParserValidationError {
-    override def errorMessage: String =
-      notNumeric("co-applicant ethnicity visual observation or surname")
+    override def fieldName: String = "Application Date"
+    override def inputValue: String = value
+    override def validValues: String = ""
   }
 
-  case object InvalidApplicantRace extends ParserValidationError {
-    override def errorMessage: String = notNumeric("applicant race")
+  case class InvalidLoanType(value: String) extends ParserValidationError {
+    override def fieldName: String = "Loan Purpose"
+    override def inputValue: String = value
+    override def validValues: String = LoanTypeEnum.values.toString
   }
 
-  case object InvalidApplicantRaceObserved extends ParserValidationError {
-    override def errorMessage: String =
-      notNumeric("applicant race visual observation or surname")
+  case class InvalidLoanPurpose(value: String) extends ParserValidationError {
+    override def fieldName: String = "Loan Purpose"
+    override def inputValue: String = value
+    override def validValues: String = LoanPurposeEnum.values.toString
   }
 
-  case object InvalidCoApplicantRace extends ParserValidationError {
-    override def errorMessage: String = notNumeric("co-applicant race")
+  case class InvalidPreapproval(value: String) extends ParserValidationError {
+    override def fieldName: String = "Preapproval"
+    override def inputValue: String = value
+    override def validValues: String = PreapprovalEnum.values.toString
   }
 
-  case object InvalidCoApplicantRaceObserved extends ParserValidationError {
-    override def errorMessage: String =
-      notNumeric("co-applicant race visual observation or surname")
-  }
-
-  case object InvalidApplicantSex extends ParserValidationError {
-    override def errorMessage: String = notNumeric("applicant sex")
-  }
-
-  case object InvalidApplicantSexObserved extends ParserValidationError {
-    override def errorMessage: String =
-      notNumeric("applicant sex visual observation or surname")
-  }
-
-  case object InvalidCoApplicantSex extends ParserValidationError {
-    override def errorMessage: String = notNumeric("co-applicant sex")
-  }
-
-  case object InvalidCoApplicantSexObserved extends ParserValidationError {
-    override def errorMessage: String =
-      notNumeric("co-applicant sex visual observation or surname")
-  }
-
-  case object InvalidAge extends ParserValidationError {
-    override def errorMessage: String = notNumeric("age")
-  }
-
-  case object InvalidApplicantCreditScore extends ParserValidationError {
-    override def errorMessage: String = notNumeric("applicant credit score")
-  }
-
-  case object InvalidApplicantCreditScoreModel extends ParserValidationError {
-    override def errorMessage: String =
-      notNumeric("applicant credit scoring model")
-  }
-
-  case object InvalidCoApplicantCreditScore extends ParserValidationError {
-    override def errorMessage: String = notNumeric("co-applicant credit score")
-  }
-
-  case object InvalidCoApplicantCreditScoreModel extends ParserValidationError {
-    override def errorMessage: String =
-      notNumeric("co-applicant credit scoring model")
-  }
-
-  case object InvalidIncome extends ParserValidationError {
-    override def errorMessage: String = notStringOrNA("income")
-  }
-
-  case object InvalidPurchaserType extends ParserValidationError {
-    override def errorMessage: String = notNumeric("purchaser type")
-  }
-
-  case object InvalidRateSpread extends ParserValidationError {
-    override def errorMessage: String = notStringOrNA("rate spread")
-  }
-
-  case object InvalidHoepaStatus extends ParserValidationError {
-    override def errorMessage: String = notNumeric("HOEPA status")
-  }
-
-  case object InvalidLienStatus extends ParserValidationError {
-    override def errorMessage: String = notNumeric("lien status")
-  }
-
-  case object InvalidDenial extends ParserValidationError {
-    override def errorMessage: String = notNumeric("denial")
-  }
-
-  case object InvalidTotalLoanCosts extends ParserValidationError {
-    override def errorMessage: String = notStringOrNA("total loan costs")
-  }
-
-  case object InvalidPointsAndFees extends ParserValidationError {
-    override def errorMessage: String = notStringOrNA("points and fees")
-  }
-
-  case object InvalidOriginationCharges extends ParserValidationError {
-    override def errorMessage: String = notStringOrNA("origination charges")
-  }
-
-  case object InvalidDiscountPoints extends ParserValidationError {
-    override def errorMessage: String =
-      notEmptyStringOrNaOrExempt("discount points")
-  }
-
-  case object InvalidLenderCredits extends ParserValidationError {
-    override def errorMessage: String =
-      notEmptyStringOrNaOrExempt("lender credits")
-  }
-
-  case object InvalidInterestRate extends ParserValidationError {
-    override def errorMessage: String = notStringOrNA("interest rate")
-  }
-
-  case object InvalidPrepaymentPenaltyTerm extends ParserValidationError {
-    override def errorMessage: String = notStringOrNA("prepayment penalty term")
-  }
-
-  case object InvalidDebtToIncomeRatio extends ParserValidationError {
-    override def errorMessage: String = notStringOrNA("debt to income ratio")
-  }
-
-  case object InvalidLoanToValueRatio extends ParserValidationError {
-    override def errorMessage: String = notStringOrNA("loan to value ratio")
-  }
-
-  case object InvalidIntroductoryRatePeriod extends ParserValidationError {
-    override def errorMessage: String =
-      notStringOrNA("introductory rate period")
-  }
-
-  case object InvalidBalloonPayment extends ParserValidationError {
-    override def errorMessage: String = notNumeric("ballon payments")
-  }
-
-  case object InvalidInterestOnlyPayment extends ParserValidationError {
-    override def errorMessage: String = notNumeric("interest only payment")
-  }
-
-  case object InvalidNegativeAmortization extends ParserValidationError {
-    override def errorMessage: String = notNumeric("negative amortization")
-  }
-
-  case object InvalidOtherNonAmortizingFeatures extends ParserValidationError {
-    override def errorMessage: String =
-      notNumeric("other non amortizing features")
-  }
-
-  case object InvalidPropertyValue extends ParserValidationError {
-    override def errorMessage: String = notStringOrNA("property value")
-  }
-
-  case object InvalidManufacturedHomeSecuredProperty
+  case class InvalidConstructionMethod(value: String)
       extends ParserValidationError {
-    override def errorMessage: String =
-      notNumeric("manufactured home secured property")
+    override def fieldName: String = "Construction Method"
+    override def inputValue: String = value
+    override def validValues: String =
+      ConstructionMethodEnum.values.toString
   }
 
-  case object InvalidManufacturedHomeLandPropertyInterest
+  case class InvalidOccupancy(value: String) extends ParserValidationError {
+    override def fieldName: String = "Occupancy Type"
+    override def inputValue: String = value
+    override def validValues: String = OccupancyEnum.values.toString
+  }
+
+  case class InvalidActionTaken(value: String) extends ParserValidationError {
+    override def fieldName: String = "Action Taken"
+    override def inputValue: String = value
+    override def validValues: String = ActionTakenTypeEnum.values.toString
+  }
+
+  case class InvalidActionTakenDate(value: String)
       extends ParserValidationError {
-    override def errorMessage: String =
-      notNumeric("manufactured home land property interest")
+    override def fieldName: String = "Action Taken Date"
+    override def inputValue: String = value
+    override def validValues: String = ""
   }
 
-  case object InvalidTotalUnits extends ParserValidationError {
-    override def errorMessage: String = notNumeric("total units")
+  case class InvalidAmount(value: String) extends ParserValidationError {
+    override def fieldName: String = "Loan Amount"
+    override def inputValue: String = value
+    override def validValues: String = ""
   }
 
-  case object InvalidMultifamilyUnits extends ParserValidationError {
-    override def errorMessage: String = notStringOrNA("multifamily units")
+  case class InvalidLoanTerm(value: String) extends ParserValidationError {
+    override def fieldName: String = "Loan Term"
+    override def inputValue: String = value
+    override def validValues: String = ""
   }
 
-  case object InvalidApplicationSubmission extends ParserValidationError {
-    override def errorMessage: String = notNumeric("application submission")
-  }
-
-  case object InvalidPayableToInstitution extends ParserValidationError {
-    override def errorMessage: String = notNumeric("payable to institution")
-  }
-
-  case object InvalidNMLSRIdentifier extends ParserValidationError {
-    override def errorMessage: String =
-      notStringOrNAOrExempt("NMLSR identifier")
-  }
-
-  case object InvalidAutomatedUnderwritingSystem extends ParserValidationError {
-    override def errorMessage: String =
-      notNumeric("automated underwriting system")
-  }
-
-  case object InvalidAutomatedUnderwritingSystemResult
+  case class InvalidApplicantEthnicity(fieldNumber: Int, value: String)
       extends ParserValidationError {
-    override def errorMessage: String =
-      notNumeric("automated underwriting result")
+    override def fieldName: String =
+      s"Ethnicity of Applicant or Borrower: ${fieldNumber.toString}"
+    override def inputValue: String = value
+    override def validValues: String = EthnicityEnum.values.toString
   }
 
-  case object InvalidMortgageType extends ParserValidationError {
-    override def errorMessage: String = notNumeric("mortgage type")
+  case class InvalidApplicantEthnicityObserved(value: String)
+      extends ParserValidationError {
+    override def fieldName: String =
+      "Ethnicity of Applicant or Borrower Collected on the Basis of Visual Observation or Surname"
+    override def inputValue: String = value
+    override def validValues: String = EthnicityObservedEnum.values.toString
   }
 
-  case object InvalidLineOfCredit extends ParserValidationError {
-    override def errorMessage: String = notNumeric("line of credit")
+  case class InvalidCoApplicantEthnicity(fieldNumber: Int, value: String)
+      extends ParserValidationError {
+    override def fieldName: String =
+      s"Ethnicity of Co-Applicant or Co-Borrower: ${fieldNumber.toString}"
+    override def inputValue: String = value
+    override def validValues: String = EthnicityEnum.values.toString
   }
 
-  case object InvalidBusinessOrCommercial extends ParserValidationError {
-    override def errorMessage: String = notNumeric("business or commercial")
+  case class InvalidCoApplicantEthnicityObserved(value: String)
+      extends ParserValidationError {
+    override def fieldName: String =
+      "Ethnicity of Co-Applicant or CoBorrower Collected on the Basis of Visual Observation or Surname"
+    override def inputValue: String = value
+    override def validValues: String = EthnicityObservedEnum.values.toString
+  }
+
+  case class InvalidApplicantRace(fieldNumber: Int, value: String)
+      extends ParserValidationError {
+    override def fieldName: String =
+      s"Race of Applicant or Borrower: ${fieldNumber.toString}"
+    override def inputValue: String = value
+    override def validValues: String = RaceEnum.values.toString
+  }
+
+  case class InvalidApplicantRaceObserved(value: String)
+      extends ParserValidationError {
+    override def fieldName: String =
+      "Race of Applicant or Borrower Collected on the Basis of Visual Observation or Surname"
+    override def inputValue: String = value
+    override def validValues: String = RaceObservedEnum.values.toString
+  }
+
+  case class InvalidCoApplicantRace(fieldNumber: Int, value: String)
+      extends ParserValidationError {
+    override def fieldName: String =
+      s"Race of Co-Applicant or Co-Borrower: ${fieldNumber.toString}"
+    override def inputValue: String = value
+    override def validValues: String = RaceEnum.values.toString
+  }
+
+  case class InvalidCoApplicantRaceObserved(value: String)
+      extends ParserValidationError {
+    override def fieldName: String =
+      "Race of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname"
+    override def inputValue: String = value
+    override def validValues: String = RaceObservedEnum.values.toString
+  }
+
+  case class InvalidApplicantSex(value: String) extends ParserValidationError {
+    override def fieldName: String = "Sex of Applicant or Borrower"
+    override def inputValue: String = value
+    override def validValues: String = SexEnum.values.toString
+  }
+
+  case class InvalidApplicantSexObserved(value: String)
+      extends ParserValidationError {
+    override def fieldName: String =
+      "Sex of Applicant or Borrower Collected on the Basis of Visual Observation or Surname"
+    override def inputValue: String = value
+    override def validValues: String = SexObservedEnum.values.toString
+  }
+
+  case class InvalidCoApplicantSex(value: String)
+      extends ParserValidationError {
+    override def fieldName: String = "Sex of Co-Applicant or Co-Borrower"
+    override def inputValue: String = value
+    override def validValues: String = SexEnum.values.toString
+  }
+
+  case class InvalidCoApplicantSexObserved(value: String)
+      extends ParserValidationError {
+    override def fieldName: String =
+      "Sex of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname"
+    override def inputValue: String = value
+    override def validValues: String = SexObservedEnum.values.toString
+  }
+
+  case class InvalidApplicantAge(value: String) extends ParserValidationError {
+    override def fieldName: String = "Age of Applicant or Borrower"
+    override def inputValue: String = value
+    override def validValues: String = ""
+  }
+
+  case class InvalidCoApplicantAge(value: String)
+      extends ParserValidationError {
+    override def fieldName: String = "Age of Co-Applicant or Co-Borrower"
+    override def inputValue: String = value
+    override def validValues: String = ""
+  }
+
+  case class InvalidApplicantCreditScore(value: String)
+      extends ParserValidationError {
+    override def fieldName: String = "Credit Score of Applicant or Borrower"
+    override def inputValue: String = value
+    override def validValues: String = ""
+  }
+
+  case class InvalidApplicantCreditScoreModel(value: String)
+      extends ParserValidationError {
+    override def fieldName: String =
+      "Applicant or Borrower, Name and Version of Credit Scoring Model"
+    override def inputValue: String = value
+    override def validValues: String = CreditScoreEnum.values.toString
+  }
+
+  case class InvalidCoApplicantCreditScore(value: String)
+      extends ParserValidationError {
+    override def fieldName: String =
+      "Credit Score of Co-Applicant or Co-Borrower"
+    override def inputValue: String = value
+    override def validValues: String = ""
+  }
+
+  case class InvalidCoApplicantCreditScoreModel(value: String)
+      extends ParserValidationError {
+    override def fieldName: String =
+      "Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model"
+    override def inputValue: String = value
+    override def validValues: String = CreditScoreEnum.values.toString
+  }
+
+  case class InvalidIncome(value: String) extends ParserValidationError {
+    override def fieldName: String = "Income"
+    override def inputValue: String = value
+    override def validValues: String = ""
+  }
+
+  case class InvalidPurchaserType(value: String) extends ParserValidationError {
+    override def fieldName: String = "Type of Purchaser"
+    override def inputValue: String = value
+    override def validValues: String = PurchaserEnum.values.toString
+  }
+
+  case class InvalidRateSpread(value: String) extends ParserValidationError {
+    override def fieldName: String = "Rate Spread"
+    override def inputValue: String = value
+    override def validValues: String = ""
+  }
+
+  case class InvalidHoepaStatus(value: String) extends ParserValidationError {
+    override def fieldName: String = "HOEPA Status"
+    override def inputValue: String = value
+    override def validValues: String = HOEPAStatusEnum.values.toString
+  }
+
+  case class InvalidLienStatus(value: String) extends ParserValidationError {
+    override def fieldName: String = "Lien Status"
+    override def inputValue: String = value
+    override def validValues: String = LienStatusEnum.values.toString
+  }
+
+  case class InvalidDenial(fieldNumber: Int, value: String)
+      extends ParserValidationError {
+    override def fieldName: String =
+      s"Reason for Denial: ${fieldNumber.toString}"
+    override def inputValue: String = value
+    override def validValues: String = DenialReasonEnum.values.toString
+  }
+
+  case class InvalidTotalLoanCosts(value: String)
+      extends ParserValidationError {
+    override def fieldName: String = "Total Loan Costs"
+    override def inputValue: String = value
+    override def validValues: String = ""
+  }
+
+  case class InvalidPointsAndFees(value: String) extends ParserValidationError {
+    override def fieldName: String = "Total Points and Fees"
+    override def inputValue: String = value
+    override def validValues: String = ""
+  }
+
+  case class InvalidOriginationCharges(value: String)
+      extends ParserValidationError {
+    override def fieldName: String = "Origination Charges"
+    override def inputValue: String = value
+    override def validValues: String = ""
+  }
+
+  case class InvalidDiscountPoints(value: String)
+      extends ParserValidationError {
+    override def fieldName: String = "Discount Points"
+    override def inputValue: String = value
+    override def validValues: String = ""
+  }
+
+  case class InvalidLenderCredits(value: String) extends ParserValidationError {
+    override def fieldName: String = "Lender Credits"
+    override def inputValue: String = value
+    override def validValues: String = ""
+  }
+
+  case class InvalidInterestRate(value: String) extends ParserValidationError {
+    override def fieldName: String = "Interest Rate"
+    override def inputValue: String = value
+    override def validValues: String = ""
+  }
+
+  case class InvalidPrepaymentPenaltyTerm(value: String)
+      extends ParserValidationError {
+    override def fieldName: String = "Prepayment Penalty Term"
+    override def inputValue: String = value
+    override def validValues: String = ""
+  }
+
+  case class InvalidDebtToIncomeRatio(value: String)
+      extends ParserValidationError {
+    override def fieldName: String = "Debt-to-Income Ratio"
+    override def inputValue: String = value
+    override def validValues: String = ""
+  }
+
+  case class InvalidLoanToValueRatio(value: String)
+      extends ParserValidationError {
+    override def fieldName: String = "Combined Loan-to-Value Ratio"
+    override def inputValue: String = value
+    override def validValues: String = ""
+  }
+
+  case class InvalidIntroductoryRatePeriod(value: String)
+      extends ParserValidationError {
+    override def fieldName: String = "Introductory Rate Period"
+    override def inputValue: String = value
+    override def validValues: String = ""
+  }
+
+  case class InvalidBalloonPayment(value: String)
+      extends ParserValidationError {
+    override def fieldName: String = "Balloon Payments"
+    override def inputValue: String = value
+    override def validValues: String = BalloonPaymentEnum.values.toString
+  }
+
+  case class InvalidInterestOnlyPayment(value: String)
+      extends ParserValidationError {
+    override def fieldName: String = "Interest-Only Payments"
+    override def inputValue: String = value
+    override def validValues: String =
+      InterestOnlyPaymentsEnum.values.toString
+  }
+
+  case class InvalidNegativeAmortization(value: String)
+      extends ParserValidationError {
+    override def fieldName: String = "Negative Amortization"
+    override def inputValue: String = value
+    override def validValues: String = NegativeAmortizationEnum.values.toString
+  }
+
+  case class InvalidOtherNonAmortizingFeatures(value: String)
+      extends ParserValidationError {
+    override def fieldName: String = "Other Non-Amortizing Features"
+    override def inputValue: String = value
+    override def validValues: String =
+      OtherNonAmortizingFeaturesEnum.values.toString
+  }
+
+  case class InvalidPropertyValue(value: String) extends ParserValidationError {
+    override def fieldName: String = "Property Value"
+    override def inputValue: String = value
+    override def validValues: String = ""
+  }
+
+  case class InvalidManufacturedHomeSecuredProperty(value: String)
+      extends ParserValidationError {
+    override def fieldName: String = "Manufactured Home Secured Property Type"
+    override def inputValue: String = value
+    override def validValues: String =
+      ManufacturedHomeSecuredPropertyEnum.values.toString
+  }
+
+  case class InvalidManufacturedHomeLandPropertyInterest(value: String)
+      extends ParserValidationError {
+    override def fieldName: String = "Manufactured Home Land Property Interest"
+    override def inputValue: String = value
+    override def validValues: String =
+      ManufacturedHomeLandPropertyInterestEnum.values.toString
+  }
+
+  case class InvalidTotalUnits(value: String) extends ParserValidationError {
+    override def fieldName: String = "Total Units"
+    override def inputValue: String = value
+    override def validValues: String = ""
+  }
+
+  case class InvalidMultifamilyUnits(value: String)
+      extends ParserValidationError {
+    override def fieldName: String = "Multifamily Affordable Units"
+    override def inputValue: String = value
+    override def validValues: String = ""
+  }
+
+  case class InvalidApplicationSubmission(value: String)
+      extends ParserValidationError {
+    override def fieldName: String = "Submission of Application"
+    override def inputValue: String = value
+    override def validValues: String = ""
+  }
+
+  case class InvalidPayableToInstitution(value: String)
+      extends ParserValidationError {
+    override def fieldName: String = "Initially Payable to Your Institution"
+    override def inputValue: String = value
+    override def validValues: String = ""
+  }
+
+  case class InvalidNMLSRIdentifier(value: String)
+      extends ParserValidationError {
+    override def fieldName: String =
+      "Mortgage Loan Originiator NMLSR Identifier"
+    override def inputValue: String = value
+    override def validValues: String = ""
+  }
+
+  case class InvalidAutomatedUnderwritingSystem(fieldNumber: Int, value: String)
+      extends ParserValidationError {
+    override def fieldName: String =
+      s"Automated Underwriting System: ${fieldNumber.toString}"
+    override def inputValue: String = value
+    override def validValues: String =
+      AutomatedUnderwritingSystemEnum.values.toString
+  }
+
+  case class InvalidAutomatedUnderwritingSystemResult(fieldNumber: Int,
+                                                      value: String)
+      extends ParserValidationError {
+    override def fieldName: String =
+      s"Automated Underwriting System Result: ${fieldNumber.toString}"
+    override def inputValue: String = value
+    override def validValues: String =
+      AutomatedUnderwritingResultEnum.values.toString
+  }
+
+  case class InvalidMortgageType(value: String) extends ParserValidationError {
+    override def fieldName: String = "Reverse Mortage"
+    override def inputValue: String = value
+    override def validValues: String = MortgageTypeEnum.values.toString
+  }
+
+  case class InvalidLineOfCredit(value: String) extends ParserValidationError {
+    override def fieldName: String = "Open-End Line of Credit"
+    override def inputValue: String = value
+    override def validValues: String = LineOfCreditEnum.values.toString
+  }
+
+  case class InvalidBusinessOrCommercial(value: String)
+      extends ParserValidationError {
+    override def fieldName: String = "Buisness or Commercial Purpose"
+    override def inputValue: String = value
+    override def validValues: String =
+      BusinessOrCommercialBusinessEnum.values.toString
   }
 
 }

@@ -4,24 +4,35 @@ import hmda.parser.ParserErrorModel.{ParserValidationError, notNumeric}
 
 object TsParserErrorModel {
 
-  case object InvalidId extends ParserValidationError {
-    override def errorMessage: String = notNumeric("id")
+  case class InvalidId(value: String) extends ParserValidationError {
+    override def fieldName: String = "Record Identifier"
+    override def inputValue: String = value.toString
+    override def validValues: String = "1"
   }
 
-  case object InvalidYear extends ParserValidationError {
-    override def errorMessage: String = notNumeric("year")
+  case class InvalidYear(value: String) extends ParserValidationError {
+    override def fieldName: String = "Calendar Year"
+    override def inputValue: String = value.toString
+    override def validValues: String = ""
   }
 
-  case object InvalidQuarter extends ParserValidationError {
-    override def errorMessage: String = notNumeric("quarter")
+  case class InvalidQuarter(value: String) extends ParserValidationError {
+    override def fieldName: String = "Calendar Quarter"
+    override def inputValue: String = value.toString
+    override def validValues: String = ""
   }
 
-  case object InvalidTotalLines extends ParserValidationError {
-    override def errorMessage: String = notNumeric("total lines")
+  case class InvalidTotalLines(value: String) extends ParserValidationError {
+    override def fieldName: String =
+      "Total Number of Entries Contained in Submission"
+    override def inputValue: String = value.toString
+    override def validValues: String = ""
   }
 
-  case object InvalidAgencyCode extends ParserValidationError {
-    override def errorMessage: String = notNumeric("agency code")
+  case class InvalidAgencyCode(value: String) extends ParserValidationError {
+    override def fieldName: String = "Federal Agency"
+    override def inputValue: String = value.toString
+    override def validValues: String = ""
   }
 
 }

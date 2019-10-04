@@ -22,10 +22,14 @@ object SubmissionProcessingCommands {
   case class StartParsing(submissionId: SubmissionId)
       extends SubmissionProcessingCommand
 
+  case class FieldParserError(fieldName: String,
+                              inputValue: String,
+                              validValues: String)
+
   case class PersistHmdaRowParsedError(
       rowNumber: Int,
       estimatedULI: String,
-      errors: List[String],
+      errors: List[FieldParserError],
       maybeReplyTo: Option[ActorRef[HmdaRowParsedError]])
       extends SubmissionProcessingCommand
 

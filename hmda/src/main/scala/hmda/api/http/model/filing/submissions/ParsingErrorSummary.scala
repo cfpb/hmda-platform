@@ -3,7 +3,8 @@ package hmda.api.http.model.filing.submissions
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowParsedError
 import hmda.model.filing.submission.{ParsedWithErrors, SubmissionStatus}
 
-case class ParsingErrorSummary(transmittalSheetErrors: Seq[String] = Nil,
+case class ParsingErrorSummary(transmittalSheetErrors: Seq[HmdaRowParsedError] =
+                                 Nil,
                                larErrors: Seq[HmdaRowParsedError] = Nil,
                                path: String = "",
                                currentPage: Int = 0,
