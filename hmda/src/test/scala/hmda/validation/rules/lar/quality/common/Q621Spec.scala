@@ -20,6 +20,12 @@ class Q621Spec extends LarEditCheckSpec {
           larIdentifier =
             lar.larIdentifier.copy(NMLSRIdentifier = "1234567890abc"))
         .mustFail
+
+      lar
+        .copy(
+          larIdentifier =
+            lar.larIdentifier.copy(NMLSRIdentifier = "1234567890!a"))
+        .mustFail
     }
   }
 }
