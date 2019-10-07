@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pgtables-configmap
+data:
+  pgtable.tsTableName2018: "transmittalsheet2018"
+  pgtable.larTableName2018: "loanapplicationregister2018"
+  pgtable.historyTableName: "submission_history"
+  pgtable.tsTableName2019: "transmittalsheet2019"
+  pgtable.larTableName2019: "loanapplicationregister2019"

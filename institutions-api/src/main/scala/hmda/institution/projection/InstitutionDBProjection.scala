@@ -28,10 +28,16 @@ object InstitutionDBProjection extends InstitutionEmailComponent {
 
   val name = "InstitutionDBProjector"
 
-  implicit val institutionRepository2018 = new InstitutionRepository2018(
-    dbConfig)
-  implicit val institutionRepository2019 = new InstitutionRepository2019(
-    dbConfig)
+  /**
+   * Note: institutions-api microservice reads the JDBC_URL env var from inst-postgres-credentials secret.
+   * In beta namespace this environment variable has currentSchema=hmda_beta_user appended to it to change the schema
+   * to BETA
+   */
+
+  implicit val institutionRepository2018 =
+    new InstitutionRepository2018(dbConfig, "institutions2018")
+  implicit val institutionRepository2019 =
+    new InstitutionRepository2019(dbConfig, "institutions2019")
   implicit val institutionEmailsRepository = new InstitutionEmailsRepository(
     dbConfig)
 
@@ -82,6 +88,7 @@ object InstitutionDBProjection extends InstitutionEmailComponent {
       if (inst.activityYear == 2018) {
         institutionRepository2018.insertOrUpdate(
           InstitutionConverter.convert(inst))
+
       } else {
         institutionRepository2019.insertOrUpdate(
           InstitutionConverter.convert(inst))

@@ -9,9 +9,10 @@ import scala.concurrent.Future
 trait LarComponent2019 {
   import dbConfig.profile.api._
 
-  class LarRepository2019(config: DatabaseConfig[JdbcProfile]) {
+  class LarRepository2019(config: DatabaseConfig[JdbcProfile],
+                          tableName: String) {
 
-    val larTable = "loanapplicationregister2019"
+    val larTable = tableName
 
     def deleteByLei(lei: String): Future[Int] = {
       config.db.run {
@@ -145,7 +146,7 @@ trait LarComponent2019 {
           ${le.tractOccupiedUnits},
           ${le.tractOneToFourFamilyUnits},
           ${le.tractMedianAge},
-          ${le.tractToMsaIncomePercent},
+          ${le.tractToMsaIncomePercent}
         )
         """
       }

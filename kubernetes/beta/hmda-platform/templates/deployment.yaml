@@ -46,25 +46,17 @@ spec:
             mountPath: /etc/localtime
         resources:
           limits:
-            memory: "6200Mi"
-            cpu: "6"
+            memory: "4200Mi"
+            cpu: "4"
           requests:
-            memory: "6200Mi"
+            memory: "4200Mi"
             cpu: "2"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
-        - name: KAFKA_MODIFIED_LAR_TOPIC
-          value: {{.Values.kafka.modifiedLarTopic}}
         - name: KAFKA_INSTITUTIONS_TOPIC
           value: {{.Values.kafka.institutionsTopic}}
-        - name: KAFKA_ANALYTICS_TOPIC
-          value: {{.Values.kafka.analyticsTopic}}
-        - name: KAFKA_IRS_TOPIC
-          value: {{.Values.kafka.irsTopic}}
         - name: KAFKA_SIGN_TOPIC
           value: {{.Values.kafka.signTopic}}
-        - name: KAFKA_DISCLOSURE_TOPIC
-          value: {{.Values.kafka.disclosureTopic}}
         - name: COMMIT_ID
           value: {{ .Values.image.commitId }}
         - name: HMDA_RUNTIME_MODE
@@ -89,6 +81,16 @@ spec:
             configMapKeyRef:
               name: cassandra-configmap
               key: cassandra-hosts
+        - name: CASSANDRA_JOURNAL_KEYSPACE
+          valueFrom:
+            configMapKeyRef:
+              name: cassandra-configmap
+              key: cassandra-keyspace
+        - name: CASSANDRA_SNAPSHOT_KEYSPACE
+          valueFrom:
+            configMapKeyRef:
+              name: cassandra-configmap
+              key: cassandra-keyspace-snapshot
         - name: CASSANDRA_CLUSTER_USERNAME
           valueFrom:
             secretKeyRef:

@@ -67,7 +67,7 @@ import hmda.validation.{AS, EC, MAT}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 object HmdaValidationError
   extends HmdaTypedPersistentActor[SubmissionProcessingCommand,
@@ -174,14 +174,18 @@ object HmdaValidationError
 
       case StartQuality(submissionId) =>
         log.info(s"Quality validation started for $submissionId")
-
+        val period = Try {
+          submissionId.period.toInt
+        }.fold(_ => 2018, identity)
         val fQuality = for {
 
           larErrors <- validateLar(
             "quality",
             ctx,
             submissionId,
-            ValidationContext())(system, materializer, blockingEc)
+            ValidationContext(filingYear = Some(period)))(system,
+            materializer,
+            blockingEc)
           _ = log.info(s"Finished ValidateLar Quality for $submissionId")
           _ = log.info(s"Started validateAsyncLar - Quality for $submissionId")
           larAsyncErrorsQuality <- validateAsyncLar("quality",
@@ -346,7 +350,7 @@ object HmdaValidationError
                 log)
               publishSignEvent(submissionId).map(signed =>
                 log.info(s"Published signed event for $submissionId"))
-              setHmdaFilerFlag(submissionId.lei, sharding)
+              setHmdaFilerFlag(submissionId.lei, submissionId.period, sharding)
               replyTo ! signed
             }
           } else {
@@ -771,11 +775,18 @@ object HmdaValidationError
 
   private def setHmdaFilerFlag[as: AS, mat: MAT, ec: EC](
                                                           institutionID: String,
+                                                          period: String,
                                                           sharding: ClusterSharding): Unit = {
 
     val institutionPersistence =
-      sharding.entityRefFor(InstitutionPersistence.typeKey,
-        s"${InstitutionPersistence.name}-$institutionID")
+      if (period == "2018") {
+        sharding.entityRefFor(InstitutionPersistence.typeKey,
+          s"${InstitutionPersistence.name}-$institutionID")
+      } else {
+        sharding.entityRefFor(
+          InstitutionPersistence.typeKey,
+          s"${InstitutionPersistence.name}-$institutionID-$period")
+      }
 
     val fInstitution: Future[Option[Institution]] = institutionPersistence ? (
       ref => GetInstitution(ref))

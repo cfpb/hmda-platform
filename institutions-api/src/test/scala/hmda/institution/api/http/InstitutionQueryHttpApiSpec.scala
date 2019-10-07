@@ -22,10 +22,10 @@ class InstitutionQueryHttpApiSpec
     with InstitutionQueryHttpApi
     with InstitutionSetup {
 
-  override val institutionRepository2018 = new InstitutionRepository2018(
-    dbConfig)
-  override val institutionRepository2019 = new InstitutionRepository2019(
-    dbConfig)
+  override val institutionRepository2018 =
+    new InstitutionRepository2018(dbConfig, "institutions2018")
+  override val institutionRepository2019 =
+    new InstitutionRepository2019(dbConfig, "institutions2019")
 
   override val ec: ExecutionContext = system.dispatcher
   override val log: LoggingAdapter = NoLogging

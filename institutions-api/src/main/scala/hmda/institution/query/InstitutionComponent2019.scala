@@ -9,8 +9,8 @@ trait InstitutionComponent2019 {
 
   import dbConfig.profile.api._
 
-  class InstitutionsTable2019(tag: Tag)
-      extends Table[InstitutionEntity](tag, "institutions2019") {
+  class InstitutionsTable2019(tag: Tag, tableName: String)
+    extends Table[InstitutionEntity](tag, tableName) {
     def lei = column[String]("lei", O.PrimaryKey)
     def activityYear = column[Int]("activity_year")
     def agency = column[Int]("agency")
@@ -49,11 +49,29 @@ trait InstitutionComponent2019 {
        hmdaFiler) <> (InstitutionEntity.tupled, InstitutionEntity.unapply)
   }
 
-  val institutionsTable2019 = TableQuery[InstitutionsTable2019]
+  val institutionsTable2019 = TableQuery[InstitutionsTable2019]((tag: Tag) =>
+    new InstitutionsTable2019(tag, "institutions2019"))
 
-  class InstitutionRepository2019(val config: DatabaseConfig[JdbcProfile])
+  class InstitutionRepository2019(val config: DatabaseConfig[JdbcProfile],
+                                  tableName: String)
       extends TableRepository[InstitutionsTable2019, String] {
+    val institutionsTable2019 = TableQuery[InstitutionsTable2019]((tag: Tag) =>
+      new InstitutionsTable2019(tag, tableName))
     val table = institutionsTable2019
+    def getId(table: InstitutionsTable2019) = table.lei
+    def deleteById(lei: String) = db.run(filterById(lei).delete)
+
+    def createSchema() = db.run(table.schema.create)
+    def dropSchema() = db.run(table.schema.drop)
+  }
+
+  class InstitutionRepository2019Beta(val config: DatabaseConfig[JdbcProfile],
+                                      tableName: String)
+    extends TableRepository[InstitutionsTable2019, String] {
+    val institutionsTable2019Beta = TableQuery[InstitutionsTable2019](
+      (tag: Tag) => new InstitutionsTable2019(tag, tableName))
+    val table = institutionsTable2019Beta
+
     def getId(table: InstitutionsTable2019) = table.lei
     def deleteById(lei: String) = db.run(filterById(lei).delete)
 

@@ -1,0 +1,70 @@
+# Default values for institutions-api.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: hmda/institutions-api
+  tag: v2.7.2
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 9092
+  targetPort: 9092
+  name: http-inst-api
+
+currentYear: 2018
+
+kafka:
+  institutionsGroup: beta-institution-group
+  institutionsTopic: beta-institution
+
+#ambassador:
+#  name: institutions-api-ambassador
+#  service:
+#    type: NodePort
+#  port: 80
+
+ingress:
+  enabled: false
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  ContainerPort: 9092
+  hosts:
+    - institutions-api.local
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources:
+  limits:
+    memory: "4200Mi"
+    cpu: "2"
+  requests:
+    memory: "4200Mi"
+    cpu: "1"
+
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+postgresql:
+  enabled: false
+  createSchema: false
