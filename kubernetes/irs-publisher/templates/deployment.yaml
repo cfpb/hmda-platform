@@ -7,6 +7,10 @@ metadata:
     chart: {{ include "irs-publisher.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    },
+    "annotations": {
+      "deployment.kubernetes.io/revision": "8",
+      "downscaler/uptime": "Mon-Fri 10:00-23:00 UTC"
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
