@@ -10,7 +10,6 @@ import akka.stream.scaladsl.{FileIO, Sink}
 import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.FlowUtils
-import hmda.api.http.codec.institution.InstitutionCodec._
 import hmda.parser.institution.InstitutionCsvParser
 import io.circe.syntax._
 import org.slf4j.LoggerFactory
