@@ -4,12 +4,13 @@ import hmda.api.http.model.filing.submissions.ParsingErrorSummary
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowParsedError
 import org.scalacheck.Gen
 import hmda.model.submission.SubmissionGenerator._
+import hmda.serialization.submission.HmdaParserErrorStateGenerator._
 
 object ParsingErrorSummaryGenerator {
 
   implicit def parsingErrorSummaryGen: Gen[ParsingErrorSummary] =
     for {
-      tsErrors <- Gen.listOf(Gen.alphaStr)
+      tsErrors <- Gen.listOf(hmdaRowParserErrorGen)
       larErrors <- Gen.listOf(hmdaRowParserErrorGen)
       path <- Gen.alphaStr.suchThat(_.length > 0)
       currentPage <- Gen.choose(1, Int.MaxValue)
@@ -22,6 +23,6 @@ object ParsingErrorSummaryGenerator {
     for {
       rowNumber <- Gen.choose(1, 100)
       estimatedULI <- Gen.alphaStr
-      errorMessages <- Gen.listOf(Gen.alphaStr)
+      errorMessages <- Gen.listOf(FieldParserErrorGen)
     } yield HmdaRowParsedError(rowNumber, estimatedULI, errorMessages)
 }

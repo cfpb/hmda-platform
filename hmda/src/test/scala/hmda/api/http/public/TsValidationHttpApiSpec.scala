@@ -70,9 +70,7 @@ class TsValidationHttpApiSpec
     "fail to parse an invalid pipe delimited TS and return list of errors" in {
       Post("/ts/parse", TsValidateRequest(invalidParseCsv)) ~> tsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
-        responseAs[TsValidateResponse].errorMessages mustBe List(
-          "id is not numeric",
-          "agency code is not numeric")
+        responseAs[TsValidateResponse].errorMessages mustBe List("Record Identifier", "Federal Agency")
       }
     }
 
@@ -82,7 +80,7 @@ class TsValidationHttpApiSpec
       Post("/ts/parse", tsValidateRequestWithTooManyFields) ~> tsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
         responseAs[TsValidateResponse].errorMessages mustBe List(
-          "An incorrect number of data fields were reported: 18 data fields were found, when 15 data fields were expected.")
+          "Number of fields")
       }
     }
 

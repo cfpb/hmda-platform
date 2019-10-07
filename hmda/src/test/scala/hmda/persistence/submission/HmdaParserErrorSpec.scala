@@ -23,6 +23,7 @@ import hmda.parser.filing.lar.LarParserErrorModel.{
   InvalidOccupancy
 }
 import hmda.parser.filing.ts.TsParserErrorModel.InvalidId
+import hmda.messages.submission.SubmissionProcessingCommands._
 
 import scala.util.Random
 
@@ -46,25 +47,38 @@ class HmdaParserErrorSpec extends AkkaCassandraPersistenceSpec {
       val hmdaParserError = sharding.entityRefFor(
         HmdaParserError.typeKey,
         s"${HmdaParserError.name}-${submissionId.toString}")
-      val e1 = List(InvalidId)
-      val e2 = List(InvalidLoanTerm, InvalidOccupancy)
-      hmdaParserError ! PersistHmdaRowParsedError(1,
-                                                  "testULI",
-                                                  e1.map(_.errorMessage),
-                                                  None)
-      hmdaParserError ! PersistHmdaRowParsedError(2,
-                                                  "testULI",
-                                                  e2.map(_.errorMessage),
-                                                  None)
+      val e1 = List(InvalidId("a"))
+      val e2 = List(InvalidLoanTerm("a"), InvalidOccupancy("a"))
+      hmdaParserError ! PersistHmdaRowParsedError(
+        1,
+        "testULI",
+        e1.map(x => FieldParserError(x.fieldName, x.inputValue, x.validValues)),
+        None)
+      hmdaParserError ! PersistHmdaRowParsedError(
+        2,
+        "testULI",
+        e2.map(x => FieldParserError(x.fieldName, x.inputValue, x.validValues)),
+        None)
       hmdaParserError ! GetParsedWithErrorCount(errorsProbe.ref)
       errorsProbe.expectMessage(HmdaRowParsedCount(2))
 
       hmdaParserError ! GetParsingErrors(1, stateProbe.ref)
       stateProbe.expectMessage(
         HmdaParserErrorState(
-          Seq(HmdaRowParsedError(1, "testULI", e1.map(_.errorMessage))),
-          Seq(HmdaRowParsedError(2, "testULI", e2.map(_.errorMessage))),
-          2))
+          Seq(
+            HmdaRowParsedError(
+              1,
+              "testULI",
+              e1.map(x =>
+                FieldParserError(x.fieldName, x.inputValue, x.validValues)))),
+          Seq(
+            HmdaRowParsedError(
+              2,
+              "testULI",
+              e2.map(x =>
+                FieldParserError(x.fieldName, x.inputValue, x.validValues)))),
+          2
+        ))
     }
   }
 }

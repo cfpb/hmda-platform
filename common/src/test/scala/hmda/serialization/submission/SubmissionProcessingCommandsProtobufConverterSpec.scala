@@ -11,6 +11,7 @@ import hmda.model.submission.SubmissionGenerator._
 import hmda.persistence.serialization.submission.processing.commands._
 import hmda.serialization.submission.SubmissionProcessingCommandsProtobufConverter._
 import hmda.serialization.validation.ValidationErrorGenerator._
+import hmda.serialization.submission.HmdaParserErrorStateGenerator._
 import org.scalacheck.Gen
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{MustMatchers, PropSpec}
@@ -51,7 +52,7 @@ class SubmissionProcessingCommandsProtobufConverterSpec
   property("Persist Parser Errors must serialize to protobuf and back") {
     val rowNumberGen = Gen.choose(0, Int.MaxValue)
     val estimatedULIGen = Gen.alphaStr
-    val errorListGen = Gen.listOf(Gen.alphaStr)
+    val errorListGen = Gen.listOf(FieldParserErrorGen)
     implicit def persistParsedErrorGen: Gen[PersistHmdaRowParsedError] = {
       for {
         rowNumber <- rowNumberGen

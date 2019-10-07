@@ -6,14 +6,22 @@ import hmda.messages.submission.SubmissionProcessingEvents.{
 }
 import hmda.model.processing.state.HmdaParserErrorState
 import org.scalacheck.Gen
+import hmda.messages.submission.SubmissionProcessingCommands.FieldParserError
 
 object HmdaParserErrorStateGenerator {
+
+  implicit def FieldParserErrorGen: Gen[FieldParserError] =
+    for {
+      fieldName <- Gen.alphaStr
+      inputValue <- Gen.alphaStr
+      validValues <- Gen.alphaStr
+    } yield FieldParserError(fieldName, inputValue, validValues)
 
   implicit def hmdaRowParsedErrorGen: Gen[HmdaRowParsedError] =
     for {
       rowNumber <- Gen.choose(0, Int.MaxValue)
       estimatedULI <- Gen.alphaStr
-      errors <- Gen.listOf(Gen.alphaStr)
+      errors <- Gen.listOf(FieldParserErrorGen)
     } yield HmdaRowParsedError(rowNumber, estimatedULI, errors)
 
   implicit def hmdaRowParsedCountGen: Gen[HmdaRowParsedCount] =
