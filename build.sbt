@@ -58,11 +58,6 @@ lazy val enumeratumDeps = Seq(enumeratum, enumeratumCirce)
 
 lazy val slickDeps = Seq(slick, slickHikaryCP, postgres, h2)
 
-lazy val scalafmtSettings = Seq(
-  scalafmtOnCompile in ThisBuild := true,
-  scalafmtTestOnCompile in ThisBuild := true
-)
-
 lazy val dockerSettings = Seq(
   Docker / maintainer := "Hmda-Ops",
   dockerBaseImage := "openjdk:8-jre-alpine3.9",
