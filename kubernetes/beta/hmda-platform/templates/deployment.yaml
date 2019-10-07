@@ -49,7 +49,7 @@ spec:
             memory: "4200Mi"
             cpu: "4"
           requests:
-            memory: "6200Mi"
+            memory: "4200Mi"
             cpu: "2"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
