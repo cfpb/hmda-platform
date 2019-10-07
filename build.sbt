@@ -1,6 +1,5 @@
 import Dependencies._
 import BuildSettings._
-import com.lucidchart.sbt.scalafmt.ScalafmtCorePlugin.autoImport._
 import sbtassembly.AssemblyPlugin.autoImport.assemblyMergeStrategy
 
 lazy val commonDeps = Seq(logback, scalaTest, scalaCheck)
