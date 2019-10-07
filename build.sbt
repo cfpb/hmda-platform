@@ -1,13 +1,11 @@
 import Dependencies._
 import BuildSettings._
+import com.lucidchart.sbt.scalafmt.ScalafmtCorePlugin.autoImport._
 import sbtassembly.AssemblyPlugin.autoImport.assemblyMergeStrategy
 
 lazy val commonDeps = Seq(logback, scalaTest, scalaCheck)
 
 lazy val sparkDeps =
-<<<<<<< HEAD
-  Seq(sparkCore, sparkSql, sparkStreaming, sparkKafka, postgres, akkaKafkaStreams)
-=======
   Seq(
     sparkCore,
     sparkSql,
@@ -16,7 +14,6 @@ lazy val sparkDeps =
     postgres,
     akkaKafkaStreams
   )
->>>>>>> upstream/master
 
 lazy val authDeps = Seq(keycloakAdapter, keycloak, jbossLogging, httpClient)
 
@@ -61,6 +58,11 @@ lazy val circeDeps      = Seq(circe, circeGeneric, circeParser)
 lazy val enumeratumDeps = Seq(enumeratum, enumeratumCirce)
 
 lazy val slickDeps = Seq(slick, slickHikaryCP, postgres, h2)
+
+lazy val scalafmtSettings = Seq(
+  scalafmtOnCompile in ThisBuild := true,
+  scalafmtTestOnCompile in ThisBuild := true
+)
 
 lazy val dockerSettings = Seq(
   Docker / maintainer := "Hmda-Ops",
@@ -136,29 +138,19 @@ lazy val `hmda-spark-reporting` = (project in file("hmda-spark-reporting"))
           oldStrategy(x)
       }
     ),
-<<<<<<< HEAD
-    Seq(
-      libraryDependencies ++= sparkDeps ++ circeDeps ++ akkaDeps
-    ),
-=======
     Seq(libraryDependencies ++= sparkDeps ++ circeDeps ++ akkaDeps),
     scalafmtSettings,
->>>>>>> upstream/master
     dockerSettings,
     packageSettings
   )
   .dependsOn(common % "compile->compile;test->test")
 
 lazy val `hmda-platform` = (project in file("hmda"))
-<<<<<<< HEAD
-  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin)
-=======
   .enablePlugins(
     JavaServerAppPackaging,
     sbtdocker.DockerPlugin,
     AshScriptPlugin
   )
->>>>>>> upstream/master
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -173,6 +165,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
           oldStrategy(x)
       }
     ),
+    scalafmtSettings,
     dockerSettings,
     packageSettings
   )
@@ -180,15 +173,11 @@ lazy val `hmda-platform` = (project in file("hmda"))
   .dependsOn(`hmda-protocol` % "compile->compile;test->test")
 
 lazy val `check-digit` = (project in file("check-digit"))
-<<<<<<< HEAD
-  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin)
-=======
   .enablePlugins(
     JavaServerAppPackaging,
     sbtdocker.DockerPlugin,
     AshScriptPlugin
   )
->>>>>>> upstream/master
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -204,6 +193,7 @@ lazy val `check-digit` = (project in file("check-digit"))
           oldStrategy(x)
       }
     ),
+    scalafmtSettings,
     dockerSettings,
     packageSettings
   )
@@ -211,15 +201,11 @@ lazy val `check-digit` = (project in file("check-digit"))
   .dependsOn(`hmda-protocol` % "compile->compile;test->test")
 
 lazy val `institutions-api` = (project in file("institutions-api"))
-<<<<<<< HEAD
-  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin)
-=======
   .enablePlugins(
     JavaServerAppPackaging,
     sbtdocker.DockerPlugin,
     AshScriptPlugin
   )
->>>>>>> upstream/master
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -235,21 +221,18 @@ lazy val `institutions-api` = (project in file("institutions-api"))
         s"${name.value}.jar"
       }
     ),
+    scalafmtSettings,
     dockerSettings,
     packageSettings
   )
   .dependsOn(common % "compile->compile;test->test")
 
 lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
-<<<<<<< HEAD
-  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin)
-=======
   .enablePlugins(
     JavaServerAppPackaging,
     sbtdocker.DockerPlugin,
     AshScriptPlugin
   )
->>>>>>> upstream/master
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -265,6 +248,7 @@ lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
           oldStrategy(x)
       }
     ),
+    scalafmtSettings,
     dockerSettings,
     packageSettings
   )
@@ -272,15 +256,11 @@ lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
   .dependsOn(`hmda-protocol` % "compile->compile;test->test")
 
 lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
-<<<<<<< HEAD
-  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin)
-=======
   .enablePlugins(
     JavaServerAppPackaging,
     sbtdocker.DockerPlugin,
     AshScriptPlugin
   )
->>>>>>> upstream/master
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -296,6 +276,7 @@ lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
         s"${name.value}.jar"
       }
     ),
+    scalafmtSettings,
     dockerSettings,
     packageSettings
   )
@@ -303,15 +284,11 @@ lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
   .dependsOn(`hmda-protocol`)
 
 lazy val `modified-lar` = (project in file("modified-lar"))
-<<<<<<< HEAD
-  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin)
-=======
   .enablePlugins(
     JavaServerAppPackaging,
     sbtdocker.DockerPlugin,
     AshScriptPlugin
   )
->>>>>>> upstream/master
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -327,6 +304,7 @@ lazy val `modified-lar` = (project in file("modified-lar"))
         s"${name.value}.jar"
       }
     ),
+    scalafmtSettings,
     dockerSettings,
     packageSettings
   )
@@ -335,15 +313,11 @@ lazy val `modified-lar` = (project in file("modified-lar"))
   .dependsOn(common)
 
 lazy val `irs-publisher` = (project in file("irs-publisher"))
-<<<<<<< HEAD
-  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin)
-=======
   .enablePlugins(
     JavaServerAppPackaging,
     sbtdocker.DockerPlugin,
     AshScriptPlugin
   )
->>>>>>> upstream/master
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -359,6 +333,7 @@ lazy val `irs-publisher` = (project in file("irs-publisher"))
         s"${name.value}.jar"
       }
     ),
+    scalafmtSettings,
     dockerSettings,
     packageSettings
   )
@@ -367,15 +342,11 @@ lazy val `irs-publisher` = (project in file("irs-publisher"))
   .dependsOn(common)
 
 lazy val `hmda-reporting` = (project in file("hmda-reporting"))
-<<<<<<< HEAD
-  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin)
-=======
   .enablePlugins(
     JavaServerAppPackaging,
     sbtdocker.DockerPlugin,
     AshScriptPlugin
   )
->>>>>>> upstream/master
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -391,6 +362,7 @@ lazy val `hmda-reporting` = (project in file("hmda-reporting"))
         s"${name.value}.jar"
       }
     ),
+    scalafmtSettings,
     dockerSettings,
     packageSettings
   )
@@ -399,13 +371,6 @@ lazy val `hmda-reporting` = (project in file("hmda-reporting"))
   .dependsOn(common)
 
 lazy val `hmda-protocol` = (project in file("protocol"))
-<<<<<<< HEAD
-  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin, AkkaGrpcPlugin)
-  .settings(hmdaBuildSettings: _*)
-
-lazy val `hmda-analytics` = (project in file("hmda-analytics"))
-  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin)
-=======
   .enablePlugins(
     JavaServerAppPackaging,
     sbtdocker.DockerPlugin,
@@ -420,7 +385,6 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
     sbtdocker.DockerPlugin,
     AshScriptPlugin
   )
->>>>>>> upstream/master
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -436,21 +400,18 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
         s"${name.value}.jar"
       }
     ),
+    scalafmtSettings,
     dockerSettings,
     packageSettings
   )
   .dependsOn(common % "compile->compile;test->test")
 
 lazy val `rate-limit` = (project in file("rate-limit"))
-<<<<<<< HEAD
-  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin)
-=======
   .enablePlugins(
     JavaServerAppPackaging,
     sbtdocker.DockerPlugin,
     AshScriptPlugin
   )
->>>>>>> upstream/master
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -467,6 +428,7 @@ lazy val `rate-limit` = (project in file("rate-limit"))
         s"${name.value}.jar"
       }
     ),
+    scalafmtSettings,
     dockerSettings,
     packageSettings
   )
@@ -474,15 +436,11 @@ lazy val `rate-limit` = (project in file("rate-limit"))
   .dependsOn(`hmda-protocol`)
 
 lazy val `data-browser` = (project in file("data-browser"))
-<<<<<<< HEAD
-  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin)
-=======
   .enablePlugins(
     JavaServerAppPackaging,
     sbtdocker.DockerPlugin,
     AshScriptPlugin
   )
->>>>>>> upstream/master
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -499,6 +457,7 @@ lazy val `data-browser` = (project in file("data-browser"))
         s"${name.value}.jar"
       }
     ),
+    scalafmtSettings,
     dockerSettings,
     packageSettings
   )
