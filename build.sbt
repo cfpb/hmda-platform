@@ -133,7 +133,6 @@ lazy val `hmda-spark-reporting` = (project in file("hmda-spark-reporting"))
       }
     ),
     Seq(libraryDependencies ++= sparkDeps ++ circeDeps ++ akkaDeps),
-    scalafmtSettings,
     dockerSettings,
     packageSettings
   )
@@ -159,7 +158,6 @@ lazy val `hmda-platform` = (project in file("hmda"))
           oldStrategy(x)
       }
     ),
-    scalafmtSettings,
     dockerSettings,
     packageSettings
   )
@@ -187,7 +185,6 @@ lazy val `check-digit` = (project in file("check-digit"))
           oldStrategy(x)
       }
     ),
-    scalafmtSettings,
     dockerSettings,
     packageSettings
   )
@@ -215,7 +212,6 @@ lazy val `institutions-api` = (project in file("institutions-api"))
         s"${name.value}.jar"
       }
     ),
-    scalafmtSettings,
     dockerSettings,
     packageSettings
   )
@@ -242,7 +238,6 @@ lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
           oldStrategy(x)
       }
     ),
-    scalafmtSettings,
     dockerSettings,
     packageSettings
   )
@@ -270,7 +265,6 @@ lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
         s"${name.value}.jar"
       }
     ),
-    scalafmtSettings,
     dockerSettings,
     packageSettings
   )
@@ -298,7 +292,6 @@ lazy val `modified-lar` = (project in file("modified-lar"))
         s"${name.value}.jar"
       }
     ),
-    scalafmtSettings,
     dockerSettings,
     packageSettings
   )
@@ -327,7 +320,6 @@ lazy val `irs-publisher` = (project in file("irs-publisher"))
         s"${name.value}.jar"
       }
     ),
-    scalafmtSettings,
     dockerSettings,
     packageSettings
   )
@@ -356,7 +348,6 @@ lazy val `hmda-reporting` = (project in file("hmda-reporting"))
         s"${name.value}.jar"
       }
     ),
-    scalafmtSettings,
     dockerSettings,
     packageSettings
   )
@@ -394,7 +385,6 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
         s"${name.value}.jar"
       }
     ),
-    scalafmtSettings,
     dockerSettings,
     packageSettings
   )
@@ -422,7 +412,6 @@ lazy val `rate-limit` = (project in file("rate-limit"))
         s"${name.value}.jar"
       }
     ),
-    scalafmtSettings,
     dockerSettings,
     packageSettings
   )
@@ -451,7 +440,6 @@ lazy val `data-browser` = (project in file("data-browser"))
         s"${name.value}.jar"
       }
     ),
-    scalafmtSettings,
     dockerSettings,
     packageSettings
   )
