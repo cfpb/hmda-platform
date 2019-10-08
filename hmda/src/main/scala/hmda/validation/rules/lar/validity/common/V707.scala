@@ -10,7 +10,6 @@ import hmda.validation.rules.EditCheck
 object V707 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V707"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     lar.lineOfCredit not equalTo(InvalidLineOfCreditCode)
-  }
 }

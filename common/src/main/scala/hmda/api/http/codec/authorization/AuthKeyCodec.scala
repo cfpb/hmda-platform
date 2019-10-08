@@ -2,7 +2,7 @@ package hmda.api.http.codec.authorization
 
 import hmda.auth.AuthKey
 import io.circe.Decoder.Result
-import io.circe.{Decoder, Encoder, HCursor, Json}
+import io.circe.{ Decoder, Encoder, HCursor, Json }
 
 object AuthKeyCodec {
 

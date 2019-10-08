@@ -8,6 +8,6 @@ sealed trait PublishEvent {
 }
 
 case class SignedEvent(submissionId: SubmissionId) extends PublishEvent {
-  override val key: String = "sign"
+  override val key: String   = "sign"
   override val value: String = s"$submissionId"
 }

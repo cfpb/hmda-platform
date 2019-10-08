@@ -7,29 +7,24 @@ import scala.concurrent.duration.FiniteDuration
 
 case class SyntacticalCheck(submissionId: String, hashedInfo: String)
 
-abstract class SyntacticalRepository
-  extends Table[SyntacticalRepository, SyntacticalCheck]
-    with RootConnector {
+abstract class SyntacticalRepository extends Table[SyntacticalRepository, SyntacticalCheck] with RootConnector {
 
   /**
   CREATE TABLE distinct_count_storage (submissionId text, hashedInfo text, PRIMARY KEY (submissionId, hashedInfo));
     */
   object submissionId extends StringColumn with PartitionKey
-  object hashedInfo extends StringColumn with ClusteringOrder
+  object hashedInfo   extends StringColumn with ClusteringOrder
 
   override def tableName: String = "distinct_count_storage"
 
-  def find(submissionId: String,
-           hashedInfo: String): Future[Option[SyntacticalCheck]] =
+  def find(submissionId: String, hashedInfo: String): Future[Option[SyntacticalCheck]] =
     select
       .where(_.submissionId eqs submissionId)
       .and(_.hashedInfo eqs hashedInfo)
       .consistencyLevel_=(ConsistencyLevel.QUORUM)
       .one()
 
-  def persist(submissionId: String,
-              hashedInfo: String,
-              timeout: FiniteDuration): Future[SyntacticalCheck] =
+  def persist(submissionId: String, hashedInfo: String, timeout: FiniteDuration): Future[SyntacticalCheck] =
     insert
       .value(_.submissionId, submissionId)
       .value(_.hashedInfo, hashedInfo)
@@ -39,9 +34,7 @@ abstract class SyntacticalRepository
       .map(_ => SyntacticalCheck(submissionId, hashedInfo))
 
   // returns true if the record was persisted and false if it was not
-  def persistsIfNotExists(submissionId: String,
-                          hashedInfo: String,
-                          timeout: FiniteDuration): Future[Boolean] =
+  def persistsIfNotExists(submissionId: String, hashedInfo: String, timeout: FiniteDuration): Future[Boolean] =
     insert
       .value(_.submissionId, submissionId)
       .value(_.hashedInfo, hashedInfo)

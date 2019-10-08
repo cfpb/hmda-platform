@@ -2,7 +2,7 @@ package hmda.api.http.codec.filing.submission
 
 import hmda.model.filing.submission.SubmissionStatus
 import io.circe.Decoder.Result
-import io.circe.{Decoder, Encoder, HCursor, Json}
+import io.circe.{ Decoder, Encoder, HCursor, Json }
 
 object SubmissionStatusCodec {
 

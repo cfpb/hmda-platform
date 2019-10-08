@@ -2,13 +2,13 @@ package hmda.api
 
 import java.net.InetSocketAddress
 
-import akka.actor.{Actor, ActorSystem, Status}
+import akka.actor.{ Actor, ActorSystem, Status }
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
 import akka.stream.ActorMaterializer
 import hmda.actor.HmdaActor
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 trait HmdaServer extends HmdaActor {
   val name: String

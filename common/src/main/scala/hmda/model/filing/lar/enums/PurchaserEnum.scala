@@ -5,7 +5,7 @@ sealed trait PurchaserEnum extends LarEnum
 object PurchaserEnum extends LarCodeEnum[PurchaserEnum] {
   override val values = List(0, 1, 2, 3, 4, 5, 6, 71, 72, 8, 9)
 
-  override def valueOf(code: Int): PurchaserEnum = {
+  override def valueOf(code: Int): PurchaserEnum =
     code match {
       case 0  => PurchaserTypeNotApplicable
       case 1  => FannieMae
@@ -20,36 +20,35 @@ object PurchaserEnum extends LarCodeEnum[PurchaserEnum] {
       case 9  => OtherPurchaserType
       case _  => InvalidPurchaserCode
     }
-  }
 }
 
 case object PurchaserTypeNotApplicable extends PurchaserEnum {
-  override val code: Int = 0
+  override val code: Int           = 0
   override val description: String = "Not Applicable"
 }
 
 case object FannieMae extends PurchaserEnum {
-  override val code: Int = 1
+  override val code: Int           = 1
   override val description: String = "Fannie Mae"
 }
 
 case object GinnieMae extends PurchaserEnum {
-  override val code: Int = 2
+  override val code: Int           = 2
   override val description: String = "Ginnie Mae"
 }
 
 case object FreddieMac extends PurchaserEnum {
-  override val code: Int = 3
+  override val code: Int           = 3
   override val description: String = "Freddie Mac"
 }
 
 case object FarmerMac extends PurchaserEnum {
-  override val code: Int = 4
+  override val code: Int           = 4
   override val description: String = "Farmer Mac"
 }
 
 case object PrivateSecuritizer extends PurchaserEnum {
-  override val code: Int = 5
+  override val code: Int           = 5
   override val description: String = "Private securitizer"
 }
 
@@ -66,21 +65,21 @@ case object CreditUnion extends PurchaserEnum {
 }
 
 case object LifeInsuranceCompany extends PurchaserEnum {
-  override val code: Int = 72
+  override val code: Int           = 72
   override val description: String = "Life insurance company"
 }
 
 case object AffiliateInstitution extends PurchaserEnum {
-  override val code: Int = 8
+  override val code: Int           = 8
   override val description: String = "Affiliate institution"
 }
 
 case object OtherPurchaserType extends PurchaserEnum {
-  override val code: Int = 9
+  override val code: Int           = 9
   override val description: String = "Other type of purchaser"
 }
 
 case object InvalidPurchaserCode extends PurchaserEnum {
-  override def code: Int = -1
+  override def code: Int           = -1
   override def description: String = "Invalid Code"
 }

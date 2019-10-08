@@ -10,8 +10,6 @@ import hmda.validation.rules.EditCheck
 object V686 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V686"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    lar.nonAmortizingFeatures.negativeAmortization not equalTo(
-      InvalidNegativeArmotizationCode)
-  }
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
+    lar.nonAmortizingFeatures.negativeAmortization not equalTo(InvalidNegativeArmotizationCode)
 }

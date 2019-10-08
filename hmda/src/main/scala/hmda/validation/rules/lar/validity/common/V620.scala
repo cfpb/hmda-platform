@@ -9,7 +9,6 @@ import hmda.validation.rules.EditCheck
 object V620 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V620"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     lar.geography.street not empty
-  }
 }

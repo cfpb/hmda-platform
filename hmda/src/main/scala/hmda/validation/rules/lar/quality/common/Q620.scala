@@ -10,11 +10,8 @@ import hmda.validation.rules.EditCheck
 object Q620 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q620"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    when(
-      lar.businessOrCommercialPurpose is equalTo(
-        NotPrimarilyBusinessOrCommercialPurpose)) {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
+    when(lar.businessOrCommercialPurpose is equalTo(NotPrimarilyBusinessOrCommercialPurpose)) {
       lar.larIdentifier.NMLSRIdentifier not equalTo("NA")
     }
-  }
 }

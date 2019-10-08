@@ -1,12 +1,7 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.lar.enums.{
-  AUSExempt,
-  AUSResultExempt,
-  EmptyAUSResultValue,
-  EmptyAUSValue
-}
+import hmda.model.filing.lar.enums.{ AUSExempt, AUSResultExempt, EmptyAUSResultValue, EmptyAUSValue }
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.dsl.ValidationResult
@@ -15,10 +10,8 @@ import hmda.validation.rules.EditCheck
 object V713 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V713"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    when(
-      lar.AUS.aus1 is equalTo(AUSExempt) or (lar.ausResult.ausResult1 is equalTo(
-        AUSResultExempt))) {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
+    when(lar.AUS.aus1 is equalTo(AUSExempt) or (lar.ausResult.ausResult1 is equalTo(AUSResultExempt))) {
       lar.AUS.aus1 is equalTo(AUSExempt) and
         (lar.ausResult.ausResult1 is equalTo(AUSResultExempt)) and
         (lar.AUS.aus2 is equalTo(EmptyAUSValue)) and
@@ -32,5 +25,4 @@ object V713 extends EditCheck[LoanApplicationRegister] {
         (lar.ausResult.ausResult5 is equalTo(EmptyAUSResultValue)) and
         (lar.ausResult.otherAusResult is empty)
     }
-  }
 }

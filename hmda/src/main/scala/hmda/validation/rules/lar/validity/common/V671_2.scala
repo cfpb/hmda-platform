@@ -12,7 +12,7 @@ object V671_2 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V671"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(
       lar.denial.otherDenialReason not empty
     ) {
@@ -21,5 +21,4 @@ object V671_2 extends EditCheck[LoanApplicationRegister] {
         (lar.denial.denialReason3 is equalTo(OtherDenialReason)) or
         (lar.denial.denialReason4 is equalTo(OtherDenialReason))
     }
-  }
 }

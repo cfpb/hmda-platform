@@ -1,22 +1,14 @@
 package hmda.persistence.submission
 
-import akka.actor.typed.{ActorRef, Behavior}
+import akka.actor.typed.{ ActorRef, Behavior }
 import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import hmda.actor.HmdaTypedActor
 import hmda.messages.submission.SubmissionCommands.ModifySubmission
-import hmda.messages.submission.SubmissionEvents.{
-  SubmissionEvent,
-  SubmissionModified
-}
+import hmda.messages.submission.SubmissionEvents.{ SubmissionEvent, SubmissionModified }
 import hmda.messages.submission.SubmissionManagerCommands._
-import hmda.messages.submission.SubmissionProcessingCommands.{
-  StartMacro,
-  StartParsing,
-  StartQuality,
-  StartSyntacticalValidity
-}
+import hmda.messages.submission.SubmissionProcessingCommands.{ StartMacro, StartParsing, StartQuality, StartSyntacticalValidity }
 import hmda.model.filing.submission._
 
 object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
@@ -33,25 +25,20 @@ object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
       val submissionId = entityId.replaceAll(s"$name-", "")
 
       val submissionPersistence =
-        sharding.entityRefFor(SubmissionPersistence.typeKey,
-                              s"${SubmissionPersistence.name}-$submissionId")
+        sharding.entityRefFor(SubmissionPersistence.typeKey, s"${SubmissionPersistence.name}-$submissionId")
 
       val hmdaParserError =
-        sharding.entityRefFor(HmdaParserError.typeKey,
-                              s"${HmdaParserError.name}-$submissionId")
+        sharding.entityRefFor(HmdaParserError.typeKey, s"${HmdaParserError.name}-$submissionId")
 
       val hmdaValidationError =
-        sharding.entityRefFor(HmdaValidationError.typeKey,
-                              s"${HmdaValidationError.name}-$submissionId")
+        sharding.entityRefFor(HmdaValidationError.typeKey, s"${HmdaValidationError.name}-$submissionId")
 
       val submissionEventResponseAdapter: ActorRef[SubmissionEvent] =
         ctx.messageAdapter(response => WrappedSubmissionEventResponse(response))
 
       Behaviors.receiveMessage {
         case UpdateSubmissionStatus(modified) =>
-          submissionPersistence ! ModifySubmission(
-            modified,
-            submissionEventResponseAdapter)
+          submissionPersistence ! ModifySubmission(modified, submissionEventResponseAdapter)
           Behaviors.same
 
         case WrappedSubmissionEventResponse(submissionEvent) =>
@@ -80,9 +67,7 @@ object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
 
     }
 
-  def startShardRegion(sharding: ClusterSharding)
-    : ActorRef[ShardingEnvelope[SubmissionManagerCommand]] = {
+  def startShardRegion(sharding: ClusterSharding): ActorRef[ShardingEnvelope[SubmissionManagerCommand]] =
     super.startShardRegion(sharding)
-  }
 
 }

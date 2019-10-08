@@ -6,7 +6,7 @@ import hmda.uli.api.model.ULIValidationErrorMessages._
 
 object ULI {
 
-  def checkDigit(loanId: String): String = {
+  def checkDigit(loanId: String): String =
     if (!loanIdIsValidLength(loanId)) {
       throw new Exception(invalidLoanIdLengthMessage)
     } else if (!isAlphanumeric(loanId)) {
@@ -14,13 +14,11 @@ object ULI {
     } else {
       stringLengthTwo(calculateCheckDigit(calculateMod(convert(loanId) * 100)))
     }
-  }
 
-  def generateULI(loanId: String): String = {
+  def generateULI(loanId: String): String =
     loanId + checkDigit(loanId).toString.trim()
-  }
 
-  def validateULI(uli: String): Boolean = {
+  def validateULI(uli: String): Boolean =
     if (!isAlphanumeric(uli)) {
       throw new Exception(nonAlphanumericULIMessage)
     } else if (!uliIsValidLength(uli)) {
@@ -28,11 +26,9 @@ object ULI {
     } else {
       calculateMod(convert(uli)) == 1
     }
-  }
 
-  def isAlphanumeric(str: String): Boolean = {
+  def isAlphanumeric(str: String): Boolean =
     str.forall(alphanumeric.contains(_))
-  }
 
   def uliIsValidLength(uli: String): Boolean = {
     val count = uli.count(_.toString.trim() != "")
@@ -84,18 +80,15 @@ object ULI {
     BigInt(digits)
   }
 
-  private def calculateMod(i: BigInt): BigInt = {
+  private def calculateMod(i: BigInt): BigInt =
     i % 97
-  }
 
-  private def calculateCheckDigit(i: BigInt): BigInt = {
+  private def calculateCheckDigit(i: BigInt): BigInt =
     98 - i
-  }
 
-  private def stringLengthTwo(n: BigInt): String = {
+  private def stringLengthTwo(n: BigInt): String =
     if (n <= 9 && n >= 0) s"0$n"
     else n.toString
-  }
 
   private val alphanumeric =
     (('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')).toSet

@@ -9,7 +9,6 @@ import hmda.validation.rules.EditCheck
 object V617 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V617"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     lar.loan.amount is greaterThanOrEqual(0)
-  }
 }

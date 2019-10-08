@@ -5,7 +5,7 @@ import hmda.persistence.serialization.filing.FilingMessage
 
 object FilingProtobufConverter {
 
-  def filingToProtobuf(filing: Filing): FilingMessage = {
+  def filingToProtobuf(filing: Filing): FilingMessage =
     FilingMessage(
       filing.period,
       filing.lei,
@@ -14,9 +14,8 @@ object FilingProtobufConverter {
       filing.start,
       filing.end
     )
-  }
 
-  def filingFromProtobuf(filingMessage: FilingMessage): Filing = {
+  def filingFromProtobuf(filingMessage: FilingMessage): Filing =
     Filing(
       filingMessage.period,
       filingMessage.lei,
@@ -25,15 +24,13 @@ object FilingProtobufConverter {
       filingMessage.start,
       filingMessage.end
     )
-  }
 
-  def filingStatusFromInt(code: Int): FilingStatus = {
+  def filingStatusFromInt(code: Int): FilingStatus =
     code match {
       case 1  => NotStarted
       case 2  => InProgress
       case 3  => Completed
       case -1 => Cancelled
     }
-  }
 
 }

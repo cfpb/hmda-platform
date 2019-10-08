@@ -12,10 +12,11 @@ import scala.util.Try
 object Q617 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q617"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(
       lar.property.propertyValue not oneOf("NA", "Exempt") and
-        (lar.loan.combinedLoanToValueRatio not oneOf("NA", "Exempt"))) {
+        (lar.loan.combinedLoanToValueRatio not oneOf("NA", "Exempt"))
+    ) {
 
       val propValue =
         Try(lar.property.propertyValue.toDouble).getOrElse(Double.MaxValue)
@@ -32,13 +33,11 @@ object Q617 extends EditCheck[LoanApplicationRegister] {
 
       combinedLoanValueRatio is greaterThanOrEqual(ratioToPrecision)
     }
-  }
 
-  private def getPrecision(number: BigDecimal): Int = {
+  private def getPrecision(number: BigDecimal): Int =
     if (number.isValidInt) {
       0
     } else {
       number.scale
     }
-  }
 }

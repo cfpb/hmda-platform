@@ -9,9 +9,8 @@ import hmda.validation.dsl.PredicateSyntax._
 object Q606 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q606"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.income is numeric) {
       lar.income.toInt is lessThan(3000)
     }
-  }
 }

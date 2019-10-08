@@ -40,29 +40,23 @@ class InstitutionEventsSerializer extends SerializerWithStringManifest {
     case evt: FilingAdded =>
       filingAddedToProtobuf(evt).toByteArray
     case _ ⇒
-      throw new IllegalArgumentException(
-        s"Cannot serialize object of type [${o.getClass.getName}]")
+      throw new IllegalArgumentException(s"Cannot serialize object of type [${o.getClass.getName}]")
   }
 
   override def fromBinary(bytes: Array[Byte], manifest: String): AnyRef =
     manifest match {
       case InstitutionCreatedManifest =>
-        institutionCreatedFromProtobuf(
-          InstitutionCreatedMessage.parseFrom(bytes))
+        institutionCreatedFromProtobuf(InstitutionCreatedMessage.parseFrom(bytes))
       case InstitutionModifiedManifest =>
-        institutionModifiedFromProtobuf(
-          InstitutionModifiedMessage.parseFrom(bytes))
+        institutionModifiedFromProtobuf(InstitutionModifiedMessage.parseFrom(bytes))
       case InstitutionDeletedManifest =>
-        institutionDeletedFromProtobuf(
-          InstitutionDeletedMessage.parseFrom(bytes))
+        institutionDeletedFromProtobuf(InstitutionDeletedMessage.parseFrom(bytes))
       case InstitutionNotExistsManifest =>
-        institutionNotExistsFromProtobuf(
-          InstitutionNotExistsMessage.parseFrom(bytes))
+        institutionNotExistsFromProtobuf(InstitutionNotExistsMessage.parseFrom(bytes))
       case FilingAddedManifest =>
         filingAddedFromProtobuf(FilingAddedMessage.parseFrom(bytes))
       case _ =>
-        throw new NotSerializableException(
-          s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
+        throw new NotSerializableException(s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
     }
 
 }

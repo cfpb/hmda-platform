@@ -9,7 +9,6 @@ case class Geography(street: String = "",
                      county: String = "",
                      tract: String = "")
     extends PipeDelimited {
-  override def toCSV: String = {
+  override def toCSV: String =
     s"$street|$city|$state|$zipCode|$county|$tract"
-  }
 }

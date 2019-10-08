@@ -22,7 +22,7 @@ object Q643 extends EditCheck[LoanApplicationRegister] {
     OtherAutomatedUnderwritingResult
   )
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.AUS.aus1 is equalTo(DesktopUnderwriter)) {
       lar.ausResult.ausResult1 is containedIn(results)
     } and when(lar.AUS.aus2 is equalTo(DesktopUnderwriter)) {
@@ -34,5 +34,4 @@ object Q643 extends EditCheck[LoanApplicationRegister] {
     } and when(lar.AUS.aus5 is equalTo(DesktopUnderwriter)) {
       lar.ausResult.ausResult5 is containedIn(results)
     }
-  }
 }

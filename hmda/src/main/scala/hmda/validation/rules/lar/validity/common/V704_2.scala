@@ -13,11 +13,8 @@ object V704_2 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V704"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.action.actionTakenType is equalTo(PurchasedLoan)) {
-      lar.ausResult.ausResult1 is oneOf(
-        AutomatedUnderwritingResultNotApplicable,
-        AUSResultExempt)
+      lar.ausResult.ausResult1 is oneOf(AutomatedUnderwritingResultNotApplicable, AUSResultExempt)
     }
-  }
 }

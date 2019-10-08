@@ -21,9 +21,8 @@ object V658_2 extends EditCheck[LoanApplicationRegister] {
     PreapprovalRequestApprovedButNotAccepted
   )
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.action.actionTakenType is containedIn(applicableList)) {
       lar.hoepaStatus is equalTo(HOEPStatusANotApplicable)
     }
-  }
 }

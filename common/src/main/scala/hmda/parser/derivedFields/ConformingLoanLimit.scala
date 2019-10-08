@@ -5,30 +5,29 @@ import hmda.model.filing.lar.enums._
 import hmda.model.census.CountyLoanLimit
 
 case class LoanLimitInfo(
-    totalUnits: Int,
-    amount: Double,
-    lienStatus: LienStatusEnum,
-    county: String,
-    state: String
+  totalUnits: Int,
+  amount: Double,
+  lienStatus: LienStatusEnum,
+  county: String,
+  state: String
 )
 
 case class StateBoundries(
-    oneUnitMax: Double,
-    oneUnitMin: Double,
-    twoUnitMax: Double,
-    twoUnitMin: Double,
-    threeUnitMax: Double,
-    threeUnitMin: Double,
-    fourUnitMax: Double,
-    fourUnitMin: Double
+  oneUnitMax: Double,
+  oneUnitMin: Double,
+  twoUnitMax: Double,
+  twoUnitMin: Double,
+  threeUnitMax: Double,
+  threeUnitMin: Double,
+  fourUnitMax: Double,
+  fourUnitMin: Double
 )
 
 object ConformingLoanLimit {
 
-  def assignLoanLimit(
-      lar: LoanApplicationRegister,
-      countyLoanLimitsByCounty: Map[String, CountyLoanLimit],
-      countyLoanLimitsByState: Map[String, StateBoundries]): String = {
+  def assignLoanLimit(lar: LoanApplicationRegister,
+                      countyLoanLimitsByCounty: Map[String, CountyLoanLimit],
+                      countyLoanLimitsByState: Map[String, StateBoundries]): String = {
     val loan = LoanLimitInfo(
       lar.property.totalUnits,
       lar.loan.amount,

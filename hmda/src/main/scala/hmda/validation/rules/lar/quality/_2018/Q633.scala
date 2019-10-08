@@ -10,15 +10,9 @@ import hmda.validation.rules.EditCheck
 object Q633 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q633"
 
-  val results = List(ReferWithCaution,
-                     Accept,
-                     Ineligible,
-                     Refer,
-                     Eligible,
-                     UnableToDetermineOrUnknown,
-                     OtherAutomatedUnderwritingResult)
+  val results = List(ReferWithCaution, Accept, Ineligible, Refer, Eligible, UnableToDetermineOrUnknown, OtherAutomatedUnderwritingResult)
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.AUS.aus1 is equalTo(GuaranteedUnderwritingSystem)) {
       lar.ausResult.ausResult1 is containedIn(results)
     } and when(lar.AUS.aus2 is equalTo(GuaranteedUnderwritingSystem)) {
@@ -30,5 +24,4 @@ object Q633 extends EditCheck[LoanApplicationRegister] {
     } and when(lar.AUS.aus5 is equalTo(GuaranteedUnderwritingSystem)) {
       lar.ausResult.ausResult5 is containedIn(results)
     }
-  }
 }

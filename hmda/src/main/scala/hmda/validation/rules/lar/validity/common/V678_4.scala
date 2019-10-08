@@ -12,11 +12,8 @@ object V678_4 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V678"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    when(
-      lar.businessOrCommercialPurpose is equalTo(
-        PrimarilyBusinessOrCommercialPurpose)) {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
+    when(lar.businessOrCommercialPurpose is equalTo(PrimarilyBusinessOrCommercialPurpose)) {
       lar.loan.prepaymentPenaltyTerm is oneOf("NA", "Exempt")
     }
-  }
 }

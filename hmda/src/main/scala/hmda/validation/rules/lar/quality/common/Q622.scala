@@ -10,9 +10,8 @@ import hmda.validation.rules.EditCheck
 object Q622 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q622"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.reverseMortgage is equalTo(ReverseMortgage)) {
       lar.applicant.age is greaterThanOrEqual(62)
     }
-  }
 }

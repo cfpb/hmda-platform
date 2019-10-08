@@ -61,8 +61,7 @@ object LarParserErrorModel {
     override def errorMessage: String = notNumeric("co-applicant ethnicity")
   }
 
-  case object InvalidCoApplicantEthnicityObserved
-      extends ParserValidationError {
+  case object InvalidCoApplicantEthnicityObserved extends ParserValidationError {
     override def errorMessage: String =
       notNumeric("co-applicant ethnicity visual observation or surname")
   }
@@ -213,14 +212,12 @@ object LarParserErrorModel {
     override def errorMessage: String = notStringOrNA("property value")
   }
 
-  case object InvalidManufacturedHomeSecuredProperty
-      extends ParserValidationError {
+  case object InvalidManufacturedHomeSecuredProperty extends ParserValidationError {
     override def errorMessage: String =
       notNumeric("manufactured home secured property")
   }
 
-  case object InvalidManufacturedHomeLandPropertyInterest
-      extends ParserValidationError {
+  case object InvalidManufacturedHomeLandPropertyInterest extends ParserValidationError {
     override def errorMessage: String =
       notNumeric("manufactured home land property interest")
   }
@@ -251,8 +248,7 @@ object LarParserErrorModel {
       notNumeric("automated underwriting system")
   }
 
-  case object InvalidAutomatedUnderwritingSystemResult
-      extends ParserValidationError {
+  case object InvalidAutomatedUnderwritingSystemResult extends ParserValidationError {
     override def errorMessage: String =
       notNumeric("automated underwriting result")
   }

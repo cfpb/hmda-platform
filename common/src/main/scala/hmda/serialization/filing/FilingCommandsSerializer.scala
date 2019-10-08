@@ -12,24 +12,23 @@ import hmda.persistence.serialization.filing.FilingMessage
 import hmda.serialization.filing.FilingCommandsProtobufConverter._
 import hmda.serialization.filing.FilingProtobufConverter._
 
-class FilingCommandsSerializer(system: ExtendedActorSystem)
-    extends SerializerWithStringManifest {
+class FilingCommandsSerializer(system: ExtendedActorSystem) extends SerializerWithStringManifest {
 
   private val resolver = ActorRefResolver(system.toTyped)
 
   override def identifier: Int = 105
 
-  final val FilingManifest = classOf[Filing].getName
-  final val CreateFilingManifest = classOf[CreateFiling].getName
-  final val UpdateFilingStatusManifest = classOf[UpdateFilingStatus].getName
-  final val GetFilingManifest = classOf[GetFiling].getName
-  final val GetFilingDetailsManifest = classOf[GetFilingDetails].getName
-  final val AddSubmissionManifest = classOf[AddSubmission].getName
-  final val UpdateSubmissionManifest = classOf[UpdateSubmission].getName
-  final val GetLatestSubmissionManifest = classOf[GetLatestSubmission].getName
+  final val FilingManifest               = classOf[Filing].getName
+  final val CreateFilingManifest         = classOf[CreateFiling].getName
+  final val UpdateFilingStatusManifest   = classOf[UpdateFilingStatus].getName
+  final val GetFilingManifest            = classOf[GetFiling].getName
+  final val GetFilingDetailsManifest     = classOf[GetFilingDetails].getName
+  final val AddSubmissionManifest        = classOf[AddSubmission].getName
+  final val UpdateSubmissionManifest     = classOf[UpdateSubmission].getName
+  final val GetLatestSubmissionManifest  = classOf[GetLatestSubmission].getName
   final val GetSubmissionSummaryManifest = classOf[GetSubmissionSummary].getName
-  final val GetSubmissionsManifest = classOf[GetSubmissions].getName
-  final val FilingStopManifest = classOf[FilingStop].getName
+  final val GetSubmissionsManifest       = classOf[GetSubmissions].getName
+  final val FilingStopManifest           = classOf[FilingStop].getName
 
   override def manifest(o: AnyRef): String = o.getClass.getName
 
@@ -57,8 +56,7 @@ class FilingCommandsSerializer(system: ExtendedActorSystem)
     case FilingStop =>
       filingStopToProtobuf().toByteArray
     case _ =>
-      throw new IllegalArgumentException(
-        s"Cannot serialize object of type [${o.getClass.getName}]")
+      throw new IllegalArgumentException(s"Cannot serialize object of type [${o.getClass.getName}]")
 
   }
 
@@ -87,8 +85,7 @@ class FilingCommandsSerializer(system: ExtendedActorSystem)
       case FilingStopManifest =>
         filingStopFromProtobuf()
       case _ =>
-        throw new NotSerializableException(
-          s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
+        throw new NotSerializableException(s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
     }
 
 }

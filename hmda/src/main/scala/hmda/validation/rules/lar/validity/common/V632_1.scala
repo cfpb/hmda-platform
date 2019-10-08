@@ -13,14 +13,13 @@ import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 
 object V632_1 extends EditCheck[LoanApplicationRegister] {
-  override def name: String = "V632-1"
+  override def name: String   = "V632-1"
   override def parent: String = "V632"
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     lar.coApplicant.ethnicity.ethnicityObserved is oneOf(
       VisualOrSurnameEthnicity,
       NotVisualOrSurnameEthnicity,
       EthnicityObservedNotApplicable,
       EthnicityObservedNoCoApplicant
     )
-  }
 }

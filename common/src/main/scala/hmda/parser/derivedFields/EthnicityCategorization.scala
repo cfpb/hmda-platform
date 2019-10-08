@@ -1,57 +1,41 @@
 package hmda.parser.derivedFields
 
-import hmda.model.filing.lar.{LoanApplicationRegister, Ethnicity}
+import hmda.model.filing.lar.{ Ethnicity, LoanApplicationRegister }
 import hmda.model.filing.lar.enums._
 
 object EthnicityCategorization {
 
   def assignEthnicityCategorization(lar: LoanApplicationRegister): String = {
-    val ethnicity = lar.applicant.ethnicity
+    val ethnicity   = lar.applicant.ethnicity
     val coEthnicity = lar.coApplicant.ethnicity
-    val ethnicityFields = Array(ethnicity.ethnicity1,
-                                ethnicity.ethnicity2,
-                                ethnicity.ethnicity3,
-                                ethnicity.ethnicity4,
-                                ethnicity.ethnicity5)
+    val ethnicityFields =
+      Array(ethnicity.ethnicity1, ethnicity.ethnicity2, ethnicity.ethnicity3, ethnicity.ethnicity4, ethnicity.ethnicity5)
 
-    val coethnicityFields = Array(coEthnicity.ethnicity1,
-                                  coEthnicity.ethnicity2,
-                                  coEthnicity.ethnicity3,
-                                  coEthnicity.ethnicity4,
-                                  coEthnicity.ethnicity5)
+    val coethnicityFields =
+      Array(coEthnicity.ethnicity1, coEthnicity.ethnicity2, coEthnicity.ethnicity3, coEthnicity.ethnicity4, coEthnicity.ethnicity5)
 
-    val hispanicEnums = Array(HispanicOrLatino,
-                              Mexican,
-                              PuertoRican,
-                              Cuban,
-                              OtherHispanicOrLatino)
+    val hispanicEnums = Array(HispanicOrLatino, Mexican, PuertoRican, Cuban, OtherHispanicOrLatino)
 
-    def checkEthnicityTwoToFiveEmpty(ethnicity: Ethnicity): Boolean = {
+    def checkEthnicityTwoToFiveEmpty(ethnicity: Ethnicity): Boolean =
       ethnicity.ethnicity2 == EmptyEthnicityValue &&
-      ethnicity.ethnicity3 == EmptyEthnicityValue &&
-      ethnicity.ethnicity4 == EmptyEthnicityValue &&
-      ethnicity.ethnicity5 == EmptyEthnicityValue
-    }
+        ethnicity.ethnicity3 == EmptyEthnicityValue &&
+        ethnicity.ethnicity4 == EmptyEthnicityValue &&
+        ethnicity.ethnicity5 == EmptyEthnicityValue
 
-    def cotainsNotHispanicOrLatinoFlag(ethnicity: Ethnicity): Boolean = {
+    def cotainsNotHispanicOrLatinoFlag(ethnicity: Ethnicity): Boolean =
       ethnicity.ethnicity1 == NotHispanicOrLatino ||
-      ethnicity.ethnicity2 == NotHispanicOrLatino ||
-      ethnicity.ethnicity3 == EmptyEthnicityValue ||
-      ethnicity.ethnicity4 == EmptyEthnicityValue ||
-      ethnicity.ethnicity5 == EmptyEthnicityValue
-    }
+        ethnicity.ethnicity2 == NotHispanicOrLatino ||
+        ethnicity.ethnicity3 == EmptyEthnicityValue ||
+        ethnicity.ethnicity4 == EmptyEthnicityValue ||
+        ethnicity.ethnicity5 == EmptyEthnicityValue
 
-    def OnlyHispanicFlag(
-        ethnicityFields: Array[EthnicityEnum],
-        ethnicityEnum: Array[EthnicityEnum with Product with Serializable])
-      : Boolean = {
+    def OnlyHispanicFlag(ethnicityFields: Array[EthnicityEnum],
+                         ethnicityEnum: Array[EthnicityEnum with Product with Serializable]): Boolean =
       ethnicityFields.exists(ethnicityEnum.contains) &&
-      !ethnicityFields.contains(NotHispanicOrLatino)
-    }
+        !ethnicityFields.contains(NotHispanicOrLatino)
 
-    def NotHispanicFlagExist(ethnicityFields: Array[EthnicityEnum]): Boolean = {
+    def NotHispanicFlagExist(ethnicityFields: Array[EthnicityEnum]): Boolean =
       ethnicityFields.contains(NotHispanicOrLatino)
-    }
 
     //Free form text only
     if (ethnicity.ethnicity1 == EmptyEthnicityValue)
