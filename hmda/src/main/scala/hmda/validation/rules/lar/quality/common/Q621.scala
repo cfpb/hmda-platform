@@ -10,8 +10,8 @@ object Q621 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q621"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    when(lar.larIdentifier.NMLSRIdentifier is alphaNumeric and
-      when (lar.larIdentifier.NMLSRIdentifier.length is lessThanOrEqual(12))
-    )
+    when(lar.larIdentifier.NMLSRIdentifier is alphaNumeric) {
+      lar.larIdentifier.NMLSRIdentifier.length is lessThanOrEqual(12)
+    }
   }
 }
