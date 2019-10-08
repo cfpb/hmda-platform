@@ -44,8 +44,7 @@ object PredicateCommon {
     case n: Number => true
     case s: String => Try(s.toDouble).isSuccess
     case _ =>
-      throw new NotImplementedError(
-        "'numeric' doesn't handle non-number/string values yet")
+      throw new NotImplementedError("'numeric' doesn't handle non-number/string values yet")
   }
 
   def alphaNumeric[A]: Predicate[A] = (_: A) match {
@@ -58,13 +57,10 @@ object PredicateCommon {
   def empty[A]: Predicate[A] = (_: A) match {
     case s: String => s.isEmpty
     case _ =>
-      throw new NotImplementedError(
-        "'empty doesn't handle non-string values yet'")
+      throw new NotImplementedError("'empty doesn't handle non-string values yet'")
   }
 
-  def when(condition: ValidationResult)(
-      thenTest: => ValidationResult): ValidationResult = {
+  def when(condition: ValidationResult)(thenTest: => ValidationResult): ValidationResult =
     condition.implies(thenTest)
-  }
 
 }

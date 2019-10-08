@@ -10,8 +10,6 @@ import hmda.validation.rules.EditCheck
 object V685 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V685"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    lar.nonAmortizingFeatures.interestOnlyPayments not equalTo(
-      InvalidInterestOnlyPaymentCode)
-  }
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
+    lar.nonAmortizingFeatures.interestOnlyPayments not equalTo(InvalidInterestOnlyPaymentCode)
 }

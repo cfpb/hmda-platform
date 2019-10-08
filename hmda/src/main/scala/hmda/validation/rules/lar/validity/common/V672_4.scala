@@ -12,9 +12,8 @@ object V672_4 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V672"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.lineOfCredit is equalTo(OpenEndLineOfCredit)) {
       lar.loanDisclosure.totalLoanCosts is oneOf("NA", "Exempt")
     }
-  }
 }

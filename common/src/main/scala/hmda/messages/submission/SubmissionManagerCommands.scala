@@ -8,12 +8,10 @@ object SubmissionManagerCommands {
 
   sealed trait SubmissionManagerCommand extends Command
 
-  case class UpdateSubmissionStatus(submission: Submission)
-      extends SubmissionManagerCommand
+  case class UpdateSubmissionStatus(submission: Submission) extends SubmissionManagerCommand
 
   case object SubmissionManagerStop extends SubmissionManagerCommand
 
-  case class WrappedSubmissionEventResponse(submissionEvent: SubmissionEvent)
-      extends SubmissionManagerCommand
+  case class WrappedSubmissionEventResponse(submissionEvent: SubmissionEvent) extends SubmissionManagerCommand
 
 }

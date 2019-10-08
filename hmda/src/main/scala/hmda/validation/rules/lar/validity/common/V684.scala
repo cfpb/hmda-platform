@@ -10,8 +10,6 @@ import hmda.validation.rules.EditCheck
 object V684 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V684"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    lar.nonAmortizingFeatures.balloonPayment not equalTo(
-      InvalidBalloonPaymentCode)
-  }
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
+    lar.nonAmortizingFeatures.balloonPayment not equalTo(InvalidBalloonPaymentCode)
 }

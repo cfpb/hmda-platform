@@ -12,12 +12,10 @@ object V666_2 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V666"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.coApplicant.creditScore is equalTo(9999)) {
       lar.coApplicant.creditScoreType is equalTo(CreditScoreNoCoApplicant)
-    } and when(
-      lar.coApplicant.creditScoreType is equalTo(CreditScoreNoCoApplicant)) {
+    } and when(lar.coApplicant.creditScoreType is equalTo(CreditScoreNoCoApplicant)) {
       lar.coApplicant.creditScore is equalTo(9999)
     }
-  }
 }

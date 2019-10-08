@@ -12,10 +12,9 @@ object V612_2 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V612"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.action.preapproval is equalTo(PreapprovalRequested)) {
       lar.loan.loanPurpose is equalTo(HomePurchase)
     }
-  }
 
 }

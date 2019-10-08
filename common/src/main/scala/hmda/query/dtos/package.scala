@@ -1,7 +1,7 @@
 package hmda.query
 
 import hmda.model.census.Census
-import spray.json.{DefaultJsonProtocol, RootJsonFormat}
+import spray.json.{ DefaultJsonProtocol, RootJsonFormat }
 
 /**
   * Domain transfer objects used to communicate with Census API
@@ -14,8 +14,6 @@ package object dtos {
   case class IndexedCensusEntry(index: String, data: Census, entryType: String)
   object IndexedCensusEntry {
     import DefaultJsonProtocol._
-    implicit val jsonFormatIndexedCensusEntry
-      : RootJsonFormat[IndexedCensusEntry] = jsonFormat3(
-      IndexedCensusEntry.apply)
+    implicit val jsonFormatIndexedCensusEntry: RootJsonFormat[IndexedCensusEntry] = jsonFormat3(IndexedCensusEntry.apply)
   }
 }

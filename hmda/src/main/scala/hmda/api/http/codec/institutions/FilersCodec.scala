@@ -5,7 +5,7 @@ import hmda.model.institution.HmdaFilerResponse
 import io.circe._
 import io.circe.Decoder.Result
 import io.circe.Decoder.Result
-import io.circe.{Decoder, Encoder, HCursor, Json}
+import io.circe.{ Decoder, Encoder, HCursor, Json }
 import io.circe.syntax._
 
 object FilersCodec {
@@ -23,8 +23,8 @@ object FilersCodec {
     new Decoder[HmdaFiler] {
       override def apply(c: HCursor): Result[HmdaFiler] =
         for {
-          lei <- c.downField("lei").as[String]
-          name <- c.downField("name").as[String]
+          lei    <- c.downField("lei").as[String]
+          name   <- c.downField("name").as[String]
           period <- c.downField("period").as[String]
         } yield {
           HmdaFiler(lei, name, period)

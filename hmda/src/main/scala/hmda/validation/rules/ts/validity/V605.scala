@@ -9,7 +9,6 @@ import hmda.validation.rules.EditCheck
 object V605 extends EditCheck[TransmittalSheet] {
   override def name: String = "V605"
 
-  override def apply(ts: TransmittalSheet): ValidationResult = {
+  override def apply(ts: TransmittalSheet): ValidationResult =
     ts.contact.address.zipCode is validZipCode
-  }
 }

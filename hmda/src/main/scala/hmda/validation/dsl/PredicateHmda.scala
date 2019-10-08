@@ -10,7 +10,7 @@ object PredicateHmda {
     case _ => false
   }
 
-  private def checkDateFormat[T](s: String): Boolean = {
+  private def checkDateFormat[T](s: String): Boolean =
     try {
       val format = new SimpleDateFormat("yyyyMMdd")
       format.setLenient(false)
@@ -19,6 +19,5 @@ object PredicateHmda {
     } catch {
       case e: Exception => false
     }
-  }
 
 }

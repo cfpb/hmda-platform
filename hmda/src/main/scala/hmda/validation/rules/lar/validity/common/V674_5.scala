@@ -21,9 +21,8 @@ object V674_5 extends EditCheck[LoanApplicationRegister] {
     PreapprovalRequestApprovedButNotAccepted
   )
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.action.actionTakenType is containedIn(actionList)) {
       lar.loanDisclosure.originationCharges is oneOf("NA", "Exempt")
     }
-  }
 }

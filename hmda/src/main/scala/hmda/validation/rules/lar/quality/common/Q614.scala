@@ -9,10 +9,8 @@ import hmda.validation.rules.EditCheck
 object Q614 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q614"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.applicant.age not equalTo(8888)) {
-      (lar.applicant.age is greaterThanOrEqual(18)) and (lar.applicant.age is lessThanOrEqual(
-        100))
+      (lar.applicant.age is greaterThanOrEqual(18)) and (lar.applicant.age is lessThanOrEqual(100))
     }
-  }
 }

@@ -12,13 +12,9 @@ object V615_3 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V615"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    when(
-      lar.property.manufacturedHomeSecuredProperty is oneOf(
-        ManufacturedHomeAndLand,
-        ManufacturedHomeAndNotLand)) {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
+    when(lar.property.manufacturedHomeSecuredProperty is oneOf(ManufacturedHomeAndLand, ManufacturedHomeAndNotLand)) {
       lar.loan.constructionMethod is equalTo(ManufacturedHome)
     }
-  }
 
 }

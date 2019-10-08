@@ -6,30 +6,25 @@ import akka.actor.ExtendedActorSystem
 import akka.actor.typed.ActorRefResolver
 import akka.actor.typed.scaladsl.adapter._
 import akka.serialization.SerializerWithStringManifest
-import hmda.messages.submission.SubmissionProcessingCommands.{
-  CompleteSyntacticalValidity,
-  GetHmdaValidationErrorState,
-  _
-}
+import hmda.messages.submission.SubmissionProcessingCommands.{ CompleteSyntacticalValidity, GetHmdaValidationErrorState, _ }
 import hmda.persistence.serialization.submission.processing.commands._
 import hmda.serialization.submission.SubmissionProcessingCommandsProtobufConverter._
 
-class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem)
-    extends SerializerWithStringManifest {
+class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem) extends SerializerWithStringManifest {
 
   private val resolver = ActorRefResolver(system.toTyped)
 
   override def identifier: Int = 109
 
-  final val StartUploadManifest = classOf[StartUpload].getName
+  final val StartUploadManifest    = classOf[StartUpload].getName
   final val CompleteUploadManifest = classOf[CompleteUpload].getName
-  final val StartParsingManifest = classOf[StartParsing].getName
+  final val StartParsingManifest   = classOf[StartParsing].getName
   final val PersistHmdaRowParsedErrorManifest =
     classOf[PersistHmdaRowParsedError].getName
   final val GetParsedWithErrorCountManifest =
     classOf[GetParsedWithErrorCount].getName
   final val GetParsingErrorsManifest = classOf[GetParsingErrors].getName
-  final val CompleteParsingManifest = classOf[CompleteParsing].getName
+  final val CompleteParsingManifest  = classOf[CompleteParsing].getName
   final val CompleteParsingWithErrorsManifest =
     classOf[CompleteParsingWithErrors].getName
   final val StartSyntacticalValidityManifest =
@@ -97,8 +92,7 @@ class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem)
     case cmd: SignSubmission =>
       signSubmissionToProtobuf(cmd, resolver).toByteArray
     case _ =>
-      throw new IllegalArgumentException(
-        s"Cannot serialize object of type [${o.getClass.getName}]")
+      throw new IllegalArgumentException(s"Cannot serialize object of type [${o.getClass.getName}]")
   }
 
   override def fromBinary(bytes: Array[Byte], manifest: String): AnyRef =
@@ -110,38 +104,25 @@ class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem)
       case StartParsingManifest =>
         startParsingFromProtobuf(StartParsingMessage.parseFrom(bytes))
       case PersistHmdaRowParsedErrorManifest =>
-        persistHmdaRowParsedErrorFromProtobuf(
-          PersistHmdaRowParsedErrorMessage.parseFrom(bytes),
-          resolver)
+        persistHmdaRowParsedErrorFromProtobuf(PersistHmdaRowParsedErrorMessage.parseFrom(bytes), resolver)
       case GetParsedWithErrorCountManifest =>
-        getParsedWithErrorCountFromProtobuf(
-          GetParsedWithErrorCountMessage.parseFrom(bytes),
-          resolver)
+        getParsedWithErrorCountFromProtobuf(GetParsedWithErrorCountMessage.parseFrom(bytes), resolver)
       case GetParsingErrorsManifest =>
-        getParsingErrorsFromProtobuf(GetParsingErrorsMessage.parseFrom(bytes),
-                                     resolver)
+        getParsingErrorsFromProtobuf(GetParsingErrorsMessage.parseFrom(bytes), resolver)
       case CompleteParsingManifest =>
         completeParsingFromProtobuf(CompleteParsingMessage.parseFrom(bytes))
       case CompleteParsingWithErrorsManifest =>
-        completeParsingWithErrorsFromProtobuf(
-          CompleteParsingWithErrorsMessage.parseFrom(bytes))
+        completeParsingWithErrorsFromProtobuf(CompleteParsingWithErrorsMessage.parseFrom(bytes))
       case StartSyntacticalValidityManifest =>
-        startSyntacticalValidityFromProtobuf(
-          StartSyntacticalValidityMessage.parseFrom(bytes))
+        startSyntacticalValidityFromProtobuf(StartSyntacticalValidityMessage.parseFrom(bytes))
       case PersistHmdaRowValidatedErrorManifest =>
-        persistHmdaRowValidatedErrorFromProtobuf(
-          PersistHmdaRowValidatedErrorMessage.parseFrom(bytes),
-          resolver)
+        persistHmdaRowValidatedErrorFromProtobuf(PersistHmdaRowValidatedErrorMessage.parseFrom(bytes), resolver)
       case PersistMacroErrorManifest =>
-        persistMacroErrorFromProtobuf(PersistMacroErrorMessage.parseFrom(bytes),
-                                      resolver)
+        persistMacroErrorFromProtobuf(PersistMacroErrorMessage.parseFrom(bytes), resolver)
       case GetHmdaValidationErrorStateManifest =>
-        getHmdaValidationErrorStateFromProtobuf(
-          GetHmdaValidationErrorStateMessage.parseFrom(bytes),
-          resolver)
+        getHmdaValidationErrorStateFromProtobuf(GetHmdaValidationErrorStateMessage.parseFrom(bytes), resolver)
       case CompleteSyntacticalValidityManifest =>
-        completeSyntacticalValidityFromProtobuf(
-          CompleteSyntacticalValidityMessage.parseFrom(bytes))
+        completeSyntacticalValidityFromProtobuf(CompleteSyntacticalValidityMessage.parseFrom(bytes))
       case StartQualityManifest =>
         startQualituFromProtobuf(StartQualityMessage.parseFrom(bytes))
       case StartMacroManifest =>
@@ -149,15 +130,12 @@ class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem)
       case CompleteQualityManifest =>
         completeQualityFromProtobuf(CompleteQualityMessage.parseFrom(bytes))
       case VerifyQualityManifest =>
-        verifyQualityFromProtobuf(VerifyQualityMessage.parseFrom(bytes),
-                                  resolver)
+        verifyQualityFromProtobuf(VerifyQualityMessage.parseFrom(bytes), resolver)
       case VerifyMacroManifest =>
         verifyMacroFromProtobuf(VerifyMacroMessage.parseFrom(bytes), resolver)
       case SignSubmissionManifest =>
-        signSubmissionFromProtobuf(SignSubmissionMessage.parseFrom(bytes),
-                                   resolver)
+        signSubmissionFromProtobuf(SignSubmissionMessage.parseFrom(bytes), resolver)
       case _ =>
-        throw new NotSerializableException(
-          s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
+        throw new NotSerializableException(s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
     }
 }

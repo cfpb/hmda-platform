@@ -4,10 +4,7 @@ import java.io.NotSerializableException
 
 import akka.serialization.SerializerWithStringManifest
 import hmda.messages.submission.SubmissionProcessingEvents._
-import hmda.model.processing.state.{
-  HmdaParserErrorState,
-  HmdaValidationErrorState
-}
+import hmda.model.processing.state.{ HmdaParserErrorState, HmdaValidationErrorState }
 import hmda.persistence.serialization.submission.processing.events.{
   HmdaParserErrorStateMessage,
   HmdaRowParsedCountMessage,
@@ -17,12 +14,11 @@ import hmda.persistence.serialization.submission.processing.events.{
 import hmda.serialization.submission.SubmissionProcessingEventsProtobufConverter._
 import hmda.serialization.validation.ValidationProtobufConverter._
 
-class SubmissionProcessingEventsSerializer
-    extends SerializerWithStringManifest {
+class SubmissionProcessingEventsSerializer extends SerializerWithStringManifest {
   override def identifier: Int = 108
 
-  final val ParsedErrorManifest = classOf[HmdaRowParsedError].getName
-  final val ParsedErrorCountManifest = classOf[HmdaRowParsedCount].getName
+  final val ParsedErrorManifest          = classOf[HmdaRowParsedError].getName
+  final val ParsedErrorCountManifest     = classOf[HmdaRowParsedCount].getName
   final val HmdaParserErrorStateManifest = classOf[HmdaParserErrorState].getName
   final val HmdaValidationErrorStateManifest =
     classOf[HmdaValidationErrorState].getName
@@ -30,13 +26,13 @@ class SubmissionProcessingEventsSerializer
     classOf[HmdaRowValidatedError].getName
   final val HmdaMacroValidatedErrorManifest =
     classOf[HmdaMacroValidatedError].getName
-  final val QualityVerifiedManifest = classOf[QualityVerified].getName
-  final val MacroVerifiedManifest = classOf[MacroVerified].getName
+  final val QualityVerifiedManifest      = classOf[QualityVerified].getName
+  final val MacroVerifiedManifest        = classOf[MacroVerified].getName
   final val NotReadyToBeVerifiedManifest = classOf[NotReadyToBeVerified].getName
   final val SyntacticalValidityCompletedManifest =
     classOf[SyntacticalValidityCompleted].getName
   final val QualityCompletedManifest = classOf[QualityCompleted].getName
-  final val MacroCompletedManifest = classOf[MacroCompleted].getName
+  final val MacroCompletedManifest   = classOf[MacroCompleted].getName
   final val SubmissionSignedManifest = classOf[SubmissionSigned].getName
   final val SubmissionNotReadyToBeSignedManifest =
     classOf[SubmissionNotReadyToBeSigned].getName
@@ -73,40 +69,31 @@ class SubmissionProcessingEventsSerializer
     case evt: SubmissionNotReadyToBeSigned =>
       submissionNotReadyToBeSignedToProtobuf(evt).toByteArray
     case _ =>
-      throw new IllegalArgumentException(
-        s"Cannot serialize object of type [${o.getClass.getName}]")
+      throw new IllegalArgumentException(s"Cannot serialize object of type [${o.getClass.getName}]")
   }
 
   override def fromBinary(bytes: Array[Byte], manifest: String): AnyRef =
     manifest match {
       case ParsedErrorManifest =>
-        hmdaRowParsedErrorFromProtobuf(
-          HmdaRowParsedErrorMessage.parseFrom(bytes))
+        hmdaRowParsedErrorFromProtobuf(HmdaRowParsedErrorMessage.parseFrom(bytes))
       case ParsedErrorCountManifest =>
-        hmdaRowParsedCountFromProtobuf(
-          HmdaRowParsedCountMessage.parseFrom(bytes))
+        hmdaRowParsedCountFromProtobuf(HmdaRowParsedCountMessage.parseFrom(bytes))
       case HmdaParserErrorStateManifest =>
-        hmdaParserErrorStateFromProtobuf(
-          HmdaParserErrorStateMessage.parseFrom(bytes))
+        hmdaParserErrorStateFromProtobuf(HmdaParserErrorStateMessage.parseFrom(bytes))
       case HmdaValidationErrorStateManifest =>
-        hmdaValidationErrorStateFromProtobuf(
-          HmdaValidationErrorStateMessage.parseFrom(bytes))
+        hmdaValidationErrorStateFromProtobuf(HmdaValidationErrorStateMessage.parseFrom(bytes))
       case HmdaRowValidatedErrorManifest =>
-        hmdaRowValidatedErrorFromProtobuf(
-          HmdaRowValidatedErrorMessage.parseFrom(bytes))
+        hmdaRowValidatedErrorFromProtobuf(HmdaRowValidatedErrorMessage.parseFrom(bytes))
       case HmdaMacroValidatedErrorManifest =>
-        hmdaMacroValidatedErrorFromProtobuf(
-          HmdaMacroValidatedErrorMessage.parseFrom(bytes))
+        hmdaMacroValidatedErrorFromProtobuf(HmdaMacroValidatedErrorMessage.parseFrom(bytes))
       case QualityVerifiedManifest =>
         qualityVerifiedFromProtobuf(QualityVerifiedMessage.parseFrom(bytes))
       case MacroVerifiedManifest =>
         macroVerifiedFromProtobuf(MacroVerifiedMessage.parseFrom(bytes))
       case NotReadyToBeVerifiedManifest =>
-        notReadyToBeVerifiedFromProtobuf(
-          NotReadyToBeVerifiedMessage.parseFrom(bytes))
+        notReadyToBeVerifiedFromProtobuf(NotReadyToBeVerifiedMessage.parseFrom(bytes))
       case SyntacticalValidityCompletedManifest =>
-        syntacticalValidityCompletedFromProtobuf(
-          SyntacticalValidityCompletedMessage.parseFrom(bytes))
+        syntacticalValidityCompletedFromProtobuf(SyntacticalValidityCompletedMessage.parseFrom(bytes))
       case QualityCompletedManifest =>
         qualityCompletedFromProtobuf(QualityCompletedMessage.parseFrom(bytes))
       case MacroCompletedManifest =>
@@ -114,10 +101,8 @@ class SubmissionProcessingEventsSerializer
       case SubmissionSignedManifest =>
         submissionSignedFromProtobuf(SubmissionSignedMessage.parseFrom(bytes))
       case SubmissionNotReadyToBeSignedManifest =>
-        submissionNotReadyToBeSignedFromProtobuf(
-          SubmissionNotReadyToBeSignedMessage.parseFrom(bytes))
+        submissionNotReadyToBeSignedFromProtobuf(SubmissionNotReadyToBeSignedMessage.parseFrom(bytes))
       case _ =>
-        throw new NotSerializableException(
-          s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
+        throw new NotSerializableException(s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
     }
 }

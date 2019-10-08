@@ -11,9 +11,8 @@ object V679_3 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V679"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.property.multiFamilyAffordableUnits is numeric) {
       lar.loan.debtToIncomeRatio is oneOf("NA", "Exempt")
     }
-  }
 }

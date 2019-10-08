@@ -1,12 +1,8 @@
 package hmda.api.http.codec.filing.submission
 
-import hmda.api.http.model.filing.submissions.{
-  PaginatedResponse,
-  PaginationLinks,
-  ParsingErrorSummary
-}
+import hmda.api.http.model.filing.submissions.{ PaginatedResponse, PaginationLinks, ParsingErrorSummary }
 import io.circe.Decoder.Result
-import io.circe.{Decoder, Encoder, HCursor, Json}
+import io.circe.{ Decoder, Encoder, HCursor, Json }
 import io.circe.syntax._
 import SubmissionStatusCodec._
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowParsedError
@@ -32,20 +28,15 @@ object ParsingErrorSummaryCodec {
     new Decoder[ParsingErrorSummary] {
       override def apply(c: HCursor): Result[ParsingErrorSummary] =
         for {
-          tsErrors <- c.downField("transmittalSheetErrors").as[Seq[String]]
+          tsErrors  <- c.downField("transmittalSheetErrors").as[Seq[String]]
           larErrors <- c.downField("larErrors").as[Seq[HmdaRowParsedError]]
-          total <- c.downField("total").as[Int]
-          status <- c.downField("status").as[SubmissionStatus]
-          links <- c.downField("_links").as[PaginationLinks]
+          total     <- c.downField("total").as[Int]
+          status    <- c.downField("status").as[SubmissionStatus]
+          links     <- c.downField("_links").as[PaginationLinks]
         } yield {
-          val path = PaginatedResponse.staticPath(links.href)
+          val path        = PaginatedResponse.staticPath(links.href)
           val currentPage = PaginatedResponse.currentPage(links.self)
-          ParsingErrorSummary(tsErrors,
-                              larErrors,
-                              path,
-                              currentPage,
-                              total,
-                              status)
+          ParsingErrorSummary(tsErrors, larErrors, path, currentPage, total, status)
         }
     }
 

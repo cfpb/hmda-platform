@@ -32,10 +32,9 @@ object V635_2 extends EditCheck[LoanApplicationRegister] {
     White
   )
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     (lar.applicant.race.race2 is containedIn(validRaceValues)) and
       (lar.applicant.race.race3 is containedIn(validRaceValues)) and
       (lar.applicant.race.race4 is containedIn(validRaceValues)) and
       (lar.applicant.race.race5 is containedIn(validRaceValues))
-  }
 }

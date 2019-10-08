@@ -1,14 +1,7 @@
 package hmda.serialization.submission
 
-import hmda.messages.submission.SubmissionEvents.{
-  SubmissionCreated,
-  SubmissionModified,
-  SubmissionNotExists
-}
-import hmda.messages.submission.SubmissionManagerCommands.{
-  UpdateSubmissionStatus,
-  WrappedSubmissionEventResponse
-}
+import hmda.messages.submission.SubmissionEvents.{ SubmissionCreated, SubmissionModified, SubmissionNotExists }
+import hmda.messages.submission.SubmissionManagerCommands.{ UpdateSubmissionStatus, WrappedSubmissionEventResponse }
 import hmda.model.filing.submission.SubmissionId
 import hmda.persistence.serialization.submission.SubmissionMessage
 import hmda.persistence.serialization.submissionmanager.commands.WrappedSubmissionEventResponseMessage.Sub
@@ -17,48 +10,34 @@ import hmda.persistence.serialization.submissionmanager.commands.WrappedSubmissi
   SubmissionModifiedField,
   SubmissionNotExistsField
 }
-import hmda.persistence.serialization.submissionmanager.commands.{
-  UpdateSubmissionStatusMessage,
-  WrappedSubmissionEventResponseMessage
-}
+import hmda.persistence.serialization.submissionmanager.commands.{ UpdateSubmissionStatusMessage, WrappedSubmissionEventResponseMessage }
 import hmda.serialization.submission.SubmissionEventsProtobufConverter._
 import hmda.serialization.submission.SubmissionProtobufConverter._
 
 object SubmissionManagerCommandsProtobufConverter {
 
-  def updateSubmissionStatusToProtobuf(
-      cmd: UpdateSubmissionStatus): UpdateSubmissionStatusMessage = {
+  def updateSubmissionStatusToProtobuf(cmd: UpdateSubmissionStatus): UpdateSubmissionStatusMessage =
     UpdateSubmissionStatusMessage(
       submission = Some(submissionToProtobuf(cmd.submission))
     )
-  }
 
-  def updateSubmissionStatusFromProtobuf(
-      bytes: Array[Byte]): UpdateSubmissionStatus = {
-    val msg = UpdateSubmissionStatusMessage.parseFrom(bytes)
-    val submission = submissionFromProtobuf(
-      msg.submission.getOrElse(SubmissionMessage()))
+  def updateSubmissionStatusFromProtobuf(bytes: Array[Byte]): UpdateSubmissionStatus = {
+    val msg        = UpdateSubmissionStatusMessage.parseFrom(bytes)
+    val submission = submissionFromProtobuf(msg.submission.getOrElse(SubmissionMessage()))
     UpdateSubmissionStatus(submission)
   }
 
-  def wrappedSubmissionEventResponseToProtobuf(
-      cmd: WrappedSubmissionEventResponse)
-    : WrappedSubmissionEventResponseMessage = {
+  def wrappedSubmissionEventResponseToProtobuf(cmd: WrappedSubmissionEventResponse): WrappedSubmissionEventResponseMessage =
     cmd.submissionEvent match {
       case sc: SubmissionCreated =>
-        WrappedSubmissionEventResponseMessage(
-          SubmissionCreatedField(submissionCreatedToProtobuf(sc)))
+        WrappedSubmissionEventResponseMessage(SubmissionCreatedField(submissionCreatedToProtobuf(sc)))
       case sm: SubmissionModified =>
-        WrappedSubmissionEventResponseMessage(
-          SubmissionModifiedField(submissionModifiedToProtobuf(sm)))
+        WrappedSubmissionEventResponseMessage(SubmissionModifiedField(submissionModifiedToProtobuf(sm)))
       case sne: SubmissionNotExists =>
-        WrappedSubmissionEventResponseMessage(
-          SubmissionNotExistsField(submissionNotExistsToProtobuf(sne)))
+        WrappedSubmissionEventResponseMessage(SubmissionNotExistsField(submissionNotExistsToProtobuf(sne)))
     }
-  }
 
-  def wrappedSubmissionEventResponseFromProtobuf(
-      bytes: Array[Byte]): WrappedSubmissionEventResponse = {
+  def wrappedSubmissionEventResponseFromProtobuf(bytes: Array[Byte]): WrappedSubmissionEventResponse = {
     val msg = WrappedSubmissionEventResponseMessage.parseFrom(bytes)
     msg.sub match {
       case Sub.SubmissionCreatedField(sc) =>

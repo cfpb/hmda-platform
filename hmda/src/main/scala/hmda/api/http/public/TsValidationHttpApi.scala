@@ -23,9 +23,7 @@ import hmda.validation.engine._
 
 import scala.concurrent.ExecutionContext
 
-trait TsValidationHttpApi
-    extends HmdaTimeDirectives
-    with FilingValidationHttpApi {
+trait TsValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpApi {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -71,11 +69,8 @@ trait TsValidationHttpApi
       }
     }
 
-  private def validate(ts: TransmittalSheet,
-                       chekType: String,
-                       ctx: ValidationContext,
-                       year: Int): Route = {
-    val ctx = ValidationContext(filingYear = Some(year))
+  private def validate(ts: TransmittalSheet, chekType: String, ctx: ValidationContext, year: Int): Route = {
+    val ctx              = ValidationContext(filingYear = Some(year))
     val validationEngine = selectTsEngine(year)
     import validationEngine._
     val validation: HmdaValidation[TransmittalSheet] = chekType match {
@@ -95,7 +90,7 @@ trait TsValidationHttpApi
     }
   }
 
-  def tsRoutes: Route = {
+  def tsRoutes: Route =
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
@@ -105,6 +100,5 @@ trait TsValidationHttpApi
         }
       }
     }
-  }
 
 }

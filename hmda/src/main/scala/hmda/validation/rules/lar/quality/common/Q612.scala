@@ -10,9 +10,8 @@ import hmda.validation.rules.EditCheck
 object Q612 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q612"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.purchaserType is oneOf(FannieMae, FreddieMac)) {
       lar.hoepaStatus is oneOf(NotHighCostMortgage, HOEPStatusANotApplicable)
     }
-  }
 }

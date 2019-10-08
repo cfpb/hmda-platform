@@ -32,7 +32,7 @@ object V636_3 extends EditCheck[LoanApplicationRegister] {
       OtherPacificIslander,
       White
     )
-    val validRace1List = RaceInformationNotProvided :: validRaceBaseList
+    val validRace1List        = RaceInformationNotProvided :: validRaceBaseList
     val validAllOtherRaceList = EmptyRaceValue :: validRaceBaseList
 
     when(applicantRace.raceObserved is equalTo(NotVisualOrSurnameRace)) {

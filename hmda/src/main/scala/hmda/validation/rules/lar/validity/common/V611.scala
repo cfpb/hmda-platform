@@ -10,10 +10,6 @@ import hmda.validation.rules.EditCheck
 object V611 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V611"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    lar.loan.loanType is oneOf(Conventional,
-                               FHAInsured,
-                               VAGuaranteed,
-                               RHSOrFSAGuaranteed)
-  }
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
+    lar.loan.loanType is oneOf(Conventional, FHAInsured, VAGuaranteed, RHSOrFSAGuaranteed)
 }

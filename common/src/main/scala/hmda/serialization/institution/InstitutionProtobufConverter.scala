@@ -1,55 +1,50 @@
 package hmda.serialization.institution
 
 import hmda.model.institution._
-import hmda.persistence.serialization.institution.{
-  InstitutionMessage,
-  ParentMessage,
-  RespondentMessage,
-  TopHolderMessage
-}
+import hmda.persistence.serialization.institution.{ InstitutionMessage, ParentMessage, RespondentMessage, TopHolderMessage }
 
 object InstitutionProtobufConverter {
 
   def respondentToProtobuf(respondent: Respondent): RespondentMessage = {
-    val name = respondent.name.getOrElse("")
+    val name  = respondent.name.getOrElse("")
     val state = respondent.state.getOrElse("")
-    val city = respondent.city.getOrElse("")
+    val city  = respondent.city.getOrElse("")
     RespondentMessage(name, state, city)
   }
 
   def respondentFromProtobuf(msg: RespondentMessage): Respondent = {
-    val name = if (msg.name != "") Some(msg.name) else None
+    val name  = if (msg.name != "") Some(msg.name) else None
     val state = if (msg.state != "") Some(msg.state) else None
-    val city = if (msg.city != "") Some(msg.city) else None
+    val city  = if (msg.city != "") Some(msg.city) else None
     Respondent(name, state, city)
 
   }
 
   def parentToProtobuf(parent: Parent): ParentMessage = {
     val idRssd = parent.idRssd
-    val name = parent.name.getOrElse("")
+    val name   = parent.name.getOrElse("")
     ParentMessage(idRssd, name)
   }
 
   def parentFromProtobuf(msg: ParentMessage): Parent = {
     val idRssd = msg.idRssd
-    val name = if (msg.name != "") Some(msg.name) else None
+    val name   = if (msg.name != "") Some(msg.name) else None
     Parent(idRssd, name)
   }
 
   def topHolderToProtobuf(topHolder: TopHolder): TopHolderMessage = {
     val idRssd = topHolder.idRssd
-    val name = topHolder.name.getOrElse("")
+    val name   = topHolder.name.getOrElse("")
     TopHolderMessage(idRssd, name)
   }
 
   def topHolderFromProtobuf(msg: TopHolderMessage): TopHolder = {
     val idRssd = msg.idRssd
-    val name = if (msg.name != "") Some(msg.name) else None
+    val name   = if (msg.name != "") Some(msg.name) else None
     TopHolder(idRssd, name)
   }
 
-  def institutionToProtobuf(i: Institution): InstitutionMessage = {
+  def institutionToProtobuf(i: Institution): InstitutionMessage =
     InstitutionMessage(
       activityYear = i.activityYear,
       lei = i.LEI,
@@ -66,9 +61,8 @@ object InstitutionProtobufConverter {
       topHolder = Some(topHolderToProtobuf(i.topHolder)),
       hmdaFilter = i.hmdaFiler
     )
-  }
 
-  def institutionFromProtobuf(msg: InstitutionMessage): Institution = {
+  def institutionFromProtobuf(msg: InstitutionMessage): Institution =
     Institution.empty.copy(
       activityYear = msg.activityYear,
       LEI = msg.lei,
@@ -78,15 +72,12 @@ object InstitutionProtobufConverter {
       taxId = if (msg.taxId == "") None else Some(msg.taxId),
       rssd = msg.rssd,
       emailDomains = msg.emailDomains,
-      respondent =
-        respondentFromProtobuf(msg.respondent.getOrElse(RespondentMessage())),
+      respondent = respondentFromProtobuf(msg.respondent.getOrElse(RespondentMessage())),
       parent = parentFromProtobuf(msg.parent.getOrElse(ParentMessage())),
       assets = msg.assets,
       otherLenderCode = msg.otherLenderCode,
-      topHolder =
-        topHolderFromProtobuf(msg.topHolder.getOrElse(TopHolderMessage())),
+      topHolder = topHolderFromProtobuf(msg.topHolder.getOrElse(TopHolderMessage())),
       hmdaFiler = msg.hmdaFilter
     )
-  }
 
 }

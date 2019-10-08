@@ -13,7 +13,7 @@ object Q630 extends EditCheck[LoanApplicationRegister] {
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
     val config = ConfigFactory.load()
-    val units = config.getInt("edits.Q630.units")
+    val units  = config.getInt("edits.Q630.units")
 
     when(lar.property.totalUnits is greaterThanOrEqual(units)) {
       lar.hoepaStatus is equalTo(HOEPStatusANotApplicable)

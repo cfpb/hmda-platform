@@ -3,54 +3,44 @@ package hmda.persistence.institution
 import akka.Done
 import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ActorRef, Behavior, TypedActorContext}
+import akka.actor.typed.{ ActorRef, Behavior, TypedActorContext }
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.actor.typed.scaladsl.adapter._
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.{
-  Effect,
-  EventSourcedBehavior,
-  RetentionCriteria
-}
+import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
 import akka.stream.ActorMaterializer
 import hmda.messages.institution.InstitutionCommands._
 import hmda.messages.institution.InstitutionEvents._
 import hmda.messages.pubsub.HmdaTopics._
-import hmda.model.institution.{Institution, InstitutionDetail}
+import hmda.model.institution.{ Institution, InstitutionDetail }
 import hmda.publication.KafkaUtils._
 import hmda.persistence.HmdaTypedPersistentActor
 
 import scala.concurrent.Future
 
-object InstitutionPersistence
-    extends HmdaTypedPersistentActor[InstitutionCommand,
-                                     InstitutionEvent,
-                                     InstitutionState] {
+object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionCommand, InstitutionEvent, InstitutionState] {
 
   override final val name = "Institution"
 
-  override def behavior(entityId: String): Behavior[InstitutionCommand] = {
+  override def behavior(entityId: String): Behavior[InstitutionCommand] =
     Behaviors.setup { ctx =>
       ctx.log.info(s"Started Institution: $entityId")
-      EventSourcedBehavior[InstitutionCommand,
-                           InstitutionEvent,
-                           InstitutionState](
+      EventSourcedBehavior[InstitutionCommand, InstitutionEvent, InstitutionState](
         persistenceId = PersistenceId(entityId),
         emptyState = InstitutionState(None),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
-      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000,
-                                                       keepNSnapshots = 10))
+      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000, keepNSnapshots = 10))
         .withTagger(_ => Set(name.toLowerCase()))
     }
-  }
 
-  override def commandHandler(ctx: TypedActorContext[InstitutionCommand])
-    : CommandHandler[InstitutionCommand, InstitutionEvent, InstitutionState] = {
-    val log = ctx.asScala.log
-    implicit val system: ActorSystem = ctx.asScala.system.toUntyped
+  override def commandHandler(
+    ctx: TypedActorContext[InstitutionCommand]
+  ): CommandHandler[InstitutionCommand, InstitutionEvent, InstitutionState] = {
+    val log                                      = ctx.asScala.log
+    implicit val system: ActorSystem             = ctx.asScala.system.toUntyped
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     (state, cmd) =>
       cmd match {
@@ -59,9 +49,7 @@ object InstitutionPersistence
             Effect.persist(InstitutionCreated(i)).thenRun { _ =>
               log.debug(s"Institution Created: ${i.toString}")
               val event = InstitutionCreated(i)
-              publishInstitutionEvent(
-                i.LEI,
-                InstitutionKafkaEvent("InstitutionCreated", event))
+              publishInstitutionEvent(i.LEI, InstitutionKafkaEvent("InstitutionCreated", event))
               replyTo ! event
             }
           } else {
@@ -78,9 +66,7 @@ object InstitutionPersistence
             Effect.persist(InstitutionModified(i)).thenRun { _ =>
               log.debug(s"Institution Modified: ${i.toString}")
               val event = InstitutionModified(i)
-              publishInstitutionEvent(
-                i.LEI,
-                InstitutionKafkaEvent("InstitutionModified", event))
+              publishInstitutionEvent(i.LEI, InstitutionKafkaEvent("InstitutionModified", event))
               replyTo ! event
             }
           } else {
@@ -97,9 +83,7 @@ object InstitutionPersistence
             Effect.persist(InstitutionDeleted(lei, activityYear)).thenRun { _ =>
               log.debug(s"Institution Deleted: $lei")
               val event = InstitutionDeleted(lei, activityYear)
-              publishInstitutionEvent(
-                lei,
-                InstitutionKafkaEvent("InstitutionDeleted", event))
+              publishInstitutionEvent(lei, InstitutionKafkaEvent("InstitutionDeleted", event))
               replyTo ! event
             }
           } else {
@@ -134,8 +118,7 @@ object InstitutionPersistence
       }
   }
 
-  override val eventHandler
-    : (InstitutionState, InstitutionEvent) => InstitutionState = {
+  override val eventHandler: (InstitutionState, InstitutionEvent) => InstitutionState = {
     case (state, InstitutionCreated(i))         => state.copy(Some(i))
     case (state, InstitutionModified(i))        => modifyInstitution(i, state)
     case (state, InstitutionDeleted(lei, year)) => state.copy(None)
@@ -143,20 +126,14 @@ object InstitutionPersistence
     case (state, InstitutionNotExists(_))       => state
   }
 
-  def startShardRegion(sharding: ClusterSharding)
-    : ActorRef[ShardingEnvelope[InstitutionCommand]] = {
+  def startShardRegion(sharding: ClusterSharding): ActorRef[ShardingEnvelope[InstitutionCommand]] =
     super.startShardRegion(sharding)
-  }
 
-  private def publishInstitutionEvent(institutionID: String,
-                                      event: InstitutionKafkaEvent)(
-      implicit system: ActorSystem,
-      materializer: ActorMaterializer): Future[Done] = {
+  private def publishInstitutionEvent(institutionID: String, event: InstitutionKafkaEvent)(implicit system: ActorSystem,
+                                                                                           materializer: ActorMaterializer): Future[Done] =
     produceInstitutionRecord(institutionTopic, institutionID, event)
-  }
 
-  private def modifyInstitution(institution: Institution,
-                                state: InstitutionState): InstitutionState = {
+  private def modifyInstitution(institution: Institution, state: InstitutionState): InstitutionState =
     if (state.isEmpty) {
       state
     } else {
@@ -166,6 +143,5 @@ object InstitutionPersistence
         state
       }
     }
-  }
 
 }

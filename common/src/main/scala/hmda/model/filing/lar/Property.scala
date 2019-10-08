@@ -8,11 +8,9 @@ import hmda.model.filing.lar.enums.{
 }
 
 case class Property(
-    propertyValue: String = "",
-    manufacturedHomeSecuredProperty: ManufacturedHomeSecuredPropertyEnum =
-      InvalidManufacturedHomeSecuredPropertyCode,
-    manufacturedHomeLandPropertyInterest: ManufacturedHomeLandPropertyInterestEnum =
-      InvalidManufacturedHomeLandPropertyCode,
-    totalUnits: Int = 0,
-    multiFamilyAffordableUnits: String = ""
+  propertyValue: String = "",
+  manufacturedHomeSecuredProperty: ManufacturedHomeSecuredPropertyEnum = InvalidManufacturedHomeSecuredPropertyCode,
+  manufacturedHomeLandPropertyInterest: ManufacturedHomeLandPropertyInterestEnum = InvalidManufacturedHomeLandPropertyCode,
+  totalUnits: Int = 0,
+  multiFamilyAffordableUnits: String = ""
 )

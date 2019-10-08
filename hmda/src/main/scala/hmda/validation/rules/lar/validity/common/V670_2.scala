@@ -12,14 +12,8 @@ object V670_2 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V670"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    when(
-      lar.denial.denialReason1 not oneOf(EmptyDenialValue,
-                                         DenialReasonNotApplicable,
-                                         InvalidDenialReasonCode,
-                                         ExemptDenialReason)) {
-      lar.action.actionTakenType is oneOf(ApplicationDenied,
-                                          PreapprovalRequestDenied)
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
+    when(lar.denial.denialReason1 not oneOf(EmptyDenialValue, DenialReasonNotApplicable, InvalidDenialReasonCode, ExemptDenialReason)) {
+      lar.action.actionTakenType is oneOf(ApplicationDenied, PreapprovalRequestDenied)
     }
-  }
 }

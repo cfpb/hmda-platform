@@ -10,12 +10,10 @@ import hmda.validation.rules.EditCheck
 object V650 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V650"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.coApplicant.sex.sexEnum is equalTo(SexNoCoApplicant)) {
       lar.coApplicant.sex.sexObservedEnum is equalTo(SexObservedNoCoApplicant)
-    } and when(lar.coApplicant.sex.sexObservedEnum is equalTo(
-      SexObservedNoCoApplicant)) {
+    } and when(lar.coApplicant.sex.sexObservedEnum is equalTo(SexObservedNoCoApplicant)) {
       lar.coApplicant.sex.sexEnum is equalTo(SexNoCoApplicant)
     }
-  }
 }

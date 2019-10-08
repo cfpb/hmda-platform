@@ -11,8 +11,6 @@ object V625_1 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V625"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    (lar.geography.tract is numeric and (lar.geography.tract.size is equalTo(
-      11))) or (lar.geography.tract.toLowerCase is equalTo("na"))
-  }
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
+    (lar.geography.tract is numeric and (lar.geography.tract.size is equalTo(11))) or (lar.geography.tract.toLowerCase is equalTo("na"))
 }

@@ -1,6 +1,6 @@
 package hmda
 
-import akka.{actor => untyped}
+import akka.{ actor => untyped }
 import akka.management.cluster.bootstrap.ClusterBootstrap
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
@@ -14,7 +14,7 @@ import hmda.api.HmdaApi
 import hmda.persistence.submission.repositories.SyntacticalDb
 import hmda.persistence.util.CassandraUtil
 import hmda.publication.HmdaPublication
-import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
+import net.manub.embeddedkafka.{ EmbeddedKafka, EmbeddedKafkaConfig }
 import com.outworkers.phantom.dsl._
 
 object HmdaPlatform extends App {
@@ -56,12 +56,11 @@ object HmdaPlatform extends App {
   }
 
   implicit val system =
-    untyped.ActorSystem(clusterConfig.getString("hmda.cluster.name"),
-                        clusterConfig)
+    untyped.ActorSystem(clusterConfig.getString("hmda.cluster.name"), clusterConfig)
 
   implicit val typedSystem = system.toTyped
 
-  implicit val mat = ActorMaterializer()
+  implicit val mat     = ActorMaterializer()
   implicit val cluster = Cluster(typedSystem)
 
   if (runtimeMode == "dcos" || runtimeMode == "kubernetes") {
@@ -75,8 +74,7 @@ object HmdaPlatform extends App {
     implicit val embeddedKafkaConfig: EmbeddedKafkaConfig = EmbeddedKafkaConfig(
       9092,
       2182,
-      Map("offsets.topic.replication.factor" -> "1",
-          "zookeeper.connection.timeout.ms" -> "20000")
+      Map("offsets.topic.replication.factor" -> "1", "zookeeper.connection.timeout.ms" -> "20000")
     )
     EmbeddedKafka.start()
   }

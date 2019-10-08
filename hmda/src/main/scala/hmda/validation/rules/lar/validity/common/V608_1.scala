@@ -12,10 +12,9 @@ object V608_1 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V608"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.loan.ULI.length is greaterThanOrEqual(23)) {
       lar.loan.ULI is alphanumeric and
         (lar.loan.ULI.length is lessThanOrEqual(45))
     }
-  }
 }

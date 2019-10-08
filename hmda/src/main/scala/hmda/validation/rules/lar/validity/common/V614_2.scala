@@ -13,9 +13,8 @@ object V614_2 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V614"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.property.multiFamilyAffordableUnits is numeric) {
       lar.action.preapproval is equalTo(PreapprovalNotRequested)
     }
-  }
 }

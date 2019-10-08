@@ -1,6 +1,6 @@
 package hmda.api.http.codec.filing
 
-import hmda.model.filing.ts.{Address, Contact, TransmittalSheet}
+import hmda.model.filing.ts.{ Address, Contact, TransmittalSheet }
 import hmda.model.institution.Agency
 import io.circe.Decoder.Result
 import io.circe._
@@ -49,15 +49,15 @@ object TsCodec {
     new Decoder[TransmittalSheet] {
       override def apply(c: HCursor): Result[TransmittalSheet] =
         for {
-          id <- c.downField("id").as[Int]
+          id              <- c.downField("id").as[Int]
           institutionName <- c.downField("institutionName").as[String]
-          year <- c.downField("year").as[Int]
-          quarter <- c.downField("quarter").as[Int]
-          contact <- c.downField("contact").as[Contact]
-          agency <- c.downField("agency").as[Int]
-          totalLines <- c.downField("totalLines").as[Int]
-          taxId <- c.downField("taxId").as[String]
-          lei <- c.downField("LEI").as[String]
+          year            <- c.downField("year").as[Int]
+          quarter         <- c.downField("quarter").as[Int]
+          contact         <- c.downField("contact").as[Contact]
+          agency          <- c.downField("agency").as[Int]
+          totalLines      <- c.downField("totalLines").as[Int]
+          taxId           <- c.downField("taxId").as[String]
+          lei             <- c.downField("LEI").as[String]
         } yield
           TransmittalSheet(
             id,

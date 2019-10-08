@@ -2,36 +2,36 @@ package hmda.parser.filing.lar
 
 import cats.implicits._
 import hmda.model.filing.lar.enums._
-import hmda.model.filing.lar.{Applicant, Ethnicity, Race, Sex}
+import hmda.model.filing.lar.{ Applicant, Ethnicity, Race, Sex }
 import hmda.parser.LarParserValidationResult
 import hmda.parser.filing.lar.LarParserErrorModel._
 
 sealed trait ApplicantFormatValidator extends LarParser {
 
   def validateApplicant(
-      ethnicity1: String,
-      ethnicity2: String,
-      ethnicity3: String,
-      ethnicity4: String,
-      ethnicity5: String,
-      otherHispanicOrLatino: String,
-      ethnicityObserved: String,
-      race1: String,
-      race2: String,
-      race3: String,
-      race4: String,
-      race5: String,
-      otherNative: String,
-      otherAsian: String,
-      otherPacific: String,
-      raceObserved: String,
-      sex: String,
-      sexObserved: String,
-      age: String,
-      creditScore: String,
-      creditScoreModel: String,
-      otherCreditScore: String,
-      coApp: Boolean
+    ethnicity1: String,
+    ethnicity2: String,
+    ethnicity3: String,
+    ethnicity4: String,
+    ethnicity5: String,
+    otherHispanicOrLatino: String,
+    ethnicityObserved: String,
+    race1: String,
+    race2: String,
+    race3: String,
+    race4: String,
+    race5: String,
+    otherNative: String,
+    otherAsian: String,
+    otherPacific: String,
+    raceObserved: String,
+    sex: String,
+    sexObserved: String,
+    age: String,
+    creditScore: String,
+    creditScoreModel: String,
+    otherCreditScore: String,
+    coApp: Boolean
   ): LarParserValidationResult[Applicant] = {
     val credEnum =
       if (coApp) InvalidCoApplicantCreditScore else InvalidApplicantCreditScore
@@ -48,16 +48,7 @@ sealed trait ApplicantFormatValidator extends LarParser {
                         otherHispanicOrLatino,
                         ethnicityObserved,
                         coApp = coApp),
-      validateRace(race1,
-                   race2,
-                   race3,
-                   race4,
-                   race5,
-                   otherNative,
-                   otherAsian,
-                   otherPacific,
-                   raceObserved,
-                   coApp = coApp),
+      validateRace(race1, race2, race3, race4, race5, otherNative, otherAsian, otherPacific, raceObserved, coApp = coApp),
       validateSex(sex, sexObserved, coApp = coApp),
       validateIntField(age, InvalidAge),
       validateIntField(creditScore, credEnum),
@@ -67,14 +58,14 @@ sealed trait ApplicantFormatValidator extends LarParser {
   }
 
   private def validateEthnicity(
-      ethnicity1: String,
-      ethnicity2: String,
-      ethnicity3: String,
-      ethnicity4: String,
-      ethnicity5: String,
-      otherHispanicOrLatino: String,
-      ethnicityObserved: String,
-      coApp: Boolean
+    ethnicity1: String,
+    ethnicity2: String,
+    ethnicity3: String,
+    ethnicity4: String,
+    ethnicity5: String,
+    otherHispanicOrLatino: String,
+    ethnicityObserved: String,
+    coApp: Boolean
   ): LarParserValidationResult[Ethnicity] = {
     val ethEnum =
       if (coApp) InvalidCoApplicantEthnicity else InvalidApplicantEthnicity
@@ -121,9 +112,9 @@ sealed trait ApplicantFormatValidator extends LarParser {
   }
 
   private def validateSex(
-      sex: String,
-      sexObserved: String,
-      coApp: Boolean
+    sex: String,
+    sexObserved: String,
+    coApp: Boolean
   ): LarParserValidationResult[Sex] = {
     val sexEnum = if (coApp) InvalidCoApplicantSex else InvalidApplicantSex
     val sexObsEnum =

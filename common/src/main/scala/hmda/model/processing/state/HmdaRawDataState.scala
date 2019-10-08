@@ -1,6 +1,6 @@
 package hmda.model.processing.state
 
-import hmda.messages.submission.HmdaRawDataEvents.{HmdaRawDataEvent, LineAdded}
+import hmda.messages.submission.HmdaRawDataEvents.{ HmdaRawDataEvent, LineAdded }
 
 case class HmdaRawDataState(size: Int = 0) {
   def update(event: HmdaRawDataEvent): HmdaRawDataState = event match {

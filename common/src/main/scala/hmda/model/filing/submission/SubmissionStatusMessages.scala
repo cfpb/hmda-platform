@@ -1,25 +1,25 @@
 package hmda.model.filing.submission
 
 object SubmissionStatusMessages {
-  val createdMsg = "No data has been uploaded yet."
-  val uploadingMsg = "Your file is uploading."
-  val uploadedMsg = "Your file has been uploaded."
-  val parsingMsg = "Checking the formatting of your data."
-  val parsedMsg = "Your data is formatted correctly."
+  val createdMsg          = "No data has been uploaded yet."
+  val uploadingMsg        = "Your file is uploading."
+  val uploadedMsg         = "Your file has been uploaded."
+  val parsingMsg          = "Checking the formatting of your data."
+  val parsedMsg           = "Your data is formatted correctly."
   val parsedWithErrorsMsg = "Your data has formatting errors."
-  val validatingMsg = "Your data is being analyzed."
+  val validatingMsg       = "Your data is being analyzed."
   val syntacticalOrValidityMsg =
     "Your data has been analyzed for Syntactical and Validity Errors."
   val syntacticalValidityErrorMsg =
     "Your data has syntactical and/or validity edits that need to be reviewed."
-  val qualityMsg = "Your data has been analyzed for Quality Errors."
-  val qualityErrorMsg = "Your data has quality edits that need to be reviewed."
+  val qualityMsg             = "Your data has been analyzed for Quality Errors."
+  val qualityErrorMsg        = "Your data has quality edits that need to be reviewed."
   val validatedWithErrorsMsg = "Your data has edits that need to be reviewed."
-  val macroMsg = "Your data has been analyzed for macro errors."
-  val macroErrorMsg = "Your data has macro edits that need to be reviewed."
-  val validatedMsg = "Your data is ready for submission."
-  val signedMsg = "Your submission has been accepted."
-  val failedMsg = "An error occurred while submitting the data."
+  val macroMsg               = "Your data has been analyzed for macro errors."
+  val macroErrorMsg          = "Your data has macro edits that need to be reviewed."
+  val validatedMsg           = "Your data is ready for submission."
+  val signedMsg              = "Your submission has been accepted."
+  val failedMsg              = "An error occurred while submitting the data."
 
   val createdDescription =
     "The filing period is open and available to accept HMDA data. Make sure your data is in a pipe-delimited text file."

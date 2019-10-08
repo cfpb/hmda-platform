@@ -12,7 +12,7 @@ object V702_1 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V702"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(
       (lar.AUS.aus1 is equalTo(OtherAUS)) or
         (lar.AUS.aus2 is equalTo(OtherAUS)) or
@@ -22,5 +22,4 @@ object V702_1 extends EditCheck[LoanApplicationRegister] {
     ) {
       lar.AUS.otherAUS not empty
     }
-  }
 }

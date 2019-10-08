@@ -9,8 +9,7 @@ import hmda.validation.dsl.PredicateSyntax._
 object V600 extends EditCheck[TransmittalSheet] {
   override def name: String = "V600"
 
-  override def apply(ts: TransmittalSheet): ValidationResult = {
+  override def apply(ts: TransmittalSheet): ValidationResult =
     ts.LEI.length is equalTo(20)
-  }
 
 }
