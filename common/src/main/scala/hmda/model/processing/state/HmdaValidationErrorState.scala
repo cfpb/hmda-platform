@@ -21,15 +21,12 @@ case class HmdaValidationErrorState(statusCode: Int = 1,
                                     qualityVerified: Boolean = false,
                                     macroVerified: Boolean = false) {
   def updateErrors(
-                    hmdaRowError: HmdaRowValidatedError): HmdaValidationErrorState = {
+    hmdaRowError: HmdaRowValidatedError
+  ): HmdaValidationErrorState = {
 
     val editSummaries = hmdaRowError.validationErrors
       .map { e =>
-        EditSummary(
-          e.editName,
-          e.validationErrorType,
-          e.validationErrorEntity
-        )
+        EditSummary(e.editName, e.validationErrorType, e.validationErrorEntity)
       }
       .groupBy(_.editType)
 
@@ -45,15 +42,19 @@ case class HmdaValidationErrorState(statusCode: Int = 1,
       qualityErrors,
       macroErrors,
       qualityVerified = qualityVerified,
-      macroVerified = qualityVerified
+      macroVerified = macroVerified
     )
   }
 
   def updateMacroErrors(
-                         error: HmdaMacroValidatedError): HmdaValidationErrorState = {
-    this.copy(`macro` = this.`macro` ++ Set(
-      EditSummary(error.error.editName, Macro, LarValidationError)),
-      macroVerified = false)
+    error: HmdaMacroValidatedError
+  ): HmdaValidationErrorState = {
+    this.copy(
+      `macro` = this.`macro` ++ Set(
+        EditSummary(error.error.editName, Macro, LarValidationError)
+      ),
+      macroVerified = false
+    )
   }
 
   def verifyQuality(evt: QualityVerified): HmdaValidationErrorState = {
