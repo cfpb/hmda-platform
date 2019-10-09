@@ -13,28 +13,15 @@ class Q621Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
      lar.mustPass
 
-      val appLAR= lar.copy(larIdentifier = lar.larIdentifier.copy(NMLSRIdentifier = "12345678!!^"))
-      appLAR.mustFail
+      val appLARTest= lar.copy(larIdentifier = lar.larIdentifier.copy(NMLSRIdentifier = "1234TEST5678!!^"))
+      appLARTest.mustFail
 
 
-      val appLARTestTwo= lar.copy(larIdentifier = lar.larIdentifier.copy(NMLSRIdentifier = "1234TEST5678!!^"))
+      val appLARTestTwo = lar.copy(larIdentifier = lar.larIdentifier.copy(NMLSRIdentifier = "1234TEST512345666553"))
       appLARTestTwo.mustFail
-
-
-      val appLARTestThree = lar.copy(larIdentifier = lar.larIdentifier.copy(NMLSRIdentifier = "1234TEST512345666553"))
-      appLARTestThree.mustFail
     }
 
   }
-
-//  property("NMLSR Identifier IS Alpha numeric and has a  of 12 or less.") {
-//    forAll(larGen) { lar =>
-//      val appLAR= lar.copy(larIdentifier = lar.larIdentifier.copy(NMLSRIdentifier = "12345678!!^"))
-//      appLAR.mustFail
-//
-//    }
-//
-//  }
 
 
 }
