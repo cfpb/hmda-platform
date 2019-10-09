@@ -28,7 +28,7 @@ sealed trait TsFormatValidator {
                  fromCassandra: Boolean = false)
     : TsParserValidationResult[TransmittalSheet] = {
     if (values.lengthCompare(numberOfFields) != 0 || (rawLine.trim.endsWith("|") && (!fromCassandra))) {
-      IncorrectNumberOfFields(values.length, numberOfFields).invalidNel
+      IncorrectNumberOfFieldsTs(values.length.toString).invalidNel
     } else {
       val id = values.headOption.getOrElse("")
       val institutionName = values(1)
@@ -106,7 +106,7 @@ sealed trait TsFormatValidator {
   }
 
   private def validateIdField(value: String): TsParserValidationResult[Int] = {
-    validateIntField(value, InvalidId(value))
+    validateIntField(value, InvalidTsId(value))
   }
 
   private def validateYear(value: String): TsParserValidationResult[Int] = {

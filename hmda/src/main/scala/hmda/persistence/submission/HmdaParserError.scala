@@ -87,8 +87,7 @@ object HmdaParserError
               PersistHmdaRowParsedError(
                 rowNumber,
                 estimateULI(line),
-                errors.map(x =>
-                  FieldParserError(x.fieldName, x.inputValue, x.validValues)),
+                errors.map(x => FieldParserError(x.fieldName, x.inputValue)),
                 None)
           }
           .via(

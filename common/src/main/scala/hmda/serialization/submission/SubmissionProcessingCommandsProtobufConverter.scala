@@ -52,7 +52,7 @@ object SubmissionProcessingCommandsProtobufConverter {
 
   def persistFieldParserErrorToProtobuf(
       cmd: FieldParserError): FieldParserErrorMessage = {
-    FieldParserErrorMessage(cmd.fieldName, cmd.inputValue, cmd.validValues)
+    FieldParserErrorMessage(cmd.fieldName, cmd.inputValue)
   }
 
   def persistFieldParserErrorFromProtobuf(
@@ -60,7 +60,6 @@ object SubmissionProcessingCommandsProtobufConverter {
     FieldParserError(
       msg.fieldName,
       msg.inputValue,
-      msg.validValues
     )
   }
 

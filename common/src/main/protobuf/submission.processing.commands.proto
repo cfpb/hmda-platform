@@ -21,7 +21,6 @@ message StartParsingMessage {
 message FieldParserErrorMessage {
     string fieldName = 1;
     string inputValue = 2;
-    string validValues = 3;
 }
 
 message PersistHmdaRowParsedErrorMessage {

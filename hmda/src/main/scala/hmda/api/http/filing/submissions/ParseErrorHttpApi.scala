@@ -20,6 +20,10 @@ import hmda.auth.OAuth2Authorization
 import hmda.messages.submission.SubmissionProcessingCommands.GetParsingErrors
 import hmda.model.processing.state.HmdaParserErrorState
 import hmda.util.http.FilingResponseUtils._
+import hmda.model.filing.ParserValidValuesLookup._
+import hmda.api.http.model.filing.submissions._
+import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowParsedError
+import hmda.api.http.codec.filing.submission.ParsingErrorSummaryCodec.parsingErrorSummaryEncoder
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -70,8 +74,9 @@ trait ParseErrorHttpApi extends HmdaTimeDirectives {
                       onComplete(fErrors) {
                         case Success(state) =>
                           val parsingErrorSummary = ParsingErrorSummary(
-                            state.transmittalSheetErrors,
-                            state.larErrors,
+                            state.transmittalSheetErrors.map(
+                              parserErrorSummaryConvertor(_)),
+                            state.larErrors.map(parserErrorSummaryConvertor(_)),
                             uri.path.toString,
                             page,
                             state.totalErrors,
@@ -105,6 +110,21 @@ trait ParseErrorHttpApi extends HmdaTimeDirectives {
         }
       }
     }
+  }
+
+  def parserErrorSummaryConvertor(
+      hmdaRowParsedError: HmdaRowParsedError): HmdaRowParsedErrorSummary = {
+    HmdaRowParsedErrorSummary(
+      hmdaRowParsedError.rowNumber,
+      hmdaRowParsedError.estimatedULI,
+      hmdaRowParsedError.errorMessages.map(
+        errorMessage =>
+          FieldParserErrorSummary(
+            errorMessage.fieldName,
+            errorMessage.inputValue,
+            lookupParserValidValues(errorMessage.fieldName)
+        ))
+    )
   }
 
 }

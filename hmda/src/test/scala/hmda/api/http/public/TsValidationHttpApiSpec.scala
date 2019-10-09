@@ -70,7 +70,9 @@ class TsValidationHttpApiSpec
     "fail to parse an invalid pipe delimited TS and return list of errors" in {
       Post("/ts/parse", TsValidateRequest(invalidParseCsv)) ~> tsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
-        responseAs[TsValidateResponse].errorMessages mustBe List("Record Identifier", "Federal Agency")
+        responseAs[TsValidateResponse].errorMessages mustBe List(
+          "Record Identifier",
+          "Federal Agency")
       }
     }
 

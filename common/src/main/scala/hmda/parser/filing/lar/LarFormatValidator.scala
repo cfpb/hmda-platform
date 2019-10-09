@@ -22,7 +22,7 @@ sealed trait LarFormatValidator extends LarParser {
     : LarParserValidationResult[LoanApplicationRegister] = {
 
     if (values.lengthCompare(numberOfFields) != 0 || (rawLine.trim.endsWith("|") && (!fromCassandra))) {
-      IncorrectNumberOfFields(values.length, numberOfFields).invalidNel
+      IncorrectNumberOfFieldsLar(values.length.toString).invalidNel
     } else {
       val id = values.headOption.getOrElse("")
       val lei = values(1).toUpperCase
@@ -490,7 +490,7 @@ sealed trait LarFormatValidator extends LarParser {
       NMLSRIdentifier: String
   ): LarParserValidationResult[LarIdentifier] = {
     (
-      validateIntField(id, InvalidId(id)),
+      validateIntField(id, InvalidLarId(id)),
       validateStr(LEI),
       validateStr(NMLSRIdentifier)
     ).mapN(LarIdentifier)

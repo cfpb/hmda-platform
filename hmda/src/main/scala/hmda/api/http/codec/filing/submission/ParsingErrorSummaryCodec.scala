@@ -3,7 +3,8 @@ package hmda.api.http.codec.filing.submission
 import hmda.api.http.model.filing.submissions.{
   PaginatedResponse,
   PaginationLinks,
-  ParsingErrorSummary
+  ParsingErrorSummary,
+  HmdaRowParsedErrorSummary
 }
 import io.circe.Decoder.Result
 import io.circe.{Decoder, Encoder, HCursor, Json}
@@ -34,8 +35,10 @@ object ParsingErrorSummaryCodec {
         for {
           tsErrors <- c
             .downField("transmittalSheetErrors")
-            .as[Seq[HmdaRowParsedError]]
-          larErrors <- c.downField("larErrors").as[Seq[HmdaRowParsedError]]
+            .as[Seq[HmdaRowParsedErrorSummary]]
+          larErrors <- c
+            .downField("larErrors")
+            .as[Seq[HmdaRowParsedErrorSummary]]
           total <- c.downField("total").as[Int]
           status <- c.downField("status").as[SubmissionStatus]
           links <- c.downField("_links").as[PaginationLinks]
