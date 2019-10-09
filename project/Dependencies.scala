@@ -61,6 +61,7 @@ object Dependencies {
   lazy val lettuce = "io.lettuce" % "lettuce-core" % Version.lettuce
   lazy val scalaJava8Compat = "org.scala-lang.modules" %% "scala-java8-compat" % Version.java8Compat
   lazy val guava = "com.google.guava" % "guava" % Version.guava
+  lazy val awsSesSdk = "com.amazonaws" % "aws-java-sdk-ses" % Version.awsSesSdk exclude ("commons-logging", "commons-logging")
 
   lazy val sparkCore = "org.apache.spark" %% "spark-core" % Version.spark % Provided
   lazy val sparkSql = "org.apache.spark" %% "spark-sql" % Version.spark % Provided

@@ -66,7 +66,7 @@ class ParserFlowSpec extends WordSpec with MustMatchers {
         .map(_.left.get)
         .runWith(TestSink.probe[List[ParserValidationError]])
         .request(1)
-        .expectNext(List(IncorrectNumberOfFields(18, 15)))
+        .expectNext(List(IncorrectNumberOfFields(18)))
     }
 
     "parse list of text into list of Loan Application Register" in {
@@ -88,7 +88,7 @@ class ParserFlowSpec extends WordSpec with MustMatchers {
         .map(_.left.get)
         .runWith(TestSink.probe[List[ParserValidationError]])
         .request(badLarList.size)
-        .expectNextN(Seq(List(IncorrectNumberOfFields(113, 110)))
+        .expectNextN(Seq(List(IncorrectNumberOfFields(113)))
           .asInstanceOf[Seq[List[ParserValidationError]]])
     }
 
@@ -114,8 +114,8 @@ class ParserFlowSpec extends WordSpec with MustMatchers {
         }
         .runWith(TestSink.probe[List[ParserValidationError]])
         .request(badHmdaFileCsv.size)
-        .expectNext(List(IncorrectNumberOfFields(18, 15)))
-        .expectNext(List(IncorrectNumberOfFields(113, 110)))
+        .expectNext(List(IncorrectNumberOfFields(18)))
+        .expectNext(List(IncorrectNumberOfFields(113)))
     }
   }
 

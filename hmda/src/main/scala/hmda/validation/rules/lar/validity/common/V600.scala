@@ -9,7 +9,6 @@ import hmda.validation.dsl.PredicateSyntax._
 object V600 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V600"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     lar.larIdentifier.LEI.length is equalTo(20)
-  }
 }

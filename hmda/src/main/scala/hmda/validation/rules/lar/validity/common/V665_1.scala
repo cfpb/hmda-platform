@@ -11,7 +11,6 @@ object V665_1 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V665"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     lar.coApplicant.creditScore is numeric
-  }
 }

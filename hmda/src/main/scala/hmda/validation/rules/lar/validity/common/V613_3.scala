@@ -12,14 +12,10 @@ object V613_3 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V613"
 
-  val actionsTaken = List(ApplicationDenied,
-                          ApplicationWithdrawnByApplicant,
-                          FileClosedForIncompleteness,
-                          PurchasedLoan)
+  val actionsTaken = List(ApplicationDenied, ApplicationWithdrawnByApplicant, FileClosedForIncompleteness, PurchasedLoan)
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.action.actionTakenType is containedIn(actionsTaken)) {
       lar.action.preapproval is equalTo(PreapprovalNotRequested)
     }
-  }
 }

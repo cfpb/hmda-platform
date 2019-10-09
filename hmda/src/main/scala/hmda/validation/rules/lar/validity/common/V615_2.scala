@@ -15,12 +15,9 @@ object V615_2 extends EditCheck[LoanApplicationRegister] {
   val propertyInterest =
     List(DirectOwnership, IndirectOwnership, PaidLeasehold, UnpaidLeasehold)
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    when(
-      lar.property.manufacturedHomeLandPropertyInterest is containedIn(
-        propertyInterest)) {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
+    when(lar.property.manufacturedHomeLandPropertyInterest is containedIn(propertyInterest)) {
       lar.loan.constructionMethod is equalTo(ManufacturedHome)
     }
-  }
 
 }

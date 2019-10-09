@@ -10,8 +10,7 @@ import hmda.messages.submission.HmdaRawDataCommands.AddLine
 import hmda.persistence.serialization.raw.data.commands.AddLineMessage
 import hmda.serialization.submission.HmdaRawDataCommandsProtobufConverter._
 
-class HmdaRawDataCommandsSerializer(system: ExtendedActorSystem)
-    extends SerializerWithStringManifest {
+class HmdaRawDataCommandsSerializer(system: ExtendedActorSystem) extends SerializerWithStringManifest {
 
   private val resolver = ActorRefResolver(system.toTyped)
 
@@ -25,8 +24,7 @@ class HmdaRawDataCommandsSerializer(system: ExtendedActorSystem)
     case cmd: AddLine =>
       addLineToProtobuf(cmd, resolver).toByteArray
     case _ =>
-      throw new IllegalArgumentException(
-        s"Cannot serialize object of type [${o.getClass.getName}]")
+      throw new IllegalArgumentException(s"Cannot serialize object of type [${o.getClass.getName}]")
   }
 
   override def fromBinary(bytes: Array[Byte], manifest: String): AnyRef =
@@ -34,7 +32,6 @@ class HmdaRawDataCommandsSerializer(system: ExtendedActorSystem)
       case AddLineManifest =>
         addLineFromProtobuf(AddLineMessage.parseFrom(bytes), resolver)
       case _ =>
-        throw new NotSerializableException(
-          s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
+        throw new NotSerializableException(s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
     }
 }

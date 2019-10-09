@@ -9,7 +9,6 @@ import hmda.validation.rules.EditCheck
 object V607 extends EditCheck[TransmittalSheet] {
   override def name: String = "V607"
 
-  override def apply(ts: TransmittalSheet): ValidationResult = {
+  override def apply(ts: TransmittalSheet): ValidationResult =
     ts.taxId is validTaxId
-  }
 }

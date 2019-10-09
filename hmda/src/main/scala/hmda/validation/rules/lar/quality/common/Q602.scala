@@ -14,7 +14,8 @@ object Q602 extends EditCheck[LoanApplicationRegister] {
     when(
       (geo.zipCode not equalTo("NA")) and
         (geo.state not equalTo("NA")) and
-        (geo.city not equalTo("NA"))) {
+        (geo.city not equalTo("NA"))
+    ) {
       geo.street not equalTo("NA")
     }
   }

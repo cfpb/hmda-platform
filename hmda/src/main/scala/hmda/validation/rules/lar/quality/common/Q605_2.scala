@@ -12,9 +12,8 @@ object Q605_2 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "Q605"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.purchaserType is equalTo(GinnieMae)) {
       lar.loan.loanType is oneOf(FHAInsured, VAGuaranteed, RHSOrFSAGuaranteed)
     }
-  }
 }

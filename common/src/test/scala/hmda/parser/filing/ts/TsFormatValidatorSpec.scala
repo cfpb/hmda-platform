@@ -31,7 +31,7 @@ class TsFormatValidatorSpec
   property("Transmittal Sheet must have the correct number of fields") {
     val values = List("a", "b", "c")
     validateTs(values) mustBe Invalid(
-      NonEmptyList.of(IncorrectNumberOfFields(values.length, numberOfFields)))
+      NonEmptyList.of(IncorrectNumberOfFields(values.length)))
   }
 
   property(
@@ -39,7 +39,7 @@ class TsFormatValidatorSpec
     forAll(tsGen) { ts =>
       val badId = badValue()
       val badValues = extractValues(ts).updated(0, badId)
-      validateTs(badValues) mustBe Invalid(NonEmptyList.of(InvalidId))
+      validateTs(badValues) mustBe Invalid(NonEmptyList.of(InvalidTsId))
     }
   }
 
@@ -85,7 +85,7 @@ class TsFormatValidatorSpec
       val badYear = badValue()
       val badValues = extractValues(ts).updated(0, badId).updated(2, badYear)
       validateTs(badValues) mustBe Invalid(
-        NonEmptyList.of(InvalidId, InvalidYear))
+        NonEmptyList.of(InvalidTsId, InvalidYear))
     }
   }
 

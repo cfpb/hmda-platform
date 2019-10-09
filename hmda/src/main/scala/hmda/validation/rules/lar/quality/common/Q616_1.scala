@@ -21,7 +21,8 @@ object Q616_1 extends EditCheck[LoanApplicationRegister] {
     when(
       lar.loanDisclosure.discountPoints not oneOf("NA", "Exempt") and
         (lar.loanDisclosure.totalLoanCosts not oneOf("NA", "Exempt"))
-        and (dP not equalTo(0.0)) and (tlc not equalTo(0.0))) {
+        and (dP not equalTo(0.0)) and (tlc not equalTo(0.0))
+    ) {
       tlc is greaterThan(dP)
     }
   }

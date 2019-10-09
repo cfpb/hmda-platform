@@ -20,7 +20,7 @@ class LarCsvParserSpec extends PropSpec with PropertyChecks with MustMatchers {
       val csv = lar.toCSV
       val csvWithPipeInEnd = csv + "|\r\nAnotherField"
       LarCsvParser(csvWithPipeInEnd) mustBe Left(
-        List(IncorrectNumberOfFields(111, 110)))
+        List(IncorrectNumberOfFields(111)))
     }
   }
 

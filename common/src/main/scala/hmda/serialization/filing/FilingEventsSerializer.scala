@@ -3,12 +3,7 @@ package hmda.serialization.filing
 import java.io.NotSerializableException
 
 import akka.serialization.SerializerWithStringManifest
-import hmda.messages.filing.FilingEvents.{
-  FilingCreated,
-  FilingStatusUpdated,
-  SubmissionAdded,
-  SubmissionUpdated
-}
+import hmda.messages.filing.FilingEvents.{ FilingCreated, FilingStatusUpdated, SubmissionAdded, SubmissionUpdated }
 import hmda.persistence.serialization.filing.events.{
   FilingCreatedMessage,
   FilingStatusUpdatedMessage,
@@ -20,10 +15,10 @@ import hmda.serialization.filing.FilingEventsProtobufConverter._
 class FilingEventsSerializer extends SerializerWithStringManifest {
   override def identifier: Int = 106
 
-  final val FilingCreatedManifest = classOf[FilingCreated].getName
+  final val FilingCreatedManifest       = classOf[FilingCreated].getName
   final val FilingStatusUpdatedManifest = classOf[FilingStatusUpdated].getName
-  final val SubmissionAddedManifest = classOf[SubmissionAdded].getName
-  final val SubmissionUpdatedManifest = classOf[SubmissionUpdated].getName
+  final val SubmissionAddedManifest     = classOf[SubmissionAdded].getName
+  final val SubmissionUpdatedManifest   = classOf[SubmissionUpdated].getName
 
   override def manifest(o: AnyRef): String = o.getClass.getName
 
@@ -37,8 +32,7 @@ class FilingEventsSerializer extends SerializerWithStringManifest {
     case evt: SubmissionUpdated =>
       submissionUpdatedToProtobuf(evt).toByteArray
     case _ =>
-      throw new IllegalArgumentException(
-        s"Cannot serialize object of type [${o.getClass.getName}]")
+      throw new IllegalArgumentException(s"Cannot serialize object of type [${o.getClass.getName}]")
 
   }
 
@@ -47,15 +41,13 @@ class FilingEventsSerializer extends SerializerWithStringManifest {
       case FilingCreatedManifest =>
         filingCreatedFromProtobuf(FilingCreatedMessage.parseFrom(bytes))
       case FilingStatusUpdatedManifest =>
-        filingStatusUpdatedFromProtobuf(
-          FilingStatusUpdatedMessage.parseFrom(bytes))
+        filingStatusUpdatedFromProtobuf(FilingStatusUpdatedMessage.parseFrom(bytes))
       case SubmissionAddedManifest =>
         submissionAddedFromProtobuf(SubmissionAddedMessage.parseFrom(bytes))
       case SubmissionUpdatedManifest =>
         submissionUpdatedFromProtoubf(SubmissionUpdatedMessage.parseFrom(bytes))
       case _ =>
-        throw new NotSerializableException(
-          s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
+        throw new NotSerializableException(s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
 
     }
 }

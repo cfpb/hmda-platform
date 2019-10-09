@@ -7,7 +7,7 @@ import hmda.api.http.model.filing.submissions.{
   HmdaRowParsedErrorSummary
 }
 import io.circe.Decoder.Result
-import io.circe.{Decoder, Encoder, HCursor, Json}
+import io.circe.{ Decoder, Encoder, HCursor, Json }
 import io.circe.syntax._
 import SubmissionStatusCodec._
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowParsedError
@@ -43,14 +43,9 @@ object ParsingErrorSummaryCodec {
           status <- c.downField("status").as[SubmissionStatus]
           links <- c.downField("_links").as[PaginationLinks]
         } yield {
-          val path = PaginatedResponse.staticPath(links.href)
+          val path        = PaginatedResponse.staticPath(links.href)
           val currentPage = PaginatedResponse.currentPage(links.self)
-          ParsingErrorSummary(tsErrors,
-                              larErrors,
-                              path,
-                              currentPage,
-                              total,
-                              status)
+          ParsingErrorSummary(tsErrors, larErrors, path, currentPage, total, status)
         }
     }
 

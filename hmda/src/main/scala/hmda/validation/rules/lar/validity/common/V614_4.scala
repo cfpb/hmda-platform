@@ -1,11 +1,7 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.lar.enums.{
-  OpenEndLineOfCredit,
-  PreapprovalNotRequested,
-  PreapprovalRequested
-}
+import hmda.model.filing.lar.enums.{ OpenEndLineOfCredit, PreapprovalNotRequested, PreapprovalRequested }
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.dsl.ValidationResult
@@ -19,9 +15,8 @@ object V614_4 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V614"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.lineOfCredit is equalTo(OpenEndLineOfCredit)) {
       lar.action.preapproval is equalTo(PreapprovalNotRequested)
     }
-  }
 }

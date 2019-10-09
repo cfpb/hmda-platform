@@ -1,12 +1,18 @@
 package hmda.api.http.codec.filing.submission
 
-import hmda.api.http.model.filing.submissions.ParsingErrorSummary
-import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowParsedError
+import hmda.api.http.model.filing.submissions.{ParsingErrorSummary, HmdaRowParsedErrorSummary, FieldParserErrorSummary}
 import org.scalacheck.Gen
 import hmda.model.submission.SubmissionGenerator._
 import hmda.serialization.submission.HmdaParserErrorStateGenerator._
 
 object ParsingErrorSummaryGenerator {
+
+  implicit def FieldParserErrorSummaryGen: Gen[FieldParserErrorSummary] =
+    for {
+      fieldName <- Gen.alphaStr
+      inputValue <- Gen.alphaStr
+      validValues <- Gen.alphaStr
+    } yield FieldParserErrorSummary(fieldName, inputValue, validValues)
 
   implicit def parsingErrorSummaryGen: Gen[ParsingErrorSummary] =
     for {
@@ -19,10 +25,10 @@ object ParsingErrorSummaryGenerator {
     } yield
       ParsingErrorSummary(tsErrors, larErrors, path, currentPage, total, status)
 
-  implicit def hmdaRowParserErrorGen: Gen[HmdaRowParsedError] =
+  implicit def hmdaRowParserErrorGen: Gen[HmdaRowParsedErrorSummary] =
     for {
       rowNumber <- Gen.choose(1, 100)
       estimatedULI <- Gen.alphaStr
-      errorMessages <- Gen.listOf(FieldParserErrorGen)
-    } yield HmdaRowParsedError(rowNumber, estimatedULI, errorMessages)
+      errorMessages <- Gen.listOf(FieldParserErrorSummaryGen)
+    } yield HmdaRowParsedErrorSummary(rowNumber, estimatedULI, errorMessages)
 }

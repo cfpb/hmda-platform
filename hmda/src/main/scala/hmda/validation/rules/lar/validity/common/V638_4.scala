@@ -14,10 +14,7 @@ object V638_4 extends EditCheck[LoanApplicationRegister] {
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
     val coAppRace = lar.coApplicant.race
-    when(
-      coAppRace.race1 is oneOf(RaceInformationNotProvided,
-                               RaceNotApplicable,
-                               RaceNoCoApplicant)) {
+    when(coAppRace.race1 is oneOf(RaceInformationNotProvided, RaceNotApplicable, RaceNoCoApplicant)) {
       (coAppRace.race2 is equalTo(EmptyRaceValue)) and
         (coAppRace.race3 is equalTo(EmptyRaceValue)) and
         (coAppRace.race4 is equalTo(EmptyRaceValue)) and

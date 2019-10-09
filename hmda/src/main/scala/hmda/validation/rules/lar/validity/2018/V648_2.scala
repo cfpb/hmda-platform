@@ -12,9 +12,8 @@ object V648_2 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V648"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.coApplicant.sex.sexEnum is equalTo(MaleAndFemale)) {
       lar.coApplicant.sex.sexObservedEnum is equalTo(NotVisualOrSurnameSex)
     }
-  }
 }

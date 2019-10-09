@@ -31,16 +31,13 @@ object LarCodec {
         ("loanDisclosure", a.loanDisclosure.asJson),
         ("nonAmortizingFeatures", a.nonAmortizingFeatures.asJson),
         ("property", a.property.asJson),
-        ("applicationSubmission",
-         a.applicationSubmission.asInstanceOf[LarEnum].asJson),
-        ("payableToInstitution",
-         a.payableToInstitution.asInstanceOf[LarEnum].asJson),
+        ("applicationSubmission", a.applicationSubmission.asInstanceOf[LarEnum].asJson),
+        ("payableToInstitution", a.payableToInstitution.asInstanceOf[LarEnum].asJson),
         ("AUS", a.AUS.asJson),
         ("ausResult", a.ausResult.asJson),
         ("reverseMortgage", a.reverseMortgage.asInstanceOf[LarEnum].asJson),
         ("lineOfCredit", a.lineOfCredit.asInstanceOf[LarEnum].asJson),
-        ("businessOrCommercialPurpose",
-         a.businessOrCommercialPurpose.asInstanceOf[LarEnum].asJson)
+        ("businessOrCommercialPurpose", a.businessOrCommercialPurpose.asInstanceOf[LarEnum].asJson)
       )
     }
 
@@ -48,33 +45,30 @@ object LarCodec {
     new Decoder[LoanApplicationRegister] {
       override def apply(c: HCursor): Result[LoanApplicationRegister] =
         for {
-          larIdentifier <- c.downField("larIdentifier").as[LarIdentifier]
-          loan <- c.downField("loan").as[Loan]
-          larAction <- c.downField("larAction").as[LarAction]
-          geography <- c.downField("geography").as[Geography]
-          applicant <- c.downField("applicant").as[Applicant]
-          coApplicant <- c.downField("coApplicant").as[Applicant]
-          income <- c.downField("income").as[String]
-          purchaserType <- c.downField("purchaserType").as[Int]
-          hoepaStatus <- c.downField("hoepaStatus").as[Int]
-          lienStatus <- c.downField("lienStatus").as[Int]
-          denial <- c.downField("denial").as[Denial]
+          larIdentifier  <- c.downField("larIdentifier").as[LarIdentifier]
+          loan           <- c.downField("loan").as[Loan]
+          larAction      <- c.downField("larAction").as[LarAction]
+          geography      <- c.downField("geography").as[Geography]
+          applicant      <- c.downField("applicant").as[Applicant]
+          coApplicant    <- c.downField("coApplicant").as[Applicant]
+          income         <- c.downField("income").as[String]
+          purchaserType  <- c.downField("purchaserType").as[Int]
+          hoepaStatus    <- c.downField("hoepaStatus").as[Int]
+          lienStatus     <- c.downField("lienStatus").as[Int]
+          denial         <- c.downField("denial").as[Denial]
           loanDisclosure <- c.downField("loanDisclosure").as[LoanDisclosure]
-          nonAmortizingFeatures <- c
-            .downField("nonAmortizingFeatures")
-            .as[NonAmortizingFeatures]
-          property <- c.downField("property").as[Property]
+          nonAmortizingFeatures <- c.downField("nonAmortizingFeatures")
+                                    .as[NonAmortizingFeatures]
+          property              <- c.downField("property").as[Property]
           applicationSubmission <- c.downField("applicationSubmission").as[Int]
-          payableToInstitution <- c.downField("payableToInstitution").as[Int]
-          aus <- c.downField("AUS").as[AutomatedUnderwritingSystem]
-          ausResult <- c
-            .downField("ausResult")
-            .as[AutomatedUnderwritingSystemResult]
+          payableToInstitution  <- c.downField("payableToInstitution").as[Int]
+          aus                   <- c.downField("AUS").as[AutomatedUnderwritingSystem]
+          ausResult <- c.downField("ausResult")
+                        .as[AutomatedUnderwritingSystemResult]
           reverseMortgage <- c.downField("reverseMortgage").as[Int]
-          lineOfCredit <- c.downField("lineOfCredit").as[Int]
-          businessOrCommercialPurpose <- c
-            .downField("businessOrCommercialPurpose")
-            .as[Int]
+          lineOfCredit    <- c.downField("lineOfCredit").as[Int]
+          businessOrCommercialPurpose <- c.downField("businessOrCommercialPurpose")
+                                          .as[Int]
         } yield
           LoanApplicationRegister(
             larIdentifier,
@@ -97,8 +91,7 @@ object LarCodec {
             ausResult,
             MortgageTypeEnum.valueOf(reverseMortgage),
             LineOfCreditEnum.valueOf(lineOfCredit),
-            BusinessOrCommercialBusinessEnum.valueOf(
-              businessOrCommercialPurpose)
+            BusinessOrCommercialBusinessEnum.valueOf(businessOrCommercialPurpose)
           )
     }
 
@@ -129,24 +122,22 @@ object LarCodec {
   implicit val loanDecoder: Decoder[Loan] = new Decoder[Loan] {
     override def apply(c: HCursor): Result[Loan] =
       for {
-        uli <- c.downField("ULI").as[String]
-        applicationDate <- c.downField("applicationDate").as[String]
-        loanType <- c.downField("loanType").as[Int]
-        loanPurpose <- c.downField("loanPurpose").as[Int]
-        constructionMethod <- c.downField("constructionMethod").as[Int]
-        occupancy <- c.downField("occupancy").as[Int]
-        amount <- c.downField("amount").as[Double]
-        loanTerm <- c.downField("loanTerm").as[String]
-        rateSpread <- c.downField("rateSpread").as[String]
-        interestRate <- c.downField("interestRate").as[String]
+        uli                   <- c.downField("ULI").as[String]
+        applicationDate       <- c.downField("applicationDate").as[String]
+        loanType              <- c.downField("loanType").as[Int]
+        loanPurpose           <- c.downField("loanPurpose").as[Int]
+        constructionMethod    <- c.downField("constructionMethod").as[Int]
+        occupancy             <- c.downField("occupancy").as[Int]
+        amount                <- c.downField("amount").as[Double]
+        loanTerm              <- c.downField("loanTerm").as[String]
+        rateSpread            <- c.downField("rateSpread").as[String]
+        interestRate          <- c.downField("interestRate").as[String]
         prepaymentPenaltyTerm <- c.downField("prepaymentPenaltyTerm").as[String]
-        debtToIncomeRatio <- c.downField("debtToIncomeRatio").as[String]
-        combinedLoanToValueRatio <- c
-          .downField("combinedLoanToValueRatio")
-          .as[String]
-        introductoryRatePeriod <- c
-          .downField("introductoryRatePeriod")
-          .as[String]
+        debtToIncomeRatio     <- c.downField("debtToIncomeRatio").as[String]
+        combinedLoanToValueRatio <- c.downField("combinedLoanToValueRatio")
+                                     .as[String]
+        introductoryRatePeriod <- c.downField("introductoryRatePeriod")
+                                   .as[String]
       } yield {
         Loan(
           uli,
@@ -178,7 +169,7 @@ object LarCodec {
   implicit val larActionDecoder: Decoder[LarAction] = new Decoder[LarAction] {
     override def apply(c: HCursor): Result[LarAction] =
       for {
-        preapproval <- c.downField("preapproval").as[Int]
+        preapproval     <- c.downField("preapproval").as[Int]
         actionTakenType <- c.downField("actionTakenType").as[Int]
         actionTakenDate <- c.downField("actionTakenDate").as[Int]
       } yield
@@ -203,12 +194,12 @@ object LarCodec {
   implicit val geographyDecoder: Decoder[Geography] = new Decoder[Geography] {
     override def apply(c: HCursor): Result[Geography] =
       for {
-        street <- c.downField("street").as[String]
-        city <- c.downField("city").as[String]
-        state <- c.downField("state").as[String]
+        street  <- c.downField("street").as[String]
+        city    <- c.downField("city").as[String]
+        state   <- c.downField("state").as[String]
         zipCode <- c.downField("zipCode").as[String]
-        county <- c.downField("county").as[String]
-        tract <- c.downField("tract").as[String]
+        county  <- c.downField("county").as[String]
+        tract   <- c.downField("tract").as[String]
       } yield Geography(street, city, state, zipCode, county, tract)
   }
 
@@ -227,13 +218,13 @@ object LarCodec {
   implicit val ethnicityDecoder: Decoder[Ethnicity] = new Decoder[Ethnicity] {
     override def apply(c: HCursor): Result[Ethnicity] =
       for {
-        ethnicity1 <- c.downField("ethnicity1").as[Int]
-        ethnicity2 <- c.downField("ethnicity2").as[Int]
-        ethnicity3 <- c.downField("ethnicity3").as[Int]
-        ethnicity4 <- c.downField("ethnicity4").as[Int]
-        ethnicity5 <- c.downField("ethnicity5").as[Int]
+        ethnicity1            <- c.downField("ethnicity1").as[Int]
+        ethnicity2            <- c.downField("ethnicity2").as[Int]
+        ethnicity3            <- c.downField("ethnicity3").as[Int]
+        ethnicity4            <- c.downField("ethnicity4").as[Int]
+        ethnicity5            <- c.downField("ethnicity5").as[Int]
         otherHispanicOrLatino <- c.downField("otherHispanicOrLatino").as[String]
-        ethnicityObserved <- c.downField("ethnicityObserved").as[Int]
+        ethnicityObserved     <- c.downField("ethnicityObserved").as[Int]
       } yield
         Ethnicity(
           EthnicityEnum.valueOf(ethnicity1),
@@ -263,16 +254,15 @@ object LarCodec {
   implicit val raceDecoder: Decoder[Race] = new Decoder[Race] {
     override def apply(c: HCursor): Result[Race] =
       for {
-        race1 <- c.downField("race1").as[Int]
-        race2 <- c.downField("race2").as[Int]
-        race3 <- c.downField("race3").as[Int]
-        race4 <- c.downField("race4").as[Int]
-        race5 <- c.downField("race5").as[Int]
+        race1           <- c.downField("race1").as[Int]
+        race2           <- c.downField("race2").as[Int]
+        race3           <- c.downField("race3").as[Int]
+        race4           <- c.downField("race4").as[Int]
+        race5           <- c.downField("race5").as[Int]
         otherNativeRace <- c.downField("otherNativeRace").as[String]
-        otherAsianRace <- c.downField("otherAsianRace").as[String]
-        otherPacificIslanderRace <- c
-          .downField("otherPacificIslanderRace")
-          .as[String]
+        otherAsianRace  <- c.downField("otherAsianRace").as[String]
+        otherPacificIslanderRace <- c.downField("otherPacificIslanderRace")
+                                     .as[String]
         raceObserved <- c.downField("raceObserved").as[Int]
       } yield
         Race(
@@ -298,7 +288,7 @@ object LarCodec {
   implicit val sexDecoder: Decoder[Sex] = new Decoder[Sex] {
     override def apply(c: HCursor): Result[Sex] =
       for {
-        sex <- c.downField("sex").as[Int]
+        sex         <- c.downField("sex").as[Int]
         sexObserved <- c.downField("sexObserved").as[Int]
       } yield Sex(SexEnum.valueOf(sex), SexObservedEnum.valueOf(sexObserved))
   }
@@ -318,12 +308,12 @@ object LarCodec {
   implicit val applicantDecoder: Decoder[Applicant] = new Decoder[Applicant] {
     override def apply(c: HCursor): Result[Applicant] =
       for {
-        ethnicity <- c.downField("ethnicity").as[Ethnicity]
-        race <- c.downField("race").as[Race]
-        sex <- c.downField("sex").as[Sex]
-        age <- c.downField("age").as[Int]
-        creditScore <- c.downField("creditScore").as[Int]
-        creditScoreType <- c.downField("creditScoreType").as[Int]
+        ethnicity             <- c.downField("ethnicity").as[Ethnicity]
+        race                  <- c.downField("race").as[Race]
+        sex                   <- c.downField("sex").as[Sex]
+        age                   <- c.downField("age").as[Int]
+        creditScore           <- c.downField("creditScore").as[Int]
+        creditScoreType       <- c.downField("creditScoreType").as[Int]
         otherCreditScoreModel <- c.downField("otherCreditScoreModel").as[String]
       } yield
         Applicant(
@@ -350,10 +340,10 @@ object LarCodec {
   implicit val denialDecoder: Decoder[Denial] = new Decoder[Denial] {
     override def apply(c: HCursor): Result[Denial] =
       for {
-        denialReason1 <- c.downField("denialReason1").as[Int]
-        denialReason2 <- c.downField("denialReason2").as[Int]
-        denialReason3 <- c.downField("denialReason3").as[Int]
-        denialReason4 <- c.downField("denialReason4").as[Int]
+        denialReason1     <- c.downField("denialReason1").as[Int]
+        denialReason2     <- c.downField("denialReason2").as[Int]
+        denialReason3     <- c.downField("denialReason3").as[Int]
+        denialReason4     <- c.downField("denialReason4").as[Int]
         otherDenialReason <- c.downField("otherDenialReason").as[String]
       } yield
         Denial(
@@ -380,29 +370,21 @@ object LarCodec {
     new Decoder[LoanDisclosure] {
       override def apply(c: HCursor): Result[LoanDisclosure] =
         for {
-          totalLoanCosts <- c.downField("totalLoanCosts").as[String]
+          totalLoanCosts     <- c.downField("totalLoanCosts").as[String]
           totalPointsAndFees <- c.downField("totalPointsAndFees").as[String]
           originationCharges <- c.downField("originationCharges").as[String]
-          discountPoints <- c.downField("discountPoints").as[String]
-          lenderCredits <- c.downField("lenderCredits").as[String]
-        } yield
-          LoanDisclosure(totalLoanCosts,
-                         totalPointsAndFees,
-                         originationCharges,
-                         discountPoints,
-                         lenderCredits)
+          discountPoints     <- c.downField("discountPoints").as[String]
+          lenderCredits      <- c.downField("lenderCredits").as[String]
+        } yield LoanDisclosure(totalLoanCosts, totalPointsAndFees, originationCharges, discountPoints, lenderCredits)
     }
 
   implicit val nonAmortizingFeaturesEncoder: Encoder[NonAmortizingFeatures] =
     new Encoder[NonAmortizingFeatures] {
       override def apply(a: NonAmortizingFeatures): Json = Json.obj(
         ("balloonPayment", a.balloonPayment.asInstanceOf[LarEnum].asJson),
-        ("interestOnlyPayment",
-         a.interestOnlyPayments.asInstanceOf[LarEnum].asJson),
-        ("negativeAmortization",
-         a.negativeAmortization.asInstanceOf[LarEnum].asJson),
-        ("otherNonAmortizingFeatures",
-         a.otherNonAmortizingFeatures.asInstanceOf[LarEnum].asJson)
+        ("interestOnlyPayment", a.interestOnlyPayments.asInstanceOf[LarEnum].asJson),
+        ("negativeAmortization", a.negativeAmortization.asInstanceOf[LarEnum].asJson),
+        ("otherNonAmortizingFeatures", a.otherNonAmortizingFeatures.asInstanceOf[LarEnum].asJson)
       )
     }
 
@@ -410,12 +392,11 @@ object LarCodec {
     new Decoder[NonAmortizingFeatures] {
       override def apply(c: HCursor): Result[NonAmortizingFeatures] =
         for {
-          ballonPayment <- c.downField("balloonPayment").as[Int]
-          interestOnlyPayment <- c.downField("interestOnlyPayment").as[Int]
+          ballonPayment        <- c.downField("balloonPayment").as[Int]
+          interestOnlyPayment  <- c.downField("interestOnlyPayment").as[Int]
           negativeAmortization <- c.downField("negativeAmortization").as[Int]
-          otherNonAmortizingFeatures <- c
-            .downField("otherNonAmortizingFeatures")
-            .as[Int]
+          otherNonAmortizingFeatures <- c.downField("otherNonAmortizingFeatures")
+                                         .as[Int]
         } yield
           NonAmortizingFeatures(
             BalloonPaymentEnum.valueOf(ballonPayment),
@@ -428,13 +409,10 @@ object LarCodec {
   implicit val propertyEncoder: Encoder[Property] = new Encoder[Property] {
     override def apply(a: Property): Json = Json.obj(
       ("propertyValue", Json.fromString(a.propertyValue)),
-      ("manufacturedHomeSecuredProperty",
-       a.manufacturedHomeSecuredProperty.asInstanceOf[LarEnum].asJson),
-      ("manufacturedHomeLandPropertyInterest",
-       a.manufacturedHomeLandPropertyInterest.asInstanceOf[LarEnum].asJson),
+      ("manufacturedHomeSecuredProperty", a.manufacturedHomeSecuredProperty.asInstanceOf[LarEnum].asJson),
+      ("manufacturedHomeLandPropertyInterest", a.manufacturedHomeLandPropertyInterest.asInstanceOf[LarEnum].asJson),
       ("totalUnits", Json.fromInt(a.totalUnits)),
-      ("multiFamilyAffordableUnits",
-       Json.fromString(a.multiFamilyAffordableUnits))
+      ("multiFamilyAffordableUnits", Json.fromString(a.multiFamilyAffordableUnits))
     )
   }
 
@@ -442,23 +420,18 @@ object LarCodec {
     override def apply(c: HCursor): Result[Property] =
       for {
         propertyValue <- c.downField("propertyValue").as[String]
-        manufacturedHomeSecuredProperty <- c
-          .downField("manufacturedHomeSecuredProperty")
-          .as[Int]
-        manufacturedHomeLandPropertyInterest <- c
-          .downField("manufacturedHomeLandPropertyInterest")
-          .as[Int]
+        manufacturedHomeSecuredProperty <- c.downField("manufacturedHomeSecuredProperty")
+                                            .as[Int]
+        manufacturedHomeLandPropertyInterest <- c.downField("manufacturedHomeLandPropertyInterest")
+                                                 .as[Int]
         totalUnits <- c.downField("totalUnits").as[Int]
-        multiFamilyAffordableUnits <- c
-          .downField("multiFamilyAffordableUnits")
-          .as[String]
+        multiFamilyAffordableUnits <- c.downField("multiFamilyAffordableUnits")
+                                       .as[String]
       } yield
         Property(
           propertyValue,
-          ManufacturedHomeSecuredPropertyEnum.valueOf(
-            manufacturedHomeSecuredProperty),
-          ManufacturedHomeLandPropertyInterestEnum.valueOf(
-            manufacturedHomeLandPropertyInterest),
+          ManufacturedHomeSecuredPropertyEnum.valueOf(manufacturedHomeSecuredProperty),
+          ManufacturedHomeLandPropertyInterestEnum.valueOf(manufacturedHomeLandPropertyInterest),
           totalUnits,
           multiFamilyAffordableUnits
         )
@@ -480,11 +453,11 @@ object LarCodec {
     new Decoder[AutomatedUnderwritingSystem] {
       override def apply(c: HCursor): Result[AutomatedUnderwritingSystem] =
         for {
-          aus1 <- c.downField("aus1").as[Int]
-          aus2 <- c.downField("aus2").as[Int]
-          aus3 <- c.downField("aus3").as[Int]
-          aus4 <- c.downField("aus4").as[Int]
-          aus5 <- c.downField("aus5").as[Int]
+          aus1     <- c.downField("aus1").as[Int]
+          aus2     <- c.downField("aus2").as[Int]
+          aus3     <- c.downField("aus3").as[Int]
+          aus4     <- c.downField("aus4").as[Int]
+          aus5     <- c.downField("aus5").as[Int]
           otherAus <- c.downField("otherAUS").as[String]
         } yield
           AutomatedUnderwritingSystem(
@@ -511,14 +484,13 @@ object LarCodec {
 
   implicit val ausResultDecoder: Decoder[AutomatedUnderwritingSystemResult] =
     new Decoder[AutomatedUnderwritingSystemResult] {
-      override def apply(
-          c: HCursor): Result[AutomatedUnderwritingSystemResult] =
+      override def apply(c: HCursor): Result[AutomatedUnderwritingSystemResult] =
         for {
-          ausResult1 <- c.downField("ausResult1").as[Int]
-          ausResult2 <- c.downField("ausResult2").as[Int]
-          ausResult3 <- c.downField("ausResult3").as[Int]
-          ausResult4 <- c.downField("ausResult4").as[Int]
-          ausResult5 <- c.downField("ausResult5").as[Int]
+          ausResult1     <- c.downField("ausResult1").as[Int]
+          ausResult2     <- c.downField("ausResult2").as[Int]
+          ausResult3     <- c.downField("ausResult3").as[Int]
+          ausResult4     <- c.downField("ausResult4").as[Int]
+          ausResult5     <- c.downField("ausResult5").as[Int]
           otherAusResult <- c.downField("otherAusResult").as[String]
         } yield
           AutomatedUnderwritingSystemResult(

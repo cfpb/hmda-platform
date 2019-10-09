@@ -5,13 +5,12 @@ object Parent {
 }
 
 case class Parent(
-    idRssd: Int,
-    name: Option[String]
+  idRssd: Int,
+  name: Option[String]
 ) {
-  def isEmpty: Boolean = {
+  def isEmpty: Boolean =
     this match {
       case Parent(-1, None) => true
       case _                => false
     }
-  }
 }

@@ -14,7 +14,7 @@ object V692_2 extends EditCheck[LoanApplicationRegister] {
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
     val config = ConfigFactory.load()
-    val units = config.getInt("edits.V692.units")
+    val units  = config.getInt("edits.V692.units")
 
     when(lar.property.totalUnits is lessThan(units)) {
       lar.property.multiFamilyAffordableUnits is oneOf("NA", "Exempt")

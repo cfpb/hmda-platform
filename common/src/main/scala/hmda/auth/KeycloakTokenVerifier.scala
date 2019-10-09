@@ -13,16 +13,15 @@ import org.keycloak.adapters.KeycloakDeployment
 import org.keycloak.representations.AccessToken
 
 import scala.concurrent.duration._
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
-class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment)(
-    implicit system: ActorSystem,
-    materializer: ActorMaterializer,
-    ec: ExecutionContext)
+class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment)(implicit system: ActorSystem,
+                                                                    materializer: ActorMaterializer,
+                                                                    ec: ExecutionContext)
     extends TokenVerifier {
 
-  val config = ConfigFactory.load()
-  val realm = config.getString("keycloak.realm")
+  val config  = ConfigFactory.load()
+  val realm   = config.getString("keycloak.realm")
   val authUrl = config.getString("keycloak.auth.server.url")
   val timeout = config.getInt("hmda.http.timeout").seconds
 
@@ -31,8 +30,7 @@ class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment)(
     fKid.map { kid =>
       RSATokenVerifier.verifyToken(
         token,
-        keycloakDeployment.getPublicKeyLocator.getPublicKey(kid,
-                                                            keycloakDeployment),
+        keycloakDeployment.getPublicKeyLocator.getPublicKey(kid, keycloakDeployment),
         keycloakDeployment.getRealmInfoUrl
       )
     }
@@ -56,7 +54,7 @@ class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment)(
   }
 
   private def parseAuthKey(line: ByteString): AuthKey = {
-    val str = line.utf8String
+    val str      = line.utf8String
     val authKeys = decode[AuthKeys](str).getOrElse(AuthKeys())
     if (authKeys.keys.nonEmpty) {
       authKeys.keys.head

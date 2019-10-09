@@ -1,22 +1,17 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.lar.enums.{
-  EmptyEthnicityValue,
-  HispanicOrLatino,
-  NotHispanicOrLatino,
-  VisualOrSurnameEthnicity
-}
+import hmda.model.filing.lar.enums.{ EmptyEthnicityValue, HispanicOrLatino, NotHispanicOrLatino, VisualOrSurnameEthnicity }
 import hmda.validation.dsl.ValidationResult
 import hmda.validation.rules.EditCheck
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 
 object V632_2 extends EditCheck[LoanApplicationRegister] {
-  override def name: String = "V632-2"
+  override def name: String   = "V632-2"
   override def parent: String = "V632"
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    val coEthnicity = lar.coApplicant.ethnicity
+    val coEthnicity      = lar.coApplicant.ethnicity
     val ethnicity1Values = List(HispanicOrLatino, NotHispanicOrLatino)
     val ethnicity2Values =
       List(HispanicOrLatino, NotHispanicOrLatino, EmptyEthnicityValue)

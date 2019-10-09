@@ -14,11 +14,12 @@ object Q626 extends EditCheck[LoanApplicationRegister] {
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
     val config = ConfigFactory.load()
     val amount = config.getInt("edits.Q626.amount")
-    val units = config.getInt("edits.Q626.units")
+    val units  = config.getInt("edits.Q626.units")
 
     when(
       lar.purchaserType is oneOf(FannieMae, GinnieMae, FreddieMac, FarmerMac) and
-        (lar.property.totalUnits is lessThanOrEqual(units))) {
+        (lar.property.totalUnits is lessThanOrEqual(units))
+    ) {
       lar.loan.amount is lessThanOrEqual(amount)
     }
   }

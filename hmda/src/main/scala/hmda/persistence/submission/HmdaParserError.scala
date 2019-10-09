@@ -2,76 +2,59 @@ package hmda.persistence.submission
 
 import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ActorRef, Behavior, TypedActorContext}
+import akka.actor.typed.{ ActorRef, Behavior, TypedActorContext }
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.stream.ActorMaterializer
-import akka.util.{ByteString, Timeout}
+import akka.util.{ ByteString, Timeout }
 import hmda.messages.submission.SubmissionProcessingCommands._
-import hmda.messages.submission.SubmissionProcessingEvents.{
-  HmdaRowParsedCount,
-  HmdaRowParsedError,
-  SubmissionProcessingEvent
-}
-import hmda.model.filing.submission.{Parsed, ParsedWithErrors}
+import hmda.messages.submission.SubmissionProcessingEvents.{ HmdaRowParsedCount, HmdaRowParsedError, SubmissionProcessingEvent }
+import hmda.model.filing.submission.{ Parsed, ParsedWithErrors }
 import hmda.persistence.HmdaTypedPersistentActor
 import akka.actor.typed.scaladsl.adapter._
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.{
-  Effect,
-  EventSourcedBehavior,
-  RetentionCriteria
-}
+import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
 import com.typesafe.config.ConfigFactory
 import hmda.model.filing.submissions.PaginatedResource
 import hmda.model.processing.state.HmdaParserErrorState
-import HmdaProcessingUtils.{readRawData, updateSubmissionStatus}
-import akka.stream.scaladsl.{Sink, Source}
+import HmdaProcessingUtils.{ readRawData, updateSubmissionStatus }
+import akka.stream.scaladsl.{ Sink, Source }
 import akka.stream.typed.scaladsl.ActorFlow
 import hmda.parser.filing.ParserFlow._
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 import hmda.query.HmdaQuery._
 
-object HmdaParserError
-    extends HmdaTypedPersistentActor[SubmissionProcessingCommand,
-                                     SubmissionProcessingEvent,
-                                     HmdaParserErrorState] {
+object HmdaParserError extends HmdaTypedPersistentActor[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaParserErrorState] {
 
   override val name: String = "HmdaParserError"
 
-  val config = ConfigFactory.load()
+  val config        = ConfigFactory.load()
   val futureTimeout = config.getInt("hmda.actor.timeout")
 
   implicit val timeout: Timeout = Timeout(futureTimeout.seconds)
 
-  override def behavior(
-      entityId: String): Behavior[SubmissionProcessingCommand] =
+  override def behavior(entityId: String): Behavior[SubmissionProcessingCommand] =
     Behaviors.setup { ctx =>
-      EventSourcedBehavior[SubmissionProcessingCommand,
-                           SubmissionProcessingEvent,
-                           HmdaParserErrorState](
+      EventSourcedBehavior[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaParserErrorState](
         persistenceId = PersistenceId(s"$entityId"),
         emptyState = HmdaParserErrorState(),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
-      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000,
-                                                      keepNSnapshots = 10))
+      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000, keepNSnapshots = 10))
     }
 
   override def commandHandler(
-      ctx: TypedActorContext[SubmissionProcessingCommand])
-    : CommandHandler[SubmissionProcessingCommand,
-                     SubmissionProcessingEvent,
-                     HmdaParserErrorState] = { (state, cmd) =>
-    val log = ctx.asScala.log
-    implicit val system: ActorSystem = ctx.asScala.system.toUntyped
+    ctx: TypedActorContext[SubmissionProcessingCommand]
+  ): CommandHandler[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaParserErrorState] = { (state, cmd) =>
+    val log                                      = ctx.asScala.log
+    implicit val system: ActorSystem             = ctx.asScala.system.toUntyped
     implicit val materializer: ActorMaterializer = ActorMaterializer()
-    implicit val ec: ExecutionContext = system.dispatcher
-    val sharding = ClusterSharding(ctx.asScala.system)
+    implicit val ec: ExecutionContext            = system.dispatcher
+    val sharding                                 = ClusterSharding(ctx.asScala.system)
 
     cmd match {
       case StartParsing(submissionId) =>
@@ -93,10 +76,9 @@ object HmdaParserError
           .via(
             ActorFlow.ask(ctx.asScala.self)(
               (el, replyTo: ActorRef[HmdaRowParsedError]) =>
-                PersistHmdaRowParsedError(el.rowNumber,
-                                          el.estimatedULI,
-                                          el.errors,
-                                          Some(replyTo))))
+                PersistHmdaRowParsedError(el.rowNumber, el.estimatedULI, el.errors, Some(replyTo))
+            )
+          )
           .runWith(Sink.ignore)
           .onComplete {
             case Success(_) =>
@@ -107,10 +89,7 @@ object HmdaParserError
 
         Effect.none
 
-      case PersistHmdaRowParsedError(rowNumber,
-                                     estimatedULI,
-                                     errors,
-                                     maybeReplyTo) =>
+      case PersistHmdaRowParsedError(rowNumber, estimatedULI, errors, maybeReplyTo) =>
         Effect
           .persist(HmdaRowParsedError(rowNumber, estimatedULI, errors))
           .thenRun { _ =>
@@ -130,14 +109,11 @@ object HmdaParserError
         val p = PaginatedResource(state.totalErrors)(page)
         val larErrorsToReturn =
           state.larErrors.slice(p.fromIndex, p.toIndex)
-        replyTo ! HmdaParserErrorState(state.transmittalSheetErrors,
-                                       larErrorsToReturn,
-                                       state.totalErrors)
+        replyTo ! HmdaParserErrorState(state.transmittalSheetErrors, larErrorsToReturn, state.totalErrors)
         Effect.none
 
       case CompleteParsing(submissionId) =>
-        log.info(
-          s"Completed Parsing for ${submissionId.toString}, total lines with errors: ${state.totalErrors}")
+        log.info(s"Completed Parsing for ${submissionId.toString}, total lines with errors: ${state.totalErrors}")
         val updatedStatus = if (state.totalErrors == 0) {
           Parsed
         } else {
@@ -154,18 +130,14 @@ object HmdaParserError
     }
   }
 
-  override def eventHandler: (
-      HmdaParserErrorState,
-      SubmissionProcessingEvent) => HmdaParserErrorState = {
+  override def eventHandler: (HmdaParserErrorState, SubmissionProcessingEvent) => HmdaParserErrorState = {
     case (state, error @ HmdaRowParsedError(_, _, _)) =>
       state.update(error)
     case (state, _) => state
   }
 
-  def startShardRegion(sharding: ClusterSharding)
-    : ActorRef[ShardingEnvelope[SubmissionProcessingCommand]] = {
+  def startShardRegion(sharding: ClusterSharding): ActorRef[ShardingEnvelope[SubmissionProcessingCommand]] =
     super.startShardRegion(sharding)
-  }
 
   def estimateULI(line: String): String = {
     val larItems = line.split('|')

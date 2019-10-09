@@ -1,30 +1,20 @@
 package hmda.persistence.filing
 
-import akka.actor.typed.{ActorRef, Behavior, TypedActorContext}
+import akka.actor.typed.{ ActorRef, Behavior, TypedActorContext }
 import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityTypeKey}
+import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityTypeKey }
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.{
-  Effect,
-  EventSourcedBehavior,
-  RetentionCriteria
-}
+import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
 import hmda.messages.filing.FilingCommands._
-import hmda.messages.filing.FilingEvents.{
-  FilingCreated,
-  FilingEvent,
-  SubmissionAdded,
-  SubmissionUpdated
-}
+import hmda.messages.filing.FilingEvents.{ FilingCreated, FilingEvent, SubmissionAdded, SubmissionUpdated }
 import hmda.messages.institution.InstitutionCommands.AddFiling
 import hmda.model.filing.FilingDetails
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.persistence.institution.InstitutionPersistence
 
-object FilingPersistence
-    extends HmdaTypedPersistentActor[FilingCommand, FilingEvent, FilingState] {
+object FilingPersistence extends HmdaTypedPersistentActor[FilingCommand, FilingEvent, FilingState] {
 
   override final val name = "Filing"
 
@@ -38,14 +28,12 @@ object FilingPersistence
         emptyState = FilingState(),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
-      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000,
-                                                      keepNSnapshots = 10))
+      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000, keepNSnapshots = 10))
     }
 
-  override def commandHandler(ctx: TypedActorContext[FilingCommand])
-    : CommandHandler[FilingCommand, FilingEvent, FilingState] = {
+  override def commandHandler(ctx: TypedActorContext[FilingCommand]): CommandHandler[FilingCommand, FilingEvent, FilingState] = {
     (state, cmd) =>
-      val log = ctx.asScala.log
+      val log      = ctx.asScala.log
       val sharding = ClusterSharding(ctx.asScala.system)
       cmd match {
         case CreateFiling(filing, replyTo) =>
@@ -53,13 +41,9 @@ object FilingPersistence
             log.debug(s"Filing created: ${filing.lei}-${filing.period}")
             val institutionPersistence = {
               if (filing.period == "2018") {
-                sharding.entityRefFor(
-                  InstitutionPersistence.typeKey,
-                  s"${InstitutionPersistence.name}-${filing.lei}")
+                sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-${filing.lei}")
               } else {
-                sharding.entityRefFor(
-                  InstitutionPersistence.typeKey,
-                  s"${InstitutionPersistence.name}-${filing.lei}-${filing.period}")
+                sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-${filing.lei}-${filing.period}")
               }
             }
             institutionPersistence ! AddFiling(filing, None)
@@ -138,9 +122,7 @@ object FilingPersistence
     case (state, _)                          => state
   }
 
-  def startShardRegion(
-      sharding: ClusterSharding): ActorRef[ShardingEnvelope[FilingCommand]] = {
+  def startShardRegion(sharding: ClusterSharding): ActorRef[ShardingEnvelope[FilingCommand]] =
     super.startShardRegion(sharding)
-  }
 
 }

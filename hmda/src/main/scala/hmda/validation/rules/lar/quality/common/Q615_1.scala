@@ -20,7 +20,8 @@ object Q615_1 extends EditCheck[LoanApplicationRegister] {
     when(
       lar.loanDisclosure.originationCharges not oneOf("NA", "Exempt") and
         (lar.loanDisclosure.totalLoanCosts not oneOf("NA", "Exempt")) and
-        (oC not equalTo(0.0)) and (tlc not equalTo(0.0))) {
+        (oC not equalTo(0.0)) and (tlc not equalTo(0.0))
+    ) {
       tlc is greaterThan(oC)
     }
   }

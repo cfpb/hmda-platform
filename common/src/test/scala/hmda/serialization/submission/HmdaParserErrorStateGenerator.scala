@@ -14,8 +14,7 @@ object HmdaParserErrorStateGenerator {
     for {
       fieldName <- Gen.alphaStr
       inputValue <- Gen.alphaStr
-      validValues <- Gen.alphaStr
-    } yield FieldParserError(fieldName, inputValue, validValues)
+    } yield FieldParserError(fieldName, inputValue)
 
   implicit def hmdaRowParsedErrorGen: Gen[HmdaRowParsedError] =
     for {

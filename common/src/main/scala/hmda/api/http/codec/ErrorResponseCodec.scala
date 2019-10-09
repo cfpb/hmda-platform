@@ -3,7 +3,7 @@ package hmda.api.http.codec
 import akka.http.scaladsl.model.Uri.Path
 import hmda.api.http.model.ErrorResponse
 import io.circe.Decoder.Result
-import io.circe.{Decoder, Encoder, HCursor, Json}
+import io.circe.{ Decoder, Encoder, HCursor, Json }
 
 object ErrorResponseCodec {
 
@@ -21,8 +21,8 @@ object ErrorResponseCodec {
       override def apply(c: HCursor): Result[ErrorResponse] =
         for {
           httpStatus <- c.downField("httpStatus").as[Int]
-          message <- c.downField("message").as[String]
-          pathStr <- c.downField("path").as[String]
+          message    <- c.downField("message").as[String]
+          pathStr    <- c.downField("path").as[String]
         } yield {
           ErrorResponse(httpStatus, message, Path.apply(pathStr))
         }

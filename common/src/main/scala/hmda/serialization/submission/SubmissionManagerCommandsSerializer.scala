@@ -3,10 +3,7 @@ package hmda.serialization.submission
 import java.io.NotSerializableException
 
 import akka.serialization.SerializerWithStringManifest
-import hmda.messages.submission.SubmissionManagerCommands.{
-  UpdateSubmissionStatus,
-  WrappedSubmissionEventResponse
-}
+import hmda.messages.submission.SubmissionManagerCommands.{ UpdateSubmissionStatus, WrappedSubmissionEventResponse }
 import hmda.serialization.submission.SubmissionManagerCommandsProtobufConverter._
 
 class SubmissionManagerCommandsSerializer extends SerializerWithStringManifest {
@@ -26,8 +23,7 @@ class SubmissionManagerCommandsSerializer extends SerializerWithStringManifest {
     case cmd: WrappedSubmissionEventResponse =>
       wrappedSubmissionEventResponseToProtobuf(cmd).toByteArray
     case _ =>
-      throw new IllegalArgumentException(
-        s"Cannot serialize object of type [${o.getClass.getName}]")
+      throw new IllegalArgumentException(s"Cannot serialize object of type [${o.getClass.getName}]")
   }
 
   override def fromBinary(bytes: Array[Byte], manifest: String): AnyRef =
@@ -37,8 +33,7 @@ class SubmissionManagerCommandsSerializer extends SerializerWithStringManifest {
       case WrappedSubmissionEventResponseManifest =>
         wrappedSubmissionEventResponseFromProtobuf(bytes)
       case _ =>
-        throw new NotSerializableException(
-          s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
+        throw new NotSerializableException(s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
     }
 
 }

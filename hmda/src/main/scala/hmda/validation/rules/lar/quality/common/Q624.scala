@@ -15,9 +15,7 @@ object Q624 extends EditCheck[LoanApplicationRegister] {
     val config = ConfigFactory.load()
     val amount = config.getInt("edits.Q624.amount")
 
-    when(
-      lar.loan.loanType is equalTo(FHAInsured) and (lar.property.totalUnits is equalTo(
-        1))) {
+    when(lar.loan.loanType is equalTo(FHAInsured) and (lar.property.totalUnits is equalTo(1))) {
       lar.loan.amount is lessThanOrEqual(amount)
     }
   }

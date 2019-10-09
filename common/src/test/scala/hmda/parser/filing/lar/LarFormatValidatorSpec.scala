@@ -25,7 +25,7 @@ class LarFormatValidatorSpec
   property("Loan Application Register must have the correct number of fields") {
     val values = List("a", "b", "c")
     validateLar(values) mustBe Invalid(
-      NonEmptyList.of(IncorrectNumberOfFields(values.length, numberOfFields))
+      NonEmptyList.of(IncorrectNumberOfFields(values.length))
     )
   }
 
@@ -35,7 +35,7 @@ class LarFormatValidatorSpec
       val larId = lar.larIdentifier
       val badId = badValue()
       validateLarIdentifier(badId, larId.LEI, larId.NMLSRIdentifier) mustBe Invalid(
-        NonEmptyList.of(InvalidId))
+        NonEmptyList.of(InvalidLarId))
     }
   }
 
