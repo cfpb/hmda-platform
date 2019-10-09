@@ -18,8 +18,7 @@ class FilingDetailsSerializer extends SerializerWithStringManifest {
     case evt: FilingDetails =>
       filingDetailsToProtobuf(evt).toByteArray
     case _ =>
-      throw new IllegalArgumentException(
-        s"Cannot serialize object of type [${o.getClass.getName}]")
+      throw new IllegalArgumentException(s"Cannot serialize object of type [${o.getClass.getName}]")
 
   }
 
@@ -28,8 +27,7 @@ class FilingDetailsSerializer extends SerializerWithStringManifest {
       case FilingDetailsManifest =>
         filingDetailsFromProtobuf(FilingDetailsMessage.parseFrom(bytes))
       case _ =>
-        throw new NotSerializableException(
-          s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
+        throw new NotSerializableException(s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
 
     }
 }

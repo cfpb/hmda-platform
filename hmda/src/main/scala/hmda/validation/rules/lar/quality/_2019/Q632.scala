@@ -20,8 +20,7 @@ object Q632 extends EditCheck[LoanApplicationRegister] {
                      AcceptEligible,
                      AcceptIneligible)
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
-
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.AUS.aus1 is equalTo(TechnologyOpenToApprovedLenders)) {
       lar.ausResult.ausResult1 is containedIn(results)
     } and when(lar.AUS.aus2 is equalTo(TechnologyOpenToApprovedLenders)) {
@@ -34,5 +33,4 @@ object Q632 extends EditCheck[LoanApplicationRegister] {
       lar.ausResult.ausResult5 is containedIn(results)
     }
 
-  }
 }

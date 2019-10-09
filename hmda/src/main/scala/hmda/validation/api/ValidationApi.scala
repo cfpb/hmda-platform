@@ -2,12 +2,8 @@ package hmda.validation.api
 
 import cats.Semigroup
 import hmda.model.validation._
-import hmda.validation.dsl.{
-  ValidationFailure,
-  ValidationResult,
-  ValidationSuccess
-}
-import hmda.validation.rules.{AsyncEditCheck, EditCheck}
+import hmda.validation.dsl.{ ValidationFailure, ValidationResult, ValidationSuccess }
+import hmda.validation.rules.{ AsyncEditCheck, EditCheck }
 import cats.implicits._
 import hmda.validation._
 
@@ -23,27 +19,20 @@ trait ValidationApi[A] {
     override def combine(x: Future[A], y: Future[A]): Future[A] = x
   }
 
-  def check[B](
-      editCheck: EditCheck[B],
-      input: B,
-      errorId: String,
-      validationErrorType: ValidationErrorType,
-      validationErrorEntity: ValidationErrorEntity): HmdaValidation[B] = {
-    convertResult(input,
-                  editCheck(input),
-                  editCheck.name,
-                  errorId,
-                  validationErrorType,
-                  validationErrorEntity)
-  }
+  def check[B](editCheck: EditCheck[B],
+               input: B,
+               errorId: String,
+               validationErrorType: ValidationErrorType,
+               validationErrorEntity: ValidationErrorEntity): HmdaValidation[B] =
+    convertResult(input, editCheck(input), editCheck.name, errorId, validationErrorType, validationErrorEntity)
 
   def checkAsync[as: AS, mat: MAT, ec: EC, B](
-      asyncEditCheck: AsyncEditCheck[B],
-      input: B,
-      errorId: String,
-      validationErrorType: ValidationErrorType,
-      validationErrorEntity: ValidationErrorEntity
-  ): Future[HmdaValidation[B]] = {
+    asyncEditCheck: AsyncEditCheck[B],
+    input: B,
+    errorId: String,
+    validationErrorType: ValidationErrorType,
+    validationErrorEntity: ValidationErrorEntity
+  ): Future[HmdaValidation[B]] =
     convertResultAsync(
       input,
       asyncEditCheck(input),
@@ -52,47 +41,31 @@ trait ValidationApi[A] {
       validationErrorType,
       validationErrorEntity
     )
-  }
 
-  def convertResult[B](
-      input: B,
-      result: ValidationResult,
-      editName: String,
-      uli: String,
-      validationErrorType: ValidationErrorType,
-      validationErrorEntity: ValidationErrorEntity): HmdaValidation[B] =
-    resultToValidationError(input,
-                            result,
-                            editName,
-                            uli,
-                            validationErrorType,
-                            validationErrorEntity)
+  def convertResult[B](input: B,
+                       result: ValidationResult,
+                       editName: String,
+                       uli: String,
+                       validationErrorType: ValidationErrorType,
+                       validationErrorEntity: ValidationErrorEntity): HmdaValidation[B] =
+    resultToValidationError(input, result, editName, uli, validationErrorType, validationErrorEntity)
 
   def convertResultAsync[ec: EC, B](
-      input: B,
-      fResult: Future[ValidationResult],
-      editName: String,
-      uli: String,
-      validationErrorType: ValidationErrorType,
-      validationErrorEntity: ValidationErrorEntity
-  ): Future[HmdaValidation[B]] = {
-    fResult.map(
-      result =>
-        resultToValidationError(input,
-                                result,
-                                editName,
-                                uli,
-                                validationErrorType,
-                                validationErrorEntity))
-  }
+    input: B,
+    fResult: Future[ValidationResult],
+    editName: String,
+    uli: String,
+    validationErrorType: ValidationErrorType,
+    validationErrorEntity: ValidationErrorEntity
+  ): Future[HmdaValidation[B]] =
+    fResult.map(result => resultToValidationError(input, result, editName, uli, validationErrorType, validationErrorEntity))
 
-  private def resultToValidationError[B](
-      input: B,
-      result: ValidationResult,
-      editName: String,
-      uli: String,
-      validationErrorType: ValidationErrorType,
-      validationErrorEntity: ValidationErrorEntity): HmdaValidation[B] = {
+  private def resultToValidationError[B](input: B,
+                                         result: ValidationResult,
+                                         editName: String,
+                                         uli: String,
+                                         validationErrorType: ValidationErrorType,
+                                         validationErrorEntity: ValidationErrorEntity): HmdaValidation[B] =
     result match {
 
       case ValidationSuccess => input.validNel
@@ -108,5 +81,4 @@ trait ValidationApi[A] {
           case Macro => MacroValidationError(editName).invalidNel
         }
     }
-  }
 }

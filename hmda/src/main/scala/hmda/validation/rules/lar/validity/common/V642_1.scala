@@ -12,13 +12,8 @@ object V642_1 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V642"
 
-  val validSexValues = List(Male,
-                            Female,
-                            SexInformationNotProvided,
-                            SexNotApplicable,
-                            MaleAndFemale)
+  val validSexValues = List(Male, Female, SexInformationNotProvided, SexNotApplicable, MaleAndFemale)
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     lar.applicant.sex.sexEnum is containedIn(validSexValues)
-  }
 }

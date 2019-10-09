@@ -6,7 +6,7 @@ import hmda.model.filing.lar.enums._
 package object SexCategorization {
 
   def assignSexCategorization(lar: LoanApplicationRegister): String = {
-    val sex = lar.applicant.sex.sexEnum
+    val sex   = lar.applicant.sex.sexEnum
     val coSex = lar.coApplicant.sex.sexEnum
 
     if (sex == SexInformationNotProvided || sex == SexNotApplicable) {

@@ -1,6 +1,6 @@
 package hmda.validation.rules
 
-import hmda.validation.{AS, EC, MAT}
+import hmda.validation.{ AS, EC, MAT }
 import hmda.validation.dsl.ValidationResult
 
 import scala.concurrent.Future

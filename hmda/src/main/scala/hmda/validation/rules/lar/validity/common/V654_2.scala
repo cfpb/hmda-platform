@@ -11,9 +11,8 @@ object V654_2 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V654"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.property.multiFamilyAffordableUnits is numeric) {
       lar.income is equalTo("NA")
     }
-  }
 }

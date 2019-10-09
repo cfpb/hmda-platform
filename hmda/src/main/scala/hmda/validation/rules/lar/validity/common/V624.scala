@@ -10,8 +10,7 @@ import hmda.validation.rules.EditCheck
 object V624 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V624"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     lar.geography.zipCode is oneOf("NA", "Exempt") or
       (lar.geography.zipCode is validZipCode)
-  }
 }

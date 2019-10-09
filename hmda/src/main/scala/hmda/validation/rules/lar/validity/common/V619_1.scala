@@ -11,8 +11,7 @@ object V619_1 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V619"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     lar.action.actionTakenDate.toString is validDateFormat
-  }
 
 }

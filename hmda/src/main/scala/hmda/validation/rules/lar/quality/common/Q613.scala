@@ -10,15 +10,8 @@ import hmda.validation.rules.EditCheck
 object Q613 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q613"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    when(
-      lar.businessOrCommercialPurpose is equalTo(
-        PrimarilyBusinessOrCommercialPurpose)) {
-      lar.loan.loanPurpose is oneOf(HomePurchase,
-                                    HomeImprovement,
-                                    Refinancing,
-                                    CashOutRefinancing,
-                                    LoanPurposeNotApplicable)
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
+    when(lar.businessOrCommercialPurpose is equalTo(PrimarilyBusinessOrCommercialPurpose)) {
+      lar.loan.loanPurpose is oneOf(HomePurchase, HomeImprovement, Refinancing, CashOutRefinancing, LoanPurposeNotApplicable)
     }
-  }
 }

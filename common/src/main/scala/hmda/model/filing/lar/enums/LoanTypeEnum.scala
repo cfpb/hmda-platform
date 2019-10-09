@@ -5,7 +5,7 @@ sealed trait LoanTypeEnum extends LarEnum
 object LoanTypeEnum extends LarCodeEnum[LoanTypeEnum] {
   override val values = List(1, 2, 3, 4)
 
-  override def valueOf(code: Int): LoanTypeEnum = {
+  override def valueOf(code: Int): LoanTypeEnum =
     code match {
       case 1 => Conventional
       case 2 => FHAInsured
@@ -13,7 +13,6 @@ object LoanTypeEnum extends LarCodeEnum[LoanTypeEnum] {
       case 4 => RHSOrFSAGuaranteed
       case _ => InvalidLoanTypeCode
     }
-  }
 }
 
 case object Conventional extends LoanTypeEnum {
@@ -29,7 +28,7 @@ case object FHAInsured extends LoanTypeEnum {
 }
 
 case object VAGuaranteed extends LoanTypeEnum {
-  override val code: Int = 3
+  override val code: Int           = 3
   override val description: String = "Veterans Affairs guaranteed (VA)"
 }
 
@@ -40,6 +39,6 @@ case object RHSOrFSAGuaranteed extends LoanTypeEnum {
 }
 
 case object InvalidLoanTypeCode extends LoanTypeEnum {
-  override def code: Int = -1
+  override def code: Int           = -1
   override def description: String = "Invalid Code"
 }

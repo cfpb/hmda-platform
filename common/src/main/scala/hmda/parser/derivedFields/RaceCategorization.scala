@@ -1,36 +1,22 @@
 package hmda.parser.derivedFields
 
-import hmda.model.filing.lar.{LoanApplicationRegister, Race}
+import hmda.model.filing.lar.{ LoanApplicationRegister, Race }
 import hmda.model.filing.lar.enums._
 
 object RaceCategorization {
 
   def assignRaceCategorization(lar: LoanApplicationRegister): String = {
 
-    val race = lar.applicant.race
+    val race   = lar.applicant.race
     val coRace = lar.coApplicant.race
 
     val raceFields =
       Array(race.race1, race.race2, race.race3, race.race4, race.race5)
-    val coRaceFields = Array(coRace.race1,
-                             coRace.race2,
-                             coRace.race3,
-                             coRace.race4,
-                             coRace.race5)
+    val coRaceFields = Array(coRace.race1, coRace.race2, coRace.race3, coRace.race4, coRace.race5)
 
-    val asianEnums = Array(Asian,
-                           AsianIndian,
-                           Chinese,
-                           Filipino,
-                           Japanese,
-                           Korean,
-                           Vietnamese,
-                           OtherAsian)
-    val hawaiianIslanderEnums = Array(NativeHawaiianOrOtherPacificIslander,
-                                      NativeHawaiian,
-                                      GuamanianOrChamorro,
-                                      Samoan,
-                                      OtherPacificIslander)
+    val asianEnums = Array(Asian, AsianIndian, Chinese, Filipino, Japanese, Korean, Vietnamese, OtherAsian)
+    val hawaiianIslanderEnums =
+      Array(NativeHawaiianOrOtherPacificIslander, NativeHawaiian, GuamanianOrChamorro, Samoan, OtherPacificIslander)
 
     if (race.race1 == EmptyRaceValue) {
       "Free Form Text Only"
@@ -45,14 +31,10 @@ object RaceCategorization {
     }
 
     // Joint
-    else if (AnyApplicantAMinority(raceFields,
-                                   asianEnums,
-                                   hawaiianIslanderEnums) &&
+    else if (AnyApplicantAMinority(raceFields, asianEnums, hawaiianIslanderEnums) &&
              AnyApplicantWhite(coRace)) {
       "Joint"
-    } else if (AnyApplicantAMinority(coRaceFields,
-                                     asianEnums,
-                                     hawaiianIslanderEnums) &&
+    } else if (AnyApplicantAMinority(coRaceFields, asianEnums, hawaiianIslanderEnums) &&
                race.race1 == White &&
                isRaceTwoToFiveEmpty(race)) {
       "Joint"
@@ -105,10 +87,7 @@ object RaceCategorization {
              isRaceTwoToFiveEmpty(race) &&
              !AnyApplicantWhite(race)) {
       NativeHawaiianOrOtherPacificIslander.description
-    } else if (OnlyNativeHawaiianOrOtherPacificIslander(
-                 raceFields,
-                 asianEnums,
-                 hawaiianIslanderEnums) &&
+    } else if (OnlyNativeHawaiianOrOtherPacificIslander(raceFields, asianEnums, hawaiianIslanderEnums) &&
                !AnyApplicantWhite(coRace)) {
       NativeHawaiianOrOtherPacificIslander.description
     } else if ((hawaiianIslanderEnums.contains(race.race1) && race.race2 == White) ||
@@ -135,77 +114,57 @@ object RaceCategorization {
       "Joint"
   }
 
-  private def AnyApplicantAMinority(
-      raceFields: Array[RaceEnum],
-      asianEnums: Array[RaceEnum with Product with Serializable],
-      hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable])
-    : Boolean = {
+  private def AnyApplicantAMinority(raceFields: Array[RaceEnum],
+                                    asianEnums: Array[RaceEnum with Product with Serializable],
+                                    hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable]): Boolean =
     raceFields.exists(asianEnums.contains) ||
-    raceFields.exists(hawaiianIslanderEnums.contains) ||
-    raceFields.contains(BlackOrAfricanAmerican) |
+      raceFields.exists(hawaiianIslanderEnums.contains) ||
+      raceFields.contains(BlackOrAfricanAmerican) |
       raceFields.contains(AmericanIndianOrAlaskaNative)
-  }
 
-  private def OnlyNativeHawaiianOrOtherPacificIslander(
-      raceFields: Array[RaceEnum],
-      asianEnums: Array[RaceEnum with Product with Serializable],
-      hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable])
-    : Boolean = {
+  private def OnlyNativeHawaiianOrOtherPacificIslander(raceFields: Array[RaceEnum],
+                                                       asianEnums: Array[RaceEnum with Product with Serializable],
+                                                       hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable]): Boolean =
     !raceFields.exists(asianEnums.contains) &&
-    raceFields.exists(hawaiianIslanderEnums.contains) &&
-    !raceFields.contains(BlackOrAfricanAmerican) &&
-    !raceFields.contains(AmericanIndianOrAlaskaNative)
-  }
+      raceFields.exists(hawaiianIslanderEnums.contains) &&
+      !raceFields.contains(BlackOrAfricanAmerican) &&
+      !raceFields.contains(AmericanIndianOrAlaskaNative)
 
-  private def OnlyAsian(
-      raceFields: Array[RaceEnum],
-      asianEnums: Array[RaceEnum with Product with Serializable],
-      hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable])
-    : Boolean = {
+  private def OnlyAsian(raceFields: Array[RaceEnum],
+                        asianEnums: Array[RaceEnum with Product with Serializable],
+                        hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable]): Boolean =
     raceFields.exists(asianEnums.contains) &&
-    !raceFields.exists(hawaiianIslanderEnums.contains) &&
-    !raceFields.contains(BlackOrAfricanAmerican) &&
-    !raceFields.contains(AmericanIndianOrAlaskaNative)
-  }
+      !raceFields.exists(hawaiianIslanderEnums.contains) &&
+      !raceFields.contains(BlackOrAfricanAmerican) &&
+      !raceFields.contains(AmericanIndianOrAlaskaNative)
 
-  private def OnlyBlackOrAfricanAmerican(
-      raceFields: Array[RaceEnum],
-      asianEnums: Array[RaceEnum with Product with Serializable],
-      hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable])
-    : Boolean = {
+  private def OnlyBlackOrAfricanAmerican(raceFields: Array[RaceEnum],
+                                         asianEnums: Array[RaceEnum with Product with Serializable],
+                                         hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable]): Boolean =
     !raceFields.exists(asianEnums.contains) &&
-    !raceFields.exists(hawaiianIslanderEnums.contains) &&
-    raceFields.contains(BlackOrAfricanAmerican) &&
-    !raceFields.contains(AmericanIndianOrAlaskaNative)
-  }
+      !raceFields.exists(hawaiianIslanderEnums.contains) &&
+      raceFields.contains(BlackOrAfricanAmerican) &&
+      !raceFields.contains(AmericanIndianOrAlaskaNative)
 
-  private def OnlyAmericanIndianOrAlaskaNative(
-      raceFields: Array[RaceEnum],
-      asianEnums: Array[RaceEnum with Product with Serializable],
-      hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable])
-    : Boolean = {
+  private def OnlyAmericanIndianOrAlaskaNative(raceFields: Array[RaceEnum],
+                                               asianEnums: Array[RaceEnum with Product with Serializable],
+                                               hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable]): Boolean =
     !raceFields.exists(asianEnums.contains) &&
-    !raceFields.exists(hawaiianIslanderEnums.contains) &&
-    !raceFields.contains(BlackOrAfricanAmerican) &&
-    raceFields.contains(AmericanIndianOrAlaskaNative)
-  }
+      !raceFields.exists(hawaiianIslanderEnums.contains) &&
+      !raceFields.contains(BlackOrAfricanAmerican) &&
+      raceFields.contains(AmericanIndianOrAlaskaNative)
 
-  private def OnlyWhite(
-      raceFields: Array[RaceEnum],
-      asianEnums: Array[RaceEnum with Product with Serializable],
-      hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable])
-    : Boolean = {
+  private def OnlyWhite(raceFields: Array[RaceEnum],
+                        asianEnums: Array[RaceEnum with Product with Serializable],
+                        hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable]): Boolean =
     !raceFields.exists(asianEnums.contains) &&
-    !raceFields.exists(hawaiianIslanderEnums.contains) &&
-    !raceFields.contains(BlackOrAfricanAmerican) &&
-    !raceFields.contains(AmericanIndianOrAlaskaNative)
-  }
+      !raceFields.exists(hawaiianIslanderEnums.contains) &&
+      !raceFields.contains(BlackOrAfricanAmerican) &&
+      !raceFields.contains(AmericanIndianOrAlaskaNative)
 
-  private def moreThanOneMinority(
-      raceFields: Array[RaceEnum],
-      asianEnums: Array[RaceEnum with Product with Serializable],
-      hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable])
-    : Boolean = {
+  private def moreThanOneMinority(raceFields: Array[RaceEnum],
+                                  asianEnums: Array[RaceEnum with Product with Serializable],
+                                  hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable]): Boolean = {
     var counter = 0
 
     if (raceFields.exists(hawaiianIslanderEnums.contains)) {
@@ -231,23 +190,20 @@ object RaceCategorization {
     false
   }
 
-  private def AnyApplicantWhite(race: Race): Boolean = {
+  private def AnyApplicantWhite(race: Race): Boolean =
     (race.race1 == White ||
-    race.race2 == White ||
-    race.race3 == White ||
-    race.race5 == White)
-  }
+      race.race2 == White ||
+      race.race3 == White ||
+      race.race5 == White)
 
-  private def isRaceThreeToFiveEmpty(race: Race): Boolean = {
+  private def isRaceThreeToFiveEmpty(race: Race): Boolean =
     race.race3 == EmptyRaceValue &&
-    race.race4 == EmptyRaceValue &&
-    race.race5 == EmptyRaceValue
-  }
+      race.race4 == EmptyRaceValue &&
+      race.race5 == EmptyRaceValue
 
-  private def isRaceTwoToFiveEmpty(race: Race): Boolean = {
+  private def isRaceTwoToFiveEmpty(race: Race): Boolean =
     race.race2 == EmptyRaceValue &&
-    race.race3 == EmptyRaceValue &&
-    race.race4 == EmptyRaceValue &&
-    race.race5 == EmptyRaceValue
-  }
+      race.race3 == EmptyRaceValue &&
+      race.race4 == EmptyRaceValue &&
+      race.race5 == EmptyRaceValue
 }

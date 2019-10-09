@@ -5,14 +5,14 @@ import io.circe._
 import io.circe.syntax._
 
 case class Applicant(
-                      ethnicity: Ethnicity = Ethnicity(),
-                      race: Race = Race(),
-                      sex: Sex = Sex(),
-                      age: Int = 0,
-                      creditScore: Int = 0,
-                      creditScoreType: CreditScoreEnum = InvalidCreditScoreCode,
-                      otherCreditScoreModel: String = ""
-                    )
+  ethnicity: Ethnicity = Ethnicity(),
+  race: Race = Race(),
+  sex: Sex = Sex(),
+  age: Int = 0,
+  creditScore: Int = 0,
+  creditScoreType: CreditScoreEnum = InvalidCreditScoreCode,
+  otherCreditScoreModel: String = ""
+)
 
 object Applicant {
   implicit val applicantEncoder: Encoder[Applicant] = (a: Applicant) =>
@@ -28,21 +28,20 @@ object Applicant {
 
   implicit val applicantDecoder: Decoder[Applicant] = (c: HCursor) =>
     for {
-      ethnicity <- c.downField("ethnicity").as[Ethnicity]
-      race <- c.downField("race").as[Race]
-      sex <- c.downField("sex").as[Sex]
-      age <- c.downField("age").as[Int]
-      creditScore <- c.downField("creditScore").as[Int]
-      creditScoreType <- c.downField("creditScoreType").as[Int]
+      ethnicity             <- c.downField("ethnicity").as[Ethnicity]
+      race                  <- c.downField("race").as[Race]
+      sex                   <- c.downField("sex").as[Sex]
+      age                   <- c.downField("age").as[Int]
+      creditScore           <- c.downField("creditScore").as[Int]
+      creditScoreType       <- c.downField("creditScoreType").as[Int]
       otherCreditScoreModel <- c.downField("otherCreditScoreModel").as[String]
-    } yield
-      Applicant(
-        ethnicity,
-        race,
-        sex,
-        age,
-        creditScore,
-        CreditScoreEnum.valueOf(creditScoreType),
-        otherCreditScoreModel
-      )
+    } yield Applicant(
+      ethnicity,
+      race,
+      sex,
+      age,
+      creditScore,
+      CreditScoreEnum.valueOf(creditScoreType),
+      otherCreditScoreModel
+    )
 }

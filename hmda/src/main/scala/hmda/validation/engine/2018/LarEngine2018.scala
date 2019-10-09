@@ -4,11 +4,10 @@ import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.lar.quality._2018._
 import hmda.validation.rules.lar.quality.common._
-import hmda.validation.rules.lar.syntactical.{S300, S301}
-import hmda.validation.rules.lar.validity.{eighteen, _}
+import hmda.validation.rules.lar.syntactical.{ S300, S301 }
+import hmda.validation.rules.lar.validity.{ eighteen, _ }
 
-private[engine] object LarEngine2018
-    extends ValidationEngine[LoanApplicationRegister] {
+private[engine] object LarEngine2018 extends ValidationEngine[LoanApplicationRegister] {
 
   override def syntacticalChecks(ctx: ValidationContext) = Vector(
     S300,

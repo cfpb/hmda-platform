@@ -21,10 +21,8 @@ object V670_3 extends EditCheck[LoanApplicationRegister] {
     PreapprovalRequestApprovedButNotAccepted
   )
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.action.actionTakenType is containedIn(actionList)) {
-      lar.denial.denialReason1 is oneOf(ExemptDenialReason,
-                                        DenialReasonNotApplicable)
+      lar.denial.denialReason1 is oneOf(ExemptDenialReason, DenialReasonNotApplicable)
     }
-  }
 }

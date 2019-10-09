@@ -12,8 +12,7 @@ object V615_1 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V615"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     lar.loan.constructionMethod is oneOf(SiteBuilt, ManufacturedHome)
-  }
 
 }

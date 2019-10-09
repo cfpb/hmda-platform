@@ -12,14 +12,14 @@ object V652_2 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V652"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(
       (lar.coApplicant.ethnicity.ethnicity1 is equalTo(EthnicityNotApplicable))
         and (lar.coApplicant.race.race1 is equalTo(RaceNotApplicable))
         and (lar.coApplicant.sex.sexEnum is equalTo(SexNotApplicable))
-        and (lar.action.actionTakenType not equalTo(PurchasedLoan))) {
+        and (lar.action.actionTakenType not equalTo(PurchasedLoan))
+    ) {
 
       lar.coApplicant.age is equalTo(8888)
     }
-  }
 }

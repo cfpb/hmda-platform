@@ -4,9 +4,9 @@ import java.io.File
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{ContentTypes, HttpMethods, HttpRequest}
+import akka.http.scaladsl.model.{ ContentTypes, HttpMethods, HttpRequest }
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{FileIO, Sink}
+import akka.stream.scaladsl.{ FileIO, Sink }
 import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.FlowUtils
@@ -20,12 +20,12 @@ object InstitutionLoader extends App with FlowUtils {
 
   val config = ConfigFactory.load()
 
-  override implicit val system: ActorSystem = ActorSystem()
+  override implicit val system: ActorSystem             = ActorSystem()
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
-  override implicit val ec: ExecutionContext = system.dispatcher
+  override implicit val ec: ExecutionContext            = system.dispatcher
 
   override def parallelism = config.getInt("hmda.loader.parallelism")
-  val url = config.getString("hmda.loader.institution.url")
+  val url                  = config.getString("hmda.loader.institution.url")
 
   println("URL: " + url)
 

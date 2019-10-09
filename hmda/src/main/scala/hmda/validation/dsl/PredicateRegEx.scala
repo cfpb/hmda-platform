@@ -5,8 +5,7 @@ import scala.util.matching.Regex
 object PredicateRegEx {
 
   def validEmail: Predicate[String] =
-    stringMatching(
-      "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$".r)
+    stringMatching("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$".r)
 
   def validPhoneNumber: Predicate[String] =
     stringMatching("^\\d{3}-\\d{3}-\\d{4}$".r)
@@ -33,11 +32,10 @@ object PredicateRegEx {
     result.mkString("^", "", "$").r
   }
 
-  private def stringMatching(regEx: Regex): Predicate[String] = {
+  private def stringMatching(regEx: Regex): Predicate[String] =
     regEx.findFirstIn(_: String) match {
       case Some(_) => true
       case None    => false
     }
-  }
 
 }

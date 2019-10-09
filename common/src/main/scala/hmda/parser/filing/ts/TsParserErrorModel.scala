@@ -1,6 +1,6 @@
 package hmda.parser.filing.ts
 
-import hmda.parser.ParserErrorModel.{ParserValidationError, notNumeric}
+import hmda.parser.ParserErrorModel.{ notNumeric, ParserValidationError }
 
 object TsParserErrorModel {
 

@@ -17,13 +17,12 @@ object V715 extends EditCheck[LoanApplicationRegister] {
       naf.balloonPayment is equalTo(BalloonPaymentExempt) or
         (naf.interestOnlyPayments is equalTo(InterestOnlyPaymentExempt)) or
         (naf.negativeAmortization is equalTo(NegativeAmortizationExempt)) or
-        (naf.otherNonAmortizingFeatures is equalTo(
-          OtherNonAmortizingFeaturesExempt))) {
+        (naf.otherNonAmortizingFeatures is equalTo(OtherNonAmortizingFeaturesExempt))
+    ) {
       naf.balloonPayment is equalTo(BalloonPaymentExempt) and
         (naf.interestOnlyPayments is equalTo(InterestOnlyPaymentExempt)) and
         (naf.negativeAmortization is equalTo(NegativeAmortizationExempt)) and
-        (naf.otherNonAmortizingFeatures is equalTo(
-          OtherNonAmortizingFeaturesExempt))
+        (naf.otherNonAmortizingFeatures is equalTo(OtherNonAmortizingFeaturesExempt))
     }
   }
 }

@@ -9,15 +9,15 @@ import hmda.validation.rules.EditCheck
 object V709 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V709"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(
       lar.geography.street is equalTo("Exempt") or
         (lar.geography.city is equalTo("Exempt")) or
-        (lar.geography.zipCode is equalTo("Exempt"))) {
+        (lar.geography.zipCode is equalTo("Exempt"))
+    ) {
 
       lar.geography.street is equalTo("Exempt") and
         (lar.geography.city is equalTo("Exempt")) and
         (lar.geography.zipCode is equalTo("Exempt"))
     }
-  }
 }

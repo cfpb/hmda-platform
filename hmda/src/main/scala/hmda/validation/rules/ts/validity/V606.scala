@@ -9,7 +9,6 @@ import hmda.validation.rules.EditCheck
 object V606 extends EditCheck[TransmittalSheet] {
   override def name: String = "V606"
 
-  override def apply(ts: TransmittalSheet): ValidationResult = {
+  override def apply(ts: TransmittalSheet): ValidationResult =
     ts.totalLines is greaterThan(0)
-  }
 }

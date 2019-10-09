@@ -32,7 +32,7 @@ object ErrorResponse {
 }
 
 case class ErrorResponse(
-    httpStatus: Int,
-    message: String,
-    path: Path
+  httpStatus: Int,
+  message: String,
+  path: Path
 )

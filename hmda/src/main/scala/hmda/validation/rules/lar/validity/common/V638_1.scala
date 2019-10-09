@@ -34,12 +34,12 @@ object V638_1 extends EditCheck[LoanApplicationRegister] {
     RaceNoCoApplicant
   )
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(
       (lar.coApplicant.race.otherAsianRace is empty) and
         (lar.coApplicant.race.otherPacificIslanderRace is empty) and
-        (lar.coApplicant.race.otherNativeRace is empty)) {
+        (lar.coApplicant.race.otherNativeRace is empty)
+    ) {
       lar.coApplicant.race.race1 is containedIn(validRaceValues)
     }
-  }
 }

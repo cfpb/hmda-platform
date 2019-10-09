@@ -1,11 +1,7 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.lar.enums.{
-  PreapprovalRequestApprovedButNotAccepted,
-  PreapprovalRequestDenied,
-  PreapprovalRequested
-}
+import hmda.model.filing.lar.enums.{ PreapprovalRequestApprovedButNotAccepted, PreapprovalRequestDenied, PreapprovalRequested }
 import hmda.validation.dsl.ValidationResult
 import hmda.validation.rules.EditCheck
 import hmda.validation.dsl.PredicateCommon._
@@ -20,9 +16,8 @@ object V613_2 extends EditCheck[LoanApplicationRegister] {
   val actionsTaken =
     List(PreapprovalRequestDenied, PreapprovalRequestApprovedButNotAccepted)
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.action.actionTakenType is containedIn(actionsTaken)) {
       lar.action.preapproval is equalTo(PreapprovalRequested)
     }
-  }
 }

@@ -1,10 +1,7 @@
 package hmda.query.repository
 
 import hmda.model.filing.submission.SubmissionId
-import hmda.model.modifiedlar.{
-  EnrichedModifiedLoanApplicationRegister,
-  ModifiedLoanApplicationRegister
-}
+import hmda.model.modifiedlar.{ EnrichedModifiedLoanApplicationRegister, ModifiedLoanApplicationRegister }
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
@@ -16,13 +13,12 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
 
   private val db = databaseConfig.db
 
-  def fetchYearTable(year: Int): String = {
+  def fetchYearTable(year: Int): String =
     year match {
       case 2018 => "modifiedlar2018"
       case 2019 => "modifiedlar2019"
       case _    => "modifiedlar2019"
     }
-  }
 
   /**
     * Deletes entries in the Modified LAR table by their LEI
@@ -41,11 +37,10 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
     * @param submissionId
     * @return the number of rows removed
     */
-  def deleteByLei(submissionId: SubmissionId): Future[Int] = {
-
+  def deleteByLei(submissionId: SubmissionId): Future[Int] =
     db.run(
-      sqlu"DELETE FROM #${fetchYearTable(submissionId.period.toInt)} WHERE UPPER(lei) = ${submissionId.lei.toUpperCase} and filing_year = ${submissionId.period.toInt}")
-  }
+      sqlu"DELETE FROM #${fetchYearTable(submissionId.period.toInt)} WHERE UPPER(lei) = ${submissionId.lei.toUpperCase} and filing_year = ${submissionId.period.toInt}"
+    )
 
   /**
     * Inserts Modified Loan Application Register data that has been enhanced with Census information via the tract map
@@ -53,8 +48,7 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
     * @param submissionId
     * @return
     */
-  def insert(input: EnrichedModifiedLoanApplicationRegister,
-             submissionId: SubmissionId): Future[Int] =
+  def insert(input: EnrichedModifiedLoanApplicationRegister, submissionId: SubmissionId): Future[Int] =
     db.run(sqlu"""INSERT INTO #${fetchYearTable(submissionId.period.toInt)} (
             id,
             lei,
@@ -262,8 +256,7 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
             ${submissionId.period.toInt},
             ${input.mlar.conformingLoanLimit},
             ${input.census.medianAge},
-            ${medianAgeCalculated(submissionId.period.toInt,
-                                  input.census.medianAge)},
+            ${medianAgeCalculated(submissionId.period.toInt, input.census.medianAge)},
             ${input.census.tracttoMsaIncomePercent},
             ${input.mlar.ethnicityCategorization},
             ${input.mlar.raceCategorization},
@@ -277,16 +270,15 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
   private def safeConvertToInt(s: String): Option[Int] =
     Try(s.toInt).toOption
 
-  private def incomeCategorization(larIncome: String,
-                                   censusMedianIncome: Int): String = {
+  private def incomeCategorization(larIncome: String, censusMedianIncome: Int): String =
     if (larIncome == "NA")
       "NA"
     else {
       //income in the lar is rounded to 1000
-      val income = larIncome.toDouble * 1000
-      val fifty = censusMedianIncome * .5
-      val eighty = censusMedianIncome * .8
-      val ninety = censusMedianIncome * .9
+      val income    = larIncome.toDouble * 1000
+      val fifty     = censusMedianIncome * .5
+      val eighty    = censusMedianIncome * .8
+      val ninety    = censusMedianIncome * .9
       val oneTwenty = censusMedianIncome * 1.2
 
       if (income < fifty) {
@@ -301,7 +293,6 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
         ">120%"
       }
     }
-  }
 
   private def medianAgeCalculated(filingYear: Int, medianAge: Int): String = {
     val medianYear = filingYear - medianAge

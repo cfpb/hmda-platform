@@ -1,16 +1,13 @@
 package hmda.persistence.submission.repositories
 
 import com.datastax.driver.core._
-import com.outworkers.phantom.connectors.{CassandraConnection, ContactPoints}
+import com.outworkers.phantom.connectors.{ CassandraConnection, ContactPoints }
 import com.outworkers.phantom.database.Database
 import com.typesafe.config.Config
 import scala.collection.JavaConverters._
 
-class SyntacticalDb private (override val connector: CassandraConnection)
-    extends Database[SyntacticalDb](connector) {
-  object distinctCountRepository
-      extends SyntacticalRepository
-      with connector.Connector
+class SyntacticalDb private (override val connector: CassandraConnection) extends Database[SyntacticalDb](connector) {
+  object distinctCountRepository extends SyntacticalRepository with connector.Connector
 
 }
 
@@ -23,12 +20,10 @@ object SyntacticalDb {
     val keyspace = config.getString("cassandra-journal.keyspace")
 
     lazy val connector: CassandraConnection =
-      ContactPoints(contactPoints)
-        .withClusterBuilder { builder =>
-          builder.withAuthProvider(new PlainTextAuthProvider(user, pass))
-          builder
-        }
-        .keySpace(name = keyspace, autoinit = true)
+      ContactPoints(contactPoints).withClusterBuilder { builder =>
+        builder.withAuthProvider(new PlainTextAuthProvider(user, pass))
+        builder
+      }.keySpace(name = keyspace, autoinit = true)
 
     new SyntacticalDb(connector)
   }
