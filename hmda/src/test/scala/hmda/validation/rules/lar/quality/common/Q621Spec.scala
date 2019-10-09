@@ -9,23 +9,15 @@ import hmda.validation.rules.lar.quality.common.Q621
 class Q621Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = Q621
 
-  property("NMLSR Identifier should not be longer than 12 characters") {
+  property("NMLSR Identifier should alphanumeric and not be longer than 12 characters") {
     forAll(larGen) { lar =>
-      whenever(lar.larIdentifier.NMLSRIdentifier.length <= 12) {
-        lar.mustPass
-      }
+     lar.mustPass
 
-      lar
-        .copy(
-          larIdentifier =
-            lar.larIdentifier.copy(NMLSRIdentifier = "1234567890abc"))
-        .mustFail
-
-      lar
-        .copy(
-          larIdentifier =
-            lar.larIdentifier.copy(NMLSRIdentifier = "1234567890!a"))
-        .mustFail
+      val appLAR= lar.copy(larIdentifier = lar.larIdentifier.copy(NMLSRIdentifier = "1234567890a!"))
+      appLAR.mustFail
     }
+
   }
+
+
 }

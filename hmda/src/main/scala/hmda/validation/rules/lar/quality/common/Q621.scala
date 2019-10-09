@@ -13,5 +13,9 @@ object Q621 extends EditCheck[LoanApplicationRegister] {
     when(lar.larIdentifier.NMLSRIdentifier is alphaNumeric) {
       lar.larIdentifier.NMLSRIdentifier.length is lessThanOrEqual(12)
     }
+
+    when( lar.larIdentifier.NMLSRIdentifier.length is lessThanOrEqual(12)) {
+      lar.larIdentifier.NMLSRIdentifier is alphaNumeric
+    }
   }
 }

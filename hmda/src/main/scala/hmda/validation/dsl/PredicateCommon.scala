@@ -48,7 +48,7 @@ object PredicateCommon {
   }
 
   def alphaNumeric[A]: Predicate[A] = (_: A) match {
-    case s: String => Try(s.matches("^[a-zA-Z0-9]*$")).isSuccess
+    case s: String => s.matches("^[a-zA-Z0-9]+$")
     case _ =>
       throw new NotImplementedError(
         "'alphanumeric' doesn't handle non-number/string values yet")
