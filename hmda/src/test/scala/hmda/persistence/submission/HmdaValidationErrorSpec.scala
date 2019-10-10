@@ -7,7 +7,7 @@ import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.cluster.typed.{ Cluster, Join }
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents._
-import hmda.model.filing.submission.{ SubmissionId, Verified }
+import hmda.model.filing.submission.{ Macro, SubmissionId, Verified }
 import hmda.model.processing.state.{ EditSummary, HmdaValidationErrorState }
 import hmda.model.validation._
 import hmda.persistence.AkkaCassandraPersistenceSpec
@@ -111,7 +111,10 @@ class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
       signedProbe.expectMessage(SubmissionNotReadyToBeSigned(submissionId))
 
       hmdaValidationError ! VerifyQuality(submissionId, true, eventsProbe.ref)
-      eventsProbe.expectMessage(QualityVerified(submissionId, true, Verified))
+      eventsProbe.expectMessage(QualityVerified(submissionId, true, Macro))
+
+      hmdaValidationError ! VerifyMacro(submissionId, true, eventsProbe.ref)
+      eventsProbe.expectMessage(MacroVerified(submissionId, true, Verified))
 
       hmdaValidationError ! SignSubmission(submissionId, signedProbe.ref, email)
       signedProbe.expectMessageType[SubmissionSigned]
