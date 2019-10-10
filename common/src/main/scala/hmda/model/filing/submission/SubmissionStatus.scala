@@ -1,6 +1,7 @@
 package hmda.model.filing.submission
 
 import hmda.model.filing.submission.SubmissionStatusMessages._
+import io.circe._
 
 object SubmissionStatus {
 
@@ -23,6 +24,16 @@ object SubmissionStatus {
     case -1 => Failed
   }
 
+  implicit val submissionStatusEncoder: Encoder[SubmissionStatus] =
+    (a: SubmissionStatus) =>
+      Json.obj(
+        ("code", Json.fromInt(a.code)),
+        ("message", Json.fromString(a.message)),
+        ("description", Json.fromString(a.description))
+      )
+
+  implicit val submissionStatusDecoder: Decoder[SubmissionStatus] =
+    (c: HCursor) => c.downField("code").as[Int].map(SubmissionStatus.valueOf)
 }
 
 sealed trait SubmissionStatus {
@@ -71,6 +82,7 @@ case object Validating extends SubmissionStatus {
   override def code: Int           = 7
   override def message: String     = validatingMsg
   override def description: String = validatingDescription
+
 }
 
 case object SyntacticalOrValidity extends SubmissionStatus {

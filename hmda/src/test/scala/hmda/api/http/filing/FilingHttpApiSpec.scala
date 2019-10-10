@@ -13,12 +13,8 @@ import akka.cluster.typed.{Cluster, Join}
 import akka.http.scaladsl.model.StatusCodes
 import hmda.persistence.filing.FilingPersistence
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.api.http.codec.filing.FilingStatusCodec._
 import hmda.messages.institution.InstitutionCommands.CreateInstitution
-import hmda.messages.institution.InstitutionEvents.{
-  InstitutionCreated,
-  InstitutionEvent
-}
+import hmda.messages.institution.InstitutionEvents._
 import hmda.model.institution.Institution
 import hmda.persistence.institution.InstitutionPersistence
 import io.circe.generic.auto._
@@ -33,7 +29,7 @@ import scala.concurrent.duration._
 import scala.util.Random
 
 class FilingHttpApiSpec
-    extends AkkaCassandraPersistenceSpec
+  extends AkkaCassandraPersistenceSpec
     with MustMatchers
     with FilingHttpApi
     with ScalatestRouteTest {
@@ -77,7 +73,7 @@ class FilingHttpApiSpec
         InstitutionPersistence.typeKey,
         s"${InstitutionPersistence.name}-${sampleInstitution.LEI}")
     institutionPersistence ! CreateInstitution(sampleInstitution,
-                                               institutionProbe.ref)
+      institutionProbe.ref)
     institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))
   }
 

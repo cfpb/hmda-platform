@@ -14,7 +14,6 @@ import hmda.api.http.directives.HmdaTimeDirectives
 import hmda.api.http.model.ErrorResponse
 import hmda.institution.query._
 import hmda.query.DbConfiguration._
-import hmda.api.http.codec.institution.InstitutionCodec._
 import hmda.institution.api.http.model.InstitutionsResponse
 import hmda.model.institution.Institution
 import hmda.utils.YearUtils._

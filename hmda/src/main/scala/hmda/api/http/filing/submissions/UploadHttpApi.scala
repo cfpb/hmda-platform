@@ -18,9 +18,6 @@ import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{ cors, corsRejectionHan
 import com.typesafe.config.Config
 import hmda.api.http.directives.HmdaTimeDirectives
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import io.circe.generic.auto._
-import hmda.api.http.codec.ErrorResponseCodec._
-import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import hmda.util.http.FilingResponseUtils._
 import hmda.api.http.model.ErrorResponse
 import hmda.auth.OAuth2Authorization

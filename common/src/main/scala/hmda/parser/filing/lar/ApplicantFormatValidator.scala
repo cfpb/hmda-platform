@@ -40,21 +40,23 @@ sealed trait ApplicantFormatValidator extends LarParser {
       else InvalidApplicantCreditScoreModel
 
     (
-      validateEthnicity(ethnicity1,
-                        ethnicity2,
-                        ethnicity3,
-                        ethnicity4,
-                        ethnicity5,
-                        otherHispanicOrLatino,
-                        ethnicityObserved,
-                        coApp = coApp),
+      validateEthnicity(
+        ethnicity1,
+        ethnicity2,
+        ethnicity3,
+        ethnicity4,
+        ethnicity5,
+        otherHispanicOrLatino,
+        ethnicityObserved,
+        coApp = coApp
+      ),
       validateRace(race1, race2, race3, race4, race5, otherNative, otherAsian, otherPacific, raceObserved, coApp = coApp),
       validateSex(sex, sexObserved, coApp = coApp),
       validateIntField(age, InvalidAge),
       validateIntField(creditScore, credEnum),
       validateLarCode(CreditScoreEnum, creditScoreModel, credModelEnum),
       validateStr(otherCreditScore)
-    ).mapN(Applicant)
+    ).mapN(Applicant.apply)
   }
 
   private def validateEthnicity(
@@ -80,19 +82,21 @@ sealed trait ApplicantFormatValidator extends LarParser {
       validateLarCodeOrEmptyField(EthnicityEnum, ethnicity5, ethEnum),
       validateStr(otherHispanicOrLatino),
       validateLarCode(EthnicityObservedEnum, ethnicityObserved, ethObsEnum)
-    ).mapN(Ethnicity)
+    ).mapN(Ethnicity.apply)
   }
 
-  private def validateRace(race1: String,
-                           race2: String,
-                           race3: String,
-                           race4: String,
-                           race5: String,
-                           otherNative: String,
-                           otherAsian: String,
-                           otherPacific: String,
-                           raceObserved: String,
-                           coApp: Boolean): LarParserValidationResult[Race] = {
+  private def validateRace(
+    race1: String,
+    race2: String,
+    race3: String,
+    race4: String,
+    race5: String,
+    otherNative: String,
+    otherAsian: String,
+    otherPacific: String,
+    raceObserved: String,
+    coApp: Boolean
+  ): LarParserValidationResult[Race] = {
 
     val raceEnum = if (coApp) InvalidCoApplicantRace else InvalidApplicantRace
     val raceObsEnum =
@@ -108,7 +112,7 @@ sealed trait ApplicantFormatValidator extends LarParser {
       validateStr(otherAsian),
       validateStr(otherPacific),
       validateLarCode(RaceObservedEnum, raceObserved, raceObsEnum)
-    ).mapN(Race)
+    ).mapN(Race.apply)
   }
 
   private def validateSex(
@@ -122,7 +126,7 @@ sealed trait ApplicantFormatValidator extends LarParser {
     (
       validateLarCode(SexEnum, sex, sexEnum),
       validateLarCode(SexObservedEnum, sexObserved, sexObsEnum)
-    ).mapN(Sex)
+    ).mapN(Sex.apply)
   }
 
 }

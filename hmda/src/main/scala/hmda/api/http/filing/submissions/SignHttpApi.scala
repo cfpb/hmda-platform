@@ -12,7 +12,6 @@ import akka.http.scaladsl.model.headers.RawHeader
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import io.circe.generic.auto._
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{ cors, corsRejectionHandler }
 import hmda.api.http.directives.HmdaTimeDirectives

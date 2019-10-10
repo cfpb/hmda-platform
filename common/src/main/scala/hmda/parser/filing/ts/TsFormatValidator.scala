@@ -89,7 +89,7 @@ sealed trait TsFormatValidator {
       validateTotalLines(totalLines),
       validateStr(taxId),
       validateStr(lei)
-    ).mapN(TransmittalSheet)
+    ).mapN(TransmittalSheet.apply)
 
   }
 

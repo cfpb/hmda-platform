@@ -15,7 +15,6 @@ import hmda.uli.api.model.ULIValidationErrorMessages._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import akka.http.scaladsl.unmarshalling.Unmarshaller._
-import hmda.api.http.codec.ErrorResponseCodec._
 
 import scala.concurrent.duration._
 

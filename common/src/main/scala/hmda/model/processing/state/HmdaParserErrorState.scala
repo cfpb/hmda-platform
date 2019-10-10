@@ -2,9 +2,10 @@ package hmda.model.processing.state
 
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowParsedError
 
-case class HmdaParserErrorState(transmittalSheetErrors: Seq[HmdaRowParsedError] = Nil,
-                                larErrors: Seq[HmdaRowParsedError] = Nil,
-                                totalErrors: Int = 0) {
+case class HmdaParserErrorState(
+                                 transmittalSheetErrors: List[HmdaRowParsedError] = Nil,
+                                 larErrors: List[HmdaRowParsedError] = Nil,
+                                 totalErrors: Int = 0) {
   def update(parserError: HmdaRowParsedError): HmdaParserErrorState = {
     val newTsErrors =
       if (parserError.rowNumber == 1) this.transmittalSheetErrors :+ parserError

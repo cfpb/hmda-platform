@@ -5,13 +5,12 @@ import akka.http.scaladsl.model.{ StatusCode, StatusCodes, Uri }
 import akka.http.scaladsl.server.Directives.complete
 import akka.http.scaladsl.server.Route
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.api.http.codec.ErrorResponseCodec._
 import hmda.api.http.model.ErrorResponse
 import hmda.model.filing.submission.SubmissionId
 
 object FilingResponseUtils {
 
-  def failedResponse(status: StatusCode, uri: Uri, error: Throwable) = {
+  def failedResponse(status: StatusCode, uri: Uri, error: Throwable): Route = {
     val errorResponse =
       ErrorResponse(status.intValue(), error.getLocalizedMessage, uri.path)
     complete(ToResponseMarshallable(status -> errorResponse))
