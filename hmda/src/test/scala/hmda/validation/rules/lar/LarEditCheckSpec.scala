@@ -12,7 +12,7 @@ abstract class LarEditCheckSpec
     with MustMatchers {
 
   implicit val generatorDriverConfig =
-    PropertyCheckConfiguration(minSuccessful = 100, maxDiscardedFactor = 5.0)
+    PropertyCheckConfiguration(minSuccessful = 100, maxDiscardedFactor = 15.0)
 
   def check: EditCheck[LoanApplicationRegister]
 

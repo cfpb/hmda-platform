@@ -29,7 +29,6 @@ class V699Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = V699
 
   property("AUS Results must be valid if AUS is Other AUS") {
-    forAll(larGen) { lar =>
       val validAUSResults = List(
         ApproveEligible,
         ApproveIneligible,
@@ -48,17 +47,19 @@ class V699Spec extends LarEditCheckSpec {
         UnableToDetermineOrUnknown,
         OtherAutomatedUnderwritingResult
       )
-
-      whenever(
-        (lar.AUS.aus1 != OtherAUS) &&
-          (lar.AUS.aus2 != OtherAUS) &&
-          (lar.AUS.aus3 != OtherAUS) &&
-          (lar.AUS.aus4 != OtherAUS) &&
-          (lar.AUS.aus5 != OtherAUS)
-      ) {
-        lar.mustPass
+      forAll(larGen) { lar =>
+        lar.copy(AUS = lar.AUS.copy(aus1 = OtherAUS))
+        whenever(
+          (lar.AUS.aus1 != OtherAUS) &&
+            (lar.AUS.aus2 != OtherAUS) &&
+            (lar.AUS.aus3 != OtherAUS) &&
+            (lar.AUS.aus4 != OtherAUS) &&
+            (lar.AUS.aus5 != OtherAUS)
+        ) {
+          lar.mustPass
+        }
       }
-
+    forAll(larGen) { lar =>
       whenever(
         (validAUSResults contains lar.ausResult.ausResult1) &&
           (validAUSResults contains lar.ausResult.ausResult2) &&
@@ -67,8 +68,8 @@ class V699Spec extends LarEditCheckSpec {
           (validAUSResults contains lar.ausResult.ausResult5)
       ) {
         lar.mustPass
-      }
-
+      }}
+    forAll(larGen) { lar =>
       val relevantAUSLar1 = lar.copy(AUS = lar.AUS.copy(aus1 = OtherAUS))
       val relevantAUSLar2 = lar.copy(AUS = lar.AUS.copy(aus2 = OtherAUS))
       val relevantAUSLar3 = lar.copy(AUS = lar.AUS.copy(aus3 = OtherAUS))
