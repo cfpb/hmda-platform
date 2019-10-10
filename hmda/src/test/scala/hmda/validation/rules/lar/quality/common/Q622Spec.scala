@@ -5,7 +5,6 @@ import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums.ReverseMortgage
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
-import hmda.validation.rules.lar.quality.common.Q622
 
 class Q622Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = Q622

@@ -11,8 +11,6 @@ import akka.http.scaladsl.server.Route
 import hmda.api.http.model.public.LarValidateRequest
 import hmda.parser.filing.lar.LarCsvParser
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import io.circe.generic.auto._
-import hmda.api.http.codec.filing.LarCodec._
 import hmda.api.http.directives.HmdaTimeDirectives
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import hmda.model.filing.lar.LoanApplicationRegister
@@ -23,7 +21,9 @@ import hmda.validation.engine._
 
 import scala.concurrent.ExecutionContext
 
-trait LarValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpApi {
+trait LarValidationHttpApi
+  extends HmdaTimeDirectives
+    with FilingValidationHttpApi {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -69,8 +69,10 @@ trait LarValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpA
       }
     }
 
-  private def validate(lar: LoanApplicationRegister, checkType: String, year: Int): Route = {
-    val ctx              = ValidationContext(filingYear = Some(year))
+  private def validate(lar: LoanApplicationRegister,
+                       checkType: String,
+                       year: Int): Route = {
+    val ctx = ValidationContext(filingYear = Some(year))
     val validationEngine = selectLarEngine(year)
     import validationEngine._
     val validation: HmdaValidation[LoanApplicationRegister] = checkType match {
@@ -86,11 +88,11 @@ trait LarValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpA
     maybeErrors match {
       case Right(l) => complete(l)
       case Left(errors) =>
-        complete(ToResponseMarshallable(aggregateErrors(errors, year.toString)))
+        complete(aggregateErrors(errors, year.toString))
     }
   }
 
-  def larRoutes: Route =
+  def larRoutes: Route = {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
@@ -100,5 +102,6 @@ trait LarValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpA
         }
       }
     }
+  }
 
 }

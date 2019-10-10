@@ -11,7 +11,6 @@ import akka.http.scaladsl.model.headers.RawHeader
 import hmda.parser.filing.ts.TsCsvParser
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.public.TsValidateRequest
-import hmda.api.http.codec.filing.TsCodec._
 import hmda.api.http.directives.HmdaTimeDirectives
 import io.circe.generic.auto._
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
@@ -23,7 +22,9 @@ import hmda.validation.engine._
 
 import scala.concurrent.ExecutionContext
 
-trait TsValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpApi {
+trait TsValidationHttpApi
+  extends HmdaTimeDirectives
+    with FilingValidationHttpApi {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -69,8 +70,11 @@ trait TsValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpAp
       }
     }
 
-  private def validate(ts: TransmittalSheet, chekType: String, ctx: ValidationContext, year: Int): Route = {
-    val ctx              = ValidationContext(filingYear = Some(year))
+  private def validate(ts: TransmittalSheet,
+                       chekType: String,
+                       ctx: ValidationContext,
+                       year: Int): Route = {
+    val ctx = ValidationContext(filingYear = Some(year))
     val validationEngine = selectTsEngine(year)
     import validationEngine._
     val validation: HmdaValidation[TransmittalSheet] = chekType match {
@@ -90,7 +94,7 @@ trait TsValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpAp
     }
   }
 
-  def tsRoutes: Route =
+  def tsRoutes: Route = {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
@@ -100,5 +104,6 @@ trait TsValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpAp
         }
       }
     }
+  }
 
 }

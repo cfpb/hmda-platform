@@ -473,7 +473,7 @@ sealed trait LarFormatValidator extends LarParser {
       validateLarCode(BusinessOrCommercialBusinessEnum,
                       businessOrCommercial,
                       InvalidBusinessOrCommercial(businessOrCommercial))
-    ).mapN(LoanApplicationRegister)
+    ).mapN(LoanApplicationRegister.apply)
   }
 
   def validateLarIdentifier(
@@ -485,7 +485,7 @@ sealed trait LarFormatValidator extends LarParser {
       validateIntField(id, InvalidLarId(id)),
       validateStr(LEI),
       validateStr(NMLSRIdentifier)
-    ).mapN(LarIdentifier)
+    ).mapN(LarIdentifier.apply)
 
   def validateLoan(
     uli: String,
@@ -532,7 +532,7 @@ sealed trait LarFormatValidator extends LarParser {
       validateIntStrOrNAOrExemptField(
         introductoryRate,
         InvalidIntroductoryRatePeriod(introductoryRate))
-    ).mapN(Loan)
+    ).mapN(Loan.apply)
 
   def validateLarAction(preapproval: String, actionTaken: String, actionDate: String): LarParserValidationResult[LarAction] =
     (
@@ -543,7 +543,7 @@ sealed trait LarFormatValidator extends LarParser {
                       actionTaken,
                       InvalidActionTaken(actionTaken)),
       validateIntField(actionDate, InvalidActionTakenDate(actionDate))
-    ).mapN(LarAction)
+    ).mapN(LarAction.apply)
 
   def validateGeography(street: String,
                         city: String,
@@ -558,7 +558,7 @@ sealed trait LarFormatValidator extends LarParser {
       validateStr(zipCode),
       validateStr(county),
       validateStr(tract)
-    ).mapN(Geography)
+    ).mapN(Geography.apply)
 
   def validateDenial(
     denial1: String,
@@ -579,7 +579,7 @@ sealed trait LarFormatValidator extends LarParser {
                                   denial4,
                                   InvalidDenial(4, denial4)),
       validateStr(otherDenial)
-    ).mapN(Denial)
+    ).mapN(Denial.apply)
 
   def validateLoanDisclosure(
     totalLoanCosts: String,
@@ -603,7 +603,7 @@ sealed trait LarFormatValidator extends LarParser {
       validateDoubleStrOrNAOrExemptOrEmptyField(
         lenderCredits,
         InvalidLenderCredits(lenderCredits))
-    ).mapN(LoanDisclosure)
+    ).mapN(LoanDisclosure.apply)
 
   def validateNonAmortizingFeatures(
     ballonPayment: String,
@@ -625,7 +625,7 @@ sealed trait LarFormatValidator extends LarParser {
         OtherNonAmortizingFeaturesEnum,
         otherNonAmortizingFeatures,
         InvalidOtherNonAmortizingFeatures(otherNonAmortizingFeatures))
-    ).mapN(NonAmortizingFeatures)
+    ).mapN(NonAmortizingFeatures.apply)
 
   def validateProperty(
     propertyValue: String,
@@ -650,7 +650,7 @@ sealed trait LarFormatValidator extends LarParser {
       validateIntField(totalUnits, InvalidTotalUnits(totalUnits)),
       validateIntStrOrNAOrExemptField(multifamilyUnits,
                                       InvalidMultifamilyUnits(multifamilyUnits))
-    ).mapN(Property)
+    ).mapN(Property.apply)
 
   def validateAus(
     aus1: String,
@@ -677,7 +677,7 @@ sealed trait LarFormatValidator extends LarParser {
                                   aus5,
                                   InvalidAutomatedUnderwritingSystem(5, aus5)),
       validateStr(otherAus)
-    ).mapN(AutomatedUnderwritingSystem)
+    ).mapN(AutomatedUnderwritingSystem.apply)
 
   def validateAusResult(
     ausResult1: String,
@@ -708,7 +708,7 @@ sealed trait LarFormatValidator extends LarParser {
         ausResult5,
         InvalidAutomatedUnderwritingSystemResult(5, ausResult5)),
       validateStr(otherAusResult)
-    ).mapN(AutomatedUnderwritingSystemResult)
+    ).mapN(AutomatedUnderwritingSystemResult.apply)
 
 }
 

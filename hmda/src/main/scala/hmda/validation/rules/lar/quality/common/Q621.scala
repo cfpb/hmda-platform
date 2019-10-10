@@ -9,6 +9,10 @@ import hmda.validation.rules.EditCheck
 object Q621 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q621"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult =
-    lar.larIdentifier.NMLSRIdentifier.length is lessThanOrEqual(12)
+  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+    when( lar.larIdentifier.NMLSRIdentifier.length is greaterThan(0)) {
+      ( lar.larIdentifier.NMLSRIdentifier is alphaNumeric) and
+      ( lar.larIdentifier.NMLSRIdentifier.length is lessThanOrEqual(12))
+    }
+  }
 }

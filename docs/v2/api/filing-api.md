@@ -154,7 +154,9 @@ Example response:
       "fileName": "bank1_hmda_2018.txt",
       "receipt": "",
       "start": 1483287071000,
-      "end": 0
+      "end": 0,
+      "qualityVerified": false,
+      "macroVerified": false
     },
     {
       "id": {
@@ -170,7 +172,9 @@ Example response:
       "fileName": "bank1_lars_2018.txt",
       "receipt": "",
       "start": 1483287071000,
-      "end": 0
+      "end": 0,
+      "qualityVerified": false,
+      "macroVerified": false
     },
     {
       "id": {
@@ -186,7 +190,9 @@ Example response:
       "fileName": "bank1_lars_2018.txt",
       "receipt": "",
       "start": 1483287071000,
-      "end": 0
+      "end": 0,
+      "qualityVerified": false,
+      "macroVerified": false
     }
   ]
 }
@@ -247,7 +253,9 @@ Example response:
   "fileName": "bank1_lars_2017.txt",
   "receipt": "",
   "start": 1483287071000,
-  "end": 1514736671000
+  "end": 1514736671000,
+  "qualityVerified": false,
+  "macroVerified": false
 }
 ```
 
@@ -418,7 +426,9 @@ Example response:
   "status": {
       "code": 8,
       "message": "Your data has been analyzed for Syntactical and Validity Errors.",
-      "description": "Your file has been analyzed and does not contain any Syntactical or Validity errors."
+      "description": "Your file has been analyzed and does not contain any Syntactical or Validity errors.",
+      "qualityVerified": false,
+      "macroVerified": false
   }
 }
 ```

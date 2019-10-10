@@ -14,7 +14,6 @@ import hmda.dataBrowser.models.HealthCheckStatus.Up
 import hmda.dataBrowser.models._
 import hmda.dataBrowser.repositories._
 import hmda.dataBrowser.services._
-import io.circe.generic.auto._
 import io.lettuce.core.api.async.RedisAsyncCommands
 import io.lettuce.core.{ClientOptions, RedisClient}
 import monix.eval.Task

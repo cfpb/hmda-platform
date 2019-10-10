@@ -3,7 +3,7 @@ package hmda.messages.submission
 import akka.actor.typed.ActorRef
 import hmda.messages.CommonMessages.Command
 import hmda.messages.submission.SubmissionProcessingEvents._
-import hmda.model.filing.submission.SubmissionId
+import hmda.model.filing.submission.{ SubmissionId, VerificationStatus }
 import hmda.model.processing.state.{ HmdaParserErrorState, HmdaValidationErrorState }
 import hmda.model.validation.{ MacroValidationError, ValidationError }
 
@@ -35,11 +35,12 @@ object SubmissionProcessingCommands {
 
   case class StartSyntacticalValidity(submissionId: SubmissionId) extends SubmissionProcessingCommand
 
-  case class PersistHmdaRowValidatedError(submissionId: SubmissionId,
-                                          rowNumber: Int,
-                                          validationErrors: List[ValidationError],
-                                          replyTo: Option[ActorRef[HmdaRowValidatedError]])
-      extends SubmissionProcessingCommand
+  case class PersistHmdaRowValidatedError(
+    submissionId: SubmissionId,
+    rowNumber: Int,
+    validationErrors: List[ValidationError],
+    replyTo: Option[ActorRef[HmdaRowValidatedError]]
+  ) extends SubmissionProcessingCommand
 
   case class PersistMacroError(
     submissionId: SubmissionId,
@@ -49,6 +50,8 @@ object SubmissionProcessingCommands {
 
   case class GetHmdaValidationErrorState(submissionId: SubmissionId, replyTo: ActorRef[HmdaValidationErrorState])
       extends SubmissionProcessingCommand
+
+  case class GetVerificationStatus(replyTo: ActorRef[VerificationStatus]) extends SubmissionProcessingCommand
 
   case class CompleteSyntacticalValidity(submissionId: SubmissionId) extends SubmissionProcessingCommand
 

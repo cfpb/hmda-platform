@@ -3,7 +3,6 @@ package hmda.api.http.codec.filing.submission
 import org.scalatest.{MustMatchers, PropSpec}
 import org.scalatest.prop.PropertyChecks
 import ParsingErrorSummaryGenerator._
-import ParsingErrorSummaryCodec._
 import hmda.api.http.model.filing.submissions.ParsingErrorSummary
 import io.circe.syntax._
 

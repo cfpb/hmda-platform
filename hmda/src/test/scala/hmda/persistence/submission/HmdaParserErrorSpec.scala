@@ -65,13 +65,13 @@ class HmdaParserErrorSpec extends AkkaCassandraPersistenceSpec {
       hmdaParserError ! GetParsingErrors(1, stateProbe.ref)
       stateProbe.expectMessage(
         HmdaParserErrorState(
-          Seq(
+          List(
             HmdaRowParsedError(
               1,
               "testULI",
               e1.map(x =>
                 FieldParserError(x.fieldName, x.inputValue)))),
-          Seq(
+          List(
             HmdaRowParsedError(
               2,
               "testULI",

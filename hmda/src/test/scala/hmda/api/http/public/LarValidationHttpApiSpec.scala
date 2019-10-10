@@ -20,7 +20,6 @@ import hmda.model.filing.ts.TsGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
-import hmda.api.http.codec.filing.LarCodec._
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.util.http.FileUploadUtils
@@ -83,7 +82,7 @@ class LarValidationHttpApiSpec
       Post("/lar/parse", LarValidateRequest(badCsv)) ~> larRoutes ~> check {
         status mustBe StatusCodes.BadRequest
         responseAs[LarValidateResponse] mustBe LarValidateResponse(
-          List("Record Identifier"))
+          List("LAR Record Identifier"))
       }
     }
 
@@ -91,7 +90,7 @@ class LarValidationHttpApiSpec
       Post("/lar/parse", LarValidateRequest(larCsv + "|too|many|fields")) ~> larRoutes ~> check {
         status mustBe StatusCodes.BadRequest
         responseAs[LarValidateResponse] mustBe LarValidateResponse(
-          List("Number of fields"))
+          List("Incorrect Number of LAR Fields"))
       }
     }
 

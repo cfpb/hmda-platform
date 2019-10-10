@@ -17,7 +17,6 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.model.filing.ts.{Address, Contact, TransmittalSheet}
 import hmda.model.institution.Agency
 import io.circe.generic.auto._
-import hmda.api.http.codec.filing.TsCodec._
 
 class TsValidationHttpApiSpec
     extends WordSpec
@@ -71,7 +70,7 @@ class TsValidationHttpApiSpec
       Post("/ts/parse", TsValidateRequest(invalidParseCsv)) ~> tsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
         responseAs[TsValidateResponse].errorMessages mustBe List(
-          "Record Identifier",
+          "Transmittal Sheet Record Identifier",
           "Federal Agency")
       }
     }
@@ -82,7 +81,7 @@ class TsValidationHttpApiSpec
       Post("/ts/parse", tsValidateRequestWithTooManyFields) ~> tsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
         responseAs[TsValidateResponse].errorMessages mustBe List(
-          "Number of fields")
+          "Incorrect Number of TS Fields")
       }
     }
 
