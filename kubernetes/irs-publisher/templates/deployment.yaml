@@ -2,6 +2,8 @@ apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
   name: {{ include "irs-publisher.fullname" . }}
+  annotations:
+    downscaler/uptime: Mon-Fri 10:00-23:00 UTC
   labels:
     app: {{ include "irs-publisher.name" . }}
     chart: {{ include "irs-publisher.chart" . }}
