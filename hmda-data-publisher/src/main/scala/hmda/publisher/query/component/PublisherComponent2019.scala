@@ -1,5 +1,7 @@
 package hmda.publisher.query.component
 
+import java.sql.Timestamp
+
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
@@ -153,7 +155,7 @@ trait PublisherComponent2019 {
     def totalLines = column[Int]("total_lines")
     def taxId = column[String]("tax_id")
     def submissionId = column[Option[String]]("submission_id")
-
+    def createdAt = column[Option[Timestamp]]("created_at")
     override def * =
       (
         lei,
@@ -171,8 +173,9 @@ trait PublisherComponent2019 {
         agency,
         totalLines,
         taxId,
-        submissionId
-      ) <> (TransmittalSheetEntity.tupled, TransmittalSheetEntity.unapply)
+        submissionId,
+        createdAt
+    ) <> (TransmittalSheetEntity.tupled, TransmittalSheetEntity.unapply)
   }
 
   val transmittalSheetTable2019 = TableQuery[TransmittalSheetTable]

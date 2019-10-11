@@ -155,6 +155,8 @@ trait PublisherComponent2018 {
     def totalLines = column[Int]("total_lines")
     def taxId = column[String]("tax_id")
     def submissionId = column[Option[String]]("submission_id")
+    def createdAt = column[Option[Timestamp]]("created_at")
+
 
     override def * =
       (
@@ -173,7 +175,8 @@ trait PublisherComponent2018 {
         agency,
         totalLines,
         taxId,
-        submissionId
+        submissionId,
+        createdAt
       ) <> (TransmittalSheetEntity.tupled, TransmittalSheetEntity.unapply)
   }
 

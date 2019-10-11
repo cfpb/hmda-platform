@@ -16,7 +16,9 @@ case class TransmittalSheetEntity(
   agency: Int = 0,
   totalLines: Int = 0,
   taxId: String = "",
-  submissionId: Option[String] = Some("")
+  submissionId: Option[String] = Some(""),
+  createdAt: Option[java.sql.Timestamp] = Some(new java.sql.Timestamp(0))
+
 ) {
   def isEmpty: Boolean = lei == ""
 
@@ -25,7 +27,7 @@ case class TransmittalSheetEntity(
       s"$quarter|$name|$phone|" +
       s"$email|$street|$city|" +
       s"$state|$zipCode|$agency|" +
-      s"$totalLines|$taxId|$lei"
+      s"$totalLines|$taxId|$lei|$"
 
   def toPublicPSV: String =
     s"$year|$quarter|$lei|$taxId|$agency|" +
