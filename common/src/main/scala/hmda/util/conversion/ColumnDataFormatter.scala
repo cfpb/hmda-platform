@@ -6,9 +6,9 @@ trait ColumnDataFormatter {
 
   val timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 
-  def dateToString(value:java.sql.Timestamp ): String =
-    if(value !=null) {
-      val entryTime: String = timeFormat.format(value)
+  def dateToString(option:Option[java.sql.Timestamp] ): String =
+    if(option !=null) {
+      val entryTime: String = timeFormat.format(option.getOrElse(new java.sql.Timestamp(0)))
       java.sql.Timestamp.valueOf(entryTime).toString
     }else{
       "NA"
