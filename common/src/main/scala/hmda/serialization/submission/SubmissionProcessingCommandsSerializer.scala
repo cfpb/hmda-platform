@@ -47,7 +47,8 @@ class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem) extend
     classOf[VerifyQuality].getName
   final val VerifyMacroManifest =
     classOf[VerifyMacro].getName
-  final val SignSubmissionManifest = classOf[SignSubmission].getName
+  final val SignSubmissionManifest        = classOf[SignSubmission].getName
+  final val GetVerificationStatusManifest = classOf[GetVerificationStatus].getName
 
   override def manifest(o: AnyRef): String = o.getClass.getName
 
@@ -91,6 +92,8 @@ class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem) extend
       verifyMacroToProtobuf(cmd, resolver).toByteArray
     case cmd: SignSubmission =>
       signSubmissionToProtobuf(cmd, resolver).toByteArray
+    case cmd: GetVerificationStatus =>
+      getVerificationStatusToProtobuf(cmd, resolver).toByteArray
     case _ =>
       throw new IllegalArgumentException(s"Cannot serialize object of type [${o.getClass.getName}]")
   }
@@ -135,6 +138,8 @@ class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem) extend
         verifyMacroFromProtobuf(VerifyMacroMessage.parseFrom(bytes), resolver)
       case SignSubmissionManifest =>
         signSubmissionFromProtobuf(SignSubmissionMessage.parseFrom(bytes), resolver)
+      case GetVerificationStatusManifest =>
+        getVerificationStatusFromProtobuf(GetVerificationStatusMessage.parseFrom(bytes), resolver)
       case _ =>
         throw new NotSerializableException(s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
     }

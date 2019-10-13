@@ -88,4 +88,9 @@ message SubmissionNotReadyToBeSignedMessage {
     SubmissionIdMessage submissionId = 1;
 }
 
+message VerificationStatusMessage {
+    bool qualityVerified = 1;
+    bool macroVerified = 2;
+}
+
 

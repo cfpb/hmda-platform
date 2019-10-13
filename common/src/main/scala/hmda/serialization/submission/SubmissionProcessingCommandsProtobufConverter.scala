@@ -21,6 +21,16 @@ object SubmissionProcessingCommandsProtobufConverter {
       submissionIdFromProtobuf(msg.submissionId.getOrElse(SubmissionIdMessage()))
     )
 
+  def getVerificationStatusToProtobuf(cmd: GetVerificationStatus, refResolver: ActorRefResolver): GetVerificationStatusMessage =
+    GetVerificationStatusMessage(
+      refResolver.toSerializationFormat(cmd.replyTo)
+    )
+
+  def getVerificationStatusFromProtobuf(msg: GetVerificationStatusMessage, refResolver: ActorRefResolver): GetVerificationStatus =
+    GetVerificationStatus(
+      refResolver.resolveActorRef(msg.replyTo)
+    )
+
   def completeUploadToProtobuf(cmd: CompleteUpload): CompleteUploadMessage =
     CompleteUploadMessage(
       submissionIdToProtobuf(cmd.submissionId)
@@ -52,8 +62,10 @@ object SubmissionProcessingCommandsProtobufConverter {
       }
     )
 
-  def persistHmdaRowParsedErrorFromProtobuf(msg: PersistHmdaRowParsedErrorMessage,
-                                            refResolver: ActorRefResolver): PersistHmdaRowParsedError =
+  def persistHmdaRowParsedErrorFromProtobuf(
+    msg: PersistHmdaRowParsedErrorMessage,
+    refResolver: ActorRefResolver
+  ): PersistHmdaRowParsedError =
     PersistHmdaRowParsedError(
       msg.rowNumber,
       msg.estimatedULI,
@@ -127,8 +139,10 @@ object SubmissionProcessingCommandsProtobufConverter {
       submissionIdFromProtobuf(msg.submissionId.getOrElse(SubmissionIdMessage()))
     )
 
-  def persistHmdaRowValidatedErrorToProtobuf(cmd: PersistHmdaRowValidatedError,
-                                             refResolver: ActorRefResolver): PersistHmdaRowValidatedErrorMessage =
+  def persistHmdaRowValidatedErrorToProtobuf(
+    cmd: PersistHmdaRowValidatedError,
+    refResolver: ActorRefResolver
+  ): PersistHmdaRowValidatedErrorMessage =
     PersistHmdaRowValidatedErrorMessage(
       submissionIdToProtobuf(cmd.submissionId),
       cmd.rowNumber,
@@ -139,8 +153,10 @@ object SubmissionProcessingCommandsProtobufConverter {
       }
     )
 
-  def persistHmdaRowValidatedErrorFromProtobuf(msg: PersistHmdaRowValidatedErrorMessage,
-                                               refResolver: ActorRefResolver): PersistHmdaRowValidatedError =
+  def persistHmdaRowValidatedErrorFromProtobuf(
+    msg: PersistHmdaRowValidatedErrorMessage,
+    refResolver: ActorRefResolver
+  ): PersistHmdaRowValidatedError =
     PersistHmdaRowValidatedError(
       submissionIdFromProtobuf(msg.submissionId.getOrElse(SubmissionIdMessage())),
       msg.rowNumber,
@@ -151,15 +167,19 @@ object SubmissionProcessingCommandsProtobufConverter {
       else Some(refResolver.resolveActorRef(msg.replyTo))
     )
 
-  def getHmdaValidationErrorStateToProtobuf(cmd: GetHmdaValidationErrorState,
-                                            actorRefResolver: ActorRefResolver): GetHmdaValidationErrorStateMessage =
+  def getHmdaValidationErrorStateToProtobuf(
+    cmd: GetHmdaValidationErrorState,
+    actorRefResolver: ActorRefResolver
+  ): GetHmdaValidationErrorStateMessage =
     GetHmdaValidationErrorStateMessage(
       submissionIdToProtobuf(cmd.submissionId),
       actorRefResolver.toSerializationFormat(cmd.replyTo)
     )
 
-  def getHmdaValidationErrorStateFromProtobuf(msg: GetHmdaValidationErrorStateMessage,
-                                              actorRefResolver: ActorRefResolver): GetHmdaValidationErrorState =
+  def getHmdaValidationErrorStateFromProtobuf(
+    msg: GetHmdaValidationErrorStateMessage,
+    actorRefResolver: ActorRefResolver
+  ): GetHmdaValidationErrorState =
     GetHmdaValidationErrorState(
       submissionIdFromProtobuf(msg.submissionId.getOrElse(SubmissionIdMessage())),
       actorRefResolver.resolveActorRef(msg.replyTo)

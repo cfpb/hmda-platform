@@ -102,3 +102,7 @@ message SignSubmissionMessage {
     string email = 3;
 }
 
+message GetVerificationStatusMessage {
+    string replyTo = 1;
+}
+
