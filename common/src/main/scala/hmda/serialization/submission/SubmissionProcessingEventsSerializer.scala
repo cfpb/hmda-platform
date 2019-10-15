@@ -4,6 +4,7 @@ import java.io.NotSerializableException
 
 import akka.serialization.SerializerWithStringManifest
 import hmda.messages.submission.SubmissionProcessingEvents._
+import hmda.model.filing.submission.VerificationStatus
 import hmda.model.processing.state.{ HmdaParserErrorState, HmdaValidationErrorState }
 import hmda.persistence.serialization.submission.processing.events.{
   HmdaParserErrorStateMessage,
@@ -36,6 +37,8 @@ class SubmissionProcessingEventsSerializer extends SerializerWithStringManifest 
   final val SubmissionSignedManifest = classOf[SubmissionSigned].getName
   final val SubmissionNotReadyToBeSignedManifest =
     classOf[SubmissionNotReadyToBeSigned].getName
+  final val VerificationStatusManifest =
+    classOf[VerificationStatus].getName
 
   override def manifest(o: AnyRef): String = o.getClass.getName
 
@@ -68,6 +71,8 @@ class SubmissionProcessingEventsSerializer extends SerializerWithStringManifest 
       submissionSignedToProtobuf(evt).toByteArray
     case evt: SubmissionNotReadyToBeSigned =>
       submissionNotReadyToBeSignedToProtobuf(evt).toByteArray
+    case evt: VerificationStatus =>
+      verificationStatusToProtobuf(evt).toByteArray
     case _ =>
       throw new IllegalArgumentException(s"Cannot serialize object of type [${o.getClass.getName}]")
   }
@@ -102,6 +107,8 @@ class SubmissionProcessingEventsSerializer extends SerializerWithStringManifest 
         submissionSignedFromProtobuf(SubmissionSignedMessage.parseFrom(bytes))
       case SubmissionNotReadyToBeSignedManifest =>
         submissionNotReadyToBeSignedFromProtobuf(SubmissionNotReadyToBeSignedMessage.parseFrom(bytes))
+      case VerificationStatusManifest =>
+        verificationStatusFromProtobuf(VerificationStatusMessage.parseFrom(bytes))
       case _ =>
         throw new NotSerializableException(s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
     }
