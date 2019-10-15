@@ -42,6 +42,7 @@ object Dependencies {
   lazy val cassandraLauncher = "com.typesafe.akka" %% "akka-persistence-cassandra-launcher" % Version.cassandraPluginVersion
   lazy val slick = "com.typesafe.slick" %% "slick" % Version.slick
   lazy val slickHikaryCP = "com.typesafe.slick" %% "slick-hikaricp" % Version.slick
+  lazy val alpakkaSlick = "com.lightbend.akka" %% "akka-stream-alpakka-slick" % Version.alpakkaSlick
   lazy val postgres = "org.postgresql" % "postgresql" % Version.postgres
   lazy val h2 = "com.h2database" % "h2" % Version.h2 % Test
   lazy val keycloakAdapter = "org.keycloak" % "keycloak-adapter-core" % Version.keycloak
