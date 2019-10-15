@@ -1,15 +1,16 @@
 package hmda.util.conversion
 
-import java.text.SimpleDateFormat
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 trait ColumnDataFormatter {
 
-  val timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+  private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS").withZone(ZoneOffset.ofHours(-5));
 
   def dateToString(option:Option[java.sql.Timestamp] ): String =
     if(option !=null) {
-      val entryTime: String = timeFormat.format(option.getOrElse(new java.sql.Timestamp(0)))
-      java.sql.Timestamp.valueOf(entryTime).toString
+      val entryTime = dateFormatter.format(option.getOrElse(new java.sql.Timestamp(0)).toInstant)
+      entryTime
     }else{
       "NA"
     }
