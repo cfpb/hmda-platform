@@ -8,7 +8,7 @@ object HmdaFiler {
   implicit val encoder: Encoder[HmdaFiler] =
     (a: HmdaFiler) =>
       Json.obj(
-        ("lei", Json.fromString(a.name)),
+        ("lei", Json.fromString(a.lei)),
         ("name", Json.fromString(a.name)),
         ("period", Json.fromString(a.period))
       )
@@ -16,8 +16,8 @@ object HmdaFiler {
   implicit val decoder: Decoder[HmdaFiler] =
     (c: HCursor) =>
       for {
-        lei <- c.downField("lei").as[String]
-        name <- c.downField("name").as[String]
+        lei    <- c.downField("lei").as[String]
+        name   <- c.downField("name").as[String]
         period <- c.downField("period").as[String]
       } yield {
         HmdaFiler(lei, name, period)
