@@ -53,7 +53,7 @@ object HmdaProcessingUtils {
     }
   }
 
-  def updateSubmissionReceipt(sharding: ClusterSharding, submissionId: SubmissionId, timestamp: Long, receipt: String, modified: SubmissionStatus, log: Logger)(
+  def updateSubmissionStatusAndReceipt(sharding: ClusterSharding, submissionId: SubmissionId, timestamp: Long, receipt: String, modified: SubmissionStatus, log: Logger)(
     implicit ec: ExecutionContext,
     timeout: Timeout
   ): Unit = {
