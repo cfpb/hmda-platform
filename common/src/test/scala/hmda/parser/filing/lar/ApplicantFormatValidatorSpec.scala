@@ -72,9 +72,9 @@ class ApplicantFormatValidatorSpec
         .updated(7, "b")
         .updated(16, "oh")
       validateApplicantValues(badValues) mustBe Invalid(
-        NonEmptyList.of(InvalidApplicantEthnicity,
-                        InvalidApplicantRace,
-                        InvalidApplicantSex)
+        NonEmptyList.of(InvalidApplicantEthnicity(1, "a"),
+                        InvalidApplicantRace(1, "b"),
+                        InvalidApplicantSex("oh"))
       )
     }
   }

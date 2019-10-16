@@ -5,7 +5,6 @@ import com.typesafe.config.ConfigFactory
 import hmda.model.filing.lar._
 import hmda.model.filing.lar.enums._
 import hmda.parser.LarParserValidationResult
-import hmda.parser.ParserErrorModel.IncorrectNumberOfFields
 import hmda.parser.filing.lar.ApplicantFormatValidator._
 import hmda.parser.filing.lar.LarParserErrorModel._
 

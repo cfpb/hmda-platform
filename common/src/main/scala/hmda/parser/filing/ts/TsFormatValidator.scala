@@ -6,7 +6,7 @@ import com.typesafe.config.ConfigFactory
 import hmda.model.filing.EditDescriptionLookup
 import hmda.model.filing.ts.{ Address, Contact, TransmittalSheet }
 import hmda.model.institution.Agency
-import hmda.parser.ParserErrorModel.{ IncorrectNumberOfFields, ParserValidationError }
+import hmda.parser.ParserErrorModel.ParserValidationError
 import hmda.parser.filing.ts.TsParserErrorModel._
 
 import scala.util.{ Failure, Success, Try }

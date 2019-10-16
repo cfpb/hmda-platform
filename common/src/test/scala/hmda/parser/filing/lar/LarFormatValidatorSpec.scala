@@ -5,7 +5,6 @@ import cats.data.Validated.{Invalid, Valid}
 import com.typesafe.config.ConfigFactory
 import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.enums._
-import hmda.parser.ParserErrorModel.IncorrectNumberOfFields
 import hmda.parser.filing.lar.LarFormatValidator._
 import hmda.parser.filing.lar.LarParserErrorModel._
 import hmda.parser.filing.lar.LarValidationUtils._
@@ -25,7 +24,7 @@ class LarFormatValidatorSpec
   property("Loan Application Register must have the correct number of fields") {
     val values = List("a", "b", "c")
     validateLar(values) mustBe Invalid(
-      NonEmptyList.of(IncorrectNumberOfFields(values.length))
+      NonEmptyList.of(IncorrectNumberOfFieldsLar(values.length.toString))
     )
   }
 
@@ -35,7 +34,7 @@ class LarFormatValidatorSpec
       val larId = lar.larIdentifier
       val badId = badValue()
       validateLarIdentifier(badId, larId.LEI, larId.NMLSRIdentifier) mustBe Invalid(
-        NonEmptyList.of(InvalidLarId))
+        NonEmptyList.of(InvalidLarId(badId)))
     }
   }
 
@@ -93,18 +92,21 @@ class LarFormatValidatorSpec
     )
   }
   property("InvalidActionTakenDate") {
-    validateIntField(badValue(), InvalidActionTakenDate(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidActionTakenDate(badValue()))
+    val actionTakenDate = badValue()
+    validateIntField(actionTakenDate, InvalidActionTakenDate(actionTakenDate)) mustBe Invalid(
+      NonEmptyList.of(InvalidActionTakenDate(actionTakenDate))
     )
   }
   property("InvalidAmount") {
-    validateDoubleField(badValue(), InvalidAmount(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidAmount(badValue()))
+    val invalidAmount = badValue()
+    validateDoubleField(invalidAmount, InvalidAmount(invalidAmount)) mustBe Invalid(
+      NonEmptyList.of(InvalidAmount(invalidAmount))
     )
   }
   property("InvalidLoanTerm") {
-    validateIntStrOrNAField(badValue(), InvalidLoanTerm(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidLoanTerm(badValue()))
+    val invalidLoanTerm = badValue()
+    validateIntStrOrNAField(invalidLoanTerm, InvalidLoanTerm(invalidLoanTerm)) mustBe Invalid(
+      NonEmptyList.of(InvalidLoanTerm(invalidLoanTerm))
     )
   }
 
@@ -144,87 +146,102 @@ class LarFormatValidatorSpec
   }
 
   property("InvalidIncome") {
-    validateIntStrOrNAField(badValue(), InvalidIncome(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidIncome(badValue()))
+    val invalidIncome = badValue()
+    validateIntStrOrNAField(invalidIncome, InvalidIncome(invalidIncome)) mustBe Invalid(
+      NonEmptyList.of(InvalidIncome(invalidIncome))
     )
   }
   property("InvalidPurchaserType") {
-    validateLarCode(PurchaserEnum, badValue(), InvalidPurchaserType(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidPurchaserType(badValue()))
+    val invalidPurchaserType = badValue()
+    validateLarCode(PurchaserEnum, invalidPurchaserType, InvalidPurchaserType(invalidPurchaserType)) mustBe Invalid(
+      NonEmptyList.of(InvalidPurchaserType(invalidPurchaserType))
     )
   }
   property("InvalidRateSpread") {
-    validateDoubleStrOrNAField(badValue(), InvalidRateSpread(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidRateSpread(badValue()))
+    val invalidRateSpread = badValue()
+    validateDoubleStrOrNAField(invalidRateSpread, InvalidRateSpread(invalidRateSpread)) mustBe Invalid(
+      NonEmptyList.of(InvalidRateSpread(invalidRateSpread))
     )
   }
   property("InvalidHoepaStatus") {
-    validateLarCode(HOEPAStatusEnum, badValue(), InvalidHoepaStatus(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidHoepaStatus(badValue()))
+    val invalidHoepaStatus = badValue()
+    validateLarCode(HOEPAStatusEnum, invalidHoepaStatus, InvalidHoepaStatus(invalidHoepaStatus)) mustBe Invalid(
+      NonEmptyList.of(InvalidHoepaStatus(invalidHoepaStatus))
     )
   }
   property("InvalidLienStatus") {
-    validateLarCode(LienStatusEnum, badValue(), InvalidLienStatus(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidLienStatus(badValue()))
+    val invalidLienStatus = badValue()
+    validateLarCode(LienStatusEnum, invalidLienStatus, InvalidLienStatus(invalidLienStatus)) mustBe Invalid(
+      NonEmptyList.of(InvalidLienStatus(invalidLienStatus))
     )
   }
   property("Denial Reason 1") {
-    validateLarCode(DenialReasonEnum, badValue(), InvalidDenial(1, badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidDenial(1, badValue()))
+    val invalidDenial = badValue()
+    validateLarCode(DenialReasonEnum, invalidDenial, InvalidDenial(1, invalidDenial)) mustBe Invalid(
+      NonEmptyList.of(InvalidDenial(1, invalidDenial))
     )
   }
 
   property("Denial Reason 2-4") {
+    val invalidDenial = badValue()
     validateLarCodeOrEmptyField(DenialReasonEnum,
-                                badValue(),
-                                InvalidDenial(1, badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidDenial(1, badValue()))
+                                invalidDenial,
+                                InvalidDenial(1, invalidDenial)) mustBe Invalid(
+      NonEmptyList.of(InvalidDenial(1, invalidDenial))
     )
     validateLarCodeOrEmptyField(DenialReasonEnum, "-1", InvalidDenial(1, "-1")) mustBe Valid(
       InvalidDenialReasonCode)
   }
   property("InvalidTotalLoanCosts") {
-    validateDoubleStrOrNAField(badValue(), InvalidTotalLoanCosts(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidTotalLoanCosts(badValue()))
+    val invalidTotalLoanCosts = badValue()
+    validateDoubleStrOrNAField(invalidTotalLoanCosts, InvalidTotalLoanCosts(invalidTotalLoanCosts)) mustBe Invalid(
+      NonEmptyList.of(InvalidTotalLoanCosts(invalidTotalLoanCosts))
     )
   }
   property("InvalidPointsAndFees") {
-    validateDoubleStrOrNAField(badValue(), InvalidPointsAndFees(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidPointsAndFees(badValue()))
+    val invalidPointsandFeeds = badValue()
+    validateDoubleStrOrNAField(invalidPointsandFeeds, InvalidPointsAndFees(invalidPointsandFeeds)) mustBe Invalid(
+      NonEmptyList.of(InvalidPointsAndFees(invalidPointsandFeeds))
     )
   }
   property("InvalidOriginationCharges") {
+    val invalidOriginationCharges = badValue()
     validateDoubleStrOrNAField(
-      badValue(),
-      InvalidOriginationCharges(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidOriginationCharges(badValue()))
+      invalidOriginationCharges,
+      InvalidOriginationCharges(invalidOriginationCharges)) mustBe Invalid(
+      NonEmptyList.of(InvalidOriginationCharges(invalidOriginationCharges))
     )
   }
   property("InvalidDiscountPoints") {
-    validateDoubleStrOrNAField(badValue(), InvalidDiscountPoints(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidDiscountPoints(badValue()))
+    val invalidDiscountPoints = badValue()
+    validateDoubleStrOrNAField(invalidDiscountPoints, InvalidDiscountPoints(invalidDiscountPoints)) mustBe Invalid(
+      NonEmptyList.of(InvalidDiscountPoints(invalidDiscountPoints))
     )
   }
   property("InvalidLenderCredits") {
-    validateDoubleStrOrNAField(badValue(), InvalidLenderCredits(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidLenderCredits(badValue()))
+    val invalidLenderCredits = badValue()
+    validateDoubleStrOrNAField(invalidLenderCredits, InvalidLenderCredits(invalidLenderCredits)) mustBe Invalid(
+      NonEmptyList.of(InvalidLenderCredits(invalidLenderCredits))
     )
   }
   property("InvalidInterestRate") {
-    validateDoubleStrOrNAField(badValue(), InvalidInterestRate(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidInterestRate(badValue()))
+    val invalidInterestRate = badValue()
+    validateDoubleStrOrNAField(invalidInterestRate, InvalidInterestRate(invalidInterestRate)) mustBe Invalid(
+      NonEmptyList.of(InvalidInterestRate(invalidInterestRate))
     )
   }
   property("InvalidPrepaymentPenaltyTerm") {
+    val invalidPrepaymentPenaltyTerm = badValue()
     validateIntStrOrNAField(
-      badValue(),
-      InvalidPrepaymentPenaltyTerm(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidPrepaymentPenaltyTerm(badValue()))
+      invalidPrepaymentPenaltyTerm,
+      InvalidPrepaymentPenaltyTerm(invalidPrepaymentPenaltyTerm)) mustBe Invalid(
+      NonEmptyList.of(InvalidPrepaymentPenaltyTerm(invalidPrepaymentPenaltyTerm))
     )
   }
   property("InvalidDebtToIncomeRatio") {
-    validateDoubleStrOrNAField(badValue(), InvalidDebtToIncomeRatio(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidDebtToIncomeRatio(badValue()))
+    val invalidDebtToIncomeRatio = badValue()
+    validateDoubleStrOrNAField(invalidDebtToIncomeRatio, InvalidDebtToIncomeRatio(invalidDebtToIncomeRatio)) mustBe Invalid(
+      NonEmptyList.of(InvalidDebtToIncomeRatio(invalidDebtToIncomeRatio))
     )
   }
   property("Valid Debt to Income Ratio") {
@@ -232,105 +249,120 @@ class LarFormatValidatorSpec
       "4.125")
   }
   property("InvalidLoanToValueRatio") {
-    validateDoubleStrOrNAField(badValue(), InvalidLoanToValueRatio(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidLoanToValueRatio(badValue()))
+    val invalidLoanToValueRatio = badValue()
+    validateDoubleStrOrNAField(invalidLoanToValueRatio, InvalidLoanToValueRatio(invalidLoanToValueRatio)) mustBe Invalid(
+      NonEmptyList.of(InvalidLoanToValueRatio(invalidLoanToValueRatio))
     )
   }
   property("InvalidIntroductoryRatePeriod") {
+    val invalidntroductoryRatePeriod = badValue()
     validateIntStrOrNAField(
-      badValue(),
-      InvalidIntroductoryRatePeriod(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidIntroductoryRatePeriod(badValue()))
+      invalidntroductoryRatePeriod,
+      InvalidIntroductoryRatePeriod(invalidntroductoryRatePeriod)) mustBe Invalid(
+      NonEmptyList.of(InvalidIntroductoryRatePeriod(invalidntroductoryRatePeriod))
     )
   }
   property("InvalidBalloonPayment") {
+    val invalidBalloonPayment = badValue()
     validateLarCode(BalloonPaymentEnum,
-                    badValue(),
-                    InvalidBalloonPayment(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidBalloonPayment(badValue()))
+                    invalidBalloonPayment,
+                    InvalidBalloonPayment(invalidBalloonPayment)) mustBe Invalid(
+      NonEmptyList.of(InvalidBalloonPayment(invalidBalloonPayment))
     )
   }
   property("InvalidInterestOnlyPayment") {
+    val invalidInterestOnlyPayment = badValue()
     validateLarCode(InterestOnlyPaymentsEnum,
-                    badValue(),
-                    InvalidInterestOnlyPayment(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidInterestOnlyPayment(badValue()))
+                    invalidInterestOnlyPayment,
+                    InvalidInterestOnlyPayment(invalidInterestOnlyPayment)) mustBe Invalid(
+      NonEmptyList.of(InvalidInterestOnlyPayment(invalidInterestOnlyPayment))
     )
   }
   property("InvalidNegativeAmortization") {
+    val invalidNegativeAmortization = badValue()
     validateLarCode(NegativeAmortizationEnum,
-                    badValue(),
-                    InvalidNegativeAmortization(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidNegativeAmortization(badValue()))
+                    invalidNegativeAmortization,
+                    InvalidNegativeAmortization(invalidNegativeAmortization)) mustBe Invalid(
+      NonEmptyList.of(InvalidNegativeAmortization(invalidNegativeAmortization))
     )
   }
   property("InvalidOtherNonAmortizingFeatures") {
+    val invalidOtherNonAmortizingFeatures = badValue()
     validateLarCode(
       OtherNonAmortizingFeaturesEnum,
-      badValue(),
-      InvalidOtherNonAmortizingFeatures(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidOtherNonAmortizingFeatures(badValue()))
+      invalidOtherNonAmortizingFeatures,
+      InvalidOtherNonAmortizingFeatures(invalidOtherNonAmortizingFeatures)) mustBe Invalid(
+      NonEmptyList.of(InvalidOtherNonAmortizingFeatures(invalidOtherNonAmortizingFeatures))
     )
   }
   property("InvalidPropertyValue") {
     validateIntStrOrNAField("", InvalidPropertyValue("")) mustBe Invalid(
       NonEmptyList.of(InvalidPropertyValue(""))
     )
-    validateIntStrOrNAField(badValue(), InvalidPropertyValue(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidPropertyValue(badValue()))
+    val invalidPropertyValue = badValue()
+    validateIntStrOrNAField(invalidPropertyValue, InvalidPropertyValue(invalidPropertyValue)) mustBe Invalid(
+      NonEmptyList.of(InvalidPropertyValue(invalidPropertyValue))
     )
   }
   property("InvalidManufacturedHomeSecuredProperty") {
+    val invalidManufacturedHomeSecuredProperty = badValue()
     validateLarCode(
       ManufacturedHomeSecuredPropertyEnum,
-      badValue(),
-      InvalidManufacturedHomeSecuredProperty(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidManufacturedHomeSecuredProperty(badValue()))
+      invalidManufacturedHomeSecuredProperty,
+      InvalidManufacturedHomeSecuredProperty(invalidManufacturedHomeSecuredProperty)) mustBe Invalid(
+      NonEmptyList.of(InvalidManufacturedHomeSecuredProperty(invalidManufacturedHomeSecuredProperty))
     )
   }
   property("InvalidManufacturedHomeLandPropertyInterest") {
+    val invalidManufacturedHomeLandPropertyInterest = badValue()
     validateLarCode(
       ManufacturedHomeLandPropertyInterestEnum,
-      badValue(),
-      InvalidManufacturedHomeLandPropertyInterest(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidManufacturedHomeLandPropertyInterest(badValue()))
+      invalidManufacturedHomeLandPropertyInterest,
+      InvalidManufacturedHomeLandPropertyInterest(invalidManufacturedHomeLandPropertyInterest)) mustBe Invalid(
+      NonEmptyList.of(InvalidManufacturedHomeLandPropertyInterest(invalidManufacturedHomeLandPropertyInterest))
     )
   }
   property("InvalidTotalUnits") {
-    validateIntField(badValue(), InvalidTotalUnits(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidTotalUnits(badValue()))
+    val invalidTotalUnits = badValue()
+    validateIntField(invalidTotalUnits, InvalidTotalUnits(invalidTotalUnits)) mustBe Invalid(
+      NonEmptyList.of(InvalidTotalUnits(invalidTotalUnits))
     )
   }
   property("InvalidMultifamilyUnits") {
-    validateIntStrOrNAField(badValue(), InvalidMultifamilyUnits(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidMultifamilyUnits(badValue()))
+    val invalidMultifamilyUnits = badValue()
+    validateIntStrOrNAField(invalidMultifamilyUnits, InvalidMultifamilyUnits(invalidMultifamilyUnits)) mustBe Invalid(
+      NonEmptyList.of(InvalidMultifamilyUnits(invalidMultifamilyUnits))
     )
   }
   property("InvalidApplicationSubmission") {
+    val invalidApplicationSubmission = badValue()
     validateLarCode(ApplicationSubmissionEnum,
-                    badValue(),
-                    InvalidApplicationSubmission(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidApplicationSubmission(badValue()))
+                    invalidApplicationSubmission,
+                    InvalidApplicationSubmission(invalidApplicationSubmission)) mustBe Invalid(
+      NonEmptyList.of(InvalidApplicationSubmission(invalidApplicationSubmission))
     )
   }
   property("InvalidPayableToInstitution") {
+    val invalidPayableToInstitution = badValue()
     validateLarCode(PayableToInstitutionEnum,
-                    badValue(),
-                    InvalidPayableToInstitution(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidPayableToInstitution(badValue()))
+                    invalidPayableToInstitution,
+                    InvalidPayableToInstitution(invalidPayableToInstitution)) mustBe Invalid(
+      NonEmptyList.of(InvalidPayableToInstitution(invalidPayableToInstitution))
     )
   }
   property("InvalidNMLSRIdentifier") {
-    validateIntStrOrNAField(badValue(), InvalidNMLSRIdentifier(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidNMLSRIdentifier(badValue()))
+    val invalidNMLSRIdentifier = badValue()
+    validateIntStrOrNAField(invalidNMLSRIdentifier, InvalidNMLSRIdentifier(invalidNMLSRIdentifier)) mustBe Invalid(
+      NonEmptyList.of(InvalidNMLSRIdentifier(invalidNMLSRIdentifier))
     )
   }
   property("InvalidAutomatedUnderwritingSystem 1") {
+    val invalidAUSSystem = badValue()
     validateLarCode(
       AutomatedUnderwritingSystemEnum,
-      badValue(),
-      InvalidAutomatedUnderwritingSystem(1, badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidAutomatedUnderwritingSystem(1, badValue()))
+      invalidAUSSystem,
+      InvalidAutomatedUnderwritingSystem(1, invalidAUSSystem)) mustBe Invalid(
+      NonEmptyList.of(InvalidAutomatedUnderwritingSystem(1, invalidAUSSystem))
     )
     validateLarCode(AutomatedUnderwritingResultEnum,
                     "2",
@@ -345,11 +377,12 @@ class LarFormatValidatorSpec
   }
 
   property("InvalidAutomatedUnderwritingSystem 2 - 5") {
+    val invalidAUSSystem = badValue()
     validateLarCodeOrEmptyField(
       AutomatedUnderwritingSystemEnum,
-      badValue(),
-      InvalidAutomatedUnderwritingSystem(1, badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidAutomatedUnderwritingSystem(1, badValue()))
+      invalidAUSSystem,
+      InvalidAutomatedUnderwritingSystem(1, invalidAUSSystem)) mustBe Invalid(
+      NonEmptyList.of(InvalidAutomatedUnderwritingSystem(1, invalidAUSSystem))
     )
     validateLarCodeOrEmptyField(
       AutomatedUnderwritingResultEnum,
@@ -359,11 +392,12 @@ class LarFormatValidatorSpec
 
   }
   property("InvalidAutomatedUnderwritingSystemResult 1") {
+    val invalidAUSResult = badValue()
     validateLarCode(
       AutomatedUnderwritingResultEnum,
-      badValue(),
-      InvalidAutomatedUnderwritingSystemResult(1, badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidAutomatedUnderwritingSystemResult(1, badValue()))
+      invalidAUSResult,
+      InvalidAutomatedUnderwritingSystemResult(1, invalidAUSResult)) mustBe Invalid(
+      NonEmptyList.of(InvalidAutomatedUnderwritingSystemResult(1, invalidAUSResult))
     )
     validateLarCode(AutomatedUnderwritingResultEnum,
                     "2",
@@ -378,11 +412,12 @@ class LarFormatValidatorSpec
   }
 
   property("InvalidAutomatedUnderwritingSystemResult 2-5") {
+    val invalidAUSResult = badValue()
     validateLarCodeOrEmptyField(
       AutomatedUnderwritingResultEnum,
-      badValue(),
-      InvalidAutomatedUnderwritingSystemResult(1, badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidAutomatedUnderwritingSystemResult(1, badValue()))
+      invalidAUSResult,
+      InvalidAutomatedUnderwritingSystemResult(1, invalidAUSResult)) mustBe Invalid(
+      NonEmptyList.of(InvalidAutomatedUnderwritingSystemResult(1, invalidAUSResult))
     )
     validateLarCodeOrEmptyField(
       AutomatedUnderwritingResultEnum,
@@ -397,22 +432,25 @@ class LarFormatValidatorSpec
       InvalidAutomatedUnderwritingResultCode)
   }
   property("InvalidMortgageType") {
+    val invalidMortgageType = badValue()
     validateLarCode(MortgageTypeEnum,
-                    badValue(),
-                    InvalidMortgageType(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidMortgageType(badValue())))
+                    invalidMortgageType,
+                    InvalidMortgageType(invalidMortgageType)) mustBe Invalid(
+      NonEmptyList.of(InvalidMortgageType(invalidMortgageType)))
   }
   property("InvalidLineOfCredit") {
+    val invalidLineOfCredit = badValue()
     validateLarCode(LineOfCreditEnum,
-                    badValue(),
-                    InvalidLineOfCredit(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidLineOfCredit(badValue())))
+                    invalidLineOfCredit,
+                    InvalidLineOfCredit(invalidLineOfCredit)) mustBe Invalid(
+      NonEmptyList.of(InvalidLineOfCredit(invalidLineOfCredit)))
   }
   property("InvalidBusinessOrCommercial") {
+    val invalidCommercialType = badValue()
     validateLarCode(BusinessOrCommercialBusinessEnum,
-                    badValue(),
-                    InvalidBusinessOrCommercial(badValue())) mustBe Invalid(
-      NonEmptyList.of(InvalidBusinessOrCommercial(badValue())))
+                    invalidCommercialType,
+                    InvalidBusinessOrCommercial(invalidCommercialType)) mustBe Invalid(
+      NonEmptyList.of(InvalidBusinessOrCommercial(invalidCommercialType)))
   }
 
 }
