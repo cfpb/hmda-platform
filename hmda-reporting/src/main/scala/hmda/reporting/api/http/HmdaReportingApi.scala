@@ -1,6 +1,6 @@
 package hmda.reporting.api.http
 
-import akka.actor.{ActorSystem, Props}
+import akka.actor.{ ActorSystem, Props }
 import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
@@ -12,7 +12,7 @@ import hmda.api.http.HttpServer
 import hmda.api.http.routes.BaseHttpApi
 import hmda.query.DbConfiguration.dbConfig
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.duration._
 
@@ -20,15 +20,12 @@ object HmdaReportingApi {
   def props(): Props = Props(new HmdaReportingApi)
 }
 
-class HmdaReportingApi
-    extends HttpServer
-    with BaseHttpApi
-    with ReportingHttpApi {
+class HmdaReportingApi extends HttpServer with BaseHttpApi with ReportingHttpApi {
 
-  override implicit val system: ActorSystem = context.system
+  override implicit val system: ActorSystem             = context.system
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
-  override implicit val ec: ExecutionContext = context.dispatcher
-  override val log = Logging(system, getClass)
+  override implicit val ec: ExecutionContext            = context.dispatcher
+  override val log                                      = Logging(system, getClass)
 
   val duration: FiniteDuration =
     config.getInt("hmda.reporting.http.timeout").seconds
@@ -37,12 +34,9 @@ class HmdaReportingApi
 
   override val name: String = "hmda-reporting-api"
   override val host: String = config.getString("hmda.reporting.http.host")
-  override val port: Int = config.getInt("hmda.reporting.http.port")
+  override val port: Int    = config.getInt("hmda.reporting.http.port")
 
   override val paths: Route = routes(s"$name") ~ hmdaFilerRoutes
-
-  override val institutionRepository: InstitutionRepository =
-    new InstitutionRepository(dbConfig)
 
   override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
     paths,
