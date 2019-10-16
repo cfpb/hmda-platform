@@ -53,26 +53,31 @@ object HmdaProcessingUtils {
     }
   }
 
-  def updateSubmissionReceipt(sharding: ClusterSharding, submissionId: SubmissionId, timestamp: Long, receipt: String, log: Logger)(
+  def updateSubmissionReceipt(sharding: ClusterSharding, submissionId: SubmissionId, timestamp: Long, receipt: String, modified: SubmissionStatus, log: Logger)(
     implicit ec: ExecutionContext,
     timeout: Timeout
   ): Unit = {
     val submissionPersistence: EntityRef[SubmissionCommand] =
       sharding.entityRefFor(SubmissionPersistence.typeKey, s"${SubmissionPersistence.name}-$submissionId")
 
+    val submissionManager =
+      sharding.entityRefFor(SubmissionManager.typeKey, s"${SubmissionManager.name}-$submissionId")
+
     val fSubmission: Future[Option[Submission]] = submissionPersistence ? (ref => GetSubmission(ref))
 
     for {
-      s <- fSubmission
-      m = s
+      m <- fSubmission
+      s = m
         .map(e => e.copy(receipt = receipt, end = timestamp))
         .getOrElse(Submission())
     } yield {
-      if (s.isEmpty) {
+      if (m.isEmpty) {
         log
           .error(s"Submission $submissionId could not be retrieved")
       } else {
-        val fUpdated: Future[SubmissionEvent] = submissionPersistence ? (ref => ModifySubmission(m, ref))
+        val modifiedSubmission = s.copy(status = modified)
+        submissionManager ! UpdateSubmissionStatus(modifiedSubmission)
+        val fUpdated: Future[SubmissionEvent] = submissionPersistence ? (ref => ModifySubmission(s, ref))
         fUpdated.map(e => log.debug(s"Updated receipt for submission $submissionId"))
       }
     }
