@@ -15,7 +15,7 @@ object Q604 extends EditCheck[LoanApplicationRegister] {
     val county = lar.geography.county
     val state  = lar.geography.state
     if (county.toLowerCase != "na" && state.toLowerCase != "na") {
-      if (CensusRecords.indexedCounty.contains(county)) {
+      if (CensusRecords.indexedCounty2019.contains(county)) {
         val countyState = Census.states.getOrElse(state, State("", ""))
         if (county.take(2) == countyState.code) {
           ValidationSuccess
