@@ -40,8 +40,8 @@ object HmdaProcessingUtils {
     val fSubmission: Future[Option[Submission]] = submissionPersistence ? (ref => GetSubmission(ref))
 
     for {
-      maybeSubmission <- fSubmission
-      submission = maybeSubmission.getOrElse(Submission())
+      potentialSubmission <- fSubmission
+      submission = potentialSubmission.getOrElse(Submission())
     } yield {
       if (submission.isEmpty) {
         log
@@ -52,7 +52,7 @@ object HmdaProcessingUtils {
       }
     }
   }
-
+  
   def updateSubmissionStatusAndReceipt(sharding: ClusterSharding, submissionId: SubmissionId, timestamp: Long, receipt: String, modified: SubmissionStatus, log: Logger)(
     implicit ec: ExecutionContext,
     timeout: Timeout
@@ -66,12 +66,12 @@ object HmdaProcessingUtils {
     val fSubmission: Future[Option[Submission]] = submissionPersistence ? (ref => GetSubmission(ref))
 
     for {
-      maybeSubmission <- fSubmission
-      submission = maybeSubmission
+      potentialSubmission <- fSubmission
+      submission = potentialSubmission
         .map(e => e.copy(receipt = receipt, end = timestamp))
         .getOrElse(Submission())
     } yield {
-      if (maybeSubmission.isEmpty) {
+      if (potentialSubmission.isEmpty) {
         log
           .error(s"Submission $submissionId could not be retrieved")
       } else {
