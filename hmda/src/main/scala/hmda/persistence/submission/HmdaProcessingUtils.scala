@@ -40,14 +40,14 @@ object HmdaProcessingUtils {
     val fSubmission: Future[Option[Submission]] = submissionPersistence ? (ref => GetSubmission(ref))
 
     for {
-      m <- fSubmission
-      s = m.getOrElse(Submission())
+      maybeSubmission <- fSubmission
+      submission = maybeSubmission.getOrElse(Submission())
     } yield {
-      if (s.isEmpty) {
+      if (submission.isEmpty) {
         log
           .error(s"Submission $submissionId could not be retrieved")
       } else {
-        val modifiedSubmission = s.copy(status = modified)
+        val modifiedSubmission = submission.copy(status = modified)
         submissionManager ! UpdateSubmissionStatus(modifiedSubmission)
       }
     }
@@ -66,18 +66,18 @@ object HmdaProcessingUtils {
     val fSubmission: Future[Option[Submission]] = submissionPersistence ? (ref => GetSubmission(ref))
 
     for {
-      m <- fSubmission
-      s = m
+      maybeSubmission <- fSubmission
+      submission = maybeSubmission
         .map(e => e.copy(receipt = receipt, end = timestamp))
         .getOrElse(Submission())
     } yield {
-      if (m.isEmpty) {
+      if (maybeSubmission.isEmpty) {
         log
           .error(s"Submission $submissionId could not be retrieved")
       } else {
-        val modifiedSubmission = s.copy(status = modified)
+        val modifiedSubmission = submission.copy(status = modified)
         submissionManager ! UpdateSubmissionStatus(modifiedSubmission)
-        val fUpdated: Future[SubmissionEvent] = submissionPersistence ? (ref => ModifySubmission(s, ref))
+        val fUpdated: Future[SubmissionEvent] = submissionPersistence ? (ref => ModifySubmission(submission, ref))
         fUpdated.map(e => log.debug(s"Updated receipt for submission $submissionId"))
       }
     }

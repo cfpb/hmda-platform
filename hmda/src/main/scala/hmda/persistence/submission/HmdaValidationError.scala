@@ -284,7 +284,7 @@ object HmdaValidationError
             Effect.persist(signed).thenRun { _ =>
               log.info(s"Submission $submissionId signed at ${Instant.ofEpochMilli(timestamp)}")
               updateSubmissionStatusAndReceipt(sharding, submissionId, timestamp, s"${signed.submissionId}-${signed.timestamp}", Signed, log)
-              publishSignEvent(submissionId).map(signed => log.info(s"Published signed event for $timestamp"))
+              publishSignEvent(submissionId).map(signed => log.info(s"Published signed event for $submissionId"))
               setHmdaFilerFlag(submissionId.lei, submissionId.period, sharding)
               replyTo ! signed
             }
