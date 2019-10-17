@@ -34,10 +34,11 @@ sealed trait ApplicantFormatValidator extends LarParser {
     coApp: Boolean
   ): LarParserValidationResult[Applicant] = {
     val credEnum =
-      if (coApp) InvalidCoApplicantCreditScore else InvalidApplicantCreditScore
+      if (coApp) InvalidCoApplicantCreditScore(creditScore)
+      else InvalidApplicantCreditScore(creditScore)
     val credModelEnum =
-      if (coApp) InvalidCoApplicantCreditScoreModel
-      else InvalidApplicantCreditScoreModel
+      if (coApp) InvalidCoApplicantCreditScoreModel(creditScoreModel)
+      else InvalidApplicantCreditScoreModel(creditScoreModel)
 
     (
       validateEthnicity(
@@ -52,7 +53,7 @@ sealed trait ApplicantFormatValidator extends LarParser {
       ),
       validateRace(race1, race2, race3, race4, race5, otherNative, otherAsian, otherPacific, raceObserved, coApp = coApp),
       validateSex(sex, sexObserved, coApp = coApp),
-      validateIntField(age, InvalidAge),
+      validateIntField(age, InvalidApplicantAge(age)),
       validateIntField(creditScore, credEnum),
       validateLarCode(CreditScoreEnum, creditScoreModel, credModelEnum),
       validateStr(otherCreditScore)
@@ -69,17 +70,30 @@ sealed trait ApplicantFormatValidator extends LarParser {
     ethnicityObserved: String,
     coApp: Boolean
   ): LarParserValidationResult[Ethnicity] = {
-    val ethEnum =
-      if (coApp) InvalidCoApplicantEthnicity else InvalidApplicantEthnicity
+    val ethEnum1 =
+      if (coApp) InvalidCoApplicantEthnicity(1, ethnicity1)
+      else InvalidApplicantEthnicity(1, ethnicity1)
+    val ethEnum2 =
+      if (coApp) InvalidCoApplicantEthnicity(2, ethnicity2)
+      else InvalidApplicantEthnicity(2, ethnicity2)
+    val ethEnum3 =
+      if (coApp) InvalidCoApplicantEthnicity(3, ethnicity3)
+      else InvalidApplicantEthnicity(3, ethnicity3)
+    val ethEnum4 =
+      if (coApp) InvalidCoApplicantEthnicity(4, ethnicity4)
+      else InvalidApplicantEthnicity(4, ethnicity4)
+    val ethEnum5 =
+      if (coApp) InvalidCoApplicantEthnicity(5, ethnicity5)
+      else InvalidApplicantEthnicity(5, ethnicity5)
     val ethObsEnum =
-      if (coApp) InvalidCoApplicantEthnicityObserved
-      else InvalidApplicantEthnicityObserved
+      if (coApp) InvalidCoApplicantEthnicityObserved(ethnicityObserved)
+      else InvalidApplicantEthnicityObserved(ethnicityObserved)
     (
-      validateLarCodeOrEmptyField(EthnicityEnum, ethnicity1, ethEnum),
-      validateLarCodeOrEmptyField(EthnicityEnum, ethnicity2, ethEnum),
-      validateLarCodeOrEmptyField(EthnicityEnum, ethnicity3, ethEnum),
-      validateLarCodeOrEmptyField(EthnicityEnum, ethnicity4, ethEnum),
-      validateLarCodeOrEmptyField(EthnicityEnum, ethnicity5, ethEnum),
+      validateLarCodeOrEmptyField(EthnicityEnum, ethnicity1, ethEnum1),
+      validateLarCodeOrEmptyField(EthnicityEnum, ethnicity2, ethEnum2),
+      validateLarCodeOrEmptyField(EthnicityEnum, ethnicity3, ethEnum3),
+      validateLarCodeOrEmptyField(EthnicityEnum, ethnicity4, ethEnum4),
+      validateLarCodeOrEmptyField(EthnicityEnum, ethnicity5, ethEnum5),
       validateStr(otherHispanicOrLatino),
       validateLarCode(EthnicityObservedEnum, ethnicityObserved, ethObsEnum)
     ).mapN(Ethnicity.apply)
@@ -98,16 +112,30 @@ sealed trait ApplicantFormatValidator extends LarParser {
     coApp: Boolean
   ): LarParserValidationResult[Race] = {
 
-    val raceEnum = if (coApp) InvalidCoApplicantRace else InvalidApplicantRace
+    val raceEnum1 =
+      if (coApp) InvalidCoApplicantRace(1, race1)
+      else InvalidApplicantRace(1, race1)
+    val raceEnum2 =
+      if (coApp) InvalidCoApplicantRace(2, race2)
+      else InvalidApplicantRace(2, race2)
+    val raceEnum3 =
+      if (coApp) InvalidCoApplicantRace(3, race3)
+      else InvalidApplicantRace(3, race3)
+    val raceEnum4 =
+      if (coApp) InvalidCoApplicantRace(4, race4)
+      else InvalidApplicantRace(4, race4)
+    val raceEnum5 =
+      if (coApp) InvalidCoApplicantRace(5, race5)
+      else InvalidApplicantRace(5, race5)
     val raceObsEnum =
-      if (coApp) InvalidCoApplicantRaceObserved
-      else InvalidApplicantRaceObserved
+      if (coApp) InvalidCoApplicantRaceObserved(raceObserved)
+      else InvalidApplicantRaceObserved(raceObserved)
     (
-      validateLarCodeOrEmptyField(RaceEnum, race1, raceEnum),
-      validateLarCodeOrEmptyField(RaceEnum, race2, raceEnum),
-      validateLarCodeOrEmptyField(RaceEnum, race3, raceEnum),
-      validateLarCodeOrEmptyField(RaceEnum, race4, raceEnum),
-      validateLarCodeOrEmptyField(RaceEnum, race5, raceEnum),
+      validateLarCodeOrEmptyField(RaceEnum, race1, raceEnum1),
+      validateLarCodeOrEmptyField(RaceEnum, race2, raceEnum2),
+      validateLarCodeOrEmptyField(RaceEnum, race3, raceEnum3),
+      validateLarCodeOrEmptyField(RaceEnum, race4, raceEnum4),
+      validateLarCodeOrEmptyField(RaceEnum, race5, raceEnum5),
       validateStr(otherNative),
       validateStr(otherAsian),
       validateStr(otherPacific),
@@ -120,9 +148,11 @@ sealed trait ApplicantFormatValidator extends LarParser {
     sexObserved: String,
     coApp: Boolean
   ): LarParserValidationResult[Sex] = {
-    val sexEnum = if (coApp) InvalidCoApplicantSex else InvalidApplicantSex
+    val sexEnum =
+      if (coApp) InvalidCoApplicantSex(sex) else InvalidApplicantSex(sex)
     val sexObsEnum =
-      if (coApp) InvalidCoApplicantSexObserved else InvalidApplicantSexObserved
+      if (coApp) InvalidCoApplicantSexObserved(sexObserved)
+      else InvalidApplicantSexObserved(sexObserved)
     (
       validateLarCode(SexEnum, sex, sexEnum),
       validateLarCode(SexObservedEnum, sexObserved, sexObsEnum)

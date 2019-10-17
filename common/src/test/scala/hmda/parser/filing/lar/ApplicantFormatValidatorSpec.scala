@@ -22,7 +22,7 @@ class ApplicantFormatValidatorSpec
       val applicant = lar.applicant
       val badValues = extractValues(applicant).updated(0, "a")
       validateApplicantValues(badValues) mustBe Invalid(
-        NonEmptyList.of(InvalidApplicantEthnicity))
+        NonEmptyList.of(InvalidApplicantEthnicity(1, "a")))
     }
   }
 
@@ -31,7 +31,7 @@ class ApplicantFormatValidatorSpec
       val applicant = lar.applicant
       val badValues = extractValues(applicant).updated(7, "a")
       validateApplicantValues(badValues) mustBe Invalid(
-        NonEmptyList.of(InvalidApplicantRace))
+        NonEmptyList.of(InvalidApplicantRace(1, "a")))
     }
   }
 
@@ -40,7 +40,7 @@ class ApplicantFormatValidatorSpec
       val applicant = lar.applicant
       val badValues = extractValues(applicant).updated(16, "o")
       validateApplicantValues(badValues) mustBe Invalid(
-        NonEmptyList.of(InvalidApplicantSex))
+        NonEmptyList.of(InvalidApplicantSex("o")))
     }
   }
 
@@ -49,7 +49,7 @@ class ApplicantFormatValidatorSpec
       val applicant = lar.applicant
       val badValues = extractValues(applicant).updated(18, "xx")
       validateApplicantValues(badValues) mustBe Invalid(
-        NonEmptyList.of(InvalidAge)
+        NonEmptyList.of(InvalidApplicantAge("xx"))
       )
     }
   }
@@ -59,7 +59,7 @@ class ApplicantFormatValidatorSpec
       val applicant = lar.applicant
       val badValues = extractValues(applicant).updated(20, "a")
       validateApplicantValues(badValues) mustBe Invalid(
-        NonEmptyList.of(InvalidApplicantCreditScoreModel)
+        NonEmptyList.of(InvalidApplicantCreditScoreModel("a"))
       )
     }
   }
@@ -72,9 +72,9 @@ class ApplicantFormatValidatorSpec
         .updated(7, "b")
         .updated(16, "oh")
       validateApplicantValues(badValues) mustBe Invalid(
-        NonEmptyList.of(InvalidApplicantEthnicity,
-                        InvalidApplicantRace,
-                        InvalidApplicantSex)
+        NonEmptyList.of(InvalidApplicantEthnicity(1, "a"),
+                        InvalidApplicantRace(1, "b"),
+                        InvalidApplicantSex("oh"))
       )
     }
   }

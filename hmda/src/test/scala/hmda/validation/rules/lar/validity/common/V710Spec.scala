@@ -11,8 +11,6 @@ class V710Spec extends LarEditCheckSpec {
 
   property("If credit is reported exempt, all fields must be reported exempt") {
     forAll(larGen) { lar =>
-      lar.mustPass
-
       val invalidLar1 =
         lar.copy(applicant = lar.applicant.copy(creditScore = 1111))
       invalidLar1.mustFail

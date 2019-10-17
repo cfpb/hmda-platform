@@ -5,11 +5,12 @@ option optimize_for = SPEED;
 
 import "submission.proto";
 import "validation.proto";
+import "submission.processing.commands.proto";
 
 message HmdaRowParsedErrorMessage {
     int32 rowNumber = 1;
     string estimatedULI = 3;
-    repeated string errors = 2;
+    repeated FieldParserErrorMessage errors = 2;
 }
 
 message HmdaRowParsedCountMessage {

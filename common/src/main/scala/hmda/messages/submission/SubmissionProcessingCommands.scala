@@ -16,12 +16,14 @@ object SubmissionProcessingCommands {
 
   case class StartParsing(submissionId: SubmissionId) extends SubmissionProcessingCommand
 
+  case class FieldParserError(fieldName: String, inputValue: String)
+
   case class PersistHmdaRowParsedError(
-    rowNumber: Int,
-    estimatedULI: String,
-    errors: List[String],
-    maybeReplyTo: Option[ActorRef[HmdaRowParsedError]]
-  ) extends SubmissionProcessingCommand
+      rowNumber: Int,
+      estimatedULI: String,
+      errors: List[FieldParserError],
+      maybeReplyTo: Option[ActorRef[HmdaRowParsedError]])
+      extends SubmissionProcessingCommand
 
   case class GetParsedWithErrorCount(replyTo: ActorRef[SubmissionProcessingEvent]) extends SubmissionProcessingCommand
 

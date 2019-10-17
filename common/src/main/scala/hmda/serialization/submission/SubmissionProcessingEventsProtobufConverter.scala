@@ -14,6 +14,7 @@ import hmda.persistence.serialization.submission.processing.events.{
 import hmda.persistence.serialization.validation.ValidationErrorMessage
 import hmda.serialization.submission.SubmissionProtobufConverter._
 import hmda.serialization.validation.ValidationProtobufConverter._
+import hmda.serialization.submission.SubmissionProcessingCommandsProtobufConverter._
 
 object SubmissionProcessingEventsProtobufConverter {
 
@@ -21,14 +22,16 @@ object SubmissionProcessingEventsProtobufConverter {
     HmdaRowParsedErrorMessage(
       hmdaRowParsedError.rowNumber,
       hmdaRowParsedError.estimatedULI,
-      hmdaRowParsedError.errorMessages
+      hmdaRowParsedError.errorMessages.map(x =>
+        persistFieldParserErrorToProtobuf(x))
     )
 
   def hmdaRowParsedErrorFromProtobuf(hmdaRowParsedErrorMessage: HmdaRowParsedErrorMessage): HmdaRowParsedError =
     HmdaRowParsedError(
       hmdaRowParsedErrorMessage.rowNumber,
       hmdaRowParsedErrorMessage.estimatedULI,
-      hmdaRowParsedErrorMessage.errors.toList
+      hmdaRowParsedErrorMessage.errors.toList.map(x =>
+        persistFieldParserErrorFromProtobuf(x))
     )
 
   def hmdaRowParsedCountToProtobuf(hmdaRowParsedCount: HmdaRowParsedCount): HmdaRowParsedCountMessage =

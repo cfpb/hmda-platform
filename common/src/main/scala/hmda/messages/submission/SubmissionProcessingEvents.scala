@@ -3,6 +3,7 @@ package hmda.messages.submission
 import hmda.messages.CommonMessages.Event
 import hmda.model.filing.submission.{SubmissionId, SubmissionStatus}
 import hmda.model.validation.{MacroValidationError, ValidationError}
+import hmda.messages.submission.SubmissionProcessingCommands.FieldParserError
 import io.circe._
 import io.circe.generic.semiauto._
 
@@ -11,13 +12,8 @@ object SubmissionProcessingEvents {
 
   case class HmdaRowParsedError(rowNumber: Int,
                                 estimatedULI: String,
-                                errorMessages: List[String])
-    extends SubmissionProcessingEvent
-
-  object HmdaRowParsedError {
-    implicit val codec: Codec[HmdaRowParsedError] =
-      deriveCodec[HmdaRowParsedError]
-  }
+                                errorMessages: List[FieldParserError])
+      extends SubmissionProcessingEvent
 
   case class HmdaRowValidatedError(rowNumber: Int,
                                    validationErrors: List[ValidationError])

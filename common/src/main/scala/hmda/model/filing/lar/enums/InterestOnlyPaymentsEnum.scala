@@ -3,7 +3,7 @@ package hmda.model.filing.lar.enums
 sealed trait InterestOnlyPaymentsEnum extends LarEnum
 
 object InterestOnlyPaymentsEnum extends LarCodeEnum[InterestOnlyPaymentsEnum] {
-  override val values = List(1, 2)
+  override val values = List(1, 2, 1111)
 
   override def valueOf(code: Int): InterestOnlyPaymentsEnum =
     code match {

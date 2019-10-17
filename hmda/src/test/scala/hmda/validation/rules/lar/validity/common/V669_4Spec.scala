@@ -11,7 +11,7 @@ class V669_4Spec extends LarEditCheckSpec {
 
   property("If denial reason 1 is exempt or NA, then 2-4 must be blank") {
     forAll(larGen) { lar =>
-      whenever(lar.denial.denialReason1 != DenialReasonNotApplicable) {
+      whenever(lar.denial.denialReason1 != DenialReasonNotApplicable && lar.denial.denialReason1 != ExemptDenialReason) {
         lar.mustPass
       }
 

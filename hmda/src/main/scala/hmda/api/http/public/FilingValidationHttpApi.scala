@@ -14,7 +14,7 @@ import hmda.model.filing.EditDescriptionLookup
 trait FilingValidationHttpApi {
 
   def completeWithParsingErrors(errors: List[ParserValidationError]): Route = {
-    val errorList = errors.map(e => e.errorMessage)
+    val errorList = errors.map(e => e.fieldName)
     complete(
       ToResponseMarshallable(StatusCodes.BadRequest -> LarValidateResponse(errorList))
     )

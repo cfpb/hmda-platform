@@ -12,10 +12,9 @@ class V714Spec extends LarEditCheckSpec {
   property(
     "If Application Channel exemption election is taken, all fields must be exempt") {
     forAll(larGen) { lar =>
-      lar.mustPass
 
-      lar.copy(applicationSubmission = ApplicationSubmissionExempt).mustFail
-      lar.copy(payableToInstitution = PayableToInstitutionExempt).mustFail
+      lar.copy(applicationSubmission = ApplicationSubmissionExempt, payableToInstitution = PayableToInstitutionNotApplicable).mustFail
+      lar.copy(applicationSubmission = ApplicationSubmissionNotApplicable, payableToInstitution = PayableToInstitutionExempt).mustFail
 
       lar
         .copy(applicationSubmission = ApplicationSubmissionExempt,

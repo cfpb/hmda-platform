@@ -82,15 +82,15 @@ class LarValidationHttpApiSpec
       Post("/lar/parse", LarValidateRequest(badCsv)) ~> larRoutes ~> check {
         status mustBe StatusCodes.BadRequest
         responseAs[LarValidateResponse] mustBe LarValidateResponse(
-          List("id is not numeric"))
+          List("LAR Record Identifier"))
       }
     }
 
     "fail to parse a valid pipe delimited LAR with too many fields and return an error" in {
       Post("/lar/parse", LarValidateRequest(larCsv + "|too|many|fields")) ~> larRoutes ~> check {
         status mustBe StatusCodes.BadRequest
-        responseAs[LarValidateResponse] mustBe LarValidateResponse(List(
-          "An incorrect number of data fields were reported: 113 data fields were found, when 110 data fields were expected."))
+        responseAs[LarValidateResponse] mustBe LarValidateResponse(
+          List("Incorrect Number of LAR Fields"))
       }
     }
 

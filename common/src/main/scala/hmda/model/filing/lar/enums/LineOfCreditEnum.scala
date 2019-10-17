@@ -3,7 +3,7 @@ package hmda.model.filing.lar.enums
 sealed trait LineOfCreditEnum extends LarEnum
 
 object LineOfCreditEnum extends LarCodeEnum[LineOfCreditEnum] {
-  override val values = List(1, 2)
+  override val values = List(1, 2, 1111)
 
   override def valueOf(code: Int): LineOfCreditEnum =
     code match {

@@ -34,7 +34,7 @@ import hmda.model.filing.submission.{Created, Submission, SubmissionId}
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators.institutionGen
 import hmda.model.submission.SubmissionGenerator.submissionGen
-import hmda.parser.filing.lar.LarParserErrorModel.InvalidId
+import hmda.parser.filing.lar.LarParserErrorModel.InvalidLarId
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.{HmdaParserError, SubmissionPersistence}
@@ -44,6 +44,7 @@ import hmda.messages.submission.SubmissionProcessingEvents.{
   HmdaRowParsedCount,
   SubmissionProcessingEvent
 }
+import hmda.messages.submission.SubmissionProcessingCommands._
 import org.keycloak.adapters.KeycloakDeploymentBuilder
 
 import scala.concurrent.ExecutionContext
@@ -135,10 +136,12 @@ class ParseErrorHttpApiSpec
       HmdaParserError.typeKey,
       s"${HmdaParserError.name}-${sampleSubmission.id.toString}")
     for (i <- 1 to 100) {
-      val errorList = List(InvalidId)
-      hmdaParserError ! PersistHmdaRowParsedError(i,
+      val errorList = List(InvalidLarId("a"))
+      hmdaParserError ! PersistHmdaRowParsedError(
+        i,
         "testULI",
-        errorList.map(_.errorMessage),
+        errorList.map(x =>
+          FieldParserError(x.fieldName, x.inputValue)),
         None)
     }
 

@@ -4,11 +4,11 @@ import cats.data.NonEmptyList
 import cats.data.Validated.{Invalid, Valid}
 import com.typesafe.config.ConfigFactory
 import hmda.model.filing.ts.TsGenerators._
-import hmda.parser.ParserErrorModel.IncorrectNumberOfFields
 import hmda.parser.filing.ts.TsFormatValidator._
 import hmda.parser.filing.ts.TsParserErrorModel._
 import hmda.parser.filing.ts.TsValidationUtils._
 import org.scalatest.prop.PropertyChecks
+import hmda.parser.filing.ts.TsParserErrorModel.IncorrectNumberOfFieldsTs
 import org.scalatest.{MustMatchers, PropSpec}
 
 class TsFormatValidatorSpec
@@ -31,7 +31,7 @@ class TsFormatValidatorSpec
   property("Transmittal Sheet must have the correct number of fields") {
     val values = List("a", "b", "c")
     validateTs(values) mustBe Invalid(
-      NonEmptyList.of(IncorrectNumberOfFields(values.length, numberOfFields)))
+      NonEmptyList.of(IncorrectNumberOfFieldsTs(values.length.toString)))
   }
 
   property(
@@ -39,7 +39,7 @@ class TsFormatValidatorSpec
     forAll(tsGen) { ts =>
       val badId = badValue()
       val badValues = extractValues(ts).updated(0, badId)
-      validateTs(badValues) mustBe Invalid(NonEmptyList.of(InvalidId))
+      validateTs(badValues) mustBe Invalid(NonEmptyList.of(InvalidTsId(badId)))
     }
   }
 
@@ -48,7 +48,7 @@ class TsFormatValidatorSpec
     forAll(tsGen) { ts =>
       val badYear = badValue()
       val badValues = extractValues(ts).updated(2, badYear)
-      validateTs(badValues) mustBe Invalid(NonEmptyList.of(InvalidYear))
+      validateTs(badValues) mustBe Invalid(NonEmptyList.of(InvalidYear(badYear)))
     }
   }
 
@@ -57,7 +57,7 @@ class TsFormatValidatorSpec
     forAll(tsGen) { ts =>
       val badQuarter = badValue()
       val badValues = extractValues(ts).updated(3, badQuarter)
-      validateTs(badValues) mustBe Invalid(NonEmptyList.of(InvalidQuarter))
+      validateTs(badValues) mustBe Invalid(NonEmptyList.of(InvalidQuarter(badQuarter)))
     }
   }
 
@@ -66,7 +66,7 @@ class TsFormatValidatorSpec
     forAll(tsGen) { ts =>
       val badTotalLines = badValue()
       val badValues = extractValues(ts).updated(12, badTotalLines)
-      validateTs(badValues) mustBe Invalid(NonEmptyList.of(InvalidTotalLines))
+      validateTs(badValues) mustBe Invalid(NonEmptyList.of(InvalidTotalLines(badTotalLines)))
     }
   }
 
@@ -75,7 +75,7 @@ class TsFormatValidatorSpec
     forAll(tsGen) { ts =>
       val badAgencyCode = badValue()
       val badValues = extractValues(ts).updated(11, badAgencyCode)
-      validateTs(badValues) mustBe Invalid(NonEmptyList.of(InvalidAgencyCode))
+      validateTs(badValues) mustBe Invalid(NonEmptyList.of(InvalidAgencyCode(badAgencyCode)))
     }
   }
 
@@ -85,7 +85,7 @@ class TsFormatValidatorSpec
       val badYear = badValue()
       val badValues = extractValues(ts).updated(0, badId).updated(2, badYear)
       validateTs(badValues) mustBe Invalid(
-        NonEmptyList.of(InvalidId, InvalidYear))
+        NonEmptyList.of(InvalidTsId(badId), InvalidYear(badYear)))
     }
   }
 

@@ -18,10 +18,15 @@ message StartParsingMessage {
     SubmissionIdMessage submissionId = 1;
 }
 
+message FieldParserErrorMessage {
+    string fieldName = 1;
+    string inputValue = 2;
+}
+
 message PersistHmdaRowParsedErrorMessage {
     int32 rowNumber = 1;
     string estimatedULI = 4;
-    repeated string errors = 2;
+    repeated FieldParserErrorMessage fieldErrors = 2;
     string maybeReplyTo = 3;
 }
 

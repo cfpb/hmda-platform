@@ -19,6 +19,9 @@ import hmda.model.filing.submission.{Submission, SubmissionId}
 import hmda.model.processing.state.HmdaParserErrorState
 import hmda.persistence.submission.{HmdaParserError, SubmissionPersistence}
 import hmda.util.http.FilingResponseUtils._
+import hmda.model.filing.ParserValidValuesLookup._
+import hmda.api.http.model.filing.submissions._
+import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowParsedError
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -64,14 +67,14 @@ trait ParseErrorHttpApi extends HmdaTimeDirectives {
                           HmdaParserError.typeKey,
                           s"${HmdaParserError.name}-${submissionId.toString}")
                       val fErrors
-                      : Future[HmdaParserErrorState] = hmdaParserError ? (
-                        ref => GetParsingErrors(page, ref))
+                        : Future[HmdaParserErrorState] = hmdaParserError ? (
+                          ref => GetParsingErrors(page, ref))
                       onComplete(fErrors) {
                         case Success(state) =>
                           val parsingErrorSummary = ParsingErrorSummary(
-                            state.transmittalSheetErrors.flatMap(
-                              _.errorMessages),
-                            state.larErrors,
+                            state.transmittalSheetErrors.map(
+                              parserErrorSummaryConvertor(_)),
+                            state.larErrors.map(parserErrorSummaryConvertor(_)),
                             uri.path.toString,
                             page,
                             state.totalErrors,
@@ -105,6 +108,21 @@ trait ParseErrorHttpApi extends HmdaTimeDirectives {
         }
       }
     }
+  }
+
+  def parserErrorSummaryConvertor(
+      hmdaRowParsedError: HmdaRowParsedError): HmdaRowParsedErrorSummary = {
+    HmdaRowParsedErrorSummary(
+      hmdaRowParsedError.rowNumber,
+      hmdaRowParsedError.estimatedULI,
+      hmdaRowParsedError.errorMessages.map(
+        errorMessage =>
+          FieldParserErrorSummary(
+            errorMessage.fieldName,
+            errorMessage.inputValue,
+            lookupParserValidValues(errorMessage.fieldName)
+        ))
+    )
   }
 
 }

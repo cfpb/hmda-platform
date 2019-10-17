@@ -1,27 +1,39 @@
 package hmda.parser.filing.ts
 
-import hmda.parser.ParserErrorModel.{ notNumeric, ParserValidationError }
+import hmda.parser.ParserErrorModel.ParserValidationError
 
 object TsParserErrorModel {
 
-  case object InvalidId extends ParserValidationError {
-    override def errorMessage: String = notNumeric("id")
+  case class IncorrectNumberOfFieldsTs(value: String)
+      extends ParserValidationError {
+    override def fieldName: String = "Incorrect Number of TS Fields"
+    override def inputValue: String = value.toString
   }
 
-  case object InvalidYear extends ParserValidationError {
-    override def errorMessage: String = notNumeric("year")
+  case class InvalidTsId(value: String) extends ParserValidationError {
+    override def fieldName: String = "Transmittal Sheet Record Identifier"
+    override def inputValue: String = value.toString
   }
 
-  case object InvalidQuarter extends ParserValidationError {
-    override def errorMessage: String = notNumeric("quarter")
+  case class InvalidYear(value: String) extends ParserValidationError {
+    override def fieldName: String = "Calendar Year"
+    override def inputValue: String = value.toString
   }
 
-  case object InvalidTotalLines extends ParserValidationError {
-    override def errorMessage: String = notNumeric("total lines")
+  case class InvalidQuarter(value: String) extends ParserValidationError {
+    override def fieldName: String = "Calendar Quarter"
+    override def inputValue: String = value.toString
   }
 
-  case object InvalidAgencyCode extends ParserValidationError {
-    override def errorMessage: String = notNumeric("agency code")
+  case class InvalidTotalLines(value: String) extends ParserValidationError {
+    override def fieldName: String =
+      "Total Number of Entries Contained in Submission"
+    override def inputValue: String = value.toString
+  }
+
+  case class InvalidAgencyCode(value: String) extends ParserValidationError {
+    override def fieldName: String = "Federal Agency"
+    override def inputValue: String = value.toString
   }
 
 }

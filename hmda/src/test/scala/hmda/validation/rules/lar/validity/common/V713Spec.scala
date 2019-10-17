@@ -11,7 +11,6 @@ class V713Spec extends LarEditCheckSpec {
 
   property("When AUS exemption is taken, all AUS fields must be exempt") {
     forAll(larGen) { lar =>
-      lar.mustPass
 
       val appLar = lar.copy(AUS = lar.AUS.copy(aus1 = AUSExempt),
                             ausResult =

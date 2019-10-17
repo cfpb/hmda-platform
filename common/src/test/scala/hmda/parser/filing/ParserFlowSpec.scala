@@ -10,8 +10,9 @@ import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.filing.ts.TsGenerators._
+import hmda.parser.filing.ts.TsParserErrorModel.IncorrectNumberOfFieldsTs
+import hmda.parser.filing.lar.LarParserErrorModel.IncorrectNumberOfFieldsLar
 import hmda.parser.ParserErrorModel.{
-  IncorrectNumberOfFields,
   ParserValidationError
 }
 import hmda.parser.filing.ParserFlow._
@@ -66,7 +67,7 @@ class ParserFlowSpec extends WordSpec with MustMatchers {
         .map(_.left.get)
         .runWith(TestSink.probe[List[ParserValidationError]])
         .request(1)
-        .expectNext(List(IncorrectNumberOfFields(18, 15)))
+        .expectNext(List(IncorrectNumberOfFieldsTs("18")))
     }
 
     "parse list of text into list of Loan Application Register" in {
@@ -88,7 +89,7 @@ class ParserFlowSpec extends WordSpec with MustMatchers {
         .map(_.left.get)
         .runWith(TestSink.probe[List[ParserValidationError]])
         .request(badLarList.size)
-        .expectNextN(Seq(List(IncorrectNumberOfFields(113, 110)))
+        .expectNextN(Seq(List(IncorrectNumberOfFieldsLar("113")))
           .asInstanceOf[Seq[List[ParserValidationError]]])
     }
 
@@ -114,8 +115,8 @@ class ParserFlowSpec extends WordSpec with MustMatchers {
         }
         .runWith(TestSink.probe[List[ParserValidationError]])
         .request(badHmdaFileCsv.size)
-        .expectNext(List(IncorrectNumberOfFields(18, 15)))
-        .expectNext(List(IncorrectNumberOfFields(113, 110)))
+        .expectNext(List(IncorrectNumberOfFieldsTs("18")))
+        .expectNext(List(IncorrectNumberOfFieldsLar("113")))
     }
   }
 

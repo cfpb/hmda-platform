@@ -2,8 +2,9 @@ package hmda.model.filing.lar.enums
 
 sealed trait BusinessOrCommercialBusinessEnum extends LarEnum
 
-object BusinessOrCommercialBusinessEnum extends LarCodeEnum[BusinessOrCommercialBusinessEnum] {
-  override val values = List(1, 2)
+object BusinessOrCommercialBusinessEnum
+    extends LarCodeEnum[BusinessOrCommercialBusinessEnum] {
+  override val values = List(1, 2, 1111)
 
   override def valueOf(code: Int): BusinessOrCommercialBusinessEnum =
     code match {

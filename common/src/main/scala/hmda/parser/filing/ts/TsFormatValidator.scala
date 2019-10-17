@@ -6,7 +6,7 @@ import com.typesafe.config.ConfigFactory
 import hmda.model.filing.EditDescriptionLookup
 import hmda.model.filing.ts.{ Address, Contact, TransmittalSheet }
 import hmda.model.institution.Agency
-import hmda.parser.ParserErrorModel.{ IncorrectNumberOfFields, ParserValidationError }
+import hmda.parser.ParserErrorModel.ParserValidationError
 import hmda.parser.filing.ts.TsParserErrorModel._
 
 import scala.util.{ Failure, Success, Try }
@@ -22,7 +22,7 @@ sealed trait TsFormatValidator {
 
   def validateTs(values: Seq[String], rawLine: String = "", fromCassandra: Boolean = false): TsParserValidationResult[TransmittalSheet] =
     if (values.lengthCompare(numberOfFields) != 0 || (rawLine.trim.endsWith("|") && (!fromCassandra))) {
-      IncorrectNumberOfFields(values.length, numberOfFields).invalidNel
+      IncorrectNumberOfFieldsTs(values.length.toString).invalidNel
     } else {
       val id              = values.headOption.getOrElse("")
       val institutionName = values(1)
@@ -96,17 +96,22 @@ sealed trait TsFormatValidator {
   private def validateStr(str: String): TsParserValidationResult[String] =
     str.validNel
 
-  private def validateIdField(value: String): TsParserValidationResult[Int] =
-    validateIntField(value, InvalidId)
+  private def validateIdField(value: String): TsParserValidationResult[Int] = {
+    validateIntField(value, InvalidTsId(value))
+  }
 
-  private def validateYear(value: String): TsParserValidationResult[Int] =
-    validateIntField(value, InvalidYear)
+  private def validateYear(value: String): TsParserValidationResult[Int] = {
+    validateIntField(value, InvalidYear(value))
+  }
 
-  private def validateQuarter(value: String): TsParserValidationResult[Int] =
-    validateIntField(value, InvalidQuarter)
+  private def validateQuarter(value: String): TsParserValidationResult[Int] = {
+    validateIntField(value, InvalidQuarter(value))
+  }
 
-  private def validateTotalLines(value: String): TsParserValidationResult[Int] =
-    validateIntField(value, InvalidTotalLines)
+  private def validateTotalLines(
+      value: String): TsParserValidationResult[Int] = {
+    validateIntField(value, InvalidTotalLines(value))
+  }
 
   private def validateContact(contact: Contact): TsParserValidationResult[Contact] =
     contact.validNel
@@ -114,7 +119,7 @@ sealed trait TsFormatValidator {
   private def validateAgencyCode(code: String): TsParserValidationResult[Agency] =
     Try(Agency.valueOf(code.toInt)) match {
       case Success(c) => c.validNel
-      case Failure(_) => InvalidAgencyCode.invalidNel
+      case Failure(_) => InvalidAgencyCode(code).invalidNel
     }
 
   private def validateIntField(value: String, parserValidation: ParserValidationError): TsParserValidationResult[Int] =

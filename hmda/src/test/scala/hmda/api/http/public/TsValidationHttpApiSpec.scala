@@ -70,8 +70,8 @@ class TsValidationHttpApiSpec
       Post("/ts/parse", TsValidateRequest(invalidParseCsv)) ~> tsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
         responseAs[TsValidateResponse].errorMessages mustBe List(
-          "id is not numeric",
-          "agency code is not numeric")
+          "Transmittal Sheet Record Identifier",
+          "Federal Agency")
       }
     }
 
@@ -81,7 +81,7 @@ class TsValidationHttpApiSpec
       Post("/ts/parse", tsValidateRequestWithTooManyFields) ~> tsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
         responseAs[TsValidateResponse].errorMessages mustBe List(
-          "An incorrect number of data fields were reported: 18 data fields were found, when 15 data fields were expected.")
+          "Incorrect Number of TS Fields")
       }
     }
 

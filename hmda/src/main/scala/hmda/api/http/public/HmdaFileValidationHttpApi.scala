@@ -124,7 +124,7 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
       .map {
         case (i, Right(_)) => Validated(i, "OK")
         case (i, Left(errors)) =>
-          Validated(i, errors.map(e => e.errorMessage).mkString(","))
+          Validated(i, errors.map(e => e.fieldName).mkString(","))
       }
       .filter(x => x.errors != "OK")
 
@@ -142,7 +142,7 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
       .map {
         case (i, Right(_)) => Validated(i, "OK")
         case (i, Left(errors)) =>
-          Validated(i, errors.map(e => e.errorMessage).mkString(","))
+          Validated(i, errors.map(e => e.fieldName).mkString(","))
       }
       .filter(x => x.errors != "OK")
 

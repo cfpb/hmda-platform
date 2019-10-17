@@ -51,16 +51,32 @@ object SubmissionProcessingCommandsProtobufConverter {
       submissionIdFromProtobuf(msg.submissionId.getOrElse(SubmissionIdMessage()))
     )
 
-  def persistHmdaRowParsedErrorToProtobuf(cmd: PersistHmdaRowParsedError, refResolver: ActorRefResolver): PersistHmdaRowParsedErrorMessage =
+  def persistFieldParserErrorToProtobuf(
+      cmd: FieldParserError): FieldParserErrorMessage = {
+    FieldParserErrorMessage(cmd.fieldName, cmd.inputValue)
+  }
+
+  def persistFieldParserErrorFromProtobuf(
+      msg: FieldParserErrorMessage): FieldParserError = {
+    FieldParserError(
+      msg.fieldName,
+      msg.inputValue,
+    )
+  }
+
+  def persistHmdaRowParsedErrorToProtobuf(
+      cmd: PersistHmdaRowParsedError,
+      refResolver: ActorRefResolver): PersistHmdaRowParsedErrorMessage = {
     PersistHmdaRowParsedErrorMessage(
       cmd.rowNumber,
       cmd.estimatedULI,
-      cmd.errors,
+      cmd.errors.map(x => persistFieldParserErrorToProtobuf(x)),
       cmd.maybeReplyTo match {
         case None      => ""
         case Some(ref) => refResolver.toSerializationFormat(ref)
       }
     )
+  }
 
   def persistHmdaRowParsedErrorFromProtobuf(
     msg: PersistHmdaRowParsedErrorMessage,
@@ -69,7 +85,7 @@ object SubmissionProcessingCommandsProtobufConverter {
     PersistHmdaRowParsedError(
       msg.rowNumber,
       msg.estimatedULI,
-      msg.errors.toList,
+      msg.fieldErrors.toList.map(x => persistFieldParserErrorFromProtobuf(x)),
       if (msg.maybeReplyTo == "") None
       else Some(refResolver.resolveActorRef(msg.maybeReplyTo))
     )
