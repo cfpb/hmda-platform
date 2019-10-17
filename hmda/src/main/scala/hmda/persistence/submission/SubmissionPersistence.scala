@@ -56,12 +56,22 @@ object SubmissionPersistence extends HmdaTypedPersistentActor[SubmissionCommand,
         if (state.submission.map(s => s.id).contains(modified.id)) {
           if (modified.status == SubmissionStatus.valueOf(Signed.code) && (modified.end == 0 || modified.receipt.isEmpty)) {
             //for when submission is signed but end date and receipt are empty
-            val timestamp      = Instant.now().toEpochMilli
+            val timestamp = Instant.now().toEpochMilli
             val modifiedSigned = modified.copy(end = timestamp, receipt = s"${modified.id}-$timestamp")
             Effect.persist(SubmissionModified(modifiedSigned)).thenRun { _ =>
               log.debug(s"persisted modified Submission: ${modifiedSigned.toString}")
               val filingPersistence = sharding.entityRefFor(FilingPersistence.typeKey,
-                                                            s"${FilingPersistence.name}-${modified.id.lei}-${modifiedSigned.id.period}")
+                s"${FilingPersistence.name}-${modified.id.lei}-${modifiedSigned.id.period}")
+              filingPersistence ! UpdateSubmission(modifiedSigned, None)
+              replyTo ! SubmissionModified(modifiedSigned)
+            }
+          } else if (modified.status == SubmissionStatus.valueOf(Signed.code) && modified.end != 0 && !(modified.receipt.isEmpty)) {
+            //for when submission is signed and end date and receipt are not empty
+            val modifiedSigned = modified.copy(end = modified.end, receipt = s"${modified.receipt}")
+            Effect.persist(SubmissionModified(modifiedSigned)).thenRun { _ =>
+              log.debug(s"persisted modified Submission: ${modifiedSigned.toString}")
+              val filingPersistence = sharding.entityRefFor(FilingPersistence.typeKey,
+                s"${FilingPersistence.name}-${modified.id.lei}-${modifiedSigned.id.period}")
               filingPersistence ! UpdateSubmission(modifiedSigned, None)
               replyTo ! SubmissionModified(modifiedSigned)
             }

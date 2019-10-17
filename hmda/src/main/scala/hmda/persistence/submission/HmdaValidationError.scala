@@ -40,7 +40,7 @@ import hmda.parser.filing.ts.TsCsvParser
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.EditDetailsConverter._
-import hmda.persistence.submission.HmdaProcessingUtils.{ readRawData, updateSubmissionReceipt, updateSubmissionStatus }
+import hmda.persistence.submission.HmdaProcessingUtils.{ readRawData, updateSubmissionStatusAndReceipt, updateSubmissionStatus }
 import hmda.publication.KafkaUtils._
 import hmda.util.streams.FlowUtils.framing
 import hmda.validation.context.ValidationContext
@@ -283,8 +283,7 @@ object HmdaValidationError
                 .noEditsFound()) {
             Effect.persist(signed).thenRun { _ =>
               log.info(s"Submission $submissionId signed at ${Instant.ofEpochMilli(timestamp)}")
-              updateSubmissionStatus(sharding, submissionId, Signed, log)
-              updateSubmissionReceipt(sharding, submissionId, signed.timestamp, s"${signed.submissionId}-${signed.timestamp}", log)
+              updateSubmissionStatusAndReceipt(sharding, submissionId, timestamp, s"${signed.submissionId}-${signed.timestamp}", Signed, log)
               publishSignEvent(submissionId).map(signed => log.info(s"Published signed event for $submissionId"))
               setHmdaFilerFlag(submissionId.lei, submissionId.period, sharding)
               replyTo ! signed
