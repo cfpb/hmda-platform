@@ -5,13 +5,19 @@ import hmda.parser.derivedFields._
 import hmda.model.census.CountyLoanLimit
 import hmda.census.records._
 import hmda.model.census.Census
+import com.typesafe.config.ConfigFactory
 
 object LarConverter2019 {
 
-  val censusTractMap: Map[String, Census] =
-    CensusRecords.indexedTract
+    val config = ConfigFactory.load()
 
-  val censusRecords = CensusRecords.parseCensusFile
+  val censusFileName2019 =
+      config.getString("hmda.census.fields.2019.filename")
+
+  val censusTractMap: Map[String, Census] =
+    CensusRecords.indexedTract2019
+
+  val censusRecords = CensusRecords.parseCensusFile(censusFileName2019)
   val countyLoanLimits: Seq[CountyLoanLimit] =
     CountyLoanLimitRecords.parseCountyLoanLimitFile()
   val countyLoanLimitsByCounty: Map[String, CountyLoanLimit] =
@@ -38,9 +44,7 @@ object LarConverter2019 {
     }
 
   def apply(
-      lar: LoanApplicationRegister,
-      countyLoanLimitsByCounty: Map[String, CountyLoanLimit],
-      countyLoanLimitsByState: Map[String, StateBoundries]
+      lar: LoanApplicationRegister
   ): LarEntity2019 = {
     val census = censusTractMap.getOrElse(lar.geography.tract, Census())
     LarEntity2019(
