@@ -209,10 +209,10 @@ trait DataBrowserHttpApi extends Settings {
         pathPrefix("health") {
           onComplete(healthCheck.healthCheckStatus.runToFuture) {
             case Success(hs @ HealthCheckResponse(Up, Up, Up)) =>
-              complete(StatusCodes.OK, hs)
+              complete(StatusCodes.OK)
 
             case Success(hs) =>
-              complete(StatusCodes.ServiceUnavailable, hs)
+              complete(StatusCodes.ServiceUnavailable)
 
             case Failure(ex) =>
               log.error(ex, "Failed to perform a health check")
