@@ -1,7 +1,19 @@
 package hmda.util.conversion
 
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+
 trait ColumnDataFormatter {
 
+  private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS").withZone(ZoneOffset.ofHours(-5));
+
+  def dateToString(option:Option[java.sql.Timestamp] ): String =
+    if(option !=null) {
+      val entryTime = dateFormatter.format(option.getOrElse(new java.sql.Timestamp(0)).toInstant)
+      entryTime
+    }else{
+      "NA"
+    }
   def extractOpt(option: Option[Any]): Any =
     option.getOrElse("")
 

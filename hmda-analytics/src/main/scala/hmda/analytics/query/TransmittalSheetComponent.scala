@@ -1,9 +1,12 @@
 package hmda.analytics.query
 
+import java.sql.Timestamp
+
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
+
 import scala.concurrent.Future
 import hmda.query.ts._
 
@@ -30,6 +33,7 @@ trait TransmittalSheetComponent {
     def totalLines = column[Int]("total_lines")
     def taxId = column[String]("tax_id")
     def submissionId = column[Option[String]]("submission_id")
+    def createdAt = column[Option[Timestamp]]("created_at")
 
     override def * =
       (
@@ -48,7 +52,8 @@ trait TransmittalSheetComponent {
         agency,
         totalLines,
         taxId,
-        submissionId
+        submissionId,
+        createdAt
       ) <> (TransmittalSheetEntity.tupled, TransmittalSheetEntity.unapply)
   }
 
