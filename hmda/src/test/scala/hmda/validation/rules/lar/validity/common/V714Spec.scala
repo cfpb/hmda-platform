@@ -14,7 +14,7 @@ class V714Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
 
       lar.copy(applicationSubmission = ApplicationSubmissionExempt, payableToInstitution = PayableToInstitutionNotApplicable).mustFail
-      lar.copy(payableToInstitution = PayableToInstitutionExempt, applicationSubmission = ApplicationSubmissionNotApplicable).mustFail
+      lar.copy(applicationSubmission = ApplicationSubmissionNotApplicable, payableToInstitution = PayableToInstitutionExempt).mustFail
 
       lar
         .copy(applicationSubmission = ApplicationSubmissionExempt,
