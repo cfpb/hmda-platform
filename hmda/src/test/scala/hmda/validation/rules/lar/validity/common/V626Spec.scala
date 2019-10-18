@@ -4,9 +4,10 @@ import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
+import hmda.census.records.CensusRecords
 
 class V626Spec extends LarEditCheckSpec {
-  override def check: EditCheck[LoanApplicationRegister] = V626
+  override def check: EditCheck[LoanApplicationRegister] = V626.withIndexedCounties(CensusRecords.indexedCounty2018)
 
   property("Census County must be valid") {
     forAll(larGen) { lar =>

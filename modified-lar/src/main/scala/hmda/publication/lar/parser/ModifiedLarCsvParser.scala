@@ -6,13 +6,11 @@ import Math._
 import hmda.model.modifiedlar.ModifiedLoanApplicationRegister
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.model.census.CountyLoanLimit
-import hmda.census.records.CensusRecords
 import hmda.census.records.CountyLoanLimitRecords
 import hmda.parser.derivedFields._
 
 object ModifiedLarCsvParser {
 
-  val censusRecords = CensusRecords.parseCensusFile
   val countyLoanLimits: Seq[CountyLoanLimit] =
     CountyLoanLimitRecords.parseCountyLoanLimitFile()
   val countyLoanLimitsByCounty: Map[String, CountyLoanLimit] =

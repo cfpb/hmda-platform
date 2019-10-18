@@ -33,10 +33,6 @@ import hmda.query.DbConfiguration.dbConfig
 import hmda.query.HmdaQuery.{readRawData, readSubmission}
 import hmda.util.BankFilterUtils._
 import hmda.util.streams.FlowUtils.framing
-import hmda.census.records._
-import hmda.model.census.Census
-import hmda.parser.derivedFields._
-import hmda.model.census.CountyLoanLimit
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -96,34 +92,7 @@ object HmdaAnalyticsApp
   val submissionHistoryRepository =
     new SubmissionHistoryRepository(dbConfig, histTableName)
 
-  val censusTractMap: Map[String, Census] =
-    CensusRecords.indexedTract
-
-  val censusRecords = CensusRecords.parseCensusFile
-  val countyLoanLimits: Seq[CountyLoanLimit] =
-    CountyLoanLimitRecords.parseCountyLoanLimitFile()
-  val countyLoanLimitsByCounty: Map[String, CountyLoanLimit] =
-    countyLoanLimits
-      .map(county => county.stateCode + county.countyCode -> county)
-      .toMap
-  val countyLoanLimitsByState: Map[String, StateBoundries] =
-    countyLoanLimits.groupBy(county => county.stateAbbrv).mapValues {
-      countyList =>
-        val oneUnit = countyList.map(county => county.oneUnitLimit)
-        val twoUnit = countyList.map(county => county.twoUnitLimit)
-        val threeUnit = countyList.map(county => county.threeUnitLimit)
-        val fourUnit = countyList.map(county => county.fourUnitLimit)
-        StateBoundries(
-          oneUnitMax = oneUnit.max,
-          oneUnitMin = oneUnit.min,
-          twoUnitMax = twoUnit.max,
-          twoUnitMin = twoUnit.min,
-          threeUnitMax = threeUnit.max,
-          threeUnitMin = threeUnit.min,
-          fourUnitMax = fourUnit.max,
-          fourUnitMin = fourUnit.min
-        )
-    }
+  
 
   val consumerSettings: ConsumerSettings[String, String] =
     ConsumerSettings(kafkaConfig,
@@ -280,15 +249,11 @@ object HmdaAnalyticsApp
               }
               case 2019 => {
                 larRepository2019.insert(
-                  LarConverter2019(lar,
-                                   countyLoanLimitsByCounty,
-                                   countyLoanLimitsByState))
+                  LarConverter2019(lar))
               }
               case _ => {
                 larRepository2019.insert(
-                  LarConverter2019(lar,
-                                   countyLoanLimitsByCounty,
-                                   countyLoanLimitsByState))
+                  LarConverter2019(lar))
               }
             }
           } yield insertorupdate

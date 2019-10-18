@@ -1,11 +1,16 @@
 package hmda.validation.rules.lar.quality.common
 
-import hmda.census.records.CensusRecords
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.dsl.{ ValidationFailure, ValidationResult, ValidationSuccess }
 import hmda.validation.rules.EditCheck
+import hmda.model.census.Census
 
-object Q603 extends EditCheck[LoanApplicationRegister] {
+object Q603 {
+  def withIndexedSmallCounties(indexedSmallCounties: Map[String, Census]): EditCheck[LoanApplicationRegister] =
+    new Q603(indexedSmallCounties)
+}
+
+class Q603 private (indexedSmallCounties: Map[String, Census]) extends EditCheck[LoanApplicationRegister] {
 
   override def name: String = "Q603"
 
@@ -15,7 +20,7 @@ object Q603 extends EditCheck[LoanApplicationRegister] {
     val tract  = lar.geography.tract
 
     if (tract.toLowerCase == "na" && county.toLowerCase != "na") {
-      if (CensusRecords.indexedSmallCounty.contains(county)) {
+      if (indexedSmallCounties.contains(county)) {
         ValidationSuccess
       } else {
         ValidationFailure
