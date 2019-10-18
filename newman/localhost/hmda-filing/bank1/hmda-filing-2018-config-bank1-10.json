@@ -4,7 +4,7 @@
     "host_filing_api": "localhost:8080",
     "host-public-api": "localhost:8082",
     "test-lei": "BANK1LEIFORTEST12345",
-    "filing-year": "2019",
+    "filing-year": "2018",
     "testData": [
       {
         "testName": "admin api health check",
@@ -24,7 +24,7 @@
       {
         "testName": "create institution",
         "requestBody": {
-          "activityYear": 2019,
+          "activityYear": 2018,
           "lei": "BANK1LEIFORTEST12345",
           "agency": 9,
           "institutionType": -1,
@@ -52,7 +52,7 @@
           "hmdaFiler": true
         },
         "expectedResponse": {
-          "activityYear": 2019,
+          "activityYear": 2018,
           "lei": "BANK1LEIFORTEST12345",
           "agency": 9,
           "institutionType": -1,
@@ -85,7 +85,7 @@
       {
         "testName": "institution get api call",
         "expectedResponse": {
-          "activityYear": 2019,
+          "activityYear": 2018,
           "lei": "BANK1LEIFORTEST12345",
           "agency": 9,
           "institutionType": -1,
@@ -118,7 +118,7 @@
         "testName": "test start a filing",
         "expectedResponse": {
           "filing": {
-            "period": "2019",
+            "period": "2018",
             "lei": "BANK1LEIFORTEST12345",
             "status": {
               "code": 2,
@@ -137,7 +137,7 @@
         "expectedResponse": {
           "id": {
             "lei": "BANK1LEIFORTEST12345",
-            "period": "2019",
+            "period": "2018",
             "sequenceNumber": 1
           },
           "status": {
@@ -154,11 +154,11 @@
       },
       {
         "testName": "filing psv upload test",
-        "sourceFile": "Bank1_3_q645_1.txt",
+        "sourceFile": "../../../../data/2018/clean_test_files/bank_1/clean_file_10_rows_Bank1_syntax_validity.txt",
         "expectedResponse": {
           "id": {
             "lei": "BANK1LEIFORTEST12345",
-            "period": "2019",
+            "period": "2018",
             "sequenceNumber": 7
           },
           "status": {
@@ -178,7 +178,7 @@
         "expectedResponse": {
           "id": {
             "lei": "BANK1LEIFORTEST12345",
-            "period": "2019",
+            "period": "2018",
             "sequenceNumber": 12
           },
           "status": {
@@ -188,7 +188,7 @@
           },
           "start": 1562662935676,
           "end": 0,
-          "fileName": "Bank1_3_q645_1.txt",
+          "fileName": "clean_10_row.txt",
           "receipt": ""
         },
         "testNumber": 8

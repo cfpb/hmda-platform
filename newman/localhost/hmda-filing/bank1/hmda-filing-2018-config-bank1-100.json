@@ -154,7 +154,7 @@
       },
       {
         "testName": "filing psv upload test",
-        "sourceFile": "clean_10_row.txt",
+        "sourceFile": "../../../../data/2018/clean_test_files/bank_1/clean_file_100_rows_Bank1_syntax_validity.txt",
         "expectedResponse": {
           "id": {
             "lei": "BANK1LEIFORTEST12345",
