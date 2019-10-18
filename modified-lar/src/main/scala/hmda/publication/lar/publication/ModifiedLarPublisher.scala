@@ -65,7 +65,8 @@ object ModifiedLarPublisher {
   }
 
   def behavior(
-      indexTractMap: Map[String, Census],
+      indexTractMap2018: Map[String, Census],
+      indexTractMap2019: Map[String, Census],
       modifiedLarRepo: ModifiedLarRepository): Behavior[ModifiedLarCommand] =
     Behaviors.setup { ctx =>
       val log = ctx.log
@@ -127,11 +128,13 @@ object ModifiedLarPublisher {
             : Sink[ModifiedLoanApplicationRegister, Future[Done]] =
             Flow[ModifiedLoanApplicationRegister]
               .map(
-                mlar =>
+                mlar => {
+                  val indexTractMap = if (submissionId.period == 2018) indexTractMap2018 else indexTractMap2019
                   EnrichedModifiedLoanApplicationRegister(
                     mlar,
                     indexTractMap.getOrElse(mlar.tract, Census())
                 )
+                  }
               )
               .mapAsync(parallelism)(enriched =>
                 modifiedLarRepo

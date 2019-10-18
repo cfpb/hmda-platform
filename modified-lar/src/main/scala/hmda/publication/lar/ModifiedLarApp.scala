@@ -57,8 +57,11 @@ object ModifiedLarApp extends App {
     bankFilterConfig.getString("bank-filter-list").toUpperCase.split(",")
   val parallelism = config.getInt("hmda.lar.modified.parallelism")
 
-  val censusTractMap: Map[String, Census] =
-    CensusRecords.indexedTract
+  val censusTractMap2018: Map[String, Census] =
+    CensusRecords.indexedTract2018
+
+  val censusTractMap2019: Map[String, Census] =
+    CensusRecords.indexedTract2019
 
   def submitForPersistence(
       modifiedLarPublisher: ActorRef[PersistToS3AndPostgres])(
@@ -84,7 +87,7 @@ object ModifiedLarApp extends App {
   val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
   val repo = new ModifiedLarRepository(databaseConfig)
   val modifiedLarPublisher =
-    system.spawn(ModifiedLarPublisher.behavior(censusTractMap, repo),
+    system.spawn(ModifiedLarPublisher.behavior(censusTractMap2018, censusTractMap2019, repo),
                  ModifiedLarPublisher.name)
   val processKafkaRecord: String => Future[Done] =
     submitForPersistence(modifiedLarPublisher)
