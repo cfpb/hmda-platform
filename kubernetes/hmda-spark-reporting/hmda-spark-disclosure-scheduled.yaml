@@ -11,7 +11,7 @@ spec:
   template:
     type: Scala
     mode: cluster
-    image: "hmda/hmda-spark-reporting"
+    image: "hmda/hmda-spark-reporting:proddata"
     imagePullPolicy: Always
     mainClass: com.hmda.reports.DisclosureReports
     mainApplicationFile: "local:///opt/spark/cfpb/hmda/jars/hmda-spark-reporting.jar"
