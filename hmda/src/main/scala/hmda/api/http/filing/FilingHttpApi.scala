@@ -24,7 +24,7 @@ import hmda.auth.OAuth2Authorization
 import hmda.messages.filing.FilingEvents.FilingCreated
 import hmda.messages.institution.InstitutionCommands.GetInstitution
 import hmda.messages.submission.SubmissionProcessingCommands.GetVerificationStatus
-import hmda.model.filing.submission.VerificationStatus
+import hmda.model.filing.submission.{ QualityMacroExists, VerificationStatus }
 import hmda.model.institution.Institution
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.HmdaValidationError
@@ -50,7 +50,7 @@ trait FilingHttpApi extends HmdaTimeDirectives {
           sharding.entityRefFor(HmdaValidationError.typeKey, s"${HmdaValidationError.name}-${s.id}")
         val fStatus: Future[VerificationStatus] = entity ? (reply => GetVerificationStatus(reply))
         fStatus.map { v =>
-          SubmissionResponse(s, v)
+          SubmissionResponse(s, v, QualityMacroExists("one", "two"))
         }
       }
     val fSubmissionResponse = Future.sequence(submissionResponsesF)
