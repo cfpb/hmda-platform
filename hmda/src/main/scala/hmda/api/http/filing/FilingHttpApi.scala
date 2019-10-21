@@ -18,7 +18,6 @@ import hmda.model.filing.{ Filing, FilingDetails, InProgress }
 import hmda.persistence.filing.FilingPersistence
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.ErrorResponse
-import io.circe.generic.auto._
 import hmda.auth.OAuth2Authorization
 import hmda.messages.filing.FilingCommands
 import hmda.messages.filing.FilingEvents.FilingCreated
