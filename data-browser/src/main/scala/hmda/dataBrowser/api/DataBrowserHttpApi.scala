@@ -2,7 +2,7 @@ package hmda.dataBrowser.api
 
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.ContentTypes._
-import akka.http.scaladsl.model.{HttpEntity, StatusCodes, Uri}
+import akka.http.scaladsl.model.{ HttpEntity, StatusCodes, Uri }
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.RouteDirectives.complete
@@ -15,18 +15,18 @@ import hmda.dataBrowser.models._
 import hmda.dataBrowser.repositories._
 import hmda.dataBrowser.services._
 import io.lettuce.core.api.async.RedisAsyncCommands
-import io.lettuce.core.{ClientOptions, RedisClient}
+import io.lettuce.core.{ ClientOptions, RedisClient }
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
 trait DataBrowserHttpApi extends Settings {
 
-  val Csv = "csv"
-  val Pipe = "pipe"
+  val Csv          = "csv"
+  val Pipe         = "pipe"
   val Aggregations = "aggregations"
   val log: LoggingAdapter
   implicit val materializer: ActorMaterializer
@@ -44,8 +44,7 @@ trait DataBrowserHttpApi extends Settings {
         ClientOptions
           .builder()
           .autoReconnect(true)
-          .disconnectedBehavior(
-            ClientOptions.DisconnectedBehavior.REJECT_COMMANDS)
+          .disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS)
           .cancelCommandsOnReconnectFailure(true)
           .build()
       )
@@ -69,11 +68,8 @@ trait DataBrowserHttpApi extends Settings {
   val healthCheck: HealthCheckService =
     new HealthCheckService(repository, cache, fileCache)
 
-  def serveData(queries: List[QueryField],
-                delimiter: Delimiter,
-                errorMessage: String): Route =
-    onComplete(
-      obtainDataSource(fileCache, query)(queries, delimiter).runToFuture) {
+  def serveData(queries: List[QueryField], delimiter: Delimiter, errorMessage: String): Route =
+    onComplete(obtainDataSource(fileCache, query)(queries, delimiter).runToFuture) {
       case Failure(ex) =>
         log.error(ex, errorMessage)
         complete(StatusCodes.InternalServerError)
@@ -96,9 +92,7 @@ trait DataBrowserHttpApi extends Settings {
             complete(
               query
                 .fetchAggregate(countFields)
-                .map(aggs =>
-                  AggregationResponse(Parameters.fromBrowserFields(countFields),
-                                      aggs))
+                .map(aggs => AggregationResponse(Parameters.fromBrowserFields(countFields), aggs))
                 .runToFuture
             )
           }
@@ -109,16 +103,12 @@ trait DataBrowserHttpApi extends Settings {
               (path(Csv) & get) {
                 extractNationwideMandatoryYears { mandatoryFields =>
                   //remove filters that have all options selected
-                  val allFields = (queryFields ++ mandatoryFields).filterNot {
-                    eachQueryField =>
-                      eachQueryField.isAllSelected
+                  val allFields = (queryFields ++ mandatoryFields).filterNot { eachQueryField =>
+                    eachQueryField.isAllSelected
                   }
                   log.info("Nationwide [CSV]: " + allFields)
                   contentDispositionHeader(allFields, Commas) {
-                    serveData(
-                      allFields,
-                      Commas,
-                      s"Failed to perform nationwide CSV query with the following queries: $allFields")
+                    serveData(allFields, Commas, s"Failed to perform nationwide CSV query with the following queries: $allFields")
                   }
                 }
               } ~
@@ -126,16 +116,12 @@ trait DataBrowserHttpApi extends Settings {
                 (path(Pipe) & get) {
                   extractNationwideMandatoryYears { mandatoryFields =>
                     //remove filters that have all options selected
-                    val allFields = (queryFields ++ mandatoryFields).filterNot {
-                      eachQueryField =>
-                        eachQueryField.isAllSelected
+                    val allFields = (queryFields ++ mandatoryFields).filterNot { eachQueryField =>
+                      eachQueryField.isAllSelected
                     }
                     log.info("Nationwide [Pipe]: " + allFields)
                     contentDispositionHeader(allFields, Pipes) {
-                      serveData(
-                        allFields,
-                        Pipes,
-                        s"Failed to perform nationwide PSV query with the following queries: $allFields")
+                      serveData(allFields, Pipes, s"Failed to perform nationwide PSV query with the following queries: $allFields")
                     }
                   }
 
@@ -149,27 +135,22 @@ trait DataBrowserHttpApi extends Settings {
                   complete(
                     query
                       .fetchAggregate(allFields)
-                      .map(aggs =>
-                        AggregationResponse(
-                          Parameters.fromBrowserFields(allFields),
-                          aggs))
-                      .runToFuture)
+                      .map(aggs => AggregationResponse(Parameters.fromBrowserFields(allFields), aggs))
+                      .runToFuture
+                  )
                 }
               }
           } ~
           // GET /view/aggregations
           (path(Aggregations) & get) {
-            extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
-              extractFieldsForAggregation { remainingQueryFields =>
-                val allFields = mandatoryFields ++ remainingQueryFields
+            extractYearsAndMsaAndStateAndCountyBrowserFields { mandatoryFields =>
+               extractFieldsForAggregation { remainingQueryFields =>
+                 val allFields = mandatoryFields ++ remainingQueryFields
                 log.info("Aggregations: " + allFields)
                 complete(
                   query
                     .fetchAggregate(allFields)
-                    .map(aggs =>
-                      AggregationResponse(
-                        Parameters.fromBrowserFields(allFields),
-                        aggs))
+                    .map(aggs => AggregationResponse(Parameters.fromBrowserFields(allFields), aggs))
                     .runToFuture
                 )
               }
@@ -177,30 +158,24 @@ trait DataBrowserHttpApi extends Settings {
           } ~
           // GET /view/csv
           (path(Csv) & get) {
-            extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
+            extractYearsAndMsaAndStateAndCountyBrowserFields { mandatoryFields =>
               extractFieldsForRawQueries { remainingQueryFields =>
                 val allFields = mandatoryFields ++ remainingQueryFields
                 log.info("CSV: " + allFields)
                 contentDispositionHeader(allFields, Commas) {
-                  serveData(
-                    allFields,
-                    Commas,
-                    s"Failed to fetch data for /view/csv with the following queries: $allFields")
+                  serveData(allFields, Commas, s"Failed to fetch data for /view/csv with the following queries: $allFields")
                 }
               }
             }
           } ~
           // GET /view/pipe
           (path(Pipe) & get) {
-            extractYearsAndMsaAndStateBrowserFields { mandatoryFields =>
+            extractYearsAndMsaAndStateAndCountyBrowserFields { mandatoryFields =>
               extractFieldsForRawQueries { remainingQueryFields =>
                 val allFields = mandatoryFields ++ remainingQueryFields
                 log.info("CSV: " + allFields)
                 contentDispositionHeader(allFields, Pipes) {
-                  serveData(
-                    allFields,
-                    Commas,
-                    s"Failed to fetch data for /view/pipe with the following queries: $allFields")
+                  serveData(allFields, Commas, s"Failed to fetch data for /view/pipe with the following queries: $allFields")
                 }
               }
             }
