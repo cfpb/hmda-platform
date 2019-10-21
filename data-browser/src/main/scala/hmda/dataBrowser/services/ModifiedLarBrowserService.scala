@@ -2,25 +2,18 @@ package hmda.dataBrowser.services
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.dataBrowser.models._
-import hmda.dataBrowser.repositories.{
-  ModifiedLarAggregateCache,
-  ModifiedLarRepository
-}
+import hmda.dataBrowser.repositories.{ ModifiedLarAggregateCache, ModifiedLarRepository }
 import monix.eval.Task
 
-class ModifiedLarBrowserService(repo: ModifiedLarRepository,
-                                cache: ModifiedLarAggregateCache)
-    extends QueryService {
-  override def fetchData(
-      queries: List[QueryField]): Source[ModifiedLarEntity, NotUsed] =
+class ModifiedLarBrowserService(repo: ModifiedLarRepository, cache: ModifiedLarAggregateCache) extends QueryService {
+  override def fetchData(queries: List[QueryField]): Source[ModifiedLarEntity, NotUsed] =
     repo.find(queries)
 
-  private def generateCombinations[T](x: List[List[T]]): List[List[T]] = {
+  private def generateCombinations[T](x: List[List[T]]): List[List[T]] =
     x match {
       case Nil    => List(Nil)
       case h :: _ => h.flatMap(i => generateCombinations(x.tail).map(i :: _))
     }
-  }
 
   def permuteQueryFields(input: List[QueryField]): List[List[QueryField]] = {
     val singleElementBrowserFields: List[List[QueryField]] =
@@ -33,28 +26,29 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository,
     generateCombinations(singleElementBrowserFields)
   }
 
-  override def fetchAggregate(
-      fields: List[QueryField]): Task[Seq[Aggregation]] = {
+  override def fetchAggregate(fields: List[QueryField]): Task[Seq[Aggregation]] = {
     val optState: Option[QueryField] =
       fields.filter(_.values.nonEmpty).find(_.name == "state")
     val optMsaMd: Option[QueryField] =
       fields.filter(_.values.nonEmpty).find(_.name == "msamd")
+    val optCounty: Option[QueryField] =
+      fields.filter(_.values.nonEmpty).find(_.name == "county")
     val optYear: Option[QueryField] =
       fields.filter(_.values.nonEmpty).find(_.name == "year")
+
     val rest = fields
       .filterNot(_.name == "state")
       .filterNot(_.name == "msamd")
+      .filterNot(_.name == "county")
       .filterNot(_.name == "year")
 
     val queryFieldCombinations = permuteQueryFields(rest)
-      .map(eachList =>
-        optYear.toList ++ optState.toList ++ optMsaMd.toList ++ eachList)
+      .map(eachList => optYear.toList ++ optState.toList ++ optMsaMd.toList ++ optCounty.toList ++ eachList)
       .map(eachCombination => eachCombination.sortBy(field => field.name))
 
     Task.gatherUnordered {
       queryFieldCombinations.map { eachCombination =>
-        val fieldInfos = eachCombination.map(field =>
-          FieldInfo(field.name, field.values.mkString(",")))
+        val fieldInfos = eachCombination.map(field => FieldInfo(field.name, field.values.mkString(",")))
         cache
           .find(eachCombination)
           .flatMap {
@@ -66,8 +60,7 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository,
             case Some(stat) =>
               Task.now(stat)
           }
-          .map(statistic =>
-            Aggregation(statistic.count, statistic.sum, fieldInfos))
+          .map(statistic => Aggregation(statistic.count, statistic.sum, fieldInfos))
       }
     }
   }
