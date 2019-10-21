@@ -82,12 +82,12 @@ class MacroValidationFlowSpec
         lar.copy(loan = homePurchaseLoan, action = approved)
       }
 
-      val originatedSource = homePurchaseSource.take(30).map { lar =>
+      val originatedSource = homePurchaseSource.take(97).map { lar =>
         val originated = lar.action.copy(actionTakenType = LoanOriginated)
         lar.copy(action = originated)
       }
 
-      val q634Source = homePurchaseSource.drop(30) concat originatedSource
+      val q634Source = homePurchaseSource.drop(97) concat originatedSource
       Q634(q634Source).map(e => e mustBe MacroValidationError(q634Name))
     }
 
