@@ -21,6 +21,8 @@ final case class InvalidActions(
 
 final case class InvalidMsaMds(invalidMsaMds: Seq[String], errorType: String = "invalid-msamds", message: String = "") extends ErrorResponse
 
+final case class InvalidLEIs(invalidLEIs: Seq[String], errorType: String = "invalid-LEIs", message: String = "") extends ErrorResponse
+
 final case class InvalidStates(
                                 invalidStates: Seq[String],
                                 errorType: String = "invalid-states",
@@ -33,9 +35,9 @@ final case class InvalidCounties(
                                   message: String = s"valid counties are ${CensusRecords.indexedCounty2018.keys.mkString(", ")}"
                                 ) extends ErrorResponse
 
-final case class OnlyStatesOrMsaMdsOrCounties(
-                                               errorType: String = "provide-only-msamds-or-states-or-counties",
-                                               message: String = "Provide only states or msamds or counties but not both"
+final case class OnlyStatesOrMsaMdsOrCountiesOrLEIs(
+                                               errorType: String = "provide-only-msamds-or-states-or-counties-or-leis",
+                                               message: String = "Provide only states or msamds or counties or leis but not all"
                                              ) extends ErrorResponse
 
 final case class ProvideYearAndStatesOrMsaMds(
