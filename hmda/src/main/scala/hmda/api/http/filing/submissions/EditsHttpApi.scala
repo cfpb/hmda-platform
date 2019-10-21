@@ -58,8 +58,6 @@ trait EditsHttpApi extends HmdaTimeDirectives {
 
           onComplete(fEditsAndVer) {
             case Success((edits, ver)) =>
-              println("This is the size of quality: " + edits.quality.size)
-              println("This is the size of macro: " + edits.`macro`.size)
               val syntactical =
                 SyntacticalEditSummaryResponse(edits.syntactical.map { editSummary =>
                   toEditSummaryResponse(editSummary, period)
