@@ -1,4 +1,12 @@
+#! /bin/bash
+
+if (( $# < 2 ))
+  then
+    echo "usage: ./run_newman.sh <num_times> <num_rows>"
+    exit 1
+fi
+
 for i in `seq 0 $1`
 do
-  echo "Num: $i"
+  eval 'newman run hmda-filing-api-test-'$2'.json -d hmda-filing-2018-config-bank1-'$2'.json'
 done
