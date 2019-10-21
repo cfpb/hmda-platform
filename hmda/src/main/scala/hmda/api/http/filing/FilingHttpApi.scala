@@ -23,9 +23,10 @@ import hmda.api.http.model.filing.submissions._
 import hmda.auth.OAuth2Authorization
 import hmda.messages.filing.FilingEvents.FilingCreated
 import hmda.messages.institution.InstitutionCommands.GetInstitution
-import hmda.messages.submission.SubmissionProcessingCommands.GetVerificationStatus
+import hmda.messages.submission.SubmissionProcessingCommands.{ GetHmdaValidationErrorState, GetVerificationStatus }
 import hmda.model.filing.submission.{ QualityMacroExists, VerificationStatus }
 import hmda.model.institution.Institution
+import hmda.model.processing.state.HmdaValidationErrorState
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.HmdaValidationError
 import hmda.util.http.FilingResponseUtils._
@@ -48,10 +49,15 @@ trait FilingHttpApi extends HmdaTimeDirectives {
       filingDetails.submissions.map { s =>
         val entity =
           sharding.entityRefFor(HmdaValidationError.typeKey, s"${HmdaValidationError.name}-${s.id}")
-        val fStatus: Future[VerificationStatus] = entity ? (reply => GetVerificationStatus(reply))
-        fStatus.map { v =>
-          SubmissionResponse(s, v, QualityMacroExists("one", "two"))
-        }
+        val fStatus: Future[VerificationStatus]      = entity ? (reply => GetVerificationStatus(reply))
+        val fEdits: Future[HmdaValidationErrorState] = entity ? (reply => GetHmdaValidationErrorState(s.id, reply))
+        val fSubmissionAndVerified                   = fStatus.map(v => (s, v))
+        val fQMExists                                = fEdits.map(r => QualityMacroExists(!r.quality.isEmpty, !r.`macro`.isEmpty))
+        for {
+          submissionAndVerified <- fSubmissionAndVerified
+          (submision, verified) = submissionAndVerified
+          qmExists              <- fQMExists
+        } yield SubmissionResponse(submision, verified, qmExists)
       }
     val fSubmissionResponse = Future.sequence(submissionResponsesF)
     fSubmissionResponse.map(submissionResponses => FilingDetailsResponse(filingDetails.filing, submissionResponses))

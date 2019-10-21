@@ -167,39 +167,22 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
 
             val fLatest: Future[Option[Submission]] = filingPersistence ? (ref => GetLatestSubmission(ref))
 
-            val fResponse: Future[Option[SubmissionResponse]] = fLatest.flatMap {
+            val fResponse = fLatest.flatMap {
               case Some(s) =>
                 val entity =
                   sharding.entityRefFor(HmdaValidationError.typeKey, s"${HmdaValidationError.name}-${s.id}")
                 val fStatus: Future[VerificationStatus]      = entity ? (reply => GetVerificationStatus(reply))
                 val fEdits: Future[HmdaValidationErrorState] = entity ? (reply => GetHmdaValidationErrorState(s.id, reply))
 
-                fStatus.map { v =>
-                  val qualityExists: Future[Boolean] = fEdits.map { r =>
-                    r.quality.size match {
-                      case 0 =>
-                        false
-                      case _ =>
-                        true
-                    }
-                  }
-                  val macroExists = fEdits.map { r =>
-                    r.`macro`.size match {
-                      case 0 =>
-                        false
-                      case _ =>
-                        true
-                    }
-                  }
+                val fSubmissionAndVerified = fStatus.map(v => (s, v))
 
-                  onComplete(qualityExists) {}
+                val fQMExists = fEdits.map(r => QualityMacroExists(!r.quality.isEmpty, !r.`macro`.isEmpty))
 
-                  Option(SubmissionResponse(s, v, QualityMacroExists("one", "two")))
-
-                }
-
-//
-
+                for {
+                  submissionAndVerified <- fSubmissionAndVerified
+                  (submision, verified) = submissionAndVerified
+                  qmExists              <- fQMExists
+                } yield Option(SubmissionResponse(submision, verified, qmExists))
               case None =>
                 Future.successful(None)
             }
