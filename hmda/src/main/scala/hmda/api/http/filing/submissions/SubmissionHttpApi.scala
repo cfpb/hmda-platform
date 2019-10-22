@@ -8,7 +8,6 @@ import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{ StatusCodes, Uri }
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.server.{ PathMatcher1, Route }
 import akka.util.{ ByteString, Timeout }
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
@@ -24,7 +23,7 @@ import hmda.messages.institution.InstitutionCommands.GetInstitution
 import hmda.messages.submission.SubmissionCommands.CreateSubmission
 import hmda.messages.submission.SubmissionEvents.SubmissionCreated
 import hmda.messages.submission.SubmissionProcessingCommands.GetVerificationStatus
-import hmda.model.filing.{ Filing, FilingDetails }
+import hmda.model.filing.Filing
 import hmda.model.filing.submission._
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.institution.Institution
@@ -67,9 +66,9 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
       }
     }
 
-  def createSubmissionIfValid(lei: String, year: Int, quarter: Option[String], uri: Uri): Route = {
+  private def createSubmissionIfValid(lei: String, year: Int, quarter: Option[String], uri: Uri): Route = {
     val period = YearUtils.period(year, quarter)
-    onComplete(obtainLatestSubmission(lei, year, quarter)) {
+    onComplete(obtainLatestSubmissionAndFilingAndInstitution(lei, year, quarter)) {
       case Success(check) =>
         check match {
           case (None, _, _) =>
@@ -93,7 +92,7 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
     }
   }
 
-  def obtainLatestSubmission(
+  def obtainLatestSubmissionAndFilingAndInstitution(
     lei: String,
     period: Int,
     quarter: Option[String]
@@ -112,101 +111,148 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
     } yield (i, f, l)
   }
 
-  def submissionSummary(oAuth2Authorization: OAuth2Authorization): Route =
-    path("institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "summary") { (lei, period, seqNr) =>
+  def submissionSummaryPath(oAuth2Authorization: OAuth2Authorization): Route = timedGet { uri =>
+    path("institutions" / Segment / "filings" / Year / "submissions" / IntNumber / "summary") { (lei, year, seqNr) =>
       oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
-        timedGet { uri =>
-          val submissionId = SubmissionId(lei, period, seqNr)
-
-          val filingPersistence =
-            sharding.entityRefFor(FilingPersistence.typeKey, s"${FilingPersistence.name}-$lei-$period")
-
-          val fSummary: Future[Option[Submission]] = filingPersistence ? (ref => GetSubmissionSummary(submissionId, ref))
-
-          val fTs: Future[Option[TransmittalSheet]] =
-            readRawData(submissionId)
-              .map(line => line.data)
-              .map(ByteString(_))
-              .take(1)
-              .via(framing("\n"))
-              .map(_.utf8String)
-              .map(_.trim)
-              .map(s => TsCsvParser(s))
-              .map { s =>
-                s.getOrElse(TransmittalSheet())
-              }
-              .runWith(Sink.seq)
-              .map(xs => xs.headOption)
-
-          val fCheck = for {
-            t <- fTs
-            s <- fSummary
-          } yield SubmissionSummary(s, t)
-
-          onComplete(fCheck) {
-            case Success(check) =>
-              check match {
-                case SubmissionSummary(None, _) =>
-                  val errorResponse = ErrorResponse(404, s"Submission ${submissionId.toString} not available", uri.path)
-                  complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
-                case SubmissionSummary(_, None) =>
-                  val errorResponse =
-                    ErrorResponse(404, s"Transmittal Sheet not found", uri.path)
-                  complete(StatusCodes.NotFound -> errorResponse)
-                case _ =>
-                  complete(ToResponseMarshallable(check))
-              }
-            case Failure(error) =>
-              failedResponse(StatusCodes.InternalServerError, uri, error)
-          }
-        }
+        getSubmissionSummary(lei, year, None, seqNr, uri)
       }
+    } ~ path("institutions" / Segment / "filings" / Year / "quarter" / Quarter / "submissions" / IntNumber / "summary") {
+      (lei, year, quarter, seqNr) =>
+        oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+          getSubmissionSummary(lei, year, Option(quarter), seqNr, uri)
+        }
     }
+  }
+
+  private def getSubmissionSummary(lei: String, year: Int, quarter: Option[String], seqNr: Int, uri: Uri): Route = {
+    val period                               = YearUtils.period(year, quarter)
+    val submissionId                         = SubmissionId(lei, period, seqNr)
+    val filingPersistence                    = selectFiling(sharding, lei, year, quarter)
+    val fSummary: Future[Option[Submission]] = filingPersistence ? (ref => GetSubmissionSummary(submissionId, ref))
+    val fTs: Future[Option[TransmittalSheet]] =
+      readRawData(submissionId)
+        .map(line => line.data)
+        .map(ByteString(_))
+        .take(1)
+        .via(framing("\n"))
+        .map(_.utf8String)
+        .map(_.trim)
+        .map(s => TsCsvParser(s))
+        .map { s =>
+          s.getOrElse(TransmittalSheet())
+        }
+        .runWith(Sink.seq)
+        .map(xs => xs.headOption)
+
+    val fCheck = for {
+      t <- fTs
+      s <- fSummary
+    } yield SubmissionSummary(s, t)
+
+    onComplete(fCheck) {
+      case Success(check) =>
+        check match {
+          case (SubmissionSummary(None, _)) =>
+            val errorResponse = ErrorResponse(404, s"Submission ${submissionId.toString} not available", uri.path)
+            complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
+          case (SubmissionSummary(_, None)) =>
+            val errorResponse =
+              ErrorResponse(404, s"Transmittal Sheet not found", uri.path)
+            complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
+          case _ =>
+            complete(ToResponseMarshallable(check))
+        }
+      case Failure(error) =>
+        failedResponse(StatusCodes.InternalServerError, uri, error)
+    }
+  }
 
   //institutions/<lei>/filings/<period>/submissions/latest
-  def submissionLatestPath(oAuth2Authorization: OAuth2Authorization): Route =
-    path("institutions" / Segment / "filings" / Segment / "submissions" / "latest") { (lei, period) =>
-      oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
-        respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-          timedGet { uri =>
-            val filingPersistence =
-              sharding.entityRefFor(FilingPersistence.typeKey, s"${FilingPersistence.name}-$lei-$period")
-
-            val fLatest: Future[Option[Submission]] = filingPersistence ? (ref => GetLatestSubmission(ref))
-
-            val fResponse = fLatest.flatMap {
-              case Some(s) =>
-                val entity =
-                  sharding.entityRefFor(HmdaValidationError.typeKey, s"${HmdaValidationError.name}-${s.id}")
-                val fStatus: Future[VerificationStatus] = entity ? (reply => GetVerificationStatus(reply))
-                fStatus.map(v => Option(SubmissionResponse(s, v)))
-
-              case None =>
-                Future.successful(None)
-            }
-
-            onComplete(fResponse) {
-              case Success(maybeLatest) =>
-                maybeLatest match {
-                  case Some(latest) =>
-                    complete(latest)
-
-                  case None =>
-                    complete(StatusCodes.NotFound)
-                }
-              case Failure(error) =>
-                failedResponse(StatusCodes.InternalServerError, uri, error)
-            }
+  def latestSubmissionPath(oAuth2Authorization: OAuth2Authorization): Route =
+    respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+      timedGet { uri =>
+        path("institutions" / Segment / "filings" / Year / "submissions" / "latest") { (lei, year) =>
+          oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+            getLatestSubmission(lei, year, None, uri)
+          }
+        } ~ path("institutions" / Segment / "filings" / Year / "quarter" / Quarter / "submissions" / "latest") { (lei, year, quarter) =>
+          oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+            getLatestSubmission(lei, year, Option(quarter), uri)
           }
         }
       }
     }
+
+  private def getLatestSubmission(lei: String, period: Int, quarter: Option[String], uri: Uri): Route = {
+    val fil                                 = selectFiling(sharding, lei, period, quarter)
+    val fLatest: Future[Option[Submission]] = fil ? (ref => GetLatestSubmission(ref))
+    val fResponse = fLatest.flatMap {
+      case Some(s) =>
+        val entity =
+          sharding.entityRefFor(HmdaValidationError.typeKey, s"${HmdaValidationError.name}-${s.id}")
+        val fStatus: Future[VerificationStatus] = entity ? (reply => GetVerificationStatus(reply))
+        fStatus.map(v => Option(SubmissionResponse(s, v)))
+
+      case None =>
+        Future.successful(None)
+    }
+    onComplete(fResponse) {
+      case Success(maybeLatest) =>
+        maybeLatest match {
+          case Some(latest) =>
+            complete(latest)
+          case None =>
+            complete(StatusCodes.NotFound)
+        }
+      case Failure(error) =>
+        failedResponse(StatusCodes.InternalServerError, uri, error)
+    }
+  }
+
+//  //institutions/<lei>/filings/<period>/submissions/latest
+//  def submissionLatestPath(oAuth2Authorization: OAuth2Authorization): Route =
+//    path("institutions" / Segment / "filings" / Segment / "submissions" / "latest") { (lei, period) =>
+//      oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+//        respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+//          timedGet { uri =>
+//            val filingPersistence =
+//              sharding.entityRefFor(FilingPersistence.typeKey, s"${FilingPersistence.name}-$lei-$period")
+//
+//            val fLatest: Future[Option[Submission]] = filingPersistence ? (ref => GetLatestSubmission(ref))
+//
+//            val fResponse = fLatest.flatMap {
+//              case Some(s) =>
+//                val entity =
+//                  sharding.entityRefFor(HmdaValidationError.typeKey, s"${HmdaValidationError.name}-${s.id}")
+//                val fStatus: Future[VerificationStatus] = entity ? (reply => GetVerificationStatus(reply))
+//                fStatus.map(v => Option(SubmissionResponse(s, v)))
+//
+//              case None =>
+//                Future.successful(None)
+//            }
+//
+//            onComplete(fResponse) {
+//              case Success(maybeLatest) =>
+//                maybeLatest match {
+//                  case Some(latest) =>
+//                    complete(latest)
+//
+//                  case None =>
+//                    complete(StatusCodes.NotFound)
+//                }
+//              case Failure(error) =>
+//                failedResponse(StatusCodes.InternalServerError, uri, error)
+//            }
+//          }
+//        }
+//      }
+//    }
 
   def submissionRoutes(oAuth2Authorization: OAuth2Authorization): Route =
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          submissionCreatePath(oAuth2Authorization) ~ submissionLatestPath(oAuth2Authorization) ~ submissionSummary(oAuth2Authorization)
+          submissionCreatePath(oAuth2Authorization) ~ latestSubmissionPath(oAuth2Authorization) ~ submissionSummaryPath(oAuth2Authorization)
         }
       }
     }
@@ -219,7 +265,7 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
 
     onComplete(createdF) {
       case Success(created) =>
-        complete(StatusCodes.Created -> created.submission)
+        complete(StatusCodes.Created, created.submission)
       case Failure(error) =>
         failedResponse(StatusCodes.InternalServerError, uri, error)
     }
