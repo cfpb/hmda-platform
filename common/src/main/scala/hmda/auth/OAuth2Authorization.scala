@@ -19,7 +19,7 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
       case t if t.roles.contains(role) =>
         provide(t)
       case _ =>
-        if (runtimeMode == "dev") {
+        if (runtimeMode == "dev-test") {
           provide(VerifiedToken())
         } else {
           reject(AuthorizationFailedRejection)
@@ -30,7 +30,7 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
   def authorizeTokenWithLeiQuarter(lei: String): Directive1[VerifiedToken] =
     authorizeToken flatMap {
       case t if t.lei.nonEmpty =>
-        if (runtimeMode == "dev") {
+        if (runtimeMode == "dev-test") {
           provide(t)
         } else {
           val leiList = t.lei.split(',')
