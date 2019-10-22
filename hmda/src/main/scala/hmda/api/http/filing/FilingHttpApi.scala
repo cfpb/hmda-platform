@@ -3,30 +3,28 @@ package hmda.api.http.filing
 import java.time.Instant
 
 import akka.actor.ActorSystem
-import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
+import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.{ StatusCodes, Uri }
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.{ PathMatcher1, Route }
+import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.model.headers.RawHeader
 import hmda.api.http.directives.HmdaTimeDirectives
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import hmda.messages.filing.FilingCommands.{ CreateFiling, GetFilingDetails }
 import hmda.model.filing.{ Filing, FilingDetails, InProgress }
-import hmda.persistence.filing.FilingPersistence
+import hmda.persistence.filing.FilingPersistence._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.ErrorResponse
 import hmda.auth.OAuth2Authorization
-import hmda.messages.filing.FilingCommands
 import hmda.messages.filing.FilingEvents.FilingCreated
-import hmda.messages.institution.InstitutionCommands
 import hmda.messages.institution.InstitutionCommands.GetInstitution
 import hmda.model.institution.Institution
-import hmda.persistence.institution.InstitutionPersistence
+import hmda.persistence.institution.InstitutionPersistence._
 import hmda.util.http.FilingResponseUtils._
-import hmda.utils.YearUtils._
+import hmda.api.http.PathMatchers._
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
@@ -39,9 +37,6 @@ trait FilingHttpApi extends HmdaTimeDirectives {
   implicit val ec: ExecutionContext
   implicit val timeout: Timeout
   val sharding: ClusterSharding
-
-  val Quarter: PathMatcher1[String] = Segment.flatMap(Option(_).filter(isValidQuarter))
-  val Year: PathMatcher1[Int]       = IntNumber.flatMap(Option(_).filter(isValidYear))
 
   def filingRoutes(oAuth2Authorization: OAuth2Authorization): Route =
     handleRejections(corsRejectionHandler) {
@@ -69,7 +64,7 @@ trait FilingHttpApi extends HmdaTimeDirectives {
         }
       } ~ path("institutions" / Segment / "filings" / Year / "quarter" / Quarter) { (lei, year, quarter) =>
         pathEndOrSingleSlash {
-          // POST/institutions/<lei>/filings/<year>/quarter/<quarter>
+          // POST/institutions/<lei>/filings/<year>/quarters/<quarter>
           timedPost { uri =>
             createFilingForInstitution(lei, year, Option(quarter), uri)
           } ~
@@ -81,21 +76,9 @@ trait FilingHttpApi extends HmdaTimeDirectives {
       }
     }
 
-  def selectInstitution(lei: String, year: Int, quarter: Option[String]): EntityRef[InstitutionCommands.InstitutionCommand] =
-    if (year == 2018) sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-$lei")
-    else {
-      val coordinates = quarter.fold(ifEmpty = s"$lei-$year")(q => s"$lei-$year-$q")
-      sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-$coordinates")
-    }
-
-  def selectFiling(lei: String, year: Int, quarter: Option[String]): EntityRef[FilingCommands.FilingCommand] = {
-    val coordinates = quarter.fold(ifEmpty = s"$lei-$year")(q => s"$lei-$year-$q")
-    sharding.entityRefFor(FilingPersistence.typeKey, s"${FilingPersistence.name}-$coordinates")
-  }
-
   def obtainFilingDetails(lei: String, period: Int, quarter: Option[String]): Future[(Option[Institution], Option[FilingDetails])] = {
-    val ins = selectInstitution(lei, period, quarter)
-    val fil = selectFiling(lei, period, quarter)
+    val ins = selectInstitution(sharding, lei, period)
+    val fil = selectFiling(sharding, lei, period, quarter)
 
     val fInstitution: Future[Option[Institution]] = ins ? (ref => GetInstitution(ref))
     val fDetails: Future[Option[FilingDetails]]   = fil ? (ref => GetFilingDetails(ref))
@@ -147,7 +130,7 @@ trait FilingHttpApi extends HmdaTimeDirectives {
           start = now,
           end = 0L
         )
-        val fFiling: Future[FilingCreated] = selectFiling(lei, year, quarter) ? (ref => CreateFiling(filing, ref))
+        val fFiling: Future[FilingCreated] = selectFiling(sharding, lei, year, quarter) ? (ref => CreateFiling(filing, ref))
         onComplete(fFiling) {
           case Success(created) =>
             val filingDetails = FilingDetails(created.filing, Nil)

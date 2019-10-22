@@ -19,4 +19,7 @@ object YearUtils {
       val digit = quarter.last.toString.toInt
       digit >= 1 && digit <= 3
     }
+
+  def period(year: Int, quarter: Option[String]): String =
+    quarter.fold(ifEmpty = s"$year")(quarter => s"$year-$quarter")
 }
