@@ -1,39 +1,31 @@
 package com.hmda.reports.processing
 
 import akka.Done
-import akka.actor.{Actor, ActorLogging, Props}
+import akka.actor.{ Actor, ActorLogging, Props }
 import akka.stream._
 import akka.stream.scaladsl._
 import akka.pattern.pipe
 import akka.stream.alpakka.s3.S3Settings
 import com.hmda.reports.model._
-import hmda.model.census.{Census, State}
+import hmda.model.census.{ Census, State }
 import io.circe.generic.auto._
 import io.circe.syntax._
-import org.apache.spark.sql.{SparkSession, _}
+import org.apache.spark.sql.{ SparkSession, _ }
 
 import scala.concurrent._
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
-class DisclosureProcessing(spark: SparkSession, s3Settings: S3Settings)
-    extends Actor
-    with ActorLogging {
+class DisclosureProcessing(spark: SparkSession, s3Settings: S3Settings) extends Actor with ActorLogging {
   import DisclosureProcessing._
 
   implicit val mat: ActorMaterializer = ActorMaterializer()(context.system)
-  implicit val ec: ExecutionContext = context.dispatcher
+  implicit val ec: ExecutionContext   = context.dispatcher
 
   override def receive: Receive = {
     case ProcessDisclosureKafkaRecord(lei, lookupMap, jdbcUrl, bucket, year) =>
       val originalSender = sender()
       log.info(s"Beginning process for $lei")
-      processDisclosureKafkaRecord(lei,
-                                   spark,
-                                   lookupMap,
-                                   jdbcUrl,
-                                   bucket,
-                                   year,
-                                   s3Settings)
+      processDisclosureKafkaRecord(lei, spark, lookupMap, jdbcUrl, bucket, year, s3Settings)
         .map(_ => Finished)
         .pipeTo(originalSender)
       log.info(s"Finished process for $lei")
@@ -43,30 +35,29 @@ class DisclosureProcessing(spark: SparkSession, s3Settings: S3Settings)
 
 object DisclosureProcessing {
   case class ProcessDisclosureKafkaRecord(
-      lei: String,
-      lookupMap: Map[(Int, Int), StateMapping],
-      jdbcUrl: String,
-      bucket: String,
-      year: String)
+    lei: String,
+    lookupMap: Map[(Int, Int), StateMapping],
+    jdbcUrl: String,
+    bucket: String,
+    year: String
+  )
   case object Finished
 
   def props(sparkSession: SparkSession, s3Settings: S3Settings): Props =
     Props(new DisclosureProcessing(sparkSession, s3Settings))
 
-  def processDisclosureKafkaRecord(lei: String,
-                                   spark: SparkSession,
-                                   lookupMap: Map[(Int, Int), StateMapping],
-                                   jdbcUrl: String,
-                                   bucket: String,
-                                   year: String,
-                                   s3Settings: S3Settings)(
-      implicit mat: ActorMaterializer,
-      ec: ExecutionContext): Future[Unit] = {
+  def processDisclosureKafkaRecord(
+    lei: String,
+    spark: SparkSession,
+    lookupMap: Map[(Int, Int), StateMapping],
+    jdbcUrl: String,
+    bucket: String,
+    year: String,
+    s3Settings: S3Settings
+  )(implicit mat: ActorMaterializer, ec: ExecutionContext): Future[Unit] = {
     import spark.implicits._
 
-    def jsonFormationTable1(msaMd: Msa,
-                            input: List[Data],
-                            leiDetails: Institution): OutDisclosure1 = {
+    def jsonFormationTable1(msaMd: Msa, input: List[Data], leiDetails: Institution): OutDisclosure1 = {
       val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
 
       val tracts = input
@@ -81,20 +72,17 @@ object DisclosureProcessing {
                     .groupBy(d => d.title)
                     .map {
                       case (title, datasByTitle) =>
-                        val listInfo: List[Info] = datasByTitle.map(d =>
-                          Info(d.dispositionName, d.count, d.loan_amount))
+                        val listInfo: List[Info] = datasByTitle.map(d => Info(d.dispositionName, d.count, d.loan_amount))
                         Disposition(title.split("-")(0).trim, listInfo, title)
                     }
                     .toList
                     .sorted
-                  val stateCode = Try(tract.take(2).toInt).getOrElse(-1)
-                  val countyCode = Try(tract.slice(2, 5).toInt).getOrElse(-1)
+                  val stateCode      = Try(tract.take(2).toInt).getOrElse(-1)
+                  val countyCode     = Try(tract.slice(2, 5).toInt).getOrElse(-1)
                   val remainingTract = tract.drop(5)
                   val stateMapping =
                     lookupMap.getOrElse((stateCode, countyCode), StateMapping())
-                  Tract(
-                    stateMapping.county + "/" + stateMapping.stateName + "/" + remainingTract,
-                    dispositions)
+                  Tract(stateMapping.county + "/" + stateMapping.stateName + "/" + remainingTract, dispositions)
                 //                  Tract("", dispositions)
               }
               .toList
@@ -114,9 +102,7 @@ object DisclosureProcessing {
       )
     }
 
-    def jsonFormationTable2(msaMd: Msa,
-                            input: List[Data],
-                            leiDetails: Institution): OutDisclosure2 = {
+    def jsonFormationTable2(msaMd: Msa, input: List[Data], leiDetails: Institution): OutDisclosure2 = {
       val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
 
       val tracts = input
@@ -131,20 +117,17 @@ object DisclosureProcessing {
                     .groupBy(d => d.title)
                     .map {
                       case (title, datasByTitle) =>
-                        val listInfo: List[Info] = datasByTitle.map(d =>
-                          Info(d.dispositionName, d.count, d.loan_amount))
+                        val listInfo: List[Info] = datasByTitle.map(d => Info(d.dispositionName, d.count, d.loan_amount))
                         Disposition(title.split("-")(0).trim, listInfo, title)
                     }
                     .toList
                     .sorted
-                  val stateCode = Try(tract.take(2).toInt).getOrElse(-1)
-                  val countyCode = Try(tract.slice(2, 5).toInt).getOrElse(-1)
+                  val stateCode      = Try(tract.take(2).toInt).getOrElse(-1)
+                  val countyCode     = Try(tract.slice(2, 5).toInt).getOrElse(-1)
                   val remainingTract = tract.drop(5)
                   val stateMapping =
                     lookupMap.getOrElse((stateCode, countyCode), StateMapping())
-                  Tract2(
-                    stateMapping.county + "/" + stateMapping.stateName + "/" + remainingTract,
-                    dispositions(0).values)
+                  Tract2(stateMapping.county + "/" + stateMapping.stateName + "/" + remainingTract, dispositions(0).values)
                 //                  Tract2("", dispositions(0).values)
               }
               .toList
@@ -174,7 +157,8 @@ object DisclosureProcessing {
             s"$bucket/reports/disclosure/$year/$lei/${input.msa.id}/1.json",
             data,
             "cfpb-hmda-public",
-            s3Settings)(mat, ec)
+            s3Settings
+          )(mat, ec)
         }
         .runWith(Sink.ignore)
 
@@ -186,18 +170,20 @@ object DisclosureProcessing {
             s"$bucket/reports/disclosure/$year/$lei/${input.msa.id}/2.json",
             data,
             "cfpb-hmda-public",
-            s3Settings)(mat, ec)
+            s3Settings
+          )(mat, ec)
         }
         .runWith(Sink.ignore)
 
     def leiDetails: Institution =
       spark.read
         .format("jdbc")
-        .option("profile", "slick.jdbc.PostgresProfile")
+        .option("driver", "org.postgresql.Driver")
         .option("url", jdbcUrl)
         .option(
           "dbtable",
-          s"(select lei, respondent_name as institutionName from institutions2018 where lei = '$lei' and hmda_filer = true) as institutions2018")
+          s"(select lei, respondent_name as institutionName from institutions2018 where lei = '$lei' and hmda_filer = true) as institutions2018"
+        )
         .load()
         .as[Institution]
         .collect()
@@ -206,11 +192,9 @@ object DisclosureProcessing {
     def cachedRecordsDf: DataFrame =
       spark.read
         .format("jdbc")
-        .option("profile", "slick.jdbc.PostgresProfile")
+        .option("driver", "org.postgresql.Driver")
         .option("url", jdbcUrl)
-        .option(
-          "dbtable",
-          s"(select * from modifiedlar2018 where lei = '$lei' and filing_year = $year) as mlar")
+        .option("dbtable", s"(select * from modifiedlar2018 where lei = '$lei' and filing_year = $year) as mlar")
         .load()
         .cache()
 
@@ -244,8 +228,7 @@ object DisclosureProcessing {
     result.onComplete {
       case Success(_) => println(s"Finished processing LEI: $lei")
       case Failure(exception) =>
-        println(
-          s"Exception happened when processing LEI $lei" + exception.getMessage)
+        println(s"Exception happened when processing LEI $lei" + exception.getMessage)
         println("Printing stacktrace")
         exception.printStackTrace()
     }
