@@ -1,11 +1,11 @@
 package hmda.util.conversion
 
-import java.time.ZoneOffset
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 trait ColumnDataFormatter {
 
-  private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS").withZone(ZoneOffset.ofHours(-5));
+  private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
 
   def dateToString(option:Option[java.sql.Timestamp] ): String =
     if(option !=null) {
