@@ -56,7 +56,7 @@ trait FilingHttpApi extends HmdaTimeDirectives {
     }
 
   def filingReadPath(oAuth2Authorization: OAuth2Authorization): Route =
-    respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+    respondWithDefaultHeader(RawHeader("Cache-Control", "no-cache")) {
       path("institutions" / Segment / "filings" / Year) { (lei, year) =>
         oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
           pathEndOrSingleSlash {
@@ -69,17 +69,17 @@ trait FilingHttpApi extends HmdaTimeDirectives {
                 getFilingForInstitution(lei, year, None, uri)
               }
           }
-        } ~ path("institutions" / Segment / "filings" / Year / "quarter" / Quarter) { (lei, year, quarter) =>
-          pathEndOrSingleSlash {
-            // POST/institutions/<lei>/filings/<year>/quarters/<quarter>
-            timedPost { uri =>
-              createFilingForInstitution(lei, year, Option(quarter), uri)
-            } ~
-              // GET /institutions/<lei>/filings/<year>/quarters/<quarter>
-              timedGet { uri =>
-                getFilingForInstitution(lei, year, Option(quarter), uri)
-              }
-          }
+        }
+      } ~ path("institutions" / Segment / "filings" / Year / "quarter" / Quarter) { (lei, year, quarter) =>
+        pathEndOrSingleSlash {
+          // POST/institutions/<lei>/filings/<year>/quarters/<quarter>
+          timedPost { uri =>
+            createFilingForInstitution(lei, year, Option(quarter), uri)
+          } ~
+            // GET /institutions/<lei>/filings/<year>/quarters/<quarter>
+            timedGet { uri =>
+              getFilingForInstitution(lei, year, Option(quarter), uri)
+            }
         }
       }
     }
