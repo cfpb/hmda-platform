@@ -3,7 +3,7 @@ package hmda.persistence.submission
 import akka.actor.typed.{ ActorRef, Behavior }
 import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
+import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import hmda.actor.HmdaTypedActor
 import hmda.messages.submission.SubmissionCommands.ModifySubmission
 import hmda.messages.submission.SubmissionEvents.{ SubmissionEvent, SubmissionModified }
@@ -69,5 +69,8 @@ object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
 
   def startShardRegion(sharding: ClusterSharding): ActorRef[ShardingEnvelope[SubmissionManagerCommand]] =
     super.startShardRegion(sharding)
+
+  def selectSubmissionManager(sharding: ClusterSharding, submissionId: SubmissionId): EntityRef[SubmissionManagerCommand] =
+    sharding.entityRefFor(SubmissionManager.typeKey, s"${SubmissionManager.name}-${submissionId.toString}")
 
 }

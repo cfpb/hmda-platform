@@ -25,8 +25,12 @@ import hmda.messages.submission.HmdaRawDataCommands.{ AddLine, HmdaRawDataComman
 import hmda.messages.submission.HmdaRawDataEvents.HmdaRawDataEvent
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.model.filing.submission._
-import hmda.persistence.submission.{ HmdaRawData, SubmissionManager, SubmissionPersistence }
 import hmda.messages.submission.SubmissionManagerCommands.{ SubmissionManagerCommand, UpdateSubmissionStatus }
+import hmda.api.http.PathMatchers._
+import hmda.persistence.submission.HmdaRawData.selectHmdaRawData
+import hmda.persistence.submission.SubmissionManager.selectSubmissionManager
+import hmda.persistence.submission.SubmissionPersistence.selectSubmissionPersistence
+import hmda.utils.YearUtils
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
@@ -41,53 +45,6 @@ trait UploadHttpApi extends HmdaTimeDirectives {
   implicit val timeout: Timeout
   val config: Config
 
-  // institutions/<lei>/filings/<period>/submissions/<seqNr>
-  def uploadHmdaFileRoute(oAuth2Authorization: OAuth2Authorization) =
-    path(Segment / "filings" / Segment / "submissions" / IntNumber) { (lei, period, seqNr) =>
-      oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
-        timedPost { uri =>
-          respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-            val submissionId    = SubmissionId(lei, period, seqNr)
-            val uploadTimestamp = Instant.now.toEpochMilli
-
-            val submissionManager =
-              sharding.entityRefFor(SubmissionManager.typeKey, s"${SubmissionManager.name}-${submissionId.toString}")
-
-            val submissionPersistence =
-              sharding.entityRefFor(SubmissionPersistence.typeKey, s"${SubmissionPersistence.name}-${submissionId.toString}")
-
-            val hmdaRaw =
-              sharding.entityRefFor(
-                HmdaRawData.typeKey,
-                s"${HmdaRawData.name}-${submissionId.toString}"
-              )
-
-            val fSubmission: Future[Option[Submission]] = submissionPersistence ? (ref => GetSubmission(ref))
-
-            val fCheckSubmission = for {
-              s <- fSubmission.mapTo[Option[Submission]]
-            } yield s
-
-            onComplete(fCheckSubmission) {
-              case Success(result) =>
-                result match {
-                  case Some(submission) =>
-                    if (submission.status == Created) {
-                      uploadFile(hmdaRaw, submissionManager, uploadTimestamp, submission, uri)
-                    } else {
-                      submissionNotAvailable(submissionId, uri)
-                    }
-                  case None =>
-                    submissionNotAvailable(submissionId, uri)
-                }
-              case Failure(error) =>
-                failedResponse(StatusCodes.InternalServerError, uri, error)
-            }
-          }
-        }
-      }
-    }
-
   def uploadRoutes(oAuth2Authorization: OAuth2Authorization): Route =
     handleRejections(corsRejectionHandler) {
       cors() {
@@ -99,11 +56,56 @@ trait UploadHttpApi extends HmdaTimeDirectives {
       }
     }
 
-  private def uploadFile(hmdaRaw: EntityRef[HmdaRawDataCommand],
-                         submissionManager: EntityRef[SubmissionManagerCommand],
-                         uploadTimeStamp: Long,
-                         submission: Submission,
-                         uri: Uri): Route = {
+  // POST <lei>/filings/<year>/submissions/<seqNr>
+  // POST <lei>/filings/<year>/quarter/<q>/submissions/<seqNr>
+  def uploadHmdaFileRoute(oauth2Authorization: OAuth2Authorization): Route =
+    respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+      timedPost { uri =>
+        pathPrefix(Segment / "filings") { lei =>
+          oauth2Authorization.authorizeTokenWithLei(lei) { _ =>
+            path(Year / "submissions" / IntNumber) { (year, seqNr) =>
+              checkAndUploadSubmission(lei, year, None, seqNr, uri)
+            } ~ path(Year / "quarter" / Quarter / "submissions" / IntNumber) { (year, quarter, seqNr) =>
+              checkAndUploadSubmission(lei, year, Option(quarter), seqNr, uri)
+            }
+          }
+        }
+      }
+    }
+
+  private def checkAndUploadSubmission(lei: String, year: Int, quarter: Option[String], seqNr: Int, uri: Uri): Route = {
+    val period                                  = YearUtils.period(year, quarter)
+    val submissionId                            = SubmissionId(lei, period, seqNr)
+    val uploadTimestamp                         = Instant.now.toEpochMilli
+    val submissionManager                       = selectSubmissionManager(sharding, submissionId)
+    val submissionPersistence                   = selectSubmissionPersistence(sharding, submissionId)
+    val hmdaRaw                                 = selectHmdaRawData(sharding, submissionId)
+    val fSubmission: Future[Option[Submission]] = submissionPersistence ? (ref => GetSubmission(ref))
+
+    onComplete(fSubmission) {
+      case Success(result) =>
+        result match {
+          case Some(submission) =>
+            if (submission.status == Created) {
+              uploadFile(hmdaRaw, submissionManager, uploadTimestamp, submission, uri)
+            } else {
+              submissionNotAvailable(submissionId, uri)
+            }
+          case None =>
+            submissionNotAvailable(submissionId, uri)
+        }
+      case Failure(error) =>
+        failedResponse(StatusCodes.InternalServerError, uri, error)
+    }
+  }
+
+  private def uploadFile(
+    hmdaRaw: EntityRef[HmdaRawDataCommand],
+    submissionManager: EntityRef[SubmissionManagerCommand],
+    uploadTimeStamp: Long,
+    submission: Submission,
+    uri: Uri
+  ): Route = {
     val splitLines =
       Framing.delimiter(ByteString("\n"), 2048, allowTruncation = true)
 
@@ -148,5 +150,4 @@ trait UploadHttpApi extends HmdaTimeDirectives {
     val response: Future[HmdaRawDataEvent] = entityRef ? (ref => AddLine(submissionId, Instant.now.toEpochMilli, data, Some(ref)))
     response
   }
-
 }
