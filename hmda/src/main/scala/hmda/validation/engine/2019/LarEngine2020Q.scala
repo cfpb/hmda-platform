@@ -8,7 +8,7 @@ import hmda.validation.rules.lar.syntactical.{ S300, S301 }
 import hmda.validation.rules.lar.validity._
 import hmda.validation.rules.lar.validity.nineteen
 
-private[engine] object LarEngine2019Q extends ValidationEngine[LoanApplicationRegister] {
+private[engine] object LarEngine2020Q extends ValidationEngine[LoanApplicationRegister] {
 
   override def syntacticalChecks(ctx: ValidationContext) = Vector(
     S300,
