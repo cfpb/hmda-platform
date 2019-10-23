@@ -69,6 +69,17 @@ trait FilingHttpApi extends HmdaTimeDirectives {
                 getFilingForInstitution(lei, year, None, uri)
               }
           }
+        } ~ path("institutions" / Segment / "filings" / Year / "quarter" / Quarter) { (lei, year, quarter) =>
+          pathEndOrSingleSlash {
+            // POST/institutions/<lei>/filings/<year>/quarters/<quarter>
+            timedPost { uri =>
+              createFilingForInstitution(lei, year, Option(quarter), uri)
+            } ~
+              // GET /institutions/<lei>/filings/<year>/quarters/<quarter>
+              timedGet { uri =>
+                getFilingForInstitution(lei, year, Option(quarter), uri)
+              }
+          }
         }
       }
     }
