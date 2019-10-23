@@ -1,41 +1,34 @@
 package com.hmda.reports.processing
 
 import akka.Done
-import akka.actor.{Actor, ActorLogging, Props}
+import akka.actor.{ Actor, ActorLogging, Props }
 import akka.stream._
 import akka.stream.scaladsl._
 import akka.pattern.pipe
 import akka.stream.alpakka.s3.S3Settings
 import akka.util.ByteString
 import com.hmda.reports.model._
-import hmda.model.census.{Census, State}
+import hmda.model.census.{ Census, State }
 import io.circe.generic.auto._
 import io.circe.syntax._
-import org.apache.spark.sql.{SparkSession, _}
+import org.apache.spark.sql.{ SparkSession, _ }
 import org.apache.spark.sql.functions._
 
 import scala.concurrent._
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
-class AggregateProcessing(spark: SparkSession, s3Settings: S3Settings)
-    extends Actor
-    with ActorLogging {
+class AggregateProcessing(spark: SparkSession, s3Settings: S3Settings) extends Actor with ActorLogging {
 
   import AggregateProcessing._
 
   implicit val mat: ActorMaterializer = ActorMaterializer()(context.system)
-  implicit val ec: ExecutionContext = context.dispatcher
+  implicit val ec: ExecutionContext   = context.dispatcher
 
   override def receive: Receive = {
     case ProcessAggregateKafkaRecord(lookupMap, jdbcUrl, bucket, year) =>
       val originalSender = sender()
       log.info(s"Beginning Aggregate Reports")
-      processAggregateKafkaRecord(spark,
-                                  lookupMap,
-                                  jdbcUrl,
-                                  bucket,
-                                  year,
-                                  s3Settings)
+      processAggregateKafkaRecord(spark, lookupMap, jdbcUrl, bucket, year, s3Settings)
         .map(_ => Finished)
         .pipeTo(originalSender)
       log.info(s"Finished process for Aggregate Reports")
@@ -44,31 +37,28 @@ class AggregateProcessing(spark: SparkSession, s3Settings: S3Settings)
 }
 
 object AggregateProcessing {
-  case class ProcessAggregateKafkaRecord(
-      lookupMap: Map[(Int, Int), StateMapping],
-      jdbcUrl: String,
-      bucket: String,
-      year: String)
+
+  case class ProcessAggregateKafkaRecord(lookupMap: Map[(Int, Int), StateMapping], jdbcUrl: String, bucket: String, year: String)
   case object Finished
 
   def props(sparkSession: SparkSession, s3Settings: S3Settings): Props =
     Props(new AggregateProcessing(sparkSession, s3Settings))
 
-  def processAggregateKafkaRecord(spark: SparkSession,
-                                  lookupMap: Map[(Int, Int), StateMapping],
-                                  jdbcUrl: String,
-                                  bucket: String,
-                                  year: String,
-                                  s3Settings: S3Settings)(
-      implicit mat: ActorMaterializer,
-      ec: ExecutionContext): Future[Unit] = {
+  def processAggregateKafkaRecord(
+    spark: SparkSession,
+    lookupMap: Map[(Int, Int), StateMapping],
+    jdbcUrl: String,
+    bucket: String,
+    year: String,
+    s3Settings: S3Settings
+  )(implicit mat: ActorMaterializer, ec: ExecutionContext): Future[Unit] = {
 
     import spark.implicits._
 
     def cachedRecordsDf: DataFrame =
       spark.read
         .format("jdbc")
-        .option("profile", "slick.jdbc.PostgresProfile")
+        .option("driver", "org.postgresql.Driver")
         .option("url", jdbcUrl)
         .option("numPartitions", 1000)
         .option("partitionColumn", "msa_md")
@@ -87,16 +77,16 @@ object AggregateProcessing {
     val cachedRecordsInstitions2018: DataFrame =
       spark.read
         .format("jdbc")
-        .option("profile", "slick.jdbc.PostgresProfile")
+        .option("driver", "org.postgresql.Driver")
         .option("url", jdbcUrl)
         .option(
           "dbtable",
-          s"(select lei as institution_lei, respondent_name from institutions2018_snapshot where hmda_filer = true) as institutions2018")
+          s"(select lei as institution_lei, respondent_name from institutions2018_snapshot where hmda_filer = true) as institutions2018"
+        )
         .load()
         .cache()
 
-    def jsonFormationTable9(msaMd: Msa,
-                            input: List[DataMedAge]): OutAggregateMedAge = {
+    def jsonFormationTable9(msaMd: Msa, input: List[DataMedAge]): OutAggregateMedAge = {
       val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
       val medianAges = input
         .groupBy(d => d.msa_md)
@@ -116,8 +106,7 @@ object AggregateProcessing {
                     }
                     .toList
                     .sorted
-                  BaseProcessing.buildSortedMedAge(
-                    MedianAge(medianAge, dispositions, "unsorted"))
+                  BaseProcessing.buildSortedMedAge(MedianAge(medianAge, dispositions, "unsorted"))
               }
               .toList
               .sorted
@@ -136,9 +125,7 @@ object AggregateProcessing {
       )
     }
 
-    def jsonFormationAggregateTable1(
-        msaMd: Msa,
-        input: List[AggregateData]): OutAggregate1 = {
+    def jsonFormationAggregateTable1(msaMd: Msa, input: List[AggregateData]): OutAggregate1 = {
       val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
 
       val tracts = input
@@ -153,20 +140,17 @@ object AggregateProcessing {
                     .groupBy(d => d.title)
                     .map {
                       case (title, datasByTitle) =>
-                        val listInfo: List[Info] = datasByTitle.map(d =>
-                          Info(d.dispositionName, d.count, d.loan_amount))
+                        val listInfo: List[Info] = datasByTitle.map(d => Info(d.dispositionName, d.count, d.loan_amount))
                         Disposition(title.split("-")(0).trim, listInfo, title)
                     }
                     .toList
                     .sorted
-                  val stateCode = Try(tract.take(2).toInt).getOrElse(-1)
-                  val countyCode = Try(tract.slice(2, 5).toInt).getOrElse(-1)
+                  val stateCode      = Try(tract.take(2).toInt).getOrElse(-1)
+                  val countyCode     = Try(tract.slice(2, 5).toInt).getOrElse(-1)
                   val remainingTract = tract.drop(5)
                   val stateMapping =
                     lookupMap.getOrElse((stateCode, countyCode), StateMapping())
-                  Tract(
-                    stateMapping.county + "/" + stateMapping.stateName + "/" + remainingTract,
-                    dispositions)
+                  Tract(stateMapping.county + "/" + stateMapping.stateName + "/" + remainingTract, dispositions)
               }
               .toList
             tracts
@@ -183,9 +167,7 @@ object AggregateProcessing {
       )
     }
 
-    def jsonFormationAggregateTable2(
-        msaMd: Msa,
-        input: List[AggregateData]): OutAggregate2 = {
+    def jsonFormationAggregateTable2(msaMd: Msa, input: List[AggregateData]): OutAggregate2 = {
       val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
 
       val tracts = input
@@ -200,20 +182,17 @@ object AggregateProcessing {
                     .groupBy(d => d.title)
                     .map {
                       case (title, datasByTitle) =>
-                        val listInfo: List[Info] = datasByTitle.map(d =>
-                          Info(d.dispositionName, d.count, d.loan_amount))
+                        val listInfo: List[Info] = datasByTitle.map(d => Info(d.dispositionName, d.count, d.loan_amount))
                         Disposition(title.split("-")(0).trim, listInfo, title)
                     }
                     .toList
                     .sorted
-                  val stateCode = Try(tract.take(2).toInt).getOrElse(-1)
-                  val countyCode = Try(tract.slice(2, 5).toInt).getOrElse(-1)
+                  val stateCode      = Try(tract.take(2).toInt).getOrElse(-1)
+                  val countyCode     = Try(tract.slice(2, 5).toInt).getOrElse(-1)
                   val remainingTract = tract.drop(5)
                   val stateMapping =
                     lookupMap.getOrElse((stateCode, countyCode), StateMapping())
-                  Tract2(
-                    stateMapping.county + "/" + stateMapping.stateName + "/" + remainingTract,
-                    dispositions(0).values)
+                  Tract2(stateMapping.county + "/" + stateMapping.stateName + "/" + remainingTract, dispositions(0).values)
                 //                  Tract2("", dispositions(0).values)
               }
               .toList
@@ -232,20 +211,13 @@ object AggregateProcessing {
       )
     }
 
-    def buildDisposition(input: List[DataRaceEthnicity],
-                         title: String): DispositionRaceEthnicity =
+    def buildDisposition(input: List[DataRaceEthnicity], title: String): DispositionRaceEthnicity =
       input.foldLeft(DispositionRaceEthnicity(title, 0, 0, title)) {
-        case (
-            DispositionRaceEthnicity(name, curCount, curValue, nameForSorting),
-            next) =>
-          DispositionRaceEthnicity(name.split("-")(0).trim,
-                                   curCount + next.count,
-                                   curValue + next.loan_amount,
-                                   nameForSorting)
+        case (DispositionRaceEthnicity(name, curCount, curValue, nameForSorting), next) =>
+          DispositionRaceEthnicity(name.split("-")(0).trim, curCount + next.count, curValue + next.loan_amount, nameForSorting)
       }
 
-    def jsonTransformationReportByEthnicityThenGender(
-        input: List[DataRaceEthnicity]): List[ReportByEthnicityThenGender] = {
+    def jsonTransformationReportByEthnicityThenGender(input: List[DataRaceEthnicity]): List[ReportByEthnicityThenGender] = {
       val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
       input
         .groupBy(data => (data.msa_md, data.msa_md_name))
@@ -254,14 +226,12 @@ object AggregateProcessing {
             val totalGrouping: List[Ethnicity] = dataForMsa
               .groupBy(_.ethnicity)
               .map {
-                case (eachEthnicity,
-                      dataForEthnicity: List[DataRaceEthnicity]) =>
+                case (eachEthnicity, dataForEthnicity: List[DataRaceEthnicity]) =>
                   val dispositionsByEthnicity: List[DispositionRaceEthnicity] =
                     dataForEthnicity
                       .groupBy(_.title)
                       .map {
-                        case (eachDisposition: String,
-                              dataForDisposition: List[DataRaceEthnicity]) =>
+                        case (eachDisposition: String, dataForDisposition: List[DataRaceEthnicity]) =>
                           buildDisposition(dataForDisposition, eachDisposition)
                       }
                       .toList
@@ -271,33 +241,23 @@ object AggregateProcessing {
                     dataForEthnicity
                       .groupBy(_.sex)
                       .map {
-                        case (eachGender: String,
-                              dataForGender: List[DataRaceEthnicity]) =>
-                          val dispositionsForGender
-                            : List[DispositionRaceEthnicity] =
+                        case (eachGender: String, dataForGender: List[DataRaceEthnicity]) =>
+                          val dispositionsForGender: List[DispositionRaceEthnicity] =
                             dataForGender
                               .groupBy(_.title)
                               .map {
-                                case (eachDisposition: String,
-                                      dataForDisposition: List[
-                                        DataRaceEthnicity]) =>
-                                  buildDisposition(dataForDisposition,
-                                                   eachDisposition)
+                                case (eachDisposition: String, dataForDisposition: List[DataRaceEthnicity]) =>
+                                  buildDisposition(dataForDisposition, eachDisposition)
                               }
                               .toList
                               .sorted
-                          BaseProcessing.buildSortedGender(
-                            Gender(eachGender,
-                                   dispositionsForGender,
-                                   "unsorted"))
+                          BaseProcessing.buildSortedGender(Gender(eachGender, dispositionsForGender, "unsorted"))
                       }
                       .toList
                       .sorted
                   BaseProcessing.buildSortedEthnicity(
-                    Ethnicity(eachEthnicity,
-                              dispositionsByEthnicity,
-                              dispositionByEthnicityAndGender,
-                              "unsorted"))
+                    Ethnicity(eachEthnicity, dispositionsByEthnicity, dispositionByEthnicityAndGender, "unsorted")
+                  )
 
               }
               .toList
@@ -316,8 +276,7 @@ object AggregateProcessing {
         .toList
     }
 
-    def jsonFormationRaceThenGender(
-        input: List[DataRaceEthnicity]): List[ReportByRaceThenGender] = {
+    def jsonFormationRaceThenGender(input: List[DataRaceEthnicity]): List[ReportByRaceThenGender] = {
       val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
       input
         .groupBy(data => (data.msa_md, data.msa_md_name))
@@ -331,8 +290,7 @@ object AggregateProcessing {
                     dataForRace
                       .groupBy(_.title)
                       .map {
-                        case (eachDisposition: String,
-                              dataForDisposition: List[DataRaceEthnicity]) =>
+                        case (eachDisposition: String, dataForDisposition: List[DataRaceEthnicity]) =>
                           buildDisposition(dataForDisposition, eachDisposition)
                       }
                       .toList
@@ -342,34 +300,22 @@ object AggregateProcessing {
                     dataForRace
                       .groupBy(_.sex)
                       .map {
-                        case (eachGender: String,
-                              dataForGender: List[DataRaceEthnicity]) =>
-                          val dispositionsForGender
-                            : List[DispositionRaceEthnicity] =
+                        case (eachGender: String, dataForGender: List[DataRaceEthnicity]) =>
+                          val dispositionsForGender: List[DispositionRaceEthnicity] =
                             dataForGender
                               .groupBy(_.title)
                               .map {
-                                case (eachDisposition: String,
-                                      dataForDisposition: List[
-                                        DataRaceEthnicity]) =>
-                                  buildDisposition(dataForDisposition,
-                                                   eachDisposition)
+                                case (eachDisposition: String, dataForDisposition: List[DataRaceEthnicity]) =>
+                                  buildDisposition(dataForDisposition, eachDisposition)
                               }
                               .toList
                               .sorted
-                          BaseProcessing.buildSortedGender(
-                            Gender(eachGender,
-                                   dispositionsForGender,
-                                   "unsorted"))
+                          BaseProcessing.buildSortedGender(Gender(eachGender, dispositionsForGender, "unsorted"))
                       }
                       .toList
                       .sorted
 
-                  BaseProcessing.buildSortedRace(
-                    Race(eachRace,
-                         dispositionsByRace,
-                         dispositionByRaceAndGender,
-                         "unsorted"))
+                  BaseProcessing.buildSortedRace(Race(eachRace, dispositionsByRace, dispositionByRaceAndGender, "unsorted"))
               }
               .toList
               .sorted
@@ -391,11 +337,10 @@ object AggregateProcessing {
       Source(input)
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
-          BaseProcessing.persistSingleFile(
-            s"$bucket/reports/aggregate/$year/${input.msa.id}/1.json",
-            data,
-            "cfpb-hmda-public",
-            s3Settings)(mat, ec)
+          BaseProcessing.persistSingleFile(s"$bucket/reports/aggregate/$year/${input.msa.id}/1.json", data, "cfpb-hmda-public", s3Settings)(
+            mat,
+            ec
+          )
         }
         .runWith(Sink.ignore)
 
@@ -403,11 +348,10 @@ object AggregateProcessing {
       Source(input)
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
-          BaseProcessing.persistSingleFile(
-            s"$bucket/reports/aggregate/$year/${input.msa.id}/2.json",
-            data,
-            "cfpb-hmda-public",
-            s3Settings)(mat, ec)
+          BaseProcessing.persistSingleFile(s"$bucket/reports/aggregate/$year/${input.msa.id}/2.json", data, "cfpb-hmda-public", s3Settings)(
+            mat,
+            ec
+          )
         }
         .runWith(Sink.ignore)
 
@@ -415,11 +359,10 @@ object AggregateProcessing {
       Source(input)
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
-          BaseProcessing.persistSingleFile(
-            s"$bucket/reports/aggregate/$year/${input.msa.id}/9.json",
-            data,
-            "cfpb-hmda-public",
-            s3Settings)(mat, ec)
+          BaseProcessing.persistSingleFile(s"$bucket/reports/aggregate/$year/${input.msa.id}/9.json", data, "cfpb-hmda-public", s3Settings)(
+            mat,
+            ec
+          )
         }
         .runWith(Sink.ignore)
 
@@ -427,24 +370,21 @@ object AggregateProcessing {
       Source(input)
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
-          BaseProcessing.persistSingleFile(
-            s"$bucket/reports/aggregate/$year/${input.msa.id}/i.json",
-            data,
-            "cfpb-hmda-public",
-            s3Settings)(mat, ec)
+          BaseProcessing.persistSingleFile(s"$bucket/reports/aggregate/$year/${input.msa.id}/i.json", data, "cfpb-hmda-public", s3Settings)(
+            mat,
+            ec
+          )
         }
         .runWith(Sink.ignore)
 
-    def persistJsonEthnicitySex(
-        input: List[ReportByEthnicityThenGender]): Future[Done] =
+    def persistJsonEthnicitySex(input: List[ReportByEthnicityThenGender]): Future[Done] =
       Source(input)
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
-          BaseProcessing.persistSingleFile(
-            s"$bucket/reports/aggregate/$year/${input.msa.id}/4.json",
-            data,
-            "cfpb-hmda-public",
-            s3Settings)(mat, ec)
+          BaseProcessing.persistSingleFile(s"$bucket/reports/aggregate/$year/${input.msa.id}/4.json", data, "cfpb-hmda-public", s3Settings)(
+            mat,
+            ec
+          )
         }
         .runWith(Sink.ignore)
 
@@ -452,11 +392,10 @@ object AggregateProcessing {
       Source(input)
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
-          BaseProcessing.persistSingleFile(
-            s"$bucket/reports/aggregate/$year/${input.msa.id}/3.json",
-            data,
-            "cfpb-hmda-public",
-            s3Settings)(mat, ec)
+          BaseProcessing.persistSingleFile(s"$bucket/reports/aggregate/$year/${input.msa.id}/3.json", data, "cfpb-hmda-public", s3Settings)(
+            mat,
+            ec
+          )
         }
         .runWith(Sink.ignore)
 
@@ -501,10 +440,12 @@ object AggregateProcessing {
       val clonedDf = cachedRecordsDf
         .withColumnRenamed("lei", "mlar_lei")
       clonedDf
-        .join(clonedRenamed,
-              clonedRenamed
-                .col("institution_lei") === clonedDf.col("mlar_lei"),
-              "inner")
+        .join(
+          clonedRenamed,
+          clonedRenamed
+            .col("institution_lei") === clonedDf.col("mlar_lei"),
+          "inner"
+        )
         .groupBy(col("msa_md"), col("msa_md_name"))
         .agg(collect_set(col("respondent_name")) as "reported_institutions")
         .as[ReportedInstitutions]
@@ -531,16 +472,14 @@ object AggregateProcessing {
         )
     }
 
-    def persistIncomeRaceEthnicity(
-        input: List[ReportByApplicantIncome]): Future[Done] =
+    def persistIncomeRaceEthnicity(input: List[ReportByApplicantIncome]): Future[Done] =
       Source(input)
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
-          BaseProcessing.persistSingleFile(
-            s"$bucket/reports/aggregate/$year/${input.msa.id}/5.json",
-            data,
-            "cfpb-hmda-public",
-            s3Settings)(mat, ec)
+          BaseProcessing.persistSingleFile(s"$bucket/reports/aggregate/$year/${input.msa.id}/5.json", data, "cfpb-hmda-public", s3Settings)(
+            mat,
+            ec
+          )
         }
         .runWith(Sink.ignore)
 
@@ -549,25 +488,22 @@ object AggregateProcessing {
       _ <- persistJson2(aggregateTable2)
       _ <- persistJson9(aggregateTable9)
       _ <- persistJsonI(aggregateTableI.toList)
-      _ <- persistJsonRaceSex(
-        jsonFormationRaceThenGender(
-          RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
-                                                          spark)))
+      _ <- persistJsonRaceSex(jsonFormationRaceThenGender(RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf, spark)))
       _ <- persistJsonEthnicitySex(
-        jsonTransformationReportByEthnicityThenGender(
-          RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
-                                                          spark)))
+            jsonTransformationReportByEthnicityThenGender(RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf, spark))
+          )
       _ <- persistIncomeRaceEthnicity(
-        IncomeRaceEthnicityProcessing.jsonFormationApplicantIncome(
-          IncomeRaceEthnicityProcessing
-            .outputCollectionTableIncome(cachedRecordsDf, spark)))
+            IncomeRaceEthnicityProcessing.jsonFormationApplicantIncome(
+              IncomeRaceEthnicityProcessing
+                .outputCollectionTableIncome(cachedRecordsDf, spark)
+            )
+          )
     } yield ()
 
     result.onComplete {
       case Success(_) => println(s"Finished Aggregate Reports")
       case Failure(exception) =>
-        println(
-          s"Exception happened when processing Aggregate Reports" + exception.getMessage)
+        println(s"Exception happened when processing Aggregate Reports" + exception.getMessage)
         println("Printing stacktrace")
         exception.printStackTrace()
     }

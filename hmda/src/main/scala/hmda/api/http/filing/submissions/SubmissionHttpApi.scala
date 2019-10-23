@@ -4,40 +4,39 @@ import akka.actor.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
+import akka.http.scaladsl.model.{ HttpResponse, StatusCodes, Uri }
 import akka.http.scaladsl.model.headers.RawHeader
-import akka.http.scaladsl.model.{ StatusCodes, Uri }
-import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import akka.util.{ ByteString, Timeout }
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Sink
 import akka.util.{ ByteString, Timeout }
+import hmda.api.http.directives.HmdaTimeDirectives
+import akka.http.scaladsl.server.Directives._
+import akka.stream.scaladsl.Sink
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.api.http.directives.HmdaTimeDirectives
-import hmda.api.http.model.ErrorResponse
-import hmda.api.http.model.filing.submissions.SubmissionResponse
-import hmda.auth.OAuth2Authorization
-import hmda.messages.filing.FilingCommands._
+import hmda.messages.filing.FilingCommands.{ GetFiling, GetLatestSubmission, GetSubmissionSummary }
 import hmda.messages.institution.InstitutionCommands.GetInstitution
 import hmda.messages.submission.SubmissionCommands.CreateSubmission
 import hmda.messages.submission.SubmissionEvents.SubmissionCreated
-import hmda.messages.submission.SubmissionProcessingCommands.GetVerificationStatus
 import hmda.model.filing.Filing
-import hmda.model.filing.submission._
-import hmda.model.filing.ts.TransmittalSheet
+import hmda.model.filing.submission.{ QualityMacroExists, Submission, SubmissionId, SubmissionSummary, VerificationStatus }
 import hmda.model.institution.Institution
+import hmda.persistence.submission.{ HmdaValidationError, SubmissionPersistence }
+import hmda.auth.OAuth2Authorization
+import hmda.model.filing.ts.TransmittalSheet
 import hmda.parser.filing.ts.TsCsvParser
-import hmda.persistence.filing.FilingPersistence
-import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.HmdaProcessingUtils._
-import hmda.persistence.submission._
+import hmda.api.http.model.ErrorResponse
 import hmda.util.http.FilingResponseUtils._
 import hmda.util.streams.FlowUtils.framing
 import hmda.api.http.PathMatchers._
+import hmda.api.http.model.filing.submissions.SubmissionResponse
+import hmda.messages.submission.SubmissionProcessingCommands.{ GetHmdaValidationErrorState, GetVerificationStatus }
+import hmda.model.processing.state.HmdaValidationErrorState
 import hmda.persistence.filing.FilingPersistence.selectFiling
 import hmda.persistence.institution.InstitutionPersistence.selectInstitution
 import hmda.utils.YearUtils
+
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
@@ -50,7 +49,6 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
   implicit val timeout: Timeout
   val sharding: ClusterSharding
 
-  //institutions/<lei>/filings/<period>/submissions
   def submissionCreatePath(oauth2Authorization: OAuth2Authorization): Route =
     respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
       timedPost { uri =>
@@ -92,7 +90,21 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
     }
   }
 
-  def obtainLatestSubmissionAndFilingAndInstitution(
+  private def createSubmission(uri: Uri, submissionId: SubmissionId): Route = {
+    val submissionPersistence =
+      sharding.entityRefFor(SubmissionPersistence.typeKey, s"${SubmissionPersistence.name}-${submissionId.toString}")
+
+    val createdF: Future[SubmissionCreated] = submissionPersistence ? (ref => CreateSubmission(submissionId, ref))
+
+    onComplete(createdF) {
+      case Success(created) =>
+        complete(StatusCodes.Created, created.submission)
+      case Failure(error) =>
+        failedResponse(StatusCodes.InternalServerError, uri, error)
+    }
+  }
+
+  private def obtainLatestSubmissionAndFilingAndInstitution(
     lei: String,
     period: Int,
     quarter: Option[String]
@@ -167,7 +179,6 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
     }
   }
 
-  //institutions/<lei>/filings/<period>/submissions/latest
   def latestSubmissionPath(oAuth2Authorization: OAuth2Authorization): Route =
     respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
       timedGet { uri =>
@@ -190,9 +201,18 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
       case Some(s) =>
         val entity =
           sharding.entityRefFor(HmdaValidationError.typeKey, s"${HmdaValidationError.name}-${s.id}")
-        val fStatus: Future[VerificationStatus] = entity ? (reply => GetVerificationStatus(reply))
-        fStatus.map(v => Option(SubmissionResponse(s, v)))
+        val fStatus: Future[VerificationStatus]      = entity ? (reply => GetVerificationStatus(reply))
+        val fEdits: Future[HmdaValidationErrorState] = entity ? (reply => GetHmdaValidationErrorState(s.id, reply))
 
+        val fSubmissionAndVerified = fStatus.map(v => (s, v))
+
+        val fQMExists = fEdits.map(r => QualityMacroExists(!r.quality.isEmpty, !r.`macro`.isEmpty))
+
+        for {
+          submissionAndVerified <- fSubmissionAndVerified
+          (submision, verified) = submissionAndVerified
+          qmExists              <- fQMExists
+        } yield Option(SubmissionResponse(submision, verified, qmExists))
       case None =>
         Future.successful(None)
     }
@@ -200,53 +220,13 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
       case Success(maybeLatest) =>
         maybeLatest match {
           case Some(latest) =>
-            complete(latest)
-          case None =>
-            complete(StatusCodes.NotFound)
+            complete(ToResponseMarshallable(latest))
+          case None => complete(HttpResponse(StatusCodes.NotFound))
         }
       case Failure(error) =>
         failedResponse(StatusCodes.InternalServerError, uri, error)
     }
   }
-
-//  //institutions/<lei>/filings/<period>/submissions/latest
-//  def submissionLatestPath(oAuth2Authorization: OAuth2Authorization): Route =
-//    path("institutions" / Segment / "filings" / Segment / "submissions" / "latest") { (lei, period) =>
-//      oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
-//        respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-//          timedGet { uri =>
-//            val filingPersistence =
-//              sharding.entityRefFor(FilingPersistence.typeKey, s"${FilingPersistence.name}-$lei-$period")
-//
-//            val fLatest: Future[Option[Submission]] = filingPersistence ? (ref => GetLatestSubmission(ref))
-//
-//            val fResponse = fLatest.flatMap {
-//              case Some(s) =>
-//                val entity =
-//                  sharding.entityRefFor(HmdaValidationError.typeKey, s"${HmdaValidationError.name}-${s.id}")
-//                val fStatus: Future[VerificationStatus] = entity ? (reply => GetVerificationStatus(reply))
-//                fStatus.map(v => Option(SubmissionResponse(s, v)))
-//
-//              case None =>
-//                Future.successful(None)
-//            }
-//
-//            onComplete(fResponse) {
-//              case Success(maybeLatest) =>
-//                maybeLatest match {
-//                  case Some(latest) =>
-//                    complete(latest)
-//
-//                  case None =>
-//                    complete(StatusCodes.NotFound)
-//                }
-//              case Failure(error) =>
-//                failedResponse(StatusCodes.InternalServerError, uri, error)
-//            }
-//          }
-//        }
-//      }
-//    }
 
   def submissionRoutes(oAuth2Authorization: OAuth2Authorization): Route =
     handleRejections(corsRejectionHandler) {
@@ -256,19 +236,4 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
         }
       }
     }
-
-  private def createSubmission(uri: Uri, submissionId: SubmissionId): Route = {
-    val submissionPersistence =
-      sharding.entityRefFor(SubmissionPersistence.typeKey, s"${SubmissionPersistence.name}-${submissionId.toString}")
-
-    val createdF: Future[SubmissionCreated] = submissionPersistence ? (ref => CreateSubmission(submissionId, ref))
-
-    onComplete(createdF) {
-      case Success(created) =>
-        complete(StatusCodes.Created, created.submission)
-      case Failure(error) =>
-        failedResponse(StatusCodes.InternalServerError, uri, error)
-    }
-  }
-
 }
