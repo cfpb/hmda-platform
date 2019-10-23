@@ -40,7 +40,7 @@ import hmda.parser.filing.ts.TsCsvParser
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.EditDetailsConverter._
-import hmda.persistence.submission.HmdaProcessingUtils.{ readRawData, updateSubmissionStatusAndReceipt, updateSubmissionStatus }
+import hmda.persistence.submission.HmdaProcessingUtils.{ readRawData, updateSubmissionStatus, updateSubmissionStatusAndReceipt }
 import hmda.publication.KafkaUtils._
 import hmda.util.streams.FlowUtils.framing
 import hmda.validation.context.ValidationContext
@@ -55,9 +55,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success, Try }
 
 object HmdaValidationError
-    extends HmdaTypedPersistentActor[SubmissionProcessingCommand,
-                                     SubmissionProcessingEvent,
-                                     HmdaValidationErrorState] {
+    extends HmdaTypedPersistentActor[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaValidationErrorState] {
 
   override val name: String = "HmdaValidationError"
 
@@ -66,27 +64,21 @@ object HmdaValidationError
 
   implicit val timeout: Timeout = Timeout(futureTimeout.seconds)
 
-  override def behavior(
-      entityId: String): Behavior[SubmissionProcessingCommand] =
+  override def behavior(entityId: String): Behavior[SubmissionProcessingCommand] =
     Behaviors.setup { ctx =>
-      EventSourcedBehavior[SubmissionProcessingCommand,
-                           SubmissionProcessingEvent,
-                           HmdaValidationErrorState](
+      EventSourcedBehavior[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaValidationErrorState](
         persistenceId = PersistenceId(s"$entityId"),
         emptyState = HmdaValidationErrorState(),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
-      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000,
-                                                      keepNSnapshots = 10))
+      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000, keepNSnapshots = 10))
     }
 
   override def commandHandler(
-      ctx: TypedActorContext[SubmissionProcessingCommand])
-    : CommandHandler[SubmissionProcessingCommand,
-                     SubmissionProcessingEvent,
-                     HmdaValidationErrorState] = { (state, cmd) =>
-    val log = ctx.asScala.log
-    implicit val system: ActorSystem = ctx.asScala.system.toUntyped
+    ctx: TypedActorContext[SubmissionProcessingCommand]
+  ): CommandHandler[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaValidationErrorState] = { (state, cmd) =>
+    val log                                      = ctx.asScala.log
+    implicit val system: ActorSystem             = ctx.asScala.system.toUntyped
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     implicit val ec: ExecutionContext            = system.dispatcher
     val blockingEc: ExecutionContext =
@@ -99,38 +91,27 @@ object HmdaValidationError
         log.info(s"Syntactical / Validity validation started for $submissionId")
 
         val fValidationContext =
-          validationContext(submissionId.period.toInt,
-                            sharding,
-                            ctx,
-                            submissionId)
+          validationContext(submissionId.period.toInt, sharding, ctx, submissionId)
 
         val fSyntacticalValidity = for {
           validationContext <- fValidationContext
 
           tsErrors <- validateTs(ctx, submissionId, validationContext)
-            .toMat(Sink.ignore)(Keep.right)
-            .named("validateTs[Syntactical]-" + submissionId)
-            .run()
+                       .toMat(Sink.ignore)(Keep.right)
+                       .named("validateTs[Syntactical]-" + submissionId)
+                       .run()
 
-          tsLarErrors <- validateTsLar(ctx,
-                                       submissionId,
-                                       "syntactical-validity",
-                                       validationContext)
-          _ = log.info(s"Starting validateLar - Syntactical for $submissionId")
-          larSyntacticalValidityErrors <- validateLar(
-            "syntactical-validity",
-            ctx,
-            submissionId,
-            validationContext)(system, materializer, blockingEc)
-          _ = log.info(
-            s"Starting validateAsycLar - Syntactical for $submissionId")
-          larAsyncErrors <- validateAsyncLar("syntactical-validity",
-                                             ctx,
-                                             submissionId).runWith(Sink.ignore)
-          _ = log.info(
-            s"Finished validateAsycLar - Syntactical for $submissionId")
-        } yield
-          (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
+          tsLarErrors <- validateTsLar(ctx, submissionId, "syntactical-validity", validationContext)
+          _           = log.info(s"Starting validateLar - Syntactical for $submissionId")
+          larSyntacticalValidityErrors <- validateLar("syntactical-validity", ctx, submissionId, validationContext)(
+                                           system,
+                                           materializer,
+                                           blockingEc
+                                         )
+          _              = log.info(s"Starting validateAsycLar - Syntactical for $submissionId")
+          larAsyncErrors <- validateAsyncLar("syntactical-validity", ctx, submissionId).runWith(Sink.ignore)
+          _              = log.info(s"Finished validateAsycLar - Syntactical for $submissionId")
+        } yield (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
         fSyntacticalValidity.onComplete {
           case Success(_) =>
             ctx.asScala.self ! CompleteSyntacticalValidity(submissionId)
@@ -162,19 +143,15 @@ object HmdaValidationError
         }.fold(_ => 2018, identity)
         val fQuality = for {
 
-          larErrors <- validateLar(
-            "quality",
-            ctx,
-            submissionId,
-            ValidationContext(filingYear = Some(period)))(system,
-                                                          materializer,
-                                                          blockingEc)
+          larErrors <- validateLar("quality", ctx, submissionId, ValidationContext(filingYear = Some(period)))(
+                        system,
+                        materializer,
+                        blockingEc
+                      )
           _ = log.info(s"Finished ValidateLar Quality for $submissionId")
           _ = log.info(s"Started validateAsyncLar - Quality for $submissionId")
-          larAsyncErrorsQuality <- validateAsyncLar("quality",
-                                                    ctx,
-                                                    submissionId)
-            .runWith(Sink.ignore)
+          larAsyncErrorsQuality <- validateAsyncLar("quality", ctx, submissionId)
+                                    .runWith(Sink.ignore)
           _ = log.info(s"Finished ValidateAsyncLar Quality for $submissionId")
         } yield (larErrors, larAsyncErrorsQuality)
 
@@ -231,13 +208,9 @@ object HmdaValidationError
         updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
         Effect.persist(MacroCompleted(submissionId, updatedStatus.code))
 
-      case PersistHmdaRowValidatedError(submissionId,
-                                        rowNumber,
-                                        validationErrors,
-                                        maybeReplyTo) =>
+      case PersistHmdaRowValidatedError(submissionId, rowNumber, validationErrors, maybeReplyTo) =>
         val editDetailPersistence = sharding
-          .entityRefFor(EditDetailsPersistence.typeKey,
-                        s"${EditDetailsPersistence.name}-$submissionId")
+          .entityRefFor(EditDetailsPersistence.typeKey, s"${EditDetailsPersistence.name}-$submissionId")
 
         if (validationErrors.nonEmpty) {
           Effect
@@ -310,7 +283,14 @@ object HmdaValidationError
                 .noEditsFound()) {
             Effect.persist(signed).thenRun { _ =>
               log.info(s"Submission $submissionId signed at ${Instant.ofEpochMilli(timestamp)}")
-              updateSubmissionStatusAndReceipt(sharding, submissionId, timestamp, s"${signed.submissionId}-${signed.timestamp}", Signed, log)
+              updateSubmissionStatusAndReceipt(
+                sharding,
+                submissionId,
+                timestamp,
+                s"${signed.submissionId}-${signed.timestamp}",
+                Signed,
+                log
+              )
               publishSignEvent(submissionId).map(signed => log.info(s"Published signed event for $submissionId"))
               setHmdaFilerFlag(submissionId.lei, submissionId.period, sharding)
               replyTo ! signed
@@ -714,5 +694,8 @@ object HmdaValidationError
       }
     }
   }
+
+  def selectHmdaValidationError(sharding: ClusterSharding, submissionId: SubmissionId): EntityRef[SubmissionProcessingCommand] =
+    sharding.entityRefFor(HmdaValidationError.typeKey, s"${HmdaValidationError.name}-$submissionId")
 
 }

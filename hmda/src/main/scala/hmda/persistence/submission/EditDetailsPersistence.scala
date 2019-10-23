@@ -7,9 +7,10 @@ import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior }
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
 import hmda.persistence.HmdaTypedPersistentActor
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
+import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import hmda.messages.submission.EditDetailsCommands.{ EditDetailsPersistenceCommand, GetEditRowCount, PersistEditDetails }
 import hmda.messages.submission.EditDetailsEvents.{ EditDetailsAdded, EditDetailsPersistenceEvent, EditDetailsRowCounted }
+import hmda.model.filing.submission.SubmissionId
 
 object EditDetailsPersistence
     extends HmdaTypedPersistentActor[EditDetailsPersistenceCommand, EditDetailsPersistenceEvent, EditDetailsPersistenceState] {
@@ -55,5 +56,8 @@ object EditDetailsPersistence
 
   def startShardRegion(sharding: ClusterSharding): ActorRef[ShardingEnvelope[EditDetailsPersistenceCommand]] =
     super.startShardRegion(sharding)
+
+  def selectEditDetailsPersistence(sharding: ClusterSharding, submissionId: SubmissionId): EntityRef[EditDetailsPersistenceCommand] =
+    sharding.entityRefFor(EditDetailsPersistence.typeKey, s"${EditDetailsPersistence.name}-$submissionId")
 
 }
