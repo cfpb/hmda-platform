@@ -63,7 +63,7 @@ trait VerifyHttpApi extends HmdaTimeDirectives {
       }
     }
 
-  def verify(lei: String, year: Int, quarter: Option[String], seqNr: Int, editType: String, verified: Boolean, uri: Uri): Route = {
+  private def verify(lei: String, year: Int, quarter: Option[String], seqNr: Int, editType: String, verified: Boolean, uri: Uri): Route = {
     val period                                  = YearUtils.period(year, quarter)
     val submissionId                            = SubmissionId(lei, period, seqNr)
     val submissionPersistence                   = SubmissionPersistence.selectSubmissionPersistence(sharding, submissionId)
