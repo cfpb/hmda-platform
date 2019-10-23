@@ -143,7 +143,7 @@ trait DataBrowserHttpApi extends Settings {
           } ~
           // GET /view/aggregations
           (path(Aggregations) & get) {
-            extractYearsAndMsaAndStateAndCountyBrowserFields { mandatoryFields =>
+            extractYearsAndMsaAndStateAndCountyAndLEIBrowserFields { mandatoryFields =>
                extractFieldsForAggregation { remainingQueryFields =>
                  val allFields = mandatoryFields ++ remainingQueryFields
                 log.info("Aggregations: " + allFields)
@@ -158,7 +158,7 @@ trait DataBrowserHttpApi extends Settings {
           } ~
           // GET /view/csv
           (path(Csv) & get) {
-            extractYearsAndMsaAndStateAndCountyBrowserFields { mandatoryFields =>
+            extractYearsAndMsaAndStateAndCountyAndLEIBrowserFields { mandatoryFields =>
               extractFieldsForRawQueries { remainingQueryFields =>
                 val allFields = mandatoryFields ++ remainingQueryFields
                 log.info("CSV: " + allFields)
@@ -170,7 +170,7 @@ trait DataBrowserHttpApi extends Settings {
           } ~
           // GET /view/pipe
           (path(Pipe) & get) {
-            extractYearsAndMsaAndStateAndCountyBrowserFields { mandatoryFields =>
+            extractYearsAndMsaAndStateAndCountyAndLEIBrowserFields { mandatoryFields =>
               extractFieldsForRawQueries { remainingQueryFields =>
                 val allFields = mandatoryFields ++ remainingQueryFields
                 log.info("CSV: " + allFields)

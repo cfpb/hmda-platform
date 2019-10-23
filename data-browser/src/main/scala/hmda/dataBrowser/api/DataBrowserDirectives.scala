@@ -107,6 +107,13 @@ trait DataBrowserDirectives {
         provide(Option(QueryField(name = "msamd", xs.map(_.toString), dbName = "msa_md", isAllSelected = false)))
     }
 
+  private def extractLEIs: Directive1[Option[QueryField]] =
+    parameters("leis".as(CsvSeq[String]) ? Nil).flatMap {
+      case Nil => provide(None)
+      case xs =>
+        provide(Option(QueryField(name = "lei", xs.map(_.toString), dbName = "lei", isAllSelected = false)))
+    }
+
   private def extractYears: Directive1[Option[QueryField]] =
     parameters("years".as(CsvSeq[Int]) ? Nil).flatMap {
       case Nil => provide(None)
@@ -385,12 +392,12 @@ trait DataBrowserDirectives {
       }
     }
 
-  def extractYearsAndMsaAndStateAndCountyBrowserFields(innerRoute: List[QueryField] => Route): Route =
-    (extractYears & extractMsaMds & extractStates & extractCounties) { (years, msaMds, states, counties) =>
-      if ((msaMds.nonEmpty && states.nonEmpty && counties.nonEmpty) || (msaMds.isEmpty && states.isEmpty && counties.isEmpty))
-        complete(BadRequest, OnlyStatesOrMsaMdsOrCounties())
+  def extractYearsAndMsaAndStateAndCountyAndLEIBrowserFields(innerRoute: List[QueryField] => Route): Route =
+    (extractYears & extractMsaMds & extractStates & extractCounties & extractLEIs) { (years, msaMds, states, counties,leis) =>
+      if ((msaMds.nonEmpty && states.nonEmpty && counties.nonEmpty && leis.nonEmpty) || (msaMds.isEmpty && states.isEmpty && counties.isEmpty && leis.isEmpty))
+        complete(BadRequest, OnlyStatesOrMsaMdsOrCountiesOrLEIs())
       else if (years.nonEmpty)
-        innerRoute(List(years, msaMds, states, counties).flatten)
+        innerRoute(List(years, msaMds, states, counties,leis).flatten)
       else complete(BadRequest, ProvideYearAndStatesOrMsaMds())
     }
 

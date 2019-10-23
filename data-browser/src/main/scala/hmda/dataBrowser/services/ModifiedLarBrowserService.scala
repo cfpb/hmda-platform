@@ -35,15 +35,18 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository, cache: ModifiedLarA
       fields.filter(_.values.nonEmpty).find(_.name == "county")
     val optYear: Option[QueryField] =
       fields.filter(_.values.nonEmpty).find(_.name == "year")
+    val optLEI: Option[QueryField] =
+      fields.filter(_.values.nonEmpty).find(_.name == "lei")
 
     val rest = fields
       .filterNot(_.name == "state")
       .filterNot(_.name == "msamd")
       .filterNot(_.name == "county")
       .filterNot(_.name == "year")
+      .filterNot(_.name == "lei")
 
     val queryFieldCombinations = permuteQueryFields(rest)
-      .map(eachList => optYear.toList ++ optState.toList ++ optMsaMd.toList ++ optCounty.toList ++ eachList)
+      .map(eachList => optYear.toList ++ optState.toList ++ optMsaMd.toList ++ optCounty.toList ++ optLEI.toList ++ eachList)
       .map(eachCombination => eachCombination.sortBy(field => field.name))
 
     Task.gatherUnordered {
