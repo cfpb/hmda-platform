@@ -14,9 +14,6 @@ object EditSummaryResponse {
       val xName =  x.edit
       val yName =y.edit
 
-      println("X NAME: "+xName )
-      println("Y NAME"+yName )
-
       xName compare yName
     }
 }
