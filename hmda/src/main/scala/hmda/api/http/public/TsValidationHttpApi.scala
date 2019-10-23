@@ -19,12 +19,10 @@ import hmda.model.validation.TsValidationError
 import hmda.validation.HmdaValidation
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
-
+import hmda.utils.YearUtils.Period
 import scala.concurrent.ExecutionContext
 
-trait TsValidationHttpApi
-  extends HmdaTimeDirectives
-    with FilingValidationHttpApi {
+trait TsValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpApi {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -70,17 +68,19 @@ trait TsValidationHttpApi
       }
     }
 
-  private def validate(ts: TransmittalSheet,
-                       chekType: String,
-                       ctx: ValidationContext,
-                       year: Int): Route = {
-    val ctx = ValidationContext(filingYear = Some(year))
-    val validationEngine = selectTsEngine(year)
+  private def validate(ts: TransmittalSheet, chekType: String, vc: ValidationContext, year: Int): Route = {
+    // take the year from the argument and overlay the period
+    val ctx              = vc.copy(filingPeriod = Some(Period(year, vc.filingPeriod.flatMap(_.quarter))))
+    val period           = ctx.filingPeriod.get
+    val validationEngine = selectTsEngine(period.year, period.quarter)
     import validationEngine._
     val validation: HmdaValidation[TransmittalSheet] = chekType match {
-      case "all" => checkAll(ts, ts.LEI, ctx, TsValidationError)
+      case "all" =>
+        checkAll(ts, ts.LEI, ctx, TsValidationError)
+
       case "syntactical" =>
         checkSyntactical(ts, ts.LEI, ctx, TsValidationError)
+
       case "validity" =>
         checkValidity(ts, ts.LEI, TsValidationError)
     }
@@ -88,13 +88,15 @@ trait TsValidationHttpApi
     val maybeErrors = validation.leftMap(xs => xs.toList).toEither
 
     maybeErrors match {
-      case Right(t) => complete(t)
+      case Right(t) =>
+        complete(t)
+
       case Left(errors) =>
         complete(ToResponseMarshallable(aggregateErrors(errors, year.toString)))
     }
   }
 
-  def tsRoutes: Route = {
+  def tsRoutes: Route =
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
@@ -104,6 +106,5 @@ trait TsValidationHttpApi
         }
       }
     }
-  }
 
 }

@@ -7,14 +7,15 @@ import java.time.Instant
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{ ActorRef, Behavior, TypedActorContext }
+import akka.actor.typed.{ ActorRef, Behavior, Logger, TypedActorContext }
 import akka.actor.{ ActorSystem, Scheduler }
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import akka.pattern.ask
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl._
-import akka.persistence.typed.scaladsl.EventSourcedBehavior._
+import akka.persistence.typed.scaladsl.RetentionCriteria
+import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
+import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior }
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Sink, Source, _ }
 import akka.stream.typed.scaladsl.ActorFlow
@@ -43,6 +44,8 @@ import hmda.persistence.submission.EditDetailsConverter._
 import hmda.persistence.submission.HmdaProcessingUtils.{ readRawData, updateSubmissionStatus, updateSubmissionStatusAndReceipt }
 import hmda.publication.KafkaUtils._
 import hmda.util.streams.FlowUtils.framing
+import hmda.utils.YearUtils
+import hmda.utils.YearUtils.Period
 import hmda.validation.context.ValidationContext
 import hmda.validation.filing.MacroValidationFlow._
 import hmda.validation.filing.ValidationFlow._
@@ -52,7 +55,7 @@ import hmda.validation.{ AS, EC, MAT }
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.{ Failure, Success, Try }
+import scala.util.{ Failure, Success }
 
 object HmdaValidationError
     extends HmdaTypedPersistentActor[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaValidationErrorState] {
@@ -90,8 +93,10 @@ object HmdaValidationError
         updateSubmissionStatus(sharding, submissionId, Validating, log)
         log.info(s"Syntactical / Validity validation started for $submissionId")
 
+        val period = parseAndFallback(submissionId.period)(log)
+
         val fValidationContext =
-          validationContext(submissionId.period.toInt, sharding, ctx, submissionId)
+          validationContext(period, sharding, ctx, submissionId)
 
         val fSyntacticalValidity = for {
           validationContext <- fValidationContext
@@ -112,6 +117,7 @@ object HmdaValidationError
           larAsyncErrors <- validateAsyncLar("syntactical-validity", ctx, submissionId).runWith(Sink.ignore)
           _              = log.info(s"Finished validateAsycLar - Syntactical for $submissionId")
         } yield (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
+
         fSyntacticalValidity.onComplete {
           case Success(_) =>
             ctx.asScala.self ! CompleteSyntacticalValidity(submissionId)
@@ -138,12 +144,10 @@ object HmdaValidationError
 
       case StartQuality(submissionId) =>
         log.info(s"Quality validation started for $submissionId")
-        val period = Try {
-          submissionId.period.toInt
-        }.fold(_ => 2018, identity)
+        val period = parseAndFallback(submissionId.period)(log)
         val fQuality = for {
 
-          larErrors <- validateLar("quality", ctx, submissionId, ValidationContext(filingYear = Some(period)))(
+          larErrors <- validateLar("quality", ctx, submissionId, ValidationContext(filingPeriod = Some(period)))(
                         system,
                         materializer,
                         blockingEc
@@ -215,18 +219,20 @@ object HmdaValidationError
         if (validationErrors.nonEmpty) {
           Effect
             .persist(HmdaRowValidatedError(rowNumber, validationErrors))
-            .thenRun { (x: HmdaValidationErrorState) =>
+            .thenRun { _ =>
               log.debug(s"Persisted: ${HmdaRowValidatedError(rowNumber, validationErrors)}")
 
               val hmdaRowValidatedError =
                 HmdaRowValidatedError(rowNumber, validationErrors)
 
-              persistEditDetails(editDetailPersistence, hmdaRowValidatedError).onComplete {
-                case Success(_) =>
-                  maybeReplyTo.foreach(_ ! hmdaRowValidatedError)
-
-                case Failure(exception) =>
-                  log.error("persistEditDetails failed in HmdaValidationError", exception)
+              for {
+                _ <- persistEditDetails(editDetailPersistence, hmdaRowValidatedError)
+              } yield {
+                maybeReplyTo match {
+                  case Some(replyTo) =>
+                    replyTo ! hmdaRowValidatedError
+                  case None => //Do nothing
+                }
               }
             }
         } else {
@@ -286,7 +292,7 @@ object HmdaValidationError
               updateSubmissionStatusAndReceipt(
                 sharding,
                 submissionId,
-                timestamp,
+                signed.timestamp,
                 s"${signed.submissionId}-${signed.timestamp}",
                 Signed,
                 log
@@ -306,10 +312,6 @@ object HmdaValidationError
 
       case GetHmdaValidationErrorState(_, replyTo) =>
         replyTo ! state
-        Effect.none
-
-      case GetVerificationStatus(replyTo) =>
-        replyTo ! VerificationStatus(qualityVerified = state.qualityVerified, macroVerified = state.macroVerified)
         Effect.none
 
       case _ =>
@@ -360,6 +362,15 @@ object HmdaValidationError
             PersistHmdaRowValidatedError(submissionId, el.rowNumber, el.validationErrors, Some(replyTo))
         )
       )
+
+  private def parseAndFallback(period: String, fallbackPeriod: Period = Period(2018, None))(log: Logger): Period =
+    YearUtils
+      .parsePeriod(period)
+      .fold({ ex =>
+        log.error(ex, s"Failed to parse period: $period in HmdaValidationError")
+        log.warning(s"Falling back to $fallbackPeriod")
+        fallbackPeriod
+      }, identity)
 
   private def validateTsLar[as: AS, mat: MAT, ec: EC](
     ctx: TypedActorContext[SubmissionProcessingCommand],
@@ -594,10 +605,10 @@ object HmdaValidationError
     ctx: TypedActorContext[SubmissionProcessingCommand],
     submissionId: SubmissionId
   ): Source[HmdaRowValidatedError, NotUsed] = {
-    val year = submissionId.period.toInt
+    val period = parseAndFallback(submissionId.period)(ctx.asScala.log)
     uploadConsumerRawStr(ctx, submissionId)
       .drop(1)
-      .via(validateAsyncLarFlow(editCheck, year))
+      .via(validateAsyncLarFlow(editCheck, period))
       .filter(_.isLeft)
       .map(_.left.get)
       .zip(Source.fromIterator(() => Iterator.from(2)))
@@ -621,27 +632,17 @@ object HmdaValidationError
       .map(xs => xs.headOption)
 
   private def validationContext[as: AS, mat: MAT, ec: EC](
-    year: Int,
+    period: Period,
     sharding: ClusterSharding,
     ctx: TypedActorContext[SubmissionProcessingCommand],
     submissionId: SubmissionId
   ): Future[ValidationContext] = {
-    val institutionPersistence = {
-      if (year == 2018) {
-        sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-${submissionId.lei}")
-      } else {
-        sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-${submissionId.lei}-$year")
-      }
-    }
-
-    val fInstitution: Future[Option[Institution]] = institutionPersistence ? (ref => GetInstitution(ref))
-
+    val institutionPersistence                    = InstitutionPersistence.selectInstitution(sharding, submissionId.lei, period.year)
+    val fInstitution: Future[Option[Institution]] = institutionPersistence ? GetInstitution
     for {
       ts          <- maybeTs(ctx, submissionId)
       institution <- fInstitution
-    } yield {
-      ValidationContext(institution, Some(year), ts)
-    }
+    } yield ValidationContext(institution, Some(period), ts)
   }
 
   private def uploadConsumerRawStr[as: AS](
@@ -697,5 +698,4 @@ object HmdaValidationError
 
   def selectHmdaValidationError(sharding: ClusterSharding, submissionId: SubmissionId): EntityRef[SubmissionProcessingCommand] =
     sharding.entityRefFor(HmdaValidationError.typeKey, s"${HmdaValidationError.name}-$submissionId")
-
 }

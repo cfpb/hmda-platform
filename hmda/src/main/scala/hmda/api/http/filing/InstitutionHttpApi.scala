@@ -48,7 +48,7 @@ trait InstitutionHttpApi extends HmdaTimeDirectives {
     }
 
   def obtainFilingDetails(lei: String, year: Int, quarter: Option[String], uri: Uri): Route = {
-    val institutionPersistence                      = selectInstitution(sharding, lei, year, quarter)
+    val institutionPersistence                      = selectInstitution(sharding, lei, year)
     val iDetails: Future[Option[InstitutionDetail]] = institutionPersistence ? (ref => GetInstitutionDetails(ref))
     onComplete(iDetails) {
       case Success(Some(institutionDetails)) =>

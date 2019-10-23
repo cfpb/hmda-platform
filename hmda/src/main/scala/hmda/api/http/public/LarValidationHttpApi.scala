@@ -10,6 +10,7 @@ import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Route
 import hmda.api.http.model.public.LarValidateRequest
 import hmda.parser.filing.lar.LarCsvParser
+import hmda.utils.YearUtils.Period
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.directives.HmdaTimeDirectives
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
@@ -21,9 +22,7 @@ import hmda.validation.engine._
 
 import scala.concurrent.ExecutionContext
 
-trait LarValidationHttpApi
-  extends HmdaTimeDirectives
-    with FilingValidationHttpApi {
+trait LarValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpApi {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -69,10 +68,8 @@ trait LarValidationHttpApi
       }
     }
 
-  private def validate(lar: LoanApplicationRegister,
-                       checkType: String,
-                       year: Int): Route = {
-    val ctx = ValidationContext(filingYear = Some(year))
+  private def validate(lar: LoanApplicationRegister, checkType: String, year: Int): Route = {
+    val ctx              = ValidationContext(filingPeriod = Some(Period(year, None)))
     val validationEngine = selectLarEngine(year)
     import validationEngine._
     val validation: HmdaValidation[LoanApplicationRegister] = checkType match {
@@ -92,7 +89,7 @@ trait LarValidationHttpApi
     }
   }
 
-  def larRoutes: Route = {
+  def larRoutes: Route =
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
@@ -102,6 +99,5 @@ trait LarValidationHttpApi
         }
       }
     }
-  }
 
 }
