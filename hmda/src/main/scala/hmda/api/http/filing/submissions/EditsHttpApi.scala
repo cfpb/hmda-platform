@@ -61,16 +61,16 @@ trait EditsHttpApi extends HmdaTimeDirectives {
               val syntactical =
                 SyntacticalEditSummaryResponse(edits.syntactical.map { editSummary =>
                   toEditSummaryResponse(editSummary, period)
-                }.toSeq)
+                }.toSeq.sorted)
               val validity = ValidityEditSummaryResponse(edits.validity.map { editSummary =>
                 toEditSummaryResponse(editSummary, period)
-              }.toSeq)
+              }.toSeq.sorted)
               val quality = QualityEditSummaryResponse(edits.quality.map { editSummary =>
                 toEditSummaryResponse(editSummary, period)
-              }.toSeq, edits.qualityVerified)
+              }.toSeq.sorted, edits.qualityVerified)
               val `macro` = MacroEditSummaryResponse(edits.`macro`.map { editSummary =>
                 toEditSummaryResponse(editSummary, period)
-              }.toSeq, edits.macroVerified)
+              }.toSeq.sorted, edits.macroVerified)
               val editsSummaryResponse =
                 EditsSummaryResponse(
                   syntactical,

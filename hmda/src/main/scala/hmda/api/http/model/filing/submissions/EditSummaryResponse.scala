@@ -7,6 +7,18 @@ case class EditSummaryResponse(edit: String, description: String)
 object EditSummaryResponse {
   implicit val encoder: Encoder[EditSummaryResponse] =
     deriveEncoder[EditSummaryResponse]
+
+  implicit val ordering: Ordering[EditSummaryResponse] =
+    (x: EditSummaryResponse, y: EditSummaryResponse) => {
+
+      val xName =  x.edit
+      val yName =y.edit
+
+      println("X NAME: "+xName )
+      println("Y NAME"+yName )
+
+      xName compare yName
+    }
 }
 
 case class ValidityEditSummaryResponse(edits: Seq[EditSummaryResponse])
