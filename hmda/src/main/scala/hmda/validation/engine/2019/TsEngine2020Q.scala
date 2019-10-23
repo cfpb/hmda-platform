@@ -9,7 +9,7 @@ private[engine] object TsEngine2020Q extends ValidationEngine[TransmittalSheet] 
 
   override def syntacticalChecks(ctx: ValidationContext) = Vector(
     S300,
-    S302.withContext(ctx),
+//    S302.withContext(ctx),
     S303.withContext(ctx)
   )
 
