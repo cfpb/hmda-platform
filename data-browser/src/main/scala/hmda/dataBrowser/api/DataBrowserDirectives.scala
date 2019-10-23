@@ -108,7 +108,7 @@ trait DataBrowserDirectives {
     }
 
   private def extractLEIs: Directive1[Option[QueryField]] =
-    parameters("lei".as(CsvSeq[Int]) ? Nil).flatMap {
+    parameters("leis".as(CsvSeq[String]) ? Nil).flatMap {
       case Nil => provide(None)
       case xs =>
         provide(Option(QueryField(name = "lei", xs.map(_.toString), dbName = "lei", isAllSelected = false)))
