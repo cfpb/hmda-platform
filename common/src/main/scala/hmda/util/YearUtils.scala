@@ -9,9 +9,10 @@ object YearUtils {
 
   val firstYear   = config.getString("hmda.filing.first_year")
   val currentYear = config.getString("hmda.filing.current")
+  val quarterYear = config.getString("hmda.filing.quarter_year")
 
   def isValidYear(year: Int): Boolean =
-    (year >= firstYear.toInt) && (year <= currentYear.toInt)
+    (year >= firstYear.toInt) && (year <= quarterYear.toInt)
 
   def isValidQuarter(quarter: String): Boolean =
     quarter.length == 2 &&
