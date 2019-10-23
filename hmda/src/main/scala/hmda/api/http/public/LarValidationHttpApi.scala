@@ -70,7 +70,7 @@ trait LarValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpA
 
   private def validate(lar: LoanApplicationRegister, checkType: String, year: Int): Route = {
     val ctx              = ValidationContext(filingPeriod = Some(Period(year, None)))
-    val validationEngine = selectLarEngine(year)
+    val validationEngine = selectLarEngine(year, None)
     import validationEngine._
     val validation: HmdaValidation[LoanApplicationRegister] = checkType match {
       case "all" => checkAll(lar, lar.loan.ULI, ctx, LarValidationError)

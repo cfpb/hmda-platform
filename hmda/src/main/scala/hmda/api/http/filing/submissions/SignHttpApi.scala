@@ -26,7 +26,6 @@ import hmda.api.http.PathMatchers._
 import hmda.persistence.submission.HmdaValidationError.selectHmdaValidationError
 import hmda.persistence.submission.SubmissionPersistence.selectSubmissionPersistence
 import hmda.utils.YearUtils
- vvc
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
