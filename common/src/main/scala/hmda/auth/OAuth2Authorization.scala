@@ -5,8 +5,11 @@ import akka.http.scaladsl.model.headers.{ Authorization, OAuth2BearerToken }
 import akka.http.scaladsl.server.Directives.{ reject, _ }
 import akka.http.scaladsl.server._
 import com.typesafe.config.ConfigFactory
+import hmda.model.institution.Institution
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Future
+import scala.util.{ Failure, Success }
 
 class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) {
 
@@ -27,15 +30,32 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
         }
     }
 
-  def authorizeTokenWithLeiQuarter(lei: String): Directive1[VerifiedToken] =
+  def authorizeTokenWithLeiQuarter(fInstitution: Future[Option[Institution]], lei: String): Directive1[VerifiedToken] =
     authorizeToken flatMap {
       case t if t.lei.nonEmpty =>
         if (runtimeMode == "dev") {
           provide(t)
         } else {
+//          onComplete(fInstitution) {
+//            case Failure(error) =>
+//              reject(AuthorizationFailedRejection)
+//                .toDirective[Tuple1[VerifiedToken]]
+//            case Success(Some(_)) =>
+//              provide(t)
+//            case _ =>
+//              reject(AuthorizationFailedRejection)
+//                .toDirective[Tuple1[VerifiedToken]]
+//          }
           val leiList = t.lei.split(',')
-          if (leiList.contains(lei) && leiList.contains(lei + "-Q")) {
-            provide(t)
+          if (leiList.contains(lei)) {
+            onComplete(fInstitution) {
+              case Failure(error) =>
+                reject(AuthorizationFailedRejection)
+                  .toDirective[Tuple1[VerifiedToken]]
+              case Success(_) =>
+                provide(t)
+            }
+//            provide(t)
           } else {
             reject(AuthorizationFailedRejection)
               .toDirective[Tuple1[VerifiedToken]]
