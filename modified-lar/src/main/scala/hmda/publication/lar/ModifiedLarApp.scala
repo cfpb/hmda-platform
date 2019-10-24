@@ -1,11 +1,11 @@
 package hmda.publication.lar
 
 import akka.Done
-import akka.actor.{ActorSystem, Scheduler}
+import akka.actor.{ ActorSystem, Scheduler }
 import akka.actor.typed.ActorRef
 import akka.actor.typed.scaladsl.adapter._
 import akka.kafka.scaladsl.Consumer
-import akka.kafka.{ConsumerMessage, ConsumerSettings, Subscriptions}
+import akka.kafka.{ ConsumerMessage, ConsumerSettings, Subscriptions }
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl._
@@ -26,8 +26,8 @@ import slick.jdbc.JdbcProfile
 import hmda.census.records._
 
 import scala.concurrent.duration._
-import scala.concurrent.{ExecutionContextExecutor, Future}
-import scala.util.{Failure, Success}
+import scala.concurrent.{ ExecutionContextExecutor, Future }
+import scala.util.{ Failure, Success }
 
 object ModifiedLarApp extends App {
 
@@ -45,13 +45,13 @@ object ModifiedLarApp extends App {
     """.stripMargin
   )
 
-  implicit val system: ActorSystem = ActorSystem()
+  implicit val system: ActorSystem             = ActorSystem()
   implicit val materializer: ActorMaterializer = ActorMaterializer()
-  implicit val ec: ExecutionContextExecutor = system.dispatcher
-  implicit val scheduler: Scheduler = system.scheduler
-  implicit val timeout: Timeout = Timeout(1.hour)
+  implicit val ec: ExecutionContextExecutor    = system.dispatcher
+  implicit val scheduler: Scheduler            = system.scheduler
+  implicit val timeout: Timeout                = Timeout(1.hour)
 
-  val kafkaConfig = config.getConfig("akka.kafka.consumer")
+  val kafkaConfig      = config.getConfig("akka.kafka.consumer")
   val bankFilterConfig = config.getConfig("filter")
   val bankFilterList =
     bankFilterConfig.getString("bank-filter-list").toUpperCase.split(",")
@@ -64,16 +64,14 @@ object ModifiedLarApp extends App {
     CensusRecords.indexedTract2019
 
   def submitForPersistence(
-      modifiedLarPublisher: ActorRef[PersistToS3AndPostgres])(
-      untypedSubmissionId: String)(implicit scheduler: Scheduler,
-                                   timeout: Timeout): Future[Done] = {
+    modifiedLarPublisher: ActorRef[PersistToS3AndPostgres]
+  )(untypedSubmissionId: String)(implicit scheduler: Scheduler, timeout: Timeout): Future[Done] = {
     val submissionId = SubmissionId(untypedSubmissionId)
-    if (!filterBankWithLogging(submissionId.lei, bankFilterList))
+    if (!filterBankWithLogging(submissionId.lei, bankFilterList) || filterQuarterlyFiling(submissionId))
       Future.successful(Done.done())
     else {
       val futRes: Future[PersistModifiedLarResult] =
-        modifiedLarPublisher ? ((ref: ActorRef[PersistModifiedLarResult]) =>
-          PersistToS3AndPostgres(submissionId, ref))
+        modifiedLarPublisher ? ((ref: ActorRef[PersistModifiedLarResult]) => PersistToS3AndPostgres(submissionId, ref))
       // bubble up failure if there is any (this is done to prevent a commit to Kafka from happening
       // when used in Kafka consumer Akka Stream
       futRes.map(result => result.status).flatMap {
@@ -85,40 +83,36 @@ object ModifiedLarApp extends App {
 
   // database configuration is located in `common` project
   val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
-  val repo = new ModifiedLarRepository(databaseConfig)
+  val repo           = new ModifiedLarRepository(databaseConfig)
   val modifiedLarPublisher =
-    system.spawn(ModifiedLarPublisher.behavior(censusTractMap2018, censusTractMap2019, repo),
-                 ModifiedLarPublisher.name)
+    system.spawn(ModifiedLarPublisher.behavior(censusTractMap2018, censusTractMap2019, repo), ModifiedLarPublisher.name)
   val processKafkaRecord: String => Future[Done] =
     submitForPersistence(modifiedLarPublisher)
 
   val consumerSettings: ConsumerSettings[String, String] =
-    ConsumerSettings(kafkaConfig,
-                     new StringDeserializer,
-                     new StringDeserializer)
+    ConsumerSettings(kafkaConfig, new StringDeserializer, new StringDeserializer)
       .withBootstrapServers(kafkaHosts)
       .withGroupId(HmdaGroups.modifiedLarGroup)
       .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest")
 
   val (kafkaControl: Consumer.Control, streamCompleted: Future[Done]) =
     Consumer
-      .committableSource(consumerSettings,
-                         Subscriptions.topics(HmdaTopics.signTopic,
-                                              HmdaTopics.modifiedLarTopic))
+      .committableSource(consumerSettings, Subscriptions.topics(HmdaTopics.signTopic, HmdaTopics.modifiedLarTopic))
       .mapAsync(parallelism) { msg =>
         log.info(s"Received a message - key: ${msg.record
           .key()}, value: ${msg.record.value()}")
 
         // TODO: Make configurable
         // retry the Future 10 times using a spacing of 30 seconds if there is a failure before giving up
-        akka.pattern.retry(() =>
-                             processKafkaRecord(msg.record.value().trim)
-                               .map(_ => msg.committableOffset),
-                           1,
-                           90.seconds)
+        akka.pattern.retry(
+          () =>
+            processKafkaRecord(msg.record.value().trim)
+              .map(_ => msg.committableOffset),
+          1,
+          90.seconds
+        )
       }
-      .mapAsync(parallelism * 2)((offset: ConsumerMessage.CommittableOffset) =>
-        offset.commitScaladsl())
+      .mapAsync(parallelism * 2)((offset: ConsumerMessage.CommittableOffset) => offset.commitScaladsl())
       .toMat(Sink.ignore)(Keep.both)
       .run()
 
@@ -131,8 +125,7 @@ object ModifiedLarApp extends App {
         .foreach(_ => sys.exit(1)) // The Cassandra connection stays up and prevents the app from shutting down even when the Kafka stream is not active, so we explicitly shut the application down
 
     case Success(res) =>
-      log.error(
-        "Kafka consumer infinite stream completed, an infinite stream should not complete")
+      log.error("Kafka consumer infinite stream completed, an infinite stream should not complete")
       system
         .terminate()
         .foreach(_ => sys.exit(2))

@@ -5,17 +5,17 @@ import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.adapter._
 import akka.kafka.scaladsl.Consumer
 import akka.kafka.scaladsl.Consumer.DrainingControl
-import akka.kafka.{ConsumerSettings, Subscriptions}
+import akka.kafka.{ ConsumerSettings, Subscriptions }
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{Keep, Sink, Source}
+import akka.stream.scaladsl.{ Keep, Sink, Source }
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.messages.pubsub.HmdaTopics
 import hmda.messages.pubsub.HmdaGroups
 import hmda.model.filing.submission.SubmissionId
 import hmda.publication.KafkaUtils._
-import hmda.publication.lar.publication.{IrsPublisher, PublishIrs}
+import hmda.publication.lar.publication.{ IrsPublisher, PublishIrs }
 import hmda.util.BankFilterUtils._
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -40,14 +40,14 @@ object IrsPublisherApp extends App {
     """.stripMargin
   )
 
-  implicit val system = ActorSystem()
+  implicit val system       = ActorSystem()
   implicit val materializer = ActorMaterializer()
-  implicit val ec = system.dispatcher
+  implicit val ec           = system.dispatcher
 
   implicit val timeout = Timeout(5.seconds)
 
   val kafkaConfig = system.settings.config.getConfig("akka.kafka.consumer")
-  val config = ConfigFactory.load()
+  val config      = ConfigFactory.load()
   val bankFilter =
     ConfigFactory.load("application.conf").getConfig("filter")
   val bankFilterList =
@@ -58,17 +58,13 @@ object IrsPublisherApp extends App {
     system.spawn(IrsPublisher.behavior, IrsPublisher.name)
 
   val consumerSettings: ConsumerSettings[String, String] =
-    ConsumerSettings(kafkaConfig,
-                     new StringDeserializer,
-                     new StringDeserializer)
+    ConsumerSettings(kafkaConfig, new StringDeserializer, new StringDeserializer)
       .withBootstrapServers(kafkaHosts)
       .withGroupId(HmdaGroups.irsGroup)
       .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
   Consumer
-    .committableSource(consumerSettings,
-                       Subscriptions.topics(HmdaTopics.signTopic,
-                                            HmdaTopics.irsTopic))
+    .committableSource(consumerSettings, Subscriptions.topics(HmdaTopics.signTopic, HmdaTopics.irsTopic))
     .mapAsync(parallelism) { msg =>
       processData(msg.record.value()).map(_ => msg.committableOffset)
     }
@@ -77,18 +73,18 @@ object IrsPublisherApp extends App {
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
-  def processData(msg: String): Future[Done] = {
+  def processData(msg: String): Future[Done] =
     Source
       .single(msg)
-      .filter(msg =>
-        filterBankWithLogging(SubmissionId(msg).lei, bankFilterList))
+      .filter { msg =>
+        val submissionId = SubmissionId(msg)
+        filterBankWithLogging(submissionId.lei, bankFilterList) || filterQuarterlyFiling(submissionId)
+      }
       .map { msg =>
         val submissionId = SubmissionId(msg)
         irsPublisher.toUntyped ? PublishIrs(submissionId)
       }
       .toMat(Sink.ignore)(Keep.right)
       .run()
-
-  }
 
 }
