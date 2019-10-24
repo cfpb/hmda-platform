@@ -59,7 +59,8 @@ object InstitutionProtobufConverter {
       assets = i.assets,
       otherLenderCode = i.otherLenderCode,
       topHolder = Some(topHolderToProtobuf(i.topHolder)),
-      hmdaFilter = i.hmdaFiler
+      hmdaFilter = i.hmdaFiler,
+      quarterlyFiler = i.quarterlyFiler
     )
 
   def institutionFromProtobuf(msg: InstitutionMessage): Institution =
@@ -77,7 +78,8 @@ object InstitutionProtobufConverter {
       assets = msg.assets,
       otherLenderCode = msg.otherLenderCode,
       topHolder = topHolderFromProtobuf(msg.topHolder.getOrElse(TopHolderMessage())),
-      hmdaFiler = msg.hmdaFilter
+      hmdaFiler = msg.hmdaFilter,
+      quarterlyFiler = msg.quarterlyFiler
     )
 
 }

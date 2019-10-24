@@ -18,6 +18,7 @@ message InstitutionMessage {
     int32 otherLenderCode = 12;
     TopHolderMessage topHolder = 13;
     bool hmdaFilter = 14;
+    bool quarterlyFiler = 15;
 }
 
 message RespondentMessage {

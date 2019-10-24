@@ -19,7 +19,8 @@ object Institution {
     -1,
     -1,
     TopHolder.empty,
-    false
+    hmdaFiler = false,
+    quarterlyFiler = false
   )
 
   implicit val institutionEncoder: Encoder[Institution] =
@@ -29,8 +30,7 @@ object Institution {
         ("lei", Json.fromString(i.LEI)),
         ("agency", Json.fromInt(i.agency.code)),
         ("institutionType", Json.fromInt(i.institutionType.code)),
-        ("institutionId2017",
-          Json.fromString(i.institutionId_2017.getOrElse(""))),
+        ("institutionId2017", Json.fromString(i.institutionId_2017.getOrElse(""))),
         ("taxId", Json.fromString(i.taxId.getOrElse(""))),
         ("rssd", Json.fromInt(i.rssd)),
         ("emailDomains", i.emailDomains.asJson),
@@ -39,26 +39,28 @@ object Institution {
         ("assets", Json.fromInt(i.assets)),
         ("otherLenderCode", Json.fromInt(i.otherLenderCode)),
         ("topHolder", i.topHolder.asJson),
-        ("hmdaFiler", Json.fromBoolean(i.hmdaFiler))
+        ("hmdaFiler", Json.fromBoolean(i.hmdaFiler)),
+        ("quarterlyFiler", Json.fromBoolean(i.quarterlyFiler))
       )
 
   implicit val institutionDecoder: Decoder[Institution] =
     (c: HCursor) =>
       for {
-        activityYear <- c.downField("activityYear").as[Int]
-        lei <- c.downField("lei").as[String]
-        agency <- c.downField("agency").as[Int]
-        institutionType <- c.downField("institutionType").as[Int]
+        activityYear           <- c.downField("activityYear").as[Int]
+        lei                    <- c.downField("lei").as[String]
+        agency                 <- c.downField("agency").as[Int]
+        institutionType        <- c.downField("institutionType").as[Int]
         maybeInstitutionId2017 <- c.downField("institutionId2017").as[String]
-        maybeTaxId <- c.downField("taxId").as[String]
-        rssdId <- c.downField("rssd").as[Int]
-        emailDomains <- c.downField("emailDomains").as[List[String]]
-        respondent <- c.downField("respondent").as[Respondent]
-        parent <- c.downField("parent").as[Parent]
-        assets <- c.downField("assets").as[Int]
-        otherLenderCode <- c.downField("otherLenderCode").as[Int]
-        topHolder <- c.downField("topHolder").as[TopHolder]
-        hmdaFiler <- c.downField("hmdaFiler").as[Boolean]
+        maybeTaxId             <- c.downField("taxId").as[String]
+        rssdId                 <- c.downField("rssd").as[Int]
+        emailDomains           <- c.downField("emailDomains").as[List[String]]
+        respondent             <- c.downField("respondent").as[Respondent]
+        parent                 <- c.downField("parent").as[Parent]
+        assets                 <- c.downField("assets").as[Int]
+        otherLenderCode        <- c.downField("otherLenderCode").as[Int]
+        topHolder              <- c.downField("topHolder").as[TopHolder]
+        hmdaFiler              <- c.downField("hmdaFiler").as[Boolean]
+        quarterlyFiler         <- c.downField("quarterlyFiler").as[Boolean]
       } yield {
         val institutionId2017 =
           if (maybeInstitutionId2017 == "") None
@@ -79,40 +81,40 @@ object Institution {
           assets,
           otherLenderCode,
           topHolder,
-          hmdaFiler
+          hmdaFiler,
+          quarterlyFiler
         )
       }
 }
 
 case class Institution(
-                        activityYear: Int,
-                        LEI: String,
-                        agency: Agency,
-                        institutionType: InstitutionType,
-                        institutionId_2017: Option[String],
-                        taxId: Option[String],
-                        rssd: Int,
-                        emailDomains: Seq[String],
-                        respondent: Respondent,
-                        parent: Parent,
-                        assets: Int,
-                        otherLenderCode: Int,
-                        topHolder: TopHolder,
-                        hmdaFiler: Boolean
-                      ) {
-  def toCSV: String = {
+  activityYear: Int,
+  LEI: String,
+  agency: Agency,
+  institutionType: InstitutionType,
+  institutionId_2017: Option[String],
+  taxId: Option[String],
+  rssd: Int,
+  emailDomains: Seq[String],
+  respondent: Respondent,
+  parent: Parent,
+  assets: Int,
+  otherLenderCode: Int,
+  topHolder: TopHolder,
+  hmdaFiler: Boolean,
+  quarterlyFiler: Boolean
+) {
+  def toCSV: String =
     s"$activityYear|$LEI|${agency.code}|${institutionType.code}|" +
       s"${institutionId_2017.getOrElse("")}|${taxId.getOrElse("")}|$rssd|${emailDomains
         .mkString(",")}|" +
       s"${respondent.name.getOrElse("")}|${respondent.state.getOrElse("")}|${respondent.city
         .getOrElse("")}|" +
       s"${parent.idRssd}|${parent.name.getOrElse("")}|$assets|${otherLenderCode}|" +
-      s"${topHolder.idRssd}|${topHolder.name.getOrElse("")}|$hmdaFiler"
-  }
+      s"${topHolder.idRssd}|${topHolder.name.getOrElse("")}|$hmdaFiler|$quarterlyFiler"
 
-  def valueOf(field: String): String = {
+  def valueOf(field: String): String =
     InstitutionFieldMapping
       .mapping(this)
       .getOrElse(field, s"error: field name mismatch for $field")
-  }
 }
