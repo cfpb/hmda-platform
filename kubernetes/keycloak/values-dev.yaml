@@ -64,7 +64,7 @@ keycloak:
   startupScripts: |
         #!/bin/bash
 
-        LOGIN_THEME=keycloak/themes/hmda/login/theme.properties
+        LOGIN_THEME=/opt/jboss/keycloak/themes/hmda/login/theme.properties
 
         # Update Keycloak config files based on envvars
         if [ -z ${INSTITUTION_SEARCH_URI+x} ]; then
@@ -333,7 +333,12 @@ postgresql:
     enabled: false
 
 test:
+  enabled: true
   image:
     repository: unguiculus/docker-python3-phantomjs-selenium
     tag: v1
     pullPolicy: IfNotPresent
+  securityContext:
+    runAsUser: 1000
+    fsGroup: 1000
+    runAsNonRoot: true
