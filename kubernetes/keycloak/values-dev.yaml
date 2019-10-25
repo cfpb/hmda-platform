@@ -1,7 +1,7 @@
 init:
   image:
     repository: alpine
-    tag: 3.7
+    tag: 3.10.3
     pullPolicy: IfNotPresent
 
 keycloak:
@@ -9,7 +9,7 @@ keycloak:
 
   image:
     repository: jboss/keycloak
-    tag: 4.2.1.Final
+    tag: 7.0.0
     pullPolicy: Always
 
     ## Optionally specify an array of imagePullSecrets.
@@ -61,7 +61,7 @@ keycloak:
   extraContainers: |
 
   ## Custom script that is run before Keycloak is started.
-  preStartScript: |
+  startupScripts: |
         #!/bin/bash
 
         LOGIN_THEME=keycloak/themes/hmda/login/theme.properties
