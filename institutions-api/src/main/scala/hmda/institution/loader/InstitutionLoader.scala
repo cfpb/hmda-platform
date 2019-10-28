@@ -42,11 +42,19 @@ object InstitutionLoader extends App with FlowUtils {
     sys.exit(2)
   }
 
+  val postOrPut = args(1)
+  log.info(s"Running in $postOrPut mode")
   val source = FileIO.fromPath(file.toPath)
 
   def request(json: String) =
-    HttpRequest(uri = s"$url", method = HttpMethods.POST)
-      .withEntity(ContentTypes.`application/json`, ByteString(json))
+    postOrPut match {
+      case "put" =>
+        HttpRequest(uri = s"$url", method = HttpMethods.PUT)
+          .withEntity(ContentTypes.`application/json`, ByteString(json))
+      case _ =>
+        HttpRequest(uri = s"$url", method = HttpMethods.POST)
+          .withEntity(ContentTypes.`application/json`, ByteString(json))
+    }
 
   source
     .via(framing)
