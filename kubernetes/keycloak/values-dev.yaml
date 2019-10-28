@@ -61,7 +61,8 @@ keycloak:
   extraContainers: |
 
   ## Custom script that is run before Keycloak is started.
-  startupScripts: |
+  startupScripts:
+    script.sh: |
         #!/bin/bash
 
         LOGIN_THEME=/opt/jboss/keycloak/themes/hmda/login/theme.properties
@@ -118,7 +119,7 @@ keycloak:
     - name: JDBC_PARAMS
       value: "ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory"
     - name: FILING_APP_URL
-      value: "/filing/2018/"
+      value: "/filing/2018"
     - name: INSTITUTION_SEARCH_URI
       value: "/v2/public"
     - name: INSTITUTION_SEARCH_VALIDATE_SSL
