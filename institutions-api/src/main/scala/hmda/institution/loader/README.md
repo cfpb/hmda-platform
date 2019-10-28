@@ -5,6 +5,6 @@
 
 $ env JAVA_OPTS="-Xmx8096m" sbt
 $ project institutions-api
-$ runMain hmda.institution.loader.InstitutionLoader <path to institutions file>
+$ runMain hmda.institution.loader.InstitutionLoader <path to institutions file> <post or put>
 
 As the institution loader runs, you'll start seeing logs of institutions being added in the local instance of the platform. Additionally, the kafka topic will start being populated. 

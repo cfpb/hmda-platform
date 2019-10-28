@@ -43,21 +43,17 @@ object InstitutionLoader extends App with FlowUtils {
   }
 
   val postOrPut = args(1)
-
+  log.info(s"Running in $postOrPut mode")
   val source = FileIO.fromPath(file.toPath)
 
   def request(json: String) =
     postOrPut match {
-      case "put" => {
-        log.info("Running put")
+      case "put" =>
         HttpRequest(uri = s"$url", method = HttpMethods.PUT)
           .withEntity(ContentTypes.`application/json`, ByteString(json))
-      }
-      case _ => {
-        log.info("Running post")
+      case _ =>
         HttpRequest(uri = s"$url", method = HttpMethods.POST)
           .withEntity(ContentTypes.`application/json`, ByteString(json))
-      }
     }
 
   source
