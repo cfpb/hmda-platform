@@ -1,7 +1,7 @@
 package hmda.model.filing.submission
 
 object SubmissionId {
-  def apply(s: String): SubmissionId = {
+  def apply(s: String): SubmissionId =
     s.split('-').toList match {
       case lei :: year :: quarter :: seqNr :: Nil =>
         SubmissionId(lei, s"$year-$quarter", seqNr.toInt)
