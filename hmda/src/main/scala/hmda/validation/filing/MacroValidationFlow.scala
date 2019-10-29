@@ -126,7 +126,7 @@ object MacroValidationFlow {
   ): Future[ValidationError] = {
 
     val countPredicateF  = count(source.filter(homePurchaseLoanOriginated))
-    val countComparisonF = count(source.filter(loanOriginated))
+    val countComparisonF = count(source.filter(homePurchasedApp))
 
     for {
       countPredicate  <- countPredicateF
@@ -221,6 +221,10 @@ object MacroValidationFlow {
     (lar: LoanApplicationRegister) =>
       lar.action.actionTakenType == LoanOriginated &&
         lar.loan.loanPurpose == HomePurchase
+  
+  def homePurchasedApp: LarPredicate = 
+    (lar: LoanApplicationRegister) =>
+      lar.loan.loanPurpose == HomePurchase
 
   //Q635
   def applicationApprovedButNotAccepted: LarPredicate =
