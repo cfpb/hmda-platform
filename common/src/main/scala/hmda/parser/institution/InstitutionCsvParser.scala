@@ -50,22 +50,16 @@ object InstitutionCsvParser {
         topHolderIdRssd,
         if (topHolderName == "") None else Some(topHolderName)
       ),
-      hmdaFiler match {
-        case "t"     => true
-        case "f"     => false
-        case "true"  => true
-        case "false" => false
-        case _       => false
-      },
-      quarterlyFiler match {
-        case "t"     => true
-        case "f"     => false
-        case "true"  => true
-        case "false" => false
-        case _       => false
-      }
+      parseBoolean(hmdaFiler),
+      parseBoolean(quarterlyFiler)
     )
-
   }
-
+  def parseBoolean(i: String): Boolean =
+    i match {
+      case "t"     => true
+      case "f"     => false
+      case "true"  => true
+      case "false" => false
+      case _       => false
+    }
 }

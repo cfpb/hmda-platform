@@ -6,19 +6,19 @@ import io.circe.syntax._
 
 object Institution {
   def empty: Institution = Institution(
-    2018,
-    "",
-    UndeterminedAgency,
-    UndeterminedInstitutionType,
-    None,
-    None,
-    -1,
-    Nil,
-    Respondent.empty,
-    Parent.empty,
-    -1,
-    -1,
-    TopHolder.empty,
+    activityYear = 2018,
+    LEI = "",
+    agency = UndeterminedAgency,
+    institutionType = UndeterminedInstitutionType,
+    institutionId_2017 = None,
+    taxId = None,
+    rssd = -1,
+    emailDomains = Nil,
+    respondent = Respondent.empty,
+    parent = Parent.empty,
+    assets = -1,
+    otherLenderCode = -1,
+    topHolder = TopHolder.empty,
     hmdaFiler = false,
     quarterlyFiler = false
   )

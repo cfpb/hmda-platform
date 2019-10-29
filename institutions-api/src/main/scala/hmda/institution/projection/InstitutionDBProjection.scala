@@ -84,7 +84,6 @@ object InstitutionDBProjection extends InstitutionEmailComponent {
         case 2019 =>
           institutionRepository2019.insertOrUpdate(InstitutionConverter.convert(inst))
         case 2020 =>
-          println("CAME HERE!!!!! " + InstitutionConverter.convert(inst).quarterlyFiler)
           institutionRepository2020.insertOrUpdate(InstitutionConverter.convert(inst))
       }
     }
