@@ -27,7 +27,7 @@ trait InstitutionComponent2020 {
     def topHolderIdRssd = column[Int]("topholder_id_rssd")
     def topHolderName   = column[String]("topholder_name")
     def hmdaFiler       = column[Boolean]("hmda_filer")
-    def quarterlyFiler  = column[Boolean]("quarterly_filer")
+    def quarterlyFiler  = column[Boolean]("quarterly_filer") = false
 
     def * =
       (
