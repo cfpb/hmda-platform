@@ -31,7 +31,7 @@ object EditDetailsConverter {
         val fieldValue =
           validationError.fields.getOrElse(fieldKey, "Detail not found")
         val fieldValueFriendly =
-          if (fieldValue == "-1") "Invalid input" else fieldValue
+          if (fieldValue == "-1") fieldValue else fieldValue
         FieldDetails(fieldKey, fieldValueFriendly)
       })
 }
