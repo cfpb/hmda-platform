@@ -55,7 +55,7 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
       query <- db.run(table.filter(_.lei === i.lei).result)
       result <- if (!query.toList.map(_.emailDomain).contains(i.emailDomain)) {
                  db.run(table += i)
-               } else Future(0)
+               } else Future.successful(0)
     } yield {
       result
     }
