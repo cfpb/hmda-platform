@@ -2,22 +2,16 @@ package hmda.model.filing.submission
 
 object SubmissionId {
   def apply(s: String): SubmissionId = {
-    val components = s.split('-')
-    components.size match {
-      case 3 => { //yearly filing
-        val lei    = components.head
-        val period = components.tail.head
-        val seqNr  = components.reverse.head.toInt
-        SubmissionId(lei, period, seqNr)
-      }
-      case 4 => { //quarterly filing
-        val lei    = components.head
-        val period = components.tail.head + "-" + components.tail(1)
-        val seqNr  = components.reverse.head.toInt
-        SubmissionId(lei, period, seqNr)
-      }
+    s.split('-').toList match {
+      case lei :: year :: quarter :: seqNr :: Nil =>
+        SubmissionId(lei, s"$year-$quarter", seqNr.toInt)
+
+      case lei :: year :: seqNr :: Nil =>
+        SubmissionId(lei, year, seqNr.toInt)
+
+      case _ =>
+        throw new IllegalArgumentException(s"Unable to parse $s into a valid Submission ID")
     }
-  }
 }
 
 case class SubmissionId(lei: String = "", period: String = "", sequenceNumber: Int = 0) {
