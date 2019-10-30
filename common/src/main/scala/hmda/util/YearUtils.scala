@@ -15,11 +15,11 @@ object YearUtils {
     (year >= firstYear.toInt) && (year <= quarterYear.toInt)
 
   def isValidQuarter(quarter: String): Boolean =
-    quarter.length == 2 &&
-      quarter.head == 'Q' &&
-      quarter.last.isDigit && {
-      val digit = quarter.last.toString.toInt
-      digit >= 1 && digit <= 3
+    quarter match {
+      case "Q1" => true
+      case "Q2" => true
+      case "Q3" => true
+      case _    => false
     }
 
   def period(year: Int, quarter: Option[String]): String =
