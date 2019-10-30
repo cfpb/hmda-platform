@@ -8,8 +8,8 @@ metadata:
     getambassador.io/config: |
       apiVersion: ambassador/v1
       kind: Mapping
-      name: keycloak_https_mapping_
-      ambassador_id: ambassador-default-2
+      name: keycloak_https_mapping
+      ambassador_id: ambassador-default-1
       prefix: /auth/
       rewrite: /auth/
       service: keycloak-http.default.svc.cluster.local
