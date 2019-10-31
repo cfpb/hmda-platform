@@ -3,7 +3,7 @@ package hmda.persistence.filing
 import akka.actor.typed.{ ActorRef, Behavior, TypedActorContext }
 import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityTypeKey }
+import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef, EntityTypeKey }
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
@@ -13,6 +13,7 @@ import hmda.messages.institution.InstitutionCommands.AddFiling
 import hmda.model.filing.FilingDetails
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.persistence.institution.InstitutionPersistence
+import hmda.utils.YearUtils
 
 object FilingPersistence extends HmdaTypedPersistentActor[FilingCommand, FilingEvent, FilingState] {
 
@@ -124,5 +125,10 @@ object FilingPersistence extends HmdaTypedPersistentActor[FilingCommand, FilingE
 
   def startShardRegion(sharding: ClusterSharding): ActorRef[ShardingEnvelope[FilingCommand]] =
     super.startShardRegion(sharding)
+
+  def selectFiling(sharding: ClusterSharding, lei: String, year: Int, quarter: Option[String]): EntityRef[FilingCommand] = {
+    val period = YearUtils.period(year, quarter)
+    sharding.entityRefFor(FilingPersistence.typeKey, s"${FilingPersistence.name}-$lei-$period")
+  }
 
 }

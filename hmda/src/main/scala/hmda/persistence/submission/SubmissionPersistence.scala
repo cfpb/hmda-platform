@@ -5,14 +5,14 @@ import java.time.Instant
 import akka.actor.typed.{ ActorRef, Behavior, TypedActorContext }
 import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
+import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
 import hmda.messages.filing.FilingCommands.{ AddSubmission, UpdateSubmission }
 import hmda.messages.submission.SubmissionCommands._
 import hmda.messages.submission.SubmissionEvents.{ SubmissionCreated, SubmissionEvent, SubmissionModified, SubmissionNotExists }
-import hmda.model.filing.submission.{ Created, Signed, Submission, SubmissionStatus }
+import hmda.model.filing.submission.{ Created, Signed, Submission, SubmissionId, SubmissionStatus }
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.persistence.filing.FilingPersistence
 
@@ -56,12 +56,12 @@ object SubmissionPersistence extends HmdaTypedPersistentActor[SubmissionCommand,
         if (state.submission.map(s => s.id).contains(modified.id)) {
           if (modified.status == SubmissionStatus.valueOf(Signed.code) && (modified.end == 0 || modified.receipt.isEmpty)) {
             //for when submission is signed but end date and receipt are empty
-            val timestamp = Instant.now().toEpochMilli
+            val timestamp      = Instant.now().toEpochMilli
             val modifiedSigned = modified.copy(end = timestamp, receipt = s"${modified.id}-$timestamp")
             Effect.persist(SubmissionModified(modifiedSigned)).thenRun { _ =>
               log.debug(s"persisted modified Submission: ${modifiedSigned.toString}")
-              val filingPersistence = sharding.entityRefFor(FilingPersistence.typeKey,
-                s"${FilingPersistence.name}-${modified.id.lei}-${modifiedSigned.id.period}")
+              val filingPersistence = sharding
+                .entityRefFor(FilingPersistence.typeKey, s"${FilingPersistence.name}-${modified.id.lei}-${modifiedSigned.id.period}")
               filingPersistence ! UpdateSubmission(modifiedSigned, None)
               replyTo ! SubmissionModified(modifiedSigned)
             }
@@ -70,8 +70,8 @@ object SubmissionPersistence extends HmdaTypedPersistentActor[SubmissionCommand,
             val modifiedSigned = modified.copy(end = modified.end, receipt = s"${modified.receipt}")
             Effect.persist(SubmissionModified(modifiedSigned)).thenRun { _ =>
               log.debug(s"persisted modified Submission: ${modifiedSigned.toString}")
-              val filingPersistence = sharding.entityRefFor(FilingPersistence.typeKey,
-                s"${FilingPersistence.name}-${modified.id.lei}-${modifiedSigned.id.period}")
+              val filingPersistence = sharding
+                .entityRefFor(FilingPersistence.typeKey, s"${FilingPersistence.name}-${modified.id.lei}-${modifiedSigned.id.period}")
               filingPersistence ! UpdateSubmission(modifiedSigned, None)
               replyTo ! SubmissionModified(modifiedSigned)
             }
@@ -112,5 +112,8 @@ object SubmissionPersistence extends HmdaTypedPersistentActor[SubmissionCommand,
 
   def startShardRegion(sharding: ClusterSharding): ActorRef[ShardingEnvelope[SubmissionCommand]] =
     super.startShardRegion(sharding)
+
+  def selectSubmissionPersistence(sharding: ClusterSharding, submissionId: SubmissionId): EntityRef[SubmissionCommand] =
+    sharding.entityRefFor(SubmissionPersistence.typeKey, s"${SubmissionPersistence.name}-${submissionId.toString}")
 
 }

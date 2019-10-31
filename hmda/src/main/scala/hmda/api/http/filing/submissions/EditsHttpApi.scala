@@ -4,9 +4,11 @@ import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
-import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, StatusCodes }
-import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.marshalling.ToResponseMarshallable
+import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, StatusCodes, Uri }
+import akka.http.scaladsl.server.Directives.{ encodeResponse, handleRejections }
 import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Sink, Source }
 import akka.util.{ ByteString, Timeout }
@@ -21,10 +23,15 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.filing.submissions._
 import hmda.auth.OAuth2Authorization
 import hmda.messages.submission.EditDetailsCommands.GetEditRowCount
-import hmda.messages.submission.EditDetailsEvents._
+import hmda.messages.submission.EditDetailsEvents.{ EditDetailsAdded, EditDetailsPersistenceEvent, EditDetailsRowCounted }
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowValidatedError
 import hmda.model.filing.EditDescriptionLookup
 import hmda.query.HmdaQuery._
+import hmda.api.http.PathMatchers._
+import hmda.persistence.submission.EditDetailsPersistence.selectEditDetailsPersistence
+import hmda.persistence.submission.HmdaValidationError.selectHmdaValidationError
+import hmda.utils.YearUtils
+
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.matching.Regex
 import scala.util.{ Failure, Success }
@@ -38,103 +45,122 @@ trait EditsHttpApi extends HmdaTimeDirectives {
   implicit val timeout: Timeout
   val sharding: ClusterSharding
 
-  //institutions/<lei>/filings/<period>/submissions/<submissionId>/edits
+  //GET institutions/<lei>/filings/<year>/submissions/<submissionId>/edits
+  //GET institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/edits
   def editsSummaryPath(oAuth2Authorization: OAuth2Authorization): Route =
-    path("institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "edits") { (lei, period, seqNr) =>
-      oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
-        timedGet { uri =>
-          val submissionId = SubmissionId(lei, period, seqNr)
-          val hmdaValidationError = sharding
-            .entityRefFor(HmdaValidationError.typeKey, s"${HmdaValidationError.name}-$submissionId")
-
-          val fEdits: Future[HmdaValidationErrorState] = hmdaValidationError ? (ref => GetHmdaValidationErrorState(submissionId, ref))
-
-          val fVerification: Future[VerificationStatus] = hmdaValidationError ? (ref => GetVerificationStatus(ref))
-
-          val fEditsAndVer = for {
-            edits <- fEdits
-            ver   <- fVerification
-          } yield (edits, ver)
-
-          onComplete(fEditsAndVer) {
-            case Success((edits, ver)) =>
-              val syntactical =
-                SyntacticalEditSummaryResponse(edits.syntactical.map { editSummary =>
-                  toEditSummaryResponse(editSummary, period)
-                }.toSeq.sorted)
-              val validity = ValidityEditSummaryResponse(edits.validity.map { editSummary =>
-                toEditSummaryResponse(editSummary, period)
-              }.toSeq.sorted)
-              val quality = QualityEditSummaryResponse(edits.quality.map { editSummary =>
-                toEditSummaryResponse(editSummary, period)
-              }.toSeq.sorted, edits.qualityVerified)
-              val `macro` = MacroEditSummaryResponse(edits.`macro`.map { editSummary =>
-                toEditSummaryResponse(editSummary, period)
-              }.toSeq.sorted, edits.macroVerified)
-              val editsSummaryResponse =
-                EditsSummaryResponse(
-                  syntactical,
-                  validity,
-                  quality,
-                  `macro`,
-                  SubmissionStatusResponse(
-                    submissionStatus = SubmissionStatus.valueOf(edits.statusCode),
-                    verification = ver
-                  )
-                )
-              complete(editsSummaryResponse)
-            case Failure(e) =>
-              failedResponse(StatusCodes.InternalServerError, uri, e)
+    pathPrefix("institutions" / Segment) { lei =>
+      timedGet { uri =>
+        oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+          path("filings" / Year / "submissions" / IntNumber / "edits") { (year, seqNr) =>
+            getEdits(lei, year, None, seqNr, uri)
+          } ~ path("filings" / Year / "quarter" / Quarter / "submissions" / IntNumber / "edits") { (year, quarter, seqNr) =>
+            getEdits(lei, year, Option(quarter), seqNr, uri)
           }
         }
       }
     }
 
-  //institutions/<lei>/filings/<period>/submissions/<submissionId>/edits/csv
+  private def getEdits(lei: String, year: Int, quarter: Option[String], seqNr: Int, uri: Uri): Route = {
+    val period                                    = YearUtils.period(year, quarter)
+    val submissionId                              = SubmissionId(lei, period, seqNr)
+    val hmdaValidationError                       = selectHmdaValidationError(sharding, submissionId)
+    val fEdits: Future[HmdaValidationErrorState]  = hmdaValidationError ? (ref => GetHmdaValidationErrorState(submissionId, ref))
+    val fVerification: Future[VerificationStatus] = hmdaValidationError ? (ref => GetVerificationStatus(ref))
+    val fEditsAndVer = for {
+      edits <- fEdits
+      ver   <- fVerification
+    } yield (edits, ver)
+    onComplete(fEditsAndVer) {
+      case Success((edits, ver)) =>
+        val syntactical =
+          SyntacticalEditSummaryResponse(edits.syntactical.map { editSummary =>
+            toEditSummaryResponse(editSummary, period)
+          }.toSeq.sorted)
+        val validity = ValidityEditSummaryResponse(edits.validity.map { editSummary =>
+          toEditSummaryResponse(editSummary, period)
+        }.toSeq.sorted)
+        val quality = QualityEditSummaryResponse(edits.quality.map { editSummary =>
+          toEditSummaryResponse(editSummary, period)
+        }.toSeq.sorted, edits.qualityVerified)
+        val `macro` = MacroEditSummaryResponse(edits.`macro`.map { editSummary =>
+          toEditSummaryResponse(editSummary, period)
+        }.toSeq.sorted, edits.macroVerified)
+        val editsSummaryResponse =
+          EditsSummaryResponse(
+            syntactical,
+            validity,
+            quality,
+            `macro`,
+            SubmissionStatusResponse(
+              submissionStatus = SubmissionStatus.valueOf(edits.statusCode),
+              verification = ver
+            )
+          )
+        complete(editsSummaryResponse)
+      case Failure(e) =>
+        failedResponse(StatusCodes.InternalServerError, uri, e)
+    }
+  }
 
+  //institutions/<lei>/filings/<year>/submissions/<submissionId>/edits/csv
+  //institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/edits/csv
   def editsSummaryCsvPath(oAuth2Authorization: OAuth2Authorization): Route =
-    path("institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "edits" / "csv") { (lei, period, seqNr) =>
+    pathPrefix("institutions" / Segment) { lei =>
       oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
-        val submissionId = SubmissionId(lei, period, seqNr)
-        val csv = csvHeaderSource
-          .concat(validationErrorEventStream(submissionId))
-          .map(ByteString(_))
-        complete(HttpEntity.Chunked.fromData(ContentTypes.`text/csv(UTF-8)`, csv))
+        path("filings" / Year / "submissions" / IntNumber / "edits" / "csv") { (year, seqNr) =>
+          csvEditSummaryStream(lei, year, None, seqNr)
+        } ~ path("filings" / Year / "quarter" / Quarter / "submissions" / IntNumber / "edits" / "csv") { (year, quarter, seqNr) =>
+          csvEditSummaryStream(lei, year, Option(quarter), seqNr)
+        }
       }
     }
 
-  //institutions/<lei>/filings/<period>/submissions/<submissionId>/edits/<edit>
+  private def csvEditSummaryStream(lei: String, year: Int, quarter: Option[String], seqNr: Int): Route = {
+    val period       = YearUtils.period(year, quarter)
+    val submissionId = SubmissionId(lei, period, seqNr)
+    val csv = csvHeaderSource
+      .concat(validationErrorEventStream(submissionId))
+      .map(ByteString(_))
+    complete(HttpEntity.Chunked.fromData(ContentTypes.`text/csv(UTF-8)`, csv))
+  }
+
+  // GET institutions/<lei>/filings/<year>/submissions/<submissionId>/edits/<edit>
+  // GET institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/edits/<edit>
   def editDetailsPath(oAuth2Authorization: OAuth2Authorization): Route = {
     val editNameRegex: Regex = new Regex("""[SVQ]\d\d\d(?:-\d)?""")
-    path("institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "edits" / editNameRegex) {
-      (lei, period, seqNr, editName) =>
-        oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
-          timedGet { uri =>
-            parameters('page.as[Int] ? 1) { page =>
-              val submissionId = SubmissionId(lei, period, seqNr)
-              val persistenceId =
-                s"${EditDetailsPersistence.name}-$submissionId"
-              val editDetailsPersistence = sharding
-                .entityRefFor(EditDetailsPersistence.typeKey, s"${EditDetailsPersistence.name}-$submissionId")
-
-              val fEditRowCount: Future[EditDetailsRowCounted] = editDetailsPersistence ? (ref => GetEditRowCount(editName, ref))
-
-              val fDetails: Future[EditDetailsSummary] = for {
-                editRowCount <- fEditRowCount
-                s            = EditDetailsSummary(editName, Nil, uri.path.toString(), page, editRowCount.count)
-                summary      <- editDetails(persistenceId, s)
-              } yield summary
-
-              onComplete(fDetails) {
-                case Success(summary) =>
-                  complete(summary)
-                case Failure(e) =>
-                  failedResponse(StatusCodes.InternalServerError, uri, e)
-              }
+    pathPrefix("institutions" / Segment) { lei =>
+      timedGet { uri =>
+        parameters('page.as[Int] ? 1) { page =>
+          oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+            path("filings" / Year / "submissions" / IntNumber / "edits" / editNameRegex) { (year, seqNr, editName) =>
+              getEditDetails(lei, year, None, seqNr, page, editName, uri)
+            } ~ path("filings" / Year / "quarter" / Quarter / "submissions" / IntNumber / "edits" / editNameRegex) {
+              (year, quarter, seqNr, editName) =>
+                getEditDetails(lei, year, Option(quarter), seqNr, page, editName, uri)
             }
           }
         }
+      }
+    }
+  }
 
+  private def getEditDetails(lei: String, year: Int, quarter: Option[String], seqNr: Int, page: Int, editName: String, uri: Uri): Route = {
+    val period                                       = YearUtils.period(year, quarter)
+    val submissionId                                 = SubmissionId(lei, period, seqNr)
+    val persistenceId                                = s"${EditDetailsPersistence.name}-$submissionId"
+    val editDetailsPersistence                       = selectEditDetailsPersistence(sharding, submissionId)
+    val fEditRowCount: Future[EditDetailsRowCounted] = editDetailsPersistence ? (ref => GetEditRowCount(editName, ref))
+    val fDetails: Future[EditDetailsSummary] = for {
+      editRowCount <- fEditRowCount
+      s            = EditDetailsSummary(editName, Nil, uri.path.toString(), page, editRowCount.count)
+      summary      <- editDetails(persistenceId, s)
+    } yield summary
+
+    onComplete(fDetails) {
+      case Success(summary) =>
+        complete(ToResponseMarshallable(summary))
+      case Failure(e) =>
+        failedResponse(StatusCodes.InternalServerError, uri, e)
     }
   }
 

@@ -5,7 +5,7 @@ import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ ActorRef, Behavior, TypedActorContext }
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
+import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import akka.actor.typed.scaladsl.adapter._
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
@@ -17,7 +17,7 @@ import hmda.messages.pubsub.HmdaTopics._
 import hmda.model.institution.{ Institution, InstitutionDetail }
 import hmda.publication.KafkaUtils._
 import hmda.persistence.HmdaTypedPersistentActor
-
+import hmda.utils.YearUtils
 import scala.concurrent.Future
 
 object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionCommand, InstitutionEvent, InstitutionState] {
@@ -129,8 +129,10 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
   def startShardRegion(sharding: ClusterSharding): ActorRef[ShardingEnvelope[InstitutionCommand]] =
     super.startShardRegion(sharding)
 
-  private def publishInstitutionEvent(institutionID: String, event: InstitutionKafkaEvent)(implicit system: ActorSystem,
-                                                                                           materializer: ActorMaterializer): Future[Done] =
+  private def publishInstitutionEvent(
+    institutionID: String,
+    event: InstitutionKafkaEvent
+  )(implicit system: ActorSystem, materializer: ActorMaterializer): Future[Done] =
     produceInstitutionRecord(institutionTopic, institutionID, event)
 
   private def modifyInstitution(institution: Institution, state: InstitutionState): InstitutionState =
@@ -144,4 +146,7 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
       }
     }
 
+  def selectInstitution(sharding: ClusterSharding, lei: String, year: Int): EntityRef[InstitutionCommand] =
+    if (year == 2018) sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-$lei")
+    else sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-$lei-$year")
 }
