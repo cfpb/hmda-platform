@@ -6,13 +6,14 @@ import hmda.model.census.CountyLoanLimit
 import hmda.census.records._
 import hmda.model.census.Census
 import com.typesafe.config.ConfigFactory
+import hmda.utils.YearUtils.Period
 
-object LarConverter2019 {
+object LarConverter {
 
-    val config = ConfigFactory.load()
+  val config = ConfigFactory.load()
 
   val censusFileName2019 =
-      config.getString("hmda.census.fields.2019.filename")
+    config.getString("hmda.census.fields.2019.filename")
 
   val censusTractMap: Map[String, Census] =
     CensusRecords.indexedTract2019
@@ -25,29 +26,29 @@ object LarConverter2019 {
       .map(county => county.stateCode + county.countyCode -> county)
       .toMap
   val countyLoanLimitsByState: Map[String, StateBoundries] =
-    countyLoanLimits.groupBy(county => county.stateAbbrv).mapValues {
-      countyList =>
-        val oneUnit = countyList.map(county => county.oneUnitLimit)
-        val twoUnit = countyList.map(county => county.twoUnitLimit)
-        val threeUnit = countyList.map(county => county.threeUnitLimit)
-        val fourUnit = countyList.map(county => county.fourUnitLimit)
-        StateBoundries(
-          oneUnitMax = oneUnit.max,
-          oneUnitMin = oneUnit.min,
-          twoUnitMax = twoUnit.max,
-          twoUnitMin = twoUnit.min,
-          threeUnitMax = threeUnit.max,
-          threeUnitMin = threeUnit.min,
-          fourUnitMax = fourUnit.max,
-          fourUnitMin = fourUnit.min
-        )
+    countyLoanLimits.groupBy(county => county.stateAbbrv).mapValues { countyList =>
+      val oneUnit   = countyList.map(county => county.oneUnitLimit)
+      val twoUnit   = countyList.map(county => county.twoUnitLimit)
+      val threeUnit = countyList.map(county => county.threeUnitLimit)
+      val fourUnit  = countyList.map(county => county.fourUnitLimit)
+      StateBoundries(
+        oneUnitMax = oneUnit.max,
+        oneUnitMin = oneUnit.min,
+        twoUnitMax = twoUnit.max,
+        twoUnitMin = twoUnit.min,
+        threeUnitMax = threeUnit.max,
+        threeUnitMin = threeUnit.min,
+        fourUnitMax = fourUnit.max,
+        fourUnitMin = fourUnit.min
+      )
     }
 
   def apply(
-      lar: LoanApplicationRegister
-  ): LarEntity2019 = {
+    lar: LoanApplicationRegister,
+    isQuarterly: Boolean = false
+  ): LarEntity = {
     val census = censusTractMap.getOrElse(lar.geography.tract, Census())
-    LarEntity2019(
+    LarEntity(
       lar.larIdentifier.id,
       lar.larIdentifier.LEI,
       lar.loan.ULI,
@@ -158,9 +159,7 @@ object LarConverter2019 {
       lar.reverseMortgage.code,
       lar.lineOfCredit.code,
       lar.businessOrCommercialPurpose.code,
-      ConformingLoanLimit.assignLoanLimit(lar,
-                                          countyLoanLimitsByCounty,
-                                          countyLoanLimitsByState),
+      ConformingLoanLimit.assignLoanLimit(lar, countyLoanLimitsByCounty, countyLoanLimitsByState),
       EthnicityCategorization.assignEthnicityCategorization(lar),
       RaceCategorization.assignRaceCategorization(lar),
       SexCategorization.assignSexCategorization(lar),
@@ -172,7 +171,8 @@ object LarConverter2019 {
       census.occupiedUnits,
       census.oneToFourFamilyUnits,
       census.medianAge,
-      census.tracttoMsaIncomePercent
+      census.tracttoMsaIncomePercent,
+      isQuarterly
     )
   }
 
