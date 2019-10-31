@@ -79,6 +79,19 @@ object MacroValidationFlow {
           Q647(tsSource)
         )
 
+      case Period(2020, _) =>
+        List(
+          Q634,
+          Q635(totalCount),
+          Q636(totalCount),
+          Q637(totalCount),
+          Q638,
+          Q639,
+          Q640,
+          Q646,
+          Q647(tsSource)
+        )
+
     }
 
   def macroValidation[as: AS, mat: MAT, ec: EC](
@@ -136,7 +149,7 @@ object MacroValidationFlow {
   ): Future[ValidationError] = {
 
     val countPredicateF  = count(source.filter(homePurchaseLoanOriginated))
-    val countComparisonF = count(source.filter(loanOriginated))
+    val countComparisonF = count(source.filter(homePurchasedApp))
 
     for {
       countPredicate  <- countPredicateF
@@ -231,6 +244,10 @@ object MacroValidationFlow {
     (lar: LoanApplicationRegister) =>
       lar.action.actionTakenType == LoanOriginated &&
         lar.loan.loanPurpose == HomePurchase
+  
+  def homePurchasedApp: LarPredicate = 
+    (lar: LoanApplicationRegister) =>
+      lar.loan.loanPurpose == HomePurchase
 
   //Q635
   def applicationApprovedButNotAccepted: LarPredicate =

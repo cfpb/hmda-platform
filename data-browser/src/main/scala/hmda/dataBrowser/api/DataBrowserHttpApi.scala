@@ -173,9 +173,9 @@ trait DataBrowserHttpApi extends Settings {
             extractYearsAndMsaAndStateAndCountyAndLEIBrowserFields { mandatoryFields =>
               extractFieldsForRawQueries { remainingQueryFields =>
                 val allFields = mandatoryFields ++ remainingQueryFields
-                log.info("CSV: " + allFields)
+                log.info("PIPE: " + allFields)
                 contentDispositionHeader(allFields, Pipes) {
-                  serveData(allFields, Commas, s"Failed to fetch data for /view/pipe with the following queries: $allFields")
+                  serveData(allFields, Pipes, s"Failed to fetch data for /view/pipe with the following queries: $allFields")
                 }
               }
             }
