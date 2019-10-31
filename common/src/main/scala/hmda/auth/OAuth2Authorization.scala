@@ -30,47 +30,6 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
         }
     }
 
-  def authorizeTokenWithLeiQuarter(fInstitution: Future[Option[Institution]], lei: String): Directive1[VerifiedToken] =
-    authorizeToken flatMap {
-      case t if t.lei.nonEmpty =>
-        if (runtimeMode == "dev") {
-          provide(t)
-        } else {
-//          onComplete(fInstitution) {
-//            case Failure(error) =>
-//              reject(AuthorizationFailedRejection)
-//                .toDirective[Tuple1[VerifiedToken]]
-//            case Success(Some(_)) =>
-//              provide(t)
-//            case _ =>
-//              reject(AuthorizationFailedRejection)
-//                .toDirective[Tuple1[VerifiedToken]]
-//          }
-          val leiList = t.lei.split(',')
-          if (leiList.contains(lei)) {
-            onComplete(fInstitution) {
-              case Failure(error) =>
-                reject(AuthorizationFailedRejection)
-                  .toDirective[Tuple1[VerifiedToken]]
-              case Success(_) =>
-                provide(t)
-            }
-//            provide(t)
-          } else {
-            reject(AuthorizationFailedRejection)
-              .toDirective[Tuple1[VerifiedToken]]
-          }
-        }
-
-      case _ =>
-        if (runtimeMode == "dev") {
-          provide(VerifiedToken())
-        } else {
-          reject(AuthorizationFailedRejection)
-            .toDirective[Tuple1[VerifiedToken]]
-        }
-    }
-
   def authorizeTokenWithLei(lei: String): Directive1[VerifiedToken] =
     authorizeToken flatMap {
       case t if t.lei.nonEmpty =>
