@@ -48,7 +48,7 @@ trait InstitutionComponent2019 {
         topHolderIdRssd,
         topHolderName,
         hmdaFiler,
-        false
+        quarterlyFiler
       ) <> (InstitutionEntity.tupled, InstitutionEntity.unapply)
   }
 
