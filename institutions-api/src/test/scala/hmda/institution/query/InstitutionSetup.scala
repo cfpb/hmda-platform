@@ -13,8 +13,10 @@ trait InstitutionSetup extends InstitutionEmailComponent {
     new InstitutionRepository2018(dbConfig, "institutions2018")
   implicit val institutionRepository2019 =
     new InstitutionRepository2019(dbConfig, "institutions2019")
+  implicit val institutionRepository2020 =
+    new InstitutionRepository2020(dbConfig, "institutions2020")
   implicit val emailRepository = new InstitutionEmailsRepository(dbConfig)
-  val db = emailRepository.db
+  val db                       = emailRepository.db
 
   val duration = 5.seconds
 
@@ -54,7 +56,8 @@ trait InstitutionSetup extends InstitutionEmailComponent {
           InstitutionEmailEntity(3, "BBB", "bbb.com"),
           InstitutionEmailEntity(4, "EEE", "eee.com")
         )
-      ))
+      )
+    )
     Await.result(setup, duration)
   }
 
