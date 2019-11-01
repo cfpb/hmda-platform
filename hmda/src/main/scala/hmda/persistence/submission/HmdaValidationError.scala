@@ -51,6 +51,7 @@ import hmda.validation.filing.MacroValidationFlow._
 import hmda.validation.filing.ValidationFlow._
 import hmda.validation.rules.lar.quality.common.Q600
 import hmda.validation.rules.lar.syntactical.S305
+import hmda.validation.rules.lar.syntactical.S304
 import hmda.validation.{ AS, EC, MAT }
 
 import scala.concurrent.duration._
@@ -460,16 +461,20 @@ object HmdaValidationError
       // see addTsFieldInformation in ValidationFlow which does something similar
       def enrichErrorInformation(tsLar: TransmittalLar, validationError: ValidationError): ValidationError = {
         val s305 = S305.name
+        val s304 = S304.name
         val q600 = Q600.name
         validationError match {
-          case s @ SyntacticalValidationError(_, `s305`, _, fields) =>
-            s.copyWithFields(
+          case s305 @ SyntacticalValidationError(_, `s305`, _, fields) =>
+            s305.copyWithFields(
               fields + ("The following row numbers occur multiple times" -> tsLar.duplicateLineNumbers
                 .mkString(start = "Rows: ", sep = ",", end = ""))
             )
-
-          case q @ QualityValidationError(uli, `q600`, fields) =>
-            q.copyWithFields(
+          case s304 @ SyntacticalValidationError(_, `s304`, _, fields) =>
+            s304.copyWithFields(
+              fields + ("TSCount" -> tsLar.ts.totalLines.toString) + ("LARCount" -> tsLar.larsCount.toString)
+            )
+          case q600 @ QualityValidationError(uli, `q600`, fields) =>
+            q600.copyWithFields(
               fields + ("The following row numbers have the same ULI" -> tsLar.duplicateLineNumbers
                 .mkString(start = "Rows: ", sep = ",", end = ""))
             )
