@@ -16,7 +16,7 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
-trait FilingAuthorization {
+trait QuarterlyFilingAuthorization {
   val sharding: ClusterSharding
   val log: LoggingAdapter
   implicit val timeout: Timeout
@@ -40,7 +40,7 @@ trait FilingAuthorization {
 
         case Success(Some(i)) =>
           log.info(s"institution for LEI: $lei and year: $year does not have permissions to do quarterly filing")
-          complete(BadRequest, ErrorResponse(BadRequest.intValue, "Your institution is not permitted to do quarterly filing", path))
+          complete(BadRequest, ErrorResponse(BadRequest.intValue, "Institution is not permitted to do quarterly filing", path))
       }
     }
   }
