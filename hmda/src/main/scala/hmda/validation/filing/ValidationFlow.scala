@@ -64,7 +64,7 @@ object ValidationFlow {
           case "syntactical" =>
             validationEngine.checkSyntactical(ts, ts.LEI, validationContext, TsValidationError)
           case "validity" =>
-            validationEngine.checkValidity(ts, ts.LEI, TsValidationError)
+            validationEngine.checkValidity(ts, ts.LEI, validationContext, TsValidationError)
         }
         (ts, errors)
       }
@@ -116,13 +116,13 @@ object ValidationFlow {
               .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
 
           case "validity" =>
-            validationEngine.checkValidity(lar, lar.loan.ULI, LarValidationError)
+            validationEngine.checkValidity(lar, lar.loan.ULI, ctx, LarValidationError)
 
           case "syntactical-validity" =>
             validationEngine
               .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
               .combine(
-                validationEngine.checkValidity(lar, lar.loan.ULI, LarValidationError)
+                validationEngine.checkValidity(lar, lar.loan.ULI, ctx, LarValidationError)
               )
 
           case "quality" =>
