@@ -58,10 +58,10 @@ trait DataBrowserHttpApi extends Settings {
   }
 
   val cache =
-    new RedisModifiedLarAggregateCache(redisClientTask, redis.ttl)
+    new RedisCache(redisClientTask, redis.ttl)
 
   val query: QueryService =
-    new ModifiedLarBrowserService(repository, cache)
+    new DataBrowserQueryService(repository, cache)
 
   val fileCache = new S3FileService
 
@@ -144,8 +144,8 @@ trait DataBrowserHttpApi extends Settings {
           // GET /view/aggregations
           (path(Aggregations) & get) {
             extractYearsAndMsaAndStateAndCountyAndLEIBrowserFields { mandatoryFields =>
-               extractFieldsForAggregation { remainingQueryFields =>
-                 val allFields = mandatoryFields ++ remainingQueryFields
+              extractFieldsForAggregation { remainingQueryFields =>
+                val allFields = mandatoryFields ++ remainingQueryFields
                 log.info("Aggregations: " + allFields)
                 complete(
                   query
@@ -179,14 +179,26 @@ trait DataBrowserHttpApi extends Settings {
                 }
               }
             }
+          } ~
+          // GET /view/filers/<year>
+          (path("filers" / IntNumber) & get) { year =>
+            onComplete(query.fetchFilers(year).runToFuture) {
+              case Failure(ex) =>
+                log.error(ex, "Failed to obtain filer information")
+                complete(StatusCodes.InternalServerError)
+
+              case Success(filerResponse) =>
+                complete(StatusCodes.OK, filerResponse)
+            }
           }
       } ~
         pathPrefix("health") {
           onComplete(healthCheck.healthCheckStatus.runToFuture) {
-            case Success(hs @ HealthCheckResponse(Up, Up, Up)) =>
+            case Success(HealthCheckResponse(Up, Up, Up)) =>
               complete(StatusCodes.OK)
 
             case Success(hs) =>
+              log.warning(s"Service degraded cache=${hs.cache} db=${hs.db} s3=${hs.s3}")
               complete(StatusCodes.ServiceUnavailable)
 
             case Failure(ex) =>

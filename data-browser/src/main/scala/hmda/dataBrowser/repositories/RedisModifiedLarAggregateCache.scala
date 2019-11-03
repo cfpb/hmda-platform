@@ -1,52 +1,41 @@
 package hmda.dataBrowser.repositories
 
-import hmda.dataBrowser.models.QueryField
+import hmda.dataBrowser.models.{ FilerInstitutionResponse, QueryField, Statistic }
 import io.lettuce.core.api.async.RedisAsyncCommands
 import monix.eval.Task
 
 import scala.compat.java8.FutureConverters._
-import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.syntax._
 import cats.implicits._
+import io.circe.{ Decoder, Encoder }
 
 import scala.concurrent.duration.FiniteDuration
 
-class RedisModifiedLarAggregateCache(
-    redisClient: Task[RedisAsyncCommands[String, String]],
-    timeToLive: FiniteDuration)
-    extends ModifiedLarAggregateCache {
+class RedisCache(redisClient: Task[RedisAsyncCommands[String, String]], timeToLive: FiniteDuration) extends Cache {
   private val Prefix = "AGG"
 
-  private def findAndParse(key: String): Task[Option[Statistic]] = {
-    redisClient
-      .flatMap { redisClient =>
-        Task
-          .deferFuture(redisClient.get(key).toScala)
-          .map(Option(_))
-          .map(optResponse =>
-            optResponse.flatMap(stringResponse =>
-              decode[Statistic](stringResponse).toOption))
-      }
-      .onErrorFallbackTo(Task.now(None))
-  }
+  private def findAndParse[A: Decoder](key: String): Task[Option[A]] =
+    redisClient.flatMap { redisClient =>
+      Task
+        .deferFuture(redisClient.get(key).toScala)
+        .map(Option(_))
+        .map(optResponse => optResponse.flatMap(stringResponse => decode[A](stringResponse).toOption))
+    }.onErrorFallbackTo(Task.now(None))
 
-  private def updateAndSetTTL(key: String, value: Statistic): Task[Statistic] =
+  private def updateAndSetTTL[A: Encoder](key: String, value: A): Task[A] =
     (for {
       redisClient <- redisClient
-      _ <- Task.deferFuture(redisClient.set(key, value.asJson.noSpaces).toScala)
-      _ <- Task.deferFuture(
-        redisClient.pexpire(key, timeToLive.toMillis).toScala)
+      _           <- Task.deferFuture(redisClient.set(key, value.asJson.noSpaces).toScala)
+      _           <- Task.deferFuture(redisClient.pexpire(key, timeToLive.toMillis).toScala)
     } yield value).onErrorFallbackTo(Task.now(value))
 
   private def invalidateKey(key: String): Task[Unit] =
-    redisClient
-      .flatMap { redisClient =>
-        Task
-          .deferFuture(redisClient.pexpire(key, timeToLive.toMillis).toScala)
-          .map(_ => ())
-      }
-      .onErrorFallbackTo(Task.unit)
+    redisClient.flatMap { redisClient =>
+      Task
+        .deferFuture(redisClient.pexpire(key, timeToLive.toMillis).toScala)
+        .map(_ => ())
+    }.onErrorFallbackTo(Task.unit)
 
   private def key(queryFields: List[QueryField]): String = {
     // ensure we get a stable sorting order so we form keys correctly in Redis
@@ -59,14 +48,19 @@ class RedisModifiedLarAggregateCache(
 
   override def find(queryFields: List[QueryField]): Task[Option[Statistic]] = {
     val redisKey = key(queryFields)
-    findAndParse(redisKey)
+    findAndParse[Statistic](redisKey)
   }
 
-  override def update(queryFields: List[QueryField],
-                      statistic: Statistic): Task[Statistic] = {
+  override def find(year: Int): Task[Option[FilerInstitutionResponse]] =
+    findAndParse[FilerInstitutionResponse](year.toString)
+
+  override def update(queryFields: List[QueryField], statistic: Statistic): Task[Statistic] = {
     val redisKey = key(queryFields)
     updateAndSetTTL(redisKey, statistic)
   }
+
+  override def update(year: Int, filerInstitutionResponse: FilerInstitutionResponse): Task[FilerInstitutionResponse] =
+    updateAndSetTTL(year.toString, filerInstitutionResponse)
 
   override def invalidate(queryFields: List[QueryField]): Task[Unit] = {
     val redisKey = key(queryFields)

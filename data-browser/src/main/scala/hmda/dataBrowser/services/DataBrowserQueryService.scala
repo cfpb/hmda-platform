@@ -2,11 +2,14 @@ package hmda.dataBrowser.services
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.dataBrowser.models._
-import hmda.dataBrowser.repositories.{ ModifiedLarAggregateCache, ModifiedLarRepository }
+import hmda.dataBrowser.repositories.{ Cache, ModifiedLarRepository }
+import io.circe.Codec
 import monix.eval.Task
 
-class ModifiedLarBrowserService(repo: ModifiedLarRepository, cache: ModifiedLarAggregateCache) extends QueryService {
-  override def fetchData(queries: List[QueryField]): Source[ModifiedLarEntity, NotUsed] =
+class DataBrowserQueryService(repo: ModifiedLarRepository, cache: Cache) extends QueryService {
+  override def fetchData(
+    queries: List[QueryField]
+  ): Source[ModifiedLarEntity, NotUsed] =
     repo.find(queries)
 
   private def generateCombinations[T](x: List[List[T]]): List[List[T]] =
@@ -26,7 +29,18 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository, cache: ModifiedLarA
     generateCombinations(singleElementBrowserFields)
   }
 
-  override def fetchAggregate(fields: List[QueryField]): Task[Seq[Aggregation]] = {
+  private def cacheResult[A: Codec](cacheLookup: Task[Option[A]], onMiss: Task[A], cacheUpdate: A => Task[A]): Task[A] =
+    cacheLookup.flatMap {
+      case None =>
+        onMiss.flatMap(cacheUpdate)
+
+      case Some(a) =>
+        Task.now(a)
+    }
+
+  override def fetchAggregate(
+    fields: List[QueryField]
+  ): Task[Seq[Aggregation]] = {
     val optState: Option[QueryField] =
       fields.filter(_.values.nonEmpty).find(_.name == "state")
     val optMsaMd: Option[QueryField] =
@@ -46,25 +60,31 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository, cache: ModifiedLarA
       .filterNot(_.name == "lei")
 
     val queryFieldCombinations = permuteQueryFields(rest)
-      .map(eachList => optYear.toList ++ optState.toList ++ optMsaMd.toList ++ optCounty.toList ++ optLEI.toList ++ eachList)
+      .map(
+        eachList => optYear.toList ++ optState.toList ++ optMsaMd.toList ++ optCounty.toList ++ optLEI.toList ++ eachList
+      )
       .map(eachCombination => eachCombination.sortBy(field => field.name))
 
     Task.gatherUnordered {
       queryFieldCombinations.map { eachCombination =>
-        val fieldInfos = eachCombination.map(field => FieldInfo(field.name, field.values.mkString(",")))
-        cache
-          .find(eachCombination)
-          .flatMap {
-            case None =>
-              repo
-                .findAndAggregate(eachCombination)
-                .flatMap(stat => cache.update(eachCombination, stat))
-
-            case Some(stat) =>
-              Task.now(stat)
-          }
-          .map(statistic => Aggregation(statistic.count, statistic.sum, fieldInfos))
+        val fieldInfos = eachCombination.map(
+          field => FieldInfo(field.name, field.values.mkString(","))
+        )
+        cacheResult(
+          cacheLookup = cache.find(eachCombination),
+          onMiss = repo.findAndAggregate(eachCombination),
+          cacheUpdate = cache.update(eachCombination, _: Statistic)
+        ).map(
+            statistic => Aggregation(statistic.count, statistic.sum, fieldInfos)
+          )
       }
     }
   }
+
+  override def fetchFilers(year: Int): Task[FilerInstitutionResponse] =
+    cacheResult(
+      cacheLookup = cache.find(year),
+      onMiss = repo.filers(year).map(FilerInstitutionResponse(_)),
+      cacheUpdate = cache.update(year, _: FilerInstitutionResponse)
+    )
 }
