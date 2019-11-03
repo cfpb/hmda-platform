@@ -127,18 +127,25 @@ trait SubmissionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
     } yield (i, f, l)
   }
 
-  def submissionSummaryPath(oAuth2Authorization: OAuth2Authorization): Route = timedGet { uri =>
-    path("institutions" / Segment / "filings" / Year / "submissions" / IntNumber / "summary") { (lei, year, seqNr) =>
-      oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
-        getSubmissionSummary(lei, year, None, seqNr, uri)
-      }
-    } ~ path("institutions" / Segment / "filings" / Year / "quarter" / Quarter / "submissions" / IntNumber / "summary") {
-      (lei, year, quarter, seqNr) =>
-        oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
-          getSubmissionSummary(lei, year, Option(quarter), seqNr, uri)
+  def submissionSummaryPath(oAuth2Authorization: OAuth2Authorization): Route =
+    respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+      timedGet { uri =>
+        path("institutions" / Segment / "filings" / Year / "submissions" / IntNumber / "summary") { (lei, year, seqNr) =>
+          oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+            getSubmissionSummary(lei, year, None, seqNr, uri)
+          }
+        } ~ path("institutions" / Segment / "filings" / Year / "quarter" / Quarter / "submissions" / IntNumber / "summary") {
+          (lei, year, quarter, seqNr) =>
+            oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+              pathEndOrSingleSlash {
+                quarterlyFilingAllowed(lei, year) { _ =>
+                  getSubmissionSummary(lei, year, Option(quarter), seqNr, uri)
+                }
+              }
+            }
         }
+      }
     }
-  }
 
   private def getSubmissionSummary(lei: String, year: Int, quarter: Option[String], seqNr: Int, uri: Uri): Route = {
     val period                               = YearUtils.period(year, quarter)
@@ -192,7 +199,11 @@ trait SubmissionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
           }
         } ~ path("institutions" / Segment / "filings" / Year / "quarter" / Quarter / "submissions" / "latest") { (lei, year, quarter) =>
           oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
-            getLatestSubmission(lei, year, Option(quarter), uri)
+            pathEndOrSingleSlash {
+              quarterlyFilingAllowed(lei, year) { _ =>
+                getLatestSubmission(lei, year, Option(quarter), uri)
+              }
+            }
           }
         }
       }
