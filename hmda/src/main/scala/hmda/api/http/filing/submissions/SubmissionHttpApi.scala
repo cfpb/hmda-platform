@@ -138,7 +138,7 @@ trait SubmissionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
           (lei, year, quarter, seqNr) =>
             oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
               pathEndOrSingleSlash {
-                quarterlyFilingAllowed(lei, year) { _ =>
+                quarterlyFilingAllowed(lei, year) {
                   getSubmissionSummary(lei, year, Option(quarter), seqNr, uri)
                 }
               }
@@ -200,7 +200,7 @@ trait SubmissionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
         } ~ path("institutions" / Segment / "filings" / Year / "quarter" / Quarter / "submissions" / "latest") { (lei, year, quarter) =>
           oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
             pathEndOrSingleSlash {
-              quarterlyFilingAllowed(lei, year) { _ =>
+              quarterlyFilingAllowed(lei, year) {
                 getLatestSubmission(lei, year, Option(quarter), uri)
               }
             }

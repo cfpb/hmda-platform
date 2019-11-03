@@ -12,6 +12,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Sink, Source }
 import akka.util.{ ByteString, Timeout }
+import hmda.api.http.directives.QuarterlyFilingAuthorization
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{ cors, corsRejectionHandler }
 import hmda.api.http.directives.HmdaTimeDirectives
 import hmda.messages.submission.SubmissionProcessingCommands.{ GetHmdaValidationErrorState, GetVerificationStatus }
@@ -36,7 +37,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.matching.Regex
 import scala.util.{ Failure, Success }
 
-trait EditsHttpApi extends HmdaTimeDirectives {
+trait EditsHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -54,7 +55,11 @@ trait EditsHttpApi extends HmdaTimeDirectives {
           path("filings" / Year / "submissions" / IntNumber / "edits") { (year, seqNr) =>
             getEdits(lei, year, None, seqNr, uri)
           } ~ path("filings" / Year / "quarter" / Quarter / "submissions" / IntNumber / "edits") { (year, quarter, seqNr) =>
-            getEdits(lei, year, Option(quarter), seqNr, uri)
+            pathEndOrSingleSlash {
+              quarterlyFilingAllowed(lei, year) {
+                getEdits(lei, year, Option(quarter), seqNr, uri)
+              }
+            }
           }
         }
       }
@@ -110,7 +115,11 @@ trait EditsHttpApi extends HmdaTimeDirectives {
         path("filings" / Year / "submissions" / IntNumber / "edits" / "csv") { (year, seqNr) =>
           csvEditSummaryStream(lei, year, None, seqNr)
         } ~ path("filings" / Year / "quarter" / Quarter / "submissions" / IntNumber / "edits" / "csv") { (year, quarter, seqNr) =>
-          csvEditSummaryStream(lei, year, Option(quarter), seqNr)
+          pathEndOrSingleSlash {
+            quarterlyFilingAllowed(lei, year) {
+              csvEditSummaryStream(lei, year, Option(quarter), seqNr)
+            }
+          }
         }
       }
     }
@@ -136,7 +145,13 @@ trait EditsHttpApi extends HmdaTimeDirectives {
               getEditDetails(lei, year, None, seqNr, page, editName, uri)
             } ~ path("filings" / Year / "quarter" / Quarter / "submissions" / IntNumber / "edits" / editNameRegex) {
               (year, quarter, seqNr, editName) =>
-                getEditDetails(lei, year, Option(quarter), seqNr, page, editName, uri)
+                pathEndOrSingleSlash {
+                  oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+                    quarterlyFilingAllowed(lei, year) {
+                      getEditDetails(lei, year, Option(quarter), seqNr, page, editName, uri)
+                    }
+                  }
+                }
             }
           }
         }
