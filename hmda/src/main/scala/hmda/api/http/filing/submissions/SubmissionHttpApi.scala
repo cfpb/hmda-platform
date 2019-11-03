@@ -9,7 +9,7 @@ import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.{ ByteString, Timeout }
-import hmda.api.http.directives.HmdaTimeDirectives
+import hmda.api.http.directives.{ HmdaTimeDirectives, QuarterlyFilingAuthorization }
 import akka.http.scaladsl.server.Directives._
 import akka.stream.scaladsl.Sink
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
@@ -40,7 +40,7 @@ import hmda.utils.YearUtils
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
-trait SubmissionHttpApi extends HmdaTimeDirectives {
+trait SubmissionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -58,7 +58,11 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
           }
         } ~ path("institutions" / Segment / "filings" / Year / "quarter" / Quarter / "submissions") { (lei, year, quarter) =>
           oauth2Authorization.authorizeTokenWithLei(lei) { _ =>
-            createSubmissionIfValid(lei, year, Option(quarter), uri)
+            pathEndOrSingleSlash {
+              quarterlyFilingAllowed(lei, year) {
+                createSubmissionIfValid(lei, year, Option(quarter), uri)
+              }
+            }
           }
         }
       }
