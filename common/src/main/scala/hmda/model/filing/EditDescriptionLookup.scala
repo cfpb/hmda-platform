@@ -2,6 +2,8 @@ package hmda.model.filing
 
 import com.typesafe.config.ConfigFactory
 import hmda.model.ResourceUtils._
+import hmda.utils.YearUtils
+import hmda.utils.YearUtils.Period
 
 object EditDescriptionLookup {
 
@@ -12,7 +14,8 @@ object EditDescriptionLookup {
     config.getString("hmda.filing.2018.edits.descriptions.filename")
   val editDescriptionFileName2019 =
     config.getString("hmda.filing.2019.edits.descriptions.filename")
-
+  val editDescriptionFileName2020Quarter =
+    config.getString("hmda.filing.2020Quarter.edits.descriptions.filename")
   def editDescriptionList(file: Iterable[String]): Iterable[EditDescription] =
     file
       .drop(1)
@@ -27,27 +30,29 @@ object EditDescriptionLookup {
   def editDescriptionMap(file: Iterable[String]): Map[String, EditDescription] =
     editDescriptionList(file).map(e => (e.editName, e)).toMap
 
-  val editDescriptionLines2018 = fileLines(s"/$editDescriptionFileName2018")
-  val editDescriptionLines2019 = fileLines(s"/$editDescriptionFileName2019")
+  val editDescriptionLines2018        = fileLines(s"/$editDescriptionFileName2018")
+  val editDescriptionLines2019        = fileLines(s"/$editDescriptionFileName2019")
+  val editDescriptionLines2020Quarter = fileLines(s"/$editDescriptionFileName2020Quarter")
 
-  val editDescriptionMap2018 = editDescriptionMap(editDescriptionLines2018)
-  val editDescriptionMap2019 = editDescriptionMap(editDescriptionLines2019)
+  val editDescriptionMap2018        = editDescriptionMap(editDescriptionLines2018)
+  val editDescriptionMap2019        = editDescriptionMap(editDescriptionLines2019)
+  val editDescriptionMap2020Quarter = editDescriptionMap(editDescriptionLines2020Quarter)
 
-  def mapForYear(period: String): Map[String, EditDescription] =
+  def mapForPeriod(period: Period): Map[String, EditDescription] =
     period match {
-      case "2018" => editDescriptionMap2018
-      case "2019" => editDescriptionMap2019
-      case _      => editDescriptionMap2018
+      case Period(2018, None)    => editDescriptionMap2018
+      case Period(2019, None)    => editDescriptionMap2019
+      case Period(2020, Some(_)) => editDescriptionMap2020Quarter
+      case _                     => editDescriptionMap2019
     }
 
   def lookupDescription(editName: String, period: String = "2018"): String =
-    mapForYear(period)
+    mapForPeriod(YearUtils.parsePeriod(period).right.get)
       .getOrElse(editName, EditDescription("", "", List()))
       .description
 
-  //TODO (pass in the year from ValidationFlow)
-  def lookupFields(editName: String, period: String = "2018"): List[String] =
-    mapForYear(period)
+  def lookupFields(editName: String, period: Period = Period(2018, None)): List[String] =
+    mapForPeriod(period)
       .getOrElse(editName, EditDescription("", "", List()))
       .affectedFields
 
