@@ -132,15 +132,15 @@ object ValidationFlow {
     }.map { x =>
       x._2
         .leftMap(xs => {
-          addLarFieldInformation(x._1, xs.toList)
+          addLarFieldInformation(x._1, xs.toList, period)
         })
         .toEither
     }
   }
 
-  def addLarFieldInformation(lar: LoanApplicationRegister, errors: List[ValidationError]): List[ValidationError] =
+  def addLarFieldInformation(lar: LoanApplicationRegister, errors: List[ValidationError], period: Period): List[ValidationError] =
     errors.map(error => {
-      val affectedFields = EditDescriptionLookup.lookupFields(error.editName)
+      val affectedFields = EditDescriptionLookup.lookupFields(error.editName, period)
       val fieldMap =
         ListMap(affectedFields.map(field => (field, lar.valueOf(field))): _*)
       error.copyWithFields(fieldMap)
