@@ -27,6 +27,30 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
         }
     }
 
+  def authorizeTokenWithLeiQuarter(lei: String): Directive1[VerifiedToken] =
+    authorizeToken flatMap {
+      case t if t.lei.nonEmpty =>
+        if (runtimeMode == "dev") {
+          provide(t)
+        } else {
+          val leiList = t.lei.split(',')
+          if (leiList.contains(lei) && leiList.contains(lei + "-Q")) {
+            provide(t)
+          } else {
+            reject(AuthorizationFailedRejection)
+              .toDirective[Tuple1[VerifiedToken]]
+          }
+        }
+
+      case _ =>
+        if (runtimeMode == "dev") {
+          provide(VerifiedToken())
+        } else {
+          reject(AuthorizationFailedRejection)
+            .toDirective[Tuple1[VerifiedToken]]
+        }
+    }
+
   def authorizeTokenWithLei(lei: String): Directive1[VerifiedToken] =
     authorizeToken flatMap {
       case t if t.lei.nonEmpty =>
@@ -61,13 +85,15 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
             } else ""
 
             provide(
-              VerifiedToken(token,
-                            t.getId,
-                            t.getName,
-                            t.getPreferredUsername,
-                            t.getEmail,
-                            t.getResourceAccess().get(clientId).getRoles.asScala.toSeq,
-                            lei)
+              VerifiedToken(
+                token,
+                t.getId,
+                t.getName,
+                t.getPreferredUsername,
+                t.getEmail,
+                t.getResourceAccess().get(clientId).getRoles.asScala.toSeq,
+                lei
+              )
             )
           }.recover {
             case ex: Throwable =>

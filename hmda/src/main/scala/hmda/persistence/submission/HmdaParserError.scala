@@ -2,31 +2,30 @@ package hmda.persistence.submission
 
 import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.scaladsl.adapter._
 import akka.actor.typed.{ ActorRef, Behavior, TypedActorContext }
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.stream.ActorMaterializer
-import akka.util.{ ByteString, Timeout }
-import hmda.messages.submission.SubmissionProcessingCommands._
-import hmda.messages.submission.SubmissionProcessingEvents.{ HmdaRowParsedCount, HmdaRowParsedError, SubmissionProcessingEvent }
-import hmda.model.filing.submission.{ Parsed, ParsedWithErrors }
-import hmda.persistence.HmdaTypedPersistentActor
-import akka.actor.typed.scaladsl.adapter._
+import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
-import com.typesafe.config.ConfigFactory
-import hmda.model.filing.submissions.PaginatedResource
-import hmda.model.processing.state.HmdaParserErrorState
-import HmdaProcessingUtils.{ readRawData, updateSubmissionStatus }
+import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
+import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Sink, Source }
 import akka.stream.typed.scaladsl.ActorFlow
+import akka.util.{ ByteString, Timeout }
+import com.typesafe.config.ConfigFactory
+import hmda.messages.submission.SubmissionProcessingCommands._
+import hmda.messages.submission.SubmissionProcessingEvents.{ HmdaRowParsedCount, HmdaRowParsedError, SubmissionProcessingEvent }
+import hmda.model.filing.submission.{ Parsed, ParsedWithErrors, SubmissionId }
+import hmda.model.filing.submissions.PaginatedResource
+import hmda.model.processing.state.HmdaParserErrorState
 import hmda.parser.filing.ParserFlow._
+import hmda.persistence.HmdaTypedPersistentActor
+import hmda.persistence.submission.HmdaProcessingUtils.{ readRawData, updateSubmissionStatus }
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.util.{ Failure, Success }
-import hmda.query.HmdaQuery._
 
 object HmdaParserError extends HmdaTypedPersistentActor[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaParserErrorState] {
 
@@ -67,11 +66,7 @@ object HmdaParserError extends HmdaTypedPersistentActor[SubmissionProcessingComm
           .zip(Source.fromIterator(() => Iterator.from(1)))
           .collect {
             case ((Left(errors), line), rowNumber) =>
-              PersistHmdaRowParsedError(
-                rowNumber,
-                estimateULI(line),
-                errors.map(x => FieldParserError(x.fieldName, x.inputValue)),
-                None)
+              PersistHmdaRowParsedError(rowNumber, estimateULI(line), errors.map(x => FieldParserError(x.fieldName, x.inputValue)), None)
           }
           .via(
             ActorFlow.ask(ctx.asScala.self)(
@@ -147,5 +142,8 @@ object HmdaParserError extends HmdaTypedPersistentActor[SubmissionProcessingComm
       "The ULI could not be identified."
     }
   }
+
+  def selectHmdaParserError(sharding: ClusterSharding, submissionId: SubmissionId): EntityRef[SubmissionProcessingCommand] =
+    sharding.entityRefFor(HmdaParserError.typeKey, s"${HmdaParserError.name}-${submissionId.toString}")
 
 }

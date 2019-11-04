@@ -34,7 +34,6 @@ object YearUtils {
     else if (raw.length == 2) Period(raw(0).toInt, Option(raw(1))).asRight
     else new Exception(s"Failed to parse invalid period: $period").asLeft
   }
-
   def isQuarterlyFiling(submissionId: SubmissionId): Boolean = {
     val period = parsePeriod(submissionId.period).right.get
     period.quarter match {

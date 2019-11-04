@@ -3,57 +3,45 @@ package hmda.api.http.filing.submissions
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.event.{LoggingAdapter, NoLogging}
-import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
+import akka.event.{ LoggingAdapter, NoLogging }
+import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
 import akka.util.Timeout
 import hmda.persistence.AkkaCassandraPersistenceSpec
 import org.scalatest.MustMatchers
 import akka.actor.typed.scaladsl.adapter._
-import akka.cluster.typed.{Cluster, Join}
+import akka.cluster.typed.{ Cluster, Join }
 import akka.http.scaladsl.model.StatusCodes
 import akka.testkit._
 import hmda.messages.filing.FilingCommands.CreateFiling
 import hmda.messages.filing.FilingEvents.FilingEvent
 import hmda.messages.institution.InstitutionCommands.CreateInstitution
-import hmda.messages.institution.InstitutionEvents.{
-  InstitutionCreated,
-  InstitutionEvent
-}
+import hmda.messages.institution.InstitutionEvents.{ InstitutionCreated, InstitutionEvent }
 import hmda.model.filing.Filing
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators.institutionGen
 import hmda.model.filing.FilingGenerator._
-import hmda.model.filing.submission.{
-  Submission,
-  SubmissionId,
-  VerificationStatus
-}
+import hmda.model.filing.submission.{ Submission, SubmissionId, VerificationStatus }
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.auth.{KeycloakTokenVerifier, OAuth2Authorization}
+import hmda.auth.{ KeycloakTokenVerifier, OAuth2Authorization }
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
-import hmda.persistence.submission.{HmdaValidationError, SubmissionPersistence}
+import hmda.persistence.submission.{ HmdaValidationError, SubmissionPersistence }
 import org.keycloak.adapters.KeycloakDeploymentBuilder
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-class SubmissionHttpApiSpec
-  extends AkkaCassandraPersistenceSpec
-    with MustMatchers
-    with SubmissionHttpApi
-    with ScalatestRouteTest {
+class SubmissionHttpApiSpec extends AkkaCassandraPersistenceSpec with MustMatchers with SubmissionHttpApi with ScalatestRouteTest {
 
   val duration: FiniteDuration = 10.seconds
 
-  implicit val routeTimeout: RouteTestTimeout = RouteTestTimeout(
-    duration.dilated)
+  implicit val routeTimeout: RouteTestTimeout = RouteTestTimeout(duration.dilated)
 
   override implicit val typedSystem: ActorSystem[_] = system.toTyped
-  override val log: LoggingAdapter = NoLogging
-  val ec: ExecutionContext = system.dispatcher
-  override implicit val timeout: Timeout = Timeout(duration)
-  override val sharding: ClusterSharding = ClusterSharding(typedSystem)
+  override val log: LoggingAdapter                  = NoLogging
+  val ec: ExecutionContext                          = system.dispatcher
+  override implicit val timeout: Timeout            = Timeout(duration)
+  override val sharding: ClusterSharding            = ClusterSharding(typedSystem)
 
   val oAuth2Authorization = OAuth2Authorization(
     log,
@@ -91,11 +79,8 @@ class SubmissionHttpApiSpec
     HmdaValidationError.startShardRegion(sharding)
 
     val institutionPersistence =
-      sharding.entityRefFor(
-        InstitutionPersistence.typeKey,
-        s"${InstitutionPersistence.name}-${sampleInstitution.LEI}")
-    institutionPersistence ! CreateInstitution(sampleInstitution,
-      institutionProbe.ref)
+      sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-${sampleInstitution.LEI}")
+    institutionPersistence ! CreateInstitution(sampleInstitution, institutionProbe.ref)
     institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))
 
     val filingPersistence =
@@ -112,15 +97,13 @@ class SubmissionHttpApiSpec
     s"/institutions/${sampleInstitution.LEI}/filings/$period/submissions"
   val noInstitutionUrl = s"/institutions/xxx/filings/$period/submissions"
   val noFilingUrl =
-    s"/institutions/${sampleInstitution.LEI}/filings/2017/submissions"
+    s"/institutions/${sampleInstitution.LEI}/filings/2019/submissions"
 
   "Submissions HTTP API" must {
     "create new submission" in {
       Post(url) ~> submissionRoutes(oAuth2Authorization) ~> check {
         status mustBe StatusCodes.Created
-        responseAs[Submission].id mustBe SubmissionId(sampleInstitution.LEI,
-          period,
-          1)
+        responseAs[Submission].id mustBe SubmissionId(sampleInstitution.LEI, period, 1)
       }
     }
     "fail to create a new submission if institutions does not exist" in {
@@ -146,9 +129,7 @@ class SubmissionHttpApiSpec
         responseAs[Submission].id.sequenceNumber mustBe 2
 
         import io.circe.generic.auto._
-        responseAs[VerificationStatus] mustBe VerificationStatus(
-          qualityVerified = false,
-          macroVerified = false)
+        responseAs[VerificationStatus] mustBe VerificationStatus(qualityVerified = false, macroVerified = false)
       }
     }
   }

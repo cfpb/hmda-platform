@@ -12,6 +12,8 @@ import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.institution.HUD
 import hmda.model.validation.{ EmptyMacroValidationError, MacroValidationError, ValidationError }
 import hmda.util.SourceUtils._
+import hmda.utils.YearUtils
+import hmda.utils.YearUtils.Period
 import hmda.validation.{ AS, EC, MAT }
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -47,11 +49,13 @@ object MacroValidationFlow {
   type MacroCheck =
     Source[LoanApplicationRegister, NotUsed] => Future[ValidationError]
 
-  def selectedValidations(totalCount: Int, year: Int, tsSource: Source[TransmittalSheet, NotUsed])(implicit system: ActorSystem,
-                                                                                                   mat: ActorMaterializer,
-                                                                                                   ec: ExecutionContext): List[MacroCheck] =
-    year match {
-      case 2018 =>
+  def selectedValidations(
+    totalCount: Int,
+    period: Period,
+    tsSource: Source[TransmittalSheet, NotUsed]
+  )(implicit system: ActorSystem, mat: ActorMaterializer, ec: ExecutionContext): List[MacroCheck] =
+    period match {
+      case Period(2018, _) =>
         List(
           Q634,
           Q635(totalCount),
@@ -61,7 +65,21 @@ object MacroValidationFlow {
           Q639,
           Q640
         )
-      case 2019 =>
+
+      case Period(2019, _) =>
+        List(
+          Q634,
+          Q635(totalCount),
+          Q636(totalCount),
+          Q637(totalCount),
+          Q638,
+          Q639,
+          Q640,
+          Q646,
+          Q647(tsSource)
+        )
+
+      case Period(2020, _) =>
         List(
           Q634,
           Q635(totalCount),
@@ -82,21 +100,24 @@ object MacroValidationFlow {
     submissionId: SubmissionId
   ): Future[List[ValidationError]] = {
     val fTotal: Future[Int] = count(larSource)
+    val period              = YearUtils.parsePeriod(submissionId.period).right.get
 
     fTotal.flatMap { totalCount =>
       val validations: List[MacroCheck] =
-        selectedValidations(totalCount, submissionId.period.toInt, tsSource)
+        selectedValidations(totalCount, period, tsSource)
       val fErrors: Future[List[ValidationError]] =
         Future.sequence(validations.map(eachFn => eachFn(larSource)))
       fErrors.map(errors => errors.filter(e => e != EmptyMacroValidationError()))
     }
   }
 
-  def macroEdit[as: AS, mat: MAT, ec: EC](source: Source[LoanApplicationRegister, NotUsed],
-                                          totalCount: Int,
-                                          editRatio: Double,
-                                          editName: String,
-                                          predicate: LarPredicate): Future[ValidationError] =
+  def macroEdit[as: AS, mat: MAT, ec: EC](
+    source: Source[LoanApplicationRegister, NotUsed],
+    totalCount: Int,
+    editRatio: Double,
+    editName: String,
+    predicate: LarPredicate
+  ): Future[ValidationError] =
     for {
       editCount <- count(
                     source
@@ -108,9 +129,11 @@ object MacroValidationFlow {
       else EmptyMacroValidationError()
     }
 
-  def macroEditAny[as: AS, mat: MAT, ec: EC](source: Source[LoanApplicationRegister, NotUsed],
-                                             editName: String,
-                                             predicate: LarPredicate): Future[ValidationError] =
+  def macroEditAny[as: AS, mat: MAT, ec: EC](
+    source: Source[LoanApplicationRegister, NotUsed],
+    editName: String,
+    predicate: LarPredicate
+  ): Future[ValidationError] =
     for {
       editCount <- count(
                     source
@@ -278,7 +301,7 @@ object MacroValidationFlow {
           Try(lar.income.toInt) match {
             case Success(_) => true
             case Failure(_) => false
-        }
+          }
       )
     )
 
@@ -286,12 +309,12 @@ object MacroValidationFlow {
   def exemptionTaken: LarPredicate =
     (lar: LoanApplicationRegister) => {
       lar.applicationSubmission == ApplicationSubmissionExempt || lar.ausResult.ausResult1 == AUSResultExempt || lar.ausResult.ausResult2 == AUSResultExempt || lar.ausResult.ausResult3 == AUSResultExempt || lar.ausResult.ausResult4 == AUSResultExempt ||
-      lar.ausResult.ausResult5 == AUSResultExempt || lar.AUS.aus1 == AUSExempt || lar.AUS.aus2 == AUSExempt || lar.AUS.aus3 == AUSExempt || lar.AUS.aus4 == AUSExempt || lar.AUS.aus5 == AUSExempt ||
-      lar.nonAmortizingFeatures.balloonPayment == BalloonPaymentExempt || lar.businessOrCommercialPurpose == ExemptBusinessOrCommercialPurpose || lar.applicant.creditScoreType == CreditScoreExempt || lar.coApplicant.creditScoreType == CreditScoreExempt ||
-      lar.denial.denialReason1 == ExemptDenialReason || lar.denial.denialReason2 == ExemptDenialReason || lar.denial.denialReason3 == ExemptDenialReason || lar.denial.denialReason4 == ExemptDenialReason ||
-      lar.nonAmortizingFeatures.interestOnlyPayments == InterestOnlyPaymentExempt || lar.lineOfCredit == ExemptLineOfCredit || lar.property.manufacturedHomeLandPropertyInterest == ManufacturedHomeLoanPropertyInterestExempt ||
-      lar.property.manufacturedHomeSecuredProperty == ManufacturedHomeSecuredExempt || lar.reverseMortgage == ExemptMortgageType || lar.nonAmortizingFeatures.negativeAmortization == NegativeAmortizationExempt || lar.nonAmortizingFeatures.otherNonAmortizingFeatures == OtherNonAmortizingFeaturesExempt ||
-      lar.payableToInstitution == PayableToInstitutionExempt
+        lar.ausResult.ausResult5 == AUSResultExempt || lar.AUS.aus1 == AUSExempt || lar.AUS.aus2 == AUSExempt || lar.AUS.aus3 == AUSExempt || lar.AUS.aus4 == AUSExempt || lar.AUS.aus5 == AUSExempt ||
+        lar.nonAmortizingFeatures.balloonPayment == BalloonPaymentExempt || lar.businessOrCommercialPurpose == ExemptBusinessOrCommercialPurpose || lar.applicant.creditScoreType == CreditScoreExempt || lar.coApplicant.creditScoreType == CreditScoreExempt ||
+        lar.denial.denialReason1 == ExemptDenialReason || lar.denial.denialReason2 == ExemptDenialReason || lar.denial.denialReason3 == ExemptDenialReason || lar.denial.denialReason4 == ExemptDenialReason ||
+        lar.nonAmortizingFeatures.interestOnlyPayments == InterestOnlyPaymentExempt || lar.lineOfCredit == ExemptLineOfCredit || lar.property.manufacturedHomeLandPropertyInterest == ManufacturedHomeLoanPropertyInterestExempt ||
+        lar.property.manufacturedHomeSecuredProperty == ManufacturedHomeSecuredExempt || lar.reverseMortgage == ExemptMortgageType || lar.nonAmortizingFeatures.negativeAmortization == NegativeAmortizationExempt || lar.nonAmortizingFeatures.otherNonAmortizingFeatures == OtherNonAmortizingFeaturesExempt ||
+        lar.payableToInstitution == PayableToInstitutionExempt
     }
 
 }

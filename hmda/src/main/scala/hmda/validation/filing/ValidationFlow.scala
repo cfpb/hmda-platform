@@ -16,6 +16,7 @@ import hmda.parser.filing.ts.TsCsvParser
 import hmda.validation._
 import hmda.validation.context.ValidationContext
 import hmda.util.streams.FlowUtils._
+import hmda.utils.YearUtils.Period
 import hmda.validation.engine._
 
 import scala.collection.immutable._
@@ -46,7 +47,8 @@ object ValidationFlow {
     validationContext: ValidationContext
   ): Flow[ByteString, HmdaValidated[TransmittalSheet], NotUsed] = {
     val currentYear      = config.getInt("hmda.filing.current")
-    val validationEngine = selectTsEngine(validationContext.filingYear.getOrElse(currentYear))
+    val period           = validationContext.filingPeriod.fold(Period(currentYear, None))(identity)
+    val validationEngine = selectTsEngine(period.year, period.quarter)
     Flow[ByteString]
       .via(framing("\n"))
       .map(_.utf8String)
@@ -81,7 +83,9 @@ object ValidationFlow {
     validationContext: ValidationContext
   ): Either[List[ValidationError], TransmittalLar] = {
     val currentYear      = config.getInt("hmda.filing.current")
-    val validationEngine = selectTsLarEngine(validationContext.filingYear.getOrElse(currentYear))
+    val period           = validationContext.filingPeriod.fold(Period(currentYear, None))(identity)
+    val validationEngine = selectTsLarEngine(period.year, period.quarter)
+
     val errors = checkType match {
       case "all" =>
         validationEngine.checkAll(tsLar, tsLar.ts.LEI, validationContext, TsValidationError)
@@ -99,38 +103,44 @@ object ValidationFlow {
 
   def validateLarFlow(checkType: String, ctx: ValidationContext): Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
     val currentYear      = config.getInt("hmda.filing.current")
-    val validationEngine = selectLarEngine(ctx.filingYear.getOrElse(currentYear))
+    val period           = ctx.filingPeriod.fold(Period(currentYear, None))(identity)
+    val validationEngine = selectLarEngine(period.year, period.quarter)
     collectLar.map { lar =>
       def errors =
         checkType match {
           case "all" =>
             validationEngine.checkAll(lar, lar.loan.ULI, ctx, LarValidationError)
+
           case "syntactical" =>
             validationEngine
               .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
+
           case "validity" =>
             validationEngine.checkValidity(lar, lar.loan.ULI, LarValidationError)
+
           case "syntactical-validity" =>
             validationEngine
               .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
               .combine(
                 validationEngine.checkValidity(lar, lar.loan.ULI, LarValidationError)
               )
-          case "quality" => validationEngine.checkQuality(lar, lar.loan.ULI)
+
+          case "quality" =>
+            validationEngine.checkQuality(lar, lar.loan.ULI)
         }
       (lar, errors)
     }.map { x =>
       x._2
         .leftMap(xs => {
-          addLarFieldInformation(x._1, xs.toList)
+          addLarFieldInformation(x._1, xs.toList, period)
         })
         .toEither
     }
   }
 
-  def addLarFieldInformation(lar: LoanApplicationRegister, errors: List[ValidationError]): List[ValidationError] =
+  def addLarFieldInformation(lar: LoanApplicationRegister, errors: List[ValidationError], period: Period): List[ValidationError] =
     errors.map(error => {
-      val affectedFields = EditDescriptionLookup.lookupFields(error.editName)
+      val affectedFields = EditDescriptionLookup.lookupFields(error.editName, period)
       val fieldMap =
         ListMap(affectedFields.map(field => (field, lar.valueOf(field))): _*)
       error.copyWithFields(fieldMap)
@@ -166,9 +176,9 @@ object ValidationFlow {
 
   def validateAsyncLarFlow[as: AS, mat: MAT, ec: EC](
     checkType: String,
-    year: Int
+    period: Period
   ): Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
-    val validationEngine = selectLarEngine(year)
+    val validationEngine = selectLarEngine(period.year, period.quarter)
     collectLar
       .mapAsync(1) { lar =>
         val futValidation: Future[HmdaValidation[LoanApplicationRegister]] =
