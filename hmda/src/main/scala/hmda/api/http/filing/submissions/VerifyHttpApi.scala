@@ -56,10 +56,8 @@ trait VerifyHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
                 verify(lei, year, None, seqNr, editType, editsVerification.verified, uri)
               } ~ path("quarter" / Quarter / "submissions" / IntNumber / "edits" / editTypeRegex) { (quarter, seqNr, editType) =>
                 pathEndOrSingleSlash {
-                  oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
-                    quarterlyFilingAllowed(lei, year) {
-                      verify(lei, year, Option(quarter), seqNr, editType, editsVerification.verified, uri)
-                    }
+                  quarterlyFilingAllowed(lei, year) {
+                    verify(lei, year, Option(quarter), seqNr, editType, editsVerification.verified, uri)
                   }
                 }
               }

@@ -47,10 +47,8 @@ trait ParseErrorHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
             checkSubmission(lei, year, None, seqNr, page, uri)
           } ~ path("quarter" / Quarter / "submissions" / IntNumber / "parseErrors") { (quarter, seqNr) =>
             pathEndOrSingleSlash {
-              oauth2Authorization.authorizeTokenWithLei(lei) { _ =>
-                quarterlyFilingAllowed(lei, year) {
-                  checkSubmission(lei, year, Option(quarter), seqNr, page, uri)
-                }
+              quarterlyFilingAllowed(lei, year) {
+                checkSubmission(lei, year, Option(quarter), seqNr, page, uri)
               }
             }
           }

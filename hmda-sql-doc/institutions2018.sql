@@ -43,7 +43,8 @@ CREATE TABLE hmda_user.institutions2018 (
     other_lender_code integer NOT NULL,
     topholder_id_rssd integer NOT NULL,
     topholder_name character varying NOT NULL,
-    hmda_filer boolean DEFAULT false NOT NULL
+    hmda_filer boolean DEFAULT false NOT NULL,
+    quarterly_filer boolean default false NOT NULL
 );
 
 

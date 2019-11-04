@@ -146,10 +146,8 @@ trait EditsHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization 
             } ~ path("filings" / Year / "quarter" / Quarter / "submissions" / IntNumber / "edits" / editNameRegex) {
               (year, quarter, seqNr, editName) =>
                 pathEndOrSingleSlash {
-                  oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
-                    quarterlyFilingAllowed(lei, year) {
-                      getEditDetails(lei, year, Option(quarter), seqNr, page, editName, uri)
-                    }
+                  quarterlyFilingAllowed(lei, year) {
+                    getEditDetails(lei, year, Option(quarter), seqNr, page, editName, uri)
                   }
                 }
             }

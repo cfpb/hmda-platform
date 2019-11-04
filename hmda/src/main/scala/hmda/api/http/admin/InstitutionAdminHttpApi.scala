@@ -6,7 +6,6 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import akka.http.scaladsl.server.Directives._
 import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{ HttpResponse, StatusCodes, Uri }
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Route

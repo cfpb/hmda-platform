@@ -37,7 +37,8 @@ This endpoint deals with institution events. The identifier for each entity is t
         "idRssd" : 442825905,
         "name" : "TopHolder Name"
       },
-      "hmdaFiler" : true
+      "hmdaFiler" : true,
+      "quarterlyFiler": false
     }
     ```
 
@@ -76,7 +77,8 @@ This endpoint deals with institution events. The identifier for each entity is t
             "idRssd" : 442825905,
             "name" : "TopHolder Name"
           },
-          "hmdaFiler" : true
+          "hmdaFiler" : true,
+          "quarterlyFiler" : false
         }
         ```
 

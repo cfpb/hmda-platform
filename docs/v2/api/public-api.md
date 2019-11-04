@@ -39,7 +39,8 @@ This documentation describes de public HMDA Platform HTTP API
            "idRssd" : 442825905,
            "name" : "TopHolder Name"
          },
-         "hmdaFiler" : true
+         "hmdaFiler" : true,
+         "quarterlyFiler" : false
        } 
      ]
    } 
@@ -79,7 +80,9 @@ This documentation describes de public HMDA Platform HTTP API
            "idRssd" : "442825905",
            "name" : "TopHolder Name"
          },
-         "hmdaFiler" : true
+         "hmdaFiler" : true,
+         "quarterlyFiler" : false
+  ,
        } 
      ]
    } 
@@ -118,7 +121,8 @@ This documentation describes de public HMDA Platform HTTP API
         "idRssd" : 442825905,
         "name" : "TopHolder Name"
       },
-      "hmdaFiler" : true
+      "hmdaFiler" : true,
+      "quarterlyFiler" : false
     }     
     ```
 

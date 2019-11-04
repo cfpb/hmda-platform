@@ -43,7 +43,7 @@ CREATE TABLE hmda_user.institutions2020 (
     topholder_id_rssd integer NOT NULL,
     topholder_name character varying NOT NULL,
     hmda_filer boolean NOT NULL,
-    quarterly_filer boolean NOT NULL
+    quarterly_filer boolean default false NOT NULL,
 );
 
 
