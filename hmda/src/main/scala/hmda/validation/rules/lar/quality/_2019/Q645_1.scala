@@ -11,6 +11,10 @@ object Q645_1 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "Q645"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult =
-    lar.loan.amount is greaterThanOrEqual(500)
+
+
+  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+    val loanAmount = lar.loan.amount
+    loanAmount is greaterThanOrEqual(500)
+  }
 }
