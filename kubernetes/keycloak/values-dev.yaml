@@ -1,7 +1,7 @@
 init:
   image:
     repository: alpine
-    tag: 3.7
+    tag: 3.10.3
     pullPolicy: IfNotPresent
 
 keycloak:
@@ -9,7 +9,7 @@ keycloak:
 
   image:
     repository: jboss/keycloak
-    tag: 4.2.1.Final
+    tag: 7.0.0
     pullPolicy: Always
 
     ## Optionally specify an array of imagePullSecrets.
@@ -61,10 +61,11 @@ keycloak:
   extraContainers: |
 
   ## Custom script that is run before Keycloak is started.
-  preStartScript: |
+  startupScripts:
+    script.sh: |
         #!/bin/bash
 
-        LOGIN_THEME=keycloak/themes/hmda/login/theme.properties
+        LOGIN_THEME=/opt/jboss/keycloak/themes/hmda/login/theme.properties
 
         # Update Keycloak config files based on envvars
         if [ -z ${INSTITUTION_SEARCH_URI+x} ]; then
@@ -118,7 +119,7 @@ keycloak:
     - name: JDBC_PARAMS
       value: "ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory"
     - name: FILING_APP_URL
-      value: "/filing/2018/"
+      value: "/filing/2018"
     - name: INSTITUTION_SEARCH_URI
       value: "/v2/public"
     - name: INSTITUTION_SEARCH_VALIDATE_SSL
@@ -333,7 +334,12 @@ postgresql:
     enabled: false
 
 test:
+  enabled: true
   image:
     repository: unguiculus/docker-python3-phantomjs-selenium
     tag: v1
     pullPolicy: IfNotPresent
+  securityContext:
+    runAsUser: 1000
+    fsGroup: 1000
+    runAsNonRoot: true
