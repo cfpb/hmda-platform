@@ -82,7 +82,7 @@ trait TsValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpAp
         checkSyntactical(ts, ts.LEI, ctx, TsValidationError)
 
       case "validity" =>
-        checkValidity(ts, ts.LEI, TsValidationError)
+        checkValidity(ts, ts.LEI, ctx, TsValidationError)
     }
 
     val maybeErrors = validation.leftMap(xs => xs.toList).toEither

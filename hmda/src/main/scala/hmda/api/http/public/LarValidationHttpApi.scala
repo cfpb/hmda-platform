@@ -76,7 +76,7 @@ trait LarValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpA
       case "all" => checkAll(lar, lar.loan.ULI, ctx, LarValidationError)
       case "syntactical" =>
         checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
-      case "validity" => checkValidity(lar, lar.loan.ULI, LarValidationError)
+      case "validity" => checkValidity(lar, lar.loan.ULI, ctx, LarValidationError)
       case "quality"  => checkQuality(lar, lar.loan.ULI)
     }
 

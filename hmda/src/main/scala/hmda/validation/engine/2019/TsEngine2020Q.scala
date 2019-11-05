@@ -2,7 +2,7 @@ package hmda.validation.engine
 
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.validation.context.ValidationContext
-import hmda.validation.rules.ts.syntactical.{ S300, S302, S303 }
+import hmda.validation.rules.ts.syntactical.{ S300, S303 }
 import hmda.validation.rules.ts.validity._
 
 private[engine] object TsEngine2020Q extends ValidationEngine[TransmittalSheet] {
@@ -13,7 +13,7 @@ private[engine] object TsEngine2020Q extends ValidationEngine[TransmittalSheet] 
     S303.withContext(ctx)
   )
 
-  override val validityChecks = Vector(
+  override def validityChecks(ctx: ValidationContext) = Vector(
     V600,
     V601,
     V602,
@@ -21,7 +21,8 @@ private[engine] object TsEngine2020Q extends ValidationEngine[TransmittalSheet] 
     V604,
     V605,
     V606,
-    V607
+    V607,
+    V718.withContext(ctx)
   )
 
 }

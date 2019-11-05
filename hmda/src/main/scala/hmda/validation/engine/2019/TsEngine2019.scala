@@ -13,7 +13,7 @@ private[engine] object TsEngine2019 extends ValidationEngine[TransmittalSheet] {
     S303.withContext(ctx)
   )
 
-  override val validityChecks = Vector(
+  override def validityChecks(ctx: ValidationContext) = Vector(
     V600,
     V601,
     V602,

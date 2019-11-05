@@ -14,7 +14,7 @@ private[engine] trait ValidationEngine[A] extends ValidationApi[A] {
   def syntacticalChecks(ctx: ValidationContext): Vector[EditCheck[A]] =
     Vector.empty
 
-  def validityChecks: Vector[EditCheck[A]] = Vector.empty
+  def validityChecks(ctx: ValidationContext): Vector[EditCheck[A]] = Vector.empty
 
   def qualityChecks: Vector[EditCheck[A]] = Vector.empty
 
@@ -25,7 +25,7 @@ private[engine] trait ValidationEngine[A] extends ValidationApi[A] {
   def checkAll(a: A, id: String, ctx: ValidationContext, validationErrorEntity: ValidationErrorEntity): HmdaValidation[A] = {
     val validations = Vector(
       checkSyntactical(a, id, ctx, validationErrorEntity),
-      checkValidity(a, id, validationErrorEntity),
+      checkValidity(a, id, ctx, validationErrorEntity),
       checkQuality(a, id)
     )
 
@@ -39,11 +39,11 @@ private[engine] trait ValidationEngine[A] extends ValidationApi[A] {
       runChecks(a, syntacticalChecks(ctx), Syntactical, validationErrorEntity, id)
     }
 
-  def checkValidity(a: A, id: String, validationErrorEntity: ValidationErrorEntity): HmdaValidation[A] =
-    if (validityChecks.isEmpty) {
+  def checkValidity(a: A, id: String, ctx: ValidationContext, validationErrorEntity: ValidationErrorEntity): HmdaValidation[A] =
+    if (validityChecks(ctx).isEmpty) {
       Validated.valid(a)
     } else {
-      runChecks(a, validityChecks, Validity, validationErrorEntity, id)
+      runChecks(a, validityChecks(ctx), Validity, validationErrorEntity, id)
     }
 
   def checkQuality(a: A, id: String): HmdaValidation[A] =
