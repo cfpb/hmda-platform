@@ -3,7 +3,7 @@ package hmda.api.http.directives
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.model.StatusCodes.BadRequest
+import akka.http.scaladsl.model.StatusCodes.{ BadRequest, Forbidden }
 import akka.http.scaladsl.server._
 import akka.http.scaladsl.server.Directives._
 import akka.util.Timeout
@@ -40,7 +40,7 @@ trait QuarterlyFilingAuthorization {
 
         case Success(Some(i)) =>
           log.info(s"institution for LEI: $lei and year: $year does not have permissions to do quarterly filing")
-          complete(BadRequest, ErrorResponse(BadRequest.intValue, "Institution is not permitted to do quarterly filing", path))
+          complete(Forbidden, ErrorResponse(BadRequest.intValue, "Institution is not permitted to do quarterly filing", path))
       }
     }
   }
