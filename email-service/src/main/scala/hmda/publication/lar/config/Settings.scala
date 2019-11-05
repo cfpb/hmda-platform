@@ -2,6 +2,7 @@ package hmda.publication.lar.config
 
 import akka.actor.{ ActorSystem => UntypedActorSystem }
 import com.typesafe.config.Config
+import hmda.messages.pubsub.HmdaGroups
 
 class Settings(config: Config) {
   def this(system: UntypedActorSystem) = this(system.settings.config)
@@ -18,8 +19,6 @@ class Settings(config: Config) {
 
   object kafka {
     val bootstrapServers: String = config.getString("kafka.hosts")
-    val topic: String            = config.getString("kafka.topic")
-    val groupId: String          = config.getString("kafka.group-id")
     val commitSettings: Config   = config.getConfig("kafka.commit")
   }
 }
