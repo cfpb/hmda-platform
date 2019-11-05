@@ -58,8 +58,8 @@ trait TransmittalSheetComponent {
       ) <> (TransmittalSheetEntity.tupled, TransmittalSheetEntity.unapply)
   }
 
-  //only used for setup - TransmittalSheetSetup
-  val transmittalSheetTable = TableQuery[TransmittalSheetTable]((tag: Tag) => new TransmittalSheetTable(tag, "transmittalsheet2020"))
+  //only used for setup (testing) - TransmittalSheetSetup
+  val transmittalSheetTable = TableQuery[TransmittalSheetTable]((tag: Tag) => new TransmittalSheetTable(tag, "transmittalsheet2019"))
 
   class TransmittalSheetRepository(val config: DatabaseConfig[JdbcProfile], val tableName: String)
       extends TableRepository[TransmittalSheetTable, String] {
