@@ -166,8 +166,10 @@ class PostgresModifiedLarRepository(tableName: String, config: DatabaseConfig[Jd
   override def filers(year: Int): Task[Seq[FilerInformation]] = {
     val query =
       sql"""
-        SELECT lei, respondent_name, filing_year
-        FROM #$tableName
+        SELECT distinct(a.lei), b.respondent_name, a.filing_year
+        FROM #$tableName a
+        INNER JOIN institutions2018 b
+        ON a.lei and b.lei
         WHERE filing_year = $year 
          """.as[FilerInformation]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
