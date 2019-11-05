@@ -3,7 +3,7 @@ package hmda.institution.api.http
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.{HttpResponse, StatusCodes, Uri}
+import akka.http.scaladsl.model.{ HttpResponse, StatusCodes, Uri }
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
@@ -19,12 +19,10 @@ import hmda.model.institution.Institution
 import hmda.utils.YearUtils._
 import io.circe.generic.auto._
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.{ Failure, Success }
 
-trait InstitutionQueryHttpApi
-    extends HmdaTimeDirectives
-    with InstitutionEmailComponent {
+trait InstitutionQueryHttpApi extends HmdaTimeDirectives with InstitutionEmailComponent {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -32,12 +30,10 @@ trait InstitutionQueryHttpApi
   implicit val timeout: Timeout
   val log: LoggingAdapter
 
-  implicit val institutionRepository2018 =
-    new InstitutionRepository2018(dbConfig, "institutions2018")
-  implicit val institutionRepository2019 =
-    new InstitutionRepository2019(dbConfig, "institutions2019")
-  implicit val institutionEmailsRepository = new InstitutionEmailsRepository(
-    dbConfig)
+  implicit val institutionRepository2018   = new InstitutionRepository2018(dbConfig, "institutions2018")
+  implicit val institutionRepository2019   = new InstitutionRepository2019(dbConfig, "institutions2019")
+  implicit val institutionRepository2020   = new InstitutionRepository2020(dbConfig, "institutions2020")
+  implicit val institutionEmailsRepository = new InstitutionEmailsRepository(dbConfig)
 
   val currentYear = config.getString("hmda.filing.current")
 
@@ -45,8 +41,7 @@ trait InstitutionQueryHttpApi
     path("institutions" / Segment / "year" / Segment) { (lei, year) =>
       timedGet { uri =>
         if (!isValidYear(year.toInt)) {
-          complete(
-            ErrorResponse(500, s"Invalid Year Provided: $year", uri.path))
+          complete(ErrorResponse(500, s"Invalid Year Provided: $year", uri.path))
         } else {
           val fInstitution = if (year.toInt == 2018) {
             institutionRepository2018.findById(lei)
@@ -56,24 +51,25 @@ trait InstitutionQueryHttpApi
           val fEmails = institutionEmailsRepository.findByLei(lei)
           val f = for {
             institution <- fInstitution
-            emails <- fEmails
+            emails      <- fEmails
           } yield (institution, emails.map(_.emailDomain))
 
           onComplete(f) {
             case Success((institution, emails)) =>
               if (institution.isEmpty) {
-                complete(
-                  ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
+                complete(ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
               } else {
-                complete(ToResponseMarshallable(InstitutionConverter
-                  .convert(institution.getOrElse(InstitutionEntity()), emails)))
+                complete(
+                  ToResponseMarshallable(
+                    InstitutionConverter
+                      .convert(institution.getOrElse(InstitutionEntity()), emails)
+                  )
+                )
               }
             case Failure(error) =>
               val errorResponse =
                 ErrorResponse(500, error.getLocalizedMessage, uri.path)
-              complete(
-                ToResponseMarshallable(
-                  StatusCodes.InternalServerError -> errorResponse))
+              complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
           }
         }
       }
@@ -83,17 +79,13 @@ trait InstitutionQueryHttpApi
     path("institutions" / "year" / Segment) { (year) =>
       timedGet { uri =>
         if (!isValidYear(year.toInt)) {
-          complete(
-            ErrorResponse(500, s"Invalid Year Provided: $year", uri.path))
+          complete(ErrorResponse(500, s"Invalid Year Provided: $year", uri.path))
         } else {
           parameter('domain.as[String]) { domain =>
             val f = findByEmail(domain, year)
             completeInstitutionsFuture(f, uri)
           } ~
-            parameters('domain.as[String],
-                       'lei.as[String],
-                       'respondentName.as[String],
-                       'taxId.as[String]) {
+            parameters('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String]) {
               (domain, lei, respondentName, taxId) =>
                 val f = findByFields(lei, respondentName, taxId, domain, year)
                 completeInstitutionsFuture(f, uri)
@@ -109,10 +101,7 @@ trait InstitutionQueryHttpApi
           val f = findByEmail(domain, currentYear)
           completeInstitutionsFuture(f, uri)
         } ~
-          parameters('domain.as[String],
-                     'lei.as[String],
-                     'respondentName.as[String],
-                     'taxId.as[String]) {
+          parameters('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String]) {
             (domain, lei, respondentName, taxId) =>
               val f =
                 findByFields(lei, respondentName, taxId, domain, currentYear)
@@ -121,8 +110,7 @@ trait InstitutionQueryHttpApi
       }
     }
 
-  private def completeInstitutionsFuture(f: Future[Seq[Institution]],
-                                         uri: Uri): Route = {
+  private def completeInstitutionsFuture(f: Future[Seq[Institution]], uri: Uri): Route =
     onComplete(f) {
       case Success(institutions) =>
         if (institutions.isEmpty) {
@@ -133,11 +121,8 @@ trait InstitutionQueryHttpApi
       case Failure(error) =>
         val errorResponse =
           ErrorResponse(500, error.getLocalizedMessage, uri.path)
-        complete(
-          ToResponseMarshallable(
-            StatusCodes.InternalServerError -> errorResponse))
+        complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
     }
-  }
 
   def institutionPublicRoutes: Route =
     handleRejections(corsRejectionHandler) {

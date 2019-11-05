@@ -10,7 +10,7 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.api.http.directives.HmdaTimeDirectives
+import hmda.api.http.directives.{ HmdaTimeDirectives, QuarterlyFilingAuthorization }
 import hmda.api.http.model.filing.submissions.ParsingErrorSummary
 import hmda.auth.OAuth2Authorization
 import hmda.messages.submission.SubmissionCommands.GetSubmission
@@ -28,7 +28,7 @@ import hmda.utils.YearUtils
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
-trait ParseErrorHttpApi extends HmdaTimeDirectives {
+trait ParseErrorHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -46,7 +46,11 @@ trait ParseErrorHttpApi extends HmdaTimeDirectives {
           path("submissions" / IntNumber / "parseErrors") { seqNr =>
             checkSubmission(lei, year, None, seqNr, page, uri)
           } ~ path("quarter" / Quarter / "submissions" / IntNumber / "parseErrors") { (quarter, seqNr) =>
-            checkSubmission(lei, year, Option(quarter), seqNr, page, uri)
+            pathEndOrSingleSlash {
+              quarterlyFilingAllowed(lei, year) {
+                checkSubmission(lei, year, Option(quarter), seqNr, page, uri)
+              }
+            }
           }
         }
       }

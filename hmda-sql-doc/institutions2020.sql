@@ -5,7 +5,6 @@
 -- Dumped from database version 10.6
 -- Dumped by pg_dump version 10.5
 
--- Started on 2019-06-19 00:36:09 EDT
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -22,11 +21,11 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
--- TOC entry 278 (class 1259 OID 20216)
--- Name: institutions2018; Type: TABLE; Schema: hmda_user; Owner: hmda_user
+-- TOC entry 293 (class 1259 OID 60865)
+-- Name: institutions2020; Type: TABLE; Schema: hmda_user; Owner: hmda_user
 --
 
-CREATE TABLE hmda_user.institutions2018 (
+CREATE TABLE hmda_user.institutions2020 (
     lei character varying NOT NULL,
     activity_year integer NOT NULL,
     agency integer NOT NULL,
@@ -43,24 +42,20 @@ CREATE TABLE hmda_user.institutions2018 (
     other_lender_code integer NOT NULL,
     topholder_id_rssd integer NOT NULL,
     topholder_name character varying NOT NULL,
-    hmda_filer boolean DEFAULT false NOT NULL,
-    quarterly_filer boolean default false NOT NULL
+    hmda_filer boolean NOT NULL,
+    quarterly_filer boolean default false NOT NULL,
 );
 
 
-ALTER TABLE hmda_user.institutions2018 OWNER TO hmda_user;
-
---
--- TOC entry 5485 (class 2606 OID 20223)
--- Name: institutions2018 institutions2018_pkey; Type: CONSTRAINT; Schema: hmda_user; Owner: hmda_user
---
-
-ALTER TABLE ONLY hmda_user.institutions2018
-    ADD CONSTRAINT institutions2018_pkey PRIMARY KEY (lei);
+ALTER TABLE hmda_user.institutions2019 OWNER TO hmda_user;
 
 
--- Completed on 2019-06-19 00:36:09 EDT
+ALTER TABLE ONLY hmda_user.institutions2020
+    ADD CONSTRAINT institutions2020_pkey PRIMARY KEY (lei);
+
+
 
 --
 -- PostgreSQL database dump complete
 --
+

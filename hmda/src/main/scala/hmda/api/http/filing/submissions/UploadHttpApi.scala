@@ -16,7 +16,7 @@ import akka.stream.scaladsl.{ Flow, Framing, Sink }
 import akka.util.{ ByteString, Timeout }
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{ cors, corsRejectionHandler }
 import com.typesafe.config.Config
-import hmda.api.http.directives.HmdaTimeDirectives
+import hmda.api.http.directives.{ HmdaTimeDirectives, QuarterlyFilingAuthorization }
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.util.http.FilingResponseUtils._
 import hmda.api.http.model.ErrorResponse
@@ -35,7 +35,7 @@ import hmda.utils.YearUtils
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
-trait UploadHttpApi extends HmdaTimeDirectives {
+trait UploadHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
 
   implicit val system: actor.ActorSystem
   implicit val materializer: ActorMaterializer
@@ -66,7 +66,9 @@ trait UploadHttpApi extends HmdaTimeDirectives {
             path(Year / "submissions" / IntNumber) { (year, seqNr) =>
               checkAndUploadSubmission(lei, year, None, seqNr, uri)
             } ~ path(Year / "quarter" / Quarter / "submissions" / IntNumber) { (year, quarter, seqNr) =>
-              checkAndUploadSubmission(lei, year, Option(quarter), seqNr, uri)
+              quarterlyFilingAllowed(lei, year) {
+                checkAndUploadSubmission(lei, year, Option(quarter), seqNr, uri)
+              }
             }
           }
         }

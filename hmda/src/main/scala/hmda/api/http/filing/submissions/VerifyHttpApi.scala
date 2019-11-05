@@ -7,7 +7,7 @@ import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{ StatusCodes, Uri }
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import hmda.api.http.directives.HmdaTimeDirectives
+import hmda.api.http.directives.{ HmdaTimeDirectives, QuarterlyFilingAuthorization }
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Route
@@ -33,7 +33,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.matching.Regex
 import scala.util.{ Failure, Success }
 
-trait VerifyHttpApi extends HmdaTimeDirectives {
+trait VerifyHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -55,7 +55,11 @@ trait VerifyHttpApi extends HmdaTimeDirectives {
               path("submissions" / IntNumber / "edits" / editTypeRegex) { (seqNr, editType) =>
                 verify(lei, year, None, seqNr, editType, editsVerification.verified, uri)
               } ~ path("quarter" / Quarter / "submissions" / IntNumber / "edits" / editTypeRegex) { (quarter, seqNr, editType) =>
-                verify(lei, year, Option(quarter), seqNr, editType, editsVerification.verified, uri)
+                pathEndOrSingleSlash {
+                  quarterlyFilingAllowed(lei, year) {
+                    verify(lei, year, Option(quarter), seqNr, editType, editsVerification.verified, uri)
+                  }
+                }
               }
             }
           }

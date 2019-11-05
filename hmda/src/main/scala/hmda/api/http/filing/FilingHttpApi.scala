@@ -13,7 +13,7 @@ import akka.util.Timeout
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.model.headers.RawHeader
-import hmda.api.http.directives.HmdaTimeDirectives
+import hmda.api.http.directives.{ HmdaTimeDirectives, QuarterlyFilingAuthorization }
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import hmda.messages.filing.FilingCommands.{ CreateFiling, GetFilingDetails }
 import hmda.model.filing.{ Filing, FilingDetails, InProgress }
@@ -34,10 +34,11 @@ import hmda.persistence.submission.HmdaValidationError
 import hmda.persistence.institution.InstitutionPersistence._
 import hmda.util.http.FilingResponseUtils._
 import hmda.api.http.PathMatchers._
+
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
-trait FilingHttpApi extends HmdaTimeDirectives {
+trait FilingHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -70,16 +71,20 @@ trait FilingHttpApi extends HmdaTimeDirectives {
               }
           }
         }
-      } ~ path("institutions" / Segment / "filings" / Year / "quarter" / Quarter) { (lei, year, quarter) =>
-        pathEndOrSingleSlash {
-          // POST/institutions/<lei>/filings/<year>/quarters/<quarter>
-          timedPost { uri =>
-            createFilingForInstitution(lei, year, Option(quarter), uri)
-          } ~
-            // GET /institutions/<lei>/filings/<year>/quarters/<quarter>
-            timedGet { uri =>
-              getFilingForInstitution(lei, year, Option(quarter), uri)
+      } ~ path("institutions" / Segment / "filings" / Year / "quarter" / Quarter) { (lei, period, quarter) =>
+        oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+          pathEndOrSingleSlash {
+            quarterlyFilingAllowed(lei, period) {
+              // POST/institutions/<lei>/filings/<year>/quarters/<quarter>
+              timedPost { uri =>
+                createFilingForInstitution(lei, period, Option(quarter), uri)
+              } ~
+                // GET /institutions/<lei>/filings/<year>/quarters/<quarter>
+                timedGet { uri =>
+                  getFilingForInstitution(lei, period, Option(quarter), uri)
+                }
             }
+          }
         }
       }
     }

@@ -1,11 +1,11 @@
 package hmda.institution.api.http
 
-import hmda.institution.query.{InstitutionEmailEntity, InstitutionEntity}
+import hmda.institution.query.{ InstitutionEmailEntity, InstitutionEntity }
 import hmda.model.institution._
 
 object InstitutionConverter {
 
-  def convert(entity: InstitutionEntity, emails: Seq[String]): Institution = {
+  def convert(entity: InstitutionEntity, emails: Seq[String]): Institution =
     Institution(
       entity.activityYear,
       entity.lei,
@@ -31,11 +31,11 @@ object InstitutionConverter {
         entity.topHolderIdRssd,
         if (entity.topHolderName != "") Some(entity.topHolderName) else None
       ),
-      entity.hmdaFiler
+      entity.hmdaFiler,
+      entity.quarterlyFiler
     )
-  }
 
-  def convert(institution: Institution): InstitutionEntity = {
+  def convert(institution: Institution): InstitutionEntity =
     InstitutionEntity(
       institution.LEI,
       institution.activityYear,
@@ -53,13 +53,10 @@ object InstitutionConverter {
       institution.otherLenderCode,
       institution.topHolder.idRssd,
       institution.topHolder.name.getOrElse(""),
-      institution.hmdaFiler
+      institution.hmdaFiler,
+      institution.quarterlyFiler
     )
-  }
 
-  def emailsFromInstitution(
-      institution: Institution): Seq[InstitutionEmailEntity] = {
-    institution.emailDomains.map(email =>
-      InstitutionEmailEntity(lei = institution.LEI, emailDomain = email))
-  }
+  def emailsFromInstitution(institution: Institution): Seq[InstitutionEmailEntity] =
+    institution.emailDomains.map(email => InstitutionEmailEntity(lei = institution.LEI, emailDomain = email))
 }

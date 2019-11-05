@@ -2,14 +2,14 @@ package hmda.validation.engine
 
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.validation.context.ValidationContext
-import hmda.validation.rules.ts.syntactical.{ S300, S303 }
+import hmda.validation.rules.ts.syntactical.{ S300, S303, S302 }
 import hmda.validation.rules.ts.validity._
 
 private[engine] object TsEngine2020Q extends ValidationEngine[TransmittalSheet] {
 
   override def syntacticalChecks(ctx: ValidationContext) = Vector(
     S300,
-//    S302.withContext(ctx),
+    S302.withContext(ctx),
     S303.withContext(ctx)
   )
 

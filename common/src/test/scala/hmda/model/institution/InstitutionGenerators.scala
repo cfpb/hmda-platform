@@ -1,31 +1,27 @@
 package hmda.model.institution
 
-import hmda.generators.CommonGenerators.{
-  activityYearGen,
-  emailListGen,
-  leiGen,
-  stateGen
-}
+import hmda.generators.CommonGenerators.{ activityYearGen, emailListGen, leiGen, stateGen }
 import org.scalacheck.Gen
 
 object InstitutionGenerators {
 
-  implicit def institutionGen: Gen[Institution] = {
+  implicit def institutionGen: Gen[Institution] =
     for {
-      activityYear <- activityYearGen
-      lei <- leiGen
-      agency <- agencyGen
+      activityYear    <- activityYearGen
+      lei             <- leiGen
+      agency          <- agencyGen
       institutionType <- institutionTypeGen
-      id2017 <- Gen.alphaStr
-      taxId <- Gen.alphaStr
-      rssd <- Gen.choose(0, Int.MaxValue)
-      email <- emailListGen
-      respondent <- institutionRespondentGen
-      parent <- institutionParentGen
-      assets <- Gen.choose(Int.MinValue, Int.MaxValue)
+      id2017          <- Gen.alphaStr
+      taxId           <- Gen.alphaStr
+      rssd            <- Gen.choose(0, Int.MaxValue)
+      email           <- emailListGen
+      respondent      <- institutionRespondentGen
+      parent          <- institutionParentGen
+      assets          <- Gen.choose(Int.MinValue, Int.MaxValue)
       otherLenderCode <- Gen.choose(Int.MinValue, Int.MaxValue)
-      topHolder <- topHolderGen
-      hmdaFiler <- Gen.oneOf(true, false)
+      topHolder       <- topHolderGen
+      hmdaFiler       <- Gen.oneOf(true, false)
+      quarterlyFiler  <- Gen.oneOf(true, false)
     } yield {
       Institution(
         activityYear: Int,
@@ -41,53 +37,46 @@ object InstitutionGenerators {
         assets,
         otherLenderCode,
         topHolder,
-        hmdaFiler
+        hmdaFiler,
+        quarterlyFiler
       )
     }
-  }
 
-  implicit def agencyCodeGen: Gen[Int] = {
+  implicit def agencyCodeGen: Gen[Int] =
     Gen.oneOf(Agency.values.filter(x => x != -1))
-  }
 
-  implicit def agencyGen: Gen[Agency] = {
+  implicit def agencyGen: Gen[Agency] =
     for {
       agencyCode <- agencyCodeGen
-      agency = Agency.valueOf(agencyCode)
+      agency     = Agency.valueOf(agencyCode)
     } yield agency
-  }
 
-  implicit def institutionTypeCodeGen: Gen[Int] = {
+  implicit def institutionTypeCodeGen: Gen[Int] =
     Gen.oneOf(InstitutionType.values.filter(x => x != -1))
-  }
 
-  implicit def institutionTypeGen: Gen[InstitutionType] = {
+  implicit def institutionTypeGen: Gen[InstitutionType] =
     for {
       institutionTypeCode <- institutionTypeCodeGen
-      institutionType = InstitutionType.valueOf(institutionTypeCode)
+      institutionType     = InstitutionType.valueOf(institutionTypeCode)
     } yield institutionType
-  }
 
-  implicit def institutionRespondentGen: Gen[Respondent] = {
+  implicit def institutionRespondentGen: Gen[Respondent] =
     for {
-      name <- Gen.option(Gen.alphaStr.suchThat(!_.isEmpty))
+      name  <- Gen.option(Gen.alphaStr.suchThat(!_.isEmpty))
       state <- Gen.option(stateGen)
-      city <- Gen.option(Gen.alphaStr.suchThat(!_.isEmpty))
+      city  <- Gen.option(Gen.alphaStr.suchThat(!_.isEmpty))
     } yield Respondent(name, state, city)
-  }
 
-  implicit def institutionParentGen: Gen[Parent] = {
+  implicit def institutionParentGen: Gen[Parent] =
     for {
       idRssd <- Gen.choose(Int.MinValue, Int.MaxValue)
-      name <- Gen.option(Gen.alphaStr.suchThat(!_.isEmpty))
+      name   <- Gen.option(Gen.alphaStr.suchThat(!_.isEmpty))
     } yield Parent(idRssd, name)
-  }
 
-  implicit def topHolderGen: Gen[TopHolder] = {
+  implicit def topHolderGen: Gen[TopHolder] =
     for {
       idRssd <- Gen.choose(Int.MinValue, Int.MaxValue)
-      name <- Gen.option(Gen.alphaStr.suchThat(!_.isEmpty))
+      name   <- Gen.option(Gen.alphaStr.suchThat(!_.isEmpty))
     } yield TopHolder(idRssd, name)
-  }
 
 }

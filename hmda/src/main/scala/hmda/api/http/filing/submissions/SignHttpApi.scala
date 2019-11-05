@@ -14,7 +14,7 @@ import akka.util.Timeout
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{ cors, corsRejectionHandler }
-import hmda.api.http.directives.HmdaTimeDirectives
+import hmda.api.http.directives.{ HmdaTimeDirectives, QuarterlyFilingAuthorization }
 import hmda.api.http.model.filing.submissions.{ EditsSign, SignedResponse }
 import hmda.auth.OAuth2Authorization
 import hmda.messages.submission.SubmissionCommands.GetSubmission
@@ -32,7 +32,7 @@ import scala.util.{ Failure, Success }
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
-trait SignHttpApi extends HmdaTimeDirectives {
+trait SignHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -57,12 +57,18 @@ trait SignHttpApi extends HmdaTimeDirectives {
             }
           }
         } ~ pathPrefix("quarter" / Quarter / "submissions" / IntNumber / "sign") { (quarter, seqNr) =>
-          timedGet { uri =>
-            getSubmissionForSigning(lei, year, Option(quarter), seqNr, token.email, uri)
-          } ~ timedPost { uri =>
-            respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-              entity(as[EditsSign]) { editsSign =>
-                signSubmission(lei, year, Option(quarter), seqNr, token.email, editsSign.signed, uri)
+          oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
+            timedGet { uri =>
+              quarterlyFilingAllowed(lei, year) {
+                getSubmissionForSigning(lei, year, Option(quarter), seqNr, token.email, uri)
+              }
+            } ~ timedPost { uri =>
+              respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+                entity(as[EditsSign]) { editsSign =>
+                  quarterlyFilingAllowed(lei, year) {
+                    signSubmission(lei, year, Option(quarter), seqNr, token.email, editsSign.signed, uri)
+                  }
+                }
               }
             }
           }

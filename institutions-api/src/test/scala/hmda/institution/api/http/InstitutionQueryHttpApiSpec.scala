@@ -1,12 +1,12 @@
 package hmda.institution.api.http
 
-import akka.event.{LoggingAdapter, NoLogging}
+import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
 import hmda.institution.query.InstitutionSetup
 import hmda.model.institution.Institution
-import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
+import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 import hmda.query.DbConfiguration._
 
 import scala.concurrent.ExecutionContext
@@ -26,10 +26,11 @@ class InstitutionQueryHttpApiSpec
     new InstitutionRepository2018(dbConfig, "institutions2018")
   override val institutionRepository2019 =
     new InstitutionRepository2019(dbConfig, "institutions2019")
-
+  override val institutionRepository2020 =
+    new InstitutionRepository2020(dbConfig, "institutions2020")
   override val ec: ExecutionContext = system.dispatcher
-  override val log: LoggingAdapter = NoLogging
-  implicit val timeout = Timeout(duration)
+  override val log: LoggingAdapter  = NoLogging
+  implicit val timeout              = Timeout(duration)
 
   override def beforeAll = {
     super.beforeAll()
@@ -48,9 +49,7 @@ class InstitutionQueryHttpApiSpec
       }
       Get(s"/institutions/AAA/year/2018") ~> institutionPublicRoutes ~> check {
         status mustBe StatusCodes.OK
-        responseAs[Institution] mustBe InstitutionConverter.convert(
-          instA,
-          Seq("aaa.com", "bbb.com"))
+        responseAs[Institution] mustBe InstitutionConverter.convert(instA, Seq("aaa.com", "bbb.com"))
         responseAs[Institution].emailDomains mustBe Seq("aaa.com", "bbb.com")
       }
     }
@@ -66,8 +65,7 @@ class InstitutionQueryHttpApiSpec
     }
 
     "search by fields values" in {
-      Get(
-        "/institutions/year/2018?domain=aaa.com&lei=AAA&respondentName=RespA&taxId=taxIdA") ~> institutionPublicRoutes ~> check {
+      Get("/institutions/year/2018?domain=aaa.com&lei=AAA&respondentName=RespA&taxId=taxIdA") ~> institutionPublicRoutes ~> check {
         status mustBe StatusCodes.OK
         val institutions = responseAs[InstitutionsResponse].institutions
         institutions.size mustBe 1
@@ -76,8 +74,7 @@ class InstitutionQueryHttpApiSpec
         institutions.head.respondent.name mustBe Some("RespA")
         institutions.head.emailDomains mustBe List("aaa.com", "bbb.com")
       }
-      Get(
-        "/institutions/year/2018?domain=xxx.com&lei=XXX&respondentName=RespX&taxId=taxIdX") ~> institutionPublicRoutes ~> check {
+      Get("/institutions/year/2018?domain=xxx.com&lei=XXX&respondentName=RespX&taxId=taxIdX") ~> institutionPublicRoutes ~> check {
         status mustBe StatusCodes.NotFound
       }
     }

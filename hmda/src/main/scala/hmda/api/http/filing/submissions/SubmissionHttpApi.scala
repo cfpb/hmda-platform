@@ -9,7 +9,7 @@ import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.{ ByteString, Timeout }
-import hmda.api.http.directives.HmdaTimeDirectives
+import hmda.api.http.directives.{ HmdaTimeDirectives, QuarterlyFilingAuthorization }
 import akka.http.scaladsl.server.Directives._
 import akka.stream.scaladsl.Sink
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
@@ -40,7 +40,7 @@ import hmda.utils.YearUtils
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
-trait SubmissionHttpApi extends HmdaTimeDirectives {
+trait SubmissionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -58,7 +58,11 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
           }
         } ~ path("institutions" / Segment / "filings" / Year / "quarter" / Quarter / "submissions") { (lei, year, quarter) =>
           oauth2Authorization.authorizeTokenWithLei(lei) { _ =>
-            createSubmissionIfValid(lei, year, Option(quarter), uri)
+            pathEndOrSingleSlash {
+              quarterlyFilingAllowed(lei, year) {
+                createSubmissionIfValid(lei, year, Option(quarter), uri)
+              }
+            }
           }
         }
       }
@@ -123,18 +127,25 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
     } yield (i, f, l)
   }
 
-  def submissionSummaryPath(oAuth2Authorization: OAuth2Authorization): Route = timedGet { uri =>
-    path("institutions" / Segment / "filings" / Year / "submissions" / IntNumber / "summary") { (lei, year, seqNr) =>
-      oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
-        getSubmissionSummary(lei, year, None, seqNr, uri)
-      }
-    } ~ path("institutions" / Segment / "filings" / Year / "quarter" / Quarter / "submissions" / IntNumber / "summary") {
-      (lei, year, quarter, seqNr) =>
-        oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
-          getSubmissionSummary(lei, year, Option(quarter), seqNr, uri)
+  def submissionSummaryPath(oAuth2Authorization: OAuth2Authorization): Route =
+    respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+      timedGet { uri =>
+        path("institutions" / Segment / "filings" / Year / "submissions" / IntNumber / "summary") { (lei, year, seqNr) =>
+          oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+            getSubmissionSummary(lei, year, None, seqNr, uri)
+          }
+        } ~ path("institutions" / Segment / "filings" / Year / "quarter" / Quarter / "submissions" / IntNumber / "summary") {
+          (lei, year, quarter, seqNr) =>
+            oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+              pathEndOrSingleSlash {
+                quarterlyFilingAllowed(lei, year) {
+                  getSubmissionSummary(lei, year, Option(quarter), seqNr, uri)
+                }
+              }
+            }
         }
+      }
     }
-  }
 
   private def getSubmissionSummary(lei: String, year: Int, quarter: Option[String], seqNr: Int, uri: Uri): Route = {
     val period                               = YearUtils.period(year, quarter)
@@ -188,7 +199,11 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
           }
         } ~ path("institutions" / Segment / "filings" / Year / "quarter" / Quarter / "submissions" / "latest") { (lei, year, quarter) =>
           oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
-            getLatestSubmission(lei, year, Option(quarter), uri)
+            pathEndOrSingleSlash {
+              quarterlyFilingAllowed(lei, year) {
+                getLatestSubmission(lei, year, Option(quarter), uri)
+              }
+            }
           }
         }
       }
