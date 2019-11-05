@@ -16,7 +16,7 @@ private[engine] object LarEngine2019 extends ValidationEngine[LoanApplicationReg
     S301.withContext(ctx)
   )
 
-  override val validityChecks = Vector(
+  override def validityChecks(ctx: ValidationContext) = Vector(
     V600,
     V608_1,
     V608_2,

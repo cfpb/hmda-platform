@@ -64,7 +64,7 @@ object ValidationFlow {
           case "syntactical" =>
             validationEngine.checkSyntactical(ts, ts.LEI, validationContext, TsValidationError)
           case "validity" =>
-            validationEngine.checkValidity(ts, ts.LEI, TsValidationError)
+            validationEngine.checkValidity(ts, ts.LEI, validationContext, TsValidationError)
         }
         (ts, errors)
       }
@@ -116,13 +116,13 @@ object ValidationFlow {
               .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
 
           case "validity" =>
-            validationEngine.checkValidity(lar, lar.loan.ULI, LarValidationError)
+            validationEngine.checkValidity(lar, lar.loan.ULI, ctx, LarValidationError)
 
           case "syntactical-validity" =>
             validationEngine
               .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
               .combine(
-                validationEngine.checkValidity(lar, lar.loan.ULI, LarValidationError)
+                validationEngine.checkValidity(lar, lar.loan.ULI, ctx, LarValidationError)
               )
 
           case "quality" =>
@@ -132,15 +132,15 @@ object ValidationFlow {
     }.map { x =>
       x._2
         .leftMap(xs => {
-          addLarFieldInformation(x._1, xs.toList)
+          addLarFieldInformation(x._1, xs.toList, period)
         })
         .toEither
     }
   }
 
-  def addLarFieldInformation(lar: LoanApplicationRegister, errors: List[ValidationError]): List[ValidationError] =
+  def addLarFieldInformation(lar: LoanApplicationRegister, errors: List[ValidationError], period: Period): List[ValidationError] =
     errors.map(error => {
-      val affectedFields = EditDescriptionLookup.lookupFields(error.editName)
+      val affectedFields = EditDescriptionLookup.lookupFields(error.editName, period)
       val fieldMap =
         ListMap(affectedFields.map(field => (field, lar.valueOf(field))): _*)
       error.copyWithFields(fieldMap)
