@@ -43,7 +43,8 @@ CREATE TABLE hmda_user.transmittalsheet2019 (
     tax_id character varying,
     lei character varying NOT NULL,
     created_at timestamp without time zone DEFAULT now(),
-    submission_id character varying
+    submission_id character varying,
+    is_quarterly boolean DEFAULT false NOT NULL
 );
 
 
