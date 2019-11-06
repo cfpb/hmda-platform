@@ -2,6 +2,8 @@ apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
   name: {{ include "modified-lar.fullname" . }}
+  annotations:
+    downscaler/uptime: Mon-Fri 10:00-23:00 UTC
   labels:
     app: {{ include "modified-lar.name" . }}
     chart: {{ include "modified-lar.chart" . }}
