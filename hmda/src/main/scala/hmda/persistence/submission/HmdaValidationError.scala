@@ -261,6 +261,7 @@ object HmdaValidationError
                 SubmissionStatus.valueOf(validationState.statusCode)
               updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
               replyTo ! QualityVerified(submissionId, verified, updatedStatus)
+              log.info(s"Verified Quality for $submissionId")
             }
         } else {
           replyTo ! NotReadyToBeVerified(submissionId)
@@ -268,6 +269,7 @@ object HmdaValidationError
         }
 
       case VerifyMacro(submissionId, verified, replyTo) =>
+
         if (List(Macro.code, MacroErrors.code)
               .contains(state.statusCode) || !verified) {
           Effect
@@ -277,6 +279,7 @@ object HmdaValidationError
                 SubmissionStatus.valueOf(validationState.statusCode)
               updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
               replyTo ! MacroVerified(submissionId, verified, updatedStatus)
+              log.info(s"Verified Macro for $submissionId")
             }
         } else {
           replyTo ! NotReadyToBeVerified(submissionId)
