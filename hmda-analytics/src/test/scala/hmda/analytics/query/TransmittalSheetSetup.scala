@@ -33,7 +33,7 @@ trait TransmittalSheetSetup extends TransmittalSheetComponent {
     import dbConfig.profile.api._
     val setup = db.run(
       DBIOAction.seq(
-        transmittalSheetTable.schema.create,
+          transmittalSheetTable.schema.create,
         transmittalSheetTable ++= Seq(
           ts0,
           ts1

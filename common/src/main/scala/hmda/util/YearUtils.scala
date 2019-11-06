@@ -2,6 +2,7 @@ package hmda.utils
 
 import com.typesafe.config.ConfigFactory
 import cats.implicits._
+import hmda.model.filing.submission.SubmissionId
 
 object YearUtils {
 
@@ -32,5 +33,14 @@ object YearUtils {
     if (raw.length == 1) Period(raw(0).toInt, None).asRight
     else if (raw.length == 2) Period(raw(0).toInt, Option(raw(1))).asRight
     else new Exception(s"Failed to parse invalid period: $period").asLeft
+  }
+  def isQuarterlyFiling(submissionId: SubmissionId): Boolean = {
+    val period = parsePeriod(submissionId.period).right.get
+    period.quarter match {
+      case None =>
+        false
+      case _ =>
+        true
+    }
   }
 }

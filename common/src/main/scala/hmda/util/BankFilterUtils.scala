@@ -13,15 +13,6 @@ object BankFilterUtils {
       false
     } else true
 
-  def filterQuarterlyFiling(submissionId: SubmissionId): Boolean = {
-    val period: YearUtils.Period = YearUtils.parsePeriod(submissionId.period).right.get
-    period.quarter match {
-      case None =>
-        false
-      case _ => {
-        log.info("Skipping Quarterly Filing: " + submissionId)
-        true
-      }
-    }
-  }
+  def filterQuarterlyFiling(submissionId: SubmissionId): Boolean =
+    YearUtils.isQuarterlyFiling(submissionId)
 }

@@ -26,7 +26,7 @@ SET default_with_oids = false;
 -- Name: loanapplicationregister2019; Type: TABLE; Schema: hmda_user; Owner: hmda_user
 --
 
-CREATE TABLE hmda_user.loanapplicationregister2019 (
+CREATE TABLE hmda_user.loanapplicationregister2020 (
     id integer NOT NULL,
     lei character varying NOT NULL,
     uli character varying,
@@ -150,12 +150,12 @@ CREATE TABLE hmda_user.loanapplicationregister2019 (
     tract_one_to_four_family_homes integer,
     tract_median_age_of_housing_units integer,
     tract_to_msa_income_percentage float,
-    is_quarterly boolean DEFAULT false NOT NULL
+    is_quarterly boolean DEFAULT false NOT NULL -- New for 2020 and beyond quarterly filing
     created_at timestamp without time zone DEFAULT now()
 );
 
 
-ALTER TABLE hmda_user.loanapplicationregister2019 OWNER TO hmda_user;
+ALTER TABLE hmda_user.loanapplicationregister2020 OWNER TO hmda_user;
 
 -- Completed on 2019-06-18 12:27:11 EDT
 
