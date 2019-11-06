@@ -5,6 +5,7 @@ metadata:
   labels:
     service: ambassador-admin
   name: ambassador-admin
+  namespace: default
 spec:
   type: NodePort
   ports:
@@ -19,6 +20,7 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
   name: ambassador
+  namespace: default
 rules:
 - apiGroups: [""]
   resources: [ "endpoints", "namespaces", "secrets", "services" ]
@@ -30,21 +32,29 @@ rules:
   resources: [ "customresourcedefinitions" ]
   verbs: ["get", "list", "watch"]
 - apiGroups: [ "networking.internal.knative.dev" ]
-  resources: [ "clusteringresses", "ingresses" ]
+  resources: [ "clusteringresses" ]
   verbs: ["get", "list", "watch"]
 - apiGroups: [ "networking.internal.knative.dev" ]
   resources: [ "ingresses/status", "clusteringresses/status" ]
   verbs: ["update"]
+- apiGroups: [ "extensions" ]
+  resources: [ "ingresses" ]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [ "extensions" ]
+  resources: [ "ingresses/status" ]
+  verbs: ["update"]    
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: ambassador
+  namespace: default
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
   name: ambassador
+  namespace: default
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -58,6 +68,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: authservices.getambassador.io
+  namespace: default
 spec:
   group: getambassador.io
   version: v1
@@ -77,6 +88,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: consulresolvers.getambassador.io
+  namespace: default
 spec:
   group: getambassador.io
   version: v1
@@ -94,6 +106,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: kubernetesendpointresolvers.getambassador.io
+  namespace: default
 spec:
   group: getambassador.io
   version: v1
@@ -111,6 +124,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: kubernetesserviceresolvers.getambassador.io
+  namespace: default
 spec:
   group: getambassador.io
   version: v1
@@ -128,6 +142,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: mappings.getambassador.io
+  namespace: default
 spec:
   group: getambassador.io
   version: v1
@@ -147,6 +162,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: modules.getambassador.io
+  namespace: default
 spec:
   group: getambassador.io
   version: v1
@@ -166,6 +182,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: ratelimitservices.getambassador.io
+  namespace: default
 spec:
   group: getambassador.io
   version: v1
@@ -185,6 +202,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: tcpmappings.getambassador.io
+  namespace: default
 spec:
   group: getambassador.io
   version: v1
@@ -204,6 +222,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: tlscontexts.getambassador.io
+  namespace: default
 spec:
   group: getambassador.io
   version: v1
@@ -223,6 +242,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: tracingservices.getambassador.io
+  namespace: default
 spec:
   group: getambassador.io
   version: v1
@@ -242,8 +262,12 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: ambassador
+  namespace: default
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      service: ambassador  
   template:
     metadata:
       annotations:
@@ -264,7 +288,7 @@ spec:
       serviceAccountName: ambassador
       containers:
       - name: ambassador
-        image: quay.io/datawire/ambassador:0.77.0
+        image: quay.io/datawire/ambassador:0.85.0
         resources:
           limits:
             cpu: 1
@@ -302,6 +326,16 @@ spec:
             port: 8877
           initialDelaySeconds: 30
           periodSeconds: 3
+        volumeMounts:
+        - name: ambassador-pod-info
+          mountPath: /tmp/ambassador-pod-info
+      volumes:
+      - name: ambassador-pod-info
+        downwardAPI:
+          items:
+          - path: "labels"
+            fieldRef:
+              fieldPath: metadata.labels          
       restartPolicy: Always
       securityContext:
         runAsUser: 8888
