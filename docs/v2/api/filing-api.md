@@ -77,7 +77,8 @@ Example response:
             "idRssd": 442825905,
             "name": "TopHolder Name"
         },
-        "hmdaFiler": true
+        "hmdaFiler": true,
+        "quarterlyFiler": false
     },
     "filings": [
         {
