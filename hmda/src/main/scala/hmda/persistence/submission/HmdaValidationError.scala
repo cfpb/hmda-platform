@@ -259,9 +259,9 @@ object HmdaValidationError
             .thenRun { validationState =>
               val updatedStatus =
                 SubmissionStatus.valueOf(validationState.statusCode)
-              log.info(s"Verify Quality for $submissionId")
               updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
               replyTo ! QualityVerified(submissionId, verified, updatedStatus)
+              log.info(s"Verify Quality for $submissionId")
             }
         } else {
           replyTo ! NotReadyToBeVerified(submissionId)
@@ -277,9 +277,9 @@ object HmdaValidationError
             .thenRun { validationState =>
               val updatedStatus =
                 SubmissionStatus.valueOf(validationState.statusCode)
-              log.info(s"Verify Macro for $submissionId")
               updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
               replyTo ! MacroVerified(submissionId, verified, updatedStatus)
+              log.info(s"Verify Macro for $submissionId")
             }
         } else {
           replyTo ! NotReadyToBeVerified(submissionId)
