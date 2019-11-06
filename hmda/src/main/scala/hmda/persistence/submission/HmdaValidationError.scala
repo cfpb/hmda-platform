@@ -261,7 +261,7 @@ object HmdaValidationError
                 SubmissionStatus.valueOf(validationState.statusCode)
               updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
               replyTo ! QualityVerified(submissionId, verified, updatedStatus)
-              log.info(s"Verify Quality for $submissionId")
+              log.info(s"Verified Quality for $submissionId")
             }
         } else {
           replyTo ! NotReadyToBeVerified(submissionId)
@@ -279,7 +279,7 @@ object HmdaValidationError
                 SubmissionStatus.valueOf(validationState.statusCode)
               updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
               replyTo ! MacroVerified(submissionId, verified, updatedStatus)
-              log.info(s"Verify Macro for $submissionId")
+              log.info(s"Verified Macro for $submissionId")
             }
         } else {
           replyTo ! NotReadyToBeVerified(submissionId)
