@@ -13,28 +13,29 @@ import hmda.publication.lar.database.{ EmailSubmissionStatusRepository, PGSlickE
 import hmda.publication.lar.email.SESEmailService
 import hmda.publication.lar.streams.Stream.{ commitMessages, pullEmails, sendEmailsIfNecessary }
 import monix.execution.Scheduler
-import slick.jdbc.PostgresProfile.api._
+import slick.basic.DatabaseConfig
+import slick.jdbc.JdbcProfile
 
 object EmailGuardian {
   sealed trait GuardianProtocol
-  case object Ready extends GuardianProtocol
+  case object Ready                 extends GuardianProtocol
   case class Error(message: String) extends GuardianProtocol
 
   def behavior: Behavior[GuardianProtocol] =
     Behaviors.setup { ctx =>
-      implicit val system: UntypedActorSystem              = ctx.system.toUntyped
-      implicit val mat: ActorMaterializer                  = ActorMaterializer()
-      implicit val monixScheduler: Scheduler               = Scheduler(ctx.executionContext)
+      implicit val system: UntypedActorSystem = ctx.system.toUntyped
+      implicit val mat: ActorMaterializer     = ActorMaterializer()
+      implicit val monixScheduler: Scheduler  = Scheduler(ctx.executionContext)
 
-      val database                                         = Database.forConfig("postgres")
+      val databaseConfig                                   = DatabaseConfig.forConfig[JdbcProfile]("db")
       val config                                           = Settings(system)
       val serviceClient                                    = AmazonSimpleEmailServiceClientBuilder.defaultClient()
       val emailService                                     = new SESEmailService(serviceClient, config.email.fromAddress)
-      val emailStatusRepo: EmailSubmissionStatusRepository = new PGSlickEmailSubmissionStatusRepository(database)
+      val emailStatusRepo: EmailSubmissionStatusRepository = new PGSlickEmailSubmissionStatusRepository(databaseConfig)
       val commitSettings                                   = CommitterSettings(config.kafka.commitSettings)
 
       val (control, streamCompletion) =
-        pullEmails(system, config.kafka.bootstrapServers, config.kafka.topic, config.kafka.groupId)
+        pullEmails(system, config.kafka.bootstrapServers)
           .via(sendEmailsIfNecessary(emailService, emailStatusRepo, config.email.content, config.email.parallelism))
           .asSource
           .map { case (_, offset) => offset }
@@ -51,7 +52,7 @@ object EmailGuardian {
           ctx.log.error(s"Infinite consumer stream has terminated, Error: $errorMessage")
           control.drainAndShutdown(streamCompletion).onComplete { _ =>
             serviceClient.shutdown()
-            database.shutdown
+            databaseConfig.db.shutdown
           }
           Behaviors.stopped
       }

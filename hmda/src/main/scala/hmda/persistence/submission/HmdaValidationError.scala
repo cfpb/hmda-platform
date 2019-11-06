@@ -7,41 +7,41 @@ import java.time.Instant
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{ActorRef, Behavior, Logger, TypedActorContext}
-import akka.actor.{ActorSystem, Scheduler}
+import akka.actor.typed.{ ActorRef, Behavior, Logger, TypedActorContext }
+import akka.actor.{ ActorSystem, Scheduler }
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
+import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import akka.pattern.ask
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.RetentionCriteria
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
-import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
+import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior }
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{Sink, Source, _}
+import akka.stream.scaladsl.{ Sink, Source, _ }
 import akka.stream.typed.scaladsl.ActorFlow
-import akka.util.{ByteString, Timeout}
-import akka.{Done, NotUsed}
+import akka.util.{ ByteString, Timeout }
+import akka.{ Done, NotUsed }
 import com.typesafe.config.ConfigFactory
 import hmda.HmdaPlatform
-import hmda.messages.institution.InstitutionCommands.{GetInstitution, ModifyInstitution}
+import hmda.messages.institution.InstitutionCommands.{ GetInstitution, ModifyInstitution }
 import hmda.messages.institution.InstitutionEvents.InstitutionEvent
 import hmda.messages.pubsub.HmdaTopics._
-import hmda.messages.submission.EditDetailsCommands.{EditDetailsPersistenceCommand, PersistEditDetails}
+import hmda.messages.submission.EditDetailsCommands.{ EditDetailsPersistenceCommand, PersistEditDetails }
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents._
 import hmda.model.filing.submission._
-import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
+import hmda.model.filing.ts.{ TransmittalLar, TransmittalSheet }
 import hmda.model.institution.Institution
 import hmda.model.processing.state.HmdaValidationErrorState
-import hmda.model.validation.{MacroValidationError, QualityValidationError, SyntacticalValidationError, ValidationError}
+import hmda.model.validation.{ MacroValidationError, QualityValidationError, SyntacticalValidationError, ValidationError }
 import hmda.parser.filing.ParserFlow._
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.EditDetailsConverter._
-import hmda.persistence.submission.HmdaProcessingUtils.{readRawData, updateSubmissionStatus, updateSubmissionStatusAndReceipt}
+import hmda.persistence.submission.HmdaProcessingUtils.{ readRawData, updateSubmissionStatus, updateSubmissionStatusAndReceipt }
 import hmda.publication.KafkaUtils._
 import hmda.util.streams.FlowUtils.framing
 import hmda.utils.YearUtils
@@ -52,12 +52,12 @@ import hmda.validation.filing.ValidationFlow._
 import hmda.validation.rules.lar.quality.common.Q600
 import hmda.validation.rules.lar.syntactical.S305
 import hmda.validation.rules.lar.syntactical.S304
-import hmda.validation.{AS, EC, MAT}
+import hmda.validation.{ AS, EC, MAT }
 
 import scala.collection.immutable.ListMap
 import scala.concurrent.duration._
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.{ Failure, Success }
 
 object HmdaValidationError
     extends HmdaTypedPersistentActor[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaValidationErrorState] {
@@ -299,7 +299,7 @@ object HmdaValidationError
                 Signed,
                 log
               )
-              publishSignEvent(submissionId).map(signed => log.info(s"Published signed event for $submissionId"))
+              publishSignEvent(submissionId, email).map(signed => log.info(s"Published signed event for $submissionId"))
               setHmdaFilerFlag(submissionId.lei, submissionId.period, sharding)
               replyTo ! signed
             }
@@ -472,7 +472,10 @@ object HmdaValidationError
             )
           case s304 @ SyntacticalValidationError(_, `s304`, _, fields) =>
             s304.copyWithFields(
-              ListMap("Entries Reported in Transmittal Sheet" -> tsLar.ts.totalLines.toString, "Total Number of LARs Found in File" -> tsLar.larsCount.toString)
+              ListMap(
+                "Entries Reported in Transmittal Sheet" -> tsLar.ts.totalLines.toString,
+                "Total Number of LARs Found in File"    -> tsLar.larsCount.toString
+              )
             )
           case q600 @ QualityValidationError(uli, `q600`, fields) =>
             q600.copyWithFields(
@@ -679,8 +682,13 @@ object HmdaValidationError
 
   }
 
-  private def publishSignEvent(submissionId: SubmissionId)(implicit system: ActorSystem, materializer: ActorMaterializer): Future[Done] =
+  private def publishSignEvent(
+    submissionId: SubmissionId,
+    email: String
+  )(implicit system: ActorSystem, materializer: ActorMaterializer): Future[Done] = {
     produceRecord(signTopic, submissionId.lei, submissionId.toString)
+    produceRecord(emailTopic, submissionId.toString, email)
+  }
 
   private def setHmdaFilerFlag[as: AS, mat: MAT, ec: EC](institutionID: String, period: String, sharding: ClusterSharding): Unit = {
 

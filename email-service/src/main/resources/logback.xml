@@ -14,4 +14,8 @@
         <appender-ref ref="ASYNC" />
     </root>
     <logger name="com.amazonaws" level="ERROR" />
+    <logger name="slick.jdbc.DriverDataSource" level="${EMAIL_LOG_LEVEL:-INFO}"/>
+    <logger name="slick.basic.BasicBackend.stream" level="${EMAIL_LOG_LEVEL:-INFO}"/>
+    <logger name="slick.basic.BasicBackend.action" level="${EMAIL_LOG_LEVEL:-INFO}"/>
+    <logger name="logger.slick.session" level="${EMAIL_LOG_LEVEL:-INFO}"/>
 </configuration>

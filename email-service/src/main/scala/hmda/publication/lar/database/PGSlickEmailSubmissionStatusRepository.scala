@@ -1,18 +1,20 @@
 package hmda.publication.lar.database
 
 import monix.eval.Task
-import slick.jdbc.PostgresProfile
+import slick.jdbc.{ JdbcProfile, PostgresProfile }
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.ProvenShape
 import cats.implicits._
 import hmda.model.filing.submission.SubmissionId
+import slick.basic.DatabaseConfig
 
 object PGSlickEmailSubmissionStatusRepository {
   type Postgres = PostgresProfile.backend.Database
 }
 
 import hmda.publication.lar.database.PGSlickEmailSubmissionStatusRepository.Postgres
-class PGSlickEmailSubmissionStatusRepository(db: Postgres) extends EmailSubmissionStatusRepository {
+class PGSlickEmailSubmissionStatusRepository(databaseConfig: DatabaseConfig[JdbcProfile]) extends EmailSubmissionStatusRepository {
+  val db    = databaseConfig.db
   val query = TableQuery[EmailSubmissionStatusTable]
 
   override def recordEmailSent(e: EmailSubmissionMetadata): Task[EmailSubmissionStatus] = {
