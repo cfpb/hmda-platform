@@ -9,4 +9,5 @@ import monix.eval.Task
 trait QueryService {
   def fetchAggregate(fields: List[QueryField]): Task[Seq[Aggregation]]
   def fetchData(fields: List[QueryField]): Source[ModifiedLarEntity, NotUsed]
+  def fetchFilers(year: Int): Task[FilerInstitutionResponse]
 }

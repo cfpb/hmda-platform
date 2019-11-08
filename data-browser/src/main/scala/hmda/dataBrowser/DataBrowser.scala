@@ -1,10 +1,10 @@
-package hmda.data.browser
+package hmda.dataBrowser
 
 import akka.actor.ActorSystem
 import hmda.dataBrowser.api.DataBrowserApi
 import org.slf4j.LoggerFactory
 
-object WebServer extends App {
+object DataBrowser extends App {
 
   val log = LoggerFactory.getLogger("data-browser")
 

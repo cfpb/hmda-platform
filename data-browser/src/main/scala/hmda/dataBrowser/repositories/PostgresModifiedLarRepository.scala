@@ -2,15 +2,12 @@ package hmda.dataBrowser.repositories
 
 import akka.NotUsed
 import akka.stream.scaladsl.Source
-import hmda.dataBrowser.models.{QueryField, ModifiedLarEntity}
+import hmda.dataBrowser.models.{ FilerInformation, ModifiedLarEntity, QueryField, Statistic }
 import monix.eval.Task
 import slick.basic.DatabaseConfig
-import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
-import cats.implicits._
+import slick.jdbc.{ JdbcProfile, ResultSetConcurrency, ResultSetType }
 
-class PostgresModifiedLarRepository(tableName: String,
-                                    config: DatabaseConfig[JdbcProfile])
-    extends ModifiedLarRepository {
+class PostgresModifiedLarRepository(tableName: String, config: DatabaseConfig[JdbcProfile]) extends ModifiedLarRepository {
 
   import config._
   import config.profile.api._
@@ -141,8 +138,7 @@ class PostgresModifiedLarRepository(tableName: String,
     }
   }
 
-  override def find(
-      browserFields: List[QueryField]): Source[ModifiedLarEntity, NotUsed] = {
+  override def find(browserFields: List[QueryField]): Source[ModifiedLarEntity, NotUsed] = {
     val queries = browserFields.map(field => in(field.dbName, field.values))
 
     val filterCriteria = queries match {
@@ -167,8 +163,25 @@ class PostgresModifiedLarRepository(tableName: String,
     Source.fromPublisher(publisher)
   }
 
-  override def findAndAggregate(
-      browserFields: List[QueryField]): Task[Statistic] = {
+  override def filers(year: Int): Task[Seq[FilerInformation]] = {
+    val institutionsTableName = year match { //will be needed when databrowser has to support multiple years
+      case 2018 => "institutions2018"
+      case _ => "institutions2018"
+    }
+    val query =
+      sql"""
+        SELECT a.lei, b.respondent_name, '#${year}'
+        from (
+          SELECT lei
+          FROM #${tableName}
+          GROUP BY lei
+        ) a
+          JOIN #${institutionsTableName} b ON a.lei = b.lei
+         """.as[FilerInformation]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  override def findAndAggregate(browserFields: List[QueryField]): Task[Statistic] = {
     val queries = browserFields.map(field => in(field.dbName, field.values))
     val filterCriteria = queries match {
       case Nil          => ""
