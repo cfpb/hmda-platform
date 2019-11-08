@@ -30,21 +30,27 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
         }
     }
 
-  def authorizeTokenWithLei(lei: String): Directive1[VerifiedToken] =
+  def authorizeTokenWithLei(lei: String, year: Int): Directive1[VerifiedToken] = {
+    val currentYear = config.getInt("hmda.filing.current")
     authorizeToken flatMap {
       case t if t.lei.nonEmpty =>
         if (runtimeMode == "dev") {
           provide(t)
         } else {
-          val leiList = t.lei.split(',')
-          if (leiList.contains(lei)) {
-            provide(t)
-          } else {
-            reject(AuthorizationFailedRejection)
-              .toDirective[Tuple1[VerifiedToken]]
+          year match {
+            case currentYear =>
+              val leiList = t.lei.split(',')
+              if (leiList.contains(lei)) {
+                provide(t)
+              } else {
+                reject(AuthorizationFailedRejection)
+                  .toDirective[Tuple1[VerifiedToken]]
+              }
+            case _ =>
+              reject(AuthorizationFailedRejection)
+                .toDirective[Tuple1[VerifiedToken]]
           }
         }
-
       case _ =>
         if (runtimeMode == "dev") {
           provide(VerifiedToken())
@@ -53,6 +59,8 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
             .toDirective[Tuple1[VerifiedToken]]
         }
     }
+  }
+
 
   def authorizeToken: Directive1[VerifiedToken] =
     bearerToken.flatMap {
