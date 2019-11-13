@@ -19,6 +19,7 @@ import hmda.model.validation.LarValidationError
 import hmda.validation.HmdaValidation
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
+import hmda.api.http.PathMatchers._
 
 import scala.concurrent.ExecutionContext
 
@@ -51,14 +52,14 @@ trait LarValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpA
     }
 
   //lar/validate/<year>
-  val validateLarRoute =
-    path("validate" / IntNumber) { year =>
+  val validateYearLarRoute =
+    path("validate" / Year) { year =>
       parameters('check.as[String] ? "all") { checkType =>
         timedPost { _ =>
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             entity(as[LarValidateRequest]) { req =>
               LarCsvParser(req.lar) match {
-                case Right(lar) => validate(lar, checkType, year)
+                case Right(lar) => validate(lar, checkType, year, None)
                 case Left(errors) =>
                   completeWithParsingErrors(errors)
               }
@@ -68,8 +69,26 @@ trait LarValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpA
       }
     }
 
-  private def validate(lar: LoanApplicationRegister, checkType: String, year: Int): Route = {
-    val ctx              = ValidationContext(filingPeriod = Some(Period(year, None)))
+  //lar/validate/<year>
+  val validateQuarterLarRoute =
+    path("validate" / Year / "quarter" / Quarter) { (year, quarter) =>
+      parameters('check.as[String] ? "all") { checkType =>
+        timedPost { _ =>
+          respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+            entity(as[LarValidateRequest]) { req =>
+              LarCsvParser(req.lar) match {
+                case Right(lar) => validate(lar, checkType, year, Some(quarter))
+                case Left(errors) =>
+                  completeWithParsingErrors(errors)
+              }
+            }
+          }
+        }
+      }
+    }
+
+  private def validate(lar: LoanApplicationRegister, checkType: String, year: Int, quarter: Option[String]): Route = {
+    val ctx              = ValidationContext(filingPeriod = Some(Period(year, quarter)))
     val validationEngine = selectLarEngine(year, None)
     import validationEngine._
     val validation: HmdaValidation[LoanApplicationRegister] = checkType match {
@@ -94,7 +113,7 @@ trait LarValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpA
       cors() {
         encodeResponse {
           pathPrefix("lar") {
-            parseLarRoute ~ validateLarRoute
+            parseLarRoute ~ validateYearLarRoute ~ validateQuarterLarRoute
           }
         }
       }
