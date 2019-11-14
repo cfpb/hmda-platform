@@ -7,7 +7,7 @@
 
 ## Running Locally
 
-- From command line -> env JAVA_OPTS="-Xmx8096m" sbt
+- From command line -> `env JAVA_OPTS="-Xmx8096m" sbt`
 - `project data-browser`
 - `reStart`
 
