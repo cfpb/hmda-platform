@@ -44,14 +44,11 @@ object ModifiedLarPublisher {
   final val name: String = "ModifiedLarPublisher"
 
   val config = ConfigFactory.load()
-
-  val filingYear = config.getInt("hmda.lar.modified.year")
   val accessKeyId = config.getString("aws.access-key-id")
   val secretAccess = config.getString("aws.secret-access-key ")
   val region = config.getString("aws.region")
   val bucket = config.getString("aws.public-bucket")
   val environment = config.getString("aws.environment")
-  val year = config.getInt("hmda.lar.modified.year")
   val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
   val bankFilterList =
     bankFilter.getString("bank-filter-list").toUpperCase.split(",")

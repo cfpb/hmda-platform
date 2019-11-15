@@ -49,8 +49,6 @@ object IrsPublisher {
   val region = config.getString("aws.region")
   val bucket = config.getString("aws.public-bucket")
   val environment = config.getString("aws.environment")
-  val year = config.getInt("hmda.lar.irs.year")
-
   val censusHost = config.getString("hmda.census.http.host")
   val censusPort = config.getInt("hmda.census.http.port")
 
