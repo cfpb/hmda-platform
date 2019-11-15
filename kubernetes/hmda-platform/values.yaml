@@ -33,6 +33,16 @@ kafka:
   signTopic: hmda-sign
   disclosureTopic: hmda-spark-disclosure
 
+rules:
+  yearlyFilingYearsAllowed: 2018
+  quarterlyFilingYearsAllowed: 2020
+  q1Start: April 01
+  q1End: May 30
+  q2Start: July 01
+  q2End: September 30
+  q3Start: October 01
+  q3End: December 31
+
 service:
   type: ClusterIP
   account:

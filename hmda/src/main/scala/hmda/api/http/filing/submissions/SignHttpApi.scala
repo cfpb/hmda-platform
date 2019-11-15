@@ -44,7 +44,8 @@ trait SignHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
   // GET & POST institutions/<lei>/filings/<year>/submissions/<submissionId>/sign
   // GET & POST institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/sign
   def signPath(oAuth2Authorization: OAuth2Authorization): Route =
-    pathPrefix("institutions" / Segment / "filings" / Year) { (lei, year) =>
+  //TODO: add rules
+    pathPrefix("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
       oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
         pathPrefix("submissions" / IntNumber / "sign") { seqNr =>
           timedGet { uri =>

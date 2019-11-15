@@ -58,7 +58,7 @@ trait FilingHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
 
   def filingReadPath(oAuth2Authorization: OAuth2Authorization): Route =
     respondWithDefaultHeader(RawHeader("Cache-Control", "no-cache")) {
-      path("institutions" / Segment / "filings" / Year) { (lei, year) =>
+      path("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
         oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
           pathEndOrSingleSlash {
             // POST/institutions/<lei>/filings/<year>
@@ -71,7 +71,7 @@ trait FilingHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
               }
           }
         }
-      } ~ path("institutions" / Segment / "filings" / Year / "quarter" / Quarter) { (lei, period, quarter) =>
+      } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter) { (lei, period, quarter) =>
         oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
           pathEndOrSingleSlash {
             quarterlyFilingAllowed(lei, period) {

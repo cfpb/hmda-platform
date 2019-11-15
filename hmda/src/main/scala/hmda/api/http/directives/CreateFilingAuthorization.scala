@@ -20,6 +20,6 @@ trait CreateFilingAuthorization {
     val now = LocalDate.now()
     val s = now.getDayOfYear
     if (check(year, now.getDayOfYear, quarter)) successful
-    else complete(BadRequest, ErrorResponse(BadRequest.intValue, "Cannot create a filing at this time as you do not meet the requirements", path))
+    else complete(BadRequest, ErrorResponse(BadRequest.intValue, "The provided year or quarter isn't open at the moment", path))
   }
 }

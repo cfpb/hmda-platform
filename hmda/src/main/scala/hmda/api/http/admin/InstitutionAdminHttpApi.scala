@@ -129,11 +129,13 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
   // GET institutions/<lei>/year/<year>
   // GET institutions/<lei>/year/<year>/quarter/<quarter>
   val institutionReadPath: Route =
-    path("institutions" / Segment / "year" / Year) { (lei, year) =>
+  //TODO: add rules
+    path("institutions" / Segment / "year" / IntNumber) { (lei, year) =>
       timedGet { uri =>
         getInstitution(lei, year, None, uri)
       } ~
-        path("institutions" / Segment / "year" / Year / "quarter" / Quarter) { (lei, year, quarter) =>
+        //TODO: add rules
+        path("institutions" / Segment / "year" / IntNumber / "quarter" / Quarter) { (lei, year, quarter) =>
           timedGet { uri =>
             getInstitution(lei, year, Option(quarter), uri)
           }

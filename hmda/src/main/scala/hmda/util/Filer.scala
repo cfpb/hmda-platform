@@ -24,7 +24,7 @@ object Filer {
         filingYearsAllowed.contains(year)
 
       case Some(q) =>
-        (year >= startYear) && filingYearsAllowed.contains(year) && checkQuarter(dayOfYear, resolveQuarter(q))
+        quarterlyFilingYearsAllowed.contains(year) && checkQuarter(dayOfYear, resolveQuarter(q))
     }
   }
 
@@ -37,19 +37,17 @@ object Filer {
       for {
         rawStart <- Try(hocon.getString("start")).toEither.left.map(_ => "failed to obtain start")
         rawEnd <- Try(hocon.getString("end")).toEither.left.map(_ => "failed to obtain end")
-        enabled <- Try(hocon.getBoolean("enabled")).toEither.left.map(_ => "failed to obtain enabled")
         start <- Try(formatter.parse(rawStart + year)).toEither.left.map(_ => s"failed to parse $rawStart as a valid start date")
         end <- Try(formatter.parse(rawEnd + year)).toEither.left.map(_ => s"failed to parse $rawEnd as a valid end date")
         c <- Try(QuarterConfig(
           start.get(ChronoField.DAY_OF_YEAR),
           end.get(ChronoField.DAY_OF_YEAR),
-          enabled
         )
         ).toEither.left.map(e => s"failed to build config because dates weren't valid ${e.getMessage}")
       } yield c
     }
 
-    def parseYear(s: String): Either[String, Int] = Try(s.toInt).filter(_ > 1000).toEither.left.map(e => s"failed to parse $s as a valid year because ${e.getMessage}")
+    def parseYear(s: String): Either[String, Int] = Try(s.toInt).toEither.left.map(e => s"failed to parse $s as a valid year because ${e.getMessage}")
 
     def parseYears(s: String): Either[String, List[Int]] = {
       s.split(",").map(parseYear).toList.sequence.flatMap {
@@ -59,23 +57,23 @@ object Filer {
     }
 
     for {
-      filingYearsAllowedC <- Try(hocon.getString("rules.filing-years-allowed")).toEither.left.map(_ => "Failed to get HOCON: rules.filing-years-allowed")
-      startYearC <- Try(hocon.getString("rules.quarterly-filing.start-year")).toEither.left.map(_ => "Failed to get HOCON: rules.quarterly-filing.start-year")
-      q1C <- Try(hocon.getConfig("rules.quarterly-filing.q1")).toEither.left.map(_ => "Failed to get HOCON for q1")
-      q2C <- Try(hocon.getConfig("rules.quarterly-filing.q2")).toEither.left.map(_ => "Failed to get HOCON for q2")
-      q3C <- Try(hocon.getConfig("rules.quarterly-filing.q3")).toEither.left.map(_ => "Failed to get HOCON for q3")
-      yearsAllowed <- parseYears(filingYearsAllowedC)
-      startYear <- parseYear(startYearC)
+      yearlyFilingYearsAllowedC <- Try(hocon.getString("hmda.rules.yearly-filing.years-allowed")).toEither.left.map(_ => "Failed to get HOCON: hmda.rules.yearly-filing.years-allowed")
+      quarterlyFilingYearsAllowedC  <- Try(hocon.getString("hmda.rules.quarterly-filing.years-allowed")).toEither.left.map(_ => "Failed to get HOCON: hmda.rules.quarterly-filing.years-allowed")
+      q1C <- Try(hocon.getConfig("hmda.rules.quarterly-filing.q1")).toEither.left.map(_ => "Failed to get HOCON for q1")
+      q2C <- Try(hocon.getConfig("hmda.rules.quarterly-filing.q2")).toEither.left.map(_ => "Failed to get HOCON for q2")
+      q3C <- Try(hocon.getConfig("hmda.rules.quarterly-filing.q3")).toEither.left.map(_ => "Failed to get HOCON for q3")
+      yearsAllowedForYearlyFiling <- parseYears(yearlyFilingYearsAllowedC)
+      quarterlyFilingYearsAllowed <- parseYears(quarterlyFilingYearsAllowedC)
       q1 <- parseQuarterConfig(q1C)
       q2 <- parseQuarterConfig(q2C)
       q3 <- parseQuarterConfig(q3C)
-    } yield FilingRulesConfig(QuarterlyFilingConfig(startYear, q1, q2, q3), yearsAllowed)
+    } yield FilingRulesConfig(QuarterlyFilingConfig(quarterlyFilingYearsAllowed, q1, q2, q3), yearsAllowedForYearlyFiling)
   }
 
   private def checkQuarter(dayOfYear: Int, quarterConfig: QuarterConfig): Boolean =
-    quarterConfig.enabled && (dayOfYear >= quarterConfig.startDayOfYear) && (dayOfYear <= quarterConfig.endDayOfYear)
+    (dayOfYear >= quarterConfig.startDayOfYear) && (dayOfYear <= quarterConfig.endDayOfYear)
 
-  case class QuarterConfig(startDayOfYear: Int, endDayOfYear: Int, enabled: Boolean)
-  case class QuarterlyFilingConfig(startYear: Int, q1: QuarterConfig, q2: QuarterConfig, q3: QuarterConfig)
+  case class QuarterConfig(startDayOfYear: Int, endDayOfYear: Int)
+  case class QuarterlyFilingConfig(quarterlyFilingYearsAllowed: List[Int], q1: QuarterConfig, q2: QuarterConfig, q3: QuarterConfig)
   case class FilingRulesConfig(qf: QuarterlyFilingConfig, filingYearsAllowed: List[Int])
 }
