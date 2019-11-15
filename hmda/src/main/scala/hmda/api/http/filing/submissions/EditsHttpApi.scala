@@ -31,7 +31,7 @@ import hmda.query.HmdaQuery._
 import hmda.api.http.PathMatchers._
 import hmda.persistence.submission.EditDetailsPersistence.selectEditDetailsPersistence
 import hmda.persistence.submission.HmdaValidationError.selectHmdaValidationError
-import hmda.utils.YearUtils
+import hmda.utils.YearUtils.Period
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.matching.Regex
@@ -66,8 +66,7 @@ trait EditsHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization 
     }
 
   private def getEdits(lei: String, year: Int, quarter: Option[String], seqNr: Int, uri: Uri): Route = {
-    val period                                    = YearUtils.period(year, quarter)
-    val submissionId                              = SubmissionId(lei, period, seqNr)
+    val submissionId                              = SubmissionId(lei, Period(year, quarter), seqNr)
     val hmdaValidationError                       = selectHmdaValidationError(sharding, submissionId)
     val fEdits: Future[HmdaValidationErrorState]  = hmdaValidationError ? (ref => GetHmdaValidationErrorState(submissionId, ref))
     val fVerification: Future[VerificationStatus] = hmdaValidationError ? (ref => GetVerificationStatus(ref))
@@ -79,16 +78,16 @@ trait EditsHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization 
       case Success((edits, ver)) =>
         val syntactical =
           SyntacticalEditSummaryResponse(edits.syntactical.map { editSummary =>
-            toEditSummaryResponse(editSummary, period)
+            toEditSummaryResponse(editSummary, submissionId.period)
           }.toSeq.sorted)
         val validity = ValidityEditSummaryResponse(edits.validity.map { editSummary =>
-          toEditSummaryResponse(editSummary, period)
+          toEditSummaryResponse(editSummary, submissionId.period)
         }.toSeq.sorted)
         val quality = QualityEditSummaryResponse(edits.quality.map { editSummary =>
-          toEditSummaryResponse(editSummary, period)
+          toEditSummaryResponse(editSummary, submissionId.period)
         }.toSeq.sorted, edits.qualityVerified)
         val `macro` = MacroEditSummaryResponse(edits.`macro`.map { editSummary =>
-          toEditSummaryResponse(editSummary, period)
+          toEditSummaryResponse(editSummary, submissionId.period)
         }.toSeq.sorted, edits.macroVerified)
         val editsSummaryResponse =
           EditsSummaryResponse(
@@ -125,8 +124,7 @@ trait EditsHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization 
     }
 
   private def csvEditSummaryStream(lei: String, year: Int, quarter: Option[String], seqNr: Int): Route = {
-    val period       = YearUtils.period(year, quarter)
-    val submissionId = SubmissionId(lei, period, seqNr)
+    val submissionId = SubmissionId(lei, Period(year, quarter), seqNr)
     val csv = csvHeaderSource
       .concat(validationErrorEventStream(submissionId))
       .map(ByteString(_))
@@ -158,8 +156,7 @@ trait EditsHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization 
   }
 
   private def getEditDetails(lei: String, year: Int, quarter: Option[String], seqNr: Int, page: Int, editName: String, uri: Uri): Route = {
-    val period                                       = YearUtils.period(year, quarter)
-    val submissionId                                 = SubmissionId(lei, period, seqNr)
+    val submissionId                                 = SubmissionId(lei, Period(year, quarter), seqNr)
     val persistenceId                                = s"${EditDetailsPersistence.name}-$submissionId"
     val editDetailsPersistence                       = selectEditDetailsPersistence(sharding, submissionId)
     val fEditRowCount: Future[EditDetailsRowCounted] = editDetailsPersistence ? (ref => GetEditRowCount(editName, ref))
@@ -186,7 +183,7 @@ trait EditsHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization 
       }
     }
 
-  private def toEditSummaryResponse(e: EditSummary, period: String): EditSummaryResponse =
+  private def toEditSummaryResponse(e: EditSummary, period: Period): EditSummaryResponse =
     EditSummaryResponse(e.editName, EditDescriptionLookup.lookupDescription(e.editName, period))
 
   private def editDetails(persistenceId: String, summary: EditDetailsSummary): Future[EditDetailsSummary] = {

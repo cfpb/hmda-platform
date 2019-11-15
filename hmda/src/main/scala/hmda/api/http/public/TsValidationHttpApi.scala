@@ -111,7 +111,7 @@ trait TsValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpAp
         complete(t)
 
       case Left(errors) =>
-        complete(ToResponseMarshallable(aggregateErrors(errors, year.toString)))
+        complete(ToResponseMarshallable(aggregateErrors(errors, Period(year, quarter))))
     }
   }
 

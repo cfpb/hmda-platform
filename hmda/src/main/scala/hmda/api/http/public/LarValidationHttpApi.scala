@@ -104,7 +104,7 @@ trait LarValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpA
     maybeErrors match {
       case Right(l) => complete(l)
       case Left(errors) =>
-        complete(aggregateErrors(errors, year.toString))
+        complete(aggregateErrors(errors, Period(year, quarter)))
     }
   }
 

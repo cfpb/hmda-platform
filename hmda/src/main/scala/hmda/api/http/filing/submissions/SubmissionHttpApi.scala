@@ -35,7 +35,7 @@ import hmda.messages.submission.SubmissionProcessingCommands.{ GetHmdaValidation
 import hmda.model.processing.state.HmdaValidationErrorState
 import hmda.persistence.filing.FilingPersistence.selectFiling
 import hmda.persistence.institution.InstitutionPersistence.selectInstitution
-import hmda.utils.YearUtils
+import hmda.utils.YearUtils.Period
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
@@ -69,14 +69,14 @@ trait SubmissionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
     }
 
   private def createSubmissionIfValid(lei: String, year: Int, quarter: Option[String], uri: Uri): Route = {
-    val period = YearUtils.period(year, quarter)
+    val period = Period(year, quarter)
     onComplete(obtainLatestSubmissionAndFilingAndInstitution(lei, year, quarter)) {
       case Success(check) =>
         check match {
           case (None, _, _) =>
             entityNotPresentResponse("institution", lei, uri)
           case (_, None, _) =>
-            entityNotPresentResponse("filing", period, uri)
+            entityNotPresentResponse("filing", period.toString, uri)
           case (_, _, maybeLatest) =>
             maybeLatest match {
               case None =>
@@ -148,8 +148,7 @@ trait SubmissionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
     }
 
   private def getSubmissionSummary(lei: String, year: Int, quarter: Option[String], seqNr: Int, uri: Uri): Route = {
-    val period                               = YearUtils.period(year, quarter)
-    val submissionId                         = SubmissionId(lei, period, seqNr)
+    val submissionId                         = SubmissionId(lei, Period(year, quarter), seqNr)
     val filingPersistence                    = selectFiling(sharding, lei, year, quarter)
     val fSummary: Future[Option[Submission]] = filingPersistence ? (ref => GetSubmissionSummary(submissionId, ref))
     val fTs: Future[Option[TransmittalSheet]] =

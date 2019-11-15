@@ -6,7 +6,6 @@ import akka.actor.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.{ StatusCodes, Uri }
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.StatusCodes
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
@@ -18,7 +17,6 @@ import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import hmda.messages.filing.FilingCommands.{ CreateFiling, GetFilingDetails }
 import hmda.model.filing.{ Filing, FilingDetails, InProgress }
 import hmda.persistence.filing.FilingPersistence._
-import hmda.persistence.filing.FilingPersistence
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.ErrorResponse
 import hmda.api.http.model.filing.submissions._
@@ -29,7 +27,6 @@ import hmda.messages.submission.SubmissionProcessingCommands.{ GetHmdaValidation
 import hmda.model.filing.submission.{ QualityMacroExists, VerificationStatus }
 import hmda.model.institution.Institution
 import hmda.model.processing.state.HmdaValidationErrorState
-import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.HmdaValidationError
 import hmda.persistence.institution.InstitutionPersistence._
 import hmda.util.http.FilingResponseUtils._

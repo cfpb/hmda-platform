@@ -25,7 +25,7 @@ import hmda.util.http.FilingResponseUtils._
 import hmda.api.http.PathMatchers._
 import hmda.persistence.submission.HmdaValidationError.selectHmdaValidationError
 import hmda.persistence.submission.SubmissionPersistence.selectSubmissionPersistence
-import hmda.utils.YearUtils
+import hmda.utils.YearUtils.Period
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
@@ -77,8 +77,7 @@ trait SignHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
     }
 
   private def getSubmissionForSigning(lei: String, year: Int, quarter: Option[String], seqNr: Int, email: String, uri: Uri): Route = {
-    val period                                  = YearUtils.period(year, quarter)
-    val submissionId                            = SubmissionId(lei, period, seqNr)
+    val submissionId                            = SubmissionId(lei, Period(year, quarter), seqNr)
     val submissionPersistence                   = selectSubmissionPersistence(sharding, submissionId)
     val fSubmission: Future[Option[Submission]] = submissionPersistence ? GetSubmission
     onComplete(fSubmission) {
@@ -103,8 +102,7 @@ trait SignHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
     signed: Boolean,
     uri: Uri
   ): Route = {
-    val period       = YearUtils.period(year, quarter)
-    val submissionId = SubmissionId(lei, period, seqNr)
+    val submissionId = SubmissionId(lei, Period(year, quarter), seqNr)
     if (!signed) badRequest(submissionId, uri, "Illegal argument: signed = false")
     else {
       val hmdaValidationError                    = selectHmdaValidationError(sharding, submissionId)
