@@ -52,12 +52,10 @@ trait SubmissionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
   def submissionCreatePath(oauth2Authorization: OAuth2Authorization): Route =
     respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
       timedPost { uri =>
-        //TODO: add rules
         path("institutions" / Segment / "filings" / IntNumber / "submissions") { (lei, year) =>
           oauth2Authorization.authorizeTokenWithLei(lei) { _ =>
             createSubmissionIfValid(lei, year, None, uri)
           }
-          //TODO: add rules
         } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter / "submissions") { (lei, year, quarter) =>
           oauth2Authorization.authorizeTokenWithLei(lei) { _ =>
             pathEndOrSingleSlash {
@@ -132,12 +130,10 @@ trait SubmissionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
   def submissionSummaryPath(oAuth2Authorization: OAuth2Authorization): Route =
     respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
       timedGet { uri =>
-        //TODO: add rules
         path("institutions" / Segment / "filings" / IntNumber / "submissions" / IntNumber / "summary") { (lei, year, seqNr) =>
           oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
             getSubmissionSummary(lei, year, None, seqNr, uri)
           }
-          //TODO: add rules
         } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "summary") {
           (lei, year, quarter, seqNr) =>
             oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
@@ -197,12 +193,10 @@ trait SubmissionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
   def latestSubmissionPath(oAuth2Authorization: OAuth2Authorization): Route =
     respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
       timedGet { uri =>
-        //TODO: add rules
         path("institutions" / Segment / "filings" / IntNumber / "submissions" / "latest") { (lei, year) =>
           oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
             getLatestSubmission(lei, year, None, uri)
           }
-          //TODO: add rules
         } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter / "submissions" / "latest") { (lei, year, quarter) =>
           oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
             pathEndOrSingleSlash {

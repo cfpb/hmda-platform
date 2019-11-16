@@ -41,7 +41,6 @@ trait ParseErrorHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
   // GET institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/parseErrors
   def parseErrorPath(oauth2Authorization: OAuth2Authorization): Route = timedGet { uri =>
     parameters('page.as[Int] ? 1) { page =>
-      //TODO: add rules
       pathPrefix("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
         oauth2Authorization.authorizeTokenWithLei(lei) { _ =>
           path("submissions" / IntNumber / "parseErrors") { seqNr =>

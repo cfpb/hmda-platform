@@ -52,10 +52,8 @@ trait EditsHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization 
     pathPrefix("institutions" / Segment) { lei =>
       timedGet { uri =>
         oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
-          //TODO: add rules
           path("filings" / IntNumber / "submissions" / IntNumber / "edits") { (year, seqNr) =>
             getEdits(lei, year, None, seqNr, uri)
-            //TODO: add rules
           } ~ path("filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "edits") { (year, quarter, seqNr) =>
             pathEndOrSingleSlash {
               quarterlyFilingAllowed(lei, year) {
@@ -114,10 +112,8 @@ trait EditsHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization 
   def editsSummaryCsvPath(oAuth2Authorization: OAuth2Authorization): Route =
     pathPrefix("institutions" / Segment) { lei =>
       oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
-        //TODO: add rules
         path("filings" / IntNumber / "submissions" / IntNumber / "edits" / "csv") { (year, seqNr) =>
           csvEditSummaryStream(lei, year, None, seqNr)
-          //TODO: add rules
         } ~ path("filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "edits" / "csv") { (year, quarter, seqNr) =>
           pathEndOrSingleSlash {
             quarterlyFilingAllowed(lei, year) {
@@ -145,10 +141,8 @@ trait EditsHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization 
       timedGet { uri =>
         parameters('page.as[Int] ? 1) { page =>
           oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
-            //TODO: add rules
             path("filings" / IntNumber / "submissions" / IntNumber / "edits" / editNameRegex) { (year, seqNr, editName) =>
               getEditDetails(lei, year, None, seqNr, page, editName, uri)
-              //TODO: add rules
             } ~ path("filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "edits" / editNameRegex) {
               (year, quarter, seqNr, editName) =>
                 pathEndOrSingleSlash {

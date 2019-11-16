@@ -63,10 +63,8 @@ trait UploadHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
       timedPost { uri =>
         pathPrefix(Segment / "filings") { lei =>
           oauth2Authorization.authorizeTokenWithLei(lei) { _ =>
-            //TODO: add rules
             path(IntNumber / "submissions" / IntNumber) { (year, seqNr) =>
               checkAndUploadSubmission(lei, year, None, seqNr, uri)
-              //TODO: add rules
             } ~ path(IntNumber / "quarter" / Quarter / "submissions" / IntNumber) { (year, quarter, seqNr) =>
               quarterlyFilingAllowed(lei, year) {
                 checkAndUploadSubmission(lei, year, Option(quarter), seqNr, uri)
