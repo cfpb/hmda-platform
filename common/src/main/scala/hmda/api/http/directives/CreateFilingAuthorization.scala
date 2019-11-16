@@ -1,5 +1,4 @@
 package hmda.api.http.directives
-
 import java.time.LocalDate
 
 import akka.http.scaladsl.model.StatusCodes.BadRequest
@@ -18,7 +17,6 @@ trait CreateFilingAuthorization {
   def isFilingAllowed(year: Int, quarter: Option[String])(successful: Route): Route = extractMatchedPath { path =>
     // we use this only for month and day information
     val now = LocalDate.now()
-    val s = now.getDayOfYear
     if (check(year, now.getDayOfYear, quarter)) successful
     else complete(BadRequest, ErrorResponse(BadRequest.intValue, "The provided year or quarter isn't open at the moment", path))
   }

@@ -39,6 +39,8 @@ spec:
 {{ toYaml .Values.resources | indent 12 }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
+        - name: CURRENT_YEAR
+          value: {{.Values.current.year}}
         - name: RULES_YEARLY_FILING_YEARS_ALLOWED
           value: {{.Values.rules.yearlyFilingYearsAllowed}}
         - name: RULES_QF_FILING_YEARS_ALLOWED

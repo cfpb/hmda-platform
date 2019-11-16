@@ -42,6 +42,8 @@ rules:
   q3Start: October 01
   q3End: December 31
 
+current:
+  year: 2019
 
 service:
   type: ClusterIP

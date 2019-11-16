@@ -1,9 +1,8 @@
 package hmda.util
-
 import java.time.format.DateTimeFormatterBuilder
+import cats.implicits._
 import java.time.temporal.ChronoField
 
-import cats.implicits._
 import com.typesafe.config.Config
 
 import scala.util.Try
