@@ -15,7 +15,7 @@ trait CreateFilingAuthorization {
   private val check = Filer.check(rulesConfig) _
 
   def isFilingAllowed(year: Int, quarter: Option[String])(successful: Route): Route = extractMatchedPath { path =>
-    // we use this only for month and day information
+    // we use this only for month and day information (not time)
     val now = LocalDate.now()
     if (check(year, now.getDayOfYear, quarter)) successful
     else complete(BadRequest, ErrorResponse(BadRequest.intValue, "The provided year or quarter isn't open at the moment", path))
