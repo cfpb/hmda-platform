@@ -117,7 +117,7 @@ trait FilingHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
   }
 
   def createFilingForInstitution(lei: String, year: Int, quarter: Option[String], uri: Uri): Route =
-    createFilingAllowed(year, quarter) {
+    isFilingAllowed(year, quarter) {
       onComplete(obtainFilingDetails(lei, year, quarter)) {
         case Failure(error) =>
           log.error(error, s"Unable to obtain filing details for an institution for (lei: $lei, year: $year, quarter: $quarter)")

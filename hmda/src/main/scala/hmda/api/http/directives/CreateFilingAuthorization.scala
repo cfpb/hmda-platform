@@ -15,7 +15,7 @@ trait CreateFilingAuthorization {
   private val rulesConfig = Filer.parse(config).fold(error => throw new RuntimeException(s"Failed to parse filing rules in HOCON: $error"), identity)
   private val check = Filer.check(rulesConfig) _
 
-  def createFilingAllowed(year: Int, quarter: Option[String])(successful: Route): Route = extractMatchedPath { path =>
+  def isFilingAllowed(year: Int, quarter: Option[String])(successful: Route): Route = extractMatchedPath { path =>
     // we use this only for month and day information
     val now = LocalDate.now()
     val s = now.getDayOfYear
