@@ -44,14 +44,11 @@ object ModifiedLarPublisher {
   final val name: String = "ModifiedLarPublisher"
 
   val config = ConfigFactory.load()
-
-  val filingYear = config.getInt("hmda.lar.modified.year")
   val accessKeyId = config.getString("aws.access-key-id")
   val secretAccess = config.getString("aws.secret-access-key ")
   val region = config.getString("aws.region")
   val bucket = config.getString("aws.public-bucket")
   val environment = config.getString("aws.environment")
-  val year = config.getInt("hmda.lar.modified.year")
   val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
   val bankFilterList =
     bankFilter.getString("bank-filter-list").toUpperCase.split(",")
@@ -98,13 +95,14 @@ object ModifiedLarPublisher {
             "and isCreateDispositionRecord set to " + isCreateDispositionRecord)
 
           val fileName = s"${submissionId.lei.toUpperCase()}.txt"
+          val filingPeriod= s"${submissionId.period}"
 
           val metaHeaders: Map[String, String] =
             Map("Content-Disposition" -> "attachment", "filename" -> fileName)
 
           val s3Sink = S3
             .multipartUpload(bucket,
-                             s"$environment/modified-lar/$year/$fileName",
+                             s"$environment/modified-lar/$filingPeriod/$fileName",
                              metaHeaders = MetaHeaders(metaHeaders))
             .withAttributes(S3Attributes.settings(s3Settings))
 
