@@ -30,22 +30,21 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
         }
     }
 
-  def authorizeTokenWithLei(lei: String): Directive1[VerifiedToken] = {
+  def authorizeTokenWithLei(lei: String): Directive1[VerifiedToken] =
     authorizeToken flatMap {
       case t if t.lei.nonEmpty =>
         if (runtimeMode == "dev") {
           provide(t)
         } else {
-            val leiList = t.lei.split(',')
-            if (leiList.contains(lei)) {
-              provide(t)
-            } else {
-              reject(AuthorizationFailedRejection)
-                .toDirective[Tuple1[VerifiedToken]]
-            }
+          val leiList = t.lei.split(',')
+          if (leiList.contains(lei)) {
+            provide(t)
+          } else {
             reject(AuthorizationFailedRejection)
               .toDirective[Tuple1[VerifiedToken]]
+          }
         }
+
       case _ =>
         if (runtimeMode == "dev") {
           provide(VerifiedToken())
@@ -54,7 +53,6 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
             .toDirective[Tuple1[VerifiedToken]]
         }
     }
-  }
 
 
   def authorizeToken: Directive1[VerifiedToken] =

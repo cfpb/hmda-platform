@@ -40,23 +40,23 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: CURRENT_YEAR
-          value: {{.Values.current.year}}
+          value: "{{ .Values.current.year }}"
         - name: RULES_YEARLY_FILING_YEARS_ALLOWED
-          value: {{.Values.rules.yearlyFilingYearsAllowed}}
+          value: "{{ .Values.rules.yearlyFilingYearsAllowed }}"
         - name: RULES_QF_FILING_YEARS_ALLOWED
-          value: {{.Values.rules.quarterlyFilingYearsAllowed}}
+          value: "{{ .Values.rules.quarterlyFilingYearsAllowed }}"
         - name: RULES_QF_Q1_START
-          value: {{.Values.rules.q1Start}}
+          value: "{{ .Values.rules.q1Start }}"
         - name: RULES_QF_Q1_END
-          value: {{.Values.rules.q1End}}
+          value: "{{ .Values.rules.q1End }}"
         - name: RULES_QF_Q2_START
-          value: {{.Values.rules.q2Start}}
+          value: "{{ .Values.rules.q2Start }}"
         - name: RULES_QF_Q2_END
-          value: {{.Values.rules.q2End}}
+          value: "{{ .Values.rules.q2End }}"
         - name: RULES_QF_Q3_START
-          value: {{.Values.rules.q3Start}}
+          value: "{{ .Values.rules.q3Start }}"
         - name: RULES_QF_Q3_END
-          value: {{.Values.rules.q3End}}
+          value: "{{ .Values.rules.q3End }}"
         - name: KAFKA_INSTITUTIONS_TOPIC
           value: {{.Values.kafka.institutionsTopic}}
         - name: KAFKA_SIGN_TOPIC
