@@ -9,6 +9,10 @@ image:
   tag: master
   pullPolicy: IfNotPresent
 
+kafka:
+  emailTopic: hmda-email
+  emailGroup: email-consumer 
+
 resources:
   limits:
     memory: "2200Mi"

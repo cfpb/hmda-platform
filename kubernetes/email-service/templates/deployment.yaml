@@ -86,25 +86,16 @@ spec:
               }
             },
             {
-              "name": "HTTP_CENSUS_PORT",
-              "valueFrom": {
-                "configMapKeyRef": {
-                  "name": "http-configmap",
-                  "key": "census.port"
-                }
-              }
-            },
-            {
               "name": "EMAIL_LOG_LEVEL",
               "value": "INFO"
             },
             {
               "name": "KAFKA_EMAIL_TOPIC",
-              "value": "hmda-email"
+              "value": {{.Values.kafka.emailTopic}}
             },
             {
               "name": "KAFKA_EMAIL_CONSUMER_GROUP_ID",
-              "value": "email-consumer"
+              "value": {{.Values.kafka.emailGroup}}
             },
             {
               "name": "EMAIL_SUBJECT",
