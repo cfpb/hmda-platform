@@ -49,8 +49,6 @@ object IrsPublisher {
   val region = config.getString("aws.region")
   val bucket = config.getString("aws.public-bucket")
   val environment = config.getString("aws.environment")
-  val year = config.getInt("hmda.lar.irs.year")
-
   val censusHost = config.getString("hmda.census.http.host")
   val censusPort = config.getInt("hmda.census.http.port")
 
@@ -105,12 +103,13 @@ object IrsPublisher {
       Behaviors.receiveMessage {
 
         case PublishIrs(submissionId) =>
-          log.info(s"Publishing IRS for $submissionId")
+          val filingPeriod= s"${submissionId.period}"
+          log.info(s"Publishing IRS for $submissionId for filing period $filingPeriod" )
 
           val s3Sink: Sink[ByteString, Future[MultipartUploadResult]] =
             S3.multipartUpload(
                 bucket,
-                s"$environment/reports/disclosure/$year/${submissionId.lei}/nationwide/IRS.csv")
+                s"$environment/reports/disclosure/$filingPeriod/${submissionId.lei}/nationwide/IRS.csv")
               .withAttributes(S3Attributes.settings(s3Settings))
 
           val msaSummarySource: Source[ByteString, NotUsed] = {

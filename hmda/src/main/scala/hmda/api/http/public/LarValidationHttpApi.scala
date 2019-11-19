@@ -53,7 +53,7 @@ trait LarValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpA
 
   //lar/validate/<year>
   val validateYearLarRoute =
-    path("validate" / Year) { year =>
+    path("validate" / IntNumber) { year =>
       parameters('check.as[String] ? "all") { checkType =>
         timedPost { _ =>
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
@@ -71,7 +71,7 @@ trait LarValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpA
 
   //lar/validate/<year>
   val validateQuarterLarRoute =
-    path("validate" / Year / "quarter" / Quarter) { (year, quarter) =>
+    path("validate" / IntNumber / "quarter" / Quarter) { (year, quarter) =>
       parameters('check.as[String] ? "all") { checkType =>
         timedPost { _ =>
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {

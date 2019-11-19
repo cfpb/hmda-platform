@@ -52,7 +52,7 @@ trait TsValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpAp
 
   //ts/validate/<year>
   val validateYearTsRoute =
-    path("validate" / Year) { year =>
+    path("validate" / IntNumber) { year =>
       parameters('check.as[String] ? "all") { checkType =>
         timedPost { _ =>
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
@@ -71,7 +71,7 @@ trait TsValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpAp
 
   //ts/validate/<year>/quarter/<period>
   val validateQuarterTsRoute =
-    path("validate" / Year / "quarter" / Quarter) { (year, quarter) =>
+    path("validate" / IntNumber / "quarter" / Quarter) { (year, quarter) =>
       parameters('check.as[String] ? "all") { checkType =>
         timedPost { _ =>
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {

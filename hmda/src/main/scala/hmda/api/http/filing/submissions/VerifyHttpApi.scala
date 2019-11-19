@@ -50,7 +50,7 @@ trait VerifyHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
     timedPost { uri =>
       respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
         entity(as[EditsVerification]) { editsVerification =>
-          pathPrefix("institutions" / Segment / "filings" / Year) { (lei, year) =>
+          pathPrefix("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
             oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
               path("submissions" / IntNumber / "edits" / editTypeRegex) { (seqNr, editType) =>
                 verify(lei, year, None, seqNr, editType, editsVerification.verified, uri)
