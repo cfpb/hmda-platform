@@ -54,6 +54,7 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
         }
     }
 
+
   def authorizeToken: Directive1[VerifiedToken] =
     bearerToken.flatMap {
       case Some(token) =>
