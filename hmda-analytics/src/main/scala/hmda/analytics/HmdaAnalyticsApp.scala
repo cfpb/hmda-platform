@@ -26,7 +26,6 @@ import hmda.query.DbConfiguration.dbConfig
 import hmda.query.HmdaQuery.{ readRawData, readSubmission }
 import hmda.util.BankFilterUtils._
 import hmda.util.streams.FlowUtils.framing
-import hmda.utils.YearUtils
 import hmda.utils.YearUtils.Period
 
 import scala.concurrent.Future
@@ -129,7 +128,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .map(ts => TransmittalSheetConverter(ts, submissionIdVar))
         .mapAsync(1) { ts =>
           for {
-            delete <- YearUtils.parsePeriod(submissionId.period).right.get match {
+            delete <- submissionId.period match {
                        case Period(2018, None)    => transmittalSheetRepository2018.deleteByLei(ts.lei)
                        case Period(2019, None)    => transmittalSheetRepository2019.deleteByLei(ts.lei)
                        case Period(2020, Some(_)) => transmittalSheetRepository2020.deleteByLeiAndQuarter(lei = ts.lei)
@@ -173,7 +172,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .map(ts => TransmittalSheetConverter(ts, submissionIdVar))
         .mapAsync(1) { ts =>
           for {
-            insertorupdate <- YearUtils.parsePeriod(submissionId.period).right.get match {
+            insertorupdate <- submissionId.period match {
                                case Period(2018, None) => transmittalSheetRepository2018.insert(ts)
                                case Period(2019, None) => transmittalSheetRepository2019.insert(ts)
                                case Period(2020, Some(_)) =>
@@ -199,7 +198,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .filter(lar => lar.larIdentifier.LEI != "")
         .mapAsync(1) { lar =>
           for {
-            delete <- YearUtils.parsePeriod(submissionId.period).right.get match {
+            delete <- submissionId.period match {
                        case Period(2018, None)    => larRepository2018.deleteByLei(lar.larIdentifier.LEI)
                        case Period(2019, None)    => larRepository2019.deleteByLei(lar.larIdentifier.LEI)
                        case Period(2020, Some(_)) => larRepository2020.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
@@ -222,7 +221,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .filter(lar => lar.larIdentifier.LEI != "")
         .mapAsync(1) { lar =>
           for {
-            insertorupdate <- YearUtils.parsePeriod(submissionId.period).right.get match {
+            insertorupdate <- submissionId.period match {
                                case Period(2018, None) => larRepository2018.insert(LarConverter2018(lar))
                                case Period(2019, None) =>
                                  larRepository2019.insert(
