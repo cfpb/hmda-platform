@@ -156,6 +156,15 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
     }
   }
 
+  private def checkTaxIdFormat(taxId: String): Boolean = {
+    if (taxId.contains("-")) {
+      val id = taxId.split("-")
+      if (id.length == 2 && id.head.length == 2 && id.tail.length == 7) true
+      else false
+    } else false
+  }
+
+
   def institutionAdminRoutes(oAuth2Authorization: OAuth2Authorization): Route =
     handleRejections(corsRejectionHandler) {
       cors() {
