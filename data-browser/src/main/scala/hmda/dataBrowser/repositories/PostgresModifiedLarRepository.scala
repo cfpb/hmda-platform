@@ -178,9 +178,9 @@ class PostgresModifiedLarRepository(tableName: String, config: DatabaseConfig[Jd
     }
     val query =
       sql"""
-        SELECT a.lei, b.respondent_name, '#${year.getOrElse("2018")}'
+        SELECT a.lei, b.respondent_name, a.lar_count, '#${year.getOrElse("2018")}'
         from (
-          SELECT lei
+          SELECT lei, count(*) as lar_count
           FROM #${tableName}
           #$filterCriteria
           GROUP BY lei
