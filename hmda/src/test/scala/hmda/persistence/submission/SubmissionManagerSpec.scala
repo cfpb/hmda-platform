@@ -22,6 +22,7 @@ import hmda.model.filing.submission._
 import hmda.model.submission.SubmissionGenerator.submissionGen
 import hmda.persistence.AkkaCassandraPersistenceSpec
 import hmda.persistence.filing.FilingPersistence
+import hmda.utils.YearUtils.Period
 import org.scalatest.{BeforeAndAfterAll, MustMatchers}
 import akka.testkit._
 
@@ -42,7 +43,7 @@ class SubmissionManagerSpec
 
   Cluster(typedSystem).manager ! Join(Cluster(typedSystem).selfMember.address)
 
-  val submissionId = SubmissionId("12345", "2018", 1)
+  val submissionId = SubmissionId("12345", Period(2018, None), 1)
 
   val maybeFilingProbe = TestProbe[Option[Filing]]("maybe-filing-probe")
   val submissionProbe = TestProbe[SubmissionEvent]("submission-probe")
@@ -89,7 +90,7 @@ class SubmissionManagerSpec
 
       val filingPersistence = sharding.entityRefFor(
         FilingPersistence.typeKey,
-        s"${FilingPersistence.name}-${FilingId(sampleSubmission.id.lei, sampleSubmission.id.period).toString}")
+        s"${FilingPersistence.name}-${FilingId(sampleSubmission.id.lei, sampleSubmission.id.period.toString).toString}")
 
       submissionPersistence ! CreateSubmission(sampleSubmission.id,
                                                submissionProbe.ref)

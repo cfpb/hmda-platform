@@ -23,7 +23,7 @@ import hmda.model.filing.ParserValidValuesLookup._
 import hmda.api.http.model.filing.submissions._
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowParsedError
 import hmda.api.http.PathMatchers._
-import hmda.utils.YearUtils
+import hmda.utils.YearUtils.Period
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
@@ -41,7 +41,7 @@ trait ParseErrorHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
   // GET institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/parseErrors
   def parseErrorPath(oauth2Authorization: OAuth2Authorization): Route = timedGet { uri =>
     parameters('page.as[Int] ? 1) { page =>
-      pathPrefix("institutions" / Segment / "filings" / Year) { (lei, year) =>
+      pathPrefix("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
         oauth2Authorization.authorizeTokenWithLei(lei) { _ =>
           path("submissions" / IntNumber / "parseErrors") { seqNr =>
             checkSubmission(lei, year, None, seqNr, page, uri)
@@ -58,8 +58,7 @@ trait ParseErrorHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
   }
 
   private def checkSubmission(lei: String, year: Int, quarter: Option[String], seqNr: Int, page: Int, uri: Uri) = {
-    val period                                  = YearUtils.period(year, quarter)
-    val submissionId                            = SubmissionId(lei, period, seqNr)
+    val submissionId                            = SubmissionId(lei, Period(year, quarter), seqNr)
     val submissionPersistence                   = SubmissionPersistence.selectSubmissionPersistence(sharding, submissionId)
     val fSubmission: Future[Option[Submission]] = submissionPersistence ? GetSubmission
     val fCheckSubmission = for {

@@ -30,7 +30,7 @@ import hmda.api.http.PathMatchers._
 import hmda.persistence.submission.HmdaRawData.selectHmdaRawData
 import hmda.persistence.submission.SubmissionManager.selectSubmissionManager
 import hmda.persistence.submission.SubmissionPersistence.selectSubmissionPersistence
-import hmda.utils.YearUtils
+import hmda.utils.YearUtils.Period
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
@@ -63,9 +63,9 @@ trait UploadHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
       timedPost { uri =>
         pathPrefix(Segment / "filings") { lei =>
           oauth2Authorization.authorizeTokenWithLei(lei) { _ =>
-            path(Year / "submissions" / IntNumber) { (year, seqNr) =>
+            path(IntNumber / "submissions" / IntNumber) { (year, seqNr) =>
               checkAndUploadSubmission(lei, year, None, seqNr, uri)
-            } ~ path(Year / "quarter" / Quarter / "submissions" / IntNumber) { (year, quarter, seqNr) =>
+            } ~ path(IntNumber / "quarter" / Quarter / "submissions" / IntNumber) { (year, quarter, seqNr) =>
               quarterlyFilingAllowed(lei, year) {
                 checkAndUploadSubmission(lei, year, Option(quarter), seqNr, uri)
               }
@@ -76,8 +76,7 @@ trait UploadHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
     }
 
   private def checkAndUploadSubmission(lei: String, year: Int, quarter: Option[String], seqNr: Int, uri: Uri): Route = {
-    val period                                  = YearUtils.period(year, quarter)
-    val submissionId                            = SubmissionId(lei, period, seqNr)
+    val submissionId                            = SubmissionId(lei, Period(year, quarter), seqNr)
     val uploadTimestamp                         = Instant.now.toEpochMilli
     val submissionManager                       = selectSubmissionManager(sharding, submissionId)
     val submissionPersistence                   = selectSubmissionPersistence(sharding, submissionId)

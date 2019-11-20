@@ -27,7 +27,7 @@ import hmda.messages.submission.SubmissionProcessingEvents.{
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import hmda.auth.OAuth2Authorization
 import hmda.api.http.PathMatchers._
-import hmda.utils.YearUtils
+import hmda.utils.YearUtils.Period
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.matching.Regex
@@ -50,7 +50,7 @@ trait VerifyHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
     timedPost { uri =>
       respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
         entity(as[EditsVerification]) { editsVerification =>
-          pathPrefix("institutions" / Segment / "filings" / Year) { (lei, year) =>
+          pathPrefix("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
             oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
               path("submissions" / IntNumber / "edits" / editTypeRegex) { (seqNr, editType) =>
                 verify(lei, year, None, seqNr, editType, editsVerification.verified, uri)
@@ -68,8 +68,7 @@ trait VerifyHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
     }
 
   private def verify(lei: String, year: Int, quarter: Option[String], seqNr: Int, editType: String, verified: Boolean, uri: Uri): Route = {
-    val period                                  = YearUtils.period(year, quarter)
-    val submissionId                            = SubmissionId(lei, period, seqNr)
+    val submissionId                            = SubmissionId(lei, Period(year, quarter), seqNr)
     val submissionPersistence                   = SubmissionPersistence.selectSubmissionPersistence(sharding, submissionId)
     val fSubmission: Future[Option[Submission]] = submissionPersistence ? GetSubmission
 

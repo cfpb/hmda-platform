@@ -19,6 +19,7 @@ import hmda.model.filing.submission.SubmissionId
 import hmda.messages.submission.SubmissionEvents.{ SubmissionCreated, SubmissionEvent, SubmissionModified }
 import hmda.persistence.submission.SubmissionPersistence
 import hmda.query.HmdaQuery._
+import hmda.utils.YearUtils.Period
 
 import scala.concurrent.duration._
 
@@ -40,8 +41,8 @@ trait SubmissionWsApi {
 
   //institutions/<lei>/filings/<period>/submissions/<seqNr>
   val submissionWsPath: Route = {
-    path("institutions" / Segment / "filings" / Segment / "submissions" / IntNumber) { (lei, period, seqNr) =>
-      val submissionId  = SubmissionId(lei, period, seqNr)
+    path("institutions" / Segment / "filings" / Segment / "submissions" / IntNumber) { (lei, year, seqNr) =>
+      val submissionId  = SubmissionId(lei, Period(year.toInt, None), seqNr)
       val persistenceId = s"${SubmissionPersistence.name}-$submissionId"
 
       val source =

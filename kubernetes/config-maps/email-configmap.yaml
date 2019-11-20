@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: email-configmap
+data:
+  emailSubject: HMDA Filing Confirmation
+  emailContent: Congradulations on the completion of your HMDA submission.
+  emailSender: noreply@cfpb.gov

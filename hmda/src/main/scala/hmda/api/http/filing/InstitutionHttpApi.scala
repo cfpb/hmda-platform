@@ -35,7 +35,7 @@ trait InstitutionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriz
   // GET /institutions/<lei>/year/<y>
   // GET /institutions/<lei>/year/<y>/quarter/<q>
   def institutionReadPath(oAuth2Authorization: OAuth2Authorization): Route =
-    pathPrefix("institutions" / Segment / "year" / Year) { (lei, year) =>
+    pathPrefix("institutions" / Segment / "year" / IntNumber) { (lei, year) =>
       oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
         timedGet { uri =>
           pathEndOrSingleSlash {

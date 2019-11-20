@@ -44,7 +44,6 @@ import hmda.persistence.submission.EditDetailsConverter._
 import hmda.persistence.submission.HmdaProcessingUtils.{ readRawData, updateSubmissionStatus, updateSubmissionStatusAndReceipt }
 import hmda.publication.KafkaUtils._
 import hmda.util.streams.FlowUtils.framing
-import hmda.utils.YearUtils
 import hmda.utils.YearUtils.Period
 import hmda.validation.context.ValidationContext
 import hmda.validation.filing.MacroValidationFlow._
@@ -95,7 +94,7 @@ object HmdaValidationError
         updateSubmissionStatus(sharding, submissionId, Validating, log)
         log.info(s"Syntactical / Validity validation started for $submissionId")
 
-        val period = parseAndFallback(submissionId.period)(log)
+        val period = submissionId.period
 
         val fValidationContext =
           validationContext(period, sharding, ctx, submissionId)
@@ -146,7 +145,7 @@ object HmdaValidationError
 
       case StartQuality(submissionId) =>
         log.info(s"Quality validation started for $submissionId")
-        val period = parseAndFallback(submissionId.period)(log)
+        val period = submissionId.period
         val fQuality = for {
 
           larErrors <- validateLar("quality", ctx, submissionId, ValidationContext(filingPeriod = Some(period)))(
@@ -305,7 +304,7 @@ object HmdaValidationError
               publishSignEvent(submissionId, email, signed.timestamp).map(signed => log.info(s"Published signed event for $submissionId. " +
                 s"${signTopic} (key: ${submissionId.lei}, value: ${submissionId.toString}. " +
                 s"${emailTopic} (key: ${submissionId.toString}, value: ${email})"))
-              setHmdaFilerFlag(submissionId.lei, submissionId.period, sharding)
+              setHmdaFilerFlag(submissionId.lei, submissionId.period.toString, sharding)
               replyTo ! signed
             }
           } else {
@@ -373,15 +372,6 @@ object HmdaValidationError
             PersistHmdaRowValidatedError(submissionId, el.rowNumber, el.validationErrors, Some(replyTo))
         )
       )
-
-  private def parseAndFallback(period: String, fallbackPeriod: Period = Period(2018, None))(log: Logger): Period =
-    YearUtils
-      .parsePeriod(period)
-      .fold({ ex =>
-        log.error(ex, s"Failed to parse period: $period in HmdaValidationError")
-        log.warning(s"Falling back to $fallbackPeriod")
-        fallbackPeriod
-      }, identity)
 
   private def validateTsLar[as: AS, mat: MAT, ec: EC](
     ctx: TypedActorContext[SubmissionProcessingCommand],
@@ -623,7 +613,7 @@ object HmdaValidationError
     ctx: TypedActorContext[SubmissionProcessingCommand],
     submissionId: SubmissionId
   ): Source[HmdaRowValidatedError, NotUsed] = {
-    val period = parseAndFallback(submissionId.period)(ctx.asScala.log)
+    val period = submissionId.period
     uploadConsumerRawStr(ctx, submissionId)
       .drop(1)
       .via(validateAsyncLarFlow(editCheck, period))

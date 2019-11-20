@@ -9,7 +9,7 @@ import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.{ ByteString, Timeout }
-import hmda.api.http.directives.{ HmdaTimeDirectives, QuarterlyFilingAuthorization }
+import hmda.api.http.directives.{ HmdaTimeDirectives, QuarterlyFilingAuthorization, CreateFilingAuthorization }
 import akka.http.scaladsl.server.Directives._
 import akka.stream.scaladsl.Sink
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
@@ -35,12 +35,13 @@ import hmda.messages.submission.SubmissionProcessingCommands.{ GetHmdaValidation
 import hmda.model.processing.state.HmdaValidationErrorState
 import hmda.persistence.filing.FilingPersistence.selectFiling
 import hmda.persistence.institution.InstitutionPersistence.selectInstitution
+import hmda.utils.YearUtils.Period
 import hmda.utils.YearUtils
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
-trait SubmissionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
+trait SubmissionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization with CreateFilingAuthorization {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -52,11 +53,11 @@ trait SubmissionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
   def submissionCreatePath(oauth2Authorization: OAuth2Authorization): Route =
     respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
       timedPost { uri =>
-        path("institutions" / Segment / "filings" / Year / "submissions") { (lei, year) =>
+        path("institutions" / Segment / "filings" / IntNumber / "submissions") { (lei, year) =>
           oauth2Authorization.authorizeTokenWithLei(lei) { _ =>
             createSubmissionIfValid(lei, year, None, uri)
           }
-        } ~ path("institutions" / Segment / "filings" / Year / "quarter" / Quarter / "submissions") { (lei, year, quarter) =>
+        } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter / "submissions") { (lei, year, quarter) =>
           oauth2Authorization.authorizeTokenWithLei(lei) { _ =>
             pathEndOrSingleSlash {
               quarterlyFilingAllowed(lei, year) {
@@ -69,28 +70,30 @@ trait SubmissionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
     }
 
   private def createSubmissionIfValid(lei: String, year: Int, quarter: Option[String], uri: Uri): Route = {
-    val period = YearUtils.period(year, quarter)
-    onComplete(obtainLatestSubmissionAndFilingAndInstitution(lei, year, quarter)) {
-      case Success(check) =>
-        check match {
-          case (None, _, _) =>
-            entityNotPresentResponse("institution", lei, uri)
-          case (_, None, _) =>
-            entityNotPresentResponse("filing", period, uri)
-          case (_, _, maybeLatest) =>
-            maybeLatest match {
-              case None =>
-                val submissionId = SubmissionId(lei, period, 1)
-                createSubmission(uri, submissionId)
+    isFilingAllowed(year, quarter) {
+      val period = YearUtils.period(year, quarter)
+      onComplete(obtainLatestSubmissionAndFilingAndInstitution(lei, year, quarter)) {
+        case Success(check) =>
+          check match {
+            case (None, _, _) =>
+              entityNotPresentResponse("institution", lei, uri)
+            case (_, None, _) =>
+              entityNotPresentResponse("filing", period, uri)
+            case (_, _, maybeLatest) =>
+              maybeLatest match {
+                case None =>
+                  val submissionId = SubmissionId(lei, Period(year, quarter), 1)
+                  createSubmission(uri, submissionId)
 
-              case Some(submission) =>
-                val submissionId = SubmissionId(lei, period, submission.id.sequenceNumber + 1)
-                createSubmission(uri, submissionId)
-            }
-        }
+                case Some(submission) =>
+                  val submissionId = SubmissionId(lei, Period(year, quarter), submission.id.sequenceNumber + 1)
+                  createSubmission(uri, submissionId)
+              }
+          }
 
-      case Failure(error) =>
-        failedResponse(StatusCodes.InternalServerError, uri, error)
+        case Failure(error) =>
+          failedResponse(StatusCodes.InternalServerError, uri, error)
+      }
     }
   }
 
@@ -130,11 +133,11 @@ trait SubmissionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
   def submissionSummaryPath(oAuth2Authorization: OAuth2Authorization): Route =
     respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
       timedGet { uri =>
-        path("institutions" / Segment / "filings" / Year / "submissions" / IntNumber / "summary") { (lei, year, seqNr) =>
+        path("institutions" / Segment / "filings" / IntNumber / "submissions" / IntNumber / "summary") { (lei, year, seqNr) =>
           oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
             getSubmissionSummary(lei, year, None, seqNr, uri)
           }
-        } ~ path("institutions" / Segment / "filings" / Year / "quarter" / Quarter / "submissions" / IntNumber / "summary") {
+        } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "summary") {
           (lei, year, quarter, seqNr) =>
             oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
               pathEndOrSingleSlash {
@@ -148,8 +151,7 @@ trait SubmissionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
     }
 
   private def getSubmissionSummary(lei: String, year: Int, quarter: Option[String], seqNr: Int, uri: Uri): Route = {
-    val period                               = YearUtils.period(year, quarter)
-    val submissionId                         = SubmissionId(lei, period, seqNr)
+    val submissionId                         = SubmissionId(lei, Period(year, quarter), seqNr)
     val filingPersistence                    = selectFiling(sharding, lei, year, quarter)
     val fSummary: Future[Option[Submission]] = filingPersistence ? (ref => GetSubmissionSummary(submissionId, ref))
     val fTs: Future[Option[TransmittalSheet]] =
@@ -193,11 +195,11 @@ trait SubmissionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
   def latestSubmissionPath(oAuth2Authorization: OAuth2Authorization): Route =
     respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
       timedGet { uri =>
-        path("institutions" / Segment / "filings" / Year / "submissions" / "latest") { (lei, year) =>
+        path("institutions" / Segment / "filings" / IntNumber / "submissions" / "latest") { (lei, year) =>
           oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
             getLatestSubmission(lei, year, None, uri)
           }
-        } ~ path("institutions" / Segment / "filings" / Year / "quarter" / Quarter / "submissions" / "latest") { (lei, year, quarter) =>
+        } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter / "submissions" / "latest") { (lei, year, quarter) =>
           oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
             pathEndOrSingleSlash {
               quarterlyFilingAllowed(lei, year) {

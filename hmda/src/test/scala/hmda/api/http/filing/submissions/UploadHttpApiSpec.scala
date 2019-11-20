@@ -35,6 +35,7 @@ import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission._
 import hmda.model.filing.ts.TsGenerators._
 import hmda.model.filing.lar.LarGenerators._
+import hmda.utils.YearUtils.Period
 import org.keycloak.adapters.KeycloakDeploymentBuilder
 import akka.testkit._
 
@@ -66,7 +67,7 @@ class UploadHttpApiSpec
     )
   )
 
-  val period = "2018"
+  val period = Period(2018, None)
 
   val institutionProbe = TestProbe[InstitutionEvent]("institution-probe")
   val filingProbe = TestProbe[FilingEvent]("filing-probe")
@@ -82,7 +83,7 @@ class UploadHttpApiSpec
   val sampleFiling = filingGen.sample
     .getOrElse(Filing())
     .copy(lei = sampleInstitution.LEI)
-    .copy(period = period)
+    .copy(period = period.year.toString)
 
   val submissionId = SubmissionId(sampleInstitution.LEI, period, 1)
 
