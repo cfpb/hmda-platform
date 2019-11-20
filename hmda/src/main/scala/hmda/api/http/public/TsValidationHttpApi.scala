@@ -21,6 +21,7 @@ import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
 import hmda.utils.YearUtils.Period
 import scala.concurrent.ExecutionContext
+import hmda.api.http.PathMatchers._
 
 trait TsValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpApi {
 
@@ -50,7 +51,7 @@ trait TsValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpAp
     }
 
   //ts/validate/<year>
-  val validateTsRoute =
+  val validateYearTsRoute =
     path("validate" / IntNumber) { year =>
       parameters('check.as[String] ? "all") { checkType =>
         timedPost { _ =>
@@ -58,7 +59,7 @@ trait TsValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpAp
             entity(as[TsValidateRequest]) { req =>
               TsCsvParser(req.ts) match {
                 case Right(ts) =>
-                  validate(ts, checkType, ValidationContext(None), year)
+                  validate(ts, checkType, year, None)
                 case Left(errors) =>
                   completeWithParsingErrors(errors)
               }
@@ -68,13 +69,31 @@ trait TsValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpAp
       }
     }
 
-  private def validate(ts: TransmittalSheet, chekType: String, vc: ValidationContext, year: Int): Route = {
-    // take the year from the argument and overlay the period
-    val ctx              = vc.copy(filingPeriod = Some(Period(year, vc.filingPeriod.flatMap(_.quarter))))
+  //ts/validate/<year>/quarter/<period>
+  val validateQuarterTsRoute =
+    path("validate" / IntNumber / "quarter" / Quarter) { (year, quarter) =>
+      parameters('check.as[String] ? "all") { checkType =>
+        timedPost { _ =>
+          respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+            entity(as[TsValidateRequest]) { req =>
+              TsCsvParser(req.ts) match {
+                case Right(ts) =>
+                  validate(ts, checkType, year, Some(quarter))
+                case Left(errors) =>
+                  completeWithParsingErrors(errors)
+              }
+            }
+          }
+        }
+      }
+    }
+
+  private def validate(ts: TransmittalSheet, checkType: String, year: Int, quarter: Option[String]): Route = {
+    val ctx              = ValidationContext(filingPeriod = Some(Period(year, quarter)))
     val period           = ctx.filingPeriod.get
     val validationEngine = selectTsEngine(period.year, period.quarter)
     import validationEngine._
-    val validation: HmdaValidation[TransmittalSheet] = chekType match {
+    val validation: HmdaValidation[TransmittalSheet] = checkType match {
       case "all" =>
         checkAll(ts, ts.LEI, ctx, TsValidationError)
 
@@ -92,7 +111,7 @@ trait TsValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpAp
         complete(t)
 
       case Left(errors) =>
-        complete(ToResponseMarshallable(aggregateErrors(errors, year.toString)))
+        complete(ToResponseMarshallable(aggregateErrors(errors, Period(year, quarter))))
     }
   }
 
@@ -101,7 +120,7 @@ trait TsValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpAp
       cors() {
         encodeResponse {
           pathPrefix("ts") {
-            parseTsRoute ~ validateTsRoute
+            parseTsRoute ~ validateYearTsRoute ~ validateQuarterTsRoute
           }
         }
       }

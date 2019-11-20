@@ -44,6 +44,7 @@ import hmda.messages.submission.SubmissionProcessingEvents.{
   HmdaRowParsedCount,
   SubmissionProcessingEvent
 }
+import hmda.utils.YearUtils.Period
 import hmda.messages.submission.SubmissionProcessingCommands._
 import org.keycloak.adapters.KeycloakDeploymentBuilder
 
@@ -74,7 +75,7 @@ class ParseErrorHttpApiSpec
     )
   )
 
-  val period = "2018"
+  val period = Period(2018, None)
 
   val sampleInstitution = institutionGen
     .suchThat(_.LEI != "")
@@ -85,7 +86,7 @@ class ParseErrorHttpApiSpec
   val sampleFiling = filingGen.sample
     .getOrElse(Filing())
     .copy(lei = sampleInstitution.LEI)
-    .copy(period = period)
+    .copy(period = period.year.toString)
   val submissionId = SubmissionId(sampleInstitution.LEI, period, 1)
 
   val sampleSubmission = submissionGen

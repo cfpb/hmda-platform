@@ -11,6 +11,7 @@ import akka.cluster.typed.{Cluster, Join}
 import hmda.messages.submission.HmdaRawDataCommands.AddLine
 import hmda.messages.submission.HmdaRawDataEvents.{HmdaRawDataEvent, LineAdded}
 import hmda.model.filing.submission.SubmissionId
+import hmda.utils.YearUtils.Period
 
 class HmdaRawDataSpec extends AkkaCassandraPersistenceSpec {
   override implicit val system = actor.ActorSystem()
@@ -21,7 +22,7 @@ class HmdaRawDataSpec extends AkkaCassandraPersistenceSpec {
 
   val hmdaRawProbe = TestProbe[HmdaRawDataEvent]
 
-  val submissionId = SubmissionId("12345", "2018", 1)
+  val submissionId = SubmissionId("12345", Period(2018, None), 1)
 
   "HMDA Raw Data" must {
     Cluster(typedSystem).manager ! Join(Cluster(typedSystem).selfMember.address)

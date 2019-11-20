@@ -11,6 +11,7 @@ import hmda.messages.submission.SubmissionEvents.{ SubmissionCreated, Submission
 import hmda.model.filing.submission.{ Created, Submission, SubmissionId, Uploaded }
 import hmda.model.submission.SubmissionGenerator._
 import hmda.persistence.filing.FilingPersistence
+import hmda.utils.YearUtils.Period
 
 import scala.concurrent.duration._
 
@@ -25,7 +26,7 @@ class SubmissionPersistenceSpec extends AkkaCassandraPersistenceSpec {
   val maybeSubmissionProbe =
     TestProbe[Option[Submission]]("submission-get-probe")
 
-  val submissionId = SubmissionId("12345", "2018", 1)
+  val submissionId = SubmissionId("12345", Period(2018, None), 1)
 
   val sampleSubmission = submissionGen
     .suchThat(s => !s.id.isEmpty)

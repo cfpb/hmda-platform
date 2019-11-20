@@ -18,7 +18,6 @@ import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import hmda.messages.filing.FilingCommands.{CreateFiling, GetFilingDetails}
 import hmda.model.filing.{Filing, FilingDetails, InProgress}
 import hmda.persistence.filing.FilingPersistence._
-import hmda.persistence.filing.FilingPersistence
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.ErrorResponse
 import hmda.api.http.model.filing.submissions._
@@ -29,7 +28,6 @@ import hmda.messages.submission.SubmissionProcessingCommands.{GetHmdaValidationE
 import hmda.model.filing.submission.{QualityMacroExists, VerificationStatus}
 import hmda.model.institution.Institution
 import hmda.model.processing.state.HmdaValidationErrorState
-import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.HmdaValidationError
 import hmda.persistence.institution.InstitutionPersistence._
 import hmda.util.http.FilingResponseUtils._
