@@ -1,7 +1,6 @@
 package com.hmda.reports.processing
 
 import com.hmda.reports.model._
-import com.hmda.reports.processing.BaseProcessing._
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 import org.apache.spark.sql.functions._
 
@@ -235,7 +234,6 @@ object MedianAgeProcessing {
 
   def outputCollectionTable1(cachedRecordsDf: DataFrame,
                              spark: SparkSession): List[DataMedAge] = {
-    import spark.implicits._
 
     val outputATable1 = actionsTakenTable1
       .map {

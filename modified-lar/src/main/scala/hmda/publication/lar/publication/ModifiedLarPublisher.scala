@@ -80,13 +80,10 @@ object ModifiedLarPublisher {
 
       val s3Settings = S3Settings(
         MemoryBufferType,
-        None,
         awsCredentialsProvider,
         awsRegionProvider,
-        pathStyleAccess = true,
-        None,
         ListBucketVersion2
-      )
+      ).withPathStyleAccess(true)
 
       Behaviors.receiveMessage {
 

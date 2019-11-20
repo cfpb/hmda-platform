@@ -138,30 +138,6 @@ object RaceCategorization {
       !raceFields.contains(BlackOrAfricanAmerican) &&
       !raceFields.contains(AmericanIndianOrAlaskaNative)
 
-  private def OnlyBlackOrAfricanAmerican(raceFields: Array[RaceEnum],
-                                         asianEnums: Array[RaceEnum with Product with Serializable],
-                                         hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable]): Boolean =
-    !raceFields.exists(asianEnums.contains) &&
-      !raceFields.exists(hawaiianIslanderEnums.contains) &&
-      raceFields.contains(BlackOrAfricanAmerican) &&
-      !raceFields.contains(AmericanIndianOrAlaskaNative)
-
-  private def OnlyAmericanIndianOrAlaskaNative(raceFields: Array[RaceEnum],
-                                               asianEnums: Array[RaceEnum with Product with Serializable],
-                                               hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable]): Boolean =
-    !raceFields.exists(asianEnums.contains) &&
-      !raceFields.exists(hawaiianIslanderEnums.contains) &&
-      !raceFields.contains(BlackOrAfricanAmerican) &&
-      raceFields.contains(AmericanIndianOrAlaskaNative)
-
-  private def OnlyWhite(raceFields: Array[RaceEnum],
-                        asianEnums: Array[RaceEnum with Product with Serializable],
-                        hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable]): Boolean =
-    !raceFields.exists(asianEnums.contains) &&
-      !raceFields.exists(hawaiianIslanderEnums.contains) &&
-      !raceFields.contains(BlackOrAfricanAmerican) &&
-      !raceFields.contains(AmericanIndianOrAlaskaNative)
-
   private def moreThanOneMinority(raceFields: Array[RaceEnum],
                                   asianEnums: Array[RaceEnum with Product with Serializable],
                                   hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable]): Boolean = {

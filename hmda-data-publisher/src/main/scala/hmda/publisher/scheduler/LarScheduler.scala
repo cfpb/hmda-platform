@@ -64,11 +64,8 @@ class LarScheduler
 
   val s3Settings = S3Settings(
     MemoryBufferType,
-    None,
     awsCredentialsProvider,
     awsRegionProvider,
-    false,
-    None,
     ListBucketVersion2
   )
   val bankFilter =
@@ -105,7 +102,7 @@ class LarScheduler
       val allResultsSource: Source[LarEntityImpl2018, NotUsed] =
         Source.fromPublisher(allResultsPublisher)
 
-      var results: Future[MultipartUploadResult] = allResultsSource
+      val results: Future[MultipartUploadResult] = allResultsSource
         .map(larEntity => larEntity.toRegulatorPSV + "\n")
         .map(s => ByteString(s))
         .runWith(s3Sink)
@@ -133,7 +130,7 @@ class LarScheduler
       val allResultsSource: Source[LarEntityImpl2019, NotUsed] =
         Source.fromPublisher(allResultsPublisher)
 
-      var results: Future[MultipartUploadResult] = allResultsSource
+      val results: Future[MultipartUploadResult] = allResultsSource
         .map(larEntity => larEntity.toRegulatorPSV + "\n")
         .map(s => ByteString(s))
         .runWith(s3Sink)

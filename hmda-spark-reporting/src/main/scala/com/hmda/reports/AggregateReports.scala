@@ -52,13 +52,10 @@ object AggregateReports {
     }
     val s3Settings = S3Settings(
       MemoryBufferType,
-      None,
       awsCredentialsProvider,
       awsRegionProvider,
-      pathStyleAccess = true,
-      None,
       ListBucketVersion2
-    )
+    ).withPathStyleAccess(true)
 
     import spark.implicits._
     //    create lookup map of counties

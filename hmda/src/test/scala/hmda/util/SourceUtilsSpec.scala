@@ -5,7 +5,6 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import org.scalatest.{AsyncWordSpec, MustMatchers}
 import SourceUtils._
-import org.scalacheck.Gen
 
 class SourceUtilsSpec extends AsyncWordSpec with MustMatchers {
 

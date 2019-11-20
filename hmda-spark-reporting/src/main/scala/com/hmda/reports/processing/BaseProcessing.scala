@@ -10,7 +10,7 @@ import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 import org.apache.spark.sql.functions._
 
 import scala.collection.immutable.ListMap
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 object BaseProcessing {
 
@@ -311,7 +311,6 @@ object BaseProcessing {
 
   def outputCollectionTable1(cachedRecordsDf: DataFrame,
                              spark: SparkSession): List[AggregateData] = {
-    import spark.implicits._
     val actionsTakenTable1 = ListMap(
       "Loans Originated - (A)" -> List(1),
       "Applications Approved but not Accepted - (B)" -> List(2),
@@ -411,7 +410,6 @@ object BaseProcessing {
 
   def outputCollectionTable2(cachedRecordsDf: DataFrame,
                              spark: SparkSession): List[AggregateData] = {
-    import spark.implicits._
     val actionsTakenTable2 = Map(
       "Purchased Loans" -> List(6)
     )
@@ -506,7 +504,6 @@ object BaseProcessing {
 
   def outputCollectionTable1Disclosure(cachedRecordsDf: DataFrame,
                                        spark: SparkSession): List[Data] = {
-    import spark.implicits._
     val actionsTakenTable1 = ListMap(
       "Loans Originated - (A)" -> List(1),
       "Applications Approved but not Accepted - (B)" -> List(2),
@@ -606,7 +603,6 @@ object BaseProcessing {
 
   def outputCollectionTable2Disclosure(cachedRecordsDf: DataFrame,
                                        spark: SparkSession): List[Data] = {
-    import spark.implicits._
     val actionsTakenTable2 = Map(
       "Purchased Loans" -> List(6)
     )
@@ -715,8 +711,7 @@ object BaseProcessing {
                         data: String,
                         s3Bucket: String,
                         s3Settings: S3Settings)(
-      implicit materializer: ActorMaterializer,
-      executionContext: ExecutionContext): Future[MultipartUploadResult] =
+      implicit materializer: ActorMaterializer): Future[MultipartUploadResult] =
     Source
       .single(data)
       .map(ByteString(_))
