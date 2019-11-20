@@ -180,15 +180,20 @@ trait DataBrowserHttpApi extends Settings {
               }
             }
           } ~
-          // GET /view/filers/<year>
-          (path("filers" / IntNumber) & get) { year =>
-            onComplete(query.fetchFilers(year).runToFuture) {
-              case Failure(ex) =>
-                log.error(ex, "Failed to obtain filer information")
-                complete(StatusCodes.InternalServerError)
+          // GET /view/filers?years=2018&states=<csv-states> -- GET LEIs for specific states
+          // GET /view/filers?years=2018&msamds=<csv-msamds> -- GET LEIs for specific msamds
+          // GET /view/filers?years=2018&counties=<csv-counties> -- GET LEIs for specific counties
+          // GET /view/filers?years=2018 -- GET all LEIs
+          (path("filers") & get) {
+            extractYearsMsaMdsStatesAndCounties { filerFields =>
+              onComplete(query.fetchFilers(filerFields).runToFuture) {
+                case Failure(ex) =>
+                  log.error(ex, "Failed to obtain filer information")
+                  complete(StatusCodes.InternalServerError)
 
-              case Success(filerResponse) =>
-                complete(StatusCodes.OK, filerResponse)
+                case Success(filerResponse) =>
+                  complete(StatusCodes.OK, filerResponse)
+              }
             }
           }
       } ~

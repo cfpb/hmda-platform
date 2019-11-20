@@ -392,6 +392,16 @@ trait DataBrowserDirectives {
       }
     }
 
+  def extractYearsMsaMdsStatesAndCounties(innerRoute: List[QueryField] => Route): Route =
+    (extractYears & extractMsaMds & extractStates & extractCounties) { (years, msaMds, states, counties) =>
+      if (msaMds.nonEmpty && states.nonEmpty && counties.nonEmpty)
+        complete(BadRequest, OnlyStatesOrMsaMdsOrCountiesOrLEIs())
+      else if (years.nonEmpty)
+        innerRoute(List(years, msaMds, states, counties).flatten)
+      else
+        complete(BadRequest, ProvideYearAndStatesOrMsaMdsOrCounties())
+    }
+
   def extractYearsAndMsaAndStateAndCountyAndLEIBrowserFields(innerRoute: List[QueryField] => Route): Route =
     (extractYears & extractMsaMds & extractStates & extractCounties & extractLEIs) { (years, msaMds, states, counties, leis) =>
       if ((msaMds.nonEmpty && states.nonEmpty && counties.nonEmpty && leis.nonEmpty) || (msaMds.isEmpty && states.isEmpty && counties.isEmpty && leis.isEmpty))

@@ -40,9 +40,20 @@ final case class OnlyStatesOrMsaMdsOrCountiesOrLEIs(
                                                message: String = "Provide only states or msamds or counties or leis but not all"
                                              ) extends ErrorResponse
 
+final case class OnlyStatesOrMsaMdsOrCounties(
+                                                     errorType: String = "provide-only-msamds-or-states-or-counties-or-leis",
+                                                     message: String = "Provide only states or msamds or counties but not all"
+                                                   ) extends ErrorResponse
+
+
 final case class ProvideYearAndStatesOrMsaMds(
                                                errorType: String = "provide-atleast-msamds-or-states",
                                                message: String = "Provide year and either states or msamds (but not both) "
+                                             ) extends ErrorResponse
+
+final case class ProvideYearAndStatesOrMsaMdsOrCounties(
+                                               errorType: String = "provide-atleast-msamds-or-states",
+                                               message: String = "Provide year and either states or msamds or counties (but not all) "
                                              ) extends ErrorResponse
 
 final case class NoMandatoryFieldsInCount(
