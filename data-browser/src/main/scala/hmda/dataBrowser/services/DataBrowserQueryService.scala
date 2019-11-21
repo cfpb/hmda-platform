@@ -81,10 +81,12 @@ class DataBrowserQueryService(repo: ModifiedLarRepository, cache: Cache) extends
     }
   }
 
-  override def fetchFilers(year: Int): Task[FilerInstitutionResponse] =
+  override def fetchFilers(fields: List[QueryField]): Task[FilerInstitutionResponse] = {
     cacheResult(
-      cacheLookup = cache.find(year),
-      onMiss = repo.filers(year).map(FilerInstitutionResponse(_)),
-      cacheUpdate = cache.update(year, _: FilerInstitutionResponse)
+      cacheLookup = cache.findFilers(fields),
+      onMiss = repo.findFilers(fields).map(FilerInstitutionResponse(_)),
+      cacheUpdate = cache.updateFilers(fields, _: FilerInstitutionResponse)
     )
+  }
+
 }

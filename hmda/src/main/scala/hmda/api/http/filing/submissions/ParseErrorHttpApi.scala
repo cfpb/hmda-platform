@@ -23,7 +23,7 @@ import hmda.model.filing.ParserValidValuesLookup._
 import hmda.api.http.model.filing.submissions._
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowParsedError
 import hmda.api.http.PathMatchers._
-import hmda.utils.YearUtils
+import hmda.utils.YearUtils.Period
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
@@ -58,8 +58,7 @@ trait ParseErrorHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
   }
 
   private def checkSubmission(lei: String, year: Int, quarter: Option[String], seqNr: Int, page: Int, uri: Uri) = {
-    val period                                  = YearUtils.period(year, quarter)
-    val submissionId                            = SubmissionId(lei, period, seqNr)
+    val submissionId                            = SubmissionId(lei, Period(year, quarter), seqNr)
     val submissionPersistence                   = SubmissionPersistence.selectSubmissionPersistence(sharding, submissionId)
     val fSubmission: Future[Option[Submission]] = submissionPersistence ? GetSubmission
     val fCheckSubmission = for {

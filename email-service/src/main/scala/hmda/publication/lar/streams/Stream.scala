@@ -18,8 +18,10 @@ import org.apache.kafka.common.serialization.StringDeserializer
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import org.slf4j.LoggerFactory
 
 object Stream {
+  val log = LoggerFactory.getLogger("hmda")
   def pullEmails(system: ActorSystem, bootstrapServers: String): SourceWithContext[
     CommittableMessage[String, String],
     CommittableOffset,
@@ -63,6 +65,8 @@ object Stream {
     val rawSubmissionId = record.key()
     val toAddress       = record.value()
     val sId             = submissionId(rawSubmissionId)
+
+    log.info(s"Working on ${rawSubmissionId} and ${toAddress}")
 
     val process = for {
       optPresent <- submissionStatusRepo.findBySubmissionId(sId)

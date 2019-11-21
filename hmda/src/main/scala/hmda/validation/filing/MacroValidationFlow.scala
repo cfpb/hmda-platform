@@ -12,7 +12,6 @@ import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.institution.HUD
 import hmda.model.validation.{ EmptyMacroValidationError, MacroValidationError, ValidationError }
 import hmda.util.SourceUtils._
-import hmda.utils.YearUtils
 import hmda.utils.YearUtils.Period
 import hmda.validation.{ AS, EC, MAT }
 
@@ -100,11 +99,10 @@ object MacroValidationFlow {
     submissionId: SubmissionId
   ): Future[List[ValidationError]] = {
     val fTotal: Future[Int] = count(larSource)
-    val period              = YearUtils.parsePeriod(submissionId.period).right.get
 
     fTotal.flatMap { totalCount =>
       val validations: List[MacroCheck] =
-        selectedValidations(totalCount, period, tsSource)
+        selectedValidations(totalCount, submissionId.period, tsSource)
       val fErrors: Future[List[ValidationError]] =
         Future.sequence(validations.map(eachFn => eachFn(larSource)))
       fErrors.map(errors => errors.filter(e => e != EmptyMacroValidationError()))

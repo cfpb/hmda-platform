@@ -27,6 +27,7 @@ import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.{ HmdaValidationError, SubmissionPersistence }
 import org.keycloak.adapters.KeycloakDeploymentBuilder
+import hmda.utils.YearUtils.Period
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -52,7 +53,7 @@ class SubmissionHttpApiSpec extends AkkaCassandraPersistenceSpec with MustMatche
     )
   )
 
-  val period = "2018"
+  val period = Period(2018, None)
 
   val sampleInstitution: Institution = institutionGen
     .suchThat(_.LEI != "")
@@ -62,7 +63,7 @@ class SubmissionHttpApiSpec extends AkkaCassandraPersistenceSpec with MustMatche
   val sampleFiling: Filing = filingGen.sample
     .getOrElse(Filing())
     .copy(lei = sampleInstitution.LEI)
-    .copy(period = period)
+    .copy(period = period.year.toString)
 
   val institutionProbe: TestProbe[InstitutionEvent] =
     TestProbe[InstitutionEvent]("institution-probe")

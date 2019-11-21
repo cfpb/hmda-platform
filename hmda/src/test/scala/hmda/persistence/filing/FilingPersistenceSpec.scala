@@ -13,6 +13,7 @@ import hmda.model.filing.FilingGenerator._
 import hmda.model.filing.submission._
 import hmda.model.submission.SubmissionGenerator._
 import hmda.persistence.institution.InstitutionPersistence
+import hmda.utils.YearUtils.Period
 
 class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
   override implicit val system = actor.ActorSystem()
@@ -41,7 +42,7 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
     .suchThat(s => s.id.lei != "" && s.id.lei != "AA")
     .suchThat(s => s.status == SubmissionStatus.valueOf(QualityErrors.code))
     .sample
-    .getOrElse(Submission(SubmissionId("12345", "2018", 1)))
+    .getOrElse(Submission(SubmissionId("12345", Period(2018, None), 1)))
 
   val modified = sampleSubmission.copy(status = Uploaded)
 
