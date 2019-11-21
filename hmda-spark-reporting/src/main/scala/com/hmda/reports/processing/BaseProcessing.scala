@@ -311,7 +311,6 @@ object BaseProcessing {
 
   def outputCollectionTable1(cachedRecordsDf: DataFrame,
                              spark: SparkSession): List[AggregateData] = {
-    import spark.implicits._
     val actionsTakenTable1 = ListMap(
       "Loans Originated - (A)" -> List(1),
       "Applications Approved but not Accepted - (B)" -> List(2),
@@ -411,7 +410,6 @@ object BaseProcessing {
 
   def outputCollectionTable2(cachedRecordsDf: DataFrame,
                              spark: SparkSession): List[AggregateData] = {
-    import spark.implicits._
     val actionsTakenTable2 = Map(
       "Purchased Loans" -> List(6)
     )
@@ -506,7 +504,6 @@ object BaseProcessing {
 
   def outputCollectionTable1Disclosure(cachedRecordsDf: DataFrame,
                                        spark: SparkSession): List[Data] = {
-    import spark.implicits._
     val actionsTakenTable1 = ListMap(
       "Loans Originated - (A)" -> List(1),
       "Applications Approved but not Accepted - (B)" -> List(2),
@@ -606,7 +603,6 @@ object BaseProcessing {
 
   def outputCollectionTable2Disclosure(cachedRecordsDf: DataFrame,
                                        spark: SparkSession): List[Data] = {
-    import spark.implicits._
     val actionsTakenTable2 = Map(
       "Purchased Loans" -> List(6)
     )
