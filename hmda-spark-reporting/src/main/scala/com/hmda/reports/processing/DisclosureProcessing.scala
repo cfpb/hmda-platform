@@ -157,7 +157,7 @@ object DisclosureProcessing {
             data,
             "cfpb-hmda-public",
             s3Settings
-          )(mat)
+          )(mat, ec)
         }
         .runWith(Sink.ignore)
 
@@ -170,7 +170,7 @@ object DisclosureProcessing {
             data,
             "cfpb-hmda-public",
             s3Settings
-          )(mat)
+          )(mat, ec)
         }
         .runWith(Sink.ignore)
 

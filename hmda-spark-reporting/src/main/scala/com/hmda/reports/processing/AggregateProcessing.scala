@@ -51,6 +51,8 @@ object AggregateProcessing {
     s3Settings: S3Settings
   )(implicit mat: ActorMaterializer, ec: ExecutionContext): Future[Unit] = {
 
+    import spark.implicits._
+
     def cachedRecordsDf: DataFrame =
       spark.read
         .format("jdbc")
@@ -334,7 +336,8 @@ object AggregateProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(s"$bucket/reports/aggregate/$year/${input.msa.id}/1.json", data, "cfpb-hmda-public", s3Settings)(
-            mat
+            mat,
+            ec
           )
         }
         .runWith(Sink.ignore)
@@ -344,7 +347,8 @@ object AggregateProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(s"$bucket/reports/aggregate/$year/${input.msa.id}/2.json", data, "cfpb-hmda-public", s3Settings)(
-            mat
+            mat,
+            ec
           )
         }
         .runWith(Sink.ignore)
@@ -354,7 +358,8 @@ object AggregateProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(s"$bucket/reports/aggregate/$year/${input.msa.id}/9.json", data, "cfpb-hmda-public", s3Settings)(
-            mat
+            mat,
+            ec
           )
         }
         .runWith(Sink.ignore)
@@ -364,7 +369,8 @@ object AggregateProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(s"$bucket/reports/aggregate/$year/${input.msa.id}/i.json", data, "cfpb-hmda-public", s3Settings)(
-            mat
+            mat,
+            ec
           )
         }
         .runWith(Sink.ignore)
@@ -374,7 +380,8 @@ object AggregateProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(s"$bucket/reports/aggregate/$year/${input.msa.id}/4.json", data, "cfpb-hmda-public", s3Settings)(
-            mat
+            mat,
+            ec
           )
         }
         .runWith(Sink.ignore)
@@ -384,7 +391,8 @@ object AggregateProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(s"$bucket/reports/aggregate/$year/${input.msa.id}/3.json", data, "cfpb-hmda-public", s3Settings)(
-            mat
+            mat,
+            ec
           )
         }
         .runWith(Sink.ignore)
@@ -467,7 +475,8 @@ object AggregateProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(s"$bucket/reports/aggregate/$year/${input.msa.id}/5.json", data, "cfpb-hmda-public", s3Settings)(
-            mat
+            mat,
+            ec
           )
         }
         .runWith(Sink.ignore)
