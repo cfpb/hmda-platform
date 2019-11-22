@@ -235,6 +235,8 @@ object MedianAgeProcessing {
   def outputCollectionTable1(cachedRecordsDf: DataFrame,
                              spark: SparkSession): List[DataMedAge] = {
 
+    import spark.implicits._
+    
     val outputATable1 = actionsTakenTable1
       .map {
         case (description, eachList) =>

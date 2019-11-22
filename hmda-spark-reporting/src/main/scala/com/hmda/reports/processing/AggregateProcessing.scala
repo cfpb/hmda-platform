@@ -50,6 +50,8 @@ object AggregateProcessing {
     year: String,
     s3Settings: S3Settings
   )(implicit mat: ActorMaterializer, ec: ExecutionContext): Future[Unit] = {
+    
+    import spark.implicits._
 
     def cachedRecordsDf: DataFrame =
       spark.read
