@@ -207,7 +207,8 @@ object HmdaValidationError
       case CompleteMacro(submissionId) =>
         log.info(s"Macro Validation finished for $submissionId")
         val updatedStatus =
-          if (!state.macroVerified) MacroErrors
+          if (state.quality.isEmpty && state.`macro`.isEmpty && !state.macroVerified && !state.qualityVerified) Verified //This is for when a submission doesn't contain any quality or macro errors
+          else if (!state.macroVerified) MacroErrors
           else if (state.qualityVerified) Verified
           else Macro
         updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
