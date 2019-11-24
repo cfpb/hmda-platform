@@ -16,7 +16,6 @@ private[engine] object TsEngine2020Q extends ValidationEngine[TransmittalSheet] 
   override def validityChecks(ctx: ValidationContext) = Vector(
     V600,
     V601,
-    V602,
     V603,
     V604,
     V605,
