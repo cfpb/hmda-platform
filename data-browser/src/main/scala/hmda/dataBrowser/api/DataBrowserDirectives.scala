@@ -1,7 +1,7 @@
 package hmda.dataBrowser.api
 
 import akka.NotUsed
-import akka.http.scaladsl.common.{ CsvEntityStreamingSupport, EntityStreamingSupport }
+import akka.http.scaladsl.common.{CsvEntityStreamingSupport, EntityStreamingSupport}
 import akka.http.scaladsl.model.StatusCodes.BadRequest
 import akka.http.scaladsl.model.headers.ContentDispositionTypes.attachment
 import akka.http.scaladsl.model.headers.`Content-Disposition`
@@ -31,8 +31,9 @@ import hmda.dataBrowser.services._
 import io.circe.generic.auto._
 import monix.eval.Task
 import cats.implicits._
+import hmda.dataBrowser.Settings
 
-trait DataBrowserDirectives {
+trait DataBrowserDirectives extends Settings {
   private implicit val csvStreamingSupport: CsvEntityStreamingSupport =
     EntityStreamingSupport.csv()
 
@@ -86,8 +87,14 @@ trait DataBrowserDirectives {
   }
 
   def contentDispositionHeader(queries: List[QueryField], delimiter: Delimiter)(route: Route): Route = {
-    val filename =
+    val queryName =
       queries.map(q => q.name + "_" + q.values.mkString("-")).mkString("_")
+    val filename = queryName.length match {
+      case x if x > 100 =>
+        queryName.slice(0,100)+md5HashString(queryName)
+      case _ =>
+        queryName
+    }
     respondWithHeader(`Content-Disposition`(attachment, Map("filename" -> (filename + fileEnding(delimiter)))))(route)
   }
 

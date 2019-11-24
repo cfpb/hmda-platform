@@ -1,5 +1,8 @@
 package hmda.dataBrowser
 
+import java.math.BigInteger
+import java.security.MessageDigest
+
 import com.typesafe.config.{Config, ConfigFactory}
 
 import scala.concurrent.duration._
@@ -12,6 +15,13 @@ trait Settings {
     FiniteDuration(duration.toMillis, MILLISECONDS)
   }
 
+  def md5HashString(s: String): String = {
+    val md           = MessageDigest.getInstance("MD5")
+    val digest       = md.digest(s.getBytes)
+    val bigInt       = new BigInteger(1, digest)
+    val hashedString = bigInt.toString(16)
+    hashedString
+  }
   object server {
     val host: String = config.getString("server.bindings.address")
     val port: Int = config.getInt("server.bindings.port")
