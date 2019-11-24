@@ -12,7 +12,7 @@ object V619_2 extends EditCheck[LoanApplicationRegister] {
   override def parent: String = "V619"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    val year = "2019"
+    val year = "2020"
 
     lar.action.actionTakenDate.toString.slice(0, 4) is equalTo(year)
   }
