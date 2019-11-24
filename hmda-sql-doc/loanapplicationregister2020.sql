@@ -150,7 +150,7 @@ CREATE TABLE hmda_user.loanapplicationregister2020 (
     tract_one_to_four_family_homes integer,
     tract_median_age_of_housing_units integer,
     tract_to_msa_income_percentage float,
-    is_quarterly boolean DEFAULT false NOT NULL -- New for 2020 and beyond quarterly filing
+    is_quarterly boolean DEFAULT false NOT NULL, -- New for 2020 and beyond quarterly filing
     created_at timestamp without time zone DEFAULT now()
 );
 
