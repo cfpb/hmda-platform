@@ -24,6 +24,7 @@ import hmda.parser.filing.lar.LarParserErrorModel.{
 }
 import hmda.parser.filing.ts.TsParserErrorModel.InvalidTsId
 import hmda.messages.submission.SubmissionProcessingCommands._
+import hmda.utils.YearUtils.Period
 
 import scala.util.Random
 
@@ -36,7 +37,7 @@ class HmdaParserErrorSpec extends AkkaCassandraPersistenceSpec {
   SubmissionPersistence.startShardRegion(sharding)
   HmdaParserError.startShardRegion(sharding)
 
-  val submissionId = SubmissionId(Random.nextInt(12345).toString, "2018", 1)
+  val submissionId = SubmissionId(Random.nextInt(12345).toString, Period(2018, None), 1)
 
   val errorsProbe = TestProbe[SubmissionProcessingEvent]("processing-event")
   val stateProbe = TestProbe[HmdaParserErrorState]("parser-errors")

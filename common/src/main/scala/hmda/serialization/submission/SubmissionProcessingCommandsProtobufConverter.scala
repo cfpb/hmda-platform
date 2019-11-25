@@ -282,7 +282,8 @@ object SubmissionProcessingCommandsProtobufConverter {
   def signSubmissionToProtobuf(cmd: SignSubmission, refResolver: ActorRefResolver): SignSubmissionMessage =
     SignSubmissionMessage(
       submissionIdToProtobuf(cmd.submissionId),
-      refResolver.toSerializationFormat(cmd.replyTo)
+      refResolver.toSerializationFormat(cmd.replyTo),
+      cmd.email
     )
 
   def signSubmissionFromProtobuf(msg: SignSubmissionMessage, refResolver: ActorRefResolver): SignSubmission =

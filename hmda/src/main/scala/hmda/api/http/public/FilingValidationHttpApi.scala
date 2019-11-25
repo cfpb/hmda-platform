@@ -10,6 +10,7 @@ import hmda.api.http.model.public.{ LarValidateResponse, SingleValidationErrorRe
 import hmda.model.validation._
 import hmda.parser.ParserErrorModel.ParserValidationError
 import hmda.model.filing.EditDescriptionLookup
+import hmda.utils.YearUtils.Period
 
 trait FilingValidationHttpApi {
 
@@ -20,7 +21,7 @@ trait FilingValidationHttpApi {
     )
   }
 
-  def aggregateErrors(errors: List[ValidationError], period: String): SingleValidationErrorResult = {
+  def aggregateErrors(errors: List[ValidationError], period: Period): SingleValidationErrorResult = {
     val groupedErrors = errors.groupBy(_.validationErrorType)
     def allOfType(errorType: ValidationErrorType): Seq[ValidationSingleErrorSummary] =
       groupedErrors

@@ -3,7 +3,6 @@ package com.hmda.reports.processing
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 import org.apache.spark.sql.functions._
 import com.hmda.reports.model._
-import hmda.model.census.{Census, State}
 
 object IncomeRaceEthnicityProcessing {
   val races = List(

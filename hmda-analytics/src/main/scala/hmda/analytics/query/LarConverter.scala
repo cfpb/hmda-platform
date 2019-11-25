@@ -6,7 +6,6 @@ import hmda.model.census.CountyLoanLimit
 import hmda.census.records._
 import hmda.model.census.Census
 import com.typesafe.config.ConfigFactory
-import hmda.utils.YearUtils.Period
 
 object LarConverter {
 

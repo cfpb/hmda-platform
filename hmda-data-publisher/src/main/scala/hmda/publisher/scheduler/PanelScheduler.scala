@@ -74,11 +74,8 @@ class PanelScheduler
   val s3Settings =
     S3Settings(
       MemoryBufferType,
-      None,
       awsCredentialsProvider,
       awsRegionProvider,
-      false,
-      None,
       ListBucketVersion2
     )
 
@@ -107,7 +104,7 @@ class PanelScheduler
 
   }
 
-  private def panelSync2018 = {
+  private def panelSync2018() = {
 
     val allResults: Future[Seq[InstitutionEntity]] =
       institutionRepository2018.findActiveFilers(bankFilterList)
@@ -137,7 +134,7 @@ class PanelScheduler
     }
   }
 
-  private def panelSync2019 = {
+  private def panelSync2019() = {
 
     val allResults: Future[Seq[InstitutionEntity]] =
       institutionRepository2019.findActiveFilers(bankFilterList)

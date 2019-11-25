@@ -2,6 +2,7 @@ package hmda.serialization.submission
 
 import hmda.model.filing.submission._
 import hmda.persistence.serialization.submission.{ SubmissionIdMessage, SubmissionMessage }
+import hmda.utils.YearUtils._
 
 object SubmissionProtobufConverter {
 
@@ -31,7 +32,7 @@ object SubmissionProtobufConverter {
       Some(
         SubmissionIdMessage(
           submissionId.lei,
-          submissionId.period,
+          submissionId.period.toString,
           submissionId.sequenceNumber
         )
       )
@@ -40,7 +41,7 @@ object SubmissionProtobufConverter {
   def submissionIdFromProtobuf(submissionIdMessage: SubmissionIdMessage): SubmissionId =
     SubmissionId(
       submissionIdMessage.lei,
-      submissionIdMessage.period,
+      parsePeriod(submissionIdMessage.period).right.get,
       submissionIdMessage.sequenceNumber
     )
 

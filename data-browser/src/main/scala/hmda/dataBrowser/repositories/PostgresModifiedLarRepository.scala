@@ -131,6 +131,7 @@ class PostgresModifiedLarRepository(tableName: String, config: DatabaseConfig[Jd
     else {
       val secondaries =
         remainingExpressions
+          //do not include year in the WHERE clause because all entries in the table (modifiedlar2018_snapshot) have filing_year = 2018
           .filterNot(_ == "filing_year IN ('2018')")
           .map(expr => s"AND $expr")
           .mkString(sep = " ")
@@ -163,17 +164,25 @@ class PostgresModifiedLarRepository(tableName: String, config: DatabaseConfig[Jd
     Source.fromPublisher(publisher)
   }
 
-  override def filers(year: Int): Task[Seq[FilerInformation]] = {
+  override def findFilers(filerFields: List[QueryField]): Task[Seq[FilerInformation]] = {
+    val year = filerFields.find(_.name == "year").map(_.values.head.toInt)
     val institutionsTableName = year match { //will be needed when databrowser has to support multiple years
-      case 2018 => "institutions2018"
+      case Some(2018) => "institutions2018"
       case _ => "institutions2018"
+    }
+    //do not include year in the WHERE clause because all entries in the table (modifiedlar2018_snapshot) have filing_year = 2018
+    val queries = filerFields.filterNot(_.name == "year").map(field => in(field.dbName, field.values))
+    val filterCriteria = queries match {
+      case Nil          => ""
+      case head :: tail => whereAndOpt(head, tail: _*)
     }
     val query =
       sql"""
-        SELECT a.lei, b.respondent_name, '#${year}'
+        SELECT a.lei, b.respondent_name, a.lar_count, '#${year.getOrElse("2018")}'
         from (
-          SELECT lei
+          SELECT lei, count(*) as lar_count
           FROM #${tableName}
+          #$filterCriteria
           GROUP BY lei
         ) a
           JOIN #${institutionsTableName} b ON a.lei = b.lei

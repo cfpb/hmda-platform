@@ -17,6 +17,7 @@ import hmda.messages.submission.EditDetailsEvents.{
 }
 import hmda.model.edits.{EditDetails, EditDetailsRow}
 import hmda.model.filing.submission.SubmissionId
+import hmda.utils.YearUtils.Period
 
 import scala.util.Random
 
@@ -35,7 +36,7 @@ class EditDetailsPersistenceSpec extends AkkaCassandraPersistenceSpec {
   }
 
   "Edit Details" must {
-    val submissionId = SubmissionId(Random.nextInt(12345).toString, "2018", 1)
+    val submissionId = SubmissionId(Random.nextInt(12345).toString, Period(2018, None), 1)
     Cluster(typedSystem).manager ! Join(Cluster(typedSystem).selfMember.address)
     "be persisted and read back" in {
       val editDetail1 = EditDetails("S300",

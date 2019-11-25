@@ -2,7 +2,6 @@ package hmda.model.filing
 
 import com.typesafe.config.ConfigFactory
 import hmda.model.ResourceUtils._
-import hmda.utils.YearUtils
 import hmda.utils.YearUtils.Period
 
 object EditDescriptionLookup {
@@ -46,8 +45,8 @@ object EditDescriptionLookup {
       case _                     => editDescriptionMap2019
     }
 
-  def lookupDescription(editName: String, period: String = "2018"): String =
-    mapForPeriod(YearUtils.parsePeriod(period).right.get)
+  def lookupDescription(editName: String, period: Period = Period(2018, None)): String =
+    mapForPeriod(period)
       .getOrElse(editName, EditDescription("", "", List()))
       .description
 

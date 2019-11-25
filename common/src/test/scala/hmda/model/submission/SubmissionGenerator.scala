@@ -2,6 +2,7 @@ package hmda.model.submission
 
 import hmda.model.filing.submission._
 import org.scalacheck.Gen
+import hmda.utils.YearUtils.Period
 
 object SubmissionGenerator {
 
@@ -28,9 +29,9 @@ object SubmissionGenerator {
   implicit def submissionIdGen: Gen[SubmissionId] = {
     for {
       institutionId <- Gen.alphaStr
-      period <- Gen.alphaStr
+      year <- Gen.choose(2018,2020)
       seqNr <- Gen.choose(0, Int.MaxValue)
-    } yield SubmissionId(institutionId, period, seqNr)
+    } yield SubmissionId(institutionId, Period(year, None), seqNr)
   }
 
   implicit def submissionGen: Gen[Submission] = {

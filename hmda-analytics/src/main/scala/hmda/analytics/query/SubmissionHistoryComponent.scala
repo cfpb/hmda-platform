@@ -13,14 +13,11 @@ trait SubmissionHistoryComponent {
 
   class SubmissionHistoryRepository(config: DatabaseConfig[JdbcProfile],
                                     tableName: String) {
-    def fetchYearTable(year: Int): String = {
-      tableName
-    }
     def insert(lei: String,
                submissionId: SubmissionId,
                signDate: Option[Long]): Future[Int] =
       config.db.run {
-        sqlu"""INSERT INTO #${fetchYearTable(submissionId.period.toInt)}
+        sqlu"""INSERT INTO #${tableName}
            VALUES (
             ${lei.toUpperCase},
             ${submissionId.toString},

@@ -6,9 +6,7 @@ import akka.stream._
 import akka.stream.scaladsl._
 import akka.pattern.pipe
 import akka.stream.alpakka.s3.S3Settings
-import akka.util.ByteString
 import com.hmda.reports.model._
-import hmda.model.census.{ Census, State }
 import io.circe.generic.auto._
 import io.circe.syntax._
 import org.apache.spark.sql.{ SparkSession, _ }
@@ -52,7 +50,7 @@ object AggregateProcessing {
     year: String,
     s3Settings: S3Settings
   )(implicit mat: ActorMaterializer, ec: ExecutionContext): Future[Unit] = {
-
+    
     import spark.implicits._
 
     def cachedRecordsDf: DataFrame =

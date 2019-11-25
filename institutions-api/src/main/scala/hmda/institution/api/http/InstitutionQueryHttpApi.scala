@@ -16,7 +16,6 @@ import hmda.institution.query._
 import hmda.query.DbConfiguration._
 import hmda.institution.api.http.model.InstitutionsResponse
 import hmda.model.institution.Institution
-import hmda.util.Filer
 import hmda.utils.YearUtils._
 import io.circe.generic.auto._
 
@@ -81,7 +80,7 @@ trait InstitutionQueryHttpApi extends HmdaTimeDirectives with InstitutionEmailCo
             val f = findByEmail(domain, year.toString)
             completeInstitutionsFuture(f, uri)
           } ~
-            parameters('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String]) {
+            parameters(('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String])) {
               (domain, lei, respondentName, taxId) =>
                 val f = findByFields(lei, respondentName, taxId, domain, year.toString)
                 completeInstitutionsFuture(f, uri)
@@ -97,7 +96,7 @@ trait InstitutionQueryHttpApi extends HmdaTimeDirectives with InstitutionEmailCo
           val f = findByEmail(domain, currentYear)
           completeInstitutionsFuture(f, uri)
         } ~
-          parameters('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String]) {
+          parameters(('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String])) {
             (domain, lei, respondentName, taxId) =>
               val f =
                 findByFields(lei, respondentName, taxId, domain, currentYear)

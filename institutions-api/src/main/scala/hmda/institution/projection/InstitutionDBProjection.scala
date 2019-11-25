@@ -2,14 +2,13 @@ package hmda.institution.projection
 
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.scaladsl.adapter._
-import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
 import com.typesafe.config.ConfigFactory
 import hmda.institution.api.http.InstitutionConverter
 import hmda.institution.query._
 import hmda.messages.institution.InstitutionEvents.{ InstitutionCreated, InstitutionDeleted, InstitutionEvent, InstitutionModified }
 import hmda.model.institution.Institution
 import hmda.query.DbConfiguration._
+import org.slf4j.LoggerFactory
 
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -33,17 +32,11 @@ object InstitutionDBProjection extends InstitutionEmailComponent {
   implicit val institutionEmailsRepository = new InstitutionEmailsRepository(dbConfig)
 
   implicit val ec: ExecutionContext = ExecutionContext.global
+  val log = LoggerFactory.getLogger("hmda")
 
   val behavior: Behavior[InstitutionProjectionCommand] =
     Behaviors.setup { ctx =>
       val log = ctx.log
-      val decider: Supervision.Decider = {
-        case e: Throwable =>
-          log.error(e.getLocalizedMessage)
-          Supervision.Resume
-      }
-      implicit val system       = ctx.system.toUntyped
-      implicit val materializer = ActorMaterializer(ActorMaterializerSettings(system).withSupervisionStrategy(decider))
 
       log.info(s"Started $name")
 
@@ -72,6 +65,7 @@ object InstitutionDBProjection extends InstitutionEmailComponent {
           case 2020 =>
             institutionRepository2020.deleteById(lei)
         }
+      case other => log.error(s"Unexpected event passed to Institution DB Projector: ${other}")
     }
     event
   }

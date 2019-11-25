@@ -2,6 +2,7 @@ projects = [
     [name: "auth", repo: "hmda-platform", jenkinsfilePath: "auth/Jenkinsfile"],
     [name: "census-api", repo: "hmda-platform", jenkinsfilePath: "census-api/Jenkinsfile"],
     [name: "check-digit", repo: "hmda-platform", jenkinsfilePath: "check-digit/Jenkinsfile"],
+    [name: "email-service", repo: "hmda-platform", jenkinsfilePath: "email-service/Jenkinsfile"],
     [name: "hmda-analytics", repo: "hmda-platform", jenkinsfilePath: "hmda-analytics/Jenkinsfile"],
     [name: "hmda-data-browser-api", repo: "hmda-platform", jenkinsfilePath: "data-browser/Jenkinsfile"],
     [name: "hmda-documentation", repo: "hmda-documentation", jenkinsfilePath: "Jenkinsfile"],

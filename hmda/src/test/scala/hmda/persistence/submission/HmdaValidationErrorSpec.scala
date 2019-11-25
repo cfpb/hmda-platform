@@ -12,6 +12,7 @@ import hmda.model.processing.state.{ EditSummary, HmdaValidationErrorState }
 import hmda.model.validation._
 import hmda.persistence.AkkaCassandraPersistenceSpec
 import hmda.persistence.institution.InstitutionPersistence
+import hmda.utils.YearUtils.Period
 
 class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
   override implicit val system      = actor.ActorSystem()
@@ -24,7 +25,7 @@ class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
   EditDetailsPersistence.startShardRegion(sharding)
   InstitutionPersistence.startShardRegion(sharding)
 
-  val submissionId = SubmissionId("12345", "2018", 1)
+  val submissionId = SubmissionId("12345", Period(2018, None), 1)
 
   val errorsProbe = TestProbe[HmdaRowValidatedError]("processing-event")
   val stateProbe  = TestProbe[HmdaValidationErrorState]("state-probe")

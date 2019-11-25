@@ -1,7 +1,7 @@
 package hmda.query.repository
 
 import hmda.model.filing.submission.SubmissionId
-import hmda.model.modifiedlar.{ EnrichedModifiedLoanApplicationRegister, ModifiedLoanApplicationRegister }
+import hmda.model.modifiedlar.EnrichedModifiedLoanApplicationRegister
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
@@ -39,7 +39,7 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
     */
   def deleteByLei(submissionId: SubmissionId): Future[Int] =
     db.run(
-      sqlu"DELETE FROM #${fetchYearTable(submissionId.period.toInt)} WHERE UPPER(lei) = ${submissionId.lei.toUpperCase} and filing_year = ${submissionId.period.toInt}"
+      sqlu"DELETE FROM #${fetchYearTable(submissionId.period.year.toInt)} WHERE UPPER(lei) = ${submissionId.lei.toUpperCase} and filing_year = ${submissionId.period.year.toInt}"
     )
 
   /**
@@ -49,7 +49,7 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
     * @return
     */
   def insert(input: EnrichedModifiedLoanApplicationRegister, submissionId: SubmissionId): Future[Int] =
-    db.run(sqlu"""INSERT INTO #${fetchYearTable(submissionId.period.toInt)} (
+    db.run(sqlu"""INSERT INTO #${fetchYearTable(submissionId.period.year.toInt)} (
             id,
             lei,
             loan_type,
@@ -253,10 +253,10 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
             ${input.census.msaMd},
             ${input.census.name},
             ${submissionId.toString},
-            ${submissionId.period.toInt},
+            ${submissionId.period.year.toInt},
             ${input.mlar.conformingLoanLimit},
             ${input.census.medianAge},
-            ${medianAgeCalculated(submissionId.period.toInt, input.census.medianAge)},
+            ${medianAgeCalculated(submissionId.period.year.toInt, input.census.medianAge)},
             ${input.census.tracttoMsaIncomePercent},
             ${input.mlar.ethnicityCategorization},
             ${input.mlar.raceCategorization},

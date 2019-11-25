@@ -1,7 +1,6 @@
 package hmda.parser.filing.lar
 
 import hmda.parser.ParserErrorModel._
-import hmda.model.filing.lar.enums._
 
 object LarParserErrorModel {
 

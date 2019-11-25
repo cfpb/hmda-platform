@@ -17,7 +17,6 @@ import hmda.messages.pubsub.HmdaTopics._
 import hmda.model.institution.{ Institution, InstitutionDetail }
 import hmda.publication.KafkaUtils._
 import hmda.persistence.HmdaTypedPersistentActor
-import hmda.utils.YearUtils
 import scala.concurrent.Future
 
 object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionCommand, InstitutionEvent, InstitutionState] {

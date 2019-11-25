@@ -35,6 +35,7 @@ import hmda.messages.submission.SubmissionProcessingCommands.{ GetHmdaValidation
 import hmda.model.processing.state.HmdaValidationErrorState
 import hmda.persistence.filing.FilingPersistence.selectFiling
 import hmda.persistence.institution.InstitutionPersistence.selectInstitution
+import hmda.utils.YearUtils.Period
 import hmda.utils.YearUtils
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -81,11 +82,11 @@ trait SubmissionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
             case (_, _, maybeLatest) =>
               maybeLatest match {
                 case None =>
-                  val submissionId = SubmissionId(lei, period, 1)
+                  val submissionId = SubmissionId(lei, Period(year, quarter), 1)
                   createSubmission(uri, submissionId)
 
                 case Some(submission) =>
-                  val submissionId = SubmissionId(lei, period, submission.id.sequenceNumber + 1)
+                  val submissionId = SubmissionId(lei, Period(year, quarter), submission.id.sequenceNumber + 1)
                   createSubmission(uri, submissionId)
               }
           }
@@ -104,7 +105,7 @@ trait SubmissionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
 
     onComplete(createdF) {
       case Success(created) =>
-        complete(StatusCodes.Created, created.submission)
+        complete((StatusCodes.Created, created.submission))
       case Failure(error) =>
         failedResponse(StatusCodes.InternalServerError, uri, error)
     }
@@ -150,8 +151,7 @@ trait SubmissionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
     }
 
   private def getSubmissionSummary(lei: String, year: Int, quarter: Option[String], seqNr: Int, uri: Uri): Route = {
-    val period                               = YearUtils.period(year, quarter)
-    val submissionId                         = SubmissionId(lei, period, seqNr)
+    val submissionId                         = SubmissionId(lei, Period(year, quarter), seqNr)
     val filingPersistence                    = selectFiling(sharding, lei, year, quarter)
     val fSummary: Future[Option[Submission]] = filingPersistence ? (ref => GetSubmissionSummary(submissionId, ref))
     val fTs: Future[Option[TransmittalSheet]] =
