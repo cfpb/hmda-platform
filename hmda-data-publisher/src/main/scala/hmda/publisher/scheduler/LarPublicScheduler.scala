@@ -50,11 +50,8 @@ class LarPublicScheduler
 
   val s3Settings = S3Settings(
     MemoryBufferType,
-    None,
     awsCredentialsProvider,
     awsRegionProvider,
-    false,
-    None,
     ListBucketVersion2
   )
   val bankFilter =

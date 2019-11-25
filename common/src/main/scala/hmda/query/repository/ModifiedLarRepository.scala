@@ -1,7 +1,7 @@
 package hmda.query.repository
 
 import hmda.model.filing.submission.SubmissionId
-import hmda.model.modifiedlar.{ EnrichedModifiedLoanApplicationRegister, ModifiedLoanApplicationRegister }
+import hmda.model.modifiedlar.EnrichedModifiedLoanApplicationRegister
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 

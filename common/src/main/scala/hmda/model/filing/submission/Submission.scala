@@ -1,6 +1,6 @@
 package hmda.model.filing.submission
 
-import io.circe.{Codec, Encoder}
+import io.circe.Codec
 import io.circe.generic.semiauto._
 
 case class Submission(

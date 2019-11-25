@@ -6,7 +6,7 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import akka.http.scaladsl.server.Directives._
 import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
-import akka.http.scaladsl.model.{ HttpResponse, StatusCodes, Uri }
+import akka.http.scaladsl.model.{ StatusCodes, Uri }
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Route
 import hmda.model.institution.Institution
@@ -67,7 +67,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
                       failedResponse(StatusCodes.InternalServerError, uri, error)
 
                     case Success(InstitutionCreated(i)) =>
-                      complete(StatusCodes.Created, i)
+                      complete((StatusCodes.Created, i))
                   }
               }
             }
@@ -84,10 +84,10 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
                   failedResponse(StatusCodes.InternalServerError, uri, error)
 
                 case Success(InstitutionModified(i)) =>
-                  complete(StatusCodes.Accepted, i)
+                  complete((StatusCodes.Accepted, i))
 
                 case Success(InstitutionNotExists(lei)) =>
-                  complete(StatusCodes.NotFound, lei)
+                  complete((StatusCodes.NotFound, lei))
 
                 case Success(_) =>
                   complete(StatusCodes.BadRequest)
@@ -103,10 +103,10 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
                   failedResponse(StatusCodes.InternalServerError, uri, error)
 
                 case Success(InstitutionDeleted(lei, year)) =>
-                  complete(StatusCodes.Accepted, InstitutionDeletedResponse(lei))
+                  complete((StatusCodes.Accepted, InstitutionDeletedResponse(lei)))
 
                 case Success(InstitutionNotExists(lei)) =>
-                  complete(StatusCodes.NotFound, lei)
+                  complete((StatusCodes.NotFound, lei))
 
                 case Success(_) =>
                   complete(StatusCodes.BadRequest)
@@ -146,7 +146,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
     onComplete(fInstitution) {
       case Failure(error) =>
         val errorResponse = ErrorResponse(500, error.getLocalizedMessage, uri.path)
-        complete(StatusCodes.InternalServerError, errorResponse)
+        complete((StatusCodes.InternalServerError, errorResponse))
 
       case Success(Some(i)) =>
         complete(i)

@@ -80,13 +80,10 @@ object ModifiedLarPublisher {
 
       val s3Settings = S3Settings(
         MemoryBufferType,
-        None,
         awsCredentialsProvider,
         awsRegionProvider,
-        pathStyleAccess = true,
-        None,
         ListBucketVersion2
-      )
+      ).withPathStyleAccess(true)
 
       Behaviors.receiveMessage {
 
@@ -127,7 +124,7 @@ object ModifiedLarPublisher {
             Flow[ModifiedLoanApplicationRegister]
               .map(
                 mlar => {
-                  val indexTractMap = if (submissionId.period == 2018) indexTractMap2018 else indexTractMap2019
+                  val indexTractMap = if (submissionId.period.year == 2018) indexTractMap2018 else indexTractMap2019
                   EnrichedModifiedLoanApplicationRegister(
                     mlar,
                     indexTractMap.getOrElse(mlar.tract, Census())

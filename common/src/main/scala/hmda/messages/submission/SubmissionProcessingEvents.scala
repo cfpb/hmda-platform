@@ -4,8 +4,6 @@ import hmda.messages.CommonMessages.Event
 import hmda.model.filing.submission.{SubmissionId, SubmissionStatus}
 import hmda.model.validation.{MacroValidationError, ValidationError}
 import hmda.messages.submission.SubmissionProcessingCommands.FieldParserError
-import io.circe._
-import io.circe.generic.semiauto._
 
 object SubmissionProcessingEvents {
   sealed trait SubmissionProcessingEvent extends Event

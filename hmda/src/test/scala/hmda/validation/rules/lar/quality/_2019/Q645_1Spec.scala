@@ -4,7 +4,7 @@ import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 import hmda.model.filing.lar.LarGenerators._
-import hmda.model.filing.lar.enums.{HomeImprovement, HomePurchase}
+import hmda.model.filing.lar.enums.HomeImprovement
 
 class Q645_1Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = Q645_1

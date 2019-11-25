@@ -27,19 +27,12 @@ import hmda.util.streams.FlowUtils._
 
 import scala.util.{Failure, Success, Try}
 
-import akka.actor.{ActorSystem, Props}
-import akka.event.Logging
-import akka.pattern.pipe
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Route
+import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import com.typesafe.config.ConfigFactory
-import hmda.api.http.HttpServer
-import hmda.api.http.routes.BaseHttpApi
 import akka.http.scaladsl.server.Directives._
 import akka.util.Timeout
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 trait ULIHttpApi extends HmdaTimeDirectives {

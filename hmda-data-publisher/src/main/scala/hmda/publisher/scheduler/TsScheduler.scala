@@ -61,11 +61,8 @@ class TsScheduler
 
   val s3Settings = S3Settings(
     MemoryBufferType,
-    None,
     awsCredentialsProvider,
     awsRegionProvider,
-    false,
-    None,
     ListBucketVersion2
   )
 

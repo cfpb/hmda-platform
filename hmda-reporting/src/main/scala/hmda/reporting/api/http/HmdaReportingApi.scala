@@ -10,7 +10,6 @@ import akka.util.Timeout
 import akka.pattern.pipe
 import hmda.api.http.HttpServer
 import hmda.api.http.routes.BaseHttpApi
-import hmda.query.DbConfiguration.dbConfig
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.duration.FiniteDuration

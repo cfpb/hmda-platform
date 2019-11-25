@@ -6,7 +6,6 @@ import akka.actor.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.{StatusCodes, Uri}
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.StatusCodes
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
@@ -126,7 +125,7 @@ trait FilingHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
 
         case Success((Some(_), Some(_))) =>
           val errorResponse = ErrorResponse(400, s"Filing $lei-$year${quarter.fold("")(q => s"-$q")} already exists", uri.path)
-          complete(StatusCodes.BadRequest, errorResponse)
+          complete((StatusCodes.BadRequest, errorResponse))
 
         case Success((Some(_), None)) =>
           val now = Instant.now().toEpochMilli
@@ -144,10 +143,10 @@ trait FilingHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
           onComplete(fFiling) {
             case Success(created) =>
               val filingDetails = FilingDetails(created.filing, Nil)
-              complete(StatusCodes.Created, filingDetails)
+              complete((StatusCodes.Created, filingDetails))
 
             case Failure(error) =>
-              log.error(error, "Unable to create a filing for an institution for (lei: $lei, period: $period, quarter: $quarter)")
+              log.error(error, s"Unable to create a filing for an institution for (lei: $lei, period: $period, quarter: $quarter)")
               failedResponse(StatusCodes.InternalServerError, uri, error)
           }
       }
@@ -163,7 +162,7 @@ trait FilingHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
 
       case Success((Some(i), None)) =>
         val errorResponse = ErrorResponse(404, s"Filing for institution: ${i.LEI} and period: $period does not exist", uri.path)
-        complete(StatusCodes.NotFound, errorResponse)
+        complete((StatusCodes.NotFound, errorResponse))
 
       case Failure(error) =>
         failedResponse(StatusCodes.InternalServerError, uri, error)

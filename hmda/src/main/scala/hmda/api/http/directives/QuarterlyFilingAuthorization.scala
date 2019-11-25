@@ -33,14 +33,14 @@ trait QuarterlyFilingAuthorization {
 
         case Success(None) =>
           log.info(s"institution does not exist for LEI: $lei and year: $year")
-          complete(BadRequest, ErrorResponse(BadRequest.intValue, "institution does not exist", path))
+          complete((BadRequest, ErrorResponse(BadRequest.intValue, "institution does not exist", path)))
 
         case Success(Some(i)) if i.quarterlyFiler =>
           successful
 
         case Success(Some(i)) =>
           log.info(s"institution for LEI: $lei and year: $year does not have permissions to do quarterly filing")
-          complete(Forbidden, ErrorResponse(BadRequest.intValue, "Institution is not permitted to do quarterly filing", path))
+          complete((Forbidden, ErrorResponse(BadRequest.intValue, "Institution is not permitted to do quarterly filing", path)))
       }
     }
   }

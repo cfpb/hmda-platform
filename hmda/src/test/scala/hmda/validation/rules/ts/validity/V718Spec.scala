@@ -1,7 +1,6 @@
 package hmda.validation.rules.ts.validity
 
 import hmda.model.filing.ts.TransmittalSheet
-import hmda.model.institution._
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.ts.TsEditCheckSpec
 import hmda.model.filing.ts.TsGenerators._

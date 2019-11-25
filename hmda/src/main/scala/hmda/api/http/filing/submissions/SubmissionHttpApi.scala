@@ -105,7 +105,7 @@ trait SubmissionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
 
     onComplete(createdF) {
       case Success(created) =>
-        complete(StatusCodes.Created, created.submission)
+        complete((StatusCodes.Created, created.submission))
       case Failure(error) =>
         failedResponse(StatusCodes.InternalServerError, uri, error)
     }

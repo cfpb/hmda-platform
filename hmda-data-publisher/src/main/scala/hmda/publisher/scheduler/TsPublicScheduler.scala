@@ -1,7 +1,5 @@
 package hmda.publisher.scheduler
 
-import java.time.LocalDateTime
-
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3._
@@ -52,11 +50,8 @@ class TsPublicScheduler
 
   val s3Settings = S3Settings(
     MemoryBufferType,
-    None,
     awsCredentialsProvider,
     awsRegionProvider,
-    false,
-    None,
     ListBucketVersion2
   )
 
@@ -75,8 +70,6 @@ class TsPublicScheduler
 
     case TsPublicScheduler2018 =>
       println("test timer public ts")
-
-      val now = LocalDateTime.now().minusDays(1)
 
       val fileNamePSV = "2018_ts.txt"
 

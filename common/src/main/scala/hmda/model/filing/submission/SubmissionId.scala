@@ -19,5 +19,5 @@ case class SubmissionId(lei: String = "", period: Period = Period(2018, None), s
   override def toString: String = s"$lei-$period-$sequenceNumber"
 
   def isEmpty: Boolean =
-    lei == "" && period == "" && sequenceNumber == 0
+    lei == "" && period == Period(2018, None) && sequenceNumber == 0
 }
