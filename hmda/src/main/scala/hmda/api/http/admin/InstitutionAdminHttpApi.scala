@@ -50,10 +50,10 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
       path("institutions") {
         entity(as[Institution]) { institution =>
           timedPost { uri =>
-            sanatizeInstitutionIdentifieds(institution, uri, postInstitution)
+            sanatizeInstitutionIdentifieds(institution, true, uri, postInstitution)
           } ~
             timedPut { uri =>
-              sanatizeInstitutionIdentifieds(institution, uri, putInstitution)
+              sanatizeInstitutionIdentifieds(institution, false, uri, putInstitution)
             } ~
             timedDelete { uri =>
               val institutionPersistence = InstitutionPersistence.selectInstitution(sharding, institution.LEI, institution.activityYear)
@@ -180,10 +180,10 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
     lei.length == 20 && lei == lei.toUpperCase && lei.forall(alphaNumeric.contains(_))
   }
 
-  private def sanatizeInstitutionIdentifieds(institution: Institution, uri: Uri, route: (Institution, Uri) => Route): Route = {
+  private def sanatizeInstitutionIdentifiers(institution: Institution, checkLei: Boolean, uri: Uri, route: (Institution, Uri) => Route): Route = {
     if (!checkTaxIdFormat(institution.taxId)) {
       complete((StatusCodes.BadRequest, "Incorrect tax-id format"))
-    } else if (!checkLeiFormat(institution.LEI)) {
+    } else if (checkLei && !checkLeiFormat(institution.LEI)) {
       complete((StatusCodes.BadRequest, "Incorrect lei format"))
     } else route(institution, uri)
   }
