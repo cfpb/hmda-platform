@@ -49,51 +49,14 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
     oAuth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
       path("institutions") {
         entity(as[Institution]) { institution =>
-          val institutionPersistence = InstitutionPersistence.selectInstitution(sharding, institution.LEI, institution.activityYear)
           timedPost { uri =>
-            respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-              val fInstitution: Future[Option[Institution]] = institutionPersistence ? GetInstitution
-              onComplete(fInstitution) {
-                case Failure(error) =>
-                  failedResponse(StatusCodes.InternalServerError, uri, error)
-
-                case Success(Some(_)) =>
-                  entityAlreadyExists(StatusCodes.BadRequest, uri, s"Institution ${institution.LEI} already exists")
-
-                case Success(None) =>
-                  val fCreated: Future[InstitutionCreated] = institutionPersistence ? (ref => CreateInstitution(institution, ref))
-                  onComplete(fCreated) {
-                    case Failure(error) =>
-                      failedResponse(StatusCodes.InternalServerError, uri, error)
-
-                    case Success(InstitutionCreated(i)) =>
-                      complete(StatusCodes.Created, i)
-                  }
-              }
-            }
+            sanatizeInstitutionIdentifieds(institution, uri, postInstitution)
           } ~
             timedPut { uri =>
-              val originalInst: Future[Option[Institution]] = institutionPersistence ? GetInstitution
-              val fModified = for {
-                original <- originalInst
-                m        <- modifyCall(institution, original, institutionPersistence)
-              } yield m
-
-              onComplete(fModified) {
-                case Failure(error) =>
-                  failedResponse(StatusCodes.InternalServerError, uri, error)
-
-                case Success(InstitutionModified(i)) =>
-                  complete(StatusCodes.Accepted, i)
-
-                case Success(InstitutionNotExists(lei)) =>
-                  complete(StatusCodes.NotFound, lei)
-
-                case Success(_) =>
-                  complete(StatusCodes.BadRequest)
-              }
+              sanatizeInstitutionIdentifieds(institution, uri, putInstitution)
             } ~
             timedDelete { uri =>
+              val institutionPersistence = InstitutionPersistence.selectInstitution(sharding, institution.LEI, institution.activityYear)
               val fDeleted: Future[InstitutionEvent] = institutionPersistence ? (
                 ref => DeleteInstitution(institution.LEI, institution.activityYear, ref)
               )
@@ -115,6 +78,53 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
         }
       }
     }
+
+  private def postInstitution(institution: Institution, uri: Uri): Route = {
+    val institutionPersistence = InstitutionPersistence.selectInstitution(sharding, institution.LEI, institution.activityYear)
+    respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+      val fInstitution: Future[Option[Institution]] = institutionPersistence ? GetInstitution
+      onComplete(fInstitution) {
+        case Failure(error) =>
+          failedResponse(StatusCodes.InternalServerError, uri, error)
+
+        case Success(Some(_)) =>
+          entityAlreadyExists(StatusCodes.BadRequest, uri, s"Institution ${institution.LEI} already exists")
+
+        case Success(None) =>
+          val fCreated: Future[InstitutionCreated] = institutionPersistence ? (ref => CreateInstitution(institution, ref))
+          onComplete(fCreated) {
+            case Failure(error) =>
+              failedResponse(StatusCodes.InternalServerError, uri, error)
+
+            case Success(InstitutionCreated(i)) =>
+              complete(StatusCodes.Created, i)
+          }
+      }
+    }
+  }
+
+  private def putInstitution(institution: Institution, uri: Uri): Route = {
+    val institutionPersistence = InstitutionPersistence.selectInstitution(sharding, institution.LEI, institution.activityYear)
+    val originalInst: Future[Option[Institution]] = institutionPersistence ? GetInstitution
+    val fModified = for {
+      original <- originalInst
+      m        <- modifyCall(institution, original, institutionPersistence)
+    } yield m
+
+    onComplete(fModified) {
+      case Failure(error) =>
+        failedResponse(StatusCodes.InternalServerError, uri, error)
+
+      case Success(InstitutionModified(i)) =>
+        complete(StatusCodes.Accepted, i)
+
+      case Success(InstitutionNotExists(lei)) =>
+        complete(StatusCodes.NotFound, lei)
+
+      case Success(_) =>
+        complete(StatusCodes.BadRequest)
+    }
+  }
 
   private def modifyCall(
     incomingInstitution: Institution,
@@ -156,12 +166,26 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
     }
   }
 
-  private def checkTaxIdFormat(taxId: String): Boolean = {
+  private def checkTaxIdFormat(taxIdOption: Option[String]): Boolean = {
+    val taxId = taxIdOption.getOrElse("")
     if (taxId.contains("-")) {
       val id = taxId.split("-")
-      if (id.length == 2 && id.head.length == 2 && id.tail.length == 7) true
-      else false
+      id.length == 2 && id.head.length == 2 && id.tail.length == 7
     } else false
+  }
+
+  val alphaNumeric = (('a' to 'z') ++ ('A' to 'A') ++ ('0' to '0')).toSet
+
+  private def checkLeiFormat(lei: String): Boolean = {
+    lei.length == 20 && lei == lei.toUpperCase && lei.forall(alphaNumeric.contains(_))
+  }
+
+  private def sanatizeInstitutionIdentifieds(institution: Institution, uri: Uri, route: (Institution, Uri) => Route): Route = {
+    if (!checkTaxIdFormat(institution.taxId)) {
+      complete((StatusCodes.BadRequest, "Incorrect tax-id format"))
+    } else if (!checkLeiFormat(institution.LEI)) {
+      complete((StatusCodes.BadRequest, "Incorrect lei format"))
+    } else route(institution, uri)
   }
 
 
