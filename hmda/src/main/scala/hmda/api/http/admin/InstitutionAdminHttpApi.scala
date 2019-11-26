@@ -50,10 +50,10 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
       path("institutions") {
         entity(as[Institution]) { institution =>
           timedPost { uri =>
-            sanatizeInstitutionIdentifieds(institution, true, uri, postInstitution)
+            sanatizeInstitutionIdentifiers(institution, true, uri, postInstitution)
           } ~
             timedPut { uri =>
-              sanatizeInstitutionIdentifieds(institution, false, uri, putInstitution)
+              sanatizeInstitutionIdentifiers(institution, false, uri, putInstitution)
             } ~
             timedDelete { uri =>
               val institutionPersistence = InstitutionPersistence.selectInstitution(sharding, institution.LEI, institution.activityYear)
@@ -166,24 +166,24 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
     }
   }
 
-  private def checkTaxIdFormat(taxIdOption: Option[String]): Boolean = {
+  private def validTaxIdFormat(taxIdOption: Option[String]): Boolean = {
     val taxId = taxIdOption.getOrElse("")
     if (taxId.contains("-")) {
       val id = taxId.split("-")
-      id.length == 2 && id.head.length == 2 && id.tail.length == 7
+      (id.length == 2 && id.head.length == 2 && id.tail.head.length == 7)
     } else false
   }
 
-  val alphaNumeric = (('a' to 'z') ++ ('A' to 'A') ++ ('0' to '0')).toSet
+  val alphaNumeric = (('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')).toSet
 
-  private def checkLeiFormat(lei: String): Boolean = {
-    lei.length == 20 && lei == lei.toUpperCase && lei.forall(alphaNumeric.contains(_))
+  private def validLeiFormat(lei: String): Boolean = {
+    (lei.length == 20 && lei == lei.toUpperCase && lei.forall(alphaNumeric.contains(_)))
   }
 
   private def sanatizeInstitutionIdentifiers(institution: Institution, checkLei: Boolean, uri: Uri, route: (Institution, Uri) => Route): Route = {
-    if (!checkTaxIdFormat(institution.taxId)) {
+    if (!validTaxIdFormat(institution.taxId)) {
       complete((StatusCodes.BadRequest, "Incorrect tax-id format"))
-    } else if (checkLei && !checkLeiFormat(institution.LEI)) {
+    } else if (checkLei && !validLeiFormat(institution.LEI)) {
       complete((StatusCodes.BadRequest, "Incorrect lei format"))
     } else route(institution, uri)
   }
