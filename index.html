@@ -230,6 +230,12 @@
                     <a href="#data-browser-api-csv-example" class="toc-h2 toc-link" data-title="CSV Example">CSV Example</a>
                   </li>
                   <li>
+                    <a href="#data-browser-api-filers" class="toc-h2 toc-link" data-title="Filers">Filers</a>
+                  </li>
+                  <li>
+                    <a href="#data-browser-api-filers-example" class="toc-h2 toc-link" data-title="Filers Example">Filers Example</a>
+                  </li>
+                  <li>
                     <a href="#data-browser-api-errors" class="toc-h2 toc-link" data-title="Errors">Errors</a>
                   </li>
               </ul>
@@ -282,6 +288,17 @@
                           <li>
                             <a href="#hmda-filing-api-end-points-get-sign-receipt" class="toc-h3 toc-link" data-title="Get Sign receipt">Get Sign receipt</a>
                           </li>
+                          <li>
+                            <a href="#hmda-filing-api-end-points-submission-status" class="toc-h3 toc-link" data-title="Submission Status">Submission Status</a>
+                              <ul class="toc-list-h4">
+                                  <li>
+                                    <a href="#hmda-filing-api-end-points-submission-status-structure" class="toc-h4 toc-link" data-title="Structure">Structure</a>
+                                  </li>
+                                  <li>
+                                    <a href="#hmda-filing-api-end-points-submission-status-status-codes" class="toc-h4 toc-link" data-title="Status Codes">Status Codes</a>
+                                  </li>
+                              </ul>
+                          </li>
                       </ul>
                   </li>
               </ul>
@@ -318,19 +335,25 @@
 
 <p><em>Note:</em> depending on the query, files might take a while to generate and may not open using conventional spread sheet applications.</p>
 <h2 id='data-browser-api-end-points'>End Points</h2>
-<p>Use <code>data-browser-api/view/</code> for the end points bellow. Each end point could be called on nationwide data or on specific states/msamds. If <code>nationwide</code> is not specified, state(s) or msamds <strong>must</strong> be selected. A call made with the nationwide end point will discard any state(s) or msamds if present. For state, use 2 character state name. For msamd use a 5 digit integer.</p>
+<p>Use <code>data-browser-api/view/</code> for the endpoints below. Each endpoint could be called on nationwide data or on specific states/msamds/counties. If <code>nationwide</code> is not specified, state(s) or msamds or counties <strong>must</strong> be selected. A call made with the nationwide endpoint will discard any state(s) or msamds if present. For state, use 2 character state name. For msamd use a 5 digit integer. For counties use 5 digit county code.</p>
 
 <ul>
 <li><strong>Aggregations</strong></li>
 </ul>
 
-<p>The <code>aggregation</code> end point can be used to generated JSON reports.</p>
+<p>The <code>aggregation</code> endpoint can be used to generated JSON reports.</p>
 
 <ul>
 <li><strong>CSV</strong></li>
 </ul>
 
-<p>The <code>csv</code> end point can be used to generate CSV reports. The file will be streamed.</p>
+<p>The <code>csv</code> endpoint can be used to generate CSV reports. The file will be streamed.</p>
+
+<ul>
+<li><strong>Institutions</strong></li>
+</ul>
+
+<p>The <code>filers</code> endpoint will show a list of all institutions available.</p>
 <h2 id='data-browser-api-filters'>Filters</h2>
 <p>Data request could be filtered based on the following parameters. Multiple options are acceptable.</p>
 
@@ -389,7 +412,7 @@
 <blockquote>
 <p>Example</p>
 </blockquote>
-<pre class="highlight shell tab-shell"><code>  curl <span class="s2">"http://localhost:8070/data-browser-api/view/aggregations?states=MD&amp;years=2018&amp;actions_taken=5,6&amp;races=White,Asian,Joint"</span>
+<pre class="highlight shell tab-shell"><code>  curl <span class="s2">"https://ffiec.cfpb.gov/v2//data-browser-api/view/aggregations?states=MD&amp;years=2018&amp;actions_taken=5,6&amp;races=White,Asian,Joint"</span>
 </code></pre>
 <blockquote>
 <p>JSON Response</p>
@@ -482,7 +505,7 @@
 <blockquote>
 <p>Example</p>
 </blockquote>
-<pre class="highlight shell tab-shell"><code>  curl -L <span class="s2">"http://localhost:8070/data-browser-api/view/csv?states=CA,MD,DC&amp;years=2018&amp;actions_taken=5"</span>
+<pre class="highlight shell tab-shell"><code>  curl -L <span class="s2">"https://ffiec.cfpb.gov/v2//data-browser-api/view/csv?states=CA,MD,DC&amp;years=2018&amp;actions_taken=5"</span>
 </code></pre>
 <blockquote>
 <p>CSV file</p>
@@ -509,11 +532,78 @@
 <td>5</td>
 </tr>
 </tbody></table>
+<h2 id='data-browser-api-filers'>Filers</h2>
+<p>The <code>filers</code> endpoint takes the following parameters</p>
+
+<table><thead>
+<tr>
+<th>Parameter Name</th>
+<th>Options</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>years</td>
+<td>CSV list of years (example: 2018,2019)</td>
+</tr>
+<tr>
+<td>states</td>
+<td>two letter state code</td>
+</tr>
+<tr>
+<td>msamds</td>
+<td>5 digit integer code</td>
+</tr>
+<tr>
+<td>counties</td>
+<td>5 digit integer code</td>
+</tr>
+</tbody></table>
+<h2 id='data-browser-api-filers-example'>Filers Example</h2>
+<blockquote>
+<p>Example</p>
+</blockquote>
+<pre class="highlight shell tab-shell"><code>  curl <span class="s2">"https://ffiec.cfpb.gov/v2//data-browser-api/view/filers?states=MD,DCyears=2018"</span>
+</code></pre>
+<blockquote>
+<p>JSON Response</p>
+</blockquote>
+<pre class="highlight json tab-json"><code><span class="w">  </span><span class="p">{</span><span class="w">
+   </span><span class="err">institutions</span><span class="p">:[</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+         </span><span class="err">lei</span><span class="p">:</span><span class="s2">"lei"</span><span class="p">,</span><span class="w">
+         </span><span class="err">name</span><span class="p">:</span><span class="s2">"institution name"</span><span class="p">,</span><span class="w">
+         </span><span class="err">period</span><span class="p">:</span><span class="mi">2018</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+         </span><span class="err">lei</span><span class="p">:</span><span class="s2">"lei"</span><span class="p">,</span><span class="w">
+         </span><span class="err">name</span><span class="p">:</span><span class="s2">"institution name"</span><span class="p">,</span><span class="w">
+         </span><span class="err">period</span><span class="p">:</span><span class="mi">2018</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+   </span><span class="p">]</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span></code></pre>
+<p><code>GET</code> with the following parameters</p>
+
+<table><thead>
+<tr>
+<th>var</th>
+<th>value</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>years</td>
+<td>2018,2019</td>
+</tr>
+<tr>
+<td>states</td>
+<td>MD,DC</td>
+</tr>
+</tbody></table>
 <h2 id='data-browser-api-errors'>Errors</h2>
 <blockquote>
 <p>Example</p>
 </blockquote>
-<pre class="highlight shell tab-shell"><code>curl <span class="s2">"http://localhost:8070/data-browser-api/view/csv"</span>
+<pre class="highlight shell tab-shell"><code>curl <span class="s2">"https://ffiec.cfpb.gov/v2//data-browser-api/view/csv"</span>
 </code></pre>
 <blockquote>
 <p>JSON Response</p>
@@ -779,19 +869,15 @@
         </span><span class="s2">"period"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2018"</span><span class="p">,</span><span class="w">
         </span><span class="s2">"sequenceNumber"</span><span class="p">:</span><span class="w"> </span><span class="mi">55</span><span class="w">
     </span><span class="p">},</span><span class="w">
-    </span><span class="s2">"status"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="s2">"code"</span><span class="p">:</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w">
-        </span><span class="s2">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your data has macro edits that need to be reviewed."</span><span class="p">,</span><span class="w">
-        </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded."</span><span class="w">
+    </span><span class="s2">"status"</span><span class="p">:{</span><span class="w">
+        </span><span class="s2">"code"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your file has been uploaded."</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your data is ready to be analyzed."</span><span class="w">
     </span><span class="p">},</span><span class="w">
     </span><span class="s2">"start"</span><span class="p">:</span><span class="w"> </span><span class="mi">1572372016130</span><span class="p">,</span><span class="w">
     </span><span class="s2">"end"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"fileName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"clean_file_10.txt"</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"receipt"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"qualityVerified"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"macroVerified"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"qualityExists"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"macroExists"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+    </span><span class="s2">"fileName"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"receipt"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></code></pre>
 <table><thead>
@@ -834,9 +920,9 @@
     </span><span class="s2">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
     </span><span class="s2">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
     </span><span class="s2">"status"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="s2">"code"</span><span class="p">:</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w">
-        </span><span class="s2">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your data has macro edits that need to be reviewed."</span><span class="p">,</span><span class="w">
-        </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded."</span><span class="w">
+        </span><span class="s2">"code"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your data has formatting errors."</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Review these errors and update your file. Then, upload the corrected file."</span><span class="w">
     </span><span class="p">},</span><span class="w">
     </span><span class="s2">"_links"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
         </span><span class="s2">"href"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/parseErrors{rel}"</span><span class="p">,</span><span class="w">
@@ -867,7 +953,7 @@
 <blockquote>
 <p>Example</p>
 </blockquote>
-<pre class="highlight shell tab-shell"><code>curl -X POST <span class="se">\</span>
+<pre class="highlight shell tab-shell"><code>curl -X GET <span class="se">\</span>
   https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/edits <span class="se">\</span>
   -H <span class="s1">'Authorization: Bearer {{access_token}}'</span>
 </code></pre>
@@ -931,7 +1017,7 @@
 <blockquote>
 <p>Example</p>
 </blockquote>
-<pre class="highlight shell tab-shell"><code>curl -X POST <span class="se">\</span>
+<pre class="highlight shell tab-shell"><code>curl -X GET <span class="se">\</span>
   https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/edits/Q631 <span class="se">\</span>
   -H <span class="s1">'Authorization: Bearer {{access_token}}'</span>
 </code></pre>
@@ -1108,7 +1194,7 @@
 <blockquote>
 <p>Example</p>
 </blockquote>
-<pre class="highlight shell tab-shell"><code>curl -X POST <span class="se">\</span>
+<pre class="highlight shell tab-shell"><code>curl -X GET <span class="se">\</span>
   https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/1520/sign <span class="se">\</span>
   -H <span class="s1">'Authorization: Bearer {{access_token}}'</span> <span class="se">\</span>
   -d <span class="s1">'{"verified": true}'</span>
@@ -1142,6 +1228,139 @@
 <td><code>/{{year}}/submissions/{{sequenceNumber}}/sign</code></td>
 </tr>
 </tbody></table>
+<h3 id='hmda-filing-api-end-points-submission-status'>Submission Status</h3><h4 id='hmda-filing-api-end-points-submission-status-structure'>Structure</h4>
+<blockquote>
+<p>Example</p>
+</blockquote>
+<pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+  </span><span class="s2">"id"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"lei"</span><span class="p">:</span><span class="w"> </span><span class="s2">"12345abc"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"period"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2018"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"sequenceNumber"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="s2">"status"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"code"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"No data has been uploaded yet."</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The filing period is open and available to accept HMDA data. Make sure your data is in a pipe-delimited text file."</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="s2">"start"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+  </span><span class="s2">"end"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+  </span><span class="s2">"fileName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"test.txt"</span><span class="p">,</span><span class="w">
+  </span><span class="s2">"receipt"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+<p>Every submission will store a <code>SubmissionStatus</code> object with the following structure:  </p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>code</td>
+<td>Integer</td>
+</tr>
+<tr>
+<td>message</td>
+<td>String</td>
+</tr>
+<tr>
+<td>description</td>
+<td>String</td>
+</tr>
+</tbody></table>
+<h4 id='hmda-filing-api-end-points-submission-status-status-codes'>Status Codes</h4>
+<p>In order to track the status of a filing for a financial institution, the following states are captured by the backend:  </p>
+
+<table><thead>
+<tr>
+<th>Code</th>
+<th>Message</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>1</td>
+<td>No data has been uploaded yet.</td>
+<td>The filing period is open and available to accept HMDA data. Make sure your data is in a pipe-delimited text file.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Your file is uploading.</td>
+<td>Your file is currently being uploaded to the HMDA Platform.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Your file has been uploaded.</td>
+<td>Your data is ready to be analyzed.</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Checking the formatting of your data.</td>
+<td>Your file is being analyzed to ensure that it meets formatting requirements specified in the HMDA Filing Instructions Guide.</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Your data has formatting errors.</td>
+<td>Review these errors and update your file. Then, upload the corrected file.</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Your data is formatted correctly.</td>
+<td>Your file meets the formatting requirements specified in the HMDA Filing Instructions Guide. Your data will now be analyzed for any edits.</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Your data is being analyzed.</td>
+<td>Your data has been uploaded and is being checked for any edits.</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Your data has been analyzed for Syntactical and Validity Errors.</td>
+<td>Your file has been analyzed and does not contain any Syntactical or Validity errors.</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Your data has syntactical and/or validity edits that need to be reviewed.</td>
+<td>Your file has been uploaded, but the filing process may not proceed until the file is corrected and re-uploaded.</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Your data has been analyzed for Quality Errors.</td>
+<td>Your file has been analyzed, and does not contain quality errors.</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Your data has quality edits that need to be reviewed.</td>
+<td>Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded.</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Your data has been analyzed for macro errors.</td>
+<td>Your file has been analyzed, and does not contain macro errors.</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Your data has macro edits that need to be reviewed.</td>
+<td>Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded.</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Your data is ready for submission.</td>
+<td>Your financial institution has certified that the data is correct, but it has not been submitted yet.</td>
+</tr>
+<tr>
+<td>15</td>
+<td>Your submission has been accepted.</td>
+<td>This completes your HMDA filing process for this year. If you need to upload a new HMDA file, the previously completed filing will not be overridden until all edits have been cleared and verified, and the new file has been submitted.</td>
+</tr>
+<tr>
+<td>-1</td>
+<td>An error occurred while submitting the data.</td>
+<td>Please re-upload your file.</td>
+</tr>
+</tbody></table>
 <h1 id='rate-spread'>Rate Spread</h1><h2 id='rate-spread-rate-spread-api'>Rate Spread API</h2>
 <p>The <code>/rateSpread</code> endpoint you can provide information about a loan and have the rate spread calculated via <code>POST</code>.</p>
 
@@ -1155,7 +1374,7 @@
 <blockquote>
 <p>Example</p>
 </blockquote>
-<pre class="highlight shell tab-shell"><code>  curl -X POST <span class="s2">"https://ffiec.cfpb.gov/public/rateSpread"</span> -H <span class="s2">"Content-Type: application/json"</span> -d <span class="s1">'{ "actionTakenType": 1, "loanTerm": 30, "amortizationType": "FixedRate", "apr": 6.0, "lockInDate": "2017-11-20", "reverseMortgage": 2 }'</span>
+<pre class="highlight shell tab-shell"><code>  curl -X POST <span class="s2">"https://ffiec</span><span class="se">.</span><span class="s2">cfpb</span><span class="se">.</span><span class="s2">gov/public/rateSpread"</span> -H <span class="s2">"Content-Type: application/json"</span> -d <span class="s1">'{ "actionTakenType": 1, "loanTerm": 30, "amortizationType": "FixedRate", "apr": 6.0, "lockInDate": "2017-11-20", "reverseMortgage": 2 }'</span>
 </code></pre>
 <blockquote>
 <p>JSON Response</p>
@@ -1240,7 +1459,7 @@
 <blockquote>
 <p>Example</p>
 </blockquote>
-<pre class="highlight shell tab-shell"><code>curl -X POST <span class="s2">"https://ffiec.cfpb.gov/public/rateSpread/csv"</span> -F <span class="nv">file</span><span class="o">=</span>&lt;file.csv&gt;
+<pre class="highlight shell tab-shell"><code>curl -X POST <span class="s2">"https://ffiec</span><span class="se">.</span><span class="s2">cfpb</span><span class="se">.</span><span class="s2">gov/public/rateSpread/csv"</span> -F <span class="nv">file</span><span class="o">=</span>&lt;file.csv&gt;
 </code></pre>
 <blockquote>
 <p>CSV file with an added column for rate_spread calculated for each row</p>
