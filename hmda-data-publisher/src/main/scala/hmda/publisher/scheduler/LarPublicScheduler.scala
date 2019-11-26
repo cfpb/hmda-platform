@@ -71,7 +71,6 @@ class LarPublicScheduler
   override def receive: Receive = {
 
     case LarPublicScheduler2018 =>
-      println("test timer public lar")
       val fileNamePSV = "2018_lar.txt"
 
       val allResultsPublisher: DatabasePublisher[ModifiedLarEntityImpl] =

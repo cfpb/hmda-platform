@@ -9,4 +9,6 @@ object Schedules {
   case object TsScheduler2018
   case object TsPublicScheduler2018
   case object TsScheduler2019
+  case object LarSchedulerQuarterly2020
+  case object TsSchedulerQuarterly2020
 }
