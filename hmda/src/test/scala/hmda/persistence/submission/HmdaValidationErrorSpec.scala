@@ -7,7 +7,7 @@ import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.cluster.typed.{ Cluster, Join }
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents._
-import hmda.model.filing.submission.{ Macro, SubmissionId, Verified }
+import hmda.model.filing.submission.{ Macro, SubmissionId, Verified, MacroErrors }
 import hmda.model.processing.state.{ EditSummary, HmdaValidationErrorState }
 import hmda.model.validation._
 import hmda.persistence.AkkaCassandraPersistenceSpec
@@ -42,7 +42,8 @@ class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
         SyntacticalValidationError("12345XXX", "S300", LarValidationError),
         SyntacticalValidationError("12345XXX", "S301", LarValidationError),
         ValidityValidationError("", "V600", LarValidationError),
-        QualityValidationError("12345XXX", "Q601")
+        QualityValidationError("12345XXX", "Q601"),
+        MacroValidationError("Q634")
       )
       hmdaValidationError ! PersistHmdaRowValidatedError(submissionId, 1, List(tsError), Some(errorsProbe.ref))
       errorsProbe.expectMessage(HmdaRowValidatedError(1, List(tsError)))
@@ -89,6 +90,14 @@ class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
             LarValidationError
           )
         )
+      val macroEditSummary =
+        Set(
+          EditSummary(
+            "Q634",
+            hmda.model.validation.Macro,
+            LarValidationError
+          )
+        )
 
       stateProbe.expectMessage(
         HmdaValidationErrorState(
@@ -96,6 +105,7 @@ class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
           syntacticalEditSummary,
           validityEditSummary,
           qualityEditSummary,
+          macroEditSummary,
           qualityVerified = false
         )
       )
@@ -112,7 +122,7 @@ class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
       signedProbe.expectMessage(SubmissionNotReadyToBeSigned(submissionId))
 
       hmdaValidationError ! VerifyQuality(submissionId, true, eventsProbe.ref)
-      eventsProbe.expectMessage(QualityVerified(submissionId, true, Macro))
+      eventsProbe.expectMessage(QualityVerified(submissionId, true, MacroErrors))
 
       hmdaValidationError ! VerifyMacro(submissionId, true, eventsProbe.ref)
       eventsProbe.expectMessage(MacroVerified(submissionId, true, Verified))
