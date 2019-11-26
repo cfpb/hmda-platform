@@ -1,0 +1,29 @@
+{
+    "activityYear": 2020,
+    "lei": "B90YWS6AFX2LGWOXJ1LD",
+    "agency": 9,
+    "institutionType": -1,
+    "institutionId2017": "",
+    "taxId": "01-0123456",
+    "rssd": -1,
+    "emailDomains": [
+        "bank1.com"
+    ],
+    "respondent": {
+        "name": "Bank 0",
+        "state": "",
+        "city": ""
+    },
+    "parent": {
+        "idRssd": -1,
+        "name": ""
+    },
+    "assets": -1,
+    "otherLenderCode": -1,
+    "topHolder": {
+        "idRssd": -1,
+        "name": ""
+    },
+    "hmdaFiler": false,
+    "quarterlyFiler": true
+}

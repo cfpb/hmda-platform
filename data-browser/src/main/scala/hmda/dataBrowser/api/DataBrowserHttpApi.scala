@@ -186,6 +186,7 @@ trait DataBrowserHttpApi extends Settings {
           // GET /view/filers?years=2018 -- GET all LEIs
           (path("filers") & get) {
             extractYearsMsaMdsStatesAndCounties { filerFields =>
+              log.info("Filers: " + filerFields)
               onComplete(query.fetchFilers(filerFields).runToFuture) {
                 case Failure(ex) =>
                   log.error(ex, "Failed to obtain filer information")

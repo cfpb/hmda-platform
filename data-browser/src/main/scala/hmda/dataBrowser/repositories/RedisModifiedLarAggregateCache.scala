@@ -51,8 +51,10 @@ class RedisCache(redisClient: Task[RedisAsyncCommands[String, String]], timeToLi
     findAndParse[Statistic](redisKey)
   }
 
-  override def findFilers(filerFields: List[QueryField]): Task[Option[FilerInstitutionResponse]] =
-    findAndParse[FilerInstitutionResponse]("year".toString)
+  override def findFilers(filerFields: List[QueryField]): Task[Option[FilerInstitutionResponse]] = {
+    val redisKey = key(filerFields)
+    findAndParse[FilerInstitutionResponse](redisKey)
+  }
 
   override def update(queryFields: List[QueryField], statistic: Statistic): Task[Statistic] = {
     val redisKey = key(queryFields)

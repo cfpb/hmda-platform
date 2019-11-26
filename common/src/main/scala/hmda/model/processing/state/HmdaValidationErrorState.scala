@@ -59,7 +59,7 @@ case class HmdaValidationErrorState(statusCode: Int = 1,
 
   def verifyQuality(evt: QualityVerified): HmdaValidationErrorState = {
     val status = if (evt.verified) {
-      if (macroVerified) Verified.code
+      if (!macroVerified && `macro`.isEmpty) Verified.code
       else if (`macro`.isEmpty) hmda.model.filing.submission.Macro.code
       else MacroErrors.code
     } else {
