@@ -170,7 +170,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
     val taxId = taxIdOption.getOrElse("")
     if (taxId.contains("-")) {
       val id = taxId.split("-")
-      (id.length == 2 && id.head.length == 2 && id.tail.head.length == 7)
+      (id.length == 2 && id.head.length == 2 && id.last.length == 7)
     } else false
   }
 
