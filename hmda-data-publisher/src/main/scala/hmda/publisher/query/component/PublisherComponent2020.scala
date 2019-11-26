@@ -508,7 +508,8 @@ trait PublisherComponent2020 {
       if(includeQuarterly){
         db.stream(
           table
-            .filterNot(lar =>(lar.lei.toUpperCase inSet bankIgnoreList)&& !lar.isQuarterly  )
+            .filterNot(
+              lar =>(lar.lei.toUpperCase inSet bankIgnoreList)&& !lar.isQuarterly  )
             .result
             .withStatementParameters(
               rsType = ResultSetType.ForwardOnly,
