@@ -112,7 +112,7 @@ class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
       signedProbe.expectMessage(SubmissionNotReadyToBeSigned(submissionId))
 
       hmdaValidationError ! VerifyQuality(submissionId, true, eventsProbe.ref)
-      eventsProbe.expectMessage(QualityVerified(submissionId, true, Macro))
+      eventsProbe.expectMessage(QualityVerified(submissionId, true, Verified))
 
       hmdaValidationError ! VerifyMacro(submissionId, true, eventsProbe.ref)
       eventsProbe.expectMessage(MacroVerified(submissionId, true, Verified))
