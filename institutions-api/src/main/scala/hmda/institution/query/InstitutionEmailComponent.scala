@@ -20,10 +20,6 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
 
     def * =
       (id, lei, emailDomain) <> (InstitutionEmailEntity.tupled, InstitutionEmailEntity.unapply)
-
-    def institutionFK =
-      foreignKey("INST_FK", lei, institutionsTable2018)(_.lei, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
-
   }
 
   val institutionEmailsTable = TableQuery[InstitutionEmailsTable]
