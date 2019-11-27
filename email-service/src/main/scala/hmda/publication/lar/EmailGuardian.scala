@@ -36,7 +36,7 @@ object EmailGuardian {
 
       val (control, streamCompletion) =
         pullEmails(system, config.kafka.bootstrapServers)
-          .via(sendEmailsIfNecessary(emailService, emailStatusRepo, config.email.content, config.email.parallelism))
+          .via(sendEmailsIfNecessary(emailService, emailStatusRepo, config.email.content, config.email.subject, config.email.parallelism))
           .asSource
           .map { case (_, offset) => offset }
           .toMat(commitMessages(commitSettings))(Keep.both)

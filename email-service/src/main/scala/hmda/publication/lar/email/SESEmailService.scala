@@ -17,7 +17,7 @@ class SESEmailService(emailClient: AmazonSimpleEmailService, fromAddress: String
           .withMessage(
             new Message()
               .withSubject(new Content().withCharset(UTF8).withData(subject))
-              .withBody(new Body().withText(new Content().withCharset(UTF8).withData(plainTextContent)))
+              .withBody(new Body().withHtml(new Content().withData(plainTextContent)))
           )
           .withDestination(new Destination().withToAddresses(recipientAddress))
           .withSource(fromAddress)
