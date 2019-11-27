@@ -168,16 +168,19 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
 
   private def validTaxIdFormat(taxIdOption: Option[String]): Boolean = {
     val taxId = taxIdOption.getOrElse("")
-    if (taxId.contains("-")) {
-      val id = taxId.split("-")
-      (id.length == 2 && id.head.length == 2 && id.last.length == 7)
-    } else false
+    val taxIdPattern ="[0-9]{2}\\-[0-9]{7}$".r
+    taxId match {
+      case taxIdPattern() => true
+      case _ => false
+    }
   }
 
-  val alphaNumeric = (('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')).toSet
-
   private def validLeiFormat(lei: String): Boolean = {
-    (lei.length == 20 && lei == lei.toUpperCase && lei.forall(alphaNumeric.contains(_)))
+    val leiPattern = "[A-Z0-9]{20}$".r
+    lei match {
+      case leiPattern() => true
+      case _ => false
+    }
   }
 
   private def sanatizeInstitutionIdentifiers(institution: Institution, checkLei: Boolean, uri: Uri, route: (Institution, Uri) => Route): Route = {

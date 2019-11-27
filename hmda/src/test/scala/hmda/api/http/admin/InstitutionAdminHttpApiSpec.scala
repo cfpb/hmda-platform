@@ -52,14 +52,11 @@ class InstitutionAdminHttpApiSpec
   override def afterAll(): Unit = super.afterAll()
 
   val lei = Random.alphanumeric.take(20).mkString.toUpperCase
-  val generatedTaxId = Random.alphanumeric.take(2).mkString + "-" + Random.alphanumeric.take(7).mkString
-  println(lei)
-  println(generatedTaxId)
   val sampleInstitution =
     institutionGen.sample
       .getOrElse(Institution.empty)
       .copy(LEI = lei)
-      .copy(taxId = Option(generatedTaxId))
+      .copy(taxId = Option("12-3456789"))
       .copy(activityYear = 2018)
 
   val modified =
