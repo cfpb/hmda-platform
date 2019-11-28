@@ -425,7 +425,7 @@ object HmdaValidationError
         .collect {
           case (Right(parsed), line, rowNumber) => (parsed, line, rowNumber)
         }
-        .mapAsync(1) {
+        .mapAsync(16) {
           case (lar, rawLine, rowNumber) =>
             checkType match {
               case RawLine =>
@@ -502,9 +502,17 @@ object HmdaValidationError
 
     editType match {
       case "syntactical-validity" =>
+        val distinctRawLineResult = checkForDistinctElements(RawLine)
+        val distinctULIResult = checkForDistinctElements(ULI)
         for {
+          // NOTE: Optimization: These two calls will happen in parallel
+          // However, only distinctRawLineResult is used in syntactical validity and distinctULIResult
+          // is used in the next quality which comes after syntactical validity
+          // Because of the eager nature of Future, these calls will evaluate in parallel
           header         <- headerResultTest
-          distinctResult <- checkForDistinctElements(RawLine)
+          distinctResult <- distinctRawLineResult
+          distinctULIResult <- distinctULIResult // NOTE this is not used in this step but the results are pre-computed for the next step (quality)
+          _ <- appDb.duplicateLineNumbersRepository.persist(submissionId.toString, "uli", distinctULIResult.totalCount, distinctULIResult.duplicateLineNumbers.toSet)
           distinctCount  <- appDb.distinctCountRepository.count(submissionId.toString) //S304 and //S305
           res <- validateAndPersistErrors(
                   TransmittalLar(
@@ -519,9 +527,16 @@ object HmdaValidationError
                 )
         } yield res
       case "quality" =>
+        // use pre-computed results from previous step
+        val cachedULIResults =
+          appDb.duplicateLineNumbersRepository.find(submissionId.toString, "uli")
+            .map(_.fold(ifEmpty = {
+              log.error(s"Expected a cached result for ULI for Submission ID: ${submissionId.toString} but did not get one, it seems like syntactical-validity did not run before this to pre-compute the result")
+              DistinctElementsResult(0, Vector.empty, ULI)
+            })(r => DistinctElementsResult(r.totalCount, r.lineNumbers.toVector, ULI)))
         for {
           header           <- headerResultTest
-          distinctResult   <- checkForDistinctElements(ULI)
+          distinctResult   <- cachedULIResults
           distinctUliCount <- appDb.distinctCountRepository.count(submissionId.toString + "uli") //Q600
           _                <- appDb.distinctCountRepository.remove(submissionId.toString)
           _                <- appDb.distinctCountRepository.remove(submissionId.toString + "uli")
