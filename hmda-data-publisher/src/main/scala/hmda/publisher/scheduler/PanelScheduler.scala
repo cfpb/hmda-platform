@@ -6,12 +6,7 @@ import java.time.format.DateTimeFormatter
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{
-  MemoryBufferType,
-  MultipartUploadResult,
-  S3Attributes,
-  S3Settings
-}
+import akka.stream.alpakka.s3.{MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
@@ -20,19 +15,9 @@ import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.query.DbConfiguration.dbConfig
-import hmda.publisher.query.component.{
-  PublisherComponent2018,
-  PublisherComponent2019
-}
-import hmda.publisher.query.panel.{
-  InstitutionAltEntity,
-  InstitutionEmailEntity,
-  InstitutionEntity
-}
-import hmda.publisher.scheduler.schedules.Schedules.{
-  PanelScheduler2018,
-  PanelScheduler2019
-}
+import hmda.publisher.query.component.{InstitutionEmailComponent, PublisherComponent2018, PublisherComponent2019}
+import hmda.publisher.query.panel.{InstitutionAltEntity, InstitutionEmailEntity, InstitutionEntity}
+import hmda.publisher.scheduler.schedules.Schedules.{PanelScheduler2018, PanelScheduler2019}
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -40,15 +25,15 @@ import scala.util.{Failure, Success}
 class PanelScheduler
     extends HmdaActor
     with PublisherComponent2018
-    with PublisherComponent2019 {
+    with PublisherComponent2019
+      with InstitutionEmailComponent {
 
   implicit val ec = context.system.dispatcher
   implicit val materializer = ActorMaterializer()
   private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   def institutionRepository2018 = new InstitutionRepository2018(dbConfig)
   def institutionRepository2019 = new InstitutionRepository2019(dbConfig)
-  def emailRepository2018 = new InstitutionEmailsRepository2018(dbConfig)
-  def emailRepository2019 = new InstitutionEmailsRepository2019(dbConfig)
+  def emailRepository = new InstitutionEmailsRepository2018(dbConfig)
 
   val bankFilter =
     ConfigFactory.load("application.conf").getConfig("filter")
@@ -148,7 +133,7 @@ class PanelScheduler
       .fromFuture(allResults)
       .map(seek => seek.toList)
       .mapConcat(identity)
-      .mapAsync(1)(institution => appendEmailDomains2019(institution))
+      .mapAsync(1)(institution => appendEmailDomains(institution))
       .map(institution => institution.toPSV + "\n")
       .map(s => ByteString(s))
       .runWith(s3Sink)
@@ -168,7 +153,7 @@ class PanelScheduler
       institution: InstitutionEntity): Future[InstitutionAltEntity] = {
 
     val emails: Future[Seq[InstitutionEmailEntity]] =
-      emailRepository2018.findByLei(institution.lei)
+      emailRepository.findByLei(institution.lei)
 
     emails.map(
       emailList =>
@@ -194,11 +179,11 @@ class PanelScheduler
       ))
   }
 
-  def appendEmailDomains2019(
+  def appendEmailDomains(
       institution: InstitutionEntity): Future[InstitutionAltEntity] = {
 
     val emails: Future[Seq[InstitutionEmailEntity]] =
-      emailRepository2019.findByLei(institution.lei)
+      emailRepository.findByLei(institution.lei)
 
     emails.map(
       emailList =>

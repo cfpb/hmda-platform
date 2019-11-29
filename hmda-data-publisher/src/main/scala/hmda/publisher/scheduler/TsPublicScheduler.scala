@@ -3,7 +3,6 @@ package hmda.publisher.scheduler
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3._
-import akka.stream.scaladsl._
 import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
@@ -12,11 +11,11 @@ import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
-import hmda.query.DbConfiguration.dbConfig
-import hmda.query.ts._
 import hmda.publisher.helper.TSHeader
 import hmda.publisher.query.component.PublisherComponent2018
 import hmda.publisher.scheduler.schedules.Schedules.TsPublicScheduler2018
+import hmda.query.DbConfiguration.dbConfig
+import hmda.query.ts._
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -69,7 +68,6 @@ class TsPublicScheduler
   override def receive: Receive = {
 
     case TsPublicScheduler2018 =>
-      println("test timer public ts")
 
       val fileNamePSV = "2018_ts.txt"
 
