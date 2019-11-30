@@ -425,7 +425,7 @@ object HmdaValidationError
         .collect {
           case (Right(parsed), line, rowNumber) => (parsed, line, rowNumber)
         }
-        .mapAsync(16) {
+        .mapAsync(1) {
           case (lar, rawLine, rowNumber) =>
             checkType match {
               case RawLine =>
