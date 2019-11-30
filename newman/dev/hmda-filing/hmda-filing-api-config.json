@@ -121,10 +121,13 @@
         "testNumber": 4
       },
       {
-        "testName": "test start a filing",
+        "testName": "test start a Submission",
         "expectedResponse": {
           "filing": {
-            "period": "2018",
+            "period": {
+            "year": 2018,
+            "quarter": null
+          },
             "lei": "BANK1LEIFORTEST12345",
             "status": {
               "code": 2,
@@ -143,7 +146,10 @@
         "expectedResponse": {
           "id": {
             "lei": "BANK1LEIFORTEST12345",
-            "period": "2018",
+            "period": {
+            "year": 2018,
+            "quarter": null
+          },
             "sequenceNumber": 1
           },
           "status": {
@@ -160,7 +166,7 @@
       },
       {
         "testName": "filing psv upload test",
-        "sourceFile": "hmda-filing/clean_10_row.txt",
+        "sourceFile": "dev/hmda-filing/clean_10_row.txt",
         "expectedResponse": {
           "id": {
             "lei": "BANK1LEIFORTEST12345",
@@ -184,7 +190,10 @@
         "expectedResponse": {
           "id": {
             "lei": "BANK1LEIFORTEST12345",
-            "period": "2018",
+            "period": {
+              "year": 2018,
+              "quarter": null
+            },
             "sequenceNumber": 12
           },
           "status": {
