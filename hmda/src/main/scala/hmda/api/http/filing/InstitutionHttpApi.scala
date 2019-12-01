@@ -22,7 +22,7 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.ErrorResponse
 import hmda.auth.OAuth2Authorization
 import hmda.messages.filing.FilingCommands.GetFilingDetails
-import hmda.model.filing.FilingDetails
+import hmda.model.filing.{Filing, FilingDetails}
 import hmda.persistence.filing.FilingPersistence.selectFiling
 import hmda.persistence.institution.InstitutionPersistence.selectInstitution
 
@@ -71,6 +71,9 @@ trait InstitutionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriz
         complete(
           ToResponseMarshallable(StatusCodes.NotFound -> errorResponse)
         )
+      case Success((Some(institution), None)) =>
+        complete(ToResponseMarshallable(InstitutionDetail(Option(institution), List(Filing()))))
+
       case Failure(error) =>
         failedResponse(StatusCodes.InternalServerError, uri, error)
     }
