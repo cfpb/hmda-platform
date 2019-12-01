@@ -17,9 +17,7 @@ trait CreateFilingAuthorization {
   def isFilingAllowed(year: Int, quarter: Option[String])(successful: Route): Route = extractMatchedPath { path =>
     // we use this only for month and day information (not time)
     val now = LocalDate.now()
-    val runtimeMode = config.getString("hmda.runtime.mode")
-
-    if (runtimeMode == "dev" || check(year, now.getDayOfYear, quarter)) successful
+    if (check(year, now.getDayOfYear, quarter)) successful
     else complete((BadRequest, ErrorResponse(BadRequest.intValue, "The provided year or quarter isn't open at the moment", path)))
   }
 }
