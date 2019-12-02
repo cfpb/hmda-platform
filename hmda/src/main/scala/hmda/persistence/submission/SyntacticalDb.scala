@@ -1,14 +1,16 @@
 package hmda.persistence.submission.repositories
 
 import com.datastax.driver.core._
-import com.outworkers.phantom.connectors.{ CassandraConnection, ContactPoints }
+import com.outworkers.phantom.connectors.{CassandraConnection, ContactPoints}
 import com.outworkers.phantom.database.Database
 import com.typesafe.config.Config
+import hmda.persistence.submission.repository.DuplicateLineNumberRepository
+
 import scala.collection.JavaConverters._
 
 class SyntacticalDb private (override val connector: CassandraConnection) extends Database[SyntacticalDb](connector) {
   object distinctCountRepository extends SyntacticalRepository with connector.Connector
-
+  object duplicateLineNumbersRepository extends DuplicateLineNumberRepository with connector.Connector
 }
 
 object SyntacticalDb {
