@@ -33,6 +33,9 @@ sealed trait ApplicantFormatValidator extends LarParser {
     otherCreditScore: String,
     coApp: Boolean
   ): LarParserValidationResult[Applicant] = {
+    val ageEnum = 
+      if (coApp) InvalidCoApplicantAge(age)
+      else InvalidApplicantAge(age)
     val credEnum =
       if (coApp) InvalidCoApplicantCreditScore(creditScore)
       else InvalidApplicantCreditScore(creditScore)
@@ -53,7 +56,7 @@ sealed trait ApplicantFormatValidator extends LarParser {
       ),
       validateRace(race1, race2, race3, race4, race5, otherNative, otherAsian, otherPacific, raceObserved, coApp = coApp),
       validateSex(sex, sexObserved, coApp = coApp),
-      validateIntField(age, InvalidApplicantAge(age)),
+      validateIntField(age, ageEnum),
       validateIntField(creditScore, credEnum),
       validateLarCode(CreditScoreEnum, creditScoreModel, credModelEnum),
       validateStr(otherCreditScore)
