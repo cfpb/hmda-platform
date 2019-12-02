@@ -4,7 +4,6 @@ import akka.event.{LoggingAdapter, NoLogging}
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import akka.util.Timeout
-import hmda.api.http.model.public.ValidatedResponse
 import hmda.model.filing.lar.LarGenerators.larNGen
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.filing.ts.TsGenerators.tsGen

@@ -11,17 +11,13 @@ import akka.util.{ ByteString, Timeout }
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.stream.scaladsl.{ Broadcast, Concat, Flow, GraphDSL, Sink, Source }
-import hmda.api.http.model.public.{ Validated, ValidatedResponse }
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.directives.HmdaTimeDirectives
 import io.circe.generic.auto._
-import hmda.api.http.model.filing.submissions.{ HmdaRowParsedErrorSummary, FieldParserErrorSummary }
-import hmda.messages.submission.SubmissionProcessingEvents._
-import hmda.model.filing.ParserValidValuesLookup._
-import hmda.messages.submission.SubmissionProcessingCommands.FieldParserError
-import hmda.parser.ParserErrorModel.ParserValidationError
+import hmda.api.http.model.filing.submissions.HmdaRowParsedErrorSummary
+import hmda.api.http.utils.ParserErrorUtils
 
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
@@ -139,7 +135,7 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
       .map {
         case (i, Right(_)) => None
         case (i, Left(errors)) =>
-          Some(parserErrorSummaryConvertor(parserHmdaRowParsedErrorConvertor(i, "ts", errors)))
+          Some(ParserErrorUtils.parserValidationErrorSummaryConvertor(i, "ts", errors))
       }
 
   private def processLarSource: Flow[ByteString, Option[HmdaRowParsedErrorSummary], NotUsed] =
@@ -156,44 +152,7 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
       .map {
         case (i, lar, Right(_)) => None
         case (i, lar, Left(errors)) =>
-          Some(parserErrorSummaryConvertor(parserHmdaRowParsedErrorConvertor(i, lar, errors)))
+          Some(ParserErrorUtils.parserValidationErrorSummaryConvertor(i, lar, errors))
       }
-
-  def parserHmdaRowParsedErrorConvertor(line: Int, lar: String, errors: List[ParserValidationError]): HmdaRowParsedError= {
-    HmdaRowParsedError(
-      line,
-      estimateULI(lar),
-      errors.map(error =>
-        FieldParserError(
-          error.fieldName,
-          error.inputValue
-        )
-      )
-    )
-  }
-
-  def parserErrorSummaryConvertor(
-      hmdaRowParsedError: HmdaRowParsedError): HmdaRowParsedErrorSummary = {
-    HmdaRowParsedErrorSummary(
-      hmdaRowParsedError.rowNumber,
-      hmdaRowParsedError.estimatedULI,
-      hmdaRowParsedError.errorMessages.map(
-        errorMessage =>
-          FieldParserErrorSummary(
-            errorMessage.fieldName,
-            errorMessage.inputValue,
-            lookupParserValidValues(errorMessage.fieldName)
-        ))
-    )
-  }
-
-  def estimateULI(line: String): String = {
-    val larItems = line.split('|')
-    if (larItems.length >= 3) {
-      larItems(2)
-    } else {
-      "The ULI could not be identified."
-    }
-  }
 
 }

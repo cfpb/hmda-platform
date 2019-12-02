@@ -22,6 +22,7 @@ import hmda.model.processing.state.HmdaParserErrorState
 import hmda.parser.filing.ParserFlow._
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.persistence.submission.HmdaProcessingUtils.{ readRawData, updateSubmissionStatus }
+import hmda.api.http.utils.ParserErrorUtils._
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -133,15 +134,6 @@ object HmdaParserError extends HmdaTypedPersistentActor[SubmissionProcessingComm
 
   def startShardRegion(sharding: ClusterSharding): ActorRef[ShardingEnvelope[SubmissionProcessingCommand]] =
     super.startShardRegion(sharding)
-
-  def estimateULI(line: String): String = {
-    val larItems = line.split('|')
-    if (larItems.length >= 3) {
-      larItems(2)
-    } else {
-      "The ULI could not be identified."
-    }
-  }
 
   def selectHmdaParserError(sharding: ClusterSharding, submissionId: SubmissionId): EntityRef[SubmissionProcessingCommand] =
     sharding.entityRefFor(HmdaParserError.typeKey, s"${HmdaParserError.name}-${submissionId.toString}")
