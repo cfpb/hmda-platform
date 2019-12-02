@@ -63,16 +63,16 @@ trait InstitutionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriz
     } yield(institution, filings)
 
     onComplete(iDetails) {
-      case Success((Some(institution), Some(filings))) =>
-        complete(ToResponseMarshallable(InstitutionDetail(Option(institution), List(filings.filing))))
+      case Success((i @ Some(_), optFilings)) =>
+        complete(InstitutionDetail(i, optFilings.map(_.filing).toList))
+      case Success((i @ Some(_), None)) =>
+        complete(InstitutionDetail(i, List(Filing())))
       case Success((None,_)) =>
         val errorResponse =
           ErrorResponse(404, s"Institution: $lei does not exist", uri.path)
         complete(
           ToResponseMarshallable(StatusCodes.NotFound -> errorResponse)
         )
-      case Success((Some(institution), None)) =>
-        complete(ToResponseMarshallable(InstitutionDetail(Option(institution), List(Filing()))))
 
       case Failure(error) =>
         failedResponse(StatusCodes.InternalServerError, uri, error)
