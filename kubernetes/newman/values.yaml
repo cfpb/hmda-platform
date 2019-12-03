@@ -2,7 +2,7 @@
 # Declare variables to be passed into your templates.
 jobs:
   # third cron
-  - name: newmen-tests
+  - name: newman-tests
     image:
       repository: dtr.cfpb.gov/hmda/newman-automation
       tag: filingTimer
@@ -27,7 +27,7 @@ jobs:
       value:
     - name: MM_HOOK
       value:
-    schedule: "*/30 * * * *"
+    schedule: "*/5 * * * *"
     command: ["/bin/sh"]
     args:
       -  "-c"
