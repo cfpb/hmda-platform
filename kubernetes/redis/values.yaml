@@ -212,7 +212,9 @@ master:
   ## extraFlags:
   ##  - "--maxmemory-policy volatile-ttl"
   ##  - "--repl-backlog-size 1024mb"
-  extraFlags: []
+  extraFlags:
+    - "--maxmemory 3gb"
+    - "--maxmemory-policy allkeys-lru"
   ## Comma-separated list of Redis commands to disable
   ##
   ## Can be used to disable Redis commands for security reasons.
