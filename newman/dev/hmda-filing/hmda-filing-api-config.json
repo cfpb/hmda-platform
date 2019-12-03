@@ -145,7 +145,7 @@
         "testName": "test create a filing",
         "expectedResponse": {
           "id": {
-            "lei": "AANK1LEIFORTEST12345",
+            "lei": "BANK1LEIFORTEST12345",
             "period": {
             "year": 2018,
             "quarter": null

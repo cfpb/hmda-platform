@@ -31,7 +31,7 @@ jobs:
     command: ["/bin/sh"]
     args:
       -  "-c"
-      - ./scripts/newmanExec.sh $KC_UN $KC_PW $KC_URL $KC_CLIENT_ID $HOST_FILING $HOST_ADMIN $HOST_PUBLIC $HMDA_ENV $MM_HOOK
+      - ./scripts/newmanFilingTest.sh $KC_UN $KC_PW $KC_URL $KC_CLIENT_ID $HOST_FILING $HOST_ADMIN $HOST_PUBLIC $HMDA_ENV $MM_HOOK
     resources:
       limits:
         cpu: 50m
