@@ -16,22 +16,18 @@
 `kubectl config use-context <dev-context>`
 
 ```
-helm install  --name=hmda --namespace=newman 
---set env.HOST_FILING=<complete filing API host/endpoint>
- --set env.HOST_ADMIN=<complete admin API host/endpoint>
- --set env.HOST_PUBLIC=<complete public API host/endpoint>
- --set env.USERNAME_NM=<authorized username>
---set env.PASSWORD_NM=<authorized user password> .
+helm install  --namespace=newman  \
+--set env.KC_UN=$KC_UN \
+--set env.KC_PW=$KC_PW \
+--set env.KC_URL=$KC_URL \
+--set env.KC_CLIENT_ID=$KC_CLIENT_ID \
+--set env.HOST_FILING=$HOST_FILING \
+--set env.HOST_ADMIN=$HOST_ADMIN \
+--set env.HOST_PUBLIC=$HOST_PUBLIC \
+--set env.HMDA_ENV=$HMDA_ENV \
+--set env.MM_HOOK=$MM_HOOK .
 ```
 
 
-## Sample script executed by cronjob
-
-```
-authToken=$(./scripts/authTokenGen.sh $USERNAME_NM $PASSWORD_NM) &&
- ./node_modules/.bin/newman run hmda-filing/hmda-filing-api-test.json -d hmda-filing/hmda-filing-api-config.json 
---env-var host_filing=$HOST_FILING
- --env-var host_admin_api=$HOST_ADMIN 
---env-var host_public=$HOST_PUBLIC 
---env-var authToken= $authToken
-```
+### delete cronjob
+ `kubectl delete -n newman cronjob --all`
