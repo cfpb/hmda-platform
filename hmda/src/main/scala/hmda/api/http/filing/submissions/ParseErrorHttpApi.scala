@@ -19,7 +19,6 @@ import hmda.model.filing.submission.{ Submission, SubmissionId }
 import hmda.model.processing.state.HmdaParserErrorState
 import hmda.persistence.submission.{ HmdaParserError, SubmissionPersistence }
 import hmda.util.http.FilingResponseUtils._
-import hmda.model.filing.ParserValidValuesLookup._
 import hmda.api.http.model.filing.submissions._
 import hmda.api.http.PathMatchers._
 import hmda.utils.YearUtils.Period

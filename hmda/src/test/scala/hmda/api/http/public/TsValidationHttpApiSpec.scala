@@ -6,8 +6,7 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
 import hmda.api.http.model.public.{
   SingleValidationErrorResult,
-  TsValidateRequest,
-  TsValidateResponse
+  TsValidateRequest
 }
 import org.scalatest.{MustMatchers, WordSpec}
 
@@ -16,6 +15,7 @@ import scala.concurrent.duration._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.model.filing.ts.{Address, Contact, TransmittalSheet}
 import hmda.model.institution.Agency
+import hmda.api.http.model.filing.submissions.HmdaRowParsedErrorSummary
 import io.circe.generic.auto._
 
 class TsValidationHttpApiSpec
@@ -69,9 +69,7 @@ class TsValidationHttpApiSpec
     "fail to parse an invalid pipe delimited TS and return list of errors" in {
       Post("/ts/parse", TsValidateRequest(invalidParseCsv)) ~> tsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
-        responseAs[TsValidateResponse].errorMessages mustBe List(
-          "Transmittal Sheet Record Identifier",
-          "Federal Agency")
+        responseAs[HmdaRowParsedErrorSummary].errorMessages.length mustBe 2
       }
     }
 
@@ -80,8 +78,7 @@ class TsValidationHttpApiSpec
         TsValidateRequest(tsCsv + "|too|many|fields")
       Post("/ts/parse", tsValidateRequestWithTooManyFields) ~> tsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
-        responseAs[TsValidateResponse].errorMessages mustBe List(
-          "Incorrect Number of TS Fields")
+        responseAs[HmdaRowParsedErrorSummary].errorMessages.length mustBe 1
       }
     }
 

@@ -42,11 +42,7 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
           onComplete(processF) {
             case Success(parsed) =>
               val errorList = parsed.filter(_ != None)
-              if (errorList.length == 0){
-                complete("yay")
-              } else {
-                complete(errorList)
-              }
+              complete(errorList)
 
             case Failure(error) =>
               complete(ToResponseMarshallable(StatusCodes.BadRequest -> error.getLocalizedMessage))
