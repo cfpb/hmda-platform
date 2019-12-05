@@ -1,5 +1,4 @@
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: apps/v1beta2
 metadata:
   name: {{ template "email-service.fullname" . }}
   labels:
