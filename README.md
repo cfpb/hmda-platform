@@ -47,3 +47,4 @@ Related projects
   - https://github.com/cfpb/hmda-test-files
   - https://github.com/cfpb/hmda-documentation
   - https://github.com/cfpb/hmda-census
+  - https://github.com/cfpb/hmda-platform-api-docs
