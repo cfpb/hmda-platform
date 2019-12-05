@@ -42,24 +42,51 @@ spec:
             cpu: "2"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
-        - name: CURRENT_YEAR
-          value: "{{ .Values.current.year }}"
-        - name: RULES_YEARLY_FILING_YEARS_ALLOWED
-          value: "{{ .Values.rules.yearlyFilingYearsAllowed }}"
-        - name: RULES_QF_FILING_YEARS_ALLOWED
-          value: "{{ .Values.rules.quarterlyFilingYearsAllowed }}"
-        - name: RULES_QF_Q1_START
-          value: "{{ .Values.rules.q1Start }}"
-        - name: RULES_QF_Q1_END
-          value: "{{ .Values.rules.q1End }}"
-        - name: RULES_QF_Q2_START
-          value: "{{ .Values.rules.q2Start }}"
-        - name: RULES_QF_Q2_END
-          value: "{{ .Values.rules.q2End }}"
-        - name: RULES_QF_Q3_START
-          value: "{{ .Values.rules.q3Start }}"
-        - name: RULES_QF_Q3_END
-          value: "{{ .Values.rules.q3End }}"
+          - name: CURRENT_YEAR
+            valueFrom:
+              configMapKeyRef:
+                name: timed-guards
+                key: currentYear
+          - name: RULES_YEARLY_FILING_YEARS_ALLOWED
+            valueFrom:
+              configMapKeyRef:
+                name: timed-guards
+                key: yearsAllowed
+          - name: RULES_QF_FILING_YEARS_ALLOWED
+            valueFrom:
+              configMapKeyRef:
+                name: timed-guards
+                key: quarterlyYearsAllowed
+          - name: RULES_QF_Q1_START
+            valueFrom:
+              configMapKeyRef:
+                name: timed-guards
+                key: q1Start
+          - name: RULES_QF_Q1_END
+            valueFrom:
+              configMapKeyRef:
+                name: timed-guards
+                key: q1End
+          - name: RULES_QF_Q2_START
+            valueFrom:
+              configMapKeyRef:
+                name: timed-guards
+                key: q2Start
+          - name: RULES_QF_Q2_END
+            valueFrom:
+              configMapKeyRef:
+                name: timed-guards
+                key: q2End
+          - name: RULES_QF_Q3_START
+            valueFrom:
+              configMapKeyRef:
+                name: timed-guards
+                key: q3Start
+          - name: RULES_QF_Q3_END
+            valueFrom:
+              configMapKeyRef:
+                name: timed-guards
+                key: q3End
         - name: KAFKA_INSTITUTIONS_TOPIC
           value: {{.Values.kafka.institutionsTopic}}
         - name: KAFKA_SIGN_TOPIC

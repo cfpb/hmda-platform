@@ -20,7 +20,7 @@ class PGSlickEmailSubmissionStatusRepository(databaseConfig: DatabaseConfig[Jdbc
   override def recordEmailSent(e: EmailSubmissionMetadata): Task[EmailSubmissionStatus] = {
     val status = EmailSubmissionStatus(
       lei = e.submissionId.lei,
-      year = e.submissionId.period.toInt,
+      year = e.submissionId.period.year,
       submissionId = e.submissionId.toString,
       emailAddress = e.emailAddress,
       successful = true,
@@ -33,7 +33,7 @@ class PGSlickEmailSubmissionStatusRepository(databaseConfig: DatabaseConfig[Jdbc
   override def recordEmailFailed(e: EmailSubmissionMetadata, reason: String): Task[EmailSubmissionStatus] = {
     val status = EmailSubmissionStatus(
       lei = e.submissionId.lei,
-      year = e.submissionId.period.toInt,
+      year = e.submissionId.period.year,
       submissionId = e.submissionId.toString,
       emailAddress = e.emailAddress,
       successful = false,

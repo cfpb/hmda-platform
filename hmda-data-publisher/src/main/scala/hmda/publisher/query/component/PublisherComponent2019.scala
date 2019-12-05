@@ -2,11 +2,11 @@ package hmda.publisher.query.component
 
 import java.sql.Timestamp
 
+import hmda.publisher.query.lar.{LarEntityImpl2019, _}
+import hmda.publisher.query.panel.InstitutionEntity
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
-import hmda.publisher.query.lar.{LarEntityImpl2019, _}
-import hmda.publisher.query.panel.{InstitutionEmailEntity, InstitutionEntity}
 import slick.basic.{DatabaseConfig, DatabasePublisher}
 import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
 
@@ -100,42 +100,7 @@ trait PublisherComponent2019 {
     }
   }
 
-  class InstitutionEmailsTable(tag: Tag)
-      extends Table[InstitutionEmailEntity](tag, "institutions_emails_2019") {
-    def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
-    def lei = column[String]("lei")
-    def emailDomain = column[String]("email_domain")
 
-    def * =
-      (id, lei, emailDomain) <> (InstitutionEmailEntity.tupled, InstitutionEmailEntity.unapply)
-
-    def institutionFK =
-      foreignKey("INST_FK", lei, institutionsTable2019)(
-        _.lei,
-        onUpdate = ForeignKeyAction.Restrict,
-        onDelete = ForeignKeyAction.Cascade)
-  }
-
-  val institutionEmailsTable2019 = TableQuery[InstitutionEmailsTable]
-
-  class InstitutionEmailsRepository2019(val config: DatabaseConfig[JdbcProfile])
-      extends TableRepository[InstitutionEmailsTable, Int] {
-    val table = institutionEmailsTable2019
-    def getId(table: InstitutionEmailsTable) = table.id
-    def deleteById(id: Int) = db.run(filterById(id).delete)
-
-    def createSchema() = db.run(table.schema.create)
-    def dropSchema() = db.run(table.schema.drop)
-
-    def findByLei(lei: String) = {
-      db.run(table.filter(_.lei === lei).result)
-    }
-
-    def getAllDomains(): Future[Seq[InstitutionEmailEntity]] = {
-      db.run(table.result)
-    }
-
-  }
   class TransmittalSheetTable(tag: Tag)
       extends Table[TransmittalSheetEntity](tag, "transmittalsheet2019") {
 

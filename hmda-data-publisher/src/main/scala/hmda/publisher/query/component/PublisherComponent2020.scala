@@ -2,22 +2,22 @@ package hmda.publisher.query.component
 
 import java.sql.Timestamp
 
+import hmda.publisher.query.lar.{LarEntityImpl2020, _}
+import hmda.publisher.query.panel.InstitutionEntity
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
-import hmda.publisher.query.lar.{LarEntityImpl2018, _}
-import hmda.publisher.query.panel.{InstitutionEmailEntity, InstitutionEntity}
 import slick.basic.{DatabaseConfig, DatabasePublisher}
 import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
 
 import scala.concurrent.Future
 
-trait PublisherComponent2018 {
+trait PublisherComponent2020 {
 
   import dbConfig.profile.api._
 
   class InstitutionsTable(tag: Tag)
-      extends Table[InstitutionEntity](tag, "institutions2018") {
+      extends Table[InstitutionEntity](tag, "institutions2020") {
     def lei = column[String]("lei", O.PrimaryKey)
     def activityYear = column[Int]("activity_year")
     def agency = column[Int]("agency")
@@ -55,13 +55,13 @@ trait PublisherComponent2018 {
        topHolderName,
        hmdaFiler) <> (InstitutionEntity.tupled, InstitutionEntity.unapply)
   }
-  val institutionsTable2018 = TableQuery[InstitutionsTable]
+  val institutionsTable2020 = TableQuery[InstitutionsTable]
 
-  class InstitutionRepository2018(val config: DatabaseConfig[JdbcProfile])
+  class InstitutionRepository2020(val config: DatabaseConfig[JdbcProfile])
       extends TableRepository[InstitutionsTable, String] {
 
     override val table: config.profile.api.TableQuery[InstitutionsTable] =
-      institutionsTable2018
+      institutionsTable2020
 
     override def getId(row: InstitutionsTable): config.profile.api.Rep[Id] =
       row.lei
@@ -101,7 +101,7 @@ trait PublisherComponent2018 {
   }
 
   class TransmittalSheetTable(tag: Tag)
-      extends Table[TransmittalSheetEntity](tag, "transmittalsheet2018") {
+      extends Table[TransmittalSheetEntity](tag, "transmittalsheet2020") {
 
     def lei = column[String]("lei", O.PrimaryKey)
     def id = column[Int]("id")
@@ -142,16 +142,16 @@ trait PublisherComponent2018 {
         submissionId,
         createdAt,
         isQuarterly
-      ) <> (TransmittalSheetEntity.tupled, TransmittalSheetEntity.unapply)
+    ) <> (TransmittalSheetEntity.tupled, TransmittalSheetEntity.unapply)
   }
 
-  val transmittalSheetTable2018 = TableQuery[TransmittalSheetTable]
+  val transmittalSheetTable2020 = TableQuery[TransmittalSheetTable]
 
-  class TransmittalSheetRepository2018(val config: DatabaseConfig[JdbcProfile])
+  class TransmittalSheetRepository2020(val config: DatabaseConfig[JdbcProfile])
       extends TableRepository[TransmittalSheetTable, String] {
 
     override val table: config.profile.api.TableQuery[TransmittalSheetTable] =
-      transmittalSheetTable2018
+      transmittalSheetTable2020
 
     override def getId(row: TransmittalSheetTable): config.profile.api.Rep[Id] =
       row.lei
@@ -176,14 +176,17 @@ trait PublisherComponent2018 {
     }
 
     def getAllSheets(
-        bankIgnoreList: Array[String]): Future[Seq[TransmittalSheetEntity]] = {
-      db.run(table.filterNot(_.lei.toUpperCase inSet bankIgnoreList).result)
-    }
+        bankIgnoreList: Array[String],includeQuarterly: Boolean): Future[Seq[TransmittalSheetEntity]] = {
+      if (includeQuarterly)
+        db.run(table.filterNot(ts =>(ts.lei.toUpperCase inSet bankIgnoreList)  || !ts.isQuarterly).result)
 
+      else
+        db.run(table.filterNot(ts =>(ts.lei.toUpperCase inSet bankIgnoreList)  || ts.isQuarterly).result)
+    }
   }
 
   class LarTable(tag: Tag)
-      extends Table[LarEntityImpl2018](tag, "loanapplicationregister2018") {
+      extends Table[LarEntityImpl2020](tag, "loanapplicationregister2020") {
 
     def id = column[Int]("id")
     def lei = column[String]("lei")
@@ -303,13 +306,33 @@ trait PublisherComponent2018 {
     def reverseMortgage = column[Int]("reverse_mortgage")
     def lineOfCredits = column[Int]("line_of_credits")
     def businessOrCommercial = column[Int]("business_or_commercial")
+    def conformingLoanLimit = column[String]("conforming_loan_limit")
+    def ethnicityCategorization = column[String]("ethnicity_categorization")
+    def raceCategorization = column[String]("race_categorization")
+    def sexCategorization = column[String]("sex_categorization")
+    def dwellingCategorization = column[String]("dwelling_categorization")
+    def loanProductTypeCategorization =
+      column[String]("loan_product_type_categorization")
+    def tractPopulation = column[Int]("tract_population")
+    def tractMinorityPopulationPercent =
+      column[Double]("tract_minority_population_percent")
+    def tractMedianIncome = column[Int]("ffiec_msa_md_median_family_income")
+    def tractOccupiedUnits = column[Int]("tract_owner_occupied_units")
+    def tractOneToFourFamilyUnits =
+      column[Int]("tract_one_to_four_family_homes")
+    def tractMedianAge = column[Int]("tract_median_age_of_housing_units")
+    def tractToMsaIncomePercent =
+      column[Double]("tract_to_msa_income_percentage")
+    def isQuarterly = column[Option[Boolean]]("is_quarterly")
+
     def * =
       (larPartOneProjection,
        larPartTwoProjection,
        larPartThreeProjection,
        larPartFourProjection,
        larPartFiveProjection,
-       larPartSixProjection) <> ((LarEntityImpl2018.apply _).tupled, LarEntityImpl2018.unapply)
+       larPartSixProjection,
+       larPartSevenProjection) <> ((LarEntityImpl2020.apply _).tupled, LarEntityImpl2020.unapply)
 
     def larPartOneProjection =
       (id,
@@ -329,7 +352,7 @@ trait PublisherComponent2018 {
        state,
        zip,
        county,
-       tract) <> ((LarPartOne2018.apply _).tupled, LarPartOne2018.unapply)
+       tract) <> ((LarPartOne2020.apply _).tupled, LarPartOne2020.unapply)
 
     def larPartTwoProjection =
       (ethnicityApplicant1,
@@ -350,7 +373,7 @@ trait PublisherComponent2018 {
        raceApplicant2,
        raceApplicant3,
        raceApplicant4,
-       raceApplicant5) <> ((LarPartTwo2018.apply _).tupled, LarPartTwo2018.unapply)
+       raceApplicant5) <> ((LarPartTwo2020.apply _).tupled, LarPartTwo2020.unapply)
 
     def larPartThreeProjection =
       (otherNativeRaceApplicant,
@@ -372,7 +395,7 @@ trait PublisherComponent2018 {
        observedSexCoApplicant,
        ageApplicant,
        ageCoApplicant,
-       income) <> ((LarPartThree2018.apply _).tupled, LarPartThree2018.unapply)
+       income) <> ((LarPartThree2020.apply _).tupled, LarPartThree2020.unapply)
 
     def larPartFourProjection =
       (purchaserType,
@@ -393,7 +416,7 @@ trait PublisherComponent2018 {
        totalLoanCosts,
        totalPoints,
        originationCharges,
-      ) <> ((LarPartFour2018.apply _).tupled, LarPartFour2018.unapply)
+      ) <> ((LarPartFour2020.apply _).tupled, LarPartFour2020.unapply)
 
     def larPartFiveProjection =
       (discountPoints,
@@ -413,7 +436,7 @@ trait PublisherComponent2018 {
        landPropertyInterest,
        totalUnits,
        mfAffordable,
-       applicationSubmission) <> ((LarPartFive2018.apply _).tupled, LarPartFive2018.unapply)
+       applicationSubmission) <> ((LarPartFive2020.apply _).tupled, LarPartFive2020.unapply)
 
     def larPartSixProjection =
       (payable,
@@ -432,17 +455,32 @@ trait PublisherComponent2018 {
        otherAusResult,
        reverseMortgage,
        lineOfCredits,
-       businessOrCommercial) <> ((LarPartSix2018.apply _).tupled, LarPartSix2018.unapply)
+       businessOrCommercial) <> ((LarPartSix2020.apply _).tupled, LarPartSix2020.unapply)
+
+    def larPartSevenProjection =
+      (conformingLoanLimit,
+       ethnicityCategorization,
+       raceCategorization,
+       sexCategorization,
+       dwellingCategorization,
+       loanProductTypeCategorization,
+       tractPopulation,
+       tractMinorityPopulationPercent,
+       tractMedianIncome,
+       tractOccupiedUnits,
+       tractOneToFourFamilyUnits,
+       tractMedianAge,
+       tractToMsaIncomePercent) <> ((LarPartSeven2020.apply _).tupled, LarPartSeven2020.unapply)
 
   }
 
-  val larTable2018 = TableQuery[LarTable]
+  val larTable2020 = TableQuery[LarTable]
 
-  class LarRepository2018(val config: DatabaseConfig[JdbcProfile])
+  class LarRepository2020(val config: DatabaseConfig[JdbcProfile])
       extends TableRepository[LarTable, String] {
 
     override val table: config.profile.api.TableQuery[LarTable] =
-      larTable2018
+      larTable2020
 
     override def getId(row: LarTable): config.profile.api.Rep[Id] =
       row.lei
@@ -450,11 +488,11 @@ trait PublisherComponent2018 {
     def createSchema() = db.run(table.schema.create)
     def dropSchema() = db.run(table.schema.drop)
 
-    def insert(ts: LarEntityImpl2018): Future[Int] = {
+    def insert(ts: LarEntityImpl2020): Future[Int] = {
       db.run(table += ts)
     }
 
-    def findByLei(lei: String): Future[Seq[LarEntityImpl2018]] = {
+    def findByLei(lei: String): Future[Seq[LarEntityImpl2020]] = {
       db.run(table.filter(_.lei === lei).result)
     }
 
@@ -465,306 +503,32 @@ trait PublisherComponent2018 {
       db.run(table.size.result)
     }
     def getAllLARs(
-        bankIgnoreList: Array[String]): DatabasePublisher[LarEntityImpl2018] = {
+        bankIgnoreList: Array[String],includeQuarterly: Boolean): DatabasePublisher[LarEntityImpl2020] = {
+
+      if(includeQuarterly){
+        db.stream(
+          table
+            .filterNot(
+              lar =>(lar.lei.toUpperCase inSet bankIgnoreList)&& !lar.isQuarterly  )
+            .result
+            .withStatementParameters(
+              rsType = ResultSetType.ForwardOnly,
+              rsConcurrency = ResultSetConcurrency.ReadOnly,
+              fetchSize = 1000
+            )
+            .transactionally)
+      }
+      else{
       db.stream(
         table
-          .filterNot(_.lei.toUpperCase inSet bankIgnoreList)
+          .filterNot(lar =>(lar.lei.toUpperCase inSet bankIgnoreList) && lar.isQuarterly  )
           .result
           .withStatementParameters(
             rsType = ResultSetType.ForwardOnly,
             rsConcurrency = ResultSetConcurrency.ReadOnly,
             fetchSize = 1000
           )
-          .transactionally)
-    }
-  }
-
-  class ModifiedLarTable(tag: Tag)
-      extends Table[ModifiedLarEntityImpl](tag, "modifiedlar2018") {
-
-    def id = column[Int]("id")
-    def lei = column[String]("lei")
-    def loanType = column[Option[Int]]("loan_type")
-    def loanPurpose = column[Option[Int]]("loan_purpose")
-    def preapproval = column[Option[Int]]("preapproval")
-    def constructionMethod = column[Option[String]]("construction_method")
-    def occupancyType = column[Option[Int]]("occupancy_type")
-    def loanAmount = column[Double]("loan_amount")
-    def actionTakenType = column[Option[Int]]("action_taken_type")
-    def state = column[Option[String]]("state")
-    def county = column[Option[String]]("county")
-    def tract = column[Option[String]]("tract")
-    def ethnicityApplicant1 = column[Option[String]]("ethnicity_applicant_1")
-    def ethnicityApplicant2 = column[Option[String]]("ethnicity_applicant_2")
-    def ethnicityApplicant3 = column[Option[String]]("ethnicity_applicant_3")
-    def ethnicityApplicant4 = column[Option[String]]("ethnicity_applicant_4")
-    def ethnicityApplicant5 = column[Option[String]]("ethnicity_applicant_5")
-    def ethnicityCoApplicant1 =
-      column[Option[String]]("ethnicity_co_applicant_1")
-    def ethnicityCoApplicant2 =
-      column[Option[String]]("ethnicity_co_applicant_2")
-    def ethnicityCoApplicant3 =
-      column[Option[String]]("ethnicity_co_applicant_3")
-    def ethnicityCoApplicant4 =
-      column[Option[String]]("ethnicity_co_applicant_4")
-    def ethnicityCoApplicant5 =
-      column[Option[String]]("ethnicity_co_applicant_5")
-    def ethnicityObservedApplicant =
-      column[Option[Int]]("ethnicity_observed_applicant")
-    def ethnicityObservedCoApplicant =
-      column[Option[Int]]("ethnicity_observed_co_applicant")
-    def raceApplicant1 = column[Option[String]]("race_applicant_1")
-    def raceApplicant2 = column[Option[String]]("race_applicant_2")
-    def raceApplicant3 = column[Option[String]]("race_applicant_3")
-    def raceApplicant4 = column[Option[String]]("race_applicant_4")
-    def raceApplicant5 = column[Option[String]]("race_applicant_5")
-    def raceCoApplicant1 = column[Option[String]]("race_co_applicant_1")
-    def raceCoApplicant2 = column[Option[String]]("race_co_applicant_2")
-    def raceCoApplicant3 = column[Option[String]]("race_co_applicant_3")
-    def raceCoApplicant4 = column[Option[String]]("race_co_applicant_4")
-    def raceCoApplicant5 = column[Option[String]]("race_co_applicant_5")
-    def raceObservedApplicant = column[Option[Int]]("race_observed_applicant")
-    def raceObservedCoApplicant =
-      column[Option[Int]]("race_observed_co_applicant")
-    def sexApplicant = column[Option[Int]]("sex_applicant")
-    def sexCoApplicant = column[Option[Int]]("sex_co_applicant")
-    def observedSexApplicant = column[Option[Int]]("observed_sex_applicant")
-    def observedSexCoApplicant =
-      column[Option[Int]]("observed_sex_co_applicant")
-    def ageApplicant = column[Option[String]]("age_applicant")
-    def ageCoApplicant = column[Option[String]]("age_co_applicant")
-    def income = column[Option[String]]("income")
-    def purchaserType = column[Option[Int]]("purchaser_type")
-    def rateSpread = column[Option[String]]("rate_spread")
-    def hoepaStatus = column[Option[Int]]("hoepa_status")
-    def lienStatus = column[Option[Int]]("lien_status")
-    def creditScoreTypeApplicant =
-      column[Option[Int]]("credit_score_type_applicant")
-    def creditScoreTypeCoApplicant =
-      column[Option[Int]]("credit_score_type_co_applicant")
-    def denialReason1 = column[Option[Int]]("denial_reason1")
-    def denialReason2 = column[Option[Int]]("denial_reason2")
-    def denialReason3 = column[Option[Int]]("denial_reason3")
-    def denialReason4 = column[Option[Int]]("denial_reason4")
-    def totalLoanCosts = column[Option[String]]("total_loan_costs")
-    def totalPoints = column[Option[String]]("total_points")
-    def originationCharges = column[Option[String]]("origination_charges")
-    def discountPoints = column[Option[String]]("discount_points")
-    def lenderCredits = column[Option[String]]("lender_credits")
-    def interestRate = column[Option[String]]("interest_rate")
-    def paymentPenalty = column[Option[String]]("payment_penalty")
-    def debtToIncome = column[Option[String]]("debt_to_incode")
-    def loanValueRatio = column[Option[String]]("loan_value_ratio")
-    def loanTerm = column[Option[String]]("loan_term")
-    def rateSpreadIntro = column[Option[String]]("rate_spread_intro")
-    def baloonPayment = column[Option[Int]]("baloon_payment")
-    def insertOnlyPayment = column[Option[Int]]("insert_only_payment")
-    def amortization = column[Option[Int]]("amortization")
-    def otherAmortization = column[Option[Int]]("other_amortization")
-    def propertyValue = column[String]("property_value")
-    def homeSecurityPolicy = column[Option[Int]]("home_security_policy")
-    def landPropertyInterest = column[Option[Int]]("lan_property_interest")
-    def totalUnits = column[Option[String]]("total_units")
-    def mfAffordable = column[Option[String]]("mf_affordable")
-    def applicationSubmission = column[Option[Int]]("application_submission")
-    def payable = column[Option[Int]]("payable")
-    def aus1 = column[Option[Int]]("aus1")
-    def aus2 = column[Option[Int]]("aus2")
-    def aus3 = column[Option[Int]]("aus3")
-    def aus4 = column[Option[Int]]("aus4")
-    def aus5 = column[Option[Int]]("aus5")
-    def reverseMortgage = column[Option[Int]]("reverse_mortgage")
-    def lineOfCredits = column[Option[Int]]("line_of_credits")
-    def businessOrCommercial = column[Option[Int]]("business_or_commercial")
-    def filingYear = column[Option[Int]]("filing_year")
-    def msaMd = column[Option[Int]]("msa_md")
-    def conformingLoanLimit = column[Option[String]]("conforming_loan_limit")
-    def loanFlag = column[Option[String]]("loan_flag")
-    def dwellingCategory = column[Option[String]]("dwelling_category")
-    def loanProductType = column[Option[String]]("loan_product_type")
-    def ethnicityCategorization =
-      column[Option[String]]("ethnicity_categorization")
-    def raceCategorization = column[Option[String]]("race_categorization")
-    def sexCategorization = column[Option[String]]("sex_categorization")
-    def applicantAgeGreaterThan62 =
-      column[Option[String]]("applicant_age_greater_than_62")
-    def coapplicantAgeGreaterThan62 =
-      column[Option[String]]("coapplicant_age_greater_than_62")
-    def population = column[Option[String]]("population")
-    def minorityPopulationPercent =
-      column[Option[String]]("minority_population_percent")
-    def ffiecMedFamIncome = column[Option[String]]("ffiec_med_fam_income")
-    def medianIncomePercentage = column[Option[Int]]("median_income_percentage")
-    def ownerOccupiedUnits = column[Option[String]]("owner_occupied_units")
-    def oneToFourFamUnits = column[Option[String]]("one_to_four_fam_units")
-    def medianAge = column[Option[Int]]("median_age")
-    def tractToMsamd = column[Option[String]]("tract_to_msamd")
-    def medianAgeCalculated = column[Option[String]]("median_age_calculated")
-    def percentMedianMsaIncome =
-      column[Option[String]]("percent_median_msa_income")
-    def msaMDName = column[Option[String]]("msa_md_name")
-    def createdAt = column[Timestamp]("created_at")
-    def * =
-      (mlarPartOneProjection,
-       mlarPartTwoProjection,
-       mlarPartThreeProjection,
-       mlarPartFourProjection,
-       mlarPartFiveProjection,
-       mlarPartSixProjection) <> ((ModifiedLarEntityImpl.apply _).tupled, ModifiedLarEntityImpl.unapply)
-
-    def mlarPartOneProjection =
-      (filingYear,
-       lei,
-       msaMd,
-       state,
-       county,
-       tract,
-       conformingLoanLimit,
-       loanFlag,
-       loanProductType,
-       dwellingCategory,
-       ethnicityCategorization,
-       raceCategorization,
-       sexCategorization,
-       actionTakenType,
-       purchaserType,
-       preapproval,
-       loanType,
-       loanPurpose,
-       lienStatus) <> ((ModifiedLarPartOne.apply _).tupled, ModifiedLarPartOne.unapply)
-
-    def mlarPartTwoProjection =
-      (reverseMortgage,
-       lineOfCredits,
-       businessOrCommercial,
-       loanAmount,
-       loanValueRatio,
-       interestRate,
-       rateSpread,
-       hoepaStatus,
-       totalLoanCosts,
-       totalPoints,
-       originationCharges,
-       discountPoints,
-       lenderCredits,
-       loanTerm,
-       paymentPenalty,
-       rateSpreadIntro,
-       amortization,
-       insertOnlyPayment) <> ((ModifiedLarPartTwo.apply _).tupled, ModifiedLarPartTwo.unapply)
-
-    def mlarPartThreeProjection =
-      (baloonPayment,
-       otherAmortization,
-       propertyValue,
-       constructionMethod,
-       occupancyType,
-       homeSecurityPolicy,
-       landPropertyInterest,
-       totalUnits,
-       mfAffordable,
-       income,
-       debtToIncome,
-       creditScoreTypeApplicant,
-       creditScoreTypeCoApplicant,
-       ethnicityApplicant1,
-       ethnicityApplicant2,
-       ethnicityApplicant3,
-       ethnicityApplicant4) <> ((ModifiedLarPartThree.apply _).tupled, ModifiedLarPartThree.unapply)
-
-    def mlarPartFourProjection =
-      (ethnicityApplicant5,
-       ethnicityCoApplicant1,
-       ethnicityCoApplicant2,
-       ethnicityCoApplicant3,
-       ethnicityCoApplicant4,
-       ethnicityCoApplicant5,
-       ethnicityObservedApplicant,
-       ethnicityObservedCoApplicant,
-       raceApplicant1,
-       raceApplicant2,
-       raceApplicant3,
-       raceApplicant4,
-       raceApplicant5,
-       raceCoApplicant1,
-       raceCoApplicant2,
-       raceCoApplicant3,
-       raceCoApplicant4) <> ((ModifiedLarPartFour.apply _).tupled, ModifiedLarPartFour.unapply)
-
-    def mlarPartFiveProjection =
-      (raceCoApplicant5,
-       raceObservedApplicant,
-       raceObservedCoApplicant,
-       sexApplicant,
-       sexCoApplicant,
-       observedSexApplicant,
-       observedSexCoApplicant,
-       ageApplicant,
-       ageCoApplicant,
-       applicantAgeGreaterThan62,
-       coapplicantAgeGreaterThan62,
-       applicationSubmission,
-       payable,
-       aus1,
-       aus2,
-       aus3,
-       aus4) <> ((ModifiedLarPartFive.apply _).tupled, ModifiedLarPartFive.unapply)
-
-    def mlarPartSixProjection =
-      (aus5,
-       denialReason1,
-       denialReason2,
-       denialReason3,
-       denialReason4,
-       population,
-       minorityPopulationPercent,
-       ffiecMedFamIncome,
-       medianIncomePercentage,
-       ownerOccupiedUnits,
-       oneToFourFamUnits,
-       medianAge) <> ((ModifiedLarPartSix.apply _).tupled, ModifiedLarPartSix.unapply)
-  }
-
-  val mlarTable2018 = TableQuery[ModifiedLarTable]
-
-  class ModifiedLarRepository2018(val config: DatabaseConfig[JdbcProfile])
-      extends TableRepository[ModifiedLarTable, String] {
-
-    override val table: config.profile.api.TableQuery[ModifiedLarTable] =
-      mlarTable2018
-
-    override def getId(row: ModifiedLarTable): config.profile.api.Rep[Id] =
-      row.lei
-
-    def createSchema() = db.run(table.schema.create)
-    def dropSchema() = db.run(table.schema.drop)
-
-    def insert(ts: ModifiedLarEntityImpl): Future[Int] = {
-      db.run(table += ts)
-    }
-
-    def findByLei(lei: String): Future[Seq[ModifiedLarEntityImpl]] = {
-      db.run(table.filter(_.lei === lei).result)
-    }
-
-    def deleteByLei(lei: String): Future[Int] = {
-      db.run(table.filter(_.lei === lei).delete)
-    }
-    def count(): Future[Int] = {
-      db.run(table.size.result)
-    }
-    def getAllLARs(bankIgnoreList: Array[String])
-      : DatabasePublisher[ModifiedLarEntityImpl] = {
-      db.stream(
-        table
-          .filterNot(_.lei.toUpperCase inSet bankIgnoreList)
-          .result
-          .withStatementParameters(
-            rsType = ResultSetType.ForwardOnly,
-            rsConcurrency = ResultSetConcurrency.ReadOnly,
-            fetchSize = 1000
-          )
-          .transactionally)
+          .transactionally)}
     }
   }
 

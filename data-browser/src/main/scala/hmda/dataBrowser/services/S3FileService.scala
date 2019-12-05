@@ -57,21 +57,22 @@ class S3FileService(implicit mat: ActorMaterializer) extends FileService with Se
       .map(opt => opt.map { case (source, _) => source })
   }
 
-  private def md5HashString(s: String): String = {
-    val md           = MessageDigest.getInstance("MD5")
-    val digest       = md.digest(s.getBytes)
-    val bigInt       = new BigInteger(1, digest)
-    val hashedString = bigInt.toString(16)
-    hashedString
-  }
-
-  private def formName(queries: List[QueryField]): String =
+  private def formName(queries: List[QueryField]): String = {
     // sort by name and then within each query field sort the values
-    queries
+    val name = queries
       .map(q => q.copy(values = q.values.sorted))
       .sortBy(_.dbName)
       .map(q => s"${q.name}_${q.values.mkString("-")}")
       .mkString("_")
+    //If name is greater than 100 then slice to 100 and append md5 hash.
+    //This is to prevent file names to grow over excel's 218 character limit while still maintaining unique file names for S3 Cache.
+    name.length match {
+      case x if x > 100 =>
+        name.slice(0,100)+md5HashString(name)
+      case _ =>
+        name
+    }
+  }
 
   private def s3Key(queries: List[QueryField], delimiter: Delimiter): String = {
     val input = md5HashString(formName(queries))

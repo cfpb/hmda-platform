@@ -119,7 +119,7 @@ keycloak:
     - name: JDBC_PARAMS
       value: "ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory"
     - name: FILING_APP_URL
-      value: "/filing/2018"
+      value: "/filing/2018/"
     - name: INSTITUTION_SEARCH_URI
       value: "/v2/public"
     - name: INSTITUTION_SEARCH_VALIDATE_SSL
