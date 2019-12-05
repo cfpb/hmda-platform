@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: email-configmap
+data:
+  emailSubject: HMDA filing accepted![BETA]
+  emailContent: <b>HMDA filing accepted![BETA]</b><br>Congratulations, you have successfully completed your HMDA filing for <period>!<br>Your data and signature were received and recorded on <datetime>. Your receipt number for this submission is <uniq_id>
+  emailSender: noreply@cfpb.gov
