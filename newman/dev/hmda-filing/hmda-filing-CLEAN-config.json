@@ -24,63 +24,57 @@
           "activityYear": 2018,
           "lei": "BANK1LEIFORTEST12345",
           "agency": 9,
-          "institutionType": 1,
-          "institutionId2017": "1",
+          "institutionType": -1,
+          "institutionId2017": "",
           "taxId": "02-1234567",
-          "rssd": 1,
+          "rssd": -1,
           "emailDomains": [
-            "bank1.com",
-            "cfpb.gov",
-            "cfpb.gov"
+            "bank1.com"
           ],
           "respondent": {
             "name": "Bank 1",
-            "state": "DC",
-            "city": "Washington"
+            "state": "",
+            "city": ""
           },
           "parent": {
-            "idRssd": 2,
-            "name": "The Bank 1 Parent"
+            "idRssd": -1,
+            "name": ""
           },
-          "assets": 10,
+          "assets": -1,
           "otherLenderCode": -1,
           "topHolder": {
-            "idRssd": 3,
-            "name": "Bank 1 Top Holder"
+            "idRssd": -1,
+            "name": ""
           },
-          "hmdaFiler": true,
-          "quarterlyFiler": false
+          "hmdaFiler": true
         },
         "expectedResponse": {
           "activityYear": 2018,
           "lei": "BANK1LEIFORTEST12345",
           "agency": 9,
-          "institutionType": 1,
-          "institutionId2017": "1",
+          "institutionType": -1,
+          "institutionId2017": "",
           "taxId": "02-1234567",
-          "rssd": 1,
+          "rssd": -1,
           "emailDomains": [
-            "bank1.com",
-            "cfpb.gov",
-            "cfpb.gov"
+            "bank1.com"
           ],
           "respondent": {
             "name": "Bank 1",
-            "state": "DC",
-            "city": "Washington"
+            "state": "",
+            "city": ""
           },
           "parent": {
-            "idRssd": 2,
-            "name": "The Bank 1 Parent"
+            "idRssd": -1,
+            "name": ""
           },
-          "assets": 10,
+          "assets": -1,
           "otherLenderCode": -1,
           "topHolder": {
-            "idRssd": 3,
-            "name": "Bank 1 Top Holder"
+            "idRssd": -1,
+            "name": ""
           },
-          "hmdaFiler": true,
-          "quarterlyFiler": false
+          "hmdaFiler": true
         },
         "expectedMessage": "Institution BANK1LEIFORTEST12345 already exists",
         "testNumber": 3
@@ -115,19 +109,15 @@
             "idRssd": 3,
             "name": "Bank 1 Top Holder"
           },
-          "hmdaFiler": true,
-          "quarterlyFiler": false
+          "hmdaFiler": true
         },
         "testNumber": 4
       },
       {
-        "testName": "test start a Submission",
+        "testName": "test start a filing",
         "expectedResponse": {
           "filing": {
-            "period": {
-            "year": 2018,
-            "quarter": null
-          },
+            "period": "2018",
             "lei": "BANK1LEIFORTEST12345",
             "status": {
               "code": 2,
@@ -145,11 +135,8 @@
         "testName": "test create a filing",
         "expectedResponse": {
           "id": {
-            "lei": "AANK1LEIFORTEST12345",
-            "period": {
-            "year": 2018,
-            "quarter": null
-          },
+            "lei": "BANK1LEIFORTEST12345",
+            "period": "2018",
             "sequenceNumber": 1
           },
           "status": {
@@ -166,7 +153,7 @@
       },
       {
         "testName": "filing psv upload test",
-        "sourceFile": "dev/hmda-filing/clean_10_row.txt",
+        "sourceFile": "hmda-filing/clean_10_row.txt",
         "expectedResponse": {
           "id": {
             "lei": "BANK1LEIFORTEST12345",
@@ -190,10 +177,7 @@
         "expectedResponse": {
           "id": {
             "lei": "BANK1LEIFORTEST12345",
-            "period": {
-              "year": 2018,
-              "quarter": null
-            },
+            "period": "2018",
             "sequenceNumber": 12
           },
           "status": {

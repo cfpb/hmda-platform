@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#1 normal test
  test=$(./node_modules/.bin/newman run dev/data-browser/data-browser-api-test.json -d\
  dev/data-browser/data-browser-api-config.json \
  --env-var db-api=$1 \
@@ -16,6 +17,8 @@ data="$( jq -nc --arg str "# $2 Newman Error (Data Browser Test): $testResults" 
  if [[ $data == *"failure"* ]]; then
      curl -i -X POST -H 'Content-Type: application/json' -d "$data" $3
 fi
+
+
 
 
 # Keycloak env vars
