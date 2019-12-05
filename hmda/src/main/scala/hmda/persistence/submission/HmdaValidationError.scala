@@ -412,8 +412,8 @@ object HmdaValidationError
     case object RawLine extends DistinctCheckType
     case object ULI     extends DistinctCheckType
 
-    def checkForDistinctElements(checkType: DistinctCheckType): Future[DistinctElementsResult] =
-      uploadConsumerRawStr(ctx, submissionId)
+    def checkForDistinctElements(checkType: DistinctCheckType): Future[DistinctElementsResult] = {
+      val uploadProgram: Future[DistinctElementsResult] = uploadConsumerRawStr(ctx, submissionId)
         .drop(1) // header
         .via(framing("\n"))
         .map(_.utf8String)
@@ -435,6 +435,7 @@ object HmdaValidationError
                   .persistsIfNotExists(submissionId.toString, md5HashString(rawLine), 260.minutes)
                   .map(persisted => (persisted, rowNumber))
 
+
               case ULI =>
                 // used for quality checks
                 appDb.distinctCountRepository
@@ -451,8 +452,18 @@ object HmdaValidationError
         })(Keep.right)
         .named(s"checkForDistinctElements[$checkType]-" + submissionId)
         .run()
+      uploadProgram.onComplete{
+        case Success(value) =>
+          log.info(s"Check for distinct elements has passed for ${submissionId}")
+        case Failure(exception) =>
+          log.error(exception, s"Failed checking for distinct elements ${submissionId}")
+      }
+      uploadProgram
+    }
 
     def validateAndPersistErrors(tsLar: TransmittalLar, checkType: String, vc: ValidationContext): Future[List[ValidationError]] = {
+
+      log.info(s"In validateAnPersistErrors for ${submissionId} for ${checkType}")
 
       // see addTsFieldInformation in ValidationFlow which does something similar
       def enrichErrorInformation(tsLar: TransmittalLar, validationError: ValidationError): ValidationError = {
