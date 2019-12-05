@@ -144,7 +144,7 @@ trait UploadHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
 
   private def uploadFile(submissionId: SubmissionId, hmdaRaw: EntityRef[HmdaRawDataCommand]) =
     Flow[String]
-      .mapAsync(2)(line => persistLine(hmdaRaw, submissionId, line))
+      .mapAsync(5)(line => persistLine(hmdaRaw, submissionId, line))
 
   private def persistLine(entityRef: EntityRef[HmdaRawDataCommand], submissionId: SubmissionId, data: String): Future[HmdaRawDataEvent] = {
 
