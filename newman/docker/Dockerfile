@@ -1,10 +1,12 @@
 FROM node:8.16.0-jessie as build-stage
 
+RUN mkdir -p /home/newman-trials
+
+WORKDIR /home/newman-trials
 
 COPY newman-pak/*  .
-COPY dev/hmda-filing/*  hmda-filing/
-COPY dev/data-browser/*  data-browser/
-COPY scripts/*  scripts/
+COPY dev/hmda-filing/  dev/hmda-filing/
+COPY scripts/  scripts/
 
 RUN JQ_URL="https://circle-downloads.s3.amazonaws.com/circleci-images/cache/linux-amd64/jq-latest" \
   && curl --silent --show-error --location --fail --retry 3 --output /usr/bin/jq $JQ_URL \
@@ -16,6 +18,5 @@ RUN JQ_URL="https://circle-downloads.s3.amazonaws.com/circleci-images/cache/linu
   && chmod -R 755 /home/newman-trials \
   && rm -rf newman-4.5.6.tgz \
 
-WORKDIR /home/newman-trials
 
 

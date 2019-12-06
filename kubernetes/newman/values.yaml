@@ -27,7 +27,7 @@ jobs:
       value:
     - name: MM_HOOK
       value:
-    schedule: "*/5 * * * *"
+    schedule: "0 * * * *"
     command: ["/bin/sh"]
     args:
       -  "-c"
