@@ -131,7 +131,7 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
       .map {
         case (i, Right(_)) => None
         case (i, Left(errors)) =>
-          Some(ParserErrorUtils.parserValidationErrorSummaryConvertor(i, "ts", errors))
+          Some(ParserErrorUtils.parserValidationErrorSummaryConvertor(i, None, errors))
       }
 
   private def processLarSource: Flow[ByteString, Option[HmdaRowParsedErrorSummary], NotUsed] =
@@ -148,7 +148,7 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
       .map {
         case (i, lar, Right(_)) => None
         case (i, lar, Left(errors)) =>
-          Some(ParserErrorUtils.parserValidationErrorSummaryConvertor(i, lar, errors))
+          Some(ParserErrorUtils.parserValidationErrorSummaryConvertor(i, Some(lar), errors))
       }
 
 }

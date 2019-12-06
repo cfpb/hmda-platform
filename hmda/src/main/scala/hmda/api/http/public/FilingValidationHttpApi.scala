@@ -15,7 +15,7 @@ import hmda.api.http.utils.ParserErrorUtils._
 
 trait FilingValidationHttpApi {
 
-  def completeWithParsingErrors(lar: String, errors: List[ParserValidationError]): Route = {
+  def completeWithParsingErrors(lar: Option[String], errors: List[ParserValidationError]): Route = {
     complete(
       ToResponseMarshallable(StatusCodes.BadRequest -> parserValidationErrorSummaryConvertor(0, lar, errors))
     )

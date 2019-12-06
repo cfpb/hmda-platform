@@ -7,10 +7,13 @@ import hmda.messages.submission.SubmissionProcessingEvents._
 
 object ParserErrorUtils {
 
-    def parserValidationErrorSummaryConvertor(line: Int, lar: String, errors: List[ParserValidationError]): HmdaRowParsedErrorSummary = {
+    def parserValidationErrorSummaryConvertor(line: Int, lar: Option[String], errors: List[ParserValidationError]): HmdaRowParsedErrorSummary = {
         HmdaRowParsedErrorSummary(
             line,
-            estimateULI(lar),
+            lar match {
+              case Some(lar) => estimateULI(lar)
+              case None => "Transmittal Sheet"
+            }, 
             errors.map(error => 
             FieldParserErrorSummary(
                 error.fieldName,

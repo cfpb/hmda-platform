@@ -40,7 +40,7 @@ trait TsValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpAp
             TsCsvParser(req.ts) match {
               case Right(ts) => complete(ToResponseMarshallable(ts))
               case Left(errors) =>
-                completeWithParsingErrors(req.ts, errors)
+                completeWithParsingErrors(None, errors)
             }
           }
         }
@@ -61,7 +61,7 @@ trait TsValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpAp
                 case Right(ts) =>
                   validate(ts, checkType, year, None)
                 case Left(errors) =>
-                  completeWithParsingErrors(req.ts, errors)
+                  completeWithParsingErrors(None, errors)
               }
             }
           }
@@ -80,7 +80,7 @@ trait TsValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpAp
                 case Right(ts) =>
                   validate(ts, checkType, year, Some(quarter))
                 case Left(errors) =>
-                  completeWithParsingErrors(req.ts, errors)
+                  completeWithParsingErrors(None, errors)
               }
             }
           }
