@@ -1,0 +1,128 @@
+newman
+
+HMDA Filing API Test(s)
+
+→ ADMIN API Health Check
+  GET https://hmda4.demo.cfpb.gov/v2/admin/ [200 OK, 354B, 405ms]
+  ✓  Status code is 200
+  ✓  Admin API Health Check
+
+→ Filing API Health Check
+  GET https://hmda4.demo.cfpb.gov/v2/filing/ [200 OK, 355B, 219ms]
+  ✓  Status code is 200
+  ✓  Filing API Health Check
+
+→ HMDA Public API Health Check
+  GET https://hmda4.demo.cfpb.gov/v2/public/ [200 OK, 355B, 238ms]
+  ✓  Status code is 200
+  ✓  Public API Health Check
+
+→ Create Institution
+  POST https://hmda4.demo.cfpb.gov/v2/admin/institutions [400 Bad Request, 374B, 234ms]
+  ✓  Status code is 201 or 400
+  ✓  Create Institution
+
+→ Get Institution Test
+  GET https://hmda4.demo.cfpb.gov/v2/admin/institutions/NEWMANLEITEST1234678/year/2019 [200 OK, 607B, 239ms]
+  ✓  Status code is 200
+  ✓  GET Institution Test
+
+→ Start A Filing Test
+  POST https://hmda4.demo.cfpb.gov/v2/filing/institutions/NEWMANLEITEST1234678/filings/2019 [400 Bad Request, 408B, 243ms]
+  ✓  Status code is 200, 201 or 400
+  ✓  Start A Submission Test
+
+→ Create A Submission Test
+  POST https://hmda4.demo.cfpb.gov/v2/filing/institutions/NEWMANLEITEST1234678/filings/2019/submissions [201 Created, 615B, 280ms]
+  ✓  Status code is 201
+  ┌
+  │ 53
+  └
+  ✓  Create A Submission Test
+
+→ Upload A Submission Test
+  POST https://hmda4.demo.cfpb.gov/v2/filing/institutions/NEWMANLEITEST1234678/filings/2019/submissions/53 [202 Accepted, 534B, 332ms]
+  ✓  Status code is 202
+  ┌
+  │ '{"id":{"lei":"NEWMANLEITEST1234678","period":{"year":
+  │ 2019,"quarter":null},"sequenceNumber":53},"status":{"c
+  │ ode":3,"message":"Your file has been uploaded.","descr
+  │ iption":"Your data is ready to be analyzed."},"start":
+  │ 1575593990041,"end":0,"fileName":"","receipt":""}'
+  └
+  ✓  Upload A Submission Test
+  ┌
+  │ 'Sleeping for 10 seconds before next request.'
+  └
+
+→ Get Latest Submission Test
+  GET https://hmda4.demo.cfpb.gov/v2/filing/institutions/NEWMANLEITEST1234678/filings/2019/submissions/latest [200 OK, 769B, 320ms]
+  ✓  Status code is 200
+  ┌
+  │ '{"id":{"lei":"NEWMANLEITEST1234678","period":{"year":
+  │ 2019,"quarter":null},"sequenceNumber":53},"status":{"c
+  │ ode":13,"message":"Your data has macro edits that need
+  │  to be reviewed.","description":"Your file has been up
+  │ loaded, but the filing process may not proceed until e
+  │ dits are verified or the file is corrected and re-uplo
+  │ aded."},"start":1575593990041,"end":0,"fileName":"newm
+  │ anBank_yes_M_no_Q_2019.txt","receipt":"","qualityVerif
+  │ ied":false,"macroVerified":false,"qualityExists":false
+  │ ,"macroExists":true}'
+  └
+  ✓  Get Latest Submission Test
+
+→ Macro Edits Verification Test
+  POST https://hmda4.demo.cfpb.gov/v2/filing/institutions/NEWMANLEITEST1234678/filings/2019/submissions/53/edits/macro [200 OK, 467B, 250ms]
+  ✓  Status code is 200, 201 or 400
+  ┌
+  │ '{"verified":true,"status":{"code":14,"message":"Your 
+  │ data is ready for submission.","description":"Your fin
+  │ ancial institution has certified that the data is corr
+  │ ect, but it has not been submitted yet."}}'
+  └
+  ✓  Macro Edits Verification Test
+
+→ Sign A Submission Test
+  POST https://hmda4.demo.cfpb.gov/v2/filing/institutions/NEWMANLEITEST1234678/filings/2019/submissions/53/sign [400 Bad Request, 446B, 237ms]
+  ✓  Status code is 200, 201 or 400
+  ┌
+  │ '{"httpStatus":400,"message":"Submission NEWMANLEITEST
+  │ 1234678-2019-53 is not ready to be signed","path":"/in
+  │ stitutions/NEWMANLEITEST1234678/filings/2019/submissio
+  │ ns/53/sign"}'
+  └
+  1. Sign A Submission Test
+  2⠄ AssertionFailure in test-script
+
+┌─────────────────────────┬────────────────────┬────────────────────┐
+│                         │           executed │             failed │
+├─────────────────────────┼────────────────────┼────────────────────┤
+│              iterations │                  1 │                  0 │
+├─────────────────────────┼────────────────────┼────────────────────┤
+│                requests │                 11 │                  0 │
+├─────────────────────────┼────────────────────┼────────────────────┤
+│            test-scripts │                 11 │                  1 │
+├─────────────────────────┼────────────────────┼────────────────────┤
+│      prerequest-scripts │                 11 │                  0 │
+├─────────────────────────┼────────────────────┼────────────────────┤
+│              assertions │                 22 │                  1 │
+├─────────────────────────┴────────────────────┴────────────────────┤
+│ total run duration: 13.4s                                         │
+├───────────────────────────────────────────────────────────────────┤
+│ total data received: 2.39KB (approx)                              │
+├───────────────────────────────────────────────────────────────────┤
+│ average response time: 272ms [min: 219ms, max: 405ms, s.d.: 54ms] │
+└───────────────────────────────────────────────────────────────────┘
+
+  #  failure           detail                                   
+                                                                
+ 1.  TypeError         Sign A Submission Test                   
+                       Cannot read property 'code' of undefined 
+                       at assertion:1 in test-script            
+                       inside "Sign A Submission Test"          
+                                                                
+ 2.  AssertionFailure                                           
+                       Sign A Submission Test                   
+                       at test-script:38:17                     
+                       inside "Sign A Submission Test"          

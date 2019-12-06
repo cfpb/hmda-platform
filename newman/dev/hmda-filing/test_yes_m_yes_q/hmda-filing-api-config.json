@@ -1,10 +1,7 @@
 [
   {
-    "host-admin-api": "localhost:8081",
-    "host_filing_api": "localhost:8080",
-    "host-public-api": "localhost:8082",
-    "test-lei": "BANK1LEIFORTEST12345",
-    "filing-year": "2018",
+    "test-lei": "NEWMANLEITEST1234678",
+    "filing-year": "2019",
     "testData": [
       {
         "testName": "admin api health check",
@@ -24,18 +21,18 @@
       {
         "testName": "create institution",
         "requestBody": {
-          "activityYear": 2018,
-          "lei": "BANK1LEIFORTEST12345",
+          "activityYear": 2019,
+          "lei": "NEWMANLEITEST1234678",
           "agency": 9,
           "institutionType": -1,
           "institutionId2017": "",
-          "taxId": "02-1234567",
+          "taxId": "84-7652134",
           "rssd": -1,
           "emailDomains": [
-            "bank1.com"
+            "newmantest.com"
           ],
           "respondent": {
-            "name": "Bank 1",
+            "name": "Newman Bank",
             "state": "",
             "city": ""
           },
@@ -49,21 +46,22 @@
             "idRssd": -1,
             "name": ""
           },
-          "hmdaFiler": true
+          "hmdaFiler": true,
+          "quarterlyFiler": true
         },
         "expectedResponse": {
-          "activityYear": 2018,
-          "lei": "BANK1LEIFORTEST12345",
+          "activityYear": 2019,
+          "lei": "NEWMANLEITEST1234678",
           "agency": 9,
           "institutionType": -1,
           "institutionId2017": "",
-          "taxId": "02-1234567",
+          "taxId": "84-7652134",
           "rssd": -1,
           "emailDomains": [
-            "bank1.com"
+            "newmantest.com"
           ],
           "respondent": {
-            "name": "Bank 1",
+            "name": "Newman Bank",
             "state": "",
             "city": ""
           },
@@ -77,26 +75,27 @@
             "idRssd": -1,
             "name": ""
           },
-          "hmdaFiler": true
+          "hmdaFiler": true,
+          "quarterlyFiler": true
         },
-        "expectedMessage": "Institution BANK1LEIFORTEST12345 already exists",
+        "expectedMessage": "Institution NEWMANLEITEST1234678 already exists",
         "testNumber": 3
       },
       {
         "testName": "institution get api call",
         "expectedResponse": {
-          "activityYear": 2018,
-          "lei": "BANK1LEIFORTEST12345",
+          "activityYear": 2019,
+          "lei": "NEWMANLEITEST1234678",
           "agency": 9,
           "institutionType": -1,
           "institutionId2017": "",
-          "taxId": "02-1234567",
+          "taxId": "84-7652134",
           "rssd": -1,
           "emailDomains": [
-            "bank1.com"
+            "newmantest.com"
           ],
           "respondent": {
-            "name": "Bank 1",
+            "name": "Newman Bank",
             "state": "",
             "city": ""
           },
@@ -110,16 +109,20 @@
             "idRssd": -1,
             "name": ""
           },
-          "hmdaFiler": true
+          "hmdaFiler": true,
+          "quarterlyFiler": true
         },
         "testNumber": 4
       },
       {
-        "testName": "test start a filing",
+        "testName": "test start a Submission",
         "expectedResponse": {
           "filing": {
-            "period": "2018",
-            "lei": "BANK1LEIFORTEST12345",
+            "period": {
+              "year": 2019,
+              "quarter": null
+            },
+            "lei": "NEWMANLEITEST1234678",
             "status": {
               "code": 2,
               "message": "in-progress"
@@ -136,8 +139,11 @@
         "testName": "test create a filing",
         "expectedResponse": {
           "id": {
-            "lei": "BANK1LEIFORTEST12345",
-            "period": "2018",
+            "lei": "NEWMANLEITEST1234678",
+            "period": {
+              "year": 2019,
+              "quarter": null
+            },
             "sequenceNumber": 1
           },
           "status": {
@@ -154,11 +160,11 @@
       },
       {
         "testName": "filing psv upload test",
-        "sourceFile": "../../../../data/2018/clean_test_files/bank_1/clean_file_100_rows_Bank1_syntax_validity.txt",
+        "sourceFile": "dev/hmda-filing/test_yes_m_yes_q/newmanBank_yes_M_yes_Q_2019.txt",
         "expectedResponse": {
           "id": {
-            "lei": "BANK1LEIFORTEST12345",
-            "period": "2018",
+            "lei": "NEWMANLEITEST1234678",
+            "period": "2019",
             "sequenceNumber": 7
           },
           "status": {
@@ -177,8 +183,11 @@
         "testName": "get latest submission test",
         "expectedResponse": {
           "id": {
-            "lei": "BANK1LEIFORTEST12345",
-            "period": "2018",
+            "lei": "NEWMANLEITEST1234678",
+            "period": {
+              "year": 2019,
+              "quarter": null
+            },
             "sequenceNumber": 12
           },
           "status": {
@@ -188,12 +197,11 @@
           },
           "start": 1562662935676,
           "end": 0,
-          "fileName": "clean_10_row.txt",
+          "fileName": "newmanBank_yes_M_yes_Q_2019.txt",
           "receipt": ""
         },
         "testNumber": 8
-      },
-      {
+      },      {
         "testName": "quality edits test",
         "requestBody": {
           "verified": true
@@ -212,7 +220,7 @@
         "requestBody": {
           "signed": true
         },
-        "testNumber": 11
+        "testNumber": 10
       }
     ]
   }

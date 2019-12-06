@@ -1,7 +1,7 @@
 [
   {
-    "test-lei": "BANK1LEIFORTEST12345",
-    "filing-year": "2018",
+    "test-lei": "NEWMANLEITEST1234678",
+    "filing-year": "2019",
     "testData": [
       {
         "testName": "admin api health check",
@@ -21,102 +21,96 @@
       {
         "testName": "create institution",
         "requestBody": {
-          "activityYear": 2018,
-          "lei": "BANK1LEIFORTEST12345",
+          "activityYear": 2019,
+          "lei": "NEWMANLEITEST1234678",
           "agency": 9,
-          "institutionType": 1,
-          "institutionId2017": "1",
-          "taxId": "02-1234567",
-          "rssd": 1,
+          "institutionType": -1,
+          "institutionId2017": "",
+          "taxId": "84-7652134",
+          "rssd": -1,
           "emailDomains": [
-            "bank1.com",
-            "cfpb.gov",
-            "cfpb.gov"
+            "newmantest.com"
           ],
           "respondent": {
-            "name": "Bank 1",
-            "state": "DC",
-            "city": "Washington"
+            "name": "Newman Bank",
+            "state": "",
+            "city": ""
           },
           "parent": {
-            "idRssd": 2,
-            "name": "The Bank 1 Parent"
+            "idRssd": -1,
+            "name": ""
           },
-          "assets": 10,
+          "assets": -1,
           "otherLenderCode": -1,
           "topHolder": {
-            "idRssd": 3,
-            "name": "Bank 1 Top Holder"
+            "idRssd": -1,
+            "name": ""
           },
           "hmdaFiler": true,
-          "quarterlyFiler": false
+          "quarterlyFiler": true
         },
         "expectedResponse": {
-          "activityYear": 2018,
-          "lei": "BANK1LEIFORTEST12345",
+          "activityYear": 2019,
+          "lei": "NEWMANLEITEST1234678",
           "agency": 9,
-          "institutionType": 1,
-          "institutionId2017": "1",
-          "taxId": "02-1234567",
-          "rssd": 1,
+          "institutionType": -1,
+          "institutionId2017": "",
+          "taxId": "84-7652134",
+          "rssd": -1,
           "emailDomains": [
-            "bank1.com",
-            "cfpb.gov",
-            "cfpb.gov"
+            "newmantest.com"
           ],
           "respondent": {
-            "name": "Bank 1",
-            "state": "DC",
-            "city": "Washington"
+            "name": "Newman Bank",
+            "state": "",
+            "city": ""
           },
           "parent": {
-            "idRssd": 2,
-            "name": "The Bank 1 Parent"
+            "idRssd": -1,
+            "name": ""
           },
-          "assets": 10,
+          "assets": -1,
           "otherLenderCode": -1,
           "topHolder": {
-            "idRssd": 3,
-            "name": "Bank 1 Top Holder"
+            "idRssd": -1,
+            "name": ""
           },
           "hmdaFiler": true,
-          "quarterlyFiler": false
+          "quarterlyFiler": true
         },
-        "expectedMessage": "Institution BANK1LEIFORTEST12345 already exists",
+        "expectedMessage": "Institution NEWMANLEITEST1234678 already exists",
         "testNumber": 3
       },
       {
         "testName": "institution get api call",
         "expectedResponse": {
-          "activityYear": 2018,
-          "lei": "BANK1LEIFORTEST12345",
+          "activityYear": 2019,
+          "lei": "NEWMANLEITEST1234678",
           "agency": 9,
-          "institutionType": 1,
-          "institutionId2017": "1",
-          "taxId": "02-1234567",
-          "rssd": 1,
+          "institutionType": -1,
+          "institutionId2017": "",
+          "taxId": "84-7652134",
+          "rssd": -1,
           "emailDomains": [
-            "bank1.com",
-            "cfpb.gov",
-            "cfpb.gov"
+            "newmantest.com"
           ],
           "respondent": {
-            "name": "Bank 1",
-            "state": "DC",
-            "city": "Washington"
+            "name": "Newman Bank",
+            "state": "",
+            "city": ""
           },
           "parent": {
-            "idRssd": 2,
-            "name": "The Bank 1 Parent"
+            "idRssd": -1,
+            "name": ""
           },
-          "assets": 10,
+          "assets": -1,
           "otherLenderCode": -1,
           "topHolder": {
-            "idRssd": 3,
-            "name": "Bank 1 Top Holder"
+            "idRssd": -1,
+            "name": ""
           },
           "hmdaFiler": true,
-          "quarterlyFiler": false
+          "quarterlyFiler": true
         },
         "testNumber": 4
       },
@@ -125,10 +119,10 @@
         "expectedResponse": {
           "filing": {
             "period": {
-            "year": 2018,
+            "year": 2019,
             "quarter": null
           },
-            "lei": "BANK1LEIFORTEST12345",
+            "lei": "NEWMANLEITEST1234678",
             "status": {
               "code": 2,
               "message": "in-progress"
@@ -145,9 +139,9 @@
         "testName": "test create a filing",
         "expectedResponse": {
           "id": {
-            "lei": "AANK1LEIFORTEST12345",
+            "lei": "NEWMANLEITEST1234678",
             "period": {
-            "year": 2018,
+            "year": 2019,
             "quarter": null
           },
             "sequenceNumber": 1
@@ -166,11 +160,11 @@
       },
       {
         "testName": "filing psv upload test",
-        "sourceFile": "dev/hmda-filing/clean_10_row.txt",
+        "sourceFile": "dev/hmda-filing/test_no_m_yes_q/newmanBank_no_M_yes_Q_2019.txt",
         "expectedResponse": {
           "id": {
-            "lei": "BANK1LEIFORTEST12345",
-            "period": "2018",
+            "lei": "NEWMANLEITEST1234678",
+            "period": "2019",
             "sequenceNumber": 7
           },
           "status": {
@@ -189,9 +183,9 @@
         "testName": "get latest submission test",
         "expectedResponse": {
           "id": {
-            "lei": "BANK1LEIFORTEST12345",
+            "lei": "NEWMANLEITEST1234678",
             "period": {
-              "year": 2018,
+              "year": 2019,
               "quarter": null
             },
             "sequenceNumber": 12
@@ -203,7 +197,7 @@
           },
           "start": 1562662935676,
           "end": 0,
-          "fileName": "clean_10_row.txt",
+          "fileName": "newmanBank_no_M_yes_Q_2019.txt",
           "receipt": ""
         },
         "testNumber": 8
@@ -216,18 +210,11 @@
         "testNumber": 9
       },
       {
-        "testName": "macro edits test",
-        "requestBody": {
-          "verified": true
-        },
-        "testNumber": 10
-      },
-      {
         "testName": "sign latest submission test",
         "requestBody": {
           "signed": true
         },
-        "testNumber": 11
+        "testNumber": 10
       }
     ]
   }
