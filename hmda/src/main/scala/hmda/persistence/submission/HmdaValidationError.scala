@@ -290,7 +290,7 @@ object HmdaValidationError
         if (state.statusCode == Verified.code) {
           val timestamp = Instant.now().toEpochMilli
           val signed    = SubmissionSigned(submissionId, timestamp, Signed)
-          if ((state.qualityVerified && state.macroVerified) || state.noEditsFound() || (state.qualityVerified && state.`macro`.isEmpty)) {
+          if ((state.qualityVerified && state.macroVerified) || state.noEditsFound() || (state.qualityVerified && state.`macro`.isEmpty) || (state.quality.isEmpty && state.macroVerified)) {
             Effect.persist(signed).thenRun { _ =>
               log.info(s"Submission $submissionId signed at ${Instant.ofEpochMilli(timestamp)}")
               updateSubmissionStatusAndReceipt(
