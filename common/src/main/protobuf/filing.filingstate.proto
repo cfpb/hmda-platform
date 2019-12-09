@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.serialization";
+option optimize_for = SPEED;
+
+import "filing.proto";
+import "submission.proto";
+
+message FilingStateMessage {
+    FilingMessage filing = 1;
+    repeated SubmissionMessage submissions = 2;
+}
