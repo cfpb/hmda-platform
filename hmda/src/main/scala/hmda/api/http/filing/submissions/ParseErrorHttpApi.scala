@@ -19,11 +19,10 @@ import hmda.model.filing.submission.{ Submission, SubmissionId }
 import hmda.model.processing.state.HmdaParserErrorState
 import hmda.persistence.submission.{ HmdaParserError, SubmissionPersistence }
 import hmda.util.http.FilingResponseUtils._
-import hmda.model.filing.ParserValidValuesLookup._
 import hmda.api.http.model.filing.submissions._
-import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowParsedError
 import hmda.api.http.PathMatchers._
 import hmda.utils.YearUtils.Period
+import hmda.api.http.utils.ParserErrorUtils._
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
@@ -103,19 +102,4 @@ trait ParseErrorHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriza
         }
       }
     }
-
-  private def parserErrorSummaryConvertor(hmdaRowParsedError: HmdaRowParsedError): HmdaRowParsedErrorSummary =
-    HmdaRowParsedErrorSummary(
-      hmdaRowParsedError.rowNumber,
-      hmdaRowParsedError.estimatedULI,
-      hmdaRowParsedError.errorMessages.map(
-        errorMessage =>
-          FieldParserErrorSummary(
-            errorMessage.fieldName,
-            errorMessage.inputValue,
-            lookupParserValidValues(errorMessage.fieldName)
-          )
-      )
-    )
-
 }

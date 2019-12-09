@@ -41,7 +41,7 @@ trait LarValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpA
               case Right(lar) =>
                 complete(ToResponseMarshallable(lar))
               case Left(errors) =>
-                completeWithParsingErrors(errors)
+                completeWithParsingErrors(Some(req.lar), errors)
             }
           }
         }
@@ -61,7 +61,7 @@ trait LarValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpA
               LarCsvParser(req.lar) match {
                 case Right(lar) => validate(lar, checkType, year, None)
                 case Left(errors) =>
-                  completeWithParsingErrors(errors)
+                  completeWithParsingErrors(Some(req.lar), errors)
               }
             }
           }
@@ -79,7 +79,7 @@ trait LarValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpA
               LarCsvParser(req.lar) match {
                 case Right(lar) => validate(lar, checkType, year, Some(quarter))
                 case Left(errors) =>
-                  completeWithParsingErrors(errors)
+                  completeWithParsingErrors(Some(req.lar), errors)
               }
             }
           }

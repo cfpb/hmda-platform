@@ -3,7 +3,6 @@ package hmda.api.http.codec.filing.submission
 import hmda.api.http.model.filing.submissions.{ParsingErrorSummary, HmdaRowParsedErrorSummary, FieldParserErrorSummary}
 import org.scalacheck.Gen
 import hmda.model.submission.SubmissionGenerator._
-import hmda.serialization.submission.HmdaParserErrorStateGenerator._
 
 object ParsingErrorSummaryGenerator {
 

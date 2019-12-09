@@ -11,7 +11,13 @@ case class FieldParserErrorSummary(fieldName: String,
 case class HmdaRowParsedErrorSummary(
     rowNumber: Int,
     estimatedULI: String,
-    errorMessages: List[FieldParserErrorSummary])
+    errorMessages: List[FieldParserErrorSummary]){
+      def toCsv: String = {
+        errorMessages.map(error => 
+          s"$rowNumber|$estimatedULI|${error.fieldName}|${error.inputValue}|${error.validValues}\n"
+        ).reduce(_ + _)
+      }
+    }
 
 case class ParsingErrorSummary(
     transmittalSheetErrors: Seq[HmdaRowParsedErrorSummary] = Nil,

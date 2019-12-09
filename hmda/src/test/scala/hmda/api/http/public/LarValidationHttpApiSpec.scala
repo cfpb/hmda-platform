@@ -6,7 +6,6 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
 import hmda.api.http.model.public.{
   LarValidateRequest,
-  LarValidateResponse,
   SingleValidationErrorResult,
   ValidationErrorSummary,
   ValidationSingleErrorSummary
@@ -23,6 +22,7 @@ import io.circe.generic.auto._
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.util.http.FileUploadUtils
+import hmda.api.http.model.filing.submissions.HmdaRowParsedErrorSummary
 
 class LarValidationHttpApiSpec
     extends WordSpec
@@ -81,16 +81,14 @@ class LarValidationHttpApiSpec
       val badCsv = badValues.mkString("|")
       Post("/lar/parse", LarValidateRequest(badCsv)) ~> larRoutes ~> check {
         status mustBe StatusCodes.BadRequest
-        responseAs[LarValidateResponse] mustBe LarValidateResponse(
-          List("LAR Record Identifier"))
+        responseAs[HmdaRowParsedErrorSummary].errorMessages.head.fieldName mustBe "LAR Record Identifier"
       }
     }
 
     "fail to parse a valid pipe delimited LAR with too many fields and return an error" in {
       Post("/lar/parse", LarValidateRequest(larCsv + "|too|many|fields")) ~> larRoutes ~> check {
         status mustBe StatusCodes.BadRequest
-        responseAs[LarValidateResponse] mustBe LarValidateResponse(
-          List("Incorrect Number of LAR Fields"))
+        responseAs[HmdaRowParsedErrorSummary].errorMessages.length mustBe 1
       }
     }
 

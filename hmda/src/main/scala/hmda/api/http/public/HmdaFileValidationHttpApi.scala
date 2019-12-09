@@ -11,12 +11,13 @@ import akka.util.{ ByteString, Timeout }
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.stream.scaladsl.{ Broadcast, Concat, Flow, GraphDSL, Sink, Source }
-import hmda.api.http.model.public.{ Validated, ValidatedResponse }
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.directives.HmdaTimeDirectives
 import io.circe.generic.auto._
+import hmda.api.http.model.filing.submissions.HmdaRowParsedErrorSummary
+import hmda.api.http.utils.ParserErrorUtils
 
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
@@ -40,7 +41,9 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
             byteSource.via(processHmdaFile).runWith(Sink.seq)
           onComplete(processF) {
             case Success(parsed) =>
-              complete(ToResponseMarshallable(ValidatedResponse(parsed)))
+              val errorList = parsed.filter(_ != None)
+              complete(errorList)
+
             case Failure(error) =>
               complete(ToResponseMarshallable(StatusCodes.BadRequest -> error.getLocalizedMessage))
           }
@@ -57,10 +60,14 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
             fileUpload("file") {
               case (_, byteSource) =>
                 val headerSource =
-                  Source.fromIterator(() => List("lineNumber|errors\n").toIterator)
+                  Source.fromIterator(() => List("Row Number|Estimated ULI|Field Name|Input Value|Valid Values\n").toIterator)
                 val errors = byteSource
                   .via(processHmdaFile)
-                  .map(v => s"${v.lineNumber}|${v.errors}\n")
+                  .filter(_ != None)
+                  .map(option => option match {
+                    case Some(error) => error.toCsv
+                    case None => ""
+                  })
                   .map(s => ByteString(s))
 
                 val csvF = headerSource
@@ -97,12 +104,12 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
       }
     }
 
-  private def processHmdaFile: Flow[ByteString, Validated, NotUsed] =
+  private def processHmdaFile: Flow[ByteString, Option[HmdaRowParsedErrorSummary], NotUsed] =
     Flow.fromGraph(GraphDSL.create() { implicit b =>
       import GraphDSL.Implicits._
 
       val bcast  = b.add(Broadcast[ByteString](2))
-      val concat = b.add(Concat[Validated](2))
+      val concat = b.add(Concat[Option[HmdaRowParsedErrorSummary]](2))
 
       bcast ~> processTsSource ~> concat.in(0)
       bcast ~> processLarSource ~> concat.in(1)
@@ -110,7 +117,7 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
       FlowShape(bcast.in, concat.out)
     })
 
-  private def processTsSource: Flow[ByteString, Validated, NotUsed] =
+  private def processTsSource: Flow[ByteString, Option[HmdaRowParsedErrorSummary], NotUsed] =
     Flow[ByteString]
       .via(framing("\n"))
       .map(_.utf8String)
@@ -122,13 +129,12 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
           (index, TsCsvParser(ts))
       }
       .map {
-        case (i, Right(_)) => Validated(i, "OK")
+        case (i, Right(_)) => None
         case (i, Left(errors)) =>
-          Validated(i, errors.map(e => e.fieldName).mkString(","))
+          Some(ParserErrorUtils.parserValidationErrorSummaryConvertor(i, None, errors))
       }
-      .filter(x => x.errors != "OK")
 
-  private def processLarSource: Flow[ByteString, Validated, NotUsed] =
+  private def processLarSource: Flow[ByteString, Option[HmdaRowParsedErrorSummary], NotUsed] =
     Flow[ByteString]
       .via(framing("\n"))
       .map(_.utf8String)
@@ -137,13 +143,12 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
       .zip(Source.fromIterator(() => Iterator.from(2)))
       .map {
         case (lar, index) =>
-          (index, LarCsvParser(lar))
+          (index, lar, LarCsvParser(lar))
       }
       .map {
-        case (i, Right(_)) => Validated(i, "OK")
-        case (i, Left(errors)) =>
-          Validated(i, errors.map(e => e.fieldName).mkString(","))
+        case (i, lar, Right(_)) => None
+        case (i, lar, Left(errors)) =>
+          Some(ParserErrorUtils.parserValidationErrorSummaryConvertor(i, Some(lar), errors))
       }
-      .filter(x => x.errors != "OK")
 
 }
