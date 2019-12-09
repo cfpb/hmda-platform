@@ -34,7 +34,7 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
 
     def findByEmail(email: String) = {
       val emailDomain = extractDomain(email)
-      val query       = table.filter(_.emailDomain === emailDomain)
+      val query       = table.filter(_.emailDomain.trim === emailDomain.trim)
       db.run(query.result)
     }
 
@@ -77,7 +77,7 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
 
     val emailDomain = extractDomain(email)
     val emailSingleQuery =
-      institutionEmailsRepository.table.filter(_.emailDomain === emailDomain)
+      institutionEmailsRepository.table.filter(_.emailDomain.trim === emailDomain.trim)
 
     def emailTotalQuery(leis: Seq[String]) =
       institutionEmailsRepository.table.filter(_.lei inSet leis)
