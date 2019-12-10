@@ -244,6 +244,33 @@ lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(`hmda-protocol` % "compile->compile;test->test")
 
+lazy val `hmda-dashboard` = (project in file("hmda-dashboard"))
+  .enablePlugins(
+    JavaServerAppPackaging,
+    sbtdocker.DockerPlugin,
+    AshScriptPlugin
+  )
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      mainClass in Compile := Some("hmda.dashboard.HmdaDashboard"),
+      assemblyJarName in assembly := {
+        s"${name.value}.jar"
+      },
+      assemblyMergeStrategy in assembly := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      }
+    ),
+    dockerSettings,
+    packageSettings
+  )
+  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(`hmda-protocol` % "compile->compile;test->test")
+
 lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
   .enablePlugins(
     JavaServerAppPackaging,

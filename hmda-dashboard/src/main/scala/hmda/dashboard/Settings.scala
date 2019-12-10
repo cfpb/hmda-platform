@@ -1,0 +1,34 @@
+package hmda.dashboard
+
+import java.math.BigInteger
+import java.security.MessageDigest
+
+import com.typesafe.config.{Config, ConfigFactory}
+
+import scala.concurrent.duration._
+
+trait Settings {
+  private val config: Config = ConfigFactory.load()
+
+  private def getDuration(key: String): FiniteDuration = {
+    val duration = config.getDuration(key)
+    FiniteDuration(duration.toMillis, MILLISECONDS)
+  }
+
+  def md5HashString(s: String): String = {
+    val md           = MessageDigest.getInstance("MD5")
+    val digest       = md.digest(s.getBytes)
+    val bigInt       = new BigInteger(1, digest)
+    val hashedString = bigInt.toString(16)
+    hashedString
+  }
+  object server {
+    val host: String = config.getString("server.bindings.address")
+    val port: Int = config.getInt("server.bindings.port")
+    val askTimeout: FiniteDuration = getDuration("server.ask-timeout")
+  }
+
+  object database {
+    val tableName: String = config.getString("dbconfig.table")
+  }
+}
