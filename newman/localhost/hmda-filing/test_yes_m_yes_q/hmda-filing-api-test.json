@@ -343,7 +343,7 @@
 							"pm.expect(actualResponse.status.code).to.equal(testDataChunk.expectedResponse.status.code)",
 							"pm.expect(actualResponse.status.message).to.equal(testDataChunk.expectedResponse.status.message)",
 							"pm.expect(actualResponse.status.description).to.equal(testDataChunk.expectedResponse.status.description)",
-							"setTimeout(function(){console.log(\"Sleeping for 100 seconds before next request.\");}, 100000);",
+							"setTimeout(function(){console.log(\"Sleeping for 10 seconds before next request.\");}, 10000);",
               "});"
             ]
           }

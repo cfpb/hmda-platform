@@ -27,8 +27,8 @@ jobs:
       value:
     - name: MM_HOOK
       value:
-    schedule: "*/5 * * * *"
-    command: ["/bin/sh"]
+    schedule: "0 * * * *"
+    command: ["/bin/bash"]
     args:
       -  "-c"
       - ./scripts/newmanFilingTest.sh $KC_UN $KC_PW $KC_URL $KC_CLIENT_ID $HOST_FILING $HOST_ADMIN $HOST_PUBLIC $HMDA_ENV $MM_HOOK

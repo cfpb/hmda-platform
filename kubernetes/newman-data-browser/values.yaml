@@ -12,7 +12,7 @@ jobs:
     - name: HOST_DATA_BROWSER
       value:
     schedule: "*/5 * * * *"
-    command: ["/bin/sh"]
+    command: ["/bin/bash"]
     args:
       -  "-c"
       - NODE_OPTIONS="--max_old_space_size=2048" ./node_modules/.bin/newman run data-browser/data-browser-api-test.json -d data-browser/data-browser-api-config.json --env-var db-api=$HOST_DATA_BROWSER  --timeout-script 500000
