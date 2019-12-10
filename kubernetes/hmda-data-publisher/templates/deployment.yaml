@@ -151,6 +151,16 @@ spec:
               configMapKeyRef:
                 name: schedule-configmap
                 key: publisher.panel.public.2018
+          - name: LAR_Scheduler_Quarterly_2020
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.lar.quarterly.2020
+          - name: TS_Scheduler_Quarterly_2020
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.ts.quarterly.2020
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
