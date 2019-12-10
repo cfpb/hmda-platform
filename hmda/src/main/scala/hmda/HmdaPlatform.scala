@@ -1,6 +1,6 @@
 package hmda
 
-import akka.{ actor => untyped }
+import akka.{actor => untyped}
 import akka.management.cluster.bootstrap.ClusterBootstrap
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
@@ -14,7 +14,7 @@ import hmda.api.HmdaApi
 import hmda.persistence.submission.repositories.SyntacticalDb
 import hmda.persistence.util.CassandraUtil
 import hmda.publication.HmdaPublication
-import net.manub.embeddedkafka.{ EmbeddedKafka, EmbeddedKafkaConfig }
+import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
 import com.outworkers.phantom.dsl._
 
 object HmdaPlatform extends App {
