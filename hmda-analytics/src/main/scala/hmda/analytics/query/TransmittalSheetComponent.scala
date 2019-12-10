@@ -56,7 +56,7 @@ trait TransmittalSheetComponent {
         submissionId,
         createdAt,
         isQuarterly,
-      signDate
+        signDate
       ) <> (TransmittalSheetEntity.tupled, TransmittalSheetEntity.unapply)
   }
 

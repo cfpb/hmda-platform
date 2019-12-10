@@ -2,6 +2,7 @@ package hmda.util.conversion
 
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Date
 
 trait ColumnDataFormatter {
 
@@ -9,8 +10,10 @@ trait ColumnDataFormatter {
 
   def dateToString(option:Option[Long] ): String =
     if(option !=null) {
-      val entryTime = dateFormatter.parse(option.getOrElse(0L).toString())
-      entryTime.toString()
+
+      val epochLong = new Date(option.getOrElse(0L) )
+       val entryTime = dateFormatter.format(epochLong.toInstant)
+      entryTime
     }else{
       "NA"
     }
