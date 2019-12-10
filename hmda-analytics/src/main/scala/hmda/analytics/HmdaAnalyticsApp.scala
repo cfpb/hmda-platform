@@ -172,14 +172,13 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .map(ts => TransmittalSheetConverter(ts, submissionIdVar))
         .mapAsync(1) { ts =>
           for {
+            signdate          <- signDate
             insertorupdate <- submissionId.period match {
-                               case Period(2018, None) => transmittalSheetRepository2018.insert(ts)
-                               case Period(2019, None) => transmittalSheetRepository2019.insert(ts)
-                               case Period(2020, Some(_)) =>
-                                 transmittalSheetRepository2020.insert(ts.copy(isQuarterly = Some(true)))
-                               case _ => transmittalSheetRepository2020.insert(ts)
+                               case Period(2018, None) => transmittalSheetRepository2018.insert(ts.copy(signDate = Some(signdate.getOrElse(0L))))
+                               case Period(2019, None) => transmittalSheetRepository2019.insert(ts.copy(signDate = Some(signdate.getOrElse(0L))))
+                               case Period(2020, Some(_)) => transmittalSheetRepository2020.insert(ts.copy(isQuarterly = Some(true)))
+                               case _ => transmittalSheetRepository2020.insert(ts.copy(signDate = Some(signdate.getOrElse(0L))))
                              }
-
           } yield insertorupdate
         }
         .runWith(Sink.ignore)

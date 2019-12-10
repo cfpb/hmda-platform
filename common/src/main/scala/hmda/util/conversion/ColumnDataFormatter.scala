@@ -7,10 +7,10 @@ trait ColumnDataFormatter {
 
   private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
 
-  def dateToString(option:Option[java.sql.Timestamp] ): String =
+  def dateToString(option:Option[Long] ): String =
     if(option !=null) {
-      val entryTime = dateFormatter.format(option.getOrElse(new java.sql.Timestamp(0)).toInstant)
-      entryTime
+      val entryTime = dateFormatter.parse(option.getOrElse(0L).toString())
+      entryTime.toString()
     }else{
       "NA"
     }

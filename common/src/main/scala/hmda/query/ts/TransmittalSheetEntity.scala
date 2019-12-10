@@ -19,8 +19,9 @@ case class TransmittalSheetEntity(
   totalLines: Int = 0,
   taxId: String = "",
   submissionId: Option[String] = Some(""),
-  createdAt: Option[java.sql.Timestamp] = Some(new java.sql.Timestamp(0)),
-  isQuarterly: Option[Boolean] = Some(false)
+  createdAt: Option[java.sql.Timestamp] = Some(new java.sql.Timestamp(System.currentTimeMillis())),
+  isQuarterly: Option[Boolean] = Some(false) ,
+  signDate: Option[Long] = Some(0L)
 ) extends ColumnDataFormatter {
   def isEmpty: Boolean = lei == ""
 
@@ -29,7 +30,7 @@ case class TransmittalSheetEntity(
       s"$quarter|$name|$phone|" +
       s"$email|$street|$city|" +
       s"$state|$zipCode|$agency|" +
-      s"$totalLines|$taxId|$lei|${dateToString(createdAt)}"
+      s"$totalLines|$taxId|$lei|${dateToString(signDate)}"
 
   def toPublicPSV: String =
     s"$year|$quarter|$lei|$taxId|$agency|" +
