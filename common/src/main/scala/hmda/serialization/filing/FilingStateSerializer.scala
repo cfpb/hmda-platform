@@ -8,7 +8,7 @@ import hmda.persistence.serialization.filing.filingstate.FilingStateMessage
 import hmda.serialization.filing.FilingStateProtobufConverter._
 
 class FilingStateSerializer extends SerializerWithStringManifest {
-  override def identifier: Int = 107
+  override def identifier: Int = 1020
 
   final val FilingStateManifest = classOf[FilingState].getName
 
