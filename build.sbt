@@ -253,16 +253,17 @@ lazy val `hmda-dashboard` = (project in file("hmda-dashboard"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      mainClass in Compile := Some("hmda.dashboard.HmdaDashboard"),
-      assemblyJarName in assembly := {
-        s"${name.value}.jar"
-      },
+      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
+        enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
+      },
+      assemblyJarName in assembly := {
+        s"${name.value}.jar"
       }
     ),
     dockerSettings,
