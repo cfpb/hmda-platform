@@ -2,14 +2,17 @@ package hmda.util.conversion
 
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Date
 
 trait ColumnDataFormatter {
 
   private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
 
-  def dateToString(option:Option[java.sql.Timestamp] ): String =
+  def dateToString(option:Option[Long] ): String =
     if(option !=null) {
-      val entryTime = dateFormatter.format(option.getOrElse(new java.sql.Timestamp(0)).toInstant)
+
+      val epochLong = new Date(option.getOrElse(0L) )
+       val entryTime = dateFormatter.format(epochLong.toInstant)
       entryTime
     }else{
       "NA"
