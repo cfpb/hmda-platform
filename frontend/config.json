@@ -1,10 +1,22 @@
 {
-  "announcement": "On September 25th, 2019, the Bureau released the 2020 FIG and the Supplemental Guide for Quarterly Filers.",
-  "defaultPeriod": "2018",
-  "filingPeriods": ["2018"],
-  "beta": {
+  "prod": {
+    "announcement": "On September 25th, 2019, the Bureau released the 2020 FIG and the Supplemental Guide for Quarterly Filers.",
+    "defaultPeriod": "2018",
+    "filingPeriods": ["2018"],
+    "beta": {
+      "announcement": "On September 25th, 2019, the Bureau released the 2020 FIG and the Supplemental Guide for Quarterly Filers.",
+      "defaultPeriod": "2019",
+      "filingPeriods": ["2019", "2018"]
+    }
+  },
+  "dev": {
     "announcement": "On September 25th, 2019, the Bureau released the 2020 FIG and the Supplemental Guide for Quarterly Filers.",
     "defaultPeriod": "2019",
-    "filingPeriods": ["2019", "2018"]
+    "filingPeriods": ["2019", "2018"],
+    "beta": {
+      "announcement": "On September 25th, 2019, the Bureau released the 2020 FIG and the Supplemental Guide for Quarterly Filers.",
+      "defaultPeriod": "2019",
+      "filingPeriods": ["2019", "2018"]
+    }
   }
 }
