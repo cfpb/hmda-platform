@@ -132,7 +132,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
                        case Period(2018, None)    => transmittalSheetRepository2018.deleteByLei(ts.lei)
                        case Period(2019, None)    => transmittalSheetRepository2019.deleteByLei(ts.lei)
                        case Period(2020, Some(_)) => transmittalSheetRepository2020.deleteByLeiAndQuarter(lei = ts.lei)
-                       case _                     => transmittalSheetRepository2019.deleteByLei(ts.lei)
+                       case _ =>  throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete TS rows.")
                      }
           } yield delete
         }
@@ -172,14 +172,14 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .map(ts => TransmittalSheetConverter(ts, submissionIdVar))
         .mapAsync(1) { ts =>
           for {
+            signdate          <- signDate
             insertorupdate <- submissionId.period match {
-                               case Period(2018, None) => transmittalSheetRepository2018.insert(ts)
-                               case Period(2019, None) => transmittalSheetRepository2019.insert(ts)
-                               case Period(2020, Some(_)) =>
-                                 transmittalSheetRepository2020.insert(ts.copy(isQuarterly = Some(true)))
-                               case _ => transmittalSheetRepository2020.insert(ts)
+                               case Period(2018, None) => transmittalSheetRepository2018.insert(ts.copy(signDate = Some(signdate.getOrElse(0L))))
+                               case Period(2019, None) => transmittalSheetRepository2019.insert(ts.copy(signDate = Some(signdate.getOrElse(0L))))
+                               case Period(2020, Some(_)) => transmittalSheetRepository2020.insert(ts.copy(isQuarterly = Some(true),
+                                 signDate =  Some(signdate.getOrElse(0L))))
+                               case _ =>  throw new IllegalArgumentException(s"Unable to discern period from $submissionId to insert TS rows.")
                              }
-
           } yield insertorupdate
         }
         .runWith(Sink.ignore)
@@ -202,8 +202,9 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
                        case Period(2018, None)    => larRepository2018.deleteByLei(lar.larIdentifier.LEI)
                        case Period(2019, None)    => larRepository2019.deleteByLei(lar.larIdentifier.LEI)
                        case Period(2020, Some(_)) => larRepository2020.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-                       case _                     => larRepository2019.deleteByLei(lar.larIdentifier.LEI)
-                     }
+                       case _ =>  throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete LAR rows.")
+
+            }
           } yield delete
         }
         .runWith(Sink.ignore)
@@ -231,7 +232,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
                                  larRepository2020.insert(
                                    LarConverter(lar = lar, isQuarterly = true)
                                  )
-                               case _ => larRepository2019.insert(LarConverter(lar))
+                               case _ =>  throw new IllegalArgumentException(s"Unable to discern period from $submissionId to insert LAR rows.")
                              }
           } yield insertorupdate
         }

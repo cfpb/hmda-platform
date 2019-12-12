@@ -121,6 +121,8 @@ trait PublisherComponent2020 {
     def submissionId = column[Option[String]]("submission_id")
     def createdAt = column[Option[Timestamp]]("created_at")
     def isQuarterly     = column[Option[Boolean]]("is_quarterly")
+    def signDate     = column[Option[Long]]("sign_date")
+
 
     override def * =
       (
@@ -141,7 +143,8 @@ trait PublisherComponent2020 {
         taxId,
         submissionId,
         createdAt,
-        isQuarterly
+        isQuarterly,
+        signDate
     ) <> (TransmittalSheetEntity.tupled, TransmittalSheetEntity.unapply)
   }
 
