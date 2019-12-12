@@ -69,7 +69,8 @@ object Stream {
     submissionStatusRepo: SubmissionStatusRepo,
     emailContent: String,
     emailSubject: String,
-    timesToRetry: Int = 4
+    timesToRetry: Int = 4,
+    bankFilterList: Array[String]
   )(
     record: ConsumerRecord[String, String]
   ): Task[Either[Throwable, Unit]] = {
@@ -77,36 +78,41 @@ object Stream {
     val toAddress       = record.value()
     val submission             = submissionId(rawSubmissionId)
 
-    log.info(s"Working on ${rawSubmissionId} and ${toAddress}")
+   if (!bankFilterList.contains(submission.id.lei)) {
+     log.info(s"Working on ${rawSubmissionId} and ${toAddress}")
 
-    val df:SimpleDateFormat = new SimpleDateFormat("MMMM dd, YYYY, hh:MM:ss a")
+     val df: SimpleDateFormat = new SimpleDateFormat("MMMM dd, YYYY, hh:MM:ss a")
 
-    val formattedEmail = emailContent.replaceAll("<period>",submission.id.period.toString)
-                          .replaceAll("<datetime>",df.format(submission.receipt.toLong))
-                          .replaceAll("<uniq_id>",submission.id.toString+"-"+submission.receipt)
+     val formattedEmail = emailContent.replaceAll("<period>", submission.id.period.toString)
+       .replaceAll("<datetime>", df.format(submission.receipt.toLong))
+       .replaceAll("<uniq_id>", submission.id.toString + "-" + submission.receipt)
 
-    val process = for {
-      optPresent <- submissionStatusRepo.findBySubmissionId(submission.id)
-      // decide whether to send email based on if we've already done it
+     val process = for {
+       optPresent <- submissionStatusRepo.findBySubmissionId(submission.id)
+       // decide whether to send email based on if we've already done it
 
-      sendEmail = optPresent match {
-        case None => emailService.send(Email(toAddress, emailSubject, formattedEmail))
+       sendEmail = optPresent match {
+         case None => emailService.send(Email(toAddress, emailSubject, formattedEmail))
 
-        case Some(status) if status.successful => ().asRight.pure[Task]
+         case Some(status) if status.successful => ().asRight.pure[Task]
 
-        case Some(_) => emailService.send(Email(toAddress, emailSubject, formattedEmail))
-      }
-      status   <- sendEmail
-      metadata = EmailSubmissionMetadata(submission.id, toAddress)
-      recordSubmission = status match {
-        case Left(error) => submissionStatusRepo.recordEmailFailed(metadata, error.getMessage)
+         case Some(_) => emailService.send(Email(toAddress, emailSubject, formattedEmail))
+       }
+       status <- sendEmail
+       metadata = EmailSubmissionMetadata(submission.id, toAddress)
+       recordSubmission = status match {
+         case Left(error) => submissionStatusRepo.recordEmailFailed(metadata, error.getMessage)
 
-        case Right(_) => submissionStatusRepo.recordEmailSent(metadata)
-      }
-      _ <- recordSubmission
-    } yield status
+         case Right(_) => submissionStatusRepo.recordEmailSent(metadata)
+       }
+       _ <- recordSubmission
+     } yield status
 
-    retryBackoff(process, timesToRetry, 5.seconds)
+     retryBackoff(process, timesToRetry, 5.seconds)
+   }else {
+     log.info(s"Filter sending email for ${rawSubmissionId}")
+      ().asRight.pure[Task]
+   }
   }
 
   def sendEmailsIfNecessary(
@@ -115,7 +121,8 @@ object Stream {
     emailContent: String,
     emailSubject: String,
     parallelism: Int = 2,
-    timesToRetry: Int = 4
+    timesToRetry: Int = 4,
+    bankFilterList: Array[String]
   )(
     implicit s: Scheduler
   ): FlowWithContext[ConsumerRecord[String, String], CommittableOffset, ConsumerRecord[String, String], CommittableOffset, NotUsed]#Repr[
@@ -123,7 +130,7 @@ object Stream {
     CommittableOffset
   ] =
     FlowWithContext[ConsumerRecord[String, String], CommittableOffset].mapAsync(parallelism) { record =>
-      sendEmailAndUpdateStatus(emailService, submissionStatusRepo, emailContent, emailSubject, timesToRetry)(record).runToFuture
+      sendEmailAndUpdateStatus(emailService, submissionStatusRepo, emailContent, emailSubject, timesToRetry,bankFilterList)(record).runToFuture
     }
 
   def commitMessages(commitSettings: CommitterSettings): Sink[CommittableOffset, Future[Done]] =
