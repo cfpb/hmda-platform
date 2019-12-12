@@ -26,6 +26,42 @@ trait ColumnDataFormatter {
     } else {
       value
     }
+  def removeTrailingPipe(value: String): String =
+    if (!value.isEmpty && value.endsWith("|")) {
+      value.init
+    } else {
+      value
+    }
+
+  def removeBOM(value: String): String =
+    if (!value.isEmpty){
+
+      if (value.contains("""\ufeff"""))
+      {
+        value.replace("""\ufeff""", "")
+      }
+      else if (value.contains("""ï»¿"""))
+      {
+        value.replace("ï»¿", "")
+      }
+      else if (value.contains("""\efbbbf"""))
+      {
+        value.replace("""\efbbbf""", "")
+      }
+      else if (value.contains("""\ffe"""))
+      {
+        value.replace("""\ffe""", "")
+      }
+      else {
+        value
+      }
+    }
+    else {
+      value
+    }
+
+
+  "\ufeff"
   def toBigDecimalString(value: String): String =
     if (validNum(value)) {
       BigDecimal(value).bigDecimal.toPlainString
