@@ -38,7 +38,7 @@ class PostgresRepository (tableName: String, config: DatabaseConfig[JdbcProfile]
   def find(year: Int): Task[Vector[TotalFilers]] = {
     val query =
       sql"""
-        select count(*) from institutions2019 where hmda_filer = true;
+        select count(*) from institutions2018 where hmda_filer = true;
         """.as[TotalFilers]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }

@@ -12,7 +12,6 @@ import hmda.dashboard.models.HealthCheckStatus.Up
 import hmda.dashboard.models._
 import hmda.dashboard.repositories._
 import hmda.dashboard.services._
-import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
@@ -62,7 +61,6 @@ trait HmdaDashboardHttpApi extends Settings {
             case Success(filerResponse) => {
               log.info(s"${filerResponse}")
               complete(StatusCodes.OK, filerResponse)
-
             }
 
           }
