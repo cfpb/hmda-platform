@@ -27,7 +27,9 @@ libraryDependencies += Cinnamon.library.cinnamonAkkaHttp
 libraryDependencies += Cinnamon.library.cinnamonAkkaStream
 libraryDependencies += Cinnamon.library.cinnamonPrometheus
 libraryDependencies += Cinnamon.library.cinnamonPrometheusHttpServer
-libraryDependencies += "com.lightbend.akka" %% "akka-diagnostics" % "1.1.7"
+libraryDependencies += Cinnamon.library.cinnamonJvmMetricsProducer
+//libraryDependencies += Cinnamon.library.cinnamonAkkaPersistence
+libraryDependencies += "com.lightbend.akka" %% "akka-diagnostics" % "1.1.12"
 
 javaOptions in Universal ++= Seq(
   "-J-XX:+UnlockExperimentalVMOptions",
