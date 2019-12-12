@@ -12,6 +12,7 @@ import hmda.dashboard.models.HealthCheckStatus.Up
 import hmda.dashboard.models._
 import hmda.dashboard.repositories._
 import hmda.dashboard.services._
+import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
@@ -30,25 +31,41 @@ trait HmdaDashboardHttpApi extends Settings {
   val healthCheck: HealthCheckService =
     new HealthCheckService(repository)
 
+  val query: QueryService =
+    new DashboardQueryService(repository)
+
   val hmdaDashboardRoutes: Route =
     encodeResponse {
-      pathPrefix("view") {
-        log.info("hmda-dashboard")
-        complete(StatusCodes.OK)
-      } ~
-      pathPrefix("health") {
-        onComplete(healthCheck.healthCheckStatus.runToFuture) {
-          case Success(HealthCheckResponse(Up)) =>
-            log.info("hmda-dashboard health check OK")
-            complete(StatusCodes.OK)
+      pathPrefix("dashboard") {
+        pathPrefix("health") {
+          onComplete(healthCheck.healthCheckStatus.runToFuture) {
+            case Success(HealthCheckResponse(Up)) =>
+              log.info("hmda-dashboard health check OK")
+              complete(StatusCodes.OK)
 
-          case Success(hs) =>
-            log.warning(s"Service degraded db=${hs.db}")
-            complete(StatusCodes.ServiceUnavailable)
+            case Success(hs) =>
+              log.warning(s"Service degraded db=${hs.db}")
+              complete(StatusCodes.ServiceUnavailable)
 
-          case Failure(ex) =>
-            log.error(ex, "Failed to perform a health check")
-            complete(StatusCodes.InternalServerError)
+            case Failure(ex) =>
+              log.error(ex, "Failed to perform a health check")
+              complete(StatusCodes.InternalServerError)
+          }
+        }~
+        path("total_filers" / IntNumber) { (year) =>
+          log.info(s"total filers for year=${year}")
+          onComplete(query.fetchData(year).runToFuture) {
+            case Failure(ex) =>
+              log.error(ex, "errorMessage")
+              complete(StatusCodes.InternalServerError)
+
+            case Success(filerResponse) => {
+              log.info(s"${filerResponse}")
+              complete(StatusCodes.OK, filerResponse)
+
+            }
+
+          }
         }
       }
     }
