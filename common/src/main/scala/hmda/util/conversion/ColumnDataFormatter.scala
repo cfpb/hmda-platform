@@ -60,8 +60,6 @@ trait ColumnDataFormatter {
       value
     }
 
-
-  "\ufeff"
   def toBigDecimalString(value: String): String =
     if (validNum(value)) {
       BigDecimal(value).bigDecimal.toPlainString
