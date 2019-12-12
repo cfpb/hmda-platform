@@ -4,13 +4,18 @@ import java.io.NotSerializableException
 
 import akka.serialization.SerializerWithStringManifest
 import hmda.model.filing.FilingDetails
+import hmda.persistence.filing.FilingState
 import hmda.persistence.serialization.filing.filingdetails.FilingDetailsMessage
+import hmda.persistence.serialization.filing.filingstate.FilingStateMessage
 import hmda.serialization.filing.FilingDetailsProtobufConverter._
+import hmda.serialization.filing.FilingStateProtobufConverter._
 
 class FilingDetailsSerializer extends SerializerWithStringManifest {
   override def identifier: Int = 107
 
   final val FilingDetailsManifest = classOf[FilingDetails].getName
+
+  final val FilingStateManifest = classOf[FilingState].getName
 
   override def manifest(o: AnyRef): String = o.getClass.getName
 
@@ -26,6 +31,8 @@ class FilingDetailsSerializer extends SerializerWithStringManifest {
     manifest match {
       case FilingDetailsManifest =>
         filingDetailsFromProtobuf(FilingDetailsMessage.parseFrom(bytes))
+      case FilingStateManifest =>
+        filingStateFromProtobuf(FilingStateMessage.parseFrom(bytes))
       case _ =>
         throw new NotSerializableException(s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
 
