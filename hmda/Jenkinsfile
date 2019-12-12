@@ -102,11 +102,11 @@ volumes: [
           usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
           withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
             if (gitTagged || gitBranch == "master" || isDeployPR) {
-              sh "docker build --rm -t=hmda/hmda-platform:internal hmda/target/docker/stage"
+              sh "docker build --rm -t=hmda/hmda-platform:${env.DOCKER_TAG} hmda/target/docker/stage"
 
               //Push to DTR
               sh """
-                docker tag hmda/hmda-platform:internal ${DOCKER_REGISTRY_URL}/hmda/hmda-platform:${env.DOCKER_TAG}
+                docker tag hmda/hmda-platform:${env.DOCKER_TAG} ${DOCKER_REGISTRY_URL}/hmda/hmda-platform:${env.DOCKER_TAG}
                 docker login ${DOCKER_REGISTRY_URL} -u ${env.DTR_USER} -p ${env.DTR_PASSWORD}
                 docker push ${DOCKER_REGISTRY_URL}/hmda/hmda-platform:${env.DOCKER_TAG}
               """
