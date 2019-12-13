@@ -158,17 +158,4 @@ trait FilingHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
         failedResponse(StatusCodes.InternalServerError, uri, error)
     }
 
-  def filingDetailsResponse(filingDetails: FilingDetails): Future[FilingDetailsResponse] = {
-    val submissionResponsesF =
-      filingDetails.submissions.map { s =>
-        val entity =
-          sharding.entityRefFor(HmdaValidationError.typeKey, s"${HmdaValidationError.name}-${s.id}")
-        for {
-          (submision, verified) = submissionAndVerified
-        } yield SubmissionResponse(submision, verified, QualityMacroExists(false,false))
-      }
-    val fSubmissionResponse = Future.sequence(submissionResponsesF)
-    fSubmissionResponse.map(submissionResponses => FilingDetailsResponse(filingDetails.filing, submissionResponses))
-  }
-
 }
