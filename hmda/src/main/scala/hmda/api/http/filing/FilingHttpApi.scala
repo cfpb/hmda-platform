@@ -90,7 +90,7 @@ trait FilingHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
                            lei: String,
                            period: Int,
                            quarter: Option[String]
-                         ): Future[(Option[Institution], Option[FilingDetailsResponse])] = {
+  ): Future[(Option[Institution], Option[FilingDetails])] = {
     val ins = selectInstitution(sharding, lei, period)
     val fil = selectFiling(sharding, lei, period, quarter)
 
@@ -99,7 +99,7 @@ trait FilingHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
 
     for {
       i: Option[Institution]           <- fInstitution
-      d: Option[FilingDetailsResponse] <- fEnriched
+      d: Option[FilingDetails] <- fEnriched
     } yield (i, d)
   }
 
