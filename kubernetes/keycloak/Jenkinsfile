@@ -1,5 +1,4 @@
 podTemplate(label: 'buildHelm', containers: [
-    containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.9.8', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm', ttyEnabled: true, command: 'cat')
 ]) {
     node('buildHelm') {
@@ -9,7 +8,7 @@ podTemplate(label: 'buildHelm', containers: [
 
         stage('Ambassador Service') {
             if (env.BRANCH_NAME == 'master') {
-                container('kubectl') {
+                container('helm') {
                     sh "kubectl create --namespace=default -f kubernetes/keycloak/keycloak-ambassador.yaml | exit 0"
                 }
             }

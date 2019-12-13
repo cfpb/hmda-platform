@@ -1,7 +1,7 @@
 podTemplate(label: 'buildSbtPod', containers: [
   containerTemplate(name: 'sbt', image: 'jenkinsxio/builder-scala', ttyEnabled: true, command: 'cat'),
   containerTemplate(name: 'docker', image: 'docker', ttyEnabled: true, command: 'cat'),
-  containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm', ttyEnabled: true, command: 'cat')
+  containerTemplate(name: 'helm', image: 'alpine/helm', ttyEnabled: true, command: 'cat')
 ],
 volumes: [
   hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
@@ -70,17 +70,14 @@ volumes: [
       if (env.BRANCH_NAME == 'master' || isDeployPR) {
         container('helm') {
           dir("kubernetes/email-service") {
-            sh "helm init --client-only"
-            sh "helm dependency update"
-          }
-          sh """
-            helm upgrade --install --force --namespace=default \
-            --values=kubernetes/email-service/values-dev.yaml \
-            --set image.tag=latest \
-            --set image.pullPolicy=Always \
-            email-service \
-            kubernetes/email-service
-          """
+            sh """
+              helm upgrade --install --force --namespace=default \
+              --values=kubernetes/email-service/values-dev.yaml \
+              --set image.tag=${env.DOCKER_TAG} \
+              --set image.pullPolicy=Always \
+              email-service \
+              kubernetes/email-service
+            """
         }
       }
     }
