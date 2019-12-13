@@ -20,7 +20,10 @@ dockerCommands :=
 
 javaOptions in Universal ++= Seq(
   "-J-XX:+UnlockExperimentalVMOptions",
-  "-J-XX:+UseCGroupMemoryLimitForHeap"
+  "-J-XX:+UseCGroupMemoryLimitForHeap",
+  "-J-XX:+PrintGCDetails",
+  "-J-XX:+PrintGCDateStamps",
+  "-J-Xloggc:/opt/docker"
 )
 
 javaOptions in reStart ++= (javaOptions in run).value
