@@ -6,6 +6,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.RouteDirectives.complete
 import akka.stream.ActorMaterializer
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.dashboard.Settings
 //import hmda.dashboard.api.DataBrowserDirectives._
 import hmda.dashboard.models.HealthCheckStatus.Up
@@ -53,17 +54,28 @@ trait HmdaDashboardHttpApi extends Settings {
         }~
         path("total_filers" / IntNumber) { (year) =>
           log.info(s"total filers for year=${year}")
-          onComplete(query.fetchData(year).runToFuture) {
-            case Failure(ex) =>
-              log.error(ex, "errorMessage")
-              complete(StatusCodes.InternalServerError)
+            complete(
+              query
+                .fetchData(year)
+                .map(aggs => SingleCountAggregationResponse(aggs))
+                .runToFuture
+            )
+//          onComplete(query.fetchData(year).runToFuture) {
+//            case Failure(ex) =>
+//              log.error(ex, "errorMessage")
+//              complete(StatusCodes.InternalServerError)
+//
+//            case Success(filerResponse) => {
+//              log.info(s"${filerResponse}")
+//              //complete(StatusCodes.OK, filerResponse)
+//              complete(
+//                query
+//                    .
+//                  .map()
+//              )
+//            }
 
-            case Success(filerResponse) => {
-              log.info(s"${filerResponse}")
-              complete(StatusCodes.OK, filerResponse)
-            }
 
-          }
         }
       }
     }
