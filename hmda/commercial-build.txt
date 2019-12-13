@@ -32,11 +32,11 @@ libraryDependencies += Cinnamon.library.cinnamonAkkaPersistence
 libraryDependencies += "com.lightbend.akka" %% "akka-diagnostics" % "1.1.12"
 
 javaOptions in Universal ++= Seq(
-  "-XX:+UnlockExperimentalVMOptions",
-  "-XX:+UseCGroupMemoryLimitForHeap",
-  "-XX:+PrintGCDetails",
-  "-XX:+PrintGCDateStamps",
-  "-Xloggc:/opt/docker"
+  "-J-XX:+UnlockExperimentalVMOptions",
+  "-J-XX:+UseCGroupMemoryLimitForHeap",
+  "-J-XX:+PrintGCDetails",
+  "-J-XX:+PrintGCDateStamps",
+  "-J-Xloggc:/opt/docker/garbage-collection.log"
 )
 
 javaOptions in reStart ++= (javaOptions in run).value

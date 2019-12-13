@@ -23,7 +23,7 @@ javaOptions in Universal ++= Seq(
   "-J-XX:+UseCGroupMemoryLimitForHeap",
   "-J-XX:+PrintGCDetails",
   "-J-XX:+PrintGCDateStamps",
-  "-J-Xloggc:/opt/docker"
+  "-J-Xloggc:/opt/docker/garbage-collection.log"
 )
 
 javaOptions in reStart ++= (javaOptions in run).value
