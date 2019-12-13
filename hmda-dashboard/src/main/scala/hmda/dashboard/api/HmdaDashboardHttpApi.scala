@@ -56,26 +56,10 @@ trait HmdaDashboardHttpApi extends Settings {
           log.info(s"total filers for year=${year}")
             complete(
               query
-                .fetchData(year)
+                .fetchTotalFilers(year)
                 .map(aggs => SingleCountAggregationResponse(aggs))
                 .runToFuture
             )
-//          onComplete(query.fetchData(year).runToFuture) {
-//            case Failure(ex) =>
-//              log.error(ex, "errorMessage")
-//              complete(StatusCodes.InternalServerError)
-//
-//            case Success(filerResponse) => {
-//              log.info(s"${filerResponse}")
-//              //complete(StatusCodes.OK, filerResponse)
-//              complete(
-//                query
-//                    .
-//                  .map()
-//              )
-//            }
-
-
         }
       }
     }

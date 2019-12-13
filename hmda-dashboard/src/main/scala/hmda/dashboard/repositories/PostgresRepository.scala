@@ -35,10 +35,15 @@ class PostgresRepository (tableName: String, config: DatabaseConfig[JdbcProfile]
     }
   }
 
-  def find(year: Int): Task[Vector[TotalFilers]] = {
+  def fetchTotalFilers(year: Int): Task[Vector[TotalFilers]] = {
+    val yearToFetch = year match {
+      case 2018 => "institutions2018"
+      case 2019 => "institutions2019"
+      case _    => ""
+    }
     val query =
       sql"""
-        select count(*) from institutions2018 where hmda_filer = true;
+        select count(*) from #${yearToFetch} where hmda_filer = true;
         """.as[TotalFilers]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
