@@ -47,7 +47,7 @@ projects.each { project ->
                 }
             }
             triggers {
-                periodic(10)
+                periodic(20)
             }
         }
     }
