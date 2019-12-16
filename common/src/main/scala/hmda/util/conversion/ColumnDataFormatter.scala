@@ -7,6 +7,7 @@ import java.util.Date
 trait ColumnDataFormatter {
 
   private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
+  private val bomTypes = Seq("""\ufeff""","""ï»¿""","""\efbbbf""","""\ffe""");
 
   def dateToString(option:Option[Long] ): String =
     if(option !=null) {
@@ -34,27 +35,8 @@ trait ColumnDataFormatter {
     }
 
   def removeBOM(value: String): String =
-    if (!value.isEmpty){
-
-      if (value.contains("""\ufeff"""))
-      {
-        value.replace("""\ufeff""", "")
-      }
-      else if (value.contains("""ï»¿"""))
-      {
-        value.replace("ï»¿", "")
-      }
-      else if (value.contains("""\efbbbf"""))
-      {
-        value.replace("""\efbbbf""", "")
-      }
-      else if (value.contains("""\ffe"""))
-      {
-        value.replace("""\ffe""", "")
-      }
-      else {
-        value
-      }
+    if (!value.isEmpty && bomTypes.exists(value.contains(_)) ){
+      bomTypes.foldLeft(value)((curLine, str) => curLine.replaceAll(str, ""))
     }
     else {
       value
