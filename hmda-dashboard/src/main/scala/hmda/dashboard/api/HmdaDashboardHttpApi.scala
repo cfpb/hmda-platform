@@ -8,7 +8,6 @@ import akka.http.scaladsl.server.directives.RouteDirectives.complete
 import akka.stream.ActorMaterializer
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.dashboard.Settings
-//import hmda.dashboard.api.DataBrowserDirectives._
 import hmda.dashboard.models.HealthCheckStatus.Up
 import hmda.dashboard.models._
 import hmda.dashboard.repositories._
