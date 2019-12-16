@@ -9,6 +9,6 @@ object TotalFilers {
   implicit val getResults: GetResult[TotalFilers] = GetResult(r => TotalFilers(r.<<))
 
   implicit val codec: Codec[TotalFilers] =
-    Codec.forProduct1("TotalFilers")(TotalFilers.apply)(f => (f.count))
+    Codec.forProduct1("Total Filers")(TotalFilers.apply)(f => (f.count))
 }
 

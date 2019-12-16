@@ -57,9 +57,36 @@ trait HmdaDashboardHttpApi extends Settings {
             complete(
               query
                 .fetchTotalFilers(year)
-                .map(aggs => SingleCountAggregationResponse(aggs))
+                .map(aggs => TotalFilersAggregationResponse(aggs))
                 .runToFuture
             )
+        }~
+        path("total_lars" / IntNumber) { (year) =>
+          log.info(s"total lars for year=${year}")
+          complete(
+            query
+              .fetchTotalLars(year)
+              .map(aggs => TotalLarsAggregationResponse(aggs))
+              .runToFuture
+          )
+        }~
+        path("single_attempts" / IntNumber) { (year) =>
+          log.info(s"single attempts for year=${year}")
+          complete(
+            query
+              .fetchSingleAttempts(year)
+              .map(aggs => SingleAttemptsAggregationResponse(aggs))
+              .runToFuture
+          )
+        }~
+        path("multiple_attempts" / IntNumber) { (year) =>
+          log.info(s"multiple attempts for year=${year}")
+          complete(
+            query
+              .fetchMultipleAttempts(year)
+              .map(aggs => MultipleAttemptsAggregationResponse(aggs))
+              .runToFuture
+          )
         }
       }
     }

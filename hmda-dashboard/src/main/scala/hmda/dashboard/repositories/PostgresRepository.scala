@@ -1,6 +1,6 @@
 package hmda.dashboard.repositories
 
-import hmda.dashboard.models.TotalFilers
+import hmda.dashboard.models.{MultipleAttempts, SingleAttempts, TotalFilers, TotalLars}
 import monix.eval.Task
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
@@ -35,7 +35,7 @@ class PostgresRepository (tableName: String, config: DatabaseConfig[JdbcProfile]
     }
   }
 
-  def fetchTotalFilers(year: Int): Task[Vector[TotalFilers]] = {
+  def fetchTotalFilers(year: Int): Task[Seq[TotalFilers]] = {
     val yearToFetch = year match {
       case 2018 => "institutions2018"
       case 2019 => "institutions2019"
@@ -45,6 +45,47 @@ class PostgresRepository (tableName: String, config: DatabaseConfig[JdbcProfile]
       sql"""
         select count(*) from #${yearToFetch} where hmda_filer = true;
         """.as[TotalFilers]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchTotalLars(year: Int): Task[Seq[TotalLars]] = {
+    val larTable = year match {
+      case 2018 => "loanapplicationregister2018"
+      case 2019 => "loanapplicationregister2019"
+      case _    => ""
+    }
+    val query =
+      sql"""
+        select count(*) from #${larTable};
+        """.as[TotalLars]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchSingleAttempts(year: Int): Task[Seq[SingleAttempts]] = {
+    val tsTable = year match {
+      case 2018 => "transmittalsheet2018"
+      case 2019 => "transmittalsheet2019"
+      case _    => ""
+    }
+    val dollar = "$"
+    val query =
+      sql"""
+        select count(substring(submission_id,'\d+#${dollar}')::integer) as single_attempts  from #${tsTable} a where a.submission_id is not null and substring(submission_id, '\d+#${dollar}')::integer = 1 ;
+        """.as[SingleAttempts]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchMultipleAttempts(year: Int): Task[Seq[MultipleAttempts]] = {
+    val tsTable = year match {
+      case 2018 => "transmittalsheet2018"
+      case 2019 => "transmittalsheet2019"
+      case _    => ""
+    }
+    val dollar = "$"
+    val query =
+      sql"""
+        select count(substring(submission_id,'\d+#${dollar}')::integer) as multiple_attempts  from #${tsTable} a where a.submission_id is not null and substring(submission_id, '\d+#${dollar}')::integer <> 1 ;
+        """.as[MultipleAttempts]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
