@@ -151,7 +151,7 @@ metadata:
       name: hmda_ws_mapping
       ambassador_id: ambassador-default-1
       prefix: /v2/ws/status/
-      timeout_ms: 3800000
+      timeout_ms: 380000
       retry_policy:
         num_retries: 10
         retry_on: 5xx
