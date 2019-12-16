@@ -53,7 +53,7 @@ import hmda.validation.rules.lar.quality.common.Q600
 import hmda.validation.rules.lar.syntactical.S305
 import hmda.validation.rules.lar.syntactical.S304
 import hmda.validation.{ AS, EC, MAT }
-import com.lightbend.akka.diagnostics.{StarvationDetector, StarvationDetectorSettings}
+//import com.lightbend.akka.diagnostics.{StarvationDetector, StarvationDetectorSettings}
 import scala.collection.immutable.ListMap
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
@@ -89,8 +89,8 @@ object HmdaValidationError
     val blockingEc: ExecutionContext =
       system.dispatchers.lookup("akka.blocking-quality-dispatcher")
 
-    StarvationDetector.checkExecutionContext(blockingEc, system.log, StarvationDetectorSettings.fromConfig(
-      system.settings.config.getConfig("akka.diagnostics.starvation-detector")), () => system.whenTerminated.isCompleted)
+//    StarvationDetector.checkExecutionContext(blockingEc, system.log, StarvationDetectorSettings.fromConfig(
+//      system.settings.config.getConfig("akka.diagnostics.starvation-detector")), () => system.whenTerminated.isCompleted)
 
     val sharding = ClusterSharding(ctx.asScala.system)
 
