@@ -1,6 +1,6 @@
 package hmda.dashboard.repositories
 
-import hmda.dashboard.models.{MultipleAttempts, SingleAttempts, TotalFilers, TotalLars}
+import hmda.dashboard.models.{FilerAttempts, FilersForLastDays, MultipleAttempts, SingleAttempts, TopFilers, TotalFilers, TotalLars}
 import monix.eval.Task
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
@@ -86,6 +86,56 @@ class PostgresRepository (tableName: String, config: DatabaseConfig[JdbcProfile]
       sql"""
         select count(substring(submission_id,'\d+#${dollar}')::integer) as multiple_attempts  from #${tsTable} a where a.submission_id is not null and substring(submission_id, '\d+#${dollar}')::integer <> 1 ;
         """.as[MultipleAttempts]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchTopFilers(count: Int, year: Int): Task[Seq[TopFilers]] = {
+    val tsTable = year match {
+      case 2018 => "transmittalsheet2018"
+      case 2019 => "transmittalsheet2019"
+      case _    => ""
+    }
+    val larTable = year match {
+      case 2018 => "loanapplicationregister2018"
+      case 2019 => "loanapplicationregister2019"
+      case _    => ""
+    }
+    val query = sql"""
+      select b.institution_name, a.lei, count(a.lei) from #${larTable} a join #${tsTable} b on a.lei = b.lei group by a.lei, b.institution_name order by count(a.lei) DESC LIMIT #${count};
+      """
+      .as[TopFilers]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchFilersForLastDays(days: Int, year: Int): Task[Seq[FilersForLastDays]] = {
+    val tsTable = year match {
+      case 2018 => "transmittalsheet2018"
+      case 2019 => "transmittalsheet2019"
+      case _    => ""
+    }
+    val query = sql"""
+      select created_at::date, count(*) from #${tsTable} group by created_at::date order by created_at::date DESC LIMIT #${days};
+      """
+      .as[FilersForLastDays]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchFilerAttempts(count: Int, year: Int): Task[Seq[FilerAttempts]] = {
+    val tsTable = year match {
+      case 2018 => "transmittalsheet2018"
+      case 2019 => "transmittalsheet2019"
+      case _    => ""
+    }
+    val larTable = year match {
+      case 2018 => "loanapplicationregister2018"
+      case 2019 => "loanapplicationregister2019"
+      case _    => ""
+    }
+    val dollar = "$"
+    val query = sql"""
+      select a.institution_name, count(b.lei) as lar_count, substring(submission_id,'\d+#${dollar}')::integer as attempts  from #${tsTable} a join #${larTable} b on a.lei = b.lei where a.submission_id is not null group by b.lei, a.submission_id, a.institution_name  order by substring(submission_id, '\d+#${dollar}')::integer DESC LIMIT #${count};
+      """
+      .as[FilerAttempts]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 

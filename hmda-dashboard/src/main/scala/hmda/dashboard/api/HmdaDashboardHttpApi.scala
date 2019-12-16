@@ -87,6 +87,33 @@ trait HmdaDashboardHttpApi extends Settings {
               .map(aggs => MultipleAttemptsAggregationResponse(aggs))
               .runToFuture
           )
+        }~
+          path("top_filers" / IntNumber / "year" / IntNumber) { (count, year) =>
+            log.info(s"top filers (${count}) for year=${year}")
+            complete(
+              query
+                .fetchTopFilers(count,year)
+                .map(aggs => TopFilersAggregationResponse(aggs))
+                .runToFuture
+            )
+        }~
+        path("filers_per_day" / IntNumber / "year" / IntNumber) { (days, year) =>
+          log.info(s"filers for last ${days} days for year=${year}")
+          complete(
+            query
+              .fetchFilersForLastDays(days,year)
+              .map(aggs => FilersForLastDaysAggregationResponse(aggs))
+              .runToFuture
+          )
+        }~
+        path("filer_attempts" / IntNumber / "year" / IntNumber) { (count, year) =>
+          log.info(s"top ${count} filers  attempts for year=${year}")
+          complete(
+            query
+              .fetchFilerAttempts(count,year)
+              .map(aggs => FilerAttemptsAggregationResponse(aggs))
+              .runToFuture
+          )
         }
       }
     }
