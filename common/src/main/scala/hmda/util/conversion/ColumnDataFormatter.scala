@@ -36,7 +36,7 @@ trait ColumnDataFormatter {
 
   def removeBOM(value: String): String =
     if (!value.isEmpty && bomTypes.exists(value.contains(_)) ){
-      bomTypes.foldLeft(value)((curLine, str) => curLine.replaceAll(str, ""))
+      bomTypes.foldLeft(value)((dataLine, str) => dataLine.replaceAll(str, ""))
     }
     else {
       value
