@@ -30,7 +30,8 @@ spec:
             - name: tz-config
               mountPath: /etc/localtime
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          resources: {{ toYaml .Values.resources | indent 12 }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
           env:
             - name: PG_DATABASE
               valueFrom:

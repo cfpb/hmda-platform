@@ -1,13 +1,13 @@
 {{- if .Values.ingress.enabled -}}
-{{- $fullName := include "institutions-api.fullname" . -}}
+{{- $fullName := include "hmda-dashboard.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ $fullName }}
   labels:
-    app: {{ template "institutions-api.name" . }}
-    chart: {{ template "institutions-api.chart" . }}
+    app: {{ template "hmda-dashboard.name" . }}
+    chart: {{ template "hmda-dashboard.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 {{- with .Values.ingress.annotations }}
