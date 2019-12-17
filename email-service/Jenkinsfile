@@ -1,3 +1,5 @@
+import groovy.json.JsonSlurper
+
 podTemplate(label: 'buildSbtPod', containers: [
   containerTemplate(name: 'sbt', image: 'jenkinsxio/builder-scala', ttyEnabled: true, command: 'cat'),
   containerTemplate(name: 'docker', image: 'docker', ttyEnabled: true, command: 'cat'),
@@ -7,7 +9,6 @@ volumes: [
   hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
 ]) {
    node('buildSbtPod') {
-    import groovy.json.JsonSlurper
     
     def repo = checkout scm
     def gitBranch = repo.GIT_BRANCH
