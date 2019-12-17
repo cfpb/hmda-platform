@@ -91,7 +91,7 @@ class PostgresRepository (tableName: String, config: DatabaseConfig[JdbcProfile]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
-  def fetchTSRecordCount(year: Int) : Task[Seq[TSRecordCount]] = {
+  def fetchTSRecordCount(year: Int): Task[Seq[TSRecordCount]] = {
     val tsTable = tsTableSelector(year)
     val query = sql"""
       SELECT  COUNT(*) FROM #${tsTable};
@@ -99,7 +99,7 @@ class PostgresRepository (tableName: String, config: DatabaseConfig[JdbcProfile]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
-  def fetchFilersByAgency(year: Int) : Task[Seq[FilersByAgency]] = {
+  def fetchFilersByAgency(year: Int): Task[Seq[FilersByAgency]] = {
     val tsTable = tsTableSelector(year)
     val query = sql"""
       SELECT agency, COUNT(*) FROM #${tsTable} GROUP BY agency ORDER BY agency ASC;
@@ -107,12 +107,29 @@ class PostgresRepository (tableName: String, config: DatabaseConfig[JdbcProfile]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
-  def fetchLARByAgency(year: Int) : Task[Seq[LARByAgency]] = {
+  def fetchLARByAgency(year: Int): Task[Seq[LarByAgency]] = {
     val tsTable = tsTableSelector(year)
     val larTable = larTableSelector(year)
     val query = sql"""
       SELECT ts.agency AS agency, COUNT(lar.*) FROM #${larTable} AS lar JOIN #${tsTable} AS ts ON UPPER(lar.lei) = UPPER(ts.lei) GROUP BY agency;
-      """.as[LARByAgency]
+      """.as[LarByAgency]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchTopCountiesLar(count: Int, year: Int): Task[Seq[TopCountiesLar]] = {
+    val tsTable = tsTableSelector(year)
+    val larTable = larTableSelector(year)
+    val query = sql"""
+      SELECT CAST(county AS VARCHAR), COUNT(*) FROM #${tsTable} AS ts LEFT JOIN #${larTable} AS lar ON UPPER(ts.lei) = UPPER(lar.lei) WHERE county != 'NA' GROUP BY county ORDER BY COUNT(*) DESC LIMIT #${count};
+      """.as[TopCountiesLar]
+      Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchLarCountByPropertyType(year: Int): Task[Seq[LarCountByPropertyType]] = {
+    val larTable = larTableSelector(year)
+    val query = sql"""
+      SELECT SUM(CASE WHEN construction_method='1' AND CAST(lar.total_uits AS INTEGER) <=4 THEN 1 ELSE 0 END) AS single_family, SUM(CASE WHEN construction_method='2' AND CAST(lar.total_uits AS INTEGER) <=4 THEN 1 ELSE 0 END) AS manufactured_single_family, SUM(CASE WHEN CAST(lar.total_uits AS INTEGER) > 4 THEN 1 ELSE 0 END) AS multifamily FROM #${larTable} AS lar;
+      """.as[LarCountByPropertyType]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 

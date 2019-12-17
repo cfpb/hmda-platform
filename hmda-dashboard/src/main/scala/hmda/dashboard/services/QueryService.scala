@@ -13,5 +13,7 @@ trait QueryService {
   def fetchFilerAttempts(count: Int, year: Int) : Task[Seq[FilerAttempts]]
   def fetchTSRecordCount(year: Int) : Task[Seq[TSRecordCount]]
   def fetchFilersByAgency(year: Int) : Task[Seq[FilersByAgency]]
-  def fetchLARByAgency(year: Int) : Task[Seq[LARByAgency]]
+  def fetchLARByAgency(year: Int) : Task[Seq[LarByAgency]]
+  def fetchTopCountiesLar(count: Int, year: Int) : Task[Seq[TopCountiesLar]]
+  def fetchLarCountByPropertyType(year: Int) : Task[Seq[LarCountByPropertyType]]
 }

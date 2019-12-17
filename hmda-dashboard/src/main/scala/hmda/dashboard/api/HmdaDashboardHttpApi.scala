@@ -114,7 +114,7 @@ trait HmdaDashboardHttpApi extends Settings {
               .runToFuture
           )
         }~
-          path("tsrecords" / IntNumber) { (year) =>
+          path("total_ts" / IntNumber) { (year) =>
             log.info(s"TS Records for year=${year}")
             complete(
               query
@@ -137,10 +137,28 @@ trait HmdaDashboardHttpApi extends Settings {
           complete(
             query
               .fetchLARByAgency(year)
-              .map(aggs => LARByAgencyAggregationResponse(aggs))
+              .map(aggs => LarByAgencyAggregationResponse(aggs))
               .runToFuture
           )
-        }
+        }~
+        path("top_counties_lar" / IntNumber / "year" / IntNumber) { (count, year) =>
+          log.info(s"Top ${count} counties for year=${year}")
+          complete(
+            query
+              .fetchTopCountiesLar(count, year)
+              .map(aggs => TopCountiesLarAggregationResponse(aggs))
+              .runToFuture
+          )
+        }~
+          path("lar_by_property" / IntNumber) { (year) =>
+            log.info(s"Lar count by property for year=${year}")
+            complete(
+              query
+                .fetchLarCountByPropertyType(year)
+                .map(aggs => LarCountByPropertyTypeAggregationResponse(aggs))
+                .runToFuture
+            )
+          }
       }
     }
 }

@@ -12,6 +12,6 @@ object SignsForLastDays {
   implicit val getResults: GetResult[SignsForLastDays] = GetResult(r => SignsForLastDays(r.<<,r.<<))
 
   implicit val codec: Codec[SignsForLastDays] =
-    Codec.forProduct2("date","count")(SignsForLastDays.apply)(f => (f.date,f.count))
+    Codec.forProduct2("Date","Sign Count")(SignsForLastDays.apply)(f => (f.date,f.count))
 }
 
