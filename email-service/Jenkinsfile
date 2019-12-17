@@ -15,6 +15,14 @@ volumes: [
     def isDeployPR = sh(returnStdout: true, script: "git log -1").contains("[deploy pr]")
     def gitTagged = env.TAG_NAME != null
 
+    File file = new File("./jenkins/env.json")
+    String fileContent = file.text
+    
+    def jsonSlurper = new JsonSlurper()
+    def object = jsonSlurper.parseText(fileContent)
+
+    def deploy = object.deploy.hmda-platform
+
     if (gitBranch == "master") {
       env.DOCKER_TAG = "latest"
     } else if (gitTagged) {
