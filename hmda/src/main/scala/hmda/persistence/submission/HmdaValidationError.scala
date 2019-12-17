@@ -89,6 +89,7 @@ object HmdaValidationError
     val blockingEc: ExecutionContext =
       system.dispatchers.lookup("akka.blocking-quality-dispatcher")
 
+    //Temporarily commented out since adding this bit throws an OOM
 //    StarvationDetector.checkExecutionContext(blockingEc, system.log, StarvationDetectorSettings.fromConfig(
 //      system.settings.config.getConfig("akka.diagnostics.starvation-detector")), () => system.whenTerminated.isCompleted)
 

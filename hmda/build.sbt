@@ -23,7 +23,8 @@ javaOptions in Universal ++= Seq(
   "-J-XX:+UseCGroupMemoryLimitForHeap",
   "-J-XX:+PrintGCDetails",
   "-J-XX:+PrintGCDateStamps",
-  "-J-Xloggc:/opt/docker/gc.log"
+  "-J-Xloggc:/opt/docker/gc.log",
+  "-J-XX:+HeapDumpOnOutOfMemoryError"
 )
 
 javaOptions in reStart ++= (javaOptions in run).value
