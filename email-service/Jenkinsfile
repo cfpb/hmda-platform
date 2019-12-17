@@ -7,6 +7,8 @@ volumes: [
   hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
 ]) {
    node('buildSbtPod') {
+    import groovy.json.JsonSlurper
+    
     def repo = checkout scm
     def gitBranch = repo.GIT_BRANCH
     def commitId = sh(returnStdout: true, script: 'git rev-parse HEAD')
