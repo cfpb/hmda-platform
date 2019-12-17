@@ -1,6 +1,6 @@
 package hmda.dashboard.services
 
-import hmda.dashboard.models.{FilerAttempts, FilersForLastDays, MultipleAttempts, SingleAttempts, TopFilers, TotalFilers, TotalLars}
+import hmda.dashboard.models._
 import monix.eval.Task
 
 trait QueryService {
@@ -9,6 +9,9 @@ trait QueryService {
   def fetchSingleAttempts(year: Int) : Task[Seq[SingleAttempts]]
   def fetchMultipleAttempts(year: Int) : Task[Seq[MultipleAttempts]]
   def fetchTopFilers(count: Int, year: Int) : Task[Seq[TopFilers]]
-  def fetchFilersForLastDays(days: Int, year: Int) : Task[Seq[FilersForLastDays]]
+  def fetchSignsForLastDays(days: Int, year: Int) : Task[Seq[SignsForLastDays]]
   def fetchFilerAttempts(count: Int, year: Int) : Task[Seq[FilerAttempts]]
+  def fetchTSRecordCount(year: Int) : Task[Seq[TSRecordCount]]
+  def fetchFilersByAgency(year: Int) : Task[Seq[FilersByAgency]]
+  def fetchLARByAgency(year: Int) : Task[Seq[LARByAgency]]
 }

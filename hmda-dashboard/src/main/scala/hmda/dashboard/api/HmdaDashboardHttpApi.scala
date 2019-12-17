@@ -96,12 +96,12 @@ trait HmdaDashboardHttpApi extends Settings {
                 .runToFuture
             )
         }~
-        path("filers_per_day" / IntNumber / "year" / IntNumber) { (days, year) =>
+        path("signs_per_day" / IntNumber / "year" / IntNumber) { (days, year) =>
           log.info(s"filers for last ${days} days for year=${year}")
           complete(
             query
-              .fetchFilersForLastDays(days,year)
-              .map(aggs => FilersForLastDaysAggregationResponse(aggs))
+              .fetchSignsForLastDays(days,year)
+              .map(aggs => SignsForLastDaysAggregationResponse(aggs))
               .runToFuture
           )
         }~
@@ -111,6 +111,33 @@ trait HmdaDashboardHttpApi extends Settings {
             query
               .fetchFilerAttempts(count,year)
               .map(aggs => FilerAttemptsAggregationResponse(aggs))
+              .runToFuture
+          )
+        }~
+          path("tsrecords" / IntNumber) { (year) =>
+            log.info(s"TS Records for year=${year}")
+            complete(
+              query
+                .fetchTSRecordCount(year)
+                .map(aggs => TSRecordCountAggregationResponse(aggs))
+                .runToFuture
+            )
+        }~
+        path("filers_by_agency" / IntNumber) { (year) =>
+          log.info(s"Filers by agency code for year=${year}")
+          complete(
+            query
+              .fetchFilersByAgency(year)
+              .map(aggs => FilersByAgencyAgggregationResponse(aggs))
+              .runToFuture
+          )
+        }~
+        path("lar_by_agency" / IntNumber) { (year) =>
+          log.info(s"Lar by agency code for year=${year}")
+          complete(
+            query
+              .fetchLARByAgency(year)
+              .map(aggs => LARByAgencyAggregationResponse(aggs))
               .runToFuture
           )
         }

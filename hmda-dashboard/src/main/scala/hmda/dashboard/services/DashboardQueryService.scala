@@ -20,9 +20,18 @@ class DashboardQueryService (repo: PostgresRepository) extends QueryService{
   override def fetchTopFilers(count: Int, year: Int): Task[Seq[TopFilers]] =
     repo.fetchTopFilers(count,year)
 
-  override def fetchFilersForLastDays(days: Int, year: Int): Task[Seq[FilersForLastDays]] =
-    repo.fetchFilersForLastDays(days,year)
+  override def fetchSignsForLastDays(days: Int, year: Int): Task[Seq[SignsForLastDays]] =
+    repo.fetchSignsForLastDays(days,year)
 
   override def fetchFilerAttempts(count: Int, year: Int): Task[Seq[FilerAttempts]] =
     repo.fetchFilerAttempts(count,year)
+
+  override def fetchTSRecordCount(year: Int): Task[Seq[TSRecordCount]] =
+    repo.fetchTSRecordCount(year)
+
+  override def fetchFilersByAgency(year: Int): Task[Seq[FilersByAgency]] =
+    repo.fetchFilersByAgency(year)
+
+  override def fetchLARByAgency(year: Int): Task[Seq[LARByAgency]] =
+    repo.fetchLARByAgency(year)
 }
