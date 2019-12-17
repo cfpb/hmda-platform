@@ -75,7 +75,7 @@ volumes: [
     }
 
     stage('Deploy') {
-      if (env.BRANCH_NAME == 'master' || isDeployPR) {
+      if ((env.BRANCH_NAME == 'master' || isDeployPR) && deploy) {
         container('helm') {
           dir("kubernetes/email-service") {
             sh """
@@ -86,6 +86,7 @@ volumes: [
               email-service \
               kubernetes/email-service
             """
+          }
         }
       }
     }
