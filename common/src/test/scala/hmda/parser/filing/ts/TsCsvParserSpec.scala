@@ -4,7 +4,6 @@ import hmda.model.filing.ts.TsGenerators._
 import hmda.parser.filing.ts.TsParserErrorModel.{InvalidAgencyCode, InvalidTsId}
 import hmda.parser.filing.ts.TsValidationUtils._
 import org.scalatest.prop.PropertyChecks
-import hmda.parser.filing.ts.TsParserErrorModel.IncorrectNumberOfFieldsTs
 import org.scalatest.{MustMatchers, PropSpec}
 
 class TsCsvParserSpec extends PropSpec with PropertyChecks with MustMatchers {
@@ -17,10 +16,10 @@ class TsCsvParserSpec extends PropSpec with PropertyChecks with MustMatchers {
   }
 
   property(
-    "Transmittal Sheet CSV Parser must report parsing errors for | in the end") {
+    "Transmittal Sheet CSV Parser must remove | from end of row and  and control characters") {
     forAll(tsGen) { ts =>
-      val csv = ts.toCSV + "|"
-      TsCsvParser(csv) mustBe Left(List(IncorrectNumberOfFieldsTs("16")))
+      val csv = ts.toCSV + "|\r\n"
+      TsCsvParser(csv) mustBe Right(ts)
     }
   }
 
