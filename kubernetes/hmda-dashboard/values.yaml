@@ -12,12 +12,11 @@ image:
 service:
   type: ClusterIP
   account:
-    name: hmda-dashboard-service-account-default
+    name: hmda-dashboard
   name: hmda-dashboard
-  port: 9999
 
 dashboard:
-  name: dashboard
+  name: hmda-dashboard
   protocol: TCP
   port: 6666
 
@@ -28,7 +27,7 @@ ingress:
     # kubernetes.io/tls-acme: "true"
   path: /
   hosts:
-    - hmda-dashboard.local
+    - chart-example.local
   tls: []
 
 resources:

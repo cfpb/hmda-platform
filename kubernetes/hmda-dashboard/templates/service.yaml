@@ -1,3 +1,4 @@
+---
 kind: Service
 apiVersion: v1
 metadata:
@@ -5,20 +6,19 @@ metadata:
 spec:
   selector:
     app: hmda-dashboard
-  type: NodePort
+  type: ClusterIP
   ports:
   - name: {{ .Values.dashboard.name }}
     protocol: {{ .Values.dashboard.protocol }}
     port: {{ .Values.dashboard.port }}
     targetPort: {{ .Values.dashboard.port }}
-
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
     service: ambassador-hmda-dashboard
-  name: ambassador-hmda-dashboard
+  name: ambassador-hmda-hmda-dashboard
   annotations:
     getambassador.io/config: |
       apiVersion: ambassador/v1
@@ -28,6 +28,6 @@ metadata:
       prefix: /v2/dashboard/
       service: {{ .Values.service.name }}:{{ .Values.dashboard.port }}
 spec:
-  clusterIP: None
+  clusterIP: None  
   ports:
     - port: {{ .Values.dashboard.port }}
