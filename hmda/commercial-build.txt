@@ -37,7 +37,8 @@ javaOptions in Universal ++= Seq(
   "-J-XX:+PrintGCDetails",
   "-J-XX:+PrintGCDateStamps",
   "-J-Xloggc:/opt/docker/gc.log",
-  "-J-XX:+HeapDumpOnOutOfMemoryError"
+  "-J-XX:+HeapDumpOnOutOfMemoryError",
+  "-J-XX:HeapDumpPath=/dumps/oom.bin"
 )
 
 javaOptions in reStart ++= (javaOptions in run).value
