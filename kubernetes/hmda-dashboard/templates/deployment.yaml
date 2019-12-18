@@ -60,7 +60,7 @@ spec:
                   key: url
           ports:
             - name: {{ .Values.service.name }}
-              containerPort: 9093
+              containerPort: {{ .Values.dashboard.port }}
               protocol: {{ .Values.service.protocol }}
           livenessProbe:
             httpGet:

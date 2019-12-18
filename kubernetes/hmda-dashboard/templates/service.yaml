@@ -1,50 +1,33 @@
-apiVersion: v1
 kind: Service
+apiVersion: v1
 metadata:
-  name: {{ template "hmda-dashboard.fullname" . }}
-  labels:
-    app: {{ template "hmda-dashboard.name" . }}
-    chart: {{ template "hmda-dashboard.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+  name: {{ .Values.service.name }}
 spec:
-  type: {{ .Values.service.type }}
-  ports:
-    - port: {{ .Values.service.port }}
-      targetPort: {{ .Values.service.targetPort }}
-      protocol: {{ .Values.service.protocol }}
-      name: {{ .Values.service.name }}
   selector:
-    app: {{ template "hmda-dashboard.name" . }}
-    release: {{ .Release.Name }}
+    app: hmda-dashboard
+  type: NodePort
+  ports:
+  - name: {{ .Values.dashboard.name }}
+    protocol: {{ .Values.dashboard.protocol }}
+    port: {{ .Values.dashboard.port }}
+    targetPort: {{ .Values.dashboard.port }}
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    service: hmda-dashboard-ambassador
-  name: hmda-dashboard-ambassador
+    service: ambassador-hmda-dashboard
+  name: ambassador-hmda-dashboard
   annotations:
     getambassador.io/config: |
       apiVersion: ambassador/v1
       kind: Mapping
       name: hmda_dashboard_mapping
       ambassador_id: ambassador-default-1
-      method: GET
-      prefix: /v2/public/dashboard/
-      rewrite: /dashboard/
-      service: {{ template "hmda-dashboard.fullname" .}}:{{ .Values.service.port }}
-      ---
-      apiVersion: ambassador/v1
-      kind: Mapping
-      name: institution_api_search_mapping
-      ambassador_id: ambassador-default-1
-      method: GET
-      prefix: /v2/public/dashboard?
-      rewrite: /dashboard?
-      service: {{ template "hmda-dashboard.fullname" .}}:{{ .Values.service.port }}
+      prefix: /v2/dashboard/
+      service: {{ .Values.service.name }}:{{ .Values.dashboard.port }}
 spec:
   clusterIP: None
   ports:
-    - port: {{ .Values.service.port }}
+    - port: {{ .Values.dashboard.port }}

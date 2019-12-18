@@ -11,25 +11,31 @@ image:
 
 service:
   type: ClusterIP
-  port: 9093
-  targetPort: 9093
+  account:
+    name: hmda-dashboard-service-account-default
   name: hmda-dashboard
+
+dashboard:
+  name: dashboard
+  protocol: TCP
+  port: 6666
 
 ingress:
   enabled: false
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-  ContainerPort: 9093
+  path: /
   hosts:
     - hmda-dashboard.local
   tls: []
+
 resources:
   limits:
-    memory: "4200Mi"
-    cpu: "2"
+    memory: "1024Mi"
+    cpu: "1"
   requests:
-    memory: "4200Mi"
+    memory: "1024Mi"
     cpu: "1"
 
 nodeSelector: {}
