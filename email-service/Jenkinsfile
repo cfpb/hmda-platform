@@ -1,4 +1,13 @@
+
 import groovy.json.JsonSlurper
+
+@NonCPS
+def slurper(def json) {
+    def jsonSlurper = new JsonSlurper()
+    def object = jsonSlurper.parseText(json)
+
+    def deploy = object.deploy.hmda_platform
+}
 
 podTemplate(label: 'buildSbtPod', containers: [
   containerTemplate(name: 'sbt', image: 'jenkinsxio/builder-scala', ttyEnabled: true, command: 'cat'),
@@ -9,7 +18,6 @@ volumes: [
   hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
 ]) {
    node('buildSbtPod') {
-    
     def repo = checkout scm
     def gitBranch = repo.GIT_BRANCH
     def commitId = sh(returnStdout: true, script: 'git rev-parse HEAD')
@@ -18,13 +26,9 @@ volumes: [
     def isDeployPR = sh(returnStdout: true, script: "git log -1").contains("[deploy pr]")
     def gitTagged = env.TAG_NAME != null
 
-    File file = new File("./jenkins/env.json")
-    String fileContent = file.text
+    def fileContent = sh(returnStdout: true, script: "echo \$(cat ./jenkins/env.json)")
     
-    def jsonSlurper = new JsonSlurper()
-    def object = jsonSlurper.parseText(fileContent)
-
-    def deploy = object.deploy.hmda-platform
+    def deploy = slurper(fileContent)
 
     if (gitBranch == "master") {
       env.DOCKER_TAG = "latest"
