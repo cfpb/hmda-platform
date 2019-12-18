@@ -18,14 +18,14 @@ service:
 dashboard:
   name: hmda-dashboard
   protocol: TCP
-  port: 6666
+  port: 9999
 
 ingress:
   enabled: false
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-  path: /
+  path: /dashboard/
   hosts:
     - chart-example.local
   tls: []

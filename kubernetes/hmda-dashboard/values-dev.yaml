@@ -18,7 +18,7 @@ service:
 dashboard:
   name: dashboard
   protocol: TCP
-  port: 6666
+  port: 9999
 
 ingress:
   enabled: false
