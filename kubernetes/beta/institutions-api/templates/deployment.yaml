@@ -36,7 +36,10 @@ spec:
             - name: KAFKA_INSTITUTIONS_GROUP
               value: {{.Values.kafka.institutionsGroup}}
             - name: CURRENT_YEAR
-              value: "{{.Values.currentYear}}"
+              valueFrom:
+                configMapKeyRef:
+                  name: timed-guards
+                  key: currentYear
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:
