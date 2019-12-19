@@ -19,7 +19,7 @@ import monix.eval.Task
 import monix.execution.Scheduler
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
 import org.apache.kafka.common.serialization.StringDeserializer
-
+import java.util.TimeZone
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import org.slf4j.LoggerFactory
@@ -81,7 +81,8 @@ object Stream {
    if (!bankFilterList.contains(submission.id.lei)) {
      log.info(s"Working on ${rawSubmissionId} and ${toAddress}")
 
-     val df: SimpleDateFormat = new SimpleDateFormat("MMMM dd, YYYY, hh:MM:ss a")
+     val df: SimpleDateFormat = new SimpleDateFormat("MMMM dd, YYYY, hh:mm:ss a")
+     df.setTimeZone(TimeZone.getTimeZone("EST"))
 
      val formattedEmail = emailContent.replaceAll("<period>", submission.id.period.toString)
        .replaceAll("<datetime>", df.format(submission.receipt.toLong))
