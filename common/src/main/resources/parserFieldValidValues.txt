@@ -21,17 +21,17 @@ Ethnicity of Co-Applicant or Co-Borrower: 3|Integer: 0, 1, 11, 12, 13, 14, 2, 3,
 Ethnicity of Co-Applicant or Co-Borrower: 4|Integer: 0, 1, 11, 12, 13, 14, 2, 3, 4, 5 or Blank
 Ethnicity of Co-Applicant or Co-Borrower: 5|Integer: 0, 1, 11, 12, 13, 14, 2, 3, 4, 5 or Blank
 Ethnicity of Co-Applicant or CoBorrower Collected on the Basis of Visual Observation or Surname|Integer: 1, 2, 3, 4
-Race of Applicant or Borrower: 1|Interger: 0, 1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8 or Blank
-Race of Applicant or Borrower: 2|Interger: 0, 1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8 or Blank
-Race of Applicant or Borrower: 3|Interger: 0, 1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8 or Blank
-Race of Applicant or Borrower: 4|Interger: 0, 1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8 or Blank
-Race of Applicant or Borrower: 5|Interger: 0, 1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8 or Blank
+Race of Applicant or Borrower: 1|Integer: 0, 1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8 or Blank
+Race of Applicant or Borrower: 2|Integer: 0, 1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8 or Blank
+Race of Applicant or Borrower: 3|Integer: 0, 1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8 or Blank
+Race of Applicant or Borrower: 4|Integer: 0, 1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8 or Blank
+Race of Applicant or Borrower: 5|Integer: 0, 1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8 or Blank
 Race of Applicant or Borrower Collected on the Basis of Visual Observation or Surname|1, 2, 3, 4
-Race of Co-Applicant or Co-Borrower: 1|Interger: 0, 1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8 or Blank
-Race of Co-Applicant or Co-Borrower: 2|Interger: 0, 1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8 or Blank
-Race of Co-Applicant or Co-Borrower: 3|Interger: 0, 1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8 or Blank
-Race of Co-Applicant or Co-Borrower: 4|Interger: 0, 1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8 or Blank
-Race of Co-Applicant or Co-Borrower: 5|Interger: 0, 1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8 or Blank
+Race of Co-Applicant or Co-Borrower: 1|Integer: 0, 1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8 or Blank
+Race of Co-Applicant or Co-Borrower: 2|Integer: 0, 1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8 or Blank
+Race of Co-Applicant or Co-Borrower: 3|Integer: 0, 1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8 or Blank
+Race of Co-Applicant or Co-Borrower: 4|Integer: 0, 1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8 or Blank
+Race of Co-Applicant or Co-Borrower: 5|Integer: 0, 1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8 or Blank
 Race of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname|1, 2, 3, 4
 Sex of Applicant or Borrower|Integer: 1, 2, 3, 4, 5, 6
 Sex of Applicant or Borrower Collected on the Basis of Visual Observation or Surname|Integer: 1, 2, 3, 4
