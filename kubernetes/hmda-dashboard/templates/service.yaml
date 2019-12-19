@@ -1,33 +1,41 @@
----
-kind: Service
 apiVersion: v1
+kind: Service
 metadata:
   name: {{ .Values.service.name }}
+  labels:
+    app: {{ include "hmda-dashboard.name" . }}
+    chart: {{ include "hmda-dashboard.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
-  selector:
-    app: hmda-dashboard
-  type: ClusterIP
+  type: {{ .Values.service.type }}
   ports:
-  - name: {{ .Values.dashboard.name }}
-    protocol: {{ .Values.dashboard.protocol }}
-    port: {{ .Values.dashboard.port }}
-    targetPort: {{ .Values.dashboard.port }}
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ include "hmda-dashboard.name" . }}
+    release: {{ .Release.Name }}
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    service: ambassador-hmda-dashboard
-  name: ambassador-hmda-hmda-dashboard
+    service: {{ include "hmda-dashboard.fullname" . }}-ambassador
+  name: {{ include "hmda-dashboard.fullname" . }}-ambassador
   annotations:
     getambassador.io/config: |
       apiVersion: ambassador/v1
       kind: Mapping
-      name: hmda_dashboard_mapping
+      name: data_browser_mapping
       ambassador_id: ambassador-default-1
-      prefix: /v2/dashboard/
-      service: {{ .Values.service.name }}:{{ .Values.dashboard.port }}
+      prefix: /dashboard/
+      rewrite: /dashboard/
+      service: {{ include "hmda-dashboard.fullname" . }}:{{ .Values.service.port }}
+      timeout_ms: 300000
 spec:
-  clusterIP: None  
+  clusterIP: None
   ports:
-    - port: {{ .Values.dashboard.port }}
+    - port: {{ .Values.service.port }}

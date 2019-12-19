@@ -10,10 +10,9 @@ image:
   pullPolicy: IfNotPresent
 
 service:
-  type: ClusterIP
-  account:
-    name: hmda-dashboard
   name: hmda-dashboard
+  type: ClusterIP
+  port: 9999
 
 dashboard:
   name: hmda-dashboard
@@ -25,7 +24,7 @@ ingress:
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-  path: /dashboard/
+  path: /
   hosts:
     - chart-example.local
   tls: []
