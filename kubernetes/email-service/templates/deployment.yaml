@@ -32,56 +32,56 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: JDBC_URL
-            valueFrom:
-              secretKeyRef:
-                name: inst-postgres-credentials
-                key: url
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: url
             - name: KAFKA_CLUSTER_HOSTS
-            valueFrom:
-              configMapKeyRef:
-                name: kafka-configmap
-                key: kafka.hosts
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-configmap
+                  key: kafka.hosts
             - name: AWS_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: aws-email-credentials
-                key: aws-access-key-id
+              valueFrom:
+                secretKeyRef:
+                  name: aws-email-credentials
+                  key: aws-access-key-id
             - name: AWS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: aws-email-credentials
-                key: aws-secret-access-key
+              valueFrom:
+                secretKeyRef:
+                  name: aws-email-credentials
+                  key: aws-secret-access-key
             - name: AWS_ENVIRONMENT
-            valueFrom:
-              configMapKeyRef:
-                name: s3-configmap
-                key: aws-environment
+              valueFrom:
+                configMapKeyRef:
+                  name: s3-configmap
+                  key: aws-environment
             - name: BANK_FILTER_LIST
-            valueFrom:
-              configMapKeyRef:
-                name: bank-filter-configmap
-                key: bank-filter-list
+              valueFrom:
+                configMapKeyRef:
+                  name: bank-filter-configmap
+                  key: bank-filter-list
             - name: EMAIL_LOG_LEVEL
-            value: INFO
+              value: INFO
             - name: KAFKA_EMAIL_TOPIC
-            value: {{.Values.kafka.emailTopic}}
+              value: {{.Values.kafka.emailTopic}}
             - name: KAFKA_EMAIL_CONSUMER_GROUP_ID
-            value: {{.Values.kafka.emailGroup}}
+              value: {{.Values.kafka.emailGroup}}
             - name: EMAIL_SUBJECT
-            valueFrom:
-              configMapKeyRef:
-                name: email-configmap
-                key: emailSubject
-            name: EMAIL_CONTENT
-            valueFrom:
-              configMapKeyRef:
-                name: email-configmap
-                key: emailContent
-            name: SENDER_EMAIL_ADDRESS
-            valueFrom:
-              configMapKeyRef:
-                name: email-configmap
-                key: emailSender
+              valueFrom:
+                configMapKeyRef:
+                  name: email-configmap
+                  key: emailSubject
+            - name: EMAIL_CONTENT
+              valueFrom:
+                configMapKeyRef:
+                  name: email-configmap
+                  key: emailContent
+            - name: SENDER_EMAIL_ADDRESS
+              valueFrom:
+                configMapKeyRef:
+                  name: email-configmap
+                  key: emailSender
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
