@@ -87,6 +87,8 @@ spec:
                 configMapKeyRef:
                   name: timed-guards
                   key: q3End
+            - name: KAFKA_EMAIL_TOPIC
+              value: {{.Values.kafka.emailTopic}}
             - name: KAFKA_INSTITUTIONS_TOPIC
               value: {{.Values.kafka.institutionsTopic}}
             - name: KAFKA_SIGN_TOPIC

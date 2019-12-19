@@ -31,43 +31,43 @@ spec:
               mountPath: /etc/localtime          
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            name: JDBC_URL
+            - name: JDBC_URL
             valueFrom:
               secretKeyRef:
                 name: inst-postgres-credentials
                 key: url
-            name: KAFKA_CLUSTER_HOSTS
+            - name: KAFKA_CLUSTER_HOSTS
             valueFrom:
               configMapKeyRef:
                 name: kafka-configmap
                 key: kafka.hosts
-            name: AWS_ACCESS_KEY_ID
+            - name: AWS_ACCESS_KEY_ID
             valueFrom:
               secretKeyRef:
                 name: aws-email-credentials
                 key: aws-access-key-id
-            name: AWS_SECRET_ACCESS_KEY
+            - name: AWS_SECRET_ACCESS_KEY
             valueFrom:
               secretKeyRef:
                 name: aws-email-credentials
                 key: aws-secret-access-key
-            name: AWS_ENVIRONMENT
+            - name: AWS_ENVIRONMENT
             valueFrom:
               configMapKeyRef:
                 name: s3-configmap
                 key: aws-environment
-            name: BANK_FILTER_LIST
+            - name: BANK_FILTER_LIST
             valueFrom:
               configMapKeyRef:
                 name: bank-filter-configmap
                 key: bank-filter-list
-            name: EMAIL_LOG_LEVEL
+            - name: EMAIL_LOG_LEVEL
             value: INFO
-            name: KAFKA_EMAIL_TOPIC
+            - name: KAFKA_EMAIL_TOPIC
             value: {{.Values.kafka.emailTopic}}
-            name: KAFKA_EMAIL_CONSUMER_GROUP_ID
+            - name: KAFKA_EMAIL_CONSUMER_GROUP_ID
             value: {{.Values.kafka.emailGroup}}
-            name: EMAIL_SUBJECT
+            - name: EMAIL_SUBJECT
             valueFrom:
               configMapKeyRef:
                 name: email-configmap
