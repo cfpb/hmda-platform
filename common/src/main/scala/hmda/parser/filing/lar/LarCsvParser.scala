@@ -9,7 +9,7 @@ object LarCsvParser extends ColumnDataFormatter {
   def apply(s: String, fromCassandra: Boolean = false): Either[List[ParserValidationError], LoanApplicationRegister] = {
 
     val controlCharsRemoved = controlCharacterFilter(s).trim()
-    val trailingPipeRemoved = removeTrailingPipe(controlCharsRemoved)
+    val trailingPipeRemoved = removeTrailingLARPipe(controlCharsRemoved)
     val cleanLarLine = removeBOM(trailingPipeRemoved)
     val values = cleanLarLine.trim.split('|').map(_.trim).toList
 
