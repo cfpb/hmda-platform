@@ -5,7 +5,7 @@ def slurper(def json) {
     def jsonSlurper = new JsonSlurper()
     def object = jsonSlurper.parseText(json)
 
-    def deploy = object.deploy.institutions_api
+    def deploy = object.deploy.modified_lar
 }
 
 podTemplate(label: 'buildSbtPod', containers: [

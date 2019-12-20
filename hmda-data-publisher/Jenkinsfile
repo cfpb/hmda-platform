@@ -5,7 +5,7 @@ def slurper(def json) {
     def jsonSlurper = new JsonSlurper()
     def object = jsonSlurper.parseText(json)
 
-    def deploy = object.deploy.hmda_analytics
+    def deploy = object.deploy.hmda_data_publisher
 }
 
 podTemplate(label: 'buildSbtPod', containers: [
