@@ -25,8 +25,7 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
         if (runtimeMode == "dev") {
           provide(VerifiedToken())
         } else {
-          reject(AuthorizationFailedRejection)
-            .toDirective[Tuple1[VerifiedToken]]
+          complete(StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path(""))).toDirective[Tuple1[VerifiedToken]]
         }
     }
 
@@ -37,15 +36,12 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
         if (runtimeMode == "dev") {
           provide(t)
         } else {
-          logger.info(s"Got token back for ${lei}")
           val leiList = t.lei.split(',')
           if (leiList.contains(lei)) {
-            logger.info(s"Providing for ${lei}")
             provide(t)
           } else {
             logger.info(s"Providing reject for ${lei}")
-            reject(AuthorizationFailedRejection)
-              .toDirective[Tuple1[VerifiedToken]]
+            complete(StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path(""))).toDirective[Tuple1[VerifiedToken]]
           }
         }
 
@@ -53,9 +49,8 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
         if (runtimeMode == "dev") {
           provide(VerifiedToken())
         } else {
-          logger.error("Rejecting request in authorizeTokenWithLei")
-          reject(AuthorizationFailedRejection)
-            .toDirective[Tuple1[VerifiedToken]]
+          logger.info("Rejecting request in authorizeTokenWithLei")
+          complete(StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path(""))).toDirective[Tuple1[VerifiedToken]]
         }
     }
   }
@@ -85,8 +80,6 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
           }.recover {
             case ex: Throwable =>
               logger.error("Authorization Token could not be verified {}", ex)
-//              reject(AuthorizationFailedRejection)
-//                .toDirective[Tuple1[VerifiedToken]]
               complete(StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path(""))).toDirective[Tuple1[VerifiedToken]]
           }.get
         }
@@ -95,7 +88,6 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
           provide(VerifiedToken())
         } else {
           logger.error("No bearer token found")
-//          reject(AuthorizationFailedRejection)
           complete(StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path(""))).toDirective[Tuple1[VerifiedToken]]
         }
     }
