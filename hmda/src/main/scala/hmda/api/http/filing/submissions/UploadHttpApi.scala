@@ -120,6 +120,11 @@ trait UploadHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
           .via(uploadFile(submission.id, hmdaRaw))
           .runWith(Sink.ignore)
 
+        fUploaded.onComplete{
+          case Success(_) => log.info(s"File uploaded for ${submission.id} completed")
+          case Failure(ex) => log.error(s"File uploaded for ${submission.id} failed", ex)
+        }
+
         onComplete(fUploaded) {
           case Success(_) =>
             val fileName = metadata.fileName
