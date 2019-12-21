@@ -50,6 +50,7 @@ trait SignHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
           timedGet { uri =>
             getSubmissionForSigning(lei, year, None, seqNr, token.email, uri)
           } ~ timedPost { uri =>
+            log.info("Entered in sign post")
             respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
               entity(as[EditsSign]) { editsSign =>
                 signSubmission(lei, year, None, seqNr, token.email, editsSign.signed, uri)
@@ -57,12 +58,12 @@ trait SignHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
             }
           }
         } ~ pathPrefix("quarter" / Quarter / "submissions" / IntNumber / "sign") { (quarter, seqNr) =>
-          oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
             timedGet { uri =>
               quarterlyFilingAllowed(lei, year) {
                 getSubmissionForSigning(lei, year, Option(quarter), seqNr, token.email, uri)
               }
             } ~ timedPost { uri =>
+              log.info("Entered in Quarter Post")
               respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
                 entity(as[EditsSign]) { editsSign =>
                   quarterlyFilingAllowed(lei, year) {
@@ -71,7 +72,6 @@ trait SignHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
                 }
               }
             }
-          }
         }
       }
     }
@@ -102,22 +102,27 @@ trait SignHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
     signed: Boolean,
     uri: Uri
   ): Route = {
+    log.info("entered in signSubmission")
     val submissionId = SubmissionId(lei, Period(year, quarter), seqNr)
     if (!signed) badRequest(submissionId, uri, "Illegal argument: signed = false")
     else {
+      log.info("entered in signSubmission else")
       val hmdaValidationError                    = selectHmdaValidationError(sharding, submissionId)
       val fSigned: Future[SubmissionSignedEvent] = hmdaValidationError ? (ref => SignSubmission(submissionId, ref, email))
       onComplete(fSigned) {
         case Failure(e) =>
+          log.info(s"Entered in failure: ${e}" )
           failedResponse(StatusCodes.InternalServerError, uri, e)
 
         case Success(submissionSignedEvent) =>
           submissionSignedEvent match {
             case signed @ SubmissionSigned(_, _, status) =>
+              log.info("entered in signed signSubmission")
               val signedResponse = SignedResponse(email, signed.timestamp, signed.receipt, status)
               complete(ToResponseMarshallable(signedResponse))
 
             case SubmissionNotReadyToBeSigned(id) =>
+              log.info("Entered in badRequest signSubmission")
               badRequest(id, uri, s"Submission $id is not ready to be signed")
           }
       }
@@ -128,6 +133,7 @@ trait SignHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
+          log.info("Entered in Sign path")
           signPath(oAuth2Authorization)
         }
       }
