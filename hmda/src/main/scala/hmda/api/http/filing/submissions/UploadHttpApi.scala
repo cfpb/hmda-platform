@@ -121,8 +121,8 @@ trait UploadHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
           .runWith(Sink.ignore)
 
         fUploaded.onComplete{
-          case Success(_) => log.info(s"File uploaded completed for ${submission.id}")
-          case Failure(ex) => log.error(s"File upload FAILED for ${submission.id}", ex)
+          case Success(_) => log.info(s"File upload completed for ${submission.id}")
+          case Failure(ex) => log.error(s"File upload failed for ${submission.id}", ex)
         }
 
         onComplete(fUploaded) {
