@@ -30,7 +30,6 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
     }
 
   def authorizeTokenWithLei(lei: String): Directive1[VerifiedToken] = {
-    logger.info(s"Inside authorizeTokenWithLei for ${lei}")
     authorizeToken flatMap {
       case t if t.lei.nonEmpty =>
         if (runtimeMode == "dev") {
@@ -57,7 +56,6 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
 
 
   def authorizeToken: Directive1[VerifiedToken] = {
-    logger.info("Inside authorizeToken")
     bearerToken.flatMap {
       case Some(token) =>
         onComplete(tokenVerifier.verifyToken(token)).flatMap {
@@ -94,7 +92,6 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
   }
 
   private def bearerToken: Directive1[Option[String]] = {
-    logger.info("Getting bearerToken")
     for {
       authBearerHeader <- optionalHeaderValueByType(classOf[Authorization])
                            .map(extractBearerToken)
