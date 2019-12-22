@@ -23,7 +23,7 @@ object Version {
   val embeddedKafka          = "2.3.0"
   val akkaQuartzScheduler    = "1.6.1-akka-2.5.x"
   val phantom                = "2.31.0"
-  val cinnamonMetrics        = "2.12.4"
+  val cinnamonMetrics        = "2.13.0"
   val sprayresolver          = "0.9.1"
   val spark                  = "2.4.0"
   val enumeratum             = "1.5.13"
