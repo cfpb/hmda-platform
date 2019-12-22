@@ -57,7 +57,6 @@ trait SignHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
             }
           }
         } ~ pathPrefix("quarter" / Quarter / "submissions" / IntNumber / "sign") { (quarter, seqNr) =>
-          oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
             timedGet { uri =>
               quarterlyFilingAllowed(lei, year) {
                 getSubmissionForSigning(lei, year, Option(quarter), seqNr, token.email, uri)
@@ -71,7 +70,6 @@ trait SignHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
                 }
               }
             }
-          }
         }
       }
     }
