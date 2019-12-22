@@ -22,8 +22,17 @@ testResults=$(sed -n '/failure/,$p' scripts/results.txt)
 data="$( jq -nc --arg str "# $8 Newman Error (Filing $testType): $testResults" '{"text": $str}' )"
 
 #post message is error is found
+#post message is error is found
+
  if [[ $data == *"failure"* ]]; then
-   curl -i -X POST -H 'Content-Type: application/json' -d "$data" $9
+
+   if [[ -n $9 ]];then
+     curl -i -X POST -H 'Content-Type: application/json' -d "$data" "${9}"
+   fi
+
+   if [[ -n ${10} ]];then
+     curl -i -X POST -H 'Content-Type: application/json' -d "$data" "${10}"
+   fi
 
 fi
 
@@ -43,6 +52,7 @@ done
 #MM Web hook Env Vars
 #$8 $HMDA_ENV
 #$9 $MM_HOOK
+#$10 $ALT_HOOK
 
 
 
