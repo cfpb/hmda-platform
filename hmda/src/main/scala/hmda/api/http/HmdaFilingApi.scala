@@ -44,7 +44,7 @@ class HmdaFilingApi
 
   override implicit val system: ActorSystem             = context.system
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
-  override implicit val ec: ExecutionContext            = context.dispatcher
+  implicit lazy val ec: ExecutionContext = system.dispatchers.lookup("akka.blocking-upload-dispatcher")
   val timeout: Timeout                                  = Timeout(config.getInt("hmda.http.timeout").seconds)
   override val log                                      = Logging(system, getClass)
 
