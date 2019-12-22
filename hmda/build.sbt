@@ -21,6 +21,7 @@ dockerCommands :=
 javaOptions in Universal ++= Seq(
   "-J-XX:+UnlockExperimentalVMOptions",
   "-J-XX:+UseCGroupMemoryLimitForHeap",
+  "-J-XX:+UseContainerSupport",
   "-J-XX:+PrintGCDetails",
   "-J-XX:+PrintGCDateStamps",
   "-J-Xloggc:/opt/docker/gc.log",
