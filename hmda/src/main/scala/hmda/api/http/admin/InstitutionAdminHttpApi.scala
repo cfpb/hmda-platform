@@ -45,9 +45,9 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
   val config        = ConfigFactory.load()
   val hmdaAdminRole = config.getString("keycloak.hmda.admin.role")
 
-  def institutionWritePath(oAuth2Authorization: OAuth2Authorization): Route =
-    oAuth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
-      path("institutions") {
+  def institutionWritePath(oAuth2Authorization: OAuth2Authorization): Route = {
+    path("institutions") {
+      oAuth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
         entity(as[Institution]) { institution =>
           timedPost { uri =>
             sanatizeInstitutionIdentifiers(institution, true, uri, postInstitution)
@@ -78,6 +78,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
         }
       }
     }
+  }
 
   private def postInstitution(institution: Institution, uri: Uri): Route = {
     val institutionPersistence = InstitutionPersistence.selectInstitution(sharding, institution.LEI, institution.activityYear)
@@ -138,7 +139,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
 
   // GET institutions/<lei>/year/<year>
   // GET institutions/<lei>/year/<year>/quarter/<quarter>
-  val institutionReadPath: Route =
+  val institutionReadPath: Route = {
     path("institutions" / Segment / "year" / IntNumber) { (lei, year) =>
       timedGet { uri =>
         getInstitution(lei, year, None, uri)
@@ -149,6 +150,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
           }
         }
     }
+  }
 
   private def getInstitution(lei: String, year: Int, quarter: Option[String], uri: Uri): Route = {
     val institutionPersistence                    = selectInstitution(sharding, lei, year)
@@ -192,7 +194,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
   }
 
 
-  def institutionAdminRoutes(oAuth2Authorization: OAuth2Authorization): Route =
+  def institutionAdminRoutes(oAuth2Authorization: OAuth2Authorization): Route = {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
@@ -200,4 +202,5 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
         }
       }
     }
+  }
 }
