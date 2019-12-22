@@ -11,11 +11,9 @@ import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.typed.Cluster
 import akka.management.scaladsl.AkkaManagement
 import hmda.api.HmdaApi
-import hmda.persistence.submission.repositories.SyntacticalDb
 import hmda.persistence.util.CassandraUtil
 import hmda.publication.HmdaPublication
 import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
-import com.outworkers.phantom.dsl._
 
 object HmdaPlatform extends App {
 
@@ -78,9 +76,6 @@ object HmdaPlatform extends App {
     )
     EmbeddedKafka.start()
   }
-
-  val appDb = SyntacticalDb(config)
-  appDb.create() //TODO: Fix this warning
 
   //Start Persistence
   system.spawn(HmdaPersistence.behavior, HmdaPersistence.name)

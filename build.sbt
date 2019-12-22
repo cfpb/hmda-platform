@@ -147,6 +147,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
+      libraryDependencies += zeroAllocationHashing,
       mainClass in Compile := Some("hmda.HmdaPlatform"),
       assemblyJarName in assembly := "hmda2.jar",
       assemblyMergeStrategy in assembly := {

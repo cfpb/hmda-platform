@@ -19,6 +19,13 @@ dockerCommands :=
     case v => Seq(v)
   }
 
+credentials in ThisBuild += Credentials(Path.userHome / ".lightbend" / "commercial.credentials")
+resolvers in ThisBuild += "lightbend-commercial-maven" at "https://repo.lightbend.com/commercial-releases"
+
+cinnamonMuteMissingRepoWarning := true
+
+cinnamonLogLevel := "INFO"
+
 cinnamon in run := true
 cinnamon in test := true
 
