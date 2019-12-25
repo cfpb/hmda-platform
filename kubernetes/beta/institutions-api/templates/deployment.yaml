@@ -40,6 +40,11 @@ spec:
                 configMapKeyRef:
                   name: timed-guards
                   key: currentYear
+            - name: RULES_YEARLY_FILING_YEARS_ALLOWED
+              valueFrom:
+                configMapKeyRef:
+                  name: timed-guards
+                  key: yearsAllowed
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:

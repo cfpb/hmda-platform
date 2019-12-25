@@ -67,7 +67,7 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
     }
   }
 
-  def findByEmail(email: String, year: String)(
+  def findByEmail(email: String,yearsAllowed: Array[String])(
     implicit ec: ExecutionContext,
     institutionEmailsRepository: InstitutionEmailsRepository,
     institutionRepository2018: InstitutionRepository2018,
@@ -82,44 +82,9 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
     def emailTotalQuery(leis: Seq[String]) =
       institutionEmailsRepository.table.filter(_.lei inSet leis)
 
-    year match {
-      case "2018" =>
-        def institutionQuery(leis: Seq[String]) =
-          institutionRepository2018.table.filter(_.lei inSet leis)
+    yearsAllowed match {
 
-        val db = institutionRepository2018.db
-
-        for {
-          emailEntities <- db.run(emailSingleQuery.result)
-          leis          = emailEntities.map(_.lei)
-          institutions  <- db.run(institutionQuery(leis).result)
-          emails        <- db.run(emailTotalQuery(leis).result)
-        } yield {
-          institutions.map { institution =>
-            val filteredEmails =
-              emails.filter(_.lei == institution.lei).map(_.emailDomain)
-            InstitutionConverter.convert(institution, filteredEmails)
-          }
-        }
-      case "2019" =>
-        def institutionQuery(leis: Seq[String]) =
-          institutionRepository2019.table.filter(_.lei inSet leis)
-
-        val db = institutionRepository2019.db
-
-        for {
-          emailEntities <- db.run(emailSingleQuery.result)
-          leis          = emailEntities.map(_.lei)
-          institutions  <- db.run(institutionQuery(leis).result)
-          emails        <- db.run(emailTotalQuery(leis).result)
-        } yield {
-          institutions.map { institution =>
-            val filteredEmails =
-              emails.filter(_.lei == institution.lei).map(_.emailDomain)
-            InstitutionConverter.convert(institution, filteredEmails)
-          }
-        }
-      case "2020" =>
+      case years if years.contains("2020") =>
         def institutionQuery(leis: Seq[String]) =
           institutionRepository2020.table.filter(_.lei inSet leis)
 
@@ -137,17 +102,55 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
             InstitutionConverter.convert(institution, filteredEmails)
           }
         }
+
+      case years if years.contains("2019") =>
+        def institutionQuery(leis: Seq[String]) =
+          institutionRepository2019.table.filter(_.lei inSet leis)
+
+        val db = institutionRepository2019.db
+
+        for {
+          emailEntities <- db.run(emailSingleQuery.result)
+          leis          = emailEntities.map(_.lei)
+          institutions  <- db.run(institutionQuery(leis).result)
+          emails        <- db.run(emailTotalQuery(leis).result)
+        } yield {
+          institutions.map { institution =>
+            val filteredEmails =
+              emails.filter(_.lei == institution.lei).map(_.emailDomain)
+            InstitutionConverter.convert(institution, filteredEmails)
+          }
+        }
+
+      case years if years.contains("2018") =>
+        def institutionQuery(leis: Seq[String]) =
+          institutionRepository2018.table.filter(_.lei inSet leis)
+
+        val db = institutionRepository2018.db
+
+        for {
+          emailEntities <- db.run(emailSingleQuery.result)
+          leis          = emailEntities.map(_.lei)
+          institutions  <- db.run(institutionQuery(leis).result)
+          emails        <- db.run(emailTotalQuery(leis).result)
+        } yield {
+          institutions.map { institution =>
+            val filteredEmails =
+              emails.filter(_.lei == institution.lei).map(_.emailDomain)
+            InstitutionConverter.convert(institution, filteredEmails)
+          }
+        }
     }
   }
 
-  def findByFields(lei: String, name: String, taxId: String, emailDomain: String, year: String)(
+  def findByFields(lei: String, name: String, taxId: String, emailDomain: String, yearsAllowed: Array[String])(
     implicit ec: ExecutionContext,
     institutionEmailsRepository: InstitutionEmailsRepository,
     institutionRepository2018: InstitutionRepository2018,
     institutionRepository2019: InstitutionRepository2019,
     institutionRepository2020: InstitutionRepository2020
   ): Future[Seq[Institution]] = {
-    val emailFiltered = findByEmail(emailDomain, year)
+    val emailFiltered = findByEmail(emailDomain, yearsAllowed)
     for {
       emailEntities <- emailFiltered
       filtered = emailEntities.filter(

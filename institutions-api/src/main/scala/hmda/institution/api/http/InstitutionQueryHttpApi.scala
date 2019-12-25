@@ -77,12 +77,12 @@ trait InstitutionQueryHttpApi extends HmdaTimeDirectives with InstitutionEmailCo
       timedGet { uri =>
       isFilingAllowed(year, None) {
           parameter('domain.as[String]) { domain =>
-            val f = findByEmail(domain, year.toString)
+            val f = findByEmail(domain, year.toString.toArray[String])
             completeInstitutionsFuture(f, uri)
           } ~
             parameters(('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String])) {
               (domain, lei, respondentName, taxId) =>
-                val f = findByFields(lei, respondentName, taxId, domain, year.toString)
+                val f = findByFields(lei, respondentName, taxId, domain, year.toString.toArray[String])
                 completeInstitutionsFuture(f, uri)
             }
         }
@@ -93,13 +93,13 @@ trait InstitutionQueryHttpApi extends HmdaTimeDirectives with InstitutionEmailCo
     path("institutions") {
       timedGet { uri =>
         parameter('domain.as[String]) { domain =>
-          val f = findByEmail(domain, currentYear)
+          val f = findByEmail(domain,yearsAllowed)
           completeInstitutionsFuture(f, uri)
         } ~
           parameters(('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String])) {
             (domain, lei, respondentName, taxId) =>
               val f =
-                findByFields(lei, respondentName, taxId, domain, currentYear)
+                findByFields(lei, respondentName, taxId, domain,yearsAllowed)
               completeInstitutionsFuture(f, uri)
           }
       }

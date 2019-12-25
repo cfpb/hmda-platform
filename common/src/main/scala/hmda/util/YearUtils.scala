@@ -9,6 +9,9 @@ object YearUtils {
   val config = ConfigFactory.load()
 
   val currentYear = config.getString("hmda.filing.current")
+  val yearsAllowed = config.getString("hmda.rules.yearly-filing. years-allowed").split(",")
+
+
 
   def isValidQuarter(quarter: String): Boolean =
     quarter match {
