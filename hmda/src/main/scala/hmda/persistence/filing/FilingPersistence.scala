@@ -1,14 +1,14 @@
 package hmda.persistence.filing
 
-import akka.actor.typed.{ ActorRef, Behavior, TypedActorContext }
 import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.{ActorRef, Behavior, TypedActorContext}
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef, EntityTypeKey }
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef, EntityTypeKey}
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
+import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
 import hmda.messages.filing.FilingCommands._
-import hmda.messages.filing.FilingEvents.{ FilingCreated, FilingEvent, SubmissionAdded, SubmissionUpdated }
+import hmda.messages.filing.FilingEvents.{FilingCreated, FilingEvent, SubmissionAdded, SubmissionUpdated}
 import hmda.messages.institution.InstitutionCommands.AddFiling
 import hmda.model.filing.FilingDetails
 import hmda.persistence.HmdaTypedPersistentActor
@@ -124,7 +124,7 @@ object FilingPersistence extends HmdaTypedPersistentActor[FilingCommand, FilingE
   }
 
   def startShardRegion(sharding: ClusterSharding): ActorRef[ShardingEnvelope[FilingCommand]] =
-    super.startShardRegion(sharding)
+    super.startShardRegion(sharding, FilingStop())
 
   def selectFiling(sharding: ClusterSharding, lei: String, year: Int, quarter: Option[String]): EntityRef[FilingCommand] = {
     val period = YearUtils.period(year, quarter)

@@ -1,3 +1,4 @@
+import com.lightbend.cinnamon.sbt.Cinnamon
 import com.typesafe.sbt.packager.docker._
 
 version := "latest"
@@ -18,19 +19,39 @@ dockerCommands :=
     case v => Seq(v)
   }
 
+credentials in ThisBuild += Credentials(Path.userHome / ".lightbend" / "commercial.credentials")
+resolvers in ThisBuild += "lightbend-commercial-maven" at "https://repo.lightbend.com/commercial-releases"
+
+cinnamonMuteMissingRepoWarning := true
+
+cinnamonLogLevel := "INFO"
+
+cinnamon in run := true
+cinnamon in test := true
+
+libraryDependencies += Cinnamon.library.cinnamonAkka
+libraryDependencies += Cinnamon.library.cinnamonAkkaHttp
+libraryDependencies += Cinnamon.library.cinnamonAkkaStream
+libraryDependencies += Cinnamon.library.cinnamonPrometheus
+libraryDependencies += Cinnamon.library.cinnamonPrometheusHttpServer
+libraryDependencies += Cinnamon.library.cinnamonJvmMetricsProducer
+libraryDependencies += Cinnamon.library.cinnamonAkkaPersistence
+libraryDependencies += "com.lightbend.akka" %% "akka-diagnostics" % "1.1.12"
+
 javaOptions in Universal ++= Seq(
   "-J-XX:+UnlockExperimentalVMOptions",
-//  "-J-XX:+UseCGroupMemoryLimitForHeap",
+  "-J-XX:+UseCGroupMemoryLimitForHeap",
   "-J-XX:+UseContainerSupport",
-//  "-J-XX:+PrintGCDetails",
-//  "-J-XX:+PrintGCDateStamps",
-  "-J-XX:+UnlockDiagnosticVMOptions", //allow JFR to get metadata about non-safe points
-  "-J-XX:+DebugNonSafepoints", //allow JFR to get metadata about non-safe points
-  "-J-Xloggc:/opt/docker/gc.log",
-  "-J-Xlog:gc*",
+  "-J-XX:+PrintGCDetails",
+  "-J-XX:+PrintGCDateStamps",
+//  "-J-XX:+UnlockDiagnosticVMOptions", //allow JFR to get metadata about non-safe points
+//  "-J-XX:+DebugNonSafepoints", //allow JFR to get metadata about non-safe points
+//  "-J-Xloggc:/opt/docker/gc.log",
+//  "-J-Xlog:gc*",
   "-J-XX:+HeapDumpOnOutOfMemoryError",
   "-J-XX:HeapDumpPath=/dumps/oom.bin",
-  "-J-XX:StartFlightRecording=disk=true, dumponexit=true, filename=recording.jfr, maxsize=2048m, maxage=1d, setting=profile",
+  "-J-XX:FlightRecorder",
+//  "-J-XX:StartFlightRecording=disk=true, dumponexit=true, filename=recording.jfr, maxsize=2048m, maxage=1d, setting=profile",
   "-Dcom.sun.management.jmxremote",
   "-Dcom.sun.management.jmxremote.authenticate=false",
   "-Dcom.sun.management.jmxremote.ssl=false",

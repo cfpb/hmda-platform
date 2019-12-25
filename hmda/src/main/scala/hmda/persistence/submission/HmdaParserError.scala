@@ -48,8 +48,8 @@ object HmdaParserError extends HmdaTypedPersistentActor[SubmissionProcessingComm
     }
 
   override def commandHandler(
-    ctx: TypedActorContext[SubmissionProcessingCommand]
-  ): CommandHandler[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaParserErrorState] = { (state, cmd) =>
+                               ctx: TypedActorContext[SubmissionProcessingCommand]
+                             ): CommandHandler[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaParserErrorState] = { (state, cmd) =>
     val log                                      = ctx.asScala.log
     implicit val system: ActorSystem             = ctx.asScala.system.toUntyped
     implicit val materializer: ActorMaterializer = ActorMaterializer()
@@ -120,6 +120,7 @@ object HmdaParserError extends HmdaTypedPersistentActor[SubmissionProcessingComm
         Effect.none
 
       case HmdaParserStop =>
+        log.info(s"Stopping ${ctx.asScala.self.path.name}")
         Effect.stop()
 
       case _ =>
@@ -134,7 +135,7 @@ object HmdaParserError extends HmdaTypedPersistentActor[SubmissionProcessingComm
   }
 
   def startShardRegion(sharding: ClusterSharding): ActorRef[ShardingEnvelope[SubmissionProcessingCommand]] =
-    super.startShardRegion(sharding)
+    super.startShardRegion(sharding, HmdaParserStop)
 
   def selectHmdaParserError(sharding: ClusterSharding, submissionId: SubmissionId): EntityRef[SubmissionProcessingCommand] =
     sharding.entityRefFor(HmdaParserError.typeKey, s"${HmdaParserError.name}-${submissionId.toString}")

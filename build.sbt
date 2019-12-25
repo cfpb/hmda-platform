@@ -60,7 +60,7 @@ lazy val slickDeps = Seq(slick, slickHikaryCP, postgres, h2)
 
 lazy val dockerSettings = Seq(
   Docker / maintainer := "Hmda-Ops",
-  dockerBaseImage := "openjdk:11",
+  dockerBaseImage := "openjdk:8",
   dockerRepository := Some("hmda")
 )
 
@@ -72,7 +72,7 @@ lazy val packageSettings = Seq(
     val fatJar            = (assembly in Compile).value
     // removing means filtering
     val filtered = universalMappings filter {
-      case (_, fileName) => !fileName.endsWith(".jar")
+      case (_, fileName) => !fileName.endsWith(".jar") || fileName.contains("cinnamon-agent")
     }
     // add the fat jar
     filtered :+ (fatJar -> ("lib/" + fatJar.getName))
@@ -142,7 +142,8 @@ lazy val `hmda-platform` = (project in file("hmda"))
   .enablePlugins(
     JavaServerAppPackaging,
     sbtdocker.DockerPlugin,
-    AshScriptPlugin
+    AshScriptPlugin,
+    Cinnamon
   )
   .settings(hmdaBuildSettings: _*)
   .settings(
@@ -152,6 +153,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
       assemblyJarName in assembly := "hmda2.jar",
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
+        case "cinnamon-reference.conf"               => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "logback.xml"                           => MergeStrategy.concat
         case x =>

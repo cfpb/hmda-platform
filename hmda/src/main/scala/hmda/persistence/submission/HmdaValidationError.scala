@@ -5,8 +5,8 @@ import java.time.Instant
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{ActorRef, Behavior, TypedActorContext}
-import akka.actor.{ActorSystem, Scheduler}
+import akka.actor.typed.{ActorRef, ActorSystem, Behavior, TypedActorContext}
+import akka.actor.{ActorSystem => UntypedActorSystem, Scheduler}
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import akka.pattern.ask
@@ -70,7 +70,7 @@ object HmdaValidationError
   override def behavior(entityId: String): Behavior[SubmissionProcessingCommand] =
     Behaviors.setup { ctx =>
       EventSourcedBehavior[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaValidationErrorState](
-        persistenceId = PersistenceId(s"$entityId"),
+        persistenceId = PersistenceId(entityId),
         emptyState = HmdaValidationErrorState(),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
@@ -81,7 +81,7 @@ object HmdaValidationError
                                ctx: TypedActorContext[SubmissionProcessingCommand]
                              ): CommandHandler[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaValidationErrorState] = { (state, cmd) =>
     val log                                      = ctx.asScala.log
-    implicit val system: ActorSystem             = ctx.asScala.system.toUntyped
+    implicit val system: UntypedActorSystem      = ctx.asScala.system.toUntyped
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     //    implicit val ec: ExecutionContext            = system.dispatcher
     implicit val blockingEc: ExecutionContext =
@@ -334,10 +334,13 @@ object HmdaValidationError
         replyTo ! VerificationStatus(qualityVerified = state.qualityVerified, macroVerified = state.macroVerified)
         Effect.none
 
+      case HmdaParserStop =>
+        log.info(s"Stopping ${ctx.asScala.self.path.name}")
+        Effect.stop()
+
       case _ =>
         Effect.none
     }
-
   }
 
   override def eventHandler: (HmdaValidationErrorState, SubmissionProcessingEvent) => HmdaValidationErrorState = {
@@ -361,7 +364,7 @@ object HmdaValidationError
   }
 
   def startShardRegion(sharding: ClusterSharding): ActorRef[ShardingEnvelope[SubmissionProcessingCommand]] =
-    super.startShardRegion(sharding)
+    super.startShardRegion(sharding, HmdaParserStop)
 
   private def validateTs[as: AS](
                                   ctx: TypedActorContext[SubmissionProcessingCommand],
@@ -568,7 +571,7 @@ object HmdaValidationError
                            ctx: TypedActorContext[SubmissionProcessingCommand],
                            submissionId: SubmissionId,
                            validationContext: ValidationContext
-                         )(implicit actorSystem: ActorSystem, materializer: ActorMaterializer, executionContext: ExecutionContext): Future[Unit] = {
+                         )(implicit actorSystem: UntypedActorSystem, materializer: ActorMaterializer, executionContext: ExecutionContext): Future[Unit] = {
 
     def qualityChecks: Future[List[ValidationError]] =
       if (editCheck == "quality") {
@@ -652,7 +655,7 @@ object HmdaValidationError
   private def maybeTs(
                        ctx: TypedActorContext[SubmissionProcessingCommand],
                        submissionId: SubmissionId
-                     )(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Option[TransmittalSheet]] =
+                     )(implicit system: UntypedActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Option[TransmittalSheet]] =
     uploadConsumerRawStr(ctx, submissionId)
       .take(1)
       .via(parseTsFlow)
@@ -704,7 +707,7 @@ object HmdaValidationError
                                 submissionId: SubmissionId,
                                 email: String,
                                 signedTimestamp: Long
-                              )(implicit system: ActorSystem, materializer: ActorMaterializer): Future[Done] = {
+                              )(implicit system: UntypedActorSystem, materializer: ActorMaterializer): Future[Done] = {
     produceRecord(signTopic, submissionId.lei, submissionId.toString)
     produceRecord(emailTopic, s"${submissionId.toString}-${signedTimestamp}", email)
   }
