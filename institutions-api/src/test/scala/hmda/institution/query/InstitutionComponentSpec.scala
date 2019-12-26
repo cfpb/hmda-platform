@@ -14,7 +14,7 @@ class InstitutionComponentSpec extends InstitutionAsyncSetup {
       val inst = InstitutionEmailEntity(lei = "BBB", emailDomain = "ccc.com")
       updateEmails(inst).flatMap { t =>
         t mustBe 1
-        findByEmail("emailTest@ccc.com", "2018".toArray[String]).map { xs =>
+        findByEmail("emailTest@ccc.com", "2018".split(",")).map { xs =>
           xs.size mustBe 1
           xs.map(i => i.LEI) mustBe Seq("BBB")
         }
@@ -22,7 +22,7 @@ class InstitutionComponentSpec extends InstitutionAsyncSetup {
     }
 
     "delete institutions" in {
-      findByEmail("email@eee.com", "2018".toArray[String]).map { xs =>
+      findByEmail("email@eee.com", "2018".split(",")).map { xs =>
         xs.size mustBe 1
         xs.map(i => i.LEI) mustBe Seq("EEE")
       }
