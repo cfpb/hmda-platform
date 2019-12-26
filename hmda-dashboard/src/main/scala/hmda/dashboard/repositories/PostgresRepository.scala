@@ -5,7 +5,7 @@ import monix.eval.Task
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
-class PostgresRepository (tableName: String, config: DatabaseConfig[JdbcProfile]) {
+class PostgresRepository (config: DatabaseConfig[JdbcProfile]) {
 
   import config._
   import config.profile.api._

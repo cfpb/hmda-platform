@@ -23,9 +23,9 @@ trait HmdaDashboardHttpApi extends Settings {
   val log: LoggingAdapter
   implicit val materializer: ActorMaterializer
 
-  val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("dbconfig")
+  val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
   val repository =
-    new PostgresRepository(database.tableName, databaseConfig)
+    new PostgresRepository(databaseConfig)
 
   val healthCheck: HealthCheckService =
     new HealthCheckService(repository)

@@ -17,8 +17,5 @@ trait Settings {
     val port: Int = config.getInt("server.bindings.port")
     val askTimeout: FiniteDuration = getDuration("server.ask-timeout")
   }
-
-  object database {
-    val tableName: String = config.getString("dbconfig.table")
-  }
+  
 }
