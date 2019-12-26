@@ -40,18 +40,18 @@ libraryDependencies += "com.lightbend.akka" %% "akka-diagnostics" % "1.1.12"
 
 javaOptions in Universal ++= Seq(
   "-J-XX:+UnlockExperimentalVMOptions",
-  "-J-XX:+UseCGroupMemoryLimitForHeap",
+//  "-J-XX:+UseCGroupMemoryLimitForHeap",
   "-J-XX:+UseContainerSupport",
-  "-J-XX:+PrintGCDetails",
-  "-J-XX:+PrintGCDateStamps",
-//  "-J-XX:+UnlockDiagnosticVMOptions", //allow JFR to get metadata about non-safe points
-//  "-J-XX:+DebugNonSafepoints", //allow JFR to get metadata about non-safe points
-//  "-J-Xloggc:/opt/docker/gc.log",
-//  "-J-Xlog:gc*",
+//  "-J-XX:+PrintGCDetails",
+//  "-J-XX:+PrintGCDateStamps",
+  "-J-XX:+UnlockDiagnosticVMOptions", //allow JFR to get metadata about non-safe points
+  "-J-XX:+DebugNonSafepoints", //allow JFR to get metadata about non-safe points
+  "-J-Xloggc:/opt/docker/gc.log",
+  "-J-Xlog:gc*",
   "-J-XX:+HeapDumpOnOutOfMemoryError",
   "-J-XX:HeapDumpPath=/dumps/oom.bin",
-  "-J-XX:FlightRecorder",
-//  "-J-XX:StartFlightRecording=disk=true, dumponexit=true, filename=recording.jfr, maxsize=2048m, maxage=1d, setting=profile",
+//  "-J-XX:FlightRecorder",
+  "-J-XX:StartFlightRecording=delay=4400s,duration=1500s,disk=true,filename=recording.jfr,maxsize=2048m,maxage=1d,settings=profile",
   "-Dcom.sun.management.jmxremote",
   "-Dcom.sun.management.jmxremote.authenticate=false",
   "-Dcom.sun.management.jmxremote.ssl=false",
