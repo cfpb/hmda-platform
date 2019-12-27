@@ -56,39 +56,39 @@ object MacroValidationFlow {
     period match {
       case Period(2018, _) =>
         List(
-          Q634,
-          Q635(totalCount),
-          Q636(totalCount),
-          Q637(totalCount),
-          Q638,
-          Q639,
-          Q640
+//          Q634,
+//          Q635(totalCount),
+//          Q636(totalCount),
+//          Q637(totalCount),
+//          Q638,
+//          Q639,
+//          Q640
         )
 
       case Period(2019, _) =>
         List(
-          Q634,
-          Q635(totalCount),
-          Q636(totalCount),
-          Q637(totalCount),
-          Q638,
-          Q639,
-          Q640,
-          Q646,
-          Q647(tsSource)
+//          Q634,
+//          Q635(totalCount),
+//          Q636(totalCount),
+//          Q637(totalCount),
+//          Q638,
+//          Q639,
+//          Q640,
+//          Q646,
+//          Q647(tsSource)
         )
 
       case Period(2020, _) =>
         List(
-          Q634,
-          Q635(totalCount),
-          Q636(totalCount),
-          Q637(totalCount),
-          Q638,
-          Q639,
-          Q640,
-          Q646,
-          Q647(tsSource)
+//          Q634,
+//          Q635(totalCount),
+//          Q636(totalCount),
+//          Q637(totalCount),
+//          Q638,
+//          Q639,
+//          Q640,
+//          Q646,
+//          Q647(tsSource)
         )
 
     }
