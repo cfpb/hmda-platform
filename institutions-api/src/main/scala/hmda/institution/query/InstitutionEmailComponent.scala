@@ -160,20 +160,21 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
     val db2018 = institutionRepository2018.db
 
     for {
-      //there is one email domain table shared across all, years no need to use the other instances
-      emailEntities <- db2020.run(emailSingleQuery.result)
+      //There is one email domain table shared across all years, no need to use the other instances
+      emailEntities <- db2019.run(emailSingleQuery.result)
       leis = emailEntities.map(_.lei) if !emailEntities.isEmpty
 
-      institutions2020 <- if (!leis.isEmpty)
-        db2020.run(institutionQuery2020(leis).result)
-      else Future.successful(Seq.empty)
-
-      institutions2019 <- if (institutions2020.isEmpty)
+      //Current filing season
+      institutions2019 <- if (!leis.isEmpty)
         db2019.run(institutionQuery2019(leis).result)
       else Future.successful(Seq.empty)
 
-      institutions2018 <- if (institutions2019.isEmpty && institutions2020.isEmpty)
+      institutions2018 <- if (institutions2019.isEmpty)
         db2018.run(institutionQuery2018(leis).result)
+      else Future.successful(Seq.empty)
+
+      institutions2020 <- if (institutions2018.isEmpty && institutions2019.isEmpty)
+        db2018.run(institutionQuery2020(leis).result)
       else Future.successful(Seq.empty)
 
       emails <- db2020.run(emailTotalQuery(leis).result)
@@ -181,15 +182,15 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
 
       yield (institutions2020, institutions2019, institutions2018) match {
 
-        case _ if (!institutions2020.isEmpty) => institutions2020.map {
-          institution => mergeEmailIntoInstitutions(emails, institution)
-        }
-
         case _ if (!institutions2019.isEmpty) => institutions2019.map {
           institution => mergeEmailIntoInstitutions(emails, institution)
         }
 
         case _ if (!institutions2018.isEmpty) => institutions2018.map {
+          institution => mergeEmailIntoInstitutions(emails, institution)
+        }
+
+        case _ if (!institutions2020.isEmpty) => institutions2020.map {
           institution => mergeEmailIntoInstitutions(emails, institution)
         }
       }
