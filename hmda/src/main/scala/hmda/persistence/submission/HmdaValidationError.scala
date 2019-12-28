@@ -111,7 +111,7 @@ object HmdaValidationError
             .named("validateTs[Syntactical]-" + submissionId)
             .run()
 
-//          tsLarErrors <- validateTsLar(ctx, submissionId, "syntactical-validity", validationContext)
+          tsLarErrors <- validateTsLar(ctx, submissionId, "syntactical-validity", validationContext)
           _           = log.info(s"Starting validateLar - Syntactical for $submissionId")
           larSyntacticalValidityErrors <- validateLar("syntactical-validity", ctx, submissionId, validationContext)(
             system,
@@ -121,7 +121,7 @@ object HmdaValidationError
           _              = log.info(s"Starting validateAsycLar - Syntactical for $submissionId")
           larAsyncErrors <- validateAsyncLar("syntactical-validity", ctx, submissionId).runWith(Sink.ignore)
           _              = log.info(s"Finished validateAsycLar - Syntactical for $submissionId")
-        } yield (tsErrors, larSyntacticalValidityErrors, larAsyncErrors)
+        } yield (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
 
         fSyntacticalValidity.onComplete {
           case Success(_) =>
@@ -575,8 +575,8 @@ object HmdaValidationError
 
     def qualityChecks: Future[List[ValidationError]] =
       if (editCheck == "quality") {
-//        validateTsLar(ctx, submissionId, "quality", validationContext)
-        Future.successful(Nil)
+        validateTsLar(ctx, submissionId, "quality", validationContext)
+//        Future.successful(Nil)
       } else {
         Future.successful(Nil)
       }

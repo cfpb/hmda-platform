@@ -103,12 +103,9 @@ ingress:
   #      - chart-example.local
 
 resources:
-  limits:
-    cpu: 2
-    memory: 1200Mi
   requests:
    cpu: "2"
-   memory: 1200Mi
+   memory: 6200Mi
 
 nodeSelector: {}
 
