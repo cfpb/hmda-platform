@@ -111,7 +111,7 @@ object HmdaValidationError
             .named("validateTs[Syntactical]-" + submissionId)
             .run()
 
-          tsLarErrors <- validateTsLar(ctx, submissionId, "syntactical-validity", validationContext)
+//          tsLarErrors <- validateTsLar(ctx, submissionId, "syntactical-validity", validationContext)
           _           = log.info(s"Starting validateLar - Syntactical for $submissionId")
           larSyntacticalValidityErrors <- validateLar("syntactical-validity", ctx, submissionId, validationContext)(
             system,
@@ -121,7 +121,7 @@ object HmdaValidationError
           _              = log.info(s"Starting validateAsycLar - Syntactical for $submissionId")
           larAsyncErrors <- validateAsyncLar("syntactical-validity", ctx, submissionId).runWith(Sink.ignore)
           _              = log.info(s"Finished validateAsycLar - Syntactical for $submissionId")
-        } yield (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
+        } yield (tsErrors, larSyntacticalValidityErrors, larAsyncErrors)
 
         fSyntacticalValidity.onComplete {
           case Success(_) =>
@@ -391,7 +391,7 @@ object HmdaValidationError
                                                        submissionId: SubmissionId,
                                                        editType: String,
                                                        validationContext: ValidationContext
-                                                     ): Future[List[ValidationError]] = {
+                                                       ): Future[List[ValidationError]] = {
     implicit val scheduler: Scheduler = ctx.asScala.system.scheduler
     val log                           = ctx.asScala.log
 
@@ -575,7 +575,7 @@ object HmdaValidationError
 
     def qualityChecks: Future[List[ValidationError]] =
       if (editCheck == "quality") {
-        validateTsLar(ctx, submissionId, "quality", validationContext)
+//        validateTsLar(ctx, submissionId, "quality", validationContext)
         Future.successful(Nil)
       } else {
         Future.successful(Nil)
