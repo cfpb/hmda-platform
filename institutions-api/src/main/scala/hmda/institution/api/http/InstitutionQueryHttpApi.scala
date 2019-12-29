@@ -93,7 +93,7 @@ trait InstitutionQueryHttpApi extends HmdaTimeDirectives with InstitutionEmailCo
     path("institutions") {
       timedGet { uri =>
         parameter('domain.as[String]) { domain =>
-          val f = findByEmail(domain, currentYear)
+          val f = findByEmailAnyYear(domain)
           completeInstitutionsFuture(f, uri)
         } ~
           parameters(('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String])) {
