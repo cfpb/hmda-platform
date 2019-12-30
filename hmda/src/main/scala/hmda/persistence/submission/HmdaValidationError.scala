@@ -111,7 +111,7 @@ object HmdaValidationError
             .named("validateTs[Syntactical]-" + submissionId)
             .run()
 
-//          tsLarErrors <- validateTsLar(ctx, submissionId, "syntactical-validity", validationContext)
+          tsLarErrors <- validateTsLar(ctx, submissionId, "syntactical-validity", validationContext)
           _           = log.info(s"Starting validateLar - Syntactical for $submissionId")
           larSyntacticalValidityErrors <- validateLar("syntactical-validity", ctx, submissionId, validationContext)(
             system,
@@ -121,7 +121,7 @@ object HmdaValidationError
           _              = log.info(s"Starting validateAsycLar - Syntactical for $submissionId")
           larAsyncErrors <- validateAsyncLar("syntactical-validity", ctx, submissionId).runWith(Sink.ignore)
           _              = log.info(s"Finished validateAsycLar - Syntactical for $submissionId")
-        } yield (tsErrors, larSyntacticalValidityErrors, larAsyncErrors)
+        } yield (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
 
         fSyntacticalValidity.onComplete {
           case Success(_) =>
@@ -386,185 +386,185 @@ object HmdaValidationError
         )
       )
 
-//  private def validateTsLar[as: AS, mat: MAT, ec: EC](
-//                                                       ctx: TypedActorContext[SubmissionProcessingCommand],
-//                                                       submissionId: SubmissionId,
-//                                                       editType: String,
-//                                                       validationContext: ValidationContext
-////                                                       ): Future[List[ValidationError]] = {
-//    implicit val scheduler: Scheduler = ctx.asScala.system.scheduler
-//    val log                           = ctx.asScala.log
-//
-//    log.info(s"Starting validateTsLar for $submissionId")
-//
-//    def hashString(s: String): Long =
-//      LongHashFunction.xx().hashChars(s)
-//
-//
-//    def headerResultTest: Future[TransmittalSheet] =
-//      uploadConsumerRawStr(ctx, submissionId)
-//        .take(1)
-//        .via(framing("\n"))
-//        .map(_.utf8String)
-//        .map(_.trim)
-//        .map(s => TsCsvParser(s))
-//        .collect {
-//          case Right(ts) => ts
-//        }
-//        .toMat(Sink.head)(Keep.right)
-//        .named("headerResult[Syntactical]-" + submissionId)
-//        .run()
-//
-//    case class AggregationResult(totalCount: Int, distinctCount: Int, duplicateLineNumbers: Vector[Int], checkType: DistinctCheckType)
-//    sealed trait DistinctCheckType
-//    case object RawLine extends DistinctCheckType
-//    case object ULI     extends DistinctCheckType
-//
-//    def checkForDistinctElements(checkType: DistinctCheckType): Future[AggregationResult] = {
-//      // checks the state, if the element is already there, it will return false
-//      // if its not then it will add it and return true
-//      def checkAndUpdate(state: scala.collection.mutable.Set[Long], incoming: Long): Boolean =
-//        if (state.contains(incoming)) false
-//        else {
-//          state += incoming
-//          true
-//        }
-//
-//      val uploadProgram: Future[AggregationResult] =
-//        uploadConsumerRawStr(ctx, submissionId)
-//          .drop(1) // header
-//          .via(framing("\n"))
-//          .map(_.utf8String)
-//          .map(_.trim)
-//          .zip(Source.fromIterator(() => Iterator.from(2))) // rows start from #1 but we dropped the header line so we start at #2
-//          .map {
-//            case (line, rowNumber) => (LarCsvParser(line), line, rowNumber)
-//          }
-//          .collect {
-//            case (Right(parsed), line, rowNumber) => (parsed, line, rowNumber)
-//          }
-//          .statefulMapConcat { () =>
-//            // state is initialized once when stream is initialized and then reused for the remainder of the stream
-//            val state: scala.collection.mutable.Set[Long] = scala.collection.mutable.HashSet.empty[Long]
-//
-//            (each: (LoanApplicationRegister, String, Int)) =>
-//              each match {
-//                case (lar: LoanApplicationRegister, rawLine: String, rowNumber: Int) =>
-//                  checkType match {
-//                    case RawLine =>
-//                      val hashed = hashString(rawLine)
-//                      List((checkAndUpdate(state, hashed), rowNumber))
-//
-//                    case ULI =>
-//                      val hashed = hashString(lar.loan.ULI.toUpperCase)
-//                      List((checkAndUpdate(state, hashed), rowNumber))
-//                  }
-//              }
-//          }
-//          .toMat(Sink.fold(AggregationResult(totalCount = 0, distinctCount = 0, duplicateLineNumbers = Vector.empty, checkType)) {
-//            // duplicate
-//            case (acc, (persisted, rowNumber)) if !persisted =>
-//              acc.copy(acc.totalCount + 1, acc.distinctCount, acc.duplicateLineNumbers :+ rowNumber)
-//            // no duplicate
-//            case (acc, _) => acc.copy(totalCount = acc.totalCount + 1, distinctCount = acc.distinctCount + 1)
-//          })(Keep.right)
-//          .named(s"checkForDistinctElements[$checkType]-" + submissionId)
-//          .run()
-//      uploadProgram.onComplete {
-//        case Success(value) =>
-//          log.info(s"Check for distinct elements has passed for $submissionId with $value")
-//        case Failure(exception) =>
-//          log.error(exception, s"Failed checking for distinct elements $submissionId")
-//      }
-//      uploadProgram
-//    }
-//
-//    def validateAndPersistErrors(tsLar: TransmittalLar, checkType: String, vc: ValidationContext): Future[List[ValidationError]] = {
-//
-//      log.info(s"In validateAnPersistErrors for ${submissionId} for ${checkType}")
-//
-//      // see addTsFieldInformation in ValidationFlow which does something similar
-//      def enrichErrorInformation(tsLar: TransmittalLar, validationError: ValidationError): ValidationError = {
-//        val s305 = S305.name
-//        val s304 = S304.name
-//        val q600 = Q600.name
-//        validationError match {
-//          case s305 @ SyntacticalValidationError(_, `s305`, _, fields) =>
-//            s305.copyWithFields(
-//              fields + ("The following row numbers occur multiple times" -> tsLar.duplicateLineNumbers
-//                .mkString(start = "Rows: ", sep = ",", end = ""))
-//            )
-//          case s304 @ SyntacticalValidationError(_, `s304`, _, fields) =>
-//            s304.copyWithFields(
-//              ListMap(
-//                "Entries Reported in Transmittal Sheet" -> tsLar.ts.totalLines.toString,
-//                "Total Number of LARs Found in File"    -> tsLar.larsCount.toString
-//              )
-//            )
-//          case q600 @ QualityValidationError(uli, `q600`, fields) =>
-//            q600.copyWithFields(
-//              fields + ("The following row numbers have the same ULI" -> tsLar.duplicateLineNumbers
-//                .mkString(start = "Rows: ", sep = ",", end = ""))
-//            )
-//
-//          case rest =>
-//            rest
-//        }
-//      }
-//
-//      log.info(
-//        s"ValidateTsLar counts ${checkType} - ${submissionId}: TS Total Lines ${tsLar.ts.totalLines} Lars Count ${tsLar.larsCount} ${tsLar.larsDistinctCount} Distinct ULI Count ${tsLar.distinctUliCount}"
-//      )
-//      validateTsLarEdits(tsLar, checkType, validationContext) match {
-//
-//        case Left(errors: Seq[ValidationError]) =>
-//          val enrichedErrors = errors.map(enrichErrorInformation(tsLar, _))
-//          val persisted: Future[HmdaRowValidatedError] = ctx.asScala.self ? (
-//            (ref: ActorRef[HmdaRowValidatedError]) => PersistHmdaRowValidatedError(submissionId, 1, enrichedErrors, Some(ref))
-//            )
-//          persisted.map(_ => enrichedErrors)
-//
-//        case Right(_) =>
-//          Future.successful(Nil)
-//      }
-//    }
-//
-//    editType match {
-//      case "syntactical-validity" =>
-//        for {
-//          header        <- headerResultTest
-//          rawLineResult <- checkForDistinctElements(RawLine)
-//          res <- validateAndPersistErrors(
-//            TransmittalLar(
-//              ts = header,
-//              larsCount = rawLineResult.totalCount,
-//              larsDistinctCount = rawLineResult.distinctCount,
-//              distinctUliCount = -1,
-//              duplicateLineNumbers = rawLineResult.duplicateLineNumbers.toList
-//            ),
-//            editType,
-//            validationContext
-//          )
-//        } yield res
-//
-//      case "quality" =>
-//        for {
-//          header    <- headerResultTest
-//          uliResult <- checkForDistinctElements(ULI)
-//          res <- validateAndPersistErrors(
-//            TransmittalLar(
-//              ts = header,
-//              larsCount = -1,
-//              larsDistinctCount = -1,
-//              distinctUliCount = uliResult.distinctCount,
-//              duplicateLineNumbers = uliResult.duplicateLineNumbers.toList
-//            ),
-//            editType,
-//            validationContext
-//          )
-//        } yield res
-//    }
-//  }
+  private def validateTsLar[as: AS, mat: MAT, ec: EC](
+                                                       ctx: TypedActorContext[SubmissionProcessingCommand],
+                                                       submissionId: SubmissionId,
+                                                       editType: String,
+                                                       validationContext: ValidationContext
+                                                       ): Future[List[ValidationError]] = {
+    implicit val scheduler: Scheduler = ctx.asScala.system.scheduler
+    val log                           = ctx.asScala.log
+
+    log.info(s"Starting validateTsLar for $submissionId")
+
+    def hashString(s: String): Long =
+      LongHashFunction.xx().hashChars(s)
+
+
+    def headerResultTest: Future[TransmittalSheet] =
+      uploadConsumerRawStr(ctx, submissionId)
+        .take(1)
+        .via(framing("\n"))
+        .map(_.utf8String)
+        .map(_.trim)
+        .map(s => TsCsvParser(s))
+        .collect {
+          case Right(ts) => ts
+        }
+        .toMat(Sink.head)(Keep.right)
+        .named("headerResult[Syntactical]-" + submissionId)
+        .run()
+
+    case class AggregationResult(totalCount: Int, distinctCount: Int, duplicateLineNumbers: Vector[Int], checkType: DistinctCheckType)
+    sealed trait DistinctCheckType
+    case object RawLine extends DistinctCheckType
+    case object ULI     extends DistinctCheckType
+
+    def checkForDistinctElements(checkType: DistinctCheckType): Future[AggregationResult] = {
+      // checks the state, if the element is already there, it will return false
+      // if its not then it will add it and return true
+      def checkAndUpdate(state: scala.collection.mutable.Set[Long], incoming: Long): Boolean =
+        if (state.contains(incoming)) false
+        else {
+          state += incoming
+          true
+        }
+
+      val uploadProgram: Future[AggregationResult] =
+        uploadConsumerRawStr(ctx, submissionId)
+          .drop(1) // header
+          .via(framing("\n"))
+          .map(_.utf8String)
+          .map(_.trim)
+          .zip(Source.fromIterator(() => Iterator.from(2))) // rows start from #1 but we dropped the header line so we start at #2
+          .map {
+            case (line, rowNumber) => (LarCsvParser(line), line, rowNumber)
+          }
+          .collect {
+            case (Right(parsed), line, rowNumber) => (parsed, line, rowNumber)
+          }
+          .statefulMapConcat { () =>
+            // state is initialized once when stream is initialized and then reused for the remainder of the stream
+            val state: scala.collection.mutable.Set[Long] = scala.collection.mutable.HashSet.empty[Long]
+
+            (each: (LoanApplicationRegister, String, Int)) =>
+              each match {
+                case (lar: LoanApplicationRegister, rawLine: String, rowNumber: Int) =>
+                  checkType match {
+                    case RawLine =>
+                      val hashed = hashString(rawLine)
+                      List((checkAndUpdate(state, hashed), rowNumber))
+
+                    case ULI =>
+                      val hashed = hashString(lar.loan.ULI.toUpperCase)
+                      List((checkAndUpdate(state, hashed), rowNumber))
+                  }
+              }
+          }
+          .toMat(Sink.fold(AggregationResult(totalCount = 0, distinctCount = 0, duplicateLineNumbers = Vector.empty, checkType)) {
+            // duplicate
+            case (acc, (persisted, rowNumber)) if !persisted =>
+              acc.copy(acc.totalCount + 1, acc.distinctCount, acc.duplicateLineNumbers :+ rowNumber)
+            // no duplicate
+            case (acc, _) => acc.copy(totalCount = acc.totalCount + 1, distinctCount = acc.distinctCount + 1)
+          })(Keep.right)
+          .named(s"checkForDistinctElements[$checkType]-" + submissionId)
+          .run()
+      uploadProgram.onComplete {
+        case Success(value) =>
+          log.info(s"Check for distinct elements has passed for $submissionId with $value")
+        case Failure(exception) =>
+          log.error(exception, s"Failed checking for distinct elements $submissionId")
+      }
+      uploadProgram
+    }
+
+    def validateAndPersistErrors(tsLar: TransmittalLar, checkType: String, vc: ValidationContext): Future[List[ValidationError]] = {
+
+      log.info(s"In validateAnPersistErrors for ${submissionId} for ${checkType}")
+
+      // see addTsFieldInformation in ValidationFlow which does something similar
+      def enrichErrorInformation(tsLar: TransmittalLar, validationError: ValidationError): ValidationError = {
+        val s305 = S305.name
+        val s304 = S304.name
+        val q600 = Q600.name
+        validationError match {
+          case s305 @ SyntacticalValidationError(_, `s305`, _, fields) =>
+            s305.copyWithFields(
+              fields + ("The following row numbers occur multiple times" -> tsLar.duplicateLineNumbers
+                .mkString(start = "Rows: ", sep = ",", end = ""))
+            )
+          case s304 @ SyntacticalValidationError(_, `s304`, _, fields) =>
+            s304.copyWithFields(
+              ListMap(
+                "Entries Reported in Transmittal Sheet" -> tsLar.ts.totalLines.toString,
+                "Total Number of LARs Found in File"    -> tsLar.larsCount.toString
+              )
+            )
+          case q600 @ QualityValidationError(uli, `q600`, fields) =>
+            q600.copyWithFields(
+              fields + ("The following row numbers have the same ULI" -> tsLar.duplicateLineNumbers
+                .mkString(start = "Rows: ", sep = ",", end = ""))
+            )
+
+          case rest =>
+            rest
+        }
+      }
+
+      log.info(
+        s"ValidateTsLar counts ${checkType} - ${submissionId}: TS Total Lines ${tsLar.ts.totalLines} Lars Count ${tsLar.larsCount} ${tsLar.larsDistinctCount} Distinct ULI Count ${tsLar.distinctUliCount}"
+      )
+      validateTsLarEdits(tsLar, checkType, validationContext) match {
+
+        case Left(errors: Seq[ValidationError]) =>
+          val enrichedErrors = errors.map(enrichErrorInformation(tsLar, _))
+          val persisted: Future[HmdaRowValidatedError] = ctx.asScala.self ? (
+            (ref: ActorRef[HmdaRowValidatedError]) => PersistHmdaRowValidatedError(submissionId, 1, enrichedErrors, Some(ref))
+            )
+          persisted.map(_ => enrichedErrors)
+
+        case Right(_) =>
+          Future.successful(Nil)
+      }
+    }
+
+    editType match {
+      case "syntactical-validity" =>
+        for {
+          header        <- headerResultTest
+          rawLineResult <- checkForDistinctElements(RawLine)
+          res <- validateAndPersistErrors(
+            TransmittalLar(
+              ts = header,
+              larsCount = rawLineResult.totalCount,
+              larsDistinctCount = rawLineResult.distinctCount,
+              distinctUliCount = -1,
+              duplicateLineNumbers = rawLineResult.duplicateLineNumbers.toList
+            ),
+            editType,
+            validationContext
+          )
+        } yield res
+
+      case "quality" =>
+        for {
+          header    <- headerResultTest
+          uliResult <- checkForDistinctElements(ULI)
+          res <- validateAndPersistErrors(
+            TransmittalLar(
+              ts = header,
+              larsCount = -1,
+              larsDistinctCount = -1,
+              distinctUliCount = uliResult.distinctCount,
+              duplicateLineNumbers = uliResult.duplicateLineNumbers.toList
+            ),
+            editType,
+            validationContext
+          )
+        } yield res
+    }
+  }
 
   private def validateLar(
                            editCheck: String,
@@ -575,8 +575,8 @@ object HmdaValidationError
 
     def qualityChecks: Future[List[ValidationError]] =
       if (editCheck == "quality") {
-//        validateTsLar(ctx, submissionId, "quality", validationContext)
-        Future.successful(Nil)
+        validateTsLar(ctx, submissionId, "quality", validationContext)
+//        Future.successful(Nil)
       } else {
         Future.successful(Nil)
       }

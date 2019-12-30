@@ -142,8 +142,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
   .enablePlugins(
     JavaServerAppPackaging,
     sbtdocker.DockerPlugin,
-    AshScriptPlugin,
-    Cinnamon
+    AshScriptPlugin
   )
   .settings(hmdaBuildSettings: _*)
   .settings(
