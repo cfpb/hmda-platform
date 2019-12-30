@@ -1,7 +1,7 @@
 init:
   image:
     repository: alpine
-    tag: 3.10.3
+    tag: 3.11.2
     pullPolicy: IfNotPresent
 
 keycloak:
@@ -9,7 +9,7 @@ keycloak:
 
   image:
     repository: jboss/keycloak
-    tag: 7.0.0
+    tag: 8.0.1
     pullPolicy: Always
 
     ## Optionally specify an array of imagePullSecrets.
@@ -20,8 +20,10 @@ keycloak:
     #  - myRegistrKeySecretName
 
   securityContext:
-    runAsUser: 1000
     fsGroup: 1000
+  
+  containerSecurityContext:
+    runAsUser: 1000
     runAsNonRoot: true
 
   ## The path keycloak will be served from. To serve keycloak from the root path, use two quotes (e.g. "").
@@ -64,34 +66,6 @@ keycloak:
   startupScripts: 
     script.sh: |
         #!/bin/bash
-
-        LOGIN_THEME=/opt/jboss/keycloak/themes/hmda/login/theme.properties
-
-        # Update Keycloak config files based on envvars
-        if [ -z ${INSTITUTION_SEARCH_URI+x} ]; then
-            echo 'INSTITUTION_SEARCH_URI environment variable not set' >&2
-            exit 1
-        else
-            sed -i "s@{{INSTITUTION_SEARCH_URI}}@$INSTITUTION_SEARCH_URI@g" $LOGIN_THEME
-            echo "Set institutionSearchUri=$INSTITUTION_SEARCH_URI"
-        fi
-
-        if [ -z ${FILING_APP_URL+x} ]; then
-            echo 'FILING_APP_URL environment variable not set' >&2
-            exit 1
-        else
-            sed -i "s@{{FILING_APP_URL}}@$FILING_APP_URL@g" $LOGIN_THEME
-            echo "Set filingAppUrl=$FILING_APP_URL"
-        fi
-
-        if [ -z ${SUPPORT_EMAIL+x} ]; then
-            echo 'SUPPORT_EMAIL environment variable not set' >&2
-            exit 1
-        else
-            sed -i "s/{{SUPPORT_EMAIL}}/$SUPPORT_EMAIL/g" $LOGIN_THEME
-            echo "Set supportEmailTo=$SUPPORT_EMAIL"
-        fi
-
         printf "\nEnvironment:\n"
         env | sort
 
@@ -118,14 +92,10 @@ keycloak:
       value: "true"
     - name: JDBC_PARAMS
       value: "ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory"
-    - name: FILING_APP_URL
-      value: "/filing/2018/"
     - name: INSTITUTION_SEARCH_URI
       value: "/v2/public"
     - name: INSTITUTION_SEARCH_VALIDATE_SSL
       value: "ON"
-    - name: SUPPORT_EMAIL
-      value: "hmdahelp@cfpb.gov"
     # - name: KEYCLOAK_LOGLEVEL
     #   value: DEBUG
     # - name: WILDFLY_LOGLEVEL
