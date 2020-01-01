@@ -1,3 +1,13 @@
+import groovy.json.JsonSlurper
+
+@NonCPS
+def slurper(def json) {
+    def jsonSlurper = new JsonSlurper()
+    def object = jsonSlurper.parseText(json)
+
+    def deploy = object.deploy.hmda_platform
+}
+
 podTemplate(label: 'buildSbtPod', containers: [
   containerTemplate(name: 'sbt', image: 'jenkinsxio/builder-scala', ttyEnabled: true, command: 'cat'),
   containerTemplate(name: 'docker', image: 'docker', ttyEnabled: true, command: 'cat'),
@@ -16,6 +26,9 @@ volumes: [
     def shortCommit = repo.GIT_COMMIT[0..7]
     def isDeployPR = sh(returnStdout: true, script: "git log -1").contains("[deploy pr]")
     def gitTagged = env.TAG_NAME != null
+
+    def fileContent = sh(returnStdout: true, script: "echo \$(cat ./jenkins/env.json)")
+    def deploy = slurper(fileContent)
 
     if (gitBranch == "master") {
       env.DOCKER_TAG = "latest"
@@ -118,7 +131,7 @@ volumes: [
 
     stage('Deploy') {
         withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
-          if (env.BRANCH_NAME == 'master' || isDeployPR) {
+          if ((env.BRANCH_NAME == 'master' || isDeployPR) && deploy) {
             container('helm') {
               sh """
                 helm upgrade --install --force \

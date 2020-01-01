@@ -95,10 +95,7 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
           institutions  <- db.run(institutionQuery(leis).result)
           emails        <- db.run(emailTotalQuery(leis).result)
         } yield {
-          institutions.map { institution =>
-            val filteredEmails =
-              emails.filter(_.lei == institution.lei).map(_.emailDomain)
-            InstitutionConverter.convert(institution, filteredEmails)
+          institutions.map { institution => mergeEmailIntoInstitutions(emails, institution)
           }
         }
       case "2019" =>
@@ -113,10 +110,7 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
           institutions  <- db.run(institutionQuery(leis).result)
           emails        <- db.run(emailTotalQuery(leis).result)
         } yield {
-          institutions.map { institution =>
-            val filteredEmails =
-              emails.filter(_.lei == institution.lei).map(_.emailDomain)
-            InstitutionConverter.convert(institution, filteredEmails)
+          institutions.map { institution => mergeEmailIntoInstitutions(emails, institution)
           }
         }
       case "2020" =>
@@ -131,13 +125,81 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
           institutions  <- db.run(institutionQuery(leis).result)
           emails        <- db.run(emailTotalQuery(leis).result)
         } yield {
-          institutions.map { institution =>
-            val filteredEmails =
-              emails.filter(_.lei == institution.lei).map(_.emailDomain)
-            InstitutionConverter.convert(institution, filteredEmails)
+          institutions.map { institution => mergeEmailIntoInstitutions(emails, institution)
           }
         }
     }
+  }
+
+  def findByEmailAnyYear(email: String)(
+    implicit ec: ExecutionContext,
+    institutionEmailsRepository: InstitutionEmailsRepository,
+    institutionRepository2018: InstitutionRepository2018,
+    institutionRepository2019: InstitutionRepository2019,
+    institutionRepository2020: InstitutionRepository2020
+  ): Future[Seq[Institution]] = {
+
+    val emailDomain = extractDomain(email)
+    val emailSingleQuery =
+      institutionEmailsRepository.table.filter(_.emailDomain.trim === emailDomain.trim)
+
+    def emailTotalQuery(leis: Seq[String]) =
+      institutionEmailsRepository.table.filter(_.lei inSet leis)
+
+    def institutionQuery2020(leis: Seq[String]) =
+      institutionRepository2020.table.filter(_.lei inSet leis)
+
+    def institutionQuery2019(leis: Seq[String]) =
+      institutionRepository2019.table.filter(_.lei inSet leis)
+
+    def institutionQuery2018(leis: Seq[String]) =
+      institutionRepository2018.table.filter(_.lei inSet leis)
+
+    val db2020 = institutionRepository2020.db
+    val db2019 = institutionRepository2019.db
+    val db2018 = institutionRepository2018.db
+
+    for {
+      //There is one email domain table shared across all years, no need to use the other instances
+      emailEntities <- db2019.run(emailSingleQuery.result)
+      leis = emailEntities.map(_.lei) if !emailEntities.isEmpty
+
+      //Current filing season
+      institutions2019 <- if (!leis.isEmpty)
+        db2019.run(institutionQuery2019(leis).result)
+      else Future.successful(Seq.empty)
+
+      institutions2018 <- if (institutions2019.isEmpty)
+        db2018.run(institutionQuery2018(leis).result)
+      else Future.successful(Seq.empty)
+
+      institutions2020 <- if (institutions2018.isEmpty && institutions2019.isEmpty)
+        db2018.run(institutionQuery2020(leis).result)
+      else Future.successful(Seq.empty)
+
+      emails <- db2020.run(emailTotalQuery(leis).result)
+    }
+
+      yield (institutions2020, institutions2019, institutions2018) match {
+
+        case _ if (!institutions2019.isEmpty) => institutions2019.map {
+          institution => mergeEmailIntoInstitutions(emails, institution)
+        }
+
+        case _ if (!institutions2018.isEmpty) => institutions2018.map {
+          institution => mergeEmailIntoInstitutions(emails, institution)
+        }
+
+        case _ if (!institutions2020.isEmpty) => institutions2020.map {
+          institution => mergeEmailIntoInstitutions(emails, institution)
+        }
+      }
+  }
+
+  private def mergeEmailIntoInstitutions(emails: Seq[InstitutionEmailEntity], institution: InstitutionEntity) = {
+    val filteredEmails =
+      emails.filter(_.lei == institution.lei).map(_.emailDomain)
+    InstitutionConverter.convert(institution, filteredEmails)
   }
 
   def findByFields(lei: String, name: String, taxId: String, emailDomain: String, year: String)(

@@ -47,7 +47,7 @@
     <div class="usa-banner">
       <header class="usa-banner-header">
         <div class="usa-grid usa-banner-inner">
-          <img src="${properties.filingAppUrl!}/favicon-57.png" alt="U.S. flag" />
+          <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAAA5CAYAAACMGIOFAAAB0ElEQVR4Ae2YIUwDMRSGz3sLnLeg6Rx4AeBQSJbgRb3YYSEQHB58AobMkMzCLktImASLLU+s6/3X9aVpQpN1708+0fvpy/sv9K25SrThEolEIpFoa/dxQGjL9t4TQs9CwL4eXM3PQb1kpmo93d8J0jp8TwHBGtWiEWOhJhB6FgL29eBqUrglFNJQI0Fah+8pIFhDQhYTcnGGjKWr8ds3NE5r3nNiX1ZuScjSQkKzlruHGTRH6yiPYM/172ScFQzpwzabSqtqAAcNMmWIHEIFhZSQdM3qBIHft8PTFzhntLaNrvK6e8G71BN4WZnPJB/y6PzVdEVrG3KVB3u7am4+IGRuSciDgv9dgcS7K4Qi2METfz8FYgdWQSElJHOtu02/1jGBs5/Jf7ugsyEzq5iQEtL//NEj1eP+lhkgjJdMOSEl5Oj6XRPG0nQY+fCeg63zc99kpTLGaFO4JGQxIelg6vhPDDWQOiCYQcP46XUkZDEhacRqwsRztaBZF2S6rpUk5PziWBPG8tVjPnT43omD1kGGCHpYh+omwdWpWpqusd9Y2GlL6yAKQa8GUqc0U2dzQp4Rz5Zpj1Y5fK920DqIQtCrAaqbBFenEolEIpFIFNQfcqbKl7nMC+8AAAAASUVORK5CYII=" alt="U.S. flag" />
           <p>An official website of the United States government</p>
         </div>
       </header>
@@ -56,7 +56,7 @@
       <div class="usa-logo" id="logo">
         <em class="usa-logo-text">
           <a class="usa-nav-link" href="${properties.filingAppUrl!}">
-              <img src="${properties.filingAppUrl!}/ffiec-logo.svg" height="32px" alt="FFIEC"/>HMDA Filing Platform
+              <img src="/static/media/ffiec-logo.69ef8d9f.svg" height="32px" alt="FFIEC"/>HMDA Filing Platform
           </a>
         </em>
       </div>
@@ -130,7 +130,7 @@
           <ul class="usa-unstyled-list">
             <li class="usa-footer-primary-content">
               <a class="usa-nav-link" href="${properties.filingAppUrl!}">
-                <img src="${properties.filingAppUrl!}/ffiec-logo.svg" height="21px" alt="FFIEC"/>Home Mortgage Disclosure Act
+                <img src="/static/media/ffiec-logo.69ef8d9f.svg" height="21px" alt="FFIEC"/>Home Mortgage Disclosure Act
               </a>
             </li>
           </ul>
