@@ -370,7 +370,7 @@
 							"pm.expect(actualResponse.status.code).to.equal(testDataChunk.expectedResponse.status.code)",
 							"pm.expect(actualResponse.status.message).to.equal(testDataChunk.expectedResponse.status.message)",
 							"pm.expect(actualResponse.status.description).to.equal(testDataChunk.expectedResponse.status.description)",
-							"setTimeout(function(){console.log(\"Sleeping for 10 seconds before next request.\");}, 10000);",
+							"setTimeout(function(){console.log(\"Sleeping for 30 seconds before next request.\");}, 90000);",
               "});"
             ]
           }
@@ -460,7 +460,7 @@
 	              "pm.test(\"Quality Edits Verification Test\", function () {",
 										"let actualResponse = pm.response.json()",
 										"console.log(JSON.stringify(actualResponse))",
-										"pm.expect(actualResponse.status.code).to.be.oneOf([14]);",
+										"pm.expect(actualResponse.status.code).to.be.oneOf([13]);",
 
 	              "});"
 	            ]
@@ -488,7 +488,50 @@
 	        "description": "Quality Edits Verification Test"
 	      },
 	      "response": []
-	    },
+	    },	{
+		      "name": "Macro Edits Verification Test",
+		      "event": [
+		        {
+		          "listen": "test",
+		          "script": {
+		            "type": "text/javascript",
+		            "exec": [
+		              "pm.test(\"Status code is 200, 201 or 400\",function () {",
+		              "pm.expect(pm.response.code).to.be.oneOf([200,201,400]);",
+		              "});",
+		              "",
+		              "pm.test(\"Macro Edits Verification Test\", function () {",
+											"let actualResponse = pm.response.json()",
+											"console.log(JSON.stringify(actualResponse))",
+											"pm.expect(actualResponse.status.code).to.be.oneOf([14]);",
+
+		              "});"
+		            ]
+		          }
+		        }
+		      ],
+		      "request": {
+						"url": "{{host_filing}}/institutions/{{test-lei}}/filings/{{filing-year}}/submissions/{{sequenceNumber}}/edits/macro",
+		        "method": "POST",
+		        "header": [
+		          {
+		            "key": "Content-Type",
+		            "value": "application/json"
+
+                  },
+                  {"key": "Authorization",
+                    "value": "{{authToken}}"
+                  }
+
+                ],
+						"body": {
+							"mode": "raw",
+							"raw": "{{requestBody}}"
+						},
+		        "description": "Macro Edits Verification Test"
+		      },
+		      "response": []
+		    },
 		{
       "name": "Sign A Submission Test",
       "event": [

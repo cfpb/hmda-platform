@@ -2,10 +2,10 @@
 # Declare variables to be passed into your templates.
 jobs:
   # third cron
-  - name: newmen-tests
+  - name: filing-tests-multi
     image:
-      repository: hmda/newman-tests
-      tag: dev
+      repository: dtr.cfpb.gov/hmda/newman-automation
+      tag: v1.0.1
       imagePullPolicy: Always
     # optional env vars
     env:
@@ -15,15 +15,25 @@ jobs:
       value:
     - name: HOST_PUBLIC
       value:
-    - name: USERNAME_NM
+    - name: KC_UN
       value:
-    - name: PASSWORD_NM
+    - name: KC_PW
       value:
-    schedule: "*/2 * * * *"
-    command: ["/bin/sh"]
+    - name: KC_URL
+      value:
+    - name: KC_CLIENT_ID
+      value:
+    - name: HMDA_ENV
+      value:
+    - name: MM_HOOK
+      value:
+    - name: ALT_HOOK
+      value:
+    schedule: "0 * * * *"
+    command: ["/bin/bash"]
     args:
       -  "-c"
-      - authToken=$(./scripts/authTokenGen.sh $USERNAME_NM $PASSWORD_NM) && ./node_modules/.bin/newman run hmda-filing/hmda-filing-api-test.json -d hmda-filing/hmda-filing-2018.json --env-var host_filing=$HOST_FILING --env-var host_admin_api=$HOST_ADMIN --env-var host_public=$HOST_PUBLIC --env-var authToken="Bearer $authToken"
+      - ./scripts/newmanFilingTest.sh $KC_UN $KC_PW $KC_URL $KC_CLIENT_ID $HOST_FILING $HOST_ADMIN $HOST_PUBLIC $HMDA_ENV $MM_HOOK $ALT_HOOK
     resources:
       limits:
         cpu: 50m

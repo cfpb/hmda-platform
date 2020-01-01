@@ -1,0 +1,47 @@
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+jobs:
+  # third cron
+  - name: newman-allclear-job
+    image:
+      repository: dtr.cfpb.gov/hmda/newman-automation
+      tag: v1.0.1
+      imagePullPolicy: Always
+    # optional env vars
+    env:
+      - name: HOST_FILING
+        value:
+      - name: HOST_ADMIN
+        value:
+      - name: HOST_PUBLIC
+        value:
+      - name: KC_UN
+        value:
+      - name: KC_PW
+        value:
+      - name: KC_URL
+        value:
+      - name: KC_CLIENT_ID
+        value:
+      - name: HMDA_ENV
+        value:
+      - name: MM_HOOK
+        value:
+      - name: ALT_HOOK
+        value:
+    schedule: "30 17 * * *"
+    command: ["/bin/bash"]
+    args:
+      -  "-c"
+      - ./scripts/newmanFilingALLClear.sh $KC_UN $KC_PW $KC_URL $KC_CLIENT_ID $HOST_FILING $HOST_ADMIN $HOST_PUBLIC $HMDA_ENV $MM_HOOK $ALT_HOOK
+    resources:
+      limits:
+        cpu: 50m
+        memory: 128Mi
+      requests:
+        cpu: 50m
+        memory: 128Mi
+    failedJobsHistoryLimit: 1
+    successfulJobsHistoryLimit: 3
+    concurrencyPolicy: Forbid
+    restartPolicy: Never
