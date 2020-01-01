@@ -6,7 +6,6 @@ declare -a FILING_YEARS=("2018" "2019")
 
 for filingYear in "${FILING_YEARS[@]}"
 do
-  scripts/results-"${filingYear}".txt
   for testType in "${TEST_TYPES[@]}"
   do
 

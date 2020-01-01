@@ -5,7 +5,7 @@ jobs:
   - name: newman-allclear-job
     image:
       repository: dtr.cfpb.gov/hmda/newman-automation
-      tag: v1.0.1
+      tag: v1.0.2
       imagePullPolicy: Always
     # optional env vars
     env:
