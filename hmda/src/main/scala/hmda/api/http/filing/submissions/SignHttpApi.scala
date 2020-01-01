@@ -45,33 +45,40 @@ trait SignHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
   // GET & POST institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/sign
   def signPath(oAuth2Authorization: OAuth2Authorization): Route =
     pathPrefix("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
-      oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
+//      oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
         pathPrefix("submissions" / IntNumber / "sign") { seqNr =>
-          Route.seal(timedGet { uri =>
+          timedGet { uri =>
+            oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
             getSubmissionForSigning(lei, year, None, seqNr, token.email, uri)
-          }) ~ Route.seal(timedPost { uri =>
+              }
+          } ~ timedPost { uri =>
             respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+              oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
               entity(as[EditsSign]) { editsSign =>
                 signSubmission(lei, year, None, seqNr, token.email, editsSign.signed, uri)
               }
+                }
             }
-          })
+          }
         } ~ pathPrefix("quarter" / Quarter / "submissions" / IntNumber / "sign") { (quarter, seqNr) =>
-            Route.seal(timedGet { uri =>
+            timedGet { uri =>
+              oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
               quarterlyFilingAllowed(lei, year) {
                 getSubmissionForSigning(lei, year, Option(quarter), seqNr, token.email, uri)
-              }
-            }) ~ Route.seal(timedPost { uri =>
+              }}
+
+            } ~ timedPost { uri =>
               respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+                oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
                 entity(as[EditsSign]) { editsSign =>
                   quarterlyFilingAllowed(lei, year) {
                     signSubmission(lei, year, Option(quarter), seqNr, token.email, editsSign.signed, uri)
-                  }
+                  }}
                 }
               }
-            })
+            }
         }
-      }
+//      }
     }
 
   private def getSubmissionForSigning(lei: String, year: Int, quarter: Option[String], seqNr: Int, email: String, uri: Uri): Route = {
