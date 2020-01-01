@@ -91,8 +91,6 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
             complete(StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path("")))
           })
           StandardRoute(r).toDirective[Tuple1[VerifiedToken]]
-//          logger.error("No bearer token found")
-//          complete(StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path(""))).toDirective[Tuple1[VerifiedToken]]
         }
     }
   }
