@@ -38,7 +38,6 @@ We use GitHub issues in this repository to track features, bugs, and enhancement
 Related projects
   - https://github.com/cfpb/hmda-frontend
   - https://github.com/cfpb/hmda-help
-  - https://github.com/cfpb/hmda-platform-tools
   - https://github.com/cfpb/hmda-platform-auth
   - https://github.com/cfpb/hmda-platform-larft
   - https://github.com/cfpb/hmda-test-files
