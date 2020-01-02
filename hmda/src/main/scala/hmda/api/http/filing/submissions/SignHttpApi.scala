@@ -52,7 +52,7 @@ trait SignHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
             oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
             getSubmissionForSigning(lei, year, None, seqNr, token.email, uri)
               }
-          } ~ timedPost { uri =>
+          } ~ Route.seal(timedPost { uri =>
             log.info(s"Inside timed post ${lei} and ${seqNr}")
             respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
               log.info(s"Inside respondWithHeader ${lei} and ${seqNr}")
@@ -64,7 +64,7 @@ trait SignHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
                 }
               }
             }
-          }
+          })
         }
     }
 
