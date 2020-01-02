@@ -11,6 +11,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
+import scala.concurrent.duration._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 //import io.circe.generic.auto._
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{ cors, corsRejectionHandler }
@@ -58,9 +59,10 @@ trait SignHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
               log.info(s"Inside respondWithHeader ${lei} and ${seqNr}")
               oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
                 log.info(s"Inside OAuth ${lei} and ${seqNr}")
-                entity(as[EditsSign]) { editsSign =>
+                toStrictEntity(15.seconds){entity(as[EditsSign]) { editsSign =>
                   log.info(s"Inside entity ${lei} and ${seqNr}")
                   signSubmission(lei, year, None, seqNr, token.email, editsSign.signed, uri)
+                }
                 }
               }
             }
