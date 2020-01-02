@@ -12,8 +12,9 @@ import akka.cluster.typed.Cluster
 import akka.management.scaladsl.AkkaManagement
 import hmda.api.HmdaApi
 import hmda.persistence.util.CassandraUtil
-import hmda.publication.HmdaPublication
+import hmda.publication.{HmdaPublication,KafkaUtils}
 import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
+import org.apache.kafka.clients.producer.Producer
 
 object HmdaPlatform extends App {
 
@@ -76,6 +77,9 @@ object HmdaPlatform extends App {
     )
     EmbeddedKafka.start()
   }
+
+  val stringKafkaProducer: Producer[String, String] = KafkaUtils.getStringKafkaProducer(system)
+  val institutionKafkaProducer = KafkaUtils.getInstitutionKafkaProducer(system)
 
   //Start Persistence
   system.spawn(HmdaPersistence.behavior, HmdaPersistence.name)

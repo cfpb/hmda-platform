@@ -6,6 +6,8 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
 import akka.actor.typed.{ActorRef, Behavior, TypedActorContext}
 import akka.cluster.sharding.typed.ShardingEnvelope
+import hmda.HmdaPlatform
+import hmda.HmdaPlatform.institutionKafkaProducer
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
@@ -134,7 +136,7 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
                                        institutionID: String,
                                        event: InstitutionKafkaEvent
                                      )(implicit system: ActorSystem, materializer: ActorMaterializer): Future[Done] =
-    produceInstitutionRecord(institutionTopic, institutionID, event)
+    produceInstitutionRecord(institutionTopic, institutionID, event, institutionKafkaProducer)
 
   private def modifyInstitution(institution: Institution, state: InstitutionState): InstitutionState =
     if (state.isEmpty) {

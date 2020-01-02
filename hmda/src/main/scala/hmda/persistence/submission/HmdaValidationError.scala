@@ -6,7 +6,7 @@ import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
 import akka.actor.typed.{ActorRef, ActorSystem, Behavior, TypedActorContext}
-import akka.actor.{ActorSystem => UntypedActorSystem, Scheduler}
+import akka.actor.{Scheduler, ActorSystem => UntypedActorSystem}
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import akka.pattern.ask
@@ -20,6 +20,8 @@ import akka.stream.typed.scaladsl.ActorFlow
 import akka.util.{ByteString, Timeout}
 import akka.{Done, NotUsed}
 import com.typesafe.config.ConfigFactory
+import hmda.HmdaPlatform
+import hmda.HmdaPlatform.stringKafkaProducer
 import hmda.messages.institution.InstitutionCommands.{GetInstitution, ModifyInstitution}
 import hmda.messages.institution.InstitutionEvents.InstitutionEvent
 import hmda.messages.pubsub.HmdaTopics._
@@ -709,8 +711,8 @@ object HmdaValidationError
                                 email: String,
                                 signedTimestamp: Long
                               )(implicit system: UntypedActorSystem, materializer: ActorMaterializer): Future[Done] = {
-    produceRecord(signTopic, submissionId.lei, submissionId.toString)
-    produceRecord(emailTopic, s"${submissionId.toString}-${signedTimestamp}", email)
+    produceRecord(signTopic, submissionId.lei, submissionId.toString, stringKafkaProducer)
+    produceRecord(emailTopic, s"${submissionId.toString}-${signedTimestamp}", email, stringKafkaProducer)
   }
 
   private def setHmdaFilerFlag[as: AS, mat: MAT, ec: EC](institutionID: String, period: String, sharding: ClusterSharding): Unit = {

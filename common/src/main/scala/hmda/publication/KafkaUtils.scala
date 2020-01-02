@@ -24,7 +24,7 @@ object KafkaUtils {
   val config     = ConfigFactory.load()
   val kafkaHosts = config.getString("kafka.hosts")
 
-  def getKafkaProducer(system: ActorSystem): KafkaProducer[String, String] = {
+  def getStringKafkaProducer(system: ActorSystem): KafkaProducer[String, String] = {
 
     val kafkaConfig = system.settings.config.getConfig("akka.kafka.producer")
     val producerSettings =
@@ -34,8 +34,16 @@ object KafkaUtils {
     producerSettings.createKafkaProducer()
   }
 
-  def produceInstitutionRecord(topic: String, key: String, value: InstitutionKafkaEvent)(implicit system: ActorSystem,
-                                                                                         materializer: ActorMaterializer): Future[Done] = {
+  def getInstitutionKafkaProducer(system: ActorSystem): KafkaProducer[String, InstitutionKafkaEvent] = {
+    val kafkaConfig = system.settings.config.getConfig("akka.kafka.producer")
+    val producerSettings =
+      ProducerSettings(kafkaConfig, new StringSerializer, new InstitutionKafkaEventsSerializer)
+        .withBootstrapServers(kafkaHosts)
+    producerSettings.createKafkaProducer()
+  }
+
+  def produceInstitutionRecord(topic: String, key: String, value: InstitutionKafkaEvent, kafkaProducer: KafkaProducer[String, InstitutionKafkaEvent])(implicit system: ActorSystem,
+                                                                                                                                                      materializer: ActorMaterializer): Future[Done] = {
 
     val producerSettings =
       ProducerSettings(system, new StringSerializer, new InstitutionKafkaEventsSerializer)
@@ -47,8 +55,8 @@ object KafkaUtils {
       .run()
   }
 
-  def produceRecord(topic: String, key: String, value: String)(implicit system: ActorSystem,
-                                                               materializer: ActorMaterializer): Future[Done] = {
+  def produceRecord(topic: String, key: String, value: String, producer: KafkaProducer[String, String])(implicit system: ActorSystem,
+                                                                                                        materializer: ActorMaterializer): Future[Done] = {
 
     val producerSettings =
       ProducerSettings(system, new StringSerializer, new StringSerializer)
@@ -56,9 +64,8 @@ object KafkaUtils {
 
     Source
       .single(new ProducerRecord(topic, key, value))
-      .toMat(Producer.plainSink(producerSettings))(Keep.right)
+      .toMat(Producer.plainSink(producerSettings, producer))(Keep.right)
       .run()
-
   }
 
   def consumeRecords(topic: String, f: Future[Done], parallelism: Int)(implicit system: ActorSystem,
