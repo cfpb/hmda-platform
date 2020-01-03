@@ -46,26 +46,20 @@ trait SignHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
   // GET & POST institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/sign
   def signPath(oAuth2Authorization: OAuth2Authorization): Route =
     pathPrefix("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
-        log.info(s"inside institutions/${lei}/filings/${year}")
         pathPrefix("submissions" / IntNumber / "sign") { seqNr =>
-          log.info(s"inside submissions/${seqNr}/filings/sign")
           timedGet { uri =>
             oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
             getSubmissionForSigning(lei, year, None, seqNr, token.email, uri)
               }
-          } ~ Route.seal(timedPost { uri =>
-            log.info(s"Inside timed post ${lei} and ${seqNr}")
+          } ~ timedPost { uri =>
             respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-              log.info(s"Inside respondWithHeader ${lei} and ${seqNr}")
               oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
-                log.info(s"Inside OAuth ${lei} and ${seqNr}")
                   entity(as[EditsSign]) { editsSign =>
-                  log.info(s"Inside entity ${lei} and ${seqNr}")
                   signSubmission(lei, year, None, seqNr, token.email, editsSign.signed, uri)
                   }
               }
             }
-          })
+          }
         }
     }
 
