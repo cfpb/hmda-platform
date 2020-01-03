@@ -49,21 +49,23 @@ trait VerifyHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
   def verifyPath(oAuth2Authorization: OAuth2Authorization): Route =
     timedPost { uri =>
       respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-        entity(as[EditsVerification]) { editsVerification =>
           pathPrefix("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
             oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
               path("submissions" / IntNumber / "edits" / editTypeRegex) { (seqNr, editType) =>
-                verify(lei, year, None, seqNr, editType, editsVerification.verified, uri)
+                entity(as[EditsVerification]) { editsVerification =>
+                  verify(lei, year, None, seqNr, editType, editsVerification.verified, uri)
+                }
               } ~ path("quarter" / Quarter / "submissions" / IntNumber / "edits" / editTypeRegex) { (quarter, seqNr, editType) =>
                 pathEndOrSingleSlash {
                   quarterlyFilingAllowed(lei, year) {
-                    verify(lei, year, Option(quarter), seqNr, editType, editsVerification.verified, uri)
+                    entity(as[EditsVerification]) { editsVerification =>
+                      verify(lei, year, Option(quarter), seqNr, editType, editsVerification.verified, uri)
+                    }
                   }
                 }
               }
             }
           }
-        }
       }
     }
 

@@ -59,11 +59,10 @@ trait SignHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
               log.info(s"Inside respondWithHeader ${lei} and ${seqNr}")
               oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
                 log.info(s"Inside OAuth ${lei} and ${seqNr}")
-                toStrictEntity(15.seconds){entity(as[EditsSign]) { editsSign =>
+                  entity(as[EditsSign]) { editsSign =>
                   log.info(s"Inside entity ${lei} and ${seqNr}")
                   signSubmission(lei, year, None, seqNr, token.email, editsSign.signed, uri)
-                }
-                }
+                  }
               }
             }
           })
