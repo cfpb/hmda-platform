@@ -2,10 +2,10 @@
 # Declare variables to be passed into your templates.
 jobs:
   # third cron
-  - name: newman-allclear-job
+  - name: allclear-tests
     image:
       repository: dtr.cfpb.gov/hmda/newman-automation
-      tag: v1.0.2
+      tag: v1.0.5
       imagePullPolicy: Always
     # optional env vars
     env:
@@ -29,11 +29,13 @@ jobs:
         value:
       - name: ALT_HOOK
         value:
+      - name: NEWMAN_NOTIFY
+        value: "daily"
     schedule: "30 17 * * *"
     command: ["/bin/bash"]
     args:
       -  "-c"
-      - ./scripts/newmanFilingALLClear.sh $KC_UN $KC_PW $KC_URL $KC_CLIENT_ID $HOST_FILING $HOST_ADMIN $HOST_PUBLIC $HMDA_ENV $MM_HOOK $ALT_HOOK
+      - ./scripts/newmanFiling.sh $KC_UN $KC_PW $KC_URL $KC_CLIENT_ID $HOST_FILING $HOST_ADMIN $HOST_PUBLIC $HMDA_ENV $MM_HOOK $ALT_HOOK $NEWMAN_NOTIFY
     resources:
       limits:
         cpu: 50m
