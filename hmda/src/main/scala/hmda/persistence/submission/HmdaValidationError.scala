@@ -85,13 +85,8 @@ object HmdaValidationError
     val log                                      = ctx.asScala.log
     implicit val system: UntypedActorSystem      = ctx.asScala.system.toUntyped
     implicit val materializer: ActorMaterializer = ActorMaterializer()
-    //    implicit val ec: ExecutionContext            = system.dispatcher
     implicit val blockingEc: ExecutionContext =
       system.dispatchers.lookup("akka.blocking-quality-dispatcher")
-
-    //Temporarily commented out since adding this bit throws an OOM
-    //    StarvationDetector.checkExecutionContext(blockingEc, system.log, StarvationDetectorSettings.fromConfig(
-    //      system.settings.config.getConfig("akka.diagnostics.starvation-detector")), () => system.whenTerminated.isCompleted)
 
     val sharding = ClusterSharding(ctx.asScala.system)
 
