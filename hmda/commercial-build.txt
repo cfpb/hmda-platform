@@ -27,6 +27,28 @@ dockerCommands :=
     case v => Seq(v)
   }
 
+//Cinnamon is commented out until issues around long[] staying in memory are resolved.
+/**
+credentials in ThisBuild += Credentials(Path.userHome / ".lightbend" / "commercial.credentials")
+resolvers in ThisBuild += "lightbend-commercial-maven" at "https://repo.lightbend.com/commercial-releases"
+
+cinnamonMuteMissingRepoWarning := true
+
+cinnamonLogLevel := "INFO"
+
+cinnamon in run := true
+cinnamon in test := true
+
+libraryDependencies += Cinnamon.library.cinnamonAkka
+libraryDependencies += Cinnamon.library.cinnamonAkkaHttp
+libraryDependencies += Cinnamon.library.cinnamonAkkaStream
+libraryDependencies += Cinnamon.library.cinnamonPrometheus
+libraryDependencies += Cinnamon.library.cinnamonPrometheusHttpServer
+libraryDependencies += Cinnamon.library.cinnamonJvmMetricsProducer
+libraryDependencies += Cinnamon.library.cinnamonAkkaPersistence
+libraryDependencies += "com.lightbend.akka" %% "akka-diagnostics" % "1.1.12"
+**/
+
 javaOptions in Universal ++= Seq(
   "-J-XX:+UnlockExperimentalVMOptions",
   "-J-XX:+UseContainerSupport",
