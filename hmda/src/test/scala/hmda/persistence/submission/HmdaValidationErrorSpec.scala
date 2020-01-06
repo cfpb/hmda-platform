@@ -14,8 +14,7 @@ import hmda.persistence.AkkaCassandraPersistenceSpec
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.utils.YearUtils.Period
 
-class HmdaValidationErrorSpec
-  extends AkkaCassandraPersistenceSpec {
+class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
   override implicit val system      = actor.ActorSystem()
   override implicit val typedSystem = system.toTyped
 

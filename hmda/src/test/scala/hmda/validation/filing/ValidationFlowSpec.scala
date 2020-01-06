@@ -17,8 +17,7 @@ import hmda.validation.Seq
 import hmda.model.validation._
 import scala.collection.immutable._
 
-class ValidationFlowSpec
-  extends WordSpec with MustMatchers {
+class ValidationFlowSpec extends WordSpec with MustMatchers {
 
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
