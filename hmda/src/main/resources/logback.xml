@@ -17,4 +17,6 @@
     <logger name="org.apache.kafka" level="${KAFKA_LOG_LEVEL:-INFO}" />
     <logger name="org.apache.cassandra" level="${CASSANDRA_LOG_LEVEL:-INFO}" />
     <logger name="com.outworkers.phantom" level="${PHANTOM_LOG_LEVEL:-WARN}" />
+    <logger name="com.datastax.driver.core.QueryLogger.SLOW" level="${CASSANDRA_LOG_LEVEL:-INFO}"/>
+    <logger name="com.datastax.driver.core.QueryLogger.ERROR" level="${CASSANDRA_LOG_LEVEL:-INFO}"/>
 </configuration>
