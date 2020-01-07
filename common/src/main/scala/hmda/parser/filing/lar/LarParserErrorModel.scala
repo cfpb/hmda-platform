@@ -4,6 +4,16 @@ import hmda.parser.ParserErrorModel._
 
 object LarParserErrorModel {
 
+  case class InvalidLei(value: String) extends ParserValidationError {
+    override def fieldName: String = "LEI"
+    override def inputValue: String = value
+  }
+
+  case class InvalidULI(value: String) extends ParserValidationError {
+    override def fieldName: String = "ULI"
+    override def inputValue: String = value
+  }
+
   case class InvalidLarId(value: String) extends ParserValidationError {
     override def fieldName: String = "LAR Record Identifier"
     override def inputValue: String = value

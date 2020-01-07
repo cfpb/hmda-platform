@@ -1,3 +1,5 @@
+LEI|String with no space
+ULI|String with no space
 LAR Record Identifier|Integer: 2
 Application Date|Integer or NA
 Loan Type|Integer: 1, 2, 3, 4
