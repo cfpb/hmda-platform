@@ -13,12 +13,13 @@ dockerEntrypoint ++= Seq(
 )
 
 //Add Yourkit profiler
-dockerCommands ++= Seq(
-  ExecCmd("RUN", "bash", "-c",
-  "wget https://www.yourkit.com/download/docker/YourKit-JavaProfiler-2019.8-docker.zip -P /tmp/ && " +
-   "unzip /tmp/YourKit-JavaProfiler-2019.8-docker.zip -d /opt/docker && " +
-   "rm /tmp/YourKit-JavaProfiler-2019.8-docker.zip")
-)
+//This requires openjdk:11 as base image as opposed to openjdk:11-jre-slim"
+//dockerCommands ++= Seq(
+//  ExecCmd("RUN", "bash", "-c",
+//  "curl -o /tmp/YourKit-JavaProfiler-2019.8-docker.zip https://www.yourkit.com/download/docker/YourKit-JavaProfiler-2019.8-docker.zip && " +
+//   "unzip /tmp/YourKit-JavaProfiler-2019.8-docker.zip -d /opt/docker && " +
+//   "rm /tmp/YourKit-JavaProfiler-2019.8-docker.zip")
+//)
 
 dockerCommands :=
   dockerCommands.value.flatMap {
@@ -43,7 +44,7 @@ javaOptions in Universal ++= Seq(
   "-Dcom.sun.management.jmxremote.port=1099",
   "-Dcom.sun.management.jmxremote.rmi.port=1099",
   "-Djava.rmi.server.hostname=127.0.0.1"
-  ,"-agentpath:/opt/docker/YourKit-JavaProfiler-2019.8/bin/linux-x86-64/libyjpagent.so=port=10001,listen=all,dir=/opt/docker,sampling_settings_path=/ope/docker"
+//  ,"-agentpath:/opt/docker/YourKit-JavaProfiler-2019.8/bin/linux-x86-64/libyjpagent.so=port=10001,listen=all,dir=/opt/docker,sampling_settings_path=/ope/docker"
 )
 
 javaOptions in reStart ++= (javaOptions in run).value
