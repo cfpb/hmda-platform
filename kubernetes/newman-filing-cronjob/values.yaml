@@ -38,11 +38,9 @@ jobs:
       - ./scripts/newmanFiling.sh $KC_UN $KC_PW $KC_URL $KC_CLIENT_ID $HOST_FILING $HOST_ADMIN $HOST_PUBLIC $HMDA_ENV $MM_HOOK $ALT_HOOK $NEWMAN_NOTIFY
     resources:
       limits:
-        cpu: 50m
-        memory: 128Mi
+        memory: 512Mi
       requests:
-        cpu: 50m
-        memory: 128Mi
+        memory: 512Mi
     failedJobsHistoryLimit: 1
     successfulJobsHistoryLimit: 3
     concurrencyPolicy: Forbid
