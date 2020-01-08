@@ -1,14 +1,14 @@
 package hmda.persistence.submission
 
-import akka.actor.typed.{ ActorRef, Behavior }
 import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.{ActorRef, Behavior}
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import hmda.actor.HmdaTypedActor
 import hmda.messages.submission.SubmissionCommands.ModifySubmission
-import hmda.messages.submission.SubmissionEvents.{ SubmissionEvent, SubmissionModified }
+import hmda.messages.submission.SubmissionEvents.{SubmissionEvent, SubmissionModified}
 import hmda.messages.submission.SubmissionManagerCommands._
-import hmda.messages.submission.SubmissionProcessingCommands.{ StartMacro, StartParsing, StartQuality, StartSyntacticalValidity }
+import hmda.messages.submission.SubmissionProcessingCommands.{StartMacro, StartParsing, StartQuality, StartSyntacticalValidity}
 import hmda.model.filing.submission._
 
 object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
@@ -62,13 +62,13 @@ object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
               Behaviors.same
           }
         case SubmissionManagerStop =>
+          log.info(s"Stopping ${ctx.asScala.self.path.name}")
           Behaviors.stopped
       }
-
     }
 
   def startShardRegion(sharding: ClusterSharding): ActorRef[ShardingEnvelope[SubmissionManagerCommand]] =
-    super.startShardRegion(sharding)
+    super.startShardRegion(sharding, SubmissionManagerStop)
 
   def selectSubmissionManager(sharding: ClusterSharding, submissionId: SubmissionId): EntityRef[SubmissionManagerCommand] =
     sharding.entityRefFor(SubmissionManager.typeKey, s"${SubmissionManager.name}-${submissionId.toString}")

@@ -2,17 +2,17 @@ package hmda.persistence.submission
 
 import java.time.Instant
 
-import akka.actor.typed.{ ActorRef, Behavior, TypedActorContext }
 import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.{ActorRef, Behavior, TypedActorContext}
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
-import hmda.messages.filing.FilingCommands.{ AddSubmission, UpdateSubmission }
+import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
+import hmda.messages.filing.FilingCommands.{AddSubmission, UpdateSubmission}
 import hmda.messages.submission.SubmissionCommands._
-import hmda.messages.submission.SubmissionEvents.{ SubmissionCreated, SubmissionEvent, SubmissionModified, SubmissionNotExists }
-import hmda.model.filing.submission.{ Created, Signed, Submission, SubmissionId, SubmissionStatus }
+import hmda.messages.submission.SubmissionEvents.{SubmissionCreated, SubmissionEvent, SubmissionModified, SubmissionNotExists}
+import hmda.model.filing.submission._
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.persistence.filing.FilingPersistence
 
@@ -23,16 +23,14 @@ object SubmissionPersistence extends HmdaTypedPersistentActor[SubmissionCommand,
   override def behavior(entityId: String): Behavior[SubmissionCommand] =
     Behaviors.setup { ctx =>
       EventSourcedBehavior[SubmissionCommand, SubmissionEvent, SubmissionState](
-        persistenceId = PersistenceId(s"$entityId"),
+        persistenceId = PersistenceId(entityId),
         emptyState = SubmissionState(None),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
       ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000, keepNSnapshots = 10))
     }
 
-  override def commandHandler(
-    ctx: TypedActorContext[SubmissionCommand]
-  ): CommandHandler[SubmissionCommand, SubmissionEvent, SubmissionState] = { (state, cmd) =>
+  override def commandHandler(ctx: TypedActorContext[SubmissionCommand]): CommandHandler[SubmissionCommand, SubmissionEvent, SubmissionState] = { (state, cmd) =>
     val log      = ctx.asScala.log
     val sharding = ClusterSharding(ctx.asScala.system)
     cmd match {
@@ -95,6 +93,7 @@ object SubmissionPersistence extends HmdaTypedPersistentActor[SubmissionCommand,
           Effect.none
         }
       case SubmissionStop() =>
+        log.info(s"Stopping ${ctx.asScala.self.path.name}")
         Effect.stop()
     }
   }
@@ -111,7 +110,7 @@ object SubmissionPersistence extends HmdaTypedPersistentActor[SubmissionCommand,
   }
 
   def startShardRegion(sharding: ClusterSharding): ActorRef[ShardingEnvelope[SubmissionCommand]] =
-    super.startShardRegion(sharding)
+    super.startShardRegion(sharding, SubmissionStop())
 
   def selectSubmissionPersistence(sharding: ClusterSharding, submissionId: SubmissionId): EntityRef[SubmissionCommand] =
     sharding.entityRefFor(SubmissionPersistence.typeKey, s"${SubmissionPersistence.name}-${submissionId.toString}")

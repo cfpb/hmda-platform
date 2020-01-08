@@ -28,8 +28,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.util.Random
 
-class FilingHttpApiSpec
-  extends AkkaCassandraPersistenceSpec
+class FilingHttpApiSpec extends AkkaCassandraPersistenceSpec
     with MustMatchers
     with FilingHttpApi
     with ScalatestRouteTest {

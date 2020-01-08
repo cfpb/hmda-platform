@@ -24,8 +24,7 @@ import hmda.parser.filing.lar.LarCsvParser
 import hmda.util.http.FileUploadUtils
 import hmda.api.http.model.filing.submissions.HmdaRowParsedErrorSummary
 
-class LarValidationHttpApiSpec
-    extends WordSpec
+class LarValidationHttpApiSpec extends WordSpec
     with MustMatchers
     with ScalatestRouteTest
     with LarValidationHttpApi
