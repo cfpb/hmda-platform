@@ -1,0 +1,221 @@
+[
+  {
+    "test-lei": "NEWMANLEITEST1234678",
+    "filing-year": "2018",
+    "testData": [
+      {
+        "testName": "admin api health check",
+        "expectedID": "hmda-admin-api",
+        "testNumber": 0
+      },
+      {
+        "testName": "filing health check",
+        "expectedID": "hmda-filing-api",
+        "testNumber": 1
+      },
+      {
+        "testName": "public-api health check",
+        "expectedID": "hmda-public-api",
+        "testNumber": 2
+      },
+      {
+        "testName": "create institution",
+        "requestBody": {
+          "activityYear": 2018,
+          "lei": "NEWMANLEITEST1234678",
+          "agency": 9,
+          "institutionType": -1,
+          "institutionId2017": "",
+          "taxId": "84-7652134",
+          "rssd": -1,
+          "emailDomains": [
+            "newmantest.com"
+          ],
+          "respondent": {
+            "name": "Newman Bank",
+            "state": "",
+            "city": ""
+          },
+          "parent": {
+            "idRssd": -1,
+            "name": ""
+          },
+          "assets": -1,
+          "otherLenderCode": -1,
+          "topHolder": {
+            "idRssd": -1,
+            "name": ""
+          },
+          "hmdaFiler": true,
+          "quarterlyFiler": true
+        },
+        "expectedResponse": {
+          "activityYear": 2018,
+          "lei": "NEWMANLEITEST1234678",
+          "agency": 9,
+          "institutionType": -1,
+          "institutionId2017": "",
+          "taxId": "84-7652134",
+          "rssd": -1,
+          "emailDomains": [
+            "newmantest.com"
+          ],
+          "respondent": {
+            "name": "Newman Bank",
+            "state": "",
+            "city": ""
+          },
+          "parent": {
+            "idRssd": -1,
+            "name": ""
+          },
+          "assets": -1,
+          "otherLenderCode": -1,
+          "topHolder": {
+            "idRssd": -1,
+            "name": ""
+          },
+          "hmdaFiler": true,
+          "quarterlyFiler": true
+        },
+        "expectedMessage": "Institution NEWMANLEITEST1234678 already exists",
+        "testNumber": 3
+      },
+      {
+        "testName": "institution get api call",
+        "expectedResponse": {
+          "activityYear": 2018,
+          "lei": "NEWMANLEITEST1234678",
+          "agency": 9,
+          "institutionType": -1,
+          "institutionId2017": "",
+          "taxId": "84-7652134",
+          "rssd": -1,
+          "emailDomains": [
+            "newmantest.com"
+          ],
+          "respondent": {
+            "name": "Newman Bank",
+            "state": "",
+            "city": ""
+          },
+          "parent": {
+            "idRssd": -1,
+            "name": ""
+          },
+          "assets": -1,
+          "otherLenderCode": -1,
+          "topHolder": {
+            "idRssd": -1,
+            "name": ""
+          },
+          "hmdaFiler": true,
+          "quarterlyFiler": true
+        },
+        "testNumber": 4
+      },
+      {
+        "testName": "test start a Submission",
+        "expectedResponse": {
+          "filing": {
+            "period": {
+              "year": 2018,
+              "quarter": null
+            },
+            "lei": "NEWMANLEITEST1234678",
+            "status": {
+              "code": 2,
+              "message": "in-progress"
+            },
+            "filingRequired": true,
+            "start": 1562651878216,
+            "end": 0
+          },
+          "submissions": []
+        },
+        "testNumber": 5
+      },
+      {
+        "testName": "test create a filing",
+        "expectedResponse": {
+          "id": {
+            "lei": "NEWMANLEITEST1234678",
+            "period": {
+              "year": 2018,
+              "quarter": null
+            },
+            "sequenceNumber": 1
+          },
+          "status": {
+            "code": 1,
+            "message": "No data has been uploaded yet.",
+            "description": "The filing period is open and available to accept HMDA data. Make sure your data is in a pipe-delimited text file."
+          },
+          "start": 1562655789617,
+          "end": 0,
+          "fileName": "",
+          "receipt": ""
+        },
+        "testNumber": 6
+      },
+      {
+        "testName": "filing psv upload test",
+        "sourceFile": "dev/hmda-filing/2018/test_yes_m_no_q/newmanBank_yes_M_no_Q_2018.txt",
+        "expectedResponse": {
+          "id": {
+            "lei": "NEWMANLEITEST1234678",
+            "period": "2018",
+            "sequenceNumber": 7
+          },
+          "status": {
+            "code": 3,
+            "message": "Your file has been uploaded.",
+            "description": "Your data is ready to be analyzed."
+          },
+          "start": 1562662332293,
+          "end": 0,
+          "fileName": "",
+          "receipt": ""
+        },
+        "testNumber": 7
+      },
+      {
+        "testName": "get latest submission test",
+        "expectedResponse": {
+          "id": {
+            "lei": "NEWMANLEITEST1234678",
+            "period": {
+              "year": 2018,
+              "quarter": null
+            },
+            "sequenceNumber": 12
+          },
+          "status": {
+            "code": 9,
+            "message": "Your data has syntactical and/or validity edits that need to be reviewed.",
+            "description": "Your file has been uploaded, but the filing process may not proceed until the file is corrected and re-uploaded."
+          },
+          "start": 1562662935676,
+          "end": 0,
+          "fileName": "newmanBank_yes_M_no_Q_2018.txt",
+          "receipt": ""
+        },
+        "testNumber": 8
+      },
+      {
+        "testName": "macro edits test",
+        "requestBody": {
+          "verified": true
+        },
+        "testNumber": 9
+      },
+      {
+        "testName": "sign latest submission test",
+        "requestBody": {
+          "signed": true
+        },
+        "testNumber": 10
+      }
+    ]
+  }
+]

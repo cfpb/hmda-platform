@@ -1,7 +1,7 @@
 [
   {
     "test-lei": "NEWMANLEITEST1234678",
-    "filing-year": "2019",
+    "filing-year": "2018",
     "testData": [
       {
         "testName": "admin api health check",
@@ -21,7 +21,7 @@
       {
         "testName": "create institution",
         "requestBody": {
-          "activityYear": 2019,
+          "activityYear": 2018,
           "lei": "NEWMANLEITEST1234678",
           "agency": 9,
           "institutionType": -1,
@@ -50,7 +50,7 @@
           "quarterlyFiler": true
         },
         "expectedResponse": {
-          "activityYear": 2019,
+          "activityYear": 2018,
           "lei": "NEWMANLEITEST1234678",
           "agency": 9,
           "institutionType": -1,
@@ -84,7 +84,7 @@
       {
         "testName": "institution get api call",
         "expectedResponse": {
-          "activityYear": 2019,
+          "activityYear": 2018,
           "lei": "NEWMANLEITEST1234678",
           "agency": 9,
           "institutionType": -1,
@@ -119,7 +119,7 @@
         "expectedResponse": {
           "filing": {
             "period": {
-              "year": 2019,
+              "year": 2018,
               "quarter": null
             },
             "lei": "NEWMANLEITEST1234678",
@@ -141,7 +141,7 @@
           "id": {
             "lei": "NEWMANLEITEST1234678",
             "period": {
-              "year": 2019,
+              "year": 2018,
               "quarter": null
             },
             "sequenceNumber": 1
@@ -160,11 +160,11 @@
       },
       {
         "testName": "filing psv upload test",
-        "sourceFile": "dev/hmda-filing/test_yes_m_yes_q/newmanBank_yes_M_yes_Q_2019.txt",
+        "sourceFile": "dev/hmda-filing/2018/test_yes_m_yes_q/newmanBank_yes_M_yes_Q_2018.txt",
         "expectedResponse": {
           "id": {
             "lei": "NEWMANLEITEST1234678",
-            "period": "2019",
+            "period": "2018",
             "sequenceNumber": 7
           },
           "status": {
@@ -185,7 +185,7 @@
           "id": {
             "lei": "NEWMANLEITEST1234678",
             "period": {
-              "year": 2019,
+              "year": 2018,
               "quarter": null
             },
             "sequenceNumber": 12
@@ -197,7 +197,7 @@
           },
           "start": 1562662935676,
           "end": 0,
-          "fileName": "newmanBank_yes_M_yes_Q_2019.txt",
+          "fileName": "newmanBank_yes_M_yes_Q_2018.txt",
           "receipt": ""
         },
         "testNumber": 8

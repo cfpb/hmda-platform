@@ -119,9 +119,9 @@
         "expectedResponse": {
           "filing": {
             "period": {
-            "year": 2019,
-            "quarter": null
-          },
+              "year": 2019,
+              "quarter": null
+            },
             "lei": "NEWMANLEITEST1234678",
             "status": {
               "code": 2,
@@ -141,9 +141,9 @@
           "id": {
             "lei": "NEWMANLEITEST1234678",
             "period": {
-            "year": 2019,
-            "quarter": null
-          },
+              "year": 2019,
+              "quarter": null
+            },
             "sequenceNumber": 1
           },
           "status": {
@@ -160,7 +160,7 @@
       },
       {
         "testName": "filing psv upload test",
-        "sourceFile": "dev/hmda-filing/test_no_m_yes_q/newmanBank_no_M_yes_Q_2019.txt",
+        "sourceFile": "dev/hmda-filing/2019/test_yes_m_no_q/newmanBank_yes_M_no_Q_2019.txt",
         "expectedResponse": {
           "id": {
             "lei": "NEWMANLEITEST1234678",
@@ -197,13 +197,13 @@
           },
           "start": 1562662935676,
           "end": 0,
-          "fileName": "newmanBank_no_M_yes_Q_2019.txt",
+          "fileName": "newmanBank_yes_M_no_Q_2019.txt",
           "receipt": ""
         },
         "testNumber": 8
       },
       {
-        "testName": "quality edits test",
+        "testName": "macro edits test",
         "requestBody": {
           "verified": true
         },
