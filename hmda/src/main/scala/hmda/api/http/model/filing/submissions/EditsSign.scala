@@ -1,6 +1,6 @@
 package hmda.api.http.model.filing.submissions
 
-import io.circe._
+import io.circe.Decoder
 import io.circe.generic.semiauto._
 
 case class EditsSign(signed: Boolean)

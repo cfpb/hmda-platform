@@ -85,8 +85,12 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
         if (runtimeMode == "dev") {
           provide(VerifiedToken())
         } else {
-          logger.error("No bearer token found")
-          complete(StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path(""))).toDirective[Tuple1[VerifiedToken]]
+          val r: Route = (extractRequest { req =>
+            import scala.compat.java8.OptionConverters._
+            logger.error("No bearer token, authz header [{}]" + req.getHeader("authorization").asScala)
+            complete(StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path("")))
+          })
+          StandardRoute(r).toDirective[Tuple1[VerifiedToken]]
         }
     }
   }
