@@ -6,6 +6,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.RouteDirectives.complete
 import akka.stream.ActorMaterializer
+import com.typesafe.config.ConfigFactory
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.dashboard.Settings
 import hmda.dashboard.models.HealthCheckStatus.Up
@@ -24,8 +25,11 @@ trait HmdaDashboardHttpApi extends Settings {
   implicit val materializer: ActorMaterializer
 
   val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
+  val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
+  val bankFilterList =
+    bankFilter.getString("bank-filter-list").toUpperCase.split(",")
   val repository =
-    new PostgresRepository(databaseConfig)
+    new PostgresRepository(databaseConfig,bankFilterList)
 
   val healthCheck: HealthCheckService =
     new HealthCheckService(repository)
