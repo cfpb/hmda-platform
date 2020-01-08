@@ -23,10 +23,10 @@ trait LarParser {
     }
 
   def validateStrNoSpace(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
-    if (!value.contains(" "))
-      value.validNel
-    else
+    if (value.contains(" ") || value.contains("|") || value.contains(","))
       parserValidationError.invalidNel
+    else
+      value.validNel
 
   def validateIntStrOrNAField(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
     if (value == "") {
