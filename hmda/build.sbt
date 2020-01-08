@@ -33,8 +33,6 @@ javaOptions in Universal ++= Seq(
   "-J-XX:+UseContainerSupport",
   "-J-XX:+UnlockDiagnosticVMOptions",
   "-J-XX:+DebugNonSafepoints",
-  "-J-Xloggc:/opt/docker/gc.log",
-  "-J-Xlog:gc*",
   "-J-XX:+HeapDumpOnOutOfMemoryError",
   "-J-XX:HeapDumpPath=/dumps/oom.bin",
   "-Dcom.sun.management.jmxremote",
