@@ -4,7 +4,8 @@ import akka.actor.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.{StatusCodes, Uri}
+import akka.http.scaladsl.model.StatusCodes._
+import akka.http.scaladsl.model.Uri
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
@@ -42,17 +43,54 @@ trait InstitutionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriz
       oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
         timedGet { uri =>
           pathEndOrSingleSlash {
-            obtainFilingDetails(lei, year, None, uri)
+            obtainAllFilingDetailsRoute(lei, year, uri)
           } ~ path("quarter" / Quarter) { quarter =>
             quarterlyFilingAllowed(lei, year) {
-              obtainFilingDetails(lei, year, Option(quarter), uri)
+              obtainFilingDetailsRoute(lei, year, Option(quarter), uri)
             }
           }
         }
       }
     }
 
-  def obtainFilingDetails(lei: String, year: Int, quarter: Option[String], uri: Uri): Route = {
+  private def obtainAllFilingDetailsRoute(lei: String, year: Int, uri: Uri): Route = {
+    def obtainFilingDetails(lei: String, year: Int, quarter: Option[String]): Future[Option[FilingDetails]] = {
+      val fil = selectFiling(sharding, lei, year, quarter)
+      fil ? GetFilingDetails
+    }
+
+    val institutionPersistence = selectInstitution(sharding, lei, year)
+    val fInstitution: Future[Option[Institution]] = institutionPersistence ? GetInstitution
+    val allFilings = {
+      val filingsYear = obtainFilingDetails(lei, year, None)
+      val filingsQuarters = Future.sequence(List("Q1", "Q2", "Q3").map(q => obtainFilingDetails(lei, year, Some(q))))
+
+      for {
+        year <- filingsYear
+        quarters <- filingsQuarters
+      } yield (year :: quarters).flatten.map(_.filing)
+    }
+
+    val details = for {
+      ins <- fInstitution
+      filings <- allFilings
+    } yield (ins, filings)
+
+    onComplete(details) {
+      case Failure(error) =>
+        failedResponse(InternalServerError, uri, error)
+
+      case Success((None, _)) =>
+        val errorResponse =
+          ErrorResponse(404, s"Institution: $lei does not exist", uri.path)
+        complete(NotFound -> errorResponse)
+
+      case Success((ins @ Some(_), filings)) =>
+        complete(InstitutionDetail(ins, filings))
+    }
+  }
+
+  private def obtainFilingDetailsRoute(lei: String, year: Int, quarter: Option[String], uri: Uri): Route = {
     val institutionPersistence                      = selectInstitution(sharding, lei, year)
     val fInstitution: Future[Option[Institution]] = institutionPersistence ? (ref => GetInstitution(ref))
     val fil = selectFiling(sharding, lei, year, quarter)
@@ -68,14 +106,11 @@ trait InstitutionHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthoriz
       case Success((i @ Some(_), None)) =>
         complete(InstitutionDetail(i, List(Filing())))
       case Success((None,_)) =>
-        val errorResponse =
-          ErrorResponse(404, s"Institution: $lei does not exist", uri.path)
-        complete(
-          ToResponseMarshallable(StatusCodes.NotFound -> errorResponse)
-        )
+        val errorResponse = ErrorResponse(404, s"Institution: $lei does not exist", uri.path)
+        complete(NotFound -> errorResponse)
 
       case Failure(error) =>
-        failedResponse(StatusCodes.InternalServerError, uri, error)
+        failedResponse(InternalServerError, uri, error)
     }
   }
 
