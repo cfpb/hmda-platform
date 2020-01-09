@@ -22,6 +22,12 @@ trait LarParser {
       case Failure(_) => parserValidationError.invalidNel
     }
 
+  def validateStrNoSpace(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
+    if (value.contains(" ") || value.contains("|") || value.contains(","))
+      parserValidationError.invalidNel
+    else
+      value.validNel
+
   def validateIntStrOrNAField(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
     if (value == "") {
       parserValidationError.invalidNel
@@ -72,6 +78,7 @@ trait LarParser {
     } else {
       validateDoubleField(value, parserValidationError).map(x => x.toString)
     }
+
 
   def validateStr(str: String): LarParserValidationResult[String] =
     str.validNel
