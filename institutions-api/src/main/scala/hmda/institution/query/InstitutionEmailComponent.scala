@@ -141,7 +141,7 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
 
     val emailDomain = extractDomain(email)
     val emailSingleQuery =
-      institutionEmailsRepository.table.filter(_.emailDomain.trim === emailDomain.trim)
+      institutionEmailsRepository.table.filter(_.emailDomain.trim.toLowerCase === emailDomain.trim.toLowerCase())
 
     def emailTotalQuery(leis: Seq[String]) =
       institutionEmailsRepository.table.filter(_.lei inSet leis)

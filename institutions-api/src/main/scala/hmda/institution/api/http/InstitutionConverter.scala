@@ -58,5 +58,5 @@ object InstitutionConverter {
     )
 
   def emailsFromInstitution(institution: Institution): Seq[InstitutionEmailEntity] =
-    institution.emailDomains.map(email => InstitutionEmailEntity(lei = institution.LEI, emailDomain = email))
+    institution.emailDomains.map(email => InstitutionEmailEntity(lei = institution.LEI, emailDomain = email.trim.toLowerCase()))
 }
