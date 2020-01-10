@@ -13,5 +13,5 @@ object V665_2 extends EditCheck[LoanApplicationRegister] {
   override def parent: String = "V665"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult =
-    lar.coApplicant.creditScoreType not equalTo(InvalidCreditScoreCode)
+    lar.coApplicant.creditScoreType not ofType(new InvalidCreditScoreCode)
 }
