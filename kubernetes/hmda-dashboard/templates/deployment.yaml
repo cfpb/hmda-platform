@@ -48,6 +48,11 @@ spec:
                 secretKeyRef:
                   name: inst-postgres-credentials
                   key: url
+            - name: BANK_FILTER_LIST
+                valueFrom:
+                  configMapKeyRef:
+                    name: bank-filter-configmap
+                    key: bank-filter-list
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
