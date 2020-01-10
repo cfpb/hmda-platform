@@ -1,14 +1,14 @@
 package hmda.persistence.submission
 
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ ActorRef, Behavior, TypedActorContext }
+import akka.actor.typed.{ActorRef, Behavior, TypedActorContext}
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
-import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
-import hmda.messages.submission.HmdaRawDataCommands.{ AddLine, HmdaRawDataCommand }
-import hmda.messages.submission.HmdaRawDataEvents.{ HmdaRawDataEvent, LineAdded }
+import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
+import hmda.messages.submission.HmdaRawDataCommands.{AddLine, HmdaRawDataCommand, StopRawData}
+import hmda.messages.submission.HmdaRawDataEvents.{HmdaRawDataEvent, LineAdded}
 import hmda.model.filing.submission.SubmissionId
 import hmda.model.processing.state.HmdaRawDataState
 import hmda.persistence.HmdaTypedPersistentActor
@@ -28,8 +28,8 @@ object HmdaRawData extends HmdaTypedPersistentActor[HmdaRawDataCommand, HmdaRawD
     }
 
   override def commandHandler(
-    ctx: TypedActorContext[HmdaRawDataCommand]
-  ): CommandHandler[HmdaRawDataCommand, HmdaRawDataEvent, HmdaRawDataState] = { (_, cmd) =>
+                               ctx: TypedActorContext[HmdaRawDataCommand]
+                             ): CommandHandler[HmdaRawDataCommand, HmdaRawDataEvent, HmdaRawDataState] = { (_, cmd) =>
     val log = ctx.asScala.log
     cmd match {
       case AddLine(_, timestamp, data, maybeReplyTo) =>
@@ -42,6 +42,9 @@ object HmdaRawData extends HmdaTypedPersistentActor[HmdaRawDataCommand, HmdaRawD
             case None => //Do Nothing
           }
         }
+
+      case StopRawData =>
+        Effect.stop()
     }
   }
 
@@ -50,7 +53,7 @@ object HmdaRawData extends HmdaTypedPersistentActor[HmdaRawDataCommand, HmdaRawD
   }
 
   def startShardRegion(sharding: ClusterSharding): ActorRef[ShardingEnvelope[HmdaRawDataCommand]] =
-    super.startShardRegion(sharding)
+    super.startShardRegion(sharding, StopRawData)
 
   def selectHmdaRawData(sharding: ClusterSharding, submissionId: SubmissionId): EntityRef[HmdaRawDataCommand] =
     sharding.entityRefFor(HmdaRawData.typeKey, s"${HmdaRawData.name}-${submissionId.toString}")

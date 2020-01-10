@@ -12,7 +12,6 @@ object ParserValidValuesLookup {
   def parserValidValuesMapCreator(
       file: Iterable[String]): Map[String, String] = {
     file
-      .drop(1)
       .map { s =>
         val values = s.split("\\|", -1).map(_.trim).toList
         val fieldName = values(0)

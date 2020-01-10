@@ -18,8 +18,7 @@ import hmda.parser.filing.ts.TsCsvParser
 
 import scala.concurrent.Future
 
-class MacroValidationFlowSpec
-    extends AsyncWordSpec
+class MacroValidationFlowSpec extends AsyncWordSpec
     with MustMatchers
     with BeforeAndAfterAll {
 

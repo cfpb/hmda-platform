@@ -482,7 +482,7 @@ sealed trait LarFormatValidator extends LarParser {
   ): LarParserValidationResult[LarIdentifier] =
     (
       validateIntField(id, InvalidLarId(id)),
-      validateStr(LEI),
+      validateStrNoSpace(LEI, InvalidLei(LEI)),
       validateStr(NMLSRIdentifier)
     ).mapN(LarIdentifier.apply)
 
@@ -503,7 +503,7 @@ sealed trait LarFormatValidator extends LarParser {
     introductoryRate: String
   ): LarParserValidationResult[Loan] =
     (
-      validateStr(uli),
+      validateStrNoSpace(uli, InvalidULI(uli)),
       validateIntStrOrNAField(applicationDate,
                               InvalidApplicationDate(applicationDate)),
       validateLarCode(LoanTypeEnum, loanType, InvalidLoanType(loanType)),

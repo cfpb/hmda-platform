@@ -1,48 +1,47 @@
 package hmda.persistence.submission
 
-import java.math.BigInteger
-import java.security.MessageDigest
 import java.time.Instant
 
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{ ActorRef, Behavior, TypedActorContext }
-import akka.actor.{ ActorSystem, Scheduler }
+import akka.actor.typed.{ActorRef, ActorSystem, Behavior, TypedActorContext}
+import akka.actor.{Scheduler, ActorSystem => UntypedActorSystem}
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import akka.pattern.ask
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.RetentionCriteria
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
-import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior }
+import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{ Sink, Source, _ }
+import akka.stream.scaladsl.{Sink, Source, _}
 import akka.stream.typed.scaladsl.ActorFlow
-import akka.util.{ ByteString, Timeout }
-import akka.{ Done, NotUsed }
+import akka.util.{ByteString, Timeout}
+import akka.{Done, NotUsed}
 import com.typesafe.config.ConfigFactory
 import hmda.HmdaPlatform
-import hmda.messages.institution.InstitutionCommands.{ GetInstitution, ModifyInstitution }
+import hmda.HmdaPlatform.stringKafkaProducer
+import hmda.messages.institution.InstitutionCommands.{GetInstitution, ModifyInstitution}
 import hmda.messages.institution.InstitutionEvents.InstitutionEvent
 import hmda.messages.pubsub.HmdaTopics._
-import hmda.messages.submission.EditDetailsCommands.{ EditDetailsPersistenceCommand, PersistEditDetails }
+import hmda.messages.submission.EditDetailsCommands.{EditDetailsPersistenceCommand, PersistEditDetails}
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents._
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.submission._
-import hmda.model.filing.ts.{ TransmittalLar, TransmittalSheet }
+import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
 import hmda.model.institution.Institution
 import hmda.model.processing.state.HmdaValidationErrorState
-import hmda.model.validation.{ MacroValidationError, QualityValidationError, SyntacticalValidationError, ValidationError }
+import hmda.model.validation.{MacroValidationError, QualityValidationError, SyntacticalValidationError, ValidationError}
 import hmda.parser.filing.ParserFlow._
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.EditDetailsConverter._
-import hmda.persistence.submission.HmdaProcessingUtils.{ readRawData, updateSubmissionStatus, updateSubmissionStatusAndReceipt }
+import hmda.persistence.submission.HmdaProcessingUtils.{readRawData, updateSubmissionStatus, updateSubmissionStatusAndReceipt}
 import hmda.publication.KafkaUtils._
 import hmda.util.streams.FlowUtils.framing
 import hmda.utils.YearUtils.Period
@@ -52,8 +51,8 @@ import hmda.validation.filing.ValidationFlow._
 import hmda.validation.rules.lar.quality.common.Q600
 import hmda.validation.rules.lar.syntactical.S305
 import hmda.validation.rules.lar.syntactical.S304
-import hmda.validation.{ AS, EC, MAT }
-
+import hmda.validation.{AS, EC, MAT}
+import net.openhft.hashing.LongHashFunction
 import scala.collection.immutable.ListMap
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
@@ -72,7 +71,7 @@ object HmdaValidationError
   override def behavior(entityId: String): Behavior[SubmissionProcessingCommand] =
     Behaviors.setup { ctx =>
       EventSourcedBehavior[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaValidationErrorState](
-        persistenceId = PersistenceId(s"$entityId"),
+        persistenceId = PersistenceId(entityId),
         emptyState = HmdaValidationErrorState(),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
@@ -83,11 +82,11 @@ object HmdaValidationError
                                ctx: TypedActorContext[SubmissionProcessingCommand]
                              ): CommandHandler[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaValidationErrorState] = { (state, cmd) =>
     val log                                      = ctx.asScala.log
-    implicit val system: ActorSystem             = ctx.asScala.system.toUntyped
+    implicit val system: UntypedActorSystem      = ctx.asScala.system.toUntyped
     implicit val materializer: ActorMaterializer = ActorMaterializer()
-    implicit val ec: ExecutionContext            = system.dispatcher
-    val blockingEc: ExecutionContext =
+    implicit val blockingEc: ExecutionContext =
       system.dispatchers.lookup("akka.blocking-quality-dispatcher")
+
     val sharding = ClusterSharding(ctx.asScala.system)
 
     cmd match {
@@ -331,10 +330,13 @@ object HmdaValidationError
         replyTo ! VerificationStatus(qualityVerified = state.qualityVerified, macroVerified = state.macroVerified)
         Effect.none
 
+      case HmdaParserStop =>
+        log.info(s"Stopping ${ctx.asScala.self.path.name}")
+        Effect.stop()
+
       case _ =>
         Effect.none
     }
-
   }
 
   override def eventHandler: (HmdaValidationErrorState, SubmissionProcessingEvent) => HmdaValidationErrorState = {
@@ -358,7 +360,7 @@ object HmdaValidationError
   }
 
   def startShardRegion(sharding: ClusterSharding): ActorRef[ShardingEnvelope[SubmissionProcessingCommand]] =
-    super.startShardRegion(sharding)
+    super.startShardRegion(sharding, HmdaParserStop)
 
   private def validateTs[as: AS](
                                   ctx: TypedActorContext[SubmissionProcessingCommand],
@@ -385,20 +387,15 @@ object HmdaValidationError
                                                        submissionId: SubmissionId,
                                                        editType: String,
                                                        validationContext: ValidationContext
-                                                     ): Future[List[ValidationError]] = {
+                                                       ): Future[List[ValidationError]] = {
     implicit val scheduler: Scheduler = ctx.asScala.system.scheduler
     val log                           = ctx.asScala.log
-    val appDb                         = HmdaPlatform.appDb
 
     log.info(s"Starting validateTsLar for $submissionId")
 
-    def md5HashString(s: String): String = {
-      val md           = MessageDigest.getInstance("MD5")
-      val digest       = md.digest(s.getBytes)
-      val bigInt       = new BigInteger(1, digest)
-      val hashedString = bigInt.toString(16)
-      hashedString
-    }
+    def hashString(s: String): Long =
+      LongHashFunction.xx().hashChars(s)
+
 
     def headerResultTest: Future[TransmittalSheet] =
       uploadConsumerRawStr(ctx, submissionId)
@@ -422,7 +419,7 @@ object HmdaValidationError
     def checkForDistinctElements(checkType: DistinctCheckType): Future[AggregationResult] = {
       // checks the state, if the element is already there, it will return false
       // if its not then it will add it and return true
-      def checkAndUpdate[A](state: scala.collection.mutable.Set[A], incoming: A): Boolean =
+      def checkAndUpdate(state: scala.collection.mutable.Set[Long], incoming: Long): Boolean =
         if (state.contains(incoming)) false
         else {
           state += incoming
@@ -444,18 +441,19 @@ object HmdaValidationError
           }
           .statefulMapConcat { () =>
             // state is initialized once when stream is initialized and then reused for the remainder of the stream
-            val state: scala.collection.mutable.Set[String] = scala.collection.mutable.HashSet.empty[String]
+            val state: scala.collection.mutable.Set[Long] = scala.collection.mutable.HashSet.empty[Long]
 
             (each: (LoanApplicationRegister, String, Int)) =>
               each match {
                 case (lar: LoanApplicationRegister, rawLine: String, rowNumber: Int) =>
                   checkType match {
                     case RawLine =>
-                      val hashed = md5HashString(rawLine)
+                      val hashed = hashString(rawLine)
                       List((checkAndUpdate(state, hashed), rowNumber))
+
                     case ULI =>
-                      val uli = lar.loan.ULI.toUpperCase
-                      List((checkAndUpdate(state, uli), rowNumber))
+                      val hashed = hashString(lar.loan.ULI.toUpperCase)
+                      List((checkAndUpdate(state, hashed), rowNumber))
                   }
               }
           }
@@ -529,23 +527,9 @@ object HmdaValidationError
 
     editType match {
       case "syntactical-validity" =>
-        // NOTE: Optimization: These two calls will happen in parallel
-        // However, only rawLineResult is used in syntactical validity and distinctULIResult
-        // is used in the next quality which comes after syntactical validity
-        // Because of the eager nature of Future, these calls will evaluate in parallel
-        val fRawLineResult = checkForDistinctElements(RawLine)
-        val fUliResult     = checkForDistinctElements(ULI)
         for {
           header        <- headerResultTest
-          rawLineResult <- fRawLineResult
-          uliResult     <- fUliResult // NOTE this is not used in this step but the results are pre-computed for the next step (quality)
-          _ <- appDb.aggregationCountRepository.persist(
-            submissionId.toString,
-            checkType = "uli",
-            totalCount = uliResult.totalCount,
-            distinctCount = uliResult.distinctCount,
-            lineNumbers = uliResult.duplicateLineNumbers.toSet
-          )
+          rawLineResult <- checkForDistinctElements(RawLine)
           res <- validateAndPersistErrors(
             TransmittalLar(
               ts = header,
@@ -558,20 +542,11 @@ object HmdaValidationError
             validationContext
           )
         } yield res
+
       case "quality" =>
-        // use pre-computed results from previous step
-        val cachedULIResult =
-          appDb.aggregationCountRepository
-            .find(submissionId.toString, "uli")
-            .map(_.fold(ifEmpty = {
-              log.error(
-                s"Expected a cached result for ULI for Submission ID: ${submissionId.toString} but did not get one, it seems like syntactical-validity did not run before this to pre-compute the result"
-              )
-              AggregationResult(0, 0, Vector.empty, ULI)
-            })(r => AggregationResult(r.totalCount, r.distinctCount, r.lineNumbers.toVector, ULI)))
         for {
           header    <- headerResultTest
-          uliResult <- cachedULIResult
+          uliResult <- checkForDistinctElements(ULI)
           res <- validateAndPersistErrors(
             TransmittalLar(
               ts = header,
@@ -592,11 +567,12 @@ object HmdaValidationError
                            ctx: TypedActorContext[SubmissionProcessingCommand],
                            submissionId: SubmissionId,
                            validationContext: ValidationContext
-                         )(implicit actorSystem: ActorSystem, materializer: ActorMaterializer, executionContext: ExecutionContext): Future[Unit] = {
+                         )(implicit actorSystem: UntypedActorSystem, materializer: ActorMaterializer, executionContext: ExecutionContext): Future[Unit] = {
 
     def qualityChecks: Future[List[ValidationError]] =
       if (editCheck == "quality") {
         validateTsLar(ctx, submissionId, "quality", validationContext)
+//        Future.successful(Nil)
       } else {
         Future.successful(Nil)
       }
@@ -676,7 +652,7 @@ object HmdaValidationError
   private def maybeTs(
                        ctx: TypedActorContext[SubmissionProcessingCommand],
                        submissionId: SubmissionId
-                     )(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Option[TransmittalSheet]] =
+                     )(implicit system: UntypedActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Option[TransmittalSheet]] =
     uploadConsumerRawStr(ctx, submissionId)
       .take(1)
       .via(parseTsFlow)
@@ -728,9 +704,9 @@ object HmdaValidationError
                                 submissionId: SubmissionId,
                                 email: String,
                                 signedTimestamp: Long
-                              )(implicit system: ActorSystem, materializer: ActorMaterializer): Future[Done] = {
-    produceRecord(signTopic, submissionId.lei, submissionId.toString)
-    produceRecord(emailTopic, s"${submissionId.toString}-${signedTimestamp}", email)
+                              )(implicit system: UntypedActorSystem, materializer: ActorMaterializer): Future[Done] = {
+    produceRecord(signTopic, submissionId.lei, submissionId.toString, stringKafkaProducer)
+    produceRecord(emailTopic, s"${submissionId.toString}-${signedTimestamp}", email, stringKafkaProducer)
   }
 
   private def setHmdaFilerFlag[as: AS, mat: MAT, ec: EC](institutionID: String, period: String, sharding: ClusterSharding): Unit = {

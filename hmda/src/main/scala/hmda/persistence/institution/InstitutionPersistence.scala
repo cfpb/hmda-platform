@@ -3,20 +3,23 @@ package hmda.persistence.institution
 import akka.Done
 import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ ActorRef, Behavior, TypedActorContext }
-import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import akka.actor.typed.scaladsl.adapter._
+import akka.actor.typed.{ActorRef, Behavior, TypedActorContext}
+import akka.cluster.sharding.typed.ShardingEnvelope
+import hmda.HmdaPlatform
+import hmda.HmdaPlatform.institutionKafkaProducer
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
+import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
 import akka.stream.ActorMaterializer
 import hmda.messages.institution.InstitutionCommands._
 import hmda.messages.institution.InstitutionEvents._
 import hmda.messages.pubsub.HmdaTopics._
-import hmda.model.institution.{ Institution, InstitutionDetail }
-import hmda.publication.KafkaUtils._
+import hmda.model.institution.{Institution, InstitutionDetail}
 import hmda.persistence.HmdaTypedPersistentActor
+import hmda.publication.KafkaUtils._
+
 import scala.concurrent.Future
 
 object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionCommand, InstitutionEvent, InstitutionState] {
@@ -36,8 +39,8 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
     }
 
   override def commandHandler(
-    ctx: TypedActorContext[InstitutionCommand]
-  ): CommandHandler[InstitutionCommand, InstitutionEvent, InstitutionState] = {
+                               ctx: TypedActorContext[InstitutionCommand]
+                             ): CommandHandler[InstitutionCommand, InstitutionEvent, InstitutionState] = {
     val log                                      = ctx.asScala.log
     implicit val system: ActorSystem             = ctx.asScala.system.toUntyped
     implicit val materializer: ActorMaterializer = ActorMaterializer()
@@ -60,8 +63,8 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
           }
         case ModifyInstitution(i, replyTo) =>
           if (state.institution
-                .map(i => (i.LEI, i.activityYear))
-                .contains((i.LEI, i.activityYear))) {
+            .map(i => (i.LEI, i.activityYear))
+            .contains((i.LEI, i.activityYear))) {
             Effect.persist(InstitutionModified(i)).thenRun { _ =>
               log.debug(s"Institution Modified: ${i.toString}")
               val event = InstitutionModified(i)
@@ -77,8 +80,8 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
           }
         case DeleteInstitution(lei, activityYear, replyTo) =>
           if (state.institution
-                .map(i => (i.LEI, i.activityYear))
-                .contains((lei, activityYear))) {
+            .map(i => (i.LEI, i.activityYear))
+            .contains((lei, activityYear))) {
             Effect.persist(InstitutionDeleted(lei, activityYear)).thenRun { _ =>
               log.debug(s"Institution Deleted: $lei")
               val event = InstitutionDeleted(lei, activityYear)
@@ -113,6 +116,7 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
           replyTo ! state.institution
           Effect.none
         case InstitutionStop =>
+          log.info(s"Stopping ${ctx.asScala.self.path.name}")
           Effect.stop()
       }
   }
@@ -126,13 +130,13 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
   }
 
   def startShardRegion(sharding: ClusterSharding): ActorRef[ShardingEnvelope[InstitutionCommand]] =
-    super.startShardRegion(sharding)
+    super.startShardRegion(sharding, InstitutionStop)
 
   private def publishInstitutionEvent(
-    institutionID: String,
-    event: InstitutionKafkaEvent
-  )(implicit system: ActorSystem, materializer: ActorMaterializer): Future[Done] =
-    produceInstitutionRecord(institutionTopic, institutionID, event)
+                                       institutionID: String,
+                                       event: InstitutionKafkaEvent
+                                     )(implicit system: ActorSystem, materializer: ActorMaterializer): Future[Done] =
+    produceInstitutionRecord(institutionTopic, institutionID, event, institutionKafkaProducer)
 
   private def modifyInstitution(institution: Institution, state: InstitutionState): InstitutionState =
     if (state.isEmpty) {

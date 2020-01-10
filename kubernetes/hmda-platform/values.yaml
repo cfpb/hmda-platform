@@ -103,9 +103,6 @@ ingress:
   #      - chart-example.local
 
 resources:
-  limits:
-    cpu: "6"
-    memory: 6200Mi
   requests:
    cpu: "2"
    memory: 6200Mi

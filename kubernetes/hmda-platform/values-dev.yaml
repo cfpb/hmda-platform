@@ -114,3 +114,6 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+logs:
+  cassandra: TRACE

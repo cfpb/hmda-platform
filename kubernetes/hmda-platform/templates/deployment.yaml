@@ -132,6 +132,8 @@ spec:
             secretKeyRef:
               name: cassandra-credentials
               key: cassandra.password
+        - name: CASSANDRA_LOG_LEVEL
+          value: {{ .Values.logs.cassandra }}
         - name: KEYCLOAK_AUTH_URL
           valueFrom:
             configMapKeyRef:

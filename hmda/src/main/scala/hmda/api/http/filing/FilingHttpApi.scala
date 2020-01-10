@@ -90,26 +90,16 @@ trait FilingHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
                            lei: String,
                            period: Int,
                            quarter: Option[String]
-                         ): Future[(Option[Institution], Option[FilingDetailsResponse])] = {
+  ): Future[(Option[Institution], Option[FilingDetails])] = {
     val ins = selectInstitution(sharding, lei, period)
     val fil = selectFiling(sharding, lei, period, quarter)
 
     val fInstitution: Future[Option[Institution]] = ins ? (ref => GetInstitution(ref))
-    val fEnriched: Future[Option[FilingDetailsResponse]] = {
-      val fDetails: Future[Option[FilingDetails]] = fil ? (ref => GetFilingDetails(ref))
-      fDetails.flatMap {
-        case None =>
-          Future.successful(None)
-
-        case Some(filingDetails) =>
-          filingDetailsResponse(filingDetails)
-            .map(Option(_))
-      }
-    }
+    val fEnriched: Future[Option[FilingDetails]] = fil ? (ref => GetFilingDetails(ref))
 
     for {
       i: Option[Institution]           <- fInstitution
-      d: Option[FilingDetailsResponse] <- fEnriched
+      d: Option[FilingDetails] <- fEnriched
     } yield (i, d)
   }
 
@@ -167,24 +157,5 @@ trait FilingHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
       case Failure(error) =>
         failedResponse(StatusCodes.InternalServerError, uri, error)
     }
-
-  def filingDetailsResponse(filingDetails: FilingDetails): Future[FilingDetailsResponse] = {
-    val submissionResponsesF =
-      filingDetails.submissions.map { s =>
-        val entity =
-          sharding.entityRefFor(HmdaValidationError.typeKey, s"${HmdaValidationError.name}-${s.id}")
-        val fStatus: Future[VerificationStatus]      = entity ? (reply => GetVerificationStatus(reply))
-        val fEdits: Future[HmdaValidationErrorState] = entity ? (reply => GetHmdaValidationErrorState(s.id, reply))
-        val fSubmissionAndVerified                   = fStatus.map(v => (s, v))
-        val fQMExists                                = fEdits.map(r => QualityMacroExists(!r.quality.isEmpty, !r.`macro`.isEmpty))
-        for {
-          submissionAndVerified <- fSubmissionAndVerified
-          (submision, verified) = submissionAndVerified
-          qmExists              <- fQMExists
-        } yield SubmissionResponse(submision, verified, qmExists)
-      }
-    val fSubmissionResponse = Future.sequence(submissionResponsesF)
-    fSubmissionResponse.map(submissionResponses => FilingDetailsResponse(filingDetails.filing, submissionResponses))
-  }
 
 }

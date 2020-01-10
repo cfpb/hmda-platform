@@ -1,6 +1,13 @@
 #!/bin/sh
- BEARER=$(curl -X POST $3 -d 'client_id='"$4"'&grant_type=password&username='"$1"'&password='"$2"''| awk -F'"' '$2=="access_token"{print $4}')
+
+  BEARER=$(curl --location --request POST $3 \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode "client_id=${4}" \
+--data-urlencode 'grant_type=password' \
+--data-urlencode "username=${1}" \
+--data-urlencode "password=${2}" | awk -F'"' '$2=="access_token"{print $4}')
 echo $BEARER
+
 
 #$1 username
 #$2 password

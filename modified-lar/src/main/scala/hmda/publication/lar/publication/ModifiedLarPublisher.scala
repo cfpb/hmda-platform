@@ -16,6 +16,7 @@ import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.config.ConfigFactory
 import hmda.model.census.Census
 import hmda.model.filing.submission.SubmissionId
+import hmda.model.modifiedlar.{EnrichedModifiedLoanApplicationRegister, ModifiedLoanApplicationRegister}
 import hmda.model.modifiedlar.{
   EnrichedModifiedLoanApplicationRegister,
   ModifiedLoanApplicationRegister
@@ -25,7 +26,7 @@ import hmda.query.HmdaQuery._
 import hmda.query.repository.ModifiedLarRepository
 import hmda.publication.KafkaUtils._
 import hmda.messages.pubsub.HmdaTopics._
-
+import hmda.publication.KafkaUtils
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
@@ -84,6 +85,8 @@ object ModifiedLarPublisher {
         awsRegionProvider,
         ListBucketVersion2
       ).withPathStyleAccess(true)
+
+      val kafkaProducer = KafkaUtils.getStringKafkaProducer(system)
 
       Behaviors.receiveMessage {
 
@@ -167,7 +170,8 @@ object ModifiedLarPublisher {
             else graphWithoutS3.run()
             _ <- produceRecord(disclosureTopic,
                                submissionId.lei,
-                               submissionId.toString)
+                               submissionId.toString,
+                               kafkaProducer)
           } yield ()
 
           finalResult.onComplete {

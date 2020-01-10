@@ -12,10 +12,12 @@ object EditDetailsCommands {
   trait EditDetailsPersistenceCommand
 
   case class PersistEditDetails(editDetails: EditDetails, replyTo: Option[ActorRef[EditDetailsPersistenceEvent]])
-      extends EditDetailsPersistenceCommand
+    extends EditDetailsPersistenceCommand
 
   case class GetEditRowCount(editName: String, replyTo: ActorRef[EditDetailsRowCounted]) extends EditDetailsPersistenceCommand
 
   case class GetEditDetails(submissionId: SubmissionId, editName: String, page: Int, replyTo: ActorRef[Future[Seq[EditDetails]]])
-      extends EditDetailsPersistenceCommand
+    extends EditDetailsPersistenceCommand
+
+  case object StopEditDetails extends EditDetailsPersistenceCommand
 }
