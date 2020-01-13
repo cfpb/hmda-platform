@@ -5,10 +5,13 @@ import monix.eval.Task
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
-class PostgresRepository (config: DatabaseConfig[JdbcProfile]) {
+class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Array[String] ) {
 
   import config._
   import config.profile.api._
+
+
+  private val filterList = bankFilterList.mkString("'","','","'")
 
   def tsTableSelector(year: Int): String = {
     year match {
@@ -33,15 +36,18 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile]) {
       case _    => ""
     }
     val query = sql"""
-        select count(*) from #${yearToFetch} where hmda_filer = true;
+        select count(*) from #${yearToFetch} where hmda_filer = true
+        and lei not in (#${filterList});
         """.as[TotalFilers]
+      print()
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
   def fetchTotalLars(year: Int): Task[Seq[TotalLars]] = {
     val larTable = larTableSelector(year)
     val query = sql"""
-        select count(*) from #${larTable};
+        select count(*) from #${larTable}
+        where lei NOT IN (#${filterList});
         """.as[TotalLars]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
@@ -50,7 +56,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile]) {
     val tsTable = tsTableSelector(year)
     val dollar = "$"
     val query = sql"""
-        select count(substring(submission_id,'\d+#${dollar}')::integer) as single_attempts  from #${tsTable} a where a.submission_id is not null and substring(submission_id, '\d+#${dollar}')::integer = 1 ;
+        select count(substring(submission_id,'\d+#${dollar}')::integer) as single_attempts  from #${tsTable} a where a.submission_id is not null and substring(submission_id, '\d+#${dollar}')::integer = 1 and lei NOT IN (#${filterList}) ;
         """.as[SingleAttempts]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
@@ -59,7 +65,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile]) {
     val tsTable = tsTableSelector(year)
     val dollar = "$"
     val query = sql"""
-        select count(substring(submission_id,'\d+#${dollar}')::integer) as multiple_attempts  from #${tsTable} a where a.submission_id is not null and substring(submission_id, '\d+#${dollar}')::integer <> 1 ;
+        select count(substring(submission_id,'\d+#${dollar}')::integer) as multiple_attempts from #${tsTable} a where a.submission_id is not null and substring(submission_id, '\d+#${dollar}')::integer <> 1 and lei NOT IN (#${filterList});
         """.as[MultipleAttempts]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
@@ -68,7 +74,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile]) {
     val tsTable = tsTableSelector(year)
     val larTable = larTableSelector(year)
     val query = sql"""
-      select b.institution_name, a.lei, count(a.lei) from #${larTable} a join #${tsTable} b on a.lei = b.lei group by a.lei, b.institution_name order by count(a.lei) DESC LIMIT #${count};
+      select b.institution_name, a.lei, count(a.lei) from #${larTable} a join #${tsTable} b on a.lei = b.lei where a.lei NOT IN (#${filterList}) group by a.lei, b.institution_name order by count(a.lei) DESC LIMIT #${count};
       """.as[TopFilers]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
@@ -76,7 +82,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile]) {
   def fetchSignsForLastDays(days: Int, year: Int): Task[Seq[SignsForLastDays]] = {
     val tsTable = tsTableSelector(year)
     val query = sql"""
-      select date(to_timestamp(sign_date/1000)) as signdate, count(*) as numsign from  #${tsTable} where sign_date is not null group by date(to_timestamp(sign_date/1000)) order by signdate desc limit #${days};
+      select date(to_timestamp(sign_date/1000)) as signdate, count(*) as numsign from  #${tsTable} where sign_date is not null and lei NOT IN (#${filterList}) group by date(to_timestamp(sign_date/1000)) order by signdate desc limit #${days};
       """.as[SignsForLastDays]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
@@ -86,7 +92,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile]) {
     val larTable = larTableSelector(year)
     val dollar = "$"
     val query = sql"""
-      select a.institution_name, count(b.lei) as lar_count, substring(submission_id,'\d+#${dollar}')::integer as attempts  from #${tsTable} a join #${larTable} b on a.lei = b.lei where a.submission_id is not null group by b.lei, a.submission_id, a.institution_name  order by substring(submission_id, '\d+#${dollar}')::integer DESC LIMIT #${count};
+      select a.institution_name, count(b.lei) as lar_count, substring(submission_id,'\d+#${dollar}')::integer as attempts from #${tsTable} a join #${larTable} b on a.lei = b.lei where a.submission_id is not null and a.lei NOT IN (#${filterList}) group by b.lei, a.submission_id, a.institution_name  order by substring(submission_id, '\d+#${dollar}')::integer DESC LIMIT #${count};
       """.as[FilerAttempts]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
@@ -94,7 +100,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile]) {
   def fetchTSRecordCount(year: Int): Task[Seq[TSRecordCount]] = {
     val tsTable = tsTableSelector(year)
     val query = sql"""
-      SELECT  COUNT(*) FROM #${tsTable};
+      select  count(*) from #${tsTable};
       """.as[TSRecordCount]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
@@ -102,7 +108,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile]) {
   def fetchFilersByAgency(year: Int): Task[Seq[FilersByAgency]] = {
     val tsTable = tsTableSelector(year)
     val query = sql"""
-      SELECT agency, COUNT(*) FROM #${tsTable} GROUP BY agency ORDER BY agency ASC;
+      select agency, count(*) from #${tsTable} where lei not in (#${filterList}) group by agency order by agency asc;
       """.as[FilersByAgency]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
@@ -111,7 +117,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile]) {
     val tsTable = tsTableSelector(year)
     val larTable = larTableSelector(year)
     val query = sql"""
-      SELECT ts.agency AS agency, COUNT(lar.*) FROM #${larTable} AS lar JOIN #${tsTable} AS ts ON UPPER(lar.lei) = UPPER(ts.lei) GROUP BY agency;
+      SELECT ts.agency as agency, count(lar.*) from #${larTable} as lar join #${tsTable} as ts on upper(lar.lei) = upper(ts.lei) where ts.lei not in (#${filterList}) group by agency;
       """.as[LarByAgency]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
@@ -120,7 +126,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile]) {
     val tsTable = tsTableSelector(year)
     val larTable = larTableSelector(year)
     val query = sql"""
-      SELECT CAST(county AS VARCHAR), COUNT(*) FROM #${tsTable} AS ts LEFT JOIN #${larTable} AS lar ON UPPER(ts.lei) = UPPER(lar.lei) WHERE county != 'NA' GROUP BY county ORDER BY COUNT(*) DESC LIMIT #${count};
+      select cast(county as varchar), count(*) from #${tsTable} as ts left join #${larTable} as lar on upper(ts.lei) = upper(lar.lei) where county != 'na' and ts.lei not in (#${filterList}) group by county order by count(*) desc limit #${count};
       """.as[TopCountiesLar]
       Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
@@ -128,7 +134,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile]) {
   def fetchLarCountByPropertyType(year: Int): Task[Seq[LarCountByPropertyType]] = {
     val larTable = larTableSelector(year)
     val query = sql"""
-      SELECT SUM(CASE WHEN construction_method='1' AND CAST(lar.total_uits AS INTEGER) <=4 THEN 1 ELSE 0 END) AS single_family, SUM(CASE WHEN construction_method='2' AND CAST(lar.total_uits AS INTEGER) <=4 THEN 1 ELSE 0 END) AS manufactured_single_family, SUM(CASE WHEN CAST(lar.total_uits AS INTEGER) > 4 THEN 1 ELSE 0 END) AS multifamily FROM #${larTable} AS lar;
+      select sum(case when construction_method='1' and cast(lar.total_uits as integer) <=4 then 1 else 0 end) as single_family, sum(case when construction_method='2' and cast(lar.total_uits as integer) <=4 then 1 else 0 end) as manufactured_single_family, sum(case when cast(lar.total_uits as integer) > 4 then 1 else 0 end) as multifamily from #${larTable} as lar where lei not in (#${filterList});
       """.as[LarCountByPropertyType]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
