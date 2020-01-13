@@ -5,7 +5,7 @@ trait ModifiedLarHeader {
   val MLARHeader = "activity_year|lei|derived_msa_md|state_code|county_code|census_tract|conforming_loan_limit|" +
     "derived_loan_product_type|derived_dwelling_category|derived_ethnicity|derived_race|derived_sex|" +
     "action_taken|purchaser_type|preapproval|loan_type|loan_purpose|lien_status|reverse_mortgage|" +
-    "open_end_line_of_credit|business_or_commercial_purpose|loan_amount|loan_to_value_ratio|interest_rate|" +
+    "open_end_line_of_credit|business_or_commercial_purpose|loan_amount|combined_loan_to_value_ratio|interest_rate|" +
     "rate_spread|hoepa_status|total_loan_costs|total_points_and_fees|origination_charges|discount_points|" +
     "lender_credits|loan_term|prepayment_penalty_term|intro_rate_period|negative_amortization|" +
     "interest_only_payment|balloon_payment|other_nonamortizing_features|property_value|construction_method|" +
