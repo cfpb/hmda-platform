@@ -14,7 +14,7 @@ object ManufacturedHomeLandPropertyInterestEnum
       case 4    => UnpaidLeasehold
       case 5    => ManufacturedHomeLandNotApplicable
       case 1111 => ManufacturedHomeLoanPropertyInterestExempt
-      case _    => InvalidManufacturedHomeLandPropertyCode
+      case other    => new InvalidManufacturedHomeLandPropertyCode(other)
     }
 }
 
@@ -49,7 +49,7 @@ case object ManufacturedHomeLoanPropertyInterestExempt extends ManufacturedHomeL
     "Exempt Manufactured Home Loan Property Interest"
 }
 
-case object InvalidManufacturedHomeLandPropertyCode extends ManufacturedHomeLandPropertyInterestEnum {
-  override def code: Int           = -1
+class InvalidManufacturedHomeLandPropertyCode(value: Int = -1) extends ManufacturedHomeLandPropertyInterestEnum {
+  override def code: Int           = value
   override def description: String = "Invalid Code"
 }

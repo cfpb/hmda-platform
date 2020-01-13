@@ -18,7 +18,7 @@ object PurchaserEnum extends LarCodeEnum[PurchaserEnum] {
       case 72 => LifeInsuranceCompany
       case 8  => AffiliateInstitution
       case 9  => OtherPurchaserType
-      case _  => InvalidPurchaserCode
+      case other  => new InvalidPurchaserCode(other)
     }
 }
 
@@ -79,7 +79,7 @@ case object OtherPurchaserType extends PurchaserEnum {
   override val description: String = "Other type of purchaser"
 }
 
-case object InvalidPurchaserCode extends PurchaserEnum {
-  override def code: Int           = -1
+class InvalidPurchaserCode(value: Int = -1) extends PurchaserEnum {
+  override def code: Int           = value
   override def description: String = "Invalid Code"
 }

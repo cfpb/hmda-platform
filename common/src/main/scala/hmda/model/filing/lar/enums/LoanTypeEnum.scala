@@ -11,7 +11,7 @@ object LoanTypeEnum extends LarCodeEnum[LoanTypeEnum] {
       case 2 => FHAInsured
       case 3 => VAGuaranteed
       case 4 => RHSOrFSAGuaranteed
-      case _ => InvalidLoanTypeCode
+      case other => new InvalidLoanTypeCode(other)
     }
 }
 
@@ -38,7 +38,7 @@ case object RHSOrFSAGuaranteed extends LoanTypeEnum {
     "USDA Rural Housing Service or Farm Service Agency guaranteed (RHS or FSA)"
 }
 
-case object InvalidLoanTypeCode extends LoanTypeEnum {
-  override def code: Int           = -1
+class InvalidLoanTypeCode(value: Int = -1) extends LoanTypeEnum {
+  override def code: Int           = value
   override def description: String = "Invalid Code"
 }

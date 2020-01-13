@@ -5,13 +5,13 @@ import io.circe._
 import io.circe.syntax._
 
 case class NonAmortizingFeatures(
-                                  balloonPayment: BalloonPaymentEnum = InvalidBalloonPaymentCode,
+                                  balloonPayment: BalloonPaymentEnum = new InvalidBalloonPaymentCode,
                                   interestOnlyPayments: InterestOnlyPaymentsEnum =
-                                  InvalidInterestOnlyPaymentCode,
+                                  new InvalidInterestOnlyPaymentCode,
                                   negativeAmortization: NegativeAmortizationEnum =
-                                  InvalidNegativeArmotizationCode,
+                                  new InvalidNegativeArmotizationCode,
                                   otherNonAmortizingFeatures: OtherNonAmortizingFeaturesEnum =
-                                  InvalidOtherNonAmortizingFeaturesCode)
+                                  new InvalidOtherNonAmortizingFeaturesCode)
 
 object NonAmortizingFeatures {
       implicit val nonAmortizingFeaturesEncoder: Encoder[NonAmortizingFeatures] =

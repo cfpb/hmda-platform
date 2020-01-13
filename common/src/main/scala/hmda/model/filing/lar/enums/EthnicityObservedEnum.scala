@@ -11,7 +11,7 @@ object EthnicityObservedEnum extends LarCodeEnum[EthnicityObservedEnum] {
       case 2 => NotVisualOrSurnameEthnicity
       case 3 => EthnicityObservedNotApplicable
       case 4 => EthnicityObservedNoCoApplicant
-      case _ => InvalidEthnicityObservedCode
+      case other => new InvalidEthnicityObservedCode(other)
     }
 }
 
@@ -37,7 +37,7 @@ case object EthnicityObservedNoCoApplicant extends EthnicityObservedEnum {
   override val description: String = "No co-applicant"
 }
 
-case object InvalidEthnicityObservedCode extends EthnicityObservedEnum {
-  override def code: Int           = -1
+class InvalidEthnicityObservedCode(value: Int = -1) extends EthnicityObservedEnum {
+  override def code: Int           = value
   override def description: String = "Invalid Code"
 }

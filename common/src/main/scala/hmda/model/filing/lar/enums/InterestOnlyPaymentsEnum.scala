@@ -10,7 +10,7 @@ object InterestOnlyPaymentsEnum extends LarCodeEnum[InterestOnlyPaymentsEnum] {
       case 1    => InterestOnlyPayment
       case 2    => NoInterestOnlyPayment
       case 1111 => InterestOnlyPaymentExempt
-      case _    => InvalidInterestOnlyPaymentCode
+      case other    => new InvalidInterestOnlyPaymentCode(other)
     }
 }
 
@@ -29,7 +29,7 @@ case object InterestOnlyPaymentExempt extends InterestOnlyPaymentsEnum {
   override def description: String = "Exempt Interest Only Payments"
 }
 
-case object InvalidInterestOnlyPaymentCode extends InterestOnlyPaymentsEnum {
-  override def code: Int           = -1
+class InvalidInterestOnlyPaymentCode(value: Int = -1) extends InterestOnlyPaymentsEnum {
+  override def code: Int           = value
   override def description: String = "Invalid Code"
 }

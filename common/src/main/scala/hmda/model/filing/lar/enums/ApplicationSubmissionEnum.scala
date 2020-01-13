@@ -12,7 +12,7 @@ object ApplicationSubmissionEnum
       case 2    => NotSubmittedDirectlyToInstitution
       case 3    => ApplicationSubmissionNotApplicable
       case 1111 => ApplicationSubmissionExempt
-      case _    => InvalidApplicationSubmissionCode
+      case other    => new InvalidApplicationSubmissionCode(other)
     }
 }
 
@@ -37,7 +37,7 @@ case object ApplicationSubmissionExempt extends ApplicationSubmissionEnum {
   override def description: String = "Exempt Application Submission"
 }
 
-case object InvalidApplicationSubmissionCode extends ApplicationSubmissionEnum {
-  override def code: Int           = -1
+class InvalidApplicationSubmissionCode(value: Int = -1) extends ApplicationSubmissionEnum {
+  override def code: Int           = value
   override def description: String = "Invalid code"
 }

@@ -10,7 +10,7 @@ object BalloonPaymentEnum extends LarCodeEnum[BalloonPaymentEnum] {
       case 1    => BalloonPayment
       case 2    => NoBallonPayment
       case 1111 => BalloonPaymentExempt
-      case _    => InvalidBalloonPaymentCode
+      case other    => new InvalidBalloonPaymentCode(other)
     }
 }
 
@@ -29,7 +29,7 @@ case object BalloonPaymentExempt extends BalloonPaymentEnum {
   override def description: String = "Exempt Balloon Payment"
 }
 
-case object InvalidBalloonPaymentCode extends BalloonPaymentEnum {
-  override def code: Int           = -1
+class InvalidBalloonPaymentCode(value: Int = -1) extends BalloonPaymentEnum {
+  override def code: Int           = value
   override def description: String = "Invalid Code"
 }

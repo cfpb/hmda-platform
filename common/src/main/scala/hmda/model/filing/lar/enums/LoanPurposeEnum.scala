@@ -13,7 +13,7 @@ object LoanPurposeEnum extends LarCodeEnum[LoanPurposeEnum] {
       case 32 => CashOutRefinancing
       case 4  => OtherPurpose
       case 5  => LoanPurposeNotApplicable
-      case _  => InvalidLoanPurposeCode
+      case other  => new InvalidLoanPurposeCode(other)
     }
 }
 
@@ -47,7 +47,7 @@ case object LoanPurposeNotApplicable extends LoanPurposeEnum {
   override val description: String = "Not applicable"
 }
 
-case object InvalidLoanPurposeCode extends LoanPurposeEnum {
-  override def code: Int           = -1
+class InvalidLoanPurposeCode(value: Int = -1) extends LoanPurposeEnum {
+  override def code: Int           = value
   override def description: String = "Invalid Code"
 }

@@ -34,7 +34,7 @@ object AutomatedUnderwritingResultEnum
       case 23   => ReferUnableToDetermine
       case 24   => ReferWithCautionUnableToDetermine
       case 1111 => AUSResultExempt
-      case _    => InvalidAutomatedUnderwritingResultCode
+      case other    => new InvalidAutomatedUnderwritingResultCode(other)
     }
 }
 
@@ -168,7 +168,7 @@ case object AUSResultExempt extends AutomatedUnderwritingResultEnum {
   override def description: String = "Exempt AUSResult"
 }
 
-case object InvalidAutomatedUnderwritingResultCode extends AutomatedUnderwritingResultEnum {
-  override def code: Int           = -1
+class InvalidAutomatedUnderwritingResultCode(value: Int = -1) extends AutomatedUnderwritingResultEnum {
+  override def code: Int           = value
   override def description: String = "Invalid Code"
 }

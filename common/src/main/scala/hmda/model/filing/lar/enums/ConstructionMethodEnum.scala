@@ -9,7 +9,7 @@ object ConstructionMethodEnum extends LarCodeEnum[ConstructionMethodEnum] {
     code match {
       case 1 => SiteBuilt
       case 2 => ManufacturedHome
-      case _ => InvalidConstructionMethodCode
+      case other => new InvalidConstructionMethodCode(other)
     }
 }
 
@@ -23,7 +23,7 @@ case object ManufacturedHome extends ConstructionMethodEnum {
   override val description: String = "Manufactured Home"
 }
 
-case object InvalidConstructionMethodCode extends ConstructionMethodEnum {
-  override def code: Int           = -1
+class InvalidConstructionMethodCode(value: Int = -1) extends ConstructionMethodEnum {
+  override def code: Int           = value
   override def description: String = "Invalid Code"
 }

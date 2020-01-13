@@ -9,7 +9,7 @@ object PreapprovalEnum extends LarCodeEnum[PreapprovalEnum] {
     code match {
       case 1 => PreapprovalRequested
       case 2 => PreapprovalNotRequested
-      case _ => InvalidPreapprovalCode
+      case other => new InvalidPreapprovalCode(other)
     }
 }
 
@@ -23,7 +23,7 @@ case object PreapprovalNotRequested extends PreapprovalEnum {
   override val description: String = "Preapproval not requested"
 }
 
-case object InvalidPreapprovalCode extends PreapprovalEnum {
-  override def code: Int           = -1
+class InvalidPreapprovalCode(value: Int = -1) extends PreapprovalEnum {
+  override def code: Int           = value
   override def description: String = "Invalid Code"
 }

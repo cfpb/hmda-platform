@@ -11,7 +11,7 @@ object OtherNonAmortizingFeaturesEnum
       case 1    => OtherNonFullyAmortizingFeatures
       case 2    => NoOtherNonFullyAmortizingFeatures
       case 1111 => OtherNonAmortizingFeaturesExempt
-      case _    => InvalidOtherNonAmortizingFeaturesCode
+      case other    => new InvalidOtherNonAmortizingFeaturesCode(other)
     }
 }
 
@@ -30,7 +30,7 @@ case object OtherNonAmortizingFeaturesExempt extends OtherNonAmortizingFeaturesE
   override def description: String = "Exempt Other Non Amortizing Features"
 }
 
-case object InvalidOtherNonAmortizingFeaturesCode extends OtherNonAmortizingFeaturesEnum {
-  override def code: Int           = -1
+class InvalidOtherNonAmortizingFeaturesCode(value: Int = -1) extends OtherNonAmortizingFeaturesEnum {
+  override def code: Int           = value
   override def description: String = "Invalid Code"
 }

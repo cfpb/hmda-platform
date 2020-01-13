@@ -16,7 +16,7 @@ object AutomatedUnderwritingSystemEnum
       case 5    => OtherAUS
       case 6    => AUSNotApplicable
       case 1111 => AUSExempt
-      case _    => InvalidAutomatedUnderwritingSystemCode
+      case other    => new InvalidAutomatedUnderwritingSystemCode(other)
 
     }
 }
@@ -63,7 +63,7 @@ case object AUSExempt extends AutomatedUnderwritingSystemEnum {
   override def description: String = "Exempt AUS"
 }
 
-case object InvalidAutomatedUnderwritingSystemCode extends AutomatedUnderwritingSystemEnum {
-  override def code: Int           = -1
+class InvalidAutomatedUnderwritingSystemCode(value: Int = -1) extends AutomatedUnderwritingSystemEnum {
+  override def code: Int           = value
   override def description: String = "Invalid Code"
 }
