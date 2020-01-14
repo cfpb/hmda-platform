@@ -172,7 +172,7 @@ trait HmdaDashboardHttpApi extends Settings {
 
   def myUserPassAuthenticator(credentials: Credentials): Option[String] =
     credentials match {
-      case p @ Credentials.Provided(id) if p.verify(config.getString("server.bindings.address")) => Some(id)
+      case p @ Credentials.Provided(id) if p.verify(config.getString("admin.pass")) => Some(id)
       case _ => None
     }
 }
