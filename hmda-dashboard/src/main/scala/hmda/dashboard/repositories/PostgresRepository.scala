@@ -166,6 +166,15 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
+  def fetchOpenEndCreditByAgency(year: Int): Task[Seq[OpenEndCreditByAgency]] = {
+    val tsTable = tsTableSelector(year)
+    val larTable = larTableSelector(year)
+    val query = sql"""
+      select ts.agency, count(*) from #${tsTable} as ts left join #${larTable} as lar on upper(ts.lei) = upper(lar.lei) where line_of_credits = '1' group by ts.agency
+      """.as[OpenEndCreditByAgency]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
   def healthCheck: Task[Unit] = {
     Task.deferFuture (db.run (sql"SELECT 1".as[Int] ) ).guarantee (Task.shift).void
   }

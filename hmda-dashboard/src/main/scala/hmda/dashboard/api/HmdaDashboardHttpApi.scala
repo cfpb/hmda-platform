@@ -189,7 +189,16 @@ trait HmdaDashboardHttpApi extends Settings {
               .map(aggs => LarCountUsingExemptionByAgencyAggregationResponse(aggs))
               .runToFuture
           )
-        }
+        }~
+          path("open_end_credit_by_agency" / IntNumber) { (year) =>
+            log.info(s"Open end credit By Agency for year=${year}")
+            complete(
+              query
+                .fetchOpenEndCreditByAgency(year)
+                .map(aggs => OpenEndCreditByAgencyAggregationResponse(aggs))
+                .runToFuture
+            )
+          }
       }
     }
 }
