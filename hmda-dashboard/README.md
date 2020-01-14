@@ -13,4 +13,6 @@
 - /dashboard/lar_by_agency/{{year}}
 - /dashboard/top_counties_lar/{{count}}/year/{{year}}
 - /dashboard/lar_by_property/{{year}}
+- /dashboard/filers_using_exemption_by_agency/{{year}}
+- /dashboard/denial_reason_counts_by_agency/{{year}}
 

@@ -139,6 +139,23 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
+  def fetchFilersUsingExemptionByAgency(year: Int): Task[Seq[FilersUsingExemptionByAgency]] = {
+    val tsTable = tsTableSelector(year)
+    val larTable = larTableSelector(year)
+    val query = sql"""
+      select agency as agency, count(ts.lei) from #${tsTable} as ts where upper(lei) in (select upper(lei) from #${larTable} as lar where street = 'exempt' or city = 'exempt' or zip_code = 'exempt' or rate_spread = 'exempt' or credit_score_applicant = '1111' or credit_score_co_applicant = '1111' or credit_score_type_applicant = '1111' or credit_score_type_co_applicant = '1111' or denial_reason1 = '1111' or total_loan_costs = 'exempt' or total_points = 'exempt' or origination_charges = 'exempt' or discount_points = 'exempt' or lender_credits = 'exempt' or interest_rate = 'exempt' or payment_penalty = 'exempt' or debt_to_incode = 'exempt' or loan_value_ratio = 'exempt' or loan_term = 'exempt' or rate_spread_intro = '1111' or baloon_payment = '1111' or insert_only_payment = '1111' or amortization = '1111' or other_amortization = '1111' or property_value = 'exempt' or application_submission = '1111' or lan_property_interest = '1111' or mf_affordable = 'exempt' or home_security_policy = '1111' or payable = '1111' or nmls = 'exempt' or aus1_result = '1111' or other_aus = '1111' or other_aus_result = '1111' or reverse_mortgage = '1111' or line_of_credits = '1111' or business_or_commercial = '1111') group by agency order by agency asc
+      """.as[FilersUsingExemptionByAgency]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchDenialReasonCountsByAgency(year: Int): Task[Seq[DenialReasonCountsByAgency]] = {
+    val tsTable = tsTableSelector(year)
+    val larTable = larTableSelector(year)
+    val query = sql"""
+      SELECT agency AS agency, SUM(CASE WHEN denial_reason1 = '1' OR denial_reason2 = '1' OR denial_reason3 = '1' OR denial_reason4 = '1' THEN 1 ELSE 0 END) AS dti_ratio, SUM(CASE WHEN denial_reason1 = '2' OR denial_reason2 = '2' OR denial_reason3 = '2' OR denial_reason4 = '2' THEN 1 ELSE 0 END) AS employment_hist, SUM(CASE WHEN denial_reason1 = '3' OR denial_reason2 = '3' OR denial_reason3 = '3' OR denial_reason4 = '3' THEN 1 ELSE 0 END) AS credit_hist, SUM(CASE WHEN denial_reason1 = '4' OR denial_reason2 = '4' OR denial_reason3 = '4' OR denial_reason4 = '4' THEN 1 ELSE 0 END) AS collateral, SUM(CASE WHEN denial_reason1 = '5' OR denial_reason2 = '5' OR denial_reason3 = '5' OR denial_reason4 = '5' THEN 1 ELSE 0 END) AS insufficient_cash, SUM(CASE WHEN denial_reason1 = '6' OR denial_reason2 = '6' OR denial_reason3 = '6' OR denial_reason4 = '6' THEN 1 ELSE 0 END) AS unverified_info, SUM(CASE WHEN denial_reason1 = '7' OR denial_reason2 = '7' OR denial_reason3 = '7' OR denial_reason4 = '7' THEN 1 ELSE 0 END) AS application_incomplete, SUM(CASE WHEN denial_reason1 = '8' OR denial_reason2 = '8' OR denial_reason3 = '8' OR denial_reason4 = '8' THEN 1 ELSE 0 END) AS mortagage_ins_denied, SUM(CASE WHEN denial_reason1 = '9' OR denial_reason2 = '9' OR denial_reason3 = '9' OR denial_reason4 = '9' THEN 1 ELSE 0 END) AS other, SUM(CASE WHEN denial_reason1 = '1111' THEN 1 ELSE 0 END) AS exempt_count FROM  #${tsTable} AS ts LEFT JOIN  #${larTable} AS lar ON  UPPER(ts.lei) = UPPER(lar.lei) GROUP BY  agency ORDER BY  agency      """.as[DenialReasonCountsByAgency]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
   def healthCheck: Task[Unit] = {
     Task.deferFuture (db.run (sql"SELECT 1".as[Int] ) ).guarantee (Task.shift).void
   }

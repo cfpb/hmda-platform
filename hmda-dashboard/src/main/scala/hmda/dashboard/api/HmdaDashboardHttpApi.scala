@@ -154,12 +154,30 @@ trait HmdaDashboardHttpApi extends Settings {
               .runToFuture
           )
         }~
-          path("lar_by_property" / IntNumber) { (year) =>
-            log.info(s"Lar count by property for year=${year}")
+        path("lar_by_property" / IntNumber) { (year) =>
+          log.info(s"Lar count by property for year=${year}")
+          complete(
+            query
+              .fetchLarCountByPropertyType(year)
+              .map(aggs => LarCountByPropertyTypeAggregationResponse(aggs))
+              .runToFuture
+          )
+        }~
+        path("filers_using_exemption_by_agency" / IntNumber) { (year) =>
+          log.info(s"Filers using exemption by agency for year=${year}")
+          complete(
+            query
+              .fetchFilersUsingExemptionsByAgency(year)
+              .map(aggs => FilersUsingExemptionByAgencyAggregationResponse(aggs))
+              .runToFuture
+          )
+        }~
+          path("denial_reason_counts_by_agency" / IntNumber) { (year) =>
+            log.info(s"Denial Reason Counts By Agency for year=${year}")
             complete(
               query
-                .fetchLarCountByPropertyType(year)
-                .map(aggs => LarCountByPropertyTypeAggregationResponse(aggs))
+                .fetchDenialReasonCountsByAgency(year)
+                .map(aggs => DenialReasonCountsByAgencyAggregationResponse(aggs))
                 .runToFuture
             )
           }
