@@ -15,4 +15,5 @@
 - /dashboard/lar_by_property/{{year}}
 - /dashboard/filers_using_exemption_by_agency/{{year}}
 - /dashboard/denial_reason_counts_by_agency/{{year}}
+- /dashboard/lar_count_using_exemption_by_agency/{{year}}
 

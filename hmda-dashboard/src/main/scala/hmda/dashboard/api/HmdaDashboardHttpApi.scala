@@ -172,15 +172,24 @@ trait HmdaDashboardHttpApi extends Settings {
               .runToFuture
           )
         }~
-          path("denial_reason_counts_by_agency" / IntNumber) { (year) =>
-            log.info(s"Denial Reason Counts By Agency for year=${year}")
-            complete(
-              query
-                .fetchDenialReasonCountsByAgency(year)
-                .map(aggs => DenialReasonCountsByAgencyAggregationResponse(aggs))
-                .runToFuture
-            )
-          }
+        path("denial_reason_counts_by_agency" / IntNumber) { (year) =>
+          log.info(s"Denial Reason Counts By Agency for year=${year}")
+          complete(
+            query
+              .fetchDenialReasonCountsByAgency(year)
+              .map(aggs => DenialReasonCountsByAgencyAggregationResponse(aggs))
+              .runToFuture
+          )
+        }~
+        path("lar_count_using_exemption_by_agency" / IntNumber) { (year) =>
+          log.info(s"Lar Count Using Exemption By Agency for year=${year}")
+          complete(
+            query
+              .fetchLarCountUsingExemptionByAgency(year)
+              .map(aggs => LarCountUsingExemptionByAgencyAggregationResponse(aggs))
+              .runToFuture
+          )
+        }
       }
     }
 }

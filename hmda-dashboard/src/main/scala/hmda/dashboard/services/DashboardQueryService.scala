@@ -46,4 +46,7 @@ class DashboardQueryService (repo: PostgresRepository) extends QueryService{
 
   override def fetchDenialReasonCountsByAgency(year: Int): Task[Seq[DenialReasonCountsByAgency]] =
     repo.fetchDenialReasonCountsByAgency(year)
+
+  override def fetchLarCountUsingExemptionByAgency(year: Int): Task[Seq[LarCountUsingExemptionByAgency]] =
+    repo.fetchLarCountUsingExemptionByAgency(year)
 }
