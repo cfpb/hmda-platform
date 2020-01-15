@@ -53,6 +53,11 @@ spec:
                 configMapKeyRef:
                   name: bank-filter-configmap
                   key: bank-filter-list
+            - name: DASHBOARD_ADMIN_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: dashboard_admin_pass
+                  key: password
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
