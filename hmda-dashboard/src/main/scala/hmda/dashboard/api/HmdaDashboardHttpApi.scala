@@ -38,13 +38,14 @@ trait HmdaDashboardHttpApi extends Settings {
     new DashboardQueryService(repository)
 
   val hmdaDashboardRoutes: Route =
-    encodeResponse {
-      pathPrefix("dashboard") {
-        pathPrefix("health") {
-          onComplete(healthCheck.healthCheckStatus.runToFuture) {
-            case Success(HealthCheckResponse(Up)) =>
-              log.info("hmda-dashboard health check OK")
-              complete(StatusCodes.OK)
+    authenticateBasic(realm = "secure site", myUserPassAuthenticator) { userName =>
+      encodeResponse {
+        pathPrefix("dashboard") {
+          pathPrefix("health") {
+            onComplete(healthCheck.healthCheckStatus.runToFuture) {
+              case Success(HealthCheckResponse(Up)) =>
+                log.info("hmda-dashboard health check OK")
+                complete(StatusCodes.OK)
 
             case Success(hs) =>
               log.warning(s"Service degraded db=${hs.db}")
@@ -200,5 +201,11 @@ trait HmdaDashboardHttpApi extends Settings {
             )
           }
       }
+    }
+
+  def myUserPassAuthenticator(credentials: Credentials): Option[String] =
+    credentials match {
+      case p @ Credentials.Provided(id) if p.verify(config.getString("admin.pass")) => Some(id)
+      case _ => None
     }
 }

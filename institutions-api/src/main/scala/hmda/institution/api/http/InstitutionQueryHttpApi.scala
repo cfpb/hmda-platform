@@ -3,19 +3,19 @@ package hmda.institution.api.http
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.{HttpResponse, StatusCodes, Uri}
+import akka.http.scaladsl.model.{StatusCodes, Uri}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.api.http.directives.{HmdaTimeDirectives, CreateFilingAuthorization}
+import hmda.api.http.directives.{CreateFilingAuthorization, HmdaTimeDirectives}
 import hmda.api.http.model.ErrorResponse
-import hmda.institution.query._
-import hmda.query.DbConfiguration._
 import hmda.institution.api.http.model.InstitutionsResponse
+import hmda.institution.query._
 import hmda.model.institution.Institution
+import hmda.query.DbConfiguration._
 import hmda.utils.YearUtils._
 import io.circe.generic.auto._
 
@@ -53,8 +53,8 @@ trait InstitutionQueryHttpApi extends HmdaTimeDirectives with InstitutionEmailCo
 
         onComplete(f) {
           case Success((institution, emails)) =>
-            if (institution.isEmpty) {
-              complete(ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
+            if (institution.isEmpty || institution==None) {
+              returnNotFoundError(uri)
             } else {
               complete(
                 ToResponseMarshallable(
@@ -64,6 +64,7 @@ trait InstitutionQueryHttpApi extends HmdaTimeDirectives with InstitutionEmailCo
               )
             }
           case Failure(error) =>
+
             val errorResponse =
               ErrorResponse(500, error.getLocalizedMessage, uri.path)
             complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
@@ -108,16 +109,25 @@ trait InstitutionQueryHttpApi extends HmdaTimeDirectives with InstitutionEmailCo
   private def completeInstitutionsFuture(f: Future[Seq[Institution]], uri: Uri): Route =
     onComplete(f) {
       case Success(institutions) =>
-        if (institutions.isEmpty) {
-          complete(ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
+
+        if (institutions.isEmpty || institutions == None) {
+          returnNotFoundError(uri)
         } else {
           complete(ToResponseMarshallable(InstitutionsResponse(institutions)))
         }
       case Failure(error) =>
-        val errorResponse =
-          ErrorResponse(500, error.getLocalizedMessage, uri.path)
-        complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
+        if (error.getLocalizedMessage.contains("filter predicate is not satisfied")) {
+          returnNotFoundError(uri)
+        }else {
+          val errorResponse = ErrorResponse(500, error.getLocalizedMessage, uri.path)
+          complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
+        }
     }
+
+  private def returnNotFoundError(uri: Uri) = {
+    val errorResponse = ErrorResponse(404, StatusCodes.NotFound.defaultMessage, uri.path)
+    complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
+  }
 
   def institutionPublicRoutes: Route =
     handleRejections(corsRejectionHandler) {
