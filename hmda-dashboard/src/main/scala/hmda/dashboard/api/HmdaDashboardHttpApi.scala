@@ -190,11 +190,11 @@ trait HmdaDashboardHttpApi extends Settings {
               .runToFuture
           )
         }~
-          path("open_end_credit_by_agency" / IntNumber) { (year) =>
+          path("open_end_credit_filers_by_agency" / IntNumber) { (year) =>
             log.info(s"Open end credit By Agency for year=${year}")
             complete(
               query
-                .fetchOpenEndCreditByAgency(year)
+                .fetchOpenEndCreditFilersByAgency(year)
                 .map(aggs => OpenEndCreditByAgencyAggregationResponse(aggs))
                 .runToFuture
             )

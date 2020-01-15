@@ -19,5 +19,5 @@ trait QueryService {
   def fetchFilersUsingExemptionsByAgency(year: Int) : Task[Seq[FilersUsingExemptionByAgency]]
   def fetchDenialReasonCountsByAgency(year: Int) : Task[Seq[DenialReasonCountsByAgency]]
   def fetchLarCountUsingExemptionByAgency(year: Int) : Task[Seq[LarCountUsingExemptionByAgency]]
-  def fetchOpenEndCreditByAgency(year: Int) : Task[Seq[OpenEndCreditByAgency]]
+  def fetchOpenEndCreditFilersByAgency(year: Int) : Task[Seq[OpenEndCreditByAgency]]
 }

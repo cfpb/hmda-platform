@@ -50,6 +50,6 @@ class DashboardQueryService (repo: PostgresRepository) extends QueryService{
   override def fetchLarCountUsingExemptionByAgency(year: Int): Task[Seq[LarCountUsingExemptionByAgency]] =
     repo.fetchLarCountUsingExemptionByAgency(year)
 
-  override def fetchOpenEndCreditByAgency(year: Int): Task[Seq[OpenEndCreditByAgency]] =
-    repo.fetchOpenEndCreditByAgency(year)
+  override def fetchOpenEndCreditFilersByAgency(year: Int): Task[Seq[OpenEndCreditByAgency]] =
+    repo.fetchOpenEndCreditFilersByAgency(year)
 }
