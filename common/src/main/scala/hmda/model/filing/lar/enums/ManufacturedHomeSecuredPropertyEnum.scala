@@ -39,4 +39,9 @@ case object ManufacturedHomeSecuredExempt extends ManufacturedHomeSecuredPropert
 class InvalidManufacturedHomeSecuredPropertyCode(value: Int = -1) extends ManufacturedHomeSecuredPropertyEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidManufacturedHomeSecuredPropertyCode => true
+            case _ => false
+        }
 }

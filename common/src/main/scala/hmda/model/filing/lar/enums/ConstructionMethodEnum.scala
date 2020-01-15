@@ -26,4 +26,9 @@ case object ManufacturedHome extends ConstructionMethodEnum {
 class InvalidConstructionMethodCode(value: Int = -1) extends ConstructionMethodEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidConstructionMethodCode => true
+            case _ => false
+        }
 }

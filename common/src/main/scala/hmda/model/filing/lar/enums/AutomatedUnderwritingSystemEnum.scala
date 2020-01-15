@@ -66,4 +66,9 @@ case object AUSExempt extends AutomatedUnderwritingSystemEnum {
 class InvalidAutomatedUnderwritingSystemCode(value: Int = -1) extends AutomatedUnderwritingSystemEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidAutomatedUnderwritingSystemCode => true
+            case _ => false
+        }
 }

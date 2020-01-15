@@ -32,4 +32,9 @@ case object BalloonPaymentExempt extends BalloonPaymentEnum {
 class InvalidBalloonPaymentCode(value: Int = -1) extends BalloonPaymentEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidBalloonPaymentCode => true
+            case _ => false
+        }
 }

@@ -32,4 +32,9 @@ case object NegativeAmortizationExempt extends NegativeAmortizationEnum {
 class InvalidNegativeArmotizationCode(value: Int = -1) extends NegativeAmortizationEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidNegativeArmotizationCode => true
+            case _ => false
+        }
 }

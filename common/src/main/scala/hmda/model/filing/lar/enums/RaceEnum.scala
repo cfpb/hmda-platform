@@ -136,4 +136,9 @@ case object RaceNoCoApplicant extends RaceEnum {
 class InvalidRaceCode(value: Int = -1) extends RaceEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidRaceCode => true
+            case _ => false
+        }
 }

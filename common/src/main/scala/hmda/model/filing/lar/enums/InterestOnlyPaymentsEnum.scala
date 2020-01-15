@@ -32,4 +32,9 @@ case object InterestOnlyPaymentExempt extends InterestOnlyPaymentsEnum {
 class InvalidInterestOnlyPaymentCode(value: Int = -1) extends InterestOnlyPaymentsEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidInterestOnlyPaymentCode => true
+            case _ => false
+        }
 }

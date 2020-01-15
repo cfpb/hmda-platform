@@ -32,4 +32,9 @@ case object InvestmentProperty extends OccupancyEnum {
 class InvalidOccupancyCode(value: Int = -1) extends OccupancyEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidOccupancyCode => true
+            case _ => false
+        }
 }

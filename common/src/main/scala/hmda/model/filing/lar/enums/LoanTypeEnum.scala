@@ -41,4 +41,9 @@ case object RHSOrFSAGuaranteed extends LoanTypeEnum {
 class InvalidLoanTypeCode(value: Int = -1) extends LoanTypeEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidLoanTypeCode => true
+            case _ => false
+        }
 }

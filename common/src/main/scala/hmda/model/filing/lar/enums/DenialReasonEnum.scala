@@ -87,4 +87,9 @@ case object ExemptDenialReason extends DenialReasonEnum {
 class InvalidDenialReasonCode(value: Int = -1) extends DenialReasonEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidDenialReasonCode => true
+            case _ => false
+        }
 }

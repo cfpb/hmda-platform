@@ -38,4 +38,9 @@ case object PayableToInstitutionExempt extends PayableToInstitutionEnum {
 class InvalidPayableToInstitutionCode(value: Int = -1) extends PayableToInstitutionEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidPayableToInstitutionCode => true
+            case _ => false
+        }
 }

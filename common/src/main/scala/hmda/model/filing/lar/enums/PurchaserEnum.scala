@@ -82,4 +82,9 @@ case object OtherPurchaserType extends PurchaserEnum {
 class InvalidPurchaserCode(value: Int = -1) extends PurchaserEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidPurchaserCode => true
+            case _ => false
+        }
 }

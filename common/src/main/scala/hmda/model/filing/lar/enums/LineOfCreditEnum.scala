@@ -32,4 +32,9 @@ case object ExemptLineOfCredit extends LineOfCreditEnum {
 class InvalidLineOfCreditCode(value: Int = -1) extends LineOfCreditEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidLineOfCreditCode => true
+            case _ => false
+        }
 }

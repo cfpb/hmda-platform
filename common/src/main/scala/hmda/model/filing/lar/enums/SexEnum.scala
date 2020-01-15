@@ -51,4 +51,9 @@ case object MaleAndFemale extends SexEnum {
 class InvalidSexCode(value: Int = -1) extends SexEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidSexCode => true
+            case _ => false
+        }
 }

@@ -32,4 +32,9 @@ case object ExemptMortgageType extends MortgageTypeEnum {
 class InvalidMortgageTypeCode(value: Int = -1) extends MortgageTypeEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidMortgageTypeCode => true
+            case _ => false
+        }
 }

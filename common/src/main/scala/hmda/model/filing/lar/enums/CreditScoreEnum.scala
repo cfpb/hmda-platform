@@ -80,4 +80,9 @@ case object CreditScoreExempt extends CreditScoreEnum {
 class InvalidCreditScoreCode(value: Int = -1) extends CreditScoreEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidCreditScoreCode => true
+            case _ => false
+        }
 }

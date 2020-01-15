@@ -63,4 +63,10 @@ case object PreapprovalRequestApprovedButNotAccepted extends ActionTakenTypeEnum
 class InvalidActionTakenTypeCode(value: Int = -1) extends ActionTakenTypeEnum {
   override def code: Int           = value
   override def description: String = "Invalid code"
+
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidActionTakenTypeCode => true
+            case _ => false
+        }
 }

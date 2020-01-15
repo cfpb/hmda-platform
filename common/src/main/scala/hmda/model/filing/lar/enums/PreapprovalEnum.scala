@@ -26,4 +26,9 @@ case object PreapprovalNotRequested extends PreapprovalEnum {
 class InvalidPreapprovalCode(value: Int = -1) extends PreapprovalEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidPreapprovalCode => true
+            case _ => false
+        }
 }

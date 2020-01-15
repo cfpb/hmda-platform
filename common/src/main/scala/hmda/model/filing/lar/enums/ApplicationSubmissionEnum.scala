@@ -40,4 +40,9 @@ case object ApplicationSubmissionExempt extends ApplicationSubmissionEnum {
 class InvalidApplicationSubmissionCode(value: Int = -1) extends ApplicationSubmissionEnum {
   override def code: Int           = value
   override def description: String = "Invalid code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidApplicationSubmissionCode => true
+            case _ => false
+        }
 }

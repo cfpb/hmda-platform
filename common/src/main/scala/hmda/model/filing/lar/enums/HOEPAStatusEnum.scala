@@ -32,4 +32,9 @@ case object HOEPStatusANotApplicable extends HOEPAStatusEnum {
 class InvalidHoepaStatusCode(value: Int = -1) extends HOEPAStatusEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidHoepaStatusCode => true
+            case _ => false
+        }
 }

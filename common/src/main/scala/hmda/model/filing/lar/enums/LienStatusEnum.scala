@@ -26,4 +26,9 @@ case object SecuredBySubordinateLien extends LienStatusEnum {
 class InvalidLienStatusCode(value: Int = -1) extends LienStatusEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidLienStatusCode => true
+            case _ => false
+        }
 }

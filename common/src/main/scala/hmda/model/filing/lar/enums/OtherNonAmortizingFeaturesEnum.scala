@@ -33,4 +33,9 @@ case object OtherNonAmortizingFeaturesExempt extends OtherNonAmortizingFeaturesE
 class InvalidOtherNonAmortizingFeaturesCode(value: Int = -1) extends OtherNonAmortizingFeaturesEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidOtherNonAmortizingFeaturesCode => true
+            case _ => false
+        }
 }

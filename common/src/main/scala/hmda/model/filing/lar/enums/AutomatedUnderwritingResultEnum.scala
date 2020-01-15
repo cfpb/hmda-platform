@@ -171,4 +171,9 @@ case object AUSResultExempt extends AutomatedUnderwritingResultEnum {
 class InvalidAutomatedUnderwritingResultCode(value: Int = -1) extends AutomatedUnderwritingResultEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidAutomatedUnderwritingResultCode => true
+            case _ => false
+        }
 }
