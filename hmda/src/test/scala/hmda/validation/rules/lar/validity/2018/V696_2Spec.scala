@@ -32,7 +32,7 @@ class V696_2Spec extends LarEditCheckSpec {
 
       val invalidLar3 = validLar.copy(
         ausResult = validLar.ausResult.copy(
-          ausResult3 = InvalidAutomatedUnderwritingResultCode))
+          ausResult3 = new InvalidAutomatedUnderwritingResultCode))
       invalidLar3.mustFail
     }
   }

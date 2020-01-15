@@ -15,7 +15,7 @@ class V686Spec extends LarEditCheckSpec {
 
       val invalidLar = lar.copy(
         nonAmortizingFeatures = lar.nonAmortizingFeatures.copy(
-          negativeAmortization = InvalidNegativeArmotizationCode))
+          negativeAmortization = new InvalidNegativeArmotizationCode))
       invalidLar.mustFail
     }
   }

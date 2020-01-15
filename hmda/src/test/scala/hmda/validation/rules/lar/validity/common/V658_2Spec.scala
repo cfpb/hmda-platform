@@ -12,7 +12,7 @@ class V658_2Spec extends LarEditCheckSpec {
   property("HOEPA status must be valid for the action taken type") {
     forAll(larGen) { lar =>
       val unapplicableLar = lar.copy(
-        action = lar.action.copy(actionTakenType = InvalidActionTakenTypeCode))
+        action = lar.action.copy(actionTakenType = new InvalidActionTakenTypeCode))
       unapplicableLar.mustPass
 
       val applicableLar =

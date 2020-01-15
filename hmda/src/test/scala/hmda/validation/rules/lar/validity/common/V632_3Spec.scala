@@ -27,7 +27,7 @@ class V632_3Spec extends LarEditCheckSpec {
         otherHispanicOrLatino = "other"
       )
       val invalidEthnicity2 = relevantEthnicityObserved.copy(
-        ethnicity1 = InvalidEthnicityCode,
+        ethnicity1 = new InvalidEthnicityCode,
         otherHispanicOrLatino = "other"
       )
 

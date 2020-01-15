@@ -12,7 +12,7 @@ object Q629 extends EditCheck[LoanApplicationRegister] {
 
   override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(
-      lar.action.actionTakenType not oneOf(PurchasedLoan, InvalidActionTakenTypeCode) and
+      lar.action.actionTakenType not oneOf(PurchasedLoan, new InvalidActionTakenTypeCode) and
         (lar.property.totalUnits is lessThanOrEqual(4)) and
         (lar.loan.loanPurpose is oneOf(HomePurchase, HomeImprovement, OtherPurpose))
     ) {

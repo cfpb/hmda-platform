@@ -53,11 +53,11 @@ class ValidationFlowSpec extends WordSpec with MustMatchers {
     "Ethnicity of Applicant or Borrower: 4" -> "0",
     "Ethnicity of Applicant or Borrower: 5" -> "0",
     "Ethnicity of Applicant or Borrower: Free Form Text Field for Other Hispanic or Latino" -> "ZUDIP0BD1KDWWIF5E96QGIRIQLRBMLT1CEU42OY6R21HA7LDCI080",
-    "Ethnicity of Applicant or Borrower Collected on the Basis of Visual Observation or Surname" -> "-1"
+    "Ethnicity of Applicant or Borrower Collected on the Basis of Visual Observation or Surname" -> "25"
   )
   val mapV630 = ListMap(
     "Ethnicity of Applicant or Borrower: 1" -> "4",
-    "Ethnicity of Applicant or Borrower Collected on the Basis of Visual Observation or Surname" -> "-1")
+    "Ethnicity of Applicant or Borrower Collected on the Basis of Visual Observation or Surname" -> "25")
 
   val cleanRows: Seq[String] = cleanTsTxt ++ cleanLarTxt
   val errorRows: Seq[String] = errorTsTxt ++ errorLarTxt
@@ -194,7 +194,7 @@ class ValidationFlowSpec extends WordSpec with MustMatchers {
             "95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92",
             "V612-1",
             LarValidationError,
-            ListMap("Loan Purpose" -> "-1", "Preapproval" -> "2"))
+            ListMap("Loan Purpose" -> "20", "Preapproval" -> "2"))
         ))
         .request(1)
         .expectNext(List(
@@ -248,7 +248,7 @@ class ValidationFlowSpec extends WordSpec with MustMatchers {
               "95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92",
               "V612-1",
               LarValidationError,
-              ListMap("Loan Purpose" -> "-1", "Preapproval" -> "2"))))
+              ListMap("Loan Purpose" -> "20", "Preapproval" -> "2"))))
         .request(1)
         .expectNext(List(
           ValidityValidationError(

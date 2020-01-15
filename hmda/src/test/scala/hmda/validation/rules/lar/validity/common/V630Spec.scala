@@ -18,7 +18,7 @@ class V630Spec extends LarEditCheckSpec {
 
       val unapplicableLar = lar.copy(
         applicant = lar.applicant.copy(ethnicity =
-          lar.applicant.ethnicity.copy(ethnicity1 = InvalidEthnicityCode)))
+          lar.applicant.ethnicity.copy(ethnicity1 = new InvalidEthnicityCode)))
       unapplicableLar.mustPass
 
       val ethnicityNA = applicableLar.applicant.ethnicity

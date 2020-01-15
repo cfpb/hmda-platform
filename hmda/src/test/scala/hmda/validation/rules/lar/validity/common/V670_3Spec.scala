@@ -12,7 +12,7 @@ class V670_3Spec extends LarEditCheckSpec {
   property("If application is not denied, no denial reason should be provided") {
     forAll(larGen) { lar =>
       val unappLar = lar.copy(
-        action = lar.action.copy(actionTakenType = InvalidActionTakenTypeCode))
+        action = lar.action.copy(actionTakenType = new InvalidActionTakenTypeCode))
       unappLar.mustPass
 
       val appLar =

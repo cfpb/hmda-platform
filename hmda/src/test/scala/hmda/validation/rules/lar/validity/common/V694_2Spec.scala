@@ -23,7 +23,7 @@ class V694_2Spec extends LarEditCheckSpec {
         lar.copy(action = lar.action.copy(actionTakenType = PurchasedLoan))
 
       val invalidLar =
-        appLar.copy(payableToInstitution = InvalidPayableToInstitutionCode)
+        appLar.copy(payableToInstitution = new InvalidPayableToInstitutionCode)
       invalidLar.mustFail
 
       val validLar =

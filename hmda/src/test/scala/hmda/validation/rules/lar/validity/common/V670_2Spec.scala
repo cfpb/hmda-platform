@@ -20,7 +20,7 @@ class V670_2Spec extends LarEditCheckSpec {
       appLar
         .copy(
           action =
-            appLar.action.copy(actionTakenType = InvalidActionTakenTypeCode))
+            appLar.action.copy(actionTakenType = new InvalidActionTakenTypeCode))
         .mustFail
       appLar
         .copy(action = appLar.action.copy(actionTakenType = ApplicationDenied))

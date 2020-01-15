@@ -24,7 +24,7 @@ class V689_2Spec extends LarEditCheckSpec {
       appLar
         .copy(
           property = appLar.property.copy(manufacturedHomeSecuredProperty =
-            InvalidManufacturedHomeSecuredPropertyCode))
+            new InvalidManufacturedHomeSecuredPropertyCode))
         .mustFail
       appLar
         .copy(

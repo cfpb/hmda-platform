@@ -13,7 +13,7 @@ class V612_2Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       whenever(lar.action.preapproval == PreapprovalRequested) {
         val homePurchase = lar.loan.copy(loanPurpose = HomePurchase)
-        val notHP = lar.loan.copy(loanPurpose = InvalidLoanPurposeCode)
+        val notHP = lar.loan.copy(loanPurpose = new InvalidLoanPurposeCode)
 
         lar.copy(loan = homePurchase).mustPass
         lar.copy(loan = notHP).mustFail

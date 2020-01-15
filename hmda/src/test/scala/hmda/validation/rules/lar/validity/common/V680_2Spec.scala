@@ -14,7 +14,7 @@ class V680_2Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       val unappLar = lar.copy(
         applicant = lar.applicant.copy(ethnicity =
-          lar.applicant.ethnicity.copy(ethnicity1 = InvalidEthnicityCode)))
+          lar.applicant.ethnicity.copy(ethnicity1 = new InvalidEthnicityCode)))
       unappLar.mustPass
 
       val appLar = lar.copy(

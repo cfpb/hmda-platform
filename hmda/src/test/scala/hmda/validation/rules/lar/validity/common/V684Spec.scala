@@ -15,7 +15,7 @@ class V684Spec extends LarEditCheckSpec {
 
       val invalidLar = lar.copy(
         nonAmortizingFeatures = lar.nonAmortizingFeatures.copy(
-          balloonPayment = InvalidBalloonPaymentCode))
+          balloonPayment = new InvalidBalloonPaymentCode))
       invalidLar.mustFail
     }
   }

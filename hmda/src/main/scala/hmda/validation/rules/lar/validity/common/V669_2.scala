@@ -13,7 +13,7 @@ object V669_2 extends EditCheck[LoanApplicationRegister] {
   override def parent: String = "V669"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult =
-    lar.denial.denialReason2 not oneOf(DenialReasonNotApplicable, ExemptDenialReason, InvalidDenialReasonCode) and
-      (lar.denial.denialReason3 not oneOf(DenialReasonNotApplicable, ExemptDenialReason, InvalidDenialReasonCode)) and
-      (lar.denial.denialReason4 not oneOf(DenialReasonNotApplicable, ExemptDenialReason, InvalidDenialReasonCode))
+    lar.denial.denialReason2 not oneOf(DenialReasonNotApplicable, ExemptDenialReason, new InvalidDenialReasonCode) and
+      (lar.denial.denialReason3 not oneOf(DenialReasonNotApplicable, ExemptDenialReason, new InvalidDenialReasonCode)) and
+      (lar.denial.denialReason4 not oneOf(DenialReasonNotApplicable, ExemptDenialReason, new InvalidDenialReasonCode))
 }

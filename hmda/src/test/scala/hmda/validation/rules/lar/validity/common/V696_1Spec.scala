@@ -28,7 +28,7 @@ class V696_1Spec extends LarEditCheckSpec {
       invalidLar1.mustFail
 
       val invalidLar2 = validLar.copy(
-        AUS = validLar.AUS.copy(aus3 = InvalidAutomatedUnderwritingSystemCode))
+        AUS = validLar.AUS.copy(aus3 = new InvalidAutomatedUnderwritingSystemCode))
       invalidLar2.mustFail
     }
   }

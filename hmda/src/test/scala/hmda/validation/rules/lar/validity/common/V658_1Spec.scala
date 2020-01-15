@@ -12,7 +12,7 @@ class V658_1Spec extends LarEditCheckSpec {
   property("HOEPA status must be valid") {
     forAll(larGen) { lar =>
       lar.mustPass
-      val invalidLar = lar.copy(hoepaStatus = InvalidHoepaStatusCode)
+      val invalidLar = lar.copy(hoepaStatus = new InvalidHoepaStatusCode)
       invalidLar.mustFail
     }
   }
