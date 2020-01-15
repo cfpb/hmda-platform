@@ -165,42 +165,6 @@ trait HmdaDashboardHttpApi extends Settings {
                   .map(aggs => LarCountByPropertyTypeAggregationResponse(aggs))
                   .runToFuture
               )
-            } ~
-            path("filers_using_exemption_by_agency" / IntNumber) { (year) =>
-              log.info(s"Filers using exemption by agency for year=${year}")
-              complete(
-                query
-                  .fetchFilersUsingExemptionsByAgency(year)
-                  .map(aggs => FilersUsingExemptionByAgencyAggregationResponse(aggs))
-                  .runToFuture
-              )
-            } ~
-            path("denial_reason_counts_by_agency" / IntNumber) { (year) =>
-              log.info(s"Denial Reason Counts By Agency for year=${year}")
-              complete(
-                query
-                  .fetchDenialReasonCountsByAgency(year)
-                  .map(aggs => DenialReasonCountsByAgencyAggregationResponse(aggs))
-                  .runToFuture
-              )
-            } ~
-            path("lar_count_using_exemption_by_agency" / IntNumber) { (year) =>
-              log.info(s"Lar Count Using Exemption By Agency for year=${year}")
-              complete(
-                query
-                  .fetchLarCountUsingExemptionByAgency(year)
-                  .map(aggs => LarCountUsingExemptionByAgencyAggregationResponse(aggs))
-                  .runToFuture
-              )
-            } ~
-            path("open_end_credit_filers_by_agency" / IntNumber) { (year) =>
-              log.info(s"Open end credit By Agency for year=${year}")
-              complete(
-                query
-                  .fetchOpenEndCreditFilersByAgency(year)
-                  .map(aggs => OpenEndCreditByAgencyAggregationResponse(aggs))
-                  .runToFuture
-              )
             }
         }
       }
