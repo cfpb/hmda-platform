@@ -6,8 +6,6 @@ object PredicateCommon {
 
   def equalTo[A](that: A): Predicate[A] = (_: A) == that
 
-  def ofType[A](that: A): Predicate[A] = (_: A).getClass == that.getClass
-
   def greaterThan[A: Ordering](that: A): Predicate[A] =
     implicitly[Ordering[A]].gt(_: A, that)
 
