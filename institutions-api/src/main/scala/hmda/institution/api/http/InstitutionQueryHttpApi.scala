@@ -42,6 +42,8 @@ trait InstitutionQueryHttpApi extends HmdaTimeDirectives with InstitutionEmailCo
         isFilingAllowed(year,None) {
         val fInstitution = if (year == 2018) {
           institutionRepository2018.findById(lei)
+        } else if (year == 2020) {
+          institutionRepository2020.findById(lei)
         } else {
           institutionRepository2019.findById(lei)
         }
