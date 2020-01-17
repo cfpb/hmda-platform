@@ -724,7 +724,10 @@ object HmdaValidationError
       maybeInst <- fInstitution
     } yield {
       val institution         = maybeInst.getOrElse(Institution.empty)
-      val modifiedInstitution = institution.copy(hmdaFiler = true)
+      var modifiedInstitution = institution.copy(hmdaFiler = true)
+      if(institution.quarterlyFiler==true){
+        modifiedInstitution = institution.copy(quarterlyFilerHasFiled = true)
+      }
       if (institution.LEI.nonEmpty) {
         val modified: Future[InstitutionEvent] =
           institutionPersistence ? (ref => ModifyInstitution(modifiedInstitution, ref))

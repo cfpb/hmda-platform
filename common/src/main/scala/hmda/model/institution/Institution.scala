@@ -20,7 +20,8 @@ object Institution {
     otherLenderCode = -1,
     topHolder = TopHolder.empty,
     hmdaFiler = false,
-    quarterlyFiler = false
+    quarterlyFiler = false,
+    quarterlyFilerHasFiled = false
   )
 
   implicit val institutionEncoder: Encoder[Institution] =
@@ -40,7 +41,9 @@ object Institution {
         ("otherLenderCode", Json.fromInt(i.otherLenderCode)),
         ("topHolder", i.topHolder.asJson),
         ("hmdaFiler", Json.fromBoolean(i.hmdaFiler)),
-        ("quarterlyFiler", Json.fromBoolean(i.quarterlyFiler))
+        ("quarterlyFiler", Json.fromBoolean(i.quarterlyFiler)),
+        ("quarterlyFilerHasFiled", Json.fromBoolean(i.quarterlyFiler))
+
       )
 
   implicit val institutionDecoder: Decoder[Institution] =
@@ -61,6 +64,7 @@ object Institution {
         topHolder              <- c.downField("topHolder").as[TopHolder]
         hmdaFiler              <- c.downField("hmdaFiler").as[Boolean]
         quarterlyFiler         <- c.downField("quarterlyFiler").as[Boolean]
+        quarterlyFilerHasFiled <- c.downField("quarterlyFilerHasFiled").as[Boolean]
       } yield {
         val institutionId2017 =
           if (maybeInstitutionId2017 == "") None
@@ -82,7 +86,8 @@ object Institution {
           otherLenderCode,
           topHolder,
           hmdaFiler,
-          quarterlyFiler
+          quarterlyFiler,
+          quarterlyFilerHasFiled
         )
       }
 }
@@ -102,7 +107,8 @@ case class Institution(
   otherLenderCode: Int,
   topHolder: TopHolder,
   hmdaFiler: Boolean,
-  quarterlyFiler: Boolean
+  quarterlyFiler: Boolean,
+  quarterlyFilerHasFiled: Boolean
 ) {
   def toCSV: String =
     s"$activityYear|$LEI|${agency.code}|${institutionType.code}|" +
@@ -111,7 +117,7 @@ case class Institution(
       s"${respondent.name.getOrElse("")}|${respondent.state.getOrElse("")}|${respondent.city
         .getOrElse("")}|" +
       s"${parent.idRssd}|${parent.name.getOrElse("")}|$assets|${otherLenderCode}|" +
-      s"${topHolder.idRssd}|${topHolder.name.getOrElse("")}|$hmdaFiler|$quarterlyFiler"
+      s"${topHolder.idRssd}|${topHolder.name.getOrElse("")}|$hmdaFiler|$quarterlyFiler|$quarterlyFilerHasFiled"
 
   def valueOf(field: String): String =
     InstitutionFieldMapping
