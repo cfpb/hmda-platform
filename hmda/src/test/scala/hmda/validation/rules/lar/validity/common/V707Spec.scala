@@ -13,7 +13,7 @@ class V707Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       lar.mustPass
       lar
-        .copy(lineOfCredit = InvalidLineOfCreditCode)
+        .copy(lineOfCredit = new InvalidLineOfCreditCode)
         .mustFail
     }
   }

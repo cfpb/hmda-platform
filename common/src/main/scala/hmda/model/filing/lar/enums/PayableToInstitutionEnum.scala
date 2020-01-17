@@ -11,7 +11,7 @@ object PayableToInstitutionEnum extends LarCodeEnum[PayableToInstitutionEnum] {
       case 2    => NotInitiallyPayableToInstitution
       case 3    => PayableToInstitutionNotApplicable
       case 1111 => PayableToInstitutionExempt
-      case _    => InvalidPayableToInstitutionCode
+      case other   => new InvalidPayableToInstitutionCode(other)
     }
 }
 
@@ -35,7 +35,12 @@ case object PayableToInstitutionExempt extends PayableToInstitutionEnum {
   override def description: String = "Exempt Payable to Institution"
 }
 
-case object InvalidPayableToInstitutionCode extends PayableToInstitutionEnum {
-  override def code: Int           = -1
+class InvalidPayableToInstitutionCode(value: Int = -1) extends PayableToInstitutionEnum {
+  override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidPayableToInstitutionCode => true
+            case _ => false
+        }
 }

@@ -7,9 +7,9 @@ import io.circe.syntax._
 case class Property(
                      propertyValue: String = "",
                      manufacturedHomeSecuredProperty: ManufacturedHomeSecuredPropertyEnum =
-                     InvalidManufacturedHomeSecuredPropertyCode,
+                     new InvalidManufacturedHomeSecuredPropertyCode,
                      manufacturedHomeLandPropertyInterest: ManufacturedHomeLandPropertyInterestEnum =
-                     InvalidManufacturedHomeLandPropertyCode,
+                     new InvalidManufacturedHomeLandPropertyCode,
                      totalUnits: Int = 0,
                      multiFamilyAffordableUnits: String = ""
                    )

@@ -20,7 +20,7 @@ class V638_2Spec extends LarEditCheckSpec {
       val invalidRace =
         lar.coApplicant.race.copy(race2 = EmptyRaceValue,
                                   race3 = RaceNotApplicable,
-                                  race4 = InvalidRaceCode,
+                                  race4 = new InvalidRaceCode,
                                   race5 = EmptyRaceValue)
 
       val validLar =

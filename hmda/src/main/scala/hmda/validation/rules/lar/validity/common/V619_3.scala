@@ -16,7 +16,7 @@ object V619_3 extends EditCheck[LoanApplicationRegister] {
 
   override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(
-      lar.action.actionTakenType not oneOf(PurchasedLoan, InvalidActionTakenTypeCode) and
+      lar.action.actionTakenType not oneOf(PurchasedLoan, new InvalidActionTakenTypeCode) and
         (lar.loan.applicationDate not equalTo("NA"))
     ) {
       val appDate = Try(lar.loan.applicationDate.toInt).getOrElse(Int.MaxValue)

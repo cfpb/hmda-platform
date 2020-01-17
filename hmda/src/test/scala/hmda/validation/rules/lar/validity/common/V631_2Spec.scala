@@ -20,7 +20,7 @@ class V631_2Spec extends LarEditCheckSpec {
       val invalidEthnicity =
         lar.coApplicant.ethnicity.copy(ethnicity2 = EmptyEthnicityValue,
                                        ethnicity3 = EthnicityNoCoApplicant,
-                                       ethnicity4 = InvalidEthnicityCode,
+                                       ethnicity4 = new InvalidEthnicityCode,
                                        ethnicity5 = EmptyEthnicityValue)
 
       val validLar =

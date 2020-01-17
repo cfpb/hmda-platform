@@ -5,8 +5,8 @@ import io.circe._
 import io.circe.syntax._
 
 case class LarAction(
-                      preapproval: PreapprovalEnum = InvalidPreapprovalCode,
-                      actionTakenType: ActionTakenTypeEnum = InvalidActionTakenTypeCode,
+                      preapproval: PreapprovalEnum = new InvalidPreapprovalCode,
+                      actionTakenType: ActionTakenTypeEnum = new InvalidActionTakenTypeCode,
                       actionTakenDate: Int = 0
                     )
 

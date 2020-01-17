@@ -13,7 +13,7 @@ class V706Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       lar.mustPass
       lar
-        .copy(reverseMortgage = InvalidMortgageTypeCode)
+        .copy(reverseMortgage = new InvalidMortgageTypeCode)
         .mustFail
     }
   }

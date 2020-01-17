@@ -16,7 +16,7 @@ class V615_2Spec extends LarEditCheckSpec {
       whenever(list.contains(lar.property.manufacturedHomeLandPropertyInterest)) {
         val manufactured = lar.loan.copy(constructionMethod = ManufacturedHome)
         val notManufactured =
-          lar.loan.copy(constructionMethod = InvalidConstructionMethodCode)
+          lar.loan.copy(constructionMethod = new InvalidConstructionMethodCode)
 
         lar.copy(loan = manufactured).mustPass
         lar.copy(loan = notManufactured).mustFail

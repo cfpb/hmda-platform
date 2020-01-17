@@ -13,12 +13,12 @@ class V661Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       val passingLar = lar.copy(
         applicant = lar.applicant
-          .copy(creditScore = 1, creditScoreType = InvalidCreditScoreCode))
+          .copy(creditScore = 1, creditScoreType = new InvalidCreditScoreCode))
       passingLar.mustPass
 
       val creditScoreNALar = lar.copy(
         applicant = lar.applicant
-          .copy(creditScore = 8888, creditScoreType = InvalidCreditScoreCode))
+          .copy(creditScore = 8888, creditScoreType = new InvalidCreditScoreCode))
       creditScoreNALar.mustFail
 
       val creditScoreTypeNALar = lar.copy(

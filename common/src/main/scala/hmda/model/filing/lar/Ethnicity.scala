@@ -5,13 +5,13 @@ import io.circe._
 import io.circe.syntax._
 
 case class Ethnicity(
-                      ethnicity1: EthnicityEnum = InvalidEthnicityCode,
-                      ethnicity2: EthnicityEnum = InvalidEthnicityCode,
-                      ethnicity3: EthnicityEnum = InvalidEthnicityCode,
-                      ethnicity4: EthnicityEnum = InvalidEthnicityCode,
-                      ethnicity5: EthnicityEnum = InvalidEthnicityCode,
+                      ethnicity1: EthnicityEnum = new InvalidEthnicityCode,
+                      ethnicity2: EthnicityEnum = new InvalidEthnicityCode,
+                      ethnicity3: EthnicityEnum = new InvalidEthnicityCode,
+                      ethnicity4: EthnicityEnum = new InvalidEthnicityCode,
+                      ethnicity5: EthnicityEnum = new InvalidEthnicityCode,
                       otherHispanicOrLatino: String = "",
-                      ethnicityObserved: EthnicityObservedEnum = InvalidEthnicityObservedCode
+                      ethnicityObserved: EthnicityObservedEnum = new InvalidEthnicityObservedCode
                     )
 
 object Ethnicity {

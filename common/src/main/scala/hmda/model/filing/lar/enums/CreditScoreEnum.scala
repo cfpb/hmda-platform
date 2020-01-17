@@ -18,7 +18,7 @@ object CreditScoreEnum extends LarCodeEnum[CreditScoreEnum] {
       case 9    => CreditScoreNotApplicable
       case 10   => CreditScoreNoCoApplicant
       case 1111 => CreditScoreExempt
-      case _    => InvalidCreditScoreCode
+      case other    => new InvalidCreditScoreCode(other)
     }
 }
 
@@ -77,7 +77,12 @@ case object CreditScoreExempt extends CreditScoreEnum {
   override def description: String = "Exempt Credit Score"
 }
 
-case object InvalidCreditScoreCode extends CreditScoreEnum {
-  override def code: Int           = -1
+class InvalidCreditScoreCode(value: Int = -1) extends CreditScoreEnum {
+  override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidCreditScoreCode => true
+            case _ => false
+        }
 }

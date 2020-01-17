@@ -20,7 +20,7 @@ class Q613Spec extends LarEditCheckSpec {
         businessOrCommercialPurpose = PrimarilyBusinessOrCommercialPurpose)
       appLar.copy(loan = appLar.loan.copy(loanPurpose = HomePurchase)).mustPass
       appLar
-        .copy(loan = appLar.loan.copy(loanPurpose = InvalidLoanPurposeCode))
+        .copy(loan = appLar.loan.copy(loanPurpose = new InvalidLoanPurposeCode))
         .mustFail
     }
   }

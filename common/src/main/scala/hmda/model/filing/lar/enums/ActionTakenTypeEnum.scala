@@ -15,7 +15,7 @@ object ActionTakenTypeEnum extends LarCodeEnum[ActionTakenTypeEnum] {
       case 6 => PurchasedLoan
       case 7 => PreapprovalRequestDenied
       case 8 => PreapprovalRequestApprovedButNotAccepted
-      case _ => InvalidActionTakenTypeCode
+      case other => new InvalidActionTakenTypeCode(other)
     }
 }
 
@@ -60,7 +60,13 @@ case object PreapprovalRequestApprovedButNotAccepted extends ActionTakenTypeEnum
     "Preapproval request approved but not accepted"
 }
 
-case object InvalidActionTakenTypeCode extends ActionTakenTypeEnum {
-  override def code: Int           = -1
+class InvalidActionTakenTypeCode(value: Int = -1) extends ActionTakenTypeEnum {
+  override def code: Int           = value
   override def description: String = "Invalid code"
+
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidActionTakenTypeCode => true
+            case _ => false
+        }
 }

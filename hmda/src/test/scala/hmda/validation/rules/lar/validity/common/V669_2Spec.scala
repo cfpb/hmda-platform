@@ -12,13 +12,13 @@ class V669_2Spec extends LarEditCheckSpec {
   property("Denial reason 2-4 must be valid") {
     forAll(larGen) { lar =>
       lar
-        .copy(denial = lar.denial.copy(denialReason2 = InvalidDenialReasonCode))
+        .copy(denial = lar.denial.copy(denialReason2 = new InvalidDenialReasonCode))
         .mustFail
       lar
-        .copy(denial = lar.denial.copy(denialReason3 = InvalidDenialReasonCode))
+        .copy(denial = lar.denial.copy(denialReason3 = new InvalidDenialReasonCode))
         .mustFail
       lar
-        .copy(denial = lar.denial.copy(denialReason4 = InvalidDenialReasonCode))
+        .copy(denial = lar.denial.copy(denialReason4 = new InvalidDenialReasonCode))
         .mustFail
 
       lar

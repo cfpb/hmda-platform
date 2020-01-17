@@ -189,8 +189,8 @@ class LarFormatValidatorSpec
                                 InvalidDenial(1, invalidDenial)) mustBe Invalid(
       NonEmptyList.of(InvalidDenial(1, invalidDenial))
     )
-    validateLarCodeOrEmptyField(DenialReasonEnum, "-1", InvalidDenial(1, "-1")) mustBe Valid(
-      InvalidDenialReasonCode)
+    validateLarCodeOrEmptyField(DenialReasonEnum, "-1", InvalidDenial(1, "-1")).toOption.get.getClass mustBe
+      (new InvalidDenialReasonCode).getClass
   }
   property("InvalidTotalLoanCosts") {
     val invalidTotalLoanCosts = badValue()
@@ -387,8 +387,8 @@ class LarFormatValidatorSpec
     validateLarCodeOrEmptyField(
       AutomatedUnderwritingResultEnum,
       "-1",
-      InvalidAutomatedUnderwritingSystem(1, "-1")) mustBe Valid(
-      InvalidAutomatedUnderwritingResultCode)
+      InvalidAutomatedUnderwritingSystem(1, "-1")).toOption.get.getClass mustBe (
+      new InvalidAutomatedUnderwritingResultCode).getClass
 
   }
   property("InvalidAutomatedUnderwritingSystemResult 1") {
@@ -428,8 +428,8 @@ class LarFormatValidatorSpec
     validateLarCodeOrEmptyField(
       AutomatedUnderwritingResultEnum,
       "-1",
-      InvalidAutomatedUnderwritingSystemResult(1, "-1")) mustBe Valid(
-      InvalidAutomatedUnderwritingResultCode)
+      InvalidAutomatedUnderwritingSystemResult(1, "-1")).toOption.get.getClass mustBe (
+      new InvalidAutomatedUnderwritingResultCode).getClass
   }
   property("InvalidMortgageType") {
     val invalidMortgageType = badValue()

@@ -14,7 +14,7 @@ class V708Spec extends LarEditCheckSpec {
       lar.mustPass
       lar
         .copy(
-          businessOrCommercialPurpose = InvalidBusinessOrCommercialBusinessCode)
+          businessOrCommercialPurpose = new InvalidBusinessOrCommercialBusinessCode)
         .mustFail
     }
   }

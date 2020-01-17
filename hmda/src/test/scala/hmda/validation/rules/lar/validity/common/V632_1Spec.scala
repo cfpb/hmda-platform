@@ -11,7 +11,7 @@ class V632_1Spec extends LarEditCheckSpec {
   property("The Ethnicity of Coapplication Observed Code must be Valid") {
     forAll(larGen) { lar =>
       val invalidEthnicity1 = lar.coApplicant.ethnicity
-        .copy(ethnicityObserved = InvalidEthnicityObservedCode)
+        .copy(ethnicityObserved = new InvalidEthnicityObservedCode)
       val validEthnicity = lar.coApplicant.ethnicity
         .copy(ethnicityObserved = VisualOrSurnameEthnicity)
       val invalidLar1 =

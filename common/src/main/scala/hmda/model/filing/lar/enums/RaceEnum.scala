@@ -28,7 +28,7 @@ object RaceEnum extends LarCodeEnum[RaceEnum] {
       case 6  => RaceInformationNotProvided
       case 7  => RaceNotApplicable
       case 8  => RaceNoCoApplicant
-      case _  => InvalidRaceCode
+      case other  => new InvalidRaceCode(other)
     }
 }
 
@@ -133,7 +133,12 @@ case object RaceNoCoApplicant extends RaceEnum {
   override val description: String = "No co-applicant"
 }
 
-case object InvalidRaceCode extends RaceEnum {
-  override def code: Int           = -1
+class InvalidRaceCode(value: Int = -1) extends RaceEnum {
+  override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidRaceCode => true
+            case _ => false
+        }
 }

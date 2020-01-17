@@ -13,7 +13,7 @@ class V615_1Spec extends LarEditCheckSpec {
     forAll(larGen) { l =>
       l.mustPass
       val badLoan =
-        l.loan.copy(constructionMethod = InvalidConstructionMethodCode)
+        l.loan.copy(constructionMethod = new InvalidConstructionMethodCode)
       l.copy(loan = badLoan).mustFail
     }
   }

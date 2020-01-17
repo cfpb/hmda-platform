@@ -25,7 +25,7 @@ class V635_1Spec extends LarEditCheckSpec {
       val raceValid = applicableLar.applicant.race
         .copy(race1 = AmericanIndianOrAlaskaNative)
       val raceInvalid = applicableLar.applicant.race
-        .copy(race1 = InvalidRaceCode)
+        .copy(race1 = new InvalidRaceCode)
       lar
         .copy(applicant = applicableLar.applicant.copy(race = raceValid))
         .mustPass

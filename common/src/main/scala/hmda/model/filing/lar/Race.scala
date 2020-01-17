@@ -5,15 +5,15 @@ import io.circe._
 import io.circe.syntax._
 
 case class Race(
-                 race1: RaceEnum = InvalidRaceCode,
-                 race2: RaceEnum = InvalidRaceCode,
-                 race3: RaceEnum = InvalidRaceCode,
-                 race4: RaceEnum = InvalidRaceCode,
-                 race5: RaceEnum = InvalidRaceCode,
+                 race1: RaceEnum = new InvalidRaceCode,
+                 race2: RaceEnum = new InvalidRaceCode,
+                 race3: RaceEnum = new InvalidRaceCode,
+                 race4: RaceEnum = new InvalidRaceCode,
+                 race5: RaceEnum = new InvalidRaceCode,
                  otherNativeRace: String = "",
                  otherAsianRace: String = "",
                  otherPacificIslanderRace: String = "",
-                 raceObserved: RaceObservedEnum = InvalidRaceObservedCode
+                 raceObserved: RaceObservedEnum = new InvalidRaceObservedCode
                )
 
 object Race {

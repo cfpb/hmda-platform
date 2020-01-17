@@ -11,7 +11,7 @@ object BusinessOrCommercialBusinessEnum
       case 1    => PrimarilyBusinessOrCommercialPurpose
       case 2    => NotPrimarilyBusinessOrCommercialPurpose
       case 1111 => ExemptBusinessOrCommercialPurpose
-      case _    => InvalidBusinessOrCommercialBusinessCode
+      case other    => new InvalidBusinessOrCommercialBusinessCode(other)
     }
 }
 
@@ -32,7 +32,12 @@ case object ExemptBusinessOrCommercialPurpose extends BusinessOrCommercialBusine
   override def description: String = "Exempt business or commercial purpose"
 }
 
-case object InvalidBusinessOrCommercialBusinessCode extends BusinessOrCommercialBusinessEnum {
-  override def code: Int           = -1
+class InvalidBusinessOrCommercialBusinessCode(value: Int = -1) extends BusinessOrCommercialBusinessEnum {
+  override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidBusinessOrCommercialBusinessCode => true
+            case _ => false
+        }
 }

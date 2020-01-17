@@ -13,5 +13,5 @@ object V690_1 extends EditCheck[LoanApplicationRegister] {
   override def parent: String = "V690"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult =
-    lar.property.manufacturedHomeLandPropertyInterest not equalTo(InvalidManufacturedHomeLandPropertyCode)
+    lar.property.manufacturedHomeLandPropertyInterest not equalTo(new InvalidManufacturedHomeLandPropertyCode)
 }

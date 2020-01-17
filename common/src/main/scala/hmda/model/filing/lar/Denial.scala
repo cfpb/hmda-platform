@@ -5,10 +5,10 @@ import io.circe._
 import io.circe.syntax._
 
 case class Denial(
-                   denialReason1: DenialReasonEnum = InvalidDenialReasonCode,
-                   denialReason2: DenialReasonEnum = InvalidDenialReasonCode,
-                   denialReason3: DenialReasonEnum = InvalidDenialReasonCode,
-                   denialReason4: DenialReasonEnum = InvalidDenialReasonCode,
+                   denialReason1: DenialReasonEnum = new InvalidDenialReasonCode,
+                   denialReason2: DenialReasonEnum = new InvalidDenialReasonCode,
+                   denialReason3: DenialReasonEnum = new InvalidDenialReasonCode,
+                   denialReason4: DenialReasonEnum = new InvalidDenialReasonCode,
                    otherDenialReason: String = ""
                  )
 

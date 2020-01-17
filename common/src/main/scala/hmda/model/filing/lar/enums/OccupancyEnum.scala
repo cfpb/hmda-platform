@@ -10,7 +10,7 @@ object OccupancyEnum extends LarCodeEnum[OccupancyEnum] {
       case 1 => PrincipalResidence
       case 2 => SecondResidence
       case 3 => InvestmentProperty
-      case _ => InvalidOccupancyCode
+      case other => new InvalidOccupancyCode(other)
     }
 }
 
@@ -29,7 +29,12 @@ case object InvestmentProperty extends OccupancyEnum {
   override val description: String = "Investment Property"
 }
 
-case object InvalidOccupancyCode extends OccupancyEnum {
-  override def code: Int           = -1
+class InvalidOccupancyCode(value: Int = -1) extends OccupancyEnum {
+  override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidOccupancyCode => true
+            case _ => false
+        }
 }

@@ -17,13 +17,13 @@ class V645Spec extends LarEditCheckSpec {
 
       val unapplicableLar = lar.copy(
         applicant = lar.applicant.copy(
-          sex = lar.applicant.sex.copy(sexEnum = InvalidSexCode)))
+          sex = lar.applicant.sex.copy(sexEnum = new InvalidSexCode)))
       unapplicableLar.mustPass
 
       val sexNA = applicableLar.applicant.sex
         .copy(sexObservedEnum = SexObservedNotApplicable)
       val sexNotProvided = applicableLar.applicant.sex
-        .copy(sexObservedEnum = InvalidSexObservedCode)
+        .copy(sexObservedEnum = new InvalidSexObservedCode)
       lar
         .copy(applicant = applicableLar.applicant.copy(sex = sexNA))
         .mustPass

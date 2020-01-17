@@ -13,7 +13,7 @@ class V652_2Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       val unapplicableLar1 = lar.copy(
         coApplicant = lar.coApplicant.copy(
-          race = lar.coApplicant.race.copy(race1 = InvalidRaceCode)))
+          race = lar.coApplicant.race.copy(race1 = new InvalidRaceCode)))
       unapplicableLar1.mustPass
       val unapplicableLar2 =
         lar.copy(action = lar.action.copy(actionTakenType = PurchasedLoan))
