@@ -122,3 +122,6 @@ affinity:
           - "hmda-platform"
           - "keycloak"
       topologyKey: kubernetes.io/hostname
+
+logs:
+  cassandra: TRACE
