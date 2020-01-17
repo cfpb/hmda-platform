@@ -39,15 +39,13 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
         select count(*) from #${yearToFetch} where hmda_filer = true
         and lei not in (#${filterList});
         """.as[TotalFilers]
-      print()
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
   def fetchTotalLars(year: Int): Task[Seq[TotalLars]] = {
     val larTable = larTableSelector(year)
     val query = sql"""
-        select count(*) from #${larTable}
-        where lei NOT IN (#${filterList});
+        select count(*) from #${larTable} where lei NOT IN (#${filterList});
         """.as[TotalLars]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
@@ -174,6 +172,26 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
       """.as[OpenEndCreditByAgency]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
+
+  def fetchFilersWithOnlyOpenEndCreditTransactions(year: Int): Task[Seq[FilersWithOnlyOpenEndCreditTransactions]] = {
+    val tsTable = tsTableSelector(year)
+    val larTable = larTableSelector(year)
+    val query = sql"""
+      SELECT agency, count(*) FROM #${tsTable} AS ts WHERE UPPER(lei) IN ( SELECT lei FROM #${larTable} AS lar GROUP BY lei having sum(case when line_of_credits=2 or line_of_credits=1111 then 1 else 0 end) <=0) GROUP BY ts.agency
+            """.as[FilersWithOnlyOpenEndCreditTransactions]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  // TODO:
+  def fetchFilersWithOnlyClosedEndCreditTransactions(year: Int): Task[Seq[FilersWithOnlyClosedEndCreditTransactions]] = {
+    val tsTable = tsTableSelector(year)
+    val larTable = larTableSelector(year)
+    val query = sql"""
+      SELECT ts.agency, ts.institution_name FROM #${tsTable} AS ts LEFT JOIN #${larTable} AS lar ON UPPER(ts.lei) = UPPER(lar.lei) GROUP BY ts.lei, ts.agency HAVING SUM(CASE WHEN line_of_credits=2 OR line_of_credits=1111 THEN 1 ELSE 0 END) = 0 AND SUM(CASE WHEN line_of_credits=1 THEN 1 ELSE 0 END) > 0
+      """.as[FilersWithOnlyClosedEndCreditTransactions]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
 
   def healthCheck: Task[Unit] = {
     Task.deferFuture (db.run (sql"SELECT 1".as[Int] ) ).guarantee (Task.shift).void

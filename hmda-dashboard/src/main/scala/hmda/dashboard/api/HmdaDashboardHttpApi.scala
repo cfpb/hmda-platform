@@ -201,6 +201,24 @@ trait HmdaDashboardHttpApi extends Settings {
                   .map(aggs => OpenEndCreditByAgencyAggregationResponse(aggs))
                   .runToFuture
               )
+            } ~
+            path("filers_with_only_open_end_credit_transactions" / IntNumber) { (year) =>
+              log.info(s"Filers With Only Open End Credit Transactions for year=${year}")
+              complete(
+                query
+                  .fetchFilersWithOnlyOpenEndCreditTransactions(year)
+                  .map(aggs => FilersWithOnlyOpenEndCreditTransactionsAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("filers_with_only_closed_end_credit_transactions" / IntNumber) { (year) =>
+              log.info(s"Filers With Only Closed End Credit Transactions for year=${year}")
+              complete(
+                query
+                  .fetchFilersWithOnlyClosedEndCreditTransactions(year)
+                  .map(aggs => FilersWithOnlyClosedEndCreditTransactionsAggregationResponse(aggs))
+                  .runToFuture
+              )
             }
         }
       }

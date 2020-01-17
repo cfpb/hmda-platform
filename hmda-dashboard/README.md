@@ -17,4 +17,5 @@
 - /dashboard/denial_reason_counts_by_agency/{{year}}
 - /dashboard/lar_count_using_exemption_by_agency/{{year}}
 - /dashboard/open_end_credit_filers_by_agency/{{year}}
-
+- /dashboard/filers_with_only_open_end_credit_transactions/{{year}}
+- /dashboard/filers_with_only_closed_end_credit_transactions/{{year}}
