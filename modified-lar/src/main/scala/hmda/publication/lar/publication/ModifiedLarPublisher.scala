@@ -95,6 +95,7 @@ object ModifiedLarPublisher {
             "and isCreateDispositionRecord set to " + isCreateDispositionRecord)
 
           val fileName = s"${submissionId.lei.toUpperCase()}.txt"
+          val fileNameHeader = s"${submissionId.lei.toUpperCase()}_header.txt"
           val filingPeriod= s"${submissionId.period}"
 
           val metaHeaders: Map[String, String] =
@@ -104,6 +105,12 @@ object ModifiedLarPublisher {
             .multipartUpload(bucket,
                              s"$environment/modified-lar/$filingPeriod/$fileName",
                              metaHeaders = MetaHeaders(metaHeaders))
+            .withAttributes(S3Attributes.settings(s3Settings))
+
+          val s3SinkHeaders = S3
+            .multipartUpload(bucket,
+              s"$environment/modified-lar/$filingPeriod/$fileNameHeader",
+              metaHeaders = MetaHeaders(metaHeaders))
             .withAttributes(S3Attributes.settings(s3Settings))
 
           def removeLei: Future[Int] =
@@ -116,11 +123,12 @@ object ModifiedLarPublisher {
               .map(s => ModifiedLarCsvParser(s))
 
           val s3Out: Sink[ModifiedLoanApplicationRegister,
-                          Future[MultipartUploadResult]] =
-            Flow[ModifiedLoanApplicationRegister]
-              .map(mlar => mlar.toCSV + "\n")
-              .map(ByteString(_))
-              .toMat(s3Sink)(Keep.right)
+                          Future[MultipartUploadResult]] = {
+                Flow[ModifiedLoanApplicationRegister]
+                  .map(mlar => mlar.toCSV + "\n")
+                  .map(ByteString(_))
+                  .toMat(s3Sink)(Keep.right)
+            }
 
           def postgresOut(parallelism: Int)
             : Sink[ModifiedLoanApplicationRegister, Future[Done]] =
