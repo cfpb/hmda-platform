@@ -17,13 +17,13 @@ class V640Spec extends LarEditCheckSpec {
 
       val unapplicableLar = lar.copy(
         coApplicant = lar.coApplicant.copy(
-          race = lar.coApplicant.race.copy(race1 = InvalidRaceCode)))
+          race = lar.coApplicant.race.copy(race1 = new InvalidRaceCode)))
       unapplicableLar.mustPass
 
       val raceNA = applicableLar.coApplicant.race
         .copy(raceObserved = RaceObservedNotApplicable)
       val raceVis = applicableLar.coApplicant.race
-        .copy(raceObserved = InvalidRaceObservedCode)
+        .copy(raceObserved = new InvalidRaceObservedCode)
       lar
         .copy(coApplicant = applicableLar.coApplicant.copy(race = raceNA))
         .mustPass

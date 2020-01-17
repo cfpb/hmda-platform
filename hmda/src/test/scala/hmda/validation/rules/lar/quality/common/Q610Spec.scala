@@ -29,7 +29,7 @@ class Q610Spec extends LarEditCheckSpec {
       val validLar = appLar.copy(hoepaStatus = HighCostMortgage)
       validLar.mustPass
 
-      val invalidLar = appLar.copy(hoepaStatus = InvalidHoepaStatusCode)
+      val invalidLar = appLar.copy(hoepaStatus = new InvalidHoepaStatusCode)
       invalidLar.mustFail
     }
   }

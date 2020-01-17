@@ -13,24 +13,24 @@ case class LoanApplicationRegister(
                                     applicant: Applicant = Applicant(),
                                     coApplicant: Applicant = Applicant(),
                                     income: String = "",
-                                    purchaserType: PurchaserEnum = InvalidPurchaserCode,
-                                    hoepaStatus: HOEPAStatusEnum = InvalidHoepaStatusCode,
-                                    lienStatus: LienStatusEnum = InvalidLienStatusCode,
+                                    purchaserType: PurchaserEnum = new InvalidPurchaserCode,
+                                    hoepaStatus: HOEPAStatusEnum = new InvalidHoepaStatusCode,
+                                    lienStatus: LienStatusEnum = new InvalidLienStatusCode,
                                     denial: Denial = Denial(),
                                     loanDisclosure: LoanDisclosure = LoanDisclosure(),
                                     nonAmortizingFeatures: NonAmortizingFeatures = NonAmortizingFeatures(),
                                     property: Property = Property(),
                                     applicationSubmission: ApplicationSubmissionEnum =
-                                    InvalidApplicationSubmissionCode,
+                                    new InvalidApplicationSubmissionCode,
                                     payableToInstitution: PayableToInstitutionEnum =
-                                    InvalidPayableToInstitutionCode,
+                                    new InvalidPayableToInstitutionCode,
                                     AUS: AutomatedUnderwritingSystem = AutomatedUnderwritingSystem(),
                                     ausResult: AutomatedUnderwritingSystemResult =
                                     AutomatedUnderwritingSystemResult(),
-                                    reverseMortgage: MortgageTypeEnum = InvalidMortgageTypeCode,
-                                    lineOfCredit: LineOfCreditEnum = InvalidLineOfCreditCode,
+                                    reverseMortgage: MortgageTypeEnum = new InvalidMortgageTypeCode,
+                                    lineOfCredit: LineOfCreditEnum = new InvalidLineOfCreditCode,
                                     businessOrCommercialPurpose: BusinessOrCommercialBusinessEnum =
-                                    InvalidBusinessOrCommercialBusinessCode
+                                    new InvalidBusinessOrCommercialBusinessCode
                                   ) extends PipeDelimited
   with HmdaFileRow {
 

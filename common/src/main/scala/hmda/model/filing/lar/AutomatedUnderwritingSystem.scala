@@ -7,15 +7,15 @@ import io.circe.syntax._
 
 case class AutomatedUnderwritingSystem(
                                         aus1: AutomatedUnderwritingSystemEnum =
-                                        InvalidAutomatedUnderwritingSystemCode,
+                                        new InvalidAutomatedUnderwritingSystemCode,
                                         aus2: AutomatedUnderwritingSystemEnum =
-                                        InvalidAutomatedUnderwritingSystemCode,
+                                        new InvalidAutomatedUnderwritingSystemCode,
                                         aus3: AutomatedUnderwritingSystemEnum =
-                                        InvalidAutomatedUnderwritingSystemCode,
+                                        new InvalidAutomatedUnderwritingSystemCode,
                                         aus4: AutomatedUnderwritingSystemEnum =
-                                        InvalidAutomatedUnderwritingSystemCode,
+                                        new InvalidAutomatedUnderwritingSystemCode,
                                         aus5: AutomatedUnderwritingSystemEnum =
-                                        InvalidAutomatedUnderwritingSystemCode,
+                                        new InvalidAutomatedUnderwritingSystemCode,
                                         otherAUS: String = ""
                                       ) extends PipeDelimited {
   override def toCSV: String = {

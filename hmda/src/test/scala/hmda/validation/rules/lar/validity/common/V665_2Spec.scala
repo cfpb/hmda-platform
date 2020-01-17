@@ -16,7 +16,7 @@ class V665_2Spec extends LarEditCheckSpec {
       lar
         .copy(
           coApplicant =
-            lar.coApplicant.copy(creditScoreType = InvalidCreditScoreCode))
+            lar.coApplicant.copy(creditScoreType = new InvalidCreditScoreCode))
         .mustFail
     }
   }

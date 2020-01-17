@@ -18,7 +18,7 @@ class V613_1Spec extends LarEditCheckSpec {
   property("Preapproval must fail if not equal to 1 or 2") {
     forAll(larGen) { lar =>
       lar
-        .copy(action = lar.action.copy(preapproval = InvalidPreapprovalCode))
+        .copy(action = lar.action.copy(preapproval = new InvalidPreapprovalCode))
         .mustFail
     }
   }

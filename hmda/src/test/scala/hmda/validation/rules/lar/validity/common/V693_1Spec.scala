@@ -13,7 +13,7 @@ class V693_1Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       lar.mustPass
       val invalidLar =
-        lar.copy(applicationSubmission = InvalidApplicationSubmissionCode)
+        lar.copy(applicationSubmission = new InvalidApplicationSubmissionCode)
       invalidLar.mustFail
     }
   }

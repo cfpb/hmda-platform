@@ -12,7 +12,7 @@ class V659Spec extends LarEditCheckSpec {
   property("Lein status must be valid") {
     forAll(larGen) { lar =>
       lar.mustPass
-      val invalidLar = lar.copy(lienStatus = InvalidLienStatusCode)
+      val invalidLar = lar.copy(lienStatus = new InvalidLienStatusCode)
       invalidLar.mustFail
     }
   }

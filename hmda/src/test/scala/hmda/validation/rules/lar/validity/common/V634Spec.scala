@@ -21,7 +21,7 @@ class V634Spec extends LarEditCheckSpec {
       val invalidEthnicityLar = lar.copy(
         coApplicant = lar.coApplicant.copy(
           ethnicity = lar.coApplicant.ethnicity.copy(
-            ethnicity1 = InvalidEthnicityCode,
+            ethnicity1 = new InvalidEthnicityCode,
             ethnicityObserved = EthnicityObservedNoCoApplicant)))
       invalidEthnicityLar.mustFail
 
@@ -29,14 +29,14 @@ class V634Spec extends LarEditCheckSpec {
         coApplicant = lar.coApplicant.copy(
           ethnicity = lar.coApplicant.ethnicity.copy(
             ethnicity1 = EthnicityNoCoApplicant,
-            ethnicityObserved = InvalidEthnicityObservedCode)))
+            ethnicityObserved = new InvalidEthnicityObservedCode)))
       invalidEthnicityObservedLar.mustFail
 
       val passingLarWithCoApplicant = lar.copy(
         coApplicant = lar.coApplicant.copy(
           ethnicity = lar.coApplicant.ethnicity.copy(
-            ethnicity1 = InvalidEthnicityCode,
-            ethnicityObserved = InvalidEthnicityObservedCode)))
+            ethnicity1 = new InvalidEthnicityCode,
+            ethnicityObserved = new InvalidEthnicityObservedCode)))
       passingLarWithCoApplicant.mustPass
     }
   }

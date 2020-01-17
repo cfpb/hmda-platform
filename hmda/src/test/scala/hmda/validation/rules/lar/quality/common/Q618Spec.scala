@@ -26,7 +26,7 @@ class Q618Spec extends LarEditCheckSpec {
       appLar
         .copy(
           property = appLar.property.copy(manufacturedHomeSecuredProperty =
-            InvalidManufacturedHomeSecuredPropertyCode))
+            new InvalidManufacturedHomeSecuredPropertyCode))
         .mustPass
     }
   }

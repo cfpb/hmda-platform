@@ -11,13 +11,13 @@ class V639_1Spec extends LarEditCheckSpec {
 
   property("Co-Applicant Observed Race Code Must be Valid") {
     forAll(larGen) { lar =>
-      whenever(lar.coApplicant.race.raceObserved != InvalidRaceObservedCode) {
+      whenever(lar.coApplicant.race.raceObserved != new InvalidRaceObservedCode) {
         lar.mustPass
       }
       lar
         .copy(
           coApplicant = lar.coApplicant.copy(race =
-            lar.coApplicant.race.copy(raceObserved = InvalidRaceObservedCode)))
+            lar.coApplicant.race.copy(raceObserved = new InvalidRaceObservedCode)))
         .mustFail
 
     }

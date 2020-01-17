@@ -19,7 +19,7 @@ object DenialReasonEnum extends LarCodeEnum[DenialReasonEnum] {
       case 9    => OtherDenialReason
       case 10   => DenialReasonNotApplicable
       case 1111 => ExemptDenialReason
-      case _    => InvalidDenialReasonCode
+      case other    => new InvalidDenialReasonCode(other)
     }
 }
 
@@ -84,7 +84,12 @@ case object ExemptDenialReason extends DenialReasonEnum {
   override def description: String = "Exempt Denial Reason"
 }
 
-case object InvalidDenialReasonCode extends DenialReasonEnum {
-  override def code: Int           = -1
+class InvalidDenialReasonCode(value: Int = -1) extends DenialReasonEnum {
+  override def code: Int           = value
   override def description: String = "Invalid Code"
+  override def equals(that: Any): Boolean =
+        that match {
+            case that: InvalidDenialReasonCode => true
+            case _ => false
+        }
 }

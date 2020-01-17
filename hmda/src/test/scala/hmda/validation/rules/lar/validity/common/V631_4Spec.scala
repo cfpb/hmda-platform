@@ -17,7 +17,7 @@ class V631_4Spec extends LarEditCheckSpec {
 
       val unapplicableLar = lar.copy(
         coApplicant = lar.coApplicant.copy(ethnicity =
-          lar.coApplicant.ethnicity.copy(ethnicity1 = InvalidEthnicityCode)))
+          lar.coApplicant.ethnicity.copy(ethnicity1 = new InvalidEthnicityCode)))
       unapplicableLar.mustPass
 
       val ethnicityBlank =
@@ -28,9 +28,9 @@ class V631_4Spec extends LarEditCheckSpec {
 
       val ethnicityNotBlank =
         applicableApplicant.ethnicity.copy(ethnicity2 = EmptyEthnicityValue,
-                                           ethnicity3 = InvalidEthnicityCode,
+                                           ethnicity3 = new InvalidEthnicityCode,
                                            ethnicity4 = EmptyEthnicityValue,
-                                           ethnicity5 = InvalidEthnicityCode)
+                                           ethnicity5 = new InvalidEthnicityCode)
 
       lar
         .copy(

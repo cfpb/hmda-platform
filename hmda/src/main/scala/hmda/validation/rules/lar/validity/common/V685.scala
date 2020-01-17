@@ -11,5 +11,5 @@ object V685 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V685"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult =
-    lar.nonAmortizingFeatures.interestOnlyPayments not equalTo(InvalidInterestOnlyPaymentCode)
+    lar.nonAmortizingFeatures.interestOnlyPayments not equalTo(new InvalidInterestOnlyPaymentCode)
 }

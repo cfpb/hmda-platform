@@ -14,7 +14,7 @@ class V646_2Spec extends LarEditCheckSpec {
       lar.mustPass
       val invalidLar = lar.copy(
         coApplicant = lar.coApplicant.copy(sex =
-          lar.coApplicant.sex.copy(sexObservedEnum = InvalidSexObservedCode)))
+          lar.coApplicant.sex.copy(sexObservedEnum = new InvalidSexObservedCode)))
       invalidLar.mustFail
     }
   }

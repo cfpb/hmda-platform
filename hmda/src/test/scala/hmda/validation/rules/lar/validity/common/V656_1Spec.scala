@@ -11,10 +11,10 @@ class V656_1Spec extends LarEditCheckSpec {
 
   property("Purchaser Code must be Valid") {
     forAll(larGen) { lar =>
-      whenever(lar.purchaserType != InvalidPurchaserCode) {
+      whenever(lar.purchaserType != new InvalidPurchaserCode) {
         lar.mustPass
       }
-      lar.copy(purchaserType = InvalidPurchaserCode).mustFail
+      lar.copy(purchaserType = new InvalidPurchaserCode).mustFail
     }
   }
 }

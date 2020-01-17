@@ -12,7 +12,7 @@ class V612_1Spec extends LarEditCheckSpec {
   property("Loan Purpose must be valid") {
     forAll(larGen) { l =>
       l.mustPass
-      val badLoan = l.loan.copy(loanPurpose = InvalidLoanPurposeCode)
+      val badLoan = l.loan.copy(loanPurpose = new InvalidLoanPurposeCode)
       l.copy(loan = badLoan).mustFail
     }
   }

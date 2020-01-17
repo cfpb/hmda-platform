@@ -11,5 +11,5 @@ object V686 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V686"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult =
-    lar.nonAmortizingFeatures.negativeAmortization not equalTo(InvalidNegativeArmotizationCode)
+    lar.nonAmortizingFeatures.negativeAmortization not equalTo(new InvalidNegativeArmotizationCode)
 }

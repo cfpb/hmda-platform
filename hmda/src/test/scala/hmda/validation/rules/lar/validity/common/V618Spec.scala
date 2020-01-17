@@ -13,7 +13,7 @@ class V618Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       lar.mustPass
       val badAction =
-        lar.action.copy(actionTakenType = InvalidActionTakenTypeCode)
+        lar.action.copy(actionTakenType = new InvalidActionTakenTypeCode)
       lar.copy(action = badAction).mustFail
     }
   }

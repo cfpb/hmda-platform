@@ -13,7 +13,7 @@ class V668_2Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       val passingLar = lar.copy(
         coApplicant = lar.coApplicant
-          .copy(race = lar.coApplicant.race.copy(race1 = InvalidRaceCode)))
+          .copy(race = lar.coApplicant.race.copy(race1 = new InvalidRaceCode)))
       passingLar.mustPass
 
       val appLar = lar.copy(

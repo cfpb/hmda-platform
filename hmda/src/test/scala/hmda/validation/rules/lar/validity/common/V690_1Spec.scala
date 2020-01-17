@@ -14,7 +14,7 @@ class V690_1Spec extends LarEditCheckSpec {
       lar.mustPass
       val invalidLar = lar.copy(
         property = lar.property.copy(manufacturedHomeLandPropertyInterest =
-          InvalidManufacturedHomeLandPropertyCode))
+          new InvalidManufacturedHomeLandPropertyCode))
       invalidLar.mustFail
     }
   }

@@ -4,8 +4,8 @@ import hmda.model.filing.lar.enums._
 import io.circe._
 import io.circe.syntax._
 
-case class Sex(sexEnum: SexEnum = InvalidSexCode,
-               sexObservedEnum: SexObservedEnum = InvalidSexObservedCode)
+case class Sex(sexEnum: SexEnum = new InvalidSexCode,
+               sexObservedEnum: SexObservedEnum = new InvalidSexObservedCode)
 
 object Sex {
   implicit val sexEncoder: Encoder[Sex] = (a: Sex) =>

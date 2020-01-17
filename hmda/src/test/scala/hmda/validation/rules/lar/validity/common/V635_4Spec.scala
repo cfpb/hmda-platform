@@ -16,7 +16,7 @@ class V635_4Spec extends LarEditCheckSpec {
 
       val unapplicableLar = lar.copy(
         applicant = lar.applicant.copy(
-          race = lar.applicant.race.copy(race1 = InvalidRaceCode)))
+          race = lar.applicant.race.copy(race1 = new InvalidRaceCode)))
       unapplicableLar.mustPass
 
       val raceBlank =
@@ -27,9 +27,9 @@ class V635_4Spec extends LarEditCheckSpec {
 
       val raceNotBlank =
         applicableApplicant.race.copy(race2 = EmptyRaceValue,
-                                      race3 = InvalidRaceCode,
+                                      race3 = new InvalidRaceCode,
                                       race4 = EmptyRaceValue,
-                                      race5 = InvalidRaceCode)
+                                      race5 = new InvalidRaceCode)
 
       lar
         .copy(applicant = applicableApplicant.copy(race = raceBlank))

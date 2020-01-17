@@ -10,7 +10,7 @@ case class Applicant(
   sex: Sex = Sex(),
   age: Int = 0,
   creditScore: Int = 0,
-  creditScoreType: CreditScoreEnum = InvalidCreditScoreCode,
+  creditScoreType: CreditScoreEnum = new InvalidCreditScoreCode,
   otherCreditScoreModel: String = ""
 )
 

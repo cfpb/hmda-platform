@@ -14,9 +14,9 @@ class V650Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       val unapplicableLar = lar.copy(
         coApplicant = lar.coApplicant.copy(
-          sex = lar.coApplicant.sex.copy(sexEnum = InvalidSexCode,
+          sex = lar.coApplicant.sex.copy(sexEnum = new InvalidSexCode,
                                          sexObservedEnum =
-                                           InvalidSexObservedCode)))
+                                           new InvalidSexObservedCode)))
       unapplicableLar.mustPass
 
       val applicableLar = lar.copy(
@@ -27,9 +27,9 @@ class V650Spec extends LarEditCheckSpec {
       applicableLar.mustPass
 
       val sexOInvalid = applicableLar.coApplicant.sex
-        .copy(sexObservedEnum = InvalidSexObservedCode)
+        .copy(sexObservedEnum = new InvalidSexObservedCode)
       val sexInvalid = applicableLar.coApplicant.sex
-        .copy(sexEnum = InvalidSexCode)
+        .copy(sexEnum = new InvalidSexCode)
 
       lar
         .copy(coApplicant = applicableLar.coApplicant.copy(sex = sexOInvalid))
