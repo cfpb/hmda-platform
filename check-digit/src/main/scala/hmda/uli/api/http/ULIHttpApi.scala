@@ -142,7 +142,7 @@ trait ULIHttpApi extends HmdaTimeDirectives {
             }
           } ~
           path("validate" / "csv") {
-            toStrictEntity(15.seconds) {
+            toStrictEntity(35.seconds) {
               timedPost { _ =>
                 respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
                   fileUpload("file") {
