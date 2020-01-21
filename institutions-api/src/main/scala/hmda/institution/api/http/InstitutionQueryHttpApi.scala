@@ -40,11 +40,13 @@ trait InstitutionQueryHttpApi extends HmdaTimeDirectives with InstitutionEmailCo
     path("institutions" / Segment / "year" / IntNumber) { (lei, year) =>
       timedGet { uri =>
         isFilingAllowed(year,None) {
-        val fInstitution = if (year == 2018) {
-          institutionRepository2018.findById(lei)
-        } else {
-          institutionRepository2019.findById(lei)
-        }
+
+          val fInstitution = year match {
+            case 2018 => institutionRepository2018.findById(lei)
+            case 2020 => institutionRepository2020.findById(lei)
+            case _ => institutionRepository2019.findById(lei)
+          }
+
         val fEmails = institutionEmailsRepository.findByLei(lei)
         val f = for {
           institution <- fInstitution
