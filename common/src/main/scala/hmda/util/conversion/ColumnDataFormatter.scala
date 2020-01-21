@@ -13,8 +13,13 @@ trait ColumnDataFormatter {
     if (option != null) {
 
       val epochLong = new Date(option.getOrElse(0L))
-      val entryTime = dateFormatter.format(epochLong.toInstant)
-      entryTime
+
+      if (epochLong.getTime.equals(0L)){
+        "NA"
+      } else {
+        val entryTime = dateFormatter.format(epochLong.toInstant)
+        entryTime
+      }
     } else {
       "NA"
     }
@@ -30,12 +35,12 @@ trait ColumnDataFormatter {
     }
 
   def removeTrailingLARPipe(value: String): String = {
-  if (!value.isEmpty && value.count(_ == '|') == 110 && value.endsWith("|")) {
-    value.init
-  } else {
-    value
+    if (!value.isEmpty && value.count(_ == '|') == 110 && value.endsWith("|")) {
+      value.init
+    } else {
+      value
+    }
   }
-}
   def removeTrailingTSPipe(value: String): String = {
     if (!value.isEmpty && value.count(_ == '|') == 15 && value.endsWith("|")) {
       value.init
