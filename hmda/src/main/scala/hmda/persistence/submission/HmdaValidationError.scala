@@ -725,7 +725,7 @@ object HmdaValidationError
     } yield {
       val institution         = maybeInst.getOrElse(Institution.empty)
       var modifiedInstitution = institution.copy(hmdaFiler = true)
-      if(institution.quarterlyFiler==true){
+      if(institution.quarterlyFiler==true && isQuarterlyFiling(period)){
         modifiedInstitution = institution.copy(quarterlyFilerHasFiled = true)
       }
       if (institution.LEI.nonEmpty) {
@@ -733,6 +733,14 @@ object HmdaValidationError
           institutionPersistence ? (ref => ModifyInstitution(modifiedInstitution, ref))
         modified
       }
+    }
+  }
+
+  private def isQuarterlyFiling(filingPeriod: String): Boolean = {
+    val quarterlyRegex ="-(Q*[1-3])-".r
+    filingPeriod match {
+      case quarterlyRegex() => true
+      case _ => false
     }
   }
 
