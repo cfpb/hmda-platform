@@ -81,26 +81,28 @@ trait ULIHttpApi extends HmdaTimeDirectives {
           }
         } ~
           path("checkDigit" / "csv") {
-            timedPost { _ =>
-              respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-                fileUpload("file") {
-                  case (_, byteSource) =>
-                    val headerSource = Source.fromIterator(() =>
-                      List("loanId,checkDigit,uli\n").toIterator)
-                    val checkDigit = processLoanIdFile(byteSource)
-                      .map(l => l.toCSV)
-                      .map(l => l + "\n")
-                      .map(s => ByteString(s))
+            toStrictEntity(35.seconds) {
+              timedPost { _ =>
+                respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+                  fileUpload("file") {
+                    case (_, byteSource) =>
+                      val headerSource = Source.fromIterator(() =>
+                        List("loanId,checkDigit,uli\n").toIterator)
+                      val checkDigit = processLoanIdFile(byteSource)
+                        .map(l => l.toCSV)
+                        .map(l => l + "\n")
+                        .map(s => ByteString(s))
 
-                    val csv =
-                      headerSource.map(s => ByteString(s)).concat(checkDigit)
-                    complete(
-                      HttpEntity.Chunked.fromData(
-                        `text/csv`.toContentType(HttpCharsets.`UTF-8`),
-                        csv))
+                      val csv =
+                        headerSource.map(s => ByteString(s)).concat(checkDigit)
+                      complete(
+                        HttpEntity.Chunked.fromData(
+                          `text/csv`.toContentType(HttpCharsets.`UTF-8`),
+                          csv))
 
-                  case _ =>
-                    complete(ToResponseMarshallable(StatusCodes.BadRequest))
+                    case _ =>
+                      complete(ToResponseMarshallable(StatusCodes.BadRequest))
+                  }
                 }
               }
             }
