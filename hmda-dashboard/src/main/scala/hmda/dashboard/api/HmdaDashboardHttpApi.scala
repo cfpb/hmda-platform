@@ -193,12 +193,21 @@ trait HmdaDashboardHttpApi extends Settings {
                   .runToFuture
               )
             } ~
-            path("open_end_credit_filers_by_agency" / IntNumber) { (year) =>
+            path("open_end_credit_filers_by_agency" / IntNumber) { (year) => // TODO: fix
               log.info(s"Open end credit By Agency for year=${year}")
               complete(
                 query
                   .fetchOpenEndCreditFilersByAgency(year)
                   .map(aggs => OpenEndCreditByAgencyAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+              path("open_end_credit_lar_count_by_agency" / IntNumber) { (year) => // TODO: fix
+              log.info(s"Open end credit Lar count By Agency for year=${year}")
+              complete(
+                query
+                  .fetchOpenEndCreditLarCountByAgency(year)
+                  .map(aggs => OpenEndCreditLarCountByAgencyAggregationResponse(aggs))
                   .runToFuture
               )
             } ~
@@ -217,6 +226,33 @@ trait HmdaDashboardHttpApi extends Settings {
                 query
                   .fetchFilersWithOnlyClosedEndCreditTransactions(year)
                   .map(aggs => FilersWithOnlyClosedEndCreditTransactionsAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("filer_list_only_open_end_transactions" / IntNumber) { (year) =>
+              log.info(s"Filers With Only Closed End Credit Transactions for year=${year}")
+              complete(
+                query
+                  .fetchFilersListWithOnlyOpenEndCreditTransactions(year)
+                  .map(aggs => FilersListWithOnlyOpenEndCreditAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("filers_claiming_exemption" / IntNumber) { (year) =>
+              log.info(s"Filers claiming exemptions for year=${year}")
+              complete(
+                query
+                  .fetchFilersClaimingExemption(year)
+                  .map(aggs => FilersClaimingExemptionAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("list_quarterly_filers" / IntNumber) { (year) =>
+              log.info(s"List quarterly filers for year=${year}")
+              complete(
+                query
+                  .fetchListQuarterlyFilers(year)
+                  .map(aggs => ListQuarterlyFilersAggregationResponse(aggs))
                   .runToFuture
               )
             }

@@ -168,8 +168,17 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     val tsTable = tsTableSelector(year)
     val larTable = larTableSelector(year)
     val query = sql"""
-      select ts.agency, count(*) from #${tsTable} as ts left join #${larTable} as lar on upper(ts.lei) = upper(lar.lei) where ts.lei not in (#${filterList}) and line_of_credits = '1' group by ts.agency
+      select agency ,count(ts.lei)from  #${tsTable} as ts where  upper(ts.lei) in ( select distinct(upper(lar.lei)) from #${larTable} as lar group by  lar.lei having sum(case when line_of_credits=1 then 1 else 0 end) >0)group by  ts.agency
       """.as[OpenEndCreditByAgency]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchOpenEndCreditLarCountByAgency(year: Int): Task[Seq[OpenEndCreditLarCountByAgency]] = {
+    val tsTable = tsTableSelector(year)
+    val larTable = larTableSelector(year)
+    val query = sql"""
+      select ts.agency, count(lar.*) from #${tsTable} as ts left join #${larTable} as lar on upper(ts.lei) = upper(lar.lei) where line_of_credits = 1group by ts.agency
+      """.as[OpenEndCreditLarCountByAgency]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
@@ -177,7 +186,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     val tsTable = tsTableSelector(year)
     val larTable = larTableSelector(year)
     val query = sql"""
-      SELECT agency, count(*) FROM #${tsTable} AS ts WHERE UPPER(lei) IN ( SELECT lei FROM #${larTable} AS lar GROUP BY lei having sum(case when line_of_credits=2 or line_of_credits=1111 then 1 else 0 end) <=0) GROUP BY ts.agency
+      select agency, count(*) from #${tsTable} as ts where upper(lei) in ( select lei from #${larTable} as lar group by lei having sum(case when line_of_credits=2 or line_of_credits=1111 then 1 else 0 end) <=0) group by ts.agency
             """.as[FilersWithOnlyOpenEndCreditTransactions]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
@@ -187,11 +196,37 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     val tsTable = tsTableSelector(year)
     val larTable = larTableSelector(year)
     val query = sql"""
-      SELECT ts.agency, ts.institution_name FROM #${tsTable} AS ts LEFT JOIN #${larTable} AS lar ON UPPER(ts.lei) = UPPER(lar.lei) GROUP BY ts.lei, ts.agency HAVING SUM(CASE WHEN line_of_credits=2 OR line_of_credits=1111 THEN 1 ELSE 0 END) = 0 AND SUM(CASE WHEN line_of_credits=1 THEN 1 ELSE 0 END) > 0
+      select ts.agency, ts.institution_name from #${tsTable} as ts left join #${larTable} as lar on upper(ts.lei) = upper(lar.lei) group by ts.lei, ts.agency having sum(case when line_of_credits=2 or line_of_credits=1111 then 1 else 0 end) = 0 and sum(case when line_of_credits=2 then 1 else 0 end) > 0
       """.as[FilersWithOnlyClosedEndCreditTransactions]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
+  def fetchFilersListWithOnlyOpenEndCreditTransactions(year: Int): Task[Seq[FilersListWithOnlyOpenEndCredit]] = {
+    val tsTable = tsTableSelector(year)
+    val larTable = larTableSelector(year)
+    val query = sql"""
+      select ts.lei, ts.agency, ts.institution_name from #${tsTable} as ts left join #${larTable} as lar on upper(ts.lei) = upper(lar.lei) group by ts.lei, ts.agency having sum(case when line_of_credits=2 or line_of_credits=1111 then 1 else 0 end) = 0  and sum(case when line_of_credits=1 then 1 else 0 end) > 0
+      """.as[FilersListWithOnlyOpenEndCredit]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchFilersClaimingExemption(year: Int): Task[Seq[FilersClaimingExemption]] = {
+    val tsTable = tsTableSelector(year)
+    val larTable = larTableSelector(year)
+    val query = sql"""
+      select lei ,agency ,institution_name from #${tsTable} as ts where upper(lei) in ( select upper(lei) from #${larTable} as lar where street = 'exempt' or city = 'exempt' or zip = 'exempt' or rate_spread = 'exempt' or credit_score_applicant = '1111' or credit_score_co_applicant = '1111' or credit_score_type_applicant = '1111' or credit_score_type_co_applicant = '1111' or denial_reason1 = '1111' or total_loan_costs = 'exempt' or total_points = 'exempt' or origination_charges = 'exempt' or discount_points = 'exempt' or lender_credits = 'exempt' or interest_rate = 'exempt' or payment_penalty = 'exempt' or debt_to_incode = 'exempt' or loan_value_ratio = 'exempt' or loan_term = 'exempt' or rate_spread_intro = '1111' or baloon_payment = '1111' or insert_only_payment = '1111' or amortization = '1111' or other_amortization = '1111' or property_value = 'exempt' or application_submission = '1111' or lan_property_interest = '1111' or mf_affordable = 'exempt' or home_security_policy = '1111' or payable = '1111' or nmls = 'exempt' or aus1_result = '1111' or other_aus = '1111' or other_aus_result = '1111' or reverse_mortgage = '1111' or line_of_credits = '1111' or business_or_commercial = '1111') order by  agency asc
+      """.as[FilersClaimingExemption]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchListQuarterlyFilers(year: Int): Task[Seq[ListQuarterlyFilers]] = {
+    val tsTable = tsTableSelector(year)
+    val larTable = larTableSelector(year)
+    val query = sql"""
+      select lei, agency, institution_name from #${tsTable} where upper(lei) in ( select distinct(upper(lei)) from #${larTable} group by lei having sum(case when action_taken_type != '6' then 1 else 0 end) >= 60000)
+      """.as[ListQuarterlyFilers]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
 
   def healthCheck: Task[Unit] = {
     Task.deferFuture (db.run (sql"SELECT 1".as[Int] ) ).guarantee (Task.shift).void

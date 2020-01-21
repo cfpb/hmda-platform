@@ -53,9 +53,21 @@ class DashboardQueryService (repo: PostgresRepository) extends QueryService{
   override def fetchOpenEndCreditFilersByAgency(year: Int): Task[Seq[OpenEndCreditByAgency]] =
     repo.fetchOpenEndCreditFilersByAgency(year)
 
+  override def fetchOpenEndCreditLarCountByAgency(year: Int): Task[Seq[OpenEndCreditLarCountByAgency]] =
+    repo.fetchOpenEndCreditLarCountByAgency(year)
+
   override def fetchFilersWithOnlyOpenEndCreditTransactions(year: Int): Task[Seq[FilersWithOnlyOpenEndCreditTransactions]] =
     repo.fetchFilersWithOnlyOpenEndCreditTransactions(year)
 
   override def fetchFilersWithOnlyClosedEndCreditTransactions(year: Int): Task[Seq[FilersWithOnlyClosedEndCreditTransactions]] =
     repo.fetchFilersWithOnlyClosedEndCreditTransactions((year))
+
+  override def fetchFilersListWithOnlyOpenEndCreditTransactions(year: Int): Task[Seq[FilersListWithOnlyOpenEndCredit]] =
+    repo.fetchFilersListWithOnlyOpenEndCreditTransactions(year)
+
+  override def fetchFilersClaimingExemption(year: Int) : Task[Seq[FilersClaimingExemption]] =
+    repo.fetchFilersClaimingExemption(year)
+
+  override def fetchListQuarterlyFilers(year: Int): Task[Seq[ListQuarterlyFilers]] =
+    repo.fetchListQuarterlyFilers(year)
 }
