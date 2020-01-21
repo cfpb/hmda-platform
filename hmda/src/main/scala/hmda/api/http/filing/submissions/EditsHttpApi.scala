@@ -128,6 +128,7 @@ trait EditsHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization 
     val csv = csvHeaderSource
       .concat(validationErrorEventStream(submissionId))
       .map(ByteString(_))
+    log.info("Downloading edit report for: " + submissionId)
     complete(HttpEntity.Chunked.fromData(ContentTypes.`text/csv(UTF-8)`, csv))
   }
 
