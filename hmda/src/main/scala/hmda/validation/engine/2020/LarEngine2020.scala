@@ -10,7 +10,7 @@ import hmda.validation.rules.lar.validity._
 import hmda.validation.rules.lar.validity.twentytwenty
 import hmda.census.records.CensusRecords
 
-private[engine] object LarEngine2020Q extends ValidationEngine[LoanApplicationRegister] {
+private[engine] object LarEngine2020 extends ValidationEngine[LoanApplicationRegister] {
 
   override def syntacticalChecks(ctx: ValidationContext) = Vector(
     S300,
