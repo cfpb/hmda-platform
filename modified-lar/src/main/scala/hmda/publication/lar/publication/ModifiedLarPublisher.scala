@@ -122,12 +122,15 @@ object ModifiedLarPublisher {
               .drop(1)
               .map(s => ModifiedLarCsvParser(s))
 
-          val s3Out: Sink[ModifiedLoanApplicationRegister,
-                          Future[MultipartUploadResult]] = {
+          val s3Out: Sink[ModifiedLoanApplicationRegister, Future[List[MultipartUploadResult]]] = {
                 Flow[ModifiedLoanApplicationRegister]
                   .map(mlar => mlar.toCSV + "\n")
                   .map(ByteString(_))
-                  .toMat(s3Sink)(Keep.right)
+                  .alsoToMat(s3SinkHeaders)(Keep.right)
+                  .toMat(s3Sink)(Keep.both)
+                  .mapMaterializedValue { case (fileWithHeaderResult, fileResult) =>
+                    Future.sequence(List(fileWithHeaderResult, fileResult))
+                  }
             }
 
           def postgresOut(parallelism: Int)
@@ -165,12 +168,6 @@ object ModifiedLarPublisher {
           //only write to PG - do not generate S3 files
           val graphWithoutS3 = mlarSource
             .toMat(postgresOut(2))(Keep.right)
-            .mapMaterializedValue {
-              case (futPostgresRes) =>
-                for {
-                  _ <- futPostgresRes
-                } yield futPostgresRes
-            }
 
           val finalResult: Future[Unit] = for {
             _ <- removeLei
