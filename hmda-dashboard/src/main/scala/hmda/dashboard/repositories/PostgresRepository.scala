@@ -196,7 +196,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     val tsTable = tsTableSelector(year)
     val larTable = larTableSelector(year)
     val query = sql"""
-      select ts.agency, ts.institution_name from #${tsTable} as ts left join #${larTable} as lar on upper(ts.lei) = upper(lar.lei) where ts.lei NOT IN (#${filterList}) group by ts.lei, ts.agency having sum(case when line_of_credits=2 or line_of_credits=1111 then 1 else 0 end) = 0 and sum(case when line_of_credits=2 then 1 else 0 end) > 0
+      select ts.agency, count(upper(ts.lei)) from #${tsTable} as ts where ts.lei NOT IN (#${filterList}) and upper(ts.lei) in ( select upper(lei) from #${larTable} as lar group by upper(lar.lei) having sum(case when line_of_credits=1 or line_of_credits=1111 then 1 else 0 end) = 0 and sum(case when line_of_credits=2 then 1 else 0 end) > 0) group by ts.agency;
       """.as[FilersWithOnlyClosedEndCreditTransactions]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
