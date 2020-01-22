@@ -95,6 +95,7 @@ object ModifiedLarPublisher {
             "and isCreateDispositionRecord set to " + isCreateDispositionRecord)
 
           val fileName = s"${submissionId.lei.toUpperCase()}.txt"
+          val fileNameHeader = s"${submissionId.lei.toUpperCase()}_header.txt"
           val filingPeriod= s"${submissionId.period}"
 
           val metaHeaders: Map[String, String] =
@@ -106,6 +107,12 @@ object ModifiedLarPublisher {
                              metaHeaders = MetaHeaders(metaHeaders))
             .withAttributes(S3Attributes.settings(s3Settings))
 
+          val s3SinkHeaders = S3
+            .multipartUpload(bucket,
+              s"$environment/modified-lar/$filingPeriod/$fileNameHeader",
+              metaHeaders = MetaHeaders(metaHeaders))
+            .withAttributes(S3Attributes.settings(s3Settings))
+
           def removeLei: Future[Int] =
             modifiedLarRepo.deleteByLei(submissionId)
 
@@ -115,12 +122,16 @@ object ModifiedLarPublisher {
               .drop(1)
               .map(s => ModifiedLarCsvParser(s))
 
-          val s3Out: Sink[ModifiedLoanApplicationRegister,
-                          Future[MultipartUploadResult]] =
-            Flow[ModifiedLoanApplicationRegister]
-              .map(mlar => mlar.toCSV + "\n")
-              .map(ByteString(_))
-              .toMat(s3Sink)(Keep.right)
+          val s3Out: Sink[ModifiedLoanApplicationRegister, Future[List[MultipartUploadResult]]] = {
+                Flow[ModifiedLoanApplicationRegister]
+                  .map(mlar => mlar.toCSV + "\n")
+                  .map(ByteString(_))
+                  .alsoToMat(s3SinkHeaders)(Keep.right)
+                  .toMat(s3Sink)(Keep.both)
+                  .mapMaterializedValue { case (fileWithHeaderResult, fileResult) =>
+                    Future.sequence(List(fileWithHeaderResult, fileResult))
+                  }
+            }
 
           def postgresOut(parallelism: Int)
             : Sink[ModifiedLoanApplicationRegister, Future[Done]] =
@@ -157,12 +168,6 @@ object ModifiedLarPublisher {
           //only write to PG - do not generate S3 files
           val graphWithoutS3 = mlarSource
             .toMat(postgresOut(2))(Keep.right)
-            .mapMaterializedValue {
-              case (futPostgresRes) =>
-                for {
-                  _ <- futPostgresRes
-                } yield futPostgresRes
-            }
 
           val finalResult: Future[Unit] = for {
             _ <- removeLei
