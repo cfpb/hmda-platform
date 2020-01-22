@@ -99,7 +99,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   def fetchTSRecordCount(year: Int): Task[Seq[TSRecordCount]] = {
     val tsTable = tsTableSelector(year)
     val query = sql"""
-      select  count(*) from #${tsTable};
+      select  count(*) from #${tsTable} where lei NOT IN (#${filterList}) ;
       """.as[TSRecordCount]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
