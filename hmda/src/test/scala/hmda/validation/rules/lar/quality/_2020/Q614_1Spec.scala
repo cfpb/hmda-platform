@@ -1,4 +1,4 @@
-package hmda.validation.rules.lar.quality._2020
+package hmda.validation.rules.lar.quality.twentytwenty
 
 import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister

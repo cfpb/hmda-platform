@@ -3,7 +3,7 @@ package hmda.validation.engine
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.lar.quality._2019._
-import hmda.validation.rules.lar.quality.twentytwenty._
+import hmda.validation.rules.lar.quality.{ twentytwenty => qualityTwentytwenty }
 import hmda.validation.rules.lar.quality.common._
 import hmda.validation.rules.lar.syntactical.{ S300, S301 }
 import hmda.validation.rules.lar.validity._
@@ -239,7 +239,7 @@ private[engine] object LarEngine2020Q extends ValidationEngine[LoanApplicationRe
     Q603.withIndexedSmallCounties(CensusRecords.indexedSmallCounty2019),
     Q605_1,
     Q605_2,
-    Q606,
+    qualityTwentytwenty.Q606,
     Q609,
     Q607,
     Q608,
@@ -247,7 +247,8 @@ private[engine] object LarEngine2020Q extends ValidationEngine[LoanApplicationRe
     Q611,
     Q612,
     Q613,
-    Q614,
+    qualityTwentytwenty.Q614_1,
+    qualityTwentytwenty.Q614_2,
     Q615_1,
     Q615_2,
     Q616_1,
@@ -274,6 +275,6 @@ private[engine] object LarEngine2020Q extends ValidationEngine[LoanApplicationRe
     Q644,
     Q645_1,
     Q645_2,
-    Q648
+    qualityTwentytwenty.Q648
   )
 }
