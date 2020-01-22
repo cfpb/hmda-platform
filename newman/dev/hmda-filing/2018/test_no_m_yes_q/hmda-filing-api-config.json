@@ -47,8 +47,8 @@
             "name": ""
           },
           "hmdaFiler": true,
-          "quarterlyFiler": true
-        },
+          "quarterlyFiler": true,
+          "quarterlyFilerHasFiled": true},
         "expectedResponse": {
           "activityYear": 2018,
           "lei": "NEWMANLEITEST1234678",
@@ -76,8 +76,8 @@
             "name": ""
           },
           "hmdaFiler": true,
-          "quarterlyFiler": true
-        },
+          "quarterlyFiler": true,
+          "quarterlyFilerHasFiled": true},
         "expectedMessage": "Institution NEWMANLEITEST1234678 already exists",
         "testNumber": 3
       },
@@ -110,8 +110,8 @@
             "name": ""
           },
           "hmdaFiler": true,
-          "quarterlyFiler": true
-        },
+          "quarterlyFiler": true,
+          "quarterlyFilerHasFiled": true},
         "testNumber": 4
       },
       {

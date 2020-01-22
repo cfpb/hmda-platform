@@ -18,7 +18,8 @@ case class InstitutionEntity(
   topHolderIdRssd: Int = -1,
   topHolderName: String = "",
   hmdaFiler: Boolean = false,
-  quarterlyFiler: Boolean = false
+  quarterlyFiler: Boolean = false,
+  quarterlyFilerHasFiled: Boolean = false
 ) {
   def isEmpty: Boolean = lei == ""
 }
