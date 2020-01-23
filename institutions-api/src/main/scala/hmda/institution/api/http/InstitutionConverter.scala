@@ -32,7 +32,8 @@ object InstitutionConverter {
         if (entity.topHolderName != "") Some(entity.topHolderName) else None
       ),
       entity.hmdaFiler,
-      entity.quarterlyFiler
+      entity.quarterlyFiler,
+      entity.quarterlyFilerHasFiled
     )
 
   def convert(institution: Institution): InstitutionEntity =
@@ -54,7 +55,8 @@ object InstitutionConverter {
       institution.topHolder.idRssd,
       institution.topHolder.name.getOrElse(""),
       institution.hmdaFiler,
-      institution.quarterlyFiler
+      institution.quarterlyFiler,
+      institution.quarterlyFilerHasFiled
     )
 
   def emailsFromInstitution(institution: Institution): Seq[InstitutionEmailEntity] =

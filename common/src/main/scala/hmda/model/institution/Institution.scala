@@ -42,7 +42,7 @@ object Institution {
         ("topHolder", i.topHolder.asJson),
         ("hmdaFiler", Json.fromBoolean(i.hmdaFiler)),
         ("quarterlyFiler", Json.fromBoolean(i.quarterlyFiler)),
-        ("quarterlyFilerHasFiled", Json.fromBoolean(i.quarterlyFiler))
+        ("quarterlyFilerHasFiled", Json.fromBoolean(i.quarterlyFilerHasFiled))
 
       )
 

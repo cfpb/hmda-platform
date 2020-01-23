@@ -738,9 +738,9 @@ object HmdaValidationError
   }
 
   private def isQuarterlyFiling(filingPeriod: String): Boolean = {
-    val quarterlyRegex ="-(Q*[1-3])-".r
+    val quarterlyRegex ="\\b[0-9]{4}\\b-(Q*[1-3])$".r
     filingPeriod match {
-      case quarterlyRegex() => true
+      case quarterlyRegex(_*) => true
       case _ => false
     }
   }
