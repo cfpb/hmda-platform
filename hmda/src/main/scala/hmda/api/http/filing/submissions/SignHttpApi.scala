@@ -40,17 +40,31 @@ trait SignHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization {
   // GET & POST institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/sign
   def signPath(oAuth2Authorization: OAuth2Authorization): Route =
     pathPrefix("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
-        pathPrefix("submissions" / IntNumber / "sign") { seqNr =>
+        path("submissions" / IntNumber / "sign") { seqNr =>
           timedGet { uri =>
             oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
-            getSubmissionForSigning(lei, year, None, seqNr, token.email, uri)
-              }
+              getSubmissionForSigning(lei, year,  None, seqNr, token.email, uri)
+            }
           } ~ timedPost { uri =>
             respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
               oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
-                  entity(as[EditsSign]) { editsSign =>
-                  signSubmission(lei, year, None, seqNr, token.email, editsSign.signed, uri)
-                  }
+                entity(as[EditsSign]) { editsSign =>
+                  signSubmission(lei, year,None, seqNr, token.email, editsSign.signed, uri)
+                }
+              }
+            }
+          }
+        }~ path("quarter" / Segment / "submissions" / IntNumber / "sign") {(quarter, seqNr) =>
+          timedGet { uri =>
+            oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
+              getSubmissionForSigning(lei, year,  Some(quarter), seqNr, token.email, uri)
+            }
+          } ~ timedPost { uri =>
+            respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+              oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
+                entity(as[EditsSign]) { editsSign =>
+                  signSubmission(lei, year,Some(quarter), seqNr, token.email, editsSign.signed, uri)
+                }
               }
             }
           }
