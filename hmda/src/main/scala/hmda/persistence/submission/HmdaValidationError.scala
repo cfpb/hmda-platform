@@ -310,7 +310,7 @@ object HmdaValidationError
                       s"${emailTopic} (key: ${submissionId.toString}, value: ${email})"
                   )
               )
-              setHmdaFilerFlag(submissionId.lei, submissionId.period.toString, sharding)
+              setHmdaFilerFlag(submissionId.lei, submissionId.period, sharding)
               replyTo ! signed
             }
           } else {
@@ -709,13 +709,16 @@ object HmdaValidationError
     produceRecord(emailTopic, s"${submissionId.toString}-${signedTimestamp}", email, stringKafkaProducer)
   }
 
-  private def setHmdaFilerFlag[as: AS, mat: MAT, ec: EC](institutionID: String, period: String, sharding: ClusterSharding): Unit = {
+  private def setHmdaFilerFlag[as: AS, mat: MAT, ec: EC](institutionID: String, period: Period, sharding: ClusterSharding): Unit = {
+
+    val year = period.year.toString()
+    val periodType=period.toString()
 
     val institutionPersistence =
       if (period == "2018") {
         sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-$institutionID")
       } else {
-        sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-$institutionID-$period")
+        sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-$institutionID-$year")
       }
 
     val fInstitution: Future[Option[Institution]] = institutionPersistence ? (ref => GetInstitution(ref))
@@ -724,12 +727,13 @@ object HmdaValidationError
       maybeInst <- fInstitution
     } yield {
       val institution         = maybeInst.getOrElse(Institution.empty)
-      val isQuarterlyFiler = isQuarterlyFiling(period)
+      val isQuarterlyFiler = isQuarterlyFiling(periodType)
       val modifiedInstitution = isQuarterlyFiler match {
         case true => institution.copy (quarterlyFilerHasFiled = true)
         case _ => institution.copy(hmdaFiler = true)
       }
       if (institution.LEI.nonEmpty) {
+
         val modified: Future[InstitutionEvent] =
           institutionPersistence ? (ref => ModifyInstitution(modifiedInstitution, ref))
         modified

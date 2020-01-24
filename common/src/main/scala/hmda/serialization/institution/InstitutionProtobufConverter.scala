@@ -80,7 +80,8 @@ object InstitutionProtobufConverter {
       otherLenderCode = msg.otherLenderCode,
       topHolder = topHolderFromProtobuf(msg.topHolder.getOrElse(TopHolderMessage())),
       hmdaFiler = msg.hmdaFilter,
-      quarterlyFiler = msg.quarterlyFiler
+      quarterlyFiler = msg.quarterlyFiler,
+      quarterlyFilerHasFiled = msg.quarterlyFilerHasFiled
     )
 
 }
