@@ -47,8 +47,13 @@
             "name": ""
           },
           "hmdaFiler": true,
+<<<<<<< Updated upstream
           "quarterlyFiler": true,
           "quarterlyFilerHasFiled": true},
+=======
+          "quarterlyFiler": true, "quarterlyFilerHasFiled": false
+        },
+>>>>>>> Stashed changes
         "expectedResponse": {
           "activityYear": 2019,
           "lei": "NEWMANLEITEST1234678",
@@ -76,8 +81,13 @@
             "name": ""
           },
           "hmdaFiler": true,
+<<<<<<< Updated upstream
           "quarterlyFiler": true,
           "quarterlyFilerHasFiled": true},
+=======
+          "quarterlyFiler": true, "quarterlyFilerHasFiled": false
+        },
+>>>>>>> Stashed changes
         "expectedMessage": "Institution NEWMANLEITEST1234678 already exists",
         "testNumber": 3
       },
@@ -110,8 +120,13 @@
             "name": ""
           },
           "hmdaFiler": true,
+<<<<<<< Updated upstream
           "quarterlyFiler": true,
           "quarterlyFilerHasFiled": true},
+=======
+          "quarterlyFiler": true, "quarterlyFilerHasFiled": false
+        },
+>>>>>>> Stashed changes
         "testNumber": 4
       },
       {

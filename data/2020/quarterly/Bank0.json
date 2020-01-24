@@ -25,5 +25,5 @@
         "name": ""
     },
     "hmdaFiler": false,
-    "quarterlyFiler": true
+    "quarterlyFiler": true, "quarterlyFilerHasFiled": false
 }
