@@ -115,7 +115,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     val tsTable = tsTableSelector(year)
     val larTable = larTableSelector(year)
     val query = sql"""
-      SELECT ts.agency as agency, count(lar.*) from #${larTable} as lar join #${tsTable} as ts on upper(lar.lei) = upper(ts.lei) where upper(ts.lei) not in (#${filterList}) group by agency;
+      select ts.agency as agency, count(lar.*) from #${larTable} as lar join #${tsTable} as ts on upper(lar.lei) = upper(ts.lei) where upper(ts.lei) not in (#${filterList}) group by agency;
       """.as[LarByAgency]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
@@ -124,7 +124,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     val tsTable = tsTableSelector(year)
     val larTable = larTableSelector(year)
     val query = sql"""
-      select cast(county as varchar), count(*) from #${tsTable} as ts left join #${larTable} as lar on upper(ts.lei) = upper(lar.lei) where county != 'na' and upper(ts.lei) not in (#${filterList}) group by county order by count(*) desc limit #${count};
+      select cast(county as varchar), count(*) from #${tsTable} as ts left join #${larTable} as lar on upper(ts.lei) = upper(lar.lei) where lower(county) != 'na' and upper(ts.lei) not in (#${filterList}) group by county order by count(*) desc limit #${count};
       """.as[TopCountiesLar]
       Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
