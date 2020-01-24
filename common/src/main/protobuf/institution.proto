@@ -19,6 +19,7 @@ message InstitutionMessage {
     TopHolderMessage topHolder = 13;
     bool hmdaFilter = 14;
     bool quarterlyFiler = 15;
+    bool quarterlyFilerHasFiled = 16;
 }
 
 message RespondentMessage {

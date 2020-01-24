@@ -60,7 +60,8 @@ object InstitutionProtobufConverter {
       otherLenderCode = i.otherLenderCode,
       topHolder = Some(topHolderToProtobuf(i.topHolder)),
       hmdaFilter = i.hmdaFiler,
-      quarterlyFiler = i.quarterlyFiler
+      quarterlyFiler = i.quarterlyFiler,
+      quarterlyFilerHasFiled = i.quarterlyFilerHasFiled
     )
 
   def institutionFromProtobuf(msg: InstitutionMessage): Institution =
