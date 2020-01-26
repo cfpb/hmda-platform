@@ -5,7 +5,7 @@
 -- Dumped from database version 10.6
 -- Dumped by pg_dump version 10.5
 
--- Started on 2020-06-18 12:25:03 EDT
+-- Started on 2019-06-18 12:25:03 EDT
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -23,10 +23,10 @@ SET default_with_oids = false;
 
 --
 -- TOC entry 293 (class 1259 OID 60865)
--- Name: institutions2020; Type: TABLE; Schema: hmda_user; Owner: hmda_user
+-- Name: institutions2019; Type: TABLE; Schema: hmda_user; Owner: hmda_user
 --
 
-CREATE TABLE hmda_beta_user.institutions2020 (
+CREATE TABLE hmda_beta_user.institutions2019 (
     lei character varying NOT NULL,
     activity_year integer NOT NULL,
     agency integer NOT NULL,
@@ -50,18 +50,18 @@ CREATE TABLE hmda_beta_user.institutions2020 (
 );
 
 
-ALTER TABLE hmda_beta_user.institutions2020 OWNER TO hmda_user;
+ALTER TABLE hmda_beta_user.institutions2019 OWNER TO hmda_user;
 
 --
 -- TOC entry 5447 (class 2606 OID 60872)
--- Name: institutions2020 institutions2020_pkey; Type: CONSTRAINT; Schema: hmda_user; Owner: hmda_user
+-- Name: institutions2019 institutions2019_pkey; Type: CONSTRAINT; Schema: hmda_user; Owner: hmda_user
 --
 
-ALTER TABLE ONLY hmda_beta_user.institutions2020
-    ADD CONSTRAINT institutions2020_pkey PRIMARY KEY (lei);
+ALTER TABLE ONLY hmda_beta_user.institutions2019
+    ADD CONSTRAINT institutions2019_pkey PRIMARY KEY (lei);
 
 
--- Completed on 2020-06-18 12:25:04 EDT
+-- Completed on 2019-06-18 12:25:04 EDT
 
 --
 -- PostgreSQL database dump complete
