@@ -66,6 +66,10 @@ object HmdaValidationError
   val config        = ConfigFactory.load()
   val futureTimeout = config.getInt("hmda.actor.timeout")
 
+  val quarterlyRegexQ1 ="\\b[0-9]{4}\\b-(Q*[1])$".r
+  val quarterlyRegexQ2 ="\\b[0-9]{4}\\b-(Q*[2])$".r
+  val quarterlyRegexQ3 ="\\b[0-9]{4}\\b-(Q*[3])$".r
+
   implicit val timeout: Timeout = Timeout(futureTimeout.seconds)
 
   override def behavior(entityId: String): Behavior[SubmissionProcessingCommand] =
@@ -714,6 +718,7 @@ object HmdaValidationError
     val year = period.year.toString()
     val periodType=period.toString()
 
+
     val institutionPersistence =
       if (period == "2018") {
         sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-$institutionID")
@@ -727,9 +732,12 @@ object HmdaValidationError
       maybeInst <- fInstitution
     } yield {
       val institution         = maybeInst.getOrElse(Institution.empty)
-      val isQuarterlyFiler = isQuarterlyFiling(periodType)
-      val modifiedInstitution = isQuarterlyFiler match {
-        case true => institution.copy (quarterlyFilerHasFiled = true)
+
+
+      val modifiedInstitution = periodType match {
+        case quarterlyRegexQ1(_*) => institution.copy (quarterlyFilerHasFiledQ1 = true)
+        case quarterlyRegexQ2(_*) => institution.copy (quarterlyFilerHasFiledQ2 = true)
+        case quarterlyRegexQ3(_*) => institution.copy (quarterlyFilerHasFiledQ3= true)
         case _ => institution.copy(hmdaFiler = true)
       }
       if (institution.LEI.nonEmpty) {
@@ -738,14 +746,6 @@ object HmdaValidationError
           institutionPersistence ? (ref => ModifyInstitution(modifiedInstitution, ref))
         modified
       }
-    }
-  }
-
-  private def isQuarterlyFiling(filingPeriod: String): Boolean = {
-    val quarterlyRegex ="\\b[0-9]{4}\\b-(Q*[1-3])$".r
-    filingPeriod match {
-      case quarterlyRegex(_*) => true
-      case _ => false
     }
   }
 

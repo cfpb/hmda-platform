@@ -22,7 +22,10 @@ object InstitutionGenerators {
       topHolder       <- topHolderGen
       hmdaFiler       <- Gen.oneOf(true, false)
       quarterlyFiler  <- Gen.oneOf(true, false)
-      quarterlyFilerHasFiled  <- Gen.oneOf(true, false)
+      quarterlyFilerHasFiledQ1  <- Gen.oneOf(true, false)
+      quarterlyFilerHasFiledQ2  <- Gen.oneOf(true, false)
+      quarterlyFilerHasFiledQ3  <- Gen.oneOf(true, false)
+
     } yield {
       Institution(
         activityYear: Int,
@@ -40,7 +43,10 @@ object InstitutionGenerators {
         topHolder,
         hmdaFiler,
         quarterlyFiler,
-        quarterlyFilerHasFiled
+        quarterlyFilerHasFiledQ1,
+        quarterlyFilerHasFiledQ2,
+        quarterlyFilerHasFiledQ3
+
       )
     }
 

@@ -21,7 +21,9 @@ object Institution {
     topHolder = TopHolder.empty,
     hmdaFiler = false,
     quarterlyFiler = false,
-    quarterlyFilerHasFiled = false
+    quarterlyFilerHasFiledQ1 = false,
+    quarterlyFilerHasFiledQ2 = false,
+    quarterlyFilerHasFiledQ3 = false
   )
 
   implicit val institutionEncoder: Encoder[Institution] =
@@ -42,7 +44,10 @@ object Institution {
         ("topHolder", i.topHolder.asJson),
         ("hmdaFiler", Json.fromBoolean(i.hmdaFiler)),
         ("quarterlyFiler", Json.fromBoolean(i.quarterlyFiler)),
-        ("quarterlyFilerHasFiled", Json.fromBoolean(i.quarterlyFilerHasFiled))
+        ("quarterlyFilerHasFiledQ1", Json.fromBoolean(i.quarterlyFilerHasFiledQ1)),
+        ("quarterlyFilerHasFiledQ2", Json.fromBoolean(i.quarterlyFilerHasFiledQ2)),
+        ("quarterlyFilerHasFiledQ3", Json.fromBoolean(i.quarterlyFilerHasFiledQ3))
+
 
       )
 
@@ -64,7 +69,10 @@ object Institution {
         topHolder              <- c.downField("topHolder").as[TopHolder]
         hmdaFiler              <- c.downField("hmdaFiler").as[Boolean]
         quarterlyFiler         <- c.downField("quarterlyFiler").as[Boolean]
-        quarterlyFilerHasFiled <- c.downField("quarterlyFilerHasFiled").as[Boolean]
+        quarterlyFilerHasFiledQ1 <- c.downField("quarterlyFilerHasFiledQ1").as[Boolean]
+        quarterlyFilerHasFiledQ2 <- c.downField("quarterlyFilerHasFiledQ2").as[Boolean]
+        quarterlyFilerHasFiledQ3 <- c.downField("quarterlyFilerHasFiledQ3").as[Boolean]
+
       } yield {
         val institutionId2017 =
           if (maybeInstitutionId2017 == "") None
@@ -87,7 +95,10 @@ object Institution {
           topHolder,
           hmdaFiler,
           quarterlyFiler,
-          quarterlyFilerHasFiled
+          quarterlyFilerHasFiledQ1,
+          quarterlyFilerHasFiledQ2,
+          quarterlyFilerHasFiledQ3
+
         )
       }
 }
@@ -108,8 +119,10 @@ case class Institution(
   topHolder: TopHolder,
   hmdaFiler: Boolean,
   quarterlyFiler: Boolean,
-  quarterlyFilerHasFiled: Boolean
-) {
+  quarterlyFilerHasFiledQ1: Boolean,
+  quarterlyFilerHasFiledQ2: Boolean,
+  quarterlyFilerHasFiledQ3: Boolean
+                      ) {
   def toCSV: String =
     s"$activityYear|$LEI|${agency.code}|${institutionType.code}|" +
       s"${institutionId_2017.getOrElse("")}|${taxId.getOrElse("")}|$rssd|${emailDomains
@@ -117,7 +130,8 @@ case class Institution(
       s"${respondent.name.getOrElse("")}|${respondent.state.getOrElse("")}|${respondent.city
         .getOrElse("")}|" +
       s"${parent.idRssd}|${parent.name.getOrElse("")}|$assets|${otherLenderCode}|" +
-      s"${topHolder.idRssd}|${topHolder.name.getOrElse("")}|$hmdaFiler|$quarterlyFiler|$quarterlyFilerHasFiled"
+      s"${topHolder.idRssd}|${topHolder.name.getOrElse("")}|$hmdaFiler|$quarterlyFiler|$quarterlyFilerHasFiledQ1" +
+      s"${quarterlyFilerHasFiledQ2}|${quarterlyFilerHasFiledQ3}"
 
   def valueOf(field: String): String =
     InstitutionFieldMapping

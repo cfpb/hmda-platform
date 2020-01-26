@@ -49,9 +49,9 @@
           "hmdaFiler": true,
 <<<<<<< Updated upstream
           "quarterlyFiler": true,
-          "quarterlyFilerHasFiled": true},
+          "quarterlyFilerHasFiledQ1": true},
 =======
-          "quarterlyFiler": true, "quarterlyFilerHasFiled": false
+          "quarterlyFiler": true, "quarterlyFilerHasFiledQ1": false
         },
 >>>>>>> Stashed changes
         "expectedResponse": {
@@ -83,9 +83,9 @@
           "hmdaFiler": true,
 <<<<<<< Updated upstream
           "quarterlyFiler": true,
-          "quarterlyFilerHasFiled": true},
+          "quarterlyFilerHasFiledQ1": true},
 =======
-          "quarterlyFiler": true, "quarterlyFilerHasFiled": false
+          "quarterlyFiler": true, "quarterlyFilerHasFiledQ1": false
         },
 >>>>>>> Stashed changes
         "expectedMessage": "Institution NEWMANLEITEST1234678 already exists",
@@ -122,9 +122,9 @@
           "hmdaFiler": true,
 <<<<<<< Updated upstream
           "quarterlyFiler": true,
-          "quarterlyFilerHasFiled": true},
+          "quarterlyFilerHasFiledQ1": true},
 =======
-          "quarterlyFiler": true, "quarterlyFilerHasFiled": false
+          "quarterlyFiler": true, "quarterlyFilerHasFiledQ1": false
         },
 >>>>>>> Stashed changes
         "testNumber": 4
@@ -148,7 +148,7 @@
           },
           "submissions": []
         },
-        "testNumber": 5
+        "testNumber": 0
       },
       {
         "testName": "test create a filing",
@@ -171,7 +171,7 @@
           "fileName": "",
           "receipt": ""
         },
-        "testNumber": 6
+        "testNumber": 1
       },
       {
         "testName": "filing psv upload test",
@@ -192,7 +192,7 @@
           "fileName": "",
           "receipt": ""
         },
-        "testNumber": 7
+        "testNumber": 2
       },
       {
         "testName": "get latest submission test",
@@ -215,27 +215,27 @@
           "fileName": "newmanBank_yes_M_yes_Q_2019.txt",
           "receipt": ""
         },
-        "testNumber": 8
+        "testNumber": 3
       },      {
         "testName": "quality edits test",
         "requestBody": {
           "verified": true
         },
-        "testNumber": 9
+        "testNumber": 4
       },
       {
         "testName": "macro edits test",
         "requestBody": {
           "verified": true
         },
-        "testNumber": 10
+       "testNumber": 5
       },
       {
         "testName": "sign latest submission test",
         "requestBody": {
           "signed": true
         },
-        "testNumber": 10
+       "testNumber": 6
       }
     ]
   }
