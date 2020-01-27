@@ -85,8 +85,8 @@ trait ReportingHttpApi extends InstitutionComponent {
       extractUri { uri =>
         val institutionRepository =
           year match {
-            case 2018 => new InstitutionRepository(databaseConfig, "institutions2018")
-            case 2019 => new InstitutionRepository(databaseConfig, "institutions2019")
+            case 2018 => institutionRepository2018
+            case 2019 => institutionRepository2019
           }
         val resultset = for {
           msaMdsResult      <- repo.msaMds(lei, year)
