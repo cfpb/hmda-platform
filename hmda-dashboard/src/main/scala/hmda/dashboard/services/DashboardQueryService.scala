@@ -70,4 +70,10 @@ class DashboardQueryService (repo: PostgresRepository) extends QueryService{
 
   override def fetchListQuarterlyFilers(year: Int): Task[Seq[ListQuarterlyFilers]] =
     repo.fetchListQuarterlyFilers(year)
+
+  override def fetchFilersByWeekByAgency(year: Int, week: Int): Task[Seq[FilersByWeekByAgency]] =
+    repo.fetchFilersByWeekByAgency(year, week)
+
+  override def fetchLarByWeekByAgency(year: Int, week: Int): Task[Seq[LarByWeekByAgency]] =
+    repo.fetchLarByWeekByAgency(year, week)
 }

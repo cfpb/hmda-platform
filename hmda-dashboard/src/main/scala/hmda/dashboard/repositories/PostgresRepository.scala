@@ -1,5 +1,8 @@
 package hmda.dashboard.repositories
 
+import java.text.SimpleDateFormat
+import java.util.Calendar
+
 import hmda.dashboard.models._
 import monix.eval.Task
 import slick.basic.DatabaseConfig
@@ -12,6 +15,18 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
 
 
   private val filterList = bankFilterList.mkString("'","','","'")
+
+  def getDates(y: Int, w: Int) : String = {
+    val sdf = new SimpleDateFormat("YYYY-MM-dd")
+    val cal = Calendar.getInstance
+    cal.set(Calendar.YEAR, y)
+    cal.set(Calendar.WEEK_OF_YEAR, w)
+    if (w == 1)
+      cal.set(Calendar.DAY_OF_YEAR, 1)
+    else
+      cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+    sdf.format(cal.getTime)
+  }
 
   def tsTableSelector(year: Int): String = {
     year match {
@@ -227,7 +242,27 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
+  def fetchFilersByWeekByAgency(year: Int, week: Int): Task[Seq[FilersByWeekByAgency]] = {
+    val tsTable = tsTableSelector(year)
+    val startDate = getDates(year, week)
+    val endDate = getDates(year, week+1)
+    val query = sql"""
+       select ts.agency, sum(case when to_timestamp(sign_date/1000)::date between '#${startDate}' and '#${endDate}' then 1 else 0 end) as count from #${tsTable} as ts where upper(ts.lei) not in (#${filterList}) group by ts.agency
+      """.as[FilersByWeekByAgency]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchLarByWeekByAgency(year: Int, week: Int): Task[Seq[LarByWeekByAgency]] = {
+    val tsTable = tsTableSelector(year)
+    val startDate = getDates(year+1, week)
+    val endDate = getDates(year+1, week+1)
+    val query = sql"""
+       select ts.agency ,sum(case when to_timestamp(sign_date/1000)::date between '#${startDate}' and '#${endDate}' then total_lines else 0 end) as count from #${tsTable} as ts where upper(ts.lei) not in (#${filterList}) group by ts.agency
+      """.as[LarByWeekByAgency]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
   def healthCheck: Task[Unit] = {
-    Task.deferFuture (db.run (sql"SELECT 1".as[Int] ) ).guarantee (Task.shift).void
+    Task.deferFuture (db.run (sql"select 1".as[Int] ) ).guarantee (Task.shift).void
   }
 }

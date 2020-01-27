@@ -26,4 +26,6 @@ trait QueryService {
   def fetchFilersListWithOnlyOpenEndCreditTransactions(year: Int) : Task[Seq[FilersListWithOnlyOpenEndCredit]]
   def fetchFilersClaimingExemption(year: Int) : Task[Seq[FilersClaimingExemption]]
   def fetchListQuarterlyFilers(year: Int) : Task[Seq[ListQuarterlyFilers]]
+  def fetchFilersByWeekByAgency(year: Int, week: Int) : Task[Seq[FilersByWeekByAgency]]
+  def fetchLarByWeekByAgency(year: Int, week: Int) : Task[Seq[LarByWeekByAgency]]
 }

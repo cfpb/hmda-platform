@@ -255,6 +255,24 @@ trait HmdaDashboardHttpApi extends Settings {
                   .map(aggs => ListQuarterlyFilersAggregationResponse(aggs))
                   .runToFuture
               )
+            } ~
+            path("filers_by_week_by_agency" / IntNumber / "week" / IntNumber) { (year, week) =>
+              log.info(s"Filers for year=${year} for week=${week}")
+              complete(
+                query
+                  .fetchFilersByWeekByAgency(year, week)
+                  .map(aggs => FilersByWeekByAgencyAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("lar_by_week_by_agency" / IntNumber / "week" / IntNumber) { (year, week) =>
+              log.info(s"LAR for year=${year} for week=${week}")
+              complete(
+                query
+                  .fetchLarByWeekByAgency(year, week)
+                  .map(aggs => LarByWeekByAgencyAggregationResponse(aggs))
+                  .runToFuture
+              )
             }
         }
       }

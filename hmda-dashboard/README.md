@@ -23,3 +23,5 @@
 21. /dashboard/filers_claiming_exemption/{{year}}
 22. /dashboard/filer_list_only_open_end_transactions/{{year}}
 23. /dashboard/list_quarterly_filers/{{year}}
+24. /dashboard/filers_by_week_by_agency/{{year}}/week/{{week_number}}
+25. /dashboard/lar_by_week_by_agency/{{year}}/week/{{week_number}}
