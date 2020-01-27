@@ -12,6 +12,7 @@ class Q614_2Spec extends LarEditCheckSpec {
     "Age should be between 18 and 100") {
     forAll(larGen) { lar =>
       lar.copy(coApplicant = lar.coApplicant.copy(age = 8888)).mustPass
+      lar.copy(coApplicant = lar.coApplicant.copy(age = 9999)).mustPass
       lar.copy(coApplicant = lar.coApplicant.copy(age = 17)).mustFail
       lar.copy(coApplicant = lar.coApplicant.copy(age = 18)).mustPass
       lar.copy(coApplicant = lar.coApplicant.copy(age = 100)).mustPass

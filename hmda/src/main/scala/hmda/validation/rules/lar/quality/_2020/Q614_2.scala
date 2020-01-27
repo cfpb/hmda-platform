@@ -14,7 +14,7 @@ object Q614_2 extends EditCheck[LoanApplicationRegister] {
   override def apply(lar: LoanApplicationRegister): ValidationResult ={
     val coAge = lar.coApplicant.age
 
-    when(coAge not equalTo(8888)) {
+    when(coAge not oneOf(8888, 9999)) {
         coAge is between(18, 100)
     }
   }
