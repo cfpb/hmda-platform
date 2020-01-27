@@ -26,7 +26,7 @@ trait HmdaDashboardHttpApi extends Settings {
   implicit val materializer: ActorMaterializer
   private val config: Config = ConfigFactory.load()
 
-  val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
+  val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("dashboard_db")
   val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
   val bankFilterList =
     bankFilter.getString("bank-filter-list").toUpperCase.split(",")
