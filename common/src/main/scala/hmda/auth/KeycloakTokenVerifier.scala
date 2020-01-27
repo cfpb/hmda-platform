@@ -24,9 +24,9 @@ class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment)(implicit sys
   val realm   = config.getString("keycloak.realm")
   val authUrl = config.getString("keycloak.auth.server.url")
   val timeout = config.getInt("hmda.http.timeout").seconds
+  val fKid = getKid(keycloakDeployment)
 
   override def verifyToken(token: String): Future[AccessToken] = {
-    val fKid = getKid(keycloakDeployment)
     fKid.map { kid =>
       RSATokenVerifier.verifyToken(
         token,
