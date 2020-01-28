@@ -76,4 +76,19 @@ class DashboardQueryService (repo: PostgresRepository) extends QueryService{
 
   override def fetchLarByWeekByAgency(year: Int, week: Int): Task[Seq[LarByWeekByAgency]] =
     repo.fetchLarByWeekByAgency(year, week)
+
+  override def fetchListFilersWithOnlyClosedEndCreditTransactions(year: Int): Task[Seq[ListFilersWithOnlyClosedEndCreditTransactions]] =
+    repo.fetchListFilersWithOnlyClosedEndCreditTransactions(year)
+
+  override def fetchFilersCountClosedEndOriginationsByAgency(year: Int, x: Int): Task[Seq[FilersCountClosedEndOriginationsByAgency]] =
+    repo.fetchFilersCountClosedEndOriginationsByAgency(year, x)
+
+  override def fetchFilersCountClosedEndOriginationsByAgencyGraterOrEqual(year: Int, x: Int): Task[Seq[FilersCountClosedEndOriginationsByAgencyGraterOrEqual]] =
+    repo.fetchFilersCountClosedEndOriginationsByAgencyGraterOrEqual(year, x)
+
+  override def fetchFilersCountOpenEndOriginationsByAgency(year: Int, x: Int): Task[Seq[FilersCountOpenEndOriginationsByAgency]] =
+    repo.fetchFilersCountOpenEndOriginationsByAgency(year, x)
+
+  override def fetchFilersCountOpenEndOriginationsByAgencyGraterOrEqual(year: Int, x: Int): Task[Seq[FilersCountOpenEndOriginationsByAgencyGraterOrEqual]] =
+    repo.fetchFilersCountOpenEndOriginationsByAgencyGraterOrEqual(year, x)
 }

@@ -273,6 +273,51 @@ trait HmdaDashboardHttpApi extends Settings {
                   .map(aggs => LarByWeekByAgencyAggregationResponse(aggs))
                   .runToFuture
               )
+            } ~
+            path("list_filers_with_only_closed_end_credit_transactions" / IntNumber ) { (year) =>
+              log.info(s"List filers with only closed end credit transactions for year=${year}")
+              complete(
+                query
+                  .fetchListFilersWithOnlyClosedEndCreditTransactions(year)
+                  .map(aggs => ListFilersWithOnlyClosedEndCreditTransactionsAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("filers_count_closed_end_originations_by_agency" / IntNumber / "thresh" / IntNumber) { (year, x) =>
+              log.info(s"Fetch filers count closed end originations by agency for year=${year} with threshehold<${x}")
+              complete(
+                query
+                  .fetchFilersCountClosedEndOriginationsByAgency(year, x)
+                  .map(aggs => FilersCountClosedEndOriginationsByAgencyAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("filers_count_closed_end_originations_by_agency_grater_or_equal" / IntNumber / "thresh" / IntNumber) { (year, x) =>
+              log.info(s"Fetch filers count closed end originations by agency for year=${year} with threshehold=>${x}")
+              complete(
+                query
+                  .fetchFilersCountClosedEndOriginationsByAgencyGraterOrEqual(year, x)
+                  .map(aggs => FilersCountClosedEndOriginationsByAgencyGraterThanEqualAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("filers_count_open_end_originations_by_agency" / IntNumber / "thresh" / IntNumber) { (year, x) =>
+              log.info(s"Fetch filers count open end originations by agency for year=${year} with threshehold<${x}")
+              complete(
+                query
+                  .fetchFilersCountOpenEndOriginationsByAgency(year, x)
+                  .map(aggs => FilersCountOpenEndOriginationsByAgencyAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("filers_count_open_end_originations_by_agency_grater_or_equal" / IntNumber / "thresh" / IntNumber) { (year, x) =>
+              log.info(s"Fetch filers count open end originations by agency for year=${year} with threshehold>=${x}")
+              complete(
+                query
+                  .fetchFilersCountOpenEndOriginationsByAgencyGraterOrEqual(year, x)
+                  .map(aggs => FilersCountOpenEndOriginationsByAgencyGraterOrEqualAggregationResponse(aggs))
+                  .runToFuture
+              )
             }
         }
       }

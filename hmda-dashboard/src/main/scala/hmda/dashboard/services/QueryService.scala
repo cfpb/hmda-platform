@@ -28,4 +28,9 @@ trait QueryService {
   def fetchListQuarterlyFilers(year: Int) : Task[Seq[ListQuarterlyFilers]]
   def fetchFilersByWeekByAgency(year: Int, week: Int) : Task[Seq[FilersByWeekByAgency]]
   def fetchLarByWeekByAgency(year: Int, week: Int) : Task[Seq[LarByWeekByAgency]]
+  def fetchListFilersWithOnlyClosedEndCreditTransactions(year: Int) : Task[Seq[ListFilersWithOnlyClosedEndCreditTransactions]]
+  def fetchFilersCountClosedEndOriginationsByAgency(year: Int, x: Int) : Task[Seq[FilersCountClosedEndOriginationsByAgency]]
+  def fetchFilersCountClosedEndOriginationsByAgencyGraterOrEqual(year: Int, x: Int) : Task[Seq[FilersCountClosedEndOriginationsByAgencyGraterOrEqual]]
+  def fetchFilersCountOpenEndOriginationsByAgency(year: Int, x: Int) : Task[Seq[FilersCountOpenEndOriginationsByAgency]]
+  def fetchFilersCountOpenEndOriginationsByAgencyGraterOrEqual(year: Int, x: Int) : Task[Seq[FilersCountOpenEndOriginationsByAgencyGraterOrEqual]]
 }

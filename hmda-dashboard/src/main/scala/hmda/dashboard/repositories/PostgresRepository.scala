@@ -215,6 +215,15 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
+  def fetchListFilersWithOnlyClosedEndCreditTransactions(year : Int): Task[Seq[ListFilersWithOnlyClosedEndCreditTransactions]] = {
+    val tsTable = tsTableSelector(year)
+    val larTable = larTableSelector(year)
+    val query = sql"""
+      select ts.agency, ts.institution_name, upper(ts.lei) as lei from #${tsTable} as ts where upper(lei) not in (#${filterList}) and upper(ts.lei) in ( select distinct upper(lar.lei) from #${larTable} as lar group by upper(lar.lei) having sum(case when line_of_credits = 1 or line_of_credits = 1111 then 1 else 0 end) = 0 ) group by upper(ts.lei), ts.agency, ts.institution_name
+      """.as[ListFilersWithOnlyClosedEndCreditTransactions]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
   def fetchFilersListWithOnlyOpenEndCreditTransactions(year: Int): Task[Seq[FilersListWithOnlyOpenEndCredit]] = {
     val tsTable = tsTableSelector(year)
     val larTable = larTableSelector(year)
@@ -237,15 +246,15 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     val tsTable = tsTableSelector(year)
     val larTable = larTableSelector(year)
     val query = sql"""
-      select lei, agency, institution_name from #${tsTable} where upper(lei) NOT IN (#${filterList}) and upper(lei) in ( select distinct(upper(lei)) from #${larTable} group by lei having sum(case when action_taken_type != '6' then 1 else 0 end) >= 60000)
+      select lei, agency, institution_name from #${tsTable} where upper(lei) not in (#${filterList}) and upper(lei) in ( select distinct(upper(lei)) from #${larTable} group by lei having sum(case when action_taken_type != '6' then 1 else 0 end) >= 60000)
       """.as[ListQuarterlyFilers]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
   def fetchFilersByWeekByAgency(year: Int, week: Int): Task[Seq[FilersByWeekByAgency]] = {
     val tsTable = tsTableSelector(year)
-    val startDate = getDates(year, week)
-    val endDate = getDates(year, week+1)
+    val startDate = getDates(year+1, week)
+    val endDate = getDates(year+1, week+1)
     val query = sql"""
        select ts.agency, sum(case when to_timestamp(sign_date/1000)::date between '#${startDate}' and '#${endDate}' then 1 else 0 end) as count from #${tsTable} as ts where upper(ts.lei) not in (#${filterList}) group by ts.agency
       """.as[FilersByWeekByAgency]
@@ -259,6 +268,42 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     val query = sql"""
        select ts.agency ,sum(case when to_timestamp(sign_date/1000)::date between '#${startDate}' and '#${endDate}' then total_lines else 0 end) as count from #${tsTable} as ts where upper(ts.lei) not in (#${filterList}) group by ts.agency
       """.as[LarByWeekByAgency]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchFilersCountClosedEndOriginationsByAgency(year: Int, x: Int): Task[Seq[FilersCountClosedEndOriginationsByAgency]] = {
+    val tsTable = tsTableSelector(year)
+    val larTable = larTableSelector(year)
+    val query = sql"""
+       select ts.agency ,count(upper(ts.lei)) from #${tsTable} as ts where upper(ts.lei) not in (#${filterList}) and upper(ts.lei) in ( select upper(lei) from #${larTable} group by upper(lei) having sum(case when line_of_credits=2 and action_taken_type=1 then 1 else 0 end) < #${x} ) group by ts.agency
+      """.as[FilersCountClosedEndOriginationsByAgency]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchFilersCountClosedEndOriginationsByAgencyGraterOrEqual(year: Int, x: Int): Task[Seq[FilersCountClosedEndOriginationsByAgencyGraterOrEqual]] = {
+    val tsTable = tsTableSelector(year)
+    val larTable = larTableSelector(year)
+    val query = sql"""
+       select ts.agency ,count(upper(ts.lei)) from #${tsTable} as ts where upper(ts.lei) not in (#${filterList}) and upper(ts.lei) in ( select upper(lei) from #${larTable} group by upper(lei) having sum(case when line_of_credits=2 and action_taken_type=1 then 1 else 0 end) >= #${x} ) group by ts.agency
+      """.as[FilersCountClosedEndOriginationsByAgencyGraterOrEqual]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchFilersCountOpenEndOriginationsByAgency(year: Int, x: Int): Task[Seq[FilersCountOpenEndOriginationsByAgency]] = {
+    val tsTable = tsTableSelector(year)
+    val larTable = larTableSelector(year)
+    val query = sql"""
+        select ts.agency ,count(upper(ts.lei)) from #${tsTable} as ts where upper(ts.lei) not in (#${filterList}) and upper(ts.lei) in ( select upper(lei) from #${larTable} group by upper(lei) having sum(case when line_of_credits=1 and action_taken_type=1 then 1 else 0 end) < #${x}) group by ts.agency
+      """.as[FilersCountOpenEndOriginationsByAgency]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchFilersCountOpenEndOriginationsByAgencyGraterOrEqual(year: Int, x: Int): Task[Seq[FilersCountOpenEndOriginationsByAgencyGraterOrEqual]] = {
+    val tsTable = tsTableSelector(year)
+    val larTable = larTableSelector(year)
+    val query = sql"""
+        select ts.agency ,count(upper(ts.lei)) from #${tsTable} as ts where upper(ts.lei) not in (#${filterList}) and upper(ts.lei) in ( select upper(lei) from #${larTable} group by upper(lei) having sum(case when line_of_credits=1 and action_taken_type=1 then 1 else 0 end) >= #${x}) group by ts.agency
+      """.as[FilersCountOpenEndOriginationsByAgencyGraterOrEqual]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
