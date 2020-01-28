@@ -91,4 +91,7 @@ class DashboardQueryService (repo: PostgresRepository) extends QueryService{
 
   override def fetchFilersCountOpenEndOriginationsByAgencyGraterOrEqual(year: Int, x: Int): Task[Seq[FilersCountOpenEndOriginationsByAgencyGraterOrEqual]] =
     repo.fetchFilersCountOpenEndOriginationsByAgencyGraterOrEqual(year, x)
+
+  override def fetchTopInstitutionsCountOpenEndCredit(year: Int, x: Int): Task[Seq[TopInstitutionsCountOpenEndCredit]] =
+    repo.fetchTopInstitutionsCountOpenEndCredit(year, x)
 }

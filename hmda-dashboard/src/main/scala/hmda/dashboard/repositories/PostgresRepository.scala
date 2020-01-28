@@ -307,6 +307,15 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
+  def fetchTopInstitutionsCountOpenEndCredit(year: Int, x: Int): Task[Seq[TopInstitutionsCountOpenEndCredit]] = {
+    val tsTable = tsTableSelector(year)
+    val larTable = larTableSelector(year)
+    val query = sql"""
+         select ts.agency ,upper(ts.lei) ,ts.institution_name from #${larTable} as lar left join #${tsTable} as ts on upper(lar.lei) = upper(ts.lei) where upper(ts.lei) not in (#${filterList}) group by ts.agency, upper(ts.lei) ,ts.institution_name order by rank() over(order by sum(case when line_of_credits=1 then 1 else 0 end) desc) asc limit #${x}
+      """.as[TopInstitutionsCountOpenEndCredit]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
   def healthCheck: Task[Unit] = {
     Task.deferFuture (db.run (sql"select 1".as[Int] ) ).guarantee (Task.shift).void
   }

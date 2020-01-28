@@ -318,6 +318,15 @@ trait HmdaDashboardHttpApi extends Settings {
                   .map(aggs => FilersCountOpenEndOriginationsByAgencyGraterOrEqualAggregationResponse(aggs))
                   .runToFuture
               )
+            } ~
+            path("top_institutions_count_open_end_credit" / IntNumber / "count" / IntNumber) { (year, x) =>
+              log.info(s"Top institutions count with open end credit for year=${year} limit=${x}")
+              complete(
+                query
+                  .fetchTopInstitutionsCountOpenEndCredit(year, x)
+                  .map(aggs => TopInstitutionsCountOpenEndCreditAggregationResponse(aggs))
+                  .runToFuture
+              )
             }
         }
       }

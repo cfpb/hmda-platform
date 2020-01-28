@@ -30,5 +30,4 @@
 28. /dashboard/filers_count_closed_end_originations_by_agency_grater_or_equal/{{year}}/thresh/{{x}}
 29. /dashboard/filers_count_open_end_originations_by_agency/{{year}}/thresh/{{x}}
 30. /dashboard/filers_count_open_end_originations_by_agency_grater_or_equal/{{year}}/thresh/{{x}}
-
-Filers with < X count of open-end-originations by agency
+31. /dashboard/top_institutions_count_open_end_credit/{{year}}/count/{{x}}
