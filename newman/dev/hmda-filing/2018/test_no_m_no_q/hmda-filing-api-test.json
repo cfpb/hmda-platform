@@ -52,7 +52,7 @@
   ],
   "item": [
     {
-      "name": "Start A Filing Test",
+      "name": "Start A Submission Test",
       "event": [
         {
           "listen": "test",
