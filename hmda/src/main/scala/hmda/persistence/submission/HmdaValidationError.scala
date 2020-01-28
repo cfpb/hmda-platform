@@ -66,6 +66,10 @@ object HmdaValidationError
   val config        = ConfigFactory.load()
   val futureTimeout = config.getInt("hmda.actor.timeout")
 
+  val quarterlyRegexQ1 ="\\b[0-9]{4}\\b-(Q*[1])$".r
+  val quarterlyRegexQ2 ="\\b[0-9]{4}\\b-(Q*[2])$".r
+  val quarterlyRegexQ3 ="\\b[0-9]{4}\\b-(Q*[3])$".r
+
   implicit val timeout: Timeout = Timeout(futureTimeout.seconds)
 
   override def behavior(entityId: String): Behavior[SubmissionProcessingCommand] =
@@ -310,7 +314,7 @@ object HmdaValidationError
                       s"${emailTopic} (key: ${submissionId.toString}, value: ${email})"
                   )
               )
-              setHmdaFilerFlag(submissionId.lei, submissionId.period.toString, sharding)
+              setHmdaFilerFlag(submissionId.lei, submissionId.period, sharding)
               replyTo ! signed
             }
           } else {
@@ -709,13 +713,17 @@ object HmdaValidationError
     produceRecord(emailTopic, s"${submissionId.toString}-${signedTimestamp}", email, stringKafkaProducer)
   }
 
-  private def setHmdaFilerFlag[as: AS, mat: MAT, ec: EC](institutionID: String, period: String, sharding: ClusterSharding): Unit = {
+  private def setHmdaFilerFlag[as: AS, mat: MAT, ec: EC](institutionID: String, period: Period, sharding: ClusterSharding): Unit = {
+
+    val year = period.year.toString()
+    val periodType=period.toString()
+
 
     val institutionPersistence =
       if (period == "2018") {
         sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-$institutionID")
       } else {
-        sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-$institutionID-$period")
+        sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-$institutionID-$year")
       }
 
     val fInstitution: Future[Option[Institution]] = institutionPersistence ? (ref => GetInstitution(ref))
@@ -724,8 +732,16 @@ object HmdaValidationError
       maybeInst <- fInstitution
     } yield {
       val institution         = maybeInst.getOrElse(Institution.empty)
-      val modifiedInstitution = institution.copy(hmdaFiler = true)
+
+
+      val modifiedInstitution = periodType match {
+        case quarterlyRegexQ1(_*) => institution.copy (quarterlyFilerHasFiledQ1 = true)
+        case quarterlyRegexQ2(_*) => institution.copy (quarterlyFilerHasFiledQ2 = true)
+        case quarterlyRegexQ3(_*) => institution.copy (quarterlyFilerHasFiledQ3= true)
+        case _ => institution.copy(hmdaFiler = true)
+      }
       if (institution.LEI.nonEmpty) {
+
         val modified: Future[InstitutionEvent] =
           institutionPersistence ? (ref => ModifyInstitution(modifiedInstitution, ref))
         modified

@@ -37,7 +37,7 @@
       },
       {
         "testName": "data browser csv end point check, no year",
-        "testNumber": 5,
+        "testNumber": 0,
         "expectedResponse": {
             "errorType": "provide-atleast-msamds-or-states",
             "message": "Provide year and either states or msamds or both"
@@ -45,21 +45,21 @@
       },
       {
         "testName": "data browser pipe end point check, no year, state or msamd",
-        "testNumber": 6,
+        "testNumber": 1,
         "expectedResponse": {
           "errorType":"provide-only-msamds-or-states","message":"Provide only states or msamds but not both"
         }
       },
       {
         "testName": "data browser pipe end point check, no year, state or msamd",
-        "testNumber": 7,
+        "testNumber": 2,
         "expectedResponse": {
           "errorType":"provide-only-msamds-or-states","message":"Provide only states or msamds but not both"
         }
       },
       {
         "testName": "data browser aggregation end point check, no filters",
-        "testNumber": 8,
+        "testNumber": 3,
         "expectedResponse": {
             "errorType": "provide-atleast-one-filter-criteria",
             "message": "Provide at least 1 filter criteria to perform aggregations (eg. actions_taken, races, genders, etc.)"
