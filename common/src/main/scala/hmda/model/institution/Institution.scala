@@ -130,8 +130,8 @@ case class Institution(
       s"${respondent.name.getOrElse("")}|${respondent.state.getOrElse("")}|${respondent.city
         .getOrElse("")}|" +
       s"${parent.idRssd}|${parent.name.getOrElse("")}|$assets|${otherLenderCode}|" +
-      s"${topHolder.idRssd}|${topHolder.name.getOrElse("")}|$hmdaFiler|$quarterlyFiler|$quarterlyFilerHasFiledQ1" +
-      s"${quarterlyFilerHasFiledQ2}|${quarterlyFilerHasFiledQ3}"
+      s"${topHolder.idRssd}|${topHolder.name.getOrElse("")}|$hmdaFiler|$quarterlyFiler|" +
+      s"$quarterlyFilerHasFiledQ1|$quarterlyFilerHasFiledQ2|$quarterlyFilerHasFiledQ3"
 
   def valueOf(field: String): String =
     InstitutionFieldMapping
