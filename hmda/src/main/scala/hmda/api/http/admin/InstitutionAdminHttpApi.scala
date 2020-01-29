@@ -119,8 +119,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
       case Success(InstitutionModified(i)) =>
         complete((StatusCodes.Accepted, i))
 
-      case Success(InstitutionNotExists(lei)) =>
-        complete((StatusCodes.NotFound, lei))
+      case Success(InstitutionNotExists(lei)) => postInstitution(institution,uri)
 
       case Success(_) =>
         complete(StatusCodes.BadRequest)
