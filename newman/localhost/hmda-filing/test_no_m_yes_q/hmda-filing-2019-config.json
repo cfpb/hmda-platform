@@ -130,7 +130,7 @@
           },
           "submissions": []
         },
-        "testNumber": 5
+        "testNumber": 0
       },
       {
         "testName": "test create a filing",
@@ -150,7 +150,7 @@
           "fileName": "",
           "receipt": ""
         },
-        "testNumber": 6
+        "testNumber": 1
       },
       {
         "testName": "filing psv upload test",
@@ -171,7 +171,7 @@
           "fileName": "",
           "receipt": ""
         },
-        "testNumber": 7
+        "testNumber": 2
       },
       {
         "testName": "get latest submission test",
@@ -191,21 +191,21 @@
           "fileName": "Bank1_3_q645_1.txt",
           "receipt": ""
         },
-        "testNumber": 8
+        "testNumber": 3
       },
       {
         "testName": "quality edits test",
         "requestBody": {
           "verified": true
         },
-        "testNumber": 9
+        "testNumber": 4
       },
       {
         "testName": "macro edits test",
         "requestBody": {
           "verified": true
         },
-        "testNumber": 10
+       "testNumber": 5
       },
       {
         "testName": "sign latest submission test",

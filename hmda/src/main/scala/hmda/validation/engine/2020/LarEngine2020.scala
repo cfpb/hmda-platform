@@ -239,7 +239,7 @@ private[engine] object LarEngine2020 extends ValidationEngine[LoanApplicationReg
     Q603.withIndexedSmallCounties(CensusRecords.indexedSmallCounty2019),
     Q605_1,
     Q605_2,
-    Q606,
+    qualityTwentytwenty.Q606,
     Q609,
     Q607,
     Q608,
@@ -247,7 +247,8 @@ private[engine] object LarEngine2020 extends ValidationEngine[LoanApplicationReg
     Q611,
     Q612,
     Q613,
-    Q614,
+    qualityTwentytwenty.Q614_1,
+    qualityTwentytwenty.Q614_2,
     Q615_1,
     Q615_2,
     Q616_1,
@@ -278,6 +279,9 @@ private[engine] object LarEngine2020 extends ValidationEngine[LoanApplicationReg
     qualityTwentytwenty.Q649_1,
     qualityTwentytwenty.Q649_2,
     qualityTwentytwenty.Q651,
-    qualityTwentytwenty.Q652
+    qualityTwentytwenty.Q652,
+    qualityTwentytwenty.Q653_1,
+    qualityTwentytwenty.Q653_2,
+    qualityTwentytwenty.Q654
   )
 }

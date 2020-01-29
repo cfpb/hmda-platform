@@ -3,117 +3,7 @@
     "test-lei": "NEWMANLEITEST1234678",
     "filing-year": "2018",
     "testData": [
-      {
-        "testName": "admin api health check",
-        "expectedID": "hmda-admin-api",
-        "testNumber": 0
-      },
-      {
-        "testName": "filing health check",
-        "expectedID": "hmda-filing-api",
-        "testNumber": 1
-      },
-      {
-        "testName": "public-api health check",
-        "expectedID": "hmda-public-api",
-        "testNumber": 2
-      },
-      {
-        "testName": "create institution",
-        "requestBody": {
-          "activityYear": 2018,
-          "lei": "NEWMANLEITEST1234678",
-          "agency": 9,
-          "institutionType": -1,
-          "institutionId2017": "",
-          "taxId": "84-7652134",
-          "rssd": -1,
-          "emailDomains": [
-            "newmantest.com"
-          ],
-          "respondent": {
-            "name": "Newman Bank",
-            "state": "",
-            "city": ""
-          },
-          "parent": {
-            "idRssd": -1,
-            "name": ""
-          },
-          "assets": -1,
-          "otherLenderCode": -1,
-          "topHolder": {
-            "idRssd": -1,
-            "name": ""
-          },
-          "hmdaFiler": true,
-          "quarterlyFiler": true
-        },
-        "expectedResponse": {
-          "activityYear": 2018,
-          "lei": "NEWMANLEITEST1234678",
-          "agency": 9,
-          "institutionType": -1,
-          "institutionId2017": "",
-          "taxId": "84-7652134",
-          "rssd": -1,
-          "emailDomains": [
-            "newmantest.com"
-          ],
-          "respondent": {
-            "name": "Newman Bank",
-            "state": "",
-            "city": ""
-          },
-          "parent": {
-            "idRssd": -1,
-            "name": ""
-          },
-          "assets": -1,
-          "otherLenderCode": -1,
-          "topHolder": {
-            "idRssd": -1,
-            "name": ""
-          },
-          "hmdaFiler": true,
-          "quarterlyFiler": true
-        },
-        "expectedMessage": "Institution NEWMANLEITEST1234678 already exists",
-        "testNumber": 3
-      },
-      {
-        "testName": "institution get api call",
-        "expectedResponse": {
-          "activityYear": 2018,
-          "lei": "NEWMANLEITEST1234678",
-          "agency": 9,
-          "institutionType": -1,
-          "institutionId2017": "",
-          "taxId": "84-7652134",
-          "rssd": -1,
-          "emailDomains": [
-            "newmantest.com"
-          ],
-          "respondent": {
-            "name": "Newman Bank",
-            "state": "",
-            "city": ""
-          },
-          "parent": {
-            "idRssd": -1,
-            "name": ""
-          },
-          "assets": -1,
-          "otherLenderCode": -1,
-          "topHolder": {
-            "idRssd": -1,
-            "name": ""
-          },
-          "hmdaFiler": true,
-          "quarterlyFiler": true
-        },
-        "testNumber": 4
-      },
+
       {
         "testName": "test start a Submission",
         "expectedResponse": {
@@ -133,7 +23,7 @@
           },
           "submissions": []
         },
-        "testNumber": 5
+        "testNumber": 0
       },
       {
         "testName": "test create a filing",
@@ -156,7 +46,7 @@
           "fileName": "",
           "receipt": ""
         },
-        "testNumber": 6
+        "testNumber": 1
       },
       {
         "testName": "filing psv upload test",
@@ -177,7 +67,7 @@
           "fileName": "",
           "receipt": ""
         },
-        "testNumber": 7
+        "testNumber": 2
       },
       {
         "testName": "get latest submission test",
@@ -200,21 +90,21 @@
           "fileName": "newmanBank_yes_M_no_Q_2018.txt",
           "receipt": ""
         },
-        "testNumber": 8
+        "testNumber": 3
       },
       {
         "testName": "macro edits test",
         "requestBody": {
           "verified": true
         },
-        "testNumber": 9
+        "testNumber": 4
       },
       {
         "testName": "sign latest submission test",
         "requestBody": {
           "signed": true
         },
-        "testNumber": 10
+       "testNumber": 6
       }
     ]
   }

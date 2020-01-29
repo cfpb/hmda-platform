@@ -60,7 +60,11 @@ object InstitutionProtobufConverter {
       otherLenderCode = i.otherLenderCode,
       topHolder = Some(topHolderToProtobuf(i.topHolder)),
       hmdaFilter = i.hmdaFiler,
-      quarterlyFiler = i.quarterlyFiler
+      quarterlyFiler = i.quarterlyFiler,
+      quarterlyFilerHasFiledQ1 = i.quarterlyFilerHasFiledQ1,
+      quarterlyFilerHasFiledQ2 = i.quarterlyFilerHasFiledQ2,
+      quarterlyFilerHasFiledQ3 = i.quarterlyFilerHasFiledQ3
+
     )
 
   def institutionFromProtobuf(msg: InstitutionMessage): Institution =
@@ -79,7 +83,10 @@ object InstitutionProtobufConverter {
       otherLenderCode = msg.otherLenderCode,
       topHolder = topHolderFromProtobuf(msg.topHolder.getOrElse(TopHolderMessage())),
       hmdaFiler = msg.hmdaFilter,
-      quarterlyFiler = msg.quarterlyFiler
+      quarterlyFiler = msg.quarterlyFiler,
+      quarterlyFilerHasFiledQ1 = msg.quarterlyFilerHasFiledQ1,
+      quarterlyFilerHasFiledQ2 = msg.quarterlyFilerHasFiledQ2,
+      quarterlyFilerHasFiledQ3 = msg.quarterlyFilerHasFiledQ3
     )
 
 }

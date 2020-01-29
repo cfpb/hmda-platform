@@ -25,6 +25,9 @@ object InstitutionCsvParser {
     val topHolderName       = values(16)
     val hmdaFiler           = values(17)
     val quarterlyFiler      = values(18)
+    val quarterlyFilerHasFiledQ1 = values(19)
+    val quarterlyFilerHasFiledQ2 = values(20)
+    val quarterlyFilerHasFiledQ3 = values(21)
 
     val emails =
       if (emailDomains.isEmpty) List() else emailDomains.split(',').toList
@@ -51,11 +54,14 @@ object InstitutionCsvParser {
         if (topHolderName == "") None else Some(topHolderName)
       ),
       parseBoolean(hmdaFiler),
-      parseBoolean(quarterlyFiler)
+      parseBoolean(quarterlyFiler),
+      parseBoolean(quarterlyFilerHasFiledQ1),
+      parseBoolean(quarterlyFilerHasFiledQ2),
+      parseBoolean(quarterlyFilerHasFiledQ3)
     )
   }
   def parseBoolean(i: String): Boolean =
-    i match {
+    i.toLowerCase() match {
       case "t"     => true
       case "f"     => false
       case "true"  => true

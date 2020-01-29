@@ -26,7 +26,7 @@ SET default_with_oids = false;
 -- Name: institutions2019; Type: TABLE; Schema: hmda_user; Owner: hmda_user
 --
 
-CREATE TABLE hmda_user.institutions2019 (
+CREATE TABLE hmda_beta_user.institutions2019 (
     lei character varying NOT NULL,
     activity_year integer NOT NULL,
     agency integer NOT NULL,
@@ -44,18 +44,20 @@ CREATE TABLE hmda_user.institutions2019 (
     topholder_id_rssd integer NOT NULL,
     topholder_name character varying NOT NULL,
     hmda_filer boolean NOT NULL,
-    quarterly_filer boolean default false NOT NULL
+    quarterly_filer boolean default false NOT NULL,
+    quarterly_filer_has_filed boolean default false NOT NULL
+
 );
 
 
-ALTER TABLE hmda_user.institutions2019 OWNER TO hmda_user;
+ALTER TABLE hmda_beta_user.institutions2019 OWNER TO hmda_user;
 
 --
 -- TOC entry 5447 (class 2606 OID 60872)
 -- Name: institutions2019 institutions2019_pkey; Type: CONSTRAINT; Schema: hmda_user; Owner: hmda_user
 --
 
-ALTER TABLE ONLY hmda_user.institutions2019
+ALTER TABLE ONLY hmda_beta_user.institutions2019
     ADD CONSTRAINT institutions2019_pkey PRIMARY KEY (lei);
 
 

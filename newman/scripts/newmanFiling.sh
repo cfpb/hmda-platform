@@ -28,29 +28,28 @@ else
 testResults+="# $8-${filingYear}  Something Disastrous Has Happend (Filing $testType) :starwars-darth:  "$'\n'"$testFiling"$'\n\n'
 fi
 
-rm -f scripts/results-allclear-"${filingYear}"-"${testType}".txt
+#rm -f scripts/results-allclear-"${filingYear}"-"${testType}".txt
 
 done
 done
 
 mattermostPost() {
   if [[ -n $1 ]];then
-    curl -i -X POST -H 'Content-Type: application/json' -d "$3" "${1}"
+    echo "TEST"
+   # curl -i -X POST -H 'Content-Type: application/json' -d "$3" "${1}"
     fi
 
-    if [[ -n ${2} ]];then
-    curl -i -X POST -H 'Content-Type: application/json' -d "$3" "${2}"
-  fi
+
 }
 
 #escape newman output for curl command
 data="$( jq -nc --arg str "$testResults" '{"text": $str}' )"
 
 if [[ ${11} == *"hourly"*  && $data == *"failure"* ]]; then
- mattermostPost "${9}" "${10}" "$data"
+ mattermostPost "${9}"  "$data"
 
 elif [[ ${11} == *"daily"* ]]; then
- mattermostPost "${9}" "${10}" "$data"
+ mattermostPost "${9}"  "$data"
 
 fi
 
@@ -68,5 +67,4 @@ fi
 #MM Web hook Env Vars
 #$8 $HMDA_ENV
 #$9 $MM_HOOK
-#$10 $ALT_HOOK
 #$11 $NEWMAN_NOTIFY=hourly

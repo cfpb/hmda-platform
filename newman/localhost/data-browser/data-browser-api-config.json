@@ -40,15 +40,15 @@
       },
       {
         "testName": "data browser nationwide csv end point check",
-        "testNumber": 5
+        "testNumber": 0
       },
       {
         "testName": "data browser nationwide pipe end point check",
-        "testNumber": 6
+        "testNumber": 1
       },
       {
         "testName": "data browser aggregation end point check, no state or msamd",
-        "testNumber": 7,
+        "testNumber": 2,
         "expectedResponse": {
             "errorType": "provide-atleast-msamds-or-states",
             "message": "Provide year and either states or msamds or both"
@@ -56,7 +56,7 @@
       },
       {
         "testName": "data browser csv end point check, no year",
-        "testNumber": 8,
+        "testNumber": 3,
         "expectedResponse": {
             "errorType": "provide-atleast-msamds-or-states",
             "message": "Provide year and either states or msamds or both"
@@ -64,7 +64,7 @@
       },
       {
         "testName": "data browser pipe end point check, no year, state or msamd",
-        "testNumber": 9,
+        "testNumber": 4,
         "expectedResponse": {
             "errorType": "provide-atleast-msamds-or-states",
             "message": "Provide year and either states or msamds or both"
@@ -72,7 +72,7 @@
       },
       {
         "testName": "data browser pipe end point check, no year, state or msamd",
-        "testNumber": 10,
+       "testNumber": 5,
         "expectedResponse": {
             "errorType": "provide-atleast-msamds-or-states",
             "message": "Provide year and either states or msamds or both"

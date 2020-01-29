@@ -28,6 +28,9 @@ trait InstitutionComponent2019 {
     def topHolderName   = column[String]("topholder_name")
     def hmdaFiler       = column[Boolean]("hmda_filer")
     def quarterlyFiler  = column[Boolean]("quarterly_filer")
+    def quarterlyFilerHasFiledQ1  = column[Boolean]("quarterly_filer_has_filed_q1")
+    def quarterlyFilerHasFiledQ2  = column[Boolean]("quarterly_filer_has_filed_q2")
+    def quarterlyFilerHasFiledQ3  = column[Boolean]("quarterly_filer_has_filed_q3")
 
     def * =
       (
@@ -48,7 +51,10 @@ trait InstitutionComponent2019 {
         topHolderIdRssd,
         topHolderName,
         hmdaFiler,
-        quarterlyFiler
+        quarterlyFiler,
+        quarterlyFilerHasFiledQ1,
+        quarterlyFilerHasFiledQ2,
+        quarterlyFilerHasFiledQ3
       ) <> (InstitutionEntity.tupled, InstitutionEntity.unapply)
   }
 
