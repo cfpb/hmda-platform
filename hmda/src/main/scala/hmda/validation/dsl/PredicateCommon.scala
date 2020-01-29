@@ -35,7 +35,7 @@ object PredicateCommon {
   }
 
   def between(lower: String, upper: String): Predicate[String] = { x: String =>
-    Try(lessThan(BigDecimal(upper)).check(BigDecimal(x))).getOrElse(false)
+    Try(lessThanOrEqual(BigDecimal(upper)).check(BigDecimal(x))).getOrElse(false) && Try(greaterThanOrEqual(BigDecimal(lower)).check(BigDecimal(x))).getOrElse(false)
   }
 
   def containedIn[A](domain: Seq[A]): Predicate[A] = domain.contains(_: A)
