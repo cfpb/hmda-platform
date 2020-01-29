@@ -53,7 +53,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
             sanatizeInstitutionIdentifiers(institution, true, uri, postInstitution)
           } ~
             timedPut { uri =>
-              sanatizeInstitutionIdentifiers(institution, false, uri, putInstitution)
+              sanatizeInstitutionIdentifiers(institution, true, uri, putInstitution)
             } ~
             timedDelete { uri =>
               val institutionPersistence = InstitutionPersistence.selectInstitution(sharding, institution.LEI, institution.activityYear)
