@@ -12,7 +12,6 @@ class Q650Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       lar.copy(loan = lar.loan.copy(interestRate = "8.5")).mustPass
       lar.copy(loan = lar.loan.copy(interestRate = "0.2")).mustFail
-       lar.copy(loan = lar.loan.copy(interestRate = "-1.0")).mustFail
       lar.copy(loan = lar.loan.copy(interestRate = "0.4")).mustFail
       lar.copy(loan = lar.loan.copy(interestRate = "0.5")).mustPass
     }
