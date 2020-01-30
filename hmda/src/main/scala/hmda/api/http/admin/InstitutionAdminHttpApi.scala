@@ -137,11 +137,11 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
     val originalHasFiledQ2Flag = originalInstOpt.getOrElse(Institution.empty).quarterlyFilerHasFiledQ2
     val originalHasFiledQ3Flag = originalInstOpt.getOrElse(Institution.empty).quarterlyFilerHasFiledQ3
 
-    val iFilerFlagSet     = incomingInstitution.copy(hmdaFiler = originalFilerFlag,
+    val iFilerFlagsSet     = incomingInstitution.copy(hmdaFiler = originalFilerFlag,
       quarterlyFilerHasFiledQ1 = originalHasFiledQ1Flag,
       quarterlyFilerHasFiledQ2 = originalHasFiledQ2Flag,
       quarterlyFilerHasFiledQ3 = originalHasFiledQ3Flag)
-    institutionPersistence ? (ref => ModifyInstitution(iFilerFlagSet, ref))
+    institutionPersistence ? (ref => ModifyInstitution(iFilerFlagsSet, ref))
   }
 
   // GET institutions/<lei>/year/<year>
