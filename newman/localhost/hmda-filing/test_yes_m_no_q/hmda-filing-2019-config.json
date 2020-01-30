@@ -6,21 +6,7 @@
     "test-lei": "BANK1LEIFORTEST12345",
     "filing-year": "2019",
     "testData": [
-      {
-        "testName": "admin api health check",
-        "expectedID": "hmda-admin-api",
-        "testNumber": 0
-      },
-      {
-        "testName": "filing health check",
-        "expectedID": "hmda-filing-api",
-        "testNumber": 1
-      },
-      {
-        "testName": "public-api health check",
-        "expectedID": "hmda-public-api",
-        "testNumber": 2
-      },
+
       {
         "testName": "create institution",
         "requestBody": {
@@ -133,7 +119,7 @@
         "testNumber": 0
       },
       {
-        "testName": "test create a filing",
+         "testName": "create a  submission",
         "expectedResponse": {
           "id": {
             "lei": "BANK1LEIFORTEST12345",
