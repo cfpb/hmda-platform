@@ -278,6 +278,7 @@ private[engine] object LarEngine2020 extends ValidationEngine[LoanApplicationReg
     qualityTwentytwenty.Q648,
     qualityTwentytwenty.Q649_1,
     qualityTwentytwenty.Q649_2,
+    qualityTwentytwenty.Q650,
     qualityTwentytwenty.Q653_1,
     qualityTwentytwenty.Q653_2,
     qualityTwentytwenty.Q654
