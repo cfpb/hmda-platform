@@ -1,26 +1,25 @@
 package hmda.api.http.admin
 
 import akka.actor.typed.ActorSystem
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.event.{LoggingAdapter, NoLogging}
-import akka.stream.ActorMaterializer
-import akka.util.Timeout
-import hmda.persistence.AkkaCassandraPersistenceSpec
 import akka.actor.typed.scaladsl.adapter._
+import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.cluster.typed.{Cluster, Join}
+import akka.event.{LoggingAdapter, NoLogging}
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
-import hmda.model.institution.Institution
-import org.scalatest.MustMatchers
-import hmda.model.institution.InstitutionGenerators._
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.persistence.institution.InstitutionPersistence
+import akka.stream.ActorMaterializer
 import akka.testkit._
+import akka.util.Timeout
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.admin.InstitutionDeletedResponse
 import hmda.auth.{KeycloakTokenVerifier, OAuth2Authorization}
-import io.circe.generic.auto._
+import hmda.model.institution.Institution
+import hmda.model.institution.InstitutionGenerators._
+import hmda.persistence.AkkaCassandraPersistenceSpec
+import hmda.persistence.institution.InstitutionPersistence
 import org.keycloak.adapters.KeycloakDeploymentBuilder
+import org.scalatest.MustMatchers
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -62,9 +61,11 @@ class InstitutionAdminHttpApiSpec
   val modified =
     sampleInstitution.copy(emailDomains = List("email@bank.com"))
 
-  val filerFlagNegated =
-    modified.copy(hmdaFiler = !modified.hmdaFiler)
-
+  val filerFlagsNegated = modified.copy(hmdaFiler = !modified.hmdaFiler,
+    quarterlyFilerHasFiledQ1 = !modified.quarterlyFilerHasFiledQ1,
+    quarterlyFilerHasFiledQ2 = !modified.quarterlyFilerHasFiledQ2,
+    quarterlyFilerHasFiledQ3 = !modified.quarterlyFilerHasFiledQ3
+  )
   val oAuth2Authorization = OAuth2Authorization(
     log,
     new KeycloakTokenVerifier(
@@ -136,7 +137,7 @@ class InstitutionAdminHttpApiSpec
     }
 
     "Ignore filer flag for an institution with filer flag set" in {
-      Put("/institutions", filerFlagNegated) ~> institutionAdminRoutes(
+      Put("/institutions", filerFlagsNegated) ~> institutionAdminRoutes(
         oAuth2Authorization) ~> check {
         status mustBe StatusCodes.Accepted
         responseAs[Institution] mustBe modified

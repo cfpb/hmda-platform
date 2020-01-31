@@ -5,7 +5,7 @@
     "testData": [
 
       {
-        "testName": "test start a Submission",
+        "testName": "create a  filing",
         "expectedResponse": {
           "filing": {
             "period": {
@@ -26,7 +26,7 @@
         "testNumber": 0
       },
       {
-        "testName": "test create a filing",
+         "testName": "create a  submission",
         "expectedResponse": {
           "id": {
             "lei": "NEWMANLEITEST1234678",
