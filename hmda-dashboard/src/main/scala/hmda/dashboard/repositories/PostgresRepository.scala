@@ -45,16 +45,11 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   }
 
   def fetchTotalFilers(year: Int): Task[Seq[TotalFilers]] = {
-    val yearToFetch = year match {
-      case 2018 => "institutions2018"
-      case 2019 => "institutions2019"
-      case _    => ""
-    }
-
-    val query = sql"""
-        select count(*) from #${yearToFetch} where hmda_filer = true and upper(lei) not in (#${filterList});
+    val tsTable = tsTableSelector(year)
+    val query2 = sql"""
+        select count(*) from #${tsTable} where upper(lei) not in (#${filterList});
         """.as[TotalFilers]
-    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+    Task.deferFuture(db.run(query2)).guarantee(Task.shift)
   }
 
   def fetchTotalLars(year: Int): Task[Seq[TotalLars]] = {
