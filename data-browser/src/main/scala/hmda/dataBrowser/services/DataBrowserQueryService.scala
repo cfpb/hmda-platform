@@ -8,8 +8,8 @@ import monix.eval.Task
 
 class DataBrowserQueryService(repo: ModifiedLarRepository, cache: Cache) extends QueryService {
   override def fetchData(
-    queries: List[QueryField]
-  ): Source[ModifiedLarEntity, NotUsed] =
+                          queries: List[QueryField]
+                        ): Source[ModifiedLarEntity, NotUsed] =
     repo.find(queries)
 
   private def generateCombinations[T](x: List[List[T]]): List[List[T]] =
@@ -39,8 +39,8 @@ class DataBrowserQueryService(repo: ModifiedLarRepository, cache: Cache) extends
     }
 
   override def fetchAggregate(
-    fields: List[QueryField]
-  ): Task[Seq[Aggregation]] = {
+                               fields: List[QueryField]
+                             ): Task[Seq[Aggregation]] = {
     val optState: Option[QueryField] =
       fields.filter(_.values.nonEmpty).find(_.name == "state")
     val optMsaMd: Option[QueryField] =
@@ -60,33 +60,27 @@ class DataBrowserQueryService(repo: ModifiedLarRepository, cache: Cache) extends
       .filterNot(_.name == "lei")
 
     val queryFieldCombinations = permuteQueryFields(rest)
-      .map(
-        eachList => optYear.toList ++ optState.toList ++ optMsaMd.toList ++ optCounty.toList ++ optLEI.toList ++ eachList
-      )
+      .map(eachList => optYear.toList ++ optState.toList ++ optMsaMd.toList ++ optCounty.toList ++ optLEI.toList ++ eachList)
       .map(eachCombination => eachCombination.sortBy(field => field.name))
 
     Task.gatherUnordered {
       queryFieldCombinations.map { eachCombination =>
-        val fieldInfos = eachCombination.map(
-          field => FieldInfo(field.name, field.values.mkString(","))
-        )
+        val fieldInfos = eachCombination.map(field => FieldInfo(field.name, field.values.mkString(",")))
+        println(s"cache.find($eachCombination)")
         cacheResult(
           cacheLookup = cache.find(eachCombination),
           onMiss = repo.findAndAggregate(eachCombination),
           cacheUpdate = cache.update(eachCombination, _: Statistic)
-        ).map(
-            statistic => Aggregation(statistic.count, statistic.sum, fieldInfos)
-          )
+        ).map(statistic => Aggregation(statistic.count, statistic.sum, fieldInfos))
       }
     }
   }
 
-  override def fetchFilers(fields: List[QueryField]): Task[FilerInstitutionResponse] = {
+  override def fetchFilers(fields: List[QueryField]): Task[FilerInstitutionResponse] =
     cacheResult(
       cacheLookup = cache.findFilers(fields),
       onMiss = repo.findFilers(fields).map(FilerInstitutionResponse(_)),
       cacheUpdate = cache.updateFilers(fields, _: FilerInstitutionResponse)
     )
-  }
 
 }
