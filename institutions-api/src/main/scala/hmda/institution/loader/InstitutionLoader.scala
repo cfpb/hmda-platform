@@ -4,9 +4,9 @@ import java.io.File
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{ ContentTypes, HttpMethods, HttpRequest }
+import akka.http.scaladsl.model._
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{ FileIO, Sink }
+import akka.stream.scaladsl.{FileIO, Sink}
 import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.FlowUtils
@@ -15,6 +15,7 @@ import io.circe.syntax._
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext
+import scala.util.{Failure, Success}
 
 object InstitutionLoader extends App with FlowUtils {
 
@@ -46,15 +47,23 @@ object InstitutionLoader extends App with FlowUtils {
   log.info(s"Running in $postOrPut mode")
   val source = FileIO.fromPath(file.toPath)
 
-  def request(json: String) =
+  def request(json: String) = {
+    var r = HttpRequest()
     postOrPut match {
       case "put" =>
-        HttpRequest(uri = s"$url", method = HttpMethods.PUT)
+        r = HttpRequest(uri = s"$url", method = HttpMethods.PUT)
           .withEntity(ContentTypes.`application/json`, ByteString(json))
       case _ =>
-        HttpRequest(uri = s"$url", method = HttpMethods.POST)
+        r = HttpRequest(uri = s"$url", method = HttpMethods.POST)
           .withEntity(ContentTypes.`application/json`, ByteString(json))
     }
+    Http().singleRequest(r)
+      .onComplete {
+        case Success(res) => if(res.status == StatusCodes.BadRequest) log.info(res.toString())
+        case Failure(_)   => sys.error("something wrong")
+      }
+    r
+  }
 
   source
     .via(framing)
