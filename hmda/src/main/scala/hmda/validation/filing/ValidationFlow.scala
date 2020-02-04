@@ -142,7 +142,20 @@ object ValidationFlow {
     errors.map(error => {
       val affectedFields = EditDescriptionLookup.lookupFields(error.editName, period)
       val fieldMap =
-        ListMap(affectedFields.map(field => (field, lar.valueOf(field))): _*)
+        error.editName match {
+          case "V718" =>
+            ListMap(
+              affectedFields.map(
+                field =>
+                  (
+                    field,
+                    "Provided: " + lar.valueOf(field) + ", Expected: " + period.quarter
+                  )
+              ): _*
+            )
+          case _ =>
+            ListMap(affectedFields.map(field => (field, lar.valueOf(field))): _*)
+        }
       error.copyWithFields(fieldMap)
     })
 
