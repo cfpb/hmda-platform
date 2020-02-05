@@ -15,13 +15,13 @@ trait ColumnDataFormatter {
       val epochLong = new Date(option.getOrElse(0L))
 
       if (epochLong.getTime.equals(0L)){
-        "NA"
+        "NULL"
       } else {
         val entryTime = dateFormatter.format(epochLong.toInstant)
         entryTime
       }
     } else {
-      "NA"
+      "NULL"
     }
 
   def extractOpt(option: Option[Any]): Any =
