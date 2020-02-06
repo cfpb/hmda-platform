@@ -19,6 +19,11 @@ import scala.concurrent.ExecutionContext
 object InstitutionLoader extends App with FlowUtils {
 
   val config = ConfigFactory.load()
+  var createdCount = 0
+  var acceptedCount = 0
+  var badRequestCount = 0
+  var totalCount = 0
+  var notFoundCount = 0
 
   override implicit val system: ActorSystem             = ActorSystem()
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
@@ -68,12 +73,27 @@ object InstitutionLoader extends App with FlowUtils {
     }
     .map( res => {
         res.status match {
-          case StatusCodes.BadRequest => log.info(res.toString())
-          case _ =>
+          case StatusCodes.BadRequest =>
+            log.info(res.toString())
+            badRequestCount+=1
+          case StatusCodes.Created => createdCount+=1
+          case StatusCodes.Accepted => acceptedCount+=1
+          case StatusCodes.NotFound =>
+            log.info(res.toString())
+            notFoundCount+=1
+          case _ => log.info(res.toString())
         }
+      totalCount+=1
       }
     )
     .runWith(Sink.last)
-    .onComplete(_ => system.terminate())
+    .onComplete(_ => {
+      log.info(s"${totalCount} institutions attempts")
+      log.info(s"${createdCount} institutions created (${createdCount*100/totalCount}%)")
+      log.info(s"${acceptedCount} institutions accepted (${acceptedCount*100/totalCount}%)")
+      log.info(s"${badRequestCount} institutions already exist (${badRequestCount*100/totalCount}%)")
+      log.info(s"${notFoundCount} institutions not found (${notFoundCount*100/totalCount}%)")
+      system.terminate()
+    })
 
 }
