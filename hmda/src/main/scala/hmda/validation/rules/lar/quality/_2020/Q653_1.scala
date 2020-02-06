@@ -1,4 +1,4 @@
-package hmda.validation.rules.lar.quality.twentytwenty
+package hmda.validation.rules.lar.quality._2020
 
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
