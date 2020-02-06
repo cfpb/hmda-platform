@@ -234,7 +234,7 @@ Q603|The County has a population of greater than 30,000 according to the most re
 Q604|The reported State and County are not a valid combination. If neither State nor County were reported NA, then the County must be located within the State.|County; State
 Q605-1|If Type of Purchaser equals 1 or 3, then Loan Type generally should equal 1.|Type of Purchaser; Loan Type
 Q605-2|If Type of Purchaser equals 2, then Loan Type generally should equal 2, 3 or 4.|Type of Purchaser; Loan Type
-Q606|If Income is a number, then it generally should be less than $3 million (entered as 3000).|Income
+Q606|If Income is a number, then it generally should be less than $10 million (entered as 10000).|Income
 Q607|If Lien Status equals 2, then Loan Amount generally should be less than or equal to $250 thousand (entered as 250000).|Loan Amount; Lien Status
 Q608|If Action Taken equals 1, then the Action Taken Date generally should occur after the Application Date.|Action Taken; Action Taken Date; Application Date
 Q609|If Type of Purchaser equals 1, 2, 3 or 4, then Rate Spread generally should be less than or equal to 10%, Exempt, or NA.|Type of Purchaser; Rate Spread
