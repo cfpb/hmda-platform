@@ -141,29 +141,17 @@ object RaceCategorization {
   private def moreThanOneMinority(raceFields: Array[RaceEnum],
                                   asianEnums: Array[RaceEnum with Product with Serializable],
                                   hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable]): Boolean = {
-    var counter = 0
-
-    if (raceFields.exists(hawaiianIslanderEnums.contains)) {
-      counter += 1
+    val numberOfMinorityFields = List(
+      raceFields.exists(hawaiianIslanderEnums.contains),
+      raceFields.exists(asianEnums.contains),
+      raceFields.contains(BlackOrAfricanAmerican),
+      raceFields.contains(AmericanIndianOrAlaskaNative)
+    ).filter(x => x).size
+    if (numberOfMinorityFields > 1) {
+      true
+    } else {
+      false
     }
-
-    if (raceFields.exists(asianEnums.contains)) {
-      counter += 1
-    }
-
-    if (raceFields.contains(BlackOrAfricanAmerican)) {
-      counter += 1
-    }
-
-    if (raceFields.contains(AmericanIndianOrAlaskaNative)) {
-      counter += 1
-    }
-
-    if (counter > 1) {
-      return true
-    }
-
-    false
   }
 
   private def AnyApplicantWhite(race: Race): Boolean =

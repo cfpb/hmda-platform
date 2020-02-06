@@ -70,15 +70,8 @@ object APORCommands {
   private def aporForDateAndLoanTerm(loanTerm: Int,
                                      amortizationType: RateType,
                                      lockInDate: LocalDate): Option[Double] = {
-    var aporList = Map[String, APOR]()
 
-    if (amortizationType == FixedRate) {
-      aporList = AporListEntity.fixedRateAPORMap
-    } else if (amortizationType == VariableRate) {
-      aporList = AporListEntity.variableRateAPORMap
-    }
-
-    val aporData = aporList.values.find { apor =>
+    val aporData = getAporMap(amortizationType).values.find { apor =>
       weekNumberForDate(apor.rateDate) == weekNumberForDate(lockInDate) &&
       weekYearForDate(apor.rateDate) == weekYearForDate(lockInDate)
     }
@@ -92,6 +85,13 @@ object APORCommands {
       case None => None
     }
   }
+
+  private def getAporMap(amortizationType: RateType): Map[String, APOR] =
+    if (amortizationType == FixedRate) {
+      AporListEntity.fixedRateAPORMap
+    } else {
+      AporListEntity.variableRateAPORMap
+    }
 
   private def validLoanTerm(loanTerm: Int): Boolean =
     loanTerm >= 1 && loanTerm <= 50

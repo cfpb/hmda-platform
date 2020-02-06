@@ -6,8 +6,7 @@ import hmda.query.ts._
 
 class TransmittalSheetComponentSpec extends TransmittalSheetAsyncSetup {
 
-  var submissionId = None: Option[String]
-  submissionId = Some("bank0-2018-1")
+  val submissionId = Some("bank0-2018-1")
 
   val ts =
     TransmittalSheetConverter(tsGen.sample.getOrElse(TransmittalSheet()),
