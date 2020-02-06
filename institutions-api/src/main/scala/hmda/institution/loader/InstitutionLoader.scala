@@ -15,7 +15,6 @@ import io.circe.syntax._
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext
-import scala.util.{Failure, Success}
 
 object InstitutionLoader extends App with FlowUtils {
 
@@ -48,21 +47,14 @@ object InstitutionLoader extends App with FlowUtils {
   val source = FileIO.fromPath(file.toPath)
 
   def request(json: String) = {
-    var r = HttpRequest()
     postOrPut match {
       case "put" =>
-        r = HttpRequest(uri = s"$url", method = HttpMethods.PUT)
+        HttpRequest(uri = s"$url", method = HttpMethods.PUT)
           .withEntity(ContentTypes.`application/json`, ByteString(json))
       case _ =>
-        r = HttpRequest(uri = s"$url", method = HttpMethods.POST)
+        HttpRequest(uri = s"$url", method = HttpMethods.POST)
           .withEntity(ContentTypes.`application/json`, ByteString(json))
     }
-    Http().singleRequest(r)
-      .onComplete {
-        case Success(res) => if(res.status == StatusCodes.BadRequest) log.info(res.toString())
-        case Failure(_)   => sys.error("something wrong")
-      }
-    r
   }
 
   source
@@ -74,6 +66,13 @@ object InstitutionLoader extends App with FlowUtils {
     .mapAsync(parallelism) { req =>
       Http().singleRequest(req)
     }
+    .map( res => {
+        res.status match {
+          case StatusCodes.BadRequest => log.info(res.toString())
+          case _ =>
+        }
+      }
+    )
     .runWith(Sink.last)
     .onComplete(_ => system.terminate())
 
