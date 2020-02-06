@@ -3,11 +3,11 @@ package hmda.validation.engine
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.lar.quality._2019._
-import hmda.validation.rules.lar.quality.{ twentytwenty => qualityTwentytwenty }
+import hmda.validation.rules.lar.quality.{ _2020 => quality2020 }
 import hmda.validation.rules.lar.quality.common._
 import hmda.validation.rules.lar.syntactical.{ S300, S301 }
 import hmda.validation.rules.lar.validity._
-import hmda.validation.rules.lar.validity.twentytwenty
+import hmda.validation.rules.lar.validity._2020
 import hmda.census.records.CensusRecords
 
 private[engine] object LarEngine2020Q extends ValidationEngine[LoanApplicationRegister] {
@@ -42,7 +42,7 @@ private[engine] object LarEngine2020Q extends ValidationEngine[LoanApplicationRe
     V617,
     V618,
     V619_1,
-    twentytwenty.V619_2,
+    _2020.V619_2,
     V619_3,
     V620,
     V621,
@@ -90,13 +90,13 @@ private[engine] object LarEngine2020Q extends ValidationEngine[LoanApplicationRe
     V642_2,
     V643,
     V644_1,
-    twentytwenty.V644_2,
+    _2020.V644_2,
     V645,
     V646_1,
     V646_2,
     V647,
     V648_1,
-    twentytwenty.V648_2,
+    _2020.V648_2,
     V649,
     V650,
     V651_1,
@@ -166,7 +166,7 @@ private[engine] object LarEngine2020Q extends ValidationEngine[LoanApplicationRe
     V676_3,
     V676_4,
     V676_5,
-    twentytwenty.V677_1,
+    _2020.V677_1,
     V677_2,
     V678_1,
     V678_2,
@@ -207,9 +207,9 @@ private[engine] object LarEngine2020Q extends ValidationEngine[LoanApplicationRe
     V694_3,
     V695,
     V696_1,
-    twentytwenty.V696_2,
+    _2020.V696_2,
     V696_3,
-    twentytwenty.V699,
+    _2020.V699,
     V700_1,
     V700_2,
     V701,
@@ -239,7 +239,7 @@ private[engine] object LarEngine2020Q extends ValidationEngine[LoanApplicationRe
     Q603.withIndexedSmallCounties(CensusRecords.indexedSmallCounty2019),
     Q605_1,
     Q605_2,
-    qualityTwentytwenty.Q606,
+    quality2020.Q606,
     Q609,
     Q607,
     Q608,
@@ -247,13 +247,13 @@ private[engine] object LarEngine2020Q extends ValidationEngine[LoanApplicationRe
     Q611,
     Q612,
     Q613,
-    qualityTwentytwenty.Q614_1,
-    qualityTwentytwenty.Q614_2,
+    quality2020.Q614_1,
+    quality2020.Q614_2,
     Q615_1,
     Q615_2,
     Q616_1,
     Q616_2,
-    qualityTwentytwenty.Q617,
+    quality2020.Q617,
     Q618,
     Q619,
     Q620,
@@ -275,14 +275,14 @@ private[engine] object LarEngine2020Q extends ValidationEngine[LoanApplicationRe
     Q644,
     Q645_1,
     Q645_2,
-    qualityTwentytwenty.Q648,
-    qualityTwentytwenty.Q649_1,
-    qualityTwentytwenty.Q649_2,
-    qualityTwentytwenty.Q651,
-    qualityTwentytwenty.Q652,
-    qualityTwentytwenty.Q650,
-    qualityTwentytwenty.Q653_1,
-    qualityTwentytwenty.Q653_2,
-    qualityTwentytwenty.Q654
+    quality2020.Q648,
+    quality2020.Q649_1,
+    quality2020.Q649_2,
+    quality2020.Q651,
+    quality2020.Q652,
+    quality2020.Q650,
+    quality2020.Q653_1,
+    quality2020.Q653_2,
+    quality2020.Q654
   )
 }
