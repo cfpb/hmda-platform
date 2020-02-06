@@ -4,9 +4,9 @@ import java.io.File
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{ ContentTypes, HttpMethods, HttpRequest }
+import akka.http.scaladsl.model._
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{ FileIO, Sink }
+import akka.stream.scaladsl.{FileIO, Sink}
 import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.FlowUtils
@@ -19,6 +19,11 @@ import scala.concurrent.ExecutionContext
 object InstitutionLoader extends App with FlowUtils {
 
   val config = ConfigFactory.load()
+  var createdCount = 0
+  var acceptedCount = 0
+  var badRequestCount = 0
+  var totalCount = 0
+  var notFoundCount = 0
 
   override implicit val system: ActorSystem             = ActorSystem()
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
@@ -46,7 +51,7 @@ object InstitutionLoader extends App with FlowUtils {
   log.info(s"Running in $postOrPut mode")
   val source = FileIO.fromPath(file.toPath)
 
-  def request(json: String) =
+  def request(json: String) = {
     postOrPut match {
       case "put" =>
         HttpRequest(uri = s"$url", method = HttpMethods.PUT)
@@ -55,6 +60,7 @@ object InstitutionLoader extends App with FlowUtils {
         HttpRequest(uri = s"$url", method = HttpMethods.POST)
           .withEntity(ContentTypes.`application/json`, ByteString(json))
     }
+  }
 
   source
     .via(framing)
@@ -65,7 +71,29 @@ object InstitutionLoader extends App with FlowUtils {
     .mapAsync(parallelism) { req =>
       Http().singleRequest(req)
     }
+    .map( res => {
+        res.status match {
+          case StatusCodes.BadRequest =>
+            log.info(res.toString())
+            badRequestCount+=1
+          case StatusCodes.Created => createdCount+=1
+          case StatusCodes.Accepted => acceptedCount+=1
+          case StatusCodes.NotFound =>
+            log.info(res.toString())
+            notFoundCount+=1
+          case _ => log.info(res.toString())
+        }
+      totalCount+=1
+      }
+    )
     .runWith(Sink.last)
-    .onComplete(_ => system.terminate())
+    .onComplete(_ => {
+      log.info(s"${totalCount} institutions attempts")
+      log.info(s"${createdCount} institutions created (${createdCount*100/totalCount}%)")
+      log.info(s"${acceptedCount} institutions accepted (${acceptedCount*100/totalCount}%)")
+      log.info(s"${badRequestCount} institutions already exist (${badRequestCount*100/totalCount}%)")
+      log.info(s"${notFoundCount} institutions not found (${notFoundCount*100/totalCount}%)")
+      system.terminate()
+    })
 
 }
