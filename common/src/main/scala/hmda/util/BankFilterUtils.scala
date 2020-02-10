@@ -8,12 +8,13 @@ import hmda.utils._
 object BankFilterUtils {
   val log = LoggerFactory.getLogger("hmda")
 
-  def filterBankWithLogging(institutionLei: String): Boolean = {
-  val bankFilterConfig = config.getConfig("filter")
-  val bankFilterList =
+  def getFilterList(): Array[String] = {
+    val bankFilterConfig = config.getConfig("filter")
     bankFilterConfig.getString("bank-filter-list").toUpperCase.split(",")
+  }
 
-    if (bankFilterList.contains(institutionLei.toUpperCase)) {
+  def filterBankWithLogging(institutionLei: String): Boolean = {
+    if (getFilterList().contains(institutionLei.toUpperCase)) {
       log.info(s"Filtered out $institutionLei.toUpperCase")
       false
     } else true

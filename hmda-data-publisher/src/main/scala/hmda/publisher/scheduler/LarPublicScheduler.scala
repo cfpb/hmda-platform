@@ -14,6 +14,7 @@ import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
+import hmda.util.BankFilterUtils._
 import hmda.query.DbConfiguration.dbConfig
 import hmda.publisher.helper.ModifiedLarHeader
 import hmda.publisher.query.component.PublisherComponent2018
@@ -54,10 +55,6 @@ class LarPublicScheduler
     awsRegionProvider,
     ListBucketVersion2
   )
-  val bankFilter =
-    ConfigFactory.load("application.conf").getConfig("filter")
-  val bankFilterList =
-    bankFilter.getString("bank-filter-list").toUpperCase.split(",")
 
   override def preStart() = {
     QuartzSchedulerExtension(context.system)
@@ -74,7 +71,7 @@ class LarPublicScheduler
       val fileNamePSV = "2018_lar.txt"
 
       val allResultsPublisher: DatabasePublisher[ModifiedLarEntityImpl] =
-        mlarRepository2018.getAllLARs(bankFilterList)
+        mlarRepository2018.getAllLARs(getFilterList())
 
       val allResultsSource: Source[ModifiedLarEntityImpl, NotUsed] =
         Source.fromPublisher(allResultsPublisher)

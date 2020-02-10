@@ -8,6 +8,7 @@ import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3._
 import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.Source
+import hmda.util.BankFilterUtils._
 import akka.util.ByteString
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.regions.AwsRegionProvider
@@ -44,10 +45,6 @@ class TsScheduler
   val bucket = awsConfig.getString("private-s3-bucket")
   val environment = awsConfig.getString("private-environment")
   val year = awsConfig.getString("private-year")
-  val bankFilter =
-    ConfigFactory.load("application.conf").getConfig("filter")
-  val bankFilterList =
-    bankFilter.getString("bank-filter-list").toUpperCase.split(",")
   val awsCredentialsProvider = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess))
 
@@ -91,7 +88,7 @@ class TsScheduler
           .withAttributes(S3Attributes.settings(s3Settings))
 
       val allResults: Future[Seq[TransmittalSheetEntity]] =
-        tsRepository2018.getAllSheets(bankFilterList)
+        tsRepository2018.getAllSheets(getFilterList())
 
       val results: Future[MultipartUploadResult] = Source
         .fromFuture(allResults)
@@ -119,7 +116,7 @@ class TsScheduler
           .withAttributes(S3Attributes.settings(s3Settings))
 
       val allResults: Future[Seq[TransmittalSheetEntity]] =
-        tsRepository2019.getAllSheets(bankFilterList)
+        tsRepository2019.getAllSheets(getFilterList())
 
       val results: Future[MultipartUploadResult] = Source
         .fromFuture(allResults)
