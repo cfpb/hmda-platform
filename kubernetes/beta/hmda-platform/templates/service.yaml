@@ -1,7 +1,7 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: hmda-bootstrap
+  name: hmda-bootstrap-beta
 spec:
   # by setting the clusterIp to None we are a "headless service"
   # and thus the svc ("service") DNS record for the single IP but the IPs of all nodes that we select
@@ -32,7 +32,7 @@ metadata:
   name: {{ .Values.service.name }}
 spec:
   selector:
-    app: hmda-platform
+    app: hmda-platform-beta
   type: ClusterIP
   ports:
   - name: {{ .Values.filing.name }}
