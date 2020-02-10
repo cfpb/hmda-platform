@@ -4,24 +4,15 @@ import akka.NotUsed
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.HttpRequest
-import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{
-  MemoryBufferType,
-  MultipartUploadResult,
-  S3Attributes,
-  S3Settings
-}
+import akka.stream.alpakka.s3.{MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings}
 import akka.stream.scaladsl.{Sink, Source}
 import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
 import akka.util.ByteString
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.config.ConfigFactory
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.model.census.Census
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.submission.SubmissionId
@@ -29,7 +20,6 @@ import hmda.parser.filing.lar.LarCsvParser
 import hmda.publication.lar.model.{Msa, MsaMap, MsaSummary}
 import hmda.query.HmdaQuery._
 import hmda.util.streams.FlowUtils.framing
-import io.circe.generic.auto._
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -59,7 +49,9 @@ object IrsPublisher {
     override def getRegion: String = region
   }
 
-  val behavior: Behavior[IrsPublisherCommand] =
+  def behavior(
+  indexTractMap2018: Map[String, Census],
+  indexTractMap2019: Map[String, Census]): Behavior[IrsPublisherCommand] =
     Behaviors.setup { ctx =>
       val log = ctx.log
       val decider: Supervision.Decider = {
@@ -84,22 +76,24 @@ object IrsPublisher {
         ListBucketVersion2
       )
 
-      def getCensus(hmdaCensus: String): Future[Msa] = {
-        val request = HttpRequest(
-          uri = s"http://$censusHost:$censusPort/census/tract/$hmdaCensus")
+      def getCensus(hmdaGeoTract: String,year:Int): Msa = {
 
-        for {
-          r <- Http().singleRequest(request)
-          census <- Unmarshal(r.entity).to[Census]
-        } yield {
-          val censusID =
-            if (census.msaMd == 0) "-----" else census.msaMd.toString
-          val censusName =
-            if (census.name.isEmpty) "MSA/MD NOT AVAILABLE" else census.name
-          Msa(censusID, censusName)
+        val  indexTractMap = year match {
+          case 2018 => indexTractMap2018
+          case 2019 => indexTractMap2019
+          case _ => indexTractMap2019
         }
-      }
 
+       val censusResult= indexTractMap.getOrElse(hmdaGeoTract, Census())
+
+
+        val censusID =
+          if (censusResult.msaMd == 0) "-----" else censusResult.msaMd.toString
+        val censusName =
+          if (censusResult.name.isEmpty) "MSA/MD NOT AVAILABLE" else censusResult.name
+
+        Msa(censusID, censusName)
+      }
       Behaviors.receiveMessage {
 
         case PublishIrs(submissionId) =>
@@ -128,9 +122,7 @@ object IrsPublisher {
                 .map(_.utf8String)
                 .map(_.trim)
                 .map(s => LarCsvParser(s, true).getOrElse(LoanApplicationRegister()))
-                .mapAsyncUnordered(1)(lar =>
-                  getCensus(lar.geography.tract)
-                    .map(msa => (lar, msa))) // order does not matter
+                .map(lar =>(lar,getCensus(lar.geography.tract,submissionId.period.year)))
                 .fold(MsaMap()) {
                   case (map, (lar, msa)) => map.addLar(lar, msa)
                 }
