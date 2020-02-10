@@ -52,9 +52,6 @@ object ModifiedLarApp extends App {
   implicit val timeout: Timeout                = Timeout(1.hour)
 
   val kafkaConfig      = config.getConfig("akka.kafka.consumer")
-  val bankFilterConfig = config.getConfig("filter")
-  val bankFilterList =
-    bankFilterConfig.getString("bank-filter-list").toUpperCase.split(",")
   val parallelism = config.getInt("hmda.lar.modified.parallelism")
 
   val censusTractMap2018: Map[String, Census] =
@@ -67,7 +64,7 @@ object ModifiedLarApp extends App {
     modifiedLarPublisher: ActorRef[PersistToS3AndPostgres]
   )(untypedSubmissionId: String)(implicit scheduler: Scheduler, timeout: Timeout): Future[Done] = {
     val submissionId = SubmissionId(untypedSubmissionId)
-    if (!filterBankWithLogging(submissionId.lei, bankFilterList) || filterQuarterlyFiling(submissionId))
+    if (!filterBankWithLogging(submissionId.lei) || filterQuarterlyFiling(submissionId))
       Future.successful(Done.done())
     else {
       val futRes: Future[PersistModifiedLarResult] =

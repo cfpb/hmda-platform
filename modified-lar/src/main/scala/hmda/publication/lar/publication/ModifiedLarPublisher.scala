@@ -46,9 +46,6 @@ object ModifiedLarPublisher {
   val region = config.getString("aws.region")
   val bucket = config.getString("aws.public-bucket")
   val environment = config.getString("aws.environment")
-  val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
-  val bankFilterList =
-    bankFilter.getString("bank-filter-list").toUpperCase.split(",")
   val awsCredentialsProvider = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess))
   val isGenerateS3File = config.getBoolean("hmda.lar.modified.generateS3Files")
