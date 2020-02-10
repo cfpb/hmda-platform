@@ -54,9 +54,6 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
   val kafkaConfig = system.settings.config.getConfig("akka.kafka.consumer")
   val config      = ConfigFactory.load()
-  val bankFilter  = config.getConfig("filter")
-  val bankFilterList =
-    bankFilter.getString("bank-filter-list").toUpperCase.split(",")
   val parallelism = config.getInt("hmda.analytics.parallelism")
 
   /**
@@ -102,7 +99,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
     Source
       .single(msg)
       .map(msg => SubmissionId(msg))
-      .filter(institution => filterBankWithLogging(institution.lei, bankFilterList))
+      .filter(institution => filterBankWithLogging(institution.lei))
       .mapAsync(1) { id =>
         log.info(s"Adding data for  $id")
         addTs(id)
