@@ -2,13 +2,14 @@ package hmda.publication.lar.config
 
 import akka.actor.{ActorSystem => UntypedActorSystem}
 import com.typesafe.config.Config
+import hmda.util.BankFilterUtils._
 
 class Settings(config: Config) {
   def this(system: UntypedActorSystem) = this(system.settings.config)
 
   def raw: Config = config
 
-  val bankFilterList = config.getString("filter.bank-filter-list").trim().toUpperCase.split(",")
+  val bankFilterList = getFilterList()
 
   object email {
     private val emailPath   = config.getConfig("hmda.lar.email")
