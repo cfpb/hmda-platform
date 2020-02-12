@@ -115,7 +115,7 @@ class LarScheduler
         .withAttributes(S3Attributes.settings(s3Settings))
 
       val allResultsPublisher: DatabasePublisher[LarEntityImpl2019] =
-        larRepository2019.getAllLARs(bankFilterList)
+        larRepository2019.getAllLARs(getFilterList())
       val allResultsSource: Source[LarEntityImpl2019, NotUsed] =
         Source.fromPublisher(allResultsPublisher)
 
@@ -144,7 +144,7 @@ class LarScheduler
         .withAttributes(S3Attributes.settings(s3Settings))
 
       val allResultsPublisher: DatabasePublisher[LarEntityImpl2020] =
-        larRepository2020.getAllLARs(bankFilterList,includeQuarterly)
+        larRepository2020.getAllLARs(getFilterList(),includeQuarterly)
       val allResultsSource: Source[LarEntityImpl2020, NotUsed] =
         Source.fromPublisher(allResultsPublisher)
 

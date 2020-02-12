@@ -144,7 +144,7 @@ class TsScheduler
           .withAttributes(S3Attributes.settings(s3Settings))
 
       val allResults: Future[Seq[TransmittalSheetEntity]] =
-        tsRepository2020.getAllSheets(bankFilterList,includeQuarterly)
+        tsRepository2020.getAllSheets(getFilterList(),includeQuarterly)
 
       val results: Future[MultipartUploadResult] = Source
         .fromFuture(allResults)

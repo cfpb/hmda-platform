@@ -118,7 +118,7 @@ class PanelScheduler
   private def panelSync2019() = {
 
     val allResults: Future[Seq[InstitutionEntity]] =
-      institutionRepository2019.findActiveFilers(bankFilterList)
+      institutionRepository2019.findActiveFilers(getFilterList())
     val now = LocalDateTime.now().minusDays(1)
     val formattedDate = fullDate.format(now)
     val fileName = s"$formattedDate" + "2019_panel.txt"
