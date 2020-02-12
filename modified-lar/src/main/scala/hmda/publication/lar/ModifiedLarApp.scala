@@ -1,15 +1,16 @@
 package hmda.publication.lar
 
 import akka.Done
-import akka.actor.{ ActorSystem, Scheduler }
+import akka.actor.{ActorSystem, Scheduler}
 import akka.actor.typed.ActorRef
 import akka.actor.typed.scaladsl.adapter._
 import akka.kafka.scaladsl.Consumer
-import akka.kafka.{ ConsumerMessage, ConsumerSettings, Subscriptions }
+import akka.kafka.{ConsumerMessage, ConsumerSettings, Subscriptions}
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl._
 import akka.util.Timeout
+import com.typesafe.config.ConfigFactory
 import hmda.messages.pubsub.HmdaGroups
 import hmda.model.census.Census
 import hmda.model.filing.submission.SubmissionId
@@ -26,8 +27,8 @@ import slick.jdbc.JdbcProfile
 import hmda.census.records._
 
 import scala.concurrent.duration._
-import scala.concurrent.{ ExecutionContextExecutor, Future }
-import scala.util.{ Failure, Success }
+import scala.concurrent.{ExecutionContextExecutor, Future}
+import scala.util.{Failure, Success}
 
 object ModifiedLarApp extends App {
 
@@ -51,6 +52,7 @@ object ModifiedLarApp extends App {
   implicit val scheduler: Scheduler            = system.scheduler
   implicit val timeout: Timeout                = Timeout(1.hour)
 
+  val config  = ConfigFactory.load()
   val kafkaConfig      = config.getConfig("akka.kafka.consumer")
   val parallelism = config.getInt("hmda.lar.modified.parallelism")
 
