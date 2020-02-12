@@ -1,12 +1,13 @@
 package hmda.util
 
+import com.typesafe.config.ConfigFactory
 import hmda.model.filing.submission.SubmissionId
-import hmda.publication.KafkaUtils.config
 import org.slf4j.LoggerFactory
 import hmda.utils._
 
 object BankFilterUtils {
   val log = LoggerFactory.getLogger("hmda")
+  val config  = ConfigFactory.load()
 
   def getFilterList(): Array[String] = {
     val bankFilterConfig = config.getConfig("filter")
