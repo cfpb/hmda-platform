@@ -10,6 +10,19 @@ object HmdaDashboard extends App {
   val log = LoggerFactory.getLogger("hmda-dashboard")
   log.info("Starting hmda-dashboard")
 
+  log.info {
+    """
+      |__    __  .___  ___.  _______       ___          _______       ___           _______. __    __  .______     ______        ___      .______       _______
+       |  |  |  | |   \/   | |       \     /   \        |       \     /   \         /       ||  |  |  | |   _  \   /  __  \      /   \     |   _  \     |       \
+       |  |__|  | |  \  /  | |  .--.  |   /  ^  \       |  .--.  |   /  ^  \       |   (----`|  |__|  | |  |_)  | |  |  |  |    /  ^  \    |  |_)  |    |  .--.  |
+       |   __   | |  |\/|  | |  |  |  |  /  /_\  \      |  |  |  |  /  /_\  \       \   \    |   __   | |   _  <  |  |  |  |   /  /_\  \   |      /     |  |  |  |
+       |  |  |  | |  |  |  | |  '--'  | /  _____  \     |  '--'  | /  _____  \  .----)   |   |  |  |  | |  |_)  | |  `--'  |  /  _____  \  |  |\  \----.|  '--'  |
+       |__|  |__| |__|  |__| |_______/ /__/     \__\    |_______/ /__/     \__\ |_______/    |__|  |__| |______/   \______/  /__/     \__\ | _| `._____||_______/
+
+
+    """.stripMargin
+  }
+
   implicit val system: ActorSystem = ActorSystem("hmda-dashboard")
   system.actorOf(HmdaDashboardApi.props(), "hmda-dashboard")
 

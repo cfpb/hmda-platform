@@ -26,7 +26,7 @@ trait HmdaDashboardHttpApi extends Settings {
   implicit val materializer: ActorMaterializer
   private val config: Config = ConfigFactory.load()
 
-  val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
+  val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("dashboard_db")
   val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
   val bankFilterList =
     bankFilter.getString("bank-filter-list").toUpperCase.split(",")
@@ -163,6 +163,168 @@ trait HmdaDashboardHttpApi extends Settings {
                 query
                   .fetchLarCountByPropertyType(year)
                   .map(aggs => LarCountByPropertyTypeAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("filers_using_exemption_by_agency" / IntNumber) { (year) =>
+              log.info(s"Filers using exemption by agency for year=${year}")
+              complete(
+                query
+                  .fetchFilersUsingExemptionsByAgency(year)
+                  .map(aggs => FilersUsingExemptionByAgencyAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("denial_reason_counts_by_agency" / IntNumber) { (year) =>
+              log.info(s"Denial Reason Counts By Agency for year=${year}")
+              complete(
+                query
+                  .fetchDenialReasonCountsByAgency(year)
+                  .map(aggs => DenialReasonCountsByAgencyAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("lar_count_using_exemption_by_agency" / IntNumber) { (year) =>
+              log.info(s"Lar Count Using Exemption By Agency for year=${year}")
+              complete(
+                query
+                  .fetchLarCountUsingExemptionByAgency(year)
+                  .map(aggs => LarCountUsingExemptionByAgencyAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("open_end_credit_filers_by_agency" / IntNumber) { (year) => // TODO: fix
+              log.info(s"Open end credit By Agency for year=${year}")
+              complete(
+                query
+                  .fetchOpenEndCreditFilersByAgency(year)
+                  .map(aggs => OpenEndCreditByAgencyAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+              path("open_end_credit_lar_count_by_agency" / IntNumber) { (year) => // TODO: fix
+              log.info(s"Open end credit Lar count By Agency for year=${year}")
+              complete(
+                query
+                  .fetchOpenEndCreditLarCountByAgency(year)
+                  .map(aggs => OpenEndCreditLarCountByAgencyAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("filers_with_only_open_end_credit_transactions" / IntNumber) { (year) =>
+              log.info(s"Filers With Only Open End Credit Transactions for year=${year}")
+              complete(
+                query
+                  .fetchFilersWithOnlyOpenEndCreditTransactions(year)
+                  .map(aggs => FilersWithOnlyOpenEndCreditTransactionsAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("filers_with_only_closed_end_credit_transactions" / IntNumber) { (year) =>
+              log.info(s"Filers With Only Closed End Credit Transactions for year=${year}")
+              complete(
+                query
+                  .fetchFilersWithOnlyClosedEndCreditTransactions(year)
+                  .map(aggs => FilersWithOnlyClosedEndCreditTransactionsAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("filer_list_only_open_end_transactions" / IntNumber) { (year) =>
+              log.info(s"Filers With Only Closed End Credit Transactions for year=${year}")
+              complete(
+                query
+                  .fetchFilersListWithOnlyOpenEndCreditTransactions(year)
+                  .map(aggs => FilersListWithOnlyOpenEndCreditAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("filers_claiming_exemption" / IntNumber) { (year) =>
+              log.info(s"Filers claiming exemptions for year=${year}")
+              complete(
+                query
+                  .fetchFilersClaimingExemption(year)
+                  .map(aggs => FilersClaimingExemptionAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("list_quarterly_filers" / IntNumber) { (year) =>
+              log.info(s"List quarterly filers for year=${year}")
+              complete(
+                query
+                  .fetchListQuarterlyFilers(year)
+                  .map(aggs => ListQuarterlyFilersAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("filers_by_week_by_agency" / IntNumber / "week" / IntNumber) { (year, week) =>
+              log.info(s"Filers for year=${year} for week=${week}")
+              complete(
+                query
+                  .fetchFilersByWeekByAgency(year, week)
+                  .map(aggs => FilersByWeekByAgencyAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("lar_by_week_by_agency" / IntNumber / "week" / IntNumber) { (year, week) =>
+              log.info(s"LAR for year=${year} for week=${week}")
+              complete(
+                query
+                  .fetchLarByWeekByAgency(year, week)
+                  .map(aggs => LarByWeekByAgencyAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("list_filers_with_only_closed_end_credit_transactions" / IntNumber ) { (year) =>
+              log.info(s"List filers with only closed end credit transactions for year=${year}")
+              complete(
+                query
+                  .fetchListFilersWithOnlyClosedEndCreditTransactions(year)
+                  .map(aggs => ListFilersWithOnlyClosedEndCreditTransactionsAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("filers_count_closed_end_originations_by_agency" / IntNumber / "thresh" / IntNumber) { (year, x) =>
+              log.info(s"Fetch filers count closed end originations by agency for year=${year} with threshehold<${x}")
+              complete(
+                query
+                  .fetchFilersCountClosedEndOriginationsByAgency(year, x)
+                  .map(aggs => FilersCountClosedEndOriginationsByAgencyAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("filers_count_closed_end_originations_by_agency_grater_or_equal" / IntNumber / "thresh" / IntNumber) { (year, x) =>
+              log.info(s"Fetch filers count closed end originations by agency for year=${year} with threshehold=>${x}")
+              complete(
+                query
+                  .fetchFilersCountClosedEndOriginationsByAgencyGraterOrEqual(year, x)
+                  .map(aggs => FilersCountClosedEndOriginationsByAgencyGraterThanEqualAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("filers_count_open_end_originations_by_agency" / IntNumber / "thresh" / IntNumber) { (year, x) =>
+              log.info(s"Fetch filers count open end originations by agency for year=${year} with threshehold<${x}")
+              complete(
+                query
+                  .fetchFilersCountOpenEndOriginationsByAgency(year, x)
+                  .map(aggs => FilersCountOpenEndOriginationsByAgencyAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("filers_count_open_end_originations_by_agency_grater_or_equal" / IntNumber / "thresh" / IntNumber) { (year, x) =>
+              log.info(s"Fetch filers count open end originations by agency for year=${year} with threshehold>=${x}")
+              complete(
+                query
+                  .fetchFilersCountOpenEndOriginationsByAgencyGraterOrEqual(year, x)
+                  .map(aggs => FilersCountOpenEndOriginationsByAgencyGraterOrEqualAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
+            path("top_institutions_count_open_end_credit" / IntNumber / "count" / IntNumber) { (year, x) =>
+              log.info(s"Top institutions count with open end credit for year=${year} limit=${x}")
+              complete(
+                query
+                  .fetchTopInstitutionsCountOpenEndCredit(year, x)
+                  .map(aggs => TopInstitutionsCountOpenEndCreditAggregationResponse(aggs))
                   .runToFuture
               )
             }

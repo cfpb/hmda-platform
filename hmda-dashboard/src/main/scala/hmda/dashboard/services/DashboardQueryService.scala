@@ -40,4 +40,58 @@ class DashboardQueryService (repo: PostgresRepository) extends QueryService{
 
   override def fetchLarCountByPropertyType(year: Int): Task[Seq[LarCountByPropertyType]] =
     repo.fetchLarCountByPropertyType(year)
+
+  override def fetchFilersUsingExemptionsByAgency(year: Int): Task[Seq[FilersUsingExemptionByAgency]] =
+    repo.fetchFilersUsingExemptionByAgency(year)
+
+  override def fetchDenialReasonCountsByAgency(year: Int): Task[Seq[DenialReasonCountsByAgency]] =
+    repo.fetchDenialReasonCountsByAgency(year)
+
+  override def fetchLarCountUsingExemptionByAgency(year: Int): Task[Seq[LarCountUsingExemptionByAgency]] =
+    repo.fetchLarCountUsingExemptionByAgency(year)
+
+  override def fetchOpenEndCreditFilersByAgency(year: Int): Task[Seq[OpenEndCreditByAgency]] =
+    repo.fetchOpenEndCreditFilersByAgency(year)
+
+  override def fetchOpenEndCreditLarCountByAgency(year: Int): Task[Seq[OpenEndCreditLarCountByAgency]] =
+    repo.fetchOpenEndCreditLarCountByAgency(year)
+
+  override def fetchFilersWithOnlyOpenEndCreditTransactions(year: Int): Task[Seq[FilersWithOnlyOpenEndCreditTransactions]] =
+    repo.fetchFilersWithOnlyOpenEndCreditTransactions(year)
+
+  override def fetchFilersWithOnlyClosedEndCreditTransactions(year: Int): Task[Seq[FilersWithOnlyClosedEndCreditTransactions]] =
+    repo.fetchFilersWithOnlyClosedEndCreditTransactions((year))
+
+  override def fetchFilersListWithOnlyOpenEndCreditTransactions(year: Int): Task[Seq[FilersListWithOnlyOpenEndCredit]] =
+    repo.fetchFilersListWithOnlyOpenEndCreditTransactions(year)
+
+  override def fetchFilersClaimingExemption(year: Int) : Task[Seq[FilersClaimingExemption]] =
+    repo.fetchFilersClaimingExemption(year)
+
+  override def fetchListQuarterlyFilers(year: Int): Task[Seq[ListQuarterlyFilers]] =
+    repo.fetchListQuarterlyFilers(year)
+
+  override def fetchFilersByWeekByAgency(year: Int, week: Int): Task[Seq[FilersByWeekByAgency]] =
+    repo.fetchFilersByWeekByAgency(year, week)
+
+  override def fetchLarByWeekByAgency(year: Int, week: Int): Task[Seq[LarByWeekByAgency]] =
+    repo.fetchLarByWeekByAgency(year, week)
+
+  override def fetchListFilersWithOnlyClosedEndCreditTransactions(year: Int): Task[Seq[ListFilersWithOnlyClosedEndCreditTransactions]] =
+    repo.fetchListFilersWithOnlyClosedEndCreditTransactions(year)
+
+  override def fetchFilersCountClosedEndOriginationsByAgency(year: Int, x: Int): Task[Seq[FilersCountClosedEndOriginationsByAgency]] =
+    repo.fetchFilersCountClosedEndOriginationsByAgency(year, x)
+
+  override def fetchFilersCountClosedEndOriginationsByAgencyGraterOrEqual(year: Int, x: Int): Task[Seq[FilersCountClosedEndOriginationsByAgencyGraterOrEqual]] =
+    repo.fetchFilersCountClosedEndOriginationsByAgencyGraterOrEqual(year, x)
+
+  override def fetchFilersCountOpenEndOriginationsByAgency(year: Int, x: Int): Task[Seq[FilersCountOpenEndOriginationsByAgency]] =
+    repo.fetchFilersCountOpenEndOriginationsByAgency(year, x)
+
+  override def fetchFilersCountOpenEndOriginationsByAgencyGraterOrEqual(year: Int, x: Int): Task[Seq[FilersCountOpenEndOriginationsByAgencyGraterOrEqual]] =
+    repo.fetchFilersCountOpenEndOriginationsByAgencyGraterOrEqual(year, x)
+
+  override def fetchTopInstitutionsCountOpenEndCredit(year: Int, x: Int): Task[Seq[TopInstitutionsCountOpenEndCredit]] =
+    repo.fetchTopInstitutionsCountOpenEndCredit(year, x)
 }
