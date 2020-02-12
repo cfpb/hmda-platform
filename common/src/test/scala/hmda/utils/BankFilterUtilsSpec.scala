@@ -9,8 +9,7 @@ class FilingDetailsProtobufConverterSpec extends PropSpec with MustMatchers {
   property("Must filter test instituions") {
     val institutions = List("LEI0", "LEI1", "lei2", "LEI3")
     institutions.filter(institution =>
-      filterBankWithLogging(institution, bankFilterList)) mustBe List("LEI0",
-                                                                      "LEI3")
+      filterBankWithLogging(institution)) mustBe List("LEI0", "LEI3")
   }
 
 }
