@@ -71,7 +71,7 @@ object ValidationFlow {
       .map { x =>
         x._2
           .leftMap(xs => {
-            addTsFieldInformation(x._1, xs.toList, validationContext.institution)
+            addTsFieldInformation(x._1, xs.toList, validationContext.institution, period)
           })
           .toEither
       }
@@ -96,7 +96,7 @@ object ValidationFlow {
     }
     errors
       .leftMap(xs => {
-        addTsFieldInformation(tsLar.ts, xs.toList)
+        addTsFieldInformation(tsLar.ts, xs.toList, Option(Institution.empty), period)
       })
       .toEither
   }
@@ -141,31 +141,18 @@ object ValidationFlow {
   def addLarFieldInformation(lar: LoanApplicationRegister, errors: List[ValidationError], period: Period): List[ValidationError] =
     errors.map(error => {
       val affectedFields = EditDescriptionLookup.lookupFields(error.editName, period)
-      val fieldMap =
-        error.editName match {
-          case "V718" =>
-            ListMap(
-              affectedFields.map(
-                field =>
-                  (
-                    field,
-                    "Provided: " + lar.valueOf(field) + ", Expected: " + period.quarter
-                  )
-              ): _*
-            )
-          case _ =>
-            ListMap(affectedFields.map(field => (field, lar.valueOf(field))): _*)
-        }
+      val fieldMap = ListMap(affectedFields.map(field => (field, lar.valueOf(field))): _*)
       error.copyWithFields(fieldMap)
     })
 
   def addTsFieldInformation(
     ts: TransmittalSheet,
     errors: List[ValidationError],
-    institution: Option[Institution] = Option(Institution.empty)
+    institution: Option[Institution] = Option(Institution.empty),
+    period: Period
   ): List[ValidationError] =
     errors.map(error => {
-      val affectedFields = EditDescriptionLookup.lookupFields(error.editName)
+      val affectedFields = EditDescriptionLookup.lookupFields(error.editName, period)
       val fieldMap =
         error.editName match {
           case "S303" =>
@@ -177,6 +164,23 @@ object ValidationFlow {
                     "Provided: " + ts.valueOf(field) + ", Expected: " + institution
                       .getOrElse(Institution.empty)
                       .valueOf(field)
+                  )
+              ): _*
+            )
+          case "V718" =>
+            val quarter =
+              period.quarter match {
+                case Some("Q1") => "1"
+                case Some("Q2") => "2"
+                case Some("Q3") => "3"
+                case _ => period.quarter.toString
+              }
+            ListMap(
+              affectedFields.map(
+                field =>
+                  (
+                    field,
+                    "Provided: " + ts.valueOf(field) + ", Expected: " + quarter
                   )
               ): _*
             )
