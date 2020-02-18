@@ -3,28 +3,29 @@ package hmda.publication.lar.publication
 import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{ ActorRef, Behavior }
+import akka.actor.typed.{ActorRef, Behavior}
 import akka.stream._
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
-import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.alpakka.s3._
+import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl._
 import akka.util.ByteString
-import akka.{ Done, NotUsed }
-import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
+import akka.{Done, NotUsed}
+import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.config.ConfigFactory
+import hmda.messages.pubsub.HmdaTopics._
 import hmda.model.census.Census
 import hmda.model.filing.submission.SubmissionId
-import hmda.model.modifiedlar.{ EnrichedModifiedLoanApplicationRegister, ModifiedLoanApplicationRegister }
+import hmda.model.modifiedlar.{EnrichedModifiedLoanApplicationRegister, ModifiedLoanApplicationRegister}
+import hmda.publication.KafkaUtils
+import hmda.publication.KafkaUtils._
 import hmda.publication.lar.parser.ModifiedLarCsvParser
 import hmda.query.HmdaQuery._
 import hmda.query.repository.ModifiedLarRepository
-import hmda.publication.KafkaUtils._
-import hmda.messages.pubsub.HmdaTopics._
-import hmda.publication.KafkaUtils
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.{ Failure, Success }
+
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 sealed trait ModifiedLarCommand
 case class PersistToS3AndPostgres(submissionId: SubmissionId,
@@ -46,9 +47,6 @@ object ModifiedLarPublisher {
   val region = config.getString("aws.region")
   val bucket = config.getString("aws.public-bucket")
   val environment = config.getString("aws.environment")
-  val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
-  val bankFilterList =
-    bankFilter.getString("bank-filter-list").toUpperCase.split(",")
   val awsCredentialsProvider = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess))
   val isGenerateS3File = config.getBoolean("hmda.lar.modified.generateS3Files")
@@ -141,7 +139,7 @@ object ModifiedLarPublisher {
               )
               .toMat(Sink.ignore)(Keep.right)
 
-          def mlarGraph(s3Enabled: Boolean): RunnableGraph[Future[Done]] =
+          val mlarGraphS3: RunnableGraph[Future[Done]] =
             RunnableGraph.fromGraph(
               GraphDSL.create(mlarSource, s3SinkWithHeader, s3Sink, postgresOut(2))(
                 (_, s3HeaderMat, s3NoHeaderMat, pgMat) =>
@@ -152,24 +150,27 @@ object ModifiedLarPublisher {
                   } yield akka.Done.done()
               ) { implicit builder => (source, headerSink, noHeaderSink, pgSink) =>
                 import GraphDSL.Implicits._
+
                 val mlarHeader = Source.single(ByteString(ModifiedLoanApplicationRegister.header))
+                val broadcast = builder.add(Broadcast[ModifiedLoanApplicationRegister](3))
 
-                if (s3Enabled) {
-                  (source ~> serializeMlar).prepend(mlarHeader) ~> headerSink
-                  source ~> serializeMlar ~> noHeaderSink
-                } else ()
-
-                source ~> pgSink
+                source.out ~> broadcast.in
+                (broadcast.out(0) ~> serializeMlar).prepend(mlarHeader) ~> headerSink
+                broadcast.out(1) ~> serializeMlar ~> noHeaderSink
+                broadcast.out(2) ~> pgSink
 
                 ClosedShape
               }
             )
 
+          def mlarGraphWithoutS3: RunnableGraph[Future[Done]] =
+            mlarSource.toMat(postgresOut(2))(Keep.right)
+
           // write to both Postgres and S3
-          val graphWithS3 = mlarGraph(s3Enabled = true)
+          val graphWithS3 = mlarGraphS3
 
           //only write to PG - do not generate S3 files
-          val graphWithoutS3 = mlarGraph(s3Enabled = false)
+          val graphWithoutS3 = mlarGraphWithoutS3
 
           val finalResult: Future[Unit] = for {
             _ <- removeLei
