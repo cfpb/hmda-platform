@@ -5,12 +5,10 @@ import hmda.util.BankFilterUtils._
 
 class FilingDetailsProtobufConverterSpec extends PropSpec with MustMatchers {
 
-  val bankFilterList = Array("LEI1", "LEI2")
   property("Must filter test instituions") {
-    val institutions = List("LEI0", "LEI1", "lei2", "LEI3")
+    val institutions = List("LEI0", "B90YWS6AFX2LGWOXJ1LD")
     institutions.filter(institution =>
-      filterBankWithLogging(institution, bankFilterList)) mustBe List("LEI0",
-                                                                      "LEI3")
+      filterBankWithLogging(institution)) mustBe List("LEI0")
   }
 
 }

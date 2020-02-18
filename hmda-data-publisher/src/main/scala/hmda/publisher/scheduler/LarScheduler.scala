@@ -15,6 +15,7 @@ import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
+import hmda.util.BankFilterUtils._
 import hmda.query.DbConfiguration.dbConfig
 import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020}
 import hmda.publisher.query.lar.{LarEntityImpl2018, LarEntityImpl2019, LarEntityImpl2020}
@@ -59,10 +60,6 @@ class LarScheduler
     awsRegionProvider,
     ListBucketVersion2
   )
-  val bankFilter =
-    ConfigFactory.load("application.conf").getConfig("filter")
-  val bankFilterList =
-    bankFilter.getString("bank-filter-list").toUpperCase.split(",")
 
   override def preStart() = {
     QuartzSchedulerExtension(context.system)
@@ -90,7 +87,7 @@ class LarScheduler
         .withAttributes(S3Attributes.settings(s3Settings))
 
       val allResultsPublisher: DatabasePublisher[LarEntityImpl2018] =
-        larRepository2018.getAllLARs(bankFilterList)
+        larRepository2018.getAllLARs(getFilterList())
       val allResultsSource: Source[LarEntityImpl2018, NotUsed] =
         Source.fromPublisher(allResultsPublisher)
 
@@ -118,7 +115,7 @@ class LarScheduler
         .withAttributes(S3Attributes.settings(s3Settings))
 
       val allResultsPublisher: DatabasePublisher[LarEntityImpl2019] =
-        larRepository2019.getAllLARs(bankFilterList)
+        larRepository2019.getAllLARs(getFilterList())
       val allResultsSource: Source[LarEntityImpl2019, NotUsed] =
         Source.fromPublisher(allResultsPublisher)
 
@@ -147,7 +144,7 @@ class LarScheduler
         .withAttributes(S3Attributes.settings(s3Settings))
 
       val allResultsPublisher: DatabasePublisher[LarEntityImpl2020] =
-        larRepository2020.getAllLARs(bankFilterList,includeQuarterly)
+        larRepository2020.getAllLARs(getFilterList(),includeQuarterly)
       val allResultsSource: Source[LarEntityImpl2020, NotUsed] =
         Source.fromPublisher(allResultsPublisher)
 

@@ -14,6 +14,7 @@ import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
+import hmda.util.BankFilterUtils._
 import hmda.query.DbConfiguration.dbConfig
 import hmda.publisher.query.component.{InstitutionEmailComponent, PublisherComponent2018, PublisherComponent2019}
 import hmda.publisher.query.panel.{InstitutionAltEntity, InstitutionEmailEntity, InstitutionEntity}
@@ -34,11 +35,6 @@ class PanelScheduler
   def institutionRepository2018 = new InstitutionRepository2018(dbConfig)
   def institutionRepository2019 = new InstitutionRepository2019(dbConfig)
   def emailRepository = new InstitutionEmailsRepository2018(dbConfig)
-
-  val bankFilter =
-    ConfigFactory.load("application.conf").getConfig("filter")
-  val bankFilterList =
-    bankFilter.getString("bank-filter-list").toUpperCase.split(",")
 
   val awsConfig =
     ConfigFactory.load("application.conf").getConfig("private-aws")
@@ -92,7 +88,7 @@ class PanelScheduler
   private def panelSync2018() = {
 
     val allResults: Future[Seq[InstitutionEntity]] =
-      institutionRepository2018.findActiveFilers(bankFilterList)
+      institutionRepository2018.findActiveFilers(getFilterList())
     val now = LocalDateTime.now().minusDays(1)
     val formattedDate = fullDate.format(now)
     val fileName = s"$formattedDate" + "2018_panel.txt"
@@ -122,7 +118,7 @@ class PanelScheduler
   private def panelSync2019() = {
 
     val allResults: Future[Seq[InstitutionEntity]] =
-      institutionRepository2019.findActiveFilers(bankFilterList)
+      institutionRepository2019.findActiveFilers(getFilterList())
     val now = LocalDateTime.now().minusDays(1)
     val formattedDate = fullDate.format(now)
     val fileName = s"$formattedDate" + "2019_panel.txt"

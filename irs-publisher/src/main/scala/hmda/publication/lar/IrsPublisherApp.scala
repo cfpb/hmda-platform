@@ -56,10 +56,6 @@ object IrsPublisherApp extends App {
 
   val kafkaConfig = system.settings.config.getConfig("akka.kafka.consumer")
   val config      = ConfigFactory.load()
-  val bankFilter =
-    ConfigFactory.load("application.conf").getConfig("filter")
-  val bankFilterList =
-    bankFilter.getString("bank-filter-list").toUpperCase.split(",")
   val parallelism = config.getInt("hmda.lar.irs.parallelism")
 
   val irsPublisher =
@@ -86,7 +82,7 @@ object IrsPublisherApp extends App {
       .single(msg)
       .filter { msg =>
         val submissionId = SubmissionId(msg)
-        filterBankWithLogging(submissionId.lei, bankFilterList) || filterQuarterlyFiling(submissionId)
+        filterBankWithLogging(submissionId.lei) || filterQuarterlyFiling(submissionId)
       }
       .map { msg =>
         val submissionId = SubmissionId(msg)

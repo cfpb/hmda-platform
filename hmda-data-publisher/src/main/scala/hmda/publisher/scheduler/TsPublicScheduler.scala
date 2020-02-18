@@ -6,6 +6,7 @@ import akka.stream.alpakka.s3._
 import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
+import hmda.util.BankFilterUtils._
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
@@ -36,10 +37,6 @@ class TsPublicScheduler
   val bucket = awsConfig.getString("public-s3-bucket")
   val environment = awsConfig.getString("public-environment")
   val year = awsConfig.getString("public-year")
-  val bankFilter =
-    ConfigFactory.load("application.conf").getConfig("filter")
-  val bankFilterList =
-    bankFilter.getString("bank-filter-list").toUpperCase.split(",")
   val awsCredentialsProvider = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess))
 
@@ -77,7 +74,7 @@ class TsPublicScheduler
           .withAttributes(S3Attributes.settings(s3Settings))
 
       val allResults: Future[Seq[TransmittalSheetEntity]] =
-        tsRepository2018.getAllSheets(bankFilterList)
+        tsRepository2018.getAllSheets(getFilterList())
 
       //SYNC PSV
       val resultsPSV: Future[MultipartUploadResult] = Source
