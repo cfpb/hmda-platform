@@ -102,7 +102,7 @@ object ModifiedLarPublisher {
 
           val s3SinkWithHeader = S3
             .multipartUpload(bucket,
-              s"$environment/modified-lar/$filingPeriod/$fileNameHeader",
+              s"$environment/modified-lar/$filingPeriod/header/$fileNameHeader",
               metaHeaders = MetaHeaders(metaHeaders))
             .withAttributes(S3Attributes.settings(s3Settings))
 
