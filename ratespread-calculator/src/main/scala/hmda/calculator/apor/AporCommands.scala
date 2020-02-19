@@ -4,15 +4,15 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.IsoFields
 import java.time.{LocalDate, ZoneId}
 
-import hmda.calculator.api.RateSpreadResponse.RateSpreadResponse
-import hmda.calculator.api.model.RateSpreadRequest.{RateSpreadBody}
+import hmda.calculator.api.RateSpreadResponse
+import hmda.calculator.api.model.RateSpreadRequest
 
 import scala.collection.mutable.Map
 import scala.util.{Failure, Success, Try}
 
 object APORCommands {
 
-  def getRateSpreadResponse(rateSpread: RateSpreadBody): RateSpreadResponse = {
+  def getRateSpreadResponse(rateSpread: RateSpreadRequest): RateSpreadResponse = {
 
     //1.) Validate the Rate Spread Data Otherwise fail
 

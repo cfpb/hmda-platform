@@ -3,14 +3,14 @@ package hmda.calculator.parser
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import hmda.calculator.api.model.RateSpreadRequest.RateSpreadBody
+import hmda.calculator.api.model.RateSpreadRequest
 import hmda.calculator.apor.APORCommands
 
 import scala.util.Try
 
 object RateSpreadCSVParser {
 
-  def fromCsv(s: String): RateSpreadBody = {
+  def fromCsv(s: String): RateSpreadRequest = {
     val values = s.split(',').map(_.trim)
     val actionTakenType = Try(values.head.toInt)
     val loanTerm = Try(values(1).toInt)
@@ -19,7 +19,7 @@ object RateSpreadCSVParser {
     val lockInDate = Try(
       LocalDate.parse(values(4), DateTimeFormatter.ISO_LOCAL_DATE))
     val reverseMortgage = Try(values(5).toInt)
-    RateSpreadBody(actionTakenType.get,
+    RateSpreadRequest(actionTakenType.get,
                    loanTerm.get,
                    amortizationType.get.toString,
                    apr.get,

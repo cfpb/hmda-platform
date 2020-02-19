@@ -1,7 +1,7 @@
 package hmda.calculator.apor
 
 import org.scalatest.{MustMatchers, WordSpec}
-import hmda.calculator.api.RateSpreadResponse.RateSpreadResponse
+import hmda.calculator.api.RateSpreadResponse
 import hmda.calculator.apor.APORCommands._
 import hmda.calculator.apor.AporListEntity._
 
