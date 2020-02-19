@@ -19,15 +19,10 @@ import hmda.model.filing.{Filing, FilingDetails, InProgress}
 import hmda.persistence.filing.FilingPersistence._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.ErrorResponse
-import hmda.api.http.model.filing.submissions._
 import hmda.auth.OAuth2Authorization
 import hmda.messages.filing.FilingEvents.FilingCreated
 import hmda.messages.institution.InstitutionCommands.GetInstitution
-import hmda.messages.submission.SubmissionProcessingCommands.{GetHmdaValidationErrorState, GetVerificationStatus}
-import hmda.model.filing.submission.{QualityMacroExists, VerificationStatus}
 import hmda.model.institution.Institution
-import hmda.model.processing.state.HmdaValidationErrorState
-import hmda.persistence.submission.HmdaValidationError
 import hmda.persistence.institution.InstitutionPersistence._
 import hmda.util.http.FilingResponseUtils._
 import hmda.api.http.PathMatchers._

@@ -82,7 +82,7 @@ object IrsPublisherApp extends App {
       }
       .map { msg =>
         val submissionId = SubmissionId(msg)
-        irsPublisher.toUntyped ? PublishIrs(submissionId)
+        irsPublisher.toClassic ? PublishIrs(submissionId)
       }
       .toMat(Sink.ignore)(Keep.right)
       .run()

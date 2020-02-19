@@ -60,14 +60,11 @@ class APORScheduler extends HmdaActor {
       }
 
       val s3Settings = S3Settings(
-        MemoryBufferType,
-        None,
-        awsCredentialsProvider,
-        awsRegionProvider,
-        false,
-        None,
-        ListBucketVersion2
-      )
+      MemoryBufferType,
+      awsCredentialsProvider,
+      awsRegionProvider,
+      ListBucketVersion2
+    )
 
       loadAPOR(s3Settings, bucket, fixedBucketKey, FixedRate)
       loadAPOR(s3Settings, bucket, variableBucketKey, VariableRate)

@@ -6,7 +6,6 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
 import akka.actor.typed.{ActorRef, Behavior, TypedActorContext}
 import akka.cluster.sharding.typed.ShardingEnvelope
-import hmda.HmdaPlatform
 import hmda.HmdaPlatform.institutionKafkaProducer
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import akka.persistence.typed.PersistenceId
@@ -42,7 +41,7 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
                                ctx: TypedActorContext[InstitutionCommand]
                              ): CommandHandler[InstitutionCommand, InstitutionEvent, InstitutionState] = {
     val log                                      = ctx.asScala.log
-    implicit val system: ActorSystem             = ctx.asScala.system.toUntyped
+    implicit val system: ActorSystem             = ctx.asScala.system.toClassic
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     (state, cmd) =>
       cmd match {

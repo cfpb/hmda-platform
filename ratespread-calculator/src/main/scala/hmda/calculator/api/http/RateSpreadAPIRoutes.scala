@@ -5,19 +5,9 @@ import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.MediaTypes.`text/csv`
 import akka.http.scaladsl.model.{HttpCharsets, HttpEntity, StatusCodes}
-import akka.http.scaladsl.server.Directives.{
-  as,
-  complete,
-  encodeResponse,
-  entity,
-  extractUri,
-  fileUpload,
-  path,
-  pathPrefix,
-  _
-}
+import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{Framing, Source}
+import akka.stream.scaladsl.Source
 import akka.util.{ByteString, Timeout}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.directives.HmdaTimeDirectives
