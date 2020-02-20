@@ -3,12 +3,13 @@ package hmda.validation.engine
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.lar.quality._2019._
-import hmda.validation.rules.lar.quality.{ _2020 => quality2020 }
+import hmda.validation.rules.lar.quality.{_2020 => quality2020}
 import hmda.validation.rules.lar.quality.common._
-import hmda.validation.rules.lar.syntactical.{ S300, S301 }
+import hmda.validation.rules.lar.syntactical.{S300, S301}
 import hmda.validation.rules.lar.validity._
 import hmda.validation.rules.lar.validity._2020
 import hmda.census.records.CensusRecords
+import hmda.validation.rules.lar.validity._2020.V716
 
 private[engine] object LarEngine2020 extends ValidationEngine[LoanApplicationRegister] {
 
@@ -230,7 +231,8 @@ private[engine] object LarEngine2020 extends ValidationEngine[LoanApplicationReg
     V712,
     V713,
     V714,
-    V715
+    V715,
+    V716.withIndexedCounties(CensusRecords.indexedCounty2019)
   )
 
   override val qualityChecks = Vector(
