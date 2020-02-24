@@ -279,3 +279,5 @@ Q645-1|Loan Amount should generally be greater than or equal to $500 (reported a
 Q645-2|If Loan Purpose equals 1, then Loan Amount should generally be greater than or equal to $1,000 (reported as 1000)|Loan Amount
 Q646|Your file indicates that at least one exemption code was used. Please verify that your institution is eligible for a partial exemption pursuant to the 2018 HMDA Rule.|
 Q647|If Federal Agency equals 7, indicating a non-depository institution, exemption codes should not be used in the Loan/Application Register. Your data indicates that at least one exemption code was used.|
+Q653-1|If Action Taken equals 1, 2, or 8, the CLTV should generally be between 0 and 250.|
+Q653-2|If Action Taken equals 3, 4, 5, 6, or 7, the CLTV should generally be between 0 and 1,000.|
