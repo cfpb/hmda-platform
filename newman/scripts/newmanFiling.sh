@@ -10,8 +10,8 @@ do
   for testType in "${TEST_TYPES[@]}"
  do
     authToken=$(./scripts/authTokenGen.sh $1 $2 $3 $4)
-    test=$(./node_modules/.bin/newman run dev/hmda-filing/"${filingYear}"/"$testType"/hmda-filing-api-test.json -d \
-     dev/hmda-filing/"${filingYear}"/"$testType"/hmda-filing-api-config.json \
+    test=$(./node_modules/.bin/newman run tests/hmda-filing/tests/"$testType"/hmda-filing-api-test.json -d \
+     tests/hmda-filing/configs/"${filingYear}"/"$testType"/hmda-filing-api-config.json \
  --env-var host_filing=$5 \
  --env-var host_admin_api=$6 \
  --env-var host_public=$7 \
