@@ -41,7 +41,7 @@ trait ResumableProjection {
     val log = ctx.asScala.log
     cmd match {
       case StartStreaming =>
-        implicit val system: ActorSystem             = ctx.asScala.system.toUntyped
+        implicit val system: ActorSystem             = ctx.asScala.system.toClassic
         implicit val materializer: ActorMaterializer = ActorMaterializer()
         implicit val scheduler: Scheduler            = system.scheduler
         log.info("Streaming messages from {}", name)

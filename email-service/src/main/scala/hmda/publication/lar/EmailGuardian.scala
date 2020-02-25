@@ -23,7 +23,7 @@ object EmailGuardian {
 
   def behavior: Behavior[GuardianProtocol] =
     Behaviors.setup { ctx =>
-      implicit val system: UntypedActorSystem = ctx.system.toUntyped
+      implicit val system: UntypedActorSystem = ctx.system.toClassic
       implicit val mat: ActorMaterializer     = ActorMaterializer()
       implicit val monixScheduler: Scheduler  = Scheduler(ctx.executionContext)
 

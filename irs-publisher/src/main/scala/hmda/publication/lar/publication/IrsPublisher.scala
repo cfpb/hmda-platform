@@ -60,7 +60,7 @@ object IrsPublisher {
           Supervision.Resume
       }
       implicit val ec = ctx.system.executionContext
-      implicit val system = ctx.system.toUntyped
+      implicit val system = ctx.system.toClassic
       implicit val materializer = ActorMaterializer(
         ActorMaterializerSettings(system).withSupervisionStrategy(decider))
 

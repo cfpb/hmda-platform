@@ -51,7 +51,7 @@ object HmdaParserError extends HmdaTypedPersistentActor[SubmissionProcessingComm
                                ctx: TypedActorContext[SubmissionProcessingCommand]
                              ): CommandHandler[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaParserErrorState] = { (state, cmd) =>
     val log                                      = ctx.asScala.log
-    implicit val system: ActorSystem             = ctx.asScala.system.toUntyped
+    implicit val system: ActorSystem             = ctx.asScala.system.toClassic
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     implicit val blockingEc: ExecutionContext =
       system.dispatchers.lookup("akka.blocking-parser-dispatcher")

@@ -92,7 +92,8 @@ lazy val `hmda-root` = (project in file("."))
     `hmda-analytics`,
     `hmda-data-publisher`,
     `hmda-reporting`,
-    `hmda-spark-reporting`
+    `hmda-spark-reporting`,
+    `ratespread-calculator`
   )
 
 lazy val common = (project in file("common"))
@@ -299,7 +300,7 @@ lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
     packageSettings
   )
   .dependsOn(common % "compile->compile;test->test")
-  .dependsOn(`hmda-protocol`)
+  .dependsOn(`hmda-protocol` % "compile->compile;test->test")
 
 lazy val `modified-lar` = (project in file("modified-lar"))
   .enablePlugins(

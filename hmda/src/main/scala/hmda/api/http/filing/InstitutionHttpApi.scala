@@ -3,7 +3,6 @@ package hmda.api.http.filing
 import akka.actor.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.Uri
 import akka.http.scaladsl.server.Directives._
@@ -13,7 +12,7 @@ import akka.util.Timeout
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import hmda.api.http.directives.{HmdaTimeDirectives, QuarterlyFilingAuthorization}
 import hmda.util.http.FilingResponseUtils._
-import hmda.messages.institution.InstitutionCommands.{GetInstitution, GetInstitutionDetails}
+import hmda.messages.institution.InstitutionCommands.GetInstitution
 import hmda.model.institution.{Institution, InstitutionDetail}
 import hmda.api.http.PathMatchers._
 

@@ -4,15 +4,15 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.IsoFields
 import java.time.{LocalDate, ZoneId}
 
-import hmda.calculator.api.RateSpreadResponse.RateSpreadResponse
-import hmda.calculator.api.model.RateSpreadRequest.{RateSpreadBody}
+import hmda.calculator.api.RateSpreadResponse
+import hmda.calculator.api.model.RateSpreadRequest
 
 import scala.collection.mutable.Map
 import scala.util.{Failure, Success, Try}
 
 object APORCommands {
 
-  def getRateSpreadResponse(rateSpread: RateSpreadBody): RateSpreadResponse = {
+  def getRateSpreadResponse(rateSpread: RateSpreadRequest): RateSpreadResponse = {
 
     //1.) Validate the Rate Spread Data Otherwise fail
 
@@ -70,15 +70,8 @@ object APORCommands {
   private def aporForDateAndLoanTerm(loanTerm: Int,
                                      amortizationType: RateType,
                                      lockInDate: LocalDate): Option[Double] = {
-    var aporList = Map[String, APOR]()
 
-    if (amortizationType == FixedRate) {
-      aporList = AporListEntity.fixedRateAPORMap
-    } else if (amortizationType == VariableRate) {
-      aporList = AporListEntity.variableRateAPORMap
-    }
-
-    val aporData = aporList.values.find { apor =>
+    val aporData = getAporMap(amortizationType).values.find { apor =>
       weekNumberForDate(apor.rateDate) == weekNumberForDate(lockInDate) &&
       weekYearForDate(apor.rateDate) == weekYearForDate(lockInDate)
     }
@@ -92,6 +85,13 @@ object APORCommands {
       case None => None
     }
   }
+
+  private def getAporMap(amortizationType: RateType): Map[String, APOR] =
+    if (amortizationType == FixedRate) {
+      AporListEntity.fixedRateAPORMap
+    } else {
+      AporListEntity.variableRateAPORMap
+    }
 
   private def validLoanTerm(loanTerm: Int): Boolean =
     loanTerm >= 1 && loanTerm <= 50

@@ -6,7 +6,7 @@ import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
 import hmda.publisher.query.lar.{LarEntityImpl2018, _}
-import hmda.publisher.query.panel.{InstitutionEmailEntity, InstitutionEntity}
+import hmda.publisher.query.panel.InstitutionEntity
 import slick.basic.{DatabaseConfig, DatabasePublisher}
 import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
 
