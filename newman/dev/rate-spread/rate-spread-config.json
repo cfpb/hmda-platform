@@ -1,0 +1,29 @@
+[
+    {
+      "testData": [
+        {
+          "testName": "Single Rate Spread Check",
+          "testNumber": 0,
+          "requestBody": {
+              "actionTakenType": 1,
+              "loanTerm": 20,
+              "reverseMortgage": 2,
+              "amortizationType": "FixedRate",
+              "apr": 5,
+              "lockInDate": "2018-03-22"
+            },
+          "expectedResponse": {"rateSpread": "1.030"}
+        },
+        {
+          "testName": "Current Date Ratespread Check",
+          "testNumber": 1
+        },
+        {
+          "testName": "Rate Spread CSV Check",
+          "testNumber": 2,
+          "sourceFile": "dev/rate-spread/rateSpread.txt"
+        }
+      ]
+    }
+  ]
+  
