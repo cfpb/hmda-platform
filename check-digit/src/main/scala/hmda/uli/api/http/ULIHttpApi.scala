@@ -3,37 +3,26 @@ package hmda.uli.api.http
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
-import akka.http.scaladsl.common.{
-  EntityStreamingSupport,
-  JsonEntityStreamingSupport
-}
+import akka.http.scaladsl.common.{EntityStreamingSupport, JsonEntityStreamingSupport}
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.{HttpCharsets, HttpEntity, StatusCodes}
-import akka.stream.ActorMaterializer
-import akka.util.{ByteString, Timeout}
-import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model.headers.RawHeader
+import akka.http.scaladsl.model.{HttpCharsets, HttpEntity, StatusCodes}
+import akka.http.scaladsl.server.Directives._
+import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Flow, Source}
+import akka.util.{ByteString, Timeout}
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.directives.HmdaTimeDirectives
 import hmda.uli.api.model.ULIModel._
 import hmda.uli.validation.ULI._
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import io.circe.generic.auto._
 import hmda.util.http.FilingResponseUtils.failedResponse
-
-import scala.concurrent.ExecutionContext
 import hmda.util.streams.FlowUtils._
-
-import scala.util.{Failure, Success, Try}
-
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-import akka.http.scaladsl.server.Directives._
-import akka.util.Timeout
+import io.circe.generic.auto._
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
+import scala.util.{Failure, Success, Try}
 
 trait ULIHttpApi extends HmdaTimeDirectives {
   implicit val system: ActorSystem
@@ -53,8 +42,17 @@ trait ULIHttpApi extends HmdaTimeDirectives {
               maybeDigit match {
                 case Success(digit) =>
                   val uli = ULI(loan.loanId, digit, loan.loanId + digit)
+                  log.info(
+                    "API Check Digit Request: " + maybeDigit.toString + "\n" +
+                      " Check Digit Result: " + digit.toString + "\n" +
+                      " ULI: " + uli.toString
+                  )
                   complete(ToResponseMarshallable(uli))
                 case Failure(error) =>
+                  log.info(
+                    "API Check Digit Request Failed: " + maybeDigit + "\n" +
+                    " Error: " + error.toString
+                  )
                   failedResponse(StatusCodes.BadRequest, uri, error)
               }
             } ~
@@ -74,6 +72,9 @@ trait ULIHttpApi extends HmdaTimeDirectives {
 
                   val checkDigitSource =
                     processLoanIdFile(byteSource)
+
+                  log.info("Check Digit File Request Received.")
+
                   complete(checkDigitSource)
                 case _ =>
                   complete(ToResponseMarshallable(StatusCodes.BadRequest))
@@ -95,6 +96,9 @@ trait ULIHttpApi extends HmdaTimeDirectives {
 
                       val csv =
                         headerSource.map(s => ByteString(s)).concat(checkDigit)
+
+                      log.info("CSV Check Digit File Request Received.")
+
                       complete(
                         HttpEntity.Chunked.fromData(
                           `text/csv`.toContentType(HttpCharsets.`UTF-8`),
@@ -115,8 +119,16 @@ trait ULIHttpApi extends HmdaTimeDirectives {
                 isValid match {
                   case Success(value) =>
                     val validated = ULIValidated(value)
+                    log.info(
+                      "API CheckDigit > Validate " + isValid.toString + "\n" +
+                      "Validate Response: " + validated.toString
+                    )
                     complete(ToResponseMarshallable(validated))
                   case Failure(error) =>
+                    log.info(
+                      "API CheckDigit (Validate) Failed: " + isValid.toString + "\n" +
+                      "Error: " + error.toString
+                    )
                     failedResponse(StatusCodes.BadRequest, uri, error)
                 }
               } ~
@@ -136,6 +148,9 @@ trait ULIHttpApi extends HmdaTimeDirectives {
 
                     val validatedStream =
                       processUliFile(byteSource)
+
+                    log.info("Check Digit > Validate File Request Received.")
+
                     complete(validatedStream)
 
                   case _ =>
@@ -159,6 +174,9 @@ trait ULIHttpApi extends HmdaTimeDirectives {
 
                       val csv =
                         headerSource.map(s => ByteString(s)).concat(validated)
+
+                      log.info("CSV Check Digit > Validate File Request Received.")
+
                       complete(
                         HttpEntity.Chunked.fromData(
                           `text/csv`.toContentType(HttpCharsets.`UTF-8`),
