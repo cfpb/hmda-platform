@@ -418,6 +418,7 @@ object HmdaValidationError
     sealed trait DistinctCheckType
     case object RawLine extends DistinctCheckType
     case object ULI     extends DistinctCheckType
+    case object ULIActionTaken extends DistinctCheckType
 
     def checkForDistinctElements(checkType: DistinctCheckType): Future[AggregationResult] = {
       // checks the state, if the element is already there, it will return false
@@ -456,6 +457,9 @@ object HmdaValidationError
 
                     case ULI =>
                       val hashed = hashString(lar.loan.ULI.toUpperCase)
+                      List((checkAndUpdate(state, hashed), rowNumber))
+                    case ULIActionTaken =>
+                      val hashed = hashString(lar.action.actionTakenType.code.toString+lar.loan.ULI.toUpperCase())
                       List((checkAndUpdate(state, hashed), rowNumber))
                   }
               }
@@ -575,7 +579,6 @@ object HmdaValidationError
     def qualityChecks: Future[List[ValidationError]] =
       if (editCheck == "quality") {
         validateTsLar(ctx, submissionId, "quality", validationContext)
-//        Future.successful(Nil)
       } else {
         Future.successful(Nil)
       }
