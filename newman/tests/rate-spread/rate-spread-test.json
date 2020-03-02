@@ -137,6 +137,11 @@
                 "pm.test(\"Status code is 200\",function () {",
                 "      pm.response.to.have.status(200);",
                 "});",
+                "pm.test(\"File Returned Correctly\", function () {",
+                "let testData = pm.iterationData.get(\"testData\")",
+                "let testDataChunk = testData[testNumber-1]",
+                "      pm.expect(responseBody).to.be.eql(testDataChunk.expectedResponse);",
+                "});",
                 ""            ]
             }
           }
