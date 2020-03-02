@@ -144,9 +144,10 @@ trait DataBrowserHttpApi extends Settings {
           // GET /view/aggregations
           (path(Aggregations) & get) {
             extractYearsAndMsaAndStateAndCountyAndLEIBrowserFields { mandatoryFields =>
+              log.info("Aggregations: " + mandatoryFields)
               extractFieldsForAggregation { remainingQueryFields =>
                 val allFields = mandatoryFields ++ remainingQueryFields
-                log.info("Aggregations: " + allFields)
+
                 complete(
                   query
                     .fetchAggregate(allFields)
