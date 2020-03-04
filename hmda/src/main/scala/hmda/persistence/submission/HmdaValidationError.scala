@@ -458,6 +458,7 @@ object HmdaValidationError
                     case ULI =>
                       val hashed = hashString(lar.loan.ULI.toUpperCase)
                       List((checkAndUpdate(state, hashed), rowNumber))
+
                     case ULIActionTaken =>
                       val hashed = hashString(lar.action.actionTakenType.code.toString+lar.loan.ULI.toUpperCase())
                       List((checkAndUpdate(state, hashed), rowNumber))
