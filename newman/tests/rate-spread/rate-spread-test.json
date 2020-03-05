@@ -1,0 +1,170 @@
+{
+    "info": {
+      "name": "Rate Spread Test(s)",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+      {
+        "key": "testNumber",
+        "value": 0,
+        "type": "int"
+      },
+      {
+        "key": "requestBody",
+        "value": "",
+        "type": "string"
+      },
+      {
+        "key": "expectedResponse",
+        "value": "",
+        "type": "string"
+      },
+      {
+        "key": "sourceFile",
+        "value": "",
+        "type": "string"
+      },
+      {
+        "key": "currentDate",
+        "value": "",
+        "type": "string"
+      }
+    ],
+    "event": [
+      {
+        "listen": "prerequest",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "testNumber = pm.variables.get(\"testNumber\");",
+            "let testData = pm.iterationData.get(\"testData\")",
+            "let requestBody = JSON.stringify(testData[testNumber]? testData[testNumber].requestBody:{} )",
+            "let expectedResponse = JSON.stringify(testData[testNumber]? testData[testNumber].expectedResponse:{} )",
+            "let sourceFile = testData[testNumber].sourceFile",
+            "let currentDate = new Date().toISOString().slice(0,10)",
+            "++testNumber",
+            "pm.variables.set(\"testNumber\",testNumber);",
+            "pm.variables.set(\"requestBody\",requestBody);",
+            "pm.variables.set(\"currentDate\",currentDate);",
+            "pm.variables.set(\"sourceFile\",sourceFile);"
+
+          ]
+        }
+      }
+    ],
+    "item": [
+      {
+        "name": "Single Ratespread Check",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test(\"Status code is 200\",function () {",
+                "      pm.response.to.have.status(200);",
+                "});",
+                "",
+                "pm.test(\"Recieved a Rate Spread\", function () {",
+                "let actualResponse = pm.response.json()",
+                "let testData = pm.iterationData.get(\"testData\")",
+                "let testDataChunk = testData[testNumber-1]",
+				"console.log(JSON.stringify(actualResponse))",
+				"pm.expect(actualResponse).to.be.eql(testDataChunk.expectedResponse);",
+
+              "});"            ]
+            }
+          }
+        ],
+        "request": {
+          "url":  "{{rate-spread}}",
+          "method": "POST",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{{requestBody}}"
+        },
+          "description": "Single Rate Spread Check"
+        },
+        "response": []
+      },
+      {
+        "name": "Current Date Ratespread Check",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test(\"Status code is 200\",function () {",
+                "      pm.response.to.have.status(200);",
+                "});",
+                ""
+               ]
+            }
+          }
+        ],
+        "request": {
+          "url":  "{{rate-spread}}",
+          "method": "POST",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\"actionTakenType\": 1,\"loanTerm\": 20,\"reverseMortgage\": 2,\"amortizationType\": \"FixedRate\",\"apr\": 5,\"lockInDate\": \"{{currentDate}}\"}"
+        },
+          "description": "Current Date Ratespread Check"
+        },
+        "response": []
+      },
+      {
+        "name": "Rate Spread CSV End Point Check",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test(\"Status code is 200\",function () {",
+                "      pm.response.to.have.status(200);",
+                "});",
+                "pm.test(\"File Returned Correctly\", function () {",
+                "let testData = pm.iterationData.get(\"testData\")",
+                "let testDataChunk = testData[testNumber-1]",
+                "      pm.expect(responseBody).to.be.eql(testDataChunk.expectedResponse);",
+                "});",
+                ""            ]
+            }
+          }
+        ],
+        "request": {
+          "url": "{{rate-spread}}/csv",
+          "method": "POST",
+          "header": [],
+          "body": {
+            "mode": "formdata",
+            "formdata": [
+              {
+                "key": "file",
+                "type": "file",
+                "enabled": true,
+                "src": "{{sourceFile}}"
+              }
+            ]
+          },
+          "description": "Data Browser CSV Check"
+        },
+        "response": []
+      }
+    ]
+  }
+  

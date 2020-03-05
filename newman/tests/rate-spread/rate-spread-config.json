@@ -1,0 +1,30 @@
+[
+    {
+      "testData": [
+        {
+          "testName": "Single Rate Spread Check",
+          "testNumber": 0,
+          "requestBody": {
+              "actionTakenType": 1,
+              "loanTerm": 20,
+              "reverseMortgage": 2,
+              "amortizationType": "FixedRate",
+              "apr": 5,
+              "lockInDate": "2018-03-22"
+            },
+          "expectedResponse": {"rateSpread": "1.030"}
+        },
+        {
+          "testName": "Current Date Ratespread Check",
+          "testNumber": 1
+        },
+        {
+          "testName": "Rate Spread CSV Check",
+          "testNumber": 2,
+          "sourceFile": "newman/tests/rate-spread/rateSpread.txt",
+          "expectedResponse": "action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,rate_spread\n1,30,FixedRate,6.0,2018-03-22,2,2.010,1.520\n1,30,VariableRate,6.0,2018-03-22,2,2.150,1.740\n"
+        }
+      ]
+    }
+  ]
+  
