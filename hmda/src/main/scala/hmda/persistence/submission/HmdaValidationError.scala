@@ -414,7 +414,7 @@ object HmdaValidationError
         .named("headerResult[Syntactical]-" + submissionId)
         .run()
 
-    case class AggregationResult(totalCount: Int, distinctCount: Int, duplicateLineNumbers: Vector[Int], checkType: DistinctCheckType)
+    case class AggregationResult(totalCount: Int, distinctCount: Int, duplicateLineNumbers: Vector[Int], distinctUliActionTypeCount: Int, checkType: DistinctCheckType)
     sealed trait DistinctCheckType
     case object RawLine extends DistinctCheckType
     case object ULI     extends DistinctCheckType
@@ -459,13 +459,13 @@ object HmdaValidationError
                       val hashed = hashString(lar.loan.ULI.toUpperCase)
                       List((checkAndUpdate(state, hashed), rowNumber))
 
-                    case ULIActionTaken =>
+                    case ULIActionTaken => // This is newly added for S306
                       val hashed = hashString(lar.action.actionTakenType.code.toString+lar.loan.ULI.toUpperCase())
                       List((checkAndUpdate(state, hashed), rowNumber))
                   }
               }
           }
-          .toMat(Sink.fold(AggregationResult(totalCount = 0, distinctCount = 0, duplicateLineNumbers = Vector.empty, checkType)) {
+          .toMat(Sink.fold(AggregationResult(totalCount = 0, distinctCount = 0, duplicateLineNumbers = Vector.empty, distinctUliActionTypeCount = 0, checkType)) {
             // duplicate
             case (acc, (persisted, rowNumber)) if !persisted =>
               acc.copy(acc.totalCount + 1, acc.distinctCount, acc.duplicateLineNumbers :+ rowNumber)
