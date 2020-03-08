@@ -48,14 +48,14 @@ import hmda.validation.context.ValidationContext
 import hmda.validation.filing.MacroValidationFlow._
 import hmda.validation.filing.ValidationFlow._
 import hmda.validation.rules.lar.quality.common.Q600
-import hmda.validation.rules.lar.syntactical.S305
-import hmda.validation.rules.lar.syntactical.S304
+import hmda.validation.rules.lar.syntactical.{S304, S305, S306}
 import hmda.validation.{AS, EC, MAT}
 import net.openhft.hashing.LongHashFunction
+
 import scala.collection.immutable.ListMap
 import scala.concurrent.duration._
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.{ Failure, Success }
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 object HmdaValidationError
   extends HmdaTypedPersistentActor[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaValidationErrorState] {
@@ -414,7 +414,7 @@ object HmdaValidationError
         .named("headerResult[Syntactical]-" + submissionId)
         .run()
 
-    case class AggregationResult(totalCount: Int, distinctCount: Int, duplicateLineNumbers: Vector[Int], distinctUliActionTypeCount: Int, checkType: DistinctCheckType)
+    case class AggregationResult(totalCount: Int, distinctCount: Int, duplicateLineNumbers: Vector[Int], distinctUliActionTypeCount: Int, duplicateLineNumbersUliActionType: Vector[Int], checkType: DistinctCheckType)
     sealed trait DistinctCheckType
     case object RawLine extends DistinctCheckType
     case object ULI     extends DistinctCheckType
@@ -460,17 +460,17 @@ object HmdaValidationError
                       List((checkAndUpdate(state, hashed), rowNumber))
 
                     case ULIActionTaken => // This is newly added for S306
-                      val hashed = hashString(lar.action.actionTakenType.code.toString+lar.loan.ULI.toUpperCase())
+                      val hashed = hashString(lar.action.actionTakenType.code.toString + lar.loan.ULI.toUpperCase())
                       List((checkAndUpdate(state, hashed), rowNumber))
                   }
               }
           }
-          .toMat(Sink.fold(AggregationResult(totalCount = 0, distinctCount = 0, duplicateLineNumbers = Vector.empty, distinctUliActionTypeCount = 0, checkType)) {
+          .toMat(Sink.fold(AggregationResult(totalCount = 0, distinctCount = 0, duplicateLineNumbers = Vector.empty, distinctUliActionTypeCount = 0, duplicateLineNumbersUliActionType = Vector.empty, checkType)) {
             // duplicate
             case (acc, (persisted, rowNumber)) if !persisted =>
-              acc.copy(acc.totalCount + 1, acc.distinctCount, acc.duplicateLineNumbers :+ rowNumber)
+              acc.copy(acc.totalCount + 1, acc.distinctCount, acc.duplicateLineNumbers :+ rowNumber, acc.distinctUliActionTypeCount, acc.duplicateLineNumbersUliActionType :+ rowNumber)
             // no duplicate
-            case (acc, _) => acc.copy(totalCount = acc.totalCount + 1, distinctCount = acc.distinctCount + 1)
+            case (acc, _) => acc.copy(totalCount = acc.totalCount + 1, distinctCount = acc.distinctCount + 1, distinctUliActionTypeCount = acc.distinctUliActionTypeCount)
           })(Keep.right)
           .named(s"checkForDistinctElements[$checkType]-" + submissionId)
           .run()
@@ -492,7 +492,13 @@ object HmdaValidationError
         val s305 = S305.name
         val s304 = S304.name
         val q600 = Q600.name
+        val s306 = S306.name
         validationError match {
+          case s306 @ SyntacticalValidationError(_, `s306`, _, fields) => //This is newly added for S306
+            s306.copyWithFields(
+              fields + ("The following row numbers occur multiple times" -> tsLar.duplicateLineNumbersUliActionType
+                .mkString(start = "Rows: ", sep = ",", end = ""))
+            )
           case s305 @ SyntacticalValidationError(_, `s305`, _, fields) =>
             s305.copyWithFields(
               fields + ("The following row numbers occur multiple times" -> tsLar.duplicateLineNumbers
