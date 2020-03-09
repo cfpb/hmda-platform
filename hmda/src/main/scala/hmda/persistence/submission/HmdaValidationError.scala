@@ -29,6 +29,7 @@ import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents._
 import hmda.model.filing.lar.LoanApplicationRegister
+import hmda.model.filing.lar.enums.LoanOriginated
 import hmda.model.filing.submission._
 import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
 import hmda.model.institution.Institution
@@ -390,7 +391,7 @@ object HmdaValidationError
                                                        submissionId: SubmissionId,
                                                        editType: String,
                                                        validationContext: ValidationContext
-                                                       ): Future[List[ValidationError]] = {
+                                                     ): Future[List[ValidationError]] = {
     implicit val scheduler: Scheduler = ctx.asScala.system.scheduler
     val log                           = ctx.asScala.log
 
@@ -414,7 +415,7 @@ object HmdaValidationError
         .named("headerResult[Syntactical]-" + submissionId)
         .run()
 
-    case class AggregationResult(totalCount: Int, distinctCount: Int, duplicateLineNumbers: Vector[Int], distinctUliActionTypeCount: Int, duplicateLineNumbersUliActionType: Vector[Int], checkType: DistinctCheckType)
+    case class AggregationResult(totalCount: Int, distinctCount: Int, duplicateLineNumbers: Vector[Int], checkType: DistinctCheckType)
     sealed trait DistinctCheckType
     case object RawLine extends DistinctCheckType
     case object ULI     extends DistinctCheckType
@@ -459,26 +460,30 @@ object HmdaValidationError
                       val hashed = hashString(lar.loan.ULI.toUpperCase)
                       List((checkAndUpdate(state, hashed), rowNumber))
 
-                    case ULIActionTaken => // This is newly added for S306
-                      val hashed = hashString(lar.action.actionTakenType.code.toString + lar.loan.ULI.toUpperCase())
-                      List((checkAndUpdate(state, hashed), rowNumber))
+                    case ULIActionTaken => // For S306
+                      // Only look at ULIs where the actionTakenType.code == 1
+                      if (lar.action.actionTakenType == LoanOriginated) {
+                        val hashed = hashString(lar.action.actionTakenType.code.toString + lar.loan.ULI.toUpperCase())
+                        List((checkAndUpdate(state, hashed), rowNumber))
+                      } else Nil
                   }
               }
           }
-          .toMat(Sink.fold(AggregationResult(totalCount = 0, distinctCount = 0, duplicateLineNumbers = Vector.empty, distinctUliActionTypeCount = 0, duplicateLineNumbersUliActionType = Vector.empty, checkType)) {
+          .toMat(Sink.fold(AggregationResult(totalCount = 0, distinctCount = 0, duplicateLineNumbers = Vector.empty, checkType)) {
             // duplicate
             case (acc, (persisted, rowNumber)) if !persisted =>
-              acc.copy(acc.totalCount + 1, acc.distinctCount, acc.duplicateLineNumbers :+ rowNumber, acc.distinctUliActionTypeCount, acc.duplicateLineNumbersUliActionType :+ rowNumber)
+              acc.copy(acc.totalCount + 1, acc.distinctCount, acc.duplicateLineNumbers :+ rowNumber)
             // no duplicate
-            case (acc, _) => acc.copy(totalCount = acc.totalCount + 1, distinctCount = acc.distinctCount + 1, distinctUliActionTypeCount = acc.distinctUliActionTypeCount)
+            case (acc, _) => acc.copy(totalCount = acc.totalCount + 1, distinctCount = acc.distinctCount + 1)
           })(Keep.right)
           .named(s"checkForDistinctElements[$checkType]-" + submissionId)
           .run()
+
       uploadProgram.onComplete {
         case Success(value) =>
-          log.info(s"Check for distinct elements has passed for $submissionId with $value")
+          log.info(s"Check [$checkType] for distinct elements has passed for $submissionId with $value")
         case Failure(exception) =>
-          log.error(exception, s"Failed checking for distinct elements $submissionId")
+          log.error(exception, s"Failed checking [$checkType] for distinct elements $submissionId")
       }
       uploadProgram
     }
@@ -496,7 +501,7 @@ object HmdaValidationError
         validationError match {
           case s306 @ SyntacticalValidationError(_, `s306`, _, fields) => //This is newly added for S306
             s306.copyWithFields(
-              fields + ("The following row numbers occur multiple times" -> tsLar.duplicateLineNumbersUliActionType
+              fields + ("The following row numbers occur multiple times and have the same ULI and action type" -> tsLar.duplicateLineNumbersUliActionType
                 .mkString(start = "Rows: ", sep = ",", end = ""))
             )
           case s305 @ SyntacticalValidationError(_, `s305`, _, fields) =>
@@ -544,13 +549,16 @@ object HmdaValidationError
         for {
           header        <- headerResultTest
           rawLineResult <- checkForDistinctElements(RawLine)
+          s306Result    <- checkForDistinctElements(ULIActionTaken)
           res <- validateAndPersistErrors(
             TransmittalLar(
               ts = header,
               larsCount = rawLineResult.totalCount,
               larsDistinctCount = rawLineResult.distinctCount,
               distinctUliCount = -1,
-              duplicateLineNumbers = rawLineResult.duplicateLineNumbers.toList
+              duplicateLineNumbers = rawLineResult.duplicateLineNumbers.toList,
+              distinctActionTakenUliCount = s306Result.distinctCount,
+              duplicateLineNumbersUliActionType = s306Result.duplicateLineNumbers.toList
             ),
             editType,
             validationContext

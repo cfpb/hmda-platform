@@ -6,9 +6,12 @@ import hmda.validation.dsl.ValidationResult
 import hmda.validation.rules.EditCheck
 import hmda.validation.dsl.PredicateSyntax._
 
+/**
+ * S306 is responsible for detecting rows with duplicate ULI and where actionTakenType == 1
+ */
 object S306 extends EditCheck[TransmittalLar] {
   override def name: String = "S306"
   override def apply(tsLar: TransmittalLar): ValidationResult =
-    tsLar.distinctActionTakenUliCount is greaterThan(0) // If the total number of distinctActionTakenUliCount is greater than 0, then trigger this edit
+    tsLar.duplicateLineNumbersUliActionType.length is greaterThan(0) // If the total number of distinctActionTakenUliCount is greater than 0, then trigger this edit
 
 }
