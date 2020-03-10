@@ -232,19 +232,17 @@ object HmdaValidationError
               val hmdaRowValidatedError =
                 HmdaRowValidatedError(rowNumber, validationErrors)
 
-              for {
-                _ <- persistEditDetails(editDetailPersistence, hmdaRowValidatedError)
-              } yield {
-                maybeReplyTo match {
-                  case Some(replyTo) =>
-                    replyTo ! hmdaRowValidatedError
-                  case None => //Do nothing
+              persistEditDetails(editDetailPersistence, hmdaRowValidatedError)
+                .map { _ =>
+                  maybeReplyTo match {
+                    case Some(replyTo) =>
+                      replyTo ! hmdaRowValidatedError
+
+                    case None => //Do nothing
+                  }
                 }
-              }
             }
-        } else {
-          Effect.none
-        }
+        } else Effect.none
 
       case PersistMacroError(_, validationError, maybeReplyTo) =>
         Effect.persist(HmdaMacroValidatedError(validationError)).thenRun { _ =>

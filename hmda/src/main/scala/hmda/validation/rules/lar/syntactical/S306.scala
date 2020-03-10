@@ -1,7 +1,7 @@
 package hmda.validation.rules.lar.syntactical
 
 import hmda.model.filing.ts.TransmittalLar
-import hmda.validation.dsl.PredicateCommon.greaterThan
+import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.ValidationResult
 import hmda.validation.rules.EditCheck
 import hmda.validation.dsl.PredicateSyntax._
@@ -11,7 +11,8 @@ import hmda.validation.dsl.PredicateSyntax._
  */
 object S306 extends EditCheck[TransmittalLar] {
   override def name: String = "S306"
+
   override def apply(tsLar: TransmittalLar): ValidationResult =
-    tsLar.duplicateLineNumbersUliActionType.length is greaterThan(0) // If the total number of distinctActionTakenUliCount is greater than 0, then trigger this edit
+    tsLar.duplicateLineNumbersUliActionType.length is equalTo(0)
 
 }
