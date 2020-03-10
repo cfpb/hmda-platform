@@ -1,13 +1,3 @@
-import groovy.json.JsonSlurper
-
-@NonCPS
-def slurper(def json) {
-    def jsonSlurper = new JsonSlurper()
-    def object = jsonSlurper.parseText(json)
-
-    def deploy = object.deploy.hmda_platform
-}
-
 podTemplate(label: 'buildSbtPod', containers: [
   containerTemplate(name: 'sbt', image: 'jenkinsxio/builder-scala', ttyEnabled: true, command: 'cat'),
   containerTemplate(name: 'docker', image: 'docker', ttyEnabled: true, command: 'cat'),
@@ -17,147 +7,50 @@ volumes: [
   hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
 ]) {
   node('buildSbtPod') {
-    sh "env | sort"
+    library identifier: "hmdaUtils@jenkinsSharedLibraries", retriever: modernSCM (
+        [
+            $class: 'GitSCMSource',
+            remote: 'https://github.cfpb.gov/kgudel/hmda-devops.git'
+        ]
+    )
+    
+    init.setEnvironment('data_browser')
+    init.checkForChanges('hmda-platform')
 
-    def repo = checkout scm
-    def gitBranch = repo.GIT_BRANCH
-    def commitId = sh(returnStdout: true, script: 'git rev-parse HEAD')
-    def gitCommit = repo.GIT_COMMIT
-    def shortCommit = repo.GIT_COMMIT[0..7]
-    def isDeployPR = sh(returnStdout: true, script: "git log -1").contains("[deploy pr]")
-    def gitTagged = env.TAG_NAME != null
-
-    def fileContent = sh(returnStdout: true, script: "echo \$(cat ./jenkins/env.json)")
-    def deploy = slurper(fileContent)
-
-    if (gitBranch == "master") {
-      env.DOCKER_TAG = "latest"
-    } else if (gitTagged) {
-      env.DOCKER_TAG = env.TAG_NAME
-    } else {
-      env.DOCKER_TAG = env.BRANCH_NAME
+    stage('Build Scala Code and Generate Dockerfile') {
+      container('sbt') {
+        sh "env JAVA_OPTS=\"-Xms256m -Xmx4096m -Xss8m\" sbt -batch hmda-platform/docker:stage"
+      }
     }
 
-    println "DOCKER_TAG: ${env.DOCKER_TAG}, TAG_NAME: ${env.TAG_NAME}, gitbranch: ${gitBranch}, isDeployPR: ${isDeployPR}"
-
-    sh "git remote add upstream https://github.com/cfpb/hmda-help.git"
-    sh "git fetch upstream master"
-
-    //Get list of changed files and end job if files changed aren't in relevant folders
-    folders=[]
-    def output = sh(returnStdout: true, script: "echo \$(git --no-pager diff upstream/master --name-only)").split().each{folders = folders + it.split('/')[0]}
-    if (!(gitBranch == 'master' || folders.contains('hmda') || folders.contains('common') || gitTagged)) {
-        currentBuild.result = 'SUCCESS'
-        return
-    } 
-
-    stage('Build Scala Code, Generate Dockerfile, Publish to docker hub') {
-
-      container('sbt') {
-        sh "sbt -batch hmda-platform/docker:stage"
-      }
-
+    stage('Build And Publish Docker Image') {
       container('docker') {
-        //Push to Dockerhub
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub',
-                  usernameVariable: 'DOCKER_HUB_USER', passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
-            if (gitTagged || gitBranch == "master" || isDeployPR) {
-                sh "docker build --rm -t=${env.DOCKER_HUB_USER}/hmda-platform:public hmda/target/docker/stage"
-                sh """
-                  docker tag ${env.DOCKER_HUB_USER}/hmda-platform:public ${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
-                  docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD}
-                  docker push ${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
-                  docker rmi -f ${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
-                """
-            }
-            sh "rm -rf hmda/target/docker/stage"
-        }
-      }
-    }
-
-    stage('Build Scala Code (w/ Lightbend Telemetry), Generate Dockerfile, Publish to DTR') {
-      withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'lightbend-commercial',
-        usernameVariable: 'LIGHTBEND_USER', passwordVariable: 'LIGHTBEND_PASSWORD']]) {
-            writeFile file: 'commercial.credentials',
-                      text: """
-                        realm = Bintray
-                        host = dl.bintray.com
-                        user = ${env.LIGHTBEND_USER}
-                        password = ${env.LIGHTBEND_PASSWORD}
-                      """
-        }
-
-        sh "more commercial.credentials"
-
-        //HMDA utilizes commercial lightbend plugins (Telemetry) to collect metrics.
-        //In order to not break the publicly released docker images and clone of this repository, by default we use build files that
-        //do not include lightbend's commercial jars.
-        //Files that contain lightbends commercial jars are:
-        //commercial-build
-        //hmda/commercial-build
-        //project/cinnamon
-        //These files are renamed before the project is built on Jenkins
-        sh "mkdir ${env.WORKSPACE}/.lightbend"
-        sh "cp commercial.credentials ${env.WORKSPACE}/.lightbend/commercial.credentials"
-        sh 'mv build.sbt build.txt'
-        sh 'mv commercial-build.txt build.sbt'
-        sh 'mv hmda/build.sbt hmda/build.txt'
-        sh 'mv hmda/commercial-build.txt hmda/build.sbt'
-        sh 'mv project/cinnamon.txt project/cinnamon.sbt'
-        sh 'rm -r hmda/src/test'
-
-      container('sbt') {
-        sh "sbt -batch hmda-platform/docker:stage"
-      }
-
-      container('docker') {
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'hmda-platform-jenkins-service',
-          usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
-          withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
-            if (gitTagged || gitBranch == "master" || isDeployPR) {
-              sh "docker build --rm -t=hmda/hmda-platform:${env.DOCKER_TAG} hmda/target/docker/stage"
-
-              //Push to DTR
-              sh """
-                docker tag hmda/hmda-platform:${env.DOCKER_TAG} ${DOCKER_REGISTRY_URL}/hmda/hmda-platform:${env.DOCKER_TAG}
-                docker login ${DOCKER_REGISTRY_URL} -u ${env.DTR_USER} -p ${env.DTR_PASSWORD}
-                docker push ${DOCKER_REGISTRY_URL}/hmda/hmda-platform:${env.DOCKER_TAG}
-              """
+          usernameVariable: 'DOCKER_HUB_USER', passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
+          withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'hmda-platform-jenkins-service',
+            usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
+            withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
+              dockerBuild.sbtBuild('hmda-platform')
+              }
             }
           }
         }
       }
-
+    }
 
     stage('Deploy') {
-        withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
-          if ((env.BRANCH_NAME == 'master' || isDeployPR) && deploy) {
-            container('helm') {
-              sh """
-                helm upgrade --install --force \
-                --namespace=default \
-                --values=kubernetes/hmda-platform/values-dev.yaml \
-                --set image.repository=${DOCKER_REGISTRY_URL}/hmda/hmda-platform \
-                --set commitId=$shortCommit \
-                --set image.tag=${env.DOCKER_TAG} \
-                --set image.pullPolicy=Always \
-                hmda-platform kubernetes/hmda-platform
-              """
-            }
-          }
+      if ((env.BRANCH_NAME == 'master' || isDeployPR) && deploy) {
+        container('helm') {
+          helm.deploy('hmda-platform')
         }
       }
     }
 
-    stage('Docker Clean Up')
+    stage('Docker Clean Up') {
       container('docker') {
-        sh """
-          docker images
-          docker image prune -f
-          docker images
-          docker ps -a
-        """
+        dockerBuild.clean()
       }
     }
 
   }
+}
