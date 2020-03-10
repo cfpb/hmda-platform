@@ -29,6 +29,7 @@ import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents._
 import hmda.model.filing.lar.LoanApplicationRegister
+import hmda.model.filing.lar.enums.LoanOriginated
 import hmda.model.filing.submission._
 import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
 import hmda.model.institution.Institution
@@ -48,14 +49,14 @@ import hmda.validation.context.ValidationContext
 import hmda.validation.filing.MacroValidationFlow._
 import hmda.validation.filing.ValidationFlow._
 import hmda.validation.rules.lar.quality.common.Q600
-import hmda.validation.rules.lar.syntactical.S305
-import hmda.validation.rules.lar.syntactical.S304
+import hmda.validation.rules.lar.syntactical.{S304, S305, S306}
 import hmda.validation.{AS, EC, MAT}
 import net.openhft.hashing.LongHashFunction
+
 import scala.collection.immutable.ListMap
 import scala.concurrent.duration._
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.{ Failure, Success }
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 object HmdaValidationError
   extends HmdaTypedPersistentActor[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaValidationErrorState] {
@@ -231,19 +232,17 @@ object HmdaValidationError
               val hmdaRowValidatedError =
                 HmdaRowValidatedError(rowNumber, validationErrors)
 
-              for {
-                _ <- persistEditDetails(editDetailPersistence, hmdaRowValidatedError)
-              } yield {
-                maybeReplyTo match {
-                  case Some(replyTo) =>
-                    replyTo ! hmdaRowValidatedError
-                  case None => //Do nothing
+              persistEditDetails(editDetailPersistence, hmdaRowValidatedError)
+                .map { _ =>
+                  maybeReplyTo match {
+                    case Some(replyTo) =>
+                      replyTo ! hmdaRowValidatedError
+
+                    case None => //Do nothing
+                  }
                 }
-              }
             }
-        } else {
-          Effect.none
-        }
+        } else Effect.none
 
       case PersistMacroError(_, validationError, maybeReplyTo) =>
         Effect.persist(HmdaMacroValidatedError(validationError)).thenRun { _ =>
@@ -390,7 +389,7 @@ object HmdaValidationError
                                                        submissionId: SubmissionId,
                                                        editType: String,
                                                        validationContext: ValidationContext
-                                                       ): Future[List[ValidationError]] = {
+                                                     ): Future[List[ValidationError]] = {
     implicit val scheduler: Scheduler = ctx.asScala.system.scheduler
     val log                           = ctx.asScala.log
 
@@ -418,6 +417,7 @@ object HmdaValidationError
     sealed trait DistinctCheckType
     case object RawLine extends DistinctCheckType
     case object ULI     extends DistinctCheckType
+    case object ULIActionTaken extends DistinctCheckType
 
     def checkForDistinctElements(checkType: DistinctCheckType): Future[AggregationResult] = {
       // checks the state, if the element is already there, it will return false
@@ -457,6 +457,13 @@ object HmdaValidationError
                     case ULI =>
                       val hashed = hashString(lar.loan.ULI.toUpperCase)
                       List((checkAndUpdate(state, hashed), rowNumber))
+
+                    case ULIActionTaken => // For S306
+                      // Only look at ULIs where the actionTakenType.code == 1
+                      if (lar.action.actionTakenType == LoanOriginated) {
+                        val hashed = hashString(lar.action.actionTakenType.code.toString + lar.loan.ULI.toUpperCase())
+                        List((checkAndUpdate(state, hashed), rowNumber))
+                      } else Nil
                   }
               }
           }
@@ -469,11 +476,12 @@ object HmdaValidationError
           })(Keep.right)
           .named(s"checkForDistinctElements[$checkType]-" + submissionId)
           .run()
+
       uploadProgram.onComplete {
         case Success(value) =>
-          log.info(s"Check for distinct elements has passed for $submissionId with $value")
+          log.info(s"Check [$checkType] for distinct elements has passed for $submissionId with $value")
         case Failure(exception) =>
-          log.error(exception, s"Failed checking for distinct elements $submissionId")
+          log.error(exception, s"Failed checking [$checkType] for distinct elements $submissionId")
       }
       uploadProgram
     }
@@ -487,7 +495,13 @@ object HmdaValidationError
         val s305 = S305.name
         val s304 = S304.name
         val q600 = Q600.name
+        val s306 = S306.name
         validationError match {
+          case s306 @ SyntacticalValidationError(_, `s306`, _, fields) => //This is newly added for S306
+            s306.copyWithFields(
+              fields + ("The following row numbers occur multiple times and have the same ULI and action type" -> tsLar.duplicateLineNumbersUliActionType
+                .mkString(start = "Rows: ", sep = ",", end = ""))
+            )
           case s305 @ SyntacticalValidationError(_, `s305`, _, fields) =>
             s305.copyWithFields(
               fields + ("The following row numbers occur multiple times" -> tsLar.duplicateLineNumbers
@@ -533,13 +547,16 @@ object HmdaValidationError
         for {
           header        <- headerResultTest
           rawLineResult <- checkForDistinctElements(RawLine)
+          s306Result    <- checkForDistinctElements(ULIActionTaken)
           res <- validateAndPersistErrors(
             TransmittalLar(
               ts = header,
               larsCount = rawLineResult.totalCount,
               larsDistinctCount = rawLineResult.distinctCount,
               distinctUliCount = -1,
-              duplicateLineNumbers = rawLineResult.duplicateLineNumbers.toList
+              duplicateLineNumbers = rawLineResult.duplicateLineNumbers.toList,
+              distinctActionTakenUliCount = s306Result.distinctCount,
+              duplicateLineNumbersUliActionType = s306Result.duplicateLineNumbers.toList
             ),
             editType,
             validationContext
@@ -575,7 +592,6 @@ object HmdaValidationError
     def qualityChecks: Future[List[ValidationError]] =
       if (editCheck == "quality") {
         validateTsLar(ctx, submissionId, "quality", validationContext)
-//        Future.successful(Nil)
       } else {
         Future.successful(Nil)
       }
