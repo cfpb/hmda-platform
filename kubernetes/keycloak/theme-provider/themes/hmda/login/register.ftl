@@ -83,7 +83,7 @@
           <div class="g-recaptcha" data-size="compact" data-sitekey="${recaptchaSiteKey}"></div>
         </#if>
 
-        <input name="register" id="kc-register" type="submit" value="${msg("doRegister")}"/>
+        <input disabled name="register" id="kc-register" type="submit" value="${msg("doRegister")}"/>
 
         <div id="submit-loader" class="LoadingIconWrapper">
           <div class="LoadingIcon"></div>
