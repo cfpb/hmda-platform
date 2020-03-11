@@ -1,16 +1,13 @@
 package hmda.census.records
 
-import com.typesafe.config.ConfigFactory
 import hmda.model.ResourceUtils._
 import hmda.model.census.CountyLoanLimit
+import hmda.parser.derivedFields.StateBoundries
 
 object CountyLoanLimitRecords {
 
-  def parseCountyLoanLimitFile(): List[CountyLoanLimit] = {
-    val config = ConfigFactory.load()
-    val countyLoanLimitFileName =
-      config.getString("hmda.countyLoanLimit.fields.filename")
-    val lines = fileLines(s"/$countyLoanLimitFileName")
+  def parseCountyLoanLimitFile(fileName: String): List[CountyLoanLimit] = {
+    val lines = fileLines(s"/$fileName")
     lines
       .drop(1)
       .map { s =>
@@ -29,4 +26,30 @@ object CountyLoanLimitRecords {
       }
       .toList
   }
+
+  def countyLoansLimitByCounty(countyLoanLimits: Seq[CountyLoanLimit]): Map[String, CountyLoanLimit] = {
+    countyLoanLimits
+      .map(county => county.stateCode + county.countyCode -> county)
+      .toMap
+  }
+
+  def countyLoansLimitByState(countyLoanLimits: Seq[CountyLoanLimit]): Map[String, StateBoundries] = {
+    countyLoanLimits.groupBy(county => county.stateAbbrv).mapValues { countyList =>
+      val oneUnit   = countyList.map(county => county.oneUnitLimit)
+      val twoUnit   = countyList.map(county => county.twoUnitLimit)
+      val threeUnit = countyList.map(county => county.threeUnitLimit)
+      val fourUnit  = countyList.map(county => county.fourUnitLimit)
+      StateBoundries(
+        oneUnitMax = oneUnit.max,
+        oneUnitMin = oneUnit.min,
+        twoUnitMax = twoUnit.max,
+        twoUnitMin = twoUnit.min,
+        threeUnitMax = threeUnit.max,
+        threeUnitMin = threeUnit.min,
+        fourUnitMax = fourUnit.max,
+        fourUnitMin = fourUnit.min
+      )
+    }
+  }
+
 }
