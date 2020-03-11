@@ -113,7 +113,7 @@ object ModifiedLarPublisher {
             readRawData(submissionId)
               .map(l => l.data)
               .drop(1)
-              .map(s => ModifiedLarCsvParser(s))
+              .map(s => ModifiedLarCsvParser(s, submissionId.period.year))
 
           val serializeMlar: Flow[ModifiedLoanApplicationRegister, ByteString, NotUsed] = {
             Flow[ModifiedLoanApplicationRegister]

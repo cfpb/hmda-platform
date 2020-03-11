@@ -2,46 +2,47 @@ package hmda.publication.lar.parser
 
 import hmda.model.filing.lar._
 import Math._
+import com.typesafe.config.ConfigFactory
 
 import hmda.model.modifiedlar.ModifiedLoanApplicationRegister
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.model.census.CountyLoanLimit
-import hmda.census.records.CountyLoanLimitRecords
+import hmda.census.records.CountyLoanLimitRecords._
 import hmda.parser.derivedFields._
 
 object ModifiedLarCsvParser {
+  val config = ConfigFactory.load()
 
-  val countyLoanLimits: Seq[CountyLoanLimit] =
-    CountyLoanLimitRecords.parseCountyLoanLimitFile()
-  val countyLoanLimitsByCounty: Map[String, CountyLoanLimit] =
-    countyLoanLimits
-      .map(county => county.stateCode + county.countyCode -> county)
-      .toMap
-  val countyLoanLimitsByState =
-    countyLoanLimits.groupBy(county => county.stateAbbrv).mapValues {
-      countyList =>
-        val oneUnit = countyList.map(county => county.oneUnitLimit)
-        val twoUnit = countyList.map(county => county.twoUnitLimit)
-        val threeUnit = countyList.map(county => county.threeUnitLimit)
-        val fourUnit = countyList.map(county => county.fourUnitLimit)
-        StateBoundries(
-          oneUnitMax = oneUnit.max,
-          oneUnitMin = oneUnit.min,
-          twoUnitMax = twoUnit.max,
-          twoUnitMin = twoUnit.min,
-          threeUnitMax = threeUnit.max,
-          threeUnitMin = threeUnit.min,
-          fourUnitMax = fourUnit.max,
-          fourUnitMin = fourUnit.min
-        )
-    }
+  val countyLoanLimitFileName2018 =
+      config.getString("hmda.countyLoanLimit.2018.fields.filename")
+  val countyLoanLimitFileName2019 =
+      config.getString("hmda.countyLoanLimit.2019.fields.filename")
+  val countyLoanLimitFileName2020 =
+      config.getString("hmda.countyLoanLimit.2020.fields.filename")
+  
+  val countyLoanLimits2018: Seq[CountyLoanLimit] =
+    parseCountyLoanLimitFile(countyLoanLimitFileName2018)
+  val countyLoanLimits2019: Seq[CountyLoanLimit] =
+    parseCountyLoanLimitFile(countyLoanLimitFileName2019)
+  val countyLoanLimits2020: Seq[CountyLoanLimit] =
+    parseCountyLoanLimitFile(countyLoanLimitFileName2020)
 
-  def apply(s: String): ModifiedLoanApplicationRegister = {
-    convert(LarCsvParser(s, true).getOrElse(LoanApplicationRegister()))
+  val countyLoanLimitsByCounty2018 = countyLoansLimitByCounty(countyLoanLimits2018)
+  val countyLoanLimitsByCounty2019 = countyLoansLimitByCounty(countyLoanLimits2019)
+  val countyLoanLimitsByCounty2020 = countyLoansLimitByCounty(countyLoanLimits2020)
+
+  val countyLoanLimitsByState2018 = countyLoansLimitByState(countyLoanLimits2018)
+  val countyLoanLimitsByState2019 = countyLoansLimitByState(countyLoanLimits2019)
+  val countyLoanLimitsByState2020 = countyLoansLimitByState(countyLoanLimits2020)
+
+  def apply(s: String, year: Int): ModifiedLoanApplicationRegister = {
+    convert(LarCsvParser(s, true).getOrElse(LoanApplicationRegister()), year)
   }
 
   private def convert(
-      lar: LoanApplicationRegister): ModifiedLoanApplicationRegister = {
+      lar: LoanApplicationRegister, year: Int): ModifiedLoanApplicationRegister = {
+    val countyLoanLimitsByCounty = getcountyLoanLimitsByCounty(year)
+    val countyLoanLimitsByState = getcountyLoanLimitsByState(year)
     ModifiedLoanApplicationRegister(
       lar.larIdentifier.id,
       lar.larIdentifier.LEI,
@@ -201,6 +202,22 @@ object ModifiedLarCsvParser {
   private def roundToMidPoint(x: Int): Int = {
     val rounded = 10000 * Math.floor(x / 10000) + 5000
     rounded.toDouble.toInt
+  }
+
+  private def getcountyLoanLimitsByCounty(year: Int) = {
+    year match {
+      case 2018 => countyLoanLimitsByCounty2018
+      case 2019 => countyLoanLimitsByCounty2019
+      case 2020 => countyLoanLimitsByCounty2020
+    }
+  }
+
+  private def getcountyLoanLimitsByState(year: Int) = {
+    year match {
+      case 2018 => countyLoanLimitsByState2018
+      case 2019 => countyLoanLimitsByState2019
+      case 2020 => countyLoanLimitsByState2020
+    }
   }
 
 }

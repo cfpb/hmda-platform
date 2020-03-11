@@ -222,11 +222,11 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
                                case Period(2018, None) => larRepository2018.insert(LarConverter2018(lar))
                                case Period(2019, None) =>
                                  larRepository2019.insert(
-                                   LarConverter(lar)
+                                   LarConverter(lar, 2019)
                                  )
                                case Period(2020, Some(_)) =>
                                  larRepository2020.insert(
-                                   LarConverter(lar = lar, isQuarterly = true)
+                                   LarConverter(lar = lar, 2020, isQuarterly = true)
                                  )
                                case _ =>  throw new IllegalArgumentException(s"Unable to discern period from $submissionId to insert LAR rows.")
                              }
