@@ -14,7 +14,7 @@ import hmda.api.http.directives.{CreateFilingAuthorization, HmdaTimeDirectives}
 import hmda.api.http.model.ErrorResponse
 import hmda.institution.api.http.model.InstitutionsResponse
 import hmda.institution.query._
-import hmda.model.institution.Institution
+import hmda.model.institution.{Institution, InstitutionAltEntity}
 import hmda.query.DbConfiguration._
 import hmda.utils.YearUtils._
 import io.circe.generic.auto._
@@ -92,6 +92,15 @@ trait InstitutionQueryHttpApi extends HmdaTimeDirectives with InstitutionEmailCo
       }
     }
 
+//  val institutionLoaderCSVByYear =
+//    path("institutions" / "year" / IntNumber/"csv") { year =>
+//      timedGet { uri =>
+//            val f = findByYear(year.toString)
+//        completeInstitutionsFutureCSV(f, uri)
+//
+//      }
+//    }
+
   val institutionByDomainDefaultPath =
     path("institutions") {
       timedGet { uri =>
@@ -125,6 +134,11 @@ trait InstitutionQueryHttpApi extends HmdaTimeDirectives with InstitutionEmailCo
           complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
         }
     }
+
+//  private def completeInstitutionsFutureCSV(f:Future[Seq[Future[InstitutionAltEntity]]], uri: Uri): Route =
+//    onComplete(f) {
+//
+//    }
 
   private def returnNotFoundError(uri: Uri) = {
     val errorResponse = ErrorResponse(404, StatusCodes.NotFound.defaultMessage, uri.path)
