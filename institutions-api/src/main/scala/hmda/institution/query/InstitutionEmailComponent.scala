@@ -1,13 +1,14 @@
 package hmda.institution.query
 
+import com.typesafe.config.ConfigFactory
 import hmda.institution.api.http.InstitutionConverter
-import hmda.model.institution.Institution
+import hmda.model.institution.{Institution, InstitutionAltEntity}
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 trait InstitutionEmailComponent extends InstitutionComponent2018 with InstitutionComponent2019 with InstitutionComponent2020 {
 
@@ -23,6 +24,11 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
   }
 
   val institutionEmailsTable = TableQuery[InstitutionEmailsTable]
+
+  val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
+  val bankFilterList =
+    bankFilter.getString("bank-filter-list").toUpperCase.split(",")
+
 
   class InstitutionEmailsRepository(val config: DatabaseConfig[JdbcProfile]) extends TableRepository[InstitutionEmailsTable, Int] {
     val table                                = institutionEmailsTable
@@ -67,6 +73,78 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
     }
   }
 
+  def findByYear(year: String)(
+    implicit ec: ExecutionContext,
+    institutionEmailsRepository: InstitutionEmailsRepository,
+    institutionRepository2018: InstitutionRepository2018,
+    institutionRepository2019: InstitutionRepository2019,
+    institutionRepository2020: InstitutionRepository2020
+  ):  Future[Seq[Future[InstitutionAltEntity]]]  = {
+
+    year match {
+      case "2018" =>
+        def institutionQuery() =
+          institutionRepository2018.table.filterNot(_.lei.toUpperCase inSet bankFilterList)
+        val db = institutionRepository2018.db
+
+        for {
+          institutions  <- db.run(institutionQuery().result)
+        } yield {
+          institutions.map { institution => appendEmailDomains(institution)}
+        }
+      case "2019" =>
+        def institutionQuery() =
+          institutionRepository2018.table.filterNot(_.lei.toUpperCase inSet bankFilterList)
+        val db = institutionRepository2018.db
+
+        for {
+          institutions  <- db.run(institutionQuery().result)
+        } yield {
+          institutions.map { institution => appendEmailDomains(institution)}
+        }
+      case "2020" =>
+        def institutionQuery() =
+          institutionRepository2018.table.filterNot(_.lei.toUpperCase inSet bankFilterList)
+        val db = institutionRepository2018.db
+
+        for {
+          institutions  <- db.run(institutionQuery().result)
+        } yield {
+          institutions.map { institution => appendEmailDomains(institution)}
+        }
+    }
+  }
+
+  def appendEmailDomains(
+   institution: InstitutionEntity)( implicit ec: ExecutionContext,
+                                    institutionEmailsRepository: InstitutionEmailsRepository): Future[InstitutionAltEntity] = {
+
+    val emails: Future[Seq[InstitutionEmailEntity]] =
+      institutionEmailsRepository.findByLei(institution.lei)
+
+    emails.map { emailList =>
+      InstitutionAltEntity(
+        lei = institution.lei,
+        activityYear = institution.activityYear,
+        agency = institution.agency,
+        institutionType = institution.institutionType,
+        id2017 = institution.id2017,
+        taxId = institution.taxId,
+        rssd = institution.rssd,
+        respondentName = institution.respondentName,
+        respondentState = institution.respondentState,
+        respondentCity = institution.respondentCity,
+        parentIdRssd = institution.parentIdRssd,
+        parentName = institution.parentName,
+        assets = institution.assets,
+        otherLenderCode = institution.otherLenderCode,
+        topHolderIdRssd = institution.topHolderIdRssd,
+        topHolderName = institution.topHolderName,
+        hmdaFiler = institution.hmdaFiler,
+        emailDomains = emailList.flatMap(email => email.emailDomain).mkString(",")
+      )
+    }
+  }
   def findByEmail(email: String, year: String)(
     implicit ec: ExecutionContext,
     institutionEmailsRepository: InstitutionEmailsRepository,
@@ -227,4 +305,5 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
     else
       parts(0)
   }
+
 }
