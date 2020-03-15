@@ -34,6 +34,10 @@ object LarConverter {
   val countyLoanLimits2020: Seq[CountyLoanLimit] =
     parseCountyLoanLimitFile(countyLoanLimitFileName2020)
 
+  val overallLoanLimit2018 = overallLoanLimits(countyLoanLimits2018)
+  val overallLoanLimit2019 = overallLoanLimits(countyLoanLimits2019)
+  val overallLoanLimit2020 = overallLoanLimits(countyLoanLimits2020)
+
   val countyLoanLimitsByCounty2018 = countyLoansLimitByCounty(countyLoanLimits2018)
   val countyLoanLimitsByCounty2019 = countyLoansLimitByCounty(countyLoanLimits2019)
   val countyLoanLimitsByCounty2020 = countyLoansLimitByCounty(countyLoanLimits2020)
@@ -48,6 +52,7 @@ object LarConverter {
     isQuarterly: Boolean = false
   ): LarEntity = {
     val census = censusTractMap.getOrElse(lar.geography.tract, Census())
+    val overallLoanLimit = getOverallLoanLimit(year)
     val countyLoanLimitsByCounty = getcountyLoanLimitsByCounty(year)
     val countyLoanLimitsByState = getcountyLoanLimitsByState(year)
     LarEntity(
@@ -161,7 +166,7 @@ object LarConverter {
       lar.reverseMortgage.code,
       lar.lineOfCredit.code,
       lar.businessOrCommercialPurpose.code,
-      ConformingLoanLimit.assignLoanLimit(lar, countyLoanLimitsByCounty, countyLoanLimitsByState),
+      ConformingLoanLimit.assignLoanLimit(lar, overallLoanLimit, countyLoanLimitsByCounty, countyLoanLimitsByState),
       EthnicityCategorization.assignEthnicityCategorization(lar),
       RaceCategorization.assignRaceCategorization(lar),
       SexCategorization.assignSexCategorization(lar),
@@ -194,6 +199,14 @@ object LarConverter {
       case 2018 => countyLoanLimitsByState2018
       case 2019 => countyLoanLimitsByState2019
       case 2020 => countyLoanLimitsByState2020
+    }
+  }
+
+  private def getOverallLoanLimit(year: Int) = {
+    year match {
+      case 2018 => overallLoanLimit2018
+      case 2019 => overallLoanLimit2019
+      case 2020 => overallLoanLimit2020
     }
   }
 

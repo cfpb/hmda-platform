@@ -27,6 +27,10 @@ object ModifiedLarCsvParser {
   val countyLoanLimits2020: Seq[CountyLoanLimit] =
     parseCountyLoanLimitFile(countyLoanLimitFileName2020)
 
+  val overallLoanLimit2018 = overallLoanLimits(countyLoanLimits2018)
+  val overallLoanLimit2019 = overallLoanLimits(countyLoanLimits2019)
+  val overallLoanLimit2020 = overallLoanLimits(countyLoanLimits2020)
+
   val countyLoanLimitsByCounty2018 = countyLoansLimitByCounty(countyLoanLimits2018)
   val countyLoanLimitsByCounty2019 = countyLoansLimitByCounty(countyLoanLimits2019)
   val countyLoanLimitsByCounty2020 = countyLoansLimitByCounty(countyLoanLimits2020)
@@ -41,6 +45,7 @@ object ModifiedLarCsvParser {
 
   private def convert(
       lar: LoanApplicationRegister, year: Int): ModifiedLoanApplicationRegister = {
+    val overallLoanLimit = getOverallLoanLimit(year)
     val countyLoanLimitsByCounty = getcountyLoanLimitsByCounty(year)
     val countyLoanLimitsByState = getcountyLoanLimitsByState(year)
     ModifiedLoanApplicationRegister(
@@ -131,6 +136,7 @@ object ModifiedLarCsvParser {
       lar.lineOfCredit.code,
       lar.businessOrCommercialPurpose.code,
       ConformingLoanLimit.assignLoanLimit(lar,
+                                          overallLoanLimit,
                                           countyLoanLimitsByCounty,
                                           countyLoanLimitsByState),
       EthnicityCategorization.assignEthnicityCategorization(lar),
@@ -217,6 +223,14 @@ object ModifiedLarCsvParser {
       case 2018 => countyLoanLimitsByState2018
       case 2019 => countyLoanLimitsByState2019
       case 2020 => countyLoanLimitsByState2020
+    }
+  }
+
+private def getOverallLoanLimit(year: Int) = {
+    year match {
+      case 2018 => overallLoanLimit2018
+      case 2019 => overallLoanLimit2019
+      case 2020 => overallLoanLimit2020
     }
   }
 

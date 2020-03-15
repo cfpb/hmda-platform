@@ -4,6 +4,17 @@ import hmda.model.ResourceUtils._
 import hmda.model.census.CountyLoanLimit
 import hmda.parser.derivedFields.StateBoundries
 
+case class OverallLoanLimit(
+  oneUnitMin: Double,
+  twoUnitMin: Double,
+  threeUnitMin: Double,
+  fourUnitMin: Double,
+  oneUnitMax: Double,
+  twoUnitMax: Double,
+  threeUnitMax: Double,
+  fourUnitMax: Double
+)
+
 object CountyLoanLimitRecords {
 
   def parseCountyLoanLimitFile(fileName: String): List[CountyLoanLimit] = {
@@ -50,6 +61,23 @@ object CountyLoanLimitRecords {
         fourUnitMin = fourUnit.min
       )
     }
+  }
+
+  def overallLoanLimits(countyLoanLimits: Seq[CountyLoanLimit]): OverallLoanLimit = {
+    val oneUnit   = countyLoanLimits.map(county => county.oneUnitLimit)
+    val twoUnit   = countyLoanLimits.map(county => county.twoUnitLimit)
+    val threeUnit = countyLoanLimits.map(county => county.threeUnitLimit)
+    val fourUnit  = countyLoanLimits.map(county => county.fourUnitLimit)
+    OverallLoanLimit(
+      oneUnitMin = oneUnit.min,
+      twoUnitMin = twoUnit.min,
+      threeUnitMin = threeUnit.min,
+      fourUnitMin = fourUnit.min,
+      oneUnitMax = oneUnit.max,
+      twoUnitMax = twoUnit.max,
+      threeUnitMax = threeUnit.max,
+      fourUnitMax = fourUnit.max,
+    )
   }
 
 }
