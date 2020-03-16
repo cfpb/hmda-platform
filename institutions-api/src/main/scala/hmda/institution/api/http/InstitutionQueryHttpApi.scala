@@ -92,14 +92,14 @@ trait InstitutionQueryHttpApi extends HmdaTimeDirectives with InstitutionEmailCo
       }
     }
 
-//  val institutionLoaderCSVByYear =
-//    path("institutions" / "year" / IntNumber/"csv") { year =>
-//      timedGet { uri =>
-//            val f = findByYear(year.toString)
-//        completeInstitutionsFutureCSV(f, uri)
-//
-//      }
-//    }
+  val institutionLoaderCSVByYear =
+    path("institutions" / "year" / IntNumber/"csv") { year =>
+      timedGet { uri =>
+            val f = findByYear(year.toString)
+        completeInstitutionsFutureCSV(f, uri)
+
+      }
+    }
 
   val institutionByDomainDefaultPath =
     path("institutions") {
@@ -135,10 +135,10 @@ trait InstitutionQueryHttpApi extends HmdaTimeDirectives with InstitutionEmailCo
         }
     }
 
-//  private def completeInstitutionsFutureCSV(f:Future[Seq[Future[InstitutionAltEntity]]], uri: Uri): Route =
-//    onComplete(f) {
-//
-//    }
+  private def completeInstitutionsFutureCSV(f:Future[Seq[Future[InstitutionAltEntity]]], uri: Uri): Route =
+    onComplete(f) {
+
+    }
 
   private def returnNotFoundError(uri: Uri) = {
     val errorResponse = ErrorResponse(404, StatusCodes.NotFound.defaultMessage, uri.path)
