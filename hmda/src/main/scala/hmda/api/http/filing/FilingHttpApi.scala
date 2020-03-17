@@ -26,6 +26,7 @@ import hmda.model.institution.Institution
 import hmda.persistence.institution.InstitutionPersistence._
 import hmda.util.http.FilingResponseUtils._
 import hmda.api.http.PathMatchers._
+import hmda.api.http.model.filing.submissions.FilingDetailsSummary
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -59,7 +60,9 @@ trait FilingHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
             } ~
               // GET/institutions/<lei>/filings/<year>
               timedGet { uri =>
-                getFilingForInstitution(lei, year, None, uri)
+                parameter('page.as[Int] ? 1) { pageNumber =>
+                  getFilingForInstitution(lei, year, None, uri, pageNumber)
+                }
               }
           }
         }
@@ -73,7 +76,9 @@ trait FilingHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
               } ~
                 // GET /institutions/<lei>/filings/<year>/quarters/<quarter>
                 timedGet { uri =>
-                  getFilingForInstitution(lei, period, Option(quarter), uri)
+                  parameter('page.as[Int] ? 1) { pageNumber =>
+                    getFilingForInstitution(lei, period, Option(quarter), uri, pageNumber)
+                  }
                 }
             }
           }
@@ -85,7 +90,7 @@ trait FilingHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
                            lei: String,
                            period: Int,
                            quarter: Option[String]
-  ): Future[(Option[Institution], Option[FilingDetails])] = {
+                         ): Future[(Option[Institution], Option[FilingDetails])] = {
     val ins = selectInstitution(sharding, lei, period)
     val fil = selectFiling(sharding, lei, period, quarter)
 
@@ -137,10 +142,30 @@ trait FilingHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization
       }
     }
 
-  def getFilingForInstitution(lei: String, period: Int, quarter: Option[String], uri: Uri): Route =
+  def getFilingForInstitution(lei: String, period: Int, quarter: Option[String], uri: Uri, pageNumber: Int): Route =
     onComplete(obtainFilingDetails(lei, period, quarter)) {
       case Success((Some(_), Some(filingDetails))) =>
-        complete(filingDetails)
+        val summary =
+          FilingDetailsSummary(
+            filing = filingDetails.filing,
+            submissions = Nil,
+            filingDetails.submissions.length,
+            pageNumber,
+            uri.path.toString()
+          )
+        // Note that the current Pagination structure uses the pageNumber and configuration
+        // in order to compute the fromIndex (how many entries to skip)
+        // and count (how many entries to take)
+        // So we first put in empty data but the correct page number and total length
+        // in order to compute the correct fromIndex and correct count
+        // then we put the actual adjusted data in
+        val result = summary.copy(
+          submissions =
+            filingDetails.submissions
+              .drop(summary.fromIndex)
+              .take(summary.count)
+        )
+        complete(result)
 
       case Success((None, _)) =>
         entityNotPresentResponse("institution", lei, uri)
