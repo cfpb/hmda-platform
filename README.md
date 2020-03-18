@@ -21,6 +21,9 @@ The main `GitHub` branch, `master`, points to the latest version of the HMDA Pla
 
 * [HMDA Platform v1 (2017 Data Collection)](https://github.com/cfpb/hmda-platform/tree/v1.x)
 
+## Postman Collection
+
+The [HMDA Postman](https://github.com/cfpb/hmda-platform/tree/master/newman/postman) collection is located inside the `newman/postman` folder of this repo. The collection has everything you need to file you HMDA data using API endpoints.
 
 ## Contributing
 
