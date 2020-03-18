@@ -158,12 +158,10 @@ trait InstitutionQueryHttpApi extends HmdaTimeDirectives with InstitutionEmailCo
           returnNotFoundError(uri)
         } else {
           val institutionSource = Source.fromIterator(() =>institutions.map(institution => institution + "\n").toIterator)
-          val headerSource = Source.fromIterator(() =>
-            List("activityYear,lei,agency, institutionType, institutionId2017,taxId, rssd,emailDomains,respondent,parent,assets,otherLenderCode,topHolder,hmdaFiler,quarterlyFiler,quarterlyFilerHasFiledQ1,quarterlyFilerHasFiledQ2,quarterlyFilerHasFiledQ3\n").toIterator)
+          val headerSource = Source.fromIterator(() => Institution.headers.toIterator)
 
           val institutionCSV = institutionSource.map(s => ByteString(s))
-
-          val csv =
+          val institutionHeaderCSV =
             headerSource
               .map(s => ByteString(s))
               .concat(institutionCSV)
@@ -171,7 +169,7 @@ trait InstitutionQueryHttpApi extends HmdaTimeDirectives with InstitutionEmailCo
           complete(
             HttpEntity.Chunked
               .fromData(`text/csv`.toContentType(HttpCharsets.`UTF-8`),
-                csv))
+                institutionHeaderCSV))
         }
       case Failure(error) =>
         if (error.getLocalizedMessage.contains("filter predicate is not satisfied")) {
