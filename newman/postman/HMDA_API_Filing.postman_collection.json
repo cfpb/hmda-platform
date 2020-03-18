@@ -1,0 +1,573 @@
+{
+	"info": {
+		"_postman_id": "ff1fab16-688d-4df4-8532-b0cd5a1559c8",
+		"name": "HMDA API Filing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Filing API Health Check",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{URL_FILING}}/",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0202aefd-805b-404a-b064-c53d6997dfe7",
+						"exec": [
+							"var data = pm.response.json();",
+							"pm.environment.set(\"TOKEN\", data.access_token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "client_id",
+							"value": "hmda2-api",
+							"type": "text"
+						},
+						{
+							"key": "grant_type",
+							"value": "password",
+							"type": "text"
+						},
+						{
+							"key": "username",
+							"value": "{{USERNAME}}",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "{{PASSWORD}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{URL_TOKEN}}",
+					"host": [
+						"{{URL_TOKEN}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Start filing for a year",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{LEI}}",
+						"filings",
+						"{{YEAR}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a submission",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ae599a1c-775e-486a-9420-54fca2013114",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"SEQUENCE_NUMBER\", jsonData.id.sequenceNumber);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}/submissions",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{LEI}}",
+						"filings",
+						"{{YEAR}}",
+						"submissions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Show latest submission",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}/submissions/latest",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{LEI}}",
+						"filings",
+						"{{YEAR}}",
+						"submissions",
+						"latest"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload file for submission",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "{{FILE}}"
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}/submissions/{{SEQUENCE_NUMBER}}",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{LEI}}",
+						"filings",
+						"{{YEAR}}",
+						"submissions",
+						"{{SEQUENCE_NUMBER}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Edits Summary",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}/submissions/{{SEQUENCE_NUMBER}}/edits",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{LEI}}",
+						"filings",
+						"{{YEAR}}",
+						"submissions",
+						"{{SEQUENCE_NUMBER}}",
+						"edits"
+					]
+				},
+				"description": "Edits Summary for a submission"
+			},
+			"response": []
+		},
+		{
+			"name": "Edits Detail",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}/submissions/{{SEQUENCE_NUMBER}}/edits/{{EDIT_NUMBER}}",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{LEI}}",
+						"filings",
+						"{{YEAR}}",
+						"submissions",
+						"{{SEQUENCE_NUMBER}}",
+						"edits",
+						"{{EDIT_NUMBER}}"
+					]
+				},
+				"description": "Edits Summary for a submission"
+			},
+			"response": []
+		},
+		{
+			"name": "Edits Detail CSV",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}/submissions/{{SEQUENCE_NUMBER}}/edits/csv?format=csv",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{LEI}}",
+						"filings",
+						"{{YEAR}}",
+						"submissions",
+						"{{SEQUENCE_NUMBER}}",
+						"edits",
+						"csv"
+					],
+					"query": [
+						{
+							"key": "format",
+							"value": "csv"
+						}
+					]
+				},
+				"description": "Edits Summary for a submission"
+			},
+			"response": []
+		},
+		{
+			"name": "Verify Quality Edits",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"verified\": true}"
+				},
+				"url": {
+					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}/submissions/{{SEQUENCE_NUMBER}}/edits/quality",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{LEI}}",
+						"filings",
+						"{{YEAR}}",
+						"submissions",
+						"{{SEQUENCE_NUMBER}}",
+						"edits",
+						"quality"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Verify Macro Edits",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"verified\": true}"
+				},
+				"url": {
+					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}/submissions/{{SEQUENCE_NUMBER}}/edits/macro",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{LEI}}",
+						"filings",
+						"{{YEAR}}",
+						"submissions",
+						"{{SEQUENCE_NUMBER}}",
+						"edits",
+						"macro"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Sign ",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"signed\": true}"
+				},
+				"url": {
+					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}/submissions/{{SEQUENCE_NUMBER}}/sign",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{LEI}}",
+						"filings",
+						"{{YEAR}}",
+						"submissions",
+						"{{SEQUENCE_NUMBER}}",
+						"sign"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Sign",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"signed\": true}"
+				},
+				"url": {
+					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}/submissions/{{SEQUENCE_NUMBER}}/sign",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{LEI}}",
+						"filings",
+						"{{YEAR}}",
+						"submissions",
+						"{{SEQUENCE_NUMBER}}",
+						"sign"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
