@@ -2,7 +2,7 @@ package hmda.institution.query
 
 import com.typesafe.config.ConfigFactory
 import hmda.institution.api.http.InstitutionConverter
-import hmda.model.institution.{Institution, InstitutionAltEntity}
+import hmda.model.institution.Institution
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import slick.basic.DatabaseConfig
@@ -79,7 +79,7 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
     institutionRepository2018: InstitutionRepository2018,
     institutionRepository2019: InstitutionRepository2019,
     institutionRepository2020: InstitutionRepository2020
-  ):  Future[Seq[Future[InstitutionAltEntity]]]  = {
+  ):  Future[Seq[Future[String]]]= {
 
     year match {
       case "2018" =>
@@ -90,61 +90,47 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
         for {
           institutions  <- db.run(institutionQuery().result)
         } yield {
-          institutions.map { institution => appendEmailDomains(institution)}
+          institutions.map { institution => appendLoaderEmailDomains(institution)}
         }
       case "2019" =>
         def institutionQuery() =
-          institutionRepository2018.table.filterNot(_.lei.toUpperCase inSet bankFilterList)
+          institutionRepository2019.table.filterNot(_.lei.toUpperCase inSet bankFilterList)
         val db = institutionRepository2018.db
 
         for {
           institutions  <- db.run(institutionQuery().result)
         } yield {
-          institutions.map { institution => appendEmailDomains(institution)}
+          institutions.map { institution => appendLoaderEmailDomains(institution)}
         }
       case "2020" =>
         def institutionQuery() =
-          institutionRepository2018.table.filterNot(_.lei.toUpperCase inSet bankFilterList)
+          institutionRepository2020.table.filterNot(_.lei.toUpperCase inSet bankFilterList)
         val db = institutionRepository2018.db
 
         for {
           institutions  <- db.run(institutionQuery().result)
         } yield {
-          institutions.map { institution => appendEmailDomains(institution)}
+
+          institutions.map(institution => appendLoaderEmailDomains(institution))
+
         }
     }
   }
 
-  def appendEmailDomains(
+  def appendLoaderEmailDomains(
    institution: InstitutionEntity)( implicit ec: ExecutionContext,
-                                    institutionEmailsRepository: InstitutionEmailsRepository): Future[InstitutionAltEntity] = {
+                                    institutionEmailsRepository: InstitutionEmailsRepository):Future[String]= {
+    val fEmails = institutionEmailsRepository.findByLei(institution.lei)
 
-    val emails: Future[Seq[InstitutionEmailEntity]] =
-      institutionEmailsRepository.findByLei(institution.lei)
-
-    emails.map { emailList =>
-      InstitutionAltEntity(
-        lei = institution.lei,
-        activityYear = institution.activityYear,
-        agency = institution.agency,
-        institutionType = institution.institutionType,
-        id2017 = institution.id2017,
-        taxId = institution.taxId,
-        rssd = institution.rssd,
-        respondentName = institution.respondentName,
-        respondentState = institution.respondentState,
-        respondentCity = institution.respondentCity,
-        parentIdRssd = institution.parentIdRssd,
-        parentName = institution.parentName,
-        assets = institution.assets,
-        otherLenderCode = institution.otherLenderCode,
-        topHolderIdRssd = institution.topHolderIdRssd,
-        topHolderName = institution.topHolderName,
-        hmdaFiler = institution.hmdaFiler,
-        emailDomains = emailList.flatMap(email => email.emailDomain).mkString(",")
-      )
+   for {
+      institution <- fEmails.map(emails => mergeEmailIntoInstitutions(emails,institution).toLoaderPSV)
     }
+     yield institution
+
   }
+
+
+
   def findByEmail(email: String, year: String)(
     implicit ec: ExecutionContext,
     institutionEmailsRepository: InstitutionEmailsRepository,
