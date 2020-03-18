@@ -32,6 +32,7 @@ import hmda.api.http.PathMatchers._
 import hmda.persistence.submission.EditDetailsPersistence.selectEditDetailsPersistence
 import hmda.persistence.submission.HmdaValidationError.selectHmdaValidationError
 import hmda.utils.YearUtils.Period
+import hmda.model.validation._
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.matching.Regex
@@ -185,7 +186,7 @@ trait EditsHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization 
     }
 
   private def toEditSummaryResponse(e: EditSummary, period: Period): EditSummaryResponse =
-    EditSummaryResponse(e.editName, EditDescriptionLookup.lookupDescription(e.editName, period))
+    EditSummaryResponse(e.editName, EditDescriptionLookup.lookupDescription(e.editName, period), isTransmittalSheet(e))
 
   private def editDetails(persistenceId: String, summary: EditDetailsSummary): Future[EditDetailsSummary] = {
     val editDetails = eventEnvelopeByPersistenceId(persistenceId)
@@ -220,6 +221,13 @@ trait EditsHttpApi extends HmdaTimeDirectives with QuarterlyFilingAuthorization 
           )
       )
       .map(_.toCsv)
+  }
+
+  private def isTransmittalSheet(summary: EditSummary): Boolean = {
+    summary.entityType match {
+      case TsValidationError => true
+      case LarValidationError => false
+    }
   }
 
 }
