@@ -1,27 +1,14 @@
 podTemplate(label: 'buildMavenPod', containers: [
-  containerTemplate(name: 'maven', image: 'maven:3.3.9-jdk-8-alpine', ttyEnabled: true, command: 'cat'),
+  containerTemplate(name: 'maven', image: 'maven', ttyEnabled: true, command: 'cat'),
   containerTemplate(name: 'docker', image: 'docker', ttyEnabled: true, command: 'cat'),
-  containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm', ttyEnabled: true, command: 'cat')
+  containerTemplate(name: 'helm', image: 'alpine/helm', ttyEnabled: true, command: 'cat')
 ],
 volumes: [
   hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
 ]) {
    node('buildMavenPod') {
-     def repo = checkout scm
-     def gitCommit = repo.GIT_COMMIT
-     def gitBranch = repo.GIT_BRANCH
-     def shortGitCommit = "${gitCommit[0..10]}"
-
-    sh "git remote add upstream https://github.com/cfpb/hmda-platform.git"
-    sh "git fetch upstream master"
-
-    //Get list of changed files and end job if files changed aren't in relevant folders
-    folders=[]
-    def output = sh(returnStdout: true, script: "echo \$(git --no-pager diff upstream/master --name-only)").split().each{folders = folders + it.split('/')[0]}
-    if (!(gitBranch == 'master' || folders.contains('auth') || folders.contains('common'))) {
-        currentBuild.result = 'SUCCESS'
-        return
-    } 
+    init.setEnvironment('auth')
+    init.checkForChanges('auth')
 
      stage('Build and package Java Code') {
        container('maven') {
@@ -36,25 +23,8 @@ volumes: [
           withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'hmda-platform-jenkins-service',
             usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
             withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
-              sh "docker build --rm -t=${env.DOCKER_HUB_USER}/keycloak-spi-provider ./auth/"
-              if (env.TAG_NAME != null || gitBranch == "master") {
-                if (gitBranch == "master") {
-                  env.DOCKER_TAG = "latest"
-                } else {
-                  env.DOCKER_TAG = env.TAG_NAME
-                }
-                sh """
-                  docker tag ${env.DOCKER_HUB_USER}/keycloak-spi-provider ${env.DOCKER_HUB_USER}/keycloak-spi-provider:${env.DOCKER_TAG}
-                  docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} 
-                  docker push ${env.DOCKER_HUB_USER}/keycloak-spi-provider:${env.DOCKER_TAG}
-                  docker tag ${env.DOCKER_HUB_USER}/keycloak-spi-provider:${env.DOCKER_TAG} ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/keycloak-spi-provider:${env.DOCKER_TAG}
-                  docker login ${DOCKER_REGISTRY_URL} -u ${env.DTR_USER} -p ${env.DTR_PASSWORD} 
-                  docker push ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/keycloak-spi-provider:${env.DOCKER_TAG}
-                  docker images
-                  docker image prune -f
-                  docker images
-                  docker ps -a
-                """
+              dockerBuild.sbtBuild('auth')
+              security.dockerImageScan('auth', env.DOCKER_TAG)
               }
             }
           }

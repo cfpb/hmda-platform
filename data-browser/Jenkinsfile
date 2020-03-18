@@ -31,6 +31,7 @@ volumes: [
             usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
             withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
               dockerBuild.sbtBuild('data-browser')
+              security.dockerImageScan('data-browser', env.DOCKER_TAG)
               }
             }
           }
