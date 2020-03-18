@@ -5,11 +5,11 @@ import akka.event.LoggingAdapter
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import akka.http.scaladsl.server.Directives._
-import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
-import akka.http.scaladsl.model.{ StatusCodes, Uri }
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
+import akka.http.scaladsl.model.{StatusCodes, Uri}
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Route
-import hmda.model.institution.Institution
+import hmda.model.institution.{Agency, Institution}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.directives.HmdaTimeDirectives
 import hmda.api.http.model.ErrorResponse
@@ -18,20 +18,14 @@ import hmda.persistence.institution.InstitutionPersistence
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import com.typesafe.config.ConfigFactory
 import hmda.auth.OAuth2Authorization
-import hmda.messages.institution.InstitutionCommands.{
-  CreateInstitution,
-  DeleteInstitution,
-  GetInstitution,
-  InstitutionCommand,
-  ModifyInstitution
-}
+import hmda.messages.institution.InstitutionCommands.{CreateInstitution, DeleteInstitution, GetInstitution, InstitutionCommand, ModifyInstitution}
 import hmda.messages.institution.InstitutionEvents._
 import hmda.util.http.FilingResponseUtils._
 import hmda.api.http.PathMatchers._
 import hmda.persistence.institution.InstitutionPersistence.selectInstitution
 
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.{ Failure, Success }
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
 
@@ -44,16 +38,18 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
 
   val config        = ConfigFactory.load()
   val hmdaAdminRole = config.getString("keycloak.hmda.admin.role")
+  val checkLEI = true;
+  val checkAgencyCode= true;
 
   def institutionWritePath(oAuth2Authorization: OAuth2Authorization): Route = {
     path("institutions") {
       oAuth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
         entity(as[Institution]) { institution =>
           timedPost { uri =>
-            sanatizeInstitutionIdentifiers(institution, true, uri, postInstitution)
+            sanatizeInstitutionIdentifiers(institution, checkLEI,checkAgencyCode, uri, postInstitution)
           } ~
             timedPut { uri =>
-              sanatizeInstitutionIdentifiers(institution, true, uri, putInstitution)
+              sanatizeInstitutionIdentifiers(institution, checkLEI,checkAgencyCode, uri, putInstitution)
             } ~
             timedDelete { uri =>
               val institutionPersistence = InstitutionPersistence.selectInstitution(sharding, institution.LEI, institution.activityYear)
@@ -191,11 +187,17 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
     }
   }
 
-  private def sanatizeInstitutionIdentifiers(institution: Institution, checkLei: Boolean, uri: Uri, route: (Institution, Uri) => Route): Route = {
+  private def validAgencyCodeFormat(agencyCode: Int): Boolean = {
+  agencyCode > -1  && Agency.values.contains(agencyCode)
+  }
+
+  private def sanatizeInstitutionIdentifiers(institution: Institution, checkLei: Boolean,checkAgencyCode:Boolean, uri: Uri, route: (Institution, Uri) => Route): Route = {
     if (!validTaxIdFormat(institution.taxId)) {
       complete((StatusCodes.BadRequest, "Incorrect tax-id format"))
     } else if (checkLei && !validLeiFormat(institution.LEI)) {
       complete((StatusCodes.BadRequest, "Incorrect lei format"))
+    } else if (checkAgencyCode && !validAgencyCodeFormat(institution.agency.code)) {
+      complete((StatusCodes.BadRequest, "Incorrect agency code format"))
     } else route(institution, uri)
   }
 
