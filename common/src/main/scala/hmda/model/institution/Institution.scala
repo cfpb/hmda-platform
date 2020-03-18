@@ -133,6 +133,16 @@ case class Institution(
       s"${topHolder.idRssd}|${topHolder.name.getOrElse("")}|$hmdaFiler|$quarterlyFiler|" +
       s"$quarterlyFilerHasFiledQ1|$quarterlyFilerHasFiledQ2|$quarterlyFilerHasFiledQ3"
 
+  def toLoaderPSV: String =
+    s"$activityYear|$LEI|${agency.code}|${institutionType.code}|" +
+      s"${institutionId_2017.getOrElse("")}|${taxId.getOrElse("")}|$rssd|${emailDomains
+        .mkString(",")}|" +
+      s"${respondent.name.getOrElse("")}|${respondent.state.getOrElse("")}|${respondent.city
+        .getOrElse("")}|" +
+      s"${parent.idRssd}|${parent.name.getOrElse("")}|$assets|${otherLenderCode}|" +
+      s"${topHolder.idRssd}|${topHolder.name.getOrElse("")}|f|f|" +
+      s"f|f|f"
+
   def valueOf(field: String): String =
     InstitutionFieldMapping
       .mapping(this)
