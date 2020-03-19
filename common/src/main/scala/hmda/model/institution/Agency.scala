@@ -10,7 +10,7 @@ sealed trait Agency {
 }
 
 object Agency {
-  val values = List(1, 2, 3, 5, 7, 9, -1)
+  val values = List(1, 2, 3, 5, 7, 9)
 
   def apply(): Agency =
     UndeterminedAgency
