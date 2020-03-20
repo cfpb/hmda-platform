@@ -1,5 +1,6 @@
 package hmda.institution.query
 
+import akka.http.scaladsl.testkit.RouteTestTimeout
 import hmda.institution.query.InstitutionEntityGenerators.institutionEntityGen
 import hmda.query.DbConfiguration.dbConfig
 import slick.dbio.DBIOAction
@@ -18,7 +19,8 @@ trait InstitutionSetup extends InstitutionEmailComponent {
   implicit val emailRepository = new InstitutionEmailsRepository(dbConfig)
   val db                       = emailRepository.db
 
-  val duration = 5.seconds
+  val duration = 15.seconds
+  implicit val routeTimeout = RouteTestTimeout(3.seconds)
 
   val instA = institutionEntityGen.sample
     .getOrElse(InstitutionEntity())
