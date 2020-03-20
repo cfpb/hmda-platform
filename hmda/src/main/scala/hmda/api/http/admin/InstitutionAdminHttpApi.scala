@@ -39,7 +39,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
   val config        = ConfigFactory.load()
   val hmdaAdminRole = config.getString("keycloak.hmda.admin.role")
   val checkLEI = true;
-  val checkAgencyCode= false;
+  val checkAgencyCode= true;
 
   def institutionWritePath(oAuth2Authorization: OAuth2Authorization): Route = {
     path("institutions") {

@@ -51,7 +51,7 @@ object InstitutionGenerators {
     }
 
   implicit def agencyCodeGen: Gen[Int] =
-    Gen.oneOf(Agency.values.filter(x => x != -1))
+    Gen.oneOf(Agency.values)
 
   implicit def agencyGen: Gen[Agency] =
     for {
