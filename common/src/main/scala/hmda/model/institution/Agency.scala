@@ -22,7 +22,7 @@ object Agency {
       case 5  => NCUA
       case 7  => HUD
       case 9  => CFPB
-      case _  => throw new Exception("Invalid Agency Code")
+      case _  => CFPB
     }
 
   implicit val agencyEncoder: Encoder[Agency] = (a: Agency) =>
