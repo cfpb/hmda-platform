@@ -1,7 +1,7 @@
 package hmda.model.filing.ts
 
 import hmda.model.filing.{HmdaFileRow, PipeDelimited}
-import hmda.model.institution.{Agency, UndeterminedAgency}
+import hmda.model.institution.{Agency, CFPB}
 import io.circe._
 import io.circe.syntax._
 
@@ -11,7 +11,7 @@ case class TransmittalSheet(
                              year: Int = 2018,
                              quarter: Int = 4,
                              contact: Contact = Contact(),
-                             agency: Agency = UndeterminedAgency,
+                             agency: Agency = CFPB,
                              totalLines: Int = 0,
                              taxId: String = "",
                              LEI: String = ""
