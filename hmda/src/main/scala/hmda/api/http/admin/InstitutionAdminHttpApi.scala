@@ -188,7 +188,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
   }
 
   private def validAgencyCodeFormat(agencyCode: Int): Boolean = {
-  agencyCode > -1  && Agency.values.contains(agencyCode)
+    Agency.values.contains(agencyCode)
   }
 
   private def sanatizeInstitutionIdentifiers(institution: Institution, checkLei: Boolean,checkAgencyCode:Boolean, uri: Uri, route: (Institution, Uri) => Route): Route = {
