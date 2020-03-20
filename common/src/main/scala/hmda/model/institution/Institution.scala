@@ -8,7 +8,7 @@ object Institution {
   def empty: Institution = Institution(
     activityYear = 2018,
     LEI = "",
-    agency = UndeterminedAgency,
+    agency = CFPB,
     institutionType = UndeterminedInstitutionType,
     institutionId_2017 = None,
     taxId = None,
