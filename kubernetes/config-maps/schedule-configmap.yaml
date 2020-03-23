@@ -3,17 +3,15 @@ kind: ConfigMap
 metadata:
   name: schedule-configmap
 data:
-  publisher.lar.private.2018": "\"0 55 13 ? * WED *\""
-  publisher.lar.private.2019": "0 45 19 ? OCT THU 2050"
-  publisher.lar.public.2018": "\"0 0 16 ? * SUN *\""
-  publisher.lar.quarterly.2020": "0 45 19 ? OCT THU 2050"
-  publisher.panel.private.2018": "\"0 0 14 ? * SUN *\""
-  publisher.panel.private.2019": "0 45 19 ? APR THU *"
-  publisher.panel.public.2018": "\"0 0 17 ? * SUN *\""
-  publisher.ts.private.2018": "\"0 0 15 ? * SUN *\""
-  publisher.ts.private.2019": "0 45 19 ? APR THU *"
-  publisher.ts.public.2018": "\"0 0 18 ? * SUN *\""
-  publisher.ts.quarterly.2020": "0 45 19 ? OCT THU 2050"
-  regulator.lar": "0 0 16 ? * SUN *"
-  regulator.panel": "0 0 17 ? * SUN *"
-  regulator.ts": "0 0 18 ? * SUN *"
+  publisher.lar.private.2018: '"0 30 13 ? * SUN *"'
+  publisher.lar.private.2019: 0 00 4 * * ?
+  publisher.lar.private.cll.2019: '"0 15 11 ? * MON *"'
+  publisher.lar.public.2018: '"0 30 8 ? * SUN *"'
+  publisher.lar.quarterly.2020: 0 45 19 ? OCT THU 2050
+  publisher.panel.private.2018: '"0 0 15 ? * SUN *"'
+  publisher.panel.private.2019: 0 40 5 * * ?
+  publisher.panel.public.2018: '"0 00 10 ? * SUN *"'
+  publisher.ts.private.2018: '"0 30 15 ? * SUN *"'
+  publisher.ts.private.2019: 0 10 6 * * ?
+  publisher.ts.public.2018: '"0 30 10 ? * SUN *"'
+  publisher.ts.quarterly.2020: 0 45 19 ? OCT THU 2050
