@@ -4,6 +4,7 @@ S301|The LEI in this row does not match the reported LEI in the transmittal shee
 S302|The reported Calendar Year does not match the filing year indicated at the start of the filing. Please confirm the information below and update your file accordingly. 1) The correct file has been uploaded; and 2) The correct filing year was chosen at the start of the filing; and 3) The calendar year is listed correctly in the file.|Calendar Year
 S303|The reported Federal Agency; Federal Taxpayer Identification Number; and Legal Entity Identifier must match the Federal Agency; Federal Taxpayer Identification Number; and Legal Entity Identifier for the financial institution for which you are filing. Please confirm the information below and update your file accordingly. 1)The correct financial institution was at the start of the filing; and 2)The correct file was uploaded; and 3)The Federal Agency, Federal Taxpayer Identification Number, and  Legal Entity Identifier are reported correctly in the file.|Federal Agency; Federal Taxpayer Identification Number; Legal Entity Identifier (LEI)
 S304|The reported Total Number of Entries Contained in Submission does not match the total number of LARs in the HMDA file.|Total Number of Entries Contained in Submission
+S306|If Action Taken equals 1, a duplicate ULI cannot be reported.
 V600|The required format for LEI is alphanumeric with 20 characters, and it cannot be left blank.|Legal Entity Identifier (LEI)
 V601|Financial Institution Name, Contact Person's Name, Contact Person's E-mail Address, Contact Person's Office Street Address, and Contact Person's Office City are required and must not be left blank. |Financial Institution Name; Contact Person's Name; Contact Person's E-mail Address; Contact Person's Office Street Address; Contact Person's Office City
 V602|Calendar Quarter must equal 4, and cannot be left blank.|Calendar Quarter
@@ -280,9 +281,9 @@ Q645-1|Loan Amount should generally be greater than or equal to $500 (reported a
 Q645-2|If Loan Purpose equals 1, then Loan Amount should generally be greater than or equal to $1,000 (reported as 1000)|Loan Amount
 Q646|Your file indicates that at least one exemption code was used. Please verify that your institution is eligible for a partial exemption pursuant to the 2018 HMDA Rule.|
 Q647|If Federal Agency equals 7, indicating a non-depository institution, exemption codes should not be used in the Loan/Application Register. Your data indicates that at least one exemption code was used.|
-Q648|If Action Taken equals 1, 2, 3, 4, 5, 7, or 8, the first 20 characters of the ULI should match the reported LEI.|Action Taken; Universal Loan Identifier (ULI); Legal Entity Identifier (LEI)
+Q648|If Action Taken equals 1, 2, 3, 4, 5, 7, or 8, the first 20 characters of the ULI should match the reported LEI.|Action Taken; Legal Entity Identifier (LEI)
 Q649-1|If Credit Score of Applicant or Borrower does not equal 7777, 8888, or 1111, Credit Score should generally be between 300 and 900.|Credit Score of Applicant or Borrower;
-Q649-2|If Credit Score of Co-Applicant or Co-Borrower does not equal 7777, 8888, 9999, or 1111, Credit Score should generally be between 300 and 900.|Credit Score of Applicant or Borrower;
+Q649-2|If Credit Score of Co-Applicant or Co-Borrower does not equal 7777, 8888, 9999, or 1111, Credit Score should generally be between 300 and 900.|Credit Score of Co-Applicant or Co-Borrower;
 Q650|The Interest Rate reported is greater than 0 but less than 0.5, which may indicate a misplaced decimal point.|Interest Rate
 Q651|The CLTV reported is greater than 0 but less than 1, which may indicate a misplaced decimal point.|Combined Loan-to-Value Ratio
 Q652|The DTI reported is greater than 0 but less than 1, which may indicate a misplaced decimal point.|Debt-to-Income Ratio
