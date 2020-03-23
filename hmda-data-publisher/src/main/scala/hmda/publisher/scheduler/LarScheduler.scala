@@ -19,7 +19,7 @@ import hmda.util.BankFilterUtils._
 import hmda.query.DbConfiguration.dbConfig
 import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020}
 import hmda.publisher.query.lar.{LarEntityImpl2018, LarEntityImpl2019, LarEntityImpl2020}
-import hmda.publisher.scheduler.schedules.Schedules.{LarScheduler2018, LarScheduler2019, LarSchedulerQuarterly2020}
+import hmda.publisher.scheduler.schedules.Schedules.{LarScheduler2018, LarScheduler2019, LarSchedulerLoanLimit2019, LarSchedulerQuarterly2020}
 import slick.basic.DatabasePublisher
 
 import scala.concurrent.Future
@@ -67,12 +67,15 @@ class LarScheduler
     QuartzSchedulerExtension(context.system)
       .schedule("LarScheduler2019", self, LarScheduler2019)
     QuartzSchedulerExtension(context.system)
+      .schedule("LarSchedulerLoanLimit2019", self, LarSchedulerLoanLimit2019)
+    QuartzSchedulerExtension(context.system)
       .schedule("LarSchedulerQuarterly2020", self, LarSchedulerQuarterly2020)
   }
 
   override def postStop() = {
     QuartzSchedulerExtension(context.system).cancelJob("LarScheduler2018")
     QuartzSchedulerExtension(context.system).cancelJob("LarScheduler2019")
+    QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerLoanLimit2019")
     QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerQuarterly2020")
   }
 
@@ -132,6 +135,34 @@ class LarScheduler
         case Failure(t) =>
           log.info(
             "An error has occurred getting LAR Data 2019 in Future: " + t.getMessage)
+      }
+
+    case LarSchedulerLoanLimit2019 =>
+      val now = LocalDateTime.now().minusDays(1)
+      val formattedDate = fullDate.format(now)
+      val fileName = s"$formattedDate" + "2019_lar_loan_limit.txt"
+      val s3Sink = S3
+        .multipartUpload(bucket, s"$environment/lar/$fileName")
+        .withAttributes(S3Attributes.settings(s3Settings))
+
+      val allResultsPublisher: DatabasePublisher[LarEntityImpl2019] =
+        larRepository2019.getAllLARs(getFilterList())
+      val allResultsSource: Source[LarEntityImpl2019, NotUsed] =
+        Source.fromPublisher(allResultsPublisher)
+
+      val results: Future[MultipartUploadResult] = allResultsSource
+        .map(larEntity => larEntity.toRegulatorLoanLimitPSV + "\n")
+        .map(s => ByteString(s))
+        .runWith(s3Sink)
+
+      results onComplete {
+        case Success(result) => {
+          log.info(
+            "Pushing to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
+        }
+        case Failure(t) =>
+          log.info(
+            "An error has occurred getting LAR Data Loan Limit2019 in Future: " + t.getMessage)
       }
 
     case LarSchedulerQuarterly2020 =>

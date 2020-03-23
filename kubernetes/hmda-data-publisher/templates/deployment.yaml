@@ -131,6 +131,11 @@ spec:
               configMapKeyRef:
                 name: schedule-configmap
                 key: publisher.lar.private.2019
+          - name: LAR_PRIVATE_SCHEDULE_LOAN_LIMIT_2019
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.lar.private.cll.2019
           - name: PANEL_PRIVATE_SCHEDULE_2019
             valueFrom:
               configMapKeyRef:

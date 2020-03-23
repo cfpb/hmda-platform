@@ -188,7 +188,11 @@ case class LarPartSeven2019(conformingLoanLimit: String = "",
                             tractOccupiedUnits: Int = 0,
                             tractOneToFourFamilyUnits: Int = 0,
                             tractMedianAge: Int = 0,
-                            tractToMsaIncomePercent: Double = 0.0)
+                            tractToMsaIncomePercent: Double = 0.0){
+  def toRegulatorPSV: String = {
+    s"|$conformingLoanLimit"
+  }
+}
 
 case class LarEntityImpl2019(larPartOne: LarPartOne2019,
                              larPartTwo: LarPartTwo2019,
@@ -204,5 +208,14 @@ case class LarEntityImpl2019(larPartOne: LarPartOne2019,
       larPartThree.toRegulatorPSV +
       larPartFour.toRegulatorPSV +
       larPartFive.toRegulatorPSV +
-      larPartSix.toRegulatorPSV).replaceAll("(\r\n)|\r|\n", "")
+      larPartSix.toRegulatorPSV ).replaceAll("(\r\n)|\r|\n", "")
+
+  def toRegulatorLoanLimitPSV: String =
+    (larPartOne.toRegulatorPSV +
+      larPartTwo.toRegulatorPSV +
+      larPartThree.toRegulatorPSV +
+      larPartFour.toRegulatorPSV +
+      larPartFive.toRegulatorPSV +
+      larPartSix.toRegulatorPSV +
+      larPartSeven.toRegulatorPSV ).replaceAll("(\r\n)|\r|\n", "")
 }
