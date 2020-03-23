@@ -1,5 +1,6 @@
 package hmda.institution.query
 
+import com.typesafe.config.ConfigFactory
 import hmda.institution.api.http.InstitutionConverter
 import hmda.model.institution.Institution
 import hmda.query.DbConfiguration._
@@ -7,7 +8,7 @@ import hmda.query.repository.TableRepository
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 trait InstitutionEmailComponent extends InstitutionComponent2018 with InstitutionComponent2019 with InstitutionComponent2020 {
 
@@ -23,6 +24,11 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
   }
 
   val institutionEmailsTable = TableQuery[InstitutionEmailsTable]
+
+  val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
+  val bankFilterList =
+    bankFilter.getString("bank-filter-list").toUpperCase.split(",")
+
 
   class InstitutionEmailsRepository(val config: DatabaseConfig[JdbcProfile]) extends TableRepository[InstitutionEmailsTable, Int] {
     val table                                = institutionEmailsTable
@@ -66,6 +72,64 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
       query
     }
   }
+
+  def findByYear(year: String)(
+    implicit ec: ExecutionContext,
+    institutionEmailsRepository: InstitutionEmailsRepository,
+    institutionRepository2018: InstitutionRepository2018,
+    institutionRepository2019: InstitutionRepository2019,
+    institutionRepository2020: InstitutionRepository2020
+  ):  Future[Seq[Future[String]]]= {
+
+    year match {
+      case "2018" =>
+        def institutionQuery() =
+          institutionRepository2018.table.filterNot(_.lei.toUpperCase inSet bankFilterList)
+        val db = institutionRepository2018.db
+
+        for {
+          institutions  <- db.run(institutionQuery().result)
+        } yield {
+          institutions.map { institution => appendLoaderEmailDomains(institution)}
+        }
+      case "2019" =>
+        def institutionQuery() =
+          institutionRepository2019.table.filterNot(_.lei.toUpperCase inSet bankFilterList)
+        val db = institutionRepository2018.db
+
+        for {
+          institutions  <- db.run(institutionQuery().result)
+        } yield {
+          institutions.map { institution => appendLoaderEmailDomains(institution)}
+        }
+      case "2020" =>
+        def institutionQuery() =
+          institutionRepository2020.table.filterNot(_.lei.toUpperCase inSet bankFilterList)
+        val db = institutionRepository2018.db
+
+        for {
+          institutions  <- db.run(institutionQuery().result)
+        } yield {
+
+          institutions.map(institution => appendLoaderEmailDomains(institution))
+
+        }
+    }
+  }
+
+  def appendLoaderEmailDomains(
+   institution: InstitutionEntity)( implicit ec: ExecutionContext,
+                                    institutionEmailsRepository: InstitutionEmailsRepository):Future[String]= {
+    val fEmails = institutionEmailsRepository.findByLei(institution.lei)
+
+   for {
+      institution <- fEmails.map(emails => mergeEmailIntoInstitutions(emails,institution).toLoaderPSV)
+    }
+     yield institution
+
+  }
+
+
 
   def findByEmail(email: String, year: String)(
     implicit ec: ExecutionContext,
@@ -227,4 +291,5 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
     else
       parts(0)
   }
+
 }
