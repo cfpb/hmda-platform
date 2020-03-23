@@ -138,7 +138,7 @@ class TsScheduler
        val includeQuarterly=true;
       val now = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDate.format(now)
-      val fileName = s"$formattedDate" + "_quarterly_2020_ts.txt"
+      val fileName = s"$formattedDate" + "quarterly_2020_ts.txt"
 
       val s3Sink =
         S3.multipartUpload(bucket, s"$environment/ts/$fileName")
