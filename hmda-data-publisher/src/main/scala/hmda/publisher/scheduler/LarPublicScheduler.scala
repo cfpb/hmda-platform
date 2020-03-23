@@ -4,9 +4,7 @@ import akka.NotUsed
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3._
-import akka.stream.scaladsl._
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.scaladsl.Source
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
@@ -14,12 +12,12 @@ import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
-import hmda.util.BankFilterUtils._
-import hmda.query.DbConfiguration.dbConfig
 import hmda.publisher.helper.ModifiedLarHeader
 import hmda.publisher.query.component.PublisherComponent2018
 import hmda.publisher.query.lar.ModifiedLarEntityImpl
 import hmda.publisher.scheduler.schedules.Schedules.LarPublicScheduler2018
+import hmda.query.DbConfiguration.dbConfig
+import hmda.util.BankFilterUtils._
 import slick.basic.DatabasePublisher
 
 import scala.concurrent.Future
@@ -94,7 +92,7 @@ class LarPublicScheduler
       resultsPSV onComplete {
         case Success(result) => {
           log.info(
-            "Pushing to S3: " + s"$bucket/$environment/dynamic-data/2018/$fileNamePSV" + ".")
+            "Pushed to S3: " + s"$bucket/$environment/dynamic-data/2018/$fileNamePSV" + ".")
         }
         case Failure(t) =>
           log.info(

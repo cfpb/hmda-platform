@@ -107,7 +107,7 @@ class PanelScheduler
     results onComplete {
       case Success(result) => {
         log.info(
-          "Pushing to S3: " + s"$bucket/$environment/panel/$fileName" + ".")
+          "Pushed to S3: " + s"$bucket/$environment/panel/$fileName" + ".")
       }
       case Failure(t) =>
         println(
@@ -137,7 +137,7 @@ class PanelScheduler
     results onComplete {
       case Success(result) => {
         log.info(
-          "Pushing to S3: " + s"$bucket/$environment/panel/$fileName" + ".")
+          "Pushed to S3: " + s"$bucket/$environment/panel/$fileName" + ".")
       }
       case Failure(t) =>
         println(
