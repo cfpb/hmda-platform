@@ -25,5 +25,5 @@ trait LoanLimitLarHeader {
     "autounderwriting_sys_result2|autounderwriting_sys_result3|autounderwriting_sys_result4|" +
     "autounderwriting_sys_result5|autounderwriting_sys_result_other|reverse_mortgage|openend_line_of_credit|" +
     "business_commercial_purpose|conforming_loan_limit|population|minority_population_percent|median_income_percentage|" +
-    "tract_to_msamd|owner_occupied_units|one_to_four_fam_units|medium_age" + "\n"
+    "tract_to_msamd|owner_occupied_units|one_to_four_fam_units|median_age" + "\n"
 }
