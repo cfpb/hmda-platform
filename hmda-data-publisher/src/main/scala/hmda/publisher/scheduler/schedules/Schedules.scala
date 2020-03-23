@@ -6,6 +6,7 @@ object Schedules {
   case object LarScheduler2018
   case object LarPublicScheduler2018
   case object LarScheduler2019
+  case object LarSchedulerLoanLimit2019
   case object TsScheduler2018
   case object TsPublicScheduler2018
   case object TsScheduler2019

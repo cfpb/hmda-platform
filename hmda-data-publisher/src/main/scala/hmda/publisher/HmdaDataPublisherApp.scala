@@ -26,6 +26,8 @@ object HmdaDataPublisherApp extends App {
 
   val panelTimer2019 = config.getString("akka.PanelScheduler2019").split(",")
   val larTimer2019 = config.getString("akka.LarScheduler2019").split(",")
+  val larTimerLoanLimit2019 = config.getString("akka.LarSchedulerLoanLimit2019").split(",")
+
   val tsTimer2019 = config.getString("akka.TsScheduler2019").split(",")
 
   val larPublicTimer2018 = config.getString("akka.LarPublicScheduler2018")
@@ -41,6 +43,8 @@ object HmdaDataPublisherApp extends App {
 
   log.info("Panel Timer 2019: " + panelTimer2019)
   log.info("LAR Timer 2019: " + larTimer2019)
+  log.info("LAR Timer 2019 LoanLimit: " + larTimerLoanLimit2019)
+
   log.info("TS Timer 2019: " + tsTimer2019)
 
   log.info("LAR Public 2018: " + larPublicTimer2018)
@@ -65,7 +69,9 @@ object HmdaDataPublisherApp extends App {
                 ConfigFactory
                   .parseString(larTimer2018)
                   .withValue(larTimer2019(0),
-                             ConfigValueFactory.fromAnyRef(larTimer2019(1)))
+                    ConfigValueFactory.fromAnyRef(larTimer2019(1)))
+                  .withValue(larTimerLoanLimit2019(0),
+                    ConfigValueFactory.fromAnyRef(larTimerLoanLimit2019(1)))
                   .withValue(larTimerQuarterly2020(0),
                     ConfigValueFactory.fromAnyRef(larTimerQuarterly2020(1)))
                   .withFallback(config))
