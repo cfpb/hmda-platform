@@ -92,7 +92,7 @@ class TsPublicScheduler
       resultsPSV onComplete {
         case Success(result) => {
           log.info(
-            "Pushing to S3: " + s"$bucket/$environment/dynamic-data/2018/$fileNamePSV" + ".")
+            "Pushed to S3: " + s"$bucket/$environment/dynamic-data/2018/$fileNamePSV" + ".")
         }
         case Failure(t) =>
           println(

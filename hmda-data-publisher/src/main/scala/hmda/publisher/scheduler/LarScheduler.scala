@@ -15,6 +15,7 @@ import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
+import hmda.publisher.helper.LoanLimitLarHeader
 import hmda.util.BankFilterUtils._
 import hmda.query.DbConfiguration.dbConfig
 import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020}
@@ -29,7 +30,8 @@ class LarScheduler
     extends HmdaActor
     with PublisherComponent2018
     with PublisherComponent2019
-      with PublisherComponent2020{
+      with PublisherComponent2020
+      with LoanLimitLarHeader{
 
   implicit val ec = context.system.dispatcher
   implicit val materializer = ActorMaterializer()
@@ -102,7 +104,7 @@ class LarScheduler
       results onComplete {
         case Success(result) => {
           log.info(
-            "Pushing to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
+            "Pushed to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
         }
         case Failure(t) =>
           log.info(
@@ -130,7 +132,7 @@ class LarScheduler
       results onComplete {
         case Success(result) => {
           log.info(
-            "Pushing to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
+            "Pushed to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
         }
         case Failure(t) =>
           log.info(
@@ -140,7 +142,7 @@ class LarScheduler
     case LarSchedulerLoanLimit2019 =>
       val now = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDate.format(now)
-      val fileName = s"$formattedDate" + "2019_lar_loan_limit.txt"
+      val fileName = "2019F_AGY_LAR_withFlag_"+s"$formattedDate" +"2019_lar.txt"
       val s3Sink = S3
         .multipartUpload(bucket, s"$environment/lar/$fileName")
         .withAttributes(S3Attributes.settings(s3Settings))
@@ -150,15 +152,20 @@ class LarScheduler
       val allResultsSource: Source[LarEntityImpl2019, NotUsed] =
         Source.fromPublisher(allResultsPublisher)
 
-      val results: Future[MultipartUploadResult] = allResultsSource
-        .map(larEntity => larEntity.toRegulatorLoanLimitPSV + "\n")
-        .map(s => ByteString(s))
-        .runWith(s3Sink)
+      val resultsPSV: Future[MultipartUploadResult] =
+        allResultsSource.zipWithIndex
+          .map(
+            larEntity =>
+              if (larEntity._2 == 0)
+                LoanLimitHeader.concat(larEntity._1.toRegulatorLoanLimitPSV) + "\n"
+              else larEntity._1.toRegulatorLoanLimitPSV + "\n")
+          .map(s => ByteString(s))
+          .runWith(s3Sink)
 
-      results onComplete {
-        case Success(result) => {
+      resultsPSV onComplete {
+        case Success(results) => {
           log.info(
-            "Pushing to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
+            "Pushed to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
         }
         case Failure(t) =>
           log.info(
@@ -169,7 +176,8 @@ class LarScheduler
       val includeQuarterly = true
       val now = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDate.format(now)
-      val fileName = s"$formattedDate" + "2020_quarterly_lar.txt"
+
+      val fileName = s"$formattedDate" + "quarterly_2020_lar.txt"
       val s3Sink = S3
         .multipartUpload(bucket, s"$environment/lar/$fileName")
         .withAttributes(S3Attributes.settings(s3Settings))
@@ -187,7 +195,7 @@ class LarScheduler
       results onComplete {
         case Success(result) => {
           log.info(
-            "Pushing to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
+            "Pushed to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
         }
         case Failure(t) =>
           log.info(

@@ -101,7 +101,7 @@ class TsScheduler
       results onComplete {
         case Success(result) => {
           log.info(
-            "Pushing to S3: " + s"$bucket/$environment/ts/$fileName" + ".")
+            "Pushed to S3: " + s"$bucket/$environment/ts/$fileName" + ".")
         }
         case Failure(t) =>
           println("An error has occurred getting TS Data 2018: " + t.getMessage)
@@ -129,7 +129,7 @@ class TsScheduler
       results onComplete {
         case Success(result) => {
           log.info(
-            "Pushing to S3: " + s"$bucket/$environment/ts/$fileName" + ".")
+            "Pushed to S3: " + s"$bucket/$environment/ts/$fileName" + ".")
         }
         case Failure(t) =>
           println("An error has occurred getting TS Data 2019: " + t.getMessage)
@@ -138,7 +138,8 @@ class TsScheduler
        val includeQuarterly=true;
       val now = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDate.format(now)
-      val fileName = s"$formattedDate" + "2020_quarterly_ts.txt"
+      val fileName = s"$formattedDate" + "quarterly_2020_ts.txt"
+
       val s3Sink =
         S3.multipartUpload(bucket, s"$environment/ts/$fileName")
           .withAttributes(S3Attributes.settings(s3Settings))
@@ -157,7 +158,7 @@ class TsScheduler
       results onComplete {
         case Success(result) => {
           log.info(
-            "Pushing to S3: " + s"$bucket/$environment/ts/$fileName" + ".")
+            "Pushed to S3: " + s"$bucket/$environment/ts/$fileName" + ".")
         }
         case Failure(t) =>
           println("An error has occurred getting Quarterly TS Data 2020: " + t.getMessage)

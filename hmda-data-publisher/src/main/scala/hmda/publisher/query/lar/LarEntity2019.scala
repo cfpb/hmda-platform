@@ -29,7 +29,6 @@ case class LarPartOne2019(id: Int = 0,
       s"|$actionTakenType|$actionTakenDate|$street|$city|$state|" +
       s"$zip|$county|$tract|"
   }
-
 }
 case class LarPartTwo2019(ethnicityApplicant1: String = "",
                           ethnicityApplicant2: String = "",
@@ -190,7 +189,8 @@ case class LarPartSeven2019(conformingLoanLimit: String = "",
                             tractMedianAge: Int = 0,
                             tractToMsaIncomePercent: Double = 0.0){
   def toRegulatorPSV: String = {
-    s"|$conformingLoanLimit"
+    s"|$conformingLoanLimit|$tractPopulation|$tractMinorityPopulationPercent|$tractMedianIncome|$tractToMsaIncomePercent|$tractOccupiedUnits" +
+      s"|$tractOneToFourFamilyUnits|$tractMedianAge"
   }
 }
 
