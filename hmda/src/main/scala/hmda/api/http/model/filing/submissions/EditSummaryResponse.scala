@@ -3,7 +3,7 @@ package hmda.api.http.model.filing.submissions
 import io.circe._
 import io.circe.generic.semiauto._
 
-case class EditSummaryResponse(edit: String, description: String)
+case class EditSummaryResponse(edit: String, description: String, transmittalSheet: Boolean)
 object EditSummaryResponse {
   implicit val encoder: Encoder[EditSummaryResponse] =
     deriveEncoder[EditSummaryResponse]
