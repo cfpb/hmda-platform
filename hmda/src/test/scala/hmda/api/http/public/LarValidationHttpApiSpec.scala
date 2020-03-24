@@ -107,7 +107,7 @@ class LarValidationHttpApiSpec extends WordSpec
             Seq(
               ValidationSingleErrorSummary(
                 "V600",
-                "The required format for LEI is alphanumeric with 20 characters, and it cannot be left blank.")
+                s""""The required format for LEI is alphanumeric with 20 characters, and it cannot be left blank."""")
             )))
       }
     }

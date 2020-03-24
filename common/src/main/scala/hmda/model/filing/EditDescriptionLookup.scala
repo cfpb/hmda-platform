@@ -23,7 +23,7 @@ object EditDescriptionLookup {
         val editName           = values(0)
         val editDetails        = values(1)
         val affectedDataFields = values(2).split(";").map(_.trim)
-        EditDescription(editName, editDetails, affectedDataFields.toList)
+        EditDescription(editName, s""""$editDetails"""", affectedDataFields.toList)
       }
 
   def editDescriptionMap(file: Iterable[String]): Map[String, EditDescription] =
