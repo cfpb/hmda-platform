@@ -249,6 +249,9 @@
                     <a href="#hmda-filing-api-authorization" class="toc-h2 toc-link" data-title="Authorization">Authorization</a>
                   </li>
                   <li>
+                    <a href="#hmda-filing-api-postman-collection" class="toc-h2 toc-link" data-title="Postman Collection">Postman Collection</a>
+                  </li>
+                  <li>
                     <a href="#hmda-filing-api-endpoints" class="toc-h2 toc-link" data-title="Endpoints">Endpoints</a>
                       <ul class="toc-list-h3">
                           <li>
@@ -662,7 +665,7 @@
 <p>Example</p>
 </blockquote>
 <pre class="highlight shell tab-shell"><code>  curl -X POST <span class="se">\</span>
-  <span class="s2">"https://ffiec.cfpb.gov/v2/filing/auth/realms/hmda2/protocol/openid-connect/token"</span> <span class="se">\</span>
+  <span class="s2">"https://ffiec.cfpb.gov/auth/realms/hmda2/protocol/openid-connect/token"</span> <span class="se">\</span>
   -d <span class="s1">'client_id=hmda2-api&amp;grant_type=password&amp;username={{username}}%40{{bank_domain}}&amp;password={{password}}'</span>
 </code></pre>
 <table><thead>
@@ -677,7 +680,7 @@
 </tr>
 <tr>
 <td>URL</td>
-<td><code>https://ffiec.cfpb.gov/v2/filing/auth/realms/hmda2/protocol/openid-connect/token</code></td>
+<td><code>https://ffiec.cfpb.gov/auth/realms/hmda2/protocol/openid-connect/token</code></td>
 </tr>
 <tr>
 <td>Payload</td>
@@ -688,6 +691,8 @@
 <td>JSON with <code>access_token</code></td>
 </tr>
 </tbody></table>
+<h2 id='hmda-filing-api-postman-collection'>Postman Collection</h2>
+<p>The <a href="https://github.com/cfpb/hmda-platform/tree/master/newman/postman">HMDA Postman Collection</a> can be used to file via HMDA Filing API.</p>
 <h2 id='hmda-filing-api-endpoints'>Endpoints</h2>
 <p>Use <code>https://ffiec.cfpb.gov/v2/filing/institutions/{lei}/filings</code> as a prefix for the following endpoints.</p>
 <h3 id='hmda-filing-api-endpoints-start-a-filing'>Start a Filing</h3>
