@@ -12,7 +12,7 @@ object Q649_1 extends EditCheck[LoanApplicationRegister] {
   override def parent: String = "Q649"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult ={
-    when(lar.applicant.creditScore not oneOf(7777, 8888, 1111)) {
+    when(lar.applicant.creditScore not oneOf(9999, 7777, 8888, 1111)) {
         lar.applicant.creditScore is between(300, 900)
     }
   }
