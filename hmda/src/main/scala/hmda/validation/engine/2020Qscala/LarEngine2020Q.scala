@@ -263,6 +263,7 @@ private[engine] object LarEngine2020Q extends ValidationEngine[LoanApplicationRe
     Q624,
     Q625,
     Q626,
+    Q627,
     Q628,
     Q629,
     Q630,
