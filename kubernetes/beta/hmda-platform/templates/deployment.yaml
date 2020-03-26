@@ -40,6 +40,9 @@ spec:
             requests:
               memory: "4200Mi"
               cpu: "2"
+          security:
+            - readOnlyRootFilesystem: true
+              allowPrivilegeEscalation: false          
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: CURRENT_YEAR
