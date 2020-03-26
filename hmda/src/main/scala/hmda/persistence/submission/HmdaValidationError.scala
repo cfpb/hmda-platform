@@ -516,7 +516,7 @@ object HmdaValidationError
             )
           case q600 @ QualityValidationError(uli, `q600`, fields) =>
             q600.copyWithFields(
-              fields + ("The following row numbers have the same ULI" -> tsLar.duplicateLineNumbers
+              fields + (s"$uli The following row numbers have the same ULI" -> tsLar.duplicateLineNumbers
                 .mkString(start = "Rows: ", sep = ",", end = ""))
             )
 
