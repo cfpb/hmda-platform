@@ -10,9 +10,9 @@ import hmda.validation.rules.EditCheck
 object Q648 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q648"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult ={
-    when(lar.action.actionTakenType is oneOf(LoanOriginated, ApplicationApprovedButNotAccepted, ApplicationDenied, ApplicationWithdrawnByApplicant, FileClosedForIncompleteness, PreapprovalRequestDenied, PreapprovalRequestApprovedButNotAccepted)) {
+  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+      when(lar.loan.ULI.length is greaterThanOrEqual(22) and (lar.action.actionTakenType is oneOf(LoanOriginated, ApplicationApprovedButNotAccepted, ApplicationDenied, ApplicationWithdrawnByApplicant, FileClosedForIncompleteness, PreapprovalRequestDenied, PreapprovalRequestApprovedButNotAccepted))) {
         lar.larIdentifier.LEI.take(20) is equalTo(lar.loan.ULI.take(20))
-    }
+      }
   }
 }
