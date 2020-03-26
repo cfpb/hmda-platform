@@ -24,7 +24,7 @@ class Q648Spec extends LarEditCheckSpec {
         val shortLar = relevantLar.copy(loan = relevantLar.loan.copy(ULI = shortUli))
         val invalidLar = relevantLar.copy(loan = relevantLar.loan.copy(ULI = invalidUli))
         validLar.mustPass
-        shortLar.mustFail
+        shortLar.mustPass
         invalidLar.mustFail
       }
       val purchasedLoan =
