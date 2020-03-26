@@ -13,7 +13,7 @@ class Q648Spec extends LarEditCheckSpec {
     "If loan is not purchased first characters of ULI should match LEI") {
     val lei = "abcdefghijklmnopqrstuvwxyz"
     val validUli = "abcdefghijklmnopqrst"
-    val shortUli = "abcdefghijklmnopq"
+    val shortUli = "abcdefghijklmnopqrstuvwxyz"
     val invalidUli = "abcdefghijklmnopqrsz"
     
     forAll(larGen) { lar =>
