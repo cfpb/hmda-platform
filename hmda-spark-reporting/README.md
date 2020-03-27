@@ -107,3 +107,7 @@ Below are the S3 paths for aggregate reports
 While the spark jobs are running, their status can be visualized by doing port-forwarding:
 
 `kubectl port-forward hmda-spark-disclosure-driver 4040:4040`
+
+It will look something like this:
+
+https://user-images.githubusercontent.com/44377678/77762269-a4355380-700f-11ea-9b64-067d5221c9b4.png
