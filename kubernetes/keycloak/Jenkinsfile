@@ -1,19 +1,62 @@
-podTemplate(label: 'buildHelm', containers: [
-    containerTemplate(name: 'helm', image: 'alpine/helm', ttyEnabled: true, command: 'cat')
-]) {
-    node('buildHelm') {
-        init.setEnvironment('keycloak')
+pipeline {
+    agent {
+        label 'hmdaops'
+    }
+    stages {
+        stage('init') {
+            steps {
+                script {
+                    library identifier: "hmdaUtils@jenkinsSharedLibraries", retriever: modernSCM (
+                        [
+                            $class: 'GitSCMSource',
+                            remote: 'https://github.cfpb.gov/hmda-devops/hmda-devops.git'
+                        ]
+                    )
+
+                    init.setEnvironment('modified_lar')
+                }
+            }
+        }
 
         stage('Ambassador Service') {
-            if (env.BRANCH_NAME == 'master') {
-                container('helm') {
-                    sh "kubectl create --namespace=default -f kubernetes/keycloak/keycloak-ambassador.yaml | exit 0"
+            agent {
+                docker {
+                    image 'hmda/helm'
+                    reuseNode true
+                    args '--entrypoint=\'\''
+                }
+            }
+            steps {
+                script {
+                    withCredentials([file(credentialsId: 'hmda-ops-kubeconfig', variable: 'KUBECONFIG')]) {
+                        if (env.BRANCH_NAME == 'master') {
+                            container('helm') {
+                                sh "kubectl create --namespace=default -f kubernetes/keycloak/keycloak-ambassador.yaml | exit 0"
+                            }
+                        }
+                    }
                 }
             }
         }
 
         stage('Deploy') {
-            helm.deploy('modified-lar')
+            agent {
+                docker {
+                    image 'hmda/helm'
+                    reuseNode true
+                    args '--entrypoint=\'\''
+                }
+            }
+            steps {
+                script {
+                    withCredentials([file(credentialsId: 'hmda-ops-kubeconfig', variable: 'KUBECONFIG')]) {
+                        if (env.DOCKER_PUSH == 'true') {
+                            helm.deploy('modified-lar')
+                        }
+                    }
+                }
+            }
         }
     }
+
 }

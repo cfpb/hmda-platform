@@ -32,7 +32,7 @@ projects.each { project ->
                 id('hmda')
                 repoOwner('cfpb')
                 repository(project.repo)
-                scanCredentialsId('github')
+                scanCredentialsId('009c8c9d-3cf5-4b2a-89f3-286977cabddf')
                 buildForkPRHead(true)
                 buildForkPRMerge(false) 
             }
@@ -47,7 +47,7 @@ projects.each { project ->
                 }
             }
             triggers {
-                periodic(20)
+                periodic(30)
             }
         }
     }
