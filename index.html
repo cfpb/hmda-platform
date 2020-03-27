@@ -337,7 +337,7 @@
                     <a href="#hmda-public-api-check-digit" class="toc-h2 toc-link" data-title="Check Digit">Check Digit</a>
                       <ul class="toc-list-h3">
                           <li>
-                            <a href="#hmda-public-api-check-digit-check-digit-example" class="toc-h3 toc-link" data-title="Check Digit Example">Check Digit Example</a>
+                            <a href="#hmda-public-api-check-digit-check-digit-eample" class="toc-h3 toc-link" data-title="Check Digit Eample">Check Digit Eample</a>
                           </li>
                       </ul>
                   </li>
@@ -721,6 +721,8 @@
     </span><span class="s2">"submissions"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></code></pre>
+<p>For evey filing period, you must begin by starting a filing. This only needs to be done once per filing season. The <code>POST</code> will result in a <code>200</code> only for the first time it&#39;s called. If the filing for the given filing period already exists, the <code>POST</code> will return a <code>400</code>.</p>
+
 <table><thead>
 <tr>
 <th></th>
@@ -785,6 +787,8 @@
   <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions"</span> <span class="se">\</span>
   -H <span class="s1">'Authorization: Bearer {{access_token}}'</span> <span class="se">\</span>
 </code></pre>
+<p>More than one submissions can be created for a filing period. The most recent submission will be considered the latest submission. Each <code>POST</code> on the submission endpoint will return a new submission number.</p>
+
 <blockquote>
 <p>JSON Response</p>
 </blockquote>
@@ -1809,7 +1813,7 @@
 </tbody></table>
 <h2 id='hmda-public-api-check-digit'>Check Digit</h2>
 <p>To use check digit on a csv file, use the <code>uli/validate/csv</code> and upload a csv. The respose will list the ULIs along with <code>true</code>/<code>false</code>.</p>
-<h3 id='hmda-public-api-check-digit-check-digit-example'>Check Digit Example</h3>
+<h3 id='hmda-public-api-check-digit-check-digit-eample'>Check Digit Eample</h3>
 <blockquote>
 <p>Example</p>
 </blockquote>
