@@ -470,7 +470,7 @@ object HmdaValidationError
           .toMat(Sink.fold(AggregationResult(totalCount = 0, distinctCount = 0, duplicateLineNumbers = Vector.empty, checkType, "uli-bhaarat")) {
             // duplicate
             case (acc, (persisted, rowNumber)) if !persisted =>
-              acc.copy(acc.totalCount + 1, acc.distinctCount, acc.duplicateLineNumbers :+ rowNumber, uli = "uli-bhaarat-1")
+              acc.copy(acc.totalCount + 1, acc.distinctCount, acc.duplicateLineNumbers :+ rowNumber, uli = "uli-bhaarat-1") //the ULI field here is shown as the "id" in /submissions/1/edits/Q600
             // no duplicate
             case (acc, _) => acc.copy(totalCount = acc.totalCount + 1, distinctCount = acc.distinctCount + 1, uli = "uli-bhaarat-2")
           })(Keep.right)
