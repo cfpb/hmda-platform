@@ -721,6 +721,8 @@
     </span><span class="s2">"submissions"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></code></pre>
+<p>For evey filing period, you must begin by starting a filing. This only needs to be done once per filing season. The <code>POST</code> will result in a <code>200</code> only for the first time it&#39;s called. If the filing for the given filing period already exists, the <code>POST</code> will return a <code>400</code>.</p>
+
 <table><thead>
 <tr>
 <th></th>
@@ -785,6 +787,8 @@
   <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions"</span> <span class="se">\</span>
   -H <span class="s1">'Authorization: Bearer {{access_token}}'</span> <span class="se">\</span>
 </code></pre>
+<p>More than one submissions can be created for a filing period. The most recent submission will be considered the latest submission. Each <code>POST</code> on the submission endpoint will return a new submission number.</p>
+
 <blockquote>
 <p>JSON Response</p>
 </blockquote>
