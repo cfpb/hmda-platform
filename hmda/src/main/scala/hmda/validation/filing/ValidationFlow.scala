@@ -142,7 +142,7 @@ object ValidationFlow extends ColumnDataFormatter {
   def addLarFieldInformation(lar: LoanApplicationRegister, errors: List[ValidationError], period: Period): List[ValidationError] =
     errors.map(error => {
       val affectedFields = EditDescriptionLookup.lookupFields(error.editName, period)
-      val fieldMap = ListMap(affectedFields.map(field => (field, toBigDecimalString(lar.valueOf(field)))): _*)
+      val fieldMap = ListMap(affectedFields.map((field: String) => (field, if(field == "Loan Amount") toBigDecimalString(lar.valueOf(field)) else lar.valueOf(field))): _*)
       error.copyWithFields(fieldMap)
     })
 
