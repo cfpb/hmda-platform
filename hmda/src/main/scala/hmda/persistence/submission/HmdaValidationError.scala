@@ -452,27 +452,27 @@ object HmdaValidationError
                   checkType match {
                     case RawLine =>
                       val hashed = hashString(rawLine)
-                      List((checkAndUpdate(state, hashed), rowNumber))
+                      List((checkAndUpdate(state, hashed), rowNumber, lar.loan.ULI))
 
                     case ULI =>
                       val hashed = hashString(lar.loan.ULI.toUpperCase)
-                      List((checkAndUpdate(state, hashed), rowNumber))
+                      List((checkAndUpdate(state, hashed), rowNumber, lar.loan.ULI))
 
                     case ULIActionTaken => // For S306
                       // Only look at ULIs where the actionTakenType.code == 1
                       if (lar.action.actionTakenType == LoanOriginated) {
                         val hashed = hashString(lar.action.actionTakenType.code.toString + lar.loan.ULI.toUpperCase())
-                        List((checkAndUpdate(state, hashed), rowNumber))
+                        List((checkAndUpdate(state, hashed), rowNumber, lar.loan.ULI))
                       } else Nil
                   }
               }
           }
-          .toMat(Sink.fold(AggregationResult(totalCount = 0, distinctCount = 0, duplicateLineNumbers = Vector.empty, checkType, "uli-bhaarat")) {
+          .toMat(Sink.fold(AggregationResult(totalCount = 0, distinctCount = 0, duplicateLineNumbers = Vector.empty, checkType, "empty-uli")) {
             // duplicate
-            case (acc, (persisted, rowNumber)) if !persisted =>
-              acc.copy(acc.totalCount + 1, acc.distinctCount, acc.duplicateLineNumbers :+ rowNumber, uli = "uli-bhaarat-1") //the ULI field here is shown as the "id" in /submissions/1/edits/Q600
+            case (acc, (persisted, rowNumber, uliOnWhichErrorTriggered)) if !persisted =>
+              acc.copy(acc.totalCount + 1, acc.distinctCount, acc.duplicateLineNumbers :+ rowNumber, uli = uliOnWhichErrorTriggered) //the ULI field here is shown as the "id" in /submissions/1/edits/Q600
             // no duplicate
-            case (acc, _) => acc.copy(totalCount = acc.totalCount + 1, distinctCount = acc.distinctCount + 1, uli = "uli-bhaarat-2")
+            case (acc, _) => acc.copy(totalCount = acc.totalCount + 1, distinctCount = acc.distinctCount + 1)
           })(Keep.right)
           .named(s"checkForDistinctElements[$checkType]-" + submissionId)
           .run()
