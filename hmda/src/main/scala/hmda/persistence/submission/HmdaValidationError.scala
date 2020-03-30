@@ -499,7 +499,7 @@ object HmdaValidationError
         validationError match {
           case s306 @ SyntacticalValidationError(_, `s306`, _, fields) => //This is newly added for S306
             s306.copyWithFields(
-              fields + ("The following row numbers occur multiple times and have the same ULI and action type" -> tsLar.duplicateLineNumbersUliActionType
+              fields + ("The following row numbers occur multiple times and have the same ULI with action type 1 (Loan Originated)" -> tsLar.duplicateLineNumbersUliActionType
                 .mkString(start = "Rows: ", sep = ",", end = ""))
             )
           case s305 @ SyntacticalValidationError(_, `s305`, _, fields) =>
@@ -516,7 +516,7 @@ object HmdaValidationError
             )
           case q600 @ QualityValidationError(uli, `q600`, fields) =>
             q600.copyWithFields(
-              fields + (s" The following row numbers have the same ULI" -> tsLar.duplicateLineNumbers
+              fields + (s"The following row numbers have the same ULI" -> tsLar.duplicateLineNumbers
                 .mkString(start = "Rows: ", sep = ",", end = ""))
             )
 
