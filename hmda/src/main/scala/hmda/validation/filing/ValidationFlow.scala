@@ -88,11 +88,11 @@ object ValidationFlow {
 
     val errors = checkType match {
       case "all" =>
-        validationEngine.checkAll(tsLar, tsLar.ts.LEI, validationContext, TsValidationError)
+        validationEngine.checkAll(tsLar, tsLar.uli, validationContext, TsValidationError)
       case "syntactical-validity" =>
-        validationEngine.checkSyntactical(tsLar, tsLar.ts.LEI, validationContext, TsValidationError)
+        validationEngine.checkSyntactical(tsLar, tsLar.uli, validationContext, TsValidationError)
       case "quality" =>
-        validationEngine.checkQuality(tsLar, tsLar.ts.LEI)
+        validationEngine.checkQuality(tsLar, tsLar.uli)
     }
     errors
       .leftMap(xs => {

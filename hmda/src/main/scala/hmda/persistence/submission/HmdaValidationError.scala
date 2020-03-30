@@ -413,7 +413,7 @@ object HmdaValidationError
         .named("headerResult[Syntactical]-" + submissionId)
         .run()
 
-    case class AggregationResult(totalCount: Int, distinctCount: Int, duplicateLineNumbers: Vector[Int], checkType: DistinctCheckType)
+    case class AggregationResult(totalCount: Int, distinctCount: Int, duplicateLineNumbers: Vector[Int], checkType: DistinctCheckType, uli: String)
     sealed trait DistinctCheckType
     case object RawLine extends DistinctCheckType
     case object ULI     extends DistinctCheckType
@@ -467,12 +467,12 @@ object HmdaValidationError
                   }
               }
           }
-          .toMat(Sink.fold(AggregationResult(totalCount = 0, distinctCount = 0, duplicateLineNumbers = Vector.empty, checkType)) {
+          .toMat(Sink.fold(AggregationResult(totalCount = 0, distinctCount = 0, duplicateLineNumbers = Vector.empty, checkType, "uli-bhaarat")) {
             // duplicate
             case (acc, (persisted, rowNumber)) if !persisted =>
-              acc.copy(acc.totalCount + 1, acc.distinctCount, acc.duplicateLineNumbers :+ rowNumber)
+              acc.copy(acc.totalCount + 1, acc.distinctCount, acc.duplicateLineNumbers :+ rowNumber, uli = "uli-bhaarat-1")
             // no duplicate
-            case (acc, _) => acc.copy(totalCount = acc.totalCount + 1, distinctCount = acc.distinctCount + 1)
+            case (acc, _) => acc.copy(totalCount = acc.totalCount + 1, distinctCount = acc.distinctCount + 1, uli = "uli-bhaarat-2")
           })(Keep.right)
           .named(s"checkForDistinctElements[$checkType]-" + submissionId)
           .run()
@@ -516,7 +516,7 @@ object HmdaValidationError
             )
           case q600 @ QualityValidationError(uli, `q600`, fields) =>
             q600.copyWithFields(
-              fields + (s"$uli The following row numbers have the same ULI" -> tsLar.duplicateLineNumbers
+              fields + (s" The following row numbers have the same ULI" -> tsLar.duplicateLineNumbers
                 .mkString(start = "Rows: ", sep = ",", end = ""))
             )
 
@@ -570,6 +570,7 @@ object HmdaValidationError
           res <- validateAndPersistErrors(
             TransmittalLar(
               ts = header,
+              uli = uliResult.uli,
               larsCount = -1,
               larsDistinctCount = -1,
               distinctUliCount = uliResult.distinctCount,
