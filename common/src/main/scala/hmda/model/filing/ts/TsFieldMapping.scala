@@ -17,6 +17,6 @@ object TsFieldMapping {
     "Total Number of Entries Contained in Submission" -> ts.totalLines.toString,
     "Federal Taxpayer Identification Number"          -> ts.taxId,
     "Legal Entity Identifier (LEI)"                   -> ts.LEI,
-    "All data fields in the LAR"                      -> "Your LAR contains one or more duplicate records.",
+    "All data fields in the LAR"                      -> "Your LAR contains one or more duplicate records."
   )
 }
