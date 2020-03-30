@@ -5,7 +5,6 @@ S302|The reported Calendar Year does not match the filing year indicated at the 
 S303|The reported Federal Agency; Federal Taxpayer Identification Number; and Legal Entity Identifier must match the Federal Agency; Federal Taxpayer Identification Number; and Legal Entity Identifier for the financial institution for which you are filing. Please confirm the information below and update your file accordingly. 1)The correct financial institution was at the start of the filing; and 2)The correct file was uploaded; and 3)The Federal Agency, Federal Taxpayer Identification Number, and  Legal Entity Identifier are reported correctly in the file.|Federal Agency; Federal Taxpayer Identification Number; Legal Entity Identifier (LEI)
 S304|The reported Total Number of Entries Contained in Submission does not match the total number of LARs in the HMDA file.|Total Number of Entries Contained in Submission
 S305|A duplicate transaction has been reported. Please review and update your file accordingly.|All data fields in the LAR
-S306|If Action Taken equals 1, a duplicate ULI cannot be reported.
 V600|The required format for LEI is alphanumeric with 20 characters, and it cannot be left blank.|Legal Entity Identifier (LEI)
 V601|Financial Institution Name, Contact Person's Name, Contact Person's E-mail Address, Contact Person's Office Street Address, and Contact Person's Office City are required and must not be left blank. |Financial Institution Name; Contact Person's Name; Contact Person's E-mail Address; Contact Person's Office Street Address; Contact Person's Office City
 V602|Calendar Quarter must equal 4, and cannot be left blank.|Calendar Quarter
@@ -229,7 +228,6 @@ V714|If the Application Channel exemption election is taken, Submission of Appli
 V715|If the Non-Amortizing Features exemption election is taken, Balloon Payment, Interest-Only Payments, Negative Amortization and Other Non-amortizing Features must be reported 1111.|Balloon Payment; Interest-Only Payments; Negative Amortization; Other Non-amortizing Features
 V717|An invalid Contact Person’s Email Address was provided. Please review the information below and update your file accordingly.|Contact Person's E-mail Address
 V718|An invalid Calendar Quarter was reported. Please review the information below and update your file accordingly.|Calendar Quarter
-Q600|A duplicate ULI or NULI was reported.
 Q601|Application Date occurs more than two years prior to Action Taken Date.|Application Date; Action Taken Date
 Q602|Street Address was reported NA, however City, State and Zip Code were provided.|Street Address; City; State; Zip Code
 Q603|The County has a population of greater than 30,000 according to the most recent decennial census and was not reported NA; however Census Tract was reported NA.|County; Census Tract
