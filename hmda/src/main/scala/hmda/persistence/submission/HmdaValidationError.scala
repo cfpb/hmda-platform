@@ -552,6 +552,7 @@ object HmdaValidationError
             TransmittalLar(
               ts = header,
               larsCount = rawLineResult.totalCount,
+              uli = s306Result.uli,
               larsDistinctCount = rawLineResult.distinctCount,
               distinctUliCount = -1,
               duplicateLineNumbers = rawLineResult.duplicateLineNumbers.toList,
