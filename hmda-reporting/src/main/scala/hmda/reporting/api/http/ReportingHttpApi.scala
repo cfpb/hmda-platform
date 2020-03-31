@@ -71,7 +71,7 @@ trait ReportingHttpApi extends InstitutionComponent {
                     )
                     .toSet
               )
-//          case _ => Future(Set(HmdaFiler("","","")))
+          case _ => Future(Set(HmdaFiler("","","")))
         }
 
         onComplete(futFilerSet) {
