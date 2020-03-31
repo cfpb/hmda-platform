@@ -99,18 +99,18 @@ trait InstitutionQueryHttpApi extends HmdaTimeDirectives with InstitutionEmailCo
       }
     }
 
-  val institutionLoaderCSVByYear =
-
-    path("institutions" / "csv" / IntNumber) { year =>
-      timedGet {
-        uri =>
-          val f = findByYear(year.toString)
-        val r = completeInstitutionsFutureCSV(f, uri)
-          onComplete(r) {
-            case scala.util.Success(res) => res
-            case scala.util.Failure(ex) => complete(StatusCodes.BadRequest, ex)}
-      }
-    }
+//  val institutionLoaderCSVByYear =
+//
+//    path("institutions" / "csv" / IntNumber) { year =>
+//      timedGet {
+//        uri =>
+//          val f = findByYear(year.toString)
+//        val r = completeInstitutionsFutureCSV(f, uri)
+//          onComplete(r) {
+//            case scala.util.Success(res) => res
+//            case scala.util.Failure(ex) => complete(StatusCodes.BadRequest, ex)}
+//      }
+//    }
   val institutionByDomainDefaultPath =
     path("institutions") {
       timedGet { uri =>
@@ -145,42 +145,42 @@ trait InstitutionQueryHttpApi extends HmdaTimeDirectives with InstitutionEmailCo
         }
     }
 
-  private def completeInstitutionsFutureCSV(f: Future[Seq[Future[String]]], uri: Uri):Future[Route]={
-  for{
-    possibleInstitutions <- f
-  } yield {
-   val i = Future.sequence(possibleInstitutions)
-
-    onComplete(i) {
-      case Success(institutions) =>
-
-        if (institutions.isEmpty || institutions == None) {
-          returnNotFoundError(uri)
-        } else {
-          val institutionSource = Source.fromIterator(() =>institutions.map(institution => institution + "\n").toIterator)
-          val headerSource = Source.fromIterator(() => Institution.headers.toIterator)
-
-          val institutionCSV = institutionSource.map(s => ByteString(s))
-          val institutionHeaderCSV =
-            headerSource
-              .map(s => ByteString(s))
-              .concat(institutionCSV)
-
-          complete(
-            HttpEntity.Chunked
-              .fromData(`text/csv`.toContentType(HttpCharsets.`UTF-8`),
-                institutionHeaderCSV))
-        }
-      case Failure(error) =>
-        if (error.getLocalizedMessage.contains("filter predicate is not satisfied")) {
-          returnNotFoundError(uri)
-        } else {
-          val errorResponse = ErrorResponse(500, error.getLocalizedMessage, uri.path)
-          complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
-        }
-    }
-  }
-}
+//  private def completeInstitutionsFutureCSV(f: Future[Seq[Future[String]]], uri: Uri):Future[Route]={
+//  for{
+//    possibleInstitutions <- f
+//  } yield {
+//   val i = Future.sequence(possibleInstitutions)
+//
+//    onComplete(i) {
+//      case Success(institutions) =>
+//
+//        if (institutions.isEmpty || institutions == None) {
+//          returnNotFoundError(uri)
+//        } else {
+//          val institutionSource = Source.fromIterator(() =>institutions.map(institution => institution + "\n").toIterator)
+//          val headerSource = Source.fromIterator(() => Institution.headers.toIterator)
+//
+//          val institutionCSV = institutionSource.map(s => ByteString(s))
+//          val institutionHeaderCSV =
+//            headerSource
+//              .map(s => ByteString(s))
+//              .concat(institutionCSV)
+//
+//          complete(
+//            HttpEntity.Chunked
+//              .fromData(`text/csv`.toContentType(HttpCharsets.`UTF-8`),
+//                institutionHeaderCSV))
+//        }
+//      case Failure(error) =>
+//        if (error.getLocalizedMessage.contains("filter predicate is not satisfied")) {
+//          returnNotFoundError(uri)
+//        } else {
+//          val errorResponse = ErrorResponse(500, error.getLocalizedMessage, uri.path)
+//          complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
+//        }
+//    }
+//  }
+//}
   private def returnNotFoundError(uri: Uri) = {
     val errorResponse = ErrorResponse(404, StatusCodes.NotFound.defaultMessage, uri.path)
     complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
@@ -190,7 +190,7 @@ trait InstitutionQueryHttpApi extends HmdaTimeDirectives with InstitutionEmailCo
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          institutionByIdPath ~ institutionByDomainPath ~ institutionByDomainDefaultPath ~ institutionLoaderCSVByYear
+          institutionByIdPath ~ institutionByDomainPath ~ institutionByDomainDefaultPath /* ~ institutionLoaderCSVByYear*/
         }
       }
     }
