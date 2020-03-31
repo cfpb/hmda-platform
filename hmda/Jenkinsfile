@@ -7,10 +7,10 @@ pipeline {
     stage('init') {
       steps {
         script {
-          library identifier: "hmdaUtils@jenkinsSharedLibraries", retriever: modernSCM (
+          library identifier: "hmdaUtils@master", retriever: modernSCM (
               [
                   $class: 'GitSCMSource',
-                  remote: 'https://github.cfpb.gov/hmda-devops/hmda-devops.git'
+                  remote: 'https://github.cfpb.gov/HMDA-Operations/hmda-devops.git'
               ]
           )
 
