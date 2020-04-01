@@ -28,7 +28,7 @@ pipeline {
         }
       }
       steps {
-        sh "sbt -Dsbt.global.base=.sbt -Dsbt.boot.directory=.sbt -Dsbt.ivy.home=.ivy2 -batch hmda-data-publisher/docker:stage"
+        sh "sbt -Dsbt.global.base=.sbt -Dsbt.boot.directory=.sbt -Dsbt.ivy.home=.ivy2 -batch clean hmda-data-publisher/docker:stage"
       }
     }
 
