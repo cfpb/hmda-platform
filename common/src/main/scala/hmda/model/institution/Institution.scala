@@ -6,7 +6,7 @@ import io.circe.syntax._
 
 object Institution {
 
-  implicit val headers =  List("activityYear,lei,agency, institutionType, institutionId2017,taxId, rssd,emailDomains,respondent,parent,assets,otherLenderCode,topHolder,hmdaFiler,quarterlyFiler,quarterlyFilerHasFiledQ1,quarterlyFilerHasFiledQ2,quarterlyFilerHasFiledQ3\n")
+  implicit val headers =  List("activityYear|lei|agency|institutionType|institutionId2017|taxId|rssd|emailDomains|respondent|parent|assets|otherLenderCode|topHolder|hmdaFiler|quarterlyFiler|quarterlyFilerHasFiledQ1|quarterlyFilerHasFiledQ2|quarterlyFilerHasFiledQ3\n")
 
   def empty: Institution = Institution(
     activityYear = 2018,

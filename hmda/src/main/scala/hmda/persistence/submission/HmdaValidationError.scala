@@ -413,7 +413,7 @@ object HmdaValidationError
         .named("headerResult[Syntactical]-" + submissionId)
         .run()
 
-    case class AggregationResult(totalCount: Int, distinctCount: Int, duplicateLineNumbers: Vector[Int], checkType: DistinctCheckType)
+    case class AggregationResult(totalCount: Int, distinctCount: Int, duplicateLineNumbers: Vector[Int], checkType: DistinctCheckType, uli: String)
     sealed trait DistinctCheckType
     case object RawLine extends DistinctCheckType
     case object ULI     extends DistinctCheckType
@@ -452,25 +452,25 @@ object HmdaValidationError
                   checkType match {
                     case RawLine =>
                       val hashed = hashString(rawLine)
-                      List((checkAndUpdate(state, hashed), rowNumber))
+                      List((checkAndUpdate(state, hashed), rowNumber, lar.loan.ULI))
 
                     case ULI =>
                       val hashed = hashString(lar.loan.ULI.toUpperCase)
-                      List((checkAndUpdate(state, hashed), rowNumber))
+                      List((checkAndUpdate(state, hashed), rowNumber, lar.loan.ULI))
 
                     case ULIActionTaken => // For S306
                       // Only look at ULIs where the actionTakenType.code == 1
                       if (lar.action.actionTakenType == LoanOriginated) {
                         val hashed = hashString(lar.action.actionTakenType.code.toString + lar.loan.ULI.toUpperCase())
-                        List((checkAndUpdate(state, hashed), rowNumber))
+                        List((checkAndUpdate(state, hashed), rowNumber, lar.loan.ULI))
                       } else Nil
                   }
               }
           }
-          .toMat(Sink.fold(AggregationResult(totalCount = 0, distinctCount = 0, duplicateLineNumbers = Vector.empty, checkType)) {
+          .toMat(Sink.fold(AggregationResult(totalCount = 0, distinctCount = 0, duplicateLineNumbers = Vector.empty, checkType, "empty-uli")) {
             // duplicate
-            case (acc, (persisted, rowNumber)) if !persisted =>
-              acc.copy(acc.totalCount + 1, acc.distinctCount, acc.duplicateLineNumbers :+ rowNumber)
+            case (acc, (persisted, rowNumber, uliOnWhichErrorTriggered)) if !persisted =>
+              acc.copy(acc.totalCount + 1, acc.distinctCount, acc.duplicateLineNumbers :+ rowNumber, uli = uliOnWhichErrorTriggered) //the ULI field here is shown as the "id" in /submissions/1/edits/Q600
             // no duplicate
             case (acc, _) => acc.copy(totalCount = acc.totalCount + 1, distinctCount = acc.distinctCount + 1)
           })(Keep.right)
@@ -499,7 +499,7 @@ object HmdaValidationError
         validationError match {
           case s306 @ SyntacticalValidationError(_, `s306`, _, fields) => //This is newly added for S306
             s306.copyWithFields(
-              fields + ("The following row numbers occur multiple times and have the same ULI and action type" -> tsLar.duplicateLineNumbersUliActionType
+              fields + ("The following row numbers occur multiple times and have the same ULI with action type 1 (Loan Originated)" -> tsLar.duplicateLineNumbersUliActionType
                 .mkString(start = "Rows: ", sep = ",", end = ""))
             )
           case s305 @ SyntacticalValidationError(_, `s305`, _, fields) =>
@@ -516,7 +516,7 @@ object HmdaValidationError
             )
           case q600 @ QualityValidationError(uli, `q600`, fields) =>
             q600.copyWithFields(
-              fields + ("The following row numbers have the same ULI" -> tsLar.duplicateLineNumbers
+              fields + (s"The following row numbers have the same ULI" -> tsLar.duplicateLineNumbers
                 .mkString(start = "Rows: ", sep = ",", end = ""))
             )
 
@@ -552,6 +552,7 @@ object HmdaValidationError
             TransmittalLar(
               ts = header,
               larsCount = rawLineResult.totalCount,
+              uli = s306Result.uli,
               larsDistinctCount = rawLineResult.distinctCount,
               distinctUliCount = -1,
               duplicateLineNumbers = rawLineResult.duplicateLineNumbers.toList,
@@ -570,6 +571,7 @@ object HmdaValidationError
           res <- validateAndPersistErrors(
             TransmittalLar(
               ts = header,
+              uli = uliResult.uli,
               larsCount = -1,
               larsDistinctCount = -1,
               distinctUliCount = uliResult.distinctCount,

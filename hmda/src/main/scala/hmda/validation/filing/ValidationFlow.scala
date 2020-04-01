@@ -18,11 +18,13 @@ import hmda.validation.context.ValidationContext
 import hmda.util.streams.FlowUtils._
 import hmda.utils.YearUtils.Period
 import hmda.validation.engine._
+import hmda.util.conversion.ColumnDataFormatter
+
 
 import scala.collection.immutable._
 import scala.concurrent.Future
 
-object ValidationFlow {
+object ValidationFlow extends ColumnDataFormatter{
 
   implicit val larSemigroup = new Semigroup[LoanApplicationRegister] {
     override def combine(x: LoanApplicationRegister, y: LoanApplicationRegister): LoanApplicationRegister =
@@ -88,11 +90,11 @@ object ValidationFlow {
 
     val errors = checkType match {
       case "all" =>
-        validationEngine.checkAll(tsLar, tsLar.ts.LEI, validationContext, TsValidationError)
+        validationEngine.checkAll(tsLar, tsLar.uli, validationContext, TsValidationError)
       case "syntactical-validity" =>
-        validationEngine.checkSyntactical(tsLar, tsLar.ts.LEI, validationContext, TsValidationError)
+        validationEngine.checkSyntactical(tsLar, tsLar.uli, validationContext, TsValidationError)
       case "quality" =>
-        validationEngine.checkQuality(tsLar, tsLar.ts.LEI)
+        validationEngine.checkQuality(tsLar, tsLar.uli)
     }
     errors
       .leftMap(xs => {
@@ -141,7 +143,7 @@ object ValidationFlow {
   def addLarFieldInformation(lar: LoanApplicationRegister, errors: List[ValidationError], period: Period): List[ValidationError] =
     errors.map(error => {
       val affectedFields = EditDescriptionLookup.lookupFields(error.editName, period)
-      val fieldMap = ListMap(affectedFields.map(field => (field, lar.valueOf(field))): _*)
+      val fieldMap = ListMap(affectedFields.map(field => (field, if(field == "Loan Amount") toBigDecimalString(lar.valueOf(field)) else lar.valueOf(field))): _*)
       error.copyWithFields(fieldMap)
     })
 

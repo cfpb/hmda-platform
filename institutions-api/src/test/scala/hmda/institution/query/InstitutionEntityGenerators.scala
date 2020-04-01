@@ -47,7 +47,7 @@ object InstitutionEntityGenerators {
     }
   }
 
-  implicit def agencyGen: Gen[Int] = Gen.oneOf(List(1, 2, 3, 5, 7, 9, -1))
+  implicit def agencyGen: Gen[Int] = Gen.oneOf(List(1, 2, 3, 5, 7, 9))
 
   implicit def institutionTypeGen: Gen[Int] =
     Gen.oneOf(

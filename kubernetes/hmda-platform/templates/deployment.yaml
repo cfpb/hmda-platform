@@ -37,6 +37,9 @@ spec:
             mountPath: /etc/localtime
         resources:
 {{ toYaml .Values.resources | indent 12 }}
+        security:
+          - readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false          
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: CURRENT_YEAR

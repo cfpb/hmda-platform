@@ -28,7 +28,7 @@ class Q648Spec extends LarEditCheckSpec {
         invalidLar.mustFail
       }
       val purchasedLoan =
-        lar.copy(action = lar.action.copy(actionTakenType = PurchasedLoan))
+        lar.copy(action = lar.action.copy(actionTakenType = PurchasedLoan),loan = lar.loan.copy(ULI = validUli),larIdentifier = lar.larIdentifier.copy(LEI = lei))
       purchasedLoan.mustPass
 
     }
