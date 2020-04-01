@@ -13,8 +13,8 @@ class Q648Spec extends LarEditCheckSpec {
     "If loan is not purchased first characters of ULI should match LEI") {
     val lei = "abcdefghijklmnopqrstuvwxyz"
     val validUli = "abcdefghijklmnopqrst"
-    val shortUli = "abcdefghijklmnopqrs"
-    val invalidUli = "abcdefghijklmnopqrsz"
+    val shortUli = "abcdefghijklmnopq"
+    val invalidUli = "abcdefghijklmnopqrszasas"
     
     forAll(larGen) { lar =>
       whenever(
@@ -24,7 +24,7 @@ class Q648Spec extends LarEditCheckSpec {
         val shortLar = relevantLar.copy(loan = relevantLar.loan.copy(ULI = shortUli))
         val invalidLar = relevantLar.copy(loan = relevantLar.loan.copy(ULI = invalidUli))
         validLar.mustPass
-        shortLar.mustFail
+        shortLar.mustPass
         invalidLar.mustFail
       }
       val purchasedLoan =
