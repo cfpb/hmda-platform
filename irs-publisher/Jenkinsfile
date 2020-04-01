@@ -41,7 +41,7 @@ pipeline {
               usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
               withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
                 dockerBuild.sbtBuild('irs-publisher')
-                security.dockerImageScan('irs-publisher', env.DOCKER_TAG)
+                scanImage('irs-publisher', env.DOCKER_TAG)
               }
             }
           }

@@ -41,7 +41,7 @@ pipeline {
               usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
               withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
                 dockerBuild.sbtBuild('hmda-reporting')
-                security.dockerImageScan('hmda-reporting', env.DOCKER_TAG)
+                scanImage('hmda-reporting', env.DOCKER_TAG)
               }
             }
           }
