@@ -6,13 +6,9 @@ projects = [
     [name: "hmda-analytics", repo: "hmda-platform", jenkinsfilePath: "hmda-analytics/Jenkinsfile"],
     [name: "hmda-data-browser-api", repo: "hmda-platform", jenkinsfilePath: "data-browser/Jenkinsfile"],
     [name: "hmda-documentation", repo: "hmda-documentation", jenkinsfilePath: "Jenkinsfile"],
-    [name: "hmda-data-browser-ui", repo: "hmda-data-browser", jenkinsfilePath: "Jenkinsfile"],
+    [name: "hmda-frontend", repo: "hmda-frontend", jenkinsfilePath: "Jenkinsfile"],
     [name: "hmda-help", repo: "hmda-help", jenkinsfilePath: "Jenkinsfile"],
-    [name: "hmda-homepage", repo: "hmda-homepage", jenkinsfilePath: "Jenkinsfile"],
     [name: "hmda-platform", repo: "hmda-platform", jenkinsfilePath: "hmda/Jenkinsfile"],
-    [name: "hmda-platform-ui", repo: "hmda-platform-ui", jenkinsfilePath: "Jenkinsfile"],
-    [name: "hmda-platform-tools", repo: "hmda-platform-tools", jenkinsfilePath: "Jenkinsfile"],
-    [name: "hmda-pub-ui", repo: "hmda-pub-ui", jenkinsfilePath: "Jenkinsfile"],
     [name: "hmda-data-publisher", repo: "hmda-platform", jenkinsfilePath: "hmda-data-publisher/Jenkinsfile"],
     [name: "hmda-reporting", repo: "hmda-platform", jenkinsfilePath: "hmda-reporting/Jenkinsfile"],
     [name: "hmda-spark-reporting", repo: "hmda-platform", jenkinsfilePath: "hmda-spark-reporting/Jenkinsfile"],
@@ -32,7 +28,7 @@ projects.each { project ->
                 id('hmda')
                 repoOwner('cfpb')
                 repository(project.repo)
-                scanCredentialsId('github')
+                scanCredentialsId('009c8c9d-3cf5-4b2a-89f3-286977cabddf')
                 buildForkPRHead(true)
                 buildForkPRMerge(false) 
             }
@@ -47,7 +43,7 @@ projects.each { project ->
                 }
             }
             triggers {
-                periodic(20)
+                periodic(30)
             }
         }
     }

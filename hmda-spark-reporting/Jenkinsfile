@@ -1,30 +1,67 @@
-podTemplate(label: 'buildSbtPod', containers: [
-  containerTemplate(name: 'sbt', image: 'jenkinsxio/builder-scala', ttyEnabled: true, command: 'cat'),
-  containerTemplate(name: 'docker', image: 'docker', ttyEnabled: true, command: 'cat'),
-  containerTemplate(name: 'helm', image: 'alpine/helm', ttyEnabled: true, command: 'cat')
-],
-volumes: [
-  hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
-]) {
-   node('buildSbtPod') {
-    init.setEnvironment('hmda_spark_reporting')
-    init.checkForChanges('hmda-spark-reporting')
-    
+pipeline {
+  agent {
+    label 'hmdaops'
+  }
+
+  stages {
+    stage('init') {
+      steps {
+        script {
+          library identifier: "hmdaUtils@master", retriever: modernSCM (
+              [
+                  $class: 'GitSCMSource',
+                  remote: 'https://github.cfpb.gov/HMDA-Operations/hmda-devops.git'
+              ]
+          )
+
+          init.setEnvironment('hmda_spark_reporting')
+          init.checkForChanges('hmda-spark-reporting')
+        }
+      }
+    }
+
     stage('Build Scala Code and Generate Dockerfile') {
-      container('sbt') {
-        sh "sbt -batch hmda-spark-reporting/docker"
+      agent {
+        docker {
+          image 'hmda/sbt'
+          reuseNode true
+        }
+      }
+      steps {
+        sh "sbt -Dsbt.global.base=.sbt -Dsbt.boot.directory=.sbt -Dsbt.ivy.home=.ivy2 -batch hmda-spark-reporting/docker:stage"
       }
     }
 
     stage('Build And Publish Docker Image') {
-      container('docker') {
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub',
-          usernameVariable: 'DOCKER_HUB_USER', passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
-          withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'hmda-platform-jenkins-service',
-            usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
-            withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
-              dockerBuild.sbtBuild('hmda-spark-reporting')
-              security.dockerImageScan('hmda-spark-reporting', env.DOCKER_TAG)
+      steps {
+        script {
+          withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub',
+            usernameVariable: 'DOCKER_HUB_USER', passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
+            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'hmda-platform-jenkins-service',
+              usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
+              withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
+                dockerBuild.sbtBuild('hmda-spark-reporting')
+                security.dockerImageScan('hmda-spark-reporting', env.DOCKER_TAG)
+              }
+            }
+          }
+        }
+      }
+    }
+
+    stage('Deploy') {
+      agent {
+        docker {
+          image 'hmda/helm'
+          reuseNode true
+          args '--entrypoint=\'\''
+        }
+      }
+      steps {
+        script {
+          withCredentials([file(credentialsId: 'hmda-ops-kubeconfig', variable: 'KUBECONFIG')]) {
+            if (env.DOCKER_PUSH == 'true') {
+              helm.deploy('hmda-spark-reporting')
             }
           }
         }
@@ -32,9 +69,12 @@ volumes: [
     }
 
     stage('Docker Clean Up') {
-      container('docker') {
-        dockerBuild.clean()
+      steps {
+        script {
+          dockerBuild.clean()
+        }
       }
-    } 
+    }
   }
+
 }
