@@ -31,16 +31,6 @@ class FilingEventsProtobufConverterSpec
     }
   }
 
-  property("FilingStatusUpdated must convert to and from protobuf") {
-    forAll(filingGen) { filing =>
-      val updated = FilingStatusUpdated(filing)
-      val protobuf = filingStatusUpdatedToProtobuf(updated).toByteArray
-      filingStatusUpdatedFromProtobuf(
-        FilingStatusUpdatedMessage
-          .parseFrom(protobuf)) mustBe updated
-    }
-  }
-
   property("SubmissionAdded must convert to and from protobuf") {
     forAll(submissionGen) { submission =>
       val added = SubmissionAdded(submission)
