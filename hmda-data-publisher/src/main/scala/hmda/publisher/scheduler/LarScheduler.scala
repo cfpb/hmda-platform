@@ -36,6 +36,7 @@ class LarScheduler
   implicit val ec = context.system.dispatcher
   implicit val materializer = ActorMaterializer()
   private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
+  private val fullDateQuarterly = DateTimeFormatter.ofPattern("yyyy-MM-dd_")
 
   def larRepository2018 = new LarRepository2018(dbConfig)
   def larRepository2019 = new LarRepository2019(dbConfig)
@@ -175,7 +176,7 @@ class LarScheduler
     case LarSchedulerQuarterly2020 =>
       val includeQuarterly = true
       val now = LocalDateTime.now().minusDays(1)
-      val formattedDate = fullDate.format(now)
+      val formattedDate = fullDateQuarterly.format(now)
 
       val fileName = s"$formattedDate" + "quarterly_2020_lar.txt"
       val s3Sink = S3
