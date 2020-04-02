@@ -28,7 +28,7 @@ pipeline {
         }
       }
       steps {
-        sh "sbt -Dsbt.global.base=.sbt -Dsbt.boot.directory=.sbt -Dsbt.ivy.home=.ivy2 -batch hmda-analytics/docker:stage"
+        sh "sbt -Dsbt.global.base=.sbt -Dsbt.boot.directory=.sbt -Dsbt.ivy.home=.ivy2 -batch clean hmda-analytics/docker:stage"
       }
     }
 
@@ -41,7 +41,7 @@ pipeline {
               usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
               withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
                 dockerBuild.sbtBuild('hmda-analytics')
-                security.dockerImageScan('hmda-analytics', env.DOCKER_TAG)
+                scanImage('hmda-analytics', env.DOCKER_TAG)
               }
             }
           }

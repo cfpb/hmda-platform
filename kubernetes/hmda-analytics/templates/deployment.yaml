@@ -28,7 +28,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           volumeMounts:
             - name: tz-config
-              mountPath: /etc/localtime          
+              mountPath: /etc/localtime
           security:
             - readOnlyRootFilesystem: true
               allowPrivilegeEscalation: false          

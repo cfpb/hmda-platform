@@ -28,7 +28,7 @@ pipeline {
         }
       }
       steps {
-        sh "sbt -Dsbt.global.base=.sbt -Dsbt.boot.directory=.sbt -Dsbt.ivy.home=.ivy2 -batch rate-limit/docker:stage"
+        sh "sbt -Dsbt.global.base=.sbt -Dsbt.boot.directory=.sbt -Dsbt.ivy.home=.ivy2 -batch clean rate-limit/docker:stage"
       }
     }
 
@@ -41,7 +41,7 @@ pipeline {
               usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
               withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
                 dockerBuild.sbtBuild('rate-limit')
-                security.dockerImageScan('rate-limit', env.DOCKER_TAG)
+                scanImage('rate-limit', env.DOCKER_TAG)
               }
             }
           }
