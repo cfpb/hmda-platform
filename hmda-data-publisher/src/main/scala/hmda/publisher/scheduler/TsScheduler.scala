@@ -32,6 +32,8 @@ class TsScheduler
   implicit val ec = context.system.dispatcher
   implicit val materializer = ActorMaterializer()
   private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
+  private val fullDateQuarterly = DateTimeFormatter.ofPattern("yyyy-MM-dd_")
+
   def tsRepository2018 = new TransmittalSheetRepository2018(dbConfig)
   def tsRepository2019 = new TransmittalSheetRepository2019(dbConfig)
   def tsRepository2020 = new TransmittalSheetRepository2020(dbConfig)
@@ -137,7 +139,7 @@ class TsScheduler
     case TsSchedulerQuarterly2020 =>
        val includeQuarterly=true;
       val now = LocalDateTime.now().minusDays(1)
-      val formattedDate = fullDate.format(now)
+      val formattedDate = fullDateQuarterly.format(now)
       val fileName = s"$formattedDate" + "quarterly_2020_ts.txt"
 
       val s3Sink =
