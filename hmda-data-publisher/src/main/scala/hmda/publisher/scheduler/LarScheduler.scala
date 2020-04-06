@@ -154,7 +154,7 @@ class LarScheduler
       println("starting job for LarSchedulerLoanLimit2019 ")
       val now = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDate.format(now)
-      val fileName = "msa_test_file_"+s"$formattedDate" +"2019_lar.txt"
+      val fileName = "2019F_AGY_LAR_withFlag_"+s"$formattedDate" +"2019_lar.txt"
       val s3Sink = S3
         .multipartUpload(bucket, s"$environment/lar/$fileName")
         .withAttributes(S3Attributes.settings(s3Settings))
