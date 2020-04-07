@@ -94,6 +94,7 @@ class LarScheduler
   override def receive: Receive = {
 
     case LarScheduler2018 =>
+      log.info("starting job for LarScheduler2018 ")
       val now = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDate.format(now)
       val fileName = s"$formattedDate" + "2018_lar.txt"
@@ -122,6 +123,7 @@ class LarScheduler
       }
 
     case LarScheduler2019 =>
+      log.info("starting job for LarScheduler2019 ")
       val now = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDate.format(now)
       val fileName = s"$formattedDate" + "2019_lar.txt"
@@ -150,8 +152,7 @@ class LarScheduler
       }
 
     case LarSchedulerLoanLimit2019 =>
-
-      println("starting job for LarSchedulerLoanLimit2019 ")
+      log.info("starting job for LarSchedulerLoanLimit2019 ")
       val now = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDate.format(now)
       val fileName = "2019F_AGY_LAR_withFlag_"+s"$formattedDate" +"2019_lar.txt"
@@ -185,6 +186,7 @@ class LarScheduler
       }
 
     case LarSchedulerQuarterly2020 =>
+      log.info("starting job for LarSchedulerQuarterly2020 ")
       val includeQuarterly = true
       val now = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDateQuarterly.format(now)

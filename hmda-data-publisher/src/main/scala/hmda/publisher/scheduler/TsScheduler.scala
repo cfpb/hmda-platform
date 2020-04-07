@@ -82,6 +82,7 @@ class TsScheduler
   override def receive: Receive = {
 
     case TsScheduler2018 =>
+      log.info("starting job for TsScheduler2018 ")
       val now = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDate.format(now)
       val fileName = s"$formattedDate" + "2018_ts.txt"
@@ -110,6 +111,8 @@ class TsScheduler
       }
 
     case TsScheduler2019 =>
+      log.info("starting job for TsScheduler2019 ")
+
       val now = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDate.format(now)
       val fileName = s"$formattedDate" + "2019_ts.txt"
