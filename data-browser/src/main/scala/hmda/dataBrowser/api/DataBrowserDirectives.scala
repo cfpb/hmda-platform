@@ -17,8 +17,10 @@ import hmda.dataBrowser.models.ConstructionMethod._
 import hmda.dataBrowser.models.DwellingCategory._
 import hmda.dataBrowser.models.Ethnicity._
 import hmda.dataBrowser.models.LienStatus._
+import hmda.dataBrowser.models.LienStatus2017._
 import hmda.dataBrowser.models.LoanProduct._
 import hmda.dataBrowser.models.LoanPurpose._
+import hmda.dataBrowser.models.LoanPurpose2017._
 import hmda.dataBrowser.models.LoanType._
 import hmda.dataBrowser.models.Race._
 import hmda.dataBrowser.models.Sex._
@@ -53,7 +55,7 @@ trait DataBrowserDirectives extends Settings {
   def obtainDataSource(
     cache: FileService,
     db: QueryService
-  )(queries: List[QueryField], delimiter: Delimiter): Task[Either[Source[ByteString, NotUsed], String]] = {
+  )(queries: QueryFields, delimiter: Delimiter): Task[Either[Source[ByteString, NotUsed], String]] = {
     val serializedData: Source[ByteString, NotUsed] = {
       val databaseData: Source[ModifiedLarEntity, NotUsed] =
         db.fetchData(queries)
@@ -64,14 +66,14 @@ trait DataBrowserDirectives extends Settings {
     }
 
     cache
-      .retrieveDataUrl(queries, delimiter)
+      .retrieveDataUrl(queries.queryFields, delimiter)
       .flatMap {
         case Some(url) =>
           Task.now(Right(url))
         case None =>
           // upload the data to S3 in the background and emit the Source immediately
           cache
-            .persistData(queries, delimiter, serializedData)
+            .persistData(queries.queryFields, delimiter, serializedData)
             .startAndForget *> Task(Left(serializedData))
       }
       .onErrorFallbackTo(Task.now(Left(serializedData)))
@@ -121,8 +123,8 @@ trait DataBrowserDirectives extends Settings {
         provide(Option(QueryField(name = "lei", xs.map(_.toString), dbName = "lei", isAllSelected = false)))
     }
 
-  private def extractYears: Directive1[Option[QueryField]] =
-    parameters("years".as(CsvSeq[Int]) ? Nil).flatMap {
+  private def extractYear: Directive1[Option[QueryField]] =
+    parameters("years".as(CsvSeq[String]) ? Nil).flatMap {
       case Nil => provide(None)
       case xs =>
         provide(Option(QueryField(name = "year", xs.map(_.toString), dbName = "filing_year", isAllSelected = false)))
@@ -265,9 +267,15 @@ trait DataBrowserDirectives extends Settings {
       }
     }
 
-  private def extractLienStatus: Directive1[Option[QueryField]] =
+  private def extractLienStatus(year: String): Directive1[Option[QueryField]] = {
+    def validateLienStatusFunction: Seq[String] => Either[Seq[String], Seq[LienStatus]] = {
+      year match {
+        case "2017" => validateLienStatus2017
+        case "2018" => validateLienStatus
+      }
+    }
     parameters("lien_statuses".as(CsvSeq[String]) ? Nil).flatMap { rawLienStatuses =>
-      validateLienStatus(rawLienStatuses) match {
+      validateLienStatusFunction(rawLienStatuses) match {
         case Left(invalidLienStatuses) =>
           complete((BadRequest, InvalidLienStatuses(invalidLienStatuses)))
 
@@ -281,6 +289,7 @@ trait DataBrowserDirectives extends Settings {
           provide(None)
       }
     }
+  }
 
   private def extractLoanProduct: Directive1[Option[QueryField]] =
     parameters("loan_products".as(CsvSeq[String]) ? Nil).flatMap { rawLoanProducts =>
@@ -299,9 +308,15 @@ trait DataBrowserDirectives extends Settings {
       }
     }
 
-  private def extractLoanPurpose: Directive1[Option[QueryField]] =
+  private def extractLoanPurpose(year: String): Directive1[Option[QueryField]] = {
+    def validateLoanPurposeFunction: Seq[String] => Either[Seq[String], Seq[LoanPurpose]] = {
+      year match {
+        case "2017" => validateLoanPurpose2017
+        case "2018" => validateLoanPurpose
+      }
+    }
     parameters("loan_purposes".as(CsvSeq[String]) ? Nil).flatMap { rawLoanPurposes =>
-      validateLoanPurpose(rawLoanPurposes) match {
+      validateLoanPurposeFunction(rawLoanPurposes) match {
         case Left(invalidLoanPurposes) =>
           complete((BadRequest, InvalidLoanPurposes(invalidLoanPurposes)))
 
@@ -315,6 +330,7 @@ trait DataBrowserDirectives extends Settings {
           provide(None)
       }
     }
+  }
 
   private def extractLoanType: Directive1[Option[QueryField]] =
     parameters("loan_types".as(CsvSeq[String]) ? Nil).flatMap { rawLoanTypes =>
@@ -350,10 +366,25 @@ trait DataBrowserDirectives extends Settings {
       }
     }
 
-  def extractNonMandatoryQueryFields(innerRoute: List[QueryField] => Route): Route =
+  private def invalidFieldFor2017(year: String, field: String, extractDirective: => Directive1[Option[QueryField]]): Directive1[Option[QueryField]]  = {
+    year match {
+      case "2017" => complete((BadRequest, InvalidFieldFor2017(field)))
+      case _ => extractDirective
+    }
+  }
+
+  def extractNonMandatoryQueryFields(year: String)(innerRoute: QueryFields => Route): Route =
+    year match {
+      case "2017" => extractNonMandatoryQueryFields2017(year)(innerRoute)
+      case "2018" => extractNonMandatoryQueryFields2018(year)(innerRoute)
+      case _ => complete((BadRequest, InvalidYear(year)))
+    }
+
+  def extractNonMandatoryQueryFields2018(year: String)(innerRoute: QueryFields => Route): Route =
     (extractActions & extractRaces & extractSexes &
-      extractLoanType & extractLoanPurpose & extractLienStatus &
-      extractConstructionMethod & extractDwellingCategories & extractLoanProduct & extractTotalUnits & extractEthnicities) {
+      extractLoanType & extractLoanPurpose(year) & extractLienStatus(year) &
+      extractConstructionMethod & extractDwellingCategories &
+      extractLoanProduct & extractTotalUnits & extractEthnicities) {
       (
         actionsTaken,
         races,
@@ -382,65 +413,86 @@ trait DataBrowserDirectives extends Settings {
             ethnicities
           ).flatten
         if (filteredfields.size > 2)
-          complete(BadRequest, TooManyFilterCriterias())
-        else innerRoute(filteredfields)
+          complete((BadRequest, TooManyFilterCriterias()))
+        else innerRoute(QueryFields(year, filteredfields))
     }
 
-  def extractCountFields(innerRoute: List[QueryField] => Route): Route =
-    extractNonMandatoryQueryFields { nonMandatoryFields =>
-      if (nonMandatoryFields.nonEmpty) {
-        complete(BadRequest, NoMandatoryFieldsInCount())
-      } else {
-        (extractYears & extractMsaMds & extractStates) { (years, msaMds, states) =>
-          if (years.nonEmpty && (msaMds.nonEmpty || states.nonEmpty))
-            innerRoute(List(years, msaMds, states).flatten)
-          else complete(BadRequest, ProvideYearAndStatesOrMsaMds())
+  def extractNonMandatoryQueryFields2017(year: String)(innerRoute: QueryFields => Route): Route =
+    (extractActions & extractLoanPurpose(year) & extractLienStatus(year)) {
+      (
+        actionsTaken,
+        loanPurposes,
+        lienStatuses
+      ) =>
+        val filteredfields =
+          List(
+            actionsTaken,
+            loanPurposes,
+            lienStatuses
+          ).flatten
+        if (filteredfields.size > 2)
+          complete((BadRequest, TooManyFilterCriterias()))
+        else innerRoute(QueryFields(year, filteredfields))
+    }
+
+  def extractCountFields(innerRoute: QueryFields => Route): Route =
+    (extractYear & extractMsaMds & extractStates) { (years, msaMds, states) =>
+      if (years.nonEmpty && (msaMds.nonEmpty || states.nonEmpty)) {
+        extractNonMandatoryQueryFields(years.getOrElse("2018").toString) { nonMandatoryFields =>
+          if (nonMandatoryFields.queryFields.nonEmpty) {
+            complete((BadRequest, NoMandatoryFieldsInCount()))
+          } else {
+            innerRoute((QueryFields(years.head.values.head, List(years, msaMds, states).flatten)))
+          }
         }
       }
+      else complete((BadRequest, ProvideYearAndStatesOrMsaMds()))
     }
 
-  def extractYearsMsaMdsStatesAndCounties(innerRoute: List[QueryField] => Route): Route =
-    (extractYears & extractMsaMds & extractStates & extractCounties) { (years, msaMds, states, counties) =>
+  def extractYearsMsaMdsStatesAndCounties(innerRoute: QueryFields => Route): Route =
+    (extractYear & extractMsaMds & extractStates & extractCounties) { (years, msaMds, states, counties) =>
       if (msaMds.nonEmpty && states.nonEmpty && counties.nonEmpty)
-        complete(BadRequest, OnlyStatesOrMsaMdsOrCountiesOrLEIs())
+        complete((BadRequest, OnlyStatesOrMsaMdsOrCountiesOrLEIs()))
       else if (years.nonEmpty)
-        innerRoute(List(years, msaMds, states, counties).flatten)
+        innerRoute(QueryFields(years.head.values.head, List(years, msaMds, states, counties).flatten))
       else
-        complete(BadRequest, ProvideYearAndStatesOrMsaMdsOrCounties())
+        complete((BadRequest, ProvideYearAndStatesOrMsaMdsOrCounties()))
     }
 
-  def extractYearsAndMsaAndStateAndCountyAndLEIBrowserFields(innerRoute: List[QueryField] => Route): Route =
-    (extractYears & extractMsaMds & extractStates & extractCounties & extractLEIs) { (years, msaMds, states, counties, leis) =>
+  def extractYearsAndMsaAndStateAndCountyAndLEIBrowserFields(innerRoute: QueryFields => Route): Route =
+    (extractYear & extractMsaMds & extractStates & extractCounties & extractLEIs) { (years, msaMds, states, counties, leis) =>
       if ((msaMds.nonEmpty && states.nonEmpty && counties.nonEmpty && leis.nonEmpty) || (msaMds.isEmpty && states.isEmpty && counties.isEmpty && leis.isEmpty))
-        complete(BadRequest, OnlyStatesOrMsaMdsOrCountiesOrLEIs())
+        complete((BadRequest, OnlyStatesOrMsaMdsOrCountiesOrLEIs()))
       else if (years.nonEmpty)
-        innerRoute(List(years, msaMds, states, counties, leis).flatten)
-      else complete(BadRequest, ProvideYearAndStatesOrMsaMds())
+        innerRoute(QueryFields(years.head.values.head, List(years, msaMds, states, counties, leis).flatten))
+      else complete((BadRequest, ProvideYearAndStatesOrMsaMds()))
     }
 
-  def extractNationwideMandatoryYears(innerRoute: List[QueryField] => Route): Route =
-    (extractYears) { (years) =>
+  def extractNationwideMandatoryYears(innerRoute: QueryFields => Route): Route =
+    (extractYear) { (years) =>
       if (years.nonEmpty)
-        innerRoute(List(years).flatten)
-      else complete(BadRequest, ProvideYear())
+        innerRoute(QueryFields(years.head.values.head,List(years).flatten))
+      else complete((BadRequest, ProvideYear()))
     }
 
-  def extractFieldsForAggregation(innerRoute: List[QueryField] => Route): Route =
-    extractNonMandatoryQueryFields { browserFields =>
+  def extractFieldsForAggregation(year: String)(innerRoute: QueryFields => Route): Route =
+    extractNonMandatoryQueryFields(year) { browserFields =>
       innerRoute(browserFields)
-      if (browserFields.nonEmpty) innerRoute(browserFields)
-      else complete(BadRequest, NotEnoughFilterCriterias())
+      if (browserFields.queryFields.nonEmpty) innerRoute(browserFields)
+      else complete((BadRequest, NotEnoughFilterCriterias()))
     }
 
-  def extractFieldsForCount(innerRoute: List[QueryField] => Route): Route =
-    extractNonMandatoryQueryFields { browserFields =>
+  def extractFieldsForCount(year: String)(innerRoute: QueryFields => Route): Route =
+    extractNonMandatoryQueryFields(year) { browserFields =>
       innerRoute(browserFields)
-      if (browserFields.nonEmpty) innerRoute(browserFields)
-      else complete(BadRequest, NotEnoughFilterCriterias())
+      if (browserFields.queryFields.nonEmpty) innerRoute(browserFields)
+      else complete((BadRequest, NotEnoughFilterCriterias()))
     }
 
-  def extractFieldsForRawQueries(innerRoute: List[QueryField] => Route): Route =
-    extractNonMandatoryQueryFields(innerRoute)
+  def extractFieldsForRawQueries(year: String)( innerRoute: QueryFields => Route): Route =
+    extractNonMandatoryQueryFields(year)(innerRoute)
+
 }
+
 
 object DataBrowserDirectives extends DataBrowserDirectives

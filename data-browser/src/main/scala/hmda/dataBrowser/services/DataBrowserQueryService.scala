@@ -8,9 +8,9 @@ import monix.eval.Task
 
 class DataBrowserQueryService(repo: ModifiedLarRepository, cache: Cache) extends QueryService {
   override def fetchData(
-                          queries: List[QueryField]
+                          queries: QueryFields
                         ): Source[ModifiedLarEntity, NotUsed] =
-    repo.find(queries)
+    repo.find(queries.queryFields)
 
   private def generateCombinations[T](x: List[List[T]]): List[List[T]] =
     x match {
@@ -39,8 +39,9 @@ class DataBrowserQueryService(repo: ModifiedLarRepository, cache: Cache) extends
     }
 
   override def fetchAggregate(
-                               fields: List[QueryField]
+                               queryFields: QueryFields
                              ): Task[Seq[Aggregation]] = {
+    val fields = queryFields.queryFields
     val optState: Option[QueryField] =
       fields.filter(_.values.nonEmpty).find(_.name == "state")
     val optMsaMd: Option[QueryField] =
@@ -76,11 +77,13 @@ class DataBrowserQueryService(repo: ModifiedLarRepository, cache: Cache) extends
     }
   }
 
-  override def fetchFilers(fields: List[QueryField]): Task[FilerInstitutionResponse] =
+  override def fetchFilers(queryFields: QueryFields): Task[FilerInstitutionResponse] = {
+    val fields = queryFields.queryFields
     cacheResult(
       cacheLookup = cache.findFilers(fields),
       onMiss = repo.findFilers(fields).map(FilerInstitutionResponse(_)),
       cacheUpdate = cache.updateFilers(fields, _: FilerInstitutionResponse)
     )
+  }
 
 }

@@ -122,7 +122,19 @@ final case class InvalidTotalUnits(
                                   ) extends ErrorResponse
 
 final case class InvalidEthnicities(
-                                     invalidTotalUnits: Seq[String],
+                                     invalidEthnicities: Seq[String],
                                      errorType: String = "invalid-ethnicities",
                                      message: String = s"valid ethnicities are ${Ethnicity.values.map(_.entryName).mkString(", ")}"
+                                   ) extends ErrorResponse
+
+final case class InvalidYear(
+                                     invalidYear: String,
+                                     errorType: String = "invalid-year",
+                                     message: String = s"valid years are 2017 and 2018"
+                                   ) extends ErrorResponse
+
+final case class InvalidFieldFor2017(
+                                     invalidField: String,
+                                     errorType: String = "invalid-field",
+                                     message: String = s"field is not valid for 2017 data"
                                    ) extends ErrorResponse
