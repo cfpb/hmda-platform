@@ -170,9 +170,9 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
           for {
             signdate          <- signDate
             insertorupdate <- submissionId.period match {
-                               case Period(2018, None) => transmittalSheetRepository2018.insert(ts.copy(signDate = Some(signdate.getOrElse(0L))))
-                               case Period(2019, None) => transmittalSheetRepository2019.insert(ts.copy(signDate = Some(signdate.getOrElse(0L))))
-                               case Period(2020, Some(_)) => transmittalSheetRepository2020.insert(ts.copy(isQuarterly = Some(true),
+                               case Period(2018, None) => transmittalSheetRepository2018.insert(ts.copy(lei=ts.lei.toUpperCase,signDate = Some(signdate.getOrElse(0L))))
+                               case Period(2019, None) => transmittalSheetRepository2019.insert(ts.copy(lei=ts.lei.toUpperCase,signDate = Some(signdate.getOrElse(0L))))
+                               case Period(2020, Some(_)) => transmittalSheetRepository2020.insert(ts.copy(lei=ts.lei.toUpperCase,isQuarterly = Some(true),
                                  signDate =  Some(signdate.getOrElse(0L))))
                                case _ =>  throw new IllegalArgumentException(s"Unable to discern period from $submissionId to insert TS rows.")
                              }
