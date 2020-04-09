@@ -59,33 +59,33 @@ object HmdaDataPublisherApp extends App {
       ConfigFactory
         .parseString(panelTimer2018)
         .withValue(panelTimer2019(0),
-                   ConfigValueFactory.fromAnyRef(panelTimer2019(1)))
+          ConfigValueFactory.fromAnyRef(panelTimer2019(1)))
         .withFallback(config)
     )
   panelActorSystem.actorOf(Props[PanelScheduler], "PanelScheduler")
 
   val larActorSystem =
     ActorSystem("larTask",
-                ConfigFactory
-                  .parseString(larTimer2018)
-                  .withValue(larTimer2019(0),
-                    ConfigValueFactory.fromAnyRef(larTimer2019(1)))
-                  .withValue(larTimerLoanLimit2019(0),
-                    ConfigValueFactory.fromAnyRef(larTimerLoanLimit2019(1)))
-                  .withValue(larTimerQuarterly2020(0),
-                    ConfigValueFactory.fromAnyRef(larTimerQuarterly2020(1)))
-                  .withFallback(config))
+      ConfigFactory
+        .parseString(larTimer2018)
+        .withValue(larTimer2019(0),
+          ConfigValueFactory.fromAnyRef(larTimer2019(1)))
+        .withValue(larTimerLoanLimit2019(0),
+          ConfigValueFactory.fromAnyRef(larTimerLoanLimit2019(1)))
+        .withValue(larTimerQuarterly2020(0),
+          ConfigValueFactory.fromAnyRef(larTimerQuarterly2020(1)))
+        .withFallback(config))
   larActorSystem.actorOf(Props[LarScheduler], "LarScheduler")
 
   val tsActorSystem =
     ActorSystem("tsTask",
-                ConfigFactory
-                  .parseString(tsTimer2018)
-                  .withValue(tsTimer2019(0),
-                             ConfigValueFactory.fromAnyRef(tsTimer2019(1)))
-                  .withValue(tsTimerQuarterly2020(0),
-                    ConfigValueFactory.fromAnyRef(tsTimerQuarterly2020(1)))
-                  .withFallback(config))
+      ConfigFactory
+        .parseString(tsTimer2018)
+        .withValue(tsTimer2019(0),
+          ConfigValueFactory.fromAnyRef(tsTimer2019(1)))
+        .withValue(tsTimerQuarterly2020(0),
+          ConfigValueFactory.fromAnyRef(tsTimerQuarterly2020(1)))
+        .withFallback(config))
   tsActorSystem.actorOf(Props[TsScheduler], "TsScheduler")
 
 
