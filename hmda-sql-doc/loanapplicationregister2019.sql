@@ -151,7 +151,9 @@ CREATE TABLE hmda_user.loanapplicationregister2019 (
     tract_median_age_of_housing_units integer,
     tract_to_msa_income_percentage float,
     is_quarterly boolean DEFAULT false NOT NULL,
-    created_at timestamp without time zone DEFAULT now()
+    created_at timestamp without time zone DEFAULT now(),
+    msa_md character varying,
+    msa_md_name character varying
 );
 
 

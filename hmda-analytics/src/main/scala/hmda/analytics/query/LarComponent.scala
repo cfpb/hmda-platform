@@ -13,6 +13,8 @@ trait LarComponent {
 
     val larTable = tableName
 
+    val larColumns = "(id,lei,uli,application_date,loan_type,loan_purpose,preapproval,construction_method,occupancy_type,loan_amount,action_taken_type,action_taken_date,street,city,state,zip,county,tract,ethnicity_applicant_1,ethnicity_applicant_2,ethnicity_applicant_3,ethnicity_applicant_4,ethnicity_applicant_5,other_hispanic_applicant,ethnicity_co_applicant_1,ethnicity_co_applicant_2,ethnicity_co_applicant_3,ethnicity_co_applicant_4,ethnicity_co_applicant_5,other_hispanic_co_applicant,ethnicity_observed_applicant,ethnicity_observed_co_applicant,race_applicant_1,race_applicant_2,race_applicant_3,race_applicant_4,race_applicant_5,other_native_race_applicant,other_asian_race_applicant,other_pacific_race_applicant,race_co_applicant_1,race_co_applicant_2,race_co_applicant_3,race_co_applicant_4,race_co_applicant_5,other_native_race_co_applicant,other_asian_race_co_applicant,other_pacific_race_co_applicant,race_observed_applicant,race_observed_co_applicant,sex_applicant,sex_co_applicant,observed_sex_applicant,observed_sex_co_applicant,age_applicant,age_co_applicant,income,purchaser_type,rate_spread,hoepa_status,lien_status,credit_score_applicant,credit_score_co_applicant,credit_score_type_applicant,credit_score_model_applicant,credit_score_type_co_applicant,credit_score_model_co_applicant,denial_reason1,denial_reason2,denial_reason3,denial_reason4,other_denial_reason,total_loan_costs,total_points,origination_charges,discount_points,lender_credits,interest_rate,payment_penalty,debt_to_incode,loan_value_ratio,loan_term,rate_spread_intro,baloon_payment,insert_only_payment,amortization,other_amortization,property_value,home_security_policy,lan_property_interest,total_uits,mf_affordable,application_submission,payable,nmls,aus1,aus2,aus3,aus4,aus5,other_aus,aus1_result,aus2_result,aus3_result,aus4_result,aus5_result,other_aus_result,reverse_mortgage,line_of_credits,business_or_commercial,conforming_loan_limit,ethnicity_categorization,race_categorization,sex_categorization,dwelling_categorization,loan_product_type_categorization,tract_population,tract_minority_population_percent,ffiec_msa_md_median_family_income,tract_owner_occupied_units,tract_one_to_four_family_homes,tract_median_age_of_housing_units,tract_to_msa_income_percentage,is_quarterly, msa_md, msa_md_name)"
+
     def deletebyLeiAndQuarter(lei: String): Future[Int] =
       config.db.run {
         sqlu"DELETE FROM #${larTable} WHERE UPPER(lei) = ${lei.toUpperCase} AND is_quarterly = true"
@@ -26,7 +28,7 @@ trait LarComponent {
     //for 2019 and beyond -- includes
     def insert(le: LarEntity): Future[Int] =
       config.db.run {
-        sqlu"""INSERT INTO #${larTable}
+        sqlu"""INSERT INTO #${larTable} #${larColumns}
         VALUES (
           ${le.id},
           ${le.lei.toUpperCase},
@@ -151,7 +153,9 @@ trait LarComponent {
           ${le.tractOneToFourFamilyUnits},
           ${le.tractMedianAge},
           ${le.tractToMsaIncomePercent},
-          ${le.isQuarterly}
+          ${le.isQuarterly},
+          ${le.msa_md},
+          ${le.msa_md_name}
         )
         """
       }
