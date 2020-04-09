@@ -1,11 +1,9 @@
 projects = [
     [name: "auth", repo: "hmda-platform", jenkinsfilePath: "auth/Jenkinsfile"],
-    [name: "census-api", repo: "hmda-platform", jenkinsfilePath: "census-api/Jenkinsfile"],
     [name: "check-digit", repo: "hmda-platform", jenkinsfilePath: "check-digit/Jenkinsfile"],
     [name: "email-service", repo: "hmda-platform", jenkinsfilePath: "email-service/Jenkinsfile"],
     [name: "hmda-analytics", repo: "hmda-platform", jenkinsfilePath: "hmda-analytics/Jenkinsfile"],
     [name: "hmda-data-browser-api", repo: "hmda-platform", jenkinsfilePath: "data-browser/Jenkinsfile"],
-    [name: "hmda-documentation", repo: "hmda-documentation", jenkinsfilePath: "Jenkinsfile"],
     [name: "hmda-frontend", repo: "hmda-frontend", jenkinsfilePath: "Jenkinsfile"],
     [name: "hmda-help", repo: "hmda-help", jenkinsfilePath: "Jenkinsfile"],
     [name: "hmda-platform", repo: "hmda-platform", jenkinsfilePath: "hmda/Jenkinsfile"],
@@ -28,7 +26,7 @@ projects.each { project ->
                 id('hmda')
                 repoOwner('cfpb')
                 repository(project.repo)
-                scanCredentialsId('009c8c9d-3cf5-4b2a-89f3-286977cabddf')
+                scanCredentialsId('cfpbhmdadeploybot-github')
                 buildForkPRHead(true)
                 buildForkPRMerge(false) 
             }
