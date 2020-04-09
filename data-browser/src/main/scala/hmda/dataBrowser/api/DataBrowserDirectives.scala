@@ -57,11 +57,19 @@ trait DataBrowserDirectives extends Settings {
     db: QueryService
   )(queries: QueryFields, delimiter: Delimiter): Task[Either[Source[ByteString, NotUsed], String]] = {
     val serializedData: Source[ByteString, NotUsed] = {
-      val databaseData: Source[ModifiedLarEntity, NotUsed] =
-        db.fetchData(queries)
-      delimiter match {
-        case Commas => csvSource(databaseData)
-        case Pipes  => pipeSource(databaseData)
+      queries.year match {
+        case "2017" => {
+          delimiter match {
+            case Commas => csvSource2017(db.fetchData2017(queries))
+            case Pipes  => pipeSource2017(db.fetchData2017(queries))
+          }
+        }
+        case _ => {
+          delimiter match {
+            case Commas => csvSource(db.fetchData(queries))
+            case Pipes  => pipeSource(db.fetchData(queries))
+          }
+        }
       }
     }
 
@@ -88,6 +96,15 @@ trait DataBrowserDirectives extends Settings {
       .via(csvStreamingSupport.framingRenderer)
   }
 
+  def csvSource2017(s: Source[ModifiedLarEntity2017, NotUsed]): Source[ByteString, NotUsed] = {
+    val header  = Source.single(ModifiedLarEntity2017.header)
+    val content = s.map(_.toCsv)
+
+    (header ++ content)
+      .map(ByteString(_))
+      .via(csvStreamingSupport.framingRenderer)
+  }
+
   def contentDispositionHeader(queries: List[QueryField], delimiter: Delimiter)(route: Route): Route = {
     val queryName =
       queries.map(q => q.name + "_" + q.values.mkString("-")).mkString("_")
@@ -102,6 +119,15 @@ trait DataBrowserDirectives extends Settings {
 
   def pipeSource(s: Source[ModifiedLarEntity, NotUsed]): Source[ByteString, NotUsed] = {
     val headerPipe  = Source.single(ModifiedLarEntity.headerPipe)
+    val contentPipe = s.map(_.toPipe)
+
+    (headerPipe ++ contentPipe)
+      .map(ByteString(_))
+      .via(csvStreamingSupport.framingRenderer)
+  }
+
+  def pipeSource2017(s: Source[ModifiedLarEntity2017, NotUsed]): Source[ByteString, NotUsed] = {
+    val headerPipe  = Source.single(ModifiedLarEntity2017.headerPipe)
     val contentPipe = s.map(_.toPipe)
 
     (headerPipe ++ contentPipe)
@@ -380,7 +406,7 @@ trait DataBrowserDirectives extends Settings {
       case _ => complete((BadRequest, InvalidYear(year)))
     }
 
-  def extractNonMandatoryQueryFields2018(year: String)(innerRoute: QueryFields => Route): Route =
+  private def extractNonMandatoryQueryFields2018(year: String)(innerRoute: QueryFields => Route): Route =
     (extractActions & extractRaces & extractSexes &
       extractLoanType & extractLoanPurpose(year) & extractLienStatus(year) &
       extractConstructionMethod & extractDwellingCategories &
@@ -417,7 +443,7 @@ trait DataBrowserDirectives extends Settings {
         else innerRoute(QueryFields(year, filteredfields))
     }
 
-  def extractNonMandatoryQueryFields2017(year: String)(innerRoute: QueryFields => Route): Route =
+  private def extractNonMandatoryQueryFields2017(year: String)(innerRoute: QueryFields => Route): Route =
     (extractActions & extractLoanPurpose(year) & extractLienStatus(year)) {
       (
         actionsTaken,

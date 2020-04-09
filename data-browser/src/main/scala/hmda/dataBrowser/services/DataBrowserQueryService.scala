@@ -2,15 +2,22 @@ package hmda.dataBrowser.services
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.dataBrowser.models._
-import hmda.dataBrowser.repositories.{ Cache, ModifiedLarRepository }
+import hmda.dataBrowser.repositories._
 import io.circe.Codec
 import monix.eval.Task
 
-class DataBrowserQueryService(repo: ModifiedLarRepository, cache: Cache) extends QueryService {
+class DataBrowserQueryService(repo2018: ModifiedLarRepository2018, repo2017: ModifiedLarRepository2017, cache: Cache) extends QueryService {
   override def fetchData(
-                          queries: QueryFields
-                        ): Source[ModifiedLarEntity, NotUsed] =
-    repo.find(queries.queryFields)
+                          queryFields: QueryFields
+                        ): Source[ModifiedLarEntity, NotUsed] = {
+    repo2018.find(queryFields.queryFields)
+  }
+
+  override def fetchData2017(
+                          queryFields: QueryFields
+                        ): Source[ModifiedLarEntity2017, NotUsed] = {
+    repo2017.find(queryFields.queryFields)
+  }
 
   private def generateCombinations[T](x: List[List[T]]): List[List[T]] =
     x match {
@@ -41,6 +48,11 @@ class DataBrowserQueryService(repo: ModifiedLarRepository, cache: Cache) extends
   override def fetchAggregate(
                                queryFields: QueryFields
                              ): Task[Seq[Aggregation]] = {
+    val repo = queryFields.year match {
+      case "2017" => repo2018
+      case "2018" => repo2017
+      case _ => repo2018
+    }
     val fields = queryFields.queryFields
     val optState: Option[QueryField] =
       fields.filter(_.values.nonEmpty).find(_.name == "state")
@@ -79,6 +91,11 @@ class DataBrowserQueryService(repo: ModifiedLarRepository, cache: Cache) extends
 
   override def fetchFilers(queryFields: QueryFields): Task[FilerInstitutionResponse] = {
     val fields = queryFields.queryFields
+    val repo = queryFields.year match {
+      case "2017" => repo2018
+      case "2018" => repo2017
+      case _ => repo2018
+    }
     cacheResult(
       cacheLookup = cache.findFilers(fields),
       onMiss = repo.findFilers(fields).map(FilerInstitutionResponse(_)),

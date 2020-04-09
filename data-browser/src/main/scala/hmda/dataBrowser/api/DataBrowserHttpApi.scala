@@ -32,8 +32,10 @@ trait DataBrowserHttpApi extends Settings {
   implicit val materializer: ActorMaterializer
 
   val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("databrowser_db")
-  val repository =
-    new PostgresModifiedLarRepository(database.tableName, databaseConfig)
+  val repository2018 =
+    new PostgresModifiedLarRepository(database.tableName2018, databaseConfig)
+  val repository2017 =
+    new PostgresModifiedLarRepository2017(database.tableName2017, databaseConfig)
 
   // We make the creation of the Redis client effectful because it can fail and we would like to operate
   // the service even if the cache is down (we provide fallbacks in case we receive connection errors)
@@ -61,12 +63,12 @@ trait DataBrowserHttpApi extends Settings {
     new RedisCache(redisClientTask, redis.ttl)
 
   val query: QueryService =
-    new DataBrowserQueryService(repository, cache)
+    new DataBrowserQueryService(repository2018, repository2017, cache)
 
   val fileCache = new S3FileService
 
   val healthCheck: HealthCheckService =
-    new HealthCheckService(repository, cache, fileCache)
+    new HealthCheckService(repository2018, cache, fileCache)
 
   def serveData(queries: QueryFields, delimiter: Delimiter, errorMessage: String): Route =
     onComplete(obtainDataSource(fileCache, query)(queries, delimiter).runToFuture) {

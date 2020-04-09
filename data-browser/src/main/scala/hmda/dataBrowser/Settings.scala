@@ -29,7 +29,8 @@ trait Settings {
   }
 
   object database {
-    val tableName: String = config.getString("dbconfig.table")
+    val tableName2018: String = config.getString("dbconfig.table.2018")
+    val tableName2017: String = config.getString("dbconfig.table.2017")
   }
 
   object redis {

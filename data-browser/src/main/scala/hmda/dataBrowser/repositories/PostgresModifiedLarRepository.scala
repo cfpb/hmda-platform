@@ -7,7 +7,7 @@ import monix.eval.Task
 import slick.basic.DatabaseConfig
 import slick.jdbc.{ JdbcProfile, ResultSetConcurrency, ResultSetType }
 
-class PostgresModifiedLarRepository(tableName: String, config: DatabaseConfig[JdbcProfile]) extends ModifiedLarRepository {
+class PostgresModifiedLarRepository(tableName: String, config: DatabaseConfig[JdbcProfile]) extends ModifiedLarRepository2018 {
 
   import config._
   import config.profile.api._
