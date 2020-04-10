@@ -179,7 +179,9 @@ object LarConverter {
       census.oneToFourFamilyUnits,
       census.medianAge,
       census.tracttoMsaIncomePercent,
-      isQuarterly
+      isQuarterly,
+      census.msaMd.toString,
+      census.name
     )
   }
 
