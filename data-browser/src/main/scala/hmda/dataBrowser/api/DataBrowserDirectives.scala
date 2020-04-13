@@ -158,16 +158,7 @@ trait DataBrowserDirectives extends Settings {
 
   private def extractStates: Directive1[Option[QueryField]] =
     parameters("states".as(CsvSeq[String]) ? Nil).flatMap { rawStates =>
-      validateStates(rawStates) match {
-        case Left(invalidStates) =>
-          complete((BadRequest, InvalidStates(invalidStates)))
-
-        case Right(states) if states.nonEmpty =>
-          provide(Option(QueryField(name = "state", values = states.map(_.entryName), dbName = "state", isAllSelected = false)))
-
-        case Right(_) =>
-          provide(None)
-      }
+      provide(Option(QueryField(name = "state", values = rawStates, dbName = "state", isAllSelected = false)))
     }
 
   private def extractCounties: Directive1[Option[QueryField]] =

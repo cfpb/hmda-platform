@@ -44,7 +44,8 @@ case class ModifiedLarEntity2017(
     ffiecMedFamIncome: String,
     tractToMsaIncomePct: String,
     ownerOccupiedUnits: String,
-    oneToFourFamUnits: String
+    oneToFourFamUnits: String,
+    filingYear: String
 )
 
 object ModifiedLarEntity2017 {
@@ -54,6 +55,7 @@ object ModifiedLarEntity2017 {
     GetResult(
       r =>
         ModifiedLarEntity2017(
+          r.<<,
           r.<<,
           r.<<,
           r.<<,

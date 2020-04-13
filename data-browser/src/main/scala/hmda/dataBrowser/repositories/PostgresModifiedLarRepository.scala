@@ -196,6 +196,14 @@ class PostgresModifiedLarRepository(tableName: String, config: DatabaseConfig[Jd
       case Nil          => ""
       case head :: tail => whereAndOpt(head, tail: _*)
     }
+    println("2018 db query")
+    println(sql"""
+        SELECT
+          COUNT(loan_amount),
+          SUM(loan_amount)
+        FROM #${tableName}
+        #$filterCriteria
+        """)
     val query = sql"""
         SELECT
           COUNT(loan_amount),

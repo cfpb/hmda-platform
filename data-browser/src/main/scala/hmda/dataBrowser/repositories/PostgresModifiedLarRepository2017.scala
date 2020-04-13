@@ -55,7 +55,8 @@ class PostgresModifiedLarRepository2017(tableName: String, config: DatabaseConfi
     tract_to_msa_income_pct,
     owner_occupied_units,
     one_to_four_fam_units,
-      """.stripMargin
+    filing_year
+    """.stripMargin
 
   def escape(str: String): String = str.replace("'", "")
 
@@ -89,6 +90,12 @@ class PostgresModifiedLarRepository2017(tableName: String, config: DatabaseConfi
       case head :: tail => whereAndOpt(head, tail: _*)
     }
 
+    println(sql"""
+      SELECT #${columns}
+      FROM #${tableName}
+      #$filterCriteria
+      """)
+    
     val searchQuery = sql"""
       SELECT #${columns}
       FROM #${tableName}
@@ -138,6 +145,14 @@ class PostgresModifiedLarRepository2017(tableName: String, config: DatabaseConfi
       case Nil          => ""
       case head :: tail => whereAndOpt(head, tail: _*)
     }
+    println("2017 db query")
+    println (sql"""
+        SELECT
+          COUNT(loan_amount),
+          SUM(loan_amount)
+        FROM #${tableName}
+        #$filterCriteria"""
+    )
     val query = sql"""
         SELECT
           COUNT(loan_amount),

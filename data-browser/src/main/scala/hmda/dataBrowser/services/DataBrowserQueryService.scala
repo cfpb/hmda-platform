@@ -49,8 +49,8 @@ class DataBrowserQueryService(repo2018: ModifiedLarRepository2018, repo2017: Mod
                                queryFields: QueryFields
                              ): Task[Seq[Aggregation]] = {
     val repo = queryFields.year match {
-      case "2017" => repo2018
-      case "2018" => repo2017
+      case "2017" => repo2017
+      case "2018" => repo2018
       case _ => repo2018
     }
     val fields = queryFields.queryFields
@@ -92,8 +92,8 @@ class DataBrowserQueryService(repo2018: ModifiedLarRepository2018, repo2017: Mod
   override def fetchFilers(queryFields: QueryFields): Task[FilerInstitutionResponse] = {
     val fields = queryFields.queryFields
     val repo = queryFields.year match {
-      case "2017" => repo2018
-      case "2018" => repo2017
+      case "2017" => repo2017
+      case "2018" => repo2018
       case _ => repo2018
     }
     cacheResult(
