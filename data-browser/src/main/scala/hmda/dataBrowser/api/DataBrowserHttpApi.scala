@@ -149,7 +149,7 @@ trait DataBrowserHttpApi extends Settings {
           } ~
           // GET /view/aggregations
           (path(Aggregations) & get) {
-            extractYearsAndMsaAndStateAndCountyAndLEIBrowserFields { mandatoryFields =>
+            extractMsaAndStateAndCountyAndInstitutionIdentifierBrowserFields { mandatoryFields =>
               log.info("Aggregations: " + mandatoryFields)
               extractFieldsForAggregation(mandatoryFields.year) { remainingQueryFields =>
                 val allFields = QueryFields(mandatoryFields.year, mandatoryFields.queryFields ++ remainingQueryFields.queryFields)
@@ -165,7 +165,7 @@ trait DataBrowserHttpApi extends Settings {
           } ~
           // GET /view/csv
           (path(Csv) & get) {
-            extractYearsAndMsaAndStateAndCountyAndLEIBrowserFields { mandatoryFields =>
+            extractMsaAndStateAndCountyAndInstitutionIdentifierBrowserFields { mandatoryFields =>
               extractFieldsForRawQueries(mandatoryFields.year) { remainingQueryFields =>
                 val allFields = QueryFields(mandatoryFields.year, mandatoryFields.queryFields ++ remainingQueryFields.queryFields)
                 log.info("CSV: " + allFields)
@@ -177,7 +177,7 @@ trait DataBrowserHttpApi extends Settings {
           } ~
           // GET /view/pipe
           (path(Pipe) & get) {
-            extractYearsAndMsaAndStateAndCountyAndLEIBrowserFields { mandatoryFields =>
+            extractMsaAndStateAndCountyAndInstitutionIdentifierBrowserFields { mandatoryFields =>
               extractFieldsForRawQueries(mandatoryFields.year) { remainingQueryFields =>
                 val allFields = QueryFields(mandatoryFields.year, mandatoryFields.queryFields ++ remainingQueryFields.queryFields)
                 log.info("PIPE: " + allFields)

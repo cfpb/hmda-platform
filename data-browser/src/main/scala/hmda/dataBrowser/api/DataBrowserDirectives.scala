@@ -149,6 +149,13 @@ trait DataBrowserDirectives extends Settings {
         provide(Option(QueryField(name = "lei", xs.map(_.toString), dbName = "lei", isAllSelected = false)))
     }
 
+  private def extractARIDs: Directive1[Option[QueryField]] =
+    parameters("arids".as(CsvSeq[String]) ? Nil).flatMap {
+      case Nil => provide(None)
+      case xs =>
+        provide(Option(QueryField(name = "arid", xs.map(_.toString), dbName = "arid", isAllSelected = false)))
+    }
+
   private def extractYear: Directive1[Option[QueryField]] =
     parameters("years".as(CsvSeq[String]) ? Nil).flatMap {
       case Nil => provide(None)
@@ -156,9 +163,29 @@ trait DataBrowserDirectives extends Settings {
         provide(Option(QueryField(name = "year", xs.map(_.toString), dbName = "filing_year", isAllSelected = false)))
     }
 
-  private def extractStates: Directive1[Option[QueryField]] =
+  private def extractStates(year: String): Directive1[Option[QueryField]] =
     parameters("states".as(CsvSeq[String]) ? Nil).flatMap { rawStates =>
-      provide(Option(QueryField(name = "state", values = rawStates, dbName = "state", isAllSelected = false)))
+      year match {
+        case "2017" => {
+          rawStates match {
+            case Nil => provide(None)
+            case xs =>
+              provide(Option(QueryField(name = "state", xs.map(_.toString), dbName = "state", isAllSelected = false)))
+          }
+        }
+        case _ => {
+          validateStates(rawStates) match {
+            case Left(invalidStates) =>
+              complete((BadRequest, InvalidStates(invalidStates)))
+
+            case Right(states) if states.nonEmpty =>
+              provide(Option(QueryField(name = "state", values = states.map(_.entryName), dbName = "state", isAllSelected = false)))
+
+            case Right(_) =>
+              provide(None)
+          }
+        }
+      }
     }
 
   private def extractCounties: Directive1[Option[QueryField]] =
@@ -453,36 +480,55 @@ trait DataBrowserDirectives extends Settings {
     }
 
   def extractCountFields(innerRoute: QueryFields => Route): Route =
-    (extractYear & extractMsaMds & extractStates) { (years, msaMds, states) =>
-      if (years.nonEmpty && (msaMds.nonEmpty || states.nonEmpty)) {
-        extractNonMandatoryQueryFields(years.getOrElse("2018").toString) { nonMandatoryFields =>
-          if (nonMandatoryFields.queryFields.nonEmpty) {
-            complete((BadRequest, NoMandatoryFieldsInCount()))
-          } else {
-            innerRoute((QueryFields(years.head.values.head, List(years, msaMds, states).flatten)))
+    (extractYear) { (years) =>
+      (extractMsaMds & extractStates(years.head.values.head)) { (msaMds, states) =>
+        if (years.nonEmpty && (msaMds.nonEmpty || states.nonEmpty)) {
+          extractNonMandatoryQueryFields(years.getOrElse("2018").toString) { nonMandatoryFields =>
+            if (nonMandatoryFields.queryFields.nonEmpty) {
+              complete((BadRequest, NoMandatoryFieldsInCount()))
+            } else {
+              innerRoute((QueryFields(years.head.values.head, List(years, msaMds, states).flatten)))
+            }
           }
         }
+        else complete((BadRequest, ProvideYearAndStatesOrMsaMds()))
       }
-      else complete((BadRequest, ProvideYearAndStatesOrMsaMds()))
     }
 
   def extractYearsMsaMdsStatesAndCounties(innerRoute: QueryFields => Route): Route =
-    (extractYear & extractMsaMds & extractStates & extractCounties) { (years, msaMds, states, counties) =>
-      if (msaMds.nonEmpty && states.nonEmpty && counties.nonEmpty)
-        complete((BadRequest, OnlyStatesOrMsaMdsOrCountiesOrLEIs()))
-      else if (years.nonEmpty)
-        innerRoute(QueryFields(years.head.values.head, List(years, msaMds, states, counties).flatten))
-      else
-        complete((BadRequest, ProvideYearAndStatesOrMsaMdsOrCounties()))
+    (extractYear) { (years) => 
+      (extractMsaMds & extractStates(years.head.values.head) & extractCounties) { (msaMds, states, counties) =>
+        if (msaMds.nonEmpty && states.nonEmpty && counties.nonEmpty)
+          complete((BadRequest, OnlyStatesOrMsaMdsOrCountiesOrLEIs()))
+        else if (years.nonEmpty)
+          innerRoute(QueryFields(years.head.values.head, List(years, msaMds, states, counties).flatten))
+        else
+          complete((BadRequest, ProvideYearAndStatesOrMsaMdsOrCounties()))
+      }
     }
 
-  def extractYearsAndMsaAndStateAndCountyAndLEIBrowserFields(innerRoute: QueryFields => Route): Route =
-    (extractYear & extractMsaMds & extractStates & extractCounties & extractLEIs) { (years, msaMds, states, counties, leis) =>
+  def extractMsaAndStateAndCountyAndInstitutionIdentifierBrowserFields(innerRoute: QueryFields => Route): Route =
+    (extractYear) { (years) =>
+      years.head.values.head match {
+        case "2017" => extractMsaAndStateAndCountyAndARIDBrowserFields("2017", innerRoute)
+        case year => extractMsaAndStateAndCountyAndLEIBrowserFields(year, innerRoute)
+      }
+    }
+
+  def extractMsaAndStateAndCountyAndLEIBrowserFields(year: String, innerRoute: QueryFields => Route): Route =
+    (extractMsaMds & extractStates(year) & extractCounties & extractLEIs) { (msaMds, states, counties, leis) =>
       if ((msaMds.nonEmpty && states.nonEmpty && counties.nonEmpty && leis.nonEmpty) || (msaMds.isEmpty && states.isEmpty && counties.isEmpty && leis.isEmpty))
         complete((BadRequest, OnlyStatesOrMsaMdsOrCountiesOrLEIs()))
-      else if (years.nonEmpty)
-        innerRoute(QueryFields(years.head.values.head, List(years, msaMds, states, counties, leis).flatten))
-      else complete((BadRequest, ProvideYearAndStatesOrMsaMds()))
+      else
+        innerRoute(QueryFields(year, List(msaMds, states, counties, leis).flatten))
+    }
+
+  def extractMsaAndStateAndCountyAndARIDBrowserFields(year: String, innerRoute: QueryFields => Route): Route =
+    (extractMsaMds & extractStates(year) & extractCounties & extractARIDs) { (msaMds, states, counties, arids) =>
+      if ((msaMds.nonEmpty && states.nonEmpty && counties.nonEmpty && arids.nonEmpty) || (msaMds.isEmpty && states.isEmpty && counties.isEmpty && arids.isEmpty))
+        complete((BadRequest, OnlyStatesOrMsaMdsOrCountiesOrLEIs()))
+      else
+        innerRoute(QueryFields(year, List(msaMds, states, counties, arids).flatten))
     }
 
   def extractNationwideMandatoryYears(innerRoute: QueryFields => Route): Route =
