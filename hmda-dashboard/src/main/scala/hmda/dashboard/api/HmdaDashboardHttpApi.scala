@@ -4,9 +4,9 @@ import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.server.directives.Credentials
 import akka.http.scaladsl.server.directives.RouteDirectives.complete
 import akka.stream.ActorMaterializer
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
 import com.typesafe.config.{Config, ConfigFactory}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.auth.OAuth2Authorization
@@ -26,7 +26,7 @@ trait HmdaDashboardHttpApi extends Settings {
   val log: LoggingAdapter
   implicit val materializer: ActorMaterializer
   val config: Config = ConfigFactory.load()
-  val hmdaAdminRole = config.getString("keycloak.hmda.admin.
+  val hmdaAdminRole = config.getString("keycloak.hmda.admin.role")
   val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("dashboard_db")
   val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
   val bankFilterList =
@@ -41,8 +41,7 @@ trait HmdaDashboardHttpApi extends Settings {
     new DashboardQueryService(repository)
 
   def hmdaDashboardRoutes(oAuth2Authorization: OAuth2Authorization): Route = {
-    oAuth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { userName =>
-      encodeResponse {
+    oAuth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
         withoutRequestTimeout {
           pathPrefix("dashboard") {
             pathPrefix("health") {
@@ -332,13 +331,16 @@ trait HmdaDashboardHttpApi extends Settings {
               }
           }
         }
-      }
     }
   }
 
-  def myUserPassAuthenticator(credentials: Credentials): Option[String] =
-    credentials match {
-      case p @ Credentials.Provided(id) if p.verify(config.getString("admin.pass")) => Some(id)
-      case _ => None
+  def myUserPassAuthenticator(oAuth2Authorization: OAuth2Authorization): Route = {
+    handleRejections(corsRejectionHandler) {
+      cors() {
+        encodeResponse {
+          hmdaDashboardRoutes(oAuth2Authorization)
+        }
+      }
     }
+  }
 }

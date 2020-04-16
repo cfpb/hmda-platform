@@ -56,7 +56,7 @@ class HmdaDashboardApi
       new KeycloakTokenVerifier(keycloakDeployment)
     )
 
-    override val paths: Route = routes(s"$name") ~ hmdaDashboardRoutes
+    override val paths: Route = routes(s"$name") ~ hmdaDashboardRoutes(oAuth2Authorization)
 
     override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
       paths,

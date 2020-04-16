@@ -61,6 +61,8 @@ spec:
                 secretKeyRef:
                   name: dashboard-admin-pass
                   key: password
+            - name: HMDA_RUNTIME_MODE
+              value: {{ .Values.hmda.runtimeMode }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
