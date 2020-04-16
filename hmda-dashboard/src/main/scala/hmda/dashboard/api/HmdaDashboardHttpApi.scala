@@ -41,8 +41,7 @@ trait HmdaDashboardHttpApi extends Settings {
     new DashboardQueryService(repository)
 
   def hmdaDashboardRoutes(oAuth2Authorization: OAuth2Authorization): Route = {
-    oAuth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
-        withoutRequestTimeout {
+      oAuth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
           pathPrefix("dashboard") {
             pathPrefix("health") {
               onComplete(healthCheck.healthCheckStatus.runToFuture) {
@@ -330,9 +329,10 @@ trait HmdaDashboardHttpApi extends Settings {
                 )
               }
           }
-        }
+
+      }
     }
-  }
+
 
   def myUserPassAuthenticator(oAuth2Authorization: OAuth2Authorization): Route = {
     handleRejections(corsRejectionHandler) {
