@@ -1,7 +1,7 @@
 object Version {
 
   val logback                = "1.2.1"
-  val scalaTest              = "3.0.5"
+  val scalaTest              = "3.0.8"
   val scalaCheck             = "1.14.0"
   val akka                   = "2.6.4"
   val akkaHttp               = "10.1.11"
@@ -22,7 +22,6 @@ object Version {
   val alpakkaSlick           = "1.1.1"
   val embeddedKafka          = "2.4.1"
   val akkaQuartzScheduler    = "1.8.3-akka-2.6.x"
-  val phantom                = "2.31.0"
   val cinnamonMetrics        = "2.13.3"
   val sprayresolver          = "0.9.1"
   val spark                  = "2.4.0"

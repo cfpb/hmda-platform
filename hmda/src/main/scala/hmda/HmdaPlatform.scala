@@ -1,8 +1,8 @@
 package hmda
 
-import akka.actor.{ ActorSystem => ClassicActorSystem }
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.adapter._
+import akka.actor.{ ActorSystem => ClassicActorSystem }
 import akka.cluster.typed.Cluster
 import akka.management.cluster.bootstrap.ClusterBootstrap
 import akka.management.scaladsl.AkkaManagement

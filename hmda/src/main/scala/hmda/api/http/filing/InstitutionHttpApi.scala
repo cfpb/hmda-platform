@@ -14,7 +14,7 @@ import hmda.api.http.model.ErrorResponse
 import hmda.auth.OAuth2Authorization
 import hmda.messages.filing.FilingCommands.GetFilingDetails
 import hmda.messages.institution.InstitutionCommands.GetInstitution
-import hmda.model.filing.{ Filing, FilingDetails }
+import hmda.model.filing.FilingDetails
 import hmda.model.institution.{ Institution, InstitutionDetail }
 import hmda.persistence.filing.FilingPersistence.selectFiling
 import hmda.persistence.institution.InstitutionPersistence.selectInstitution
@@ -99,8 +99,6 @@ private class InstitutionHttpApi(log: Logger, sharding: ClusterSharding)(implici
     onComplete(iDetails) {
       case Success((i @ Some(_), optFilings)) =>
         complete(InstitutionDetail(i, optFilings.map(_.filing).toList))
-      case Success((i @ Some(_), None)) =>
-        complete(InstitutionDetail(i, List(Filing())))
       case Success((None, _)) =>
         val errorResponse = ErrorResponse(404, s"Institution: $lei does not exist", uri.path)
         complete(NotFound -> errorResponse)

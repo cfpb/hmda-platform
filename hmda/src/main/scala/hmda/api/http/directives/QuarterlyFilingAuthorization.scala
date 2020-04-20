@@ -13,13 +13,13 @@ import hmda.model.institution.Institution
 import hmda.persistence.institution.InstitutionPersistence
 import org.slf4j.Logger
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.Future
 import scala.util.{ Failure, Success }
 
 object QuarterlyFilingAuthorization {
   def quarterlyFilingAllowed(log: Logger, sharding: ClusterSharding)(lei: String, year: Int)(
     successful: Route
-  )(implicit ec: ExecutionContext, timeout: Timeout): Route = {
+  )(implicit timeout: Timeout): Route = {
     val institution                           = InstitutionPersistence.selectInstitution(sharding, lei, year)
     val response: Future[Option[Institution]] = institution ? GetInstitution
     extractMatchedPath { path =>

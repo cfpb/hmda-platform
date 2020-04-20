@@ -135,8 +135,8 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
                                        institutionID: String,
                                        event: InstitutionKafkaEvent,
                                        config: Config
-                                     )(implicit materializer: Materializer): Future[Done] =
-    produceInstitutionRecord(institutionTopic, institutionID, event, institutionKafkaProducer, config)
+                                     )(implicit system: ActorSystem[_], materializer: Materializer): Future[Done] =
+    produceInstitutionRecord(institutionTopic, institutionID, event, institutionKafkaProducer)
 
   private def modifyInstitution(institution: Institution, state: InstitutionState): InstitutionState =
     if (state.isEmpty) {

@@ -1,19 +1,16 @@
 package hmda.api.http.filing.submissions
 
-import akka.actor.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{ StatusCodes, Uri }
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import akka.stream.Materializer
 import akka.util.Timeout
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.PathMatchers._
-import hmda.api.http.directives.HmdaTimeDirectives._
-import hmda.api.http.directives.{ HmdaTimeDirectives, QuarterlyFilingAuthorization }
+import hmda.api.http.directives.QuarterlyFilingAuthorization._
 import hmda.api.http.model.filing.submissions.{ EditsVerification, EditsVerificationResponse }
 import hmda.auth.OAuth2Authorization
 import hmda.messages.submission.SubmissionCommands.GetSubmission
@@ -33,7 +30,6 @@ import org.slf4j.Logger
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.matching.Regex
 import scala.util.{ Failure, Success }
-import QuarterlyFilingAuthorization._
 
 object VerifyHttpApi {
   def create(log: Logger, sharding: ClusterSharding)(implicit ec: ExecutionContext, t: Timeout): OAuth2Authorization => Route =

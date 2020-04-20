@@ -4,10 +4,11 @@ import java.util.UUID
 
 import akka.Done
 import akka.actor.typed.ActorSystem
+import akka.actor.typed.scaladsl.adapter._
 import akka.kafka.scaladsl.Consumer.DrainingControl
 import akka.kafka.scaladsl.{ Consumer, Producer }
 import akka.kafka.{ ConsumerSettings, ProducerSettings, Subscriptions }
-import akka.stream.{ ActorMaterializer, Materializer }
+import akka.stream.Materializer
 import akka.stream.scaladsl.{ Keep, Sink, Source }
 import com.typesafe.config.{ Config, ConfigFactory }
 import hmda.messages.institution.InstitutionEvents.InstitutionKafkaEvent
@@ -35,9 +36,8 @@ object KafkaUtils {
   }
 
   def getInstitutionKafkaProducer(system: ActorSystem[_]): KafkaProducer[String, InstitutionKafkaEvent] = {
-    val kafkaConfig = system.settings.config.getConfig("akka.kafka.producer")
     val producerSettings =
-      ProducerSettings(kafkaConfig, new StringSerializer, new InstitutionKafkaEventsSerializer)
+      ProducerSettings(system.toClassic, new StringSerializer, new InstitutionKafkaEventsSerializer)
         .withBootstrapServers(kafkaHosts)
     producerSettings.createKafkaProducer()
   }
@@ -46,12 +46,11 @@ object KafkaUtils {
                                 topic: String,
                                 key: String,
                                 value: InstitutionKafkaEvent,
-                                kafkaProducer: KafkaProducer[String, InstitutionKafkaEvent],
-                                config: Config
-                              )(implicit materializer: Materializer): Future[Done] = {
+                                kafkaProducer: KafkaProducer[String, InstitutionKafkaEvent]
+                              )(implicit system: ActorSystem[_], materializer: Materializer): Future[Done] = {
 
     val producerSettings =
-      ProducerSettings(config, new StringSerializer, new InstitutionKafkaEventsSerializer)
+      ProducerSettings(system.toClassic, new StringSerializer, new InstitutionKafkaEventsSerializer)
         .withBootstrapServers(kafkaHosts)
 
     Source
@@ -60,18 +59,18 @@ object KafkaUtils {
       .run()
   }
 
-  def produceRecord(topic: String, key: String, value: String, producer: KafkaProducer[String, String], config: Config)(
+  def produceRecord(topic: String, key: String, value: String, producer: KafkaProducer[String, String])(
     implicit system: ActorSystem[_],
     materializer: Materializer
   ): Future[Done] = {
 
     val producerSettings =
-      ProducerSettings(config, new StringSerializer, new StringSerializer)
+      ProducerSettings(system.toClassic, new StringSerializer, new StringSerializer)
         .withBootstrapServers(kafkaHosts)
 
     Source
       .single(new ProducerRecord(topic, key, value))
-      .toMat(Producer.plainSink(producerSettings, producer))(Keep.right)
+      .toMat(Producer.plainSink(producerSettings))(Keep.right)
       .run()
   }
 

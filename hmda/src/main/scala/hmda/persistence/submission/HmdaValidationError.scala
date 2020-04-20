@@ -723,10 +723,11 @@ object HmdaValidationError
                                 email: String,
                                 signedTimestamp: Long,
                                 config: Config
-                              )(implicit system: ActorSystem[_], materializer: Materializer): Future[Done] = {
-    produceRecord(signTopic, submissionId.lei, submissionId.toString, stringKafkaProducer, config)
-    produceRecord(emailTopic, s"${submissionId.toString}-${signedTimestamp}", email, stringKafkaProducer, config)
-  }
+                              )(implicit system: ActorSystem[_], materializer: Materializer, ec: ExecutionContext): Future[Done] =
+    for {
+      _ <- produceRecord(signTopic, submissionId.lei, submissionId.toString, stringKafkaProducer)
+      _ <- produceRecord(emailTopic, s"${submissionId.toString}-${signedTimestamp}", email, stringKafkaProducer)
+    } yield Done
 
   private def setHmdaFilerFlag(institutionID: String, period: Period, sharding: ClusterSharding)(implicit ec: ExecutionContext): Unit = {
 
