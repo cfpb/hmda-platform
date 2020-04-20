@@ -1,14 +1,14 @@
 package hmda.persistence.filing
 
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ActorRef, Behavior, TypedActorContext}
+import akka.actor.typed.{ ActorRef, Behavior, TypedActorContext }
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef, EntityTypeKey}
+import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef, EntityTypeKey }
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
-import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
+import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
 import hmda.messages.filing.FilingCommands._
-import hmda.messages.filing.FilingEvents.{FilingCreated, FilingEvent, SubmissionAdded, SubmissionUpdated}
+import hmda.messages.filing.FilingEvents.{ FilingCreated, FilingEvent, SubmissionAdded, SubmissionUpdated }
 import hmda.messages.institution.InstitutionCommands.AddFiling
 import hmda.model.filing.FilingDetails
 import hmda.persistence.HmdaTypedPersistentActor
@@ -25,7 +25,7 @@ object FilingPersistence extends HmdaTypedPersistentActor[FilingCommand, FilingE
     Behaviors.setup { ctx =>
       ctx.log.debug(s"Started Filing Persistence: s$filingId")
       EventSourcedBehavior[FilingCommand, FilingEvent, FilingState](
-        persistenceId = PersistenceId(s"$filingId"),
+        persistenceId = PersistenceId.ofUniqueId(filingId),
         emptyState = FilingState(),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
@@ -86,7 +86,7 @@ object FilingPersistence extends HmdaTypedPersistentActor[FilingCommand, FilingE
               }
             }
           } else {
-            log.warning(s"Could not update submission wth $updated")
+            log.warn(s"Could not update submission wth $updated")
             Effect.none
           }
 

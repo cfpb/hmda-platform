@@ -30,7 +30,7 @@ object Version {
   val monix                  = "3.0.0"
   val lettuce                = "5.1.6.RELEASE"
   val java8Compat            = "0.9.0"
-  val scalaMock              = "4.2.0"
+  val scalaMock              = "4.4.0"
   val guava                  = "27.1-jre"
   val awsSesSdk              = "1.11.635"
   val zeroAllocation         = "0.10.1"
