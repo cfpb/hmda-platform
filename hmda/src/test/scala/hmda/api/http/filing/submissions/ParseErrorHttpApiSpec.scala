@@ -2,69 +2,54 @@ package hmda.api.http.filing.submissions
 
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.ActorSystem
+import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.event.{LoggingAdapter, NoLogging}
+import akka.cluster.typed.{ Cluster, Join }
+import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
-import hmda.persistence.AkkaCassandraPersistenceSpec
-import org.scalatest.MustMatchers
-import akka.actor.typed.scaladsl.adapter._
-import akka.cluster.typed.{Cluster, Join}
-import akka.http.scaladsl.model.StatusCodes
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.filing.submissions.ParsingErrorSummary
+import hmda.auth.{ KeycloakTokenVerifier, OAuth2Authorization }
 import hmda.messages.filing.FilingCommands.CreateFiling
 import hmda.messages.filing.FilingEvents.FilingEvent
 import hmda.messages.institution.InstitutionCommands.CreateInstitution
-import hmda.messages.institution.InstitutionEvents.{
-  InstitutionCreated,
-  InstitutionEvent
-}
+import hmda.messages.institution.InstitutionEvents.{ InstitutionCreated, InstitutionEvent }
 import hmda.messages.submission.SubmissionCommands.CreateSubmission
-import hmda.messages.submission.SubmissionEvents.{
-  SubmissionCreated,
-  SubmissionEvent
-}
-import hmda.messages.submission.SubmissionProcessingCommands.{
-  GetParsedWithErrorCount,
-  PersistHmdaRowParsedError
-}
+import hmda.messages.submission.SubmissionEvents.{ SubmissionCreated, SubmissionEvent }
+import hmda.messages.submission.SubmissionProcessingCommands.{ GetParsedWithErrorCount, PersistHmdaRowParsedError, _ }
+import hmda.messages.submission.SubmissionProcessingEvents.{ HmdaRowParsedCount, SubmissionProcessingEvent }
 import hmda.model.filing.Filing
 import hmda.model.filing.FilingGenerator.filingGen
-import hmda.model.filing.submission.{Created, Submission, SubmissionId}
+import hmda.model.filing.submission.{ Created, Submission, SubmissionId }
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators.institutionGen
 import hmda.model.submission.SubmissionGenerator.submissionGen
 import hmda.parser.filing.lar.LarParserErrorModel.InvalidLarId
+import hmda.persistence.AkkaCassandraPersistenceSpec
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
-import hmda.persistence.submission.{HmdaParserError, SubmissionPersistence}
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.auth.{KeycloakTokenVerifier, OAuth2Authorization}
-import hmda.messages.submission.SubmissionProcessingEvents.{
-  HmdaRowParsedCount,
-  SubmissionProcessingEvent
-}
+import hmda.persistence.submission.{ HmdaParserError, SubmissionPersistence }
 import hmda.utils.YearUtils.Period
-import hmda.messages.submission.SubmissionProcessingCommands._
 import org.keycloak.adapters.KeycloakDeploymentBuilder
+import org.scalatest.MustMatchers
+import org.slf4j.{ Logger, LoggerFactory }
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.util.Random
 
-class ParseErrorHttpApiSpec
-  extends AkkaCassandraPersistenceSpec
-    with MustMatchers
-    with ParseErrorHttpApi
-    with ScalatestRouteTest {
+class ParseErrorHttpApiSpec extends AkkaCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest {
 
   val duration = 10.seconds
 
-  override implicit val typedSystem: ActorSystem[_] = system.toTyped
-  override val log: LoggingAdapter = NoLogging
-  override implicit val timeout: Timeout = Timeout(duration)
-  override val sharding: ClusterSharding = ClusterSharding(typedSystem)
-  val ec: ExecutionContext = system.dispatcher
+  implicit val typedSystem: ActorSystem[_]           = system.toTyped
+  val log: Logger                                    = LoggerFactory.getLogger(getClass)
+  implicit val timeout: Timeout                      = Timeout(duration)
+  val sharding: ClusterSharding                      = ClusterSharding(typedSystem)
+  val ec: ExecutionContext                           = system.dispatcher
+  val parserErrorRoute: OAuth2Authorization => Route = ParseErrorHttpApi.create(log, sharding)
 
   val oAuth2Authorization = OAuth2Authorization(
     log,
@@ -80,8 +65,7 @@ class ParseErrorHttpApiSpec
   val sampleInstitution = institutionGen
     .suchThat(_.LEI != "")
     .sample
-    .getOrElse(
-      Institution.empty.copy(LEI = Random.alphanumeric.take(10).mkString))
+    .getOrElse(Institution.empty.copy(LEI = Random.alphanumeric.take(10).mkString))
 
   val sampleFiling = filingGen.sample
     .getOrElse(Filing())
@@ -98,9 +82,9 @@ class ParseErrorHttpApiSpec
     .copy(id = submissionId)
 
   val institutionProbe = TestProbe[InstitutionEvent]("institution-probe")
-  val filingProbe = TestProbe[FilingEvent]("filing-probe")
-  val submissionProbe = TestProbe[SubmissionEvent]("submission-probe")
-  val errorsProbe = TestProbe[SubmissionProcessingEvent]("parsing-error-probe")
+  val filingProbe      = TestProbe[FilingEvent]("filing-probe")
+  val submissionProbe  = TestProbe[SubmissionEvent]("submission-probe")
+  val errorsProbe      = TestProbe[SubmissionProcessingEvent]("parsing-error-probe")
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -111,11 +95,8 @@ class ParseErrorHttpApiSpec
     HmdaParserError.startShardRegion(sharding)
 
     val institutionPersistence =
-      sharding.entityRefFor(
-        InstitutionPersistence.typeKey,
-        s"${InstitutionPersistence.name}-${sampleInstitution.LEI}")
-    institutionPersistence ! CreateInstitution(sampleInstitution,
-      institutionProbe.ref)
+      sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-${sampleInstitution.LEI}")
+    institutionPersistence ! CreateInstitution(sampleInstitution, institutionProbe.ref)
     institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))
 
     val filingPersistence =
@@ -126,24 +107,14 @@ class ParseErrorHttpApiSpec
     filingPersistence ! CreateFiling(sampleFiling, filingProbe.ref)
 
     val submissionPersistence =
-      sharding.entityRefFor(
-        SubmissionPersistence.typeKey,
-        s"${SubmissionPersistence.name}-${sampleSubmission.id.toString}")
-    submissionPersistence ! CreateSubmission(sampleSubmission.id,
-      submissionProbe.ref)
+      sharding.entityRefFor(SubmissionPersistence.typeKey, s"${SubmissionPersistence.name}-${sampleSubmission.id.toString}")
+    submissionPersistence ! CreateSubmission(sampleSubmission.id, submissionProbe.ref)
     submissionProbe.expectMessageType[SubmissionCreated]
 
-    val hmdaParserError = sharding.entityRefFor(
-      HmdaParserError.typeKey,
-      s"${HmdaParserError.name}-${sampleSubmission.id.toString}")
+    val hmdaParserError = sharding.entityRefFor(HmdaParserError.typeKey, s"${HmdaParserError.name}-${sampleSubmission.id.toString}")
     for (i <- 1 to 100) {
       val errorList = List(InvalidLarId("a"))
-      hmdaParserError ! PersistHmdaRowParsedError(
-        i,
-        "testULI",
-        errorList.map(x =>
-          FieldParserError(x.fieldName, x.inputValue)),
-        None)
+      hmdaParserError ! PersistHmdaRowParsedError(i, "testULI", errorList.map(x => FieldParserError(x.fieldName, x.inputValue)), None)
     }
 
     hmdaParserError ! GetParsedWithErrorCount(errorsProbe.ref)

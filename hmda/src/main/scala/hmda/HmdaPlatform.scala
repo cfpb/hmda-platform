@@ -14,7 +14,6 @@ import hmda.persistence.util.CassandraUtil
 import hmda.publication.{ HmdaPublication, KafkaUtils }
 import hmda.validation.HmdaValidation
 import net.manub.embeddedkafka.{ EmbeddedKafka, EmbeddedKafkaConfig }
-import org.apache.kafka.clients.producer.Producer
 import org.slf4j.LoggerFactory
 
 object HmdaPlatform extends App {
@@ -81,17 +80,17 @@ object HmdaPlatform extends App {
   }
 
   // TODO: Fix this as initializing it here is not a good idea, this should be initialized in HmdaPersistence and passed into HmdaValidationError
-  val stringKafkaProducer: Producer[String, String] = KafkaUtils.getStringKafkaProducer(system)
-  val institutionKafkaProducer                      = KafkaUtils.getInstitutionKafkaProducer(system)
+  val stringKafkaProducer      = KafkaUtils.getStringKafkaProducer(system)
+  val institutionKafkaProducer = KafkaUtils.getInstitutionKafkaProducer(system)
 
   //Start Persistence
-  classic.spawn(HmdaPersistence.behavior, HmdaPersistence.name)
+  classic.spawn(HmdaPersistence(), HmdaPersistence.name)
 
   //Start Validation
-  classic.spawn(HmdaValidation.behavior, HmdaValidation.name)
+  classic.spawn(HmdaValidation(), HmdaValidation.name)
 
   //Start Publication
-  classic.spawn(HmdaPublication.behavior, HmdaPublication.name)
+  classic.spawn(HmdaPublication(), HmdaPublication.name)
 
   //Start API
   classic.spawn[Nothing](HmdaApi(), HmdaApi.name)

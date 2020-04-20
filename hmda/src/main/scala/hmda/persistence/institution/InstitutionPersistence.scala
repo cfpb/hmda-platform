@@ -2,7 +2,6 @@ package hmda.persistence.institution
 
 import akka.Done
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.scaladsl.adapter._
 import akka.actor.typed.{ ActorRef, ActorSystem, Behavior, TypedActorContext }
 import akka.cluster.sharding.typed.ShardingEnvelope
 import hmda.HmdaPlatform.institutionKafkaProducer
@@ -10,7 +9,7 @@ import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
 import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
-import akka.stream.{ ActorMaterializer, Materializer }
+import akka.stream.Materializer
 import com.typesafe.config.Config
 import hmda.messages.institution.InstitutionCommands._
 import hmda.messages.institution.InstitutionEvents._
@@ -22,7 +21,6 @@ import hmda.publication.KafkaUtils._
 import scala.concurrent.Future
 
 object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionCommand, InstitutionEvent, InstitutionState] {
-
   override final val name = "Institution"
 
   override def behavior(entityId: String): Behavior[InstitutionCommand] =

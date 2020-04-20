@@ -2,10 +2,10 @@ package hmda.persistence.submission
 
 import java.time.Instant
 
+import akka.actor.typed._
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed._
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import akka.pattern.ask
@@ -17,7 +17,7 @@ import akka.stream.scaladsl.{ Sink, Source, _ }
 import akka.stream.typed.scaladsl.ActorFlow
 import akka.util.{ ByteString, Timeout }
 import akka.{ Done, NotUsed }
-import com.typesafe.config.{ Config, ConfigFactory }
+import com.typesafe.config.Config
 import hmda.HmdaPlatform.stringKafkaProducer
 import hmda.messages.institution.InstitutionCommands.{ GetInstitution, ModifyInstitution }
 import hmda.messages.institution.InstitutionEvents.InstitutionEvent
@@ -60,14 +60,9 @@ object HmdaValidationError
 
   override val name: String = "HmdaValidationError"
 
-  val config        = ConfigFactory.load()
-  val futureTimeout = config.getInt("hmda.actor.timeout")
-
   val quarterlyRegexQ1 = "\\b[0-9]{4}\\b-(Q*[1])$".r
   val quarterlyRegexQ2 = "\\b[0-9]{4}\\b-(Q*[2])$".r
   val quarterlyRegexQ3 = "\\b[0-9]{4}\\b-(Q*[3])$".r
-
-  implicit val timeout: Timeout = Timeout(futureTimeout.seconds)
 
   override def behavior(entityId: String): Behavior[SubmissionProcessingCommand] =
     Behaviors.setup { ctx =>
@@ -88,7 +83,10 @@ object HmdaValidationError
     implicit val blockingEc: ExecutionContext =
       system.dispatchers.lookup(DispatcherSelector.fromConfig("akka.blocking-quality-dispatcher"))
 
-    val sharding = ClusterSharding(ctx.asScala.system)
+    val config                    = system.settings.config
+    val futureTimeout             = config.getInt("hmda.actor.timeout")
+    implicit val timeout: Timeout = Timeout(futureTimeout.seconds)
+    val sharding                  = ClusterSharding(ctx.asScala.system)
 
     cmd match {
       case StartSyntacticalValidity(submissionId) =>
@@ -113,7 +111,8 @@ object HmdaValidationError
           larSyntacticalValidityErrors <- validateLar("syntactical-validity", ctx, submissionId, validationContext)(
             system,
             materializer,
-            blockingEc
+            blockingEc,
+            timeout
           )
           _              = log.info(s"Starting validateAsycLar - Syntactical for $submissionId")
           larAsyncErrors <- validateAsyncLar("syntactical-validity", ctx, submissionId).runWith(Sink.ignore)
@@ -150,7 +149,8 @@ object HmdaValidationError
           larErrors <- validateLar("quality", ctx, submissionId, ValidationContext(filingPeriod = Some(period)))(
             system,
             materializer,
-            blockingEc
+            blockingEc,
+            timeout
           )
           _ = log.info(s"Finished ValidateLar Quality for $submissionId")
           _ = log.info(s"Started validateAsyncLar - Quality for $submissionId")
@@ -357,10 +357,7 @@ object HmdaValidationError
                           ctx: TypedActorContext[SubmissionProcessingCommand],
                           submissionId: SubmissionId,
                           validationContext: ValidationContext
-                        ): Source[HmdaRowValidatedError, NotUsed] = {
-    implicit val system: ActorSystem[_] = ctx.asScala.system
-    implicit val ec: ExecutionContext   = ctx.asScala.executionContext
-
+                        )(implicit t: Timeout, system: ActorSystem[_]): Source[HmdaRowValidatedError, NotUsed] =
     uploadConsumerRawStr(ctx, submissionId)
       .take(1)
       .via(validateTsFlow("all", validationContext))
@@ -375,18 +372,13 @@ object HmdaValidationError
         )
       )
 
-  }
-
   private def validateTsLar(
                              ctx: TypedActorContext[SubmissionProcessingCommand],
                              submissionId: SubmissionId,
                              editType: String,
                              validationContext: ValidationContext
-                           ): Future[List[ValidationError]] = {
-    implicit val actorSystem: ActorSystem[_] = ctx.asScala.system
-    implicit val ec: ExecutionContext        = ctx.asScala.executionContext
-    val log                                  = ctx.asScala.log
-
+                           )(implicit actorSystem: ActorSystem[_], ec: ExecutionContext, t: Timeout): Future[List[ValidationError]] = {
+    val log = ctx.asScala.log
     log.info(s"Starting validateTsLar for $submissionId")
 
     def hashString(s: String): Long =
@@ -595,7 +587,7 @@ object HmdaValidationError
                            ctx: TypedActorContext[SubmissionProcessingCommand],
                            submissionId: SubmissionId,
                            validationContext: ValidationContext
-                         )(implicit system: ActorSystem[_], mat: Materializer, ec: ExecutionContext): Future[Unit] = {
+                         )(implicit system: ActorSystem[_], mat: Materializer, ec: ExecutionContext, t: Timeout): Future[Unit] = {
 
     def qualityChecks: Future[List[ValidationError]] =
       if (editCheck == "quality") validateTsLar(ctx, submissionId, "quality", validationContext)
@@ -654,7 +646,7 @@ object HmdaValidationError
                                 editCheck: String,
                                 ctx: TypedActorContext[SubmissionProcessingCommand],
                                 submissionId: SubmissionId
-                              )(implicit system: ActorSystem[_], mat: Materializer, ec: ExecutionContext): Source[HmdaRowValidatedError, NotUsed] = {
+                              )(implicit system: ActorSystem[_], mat: Materializer, ec: ExecutionContext, t: Timeout): Source[HmdaRowValidatedError, NotUsed] = {
     val period = submissionId.period
     uploadConsumerRawStr(ctx, submissionId)
       .drop(1)
@@ -686,7 +678,7 @@ object HmdaValidationError
                                  sharding: ClusterSharding,
                                  ctx: TypedActorContext[SubmissionProcessingCommand],
                                  submissionId: SubmissionId
-                               )(implicit as: ActorSystem[_], mat: Materializer, ec: ExecutionContext): Future[ValidationContext] = {
+                               )(implicit as: ActorSystem[_], mat: Materializer, ec: ExecutionContext, t: Timeout): Future[ValidationContext] = {
     val institutionPersistence                    = InstitutionPersistence.selectInstitution(sharding, submissionId.lei, period.year)
     val fInstitution: Future[Option[Institution]] = institutionPersistence ? GetInstitution
     for {
@@ -698,7 +690,7 @@ object HmdaValidationError
   private def uploadConsumerRawStr(
                                     ctx: TypedActorContext[SubmissionProcessingCommand],
                                     submissionId: SubmissionId
-                                  )(implicit as: ActorSystem[_], ec: ExecutionContext): Source[ByteString, NotUsed] =
+                                  )(implicit as: ActorSystem[_]): Source[ByteString, NotUsed] =
     readRawData(submissionId)
       .map(line => line.data)
       .map(ByteString(_))
@@ -706,7 +698,7 @@ object HmdaValidationError
   private def persistEditDetails(
                                   editDetailPersistence: EntityRef[EditDetailsPersistenceCommand],
                                   hmdaRowValidatedError: HmdaRowValidatedError
-                                )(implicit ec: ExecutionContext): Future[Iterable[EditDetailsPersistenceEvent]] = {
+                                )(implicit ec: ExecutionContext, t: Timeout): Future[Iterable[EditDetailsPersistenceEvent]] = {
 
     val details = validatedRowToEditDetails(hmdaRowValidatedError)
 
@@ -729,7 +721,10 @@ object HmdaValidationError
       _ <- produceRecord(emailTopic, s"${submissionId.toString}-${signedTimestamp}", email, stringKafkaProducer)
     } yield Done
 
-  private def setHmdaFilerFlag(institutionID: String, period: Period, sharding: ClusterSharding)(implicit ec: ExecutionContext): Unit = {
+  private def setHmdaFilerFlag(institutionID: String, period: Period, sharding: ClusterSharding)(
+    implicit ec: ExecutionContext,
+    t: Timeout
+  ): Unit = {
 
     val year       = period.year.toString
     val periodType = period.toString

@@ -1,38 +1,29 @@
 package hmda.api.http.public
 
-import akka.actor.ActorSystem
-import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.stream.{ ActorMaterializer, Materializer }
-import akka.util.Timeout
-import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.headers.RawHeader
+import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import hmda.api.http.model.public.LarValidateRequest
-import hmda.parser.filing.lar.LarCsvParser
-import hmda.utils.YearUtils.Period
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.api.http.directives.HmdaTimeDirectives._
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import hmda.api.http.PathMatchers._
+import hmda.api.http.model.public.LarValidateRequest
+import hmda.api.http.public.FilingValidationHttpDirectives._
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.validation.LarValidationError
+import hmda.parser.filing.lar.LarCsvParser
+import hmda.utils.YearUtils.Period
 import hmda.validation.HmdaValidation
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
-import hmda.api.http.PathMatchers._
 
-import scala.concurrent.ExecutionContext
+object LarValidationHttpApi {
+  def create: Route = new LarValidationHttpApi().larRoutes
+}
 
-trait LarValidationHttpApi extends FilingValidationHttpApi {
-
-  implicit val system: ActorSystem
-  implicit val materializer: Materializer
-  val log: LoggingAdapter
-  implicit val ec: ExecutionContext
-  implicit val timeout: Timeout
-
+private class LarValidationHttpApi {
   //lar/parse
-  val parseLarRoute =
+  private val parseLarRoute =
     path("parse") {
       post {
         respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
@@ -50,7 +41,7 @@ trait LarValidationHttpApi extends FilingValidationHttpApi {
     }
 
   //lar/validate/<year>
-  val validateYearLarRoute =
+  private val validateYearLarRoute =
     path("validate" / IntNumber) { year =>
       parameters('check.as[String] ? "all") { checkType =>
         post {
@@ -68,7 +59,7 @@ trait LarValidationHttpApi extends FilingValidationHttpApi {
     }
 
   //lar/validate/<year>
-  val validateQuarterLarRoute =
+  private val validateQuarterLarRoute =
     path("validate" / IntNumber / "quarter" / Quarter) { (year, quarter) =>
       parameters('check.as[String] ? "all") { checkType =>
         post {
@@ -111,10 +102,9 @@ trait LarValidationHttpApi extends FilingValidationHttpApi {
       cors() {
         encodeResponse {
           pathPrefix("lar") {
-            timed(parseLarRoute ~ validateYearLarRoute ~ validateQuarterLarRoute)
+            parseLarRoute ~ validateYearLarRoute ~ validateQuarterLarRoute
           }
         }
       }
     }
-
 }
