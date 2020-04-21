@@ -9,12 +9,15 @@ import monix.eval.Task
 trait FileService {
   def persistData(queries: List[QueryField],
                   delimiter: Delimiter,
+                  year: String,
                   data: Source[ByteString, NotUsed]): Task[Unit]
 
   def retrieveDataUrl(queries: List[QueryField],
-                      delimiter: Delimiter): Task[Option[String]]
+                      delimiter: Delimiter,
+                      year: String): Task[Option[String]]
 
   def retrieveData(
       queries: List[QueryField],
-      delimiter: Delimiter): Task[Option[Source[ByteString, NotUsed]]]
+      delimiter: Delimiter,
+      year: String): Task[Option[Source[ByteString, NotUsed]]]
 }

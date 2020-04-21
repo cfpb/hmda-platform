@@ -55,7 +55,7 @@ trait DataBrowserDirectives extends Settings {
   def obtainDataSource(
     cache: FileService,
     db: QueryService
-  )(queries: QueryFields, delimiter: Delimiter): Task[Either[Source[ByteString, NotUsed], String]] = {
+  )(queries: QueryFields, delimiter: Delimiter, year: String): Task[Either[Source[ByteString, NotUsed], String]] = {
     val serializedData: Source[ByteString, NotUsed] = {
       queries.year match {
         case "2017" => {
@@ -74,14 +74,14 @@ trait DataBrowserDirectives extends Settings {
     }
 
     cache
-      .retrieveDataUrl(queries.queryFields, delimiter)
+      .retrieveDataUrl(queries.queryFields, delimiter, year)
       .flatMap {
         case Some(url) =>
           Task.now(Right(url))
         case None =>
           // upload the data to S3 in the background and emit the Source immediately
           cache
-            .persistData(queries.queryFields, delimiter, serializedData)
+            .persistData(queries.queryFields, delimiter, year, serializedData)
             .startAndForget *> Task(Left(serializedData))
       }
       .onErrorFallbackTo(Task.now(Left(serializedData)))
@@ -410,14 +410,24 @@ trait DataBrowserDirectives extends Settings {
       }
     }
 
-  private def invalidFieldFor2017(year: String, field: String, extractDirective: => Directive1[Option[QueryField]]): Directive1[Option[QueryField]]  = {
-    year match {
-      case "2017" => complete((BadRequest, InvalidFieldFor2017(field)))
-      case _ => extractDirective
-    }
-  }
+  private def extractPropertyType: Directive1[Option[QueryField]] =
+    parameters("property_types".as(CsvSeq[String]) ? Nil).flatMap { rawPropertyTypes =>
+      validateLoanType(rawPropertyTypes) match {
+        case Left(invalidPropertyTypes) =>
+          complete((BadRequest, InvalidLoanTypes(invalidPropertyTypes)))
 
-  def extractNonMandatoryQueryFields(year: String)(innerRoute: QueryFields => Route): Route =
+        case Right(propertyTypes) if propertyTypes.nonEmpty && propertyTypes.size == PropertyType.values.size =>
+          provide(Option(QueryField("property_types", propertyTypes.map(_.entryName), "property_type", isAllSelected = true)))
+
+        case Right(propertyTypes) if propertyTypes.nonEmpty && propertyTypes.size != PropertyType.values.size =>
+          provide(Option(QueryField("property_types", propertyTypes.map(_.entryName), "property_type", isAllSelected = false)))
+
+        case Right(_) =>
+          provide(None)
+      }
+    }
+
+  private def extractNonMandatoryQueryFields(year: String)(innerRoute: QueryFields => Route): Route =
     year match {
       case "2017" => extractNonMandatoryQueryFields2017(year)(innerRoute)
       case "2018" => extractNonMandatoryQueryFields2018(year)(innerRoute)
@@ -462,17 +472,21 @@ trait DataBrowserDirectives extends Settings {
     }
 
   private def extractNonMandatoryQueryFields2017(year: String)(innerRoute: QueryFields => Route): Route =
-    (extractActions & extractLoanPurpose(year) & extractLienStatus(year)) {
+    (extractActions & extractLoanPurpose(year) & extractLienStatus(year) & extractPropertyType & extractLoanType) {
       (
         actionsTaken,
         loanPurposes,
-        lienStatuses
+        lienStatuses,
+        propertyType,
+        loanType
       ) =>
         val filteredfields =
           List(
             actionsTaken,
             loanPurposes,
-            lienStatuses
+            lienStatuses,
+            propertyType,
+            loanType
           ).flatten
         if (filteredfields.size > 2)
           complete((BadRequest, TooManyFilterCriterias()))

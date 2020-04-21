@@ -21,8 +21,8 @@ class S3FileService(implicit mat: ActorMaterializer) extends FileService with Se
 
   private final val log = LoggerFactory.getLogger(getClass)
 
-  override def persistData(queries: List[QueryField], delimiter: Delimiter, dataSource: Source[ByteString, NotUsed]): Task[Unit] = {
-    val key = s3Key(queries, delimiter)
+  override def persistData(queries: List[QueryField], delimiter: Delimiter, year: String, dataSource: Source[ByteString, NotUsed]): Task[Unit] = {
+    val key = s3Key(queries, delimiter, year)
     val friendlyName = {
       val content = formName(queries)
       s"${content}${fileEnding(delimiter)}"
@@ -50,8 +50,8 @@ class S3FileService(implicit mat: ActorMaterializer) extends FileService with Se
     }.void
   }
 
-  override def retrieveData(queries: List[QueryField], delimiter: Delimiter): Task[Option[Source[ByteString, NotUsed]]] = {
-    val key = s3Key(queries, delimiter)
+  override def retrieveData(queries: List[QueryField], delimiter: Delimiter, year: String): Task[Option[Source[ByteString, NotUsed]]] = {
+    val key = s3Key(queries, delimiter, year)
     Task
       .deferFuture(S3.download(s3.bucket, key).runWith(Sink.head))
       .map(opt => opt.map { case (source, _) => source })
@@ -74,14 +74,17 @@ class S3FileService(implicit mat: ActorMaterializer) extends FileService with Se
     }
   }
 
-  private def s3Key(queries: List[QueryField], delimiter: Delimiter): String = {
+  private def s3Key(queries: List[QueryField], delimiter: Delimiter, year: String): String = {
     val input = md5HashString(formName(queries))
-    val key   = s"${s3.environment}/${s3.filteredQueries}/$input"
+    val key = year match {
+      case "2018" => s"${s3.environment}/${s3.filteredQueries}/$input"
+      case _ => s"${s3.environment}/${year}/${s3.filteredQueries}/$input"
+    }
     s"$key${fileEnding(delimiter)}"
   }
 
-  override def retrieveDataUrl(queries: List[QueryField], delimiter: Delimiter): Task[Option[String]] = {
-    val key = s3Key(queries, delimiter)
+  override def retrieveDataUrl(queries: List[QueryField], delimiter: Delimiter, year: String): Task[Option[String]] = {
+    val key = s3Key(queries, delimiter, year)
     Task
       .deferFuture(S3.getObjectMetadata(s3.bucket, key).runWith(Sink.head))
       .onErrorHandleWith { error =>

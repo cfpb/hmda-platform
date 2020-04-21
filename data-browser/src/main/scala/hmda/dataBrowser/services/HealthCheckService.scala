@@ -46,7 +46,7 @@ class HealthCheckService(
 
     def storageQuery: Task[HealthCheckStatus] =
       health {
-        storage.retrieveDataUrl(exampleQuery, Commas)
+        storage.retrieveDataUrl(exampleQuery, Commas, "2018")
       }
 
     Task.parMap3(databaseQuery, cacheQuery, storageQuery) { (db, cache, storage) =>

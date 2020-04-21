@@ -70,8 +70,8 @@ trait DataBrowserHttpApi extends Settings {
   val healthCheck: HealthCheckService =
     new HealthCheckService(repository2018, cache, fileCache)
 
-  def serveData(queries: QueryFields, delimiter: Delimiter, errorMessage: String): Route =
-    onComplete(obtainDataSource(fileCache, query)(queries, delimiter).runToFuture) {
+  def serveData(queries: QueryFields, delimiter: Delimiter, errorMessage: String, year: String): Route =
+    onComplete(obtainDataSource(fileCache, query)(queries, delimiter, year).runToFuture) {
       case Failure(ex) =>
         log.error(ex, errorMessage)
         complete(StatusCodes.InternalServerError)
@@ -110,7 +110,7 @@ trait DataBrowserHttpApi extends Settings {
                   })
                   log.info("Nationwide [CSV]: " + allFields)
                   contentDispositionHeader(allFields.queryFields, Commas) {
-                    serveData(allFields, Commas, s"Failed to perform nationwide CSV query with the following queries: $allFields")
+                    serveData(allFields, Commas, s"Failed to perform nationwide CSV query with the following queries: $allFields", allFields.year)
                   }
                 }
               }
@@ -125,7 +125,7 @@ trait DataBrowserHttpApi extends Settings {
                   })
                   log.info("Nationwide [Pipe]: " + allFields)
                   contentDispositionHeader(allFields.queryFields, Pipes) {
-                    serveData(allFields, Pipes, s"Failed to perform nationwide PSV query with the following queries: $allFields")
+                    serveData(allFields, Pipes, s"Failed to perform nationwide PSV query with the following queries: $allFields", allFields.year)
                   }
                 }
               }
@@ -170,7 +170,7 @@ trait DataBrowserHttpApi extends Settings {
                 val allFields = QueryFields(mandatoryFields.year, mandatoryFields.queryFields ++ remainingQueryFields.queryFields)
                 log.info("CSV: " + allFields)
                 contentDispositionHeader(allFields.queryFields, Commas) {
-                  serveData(allFields, Commas, s"Failed to fetch data for /view/csv with the following queries: ${allFields.queryFields}")
+                  serveData(allFields, Commas, s"Failed to fetch data for /view/csv with the following queries: ${allFields.queryFields}", allFields.year)
                 }
               }
             }
@@ -182,7 +182,7 @@ trait DataBrowserHttpApi extends Settings {
                 val allFields = QueryFields(mandatoryFields.year, mandatoryFields.queryFields ++ remainingQueryFields.queryFields)
                 log.info("PIPE: " + allFields)
                 contentDispositionHeader(allFields.queryFields, Pipes) {
-                  serveData(allFields, Pipes, s"Failed to fetch data for /view/pipe with the following queries: ${allFields.queryFields}")
+                  serveData(allFields, Pipes, s"Failed to fetch data for /view/pipe with the following queries: ${allFields.queryFields}", allFields.year)
                 }
               }
             }
