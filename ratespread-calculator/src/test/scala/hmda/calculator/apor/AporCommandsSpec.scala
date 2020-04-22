@@ -18,6 +18,7 @@ class AporCommandsSpec extends WordSpec with MustMatchers {
     "Apor Commands" must {
         "error if loan term less than 1 year or greater than 50" in {
             getRateSpreadCalculation(1, -1, FixedRate, 3.0, lockInDate, 1) mustBe RateSpreadResponse("bad loan term")
+            getRateSpreadCalculation(1, 20, FixedRate, 3.0, lockInDate, 1) mustBe RateSpreadResponse("bad loan term")
             getRateSpreadCalculation(1, 51, FixedRate, 3.0, lockInDate, 1) mustBe RateSpreadResponse("bad loan term")
         }
         "return NA ratespread" in {
