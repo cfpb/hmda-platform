@@ -1,15 +1,12 @@
 package hmda.reporting.api.http
 
-import akka.actor.ActorSystem
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import akka.stream.ActorMaterializer
-import akka.util.Timeout
-import com.typesafe.config.ConfigFactory
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{ cors, corsRejectionHandler }
+import com.typesafe.config.Config
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.model.institution.{HmdaFiler, HmdaFilerResponse, MsaMd, MsaMdResponse}
+import hmda.model.institution.{ HmdaFiler, HmdaFilerResponse, MsaMd, MsaMdResponse }
 import hmda.query.repository.ModifiedLarRepository
 import hmda.reporting.repository.InstitutionComponent
 import hmda.util.http.FilingResponseUtils.entityNotPresentResponse
@@ -17,24 +14,22 @@ import io.circe.generic.auto._
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
-trait ReportingHttpApi extends InstitutionComponent {
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.{ Failure, Success }
 
-  implicit val system: ActorSystem
-  implicit val materializer: ActorMaterializer
-  implicit val ec: ExecutionContext
-  implicit val timeout: Timeout
+object ReportingHttpApi {
+  def create(config: Config)(implicit ec: ExecutionContext): Route =
+    new ReportingHttpApi(config)(ec).hmdaFilerRoutes
+}
+private class ReportingHttpApi(config: Config)(implicit ec: ExecutionContext) extends InstitutionComponent {
 
-  val config     = ConfigFactory.load()
-  val bankFilter = config.getConfig("filter")
-  val bankFilterList =
-    bankFilter.getString("bank-filter-list").toUpperCase.split(",")
-  val databaseConfig            = DatabaseConfig.forConfig[JdbcProfile]("db")
-  val repo                      = new ModifiedLarRepository(databaseConfig)
-  val institutionRepository2018 = new InstitutionRepository(databaseConfig, "institutions2018")
-  val institutionRepository2019 = new InstitutionRepository(databaseConfig, "institutions2019")
-  val filerListRoute: Route = {
+  private val bankFilter                = config.getConfig("filter")
+  private val bankFilterList            = bankFilter.getString("bank-filter-list").toUpperCase.split(",")
+  private val databaseConfig            = DatabaseConfig.forConfig[JdbcProfile]("db")
+  private val repo                      = new ModifiedLarRepository(databaseConfig)
+  private val institutionRepository2018 = new InstitutionRepository(databaseConfig, "institutions2018")
+  private val institutionRepository2019 = new InstitutionRepository(databaseConfig, "institutions2019")
+  private val filerListRoute: Route = {
     path("filers" / IntNumber) { filingYear =>
       get {
 
@@ -42,36 +37,32 @@ trait ReportingHttpApi extends InstitutionComponent {
           case 2018 =>
             institutionRepository2018
               .getFilteredFilers(bankFilterList)
-              .map(
-                sheets =>
-                  sheets
-                    .map(
-                      instituionEntity =>
-                        HmdaFiler(
-                          instituionEntity.lei.toUpperCase,
-                          instituionEntity.respondentName,
-                          instituionEntity.activityYear.toString
-                        )
+              .map(sheets =>
+                sheets
+                  .map(instituionEntity =>
+                    HmdaFiler(
+                      instituionEntity.lei.toUpperCase,
+                      instituionEntity.respondentName,
+                      instituionEntity.activityYear.toString
                     )
-                    .toSet
+                  )
+                  .toSet
               )
           case 2019 =>
             institutionRepository2019
               .getFilteredFilers(bankFilterList)
-              .map(
-                sheets =>
-                  sheets
-                    .map(
-                      instituionEntity =>
-                        HmdaFiler(
-                          instituionEntity.lei.toUpperCase,
-                          instituionEntity.respondentName,
-                          instituionEntity.activityYear.toString
-                        )
+              .map(sheets =>
+                sheets
+                  .map(instituionEntity =>
+                    HmdaFiler(
+                      instituionEntity.lei.toUpperCase,
+                      instituionEntity.respondentName,
+                      instituionEntity.activityYear.toString
                     )
-                    .toSet
+                  )
+                  .toSet
               )
-          case _ => Future(Set(HmdaFiler("","","")))
+          case _ => Future(Set(HmdaFiler("", "", "")))
         }
 
         onComplete(futFilerSet) {
