@@ -7,7 +7,7 @@ import hmda.census.records.OverallLoanLimit
 
 case class LoanLimitInfo(
   totalUnits: Int,
-  amount: Double,
+  amount: BigDecimal,
   lienStatus: LienStatusEnum,
   county: String,
   state: String
