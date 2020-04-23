@@ -13,7 +13,7 @@ object Q653_2 extends EditCheck[LoanApplicationRegister] {
   override def parent: String = "Q653"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult ={
-    when(lar.action.actionTakenType is oneOf(ApplicationDenied, ApplicationWithdrawnByApplicant, FileClosedForIncompleteness, PurchasedLoan, PreapprovalRequestDenied)) {
+    when(lar.action.actionTakenType is oneOf(ApplicationDenied, ApplicationWithdrawnByApplicant, FileClosedForIncompleteness, PurchasedLoan, PreapprovalRequestDenied) and (lar.loan.combinedLoanToValueRatio not oneOf("NA", "Exempt"))) {
         lar.loan.combinedLoanToValueRatio is between("0","1000")
     }
   }

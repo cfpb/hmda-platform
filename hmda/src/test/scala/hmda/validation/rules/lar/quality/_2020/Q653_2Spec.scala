@@ -18,7 +18,8 @@ class Q653_2Spec extends LarEditCheckSpec {
         relevantLar.copy(loan = relevantLar.loan.copy(combinedLoanToValueRatio = "0")).mustPass
         relevantLar.copy(loan = relevantLar.loan.copy(combinedLoanToValueRatio = "1000")).mustPass
         relevantLar.copy(loan = relevantLar.loan.copy(combinedLoanToValueRatio = "1000.01")).mustFail
-        relevantLar.copy(loan = relevantLar.loan.copy(combinedLoanToValueRatio = "NA")).mustFail
+        relevantLar.copy(loan = relevantLar.loan.copy(combinedLoanToValueRatio = "NA")).mustPass
+        relevantLar.copy(loan = relevantLar.loan.copy(combinedLoanToValueRatio = "Exempt")).mustPass
       } 
 
     }
