@@ -17,8 +17,8 @@ import scala.util.{ Failure, Success, Try }
 class DisclosureProcessing(spark: SparkSession, s3Settings: S3Settings) extends Actor with ActorLogging {
   import DisclosureProcessing._
 
-  implicit val mat: ActorMaterializer = ActorMaterializer()(context.system)
-  implicit val ec: ExecutionContext   = context.dispatcher
+  implicit val mat: Materializer    = Materializer(context.system)
+  implicit val ec: ExecutionContext = context.dispatcher
 
   override def receive: Receive = {
     case ProcessDisclosureKafkaRecord(lei, lookupMap, jdbcUrl, bucket, year) =>
@@ -34,26 +34,26 @@ class DisclosureProcessing(spark: SparkSession, s3Settings: S3Settings) extends 
 
 object DisclosureProcessing {
   case class ProcessDisclosureKafkaRecord(
-    lei: String,
-    lookupMap: Map[(Int, Int), StateMapping],
-    jdbcUrl: String,
-    bucket: String,
-    year: String
-  )
+                                           lei: String,
+                                           lookupMap: Map[(Int, Int), StateMapping],
+                                           jdbcUrl: String,
+                                           bucket: String,
+                                           year: String
+                                         )
   case object Finished
 
   def props(sparkSession: SparkSession, s3Settings: S3Settings): Props =
     Props(new DisclosureProcessing(sparkSession, s3Settings))
 
   def processDisclosureKafkaRecord(
-    lei: String,
-    spark: SparkSession,
-    lookupMap: Map[(Int, Int), StateMapping],
-    jdbcUrl: String,
-    bucket: String,
-    year: String,
-    s3Settings: S3Settings
-  )(implicit mat: ActorMaterializer, ec: ExecutionContext): Future[Unit] = {
+                                    lei: String,
+                                    spark: SparkSession,
+                                    lookupMap: Map[(Int, Int), StateMapping],
+                                    jdbcUrl: String,
+                                    bucket: String,
+                                    year: String,
+                                    s3Settings: S3Settings
+                                  )(implicit mat: Materializer, ec: ExecutionContext): Future[Unit] = {
     import spark.implicits._
 
     def jsonFormationTable1(msaMd: Msa, input: List[Data], leiDetails: Institution): OutDisclosure1 = {
