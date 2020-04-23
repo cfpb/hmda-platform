@@ -86,6 +86,7 @@ class PanelScheduler
   }
 
   private def panelSync2018() = {
+    log.info("starting job for panelSync2018 ")
 
     val allResults: Future[Seq[InstitutionEntity]] =
       institutionRepository2018.findActiveFilers(getFilterList())
@@ -116,6 +117,7 @@ class PanelScheduler
   }
 
   private def panelSync2019() = {
+    log.info("starting job for panelSync2019 ")
 
     val allResults: Future[Seq[InstitutionEntity]] =
       institutionRepository2019.findActiveFilers(getFilterList())

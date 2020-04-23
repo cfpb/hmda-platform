@@ -152,6 +152,8 @@ CREATE TABLE hmda_user.loanapplicationregister2020 (
     tract_to_msa_income_percentage float,
     is_quarterly boolean DEFAULT false NOT NULL, -- New for 2020 and beyond quarterly filing
     created_at timestamp without time zone DEFAULT now()
+    msa_md character varying,
+    msa_md_name character varying
 );
 
 

@@ -20,7 +20,7 @@ object LoanApplicationRegisterProtobufConverter {
       loan.loanPurpose.code,
       loan.constructionMethod.code,
       loan.occupancy.code,
-      loan.amount,
+      loan.amount.toDouble,
       loan.loanTerm,
       loan.rateSpread,
       loan.interestRate,

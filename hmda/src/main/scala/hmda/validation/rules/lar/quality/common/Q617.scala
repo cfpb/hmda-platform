@@ -29,7 +29,7 @@ object Q617 extends EditCheck[LoanApplicationRegister] {
       val calculatedRatio = (lar.loan.amount / propValue) * 100
 
       val ratioToPrecision =
-        BigDecimal(calculatedRatio).setScale(precision, RoundingMode.HALF_UP)
+        calculatedRatio.setScale(precision, RoundingMode.HALF_UP)
 
       combinedLoanValueRatio is greaterThanOrEqual(ratioToPrecision)
     }

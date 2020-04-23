@@ -17,23 +17,19 @@ class V608_1Spec extends LarEditCheckSpec {
 
       lar
         .copy(
-          loan = lar.loan.copy(
-            ULI = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"))
+          loan = lar.loan.copy(ULI = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"))
         .mustFail
       lar
         .copy(
-          loan = lar.loan.copy(
-            ULI = "abcdefghijklmnopqrstuvwxyz--abcdefghijklmnopqrstuvwxyz"))
+          loan = lar.loan.copy(ULI = "abcdefghijklmnopqrstuvwxyz--abcdefghijklmnopqrstuvwxyz"))
         .mustFail
       lar
         .copy(
-          loan = lar.loan.copy(
-            ULI = "abcdefghijklmnopqrstuvwxyz..abcdefghijklmnopqrstuvwxyz"))
+          loan = lar.loan.copy(ULI = "abcdefghijklmnopqrstuvwxyz..abcdefghijklmnopqrstuvwxyz"))
         .mustFail
       lar
         .copy(
-          loan = lar.loan.copy(
-            ULI = "abcdefghijklmnopqrstuvwxyz  abcdefghijklmnopqrstuvwxyz"))
+          loan = lar.loan.copy(ULI = "abcdefghijklmnopqrstuvwxyz  abcdefghijklmnopqrstuvwxyz"))
         .mustFail
     }
   }

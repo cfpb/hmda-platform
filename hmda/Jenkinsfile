@@ -40,7 +40,7 @@ pipeline {
             withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'hmda-platform-jenkins-service',
               usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
               withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
-                dockerBuild.sbtBuild('hmda-platform')
+                dockerBuild.sbtBuild('hmda-platform', 'hmda')
                 scanImage('hmda-platform', env.DOCKER_TAG)
               }
             }

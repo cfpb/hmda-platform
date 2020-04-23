@@ -65,6 +65,7 @@ class TsPublicScheduler
   override def receive: Receive = {
 
     case TsPublicScheduler2018 =>
+      log.info("starting job for TsPublicScheduler2018 ")
 
       val fileNamePSV = "2018_ts.txt"
 

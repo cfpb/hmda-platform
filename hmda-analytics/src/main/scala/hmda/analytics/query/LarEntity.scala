@@ -10,7 +10,7 @@ case class LarEntity(
   preapproval: Int = 0,
   constructionMethod: Int = 0,
   occupancyType: Int = 0,
-  loanAmount: Double = 0.0,
+  loanAmount: BigDecimal = 0.0,
   actionTakenType: Int = 0,
   actionTakenDate: Int = 0,
   street: String = "",
@@ -124,7 +124,9 @@ case class LarEntity(
   tractOneToFourFamilyUnits: Int = 0,
   tractMedianAge: Int = 0,
   tractToMsaIncomePercent: Double = 0.0,
-  isQuarterly: Boolean = false
+  isQuarterly: Boolean = false,
+  msa_md: String,
+  msa_md_name: String
 ) {
   def isEmpty: Boolean = lei == ""
 }
