@@ -10,7 +10,7 @@ case class LarEntity(
   preapproval: Int = 0,
   constructionMethod: Int = 0,
   occupancyType: Int = 0,
-  loanAmount: Double = 0.0,
+  loanAmount: BigDecimal = 0.0,
   actionTakenType: Int = 0,
   actionTakenDate: Int = 0,
   street: String = "",

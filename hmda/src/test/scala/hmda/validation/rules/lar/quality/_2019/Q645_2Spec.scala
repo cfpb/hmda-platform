@@ -14,10 +14,7 @@ class Q645_2Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       lar
         .copy(
-          loan = lar.loan.copy(
-            amount = 999,
-            loanPurpose = HomePurchase
-          )
+          loan = lar.loan.copy(loanPurpose = HomePurchase, amount = 999)
         )
         .mustFail
     }
@@ -28,10 +25,7 @@ class Q645_2Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       lar
         .copy(
-          loan = lar.loan.copy(
-            amount = 1001,
-            loanPurpose = HomePurchase
-          )
+          loan = lar.loan.copy(loanPurpose = HomePurchase, amount = 1001)
         )
         .mustPass
     }
