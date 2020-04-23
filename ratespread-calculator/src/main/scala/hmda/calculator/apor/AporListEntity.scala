@@ -1,15 +1,15 @@
 package hmda.calculator.apor
 
-import scala.collection.mutable.Map
+import scala.collection.mutable
 
 //Singleton that will allow the APOR rate lists to be updated from the S3 bucket and accessed by the API endpoints.
 object AporListEntity {
-  private var _fixedRateAPORMap = Map[String, APOR]()
-  private var _variableRateAPORMap = Map[String, APOR]()
+  private val _fixedRateAPORMap    = mutable.Map[String, APOR]()
+  private val _variableRateAPORMap = mutable.Map[String, APOR]()
 
-  def fixedRateAPORMap = _fixedRateAPORMap
+  def fixedRateAPORMap: mutable.Map[String, APOR] = _fixedRateAPORMap
 
-  def variableRateAPORMap = _variableRateAPORMap
+  def variableRateAPORMap: mutable.Map[String, APOR] = _variableRateAPORMap
 
   def AporOperation(apor: APOR, rateType: RateType) {
     if (rateType == FixedRate) {
