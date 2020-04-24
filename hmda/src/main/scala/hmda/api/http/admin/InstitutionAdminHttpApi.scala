@@ -201,7 +201,6 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
     } else route(institution, uri)
   }
 
-
   def institutionAdminRoutes(oAuth2Authorization: OAuth2Authorization): Route = {
     handleRejections(corsRejectionHandler) {
       cors() {
