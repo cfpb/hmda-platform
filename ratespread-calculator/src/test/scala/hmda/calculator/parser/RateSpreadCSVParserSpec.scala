@@ -11,13 +11,13 @@ class RateSpreadCSVParserSpec extends WordSpec with MustMatchers {
       LocalDate.parse("2017-01-02", DateTimeFormatter.ISO_LOCAL_DATE)
     val lockInDate2 =
       LocalDate.parse("2017-01-09", DateTimeFormatter.ISO_LOCAL_DATE)
-val fileSource = scala.io.Source.fromURL(
-    getClass.getResource("/yieldTableFixed.txt"))
+    val fileSource = scala.io.Source.fromURL(
+      getClass.getResource("/yieldTableFixed.txt"))
 
-  val apors = fileSource
-    .getLines()
-    .map(x => APORCsvParser(x))
-    .toList
+    val apors = fileSource
+      .getLines()
+      .map(x => APORCsvParser(x))
+      .toList
 
     "Apor Parser" must {
         "create APOR object from file" in {
@@ -29,8 +29,8 @@ val fileSource = scala.io.Source.fromURL(
               APOR(
                 lockInDate2,
                 List(3.52, 3.39, 3.41, 3.41, 3.49, 3.49, 3.77, 3.77, 3.93, 3.93, 3.93, 3.93, 3.51, 3.51, 3.51, 3.51, 3.51, 3.51, 3.51, 3.51, 3.51, 3.51, 4.24, 4.24, 4.24, 4.24, 4.24, 4.24, 4.24, 4.24, 4.24, 4.24, 4.24, 4.24, 4.24, 4.24, 4.24, 4.24, 4.24, 4.24, 4.24, 4.24, 4.24, 4.24, 4.24, 4.24, 4.24, 4.24, 4.24, 4.24)
-              )
+              ),
             )
-        }     
+        }
     }
 }

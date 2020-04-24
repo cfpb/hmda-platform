@@ -19,7 +19,7 @@ import akka.http.scaladsl.model.StatusCodes
 import scala.concurrent.duration._
 
 class RateSpreadAPISpec
-    extends WordSpec
+  extends WordSpec
     with MustMatchers
     with BeforeAndAfterAll
     with ScalatestRouteTest
@@ -35,17 +35,17 @@ class RateSpreadAPISpec
   override implicit val timeout = Timeout(duration)
   val date = LocalDate.parse("2018-03-22", DateTimeFormatter.ISO_LOCAL_DATE)
   val singleRateSpread = RateSpreadRequest(
-                          actionTakenType = 1,
-                          loanTerm = 1,
-                          amortizationType = "FixedRate",
-                          apr = 3.0,
-                          lockInDate = date,
-                          reverseMortgage = 2
-                        )
+    actionTakenType = 1,
+    loanTerm = 1,
+    amortizationType = "FixedRate",
+    apr = 3.0,
+    lockInDate = date,
+    reverseMortgage = 2
+  )
 
   val rateSpreadTxt =
     "1,30,FixedRate,6.0,2018-03-22,2,2.010\n" +
-    "1,30,VariableRate,6.0,2018-03-22,2,2.150\n"
+      "1,30,VariableRate,6.0,2018-03-22,2,2.150\n"
 
   val rateSpreadFile = multipartFile(rateSpreadTxt, "rateSpread.txt")
 
@@ -63,7 +63,7 @@ class RateSpreadAPISpec
         csv must include("1,30,VariableRate,6.0,2018-03-22,2,2.150,3.700")
       }
     }
-    
+
   }
 
 }
