@@ -39,7 +39,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
   val config        = ConfigFactory.load()
   val hmdaAdminRole = config.getString("keycloak.hmda.admin.role")
   val checkLEI = true;
-  val checkAgencyCode= true;
+  val checkAgencyCode= false;
 
   def institutionWritePath(oAuth2Authorization: OAuth2Authorization): Route = {
     path("institutions") {
@@ -200,7 +200,6 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
       complete((StatusCodes.BadRequest, "Incorrect agency code format"))
     } else route(institution, uri)
   }
-
 
   def institutionAdminRoutes(oAuth2Authorization: OAuth2Authorization): Route = {
     handleRejections(corsRejectionHandler) {
