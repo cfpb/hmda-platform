@@ -61,6 +61,13 @@ spec:
                 secretKeyRef:
                   name: dashboard-admin-pass
                   key: password
+            - name: HMDA_RUNTIME_MODE
+              value: {{ .Values.hmda.runtimeMode }}
+            - name: KEYCLOAK_AUTH_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: http-configmap
+                  key: auth.url
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}

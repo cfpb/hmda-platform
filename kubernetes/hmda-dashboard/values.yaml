@@ -19,6 +19,9 @@ dashboard:
   protocol: TCP
   port: 9999
 
+hmda:
+  runtimeMode: kubernetes
+
 ingress:
   enabled: false
   annotations: {}

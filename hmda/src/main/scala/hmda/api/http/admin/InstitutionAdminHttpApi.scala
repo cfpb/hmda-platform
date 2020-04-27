@@ -31,7 +31,7 @@ object InstitutionAdminHttpApi {
 private class InstitutionAdminHttpApi(sharding: ClusterSharding, config: Config)(implicit ec: ExecutionContext, t: Timeout) {
   val hmdaAdminRole   = config.getString("keycloak.hmda.admin.role")
   val checkLEI        = true
-  val checkAgencyCode = true
+  val checkAgencyCode = false
 
   def institutionAdminRoutes(oAuth2Authorization: OAuth2Authorization): Route =
     handleRejections(corsRejectionHandler) {

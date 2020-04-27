@@ -11,7 +11,7 @@ case class Loan(
                  loanPurpose: LoanPurposeEnum = new InvalidLoanPurposeCode,
                  constructionMethod: ConstructionMethodEnum = new InvalidConstructionMethodCode,
                  occupancy: OccupancyEnum = new InvalidOccupancyCode,
-                 amount: Double = 0.0,
+                 amount: BigDecimal = 0.0,
                  loanTerm: String = "NA",
                  rateSpread: String = "NA",
                  interestRate: String = "NA",
@@ -30,7 +30,7 @@ object Loan {
       ("loanPurpose", a.loanPurpose.asInstanceOf[LarEnum].asJson),
       ("constructionMethod", a.constructionMethod.asInstanceOf[LarEnum].asJson),
       ("occupancy", a.occupancy.asInstanceOf[LarEnum].asJson),
-      ("amount", Json.fromDoubleOrNull(a.amount)),
+      ("amount", Json.fromBigDecimal(a.amount)),
       ("loanTerm", Json.fromString(a.loanTerm)),
       ("rateSpread", Json.fromString(a.rateSpread)),
       ("interestRate", Json.fromString(a.interestRate)),
@@ -48,7 +48,7 @@ object Loan {
       loanPurpose <- c.downField("loanPurpose").as[Int]
       constructionMethod <- c.downField("constructionMethod").as[Int]
       occupancy <- c.downField("occupancy").as[Int]
-      amount <- c.downField("amount").as[Double]
+      amount <- c.downField("amount").as[BigDecimal]
       loanTerm <- c.downField("loanTerm").as[String]
       rateSpread <- c.downField("rateSpread").as[String]
       interestRate <- c.downField("interestRate").as[String]

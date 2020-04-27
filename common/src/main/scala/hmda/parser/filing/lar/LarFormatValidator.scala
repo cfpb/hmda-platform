@@ -514,7 +514,7 @@ sealed trait LarFormatValidator extends LarParser {
                       constructionMethod,
                       InvalidConstructionMethod(constructionMethod)),
       validateLarCode(OccupancyEnum, occupancy, InvalidOccupancy(occupancy)),
-      validateDoubleField(amount, InvalidAmount(amount)),
+      validateBigDecimalField(amount, InvalidAmount(amount)),
       validateIntStrOrNAOrExemptField(loanTerm, InvalidLoanTerm(loanTerm)),
       validateDoubleStrOrNAOrExemptField(rateSpread,
                                          InvalidRateSpread(rateSpread)),

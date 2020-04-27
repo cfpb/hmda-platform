@@ -22,6 +22,12 @@ trait LarParser {
       case Failure(_) => parserValidationError.invalidNel
     }
 
+  def validateBigDecimalField(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[BigDecimal] =
+    Try(BigDecimal(value)) match {
+      case Success(i) => i.validNel
+      case Failure(_) => parserValidationError.invalidNel
+    }
+
   def validateStrNoSpace(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
     if (value.contains(" ") || value.contains("|") || value.contains(","))
       parserValidationError.invalidNel

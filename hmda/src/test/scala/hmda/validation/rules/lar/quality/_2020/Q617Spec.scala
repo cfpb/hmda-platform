@@ -19,7 +19,7 @@ class Q617Spec extends LarEditCheckSpec {
 
       val appLar =
         lar.copy(loan =
-          lar.loan.copy(combinedLoanToValueRatio = "50.0", amount = 10.0, loanType = Conventional))
+          lar.loan.copy(loanType = Conventional, amount = 10.0, combinedLoanToValueRatio = "50.0"))
       appLar
         .copy(property = appLar.property.copy(propertyValue = "19.0"))
         .mustFail
@@ -36,20 +36,20 @@ class Q617Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       val appLar =
         lar.copy(
-          loan = lar.loan.copy(combinedLoanToValueRatio = "50", amount = 50.4, loanType = Conventional))
+          loan = lar.loan.copy(loanType = Conventional, amount = 50.4, combinedLoanToValueRatio = "50"))
       appLar
         .copy(property = appLar.property.copy(propertyValue = "100.0"))
         .mustPass
 
       val roundLar =
         lar.copy(
-          loan = lar.loan.copy(combinedLoanToValueRatio = "50", amount = 50.5, loanType = Conventional))
+          loan = lar.loan.copy(loanType = Conventional, amount = 50.5, combinedLoanToValueRatio = "50"))
       roundLar
         .copy(property = roundLar.property.copy(propertyValue = "100.0"))
         .mustFail
 
       val decLarAmount =
-        lar.copy(loan = lar.loan.copy(amount = 30, loanType = Conventional))
+        lar.copy(loan = lar.loan.copy(loanType = Conventional, amount = 30))
       val decLar = decLarAmount
         .copy(property = roundLar.property.copy(propertyValue = "31"))
 
@@ -68,14 +68,14 @@ class Q617Spec extends LarEditCheckSpec {
       val failLar =
         lar.copy(
           loan =
-            lar.loan.copy(combinedLoanToValueRatio = "55.0", amount = 55402.5, loanType = Conventional))
+            lar.loan.copy(loanType = Conventional, amount = 55402.5, combinedLoanToValueRatio = "55.0"))
       failLar
         .copy(property = failLar.property.copy(propertyValue = "100000.0"))
         .mustPass
       val passLar =
         lar.copy(
           loan =
-            lar.loan.copy(combinedLoanToValueRatio = "55", amount = 55402.5, loanType = Conventional))
+            lar.loan.copy(loanType = Conventional, amount = 55402.5, combinedLoanToValueRatio = "55"))
       passLar
         .copy(property = passLar.property.copy(propertyValue = "100000.0"))
         .mustPass

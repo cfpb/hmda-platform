@@ -10,7 +10,7 @@ sealed trait Agency {
 }
 
 object Agency {
-  val values = List(1, 2, 3, 5, 7, 9)
+  val values = List(1, 2, 3, 5, 7, 9, -1)
 
   def apply(): Agency = CFPB
 
@@ -22,6 +22,7 @@ object Agency {
       case 5  => NCUA
       case 7  => HUD
       case 9  => CFPB
+      case -1 => UnknownAgency
       case invalidCode =>  throw new Exception("Invalid Agency Code: "+ invalidCode)
     }
 
@@ -78,4 +79,10 @@ case object CFPB extends Agency {
 
   override val name     = "cfpb"
   override val fullName = "Consumer Financial Protection Bureau (CFPB)"
+}
+
+case object UnknownAgency extends Agency {
+  override val code = -1
+  override val name     = "unknown"
+  override val fullName = "Unknown Agency"
 }
