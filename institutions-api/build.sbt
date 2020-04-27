@@ -1,5 +1,5 @@
-packageName in Docker := "hmda-institutions-api"
+packageName in Docker := "institutions-api"
 
 dockerExposedPorts := Vector(9092)
 
-version in Docker := "0.1.3"
+version in Docker := "latest"
