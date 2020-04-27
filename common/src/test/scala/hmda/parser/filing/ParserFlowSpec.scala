@@ -1,7 +1,7 @@
 package hmda.parser.filing
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import akka.stream.scaladsl.Source
 import akka.stream.testkit.scaladsl.TestSink
 import akka.util.ByteString
@@ -10,28 +10,26 @@ import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.filing.ts.TsGenerators._
-import hmda.parser.filing.ts.TsParserErrorModel.IncorrectNumberOfFieldsTs
-import hmda.parser.filing.lar.LarParserErrorModel.IncorrectNumberOfFieldsLar
-import hmda.parser.ParserErrorModel.{
-  ParserValidationError
-}
+import hmda.parser.ParserErrorModel.ParserValidationError
 import hmda.parser.filing.ParserFlow._
-import org.scalatest.{MustMatchers, WordSpec}
+import hmda.parser.filing.lar.LarParserErrorModel.IncorrectNumberOfFieldsLar
+import hmda.parser.filing.ts.TsParserErrorModel.IncorrectNumberOfFieldsTs
+import org.scalatest.{ MustMatchers, WordSpec }
 
 class ParserFlowSpec extends WordSpec with MustMatchers {
 
-  implicit val system = ActorSystem()
-  implicit val materializer = ActorMaterializer()
+  implicit val system       = ActorSystem()
+  implicit val materializer = Materializer(system)
 
-  val ts = tsGen.sample.getOrElse(TransmittalSheet())
-  val tsCsv = ts.toCSV + "\n"
+  val ts       = tsGen.sample.getOrElse(TransmittalSheet())
+  val tsCsv    = ts.toCSV + "\n"
   val tsSource = Source.fromIterator(() => List(tsCsv).iterator)
 
-  val badTsCsv = ts.toCSV + "|too|many|fields\n"
+  val badTsCsv    = ts.toCSV + "|too|many|fields\n"
   val badTsSource = Source.fromIterator(() => List(badTsCsv).iterator)
 
-  val larList = larNGen(10).suchThat(_.nonEmpty).sample.getOrElse(Nil)
-  val larCsv = larList.map(lar => lar.toCSV + "\n")
+  val larList   = larNGen(10).suchThat(_.nonEmpty).sample.getOrElse(Nil)
+  val larCsv    = larList.map(lar => lar.toCSV + "\n")
   val larSource = Source.fromIterator(() => larCsv.iterator)
 
   val badLarList =
@@ -40,11 +38,11 @@ class ParserFlowSpec extends WordSpec with MustMatchers {
     .map(lar => lar.toCSV + "\n")
   val badLarSource = Source.fromIterator(() => badLarCsv.iterator)
 
-  val hmdaFile = List(ts) ++ larList
-  val hmdaFileCsv = List(tsCsv) ++ larCsv
+  val hmdaFile       = List(ts) ++ larList
+  val hmdaFileCsv    = List(tsCsv) ++ larCsv
   val hmdaFileSource = Source.fromIterator(() => hmdaFileCsv.iterator)
 
-  val badHmdaFileCsv = List(badTsCsv) ++ badLarCsv
+  val badHmdaFileCsv    = List(badTsCsv) ++ badLarCsv
   val badHmdaFileSource = Source.fromIterator(() => badHmdaFileCsv.iterator)
 
   "Parser Flow" must {
@@ -89,8 +87,10 @@ class ParserFlowSpec extends WordSpec with MustMatchers {
         .map(_.left.get)
         .runWith(TestSink.probe[List[ParserValidationError]])
         .request(badLarList.size)
-        .expectNextN(Seq(List(IncorrectNumberOfFieldsLar("113")))
-          .asInstanceOf[Seq[List[ParserValidationError]]])
+        .expectNextN(
+          Seq(List(IncorrectNumberOfFieldsLar("113")))
+            .asInstanceOf[Seq[List[ParserValidationError]]]
+        )
     }
 
     "parse clean HMDA file" in {

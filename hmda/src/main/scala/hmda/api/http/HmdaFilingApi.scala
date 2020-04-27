@@ -24,7 +24,7 @@ object HmdaFilingApi {
   def apply(): Behavior[Nothing] = Behaviors.setup[Nothing] { ctx =>
     implicit val system: ActorSystem[_]      = ctx.system
     implicit val classic: ClassicActorSystem = system.toClassic
-    implicit val mat: Materializer           = Materializer(system)
+    implicit val mat: Materializer           = Materializer(ctx)
     implicit val ec: ExecutionContext        = ctx.executionContext
     val config                               = system.settings.config
     val shutdown                             = CoordinatedShutdown(system)

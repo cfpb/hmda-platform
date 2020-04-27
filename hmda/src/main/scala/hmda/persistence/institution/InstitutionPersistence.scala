@@ -1,16 +1,16 @@
 package hmda.persistence.institution
 
 import akka.Done
-import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ ActorRef, ActorSystem, Behavior, TypedActorContext }
+import akka.actor.typed.scaladsl.{ ActorContext, Behaviors }
+import akka.actor.typed.{ ActorRef, ActorSystem, Behavior }
 import akka.cluster.sharding.typed.ShardingEnvelope
-import hmda.HmdaPlatform.institutionKafkaProducer
 import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
 import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
 import akka.stream.Materializer
 import com.typesafe.config.Config
+import hmda.HmdaPlatform.institutionKafkaProducer
 import hmda.messages.institution.InstitutionCommands._
 import hmda.messages.institution.InstitutionEvents._
 import hmda.messages.pubsub.HmdaTopics._
@@ -36,11 +36,11 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
     }
 
   override def commandHandler(
-                               ctx: TypedActorContext[InstitutionCommand]
+                               ctx: ActorContext[InstitutionCommand]
                              ): CommandHandler[InstitutionCommand, InstitutionEvent, InstitutionState] = {
-    val log                                 = ctx.asScala.log
-    implicit val system: ActorSystem[_]     = ctx.asScala.system
-    implicit val materializer: Materializer = Materializer(system)
+    val log                                 = ctx.log
+    implicit val system: ActorSystem[_]     = ctx.system
+    implicit val materializer: Materializer = Materializer(ctx)
     val config                              = system.settings.config
 
     (state, cmd) =>

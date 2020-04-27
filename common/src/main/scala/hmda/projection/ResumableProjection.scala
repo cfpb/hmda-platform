@@ -1,8 +1,8 @@
 package hmda.projection
 
 import akka.actor.typed.scaladsl.AskPattern._
-import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ ActorSystem, Behavior, Scheduler, TypedActorContext }
+import akka.actor.typed.scaladsl.{ ActorContext, Behaviors }
+import akka.actor.typed.{ ActorSystem, Behavior, Scheduler }
 import akka.persistence.query.{ EventEnvelope, NoOffset, Offset }
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
@@ -34,13 +34,13 @@ trait ResumableProjection {
     }
 
   def commandHandler(
-                      ctx: TypedActorContext[ProjectionCommand]
+                      ctx: ActorContext[ProjectionCommand]
                     ): CommandHandler[ProjectionCommand, ProjectionEvent, ResumableProjectionState] = { (state, cmd) =>
-    val log = ctx.asScala.log
+    val log = ctx.log
     cmd match {
       case StartStreaming =>
-        val system: ActorSystem[_]              = ctx.asScala.system
-        implicit val materializer: Materializer = Materializer(system)
+        val system: ActorSystem[_]              = ctx.system
+        implicit val materializer: Materializer = Materializer(ctx)
         implicit val scheduler: Scheduler       = system.scheduler
         log.info("Streaming messages from {}", name)
         readJournal(system)

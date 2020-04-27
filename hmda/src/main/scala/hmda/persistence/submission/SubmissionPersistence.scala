@@ -2,8 +2,8 @@ package hmda.persistence.submission
 
 import java.time.Instant
 
-import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ ActorRef, Behavior, TypedActorContext }
+import akka.actor.typed.scaladsl.{ ActorContext, Behaviors }
+import akka.actor.typed.{ ActorRef, Behavior }
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import akka.persistence.typed.PersistenceId
@@ -31,10 +31,10 @@ object SubmissionPersistence extends HmdaTypedPersistentActor[SubmissionCommand,
     }
 
   override def commandHandler(
-                               ctx: TypedActorContext[SubmissionCommand]
+                               ctx: ActorContext[SubmissionCommand]
                              ): CommandHandler[SubmissionCommand, SubmissionEvent, SubmissionState] = { (state, cmd) =>
-    val log      = ctx.asScala.log
-    val sharding = ClusterSharding(ctx.asScala.system)
+    val log      = ctx.log
+    val sharding = ClusterSharding(ctx.system)
     cmd match {
       case GetSubmission(replyTo) =>
         replyTo ! state.submission
@@ -95,7 +95,7 @@ object SubmissionPersistence extends HmdaTypedPersistentActor[SubmissionCommand,
           Effect.none
         }
       case SubmissionStop() =>
-        log.info(s"Stopping ${ctx.asScala.self.path.name}")
+        log.info(s"Stopping ${ctx.self.path.name}")
         Effect.stop()
     }
   }

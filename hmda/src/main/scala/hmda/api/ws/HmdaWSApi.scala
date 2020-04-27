@@ -21,7 +21,7 @@ object HmdaWSApi {
 
   def apply(): Behavior[Nothing] = Behaviors.setup[Nothing] { ctx =>
     implicit val system: ActorSystem[_]           = ctx.system
-    implicit val mat: Materializer                = Materializer(system)
+    implicit val mat: Materializer                = Materializer(ctx)
     implicit val classicSystem: actor.ActorSystem = system.toClassic
     implicit val ec: ExecutionContext             = system.executionContext
     val shutdown                                  = CoordinatedShutdown(system)

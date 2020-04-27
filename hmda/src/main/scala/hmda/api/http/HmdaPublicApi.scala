@@ -19,7 +19,7 @@ object HmdaPublicApi {
     implicit val classic: ClassicActorSystem = system.toClassic
     val shutdown                             = CoordinatedShutdown(system)
     implicit val ec: ExecutionContext        = ctx.executionContext
-    implicit val mat: Materializer           = Materializer(system)
+    implicit val mat: Materializer           = Materializer(ctx)
     val config                               = system.settings.config
     val host: String                         = config.getString("hmda.http.publicHost")
     val port: Int                            = config.getInt("hmda.http.publicPort")

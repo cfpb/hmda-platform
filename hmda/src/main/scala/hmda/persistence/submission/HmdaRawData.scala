@@ -1,7 +1,7 @@
 package hmda.persistence.submission
 
-import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ ActorRef, Behavior, TypedActorContext }
+import akka.actor.typed.scaladsl.{ ActorContext, Behaviors }
+import akka.actor.typed.{ ActorRef, Behavior }
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import akka.persistence.typed.PersistenceId
@@ -28,9 +28,9 @@ object HmdaRawData extends HmdaTypedPersistentActor[HmdaRawDataCommand, HmdaRawD
     }
 
   override def commandHandler(
-                               ctx: TypedActorContext[HmdaRawDataCommand]
+                               ctx: ActorContext[HmdaRawDataCommand]
                              ): CommandHandler[HmdaRawDataCommand, HmdaRawDataEvent, HmdaRawDataState] = { (_, cmd) =>
-    val log = ctx.asScala.log
+    val log = ctx.log
     cmd match {
       case AddLine(_, timestamp, data, maybeReplyTo) =>
         val evt = LineAdded(timestamp, data)

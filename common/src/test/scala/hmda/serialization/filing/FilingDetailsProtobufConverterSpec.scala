@@ -1,21 +1,13 @@
-package hmda.serialization.filing
+package hmda.util
 
-import hmda.model.filing.FilingDetailsGenerator._
-import hmda.persistence.serialization.filing.filingdetails.FilingDetailsMessage
-import hmda.serialization.filing.FilingDetailsProtobufConverter._
-import org.scalatest.prop.PropertyChecks
-import org.scalatest.{MustMatchers, PropSpec}
+import org.scalatest.{ MustMatchers, PropSpec }
+import hmda.util.BankFilterUtils._
 
-class FilingDetailsProtobufConverterSpec
-    extends PropSpec
-    with PropertyChecks
-    with MustMatchers {
+class FilingDetailsProtobufConverterSpec extends PropSpec with MustMatchers {
 
-  property("Filing Details must convert to and from protobuf") {
-    forAll(filingDetailsGen) { filingDetails =>
-      val protobuf = filingDetailsToProtobuf(filingDetails).toByteArray
-      filingDetailsFromProtobuf(FilingDetailsMessage.parseFrom(protobuf)) mustBe filingDetails
-    }
+  property("Must filter test institutions") {
+    val institutions = List("LEI0", "B90YWS6AFX2LGWOXJ1LD")
+    institutions.filter(filterBankWithLogging) mustBe List("LEI0")
   }
 
 }

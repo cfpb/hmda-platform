@@ -1,14 +1,12 @@
 package hmda.dataBrowser.api
 
-import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.ContentTypes._
 import akka.http.scaladsl.model.{ HttpEntity, StatusCodes, Uri }
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.RouteDirectives.complete
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.dataBrowser.Settings
 import hmda.dataBrowser.api.DataBrowserDirectives._
 import hmda.dataBrowser.models.HealthCheckStatus.Up
 import hmda.dataBrowser.models._
@@ -18,18 +16,22 @@ import io.lettuce.core.api.async.RedisAsyncCommands
 import io.lettuce.core.{ ClientOptions, RedisClient }
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
+import org.slf4j.Logger
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
 import scala.util.{ Failure, Success }
 
-trait DataBrowserHttpApi extends Settings {
+object DataBrowserHttpApi {
+  def create(log: Logger)(implicit mat: Materializer): Route =
+    new DataBrowserHttpApi(log)(mat).dataBrowserRoutes
+}
+
+private class DataBrowserHttpApi(log: Logger)(implicit mat: Materializer) {
 
   val Csv          = "csv"
   val Pipe         = "pipe"
   val Aggregations = "aggregations"
-  val log: LoggingAdapter
-  implicit val materializer: ActorMaterializer
 
   val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("databrowser_db")
   val repository =
@@ -71,7 +73,7 @@ trait DataBrowserHttpApi extends Settings {
   def serveData(queries: List[QueryField], delimiter: Delimiter, errorMessage: String): Route =
     onComplete(obtainDataSource(fileCache, query)(queries, delimiter).runToFuture) {
       case Failure(ex) =>
-        log.error(ex, errorMessage)
+        log.error(errorMessage, ex)
         complete(StatusCodes.InternalServerError)
 
       case Success(Left(byteSource)) =>
@@ -103,9 +105,7 @@ trait DataBrowserHttpApi extends Settings {
               (path(Csv) & get) {
                 extractNationwideMandatoryYears { mandatoryFields =>
                   //remove filters that have all options selected
-                  val allFields = (queryFields ++ mandatoryFields).filterNot { eachQueryField =>
-                    eachQueryField.isAllSelected
-                  }
+                  val allFields = (queryFields ++ mandatoryFields).filterNot(eachQueryField => eachQueryField.isAllSelected)
                   log.info("Nationwide [CSV]: " + allFields)
                   contentDispositionHeader(allFields, Commas) {
                     serveData(allFields, Commas, s"Failed to perform nationwide CSV query with the following queries: $allFields")
@@ -116,9 +116,7 @@ trait DataBrowserHttpApi extends Settings {
                 (path(Pipe) & get) {
                   extractNationwideMandatoryYears { mandatoryFields =>
                     //remove filters that have all options selected
-                    val allFields = (queryFields ++ mandatoryFields).filterNot { eachQueryField =>
-                      eachQueryField.isAllSelected
-                    }
+                    val allFields = (queryFields ++ mandatoryFields).filterNot(eachQueryField => eachQueryField.isAllSelected)
                     log.info("Nationwide [Pipe]: " + allFields)
                     contentDispositionHeader(allFields, Pipes) {
                       serveData(allFields, Pipes, s"Failed to perform nationwide PSV query with the following queries: $allFields")
@@ -190,7 +188,7 @@ trait DataBrowserHttpApi extends Settings {
               log.info("Filers: " + filerFields)
               onComplete(query.fetchFilers(filerFields).runToFuture) {
                 case Failure(ex) =>
-                  log.error(ex, "Failed to obtain filer information")
+                  log.error("Failed to obtain filer information", ex)
                   complete(StatusCodes.InternalServerError)
 
                 case Success(filerResponse) =>
@@ -205,11 +203,11 @@ trait DataBrowserHttpApi extends Settings {
               complete(StatusCodes.OK)
 
             case Success(hs) =>
-              log.warning(s"Service degraded cache=${hs.cache} db=${hs.db} s3=${hs.s3}")
+              log.warn(s"Service degraded cache=${hs.cache} db=${hs.db} s3=${hs.s3}")
               complete(StatusCodes.ServiceUnavailable)
 
             case Failure(ex) =>
-              log.error(ex, "Failed to perform a health check")
+              log.error("Failed to perform a health check", ex)
               complete(StatusCodes.InternalServerError)
           }
         }

@@ -23,7 +23,7 @@ object HmdaAdminApi {
   def apply(): Behavior[Nothing] = Behaviors.setup[Nothing] { ctx =>
     implicit val system: ActorSystem[_]      = ctx.system
     implicit val classic: ClassicActorSystem = system.toClassic
-    implicit val mat: Materializer           = Materializer(system)
+    implicit val mat: Materializer           = Materializer(ctx)
     implicit val ec: ExecutionContext        = ctx.executionContext
     val log: Logger                          = ctx.log
     val sharding                             = ClusterSharding(system)

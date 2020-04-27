@@ -1,18 +1,18 @@
 package hmda.persistence.submission
 
-import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{ ActorRef, ActorSystem, Behavior, DispatcherSelector, TypedActorContext }
+import akka.actor.typed.scaladsl.{ ActorContext, Behaviors }
+import akka.actor.typed.{ ActorRef, ActorSystem, Behavior, DispatcherSelector }
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
 import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
-import akka.stream.{ ActorMaterializer, Materializer }
+import akka.stream.Materializer
 import akka.stream.scaladsl.{ Sink, Source }
 import akka.stream.typed.scaladsl.ActorFlow
 import akka.util.{ ByteString, Timeout }
 import com.typesafe.config.ConfigFactory
+import hmda.api.http.utils.ParserErrorUtils._
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents.{ HmdaRowParsedCount, HmdaRowParsedError, SubmissionProcessingEvent }
 import hmda.model.filing.submission.{ Parsed, ParsedWithErrors, SubmissionId }
@@ -21,7 +21,6 @@ import hmda.model.processing.state.HmdaParserErrorState
 import hmda.parser.filing.ParserFlow._
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.persistence.submission.HmdaProcessingUtils.{ readRawData, updateSubmissionStatus }
-import hmda.api.http.utils.ParserErrorUtils._
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -47,13 +46,13 @@ object HmdaParserError extends HmdaTypedPersistentActor[SubmissionProcessingComm
     }
 
   override def commandHandler(
-                               ctx: TypedActorContext[SubmissionProcessingCommand]
+                               ctx: ActorContext[SubmissionProcessingCommand]
                              ): CommandHandler[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaParserErrorState] = { (state, cmd) =>
-    val log                                   = ctx.asScala.log
-    implicit val system: ActorSystem[_]       = ctx.asScala.system
-    implicit val materializer: Materializer   = Materializer(system)
+    val log                                   = ctx.log
+    implicit val system: ActorSystem[_]       = ctx.system
+    implicit val materializer: Materializer   = Materializer(ctx)
     implicit val blockingEc: ExecutionContext = system.dispatchers.lookup(DispatcherSelector.fromConfig("akka.blocking-parser-dispatcher"))
-    val sharding                              = ClusterSharding(ctx.asScala.system)
+    val sharding                              = ClusterSharding(system)
 
     cmd match {
       case StartParsing(submissionId) =>
