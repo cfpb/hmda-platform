@@ -25,7 +25,6 @@ object Version {
   val phantom                = "2.31.0"
   val cinnamonMetrics        = "2.13.0"
   val sprayresolver          = "0.9.1"
-  val spark                  = "2.4.0"
   val enumeratum             = "1.5.13"
   val enumeratumCirce        = "1.5.21"
   val monix                  = "3.0.0"
