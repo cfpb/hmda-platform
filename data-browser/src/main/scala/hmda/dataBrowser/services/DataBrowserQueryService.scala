@@ -89,17 +89,29 @@ class DataBrowserQueryService(repo2018: ModifiedLarRepository2018, repo2017: Mod
     }
   }
 
-  override def fetchFilers(queryFields: QueryFields): Task[FilerInstitutionResponse] = {
+  override def fetchFilers(queryFields: QueryFields): Task[FilerInstitutionResponse2018] = {
     val fields = queryFields.queryFields
     val repo = queryFields.year match {
-      case "2017" => repo2017
       case "2018" => repo2018
       case _ => repo2018
     }
     cacheResult(
-      cacheLookup = cache.findFilers(fields),
-      onMiss = repo.findFilers(fields).map(FilerInstitutionResponse(_)),
-      cacheUpdate = cache.updateFilers(fields, _: FilerInstitutionResponse)
+      cacheLookup = cache.findFilers2018(fields),
+      onMiss = repo.findFilers(fields).map(FilerInstitutionResponse2018(_)),
+      cacheUpdate = cache.updateFilers2018(fields, _: FilerInstitutionResponse2018)
+    )
+  }
+
+  override def fetchFilers2017(queryFields: QueryFields): Task[FilerInstitutionResponse2017] = {
+    val fields = queryFields.queryFields
+    val repo = queryFields.year match {
+      case "2017" => repo2017
+      case _ => repo2017
+    }
+    cacheResult(
+      cacheLookup = cache.findFilers2017(fields),
+      onMiss = repo.findFilers(fields).map(FilerInstitutionResponse2017(_)),
+      cacheUpdate = cache.updateFilers2017(fields, _: FilerInstitutionResponse2017)
     )
   }
 

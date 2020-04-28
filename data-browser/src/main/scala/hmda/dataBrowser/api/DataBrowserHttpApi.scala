@@ -194,13 +194,23 @@ trait DataBrowserHttpApi extends Settings {
           (path("filers") & get) {
             extractYearsMsaMdsStatesAndCounties { filerFields =>
               log.info("Filers: " + filerFields)
-              onComplete(query.fetchFilers(filerFields).runToFuture) {
-                case Failure(ex) =>
-                  log.error(ex, "Failed to obtain filer information")
-                  complete(StatusCodes.InternalServerError)
+              filerFields.year match {
+                case "2017" => onComplete(query.fetchFilers2017(filerFields).runToFuture) {
+                  case Failure(ex) =>
+                    log.error(ex, "Failed to obtain filer information")
+                    complete(StatusCodes.InternalServerError)
 
-                case Success(filerResponse) =>
-                  complete((StatusCodes.OK, filerResponse))
+                  case Success(filerResponse) =>
+                    complete((StatusCodes.OK, filerResponse))
+                }
+                case "2018" => onComplete(query.fetchFilers(filerFields).runToFuture) {
+                  case Failure(ex) =>
+                    log.error(ex, "Failed to obtain filer information")
+                    complete(StatusCodes.InternalServerError)
+
+                  case Success(filerResponse) =>
+                    complete((StatusCodes.OK, filerResponse))
+                }
               }
             }
           }

@@ -2,7 +2,7 @@ package hmda.dataBrowser.repositories
 
 import akka.NotUsed
 import akka.stream.scaladsl.Source
-import hmda.dataBrowser.models.{ FilerInformation, ModifiedLarEntity, QueryField, Statistic }
+import hmda.dataBrowser.models.{ FilerInformation2018, ModifiedLarEntity, QueryField, Statistic }
 import monix.eval.Task
 import slick.basic.DatabaseConfig
 import slick.jdbc.{ JdbcProfile, ResultSetConcurrency, ResultSetType }
@@ -164,7 +164,7 @@ class PostgresModifiedLarRepository(tableName: String, config: DatabaseConfig[Jd
     Source.fromPublisher(publisher)
   }
 
-  override def findFilers(filerFields: List[QueryField]): Task[Seq[FilerInformation]] = {
+  override def findFilers(filerFields: List[QueryField]): Task[Seq[FilerInformation2018]] = {
     val year = filerFields.find(_.name == "year").map(_.values.head.toInt)
     val institutionsTableName = year match { //will be needed when databrowser has to support multiple years
       case Some(2018) => "institutions2018"
@@ -186,7 +186,7 @@ class PostgresModifiedLarRepository(tableName: String, config: DatabaseConfig[Jd
           GROUP BY lei
         ) a
           JOIN #${institutionsTableName} b ON a.lei = b.lei
-         """.as[FilerInformation]
+         """.as[FilerInformation2018]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 

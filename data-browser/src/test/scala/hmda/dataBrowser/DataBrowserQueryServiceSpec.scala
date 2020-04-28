@@ -37,7 +37,7 @@ class DataBrowserQueryServiceSpec
 
       whenReady(futRes) { res =>
         (cache.find _).expects(*).never()
-        (cache.findFilers _).expects(*).never()
+        (cache.findFilers2018 _).expects(*).never()
         res shouldBe expected
       }
     }

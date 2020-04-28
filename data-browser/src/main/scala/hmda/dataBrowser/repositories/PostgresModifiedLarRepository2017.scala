@@ -2,7 +2,7 @@ package hmda.dataBrowser.repositories
 
 import akka.NotUsed
 import akka.stream.scaladsl.Source
-import hmda.dataBrowser.models.{ FilerInformation, ModifiedLarEntity2017, QueryField, Statistic }
+import hmda.dataBrowser.models.{ FilerInformation2017, ModifiedLarEntity2017, QueryField, Statistic }
 import monix.eval.Task
 import slick.basic.DatabaseConfig
 import slick.jdbc.{ JdbcProfile, ResultSetConcurrency, ResultSetType }
@@ -113,11 +113,11 @@ class PostgresModifiedLarRepository2017(tableName: String, config: DatabaseConfi
     Source.fromPublisher(publisher)
   }
 
-  override def findFilers(filerFields: List[QueryField]): Task[Seq[FilerInformation]] = {
+  override def findFilers(filerFields: List[QueryField]): Task[Seq[FilerInformation2017]] = {
     val year = filerFields.find(_.name == "year").map(_.values.head.toInt)
     val institutionsTableName = year match { //will be needed when databrowser has to support multiple years
-      case Some(2017) => "institutions2017"
-      case _ => "institutions2017"
+      case Some(2017) => "transmittalsheet2017_public_ultimate"
+      case _ => "transmittalsheet2017_public_ultimate"
     }
     //do not include year in the WHERE clause because all entries in the table (modifiedlar2018_snapshot) have filing_year = 2018
     val queries = filerFields.filterNot(_.name == "year").map(field => in(field.dbName, field.values))
@@ -127,15 +127,15 @@ class PostgresModifiedLarRepository2017(tableName: String, config: DatabaseConfi
     }
     val query =
       sql"""
-        SELECT a.lei, b.respondent_name, a.lar_count, '#${year.getOrElse("2017")}'
+        SELECT a.arid, b.institution_name, a.lar_count, '#${year.getOrElse("2017")}'
         from (
-          SELECT lei, count(*) as lar_count
+          SELECT arid, count(*) as lar_count
           FROM #${tableName}
           #$filterCriteria
-          GROUP BY lei
+          GROUP BY arid
         ) a
-          JOIN #${institutionsTableName} b ON a.lei = b.lei
-         """.as[FilerInformation]
+          JOIN #${institutionsTableName} b ON a.arid = b.arid
+         """.as[FilerInformation2017]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
