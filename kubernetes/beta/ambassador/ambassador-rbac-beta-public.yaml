@@ -34,15 +34,15 @@ rules:
 - apiGroups: [ "networking.internal.knative.dev" ]
   resources: [ "clusteringresses" ]
   verbs: ["get", "list", "watch"]
-- apiGroups: [ "networking.internal.knative.dev" ]    
-  resources: [ "ingresses/status", "clusteringresses/status" ]    
+- apiGroups: [ "networking.internal.knative.dev" ]
+  resources: [ "ingresses/status", "clusteringresses/status" ]
   verbs: ["update"]
 - apiGroups: [ "extensions" ]
   resources: [ "ingresses" ]
   verbs: ["get", "list", "watch"]
 - apiGroups: [ "extensions" ]
   resources: [ "ingresses/status" ]
-  verbs: ["update"]    
+  verbs: ["update"]
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -258,15 +258,14 @@ spec:
     - ambassador-crds
 ---
 apiVersion: extensions/v1beta1
-kind: Deployment
+kind: DaemonSet
 metadata:
   name: ambassador
   namespace: beta
 spec:
-  replicas: 1
   selector:
     matchLabels:
-      service: ambassador  
+      service: ambassador
   template:
     metadata:
       annotations:
@@ -305,7 +304,7 @@ spec:
         - name: SCOUT_DISABLE
           value: "1"
         - name: AMBASSADOR_ID
-          value: ambassador-beta-2    
+          value: ambassador-beta-2
         ports:
         - name: http
           containerPort: 8080
@@ -334,7 +333,7 @@ spec:
           items:
           - path: "labels"
             fieldRef:
-              fieldPath: metadata.labels          
+              fieldPath: metadata.labels
       restartPolicy: Always
       securityContext:
         runAsUser: 8888
