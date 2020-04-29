@@ -34,6 +34,7 @@ import io.circe.generic.auto._
 import monix.eval.Task
 import cats.implicits._
 import hmda.dataBrowser.Settings
+import enumeratum._
 
 trait DataBrowserDirectives extends Settings {
   private implicit val csvStreamingSupport: CsvEntityStreamingSupport =
@@ -312,7 +313,7 @@ trait DataBrowserDirectives extends Settings {
     }
 
   private def extractLienStatus(year: String): Directive1[Option[QueryField]] = {
-    def validateLienStatusFunction: Seq[String] => Either[Seq[String], Seq[LienStatus]] = {
+    def validateLienStatusFunction: Seq[String] => Either[Seq[String], Seq[EnumEntry]] = {
       year match {
         case "2017" => validateLienStatus2017
         case "2018" => validateLienStatus
@@ -353,7 +354,7 @@ trait DataBrowserDirectives extends Settings {
     }
 
   private def extractLoanPurpose(year: String): Directive1[Option[QueryField]] = {
-    def validateLoanPurposeFunction: Seq[String] => Either[Seq[String], Seq[LoanPurpose]] = {
+    def validateLoanPurposeFunction: Seq[String] => Either[Seq[String], Seq[EnumEntry]] = {
       year match {
         case "2017" => validateLoanPurpose2017
         case "2018" => validateLoanPurpose

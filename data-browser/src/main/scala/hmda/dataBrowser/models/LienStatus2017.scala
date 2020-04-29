@@ -6,8 +6,8 @@ import scala.collection.immutable
 sealed abstract class LienStatus2017(override val entryName: String)
     extends EnumEntry
 
-object LienStatus2017 extends Enum[LienStatus] {
-  val values: immutable.IndexedSeq[LienStatus] = findValues
+object LienStatus2017 extends Enum[LienStatus2017] {
+  val values: immutable.IndexedSeq[LienStatus2017] = findValues
 
   case object SecuredByFirstLien extends LienStatus2017("1")
   case object SecuredBySubordinateLien extends LienStatus2017("2")
@@ -15,9 +15,9 @@ object LienStatus2017 extends Enum[LienStatus] {
   case object NotApplicable extends LienStatus2017("4")
 
   def validateLienStatus2017(
-      rawLienStatus: Seq[String]): Either[Seq[String], Seq[LienStatus]] = {
+      rawLienStatus: Seq[String]): Either[Seq[String], Seq[LienStatus2017]] = {
     val potentialLienStatuses = rawLienStatus.map(lienStatus =>
-      (lienStatus, LienStatus.withNameInsensitiveOption(lienStatus)))
+      (lienStatus, LienStatus2017.withNameInsensitiveOption(lienStatus)))
 
     val isValidLienStatus = potentialLienStatuses.map(_._2).forall(_.isDefined)
 
