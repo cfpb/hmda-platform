@@ -1,20 +1,20 @@
 package hmda.validation.filing
 
-import akka.stream.scaladsl.Source
-import akka.util.ByteString
-import org.scalatest.{ MustMatchers, WordSpec }
-import ValidationFlow._
 import akka.actor.ActorSystem
-import akka.stream.{ ActorMaterializer, Materializer }
-import hmda.model.filing.ts.TransmittalSheet
-import hmda.parser.filing.ts.TsCsvParser
-import hmda.validation.context.ValidationContext
+import akka.stream.Materializer
+import akka.stream.scaladsl.Source
 import akka.stream.testkit.scaladsl.TestSink
+import akka.util.ByteString
 import hmda.model.filing.PipeDelimited
 import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.parser.filing.lar.LarCsvParser
-import hmda.validation.Seq
+import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.validation._
+import hmda.parser.filing.lar.LarCsvParser
+import hmda.parser.filing.ts.TsCsvParser
+import hmda.validation.Seq
+import hmda.validation.context.ValidationContext
+import hmda.validation.filing.ValidationFlow._
+import org.scalatest.{ MustMatchers, WordSpec }
 
 import scala.collection.immutable._
 

@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
+// $COVERAGE-OFF$
 object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarComponent with SubmissionHistoryComponent {
 
   val log = LoggerFactory.getLogger("hmda")
@@ -266,3 +267,4 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
   }
 
 }
+// $COVERAGE-ON$

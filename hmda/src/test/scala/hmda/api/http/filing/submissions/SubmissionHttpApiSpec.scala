@@ -10,6 +10,7 @@ import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
 import akka.testkit._
 import akka.util.Timeout
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import hmda.api.http.model.ErrorResponse
 import hmda.auth.{ KeycloakTokenVerifier, OAuth2Authorization }
 import hmda.messages.filing.FilingCommands.CreateFiling
 import hmda.messages.filing.FilingEvents.FilingEvent
@@ -130,6 +131,13 @@ class SubmissionHttpApiSpec extends AkkaCassandraPersistenceSpec with MustMatche
 
         import io.circe.generic.auto._
         responseAs[VerificationStatus] mustBe VerificationStatus(qualityVerified = false, macroVerified = false)
+      }
+    }
+
+    "return the submission summary as not found when the file has not yet been uploaded" in {
+      Get(s"$url/1/summary") ~> submissionRoutes(oAuth2Authorization) ~> check {
+        status mustBe StatusCodes.NotFound
+        responseAs[ErrorResponse]
       }
     }
   }

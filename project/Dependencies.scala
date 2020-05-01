@@ -53,6 +53,9 @@ object Dependencies {
   lazy val alpakkaSlick             = "com.lightbend.akka"        %% "akka-stream-alpakka-slick"           % Version.alpakkaSlick
   lazy val postgres                 = "org.postgresql"            % "postgresql"                           % Version.postgres
   lazy val h2                       = "com.h2database"            % "h2"                                   % Version.h2 % Test
+  lazy val embeddedPg               = "ru.yandex.qatools.embed"   % "postgresql-embedded"                  % Version.embeddedPg % Test exclude("de.flapdoodle.embed", "de.flapdoodle.embed.process")
+  lazy val embeddedPgSupport        = "de.flapdoodle.embed"       % "de.flapdoodle.embed.process"          % "2.1.2" % Test
+  lazy val apacheCommonsIO          = "commons-io"                % "commons-io"                           % "2.6" % Test
   lazy val keycloakAdapter          = "org.keycloak"              % "keycloak-adapter-core"                % Version.keycloak
   lazy val keycloak                 = "org.keycloak"              % "keycloak-core"                        % Version.keycloak
   lazy val jbossLogging             = "org.jboss.logging"         % "jboss-logging"                        % Version.jboss

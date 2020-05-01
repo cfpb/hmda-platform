@@ -1,10 +1,10 @@
 package hmda.util
 
 import akka.actor.ActorSystem
-import akka.stream.{ ActorMaterializer, Materializer }
+import akka.stream.Materializer
 import akka.stream.scaladsl.Source
+import hmda.util.SourceUtils._
 import org.scalatest.{ AsyncWordSpec, MustMatchers }
-import SourceUtils._
 
 class SourceUtilsSpec extends AsyncWordSpec with MustMatchers {
 

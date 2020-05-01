@@ -429,6 +429,7 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
+      libraryDependencies ++= Seq(Dependencies.embeddedPg, Dependencies.embeddedPgSupport, Dependencies.apacheCommonsIO),
       mainClass in Compile := Some("hmda.analytics.HmdaAnalyticsApp"),
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat

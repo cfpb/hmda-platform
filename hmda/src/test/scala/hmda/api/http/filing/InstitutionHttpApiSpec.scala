@@ -5,7 +5,6 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.cluster.typed.{ Cluster, Join }
-import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
 import akka.testkit._
@@ -18,8 +17,8 @@ import hmda.messages.institution.InstitutionCommands.CreateInstitution
 import hmda.messages.institution.InstitutionEvents.{ InstitutionCreated, InstitutionEvent }
 import hmda.model.filing.Filing
 import hmda.model.filing.FilingGenerator._
-import hmda.model.institution.{ Institution, InstitutionDetail }
 import hmda.model.institution.InstitutionGenerators._
+import hmda.model.institution.{ Institution, InstitutionDetail }
 import hmda.persistence.AkkaCassandraPersistenceSpec
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence

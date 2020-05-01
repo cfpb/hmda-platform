@@ -16,6 +16,7 @@ import hmda.validation.HmdaValidation
 import net.manub.embeddedkafka.{ EmbeddedKafka, EmbeddedKafkaConfig }
 import org.slf4j.LoggerFactory
 
+// $COVERAGE-OFF$
 object HmdaPlatform extends App {
 
   val log = LoggerFactory.getLogger("hmda")
@@ -95,3 +96,4 @@ object HmdaPlatform extends App {
   //Start API
   classic.spawn[Nothing](HmdaApi(), HmdaApi.name)
 }
+// $COVERAGE-ON$
