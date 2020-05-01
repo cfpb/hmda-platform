@@ -258,8 +258,8 @@ spec:
     categories:
     - ambassador-crds
 ---
-apiVersion: extensions/v1beta1
-kind: DeamonSet
+apiVersion: apps/v1
+kind: DaemonSet
 metadata:
   name: ambassador
   namespace: default
