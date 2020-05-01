@@ -22,7 +22,7 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
       case t if t.roles.contains(role) =>
         provide(t)
       case _ =>
-        if (runtimeMode == "dev") {
+        if (runtimeMode == "dev" || runtimeMode == "docker-compose") {
           provide(VerifiedToken())
         } else {
           complete((StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path("")))).toDirective[Tuple1[VerifiedToken]]
@@ -32,7 +32,7 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
   def authorizeTokenWithLei(lei: String): Directive1[VerifiedToken] = {
     authorizeToken flatMap {
       case t if t.lei.nonEmpty =>
-        if (runtimeMode == "dev") {
+        if (runtimeMode == "dev" || runtimeMode == "docker-compose") {
           provide(t)
         } else {
           val leiList = t.lei.split(',')
@@ -45,7 +45,7 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
         }
 
       case _ =>
-        if (runtimeMode == "dev") {
+        if (runtimeMode == "dev" || runtimeMode == "docker-compose") {
           provide(VerifiedToken())
         } else {
           logger.info("Rejecting request in authorizeTokenWithLei")
@@ -82,7 +82,7 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
           }.get
         }
       case None =>
-        if (runtimeMode == "dev") {
+        if (runtimeMode == "dev"  || runtimeMode == "docker-compose") {
           provide(VerifiedToken())
         } else {
           val r: Route = (extractRequest { req =>

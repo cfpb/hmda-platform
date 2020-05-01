@@ -42,7 +42,10 @@ object HmdaPlatform extends App {
   log.info(s"HMDA_RUNTIME_MODE: $runtimeMode")
 
   val clusterConfig = runtimeMode match {
-    case "dev" => ConfigFactory.parseResources("application-dev.conf").resolve()
+    case "dev" =>
+      ConfigFactory.parseResources("application-dev.conf").resolve()
+    case "docker-compose" =>
+      ConfigFactory.parseResources("application-dev.conf").resolve()
     case "dev-node" =>
       ConfigFactory.parseResources("application-dev.conf").resolve()
     case "kubernetes" => {
@@ -51,7 +54,8 @@ object HmdaPlatform extends App {
     }
     case "dcos" =>
       ConfigFactory.parseResources("application-dcos.conf").resolve()
-    case _ => config
+    case _ =>
+      config
   }
 
   implicit val system =
@@ -62,10 +66,15 @@ object HmdaPlatform extends App {
   implicit val mat     = ActorMaterializer()
   implicit val cluster = Cluster(typedSystem)
 
-  if (runtimeMode == "dcos" || runtimeMode == "kubernetes") {
+  if (runtimeMode == "dcos" || runtimeMode == "kubernetes" || runtimeMode == "docker-compose") {
     ClusterBootstrap(system).start()
     AkkaManagement(system).start()
   }
+
+  // if (runtimeMode == "docker-compose") {
+  //   ClusterBootstrap(system).start()
+  //   AkkaManagement(system).start()
+  // }
 
   if (runtimeMode == "dev") {
     CassandraUtil.startEmbeddedCassandra()

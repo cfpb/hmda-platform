@@ -1,0 +1,65 @@
+version: "3.7"
+
+services:
+
+  # ------------- Kafka -----------------
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+    logging:
+      driver: none
+
+  kafka:
+    image: wurstmeister/kafka
+    command: ["wait-for-it.sh", "zookeeper:2181", "--","start-kafka.sh"]
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: 192.168.99.100
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - ./wait-for-it.sh:/usr/bin/wait-for-it.sh
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  # ------------- Cassandra -------------
+  cassandra:
+    image: "cassandra:3.11.4"
+    ports:
+      - "9042:9042"
+    logging:
+      driver: none
+
+  # ------------- HMDA Platform ---------
+  hmda-platform:
+    image: hmda/hmda-platform
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+      - "8082:8082"
+    depends_on:
+      - kafka
+      - cassandra
+    environment:
+      HMDA_RUNTIME_MODE: docker-compose
+      CASSANDRA_CLUSTER_HOSTS: cassandra:9042
+      CASSANDRA_CLUSTER_PASSWORD:
+      CASSANDRA_CLUSTER_USERNAME:
+      CASSANDRA_JOURNAL_KEYSPACE: hmda2_journal
+      CASSANDRA_SNAPSHOT_KEYSPACE: hmda2_snapshot
+      KAFKA_CLUSTER_HOSTS: kafka:9092
+
+
+  institutions-api:
+    image: hmda/institutions-api
+
+  hmda-analytics:
+    image: hmda/hmda-analytics
+
+  modified-lar:
+    image: hmda/modified-lar
+
+  email-service:
+    image: hmda/email-service
