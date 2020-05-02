@@ -77,6 +77,9 @@ object InstitutionEventsProtobufConverter {
       case id: InstitutionDeleted =>
         val field = InstitutionDeletedField(institutionDeletedToProtobuf(id))
         InstitutionKafkaEventMessage(evt.eventType, field)
+
+      case other =>
+        sys.error(s"Unexpected $other when invoking institutionKafkaEventToProtobuf")
     }
 
   def institutionKafkaEventFromProtobuf(bytes: Array[Byte]): InstitutionKafkaEvent = {
@@ -88,6 +91,9 @@ object InstitutionEventsProtobufConverter {
         InstitutionKafkaEvent(msg.eventType, institutionModifiedFromProtobuf(im))
       case InstitutionEventField.InstitutionDeletedField(id) =>
         InstitutionKafkaEvent(msg.eventType, institutionDeletedFromProtobuf(id))
+
+      case other =>
+        sys.error(s"Unexpected $other when invoking institutionKafkaEventFromProtobuf")
     }
   }
 

@@ -1,11 +1,8 @@
 package hmda.dataBrowser.services
 
-import java.math.BigInteger
-import java.security.MessageDigest
-
 import akka.NotUsed
 import akka.http.scaladsl.model.ContentTypes
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import akka.stream.alpakka.s3.S3Headers
 import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.{ Sink, Source }
@@ -17,7 +14,7 @@ import hmda.dataBrowser.models.{ Delimiter, QueryField }
 import monix.eval.Task
 import org.slf4j.LoggerFactory
 
-class S3FileService(implicit mat: ActorMaterializer) extends FileService with Settings {
+class S3FileService(implicit mat: Materializer) extends FileService with Settings {
 
   private final val log = LoggerFactory.getLogger(getClass)
 
@@ -32,7 +29,7 @@ class S3FileService(implicit mat: ActorMaterializer) extends FileService with Se
     // Note: don't use meta headers as it adds the x-amz- prefix to the header
     // Note: this is the correct format to set the content-disposition
     val contentDispositionMetadata =
-      Map("Content-Disposition" -> s"attachment; filename=$friendlyName")
+    Map("Content-Disposition" -> s"attachment; filename=$friendlyName")
     val sink = S3.multipartUploadWithHeaders(
       bucket = s3.bucket,
       key = key,
@@ -68,7 +65,7 @@ class S3FileService(implicit mat: ActorMaterializer) extends FileService with Se
     //This is to prevent file names to grow over excel's 218 character limit while still maintaining unique file names for S3 Cache.
     name.length match {
       case x if x > 100 =>
-        name.slice(0,100)+md5HashString(name)
+        name.slice(0, 100) + md5HashString(name)
       case _ =>
         name
     }

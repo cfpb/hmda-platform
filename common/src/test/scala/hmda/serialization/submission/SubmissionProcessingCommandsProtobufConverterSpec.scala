@@ -9,25 +9,22 @@ import hmda.messages.submission.SubmissionProcessingEvents.SubmissionProcessingE
 import hmda.model.processing.state.HmdaParserErrorState
 import hmda.model.submission.SubmissionGenerator._
 import hmda.persistence.serialization.submission.processing.commands._
+import hmda.serialization.submission.HmdaParserErrorStateGenerator._
 import hmda.serialization.submission.SubmissionProcessingCommandsProtobufConverter._
 import hmda.serialization.validation.ValidationErrorGenerator._
-import hmda.serialization.submission.HmdaParserErrorStateGenerator._
 import org.scalacheck.Gen
-import org.scalatest.prop.PropertyChecks
-import org.scalatest.{MustMatchers, PropSpec}
+import org.scalatest.{ MustMatchers, PropSpec }
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-class SubmissionProcessingCommandsProtobufConverterSpec
-    extends PropSpec
-    with PropertyChecks
-    with MustMatchers {
+class SubmissionProcessingCommandsProtobufConverterSpec extends PropSpec with ScalaCheckPropertyChecks with MustMatchers {
 
-  implicit val system = ActorSystem()
-  implicit val typedSystem = system.toTyped
+  implicit val system                    = ActorSystem()
+  implicit val typedSystem               = system.toTyped
   val actorRefResolver: ActorRefResolver = ActorRefResolver(typedSystem)
 
   property("Start Upload must serialize to protobuf and back") {
     forAll(submissionIdGen) { submissionId =>
-      val cmd = StartUpload(submissionId)
+      val cmd      = StartUpload(submissionId)
       val protobuf = startUploadToProtobuf(cmd).toByteArray
       startUploadFromProtobuf(StartUploadMessage.parseFrom(protobuf)) mustBe cmd
     }
@@ -35,7 +32,7 @@ class SubmissionProcessingCommandsProtobufConverterSpec
 
   property("Complete Upload must serialize to protobuf and back") {
     forAll(submissionIdGen) { submissionId =>
-      val cmd = CompleteUpload(submissionId)
+      val cmd      = CompleteUpload(submissionId)
       val protobuf = completeUploadToProtobuf(cmd).toByteArray
       completeUploadFromProtobuf(CompleteUploadMessage.parseFrom(protobuf)) mustBe cmd
     }
@@ -43,57 +40,51 @@ class SubmissionProcessingCommandsProtobufConverterSpec
 
   property("Start Parsing must serialize to protobuf and back") {
     forAll(submissionIdGen) { submissionId =>
-      val cmd = StartParsing(submissionId)
+      val cmd      = StartParsing(submissionId)
       val protobuf = startParsingToProtobuf(cmd).toByteArray
       startParsingFromProtobuf(StartParsingMessage.parseFrom(protobuf)) mustBe cmd
     }
   }
 
   property("Persist Parser Errors must serialize to protobuf and back") {
-    val rowNumberGen = Gen.choose(0, Int.MaxValue)
+    val rowNumberGen    = Gen.choose(0, Int.MaxValue)
     val estimatedULIGen = Gen.alphaStr
-    val errorListGen = Gen.listOf(FieldParserErrorGen)
-    implicit def persistParsedErrorGen: Gen[PersistHmdaRowParsedError] = {
+    val errorListGen    = Gen.listOf(FieldParserErrorGen)
+    implicit def persistParsedErrorGen: Gen[PersistHmdaRowParsedError] =
       for {
-        rowNumber <- rowNumberGen
+        rowNumber    <- rowNumberGen
         estimatedULI <- estimatedULIGen
-        errors <- errorListGen
+        errors       <- errorListGen
       } yield PersistHmdaRowParsedError(rowNumber, estimatedULI, errors, None)
-    }
 
     forAll(persistParsedErrorGen) { cmd =>
       val protobuf =
         persistHmdaRowParsedErrorToProtobuf(cmd, actorRefResolver).toByteArray
-      persistHmdaRowParsedErrorFromProtobuf(
-        PersistHmdaRowParsedErrorMessage.parseFrom(protobuf),
-        actorRefResolver) mustBe cmd
+      persistHmdaRowParsedErrorFromProtobuf(PersistHmdaRowParsedErrorMessage.parseFrom(protobuf), actorRefResolver) mustBe cmd
     }
   }
 
   property("Get Parser Error Count must serialize to protobuf and back") {
-    val probe = TestProbe[SubmissionProcessingEvent]
+    val probe    = TestProbe[SubmissionProcessingEvent]
     val actorRef = probe.ref
     val resolver = ActorRefResolver(typedSystem)
-    val cmd = GetParsedWithErrorCount(actorRef)
+    val cmd      = GetParsedWithErrorCount(actorRef)
     val protobuf = getParsedWithErrorCountToProtobuf(cmd, resolver).toByteArray
-    getParsedWithErrorCountFromProtobuf(
-      GetParsedWithErrorCountMessage.parseFrom(protobuf),
-      resolver) mustBe cmd
+    getParsedWithErrorCountFromProtobuf(GetParsedWithErrorCountMessage.parseFrom(protobuf), resolver) mustBe cmd
   }
 
   property("Get Parsing Errors must serialize to protobuf and back") {
-    val probe = TestProbe[HmdaParserErrorState]
+    val probe    = TestProbe[HmdaParserErrorState]
     val actorRef = probe.ref
     val resolver = ActorRefResolver(typedSystem)
-    val cmd = GetParsingErrors(2, actorRef)
+    val cmd      = GetParsingErrors(2, actorRef)
     val protobuf = getParsingErrorsToProtobuf(cmd, resolver).toByteArray
-    getParsingErrorsFromProtobuf(GetParsingErrorsMessage.parseFrom(protobuf),
-                                 resolver) mustBe cmd
+    getParsingErrorsFromProtobuf(GetParsingErrorsMessage.parseFrom(protobuf), resolver) mustBe cmd
   }
 
   property("Complete Parsing must serialize to protobuf and back") {
     forAll(submissionIdGen) { submissionId =>
-      val cmd = CompleteParsing(submissionId)
+      val cmd      = CompleteParsing(submissionId)
       val protobuf = completeParsingToProtobuf(cmd).toByteArray
       completeParsingFromProtobuf(CompleteParsingMessage.parseFrom(protobuf)) mustBe cmd
     }
@@ -101,36 +92,27 @@ class SubmissionProcessingCommandsProtobufConverterSpec
 
   property("Complete Parsing With Errors must serialize to protobuf and back") {
     forAll(submissionIdGen) { submissionId =>
-      val cmd = CompleteParsingWithErrors(submissionId)
+      val cmd      = CompleteParsingWithErrors(submissionId)
       val protobuf = completeParsingWithErrorsToProtobuf(cmd).toByteArray
-      completeParsingWithErrorsFromProtobuf(
-        CompleteParsingWithErrorsMessage.parseFrom(protobuf)) mustBe cmd
+      completeParsingWithErrorsFromProtobuf(CompleteParsingWithErrorsMessage.parseFrom(protobuf)) mustBe cmd
     }
   }
 
   property("Start Syntactical and Validity must serialize to protobuf and back") {
     forAll(submissionIdGen) { submissionId =>
-      val cmd = StartSyntacticalValidity(submissionId)
+      val cmd      = StartSyntacticalValidity(submissionId)
       val protobuf = startSyntacticalValidityToProtobuf(cmd).toByteArray
-      startSyntacticalValidityFromProtobuf(
-        StartSyntacticalValidityMessage.parseFrom(protobuf)) mustBe cmd
+      startSyntacticalValidityFromProtobuf(StartSyntacticalValidityMessage.parseFrom(protobuf)) mustBe cmd
     }
   }
 
   property("PersistHmdaRowValidatedError must serialize to protobuf and back") {
-    forAll(submissionIdGen, validationErrorGen) {
-      (submissionId, validationError) =>
-        val persistHmdaRowValidatedError =
-          PersistHmdaRowValidatedError(submissionId,
-                                       1,
-                                       List(validationError),
-                                       None)
-        val protobuf =
-          persistHmdaRowValidatedErrorToProtobuf(persistHmdaRowValidatedError,
-                                                 actorRefResolver).toByteArray
-        persistHmdaRowValidatedErrorFromProtobuf(
-          PersistHmdaRowValidatedErrorMessage.parseFrom(protobuf),
-          actorRefResolver) mustBe persistHmdaRowValidatedError
+    forAll(submissionIdGen, validationErrorGen) { (submissionId, validationError) =>
+      val persistHmdaRowValidatedError =
+        PersistHmdaRowValidatedError(submissionId, 1, List(validationError), None)
+      val protobuf =
+        persistHmdaRowValidatedErrorToProtobuf(persistHmdaRowValidatedError, actorRefResolver).toByteArray
+      persistHmdaRowValidatedErrorFromProtobuf(PersistHmdaRowValidatedErrorMessage.parseFrom(protobuf), actorRefResolver) mustBe persistHmdaRowValidatedError
     }
   }
 

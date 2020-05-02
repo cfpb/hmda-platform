@@ -2,15 +2,15 @@ package com.hmda.reports.processing
 
 import akka.Done
 import akka.actor.{ Actor, ActorLogging, Props }
-import akka.stream._
-import akka.stream.scaladsl._
 import akka.pattern.pipe
+import akka.stream._
 import akka.stream.alpakka.s3.S3Settings
+import akka.stream.scaladsl._
 import com.hmda.reports.model._
 import io.circe.generic.auto._
 import io.circe.syntax._
-import org.apache.spark.sql.{ SparkSession, _ }
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.{ SparkSession, _ }
 
 import scala.concurrent._
 import scala.util.{ Failure, Success, Try }
@@ -19,8 +19,8 @@ class AggregateProcessing(spark: SparkSession, s3Settings: S3Settings) extends A
 
   import AggregateProcessing._
 
-  implicit val mat: ActorMaterializer = ActorMaterializer()(context.system)
-  implicit val ec: ExecutionContext   = context.dispatcher
+  implicit val mat: Materializer    = Materializer(context.system)
+  implicit val ec: ExecutionContext = context.dispatcher
 
   override def receive: Receive = {
     case ProcessAggregateKafkaRecord(lookupMap, jdbcUrl, bucket, year) =>
@@ -43,15 +43,13 @@ object AggregateProcessing {
     Props(new AggregateProcessing(sparkSession, s3Settings))
 
   def processAggregateKafkaRecord(
-    spark: SparkSession,
-    lookupMap: Map[(Int, Int), StateMapping],
-    jdbcUrl: String,
-    bucket: String,
-    year: String,
-    s3Settings: S3Settings
-  )(implicit mat: ActorMaterializer, ec: ExecutionContext): Future[Unit] = {
-    
-    import spark.implicits._
+                                   spark: SparkSession,
+                                   lookupMap: Map[(Int, Int), StateMapping],
+                                   jdbcUrl: String,
+                                   bucket: String,
+                                   year: String,
+                                   s3Settings: S3Settings
+                                 )(implicit mat: Materializer, ec: ExecutionContext): Future[Unit] = {
 
     def cachedRecordsDf: DataFrame =
       spark.read
@@ -488,14 +486,14 @@ object AggregateProcessing {
       _ <- persistJsonI(aggregateTableI.toList)
       _ <- persistJsonRaceSex(jsonFormationRaceThenGender(RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf, spark)))
       _ <- persistJsonEthnicitySex(
-            jsonTransformationReportByEthnicityThenGender(RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf, spark))
-          )
+        jsonTransformationReportByEthnicityThenGender(RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf, spark))
+      )
       _ <- persistIncomeRaceEthnicity(
-            IncomeRaceEthnicityProcessing.jsonFormationApplicantIncome(
-              IncomeRaceEthnicityProcessing
-                .outputCollectionTableIncome(cachedRecordsDf, spark)
-            )
-          )
+        IncomeRaceEthnicityProcessing.jsonFormationApplicantIncome(
+          IncomeRaceEthnicityProcessing
+            .outputCollectionTableIncome(cachedRecordsDf, spark)
+        )
+      )
     } yield ()
 
     result.onComplete {

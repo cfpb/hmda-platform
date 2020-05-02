@@ -1,18 +1,21 @@
 package hmda.api.http.filing.submissions
 
 import akka.actor.testkit.typed.scaladsl.TestProbe
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.event.{LoggingAdapter, NoLogging}
-import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
-import akka.util.Timeout
-import com.typesafe.config.{Config, ConfigFactory}
-import org.scalatest.MustMatchers
 import akka.actor.typed.scaladsl.adapter._
-import akka.cluster.typed.{Cluster, Join}
+import akka.cluster.sharding.typed.scaladsl.ClusterSharding
+import akka.cluster.typed.{ Cluster, Join }
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.model.Uri.Path
+import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
 import akka.stream.scaladsl.Source
+import akka.testkit._
+import akka.util.Timeout
+import com.typesafe.config.Config
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.filing.FileUploadUtils
+import hmda.api.http.model.ErrorResponse
+import hmda.auth.{ KeycloakTokenVerifier, OAuth2Authorization }
 import hmda.messages.filing.FilingCommands.CreateFiling
 import hmda.messages.filing.FilingEvents.FilingEvent
 import hmda.messages.institution.InstitutionCommands.CreateInstitution
@@ -21,42 +24,34 @@ import hmda.messages.submission.SubmissionCommands.CreateSubmission
 import hmda.messages.submission.SubmissionEvents._
 import hmda.model.filing.Filing
 import hmda.model.filing.FilingGenerator.filingGen
+import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.submission._
 import hmda.model.filing.ts.TransmittalSheet
+import hmda.model.filing.ts.TsGenerators._
 import hmda.model.institution.Institution
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.api.http.model.ErrorResponse
-import hmda.auth.{KeycloakTokenVerifier, OAuth2Authorization}
 import hmda.model.institution.InstitutionGenerators.institutionGen
 import hmda.model.submission.SubmissionGenerator.submissionGen
 import hmda.persistence.AkkaCassandraPersistenceSpec
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission._
-import hmda.model.filing.ts.TsGenerators._
-import hmda.model.filing.lar.LarGenerators._
 import hmda.utils.YearUtils.Period
 import org.keycloak.adapters.KeycloakDeploymentBuilder
-import akka.testkit._
+import org.scalatest.MustMatchers
+import org.slf4j.{ Logger, LoggerFactory }
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-class UploadHttpApiSpec
-  extends AkkaCassandraPersistenceSpec
-    with MustMatchers
-    with UploadHttpApi
-    with ScalatestRouteTest
-    with FileUploadUtils {
+class UploadHttpApiSpec extends AkkaCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest with FileUploadUtils {
 
-  implicit val typedSystem = system.toTyped
-  override val ec: ExecutionContext = system.dispatcher
-  override val log: LoggingAdapter = NoLogging
-  override val sharding: ClusterSharding = ClusterSharding(typedSystem)
-  val duration = 10.seconds
-  implicit val routeTimeout = RouteTestTimeout(duration.dilated)
-  override implicit val timeout: Timeout = Timeout(10.seconds)
-  override val config: Config = ConfigFactory.load()
+  implicit val typedSystem                       = system.toTyped
+  val log: Logger                                = LoggerFactory.getLogger(getClass)
+  val sharding: ClusterSharding                  = ClusterSharding(typedSystem)
+  val duration                                   = 10.seconds
+  implicit val routeTimeout                      = RouteTestTimeout(duration.dilated)
+  implicit val timeout: Timeout                  = Timeout(10.seconds)
+  val config: Config                             = typedSystem.settings.config
+  val uploadRoutes: OAuth2Authorization => Route = UploadHttpApi.create(log, sharding)
 
   val oAuth2Authorization = OAuth2Authorization(
     log,
@@ -70,8 +65,8 @@ class UploadHttpApiSpec
   val period = Period(2018, None)
 
   val institutionProbe = TestProbe[InstitutionEvent]("institution-probe")
-  val filingProbe = TestProbe[FilingEvent]("filing-probe")
-  val submissionProbe = TestProbe[SubmissionEvent]("submission-probe")
+  val filingProbe      = TestProbe[FilingEvent]("filing-probe")
+  val submissionProbe  = TestProbe[SubmissionEvent]("submission-probe")
   val maybeSubmissionProbe =
     TestProbe[Option[Submission]]("submission-probe")
 
@@ -105,11 +100,8 @@ class UploadHttpApiSpec
     HmdaRawData.startShardRegion(sharding)
 
     val institutionPersistence =
-      sharding.entityRefFor(
-        InstitutionPersistence.typeKey,
-        s"${InstitutionPersistence.name}-${sampleInstitution.LEI}")
-    institutionPersistence ! CreateInstitution(sampleInstitution,
-      institutionProbe.ref)
+      sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-${sampleInstitution.LEI}")
+    institutionPersistence ! CreateInstitution(sampleInstitution, institutionProbe.ref)
     institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))
 
     val filingPersistence =
@@ -120,18 +112,14 @@ class UploadHttpApiSpec
     filingPersistence ! CreateFiling(sampleFiling, filingProbe.ref)
 
     val submissionPersistence =
-      sharding.entityRefFor(
-        SubmissionPersistence.typeKey,
-        s"${SubmissionPersistence.name}-${sampleSubmission.id.toString}")
+      sharding.entityRefFor(SubmissionPersistence.typeKey, s"${SubmissionPersistence.name}-${sampleSubmission.id.toString}")
 
-    submissionPersistence ! CreateSubmission(sampleSubmission.id,
-      submissionProbe.ref)
+    submissionPersistence ! CreateSubmission(sampleSubmission.id, submissionProbe.ref)
     submissionProbe.expectMessageType[SubmissionCreated]
   }
 
-  override def afterAll(): Unit = {
+  override def afterAll(): Unit =
     super.afterAll()
-  }
 
   val url =
     s"/institutions/${sampleInstitution.LEI}/filings/$period/submissions/1"
@@ -139,16 +127,16 @@ class UploadHttpApiSpec
   val badUrl =
     s"/institutions/${sampleInstitution.LEI}/filings/$period/submissions/200"
 
-  val ts = tsGen.sample.getOrElse(TransmittalSheet())
-  val tsCsv = ts.toCSV + "\n"
+  val ts       = tsGen.sample.getOrElse(TransmittalSheet())
+  val tsCsv    = ts.toCSV + "\n"
   val tsSource = Source.fromIterator(() => List(tsCsv).iterator)
 
-  val larList = larNGen(10).suchThat(_.nonEmpty).sample.getOrElse(Nil)
-  val larCsv = larList.map(lar => lar.toCSV + "\n")
+  val larList   = larNGen(10).suchThat(_.nonEmpty).sample.getOrElse(Nil)
+  val larCsv    = larList.map(lar => lar.toCSV + "\n")
   val larSource = Source.fromIterator(() => larCsv.iterator)
 
   val hmdaFileCsv = List(tsCsv) ++ larCsv
-  val hmdaFile = multiPartFile(hmdaFileCsv.mkString(""), "sample.txt")
+  val hmdaFile    = multiPartFile(hmdaFileCsv.mkString(""), "sample.txt")
 
   "Upload API" must {
     "upload HMDA File" in {

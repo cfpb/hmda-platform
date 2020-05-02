@@ -1,10 +1,10 @@
 package hmda.dataBrowser
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import akka.stream.scaladsl._
 import akka.testkit.TestKit
-import hmda.dataBrowser.models.{ Aggregation, FieldInfo, ModifiedLarEntity, QueryField, Statistic }
+import hmda.dataBrowser.models._
 import hmda.dataBrowser.repositories.{ Cache, ModifiedLarRepository }
 import hmda.dataBrowser.services.DataBrowserQueryService
 import monix.eval.Task
@@ -20,7 +20,7 @@ class DataBrowserQueryServiceSpec
     with MockFactory
     with ScalaFutures
     with Matchers {
-  implicit val mat: ActorMaterializer   = ActorMaterializer()
+  implicit val mat: Materializer        = Materializer(system)
   implicit val scheduler: TestScheduler = TestScheduler(ExecutionModel.SynchronousExecution)
 
   val cache: Cache                = mock[Cache]
@@ -88,7 +88,7 @@ class DataBrowserQueryServiceSpec
       val taskActual: Task[Seq[Aggregation]] = service.fetchAggregate(List(query))
       val futActual                          = taskActual.runToFuture
       scheduler.tick()
-      whenReady(futActual) { _ should contain theSameElementsAs List(a1, a2) }
+      whenReady(futActual)(_ should contain theSameElementsAs List(a1, a2))
     }
 
     def sampleMlar = ModifiedLarEntity(

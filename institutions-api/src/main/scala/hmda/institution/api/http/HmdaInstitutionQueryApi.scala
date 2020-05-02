@@ -1,60 +1,30 @@
 package hmda.institution.api.http
 
-import akka.actor.{ActorSystem, Props}
-import akka.event.Logging
-import akka.http.scaladsl.Http
+import akka.actor.typed.Behavior
+import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.scaladsl.adapter._
+import akka.actor.{ ActorSystem, CoordinatedShutdown }
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import akka.pattern.pipe
-import akka.stream.ActorMaterializer
-import akka.util.Timeout
-import com.typesafe.config.ConfigFactory
-import hmda.api.http.HttpServer
+import hmda.api.http.directives.HmdaTimeDirectives._
 import hmda.api.http.routes.BaseHttpApi
 
-import scala.concurrent.duration._
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 object HmdaInstitutionQueryApi {
-  def props(): Props = Props(new HmdaInstitutionQueryApi)
-}
+  val name = "hmda-institution-api"
+  //  def props(): Props = Props(new HmdaInstitutionQueryApi)
 
-class HmdaInstitutionQueryApi
-    extends HttpServer
-    with BaseHttpApi
-    with InstitutionQueryHttpApi {
+  def apply(): Behavior[Nothing] = Behaviors.setup[Nothing] { ctx =>
+    implicit val ec: ExecutionContext = ctx.executionContext
+    implicit val classic: ActorSystem = ctx.system.toClassic
+    val shutdown: CoordinatedShutdown = CoordinatedShutdown(ctx.system)
+    val config                        = classic.settings.config
+    val host: String                  = config.getString("hmda.institution.http.host")
+    val port: Int                     = config.getInt("hmda.institution.http.port")
 
-  val config = ConfigFactory.load()
+    val routes = BaseHttpApi.routes(name) ~ InstitutionQueryHttpApi.create(config)
+    BaseHttpApi.runServer(shutdown, name)(timed(routes), host, port)
 
-  override implicit val system: ActorSystem = context.system
-  override implicit val materializer: ActorMaterializer = ActorMaterializer()
-  override implicit val ec: ExecutionContext = context.dispatcher
-  override val log = Logging(system, getClass)
-
-  val duration = config.getInt("hmda.institution.http.timeout").seconds
-
-  override implicit val timeout: Timeout = Timeout(duration)
-
-  val createSchema = config.getString("hmda.institution.createSchema").toBoolean
-
-  if (createSchema) {
-    institutionRepository2018.createSchema()
-    institutionRepository2019.createSchema()
-    institutionEmailsRepository.createSchema()
+    Behaviors.ignore
   }
-
-  override val name: String = "hmda-institution-api"
-  override val host: String = config.getString("hmda.institution.http.host")
-  override val port: Int = config.getInt("hmda.institution.http.port")
-
-  override val paths: Route = routes(s"$name") ~ institutionPublicRoutes
-
-  override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
-    paths,
-    host,
-    port
-  )
-
-  http pipeTo self
-
 }

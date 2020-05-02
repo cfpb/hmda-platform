@@ -1,49 +1,29 @@
 package hmda.uli.api.http
 
-import akka.actor.{ActorSystem, Props}
-import akka.event.Logging
-import akka.pattern.pipe
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Route
-import akka.stream.ActorMaterializer
-import com.typesafe.config.ConfigFactory
-import hmda.api.http.HttpServer
-import hmda.api.http.routes.BaseHttpApi
+import akka.actor.typed.Behavior
+import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.scaladsl.adapter._
+import akka.actor.{ ActorSystem, CoordinatedShutdown }
 import akka.http.scaladsl.server.Directives._
-import akka.util.Timeout
+import hmda.api.http.routes.BaseHttpApi
+import hmda.api.http.directives.HmdaTimeDirectives._
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext
 
 object HmdaUliApi {
-  def props(): Props = Props(new HmdaUliApi)
-}
+  val name: String = "hmda-uli-api"
 
-class HmdaUliApi extends HttpServer with BaseHttpApi with ULIHttpApi {
+  def apply(): Behavior[Nothing] = Behaviors.setup[Nothing] { ctx =>
+    implicit val system: ActorSystem  = ctx.system.toClassic
+    implicit val ec: ExecutionContext = ctx.executionContext
+    val shutdown                      = CoordinatedShutdown(system)
+    val config                        = ctx.system.settings.config
+    val log                           = ctx.log
+    val routes                        = BaseHttpApi.routes(name) ~ ULIHttpApi.create(log)
+    val host: String                  = config.getString("hmda.uli.http.host")
+    val port: Int                     = config.getInt("hmda.uli.http.port")
 
-  val config = ConfigFactory.load()
-
-  override implicit val system: ActorSystem = context.system
-  override implicit val materializer: ActorMaterializer = ActorMaterializer()
-  override implicit val ec: ExecutionContext = context.dispatcher
-  override val log = Logging(system, getClass)
-
-  val duration = config.getInt("hmda.uli.http.timeout").seconds
-
-  override implicit val timeout: Timeout = Timeout(duration)
-
-  override val name: String = "hmda-uli-api"
-  override val host: String = config.getString("hmda.uli.http.host")
-  override val port: Int = config.getInt("hmda.uli.http.port")
-
-  override val paths: Route = routes(s"$name") ~ uliHttpRoutes
-
-  override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
-    paths,
-    host,
-    port
-  )
-
-  http pipeTo self
-
+    BaseHttpApi.runServer(shutdown, name)(timed(routes), host, port)
+    Behaviors.empty
+  }
 }
