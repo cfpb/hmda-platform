@@ -14,6 +14,8 @@ import hmda.dataBrowser.models.{ Delimiter, QueryField }
 import monix.eval.Task
 import org.slf4j.LoggerFactory
 
+// $COVERAGE-OFF$
+// All this does is use the Alpakka S3 APIs
 class S3FileService(implicit mat: Materializer) extends FileService with Settings {
 
   private final val log = LoggerFactory.getLogger(getClass)
@@ -91,3 +93,4 @@ class S3FileService(implicit mat: Materializer) extends FileService with Setting
   def healthCheck: Task[Unit] =
     Task.deferFuture(S3.checkIfBucketExists(s3.bucket)).void
 }
+// $COVERAGE-ON$

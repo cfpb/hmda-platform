@@ -1,11 +1,10 @@
 package hmda.dataBrowser.services
 
-import akka.stream.Materializer
 import cats.implicits._
 import hmda.dataBrowser.models.HealthCheckStatus._
 import hmda.dataBrowser.models.State._
 import hmda.dataBrowser.models.{ Commas, HealthCheckResponse, HealthCheckStatus, QueryField }
-import hmda.dataBrowser.repositories.{ PostgresModifiedLarRepository, RedisCache }
+import hmda.dataBrowser.repositories.{ PostgresModifiedLarRepository, RedisModifiedLarAggregateCache }
 import monix.eval.Task
 
 /**
@@ -13,13 +12,12 @@ import monix.eval.Task
  * @param database
  * @param cache
  * @param storage
- * @param mat
  */
 class HealthCheckService(
                           database: PostgresModifiedLarRepository,
-                          cache: RedisCache,
+                          cache: RedisModifiedLarAggregateCache,
                           storage: S3FileService
-                        )(implicit mat: Materializer) {
+                        ) {
   private def health[A](task: Task[A]): Task[HealthCheckStatus] =
     task.as(Up).onErrorFallbackTo(Task.pure(Down))
 

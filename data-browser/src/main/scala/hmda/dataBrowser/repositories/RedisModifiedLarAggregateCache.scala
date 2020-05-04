@@ -12,7 +12,9 @@ import io.circe.{ Decoder, Encoder }
 
 import scala.concurrent.duration.FiniteDuration
 
-class RedisCache(redisClient: Task[RedisAsyncCommands[String, String]], timeToLive: FiniteDuration) extends Cache {
+// $COVERAGE-OFF$
+// Talks to Redis via Redis4Cats
+class RedisModifiedLarAggregateCache(redisClient: Task[RedisAsyncCommands[String, String]], timeToLive: FiniteDuration) extends Cache {
   private val Prefix = "AGG"
 
   private def findAndParse[A: Decoder](key: String): Task[Option[A]] =
@@ -61,11 +63,13 @@ class RedisCache(redisClient: Task[RedisAsyncCommands[String, String]], timeToLi
     updateAndSetTTL(redisKey, statistic)
   }
 
-  override def updateFilers(queryFields: List[QueryField], filerInstitutionResponse: FilerInstitutionResponse): Task[FilerInstitutionResponse] = {
+  override def updateFilers(
+                             queryFields: List[QueryField],
+                             filerInstitutionResponse: FilerInstitutionResponse
+                           ): Task[FilerInstitutionResponse] = {
     val redisKey = key(queryFields)
     updateAndSetTTL(redisKey.toString, filerInstitutionResponse)
   }
-
 
   override def invalidate(queryFields: List[QueryField]): Task[Unit] = {
     val redisKey = key(queryFields)
@@ -77,3 +81,4 @@ class RedisCache(redisClient: Task[RedisAsyncCommands[String, String]], timeToLi
       .flatMap(client => Task.deferFuture(client.ping().toScala))
       .void
 }
+// $COVERAGE-ON$

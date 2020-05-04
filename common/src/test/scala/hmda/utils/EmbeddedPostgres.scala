@@ -1,15 +1,12 @@
-package hmda.analytics.query
-
+package hmda.utils
 import java.nio.file.Paths
 import java.util
 
 import org.scalatest.{BeforeAndAfterAll, Suite}
-import ru.yandex.qatools.embed.postgresql.distribution.Version
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
 import scala.concurrent.Await
-import scala.concurrent.duration._
 
 trait EmbeddedPostgres extends BeforeAndAfterAll { self: Suite =>
   private val embeddedPg = new ru.yandex.qatools.embed.postgresql.EmbeddedPostgres(Version.V10_6)
