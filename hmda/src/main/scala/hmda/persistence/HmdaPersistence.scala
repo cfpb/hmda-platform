@@ -1,7 +1,7 @@
 package hmda.persistence
 
-import akka.actor.typed.{ Behavior, PostStop, PreRestart }
 import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.{ Behavior, PostStop, PreRestart }
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import com.typesafe.config.ConfigFactory
 import hmda.persistence.filing.FilingPersistence
@@ -16,10 +16,11 @@ object HmdaPersistence {
 
   val config = ConfigFactory.load()
 
-  val behavior: Behavior[HmdaPersistenceCommand] =
+  def apply(): Behavior[HmdaPersistenceCommand] =
     Behaviors.setup { ctx =>
       ctx.log.info(s"Actor started at ${ctx.self.path}")
       val sharding = ClusterSharding(ctx.system)
+
       InstitutionPersistence.startShardRegion(sharding)
       FilingPersistence.startShardRegion(sharding)
       SubmissionPersistence.startShardRegion(sharding)

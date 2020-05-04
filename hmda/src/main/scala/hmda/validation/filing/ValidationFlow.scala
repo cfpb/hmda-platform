@@ -1,7 +1,7 @@
 package hmda.validation.filing
 
 import akka.NotUsed
-import akka.stream.FlowShape
+import akka.stream.{ FlowShape, Materializer }
 import akka.stream.scaladsl.{ Broadcast, Concat, Flow, GraphDSL }
 import akka.util.ByteString
 import cats.Semigroup
@@ -20,11 +20,10 @@ import hmda.utils.YearUtils.Period
 import hmda.validation.engine._
 import hmda.util.conversion.ColumnDataFormatter
 
-
 import scala.collection.immutable._
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 
-object ValidationFlow extends ColumnDataFormatter{
+object ValidationFlow extends ColumnDataFormatter {
 
   implicit val larSemigroup = new Semigroup[LoanApplicationRegister] {
     override def combine(x: LoanApplicationRegister, y: LoanApplicationRegister): LoanApplicationRegister =
@@ -45,9 +44,9 @@ object ValidationFlow extends ColumnDataFormatter{
     })
 
   def validateTsFlow(
-    checkType: String,
-    validationContext: ValidationContext
-  ): Flow[ByteString, HmdaValidated[TransmittalSheet], NotUsed] = {
+                      checkType: String,
+                      validationContext: ValidationContext
+                    ): Flow[ByteString, HmdaValidated[TransmittalSheet], NotUsed] = {
     val currentYear      = config.getInt("hmda.filing.current")
     val period           = validationContext.filingPeriod.fold(Period(currentYear, None))(identity)
     val validationEngine = selectTsEngine(period.year, period.quarter)
@@ -70,20 +69,14 @@ object ValidationFlow extends ColumnDataFormatter{
         }
         (ts, errors)
       }
-      .map { x =>
-        x._2
-          .leftMap(xs => {
-            addTsFieldInformation(x._1, xs.toList, validationContext.institution, period)
-          })
-          .toEither
-      }
+      .map(x => x._2.leftMap(xs => addTsFieldInformation(x._1, xs.toList, validationContext.institution, period)).toEither)
   }
 
   def validateTsLarEdits(
-    tsLar: TransmittalLar,
-    checkType: String,
-    validationContext: ValidationContext
-  ): Either[List[ValidationError], TransmittalLar] = {
+                          tsLar: TransmittalLar,
+                          checkType: String,
+                          validationContext: ValidationContext
+                        ): Either[List[ValidationError], TransmittalLar] = {
     val currentYear      = config.getInt("hmda.filing.current")
     val period           = validationContext.filingPeriod.fold(Period(currentYear, None))(identity)
     val validationEngine = selectTsLarEngine(period.year, period.quarter)
@@ -96,11 +89,7 @@ object ValidationFlow extends ColumnDataFormatter{
       case "quality" =>
         validationEngine.checkQuality(tsLar, tsLar.uli)
     }
-    errors
-      .leftMap(xs => {
-        addTsFieldInformation(tsLar.ts, xs.toList, Option(Institution.empty), period)
-      })
-      .toEither
+    errors.leftMap(xs => addTsFieldInformation(tsLar.ts, xs.toList, Option(Institution.empty), period)).toEither
   }
 
   def validateLarFlow(checkType: String, ctx: ValidationContext): Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
@@ -131,42 +120,37 @@ object ValidationFlow extends ColumnDataFormatter{
             validationEngine.checkQuality(lar, lar.loan.ULI)
         }
       (lar, errors)
-    }.map { x =>
-      x._2
-        .leftMap(xs => {
-          addLarFieldInformation(x._1, xs.toList, period)
-        })
-        .toEither
-    }
+    }.map(x => x._2.leftMap(xs => addLarFieldInformation(x._1, xs.toList, period)).toEither)
   }
 
   def addLarFieldInformation(lar: LoanApplicationRegister, errors: List[ValidationError], period: Period): List[ValidationError] =
-    errors.map(error => {
+    errors.map { error =>
       val affectedFields = EditDescriptionLookup.lookupFields(error.editName, period)
-      val fieldMap = ListMap(affectedFields.map(field => (field, if(field == "Loan Amount") toBigDecimalString(lar.valueOf(field)) else lar.valueOf(field))): _*)
+      val fieldMap = ListMap(
+        affectedFields.map(field => (field, if (field == "Loan Amount") toBigDecimalString(lar.valueOf(field)) else lar.valueOf(field))): _*
+      )
       error.copyWithFields(fieldMap)
-    })
+    }
 
   def addTsFieldInformation(
-    ts: TransmittalSheet,
-    errors: List[ValidationError],
-    institution: Option[Institution] = Option(Institution.empty),
-    period: Period
-  ): List[ValidationError] =
-    errors.map(error => {
+                             ts: TransmittalSheet,
+                             errors: List[ValidationError],
+                             institution: Option[Institution] = Option(Institution.empty),
+                             period: Period
+                           ): List[ValidationError] =
+    errors.map { error =>
       val affectedFields = EditDescriptionLookup.lookupFields(error.editName, period)
       val fieldMap =
         error.editName match {
           case "S303" =>
             ListMap(
-              affectedFields.map(
-                field =>
-                  (
-                    field,
-                    "Provided: " + ts.valueOf(field) + ", Expected: " + institution
-                      .getOrElse(Institution.empty)
-                      .valueOf(field)
-                  )
+              affectedFields.map(field =>
+                (
+                  field,
+                  "Provided: " + ts.valueOf(field) + ", Expected: " + institution
+                    .getOrElse(Institution.empty)
+                    .valueOf(field)
+                )
               ): _*
             )
           case "V718" =>
@@ -175,15 +159,14 @@ object ValidationFlow extends ColumnDataFormatter{
                 case Some("Q1") => "1"
                 case Some("Q2") => "2"
                 case Some("Q3") => "3"
-                case _ => period.quarter.toString
+                case _          => period.quarter.toString
               }
             ListMap(
-              affectedFields.map(
-                field =>
-                  (
-                    field,
-                    "Provided: " + ts.valueOf(field) + ", Expected: " + quarter
-                  )
+              affectedFields.map(field =>
+                (
+                  field,
+                  "Provided: " + ts.valueOf(field) + ", Expected: " + quarter
+                )
               ): _*
             )
           case _ =>
@@ -191,12 +174,12 @@ object ValidationFlow extends ColumnDataFormatter{
         }
 
       error.copyWithFields(fieldMap)
-    })
+    }
 
-  def validateAsyncLarFlow[as: AS, mat: MAT, ec: EC](
-    checkType: String,
-    period: Period
-  ): Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
+  def validateAsyncLarFlow(
+                            checkType: String,
+                            period: Period
+                          )(implicit mat: Materializer, ec: ExecutionContext): Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
     val validationEngine = selectLarEngine(period.year, period.quarter)
     collectLar
       .mapAsync(1) { lar =>
@@ -207,11 +190,9 @@ object ValidationFlow extends ColumnDataFormatter{
             case "quality" =>
               validationEngine.checkQualityAsync(lar, lar.loan.ULI)
           }
-        futValidation.map(validation => (lar, validation))
+        futValidation
       }
-      .map { x: (LoanApplicationRegister, HmdaValidation[LoanApplicationRegister]) =>
-        x._2.leftMap(xs => xs.toList).toEither
-      }
+      .map(hmdaValidationResult => hmdaValidationResult.leftMap(_.toList).toEither)
   }
 
   private def collectLar =

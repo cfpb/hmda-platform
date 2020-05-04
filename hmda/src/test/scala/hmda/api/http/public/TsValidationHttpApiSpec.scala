@@ -1,41 +1,32 @@
 package hmda.api.http.public
 
-import akka.event.{LoggingAdapter, NoLogging}
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
-import hmda.api.http.model.public.{
-  SingleValidationErrorResult,
-  TsValidateRequest
-}
-import org.scalatest.{MustMatchers, WordSpec}
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import hmda.api.http.model.filing.submissions.HmdaRowParsedErrorSummary
+import hmda.api.http.model.public.{ SingleValidationErrorResult, TsValidateRequest }
+import hmda.model.filing.ts.{ Address, Contact, TransmittalSheet }
+import hmda.model.institution.Agency
+import io.circe.generic.auto._
+import org.scalatest.{ MustMatchers, WordSpec }
+import org.slf4j.{ Logger, LoggerFactory }
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.model.filing.ts.{Address, Contact, TransmittalSheet}
-import hmda.model.institution.Agency
-import hmda.api.http.model.filing.submissions.HmdaRowParsedErrorSummary
-import io.circe.generic.auto._
 
-class TsValidationHttpApiSpec
-    extends WordSpec
-    with MustMatchers
-    with ScalatestRouteTest
-    with TsValidationHttpApi {
-  override val log: LoggingAdapter = NoLogging
-  val ec: ExecutionContext = system.dispatcher
-  override implicit val timeout: Timeout = Timeout(5.seconds)
+class TsValidationHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest {
+  val log: Logger               = LoggerFactory.getLogger(getClass)
+  val ec: ExecutionContext      = system.dispatcher
+  implicit val timeout: Timeout = Timeout(5.seconds)
+  val tsRoutes                  = TsValidationHttpApi.create
 
   val ts = TransmittalSheet(
     1,
     "Bank 0",
     2018,
     4,
-    Contact("Jane Smith",
-            "111-111-1111",
-            "jane.smith@bank0.com",
-            Address("1600 Pennsylvania Ave NW", "Washington", "DC", "20500")),
+    Contact("Jane Smith", "111-111-1111", "jane.smith@bank0.com", Address("1600 Pennsylvania Ave NW", "Washington", "DC", "20500")),
     Agency.valueOf(9),
     100,
     "99-999999",

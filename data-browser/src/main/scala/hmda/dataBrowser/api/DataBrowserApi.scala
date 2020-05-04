@@ -1,50 +1,37 @@
 package hmda.dataBrowser.api
 
-import akka.actor.{ActorSystem, Props}
-import akka.pattern.pipe
-import akka.event.Logging
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Route
-import akka.stream.ActorMaterializer
-import hmda.api.http.HttpServer
-import hmda.api.http.routes.BaseHttpApi
+import akka.actor.CoordinatedShutdown
+import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.scaladsl.adapter._
+import akka.actor.typed.{ Behavior, SupervisorStrategy }
 import akka.http.scaladsl.server.Directives._
-import akka.util.Timeout
+import akka.stream.Materializer
+import hmda.api.http.directives.HmdaTimeDirectives._
+import hmda.api.http.routes.BaseHttpApi
+import hmda.dataBrowser.Settings
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-object DataBrowserApi {
-  def props(): Props = Props(new DataBrowserApi)
-}
+object DataBrowserApi extends Settings {
+  val name: String = "hmda-data-browser"
 
-class DataBrowserApi
-    extends HttpServer
-    with BaseHttpApi
-    with DataBrowserHttpApi {
-
-  override implicit lazy val system: ActorSystem = context.system
-  override implicit lazy val materializer: ActorMaterializer =
-    ActorMaterializer()
-  override implicit val ec: ExecutionContext = context.dispatcher
-  override val log = Logging(system, getClass)
-
-  val duration: FiniteDuration = server.askTimeout
-
-  implicit val timeout: Timeout = Timeout(duration)
-
-  override val name: String = "hmda-data-browser"
-  override val host: String = server.host
-  override val port: Int = server.port
-
-  override val paths: Route = routes(s"$name") ~ dataBrowserRoutes
-
-  override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
-    paths,
-    host,
-    port
-  )
-
-  http pipeTo self
-
+  def apply(): Behavior[Nothing] =
+    Behaviors
+      .supervise[Nothing] {
+        Behaviors.setup[Nothing] { ctx =>
+          implicit val system               = ctx.system
+          implicit val classic              = system.toClassic
+          implicit val mat                  = Materializer(ctx)
+          implicit val ec: ExecutionContext = ctx.executionContext
+          val shutdown                      = CoordinatedShutdown(system)
+          val log                           = ctx.log
+          val host: String                  = server.host
+          val port: Int                     = server.port
+          val routes                        = BaseHttpApi.routes(name) ~ DataBrowserHttpApi.create(log)
+          BaseHttpApi.runServer(shutdown, name)(timed(routes), host, port)
+          Behaviors.ignore
+        }
+      }
+      .onFailure(SupervisorStrategy.restartWithBackoff(1.second, 30.seconds, 0.01))
 }

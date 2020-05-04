@@ -1,16 +1,16 @@
 package hmda.util
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import akka.stream.scaladsl.Source
-import org.scalatest.{AsyncWordSpec, MustMatchers}
-import SourceUtils._
+import hmda.util.SourceUtils._
+import org.scalatest.{ AsyncWordSpec, MustMatchers }
 
 class SourceUtilsSpec extends AsyncWordSpec with MustMatchers {
 
-  implicit val system = ActorSystem()
-  implicit val materializer = ActorMaterializer()
-  implicit val ec = system.dispatcher
+  implicit val system       = ActorSystem()
+  implicit val materializer = Materializer(system)
+  implicit val ec           = system.dispatcher
 
   val source1 = Source.fromIterator(() => List(1, 2, 3, 4, 5).toIterator)
   val source2 = Source.fromIterator(() => List(1, 2, 3, 4).toIterator)

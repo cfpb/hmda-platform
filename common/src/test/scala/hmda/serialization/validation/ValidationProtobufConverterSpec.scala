@@ -3,13 +3,10 @@ package hmda.serialization.validation
 import hmda.persistence.serialization.validation.ValidationErrorMessage
 import hmda.serialization.validation.ValidationErrorGenerator._
 import hmda.serialization.validation.ValidationProtobufConverter._
-import org.scalatest.prop.PropertyChecks
-import org.scalatest.{MustMatchers, PropSpec}
+import org.scalatest.{ MustMatchers, PropSpec }
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-class ValidationProtobufConverterSpec
-    extends PropSpec
-    with PropertyChecks
-    with MustMatchers {
+class ValidationProtobufConverterSpec extends PropSpec with ScalaCheckPropertyChecks with MustMatchers {
 
   property("Validation Error must serialize to protobuf and back") {
     forAll(validationErrorGen) { validationError =>

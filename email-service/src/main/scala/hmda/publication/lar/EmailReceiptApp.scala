@@ -6,7 +6,7 @@ import hmda.publication.lar.EmailGuardian.GuardianProtocol
 object EmailReceiptApp {
 
   def main(args: Array[String]): Unit = {
-    implicit val system: ActorSystem[GuardianProtocol] = ActorSystem[GuardianProtocol](EmailGuardian.behavior, "guardian")
+    implicit val system: ActorSystem[GuardianProtocol] = ActorSystem[GuardianProtocol](EmailGuardian(), "email-receipt-app")
     val log                                            = system.log
     log.info("""
                | _   _ ___  ________  ___    _____                _ _
