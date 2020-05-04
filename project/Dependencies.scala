@@ -73,9 +73,4 @@ object Dependencies {
   lazy val guava                    = "com.google.guava"          % "guava"                                % Version.guava
   lazy val awsSesSdk                = "com.amazonaws"             % "aws-java-sdk-ses"                     % Version.awsSesSdk exclude ("commons-logging", "commons-logging")
   lazy val zeroAllocationHashing    = "net.openhft"               % "zero-allocation-hashing"              % Version.zeroAllocation
-
-  lazy val sparkCore      = "org.apache.spark" %% "spark-core"                 % Version.spark % Provided
-  lazy val sparkSql       = "org.apache.spark" %% "spark-sql"                  % Version.spark % Provided
-  lazy val sparkStreaming = "org.apache.spark" %% "spark-streaming"            % Version.spark % Provided
-  lazy val sparkKafka     = "org.apache.spark" %% "spark-streaming-kafka-0-10" % Version.spark
 }
