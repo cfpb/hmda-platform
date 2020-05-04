@@ -29,6 +29,8 @@ import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
+// Entrypoint
+// $COVERAGE-OFF$
 object ModifiedLarApp extends App {
 
   def submitForPersistence(
@@ -122,3 +124,4 @@ object ModifiedLarApp extends App {
   }
 
 }
+// $COVERAGE-ON$
