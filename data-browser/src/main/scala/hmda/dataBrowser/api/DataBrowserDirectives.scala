@@ -124,7 +124,10 @@ trait DataBrowserDirectives extends Settings {
     parameters("years".as(CsvSeq[Int]) ? Nil)
       .map(_.toList)
       .collect {
-        case xs if xs.nonEmpty =>
+        case Nil =>
+          None
+
+        case xs =>
           Option(QueryField(name = "year", xs.map(_.toString), dbName = "filing_year", isAllSelected = false))
       }
 
@@ -172,21 +175,17 @@ trait DataBrowserDirectives extends Settings {
   private def extractEthnicities: Directive1[Option[QueryField]] = {
     val name   = "ethnicities"
     val dbName = "ethnicity_categorization"
-    parameters("ethnicities".as(CsvSeq[String]) ? Nil).flatMap { rawEthnicities =>
-      validEthnicities(rawEthnicities) match {
-        case Left(invalidEthnicities) =>
-          import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-          complete((BadRequest, InvalidEthnicities(invalidEthnicities)))
-
+    parameters("ethnicities".as(CsvSeq[String]) ? Nil)
+      .map(validEthnicities)
+      .collect {
         case Right(ethnicities) if ethnicities.nonEmpty && ethnicities.size == Ethnicity.values.size =>
-          provide(Option(QueryField(name, ethnicities.map(_.entryName), dbName, isAllSelected = true)))
+          Option(QueryField(name, ethnicities.map(_.entryName), dbName, isAllSelected = true))
 
         case Right(ethnicities) if ethnicities.nonEmpty && ethnicities.size != Ethnicity.values.size =>
-          provide(Option(QueryField(name, ethnicities.map(_.entryName), dbName, isAllSelected = false)))
-        case Right(_) =>
-          provide(None)
+          Option(QueryField(name, ethnicities.map(_.entryName), dbName, isAllSelected = false))
+
+        case Right(_) => None
       }
-    }
   }
 
   private def extractTotalUnits: Directive1[Option[QueryField]] =
@@ -446,12 +445,8 @@ trait DataBrowserDirectives extends Settings {
       }
     }
 
-  def extractNationwideMandatoryYearsV2: Directive1[Option[QueryField]] =
-    extractYears
-
   def extractFieldsForAggregation(innerRoute: List[QueryField] => Route): Route =
     extractNonMandatoryQueryFields { browserFields =>
-      innerRoute(browserFields)
       if (browserFields.nonEmpty) innerRoute(browserFields)
       else {
         import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -461,7 +456,6 @@ trait DataBrowserDirectives extends Settings {
 
   def extractFieldsForCount(innerRoute: List[QueryField] => Route): Route =
     extractNonMandatoryQueryFields { browserFields =>
-      innerRoute(browserFields)
       if (browserFields.nonEmpty) innerRoute(browserFields)
       else {
         import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._

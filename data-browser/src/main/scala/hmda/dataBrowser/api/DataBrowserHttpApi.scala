@@ -20,12 +20,10 @@ object DataBrowserHttpApi {
   def create(log: Logger, fileCache: S3FileService, query: QueryService, healthCheck: HealthCheckService)(
     implicit mat: Materializer
   ): Route =
-    new DataBrowserHttpApi(log, fileCache, query, healthCheck)(mat).dataBrowserRoutes
+    new DataBrowserHttpApi(log, fileCache, query, healthCheck).dataBrowserRoutes
 }
 
-private class DataBrowserHttpApi(log: Logger, fileCache: S3FileService, query: QueryService, healthCheck: HealthCheckService)(
-  implicit mat: Materializer
-) {
+private class DataBrowserHttpApi(log: Logger, fileCache: S3FileService, query: QueryService, healthCheck: HealthCheckService) {
 
   val Csv          = "csv"
   val Pipe         = "pipe"
