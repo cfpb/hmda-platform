@@ -1,17 +1,23 @@
 package hmda.auth
 
-import akka.event.LoggingAdapter
-import akka.http.scaladsl.model.Uri.Path
+import akka.actor.typed.ActorSystem
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.model.headers.{Authorization, OAuth2BearerToken}
+import akka.http.scaladsl.model.Uri.Path
+import akka.http.scaladsl.model.headers.{ Authorization, OAuth2BearerToken }
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
-import com.typesafe.config.ConfigFactory
-import hmda.api.http.model.ErrorResponse
+import akka.stream.Materializer
+import com.typesafe.config.{ Config, ConfigFactory }
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import scala.collection.JavaConverters._
+import hmda.api.http.model.ErrorResponse
+import org.keycloak.adapters.KeycloakDeploymentBuilder
+import org.keycloak.representations.adapters.config.AdapterConfig
+import org.slf4j.Logger
 
-class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) {
+import scala.collection.JavaConverters._
+import scala.concurrent.ExecutionContext
+
+class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
 
   val config      = ConfigFactory.load()
   val clientId    = config.getString("keycloak.client.id")
@@ -25,11 +31,13 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
         if (runtimeMode == "dev" || runtimeMode == "docker-compose") {
           provide(VerifiedToken())
         } else {
-          complete((StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path("")))).toDirective[Tuple1[VerifiedToken]]
+          complete(
+            (StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path("")))
+          ).toDirective[Tuple1[VerifiedToken]]
         }
     }
 
-  def authorizeTokenWithLei(lei: String): Directive1[VerifiedToken] = {
+  def authorizeTokenWithLei(lei: String): Directive1[VerifiedToken] =
     authorizeToken flatMap {
       case t if t.lei.nonEmpty =>
         if (runtimeMode == "dev" || runtimeMode == "docker-compose") {
@@ -40,7 +48,9 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
             provide(t)
           } else {
             logger.info(s"Providing reject for ${lei}")
-            complete((StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path("")))).toDirective[Tuple1[VerifiedToken]]
+            complete(
+              (StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path("")))
+            ).toDirective[Tuple1[VerifiedToken]]
           }
         }
 
@@ -49,13 +59,13 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
           provide(VerifiedToken())
         } else {
           logger.info("Rejecting request in authorizeTokenWithLei")
-          complete((StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path("")))).toDirective[Tuple1[VerifiedToken]]
+          complete(
+            (StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path("")))
+          ).toDirective[Tuple1[VerifiedToken]]
         }
     }
-  }
 
-
-  def authorizeToken: Directive1[VerifiedToken] = {
+  def authorizeToken: Directive1[VerifiedToken] =
     bearerToken.flatMap {
       case Some(token) =>
         onComplete(tokenVerifier.verifyToken(token)).flatMap {
@@ -78,7 +88,12 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
           }.recover {
             case ex: Throwable =>
               logger.error("Authorization Token could not be verified {}", ex)
-              complete((StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path("")))).toDirective[Tuple1[VerifiedToken]]
+              complete(
+                (
+                  StatusCodes.Forbidden,
+                  ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path(""))
+                )
+              ).toDirective[Tuple1[VerifiedToken]]
           }.get
         }
       case None =>
@@ -88,20 +103,20 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
           val r: Route = (extractRequest { req =>
             import scala.compat.java8.OptionConverters._
             logger.error("No bearer token, authz header [{}]" + req.getHeader("authorization").asScala)
-            complete((StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path(""))))
+            complete(
+              (StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path("")))
+            )
           })
           StandardRoute(r).toDirective[Tuple1[VerifiedToken]]
         }
     }
-  }
 
-  private def bearerToken: Directive1[Option[String]] = {
+  private def bearerToken: Directive1[Option[String]] =
     for {
       authBearerHeader <- optionalHeaderValueByType(classOf[Authorization])
-                           .map(extractBearerToken)
+        .map(extractBearerToken)
       xAuthCookie <- optionalCookie("X-Authorization-Token").map(_.map(_.value))
     } yield authBearerHeader.orElse(xAuthCookie)
-  }
 
   private def extractBearerToken(authHeader: Option[Authorization]): Option[String] =
     authHeader.collect {
@@ -111,6 +126,18 @@ class OAuth2Authorization(logger: LoggingAdapter, tokenVerifier: TokenVerifier) 
 }
 
 object OAuth2Authorization {
-  def apply(logger: LoggingAdapter, tokenVerifier: TokenVerifier): OAuth2Authorization =
+  def apply(log: Logger, config: Config)(implicit system: ActorSystem[_], mat: Materializer, ec: ExecutionContext): OAuth2Authorization = {
+    val authUrl       = config.getString("keycloak.auth.server.url")
+    val keycloakRealm = config.getString("keycloak.realm")
+    val apiClientId   = config.getString("keycloak.client.id")
+    val adapterConfig = new AdapterConfig()
+    adapterConfig.setRealm(keycloakRealm)
+    adapterConfig.setAuthServerUrl(authUrl)
+    adapterConfig.setResource(apiClientId)
+    val keycloakDeployment = KeycloakDeploymentBuilder.build(adapterConfig)
+    OAuth2Authorization(log, new KeycloakTokenVerifier(keycloakDeployment))
+  }
+
+  def apply(logger: Logger, tokenVerifier: TokenVerifier): OAuth2Authorization =
     new OAuth2Authorization(logger, tokenVerifier)
 }

@@ -1,25 +1,23 @@
 package hmda.dataBrowser.services
 
-import akka.stream.ActorMaterializer
 import cats.implicits._
 import hmda.dataBrowser.models.HealthCheckStatus._
 import hmda.dataBrowser.models.State._
 import hmda.dataBrowser.models.{ Commas, HealthCheckResponse, HealthCheckStatus, QueryField }
-import hmda.dataBrowser.repositories.{ PostgresModifiedLarRepository, RedisCache }
+import hmda.dataBrowser.repositories.{ PostgresModifiedLarRepository, RedisModifiedLarAggregateCache }
 import monix.eval.Task
 
 /**
-  * This is a specific health check service
-  * @param database
-  * @param cache
-  * @param storage
-  * @param mat
-  */
+ * This is a specific health check service
+ * @param database
+ * @param cache
+ * @param storage
+ */
 class HealthCheckService(
-  database: PostgresModifiedLarRepository,
-  cache: RedisCache,
-  storage: S3FileService
-)(implicit mat: ActorMaterializer) {
+                          database: PostgresModifiedLarRepository,
+                          cache: RedisModifiedLarAggregateCache,
+                          storage: S3FileService
+                        ) {
   private def health[A](task: Task[A]): Task[HealthCheckStatus] =
     task.as(Up).onErrorFallbackTo(Task.pure(Down))
 
@@ -49,8 +47,6 @@ class HealthCheckService(
         storage.retrieveDataUrl(exampleQuery, Commas)
       }
 
-    Task.parMap3(databaseQuery, cacheQuery, storageQuery) { (db, cache, storage) =>
-      HealthCheckResponse(cache, db, storage)
-    }
+    Task.parMap3(databaseQuery, cacheQuery, storageQuery)((db, cache, storage) => HealthCheckResponse(cache, db, storage))
   }
 }

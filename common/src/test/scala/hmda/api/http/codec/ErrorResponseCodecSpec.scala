@@ -3,7 +3,7 @@ package hmda.api.http.codec
 import akka.http.scaladsl.model.Uri.Path
 import hmda.api.http.model.ErrorResponse
 import io.circe.syntax._
-import org.scalatest.{MustMatchers, WordSpec}
+import org.scalatest.{ MustMatchers, WordSpec }
 
 class ErrorResponseCodecSpec extends WordSpec with MustMatchers {
 

@@ -4,74 +4,68 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 import akka.NotUsed
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings}
+import akka.stream.alpakka.s3.{ MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings }
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
-import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
-import hmda.census.records.CensusRecords
-import hmda.model.census.Census
-import hmda.model.publication.Msa
 import hmda.publisher.helper.LoanLimitLarHeader
-import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020}
-import hmda.publisher.query.lar.{LarEntityImpl2018, LarEntityImpl2019, LarEntityImpl2020}
-import hmda.publisher.scheduler.schedules.Schedules.{LarScheduler2018, LarScheduler2019, LarSchedulerLoanLimit2019, LarSchedulerQuarterly2020}
+import hmda.publisher.query.component.{ PublisherComponent2018, PublisherComponent2019, PublisherComponent2020 }
+import hmda.publisher.query.lar.{ LarEntityImpl2018, LarEntityImpl2019, LarEntityImpl2020 }
+import hmda.publisher.scheduler.schedules.Schedules.{
+  LarScheduler2018,
+  LarScheduler2019,
+  LarSchedulerLoanLimit2019,
+  LarSchedulerQuarterly2020
+}
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
 import slick.basic.DatabasePublisher
+import software.amazon.awssdk.auth.credentials.{ AwsBasicCredentials, StaticCredentialsProvider }
+import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.regions.providers.AwsRegionProvider
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
 class LarScheduler
-    extends HmdaActor
+  extends HmdaActor
     with PublisherComponent2018
     with PublisherComponent2019
-      with PublisherComponent2020
-      with LoanLimitLarHeader{
+    with PublisherComponent2020
+    with LoanLimitLarHeader {
 
-  implicit val ec = context.system.dispatcher
-  implicit val materializer = ActorMaterializer()
-  private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
+  implicit val ec               = context.system.dispatcher
+  implicit val materializer     = Materializer(context)
+  private val fullDate          = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   private val fullDateQuarterly = DateTimeFormatter.ofPattern("yyyy-MM-dd_")
 
   def larRepository2018 = new LarRepository2018(dbConfig)
   def larRepository2019 = new LarRepository2019(dbConfig)
   def larRepository2020 = new LarRepository2020(dbConfig)
 
-  val indexTractMap2018: Map[String, Census] =
-    CensusRecords.indexedTract2018
-
-  val indexTractMap2019: Map[String, Census] =
-    CensusRecords.indexedTract2019
-
   val awsConfig =
     ConfigFactory.load("application.conf").getConfig("private-aws")
-  val accessKeyId = awsConfig.getString("private-access-key-id")
+  val accessKeyId  = awsConfig.getString("private-access-key-id")
   val secretAccess = awsConfig.getString("private-secret-access-key ")
-  val region = awsConfig.getString("private-region")
-  val bucket = awsConfig.getString("private-s3-bucket")
-  val environment = awsConfig.getString("private-environment")
-  val year = awsConfig.getString("private-year")
-  val awsCredentialsProvider = new AWSStaticCredentialsProvider(
-    new BasicAWSCredentials(accessKeyId, secretAccess))
+  val region       = awsConfig.getString("private-region")
+  val bucket       = awsConfig.getString("private-s3-bucket")
+  val environment  = awsConfig.getString("private-environment")
+  val year         = awsConfig.getString("private-year")
 
-  val awsRegionProvider = new AwsRegionProvider {
-    override def getRegion: String = region
-  }
+  val awsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccess))
 
-  val s3Settings = S3Settings(
-    MemoryBufferType,
-    awsCredentialsProvider,
-    awsRegionProvider,
-    ListBucketVersion2
-  )
+  val awsRegionProvider: AwsRegionProvider = () => Region.of(region)
+
+  val s3Settings = S3Settings(context.system)
+    .withBufferType(MemoryBufferType)
+    .withCredentialsProvider(awsCredentialsProvider)
+    .withS3RegionProvider(awsRegionProvider)
+    .withListBucketApiVersion(ListBucketVersion2)
 
   override def preStart() = {
     QuartzSchedulerExtension(context.system)
@@ -94,10 +88,9 @@ class LarScheduler
   override def receive: Receive = {
 
     case LarScheduler2018 =>
-      log.info("starting job for LarScheduler2018 ")
-      val now = LocalDateTime.now().minusDays(1)
+      val now           = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDate.format(now)
-      val fileName = s"$formattedDate" + "2018_lar.txt"
+      val fileName      = s"$formattedDate" + "2018_lar.txt"
       val s3Sink = S3
         .multipartUpload(bucket, s"$environment/lar/$fileName")
         .withAttributes(S3Attributes.settings(s3Settings))
@@ -113,20 +106,16 @@ class LarScheduler
         .runWith(s3Sink)
 
       results onComplete {
-        case Success(result) => {
-          log.info(
-            "Pushed to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
-        }
+        case Success(result) =>
+          log.info("Pushed to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
         case Failure(t) =>
-          log.info(
-            "An error has occurred getting LAR Data in Future: " + t.getMessage)
+          log.info("An error has occurred getting LAR Data in Future: " + t.getMessage)
       }
 
     case LarScheduler2019 =>
-      log.info("starting job for LarScheduler2019 ")
-      val now = LocalDateTime.now().minusDays(1)
+      val now           = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDate.format(now)
-      val fileName = s"$formattedDate" + "2019_lar.txt"
+      val fileName      = s"$formattedDate" + "2019_lar.txt"
       val s3Sink = S3
         .multipartUpload(bucket, s"$environment/lar/$fileName")
         .withAttributes(S3Attributes.settings(s3Settings))
@@ -142,20 +131,16 @@ class LarScheduler
         .runWith(s3Sink)
 
       results onComplete {
-        case Success(result) => {
-          log.info(
-            "Pushed to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
-        }
+        case Success(result) =>
+          log.info("Pushed to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
         case Failure(t) =>
-          log.info(
-            "An error has occurred getting LAR Data 2019 in Future: " + t.getMessage)
+          log.info("An error has occurred getting LAR Data 2019 in Future: " + t.getMessage)
       }
 
     case LarSchedulerLoanLimit2019 =>
-      log.info("starting job for LarSchedulerLoanLimit2019 ")
-      val now = LocalDateTime.now().minusDays(1)
+      val now           = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDate.format(now)
-      val fileName = "2019F_AGY_LAR_withFlag_"+s"$formattedDate" +"2019_lar.txt"
+      val fileName      = "2019F_AGY_LAR_withFlag_" + s"$formattedDate" + "2019_lar.txt"
       val s3Sink = S3
         .multipartUpload(bucket, s"$environment/lar/$fileName")
         .withAttributes(S3Attributes.settings(s3Settings))
@@ -167,29 +152,25 @@ class LarScheduler
 
       val resultsPSV: Future[MultipartUploadResult] =
         allResultsSource.zipWithIndex
-          .map(
-            larEntity =>
-              if (larEntity._2 == 0)
-                LoanLimitHeader.concat(appendCensus(larEntity._1,2019) ) + "\n"
-              else appendCensus(larEntity._1,2019) + "\n")
+          .map(larEntity =>
+            if (larEntity._2 == 0)
+              LoanLimitHeader.concat(larEntity._1.toRegulatorLoanLimitPSV) + "\n"
+            else larEntity._1.toRegulatorLoanLimitPSV + "\n"
+          )
           .map(s => ByteString(s))
           .runWith(s3Sink)
 
       resultsPSV onComplete {
-        case Success(results) => {
-          log.info(
-            "Pushed to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
-        }
+        case Success(results) =>
+          log.info("Pushed to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
         case Failure(t) =>
-          log.info(
-            "An error has occurred getting LAR Data Loan Limit2019 in Future: " + t.getMessage)
+          log.info("An error has occurred getting LAR Data Loan Limit2019 in Future: " + t.getMessage)
       }
 
     case LarSchedulerQuarterly2020 =>
-      log.info("starting job for LarSchedulerQuarterly2020 ")
       val includeQuarterly = true
-      val now = LocalDateTime.now().minusDays(1)
-      val formattedDate = fullDateQuarterly.format(now)
+      val now              = LocalDateTime.now().minusDays(1)
+      val formattedDate    = fullDateQuarterly.format(now)
 
       val fileName = s"$formattedDate" + "quarterly_2020_lar.txt"
       val s3Sink = S3
@@ -197,8 +178,7 @@ class LarScheduler
         .withAttributes(S3Attributes.settings(s3Settings))
 
       val allResultsPublisher: DatabasePublisher[LarEntityImpl2020] =
-        larRepository2020.getAllLARs(getFilterList(),includeQuarterly)
-
+        larRepository2020.getAllLARs(getFilterList(), includeQuarterly)
       val allResultsSource: Source[LarEntityImpl2020, NotUsed] =
         Source.fromPublisher(allResultsPublisher)
 
@@ -208,31 +188,10 @@ class LarScheduler
         .runWith(s3Sink)
 
       results onComplete {
-        case Success(result) => {
-          log.info(
-            "Pushed to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
-        }
+        case Success(result) =>
+          log.info("Pushed to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
         case Failure(t) =>
-          log.info(
-            "An error has occurred getting Quarterly LAR Data 2020 in Future: " + t.getMessage)
+          log.info("An error has occurred getting Quarterly LAR Data 2020 in Future: " + t.getMessage)
       }
-  }
-  def getCensus(hmdaGeoTract: String,year:Int): Msa = {
-
-    val  indexTractMap = year match {
-      case 2018 => indexTractMap2018
-      case 2019 => indexTractMap2019
-      case _ => indexTractMap2019
-    }
-    val censusResult= indexTractMap.getOrElse(hmdaGeoTract, Census())
-    val censusID =
-      if (censusResult.msaMd == 0) "-----" else censusResult.msaMd.toString
-    val censusName =
-      if (censusResult.name.isEmpty) "MSA/MD NOT AVAILABLE" else censusResult.name
-    Msa(censusID, censusName)
-  }
-  def appendCensus(lar: LarEntityImpl2019,year:Int): String = {
-    val msa = getCensus(lar.larPartOne.tract,year)
-    lar.appendMsa(msa)
   }
 }

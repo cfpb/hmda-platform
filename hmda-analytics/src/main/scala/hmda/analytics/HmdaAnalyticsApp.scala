@@ -2,35 +2,36 @@ package hmda.analytics
 
 import akka.Done
 import akka.actor.ActorSystem
-import akka.kafka.{ ConsumerSettings, Subscriptions }
-import akka.kafka.scaladsl.Consumer
+import akka.actor.typed.scaladsl.adapter._
 import akka.kafka.scaladsl.Consumer.DrainingControl
-import akka.stream.ActorMaterializer
+import akka.kafka.scaladsl.{ Committer, Consumer }
+import akka.kafka.{ CommitterSettings, ConsumerSettings, Subscriptions }
+import akka.stream.Materializer
 import akka.stream.scaladsl.{ Keep, Sink, Source }
 import akka.util.{ ByteString, Timeout }
 import com.typesafe.config.ConfigFactory
-import hmda.query.ts.TransmittalSheetConverter
-import hmda.analytics.query.{ LarComponent, LarConverter, LarConverter2018, SubmissionHistoryComponent, TransmittalSheetComponent }
+import hmda.analytics.query._
+import hmda.messages.pubsub.{ HmdaGroups, HmdaTopics }
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.submission.SubmissionId
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
 import hmda.publication.KafkaUtils.kafkaHosts
-import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.common.serialization.StringDeserializer
-import org.slf4j.LoggerFactory
-import hmda.messages.pubsub.HmdaTopics
-import hmda.messages.pubsub.HmdaGroups
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.HmdaQuery.{ readRawData, readSubmission }
+import hmda.query.ts.TransmittalSheetConverter
 import hmda.util.BankFilterUtils._
 import hmda.util.streams.FlowUtils.framing
 import hmda.utils.YearUtils.Period
+import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.common.serialization.StringDeserializer
+import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
+// $COVERAGE-OFF$
 object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarComponent with SubmissionHistoryComponent {
 
   val log = LoggerFactory.getLogger("hmda")
@@ -47,7 +48,8 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
     """.stripMargin)
 
   implicit val system       = ActorSystem()
-  implicit val materializer = ActorMaterializer()
+  implicit val typedSystem  = system.toTyped
+  implicit val materializer = Materializer(system)
   implicit val ec           = system.dispatcher
 
   implicit val timeout = Timeout(5.seconds)
@@ -57,10 +59,10 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
   val parallelism = config.getInt("hmda.analytics.parallelism")
 
   /**
-    * Note: hmda-analytics microservice reads the JDBC_URL env var from inst-postgres-credentials secret.
-    * In beta namespace this environment variable has currentSchema=hmda_beta_user appended to it to change the schema
-    * to BETA
-    */
+   * Note: hmda-analytics microservice reads the JDBC_URL env var from inst-postgres-credentials secret.
+   * In beta namespace this environment variable has currentSchema=hmda_beta_user appended to it to change the schema
+   * to BETA
+   */
   val tsTableName2018  = config.getString("hmda.analytics.2018.tsTableName")
   val larTableName2018 = config.getString("hmda.analytics.2018.larTableName")
   //submission_history table remains same regardless of the year. There is a sign_date column and submission_id column which would show which year the filing was for
@@ -90,8 +92,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
       log.info(s"Processing: $msg")
       processData(msg.record.value()).map(_ => msg.committableOffset)
     }
-    .mapAsync(parallelism * 2)(offset => offset.commitScaladsl())
-    .toMat(Sink.seq)(Keep.both)
+    .toMat(Committer.sink(CommitterSettings(system).withParallelism(2)))(Keep.both)
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
@@ -125,11 +126,11 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .mapAsync(1) { ts =>
           for {
             delete <- submissionId.period match {
-                       case Period(2018, None)    => transmittalSheetRepository2018.deleteByLei(ts.lei)
-                       case Period(2019, None)    => transmittalSheetRepository2019.deleteByLei(ts.lei)
-                       case Period(2020, Some(_)) => transmittalSheetRepository2020.deleteByLeiAndQuarter(lei = ts.lei)
-                       case _ =>  throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete TS rows.")
-                     }
+              case Period(2018, None)    => transmittalSheetRepository2018.deleteByLei(ts.lei)
+              case Period(2019, None)    => transmittalSheetRepository2019.deleteByLei(ts.lei)
+              case Period(2020, Some(_)) => transmittalSheetRepository2020.deleteByLeiAndQuarter(lei = ts.lei)
+              case _                     => throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete TS rows.")
+            }
           } yield delete
         }
         .runWith(Sink.ignore)
@@ -168,14 +169,19 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .map(ts => TransmittalSheetConverter(ts, submissionIdOption))
         .mapAsync(1) { ts =>
           for {
-            signdate          <- signDate
+            signdate <- signDate
             insertorupdate <- submissionId.period match {
-                               case Period(2018, None) => transmittalSheetRepository2018.insert(ts.copy(lei=ts.lei.toUpperCase,signDate = Some(signdate.getOrElse(0L))))
-                               case Period(2019, None) => transmittalSheetRepository2019.insert(ts.copy(lei=ts.lei.toUpperCase,signDate = Some(signdate.getOrElse(0L))))
-                               case Period(2020, Some(_)) => transmittalSheetRepository2020.insert(ts.copy(lei=ts.lei.toUpperCase,isQuarterly = Some(true),
-                                 signDate =  Some(signdate.getOrElse(0L))))
-                               case _ =>  throw new IllegalArgumentException(s"Unable to discern period from $submissionId to insert TS rows.")
-                             }
+              case Period(2018, None) =>
+                transmittalSheetRepository2018.insert(ts.copy(signDate = Some(signdate.getOrElse(0L))))
+              case Period(2019, None) =>
+                transmittalSheetRepository2019.insert(ts.copy(signDate = Some(signdate.getOrElse(0L))))
+              case Period(2020, Some(_)) =>
+                transmittalSheetRepository2020.insert(
+                  ts.copy(isQuarterly = Some(true), signDate = Some(signdate.getOrElse(0L)))
+                )
+              case _ =>
+                throw new IllegalArgumentException(s"Unable to discern period from $submissionId to insert TS rows.")
+            }
           } yield insertorupdate
         }
         .runWith(Sink.ignore)
@@ -195,10 +201,10 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .mapAsync(1) { lar =>
           for {
             delete <- submissionId.period match {
-                       case Period(2018, None)    => larRepository2018.deleteByLei(lar.larIdentifier.LEI)
-                       case Period(2019, None)    => larRepository2019.deleteByLei(lar.larIdentifier.LEI)
-                       case Period(2020, Some(_)) => larRepository2020.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-                       case _ =>  throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete LAR rows.")
+              case Period(2018, None)    => larRepository2018.deleteByLei(lar.larIdentifier.LEI)
+              case Period(2019, None)    => larRepository2019.deleteByLei(lar.larIdentifier.LEI)
+              case Period(2020, Some(_)) => larRepository2020.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case _                     => throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete LAR rows.")
 
             }
           } yield delete
@@ -219,17 +225,18 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .mapAsync(1) { lar =>
           for {
             insertorupdate <- submissionId.period match {
-                               case Period(2018, None) => larRepository2018.insert(LarConverter2018(lar))
-                               case Period(2019, None) =>
-                                 larRepository2019.insert(
-                                   LarConverter(lar, 2019)
-                                 )
-                               case Period(2020, Some(_)) =>
-                                 larRepository2020.insert(
-                                   LarConverter(lar = lar, 2020, isQuarterly = true)
-                                 )
-                               case _ =>  throw new IllegalArgumentException(s"Unable to discern period from $submissionId to insert LAR rows.")
-                             }
+              case Period(2018, None) => larRepository2018.insert(LarConverter2018(lar))
+              case Period(2019, None) =>
+                larRepository2019.insert(
+                  LarConverter(lar, 2019)
+                )
+              case Period(2020, Some(_)) =>
+                larRepository2020.insert(
+                  LarConverter(lar = lar, 2020, isQuarterly = true)
+                )
+              case _ =>
+                throw new IllegalArgumentException(s"Unable to discern period from $submissionId to insert LAR rows.")
+            }
           } yield insertorupdate
         }
         .runWith(Sink.ignore)
@@ -260,3 +267,4 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
   }
 
 }
+// $COVERAGE-ON$

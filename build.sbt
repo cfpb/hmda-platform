@@ -2,14 +2,10 @@ import Dependencies._
 import BuildSettings._
 import sbtassembly.AssemblyPlugin.autoImport.assemblyMergeStrategy
 
-lazy val commonDeps = Seq(logback, scalaTest, scalaCheck)
+lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson, embeddedPg, embeddedPgSupport, apacheCommonsIO, s3Mock)
 
 lazy val sparkDeps =
   Seq(
-    sparkCore,
-    sparkSql,
-    sparkStreaming,
-    sparkKafka,
     postgres,
     akkaKafkaStreams
   )
@@ -35,9 +31,7 @@ lazy val akkaDeps = Seq(
   akkaKafkaStreams,
   embeddedKafka,
   alpakkaS3,
-  akkaQuartzScheduler,
-  phantomDSL,
-  phantomJDK8
+  akkaQuartzScheduler
 )
 
 lazy val akkaPersistenceDeps =
@@ -60,7 +54,7 @@ lazy val slickDeps = Seq(slick, slickHikaryCP, postgres, h2)
 
 lazy val dockerSettings = Seq(
   Docker / maintainer := "Hmda-Ops",
-  dockerBaseImage := "openjdk:14.0.1-jdk-slim",
+  dockerBaseImage := "openjdk:14-jdk-slim",
   dockerRepository := Some("hmda")
 )
 

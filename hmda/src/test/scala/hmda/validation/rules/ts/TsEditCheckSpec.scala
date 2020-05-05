@@ -1,15 +1,12 @@
 package hmda.validation.rules.ts
 
 import hmda.model.filing.ts.TransmittalSheet
-import org.scalatest.{MustMatchers, PropSpec}
-import org.scalatest.prop.PropertyChecks
+import org.scalatest.{ MustMatchers, PropSpec }
 import hmda.validation.rules.EditCheck
-import hmda.validation.dsl.{ValidationSuccess, ValidationFailure}
+import hmda.validation.dsl.{ ValidationFailure, ValidationSuccess }
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-abstract class TsEditCheckSpec
-    extends PropSpec
-    with PropertyChecks
-    with MustMatchers {
+abstract class TsEditCheckSpec extends PropSpec with ScalaCheckPropertyChecks with MustMatchers {
 
   implicit val generatorDriverConfig =
     PropertyCheckConfiguration(minSuccessful = 100, maxDiscardedFactor = 5.0)

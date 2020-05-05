@@ -1,13 +1,10 @@
 package hmda.serialization.submission
 
 import hmda.serialization.submission.HmdaParserErrorStateGenerator._
-import org.scalatest.prop.PropertyChecks
-import org.scalatest.{MustMatchers, PropSpec}
+import org.scalatest.{ MustMatchers, PropSpec }
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-class SubmissionProcessingEventsSerializerSpec
-    extends PropSpec
-    with PropertyChecks
-    with MustMatchers {
+class SubmissionProcessingEventsSerializerSpec extends PropSpec with ScalaCheckPropertyChecks with MustMatchers {
 
   val serializer = new SubmissionProcessingEventsSerializer
 

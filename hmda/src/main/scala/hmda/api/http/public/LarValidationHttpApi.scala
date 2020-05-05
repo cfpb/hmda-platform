@@ -1,40 +1,31 @@
 package hmda.api.http.public
 
-import akka.actor.ActorSystem
-import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.stream.ActorMaterializer
-import akka.util.Timeout
-import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.headers.RawHeader
+import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import hmda.api.http.model.public.LarValidateRequest
-import hmda.parser.filing.lar.LarCsvParser
-import hmda.utils.YearUtils.Period
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.api.http.directives.HmdaTimeDirectives
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import hmda.api.http.PathMatchers._
+import hmda.api.http.model.public.LarValidateRequest
+import hmda.api.http.public.FilingValidationHttpDirectives._
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.validation.LarValidationError
+import hmda.parser.filing.lar.LarCsvParser
+import hmda.utils.YearUtils.Period
 import hmda.validation.HmdaValidation
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
-import hmda.api.http.PathMatchers._
 
-import scala.concurrent.ExecutionContext
+object LarValidationHttpApi {
+  def create: Route = new LarValidationHttpApi().larRoutes
+}
 
-trait LarValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpApi {
-
-  implicit val system: ActorSystem
-  implicit val materializer: ActorMaterializer
-  val log: LoggingAdapter
-  implicit val ec: ExecutionContext
-  implicit val timeout: Timeout
-
+private class LarValidationHttpApi {
   //lar/parse
-  val parseLarRoute =
+  private val parseLarRoute =
     path("parse") {
-      timedPost { _ =>
+      post {
         respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
           entity(as[LarValidateRequest]) { req =>
             LarCsvParser(req.lar) match {
@@ -46,16 +37,14 @@ trait LarValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpA
           }
         }
       } ~
-        timedOptions { _ =>
-          complete("OPTIONS")
-        }
+        options(complete("OPTIONS"))
     }
 
   //lar/validate/<year>
-  val validateYearLarRoute =
+  private val validateYearLarRoute =
     path("validate" / IntNumber) { year =>
       parameters('check.as[String] ? "all") { checkType =>
-        timedPost { _ =>
+        post {
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             entity(as[LarValidateRequest]) { req =>
               LarCsvParser(req.lar) match {
@@ -70,10 +59,10 @@ trait LarValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpA
     }
 
   //lar/validate/<year>
-  val validateQuarterLarRoute =
+  private val validateQuarterLarRoute =
     path("validate" / IntNumber / "quarter" / Quarter) { (year, quarter) =>
       parameters('check.as[String] ? "all") { checkType =>
-        timedPost { _ =>
+        post {
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             entity(as[LarValidateRequest]) { req =>
               LarCsvParser(req.lar) match {
@@ -118,5 +107,4 @@ trait LarValidationHttpApi extends HmdaTimeDirectives with FilingValidationHttpA
         }
       }
     }
-
 }

@@ -1,9 +1,10 @@
 package hmda.dataBrowser
 
-import akka.actor.ActorSystem
+import akka.actor.typed.ActorSystem
 import hmda.dataBrowser.api.DataBrowserApi
 import org.slf4j.LoggerFactory
 
+// $COVERAGE-OFF$
 object DataBrowser extends App {
 
   val log = LoggerFactory.getLogger("data-browser")
@@ -20,6 +21,6 @@ object DataBrowser extends App {
     """.stripMargin
   )
 
-  implicit val system: ActorSystem = ActorSystem("hmda-data-browser")
-  system.actorOf(DataBrowserApi.props(), "hmda-data-browser")
+  ActorSystem[Nothing](DataBrowserApi(), DataBrowserApi.name)
 }
+// $COVERAGE-ON$

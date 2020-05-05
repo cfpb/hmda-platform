@@ -1,39 +1,33 @@
 package hmda.api.http.public
 
 import akka.NotUsed
-import akka.actor.ActorSystem
-import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, StatusCodes }
-import akka.http.scaladsl.server.Route
-import akka.stream.{ ActorMaterializer, FlowShape }
-import akka.util.{ ByteString, Timeout }
-import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.headers.RawHeader
+import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, StatusCodes }
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 import akka.stream.scaladsl.{ Broadcast, Concat, Flow, GraphDSL, Sink, Source }
-import hmda.parser.filing.lar.LarCsvParser
-import hmda.parser.filing.ts.TsCsvParser
+import akka.stream.{ FlowShape, Materializer }
+import akka.util.ByteString
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.api.http.directives.HmdaTimeDirectives
-import io.circe.generic.auto._
 import hmda.api.http.model.filing.submissions.HmdaRowParsedErrorSummary
 import hmda.api.http.utils.ParserErrorUtils
-
-import scala.concurrent.ExecutionContext
-import scala.util.{ Failure, Success }
+import hmda.parser.filing.lar.LarCsvParser
+import hmda.parser.filing.ts.TsCsvParser
 import hmda.util.streams.FlowUtils._
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import io.circe.generic.auto._
 
-trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
+import scala.util.{ Failure, Success }
 
-  implicit val system: ActorSystem
-  implicit val materializer: ActorMaterializer
-  val log: LoggingAdapter
-  implicit val ec: ExecutionContext
-  implicit val timeout: Timeout
+object HmdaFileValidationHttpApi {
+  def create(implicit mat: Materializer): Route = new HmdaFileValidationHttpApi().hmdaFileRoutes
+}
+
+private class HmdaFileValidationHttpApi(implicit mat: Materializer) {
 
   //hmda/parse
-  val parseHmdaFileRoute =
+  private val parseHmdaFileRoute =
     path("parse") {
       fileUpload("file") {
         case (_, byteSource) =>
@@ -41,7 +35,7 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
             byteSource.via(processHmdaFile).runWith(Sink.seq)
           onComplete(processF) {
             case Success(parsed) =>
-              val errorList = parsed.filter(_ != None)
+              val errorList = parsed.filter(_.isDefined)
               complete(errorList)
 
             case Failure(error) =>
@@ -50,12 +44,10 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
         case _ =>
           complete(ToResponseMarshallable(StatusCodes.BadRequest))
       } ~
-        timedOptions { _ =>
-          complete("OPTIONS")
-        }
+        options(complete("OPTIONS"))
     } ~
       path("parse" / "csv") {
-        timedPost { _ =>
+        post {
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             fileUpload("file") {
               case (_, byteSource) =>
@@ -63,11 +55,11 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
                   Source.fromIterator(() => List("Row Number|Estimated ULI|Field Name|Input Value|Valid Values\n").toIterator)
                 val errors = byteSource
                   .via(processHmdaFile)
-                  .filter(_ != None)
-                  .map(option => option match {
+                  .filter(_.isDefined)
+                  .map {
                     case Some(error) => error.toCsv
-                    case None => ""
-                  })
+                    case None        => ""
+                  }
                   .map(s => ByteString(s))
 
                 val csvF = headerSource
@@ -88,9 +80,7 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
             }
           }
         } ~
-          timedOptions { _ =>
-            complete("OPTIONS")
-          }
+          options(complete("OPTIONS"))
       }
 
   def hmdaFileRoutes: Route =
