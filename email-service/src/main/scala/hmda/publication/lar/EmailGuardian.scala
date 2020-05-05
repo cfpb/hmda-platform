@@ -5,7 +5,7 @@ import akka.actor.typed.scaladsl._
 import akka.actor.typed.scaladsl.adapter._
 import akka.actor.{ ActorSystem => UntypedActorSystem }
 import akka.kafka.CommitterSettings
-import akka.stream.ActorMaterializer
+import akka.stream.{ ActorMaterializer, Materializer }
 import akka.stream.scaladsl.Keep
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder
 import hmda.publication.lar.config.Settings
@@ -21,10 +21,10 @@ object EmailGuardian {
   case object Ready                 extends GuardianProtocol
   case class Error(message: String) extends GuardianProtocol
 
-  def behavior: Behavior[GuardianProtocol] =
+  def apply(): Behavior[GuardianProtocol] =
     Behaviors.setup { ctx =>
       implicit val system: UntypedActorSystem = ctx.system.toClassic
-      implicit val mat: ActorMaterializer     = ActorMaterializer()
+      implicit val mat: Materializer          = Materializer(ctx)
       implicit val monixScheduler: Scheduler  = Scheduler(ctx.executionContext)
 
       val databaseConfig                                   = DatabaseConfig.forConfig[JdbcProfile]("db")
@@ -36,7 +36,17 @@ object EmailGuardian {
 
       val (control, streamCompletion) =
         pullEmails(system, config.kafka.bootstrapServers)
-          .via(sendEmailsIfNecessary(emailService, emailStatusRepo, config.email.content, config.email.subject, config.email.parallelism,config.email.timeToRetry,config.bankFilterList))
+          .via(
+            sendEmailsIfNecessary(
+              emailService,
+              emailStatusRepo,
+              config.email.content,
+              config.email.subject,
+              config.email.parallelism,
+              config.email.timeToRetry,
+              config.bankFilterList
+            )
+          )
           .asSource
           .map { case (_, offset) => offset }
           .toMat(commitMessages(commitSettings))(Keep.both)

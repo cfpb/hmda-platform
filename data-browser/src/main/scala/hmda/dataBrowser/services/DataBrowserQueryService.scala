@@ -66,7 +66,7 @@ class DataBrowserQueryService(repo: ModifiedLarRepository, cache: Cache) extends
     Task.gatherUnordered {
       queryFieldCombinations.map { eachCombination =>
         val fieldInfos = eachCombination.map(field => FieldInfo(field.name, field.values.mkString(",")))
-        println(s"cache.find($eachCombination)")
+
         cacheResult(
           cacheLookup = cache.find(eachCombination),
           onMiss = repo.findAndAggregate(eachCombination),

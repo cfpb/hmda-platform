@@ -1,25 +1,17 @@
 package hmda.serialization.institution
 
-import hmda.messages.institution.InstitutionEvents.{
-  InstitutionCreated,
-  InstitutionDeleted,
-  InstitutionModified,
-  InstitutionNotExists
-}
+import hmda.messages.institution.InstitutionEvents.{ InstitutionCreated, InstitutionDeleted, InstitutionModified, InstitutionNotExists }
 import hmda.model.institution.InstitutionGenerators._
-import org.scalatest.prop.PropertyChecks
-import org.scalatest.{MustMatchers, PropSpec}
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import org.scalatest.{ MustMatchers, PropSpec }
 
-class InstitutionEventsSerializerSpec
-    extends PropSpec
-    with PropertyChecks
-    with MustMatchers {
+class InstitutionEventsSerializerSpec extends PropSpec with ScalaCheckPropertyChecks with MustMatchers {
 
   val serializer = new InstitutionEventsSerializer()
 
   property("InstitutionCreated must serialize to and from binary") {
     forAll(institutionGen) { institution =>
-      val created = InstitutionCreated(institution)
+      val created      = InstitutionCreated(institution)
       val bytesCreated = serializer.toBinary(created)
       serializer.fromBinary(bytesCreated, serializer.InstitutionCreatedManifest) mustBe created
     }
@@ -27,11 +19,9 @@ class InstitutionEventsSerializerSpec
 
   property("InstitutionModified must serialize to and from binary") {
     forAll(institutionGen) { institution =>
-      val modified = InstitutionModified(institution)
+      val modified      = InstitutionModified(institution)
       val bytesModified = serializer.toBinary(modified)
-      serializer.fromBinary(
-        bytesModified,
-        serializer.InstitutionModifiedManifest) mustBe modified
+      serializer.fromBinary(bytesModified, serializer.InstitutionModifiedManifest) mustBe modified
     }
   }
 
@@ -46,12 +36,9 @@ class InstitutionEventsSerializerSpec
 
   property("InstitutionNotExists must serialize to and from binary") {
     forAll(institutionGen) { institution =>
-      val notExists = InstitutionNotExists(institution.LEI)
+      val notExists     = InstitutionNotExists(institution.LEI)
       val bytesNotExist = serializer.toBinary(notExists)
-      serializer.fromBinary(
-        bytesNotExist,
-        serializer.InstitutionNotExistsManifest) mustBe InstitutionNotExists(
-        institution.LEI)
+      serializer.fromBinary(bytesNotExist, serializer.InstitutionNotExistsManifest) mustBe InstitutionNotExists(institution.LEI)
     }
   }
 

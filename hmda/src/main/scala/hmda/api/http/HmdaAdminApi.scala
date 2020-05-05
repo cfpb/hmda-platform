@@ -1,67 +1,43 @@
 package hmda.api.http
 
-import akka.actor.{ ActorSystem, Props }
+import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.scaladsl.adapter._
+import akka.actor.typed.{ ActorSystem, Behavior }
+import akka.actor.{ CoordinatedShutdown, ActorSystem => ClassicActorSystem }
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.event.Logging
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Route
-import akka.pattern.pipe
-import akka.stream.ActorMaterializer
+import akka.http.scaladsl.server.Directives._
+import akka.stream.Materializer
 import akka.util.Timeout
 import hmda.api.http.admin.InstitutionAdminHttpApi
+import hmda.api.http.directives.HmdaTimeDirectives._
 import hmda.api.http.routes.BaseHttpApi
-import akka.http.scaladsl.server.Directives._
-import akka.actor.typed.scaladsl.adapter._
-import hmda.auth.{ KeycloakTokenVerifier, OAuth2Authorization }
-import org.keycloak.adapters.KeycloakDeploymentBuilder
-import org.keycloak.representations.adapters.config.AdapterConfig
+import hmda.auth.OAuth2Authorization
+import org.slf4j.Logger
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 object HmdaAdminApi {
-  def props: Props       = Props(new HmdaAdminApi)
-  final val adminApiName = "hmda-admin-api"
-}
+  val name = "hmda-admin-api"
 
-class HmdaAdminApi extends HttpServer with BaseHttpApi with InstitutionAdminHttpApi {
-  import HmdaAdminApi._
+  def apply(): Behavior[Nothing] = Behaviors.setup[Nothing] { ctx =>
+    implicit val system: ActorSystem[_]      = ctx.system
+    implicit val classic: ClassicActorSystem = system.toClassic
+    implicit val mat: Materializer           = Materializer(ctx)
+    implicit val ec: ExecutionContext        = ctx.executionContext
+    val log: Logger                          = ctx.log
+    val sharding                             = ClusterSharding(system)
+    val config                               = system.settings.config
+    implicit val timeout: Timeout            = Timeout(config.getInt("hmda.http.timeout").seconds)
+    val host: String                         = config.getString("hmda.http.adminHost")
+    val port: Int                            = config.getInt("hmda.http.adminPort")
+    val shutdown                             = CoordinatedShutdown(system)
 
-  override implicit val system: ActorSystem             = context.system
-  override implicit val materializer: ActorMaterializer = ActorMaterializer()
-  override implicit val ec: ExecutionContext            = context.dispatcher
-  override val log                                      = Logging(system, getClass)
-  override val timeout: Timeout                         = Timeout(config.getInt("hmda.http.timeout").seconds)
+    val oAuth2Authorization = OAuth2Authorization(log, config)
+    val institutionRoutes   = InstitutionAdminHttpApi.create(sharding, config)
+    val routes              = BaseHttpApi.routes(name) ~ institutionRoutes(oAuth2Authorization)
 
-  val authUrl       = config.getString("keycloak.auth.server.url")
-  val keycloakRealm = config.getString("keycloak.realm")
-  val apiClientId   = config.getString("keycloak.client.id")
-
-  val adapterConfig = new AdapterConfig()
-  adapterConfig.setRealm(keycloakRealm)
-  adapterConfig.setAuthServerUrl(authUrl)
-  adapterConfig.setResource(apiClientId)
-  println(adapterConfig.getClientKeystore)
-  val keycloakDeployment = KeycloakDeploymentBuilder.build(adapterConfig)
-
-  val oAuth2Authorization = OAuth2Authorization(
-    log,
-    new KeycloakTokenVerifier(keycloakDeployment)
-  )
-
-  override val sharding = ClusterSharding(system.toTyped)
-
-  override val name: String = adminApiName
-  override val host: String = config.getString("hmda.http.adminHost")
-  override val port: Int    = config.getInt("hmda.http.adminPort")
-
-  override val paths: Route = routes(s"$name") ~ institutionAdminRoutes(oAuth2Authorization)
-
-  override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
-    paths,
-    host,
-    port
-  )
-
-  http pipeTo self
+    BaseHttpApi.runServer(shutdown, name)(timed(routes), host, port)
+    Behaviors.empty
+  }
 }

@@ -1,9 +1,10 @@
 package hmda.auth
 
-import akka.actor.ActorSystem
+import akka.actor.typed.ActorSystem
+import akka.actor.typed.scaladsl.adapter._
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.HttpRequest
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 import io.circe.generic.auto._
@@ -15,10 +16,11 @@ import org.keycloak.representations.AccessToken
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 
-class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment)(implicit system: ActorSystem,
-                                                                    materializer: ActorMaterializer,
-                                                                    ec: ExecutionContext)
-    extends TokenVerifier {
+class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment)(
+  implicit system: ActorSystem[_],
+  materializer: Materializer,
+  ec: ExecutionContext
+) extends TokenVerifier {
 
   val config  = ConfigFactory.load()
   val realm   = config.getString("keycloak.realm")
@@ -39,9 +41,8 @@ class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment)(implicit sys
   private def getKid(keycloakDeployment: KeycloakDeployment): Future[String] = {
     val certUrl =
       s"${authUrl}realms/$realm/protocol/openid-connect/certs"
-    val fResponse = Http().singleRequest(HttpRequest(uri = certUrl))
-    val fStrictEntity =
-      fResponse.map(response => response.entity.toStrict(timeout))
+    val fResponse     = Http()(system.toClassic).singleRequest(HttpRequest(uri = certUrl))
+    val fStrictEntity = fResponse.map(response => response.entity.toStrict(timeout))
     val f = for {
       _ <- fResponse
       s <- fStrictEntity
@@ -56,10 +57,7 @@ class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment)(implicit sys
   private def parseAuthKey(line: ByteString): AuthKey = {
     val str      = line.utf8String
     val authKeys = decode[AuthKeys](str).getOrElse(AuthKeys())
-    if (authKeys.keys.nonEmpty) {
-      authKeys.keys.head
-    } else {
-      AuthKey()
-    }
+    if (authKeys.keys.nonEmpty) authKeys.keys.head
+    else AuthKey()
   }
 }

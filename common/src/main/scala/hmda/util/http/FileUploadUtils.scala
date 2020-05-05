@@ -1,10 +1,11 @@
 package hmda.util.http
 
+import akka.http.scaladsl.model.Multipart.FormData
 import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, Multipart }
 
 trait FileUploadUtils {
 
-  def multipartFile(contents: String, fileName: String) =
+  def multipartFile(contents: String, fileName: String): FormData =
     Multipart.FormData(
       Multipart.FormData.BodyPart.Strict(
         "file",

@@ -5,7 +5,7 @@ import java.net.InetSocketAddress
 import akka.actor.{ Actor, ActorSystem, Status }
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import hmda.actor.HmdaActor
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -16,7 +16,7 @@ trait HmdaServer extends HmdaActor {
   val port: Int
 
   implicit val system: ActorSystem
-  implicit val materializer: ActorMaterializer
+  implicit val materializer: Materializer
   implicit val ec: ExecutionContext
 
   val http: Future[ServerBinding]

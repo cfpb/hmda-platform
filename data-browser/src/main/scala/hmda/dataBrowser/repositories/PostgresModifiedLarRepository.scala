@@ -7,6 +7,8 @@ import monix.eval.Task
 import slick.basic.DatabaseConfig
 import slick.jdbc.{ JdbcProfile, ResultSetConcurrency, ResultSetType }
 
+// $COVERAGE-OFF$
+// Talks to Postgres using Slick
 class PostgresModifiedLarRepository(tableName: String, config: DatabaseConfig[JdbcProfile]) extends ModifiedLarRepository {
 
   import config._
@@ -168,7 +170,7 @@ class PostgresModifiedLarRepository(tableName: String, config: DatabaseConfig[Jd
     val year = filerFields.find(_.name == "year").map(_.values.head.toInt)
     val institutionsTableName = year match { //will be needed when databrowser has to support multiple years
       case Some(2018) => "institutions2018"
-      case _ => "institutions2018"
+      case _          => "institutions2018"
     }
     //do not include year in the WHERE clause because all entries in the table (modifiedlar2018_snapshot) have filing_year = 2018
     val queries = filerFields.filterNot(_.name == "year").map(field => in(field.dbName, field.values))
@@ -210,3 +212,4 @@ class PostgresModifiedLarRepository(tableName: String, config: DatabaseConfig[Jd
   def healthCheck: Task[Unit] =
     Task.deferFuture(db.run(sql"SELECT 1".as[Int])).guarantee(Task.shift).void
 }
+// $COVERAGE-ON$

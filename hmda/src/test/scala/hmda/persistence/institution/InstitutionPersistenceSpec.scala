@@ -15,7 +15,7 @@ import hmda.messages.institution.InstitutionEvents._
 
 class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
 
-  override val system = actor.ActorSystem()
+  override val system                               = actor.ActorSystem()
   override implicit val typedSystem: ActorSystem[_] = system.toTyped
 
   val sharding = ClusterSharding(typedSystem)
@@ -37,8 +37,7 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
     "be created and read back" in {
       val institutionPersistence =
         system.spawn(InstitutionPersistence.behavior("ABC12345"), actorName)
-      institutionPersistence ! CreateInstitution(sampleInstitution,
-                                                 institutionProbe.ref)
+      institutionPersistence ! CreateInstitution(sampleInstitution, institutionProbe.ref)
       institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))
 
       institutionPersistence ! GetInstitution(maybeInstitutionProbe.ref)
@@ -48,8 +47,7 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
     "not be created if it already exists" in {
       val institutionPersistence =
         system.spawn(InstitutionPersistence.behavior("ABC12345"), actorName)
-      institutionPersistence ! CreateInstitution(sampleInstitution,
-                                                 institutionProbe.ref)
+      institutionPersistence ! CreateInstitution(sampleInstitution, institutionProbe.ref)
       institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))
 
       institutionPersistence ! CreateInstitution(modified, institutionProbe.ref)
@@ -63,8 +61,7 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
 
       val institutionPersistence =
         system.spawn(InstitutionPersistence.behavior("ABC12345"), actorName)
-      institutionPersistence ! CreateInstitution(sampleInstitution,
-                                                 institutionProbe.ref)
+      institutionPersistence ! CreateInstitution(sampleInstitution, institutionProbe.ref)
       institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))
 
       institutionPersistence ! ModifyInstitution(modified, institutionProbe.ref)
@@ -86,15 +83,11 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
       val institutionPersistence =
         system.spawn(InstitutionPersistence.behavior("ABC12345"), actorName)
 
-      institutionPersistence ! CreateInstitution(sampleInstitution,
-                                                 institutionProbe.ref)
+      institutionPersistence ! CreateInstitution(sampleInstitution, institutionProbe.ref)
       institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))
 
-      institutionPersistence ! DeleteInstitution(modified.LEI,
-                                                 modified.activityYear,
-                                                 institutionProbe.ref)
-      institutionProbe.expectMessage(
-        InstitutionDeleted(modified.LEI, modified.activityYear))
+      institutionPersistence ! DeleteInstitution(modified.LEI, modified.activityYear, institutionProbe.ref)
+      institutionProbe.expectMessage(InstitutionDeleted(modified.LEI, modified.activityYear))
 
       institutionPersistence ! GetInstitution(maybeInstitutionProbe.ref)
       maybeInstitutionProbe.expectMessage(None)
@@ -104,9 +97,7 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
       val institutionPersistence =
         system.spawn(InstitutionPersistence.behavior("XXXXX"), actorName)
 
-      institutionPersistence ! DeleteInstitution(modified.LEI,
-                                                 modified.activityYear,
-                                                 institutionProbe.ref)
+      institutionPersistence ! DeleteInstitution(modified.LEI, modified.activityYear, institutionProbe.ref)
       institutionProbe.expectMessage(InstitutionNotExists(modified.LEI))
     }
 
@@ -116,11 +107,9 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
     Cluster(typedSystem).manager ! Join(Cluster(typedSystem).selfMember.address)
     "be created and read back" in {
       val institutionPersistence =
-        sharding.entityRefFor(InstitutionPersistence.typeKey,
-                              s"${InstitutionPersistence.name}-ABC12345")
+        sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-ABC12345")
 
-      institutionPersistence ! CreateInstitution(sampleInstitution,
-                                                 institutionProbe.ref)
+      institutionPersistence ! CreateInstitution(sampleInstitution, institutionProbe.ref)
       institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))
 
       institutionPersistence ! GetInstitution(maybeInstitutionProbe.ref)
@@ -128,8 +117,7 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
     }
     "be modified and read back" in {
       val institutionPersistence =
-        sharding.entityRefFor(InstitutionPersistence.typeKey,
-                              s"${InstitutionPersistence.name}-ABC12345")
+        sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-ABC12345")
 
       institutionPersistence ! ModifyInstitution(modified, institutionProbe.ref)
       institutionProbe.expectMessage(InstitutionModified(modified))
@@ -139,14 +127,10 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
     }
     "be deleted" in {
       val institutionPersistence =
-        sharding.entityRefFor(InstitutionPersistence.typeKey,
-                              s"${InstitutionPersistence.name}-ABC12345")
+        sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-ABC12345")
 
-      institutionPersistence ! DeleteInstitution(modified.LEI,
-                                                 modified.activityYear,
-                                                 institutionProbe.ref)
-      institutionProbe.expectMessage(
-        InstitutionDeleted(modified.LEI, modified.activityYear))
+      institutionPersistence ! DeleteInstitution(modified.LEI, modified.activityYear, institutionProbe.ref)
+      institutionProbe.expectMessage(InstitutionDeleted(modified.LEI, modified.activityYear))
 
       institutionPersistence ! GetInstitution(maybeInstitutionProbe.ref)
       maybeInstitutionProbe.expectMessage(None)
