@@ -64,6 +64,8 @@ class DataBrowserQueryService(repo2018: ModifiedLarRepository2018, repo2017: Mod
       fields.filter(_.values.nonEmpty).find(_.name == "year")
     val optLEI: Option[QueryField] =
       fields.filter(_.values.nonEmpty).find(_.name == "lei")
+    val optARID: Option[QueryField] =
+      fields.filter(_.values.nonEmpty).find(_.name == "arid")
 
     val rest = fields
       .filterNot(_.name == "state")
@@ -71,9 +73,10 @@ class DataBrowserQueryService(repo2018: ModifiedLarRepository2018, repo2017: Mod
       .filterNot(_.name == "county")
       .filterNot(_.name == "year")
       .filterNot(_.name == "lei")
+      .filterNot(_.name == "arid")
 
     val queryFieldCombinations = permuteQueryFields(rest)
-      .map(eachList => optYear.toList ++ optState.toList ++ optMsaMd.toList ++ optCounty.toList ++ optLEI.toList ++ eachList)
+      .map(eachList => optYear.toList ++ optState.toList ++ optMsaMd.toList ++ optCounty.toList ++ optLEI.toList ++ optARID.toList ++ eachList)
       .map(eachCombination => eachCombination.sortBy(field => field.name))
 
     Task.gatherUnordered {

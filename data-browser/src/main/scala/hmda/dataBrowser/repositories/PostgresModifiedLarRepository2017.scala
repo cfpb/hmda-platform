@@ -55,7 +55,8 @@ class PostgresModifiedLarRepository2017(tableName: String, config: DatabaseConfi
     tract_to_msa_income_pct,
     owner_occupied_units,
     one_to_four_fam_units,
-    filing_year
+    filing_year,
+    arid
     """.stripMargin
 
   def escape(str: String): String = str.replace("'", "")
