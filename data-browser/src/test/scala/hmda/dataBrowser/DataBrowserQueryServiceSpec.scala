@@ -91,6 +91,20 @@ class DataBrowserQueryServiceSpec
       whenReady(futActual)(_ should contain theSameElementsAs List(a1, a2))
     }
 
+    "fetchFilers returns all the institution filers" in {
+      val query = List(QueryField("one", List("a")))
+
+      val response = FilerInstitutionResponse(FilerInformation("example", "example", 1, 2018) :: Nil)
+      (cache.findFilers _).expects(query).returns(Task.now(None))
+      (repo.findFilers _).expects(query).returns(Task.now(response.institutions))
+      (cache.updateFilers _).expects(*, *).returns(Task.now(response))
+
+      val taskActual = service.fetchFilers(query)
+      val futActual  = taskActual.runToFuture
+      scheduler.tick()
+      whenReady(futActual)(_ shouldBe response)
+    }
+
     def sampleMlar = ModifiedLarEntity(
       filingYear = 2019,
       lei = "EXAMPLELEI",

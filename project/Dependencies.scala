@@ -43,6 +43,7 @@ object Dependencies {
     "com.lightbend.akka.management" %% "akka-management-cluster-http" % Version.akkaClusterManagement exclude ("com.typesafe.akka", "akka-http") exclude ("com.typesafe.akka", "akka-http-xml")
   lazy val akkaCors =
     "ch.megard" %% "akka-http-cors" % Version.akkaCors exclude ("com.typesafe.akka", "akka-http") exclude ("com.typesafe.akka", "akka-http-xml")
+
   lazy val circe                    = "io.circe"                  %% "circe-core"                          % Version.circe
   lazy val circeGeneric             = "io.circe"                  %% "circe-generic"                       % Version.circe
   lazy val circeParser              = "io.circe"                  %% "circe-parser"                        % Version.circe

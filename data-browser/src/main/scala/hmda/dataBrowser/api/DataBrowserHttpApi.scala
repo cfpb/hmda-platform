@@ -10,65 +10,24 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.dataBrowser.api.DataBrowserDirectives._
 import hmda.dataBrowser.models.HealthCheckStatus.Up
 import hmda.dataBrowser.models._
-import hmda.dataBrowser.repositories._
 import hmda.dataBrowser.services._
-import io.lettuce.core.api.async.RedisAsyncCommands
-import io.lettuce.core.{ ClientOptions, RedisClient }
-import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
 import org.slf4j.Logger
-import slick.basic.DatabaseConfig
-import slick.jdbc.JdbcProfile
 
 import scala.util.{ Failure, Success }
 
 object DataBrowserHttpApi {
-  def create(log: Logger)(implicit mat: Materializer): Route =
-    new DataBrowserHttpApi(log)(mat).dataBrowserRoutes
+  def create(log: Logger, fileCache: S3FileService, query: QueryService, healthCheck: HealthCheckService)(
+    implicit mat: Materializer
+  ): Route =
+    new DataBrowserHttpApi(log, fileCache, query, healthCheck).dataBrowserRoutes
 }
 
-private class DataBrowserHttpApi(log: Logger)(implicit mat: Materializer) {
+private class DataBrowserHttpApi(log: Logger, fileCache: S3FileService, query: QueryService, healthCheck: HealthCheckService) {
 
   val Csv          = "csv"
   val Pipe         = "pipe"
   val Aggregations = "aggregations"
-
-  val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("databrowser_db")
-  val repository =
-    new PostgresModifiedLarRepository(database.tableName, databaseConfig)
-
-  // We make the creation of the Redis client effectful because it can fail and we would like to operate
-  // the service even if the cache is down (we provide fallbacks in case we receive connection errors)
-  val redisClientTask: Task[RedisAsyncCommands[String, String]] = {
-    val client = RedisClient.create(redis.url)
-    Task.eval {
-      client.setOptions(
-        ClientOptions
-          .builder()
-          .autoReconnect(true)
-          .disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS)
-          .cancelCommandsOnReconnectFailure(true)
-          .build()
-      )
-
-      client
-        .connect()
-        .async()
-    }.memoizeOnSuccess
-    // we memoizeOnSuccess because if we manage to create the client, we do not want to recompute it because the
-    // client creation process is expensive and the client is able to recover internally when Redis comes back
-  }
-
-  val cache =
-    new RedisCache(redisClientTask, redis.ttl)
-
-  val query: QueryService =
-    new DataBrowserQueryService(repository, cache)
-
-  val fileCache = new S3FileService
-
-  val healthCheck: HealthCheckService =
-    new HealthCheckService(repository, cache, fileCache)
 
   def serveData(queries: List[QueryField], delimiter: Delimiter, errorMessage: String): Route =
     onComplete(obtainDataSource(fileCache, query)(queries, delimiter).runToFuture) {
