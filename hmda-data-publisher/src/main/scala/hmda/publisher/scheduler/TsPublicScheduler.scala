@@ -39,12 +39,12 @@ class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with TSHea
 
   val awsRegionProvider: AwsRegionProvider = () => Region.of(region)
 
-  val s3Settings = S3Settings(
-    MemoryBufferType,
-    awsCredentialsProvider,
-    awsRegionProvider,
-    ListBucketVersion2
-  )
+  val s3Settings =
+    S3Settings(context.system)
+      .withBufferType(MemoryBufferType)
+      .withCredentialsProvider(awsCredentialsProvider)
+      .withS3RegionProvider(awsRegionProvider)
+      .withListBucketApiVersion(ListBucketVersion2)
 
   override def preStart(): Unit =
     QuartzSchedulerExtension(context.system)

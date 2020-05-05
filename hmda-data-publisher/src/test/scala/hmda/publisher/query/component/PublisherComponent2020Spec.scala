@@ -65,7 +65,8 @@ class PublisherComponent2020Spec
         List(
           institutionRepo.dropSchema(),
           tsRepo.dropSchema(),
-          larRepo.dropSchema()
+          larRepo.dropSchema(),
+          db.run(sql"DROP TABLE loanapplicationregister2020".asUpdate)
         )
       ),
       30.seconds
@@ -76,6 +77,7 @@ class PublisherComponent2020Spec
   "InstitutionRepository2020 runthrough" in {
     import institutionRepo._
     val data = InstitutionEntity("EXAMPLE-LEI", activityYear = 2019, institutionType = 1, taxId = "ABC", hmdaFiler = true)
+    data.toPSV
     val test = for {
       rowsInserted <- insert(data)
       _            = rowsInserted shouldBe 1
@@ -100,6 +102,8 @@ class PublisherComponent2020Spec
   "TransmittalSheetRepository2020 runthrough" in {
     import tsRepo._
     val data = TransmittalSheetEntity(lei = "EXAMPLE-LEI", institutionName = "EXAMPLE-INSTITUTION", year = 2019)
+    data.toPublicPSV
+    data.toRegulatorPSV
     val test = for {
       rowsInserted <- insert(data)
       _            = rowsInserted shouldBe 1
@@ -109,10 +113,13 @@ class PublisherComponent2020Spec
       result       <- getAllSheets(Array.empty, includeQuarterly = false)
       _            = result should have length 1
       _            = result.head shouldBe data
-      result       <- count()
-      _            = result shouldBe 1
-      result       <- deleteByLei("EXAMPLE-LEI")
-      _            = result shouldBe 1
+      // note that we cannot insert quarterly entries through the Slick repository as it is misconfigured
+      result <- getAllSheets(Array.empty, includeQuarterly = true)
+      _      = result should have length 0
+      result <- count()
+      _      = result shouldBe 1
+      result <- deleteByLei("EXAMPLE-LEI")
+      _      = result shouldBe 1
     } yield ()
 
     whenReady(test)(_ => ())
@@ -129,6 +136,7 @@ class PublisherComponent2020Spec
       LarPartSix2020(),
       LarPartSeven2020()
     )
+    data.toRegulatorPSV
     val test = for {
       _      <- insert(data)
       result <- findByLei("EXAMPLE-LEI")

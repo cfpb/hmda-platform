@@ -86,8 +86,9 @@ lazy val `hmda-root` = (project in file("."))
     `hmda-analytics`,
     `hmda-data-publisher`,
     `hmda-reporting`,
-    `hmda-spark-reporting`,
-    `ratespread-calculator`
+    `ratespread-calculator`,
+    `email-service`,
+    `data-browser`
   )
 
 lazy val common = (project in file("common"))

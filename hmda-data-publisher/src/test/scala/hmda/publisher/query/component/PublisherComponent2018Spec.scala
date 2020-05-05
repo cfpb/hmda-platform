@@ -80,6 +80,7 @@ class PublisherComponent2018Spec
   "InstitutionRepository2018 runthrough" in {
     import institutionRepo._
     val data = InstitutionEntity("EXAMPLE-LEI", activityYear = 2018, institutionType = 1, taxId = "ABC", hmdaFiler = true)
+    data.toPSV
     val test = for {
       rowsInserted <- insert(data)
       _            = rowsInserted shouldBe 1
@@ -104,6 +105,8 @@ class PublisherComponent2018Spec
   "TransmittalSheetRepository runthrough" in {
     import tsRepo._
     val data = TransmittalSheetEntity(lei = "EXAMPLE-LEI", institutionName = "EXAMPLE-INSTITUTION", year = 2018)
+    data.toPublicPSV
+    data.toRegulatorPSV
     val test = for {
       rowsInserted <- insert(data)
       _            = rowsInserted shouldBe 1
@@ -132,6 +135,7 @@ class PublisherComponent2018Spec
       LarPartFive2018(),
       LarPartSix2018()
     )
+    data.toRegulatorPSV
     val test = for {
       _      <- insert(data)
       result <- findByLei("EXAMPLE-LEI")
@@ -159,6 +163,7 @@ class PublisherComponent2018Spec
       ModifiedLarPartFive(),
       ModifiedLarPartSix()
     )
+    data.toPublicPSV
     val test = for {
       _      <- insert(data)
       result <- findByLei("EXAMPLE-LEI")
