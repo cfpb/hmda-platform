@@ -12,12 +12,14 @@ import akka.util.ByteString
 import akka.{ Done, NotUsed }
 import com.typesafe.config.ConfigFactory
 import hmda.messages.pubsub.HmdaTopics._
+import hmda.messages.submission.HmdaRawDataEvents.LineAdded
 import hmda.model.census.Census
 import hmda.model.filing.submission.SubmissionId
 import hmda.model.modifiedlar.{ EnrichedModifiedLoanApplicationRegister, ModifiedLoanApplicationRegister }
 import hmda.publication.KafkaUtils
 import hmda.publication.KafkaUtils._
 import hmda.publication.lar.parser.ModifiedLarCsvParser
+import hmda.query.HmdaQuery
 import hmda.query.HmdaQuery._
 import hmda.query.repository.ModifiedLarRepository
 import software.amazon.awssdk.auth.credentials.{ AwsBasicCredentials, StaticCredentialsProvider }
@@ -55,7 +57,8 @@ object ModifiedLarPublisher {
   def behavior(
                 indexTractMap2018: Map[String, Census],
                 indexTractMap2019: Map[String, Census],
-                modifiedLarRepo: ModifiedLarRepository
+                modifiedLarRepo: ModifiedLarRepository,
+                readRawData: ActorSystem[_] => SubmissionId => Source[LineAdded, NotUsed] = as => id => HmdaQuery.readRawData(id)(as)
               ): Behavior[ModifiedLarCommand] =
     Behaviors.setup { ctx =>
       val log                                 = ctx.log
@@ -106,7 +109,7 @@ object ModifiedLarPublisher {
                 modifiedLarRepo.deleteByLei(submissionId)
 
               val mlarSource: Source[ModifiedLoanApplicationRegister, NotUsed] =
-                readRawData(submissionId)
+                readRawData(system)(submissionId)
                   .map(l => l.data)
                   .drop(1)
                   .map(s => ModifiedLarCsvParser(s, submissionId.period.year))
