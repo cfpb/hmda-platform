@@ -22,9 +22,11 @@ trait EmbeddedPostgres extends BeforeAndAfterAll { self: Suite =>
 
   def loadSqlFileFromResources(s: String): Unit = {
     import dbConfig.profile.api._
-    val db           = dbConfig.db
-    val tableSchemas = scala.io.Source.fromResource(s).mkString
-    Await.result(db.run(sql"#$tableSchemas".asUpdate), 30.seconds)
+    if (s.nonEmpty) {
+      val db           = dbConfig.db
+      val tableSchemas = scala.io.Source.fromResource(s).mkString
+      Await.result(db.run(sql"#$tableSchemas".asUpdate), 30.seconds)
+    } else ()
   }
 
   def cleanup(action: DBIO[Int]): Int = {
