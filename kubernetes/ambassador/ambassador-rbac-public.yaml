@@ -42,7 +42,7 @@ rules:
   verbs: ["get", "list", "watch"]
 - apiGroups: [ "extensions" ]
   resources: [ "ingresses/status" ]
-  verbs: ["update"]
+  verbs: ["update"]    
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -258,15 +258,16 @@ spec:
     categories:
     - ambassador-crds
 ---
-apiVersion: apps/v1
-kind: DaemonSet
+apiVersion: extensions/v1beta1
+kind: Deployment
 metadata:
   name: ambassador
   namespace: default
 spec:
+  replicas: 1
   selector:
     matchLabels:
-      service: ambassador
+      service: ambassador  
   template:
     metadata:
       annotations:
@@ -334,7 +335,7 @@ spec:
           items:
           - path: "labels"
             fieldRef:
-              fieldPath: metadata.labels
+              fieldPath: metadata.labels          
       restartPolicy: Always
       securityContext:
         runAsUser: 8888
@@ -343,4 +344,4 @@ spec:
       tolerations:
       - key: "node-type.kubernetes.dcos.io/public"
         operator: "Exists"
-        effect: "NoSchedule"
+        effect: "NoSchedule"        
