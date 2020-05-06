@@ -4,7 +4,7 @@
 
 ## Introduction
 
-By using [regtech](https://en.wikipedia.org/wiki/Regulatory_technology), the Home Mortgage Disclosure Act (HMDA) Platform has coded the [Filing Instruction Guide (FIG)](https://s3.amazonaws.com/cfpb-hmda-public/prod/help/2020-hmda-fig.pdf) to ensure the [quarterly](https://ffiec.cfpb.gov/documentation/2020/quarterly-filing-dates/) and [yearly](https://ffiec.cfpb.gov/documentation/2019/annual-filing-dates/) data being submitted () is parsed, validated for data edits (Syntactical, Validity, Quality, and Macro), and submitted as-per the instructions in the FIG. 
+By using [regtech](https://en.wikipedia.org/wiki/Regulatory_technology), the Home Mortgage Disclosure Act (HMDA) Platform has coded the [Filing Instruction Guide (FIG)](https://s3.amazonaws.com/cfpb-hmda-public/prod/help/2020-hmda-fig.pdf) to ensure the [quarterly](https://ffiec.cfpb.gov/documentation/2020/quarterly-filing-dates/) and [yearly](https://ffiec.cfpb.gov/documentation/2019/annual-filing-dates/) data being submitted is parsed, validated for data edits (Syntactical, Validity, Quality, and Macro), and submitted as-per the instructions in the FIG. 
 [Please watch this short video](https://youtu.be/C_73Swgyc4g) on how HMDA Platform transforms the data upload, validation, and submission process.
 
 
