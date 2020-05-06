@@ -9,9 +9,10 @@ import com.typesafe.config.ConfigFactory
 import hmda.api.http.model.ErrorResponse
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 
-trait CreateFilingAuthorization {
+object CreateFilingAuthorization {
   private val config = ConfigFactory.load()
-  private val rulesConfig = Filer.parse(config).fold(error => throw new RuntimeException(s"Failed to parse filing rules in HOCON: $error"), identity)
+  private val rulesConfig =
+    Filer.parse(config).fold(error => throw new RuntimeException(s"Failed to parse filing rules in HOCON: $error"), identity)
   private val check = Filer.check(rulesConfig) _
 
   def isFilingAllowed(year: Int, quarter: Option[String])(successful: Route): Route = extractMatchedPath { path =>

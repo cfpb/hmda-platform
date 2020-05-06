@@ -1,12 +1,12 @@
 package hmda.uli.api.http
 
-import akka.event.{LoggingAdapter, NoLogging}
+import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
-import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
+import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 import akka.http.scaladsl.model.Uri.Path
-import akka.http.scaladsl.model.headers.{HttpOrigin, Origin}
+import akka.http.scaladsl.model.headers.{ HttpOrigin, Origin }
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.model.ErrorResponse
 import hmda.uli.api.model.ULIModel._
@@ -15,24 +15,20 @@ import hmda.uli.api.model.ULIValidationErrorMessages._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import akka.http.scaladsl.unmarshalling.Unmarshaller._
+import org.slf4j.{ Logger, LoggerFactory }
 
 import scala.concurrent.duration._
 
-class ULIHttpApiSpec
-    extends WordSpec
-    with MustMatchers
-    with BeforeAndAfterAll
-    with ScalatestRouteTest
-    with ULIHttpApi
-    with FileUploadUtils {
+class ULIHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll with ScalatestRouteTest with FileUploadUtils {
 
-  override val log: LoggingAdapter = NoLogging
-  implicit val ec = system.dispatcher
+  val log: Logger   = LoggerFactory.getLogger(getClass)
+  implicit val ec   = system.dispatcher
+  val uliHttpRoutes = ULIHttpApi.create(log)
 
   val config = ConfigFactory.load()
 
-  val duration = 10.seconds
-  override implicit val timeout = Timeout(duration)
+  val duration         = 10.seconds
+  implicit val timeout = Timeout(duration)
 
   val p = "2017"
 
@@ -46,21 +42,20 @@ class ULIHttpApiSpec
     "##!d23e("
 
   "ULI API" must {
-    val uliFile = multipartFile(uliTxt, "ulis.txt")
-    val loanFile = multipartFile(loanTxt, "loanIds.txt")
-    val loanId = "10Bx939c5543TqA1144M999143X"
+    val uliFile               = multipartFile(uliTxt, "ulis.txt")
+    val loanFile              = multipartFile(loanTxt, "loanIds.txt")
+    val loanId                = "10Bx939c5543TqA1144M999143X"
     val nonAlphanumericLoanId = "10Bx9#9c5543TqA1144M9@9143X"
-    val checkDigit = "38"
-    val uli = "10Bx939c5543TqA1144M999143X" + checkDigit
-    val loan = Loan(loanId)
-    val nonAlphanumericLoan = Loan(nonAlphanumericLoanId)
-    val uliCheck = ULICheck(uli)
-    val shortUliCheck = ULICheck("10Bx939c5")
-    val longUliCheck = ULICheck(
-      "10Bx939c5543TqA1144M999143X1dq921CQEMWEW45p0qsDDASDAGS2912dqXS1dq921CQEMWEW45p0qsDDASDAGS2912dqXS")
-    val nonAlphaNumericCheck = ULICheck("10Bx939c5543TqA1144M9@9143X")
-    val longLoanId = "10Bx939c5543TqA1144M999143X10Bx939c5543TqA1144M999143X"
-    val longLoan = Loan(longLoanId)
+    val checkDigit            = "38"
+    val uli                   = "10Bx939c5543TqA1144M999143X" + checkDigit
+    val loan                  = Loan(loanId)
+    val nonAlphanumericLoan   = Loan(nonAlphanumericLoanId)
+    val uliCheck              = ULICheck(uli)
+    val shortUliCheck         = ULICheck("10Bx939c5")
+    val longUliCheck          = ULICheck("10Bx939c5543TqA1144M999143X1dq921CQEMWEW45p0qsDDASDAGS2912dqXS1dq921CQEMWEW45p0qsDDASDAGS2912dqXS")
+    val nonAlphaNumericCheck  = ULICheck("10Bx939c5543TqA1144M9@9143X")
+    val longLoanId            = "10Bx939c5543TqA1144M999143X10Bx939c5543TqA1144M999143X"
+    val longLoan              = Loan(longLoanId)
     "return check digit and ULI from loan id" in {
       Post("/uli/checkDigit", loan) ~> uliHttpRoutes ~> check {
         responseAs[ULI] mustBe ULI(loanId, checkDigit, uli)
@@ -93,12 +88,8 @@ class ULIHttpApiSpec
       Post("/uli/checkDigit", loanFile) ~> uliHttpRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[LoanCheckDigitResponse].loanIds mustBe Seq(
-          ULI("10Bx939c5543TqA1144M999143X",
-              "38",
-              "10Bx939c5543TqA1144M999143X38"),
-          ULI("10Cx939c5543TqA1144M999143X",
-              "10",
-              "10Cx939c5543TqA1144M999143X10")
+          ULI("10Bx939c5543TqA1144M999143X", "38", "10Bx939c5543TqA1144M999143X38"),
+          ULI("10Cx939c5543TqA1144M999143X", "10", "10Cx939c5543TqA1144M999143X10")
         )
       }
     }
@@ -107,15 +98,12 @@ class ULIHttpApiSpec
         status mustBe StatusCodes.OK
         val csv = responseAs[String]
         csv must include("loanId,checkDigit,uli")
-        csv must include(
-          "10Bx939c5543TqA1144M999143X,38,10Bx939c5543TqA1144M999143X38")
-        csv must include(
-          "10Cx939c5543TqA1144M999143X,10,10Cx939c5543TqA1144M999143X10")
+        csv must include("10Bx939c5543TqA1144M999143X,38,10Bx939c5543TqA1144M999143X38")
+        csv must include("10Cx939c5543TqA1144M999143X,10,10Cx939c5543TqA1144M999143X10")
       }
     }
     "Validate ULI" in {
-      Post("/uli/validate", uliCheck) ~> Origin(
-        HttpOrigin("http://ffiec.cfpb.gov")) ~> uliHttpRoutes ~> check {
+      Post("/uli/validate", uliCheck) ~> Origin(HttpOrigin("http://ffiec.cfpb.gov")) ~> uliHttpRoutes ~> check {
         responseAs[ULIValidated] mustBe ULIValidated(true)
       }
       Post("/uli/validate", shortUliCheck) ~> uliHttpRoutes ~> check {

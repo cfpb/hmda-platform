@@ -10,7 +10,7 @@ object HmdaValidation {
   sealed trait HmdaValidationCommand
   case object StopHmdaValidation extends HmdaValidationCommand
 
-  val behavior: Behavior[HmdaValidationCommand] =
+  def apply(): Behavior[HmdaValidationCommand] =
     Behaviors.setup { ctx =>
       ctx.log.info(s"Actor started at ${ctx.self.path}")
       Behaviors

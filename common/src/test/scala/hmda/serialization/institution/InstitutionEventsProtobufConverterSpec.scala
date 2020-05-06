@@ -1,11 +1,6 @@
 package hmda.serialization.institution
 
-import hmda.messages.institution.InstitutionEvents.{
-  InstitutionCreated,
-  InstitutionDeleted,
-  InstitutionModified,
-  InstitutionNotExists
-}
+import hmda.messages.institution.InstitutionEvents.{ InstitutionCreated, InstitutionDeleted, InstitutionModified, InstitutionNotExists }
 import hmda.model.institution.InstitutionGenerators._
 import hmda.persistence.serialization.institution.events.{
   InstitutionCreatedMessage,
@@ -14,20 +9,16 @@ import hmda.persistence.serialization.institution.events.{
   InstitutionNotExistsMessage
 }
 import hmda.serialization.institution.InstitutionEventsProtobufConverter._
-import org.scalatest.prop.PropertyChecks
-import org.scalatest.{MustMatchers, PropSpec}
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import org.scalatest.{ MustMatchers, PropSpec }
 
-class InstitutionEventsProtobufConverterSpec
-    extends PropSpec
-    with PropertyChecks
-    with MustMatchers {
+class InstitutionEventsProtobufConverterSpec extends PropSpec with ScalaCheckPropertyChecks with MustMatchers {
 
   property("InstitutionCreated must convert to and from protobuf") {
     forAll(institutionGen) { institution =>
-      val created = InstitutionCreated(institution)
+      val created  = InstitutionCreated(institution)
       val protobuf = institutionCreatedToProtobuf(created).toByteArray
-      institutionCreatedFromProtobuf(
-        InstitutionCreatedMessage.parseFrom(protobuf)) mustBe created
+      institutionCreatedFromProtobuf(InstitutionCreatedMessage.parseFrom(protobuf)) mustBe created
     }
   }
 
@@ -35,19 +26,17 @@ class InstitutionEventsProtobufConverterSpec
     forAll(institutionGen) { institution =>
       val modified = InstitutionModified(institution)
       val protobuf = institutionModifiedToProtobuf(modified).toByteArray
-      institutionModifiedFromProtobuf(
-        InstitutionModifiedMessage.parseFrom(protobuf)) mustBe modified
+      institutionModifiedFromProtobuf(InstitutionModifiedMessage.parseFrom(protobuf)) mustBe modified
     }
 
   }
 
   property("InstitutionDeleted must convert to and from protobuf") {
     forAll(institutionGen) { institution =>
-      val lei = institution.LEI
-      val deleted = InstitutionDeleted(lei, institution.activityYear)
+      val lei      = institution.LEI
+      val deleted  = InstitutionDeleted(lei, institution.activityYear)
       val protobuf = institutionDeletedToProtobuf(deleted).toByteArray
-      institutionDeletedFromProtobuf(
-        InstitutionDeletedMessage.parseFrom(protobuf)) mustBe deleted
+      institutionDeletedFromProtobuf(InstitutionDeletedMessage.parseFrom(protobuf)) mustBe deleted
     }
   }
 
@@ -57,7 +46,8 @@ class InstitutionEventsProtobufConverterSpec
         institutionNotExistsToProtobuf(InstitutionNotExists(institution.LEI)).toByteArray
       institutionNotExistsFromProtobuf(
         InstitutionNotExistsMessage
-          .parseFrom(protobuf)) mustBe InstitutionNotExists(institution.LEI)
+          .parseFrom(protobuf)
+      ) mustBe InstitutionNotExists(institution.LEI)
     }
   }
 

@@ -2,7 +2,6 @@ package hmda.dataBrowser.models
 
 import io.circe.Codec
 import slick.jdbc.GetResult
-import hmda.dataBrowser.models.FilerInformation
 
 case class FilerInformation2017(arid: String, respondentName: String, count: Int ,year: Int) extends FilerInformation
 

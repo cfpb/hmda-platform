@@ -1,13 +1,11 @@
 package hmda.dashboard.api
 
-import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.Credentials
 import akka.http.scaladsl.server.directives.RouteDirectives.complete
-import akka.stream.ActorMaterializer
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.{ Config, ConfigFactory }
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.dashboard.Settings
 import hmda.dashboard.models.HealthCheckStatus.Up
@@ -15,23 +13,24 @@ import hmda.dashboard.models._
 import hmda.dashboard.repositories._
 import hmda.dashboard.services._
 import monix.execution.Scheduler.Implicits.global
+import org.slf4j.Logger
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
-trait HmdaDashboardHttpApi extends Settings {
+object HmdaDashboardHttpApi {
+  def create(log: Logger, config: Config): Route =
+    new HmdaDashboardHttpApi(log, config).hmdaDashboardRoutes
+}
 
-  val log: LoggingAdapter
-  implicit val materializer: ActorMaterializer
-  private val config: Config = ConfigFactory.load()
-
+private class HmdaDashboardHttpApi(log: Logger, config: Config) extends Settings {
   val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("dashboard_db")
-  val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
+  val bankFilter     = ConfigFactory.load("application.conf").getConfig("filter")
   val bankFilterList =
     bankFilter.getString("bank-filter-list").toUpperCase.split(",")
   val repository =
-    new PostgresRepository(databaseConfig,bankFilterList)
+    new PostgresRepository(databaseConfig, bankFilterList)
 
   val healthCheck: HealthCheckService =
     new HealthCheckService(repository)
@@ -50,11 +49,11 @@ trait HmdaDashboardHttpApi extends Settings {
                 complete(StatusCodes.OK)
 
               case Success(hs) =>
-                log.warning(s"Service degraded db=${hs.db}")
+                log.warn(s"Service degraded db=${hs.db}")
                 complete(StatusCodes.ServiceUnavailable)
 
               case Failure(ex) =>
-                log.error(ex, "Failed to perform a health check")
+                log.error("Failed to perform a health check", ex)
                 complete(StatusCodes.InternalServerError)
             }
           } ~
@@ -202,7 +201,7 @@ trait HmdaDashboardHttpApi extends Settings {
                   .runToFuture
               )
             } ~
-              path("open_end_credit_lar_count_by_agency" / IntNumber) { (year) => // TODO: fix
+            path("open_end_credit_lar_count_by_agency" / IntNumber) { (year) => // TODO: fix
               log.info(s"Open end credit Lar count By Agency for year=${year}")
               complete(
                 query
@@ -274,7 +273,7 @@ trait HmdaDashboardHttpApi extends Settings {
                   .runToFuture
               )
             } ~
-            path("list_filers_with_only_closed_end_credit_transactions" / IntNumber ) { (year) =>
+            path("list_filers_with_only_closed_end_credit_transactions" / IntNumber) { (year) =>
               log.info(s"List filers with only closed end credit transactions for year=${year}")
               complete(
                 query
@@ -335,6 +334,6 @@ trait HmdaDashboardHttpApi extends Settings {
   def myUserPassAuthenticator(credentials: Credentials): Option[String] =
     credentials match {
       case p @ Credentials.Provided(id) if p.verify(config.getString("admin.pass")) => Some(id)
-      case _ => None
+      case _                                                                        => None
     }
 }

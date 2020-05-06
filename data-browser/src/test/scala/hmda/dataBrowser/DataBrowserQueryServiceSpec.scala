@@ -1,12 +1,13 @@
 package hmda.dataBrowser
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import akka.stream.scaladsl._
 import akka.testkit.TestKit
-import hmda.dataBrowser.models.{ Aggregation, FieldInfo, ModifiedLarEntity, QueryField, QueryFields, Statistic }
+import hmda.dataBrowser.models._
 import hmda.dataBrowser.repositories._
 import hmda.dataBrowser.services.DataBrowserQueryService
+import hmda.dataBrowser.api.DataBrowserDirectives._
 import monix.eval.Task
 import monix.execution.ExecutionModel
 import monix.execution.schedulers.TestScheduler
@@ -20,7 +21,7 @@ class DataBrowserQueryServiceSpec
     with MockFactory
     with ScalaFutures
     with Matchers {
-  implicit val mat: ActorMaterializer   = ActorMaterializer()
+  implicit val mat: Materializer        = Materializer(system)
   implicit val scheduler: TestScheduler = TestScheduler(ExecutionModel.SynchronousExecution)
 
   val cache: Cache                = mock[Cache]
@@ -67,6 +68,44 @@ class DataBrowserQueryServiceSpec
       actual should contain theSameElementsAs expected
     }
 
+    "fetchAggregate uses the cache to serve results on a cache hit" in {
+      val query = List(QueryField("one", List("a", "b")))
+
+      val e1 = Statistic(1, 1)
+      val a1 = Aggregation(e1.count, e1.sum, List(FieldInfo("one", "a")))
+      val e2 = Statistic(1, 2)
+      val a2 = Aggregation(e2.count, e2.sum, List(FieldInfo("one", "b")))
+
+      // simulate cache hits
+      inAnyOrder {
+        (cache.find _).expects(List(QueryField("one", List("a")))).returns(Task.now(Some(e1)))
+        (cache.find _).expects(List(QueryField("one", List("b")))).returns(Task.now(Some(e2)))
+        // you might find this surprising that we expect the repository to be called but we are dealing with an effect
+        // system and everything is lazy. Notice if we evaluated this effect, this test would fail
+        (repo.findAndAggregate _)
+          .expects(*)
+          .returns(Task.raiseError(new Exception("You shouldn't be evaluating me on a cache hit")))
+          .twice()
+      }
+      val taskActual: Task[Seq[Aggregation]] = service.fetchAggregate(QueryFields("2018", query))
+      val futActual                          = taskActual.runToFuture
+      scheduler.tick()
+      whenReady(futActual)(_ should contain theSameElementsAs List(a1, a2))
+    }
+
+    "fetchFilers returns all the institution filers" in {
+      val query = QueryFields("2018", List(QueryField("one", List("a"))))
+
+      val response = FilerInstitutionResponse2018(FilerInformation2018("example", "example", 1, 2018) :: Nil)
+      (cache.findFilers2018 _).expects(query.queryFields).returns(Task.now(None))
+      (repo.findFilers _).expects(query.queryFields).returns(Task.now(response.institutions))
+      (cache.updateFilers2018 _).expects(*, *).returns(Task.now(response))
+
+      val taskActual = service.fetchFilers(query)
+      val futActual  = taskActual.runToFuture
+      scheduler.tick()
+      whenReady(futActual)(_ shouldBe response)
+    }
 
     def sampleMlar = ModifiedLarEntity(
       filingYear = 2019,

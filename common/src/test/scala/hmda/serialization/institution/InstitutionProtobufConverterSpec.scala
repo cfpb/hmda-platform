@@ -1,20 +1,12 @@
 package hmda.serialization.institution
 
 import hmda.model.institution.InstitutionGenerators._
-import hmda.persistence.serialization.institution.{
-  InstitutionMessage,
-  ParentMessage,
-  RespondentMessage,
-  TopHolderMessage
-}
+import hmda.persistence.serialization.institution.{ InstitutionMessage, ParentMessage, RespondentMessage, TopHolderMessage }
 import hmda.serialization.institution.InstitutionProtobufConverter._
-import org.scalatest.prop.PropertyChecks
-import org.scalatest.{MustMatchers, PropSpec}
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import org.scalatest.{ MustMatchers, PropSpec }
 
-class InstitutionProtobufConverterSpec
-    extends PropSpec
-    with PropertyChecks
-    with MustMatchers {
+class InstitutionProtobufConverterSpec extends PropSpec with ScalaCheckPropertyChecks with MustMatchers {
 
   property("Top Holder must convert to and from protobuf") {
     forAll(topHolderGen) { topHolder =>

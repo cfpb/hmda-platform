@@ -7,6 +7,7 @@ import monix.eval.Task
 import slick.basic.DatabaseConfig
 import slick.jdbc.{ JdbcProfile, ResultSetConcurrency, ResultSetType }
 
+// $COVERAGE-OFF$
 class PostgresModifiedLarRepository2017(tableName: String, config: DatabaseConfig[JdbcProfile]) extends ModifiedLarRepository2017 {
 
   import config._
@@ -168,3 +169,4 @@ class PostgresModifiedLarRepository2017(tableName: String, config: DatabaseConfi
   def healthCheck: Task[Unit] =
     Task.deferFuture(db.run(sql"SELECT 1".as[Int])).guarantee(Task.shift).void
 }
+// $COVERAGE-ON$

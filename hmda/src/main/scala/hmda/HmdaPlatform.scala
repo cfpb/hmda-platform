@@ -1,21 +1,22 @@
 package hmda
 
-import akka.{actor => untyped}
-import akka.management.cluster.bootstrap.ClusterBootstrap
-import akka.stream.ActorMaterializer
-import com.typesafe.config.ConfigFactory
-import hmda.persistence.HmdaPersistence
-import hmda.validation.HmdaValidation
-import org.slf4j.LoggerFactory
+import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.adapter._
+import akka.actor.{ ActorSystem => ClassicActorSystem }
 import akka.cluster.typed.Cluster
+import akka.management.cluster.bootstrap.ClusterBootstrap
 import akka.management.scaladsl.AkkaManagement
+import akka.stream.Materializer
+import com.typesafe.config.ConfigFactory
 import hmda.api.HmdaApi
+import hmda.persistence.HmdaPersistence
 import hmda.persistence.util.CassandraUtil
-import hmda.publication.{HmdaPublication,KafkaUtils}
-import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
-import org.apache.kafka.clients.producer.Producer
+import hmda.publication.{ HmdaPublication, KafkaUtils }
+import hmda.validation.HmdaValidation
+import net.manub.embeddedkafka.{ EmbeddedKafka, EmbeddedKafkaConfig }
+import org.slf4j.LoggerFactory
 
+// $COVERAGE-OFF$
 object HmdaPlatform extends App {
 
   val log = LoggerFactory.getLogger("hmda")
@@ -43,24 +44,25 @@ object HmdaPlatform extends App {
 
   val clusterConfig = runtimeMode match {
     case "dev" => ConfigFactory.parseResources("application-dev.conf").resolve()
+
     case "dev-node" =>
       ConfigFactory.parseResources("application-dev.conf").resolve()
-    case "kubernetes" => {
+
+    case "kubernetes" =>
       log.info(s"HOSTNAME: ${System.getenv("HOSTNAME")}")
       ConfigFactory.parseResources("application-kubernetes.conf").resolve()
-    }
+
     case "dcos" =>
       ConfigFactory.parseResources("application-dcos.conf").resolve()
+
     case _ => config
   }
 
-  implicit val system =
-    untyped.ActorSystem(clusterConfig.getString("hmda.cluster.name"), clusterConfig)
+  implicit val classic: ClassicActorSystem = ClassicActorSystem(clusterConfig.getString("hmda.cluster.name"), clusterConfig)
+  implicit val system: ActorSystem[_]      = classic.toTyped
 
-  implicit val typedSystem = system.toTyped
-
-  implicit val mat     = ActorMaterializer()
-  implicit val cluster = Cluster(typedSystem)
+  implicit val mat     = Materializer(system)
+  implicit val cluster = Cluster(system)
 
   if (runtimeMode == "dcos" || runtimeMode == "kubernetes") {
     ClusterBootstrap(system).start()
@@ -78,18 +80,20 @@ object HmdaPlatform extends App {
     EmbeddedKafka.start()
   }
 
-  val stringKafkaProducer: Producer[String, String] = KafkaUtils.getStringKafkaProducer(system)
+  // TODO: Fix this as initializing it here is not a good idea, this should be initialized in HmdaPersistence and passed into HmdaValidationError
+  val stringKafkaProducer      = KafkaUtils.getStringKafkaProducer(system)
   val institutionKafkaProducer = KafkaUtils.getInstitutionKafkaProducer(system)
 
   //Start Persistence
-  system.spawn(HmdaPersistence.behavior, HmdaPersistence.name)
+  classic.spawn(HmdaPersistence(), HmdaPersistence.name)
 
   //Start Validation
-  system.spawn(HmdaValidation.behavior, HmdaValidation.name)
+  classic.spawn(HmdaValidation(), HmdaValidation.name)
 
   //Start Publication
-  system.spawn(HmdaPublication.behavior, HmdaPublication.name)
+  classic.spawn(HmdaPublication(), HmdaPublication.name)
 
   //Start API
-  system.actorOf(HmdaApi.props, HmdaApi.name)
+  classic.spawn[Nothing](HmdaApi(), HmdaApi.name)
 }
+// $COVERAGE-ON$

@@ -1,50 +1,88 @@
 package hmda.dataBrowser.api
 
-import akka.actor.{ActorSystem, Props}
-import akka.pattern.pipe
-import akka.event.Logging
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Route
-import akka.stream.ActorMaterializer
-import hmda.api.http.HttpServer
-import hmda.api.http.routes.BaseHttpApi
+import akka.actor.CoordinatedShutdown
+import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.{ Behavior, SupervisorStrategy }
+import akka.actor.typed.scaladsl.adapter._
 import akka.http.scaladsl.server.Directives._
-import akka.util.Timeout
+import hmda.api.http.directives.HmdaTimeDirectives._
+import hmda.api.http.routes.BaseHttpApi
+import akka.stream.Materializer
+import hmda.dataBrowser.Settings
+import hmda.dataBrowser.repositories.{ PostgresModifiedLarRepository, PostgresModifiedLarRepository2017, RedisModifiedLarAggregateCache }
+import hmda.dataBrowser.services.{ DataBrowserQueryService, HealthCheckService, QueryService, S3FileService }
+import io.lettuce.core.api.async.RedisAsyncCommands
+import io.lettuce.core.{ ClientOptions, RedisClient }
+import monix.eval.Task
+import slick.basic.DatabaseConfig
+import slick.jdbc.JdbcProfile
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-object DataBrowserApi {
-  def props(): Props = Props(new DataBrowserApi)
+// $COVERAGE-OFF$
+// Application Guardian
+object DataBrowserApi extends Settings {
+  val name: String = "hmda-data-browser"
+
+  def apply(): Behavior[Nothing] =
+    Behaviors
+      .supervise[Nothing] {
+        Behaviors.setup[Nothing] { ctx =>
+          implicit val system               = ctx.system
+          implicit val classic              = system.toClassic
+          implicit val mat                  = Materializer(ctx)
+          implicit val ec: ExecutionContext = ctx.executionContext
+          val shutdown                      = CoordinatedShutdown(system)
+          val log                           = ctx.log
+          val host: String                  = server.host
+          val port: Int                     = server.port
+
+          val repository2017 = {
+            val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("databrowser_db")
+            new PostgresModifiedLarRepository2017(database.tableName2017, databaseConfig)
+          }
+
+          val repository2018= {
+            val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("databrowser_db")
+            new PostgresModifiedLarRepository(database.tableName2018, databaseConfig)
+          }
+
+          // We make the creation of the Redis client effectful because it can fail and we would like to operate
+          // the service even if the cache is down (we provide fallbacks in case we receive connection errors)
+          val redisClientTask: Task[RedisAsyncCommands[String, String]] = {
+            val client = RedisClient.create(redis.url)
+            Task.eval {
+              client.setOptions(
+                ClientOptions
+                  .builder()
+                  .autoReconnect(true)
+                  .disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS)
+                  .cancelCommandsOnReconnectFailure(true)
+                  .build()
+              )
+
+              client
+                .connect()
+                .async()
+            }.memoizeOnSuccess
+            // we memoizeOnSuccess because if we manage to create the client, we do not want to recompute it because the
+            // client creation process is expensive and the client is able to recover internally when Redis comes back
+          }
+
+          val cache = new RedisModifiedLarAggregateCache(redisClientTask, redis.ttl)
+
+          val query: QueryService = new DataBrowserQueryService(repository2018, repository2017, cache)
+
+          val fileCache = new S3FileService
+
+          val healthCheck: HealthCheckService = new HealthCheckService(repository2018, cache, fileCache)
+
+          val routes = BaseHttpApi.routes(name) ~ DataBrowserHttpApi.create(log, fileCache, query, healthCheck)
+          BaseHttpApi.runServer(shutdown, name)(timed(routes), host, port)
+          Behaviors.ignore
+        }
+      }
+      .onFailure(SupervisorStrategy.restartWithBackoff(1.second, 30.seconds, 0.01))
 }
-
-class DataBrowserApi
-    extends HttpServer
-    with BaseHttpApi
-    with DataBrowserHttpApi {
-
-  override implicit lazy val system: ActorSystem = context.system
-  override implicit lazy val materializer: ActorMaterializer =
-    ActorMaterializer()
-  override implicit val ec: ExecutionContext = context.dispatcher
-  override val log = Logging(system, getClass)
-
-  val duration: FiniteDuration = server.askTimeout
-
-  implicit val timeout: Timeout = Timeout(duration)
-
-  override val name: String = "hmda-data-browser"
-  override val host: String = server.host
-  override val port: Int = server.port
-
-  override val paths: Route = routes(s"$name") ~ dataBrowserRoutes
-
-  override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
-    paths,
-    host,
-    port
-  )
-
-  http pipeTo self
-
-}
+// $COVERAGE-ON$

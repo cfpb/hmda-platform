@@ -1,91 +1,59 @@
 package hmda.api.http
 
-import akka.actor.{ ActorSystem, Props }
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.event.Logging
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Route
-import akka.pattern.pipe
-import akka.stream.ActorMaterializer
-import com.typesafe.config.ConfigFactory
-import hmda.api.http.filing.FilingHttpApi
-import hmda.api.http.filing.InstitutionHttpApi
-import hmda.api.http.routes.BaseHttpApi
-import akka.http.scaladsl.server.Directives._
-import akka.util.Timeout
+import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
+import akka.actor.typed.{ ActorSystem, Behavior }
+import akka.actor.{ CoordinatedShutdown, ActorSystem => ClassicActorSystem }
+import akka.cluster.sharding.typed.scaladsl.ClusterSharding
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
+import akka.stream.Materializer
+import akka.util.Timeout
 import hmda.api.http.filing.submissions._
-import hmda.auth.{ KeycloakTokenVerifier, OAuth2Authorization }
-import org.keycloak.adapters.KeycloakDeploymentBuilder
-import org.keycloak.representations.adapters.config.AdapterConfig
+import hmda.api.http.filing.{ FilingHttpApi, InstitutionHttpApi }
+import hmda.api.http.routes.BaseHttpApi
+import hmda.auth.OAuth2Authorization
+import hmda.api.http.directives.HmdaTimeDirectives._
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 object HmdaFilingApi {
-  def props: Props        = Props(new HmdaFilingApi)
-  final val filingApiName = "hmda-filing-api"
-}
+  val name = "hmda-filing-api"
 
-class HmdaFilingApi
-    extends HttpServer
-    with BaseHttpApi
-    with FilingHttpApi
-    with SubmissionHttpApi
-    with UploadHttpApi
-    with ParseErrorHttpApi
-    with InstitutionHttpApi
-    with VerifyHttpApi
-    with SignHttpApi
-    with EditsHttpApi {
-  import HmdaFilingApi._
+  def apply(): Behavior[Nothing] = Behaviors.setup[Nothing] { ctx =>
+    implicit val system: ActorSystem[_]      = ctx.system
+    implicit val classic: ClassicActorSystem = system.toClassic
+    implicit val mat: Materializer           = Materializer(ctx)
+    implicit val ec: ExecutionContext        = ctx.executionContext
+    val config                               = system.settings.config
+    val shutdown                             = CoordinatedShutdown(system)
+    implicit val timeout: Timeout            = Timeout(config.getInt("hmda.http.timeout").seconds)
+    val log                                  = ctx.log
+    val sharding                             = ClusterSharding(system)
+    val filingApiName                        = name
+    val host: String                         = config.getString("hmda.http.filingHost")
+    val port: Int                            = config.getInt("hmda.http.filingPort")
 
-  val config = ConfigFactory.load()
+    val oAuth2Authorization = OAuth2Authorization(log, config)
+    val base                = BaseHttpApi.routes(filingApiName)
+    val filingRoutes        = FilingHttpApi.create(log, sharding)
+    val submissionRoutes    = SubmissionHttpApi.create(log, sharding)
+    val uploadRoutes        = UploadHttpApi.create(log, sharding)
+    val institutionRoutes   = InstitutionHttpApi.create(log, sharding)
+    val parserErrorRoutes   = ParseErrorHttpApi.create(log, sharding)
+    val verifyRoutes        = VerifyHttpApi.create(log, sharding)
+    val signRoutes          = SignHttpApi.create(log, sharding)
+    val editRoutes          = EditsHttpApi.create(log, sharding)
 
-  override implicit val system: ActorSystem             = context.system
-  override implicit val materializer: ActorMaterializer = ActorMaterializer()
-  implicit lazy val ec: ExecutionContext = system.dispatchers.lookup("akka.blocking-upload-dispatcher")
-  val timeout: Timeout                                  = Timeout(config.getInt("hmda.http.timeout").seconds)
-  override val log                                      = Logging(system, getClass)
+    val httpRoutes: Route =
+      base ~
+        List(filingRoutes, submissionRoutes, uploadRoutes, institutionRoutes, parserErrorRoutes, verifyRoutes, signRoutes, editRoutes)
+          .map(fn => fn(oAuth2Authorization))
+          .reduce((r1, r2) => r1 ~ r2)
 
-  val authUrl       = config.getString("keycloak.auth.server.url")
-  val keycloakRealm = config.getString("keycloak.realm")
-  val apiClientId   = config.getString("keycloak.client.id")
+    BaseHttpApi.runServer(shutdown, name)(timed(httpRoutes), host, port)
 
-  val adapterConfig = new AdapterConfig()
-  adapterConfig.setRealm(keycloakRealm)
-  adapterConfig.setAuthServerUrl(authUrl)
-  adapterConfig.setResource(apiClientId)
-  println(adapterConfig.getClientKeystore)
-  val keycloakDeployment = KeycloakDeploymentBuilder.build(adapterConfig)
-
-  val oAuth2Authorization = OAuth2Authorization(
-    log,
-    new KeycloakTokenVerifier(keycloakDeployment)
-  )
-
-  val sharding = ClusterSharding(system.toTyped)
-
-  override val name: String = filingApiName
-  override val host: String = config.getString("hmda.http.filingHost")
-  override val port: Int    = config.getInt("hmda.http.filingPort")
-
-  override val paths: Route = routes(s"$name") ~
-    filingRoutes(oAuth2Authorization) ~
-    submissionRoutes(oAuth2Authorization) ~
-    uploadRoutes(oAuth2Authorization) ~
-    institutionRoutes(oAuth2Authorization) ~
-    parserErrorRoute(oAuth2Authorization) ~
-    verifyRoutes(oAuth2Authorization) ~
-    signRoutes(oAuth2Authorization) ~
-    editsRoutes(oAuth2Authorization)
-
-  override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
-    paths,
-    host,
-    port
-  )
-
-  http pipeTo self
-
+    Behaviors.empty
+  }
 }

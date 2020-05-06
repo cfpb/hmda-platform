@@ -1,79 +1,38 @@
 package hmda.dataBrowser.api
 
-import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.ContentTypes._
 import akka.http.scaladsl.model.{ HttpEntity, StatusCodes, Uri }
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.RouteDirectives.complete
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.dataBrowser.Settings
 import hmda.dataBrowser.api.DataBrowserDirectives._
 import hmda.dataBrowser.models.HealthCheckStatus.Up
 import hmda.dataBrowser.models._
-import hmda.dataBrowser.repositories._
 import hmda.dataBrowser.services._
-import io.lettuce.core.api.async.RedisAsyncCommands
-import io.lettuce.core.{ ClientOptions, RedisClient }
-import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
-import slick.basic.DatabaseConfig
-import slick.jdbc.JdbcProfile
+import org.slf4j.Logger
 
 import scala.util.{ Failure, Success }
 
-trait DataBrowserHttpApi extends Settings {
+object DataBrowserHttpApi {
+  def create(log: Logger, fileCache: S3FileService, query: QueryService, healthCheck: HealthCheckService) (
+    implicit mat: Materializer
+  ): Route =
+    new DataBrowserHttpApi(log, fileCache, query, healthCheck).dataBrowserRoutes
+}
+
+private class DataBrowserHttpApi(log: Logger, fileCache: S3FileService, query: QueryService, healthCheck: HealthCheckService){
 
   val Csv          = "csv"
   val Pipe         = "pipe"
   val Aggregations = "aggregations"
-  val log: LoggingAdapter
-  implicit val materializer: ActorMaterializer
-
-  val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("databrowser_db")
-  val repository2018 =
-    new PostgresModifiedLarRepository(database.tableName2018, databaseConfig)
-  val repository2017 =
-    new PostgresModifiedLarRepository2017(database.tableName2017, databaseConfig)
-
-  // We make the creation of the Redis client effectful because it can fail and we would like to operate
-  // the service even if the cache is down (we provide fallbacks in case we receive connection errors)
-  val redisClientTask: Task[RedisAsyncCommands[String, String]] = {
-    val client = RedisClient.create(redis.url)
-    Task.eval {
-      client.setOptions(
-        ClientOptions
-          .builder()
-          .autoReconnect(true)
-          .disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS)
-          .cancelCommandsOnReconnectFailure(true)
-          .build()
-      )
-
-      client
-        .connect()
-        .async()
-    }.memoizeOnSuccess
-    // we memoizeOnSuccess because if we manage to create the client, we do not want to recompute it because the
-    // client creation process is expensive and the client is able to recover internally when Redis comes back
-  }
-
-  val cache =
-    new RedisCache(redisClientTask, redis.ttl)
-
-  val query: QueryService =
-    new DataBrowserQueryService(repository2018, repository2017, cache)
-
-  val fileCache = new S3FileService
-
-  val healthCheck: HealthCheckService =
-    new HealthCheckService(repository2018, cache, fileCache)
-
+  
   def serveData(queries: QueryFields, delimiter: Delimiter, errorMessage: String, year: String): Route =
     onComplete(obtainDataSource(fileCache, query)(queries, delimiter, year).runToFuture) {
       case Failure(ex) =>
-        log.error(ex, errorMessage)
+        log.error(errorMessage, ex)
         complete(StatusCodes.InternalServerError)
 
       case Success(Left(byteSource)) =>
@@ -197,7 +156,7 @@ trait DataBrowserHttpApi extends Settings {
               filerFields.year match {
                 case "2017" => onComplete(query.fetchFilers2017(filerFields).runToFuture) {
                   case Failure(ex) =>
-                    log.error(ex, "Failed to obtain filer information")
+                    log.error("Failed to obtain filer information", ex)
                     complete(StatusCodes.InternalServerError)
 
                   case Success(filerResponse) =>
@@ -205,7 +164,7 @@ trait DataBrowserHttpApi extends Settings {
                 }
                 case "2018" => onComplete(query.fetchFilers(filerFields).runToFuture) {
                   case Failure(ex) =>
-                    log.error(ex, "Failed to obtain filer information")
+                    log.error("Failed to obtain filer information", ex)
                     complete(StatusCodes.InternalServerError)
 
                   case Success(filerResponse) =>
@@ -221,11 +180,11 @@ trait DataBrowserHttpApi extends Settings {
               complete(StatusCodes.OK)
 
             case Success(hs) =>
-              log.warning(s"Service degraded cache=${hs.cache} db=${hs.db} s3=${hs.s3}")
+              log.warn(s"Service degraded cache=${hs.cache} db=${hs.db} s3=${hs.s3}")
               complete(StatusCodes.ServiceUnavailable)
 
             case Failure(ex) =>
-              log.error(ex, "Failed to perform a health check")
+              log.error("Failed to perform a health check", ex)
               complete(StatusCodes.InternalServerError)
           }
         }

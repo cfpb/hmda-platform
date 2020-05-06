@@ -6,7 +6,7 @@ import java.security.MessageDigest
 import com.typesafe.config.{Config, ConfigFactory}
 
 import scala.concurrent.duration._
-
+// $COVERAGE-OFF$
 trait Settings {
   private val config: Config = ConfigFactory.load()
 
@@ -48,3 +48,4 @@ trait Settings {
       config.getString("server.s3.routes.filtered-queries")
   }
 }
+// $COVERAGE-OFF$

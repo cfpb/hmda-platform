@@ -2,47 +2,47 @@ package hmda.api.http.filing.submissions
 
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.ActorSystem
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.event.{ LoggingAdapter, NoLogging }
-import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
-import akka.util.Timeout
-import hmda.persistence.AkkaCassandraPersistenceSpec
-import org.scalatest.MustMatchers
 import akka.actor.typed.scaladsl.adapter._
+import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.cluster.typed.{ Cluster, Join }
 import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
 import akka.testkit._
+import akka.util.Timeout
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import hmda.api.http.model.ErrorResponse
+import hmda.auth.{ KeycloakTokenVerifier, OAuth2Authorization }
 import hmda.messages.filing.FilingCommands.CreateFiling
 import hmda.messages.filing.FilingEvents.FilingEvent
 import hmda.messages.institution.InstitutionCommands.CreateInstitution
 import hmda.messages.institution.InstitutionEvents.{ InstitutionCreated, InstitutionEvent }
 import hmda.model.filing.Filing
-import hmda.model.institution.Institution
-import hmda.model.institution.InstitutionGenerators.institutionGen
 import hmda.model.filing.FilingGenerator._
 import hmda.model.filing.submission.{ Submission, SubmissionId, VerificationStatus }
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.auth.{ KeycloakTokenVerifier, OAuth2Authorization }
+import hmda.model.institution.Institution
+import hmda.model.institution.InstitutionGenerators.institutionGen
+import hmda.persistence.AkkaCassandraPersistenceSpec
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.{ HmdaValidationError, SubmissionPersistence }
-import org.keycloak.adapters.KeycloakDeploymentBuilder
 import hmda.utils.YearUtils.Period
+import org.keycloak.adapters.KeycloakDeploymentBuilder
+import org.scalatest.MustMatchers
+import org.slf4j.{ Logger, LoggerFactory }
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-class SubmissionHttpApiSpec extends AkkaCassandraPersistenceSpec with MustMatchers with SubmissionHttpApi with ScalatestRouteTest {
+class SubmissionHttpApiSpec extends AkkaCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest {
 
   val duration: FiniteDuration = 10.seconds
 
   implicit val routeTimeout: RouteTestTimeout = RouteTestTimeout(duration.dilated)
 
-  override implicit val typedSystem: ActorSystem[_] = system.toTyped
-  override val log: LoggingAdapter                  = NoLogging
-  val ec: ExecutionContext                          = system.dispatcher
-  override implicit val timeout: Timeout            = Timeout(duration)
-  override val sharding: ClusterSharding            = ClusterSharding(typedSystem)
+  implicit val typedSystem: ActorSystem[_] = system.toTyped
+  val log: Logger                          = LoggerFactory.getLogger(getClass)
+  implicit val timeout: Timeout            = Timeout(duration)
+  val sharding: ClusterSharding            = ClusterSharding(typedSystem)
+  val submissionRoutes                     = SubmissionHttpApi.create(log, sharding)
 
   val oAuth2Authorization = OAuth2Authorization(
     log,
@@ -131,6 +131,13 @@ class SubmissionHttpApiSpec extends AkkaCassandraPersistenceSpec with MustMatche
 
         import io.circe.generic.auto._
         responseAs[VerificationStatus] mustBe VerificationStatus(qualityVerified = false, macroVerified = false)
+      }
+    }
+
+    "return the submission summary as not found when the file has not yet been uploaded" in {
+      Get(s"$url/1/summary") ~> submissionRoutes(oAuth2Authorization) ~> check {
+        status mustBe StatusCodes.NotFound
+        responseAs[ErrorResponse]
       }
     }
   }
