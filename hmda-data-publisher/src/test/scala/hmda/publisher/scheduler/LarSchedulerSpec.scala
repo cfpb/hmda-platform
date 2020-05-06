@@ -87,21 +87,9 @@ class LarSchedulerSpec
   }
 
   override def afterAll(): Unit = {
-    Await.ready(
-      Future.sequence(
-        List(
-          larRepository2018.dropSchema(),
-          larRepository2019.dropSchema(),
-          dbConfig.db.run(sql"DROP TABLE loanapplicationregister2020".asUpdate)
-        )
-      ),
-      30.seconds
-    )
     s3mock.stop()
     super.afterAll()
   }
-
-  override def cleanupAction = DBIO.successful(1)
 
   // We cannot rely on the larRepo's create and delete schema since it is broken (see PublisherComponent2020#LarRepository2020 for more information)
   override def bootstrapSqlFile: String = "loanapplicationregister2020.sql"

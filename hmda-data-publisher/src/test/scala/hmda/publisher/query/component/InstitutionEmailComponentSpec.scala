@@ -38,7 +38,6 @@ class InstitutionEmailComponentSpec
     super.afterAll()
   }
 
-  override def cleanupAction: DBIO[Int] = DBIO.successful(1)
   override def bootstrapSqlFile: String = ""
 
   "getId returns the Rep[Int]" in {

@@ -51,8 +51,6 @@ class TsSchedulerSpec
   val fullDate          = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   val fullDateQuarterly = DateTimeFormatter.ofPattern("yyyy-MM-dd_")
 
-  override def cleanupAction: DBIO[Int] = DBIO.successful(1)
-
   override def bootstrapSqlFile: String = ""
 
   override implicit def patienceConfig: PatienceConfig = PatienceConfig(timeout = Span(2, Minutes), interval = Span(100, Millis))
@@ -69,15 +67,7 @@ class TsSchedulerSpec
         )
         .map { case (k, v) => (k, v.asInstanceOf[Object]) }
     s3mock = S3MockApplication.start(properties.asJava)
-  }
 
-  override def afterAll(): Unit = {
-    s3mock.stop()
-    super.afterAll()
-  }
-
-  override def beforeEach(): Unit = {
-    super.beforeEach()
     Await.ready(
       Future.sequence(
         List(
@@ -93,14 +83,9 @@ class TsSchedulerSpec
     )
   }
 
-  override def afterEach(): Unit = {
-    Await.ready(
-      Future.sequence(
-        List(tsRepository2018.dropSchema(), tsRepository2019.dropSchema(), tsRepository2020.dropSchema())
-      ),
-      30.seconds
-    )
-    super.afterEach()
+  override def afterAll(): Unit = {
+    s3mock.stop()
+    super.afterAll()
   }
 
   val awsConfig    = system.settings.config.getConfig("private-aws")

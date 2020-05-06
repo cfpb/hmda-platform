@@ -48,32 +48,6 @@ class PublisherComponent2020Spec
     )
   }
 
-  override def afterEach(): Unit = {
-    super.afterEach()
-
-    val truncateAllTables =
-      institutionRepo.table.delete >>
-        tsRepo.table.delete >>
-        larRepo.table.delete
-
-    Await.ready(db.run(truncateAllTables), 30.seconds)
-  }
-
-  override def afterAll(): Unit = {
-    Await.ready(
-      Future.sequence(
-        List(
-          institutionRepo.dropSchema(),
-          tsRepo.dropSchema(),
-          larRepo.dropSchema(),
-          db.run(sql"DROP TABLE loanapplicationregister2020".asUpdate)
-        )
-      ),
-      30.seconds
-    )
-    super.afterAll()
-  }
-
   "InstitutionRepository2020 runthrough" in {
     import institutionRepo._
     val data = InstitutionEntity("EXAMPLE-LEI", activityYear = 2019, institutionType = 1, taxId = "ABC", hmdaFiler = true)
@@ -155,8 +129,6 @@ class PublisherComponent2020Spec
     } yield ()
     whenReady(test)(_ => ())
   }
-
-  override def cleanupAction: DBIO[Int] = DBIO.successful(1)
 
   // We cannot rely on the larRepo's create and delete schema since it is broken (see PublisherComponent2020#LarRepository2020 for more information)
   override def bootstrapSqlFile: String = "loanapplicationregister2020.sql"

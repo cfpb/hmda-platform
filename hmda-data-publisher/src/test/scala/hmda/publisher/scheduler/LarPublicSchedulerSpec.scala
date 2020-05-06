@@ -57,12 +57,9 @@ class LarPublicSchedulerSpec
   }
 
   override def afterAll(): Unit = {
-    Await.ready(modifiedLarRepository2018.dropSchema(), 30.seconds)
     s3mock.stop()
     super.afterAll()
   }
-
-  override def cleanupAction = DBIO.successful(1)
 
   override def bootstrapSqlFile: String = ""
 

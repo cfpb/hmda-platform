@@ -50,33 +50,6 @@ class PublisherComponent2018Spec
     )
   }
 
-  override def afterEach(): Unit = {
-    super.afterEach()
-
-    val truncateAllTables =
-      institutionRepo.table.delete >>
-        tsRepo.table.delete >>
-        larRepo.table.delete >>
-        mlarRepo.table.delete
-
-    Await.ready(db.run(truncateAllTables), 30.seconds)
-  }
-
-  override def afterAll(): Unit = {
-    Await.ready(
-      Future.sequence(
-        List(
-          institutionRepo.dropSchema(),
-          tsRepo.dropSchema(),
-          larRepo.dropSchema(),
-          mlarRepo.dropSchema()
-        )
-      ),
-      30.seconds
-    )
-    super.afterAll()
-  }
-
   "InstitutionRepository2018 runthrough" in {
     import institutionRepo._
     val data = InstitutionEntity("EXAMPLE-LEI", activityYear = 2018, institutionType = 1, taxId = "ABC", hmdaFiler = true)
@@ -180,8 +153,6 @@ class PublisherComponent2018Spec
 
     whenReady(test)(_ => ())
   }
-
-  override def cleanupAction: DBIO[Int] = DBIO.successful(1)
 
   override def bootstrapSqlFile: String = ""
 }

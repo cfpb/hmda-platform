@@ -4,6 +4,7 @@ import akka.actor.typed.ActorSystem
 import hmda.reporting.api.http.HmdaReportingApi
 import org.slf4j.LoggerFactory
 
+// $COVERAGE-OFF$
 object HmdaReporting extends App {
 
   val log = LoggerFactory.getLogger("hmda-reporting")
@@ -20,3 +21,4 @@ object HmdaReporting extends App {
     """.stripMargin)
   ActorSystem[Nothing](HmdaReportingApi(), HmdaReportingApi.name)
 }
+// $COVERAGE-ON$

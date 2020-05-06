@@ -40,12 +40,11 @@ class TsPublicSchedulerSpec
 
   override implicit def patienceConfig: PatienceConfig = PatienceConfig(timeout = Span(1, Minute), interval = Span(100, Millis))
 
-  override def cleanupAction: DBIO[Int] = DBIO.successful(1)
-
   override def bootstrapSqlFile: String = ""
 
   override def beforeAll(): Unit = {
     super.beforeAll()
+    Await.ready(tsRepository.createSchema(), 30.seconds)
     val properties: mutable.Map[String, Object] =
       mutable // S3 Mock mutates the map so we cannot use an immutable map :(
         .Map(
@@ -62,16 +61,6 @@ class TsPublicSchedulerSpec
   override def afterAll(): Unit = {
     s3mock.stop()
     super.afterAll()
-  }
-
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-    Await.ready(tsRepository.createSchema(), 30.seconds)
-  }
-
-  override def afterEach(): Unit = {
-    Await.ready(tsRepository.dropSchema(), 30.seconds)
-    super.afterEach()
   }
 
   "TsPublicScheduler should publish data to S3 for 2018" in {

@@ -87,36 +87,10 @@ class PanelSchedulerSpec
     s3mock = S3MockApplication.start(properties.asJava)
   }
 
-  override def afterEach(): Unit = {
-    Await.ready(
-      Future.sequence(
-        List(
-          dbConfig.db.run(institutionRepository2018.table.delete),
-          dbConfig.db.run(institutionRepository2019.table.delete),
-          dbConfig.db.run(institutionEmailsTable2018.delete)
-        )
-      ),
-      30.seconds
-    )
-    super.afterEach()
-  }
-
   override def afterAll(): Unit = {
-    Await.ready(
-      Future.sequence(
-        List(
-          institutionRepository2018.dropSchema(),
-          institutionRepository2019.dropSchema(),
-          emailRepository.dropSchema()
-        )
-      ),
-      30.seconds
-    )
     s3mock.stop()
     super.afterAll()
   }
-
-  override def cleanupAction = DBIO.successful(1)
 
   override def bootstrapSqlFile: String = ""
 

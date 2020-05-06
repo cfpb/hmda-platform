@@ -1,4 +1,3 @@
-
 package hmda.publication.lar.publication
 
 import akka.NotUsed
@@ -106,14 +105,6 @@ class ModifiedLarPublisherSpec
         S3MockApplication.PROP_INITIAL_BUCKETS -> "cfpb-hmda-public-dev"
       )
       .map { case (k, v) => (k, v.asInstanceOf[Object]) }
-
-  import dbConfig.profile.api._
-  override def cleanupAction: DBIO[Int] = sql"""
-    DROP SCHEMA public CASCADE;
-    CREATE SCHEMA public;
-    GRANT ALL ON SCHEMA public TO postgres;
-    GRANT ALL ON SCHEMA public TO public;    
-    """.asUpdate
 
   override def bootstrapSqlFile: String = "modifiedlar.sql"
 }
