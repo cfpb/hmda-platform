@@ -27,15 +27,13 @@ jobs:
         value:
       - name: MM_HOOK
         value:
-      - name: ALT_HOOK
-        value:
       - name: NEWMAN_NOTIFY
         value: "daily"
     schedule: "30 17 * * *"
     command: ["/bin/bash"]
     args:
       -  "-c"
-      - ./scripts/newmanFiling.sh $KC_UN $KC_PW $KC_URL $KC_CLIENT_ID $HOST_FILING $HOST_ADMIN $HOST_PUBLIC $HMDA_ENV $MM_HOOK $ALT_HOOK $NEWMAN_NOTIFY
+      - ./scripts/newmanFiling.sh $KC_UN $KC_PW $KC_URL $KC_CLIENT_ID $HOST_FILING $HOST_ADMIN $HOST_PUBLIC $HMDA_ENV $MM_HOOK $NEWMAN_NOTIFY
     resources:
       limits:
         memory: 512Mi
