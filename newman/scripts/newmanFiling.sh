@@ -20,7 +20,7 @@
 
 
 declare -a TEST_TYPES=( "test_yes_m_no_q" "test_no_m_yes_q" "test_no_m_no_q" "test_yes_m_yes_q")
-declare -a FILING_YEARS=("2018" "2019" "2020")
+declare -a FILING_YEARS=("2018" "2019")
 
 for filingYear in "${FILING_YEARS[@]}"
 do
@@ -53,7 +53,7 @@ done
 
 mattermostPost() {
   if [[ -n $1 ]];then
-    curl -i -X POST -H 'Content-Type: application/json' -d "$3" "${1}"
+    curl -i -X POST -H 'Content-Type: application/json' -d "$2" "${1}"
     fi
 }
 
