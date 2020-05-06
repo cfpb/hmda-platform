@@ -135,14 +135,6 @@ services:
     volumes:
       - ./wait-for-it.sh:/usr/bin/wait-for-it.sh
 
-  # ------------- Modifed LAR ---------
-  modified-lar:
-    image: hmda/modified-lar
-
-  # ------------- Email Service ---------
-  email-service:
-    image: hmda/email-service
-
 volumes:
   db-data:
     driver: local
