@@ -7,7 +7,7 @@ import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.cluster.typed.{ Cluster, Join }
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents._
-import hmda.model.filing.submission.{ SubmissionId, Verified, MacroErrors }
+import hmda.model.filing.submission.{ MacroErrors, SubmissionId, Verified }
 import hmda.model.processing.state.{ EditSummary, HmdaValidationErrorState }
 import hmda.model.validation._
 import hmda.persistence.AkkaCassandraPersistenceSpec

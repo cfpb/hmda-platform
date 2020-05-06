@@ -1,14 +1,14 @@
 package hmda.persistence.submission
 
-import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ActorRef, Behavior, TypedActorContext}
+import akka.actor.typed.scaladsl.{ ActorContext, Behaviors }
+import akka.actor.typed.{ ActorRef, Behavior }
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
+import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
-import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
-import hmda.messages.submission.EditDetailsCommands.{EditDetailsPersistenceCommand, GetEditRowCount, PersistEditDetails, StopEditDetails}
-import hmda.messages.submission.EditDetailsEvents.{EditDetailsAdded, EditDetailsPersistenceEvent, EditDetailsRowCounted}
+import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior }
+import hmda.messages.submission.EditDetailsCommands.{ EditDetailsPersistenceCommand, GetEditRowCount, PersistEditDetails, StopEditDetails }
+import hmda.messages.submission.EditDetailsEvents.{ EditDetailsAdded, EditDetailsPersistenceEvent, EditDetailsRowCounted }
 import hmda.model.filing.submission.SubmissionId
 import hmda.persistence.HmdaTypedPersistentActor
 
@@ -20,7 +20,7 @@ object EditDetailsPersistence
   override def behavior(entityId: String): Behavior[EditDetailsPersistenceCommand] =
     Behaviors.setup { ctx =>
       EventSourcedBehavior(
-        persistenceId = PersistenceId(entityId),
+        persistenceId = PersistenceId.ofUniqueId(entityId),
         emptyState = EditDetailsPersistenceState(),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
@@ -28,9 +28,9 @@ object EditDetailsPersistence
     }
 
   override def commandHandler(
-                               ctx: TypedActorContext[EditDetailsPersistenceCommand]
+                               ctx: ActorContext[EditDetailsPersistenceCommand]
                              ): CommandHandler[EditDetailsPersistenceCommand, EditDetailsPersistenceEvent, EditDetailsPersistenceState] = { (state, cmd) =>
-    val log = ctx.asScala.log
+    val log = ctx.log
     cmd match {
       case PersistEditDetails(editDetail, maybeReplyTo) =>
         val evt = EditDetailsAdded(editDetail)
@@ -48,7 +48,7 @@ object EditDetailsPersistence
         Effect.none
 
       case StopEditDetails =>
-        log.info(s"Stopping ${ctx.asScala.self.path.name}")
+        log.info(s"Stopping ${ctx.self.path.name}")
         Effect.stop()
     }
   }

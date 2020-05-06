@@ -1,17 +1,18 @@
 package hmda.util
 
 import akka.NotUsed
+import akka.stream.Materializer
 import akka.stream.scaladsl.{ Sink, Source }
-import hmda.validation.{ AS, MAT }
 
+import scala.collection.immutable
 import scala.concurrent.Future
 
 object SourceUtils {
 
-  def runWithSeq[T: AS: MAT](source: Source[T, NotUsed]) =
+  def runWithSeq[T](source: Source[T, NotUsed])(implicit mat: Materializer): Future[immutable.Seq[T]] =
     source.runWith(Sink.seq)
 
-  def count[T: AS: MAT](source: Source[T, NotUsed]): Future[Int] =
+  def count[T](source: Source[T, NotUsed])(implicit mat: Materializer): Future[Int] =
     source.runWith(sinkCount)
 
   private def sinkCount[T]: Sink[T, Future[Int]] =
@@ -19,5 +20,4 @@ object SourceUtils {
       val total = acc + 1
       total
     }
-
 }

@@ -1,43 +1,36 @@
 package hmda.institution.api.http
 
-import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
-import hmda.institution.query.InstitutionSetup
-import hmda.model.institution.Institution
-import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
-import hmda.query.DbConfiguration._
-
-import scala.concurrent.ExecutionContext
+import com.typesafe.config.ConfigFactory
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.institution.api.http.model.InstitutionsResponse
+import hmda.institution.query.InstitutionSetup
+import hmda.model.institution.Institution
+import hmda.query.DbConfiguration._
 import io.circe.generic.auto._
+import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 
-class InstitutionQueryHttpApiSpec
-    extends WordSpec
-    with MustMatchers
-    with BeforeAndAfterAll
-    with ScalatestRouteTest
-    with InstitutionQueryHttpApi
-    with InstitutionSetup {
+import scala.concurrent.ExecutionContext
 
-  override val institutionRepository2018 =
-    new InstitutionRepository2018(dbConfig, "institutions2018")
-  override val institutionRepository2019 =
-    new InstitutionRepository2019(dbConfig, "institutions2019")
-  override val institutionRepository2020 =
-    new InstitutionRepository2020(dbConfig, "institutions2020")
-  override val ec: ExecutionContext = system.dispatcher
-  override val log: LoggingAdapter  = NoLogging
-  implicit val timeout              = Timeout(duration)
+class InstitutionQueryHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll with ScalatestRouteTest with InstitutionSetup {
 
-  override def beforeAll = {
+  override val institutionRepository2018 = new InstitutionRepository2018(dbConfig, "institutions2018")
+  override val institutionRepository2019 = new InstitutionRepository2019(dbConfig, "institutions2019")
+  override val institutionRepository2020 = new InstitutionRepository2020(dbConfig, "institutions2020")
+  val ec: ExecutionContext               = system.dispatcher
+  val config                             = ConfigFactory.load()
+  implicit val timeout                   = Timeout(duration)
+  val institutionPublicRoutes: Route     = InstitutionQueryHttpApi.create(config)
+
+  override def beforeAll: Unit = {
     super.beforeAll()
     setup()
   }
 
-  override def afterAll = {
+  override def afterAll: Unit = {
     super.afterAll()
     tearDown()
   }

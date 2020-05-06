@@ -37,9 +37,7 @@ trait HmdaTypedActor[A] {
 
   def startShardRegion(sharding: ClusterSharding, stopMessage: A)(implicit tag: ClassTag[A]): ActorRef[ShardingEnvelope[A]] =
     sharding.init(
-      Entity(
-        typeKey = typeKey,
-        createBehavior = ctx => supervisedBehavior(ctx.entityId)
-      ).withStopMessage(stopMessage)
+      Entity(typeKey = typeKey)(createBehavior = ctx => supervisedBehavior(ctx.entityId))
+        .withStopMessage(stopMessage)
     )
 }

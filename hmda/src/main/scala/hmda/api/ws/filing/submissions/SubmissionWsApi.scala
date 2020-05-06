@@ -2,71 +2,62 @@ package hmda.api.ws.filing.submissions
 
 import java.time.Instant
 
-import akka.{ actor, NotUsed }
-import akka.event.LoggingAdapter
-import akka.http.scaladsl.model.ws.TextMessage
-import akka.http.scaladsl.model.ws.Message
-import akka.stream.ActorMaterializer
-import akka.http.scaladsl.server.Route
+import akka.NotUsed
+import akka.actor.typed.ActorSystem
+import akka.http.scaladsl.model.ws.{ Message, TextMessage }
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 import akka.stream.scaladsl.{ Flow, Source }
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
-import com.typesafe.config.ConfigFactory
 import hmda.api.ws.model.{ KeepAliveWsResponse, ServerPing, SubmissionStatus, SubmissionStatusWSResponse }
-import io.circe.syntax._
-import io.circe.generic.auto._
-import hmda.model.filing.submission.SubmissionId
 import hmda.messages.submission.SubmissionEvents.{ SubmissionCreated, SubmissionEvent, SubmissionModified }
+import hmda.model.filing.submission.SubmissionId
 import hmda.persistence.submission.SubmissionPersistence
 import hmda.query.HmdaQuery._
 import hmda.utils.YearUtils.Period
+import io.circe.generic.auto._
+import io.circe.syntax._
 
 import scala.concurrent.duration._
 
-trait SubmissionWsApi {
+object SubmissionWsApi {
+  def routes(implicit system: ActorSystem[_]): Route = {
+    val config           = system.settings.config
+    val keepAliveTimeout = config.getInt("hmda.ws.keep-alive")
 
-  implicit val system: actor.ActorSystem
-  implicit val materializer: ActorMaterializer
-  val log: LoggingAdapter
+    def wsHandler(source: Source[String, NotUsed]): Flow[Message, Message, NotUsed] =
+      Flow[Message]
+        .mapConcat(_ => Nil) //ignore messages sent from client
+        .merge(source)
+        .map(l => TextMessage(l.toString))
+        .keepAlive(keepAliveTimeout.seconds, () => TextMessage(keepAliveResponse.asJson.noSpaces))
 
-  val configuration    = ConfigFactory.load()
-  val keepAliveTimeout = configuration.getInt("hmda.ws.keep-alive")
+    def keepAliveResponse: KeepAliveWsResponse = KeepAliveWsResponse(Instant.now().toString, ServerPing.messageType)
 
-  def wsHandler(source: Source[String, NotUsed]): Flow[Message, Message, NotUsed] =
-    Flow[Message]
-      .mapConcat(_ => Nil) //ignore messages sent from client
-      .merge(source)
-      .map(l => TextMessage(l.toString))
-      .keepAlive(keepAliveTimeout.seconds, () => TextMessage(keepAliveResponse.asJson.noSpaces))
+    //institutions/<lei>/filings/<period>/submissions/<seqNr>
+    val submissionRoute =
+      path("institutions" / Segment / "filings" / Segment / "submissions" / IntNumber) { (lei, year, seqNr) =>
+        val submissionId  = SubmissionId(lei, Period(year.toInt, None), seqNr)
+        val persistenceId = s"${SubmissionPersistence.name}-$submissionId"
 
-  //institutions/<lei>/filings/<period>/submissions/<seqNr>
-  val submissionWsPath: Route = {
-    path("institutions" / Segment / "filings" / Segment / "submissions" / IntNumber) { (lei, year, seqNr) =>
-      val submissionId  = SubmissionId(lei, Period(year.toInt, None), seqNr)
-      val persistenceId = s"${SubmissionPersistence.name}-$submissionId"
+        val source =
+          eventEnvelopeByPersistenceId(persistenceId)
+            .map(env => env.event.asInstanceOf[SubmissionEvent])
+            .collect {
+              case SubmissionCreated(submission)  => submission
+              case SubmissionModified(submission) => submission
+            }
+            .map(s => SubmissionStatusWSResponse(s.status, SubmissionStatus.messageType).asJson.noSpaces)
 
-      val source =
-        eventEnvelopeByPersistenceId(persistenceId)
-          .map(env => env.event.asInstanceOf[SubmissionEvent])
-          .collect {
-            case SubmissionCreated(submission)  => submission
-            case SubmissionModified(submission) => submission
-          }
-          .map(s => SubmissionStatusWSResponse(s.status, SubmissionStatus.messageType).asJson.noSpaces)
+        handleWebSocketMessages(wsHandler(source))
+      }
 
-      handleWebSocketMessages(wsHandler(source))
-    }
-  }
-
-  def submissionWsRoutes: Route =
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          submissionWsPath
+          submissionRoute
         }
       }
     }
-
-  private def keepAliveResponse: KeepAliveWsResponse =
-    KeepAliveWsResponse(Instant.now().toString, ServerPing.messageType)
+  }
 }

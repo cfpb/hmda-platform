@@ -2,46 +2,42 @@ package hmda.api.http.filing
 
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.ActorSystem
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.event.{LoggingAdapter, NoLogging}
-import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
-import akka.util.Timeout
-import hmda.persistence.AkkaCassandraPersistenceSpec
-import org.scalatest.MustMatchers
 import akka.actor.typed.scaladsl.adapter._
-import akka.cluster.typed.{Cluster, Join}
+import akka.cluster.sharding.typed.scaladsl.ClusterSharding
+import akka.cluster.typed.{ Cluster, Join }
 import akka.http.scaladsl.model.StatusCodes
-import hmda.persistence.filing.FilingPersistence
+import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
+import akka.testkit._
+import akka.util.Timeout
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import hmda.auth.{ KeycloakTokenVerifier, OAuth2Authorization }
 import hmda.messages.institution.InstitutionCommands.CreateInstitution
 import hmda.messages.institution.InstitutionEvents._
+import hmda.model.filing.{ FilingDetails, InProgress }
 import hmda.model.institution.Institution
+import hmda.model.institution.InstitutionGenerators._
+import hmda.persistence.AkkaCassandraPersistenceSpec
+import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import io.circe.generic.auto._
-import hmda.model.institution.InstitutionGenerators._
-import akka.testkit._
-import hmda.auth.{KeycloakTokenVerifier, OAuth2Authorization}
-import hmda.model.filing.{FilingDetails, InProgress}
 import org.keycloak.adapters.KeycloakDeploymentBuilder
+import org.scalatest.MustMatchers
+import org.slf4j.{ Logger, LoggerFactory }
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.util.Random
 
-class FilingHttpApiSpec extends AkkaCassandraPersistenceSpec
-    with MustMatchers
-    with FilingHttpApi
-    with ScalatestRouteTest {
+class FilingHttpApiSpec extends AkkaCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest {
 
   val duration = 10.seconds
 
   implicit val routeTimeout = RouteTestTimeout(duration.dilated)
 
-  override implicit val typedSystem: ActorSystem[_] = system.toTyped
-  override val log: LoggingAdapter = NoLogging
-  val ec: ExecutionContext = system.dispatcher
-  override implicit val timeout: Timeout = Timeout(duration)
-  override val sharding: ClusterSharding = ClusterSharding(typedSystem)
+  implicit val typedSystem: ActorSystem[_] = system.toTyped
+  val log: Logger                          = LoggerFactory.getLogger(getClass)
+  implicit val timeout: Timeout            = Timeout(duration)
+  val sharding: ClusterSharding            = ClusterSharding(typedSystem)
+  val filingRoutes                         = FilingHttpApi.create(log, sharding)
 
   val oAuth2Authorization = OAuth2Authorization(
     log,
@@ -55,8 +51,7 @@ class FilingHttpApiSpec extends AkkaCassandraPersistenceSpec
   val sampleInstitution = institutionGen
     .suchThat(_.LEI != "")
     .sample
-    .getOrElse(
-      Institution.empty.copy(LEI = Random.alphanumeric.take(10).mkString))
+    .getOrElse(Institution.empty.copy(LEI = Random.alphanumeric.take(10).mkString))
 
   val period = "2018"
 
@@ -68,17 +63,14 @@ class FilingHttpApiSpec extends AkkaCassandraPersistenceSpec
     InstitutionPersistence.startShardRegion(sharding)
     FilingPersistence.startShardRegion(sharding)
     val institutionPersistence =
-      sharding.entityRefFor(
-        InstitutionPersistence.typeKey,
-        s"${InstitutionPersistence.name}-${sampleInstitution.LEI}")
-    institutionPersistence ! CreateInstitution(sampleInstitution,
-      institutionProbe.ref)
+      sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-${sampleInstitution.LEI}")
+    institutionPersistence ! CreateInstitution(sampleInstitution, institutionProbe.ref)
     institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))
   }
 
   override def afterAll(): Unit = super.afterAll()
 
-  val url = s"/institutions/${sampleInstitution.LEI}/filings/$period"
+  val url    = s"/institutions/${sampleInstitution.LEI}/filings/$period"
   val badUrl = s"/institutions/xxxx/filings/$period"
 
   "Filings" must {
