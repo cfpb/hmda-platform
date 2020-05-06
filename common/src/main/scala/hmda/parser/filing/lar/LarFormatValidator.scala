@@ -8,7 +8,6 @@ import hmda.parser.LarParserValidationResult
 import hmda.parser.filing.lar.ApplicantFormatValidator._
 import hmda.parser.filing.lar.LarParserErrorModel._
 
-import scala.util.Try
 
 sealed trait LarFormatValidator extends LarParser {
 

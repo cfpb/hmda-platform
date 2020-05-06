@@ -112,7 +112,6 @@ We use GitHub issues in this repository to track features, bugs, and enhancement
 Related projects
   - https://github.com/cfpb/hmda-frontend - ReactJS Front-end repository powering the [HMDA Platform](http://ffiec.cfpb.gov/)
   - https://github.com/cfpb/hmda-help - ReactJS Front-end repository powering HMDA Help - used to resolve and troubleshoot issues in filing
-  - https://github.com/cfpb/hmda-platform-auth
   - https://github.com/cfpb/hmda-platform-larft - Repo for the [Public Facing LAR formatting tool](https://ffiec.cfpb.gov/tools/lar-formatting)
   - https://github.com/cfpb/hmda-test-files - Repo for automatically generating various different test files for HMDA Data
   - https://github.com/cfpb/hmda-census - ETL for geographic and Census data used by the HMDA Platform

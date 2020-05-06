@@ -10,6 +10,7 @@ import hmda.api.http.routes.BaseHttpApi
 
 import scala.concurrent.ExecutionContext
 
+// $COVERAGE-OFF$
 object HmdaReportingApi {
   val name: String = "hmda-reporting-api"
 
@@ -26,3 +27,4 @@ object HmdaReportingApi {
     Behaviors.empty
   }
 }
+// $COVERAGE-ON$
