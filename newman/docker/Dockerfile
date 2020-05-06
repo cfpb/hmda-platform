@@ -4,6 +4,7 @@ ARG DOCKER_TAG="latest"
 RUN npm install -g newman@4.5.6 newman-reporter-html
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
+    ca-certificates \
     curl \
     jq
 
