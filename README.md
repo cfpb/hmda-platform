@@ -4,11 +4,13 @@
 
 ## Introduction
 
-For more information on HMDA, checkout the [About HMDA page](http://www.consumerfinance.gov/data-research/hmda/learn-more) on the CFPB website.
+For more information on Home Mortgage Disclosure Act (HMDA), checkout the [About HMDA page](https://www.consumerfinance.gov/policy-compliance/guidance/mortgage-resources/hmda-reporting-requirements/) on the CFPB website.
 
 ## The HMDA Platform
 
-This repository contains the code for the entirety of the `HMDA Platform` backend. This platform has been designed to accommodate the needs of the HMDA filing process by financial institutions, as well as the data management and publication needs of the HMDA data asset.
+This repository contains the code for the entirety of the public facing [HMDA Platform](https://travis-ci.org/github/cfpb/hmda-platform/builds/683660435#L941) backend. This platform has been designed to accommodate the needs of the HMDA filing process by financial institutions, as well as the data management and publication needs of the HMDA data asset. 
+
+
 The code contained in this repository covers two distinct versions of the HMDA backend, referred to as `v1` (2017 data collection) and `v2` (2018 and later data collection).
 
 The documentation for each version is linked below:
