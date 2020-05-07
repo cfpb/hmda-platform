@@ -20,23 +20,6 @@ pipeline {
       }
     }
 
-    stage('Code Scan') {
-      steps {
-        step(
-          script {
-            security.codeScan("${env.CLUSTER_NAME}-${env.STACK_NAME}-${env.APP_NAME}-checkmarx", env.INCLUDE, env.EXCLUDE)
-          }
-        )
-      }
-      post {
-        always {
-          script {
-            security.codeScanPublish()
-          }
-        }
-      }
-    }
-
     stage('Build Scala Code and Generate Dockerfile') {
       agent {
         docker {
