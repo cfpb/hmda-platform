@@ -46,3 +46,39 @@ projects.each { project ->
         }
     }
 }
+
+// repositories for code scanning
+def repositories = [
+    [name: 'hmda-frontend', repo: "https://github.com/cfpb/hmda-frontend"],
+    [name: 'hmda-platform',repo: "https://github.com/cfpb/hmda-platform"],
+    [name: 'hmda-help',repo: "https://github.com/cfpb/hmda-help"]
+]
+
+repositories.each{ repo ->
+
+    pipelineJob("${repo.name}") {
+
+        triggers {
+            cron('10 9 * * *')
+        }
+
+        environmentVariables {
+            env('EXCLUDE', '')
+            env('INCLUDE', '*')
+            env('APP_NAME', repo.name)
+            env('SCM_APP_REPO', repo.repo)
+            env('SCM_APP_BRANCH', 'master')
+
+
+            keepBuildVariables(true)
+        }
+        definition {
+            cps {
+                script(readFileFromWorkspace("jenkins/code-scan/pipeline.groovy"))
+                sandbox()
+            }
+        } 
+
+    }
+}
+
