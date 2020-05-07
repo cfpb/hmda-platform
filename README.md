@@ -4,61 +4,65 @@
 
 ## Introduction
 
-By using [regtech](https://en.wikipedia.org/wiki/Regulatory_technology), the Home Mortgage Disclosure Act (HMDA) Platform has coded the [Filing Instruction Guide (FIG)](https://s3.amazonaws.com/cfpb-hmda-public/prod/help/2020-hmda-fig.pdf) to ensure the [quarterly](https://ffiec.cfpb.gov/documentation/2020/quarterly-filing-dates/) and [yearly](https://ffiec.cfpb.gov/documentation/2019/annual-filing-dates/) data being submitted is parsed, validated for data edits (Syntactical, Validity, Quality, and Macro), and submitted as-per the instructions in the FIG. 
-[Please watch this short video](https://youtu.be/C_73Swgyc4g) on how HMDA Platform transforms the data upload, validation, and submission process.
+The Home Mortgage Disclosure Act (HMDA) Platform is a [Regulatory technology](https://en.wikipedia.org/wiki/Regulatory_technology) application for financial institutions to submit mortgage information as described in the [Filing Instruction Guide (FIG)](https://s3.amazonaws.com/cfpb-hmda-public/prod/help/2020-hmda-fig.pdf). The HMDA-Platform parses data as submitted by mortgage leading institutions and validates the information for edits (Syntactical, Validity, Quality, and Macro as-per the instructions in the FIG) before submitting the data. The HMDA-Platform supports [quarterly](https://ffiec.cfpb.gov/documentation/2020/quarterly-filing-dates/) and [yearly](https://ffiec.cfpb.gov/documentation/2019/annual-filing-dates/) filing periods. For detailed information on Home Mortgage Disclosure Act (HMDA), checkout the [About HMDA page](https://www.consumerfinance.gov/policy-compliance/rulemaking/final-rules/regulation-c-home-mortgage-disclosure-act/) on the CFPB website.
 
+Below is a short video on how HMDA Platform transforms the data upload, validation, and submission process.
 
-For detailed information on Home Mortgage Disclosure Act (HMDA), checkout the [About HMDA page](https://www.consumerfinance.gov/policy-compliance/rulemaking/final-rules/regulation-c-home-mortgage-disclosure-act/) on the CFPB website.
+[![Watch this short video](https://img.youtube.com/vi/C_73Swgyc4g/maxresdefault.jpg)](https://youtu.be/C_73Swgyc4g)
 
 ## TS and LAR File Specs
 
-The data is submitted in a flat pipe (`|`) delimitted TXT file. The text file is split into two parts: Transmission (TS) File -- first line in the file and Loan Application Register (LAR) -- all remaining lines of the file. Below are the links to the file specifications for data collected in years 2018 - current. 
+The data is submitted in a flat pipe (`|`) delimited TXT file. The text file is split into two parts: Transmission (TS) File -- first line in the file and Loan Application Register (LAR) -- all remaining lines of the file. Below are the links to the file specifications for data collected in years 2018 - current.
 - [Transmission  File Spec](https://github.com/cfpb/hmda-platform/blob/master/docs/v2/spec/2018_File_Spec_TS.csv)
-- [Loan Application Register File Spec](https://github.com/cfpb/hmda-platform/blob/master/docs/v2/spec/2018_File_Spec_LAR.csv) 
+- [Loan Application Register File Spec](https://github.com/cfpb/hmda-platform/blob/master/docs/v2/spec/2018_File_Spec_LAR.csv)
 
 ## Technical Overview
 
-This repository contains the code for the entirety of the public facing [HMDA Platform](http://ffiec.cfpb.gov/) backend. This platform has been designed to accommodate the needs of the HMDA filing process by financial institutions, as well as the data management, publication, aggregation, reporting, analyzing, visualizing, and downloading the HMDA data set. 
+This repository contains the code for the entirety of the public facing [HMDA Platform](http://ffiec.cfpb.gov/) backend. This platform has been designed to accommodate the needs of the HMDA filing process by financial institutions, as well as the data management, publication, aggregation, reporting, analyzing, visualizing, and downloading the HMDA data set.
 
-The HMDA Platform follows a loosely coupled [event driven](https://en.wikipedia.org/wiki/Event-driven_architecture) [micro-services architecture](https://en.wikipedia.org/wiki/Microservices) with API-first [(API Documentation)](https://cfpb.github.io/hmda-platform/#hmda-api-documentation) design principles. The entire platform is built on open source frameworks and remains cloud vendor agnostic. The code base contained in this repository includes the following micro-services that work together in support of the HMDA Platform.
+The HMDA Platform follows a loosely coupled [event driven](https://en.wikipedia.org/wiki/Event-driven_architecture) [micro-services architecture](https://en.wikipedia.org/wiki/Microservices) with API-first [(API Documentation)](https://cfpb.github.io/hmda-platform/#hmda-api-documentation) design principles. The entire platform is built on open source frameworks and remains cloud vendor agnostic.
 
-- [Filing Platform](https://github.com/cfpb/hmda-platform/tree/master/hmda): The entire backend API for [public facing filing platform](https://ffiec.cfpb.gov/filing/2019/). This is used for processing the uploaded TXT files and validating them in a non-blocking I/O streaming way. The APIs are built to be able to process large (1.5M+ lines) and small text files simultaneously without impeding the scalability of the platform. This contains the code for customizable data edits, a [Domain Specific Language (DSL)](https://en.wikipedia.org/wiki/Domain-specific_language) for coding the data edits, and submitting events to Kafka topics.    
+### Microservices
 
-- [Check Digit](https://github.com/cfpb/hmda-platform/tree/master/check-digit): The entire backend API for [public facing check digit tool](https://ffiec.cfpb.gov/tools/check-digit). The check digit tool is used to 1) Generate a two character check-digit based on an Legal Entity Identifier (LEI) and 2) Validate that a check-digit is calculated correctly for any complete Universal Loan Identifier (ULI). The APIs are built to process multiple row CSV files as well as one time processing.  
+The code base contained in this repository includes the following microservices that work together in support of the HMDA Platform.
 
-- [Institutions API](https://github.com/cfpb/hmda-platform/tree/master/institutions-api): Read only API for fetching details about an LEI. This microservice also listens to events put on the `institutions-api` kafka topic for Creating, updating, and deleting institution data from PostgreSQL. 
+- [Filing Platform](https://github.com/cfpb/hmda-platform/tree/master/hmda): The entire backend API for [public facing filing platform](https://ffiec.cfpb.gov/filing/2019/). Used for processing the uploaded TXT files and validating them in a non-blocking, I/O streaming way. The APIs are built to be able to process various file sizes, from small (few lines) to large (1.5M+ lines), text files simultaneously without impeding the scalability or availability of the platform. The platform contains code for customizable data edits, a [Domain Specific Language (DSL)](https://en.wikipedia.org/wiki/Domain-specific_language) for coding the data edits, and submitting events to Kafka topics.    
 
-- [Data Publisher](https://github.com/cfpb/hmda-platform/tree/master/hmda-data-publisher): This micro-service runs on a scheduled basis to make internal / external data available for research purposes on object stores such as S3. The schedule for the job is configurable via [K8s config map](https://github.com/cfpb/hmda-platform/blob/master/kubernetes/config-maps/schedule-configmap.yaml) 
+- [Check Digit](https://github.com/cfpb/hmda-platform/tree/master/check-digit): The entire backend API for [public facing check digit tool](https://ffiec.cfpb.gov/tools/check-digit). The Check Digit tool is used to (1) Generate a two character check-digit based on an Legal Entity Identifier (LEI) and (2) Validate that a check-digit is calculated correctly for any complete Universal Loan Identifier (ULI). This APIs are built to process multiple row CSV files as well as one time processing.
 
-- [hmda-dashboard](https://github.com/cfpb/hmda-platform/tree/master/hmda-dashboard): Authenticated APIs to view realtime analytics for the filings happening on the platform. The dashboard includes summarized statistics, data trends, and supports data visualizations via frontend. 
+- [Institutions API](https://github.com/cfpb/hmda-platform/tree/master/institutions-api): Read only API for fetching details about an LEI. This microservice also listens to events put on the `institutions-api` Kafka topic for Creating, updating, and deleting institution data from PostgreSQL.
 
-- [Ratespread](https://github.com/cfpb/hmda-platform/tree/master/ratespread-calculator): Public facing API for the [ratespread calculator](https://ffiec.cfpb.gov/tools/rate-spread). This calculator provides rate spreads for HMDA reportable loans with a final action date on or after January 1st, 2018. The API supports streaming CSV uploads as well as one-time calculations.
+- [Data Publisher](https://github.com/cfpb/hmda-platform/tree/master/hmda-data-publisher): This microservice runs on a scheduled basis to make internal / external data available for research purposes via object stores such as S3. The schedule for the job is configurable via [K8s config map](https://github.com/cfpb/hmda-platform/blob/master/kubernetes/config-maps/schedule-configmap.yaml)
+
+- [Ratespread](https://github.com/cfpb/hmda-platform/tree/master/ratespread-calculator): Public facing API for the [ratespread calculator](https://ffiec.cfpb.gov/tools/rate-spread). This calculator provides rate spreads for HMDA reportable loans with a final action date on or after January 1st, 2018. This API supports streaming CSV uploads as well as one-time calculations.
 
 - [modified-lar](https://github.com/cfpb/hmda-platform/tree/master/modified-lar): Event driven service of [modified-lar reports](https://ffiec.cfpb.gov/data-publication/modified-lar/2019). Each time a filer successfully submits the data, the modified-lar micro-service generates a modified-lar report and puts it in the public object store (e.g. S3). Any re-submissions automatically re-generate new modified-lar reports.
 
-- [irs-publisher](https://github.com/cfpb/hmda-platform/tree/master/irs-publisher): Event driven service of [irs-disclosure-reports](https://ffiec.cfpb.gov/data-publication/disclosure-reports/). Each time a filer successfully submits the data, the irs-publichser micro-service generates the IRS report.
+- [irs-publisher](https://github.com/cfpb/hmda-platform/tree/master/irs-publisher): Event driven service of [irs-disclosure-reports](https://ffiec.cfpb.gov/data-publication/disclosure-reports/). Each time a filer successfully submits the data, the irs-publisher microservice generates the IRS report.
 
-- [hmda-reporting](https://github.com/cfpb/hmda-platform/tree/master/hmda-reporting): Real-time Public facing API for getting information (LEI number, institution name, and year) on LEIs who have successfully submitted their data.
+- [hmda-reporting](https://github.com/cfpb/hmda-platform/tree/master/hmda-reporting): Real-time, public facing API for getting information (LEI number, institution name, and year) on LEIs who have successfully submitted their data.
 
 - [hmda-analytics](https://github.com/cfpb/hmda-platform/tree/master/hmda-analytics): Event driven service to insert, delete, update information in PostgreSQL each time there is a successful submission. The data inserted maps with the Census data to provide information for MSAMds. It also adds race, sex, and ethnicity categorization to the data.
 
-- [rate-limit](https://github.com/cfpb/hmda-platform/tree/master/rate-limit): Rate limiter service working in-sync with [ambassador](https://www.getambassador.io/docs/latest/topics/running/services/rate-limit-service/) to limit the number of times in a given time period that the API can be called. If the rate limit is reached, a 503 error code is sent. 
+- [hmda-dashboard](https://github.com/cfpb/hmda-platform/tree/master/hmda-dashboard): Authenticated APIs to view realtime analytics for the filings happening on the platform. The dashboard includes summarized statistics, data trends, and supports data visualizations via frontend.
 
-- [data-browser](https://github.com/cfpb/hmda-platform/tree/master/data-browser): Public facing API for [HMDA Data Browser](https://ffiec.cfpb.gov/data-browser/). This API makes the entire dataset available for summarized statistics, deep analysis, as well as geographic map layout. 
+- [rate-limit](https://github.com/cfpb/hmda-platform/tree/master/rate-limit): Rate limiter service working in-sync with [ambassador](https://www.getambassador.io/docs/latest/topics/running/services/rate-limit-service/) to limit the number of times in a given time period that the API can be called. If the rate limit is reached, a 503 error code is sent.
 
-- [email-service](https://github.com/cfpb/hmda-platform/tree/master/email-service): Event driven service to send an automated email to the filer on each successful submission. 
+- [data-browser](https://github.com/cfpb/hmda-platform/tree/master/data-browser): Public facing API for [HMDA Data Browser](https://ffiec.cfpb.gov/data-browser/). This API makes the entire dataset available for summarized statistics, deep analysis, as well as geographic map layout.
+
+- [email-service](https://github.com/cfpb/hmda-platform/tree/master/email-service): Event driven service to send an automated email to the filer on each successful submission.
 
 
 ## Technical Architecture
 
 <Diagram with one paragraph explanation>
 
-## One-line cloud deployment to dev/prod
+## One-line Cloud Deployment to Dev/Prod
 
-The platform and all of the related microservices explained above are deployed on Kubernetes using Helm. Each deployment is a single Helm command. Below example shows the deployment for the email-service:
+The platform and all of the related microservices explained above are deployed on [Kubernetes](https://kubernetes.io/) using [Helm](https://helm.sh/). Each deployment is a single Helm command. Below is an example for the deployment of the email-service:
 
-```
-helm upgrade --install --force \                                                                                                                                                          
+```shell
+helm upgrade --install --force \                                        
 --namespace=default \
 --values=kubernetes/email-service/values.yaml \
 --set image.repository=hmda/email-service \
@@ -68,13 +72,30 @@ email-service \
 kubernetes/email-service
 ```
 
-## One-line local setup of development environment
+## One-line Local Development Environment
 
-<docker compose setup>
+The platform and it's dependency services, Kafka, Cassandra and PostgreSQL, can run locally using [Docker Compose](https://docs.docker.com/compose/).
+
+```shell
+# Bring up hmda-platform, hmda-analytics, institutions-api
+docker-compose up
+
+# Bring up the hmda-platform
+docker-compose up hmda-platform
+```
 
 ## Automated Testing
 
-The HMDA Platform takes a rigorous automated testing approach. We've prepared [Newman](https://github.com/cfpb/hmda-platform/tree/master/newman) test scripts that perform end-to-end testing of the APIs on a recurring basis. The testing process for Newman is containerized and runs as a K8s cron job. 
+The HMDA Platform takes a rigorous automated testing approach. In addtion to Travis and CodeCov, we've prepared a suite of [Newman](https://github.com/cfpb/hmda-platform/tree/master/newman) test scripts that perform end-to-end testing of the APIs on a recurring basis. The testing process for Newman is containerized and runs as a Kubernetes CronJob to act as a monitoring and alerting system.
+
+## Postman Collection
+
+In addition to using Newman for our internal testing, we've created a [HMDA Postman](https://github.com/cfpb/hmda-platform/tree/master/newman/postman) collection that makes it easier for  users to perform a end-to-end filing of HMDA Data, including upload, parsing data, flagging edits, resolving edits, and submitting data when S/V edits are resolved.
+
+## API Documentation
+
+The [HMDA Platform Public API Documentation](https://cfpb.github.io/hmda-platform/#hmda-api-documentation) are hosted in the [HMDA Platform API Docs repo](https://github.com/cfpb/hmda-platform-api-docs) and deployed to GitHub Pages using the [`gh-pages`](https://github.com/cfpb/hmda-platform/tree/gh-pages) branch.
+
 
 ## Sprint Cadence
 
@@ -82,7 +103,7 @@ Our team works in two week sprints. The sprints are managed as [Project Boards](
 
 ## Development Process
 
-Below are the steps the development team follows to fix issues, develop new features, etc. 
+Below are the steps the development team follows to fix issues, develop new features, etc.
 
 1. Create a fork of this repository
 2. Work in a branch of the fork
@@ -92,15 +113,13 @@ Below are the steps the development team follows to fix issues, develop new feat
 6. The PR is deployed to development servers to be checked using Newman
 7. The PR is merged only by a separate member in the dev team
 
-## Postman Collection
-
-We've created a [HMDA Postman](https://github.com/cfpb/hmda-platform/tree/master/newman/postman) collection that makes it easier to do an end-to-end filing of the HMDA Data including upload, parsing data, flagging edits, resolving edits, and submitting data when S/V edits are resolved. 
-
 ## Contributing
 
-`CFPB` is developing the `HMDA Platform` in the open to maximize transparency and encourage third party contributions. If you want to contribute, please read and abide by the terms of the [License](LICENSE) for this project.
+[`CFPB`](https://www.consumerfinance.gov/) is developing the `HMDA Platform` in the open to maximize transparency and encourage third party contributions. If you want to contribute, please read and abide by the terms of the [License](LICENSE) for this project. [Pull Requests](https://help.github.com/articles/using-pull-requests/) are always welcome.
 
-We use GitHub issues in this repository to track features, bugs, and enhancements to the software. [Pull Requests](https://help.github.com/articles/using-pull-requests/) are welcome
+## Issues
+
+We use GitHub issues in this repository to track features, bugs, and enhancements to the software.
 
 ## Open source licensing info
 1. [TERMS](TERMS.md)
@@ -115,5 +134,4 @@ Related projects
   - https://github.com/cfpb/hmda-platform-larft - Repo for the [Public Facing LAR formatting tool](https://ffiec.cfpb.gov/tools/lar-formatting)
   - https://github.com/cfpb/hmda-test-files - Repo for automatically generating various different test files for HMDA Data
   - https://github.com/cfpb/hmda-census - ETL for geographic and Census data used by the HMDA Platform
-  - https://github.com/cfpb/hmda-platform-api-docs - Repo for [Public facing API Documentation](https://cfpb.github.io/hmda-platform/#hmda-api-documentation). This gets deployed to GH Pages using the [`gh-pages`](https://github.com/cfpb/hmda-platform/tree/gh-pages) branch
   - https://github.com/cfpb/HMDA_Data_Science_Kit - Repo for HMDA Data science work as well as Spark codebase for [Public Facing A&D Reports](https://ffiec.cfpb.gov/data-publication/disclosure-reports/2018)
