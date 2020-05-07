@@ -57,6 +57,22 @@ The code base contained in this repository includes the following microservices 
 
 <Diagram with one paragraph explanation>
 
+## Running with sbt
+
+The HMDA Platform can run locally using [`sbt`](https://www.scala-sbt.org/) with an [embedded Cassandra](https://doc.akka.io/docs/alpakka-kafka/current/) and [embedded Kafka](https://doc.akka.io/docs/alpakka-kafka/current/). To get started:
+
+```bash
+git clone https://github.com/cfpb/hmda-platform.git
+cd hmda-platform
+sbt
+
+[...]
+
+sbt:hmda-root> project hmda-platform
+sbt:hmda-platform> reStart
+
+```
+
 ## One-line Cloud Deployment to Dev/Prod
 
 The platform and all of the related microservices explained above are deployed on [Kubernetes](https://kubernetes.io/) using [Helm](https://helm.sh/). Each deployment is a single Helm command. Below is an example for the deployment of the email-service:
