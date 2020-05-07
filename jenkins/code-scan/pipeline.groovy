@@ -30,7 +30,6 @@ pipeline {
                     gitScm.checkout(
                         env.SCM_APP_REPO,
                         "master",
-                        scanCredentialsId('cfpbhmdadeploybot-github'),
                         false
                     )
                 }
