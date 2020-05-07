@@ -56,7 +56,7 @@ def repositories = [
 
 repositories.each{ repo ->
 
-    pipelineJob("${repo.name}") {
+    pipelineJob("checkmarx/${repo.name}") {
 
         triggers {
             cron('10 9 * * *')
