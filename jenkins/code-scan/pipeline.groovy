@@ -40,7 +40,7 @@ pipeline {
             steps {
                 step(
                     script {
-                        security.codeScan("${env.APP_NAME}-scan", env.INCLUDE, env.EXCLUDE)
+                        security.codeScan("${env.APP_NAME}-scan")
                     }
                 )
             }

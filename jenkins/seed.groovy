@@ -62,8 +62,6 @@ repositories.each{ repo ->
         }
 
         environmentVariables {
-            env('EXCLUDE', '')
-            env('INCLUDE', '*')
             env('APP_NAME', repo.name)
             env('SCM_APP_REPO', repo.repo)
             env('SCM_APP_BRANCH', 'master')
