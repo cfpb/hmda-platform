@@ -16,7 +16,7 @@ pipeline {
                     library identifier: "hmdaUtils@master", changelog: false, retriever: modernSCM (
                         [
                             $class: 'GitSCMSource',
-                            remote: env.SCM_HMDA_DEVOPS_REPO
+                            remote: 'https://github.cfpb.gov/HMDA-Operations/hmda-devops.git'
                         ]
                     )
                 }
