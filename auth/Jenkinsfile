@@ -29,6 +29,7 @@ pipeline {
       }
        steps {
          sh "mvn -B -f ./auth/ clean package"
+         sh "rm -rf data"
        }
      }
 
