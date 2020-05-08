@@ -71,11 +71,6 @@ object HmdaPlatform extends App {
     AkkaManagement(system).start()
   }
 
-  // if (runtimeMode == "docker-compose") {
-  //   ClusterBootstrap(system).start()
-  //   AkkaManagement(system).start()
-  // }
-
   if (runtimeMode == "dev") {
     CassandraUtil.startEmbeddedCassandra()
     AkkaManagement(system).start()
