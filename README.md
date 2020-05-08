@@ -26,7 +26,7 @@ The HMDA Platform follows a loosely coupled [event driven](https://en.wikipedia.
 
 The code base contained in this repository includes the following microservices that work together in support of the HMDA Platform.
 
-- [Filing Platform](https://github.com/cfpb/hmda-platform/tree/master/hmda): The entire backend API for [public facing filing platform](https://ffiec.cfpb.gov/filing/2019/). Used for processing the uploaded TXT files and validating them in a non-blocking, I/O streaming way. The APIs are built to be able to process various file sizes, from small (few lines) to large (1.5M+ lines), text files simultaneously without impeding the scalability or availability of the platform. The platform contains code for customizable data edits, a [Domain Specific Language (DSL)](https://en.wikipedia.org/wiki/Domain-specific_language) for coding the data edits, and submitting events to Kafka topics.    
+- [HMDA Platform](https://github.com/cfpb/hmda-platform/tree/master/hmda): The entire backend API for [public facing filing platform](https://ffiec.cfpb.gov/filing/2019/). Used for processing the uploaded TXT files and validating them in a non-blocking, I/O streaming way. The APIs are built to be able to process various file sizes, from small (few lines) to large (1.5M+ lines), text files simultaneously without impeding the scalability or availability of the platform. The platform contains code for customizable data edits, a [Domain Specific Language (DSL)](https://en.wikipedia.org/wiki/Domain-specific_language) for coding the data edits, and submitting events to Kafka topics.    
 
 - [Check Digit](https://github.com/cfpb/hmda-platform/tree/master/check-digit): The entire backend API for [public facing check digit tool](https://ffiec.cfpb.gov/tools/check-digit). The Check Digit tool is used to (1) Generate a two character check-digit based on an Legal Entity Identifier (LEI) and (2) Validate that a check-digit is calculated correctly for any complete Universal Loan Identifier (ULI). This APIs are built to process multiple row CSV files as well as one time processing.
 
@@ -36,26 +36,37 @@ The code base contained in this repository includes the following microservices 
 
 - [Ratespread](https://github.com/cfpb/hmda-platform/tree/master/ratespread-calculator): Public facing API for the [ratespread calculator](https://ffiec.cfpb.gov/tools/rate-spread). This calculator provides rate spreads for HMDA reportable loans with a final action date on or after January 1st, 2018. This API supports streaming CSV uploads as well as one-time calculations.
 
-- [modified-lar](https://github.com/cfpb/hmda-platform/tree/master/modified-lar): Event driven service of [modified-lar reports](https://ffiec.cfpb.gov/data-publication/modified-lar/2019). Each time a filer successfully submits the data, the modified-lar micro-service generates a modified-lar report and puts it in the public object store (e.g. S3). Any re-submissions automatically re-generate new modified-lar reports.
+- [Modified LAR](https://github.com/cfpb/hmda-platform/tree/master/modified-lar): Event driven service of [modified-lar reports](https://ffiec.cfpb.gov/data-publication/modified-lar/2019). Each time a filer successfully submits the data, the modified-lar micro-service generates a modified-lar report and puts it in the public object store (e.g. S3). Any re-submissions automatically re-generate new modified-lar reports.
 
-- [irs-publisher](https://github.com/cfpb/hmda-platform/tree/master/irs-publisher): Event driven service of [irs-disclosure-reports](https://ffiec.cfpb.gov/data-publication/disclosure-reports/). Each time a filer successfully submits the data, the irs-publisher microservice generates the IRS report.
+- [IRS Publisher](https://github.com/cfpb/hmda-platform/tree/master/irs-publisher): Event driven service of [irs-disclosure-reports](https://ffiec.cfpb.gov/data-publication/disclosure-reports/). Each time a filer successfully submits the data, the irs-publisher microservice generates the IRS report.
 
-- [hmda-reporting](https://github.com/cfpb/hmda-platform/tree/master/hmda-reporting): Real-time, public facing API for getting information (LEI number, institution name, and year) on LEIs who have successfully submitted their data.
+- [HMDA Reporting](https://github.com/cfpb/hmda-platform/tree/master/hmda-reporting): Real-time, public facing API for getting information (LEI number, institution name, and year) on LEIs who have successfully submitted their data.
 
-- [hmda-analytics](https://github.com/cfpb/hmda-platform/tree/master/hmda-analytics): Event driven service to insert, delete, update information in PostgreSQL each time there is a successful submission. The data inserted maps with the Census data to provide information for MSAMds. It also adds race, sex, and ethnicity categorization to the data.
+- [HMDA Analytics](https://github.com/cfpb/hmda-platform/tree/master/hmda-analytics): Event driven service to insert, delete, update information in PostgreSQL each time there is a successful submission. The data inserted maps with the Census data to provide information for MSAMds. It also adds race, sex, and ethnicity categorization to the data.
 
-- [hmda-dashboard](https://github.com/cfpb/hmda-platform/tree/master/hmda-dashboard): Authenticated APIs to view realtime analytics for the filings happening on the platform. The dashboard includes summarized statistics, data trends, and supports data visualizations via frontend.
+- [HMDA Dashboard](https://github.com/cfpb/hmda-platform/tree/master/hmda-dashboard): Authenticated APIs to view realtime analytics for the filings happening on the platform. The dashboard includes summarized statistics, data trends, and supports data visualizations via frontend.
 
-- [rate-limit](https://github.com/cfpb/hmda-platform/tree/master/rate-limit): Rate limiter service working in-sync with [ambassador](https://www.getambassador.io/docs/latest/topics/running/services/rate-limit-service/) to limit the number of times in a given time period that the API can be called. If the rate limit is reached, a 503 error code is sent.
+- [Rate imit](https://github.com/cfpb/hmda-platform/tree/master/rate-limit): Rate limiter service working in-sync with [ambassador](https://www.getambassador.io/docs/latest/topics/running/services/rate-limit-service/) to limit the number of times in a given time period that the API can be called. If the rate limit is reached, a 503 error code is sent.
 
-- [data-browser](https://github.com/cfpb/hmda-platform/tree/master/data-browser): Public facing API for [HMDA Data Browser](https://ffiec.cfpb.gov/data-browser/). This API makes the entire dataset available for summarized statistics, deep analysis, as well as geographic map layout.
+- [HMDA Data Browser](https://github.com/cfpb/hmda-platform/tree/master/data-browser): Public facing API for [HMDA Data Browser](https://ffiec.cfpb.gov/data-browser/). This API makes the entire dataset available for summarized statistics, deep analysis, as well as geographic map layout.
 
-- [email-service](https://github.com/cfpb/hmda-platform/tree/master/email-service): Event driven service to send an automated email to the filer on each successful submission.
+- [Email Service](https://github.com/cfpb/hmda-platform/tree/master/email-service): Event driven service to send an automated email to the filer on each successful submission.
 
 
-## Technical Architecture
+## HMDA Platform Technical Architecture
 
-<Diagram with one paragraph explanation>
+The image below shows the cloud vendor agnostic technical architecture for the HMDA Platform.
+
+<a href="diagrams/hmda_platform_diagram.png"><img src="diagram/hmda_platform_diagram.png" style="border: 2px solid #000;" /></a>
+
+## HMDA Data Browser Technical Architecture
+
+The image below shows the cloud vendor agnostic technical architecture for the HMDA Data Browser.
+
+<a href="diagrams/hmda_data_browser.png"><img src="diagram/hmda_data_browser.png" style="border: 2px solid #000;" /></a>
+
+
+
 
 ## Running with sbt
 
