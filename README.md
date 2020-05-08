@@ -57,16 +57,13 @@ The code base contained in this repository includes the following microservices 
 
 The image below shows the cloud vendor agnostic technical architecture for the HMDA Platform.
 
-<a href="diagrams/hmda_platform_diagram.png"><img src="diagram/hmda_platform_diagram.png" style="border: 2px solid #000;" /></a>
+<a href="diagrams/hmda_platform_diagram.png"><img src="diagrams/hmda_platform_diagram.png" style="border: 2px solid #000;" /></a>
 
 ## HMDA Data Browser Technical Architecture
 
 The image below shows the cloud vendor agnostic technical architecture for the HMDA Data Browser.
 
-<a href="diagrams/hmda_data_browser.png"><img src="diagram/hmda_data_browser.png" style="border: 2px solid #000;" /></a>
-
-
-
+<a href="diagrams/hmda_data_browser.png"><img src="diagrams/hmda_data_browser.png" style="border: 2px solid #000;" /></a>
 
 ## Running with sbt
 
@@ -76,9 +73,8 @@ The HMDA Platform can run locally using [`sbt`](https://www.scala-sbt.org/) with
 git clone https://github.com/cfpb/hmda-platform.git
 cd hmda-platform
 sbt
-
+export CASSANDRA_CLUSTER_HOSTS=localhost
 [...]
-
 sbt:hmda-root> project hmda-platform
 sbt:hmda-platform> reStart
 
