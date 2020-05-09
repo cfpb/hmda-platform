@@ -70,8 +70,8 @@ The HMDA Platform can run locally using [`sbt`](https://www.scala-sbt.org/) with
 ```bash
 git clone https://github.com/cfpb/hmda-platform.git
 cd hmda-platform
-sbt
 export CASSANDRA_CLUSTER_HOSTS=localhost
+sbt
 [...]
 sbt:hmda-root> project hmda-platform
 sbt:hmda-platform> reStart
