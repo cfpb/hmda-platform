@@ -1,13 +1,16 @@
 package hmda.api.http
 
+import java.io.File
+import java.nio.file.Paths
+
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.cluster.typed.{ Cluster, Join }
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.{ ContentTypes, Multipart, StatusCodes }
 import akka.http.scaladsl.model.StatusCodes.Created
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import akka.stream.scaladsl.{ Sink, Source }
+import akka.stream.scaladsl.{ FileIO, Sink }
 import akka.util.Timeout
 import hmda.api.http.admin.InstitutionAdminHttpApi
 import hmda.api.http.filing.submissions._
@@ -16,10 +19,7 @@ import hmda.api.http.model.filing.submissions.{ EditsSign, EditsVerification }
 import hmda.auth.{ KeycloakTokenVerifier, OAuth2Authorization }
 import hmda.messages.submission.SubmissionProcessingCommands.{ CompleteMacro, CompleteQuality, CompleteSyntacticalValidity }
 import hmda.model.filing.FilingDetails
-import hmda.model.filing.lar.LarGenerators.larNGen
 import hmda.model.filing.submission.{ Submission, SubmissionId }
-import hmda.model.filing.ts.TransmittalSheet
-import hmda.model.filing.ts.TsGenerators.tsGen
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators.institutionGen
 import hmda.persistence.AkkaCassandraPersistenceSpec
@@ -35,8 +35,8 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{ Millis, Minutes, Span }
 import org.slf4j.{ Logger, LoggerFactory }
 
-import scala.concurrent.{ Await, ExecutionContext }
 import scala.concurrent.duration._
+import scala.concurrent.{ Await, ExecutionContext }
 import scala.util.Random
 
 class IntegrationSpec extends AkkaCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest with FileUploadUtils with Eventually {
@@ -67,8 +67,7 @@ class IntegrationSpec extends AkkaCassandraPersistenceSpec with MustMatchers wit
     )
   )
 
-  val period          = Period(2019, None)
-  val quarterlyPeriod = Period(2020, Some("Q1"))
+  val period = Period(2019, None)
 
   val lei = Random.alphanumeric.take(20).mkString.toUpperCase
   val sampleInstitution: Institution = institutionGen
@@ -86,20 +85,11 @@ class IntegrationSpec extends AkkaCassandraPersistenceSpec with MustMatchers wit
       taxId = Option("12-3456789")
     )
 
-  val sampleInstitutionQuarterly = sampleInstitution.copy(LEI = sampleInstitution.LEI.init + "Q", activityYear = quarterlyPeriod.year)
-
-  val sampleSubmissionYearly    = SubmissionId(sampleInstitution.LEI, period, 1)
-  val sampleSubmissionQuarterly = SubmissionId(sampleInstitution.LEI, quarterlyPeriod, 1)
-
-  val ts    = tsGen.sample.getOrElse(TransmittalSheet())
-  val tsCsv = ts.toCSV + "\n"
-
-  val larList   = larNGen(10).suchThat(_.nonEmpty).sample.getOrElse(Nil)
-  val larCsv    = larList.map(lar => lar.toCSV + "\n")
-  val larSource = Source.fromIterator(() => larCsv.iterator)
-
-  val hmdaFileCsv = List(tsCsv) ++ larCsv
-  val hmdaFile    = multiPartFile(hmdaFileCsv.mkString(""), "sample.txt")
+  val sampleSubmissionYearly = SubmissionId(sampleInstitution.LEI, period, 1)
+  val hmdaFile = multiPartFile(
+    contents = scala.io.Source.fromResource("clean_file_1000_rows_Bank0_syntax_validity.txt").getLines().mkString("\n"),
+    fileName = "clean_file_1000_rows_Bank0_syntax_validity.txt"
+  )
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -117,8 +107,8 @@ class IntegrationSpec extends AkkaCassandraPersistenceSpec with MustMatchers wit
 
   override def afterAll(): Unit = super.afterAll()
 
-  "EditsHttpApi" must {
-    "allow you to view edits for a yearly submission" in {
+  "IntegrationSpec" must {
+    "run through the process for a yearly submission" in {
       import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
       val institution = Post("/institutions", sampleInstitution) ~> institutionAdminRoute(oAuth2Authorization) ~> check {
         response.status mustBe Created
@@ -165,28 +155,28 @@ class IntegrationSpec extends AkkaCassandraPersistenceSpec with MustMatchers wit
         status mustBe StatusCodes.OK
       }
 
+      HmdaValidationError.selectHmdaValidationError(sharding, uploadFileSubmission.id) ! CompleteSyntacticalValidity(
+        uploadFileSubmission.id
+      )
+      HmdaValidationError.selectHmdaValidationError(sharding, uploadFileSubmission.id) ! CompleteQuality(uploadFileSubmission.id)
+
       implicit val encoderEditsVerification: Encoder[EditsVerification] = deriveEncoder[EditsVerification]
       eventually {
         Post(
           s"/institutions/${sampleInstitution.LEI}/filings/${period.year}/submissions/${uploadFileSubmission.id.sequenceNumber}/edits/quality",
           EditsVerification(verified = true)
         ) ~> verifyRoute(oAuth2Authorization) ~> check {
-          // send after to get more coverage
-          HmdaValidationError.selectHmdaValidationError(sharding, uploadFileSubmission.id) ! CompleteSyntacticalValidity(
-            uploadFileSubmission.id
-          )
-          HmdaValidationError.selectHmdaValidationError(sharding, uploadFileSubmission.id) ! CompleteQuality(uploadFileSubmission.id)
           status mustBe StatusCodes.OK
         }
       }
+
+      HmdaValidationError.selectHmdaValidationError(sharding, uploadFileSubmission.id) ! CompleteMacro(uploadFileSubmission.id)
 
       eventually {
         Post(
           s"/institutions/${sampleInstitution.LEI}/filings/${period.year}/submissions/${uploadFileSubmission.id.sequenceNumber}/edits/macro",
           EditsVerification(verified = true)
         ) ~> verifyRoute(oAuth2Authorization) ~> check {
-          // send after to get more coverage
-          HmdaValidationError.selectHmdaValidationError(sharding, uploadFileSubmission.id) ! CompleteMacro(uploadFileSubmission.id)
           status mustBe StatusCodes.OK
         }
       }
@@ -197,125 +187,27 @@ class IntegrationSpec extends AkkaCassandraPersistenceSpec with MustMatchers wit
       ) ~> signRoute(
         oAuth2Authorization
       ) ~> check {
+        println {
+          "sign get yearly" +
+            Await.result(responseEntity.dataBytes.runWith(Sink.fold("")(_ ++ _.utf8String)), 30.seconds)
+        }
         status mustBe StatusCodes.OK
-      }
-
-      Post(
-        s"/institutions/${sampleInstitution.LEI}/filings/${period.year}/submissions/${uploadFileSubmission.id.sequenceNumber}/sign",
-        EditsSign(signed = true)
-      ) ~> signRoute(
-        oAuth2Authorization
-      ) ~> check {
-        status mustBe StatusCodes.OK
-      }
-    }
-
-    "allow you to view edits for a quarterly submission" in {
-      import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-      val institution = Post("/institutions", sampleInstitutionQuarterly) ~> institutionAdminRoute(oAuth2Authorization) ~> check {
-        response.status mustBe Created
-        responseAs[Institution]
-      }
-
-      val filingDetails =
-        Post(s"/institutions/${sampleInstitutionQuarterly.LEI}/filings/${quarterlyPeriod.year}/quarter/${quarterlyPeriod.quarter.get}") ~> filingRoute(
-          oAuth2Authorization
-        ) ~> check {
-          status mustBe StatusCodes.Created
-          import io.circe.generic.auto._
-          responseAs[FilingDetails]
-        }
-
-      val submissionQuarterly =
-        Post(
-          s"/institutions/${sampleInstitutionQuarterly.LEI}/filings/${quarterlyPeriod.year}/quarter/${quarterlyPeriod.quarter.get}/submissions"
-        ) ~> submissionRoute(
-          oAuth2Authorization
-        ) ~> check {
-          status mustBe StatusCodes.Created
-          responseAs[Submission]
-        }
-
-      val uploadFileSubmission =
-        Post(
-          s"/institutions/${sampleInstitutionQuarterly.LEI}/filings/${quarterlyPeriod.year}/quarter/${quarterlyPeriod.quarter.get}/submissions/${submissionQuarterly.id.sequenceNumber}",
-          hmdaFile
-        ) ~> fileUploadRoute(
-          oAuth2Authorization
-        ) ~> check {
-          status mustBe StatusCodes.Accepted
-          responseAs[Submission]
-        }
-
-      val editsSummary =
-        Get(
-          s"/institutions/${sampleInstitutionQuarterly.LEI}/filings/${quarterlyPeriod.year}/quarter/${quarterlyPeriod.quarter.get}/submissions/${uploadFileSubmission.id.sequenceNumber}/edits"
-        ) ~> editsRoute(
-          oAuth2Authorization
-        ) ~> check {
-          status mustBe StatusCodes.OK
-        }
-
-      Get(
-        s"/institutions/${sampleInstitutionQuarterly.LEI}/filings/${quarterlyPeriod.year}/quarter/${quarterlyPeriod.quarter.get}/submissions/${uploadFileSubmission.id.sequenceNumber}/edits/csv"
-      ) ~> editsRoute(
-        oAuth2Authorization
-      ) ~> check {
-        status mustBe StatusCodes.OK
-      }
-
-      Get(
-        s"/institutions/${sampleInstitutionQuarterly.LEI}/filings/${quarterlyPeriod.year}/quarter/${quarterlyPeriod.quarter.get}/submissions/${uploadFileSubmission.id.sequenceNumber}/edits/Q600"
-      ) ~> editsRoute(
-        oAuth2Authorization
-      ) ~> check {
-        status mustBe StatusCodes.OK
-      }
-
-      implicit val encoderEditsVerification: Encoder[EditsVerification] = deriveEncoder[EditsVerification]
-      eventually {
-        Post(
-          s"/institutions/${sampleInstitutionQuarterly.LEI}/filings/${quarterlyPeriod.year}/quarter/${quarterlyPeriod.quarter.get}/submissions/${uploadFileSubmission.id.sequenceNumber}/edits/quality",
-          EditsVerification(verified = true)
-        ) ~> verifyRoute(oAuth2Authorization) ~> check {
-          // send after to get more coverage
-          HmdaValidationError.selectHmdaValidationError(sharding, uploadFileSubmission.id) ! CompleteSyntacticalValidity(
-            uploadFileSubmission.id
-          )
-          HmdaValidationError.selectHmdaValidationError(sharding, uploadFileSubmission.id) ! CompleteQuality(uploadFileSubmission.id)
-          status mustBe StatusCodes.OK
-        }
       }
 
       eventually {
         Post(
-          s"/institutions/${sampleInstitutionQuarterly.LEI}/filings/${quarterlyPeriod.year}/quarter/${quarterlyPeriod.quarter.get}/submissions/${uploadFileSubmission.id.sequenceNumber}/edits/macro",
-          EditsVerification(verified = true)
-        ) ~> verifyRoute(oAuth2Authorization) ~> check {
-          // send after to get more coverage
-          HmdaValidationError.selectHmdaValidationError(sharding, uploadFileSubmission.id) ! CompleteMacro(uploadFileSubmission.id)
+          s"/institutions/${sampleInstitution.LEI}/filings/${period.year}/submissions/${uploadFileSubmission.id.sequenceNumber}/sign",
+          EditsSign(signed = true)
+        ) ~> signRoute(
+          oAuth2Authorization
+        ) ~> check {
+          println {
+            "sign post yearly" +
+              Await.result(responseEntity.dataBytes.runWith(Sink.fold("")(_ ++ _.utf8String)), 30.seconds)
+          }
           status mustBe StatusCodes.OK
         }
       }
-
-      implicit val encoderEditsSign: Encoder[EditsSign] = deriveEncoder[EditsSign]
-      Get(
-        s"/institutions/${sampleInstitutionQuarterly.LEI}/filings/${quarterlyPeriod.year}/quarter/${quarterlyPeriod.quarter.get}/submissions/${uploadFileSubmission.id.sequenceNumber}/sign"
-      ) ~> signRoute(
-        oAuth2Authorization
-      ) ~> check {
-        status mustBe StatusCodes.OK
-      }
-
-      Post(
-        s"/institutions/${sampleInstitutionQuarterly.LEI}/filings/${quarterlyPeriod.year}/quarter/${quarterlyPeriod.quarter.get}/submissions/${uploadFileSubmission.id.sequenceNumber}/sign",
-        EditsSign(signed = true)
-      ) ~> signRoute(
-        oAuth2Authorization
-      ) ~> check {
-        status mustBe StatusCodes.OK
-      }
     }
-
   }
 }
