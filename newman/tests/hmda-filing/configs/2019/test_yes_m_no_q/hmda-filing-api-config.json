@@ -50,7 +50,7 @@
       },
       {
         "testName": "filing psv upload test",
-        "sourceFile": "dev/hmda-filing/2019/test_yes_m_no_q/newmanBank_yes_M_no_Q_2019.txt",
+        "sourceFile": "tests/hmda-filing/configs/2019/test_yes_m_no_q/newmanBank_yes_M_no_Q_2019.txt",
         "expectedResponse": {
           "id": {
             "lei": "NEWMANLEITEST1234678",
