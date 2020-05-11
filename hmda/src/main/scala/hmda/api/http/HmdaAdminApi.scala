@@ -17,6 +17,8 @@ import org.slf4j.Logger
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
+// This is just a Guardian for starting up the API
+// $COVERAGE-OFF$
 object HmdaAdminApi {
   val name = "hmda-admin-api"
 
@@ -41,3 +43,4 @@ object HmdaAdminApi {
     Behaviors.empty
   }
 }
+// $COVERAGE-ON$

@@ -5,6 +5,8 @@ import akka.actor.typed.scaladsl.Behaviors
 import hmda.api.http.{ HmdaAdminApi, HmdaFilingApi, HmdaPublicApi }
 import hmda.api.ws.HmdaWSApi
 
+// This is just a Guardian for starting up APIs
+// $COVERAGE-OFF$
 object HmdaApi {
   val name = "HmdaApi"
 
@@ -17,3 +19,4 @@ object HmdaApi {
     Behaviors.empty
   }
 }
+// $COVERAGE-OFF$
