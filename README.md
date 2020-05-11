@@ -6,9 +6,7 @@
 
 The Home Mortgage Disclosure Act (HMDA) Platform is a [Regulatory technology](https://en.wikipedia.org/wiki/Regulatory_technology) application for financial institutions to submit mortgage information as described in the [Filing Instruction Guide (FIG)](https://s3.amazonaws.com/cfpb-hmda-public/prod/help/2020-hmda-fig.pdf). The HMDA-Platform parses data as submitted by mortgage leading institutions and validates the information for edits (Syntactical, Validity, Quality, and Macro as-per the instructions in the FIG) before submitting the data. The HMDA-Platform supports [quarterly](https://ffiec.cfpb.gov/documentation/2020/quarterly-filing-dates/) and [yearly](https://ffiec.cfpb.gov/documentation/2019/annual-filing-dates/) filing periods. For detailed information on Home Mortgage Disclosure Act (HMDA), checkout the [About HMDA page](https://www.consumerfinance.gov/policy-compliance/rulemaking/final-rules/regulation-c-home-mortgage-disclosure-act/) on the CFPB website.
 
-Below is a short video on how HMDA Platform transforms the data upload, validation, and submission process.
-
-[![Watch this short video](https://img.youtube.com/vi/C_73Swgyc4g/maxresdefault.jpg)](https://youtu.be/C_73Swgyc4g)
+[Please watch this short video](https://youtu.be/C_73Swgyc4g) to view how HMDA Platform transforms the data upload, validation, and submission process.
 
 ## TS and LAR File Specs
 
@@ -57,16 +55,13 @@ The code base contained in this repository includes the following microservices 
 
 The image below shows the cloud vendor agnostic technical architecture for the HMDA Platform.
 
-<a href="diagrams/hmda_platform_diagram.png"><img src="diagram/hmda_platform_diagram.png" style="border: 2px solid #000;" /></a>
+<a href="diagrams/hmda_platform_diagram.png"><img src="diagrams/hmda_platform_diagram.png" style="border: 2px solid #000;" /></a>
 
 ## HMDA Data Browser Technical Architecture
 
 The image below shows the cloud vendor agnostic technical architecture for the HMDA Data Browser.
 
-<a href="diagrams/hmda_data_browser.png"><img src="diagram/hmda_data_browser.png" style="border: 2px solid #000;" /></a>
-
-
-
+<a href="diagrams/hmda_data_browser.png"><img src="diagrams/hmda_data_browser.png" style="border: 2px solid #000;" /></a>
 
 ## Running with sbt
 
@@ -75,10 +70,9 @@ The HMDA Platform can run locally using [`sbt`](https://www.scala-sbt.org/) with
 ```bash
 git clone https://github.com/cfpb/hmda-platform.git
 cd hmda-platform
+export CASSANDRA_CLUSTER_HOSTS=localhost
 sbt
-
 [...]
-
 sbt:hmda-root> project hmda-platform
 sbt:hmda-platform> reStart
 
@@ -127,6 +121,10 @@ The [HMDA Platform Public API Documentation](https://cfpb.github.io/hmda-platfor
 ## Sprint Cadence
 
 Our team works in two week sprints. The sprints are managed as [Project Boards](https://github.com/cfpb/hmda-platform/projects). The backlog grooming happens every two weeks as part of Sprint Planning and Sprint Retrospectives.
+
+## Code Formatting
+
+Our team uses [Scalafmt](https://scalameta.org/scalafmt/) to format our codebase. 
 
 ## Development Process
 
