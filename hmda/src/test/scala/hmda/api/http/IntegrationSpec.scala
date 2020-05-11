@@ -1,21 +1,19 @@
 package hmda.api.http
 
-import java.io.File
-import java.nio.file.Paths
-
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.cluster.typed.{ Cluster, Join }
-import akka.http.scaladsl.model.{ ContentTypes, Multipart, StatusCodes }
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.model.StatusCodes.Created
-import akka.http.scaladsl.testkit.ScalatestRouteTest
-import akka.stream.scaladsl.{ FileIO, Sink }
+import akka.http.scaladsl.testkit.{ ScalatestRouteTest, WSProbe }
+import akka.stream.scaladsl.Sink
 import akka.util.Timeout
 import hmda.api.http.admin.InstitutionAdminHttpApi
 import hmda.api.http.filing.submissions._
 import hmda.api.http.filing.{ FileUploadUtils, FilingHttpApi }
 import hmda.api.http.model.filing.submissions.{ EditsSign, EditsVerification }
+import hmda.api.ws.filing.submissions.SubmissionWsApi
 import hmda.auth.{ KeycloakTokenVerifier, OAuth2Authorization }
 import hmda.messages.submission.SubmissionProcessingCommands.{ CompleteMacro, CompleteQuality, CompleteSyntacticalValidity }
 import hmda.model.filing.FilingDetails
@@ -57,6 +55,7 @@ class IntegrationSpec extends AkkaCassandraPersistenceSpec with MustMatchers wit
   val fileUploadRoute       = UploadHttpApi.create(log, sharding)
   val verifyRoute           = VerifyHttpApi.create(log, sharding)
   val signRoute             = SignHttpApi.create(log, sharding)
+  val wsRoute               = SubmissionWsApi.routes
 
   val oAuth2Authorization = OAuth2Authorization(
     log,
@@ -207,6 +206,22 @@ class IntegrationSpec extends AkkaCassandraPersistenceSpec with MustMatchers wit
           }
           status mustBe StatusCodes.OK
         }
+      }
+
+      val wsClient = WSProbe()
+      WS(
+        s"/institutions/${sampleInstitution.LEI}/filings/${period.year}/submissions/${uploadFileSubmission.id.sequenceNumber}",
+        wsClient.flow
+      ) ~> wsRoute ~> check {
+        wsClient.expectMessage()
+        wsClient.expectMessage()
+        wsClient.expectMessage()
+        wsClient.expectMessage()
+        wsClient.expectMessage()
+        wsClient.expectMessage()
+        wsClient.expectMessage()
+        wsClient.expectMessage()
+        wsClient.expectMessage()
       }
     }
   }
