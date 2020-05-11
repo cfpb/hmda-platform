@@ -16,6 +16,8 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.util.{ Failure, Success }
 
+// This is just a guardian
+// $COVERAGE-OFF$
 object HmdaWSApi {
   val name = "hmda-ws-api"
 
@@ -60,27 +62,4 @@ object HmdaWSApi {
     Behaviors.empty
   }
 }
-
-//class HmdaWSApi extends HttpServer with BaseWsApi with SubmissionWsApi {
-//  import HmdaWSApi._
-//
-//  val config = ConfigFactory.load()
-//
-//  override implicit val system: typed.ActorSystem[_] = context.system
-//  override implicit val materializer: Materializer   = Materializer(system)
-//  override implicit val ec: ExecutionContext         = context.dispatcher
-//
-//  override val name: String = wsApiName
-//  override val host: String = config.getString("hmda.ws.host")
-//  override val port: Int    = config.getInt("hmda.ws.port")
-//
-//  override val paths: Route = routes(s"$name") ~ submissionWsRoutes
-//
-//  override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
-//    paths,
-//    host,
-//    port
-//  )
-//
-//  http pipeTo self
-//}
+// $COVERAGE-ON$

@@ -11,6 +11,8 @@ import scala.concurrent.ExecutionContext
 import akka.http.scaladsl.server.Directives._
 import akka.actor.typed.scaladsl.adapter._
 
+// This is just a Guardian for starting up the API
+// $COVERAGE-OFF$
 object HmdaPublicApi {
   val name = "hmda-public-api"
 
@@ -30,3 +32,4 @@ object HmdaPublicApi {
     Behaviors.empty
   }
 }
+// $COVERAGE-ON$

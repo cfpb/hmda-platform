@@ -1,7 +1,7 @@
 package hmda.dataBrowser.models
 
 import slick.jdbc.GetResult
-
+// $COVERAGE-OFF$
 case class ModifiedLarEntity(
     filingYear: Int,
     lei: String,
@@ -230,3 +230,4 @@ object ModifiedLarEntity {
       s"$filingYear|$lei|$msaMd|$state|$county|$tract|$conformingLoanLimit|$loanProductType|$dwellingCategory|$ethnicityCategorization|$raceCategorization|$sexCategorization|$actionTakenType|$purchaserType|$preapproval|$loanType|$loanPurpose|$lienStatus|$reverseMortgage|$lineOfCredits|$businessOrCommercial|$loanAmount|$loanValueRatio|$interestRate|$rateSpread|$hoepaStatus|$totalLoanCosts|$totalPoints|$originationCharges|$discountPoints|$lenderCredits|$loanTerm|$paymentPenalty|$rateSpreadIntro|$amortization|$insertOnlyPayment|$baloonPayment|$otherAmortization|$propertyValue|$constructionMethod|$occupancyType|$homeSecurityPolicy|$landPropertyInterest|$totalUnits|$mfAffordable|$income|$debtToIncome|$creditScoreTypeApplicant|$creditScoreTypeCoApplicant|$ethnicityApplicant1|$ethnicityApplicant2|$ethnicityApplicant3|$ethnicityApplicant4|$ethnicityApplicant5|$ethnicityCoApplicant1|$ethnicityCoApplicant2|$ethnicityCoApplicant3|$ethnicityCoApplicant4|$ethnicityCoApplicant5|$ethnicityObservedApplicant|$ethnicityObservedCoApplicant|$raceApplicant1|$raceApplicant2|$raceApplicant3|$raceApplicant4|$raceApplicant5|$rateCoApplicant1|$rateCoApplicant2|$rateCoApplicant3|$rateCoApplicant4|$rateCoApplicant5|$raceObservedApplicant|$raceObservedCoApplicant|$sexApplicant|$sexCoApplicant|$observedSexApplicant|$observedSexCoApplicant|$ageApplicant|$ageCoApplicant|$applicantAgeGreaterThan62|$coapplicantAgeGreaterThan62|$applicationSubmission|$payable|$aus1|$aus2|$aus3|$aus4|$aus5|$denialReason1|$denialReason2|$denialReason3|$denialReason4|$population|$minorityPopulationPercent|$ffiecMedFamIncome|$medianIncomePercentage|$ownerOccupiedUnits|$oneToFourFamUnits|$medianAge"
   }
 }
+// $COVERAGE-OFF$
