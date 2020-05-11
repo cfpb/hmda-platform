@@ -115,7 +115,7 @@ In addition to using Newman for our internal testing, we've created a [HMDA Post
 
 ## API Documentation
 
-The [HMDA Platform Public API Documentation](https://cfpb.github.io/hmda-platform/#hmda-api-documentation) are hosted in the [HMDA Platform API Docs repo](https://github.com/cfpb/hmda-platform-api-docs) and deployed to GitHub Pages using the [`gh-pages`](https://github.com/cfpb/hmda-platform/tree/gh-pages) branch.
+The [HMDA Platform Public API Documentation](https://cfpb.github.io/hmda-platform/#hmda-api-documentation) is hosted in the [HMDA Platform API Docs repo](https://github.com/cfpb/hmda-platform-api-docs) and deployed to GitHub Pages using the [`gh-pages`](https://github.com/cfpb/hmda-platform/tree/gh-pages) branch.
 
 
 ## Sprint Cadence
