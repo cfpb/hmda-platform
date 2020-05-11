@@ -6,40 +6,56 @@ import akka.actor.typed.{ ActorSystem, Behavior }
 import akka.actor.{ CoordinatedShutdown, ActorSystem => ClassicActorSystem }
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
 import akka.util.Timeout
-import hmda.api.http.admin.InstitutionAdminHttpApi
-import hmda.api.http.directives.HmdaTimeDirectives._
+import hmda.api.http.filing.submissions._
+import hmda.api.http.filing.{ FilingHttpApi, InstitutionHttpApi }
 import hmda.api.http.routes.BaseHttpApi
 import hmda.auth.OAuth2Authorization
-import org.slf4j.Logger
+import hmda.api.http.directives.HmdaTimeDirectives._
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 // This is just a Guardian for starting up the API
 // $COVERAGE-OFF$
-object HmdaAdminApi {
-  val name = "hmda-admin-api"
+object HmdaFilingApi {
+  val name = "hmda-filing-api"
 
   def apply(): Behavior[Nothing] = Behaviors.setup[Nothing] { ctx =>
     implicit val system: ActorSystem[_]      = ctx.system
     implicit val classic: ClassicActorSystem = system.toClassic
     implicit val mat: Materializer           = Materializer(ctx)
     implicit val ec: ExecutionContext        = ctx.executionContext
-    val log: Logger                          = ctx.log
-    val sharding                             = ClusterSharding(system)
     val config                               = system.settings.config
-    implicit val timeout: Timeout            = Timeout(config.getInt("hmda.http.timeout").seconds)
-    val host: String                         = config.getString("hmda.http.adminHost")
-    val port: Int                            = config.getInt("hmda.http.adminPort")
     val shutdown                             = CoordinatedShutdown(system)
+    implicit val timeout: Timeout            = Timeout(config.getInt("hmda.http.timeout").seconds)
+    val log                                  = ctx.log
+    val sharding                             = ClusterSharding(system)
+    val filingApiName                        = name
+    val host: String                         = config.getString("hmda.http.filingHost")
+    val port: Int                            = config.getInt("hmda.http.filingPort")
 
     val oAuth2Authorization = OAuth2Authorization(log, config)
-    val institutionRoutes   = InstitutionAdminHttpApi.create(sharding, config)
-    val routes              = BaseHttpApi.routes(name) ~ institutionRoutes(oAuth2Authorization)
+    val base                = BaseHttpApi.routes(filingApiName)
+    val filingRoutes        = FilingHttpApi.create(log, sharding)
+    val submissionRoutes    = SubmissionHttpApi.create(log, sharding)
+    val uploadRoutes        = UploadHttpApi.create(log, sharding)
+    val institutionRoutes   = InstitutionHttpApi.create(log, sharding)
+    val parserErrorRoutes   = ParseErrorHttpApi.create(log, sharding)
+    val verifyRoutes        = VerifyHttpApi.create(log, sharding)
+    val signRoutes          = SignHttpApi.create(log, sharding)
+    val editRoutes          = EditsHttpApi.create(log, sharding)
 
-    BaseHttpApi.runServer(shutdown, name)(timed(routes), host, port)
+    val httpRoutes: Route =
+      base ~
+        List(filingRoutes, submissionRoutes, uploadRoutes, institutionRoutes, parserErrorRoutes, verifyRoutes, signRoutes, editRoutes)
+          .map(fn => fn(oAuth2Authorization))
+          .reduce((r1, r2) => r1 ~ r2)
+
+    BaseHttpApi.runServer(shutdown, name)(timed(httpRoutes), host, port)
+
     Behaviors.empty
   }
 }
