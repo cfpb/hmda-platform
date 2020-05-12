@@ -31,13 +31,5 @@ class LarComponentSpec extends AsyncWordSpec with LarComponent with EmbeddedPost
     }
   }
 
-  override def cleanupAction: DBIO[Int] =
-    sql"""
-    DROP SCHEMA public CASCADE;
-    CREATE SCHEMA public;
-    GRANT ALL ON SCHEMA public TO postgres;
-    GRANT ALL ON SCHEMA public TO public;
-    """.asUpdate
-
   override def bootstrapSqlFile: String = "hmda.sql"
 }

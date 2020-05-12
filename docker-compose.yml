@@ -1,0 +1,140 @@
+version: "3.7"
+
+services:
+
+  # ------------- Kafka -----------------
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+    logging:
+      driver: none
+
+  kafka:
+    image: wurstmeister/kafka
+    command: ["wait-for-it.sh", "zookeeper:2181", "--","start-kafka.sh"]
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_LISTENERS: INTERNAL://kafka:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      # KAFKA_CREATE_TOPICS: institution
+      KAFKA_CREATE_GROUP: institutions-group
+      KAFKA_BROKER_ID: 2
+    volumes:
+      - ./wait-for-it.sh:/usr/bin/wait-for-it.sh
+      - db-data:/var/lib/kafka/data
+
+  # ------------- Cassandra -------------
+  cassandra:
+    image: "cassandra:3.11.4"
+    ports:
+      - "9042:9042"
+    logging:
+      driver: none
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - db-data:/var/lib/cassandra/data
+
+  # ------------- HMDA Platform ---------
+  hmda-platform:
+    image: hmda/hmda-platform
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+      - "8082:8082"
+    depends_on:
+      - kafka
+      - cassandra
+    command:
+      - "wait-for-it.sh"
+      - "--service kafka:9092"
+      - "--services cassandra:9042"
+    environment:
+      HMDA_RUNTIME_MODE: docker-compose
+      CASSANDRA_CLUSTER_HOSTS: cassandra:9042
+      CASSANDRA_CLUSTER_PASSWORD:
+      CASSANDRA_CLUSTER_USERNAME:
+      CASSANDRA_JOURNAL_KEYSPACE: hmda2_journal
+      CASSANDRA_SNAPSHOT_KEYSPACE: hmda2_snapshot
+      KAFKA_CLUSTER_HOSTS: kafka:9092
+      KAFKA_INSTITUTIONS_TOPIC: institution
+      KAFKA_SIGN_TOPIC: hmda-sign
+    volumes:
+      - ./wait-for-it.sh:/usr/bin/wait-for-it.sh
+
+  # ------------- Postgres ---------
+  pg:
+    image: postgres
+    environment:
+      - POSTGRES_DB=hmda
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - 5432:5432
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  # ------------- Institutions-API ---------
+  institutions-api:
+    image: hmda/institutions-api
+    depends_on:
+      - kafka
+      - cassandra
+      - pg
+    command:
+      - "wait-for-it.sh"
+      - "--service pg:5432"
+      - "--service kafka:9092"
+      - "--services cassandra:9042"
+    environment:
+      CASSANDRA_CLUSTER_HOSTS: cassandra:9042
+      CASSANDRA_CLUSTER_PASSWORD:
+      CASSANDRA_CLUSTER_USERNAME:
+      CASSANDRA_JOURNAL_KEYSPACE: hmda2_journal
+      CASSANDRA_SNAPSHOT_KEYSPACE: hmda2_snapshot
+      KAFKA_CLUSTER_HOSTS: kafka:9092
+      KAFKA_INSTITUTIONS_TOPIC: institution
+      KAFKA_INSTITUTIONS_GROUP: institutions-group
+      PG_HOST: pg:5432
+      PG_DATABASE: hmda
+      PG_USER:
+      PG_PASSWORD:
+    volumes:
+      - ./wait-for-it.sh:/usr/bin/wait-for-it.sh
+
+  # ------------- HMDA Analytics ---------
+  hmda-analytics:
+    image: hmda/hmda-analytics
+    depends_on:
+      - kafka
+      - cassandra
+      - pg
+    command:
+      - "wait-for-it.sh"
+      - "--service pg:5432"
+      - "--service kafka:9092"
+      - "--services cassandra:9042"
+    environment:
+      CASSANDRA_CLUSTER_HOSTS: cassandra:9042
+      CASSANDRA_CLUSTER_PASSWORD:
+      CASSANDRA_CLUSTER_USERNAME:
+      CASSANDRA_JOURNAL_KEYSPACE: hmda2_journal
+      CASSANDRA_SNAPSHOT_KEYSPACE: hmda2_snapshot
+      KAFKA_CLUSTER_HOSTS: kafka:9092
+      KAFKA_INSTITUTIONS_TOPIC: institution
+      KAFKA_INSTITUTIONS_GROUP: institutions-group
+      PG_HOST: pg:5432
+      PG_DATABASE: hmda
+      PG_USER:
+      PG_PASSWORD:
+    volumes:
+      - ./wait-for-it.sh:/usr/bin/wait-for-it.sh
+
+volumes:
+  db-data:
+    driver: local

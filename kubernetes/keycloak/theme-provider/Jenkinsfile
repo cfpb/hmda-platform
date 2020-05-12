@@ -16,6 +16,7 @@ pipeline {
 
           init.setEnvironment('theme_provider')
           init.checkForChanges('theme-provider')
+          sh "rm -rf data"
         }
       }
     }
@@ -28,7 +29,7 @@ pipeline {
             withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'hmda-platform-jenkins-service',
               usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
               withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
-                dockerBuild.dockerBuild('theme-provider', 'keycloak/theme-provider/')
+                dockerBuild.dockerBuild('theme-provider', 'kubernetes/keycloak/theme-provider/')
                 scanImage('theme-provider', env.DOCKER_TAG)
               }
             }

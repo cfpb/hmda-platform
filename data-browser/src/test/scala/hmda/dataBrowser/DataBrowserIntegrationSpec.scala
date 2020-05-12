@@ -15,7 +15,6 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.{ Matchers, WordSpec }
 import org.slf4j.LoggerFactory
 import slick.basic.DatabaseConfig
-import slick.dbio.DBIO
 import slick.jdbc.JdbcProfile
 
 class DataBrowserIntegrationSpec
@@ -156,8 +155,6 @@ class DataBrowserIntegrationSpec
       ) ~> routes ~> check {}
     }
   }
-
-  override def cleanupAction: DBIO[Int] = DBIO.successful(1)
 
   override def bootstrapSqlFile: String = "modifiedlar.sql"
 }

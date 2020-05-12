@@ -14,6 +14,8 @@ import hmda.messages.projection.CommonProjectionMessages._
 import hmda.query.HmdaQuery._
 
 import scala.concurrent.Future
+// This is just a Guardian for starting up the API
+// $COVERAGE-OFF$
 
 trait ResumableProjection {
 
@@ -76,3 +78,5 @@ trait ResumableProjection {
   def projectEvent(envelope: EventEnvelope): EventEnvelope
 
 }
+// This is just a Guardian for starting up the API
+// $COVERAGE-OFF$

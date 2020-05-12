@@ -28,8 +28,9 @@ pipeline {
         }
       }
       steps {
-        sh "ls"
+        sh """find . -name target -type d -prune -exec rm -rf {} \\;"""
         sh "sbt -Dsbt.global.base=.sbt -Dsbt.boot.directory=.sbt -Dsbt.ivy.home=.ivy2 -batch clean check-digit/docker:stage"
+        sh "rm -rf data"
       }
     }
 

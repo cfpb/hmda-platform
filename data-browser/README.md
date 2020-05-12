@@ -1,16 +1,17 @@
-## Prerequisite
+## Introduction
 
-- sbt
-- PostgreSql (running locally or running on server/cloud)
-- Configure `JDBC_URL` environment variable to point to instance of PostgreSQL
-    - `export JDBC_URL="jdbc:postgresql://<server>:<port>/<dbname>>?user=<username>>&password=<pwd>&sslmode=require&ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory"`
+The Home Mortgage Disclosure Act (HMDA) Platform is a [Regulatory technology](https://en.wikipedia.org/wiki/Regulatory_technology) application for financial institutions to submit mortgage information as described in the [Filing Instruction Guide (FIG)](https://s3.amazonaws.com/cfpb-hmda-public/prod/help/2020-hmda-fig.pdf). The HMDA-Platform parses data as submitted by mortgage leading institutions and validates the information for edits (Syntactical, Validity, Quality, and Macro as-per the instructions in the FIG) before submitting the data. The HMDA-Platform supports [quarterly](https://ffiec.cfpb.gov/documentation/2020/quarterly-filing-dates/) and [yearly](https://ffiec.cfpb.gov/documentation/2019/annual-filing-dates/) filing periods. For detailed information on Home Mortgage Disclosure Act (HMDA), checkout the [About HMDA page](https://www.consumerfinance.gov/policy-compliance/rulemaking/final-rules/regulation-c-home-mortgage-disclosure-act/) on the CFPB website.
 
-## Running Locally
+The [HMDA Data Browser](https://ffiec.cfpb.gov/data-browser/) (Public Facing) allows users to filter, analyze, and download HMDA datasets and visualize data through charts, graphs, and maps.
 
-- From command line -> `env JAVA_OPTS="-Xmx8096m" sbt`
-- `project data-browser`
-- `reStart`
+## Technical Architecture
+
+The image below shows the cloud vendor agnostic technical architecture for the HMDA Data Browser.
+
+The multi-year data is stored in PostgreSQL and cached in Redis + Object Stores. The first time the user accesses the data, the cache is searched. If the data is found it the cache, it is served. However, if the data isn't found in the cache, the cache is updated and then the data is served so that the next time the data would be served from the cache. 
+
+<a href="../diagrams/hmda_data_browser.png"><img src="../diagrams/hmda_data_browser.png" style="border: 2px solid #000;" /></a>
 
 ## API Documentation
 
-https://cfpb.github.io/hmda-platform/#data-browser-api
+The API documentation for the data-browser is available publicly. https://cfpb.github.io/hmda-platform/#data-browser-api 

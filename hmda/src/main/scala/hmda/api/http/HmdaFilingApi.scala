@@ -18,6 +18,8 @@ import hmda.api.http.directives.HmdaTimeDirectives._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
+// This is just a Guardian for starting up the API
+// $COVERAGE-OFF$
 object HmdaFilingApi {
   val name = "hmda-filing-api"
 
@@ -57,3 +59,4 @@ object HmdaFilingApi {
     Behaviors.empty
   }
 }
+// $COVERAGE-ON$

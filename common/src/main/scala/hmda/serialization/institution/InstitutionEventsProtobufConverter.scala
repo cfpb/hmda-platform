@@ -12,7 +12,7 @@ import hmda.persistence.serialization.institution.events.InstitutionKafkaEventMe
 import hmda.persistence.serialization.institution.events._
 import hmda.serialization.filing.FilingProtobufConverter._
 import hmda.serialization.institution.InstitutionProtobufConverter._
-
+// $COVERAGE-OFF$
 object InstitutionEventsProtobufConverter {
 
   def institutionCreatedToProtobuf(evt: InstitutionCreated): InstitutionCreatedMessage =
@@ -98,3 +98,4 @@ object InstitutionEventsProtobufConverter {
   }
 
 }
+// $COVERAGE-OFF$

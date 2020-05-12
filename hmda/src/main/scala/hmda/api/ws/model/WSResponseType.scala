@@ -1,5 +1,6 @@
 package hmda.api.ws.model
 
+// $COVERAGE-OFF$
 trait WSResponseType {
   val messageType: String
 }
@@ -11,3 +12,4 @@ case object ServerPing extends WSResponseType {
 case object SubmissionStatus extends WSResponseType {
   override val messageType: String = "SubmissionStatus"
 }
+// $COVERAGE-ON$

@@ -52,13 +52,13 @@ class PanelScheduler extends HmdaActor with PublisherComponent2018 with Publishe
     .withS3RegionProvider(awsRegionProvider)
     .withListBucketApiVersion(ListBucketVersion2)
 
-  override def preStart(): Unit = {
-    QuartzSchedulerExtension(context.system)
-      .schedule("PanelScheduler2018", self, PanelScheduler2018)
-    QuartzSchedulerExtension(context.system)
-      .schedule("PanelScheduler2019", self, PanelScheduler2019)
-
-  }
+  override def preStart(): Unit =
+    try {
+      QuartzSchedulerExtension(context.system)
+        .schedule("PanelScheduler2018", self, PanelScheduler2018)
+      QuartzSchedulerExtension(context.system)
+        .schedule("PanelScheduler2019", self, PanelScheduler2019)
+    } catch { case e: Throwable => println(e) }
 
   override def postStop(): Unit = {
     QuartzSchedulerExtension(context.system).cancelJob("PanelScheduler2018")

@@ -21,7 +21,5 @@ class SubmissionHistoryComponentSpec extends AsyncWordSpec with SubmissionHistor
     }
   }
 
-  override def cleanupAction: DBIO[Int] = DBIO.successful(1)
-
   override def bootstrapSqlFile: String = "hmda.sql"
 }

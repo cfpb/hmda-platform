@@ -9,7 +9,6 @@ projects = [
     [name: "hmda-platform", repo: "hmda-platform", jenkinsfilePath: "hmda/Jenkinsfile"],
     [name: "hmda-data-publisher", repo: "hmda-platform", jenkinsfilePath: "hmda-data-publisher/Jenkinsfile"],
     [name: "hmda-reporting", repo: "hmda-platform", jenkinsfilePath: "hmda-reporting/Jenkinsfile"],
-    [name: "hmda-spark-reporting", repo: "hmda-platform", jenkinsfilePath: "hmda-spark-reporting/Jenkinsfile"],
     [name: "keycloak", repo: "hmda-platform", jenkinsfilePath: "kubernetes/keycloak/Jenkinsfile"],
     [name: "institutions-api", repo: "hmda-platform", jenkinsfilePath: "institutions-api/Jenkinsfile"],
     [name: "irs-publisher", repo: "hmda-platform", jenkinsfilePath: "irs-publisher/Jenkinsfile"],
@@ -46,3 +45,37 @@ projects.each { project ->
         }
     }
 }
+
+// repositories for code scanning
+def repositories = [
+    [name: 'hmda-frontend', repo: "https://github.com/cfpb/hmda-frontend"],
+    [name: 'hmda-platform',repo: "https://github.com/cfpb/hmda-platform"],
+    [name: 'hmda-help',repo: "https://github.com/cfpb/hmda-help"]
+]
+
+repositories.each{ repo ->
+
+    pipelineJob("code-scan/${repo.name}") {
+
+        triggers {
+            cron('10 9 * * *')
+        }
+
+        environmentVariables {
+            env('APP_NAME', repo.name)
+            env('SCM_APP_REPO', repo.repo)
+            env('SCM_APP_BRANCH', 'master')
+
+
+            keepBuildVariables(true)
+        }
+        definition {
+            cps {
+                script(readFileFromWorkspace("jenkins/code-scan/pipeline.groovy"))
+                sandbox()
+            }
+        } 
+
+    }
+}
+

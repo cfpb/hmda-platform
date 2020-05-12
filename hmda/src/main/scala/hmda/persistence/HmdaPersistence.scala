@@ -8,6 +8,8 @@ import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission._
 
+// This is just a guardian
+// $COVERAGE-OFF$
 object HmdaPersistence {
 
   final val name = "HmdaPersistence"
@@ -49,3 +51,4 @@ object HmdaPersistence {
     }
 
 }
+// $COVERAGE-ON$

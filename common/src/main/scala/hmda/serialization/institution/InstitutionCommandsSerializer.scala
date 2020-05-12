@@ -11,7 +11,7 @@ import hmda.model.institution.Institution
 import hmda.persistence.serialization.institution.InstitutionMessage
 import hmda.serialization.institution.InstitutionCommandsProtobufConverter._
 import hmda.serialization.institution.InstitutionProtobufConverter._
-
+// $COVERAGE-OFF$
 class InstitutionCommandsSerializer(system: ExtendedActorSystem) extends SerializerWithStringManifest {
 
   private val resolver = ActorRefResolver(system.toTyped)
@@ -68,3 +68,4 @@ class InstitutionCommandsSerializer(system: ExtendedActorSystem) extends Seriali
         throw new NotSerializableException(s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
     }
 }
+// $COVERAGE-OFF$

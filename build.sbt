@@ -86,8 +86,8 @@ lazy val `hmda-root` = (project in file("."))
     `hmda-analytics`,
     `hmda-data-publisher`,
     `hmda-reporting`,
-    `hmda-spark-reporting`,
-    `ratespread-calculator`
+    `ratespread-calculator`,
+    `data-browser`
   )
 
 lazy val common = (project in file("common"))
@@ -101,37 +101,6 @@ lazy val common = (project in file("common"))
     )
   )
 
-lazy val `hmda-spark-reporting` = (project in file("hmda-spark-reporting"))
-  .enablePlugins(sbtdocker.DockerPlugin, AshScriptPlugin)
-  .settings(hmdaBuildSettings: _*)
-  .settings(
-    Seq(
-      mainClass in assembly := Some("com.hmda.reports.DisclosureReports"),
-      assemblyJarName in assembly := "hmda-reports.jar",
-      assemblyMergeStrategy in assembly := {
-        case PathList("javax", "servlet", xs @ _*)        => MergeStrategy.last
-        case PathList("javax", "activation", xs @ _*)     => MergeStrategy.last
-        case PathList("org", "apache", xs @ _*)           => MergeStrategy.last
-        case PathList("com", "google", xs @ _*)           => MergeStrategy.last
-        case PathList("com", "esotericsoftware", xs @ _*) => MergeStrategy.last
-        case PathList("com", "codahale", xs @ _*)         => MergeStrategy.last
-        case PathList("com", "yammer", xs @ _*)           => MergeStrategy.last
-        case "META-INF/io.netty.versions.properties"      => MergeStrategy.concat
-        case "META-INF/ECLIPSEF.RSA"                      => MergeStrategy.last
-        case "META-INF/mailcap"                           => MergeStrategy.last
-        case "META-INF/mimetypes.default"                 => MergeStrategy.last
-        case "plugin.properties"                          => MergeStrategy.last
-        case "log4j.properties"                           => MergeStrategy.last
-        case x =>
-          val oldStrategy = (assemblyMergeStrategy in assembly).value
-          oldStrategy(x)
-      }
-    ),
-    Seq(libraryDependencies ++= sparkDeps ++ circeDeps ++ akkaDeps),
-    dockerSettings,
-    packageSettings
-  )
-  .dependsOn(common % "compile->compile;test->test")
 
 lazy val `hmda-platform` = (project in file("hmda"))
   .enablePlugins(
@@ -150,6 +119,9 @@ lazy val `hmda-platform` = (project in file("hmda"))
         case "cinnamon-reference.conf"               => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "logback.xml"                           => MergeStrategy.concat
+        case PathList(ps @ _ *) if ps.last endsWith ".proto" =>
+          MergeStrategy.first
+        case "module-info.class"                     => MergeStrategy.concat
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
@@ -177,6 +149,9 @@ lazy val `check-digit` = (project in file("check-digit"))
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case PathList(ps @ _ *) if ps.last endsWith ".proto" =>
+          MergeStrategy.first
+        case "module-info.class"                     => MergeStrategy.concat
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
@@ -201,6 +176,9 @@ lazy val `institutions-api` = (project in file("institutions-api"))
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case PathList(ps @ _ *) if ps.last endsWith ".proto" =>
+          MergeStrategy.first
+        case "module-info.class"                     => MergeStrategy.concat
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
@@ -230,6 +208,9 @@ lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case PathList(ps @ _ *) if ps.last endsWith ".proto" =>
+          MergeStrategy.first
+        case "module-info.class"                     => MergeStrategy.concat
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
@@ -255,6 +236,9 @@ lazy val `hmda-dashboard` = (project in file("hmda-dashboard"))
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case PathList(ps @ _ *) if ps.last endsWith ".proto" =>
+          MergeStrategy.first
+        case "module-info.class"                     => MergeStrategy.concat
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
@@ -282,6 +266,9 @@ lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case PathList(ps @ _ *) if ps.last endsWith ".proto" =>
+          MergeStrategy.first
+        case "module-info.class"                     => MergeStrategy.concat
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
@@ -309,6 +296,9 @@ lazy val `modified-lar` = (project in file("modified-lar"))
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case PathList(ps @ _ *) if ps.last endsWith ".proto" =>
+          MergeStrategy.first
+        case "module-info.class"                     => MergeStrategy.concat
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
@@ -337,6 +327,9 @@ lazy val `irs-publisher` = (project in file("irs-publisher"))
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case PathList(ps @ _ *) if ps.last endsWith ".proto" =>
+          MergeStrategy.first
+        case "module-info.class"                     => MergeStrategy.concat
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
@@ -365,6 +358,9 @@ lazy val `hmda-reporting` = (project in file("hmda-reporting"))
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case PathList(ps @ _ *) if ps.last endsWith ".proto" =>
+          MergeStrategy.first
+        case "module-info.class"                     => MergeStrategy.concat
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
@@ -402,6 +398,9 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case PathList(ps @ _ *) if ps.last endsWith ".proto" =>
+          MergeStrategy.first
+        case "module-info.class"                     => MergeStrategy.concat
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
@@ -429,6 +428,9 @@ lazy val `rate-limit` = (project in file("rate-limit"))
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case PathList(ps @ _ *) if ps.last endsWith ".proto" =>
+          MergeStrategy.first
+        case "module-info.class"                     => MergeStrategy.concat
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
@@ -457,6 +459,9 @@ lazy val `data-browser` = (project in file("data-browser"))
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case PathList(ps @ _ *) if ps.last endsWith ".proto" =>
+          MergeStrategy.first
+        case "module-info.class"                     => MergeStrategy.concat
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
@@ -479,6 +484,9 @@ lazy val `email-service` = (project in file("email-service"))
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case PathList(ps @ _ *) if ps.last endsWith ".proto" =>
+          MergeStrategy.first
+        case "module-info.class"                     => MergeStrategy.concat
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
