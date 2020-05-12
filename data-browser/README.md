@@ -10,7 +10,7 @@ The image below shows the cloud vendor agnostic technical architecture for the H
 
 The multi-year data is stored in PostgreSQL and cached in Redis + Object Stores. The first time the user accesses the data, the cache is searched. If the data is found it the cache, it is served. However, if the data isn't found in the cache, the cache is updated and then the data is served so that the next time the data would be served from the cache. 
 
-<a href="diagrams/hmda_data_browser.png"><img src="diagrams/hmda_data_browser.png" style="border: 2px solid #000;" /></a>
+<a href="../diagrams/hmda_data_browser.png"><img src="../diagrams/hmda_data_browser.png" style="border: 2px solid #000;" /></a>
 
 ## API Documentation
 
