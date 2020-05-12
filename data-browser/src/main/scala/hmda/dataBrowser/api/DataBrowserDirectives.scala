@@ -157,11 +157,13 @@ trait DataBrowserDirectives extends Settings {
         provide(Option(QueryField(name = "arid", xs.map(_.toString), dbName = "arid", isAllSelected = false)))
     }
 
-  private def extractYear: Directive1[Option[QueryField]] =
-    parameter("years" ? "").flatMap {
-      case "" => complete((BadRequest, "Must provide year parameter"))
-      case xs => provide(Option(QueryField(name = "year", Seq(xs), dbName = "filing_year", isAllSelected = false)))
-    }
+  private def extractYears: Directive1[Option[QueryField]] =
+    parameters("years".as(CsvSeq[Int]) ? Nil)
+      .map(_.toList)
+      .collect {
+        case Nil => None
+        case xs => Option(QueryField(name = "year", xs.map(_.toString), dbName = "filing_year", isAllSelected = false))
+      }
 
   private def extractStates(year: String): Directive1[Option[QueryField]] =
     parameters("states".as(CsvSeq[String]) ? Nil).flatMap { rawStates =>
@@ -499,7 +501,7 @@ trait DataBrowserDirectives extends Settings {
     }
 
   def extractCountFields(innerRoute: QueryFields => Route): Route =
-    (extractYear) { (years) =>
+    (extractYears) { (years) =>
       (extractMsaMds & extractStates(years.head.values.head)) { (msaMds, states) =>
         if (years.nonEmpty && (msaMds.nonEmpty || states.nonEmpty)) {
           extractNonMandatoryQueryFields(years.getOrElse("2018").toString) { nonMandatoryFields =>
@@ -515,7 +517,7 @@ trait DataBrowserDirectives extends Settings {
     }
 
   def extractYearsMsaMdsStatesAndCounties(innerRoute: QueryFields => Route): Route =
-    (extractYear) { (years) => 
+    (extractYears) { (years) => 
       (extractMsaMds & extractStates(years.head.values.head) & extractCounties) { (msaMds, states, counties) =>
         if (msaMds.nonEmpty && states.nonEmpty && counties.nonEmpty)
           complete((BadRequest, OnlyStatesOrMsaMdsOrCountiesOrLEIs()))
@@ -527,7 +529,7 @@ trait DataBrowserDirectives extends Settings {
     }
 
   def extractMsaAndStateAndCountyAndInstitutionIdentifierBrowserFields(innerRoute: QueryFields => Route): Route =
-    (extractYear) { (years) =>
+    (extractYears) { (years) =>
       years.head.values.head match {
         case "2017" => extractMsaAndStateAndCountyAndARIDBrowserFields("2017", innerRoute)
         case year => extractMsaAndStateAndCountyAndLEIBrowserFields(year, innerRoute)
@@ -551,7 +553,7 @@ trait DataBrowserDirectives extends Settings {
     }
 
   def extractNationwideMandatoryYears(innerRoute: QueryFields => Route): Route =
-    (extractYear) { (years) =>
+    (extractYears) { (years) =>
       if (years.nonEmpty)
         innerRoute(QueryFields(years.head.values.head,List(years).flatten))
       else complete((BadRequest, ProvideYear()))
