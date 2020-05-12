@@ -158,10 +158,9 @@ trait DataBrowserDirectives extends Settings {
     }
 
   private def extractYear: Directive1[Option[QueryField]] =
-    parameters("years".as(CsvSeq[String]) ? Nil).flatMap {
-      case Nil => provide(None)
-      case xs =>
-        provide(Option(QueryField(name = "year", xs.map(_.toString), dbName = "filing_year", isAllSelected = false)))
+    parameter("years" ? "").flatMap {
+      case "" => complete((BadRequest, "Must provide year parameter"))
+      case xs => provide(Option(QueryField(name = "year", Seq(xs), dbName = "filing_year", isAllSelected = false)))
     }
 
   private def extractStates(year: String): Directive1[Option[QueryField]] =

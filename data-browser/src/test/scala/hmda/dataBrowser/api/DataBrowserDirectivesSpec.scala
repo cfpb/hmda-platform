@@ -189,7 +189,7 @@ class DataBrowserDirectivesSpec extends WordSpec with ScalatestRouteTest with Ma
     "extractYearsAndMsaAndStateAndCountyAndLEIBrowserFields prevents you from providing no parameters" in {
       val route: Route = failingRoute(extractMsaAndStateAndCountyAndInstitutionIdentifierBrowserFields)
 
-      Get("/") ~> route ~> check {
+      Get("/?years=2018") ~> route ~> check {
         responseAs[String].contains("provide-only-msamds-or-states-or-counties-or-leis") shouldBe true
         response.status shouldBe StatusCodes.BadRequest
       }
@@ -198,7 +198,7 @@ class DataBrowserDirectivesSpec extends WordSpec with ScalatestRouteTest with Ma
     "extractYearsAndMsaAndStateAndCountyAndLEIBrowserFields must stop you if you don't provide enough mandatory parameters" in {
       val route: Route = failingRoute(extractMsaAndStateAndCountyAndInstitutionIdentifierBrowserFields)
 
-      Get("/?msamds=34980") ~> route ~> check {
+      Get("/?msamds=34980&years=2018") ~> route ~> check {
         responseAs[String].contains("provide-atleast-msamds-or-states") shouldBe true
         response.status shouldBe StatusCodes.BadRequest
       }
@@ -302,8 +302,9 @@ class DataBrowserDirectivesSpec extends WordSpec with ScalatestRouteTest with Ma
     }
 
     "extractYearsMsaMdsStatesAndCounties should fail if you provide it msamds, states and counties" in {
-      Get("/?msamds=1&states=CA&counties=19125") ~> failingRoute(extractYearsMsaMdsStatesAndCounties) ~> check {
+      Get("/?years=2018&msamds=1&states=CA&counties=19125") ~> failingRoute(extractYearsMsaMdsStatesAndCounties) ~> check {
         response.status shouldBe StatusCodes.BadRequest
+        println(responseAs[String])
         responseAs[String].contains("provide-only-msamds-or-states-or-counties-or-leis") shouldBe true
       }
     }
@@ -312,11 +313,11 @@ class DataBrowserDirectivesSpec extends WordSpec with ScalatestRouteTest with Ma
       val route = failingRoute(extractYearsMsaMdsStatesAndCounties)
       // This is actually rejected but sealing it causes it to move and do a not found
       Get("/?states=ABCD&msamds=1") ~> Route.seal(route) ~> check {
-        response.status shouldBe StatusCodes.NotFound
+        response.status shouldBe StatusCodes.BadRequest
       }
 
       Get("/?counties=INVALID") ~> Route.seal(route) ~> check {
-        response.status shouldBe StatusCodes.NotFound
+        response.status shouldBe StatusCodes.BadRequest
       }
     }
   }
