@@ -16,7 +16,7 @@ import org.slf4j.Logger
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext
-
+// $COVERAGE-OFF$
 class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
 
   val config      = ConfigFactory.load()
@@ -141,3 +141,5 @@ object OAuth2Authorization {
   def apply(logger: Logger, tokenVerifier: TokenVerifier): OAuth2Authorization =
     new OAuth2Authorization(logger, tokenVerifier)
 }
+// This is just a Guardian for starting up the API
+// $COVERAGE-OFF$

@@ -9,7 +9,7 @@ import hmda.persistence.serialization.institution.InstitutionMessage
 import hmda.persistence.serialization.institution.commands._
 import hmda.serialization.filing.FilingProtobufConverter._
 import hmda.serialization.institution.InstitutionProtobufConverter._
-
+// $COVERAGE-OFF$
 object InstitutionCommandsProtobufConverter {
 
   def createInstitutionToProtobuf(cmd: CreateInstitution, resolver: ActorRefResolver): CreateInstitutionMessage =
@@ -112,3 +112,4 @@ object InstitutionCommandsProtobufConverter {
   }
 
 }
+// $COVERAGE-OFF$
