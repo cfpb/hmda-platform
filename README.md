@@ -8,6 +8,28 @@ The Home Mortgage Disclosure Act (HMDA) Platform is a [Regulatory technology](ht
 
 [Please watch this short video](https://youtu.be/C_73Swgyc4g) to view how HMDA Platform transforms the data upload, validation, and submission process.
 
+## Contents
+
+- [TS and LAR File Specs](#ts-and-lar-file-specs)
+- [Technical Overview](#technical-overview)
+  * [Microservices](#microservices)
+- [HMDA Platform Technical Architecture](#hmda-platform-technical-architecture)
+- [HMDA Data Browser Technical Architecture](#hmda-data-browser-technical-architecture)
+- [Running with sbt](#running-with-sbt)
+- [One-line Cloud Deployment to Dev/Prod](#one-line-cloud-deployment-to-dev-prod)
+- [Docker Hub](#docker-hub)
+- [One-line Local Development Environment](#one-line-local-development-environment)
+- [Automated Testing](#automated-testing)
+- [Postman Collection](#postman-collection)
+- [API Documentation](#api-documentation)
+- [Sprint Cadence](#sprint-cadence)
+- [Code Formatting](#code-formatting)
+- [Development Process](#development-process)
+- [Contributing](#contributing)
+- [Issues](#issues)
+- [Open source licensing info](#open-source-licensing-info)
+- [Credits and references](#credits-and-references)
+
 ## TS and LAR File Specs
 
 The data is submitted in a flat pipe (`|`) delimited TXT file. The text file is split into two parts: Transmission (TS) File -- first line in the file and Loan Application Register (LAR) -- all remaining lines of the file. Below are the links to the file specifications for data collected in years 2018 - current.
@@ -59,9 +81,7 @@ The image below shows the cloud vendor agnostic technical architecture for the H
 
 ## HMDA Data Browser Technical Architecture
 
-The image below shows the cloud vendor agnostic technical architecture for the HMDA Data Browser.
-
-<a href="diagrams/hmda_data_browser.png"><img src="diagrams/hmda_data_browser.png" style="border: 2px solid #000;" /></a>
+<a href="data-browser/README.md">Please view the README for HMDA Data Browser</a>
 
 ## Running with sbt
 
@@ -85,13 +105,17 @@ The platform and all of the related microservices explained above are deployed o
 ```shell
 helm upgrade --install --force \                                        
 --namespace=default \
---values=kubernetes/email-service/values.yaml \
---set image.repository=hmda/email-service \
+--values=kubernetes/hmda-platform/values.yaml \
+--set image.repository=hmda/hmda-platform \
 --set image.tag=<tag name> \
 --set image.pullPolicy=Always \
-email-service \
-kubernetes/email-service
+hmda-platform \
+kubernetes/hmda-platform
 ```
+
+## Docker Hub
+
+All of the containers built by the HMDA Platform are released publicly via Docker Hub: https://hub.docker.com/u/hmda
 
 ## One-line Local Development Environment
 
