@@ -1,5 +1,5 @@
 package hmda.model.publication
-
+// $COVERAGE-OFF$
 import hmda.model.filing.lar._
 import hmda.model.filing.lar.enums._
 
@@ -127,3 +127,4 @@ case object MsaSummary {
     }
   }
 }
+// $COVERAGE-OFF$
