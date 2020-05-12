@@ -87,7 +87,6 @@ lazy val `hmda-root` = (project in file("."))
     `hmda-data-publisher`,
     `hmda-reporting`,
     `ratespread-calculator`,
-    `email-service`,
     `data-browser`
   )
 
