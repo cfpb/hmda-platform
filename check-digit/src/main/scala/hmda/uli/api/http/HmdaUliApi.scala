@@ -10,6 +10,8 @@ import hmda.api.http.directives.HmdaTimeDirectives._
 
 import scala.concurrent.ExecutionContext
 
+// This is just a Guardian for starting up the API
+// $COVERAGE-OFF$
 object HmdaUliApi {
   val name: String = "hmda-uli-api"
 
@@ -27,3 +29,5 @@ object HmdaUliApi {
     Behaviors.empty
   }
 }
+// This is just a Guardian for starting up the API
+// $COVERAGE-OFF$

@@ -6,7 +6,7 @@ import akka.serialization.SerializerWithStringManifest
 import hmda.model.institution.InstitutionDetail
 import hmda.persistence.serialization.institution.institutiondetail.InstitutionDetailMessage
 import hmda.serialization.institution.InstitutionDetailProtobufConverter._
-
+// $COVERAGE-OFF$
 class InstitutionDetailSerializer extends SerializerWithStringManifest {
   override def identifier: Int = 110
 
@@ -30,3 +30,4 @@ class InstitutionDetailSerializer extends SerializerWithStringManifest {
     }
 
 }
+// $COVERAGE-OFF$
