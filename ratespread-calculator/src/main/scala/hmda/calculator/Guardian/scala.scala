@@ -6,6 +6,7 @@ import hmda.calculator.api.http.RateSpreadAPI
 import hmda.calculator.scheduler.APORScheduler
 import hmda.calculator.scheduler.APORScheduler.Command
 
+// $COVERAGE-OFF$
 object Guardian {
   val name = "ratespread-calculator-guardian"
 
@@ -18,3 +19,4 @@ object Guardian {
     Behaviors.ignore
   }
 }
+// $COVERAGE-ON$
