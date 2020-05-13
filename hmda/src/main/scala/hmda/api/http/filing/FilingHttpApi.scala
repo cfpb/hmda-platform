@@ -3,32 +3,31 @@ package hmda.api.http.filing
 import java.time.Instant
 
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.http.scaladsl.model.{ StatusCodes, Uri }
 import akka.http.scaladsl.model.headers.RawHeader
+import akka.http.scaladsl.model.{StatusCodes, Uri}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.util.Timeout
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.PathMatchers._
-import hmda.api.http.directives.CreateFilingAuthorization
 import hmda.api.http.directives.CreateFilingAuthorization._
 import hmda.api.http.directives.QuarterlyFilingAuthorization.quarterlyFilingAllowed
 import hmda.api.http.model.ErrorResponse
 import hmda.api.http.model.filing.submissions.FilingDetailsSummary
 import hmda.auth.OAuth2Authorization
-import hmda.messages.filing.FilingCommands.{ CreateFiling, GetFilingDetails }
+import hmda.messages.filing.FilingCommands.{CreateFiling, GetFilingDetails}
 import hmda.messages.filing.FilingEvents.FilingCreated
 import hmda.messages.institution.InstitutionCommands.GetInstitution
-import hmda.model.filing.{ Filing, FilingDetails, InProgress }
+import hmda.model.filing.{Filing, FilingDetails, InProgress}
 import hmda.model.institution.Institution
 import hmda.persistence.filing.FilingPersistence._
 import hmda.persistence.institution.InstitutionPersistence._
 import hmda.util.http.FilingResponseUtils._
 import org.slf4j.Logger
 
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.{ Failure, Success }
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 object FilingHttpApi {
   def create(log: Logger, sharding: ClusterSharding)(implicit ec: ExecutionContext, t: Timeout): OAuth2Authorization => Route =
@@ -139,26 +138,31 @@ private class FilingHttpApi(log: Logger, sharding: ClusterSharding)(implicit val
   def getFilingForInstitution(lei: String, period: Int, quarter: Option[String], uri: Uri, pageNumber: Int): Route =
     onComplete(obtainFilingDetails(lei, period, quarter)) {
       case Success((Some(_), Some(filingDetails))) =>
-        val summary =
-          FilingDetailsSummary(
-            filing = filingDetails.filing,
-            submissions = Nil,
-            filingDetails.submissions.length,
-            pageNumber,
-            uri.path.toString()
+        
+        if (pageNumber == 0)
+          complete(filingDetails)
+        else {
+          val summary =
+            FilingDetailsSummary(
+              filing = filingDetails.filing,
+              submissions = Nil,
+              filingDetails.submissions.length,
+              pageNumber,
+              uri.path.toString()
+            )
+          // Note that the current Pagination structure uses the pageNumber and configuration
+          // in order to compute the fromIndex (how many entries to skip)
+          // and count (how many entries to take)
+          // So we first put in empty data but the correct page number and total length
+          // in order to compute the correct fromIndex and correct count
+          // then we put the actual adjusted data in
+          val result = summary.copy(
+            submissions = filingDetails.submissions
+              .drop(summary.fromIndex)
+              .take(summary.count)
           )
-        // Note that the current Pagination structure uses the pageNumber and configuration
-        // in order to compute the fromIndex (how many entries to skip)
-        // and count (how many entries to take)
-        // So we first put in empty data but the correct page number and total length
-        // in order to compute the correct fromIndex and correct count
-        // then we put the actual adjusted data in
-        val result = summary.copy(
-          submissions = filingDetails.submissions
-            .drop(summary.fromIndex)
-            .take(summary.count)
-        )
-        complete(result)
+          complete(result)
+        }
 
       case Success((None, _)) =>
         entityNotPresentResponse("institution", lei, uri)
