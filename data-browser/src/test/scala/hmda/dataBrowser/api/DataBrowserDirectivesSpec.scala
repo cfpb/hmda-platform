@@ -167,7 +167,7 @@ class DataBrowserDirectivesSpec extends WordSpec with ScalatestRouteTest with Ma
     "extractYearsAndMsaAndStateAndCountyAndLEIBrowserFields extract years, msamds, states, counties and LEI" in {
       val route: Route = get {
         extractMsaAndStateAndCountyAndInstitutionIdentifierBrowserFields { queries =>
-          queries.queryFields.map(_.name) shouldBe List("year", "msamd")
+          queries.queryFields.map(_.name) shouldBe List("msamd")
           complete(StatusCodes.OK)
         }
       }
@@ -180,7 +180,7 @@ class DataBrowserDirectivesSpec extends WordSpec with ScalatestRouteTest with Ma
     "extractYearsAndMsaAndStateAndCountyAndLEIBrowserFields prevents you from providing too many parameters" in {
       val route: Route = failingRoute(extractMsaAndStateAndCountyAndInstitutionIdentifierBrowserFields)
 
-      Get("/?msamds=34980&leis=BANK0&states=CA,AK&actions_taken=1,2,3&counties=19125") ~> route ~> check {
+      Get("/?msamds=34980&leis=BANK0&states=CA,AK&actions_taken=1,2,3&counties=19125&years=2018") ~> route ~> check {
         responseAs[String].contains("provide-only-msamds-or-states-or-counties-or-leis") shouldBe true
         response.status shouldBe StatusCodes.BadRequest
       }
@@ -198,8 +198,8 @@ class DataBrowserDirectivesSpec extends WordSpec with ScalatestRouteTest with Ma
     "extractYearsAndMsaAndStateAndCountyAndLEIBrowserFields must stop you if you don't provide enough mandatory parameters" in {
       val route: Route = failingRoute(extractMsaAndStateAndCountyAndInstitutionIdentifierBrowserFields)
 
-      Get("/?msamds=34980&years=2018") ~> route ~> check {
-        responseAs[String].contains("provide-atleast-msamds-or-states") shouldBe true
+      Get("/?years=2018") ~> route ~> check {
+        responseAs[String].contains("provide-only-msamds-or-states-or-counties-or-leis") shouldBe true
         response.status shouldBe StatusCodes.BadRequest
       }
     }
@@ -244,7 +244,7 @@ class DataBrowserDirectivesSpec extends WordSpec with ScalatestRouteTest with Ma
         extractCountFields(queries => complete(StatusCodes.OK))
       }
 
-      Get("/?years=2018&msamds=34980&states=CA") ~> route ~> check {
+      Get("/?years=2017&msamds=34980&states=CA") ~> route ~> check {
         response.status shouldBe StatusCodes.OK
       }
     }
@@ -261,14 +261,14 @@ class DataBrowserDirectivesSpec extends WordSpec with ScalatestRouteTest with Ma
     "extractCountFields should prevent non-mandatory fields again" in {
       val route = failingRoute(extractCountFields)
 
-      Get("/?actions_taken=1,2,3") ~> route ~> check {
+      Get("/?actions_taken=1,2,3&years=2018&states=CA") ~> route ~> check {
         response.status shouldBe StatusCodes.BadRequest
         responseAs[String].contains("no-filters") shouldBe true
       }
     }
 
     "extractCountFields should make you provide fields" in {
-      Get("/") ~> failingRoute(extractCountFields) ~> check {
+      Get("/?years=2018") ~> failingRoute(extractCountFields) ~> check {
         response.status shouldBe StatusCodes.BadRequest
         responseAs[String].contains("provide-atleast-msamds-or-states") shouldBe true
       }
@@ -279,7 +279,7 @@ class DataBrowserDirectivesSpec extends WordSpec with ScalatestRouteTest with Ma
 
       Get("/") ~> route ~> check {
         response.status shouldBe StatusCodes.BadRequest
-        responseAs[String].contains("provide-years") shouldBe true
+        responseAs[String].contains("must provide year parameter") shouldBe true
       }
     }
 
@@ -297,14 +297,13 @@ class DataBrowserDirectivesSpec extends WordSpec with ScalatestRouteTest with Ma
 
       Get("/") ~> route ~> check {
         response.status shouldBe StatusCodes.BadRequest
-        responseAs[String].contains("provide-atleast-msamds-or-states") shouldBe true
+        responseAs[String].contains("must provide year parameter") shouldBe true
       }
     }
 
     "extractYearsMsaMdsStatesAndCounties should fail if you provide it msamds, states and counties" in {
       Get("/?years=2018&msamds=1&states=CA&counties=19125") ~> failingRoute(extractYearsMsaMdsStatesAndCounties) ~> check {
         response.status shouldBe StatusCodes.BadRequest
-        println(responseAs[String])
         responseAs[String].contains("provide-only-msamds-or-states-or-counties-or-leis") shouldBe true
       }
     }
@@ -312,12 +311,12 @@ class DataBrowserDirectivesSpec extends WordSpec with ScalatestRouteTest with Ma
     "extractYearsMsaMdsStatesAndCounties should fail if you provide it msamds but invalid states or invalid counties" in {
       val route = failingRoute(extractYearsMsaMdsStatesAndCounties)
       // This is actually rejected but sealing it causes it to move and do a not found
-      Get("/?states=ABCD&msamds=1") ~> Route.seal(route) ~> check {
+      Get("/?states=ABCD&msamds=1&years=2018") ~> Route.seal(route) ~> check {
         response.status shouldBe StatusCodes.BadRequest
       }
 
-      Get("/?counties=INVALID") ~> Route.seal(route) ~> check {
-        response.status shouldBe StatusCodes.BadRequest
+      Get("/?counties=INVALID&years=2018") ~> Route.seal(route) ~> check {
+        response.status shouldBe StatusCodes.NotFound
       }
     }
   }
