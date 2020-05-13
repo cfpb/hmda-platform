@@ -75,4 +75,7 @@ object Dependencies {
   lazy val guava                 = "com.google.guava"          % "guava"                       % Version.guava
   lazy val awsSesSdk             = "com.amazonaws"             % "aws-java-sdk-ses"            % Version.awsSesSdk exclude ("commons-logging", "commons-logging")
   lazy val zeroAllocationHashing = "net.openhft"               % "zero-allocation-hashing"     % Version.zeroAllocation
+  lazy val ioNetty               = "io.netty"                  % "netty-transport-native-epoll"% Version.ioNetty
+
+
 }
