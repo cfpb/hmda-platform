@@ -10,7 +10,7 @@ import hmda.persistence.serialization.submission.commands.{
 }
 import hmda.persistence.serialization.submission.{ SubmissionIdMessage, SubmissionMessage }
 import hmda.serialization.submission.SubmissionProtobufConverter._
-
+// $COVERAGE-OFF$
 object SubmissionCommandsProtobufConverter {
 
   def createSubmissionToProtobuf(cmd: CreateSubmission, resolver: ActorRefResolver): CreateSubmissionMessage =
@@ -57,3 +57,4 @@ object SubmissionCommandsProtobufConverter {
     SubmissionStop()
 
 }
+// $COVERAGE-ON$
