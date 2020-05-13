@@ -11,7 +11,7 @@ import hmda.model.filing.Filing
 import hmda.persistence.serialization.filing.FilingMessage
 import hmda.serialization.filing.FilingCommandsProtobufConverter._
 import hmda.serialization.filing.FilingProtobufConverter._
-
+// $COVERAGE-OFF$
 class FilingCommandsSerializer(system: ExtendedActorSystem) extends SerializerWithStringManifest {
 
   private val resolver = ActorRefResolver(system.toTyped)
@@ -89,3 +89,4 @@ class FilingCommandsSerializer(system: ExtendedActorSystem) extends SerializerWi
     }
 
 }
+// $COVERAGE-ON$

@@ -8,7 +8,7 @@ import hmda.persistence.serialization.submission.processing.commands._
 import hmda.persistence.serialization.validation.ValidationErrorMessage
 import hmda.serialization.submission.SubmissionProtobufConverter._
 import hmda.serialization.validation.ValidationProtobufConverter._
-
+// $COVERAGE-OFF$
 object SubmissionProcessingCommandsProtobufConverter {
 
   def startUploadToProtobuf(cmd: StartUpload): StartUploadMessage =
@@ -294,3 +294,5 @@ object SubmissionProcessingCommandsProtobufConverter {
     )
 
 }
+
+// $COVERAGE-ON$
