@@ -138,7 +138,8 @@ private class FilingHttpApi(log: Logger, sharding: ClusterSharding)(implicit val
   def getFilingForInstitution(lei: String, period: Int, quarter: Option[String], uri: Uri, pageNumber: Int): Route =
     onComplete(obtainFilingDetails(lei, period, quarter)) {
       case Success((Some(_), Some(filingDetails))) =>
-        
+
+        // get all filings 
         if (pageNumber == 0)
           complete(filingDetails)
         else {
