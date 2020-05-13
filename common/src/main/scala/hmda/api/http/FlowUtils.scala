@@ -9,7 +9,7 @@ import akka.stream.scaladsl.{ Flow, Framing }
 import akka.util.ByteString
 
 import scala.concurrent.{ ExecutionContext, Future }
-
+// $COVERAGE-OFF$
 object FlowUtils {
   def framing: Flow[ByteString, ByteString, NotUsed] =
     Framing.delimiter(ByteString("\n"), maximumFrameLength = 65536, allowTruncation = true)
@@ -29,3 +29,4 @@ object FlowUtils {
     } yield content
   }
 }
+// $COVERAGE-ON$

@@ -16,7 +16,7 @@ import hmda.serialization.submission.SubmissionProtobufConverter._
 import hmda.serialization.validation.ValidationProtobufConverter._
 import hmda.serialization.submission.SubmissionProcessingCommandsProtobufConverter._
 
-// $COVERAGE-OFF
+// $COVERAGE-OFF$
 object SubmissionProcessingEventsProtobufConverter {
 
   def hmdaRowParsedErrorToProtobuf(hmdaRowParsedError: HmdaRowParsedError): HmdaRowParsedErrorMessage =
@@ -217,4 +217,4 @@ object SubmissionProcessingEventsProtobufConverter {
     )
 
 }
-// $COVERAGE-ON
+// $COVERAGE-ON$
