@@ -14,7 +14,7 @@ import hmda.persistence.serialization.submission.processing.events.{
 }
 import hmda.serialization.submission.SubmissionProcessingEventsProtobufConverter._
 import hmda.serialization.validation.ValidationProtobufConverter._
-
+// $COVERAGE-OFF$
 class SubmissionProcessingEventsSerializer extends SerializerWithStringManifest {
   override def identifier: Int = 108
 
@@ -113,3 +113,4 @@ class SubmissionProcessingEventsSerializer extends SerializerWithStringManifest 
         throw new NotSerializableException(s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
     }
 }
+// $COVERAGE-ON$

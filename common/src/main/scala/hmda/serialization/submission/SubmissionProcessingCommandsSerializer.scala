@@ -9,7 +9,7 @@ import akka.serialization.SerializerWithStringManifest
 import hmda.messages.submission.SubmissionProcessingCommands.{ CompleteSyntacticalValidity, GetHmdaValidationErrorState, _ }
 import hmda.persistence.serialization.submission.processing.commands._
 import hmda.serialization.submission.SubmissionProcessingCommandsProtobufConverter._
-
+// $COVERAGE-OFF$
 class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem) extends SerializerWithStringManifest {
 
   private val resolver = ActorRefResolver(system.toTyped)
@@ -144,3 +144,4 @@ class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem) extend
         throw new NotSerializableException(s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
     }
 }
+// $COVERAGE-ON$

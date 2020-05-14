@@ -7,7 +7,7 @@ import hmda.persistence.serialization.filing.commands._
 import hmda.persistence.serialization.submission.{ SubmissionIdMessage, SubmissionMessage }
 import hmda.serialization.filing.FilingProtobufConverter._
 import hmda.serialization.submission.SubmissionProtobufConverter._
-
+// $COVERAGE-OFF$
 object FilingCommandsProtobufConverter {
 
   def createFilingToProtobuf(cmd: CreateFiling, refResolver: ActorRefResolver): CreateFilingMessage = {
@@ -160,3 +160,4 @@ object FilingCommandsProtobufConverter {
     FilingStop
 
 }
+// $COVERAGE-ON$

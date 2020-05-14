@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
 
+// $COVERAGE-OFF$
 object HmdaInstitutionApi extends App {
 
   val log = LoggerFactory.getLogger("hmda")
@@ -85,3 +86,4 @@ object HmdaInstitutionApi extends App {
       .run()
 
 }
+// $COVERAGE-ON$
