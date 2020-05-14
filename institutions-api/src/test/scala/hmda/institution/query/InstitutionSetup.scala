@@ -67,6 +67,7 @@ trait InstitutionSetup extends InstitutionEmailComponent {
     Await.result(emailRepository.dropSchema(), duration)
     Await.result(institutionRepository2018.dropSchema(), duration)
     Await.result(institutionRepository2019.dropSchema(), duration)
+    Await.result(institutionRepository2020.dropSchema(), duration)
   }
 
 }

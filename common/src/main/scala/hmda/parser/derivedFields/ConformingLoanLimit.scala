@@ -4,7 +4,7 @@ import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
 import hmda.model.census.CountyLoanLimit
 import hmda.census.records.OverallLoanLimit
-
+// $COVERAGE-OFF$
 case class LoanLimitInfo(
   totalUnits: Int,
   amount: BigDecimal,
@@ -160,3 +160,4 @@ object ConformingLoanLimit {
 
   }
 }
+// $COVERAGE-ON$
