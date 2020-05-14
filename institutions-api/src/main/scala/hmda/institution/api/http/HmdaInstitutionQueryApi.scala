@@ -10,6 +10,7 @@ import hmda.api.http.routes.BaseHttpApi
 
 import scala.concurrent.ExecutionContext
 
+// $COVERAGE-OFF$
 object HmdaInstitutionQueryApi {
   val name = "hmda-institution-api"
   //  def props(): Props = Props(new HmdaInstitutionQueryApi)
@@ -28,3 +29,4 @@ object HmdaInstitutionQueryApi {
     Behaviors.ignore
   }
 }
+// $COVERAGE-ON$

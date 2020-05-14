@@ -2,6 +2,7 @@ package hmda.parser.filing.lar
 
 import hmda.parser.ParserErrorModel._
 
+// $COVERAGE-OFF$
 object LarParserErrorModel {
 
   case class InvalidLei(value: String) extends ParserValidationError {
@@ -389,3 +390,4 @@ object LarParserErrorModel {
   }
 
 }
+// $COVERAGE-ON$

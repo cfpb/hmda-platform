@@ -40,6 +40,15 @@ class InstitutionQueryHttpApiSpec extends WordSpec with MustMatchers with Before
       Get("/institutions/XXX/year/2018") ~> institutionPublicRoutes ~> check {
         status mustBe StatusCodes.NotFound
       }
+
+      Get("/institutions/XXX/year/2019") ~> institutionPublicRoutes ~> check {
+        status mustBe StatusCodes.NotFound
+      }
+
+      Get("/institutions/XXX/year/2020") ~> institutionPublicRoutes ~> check {
+        status mustBe StatusCodes.NotFound
+      }
+
       Get(s"/institutions/AAA/year/2018") ~> institutionPublicRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[Institution] mustBe InstitutionConverter.convert(instA, Seq("aaa.com", "bbb.com"))
@@ -67,8 +76,19 @@ class InstitutionQueryHttpApiSpec extends WordSpec with MustMatchers with Before
         institutions.head.respondent.name mustBe Some("RespA")
         institutions.head.emailDomains mustBe List("aaa.com", "bbb.com")
       }
+
       Get("/institutions/year/2018?domain=xxx.com&lei=XXX&respondentName=RespX&taxId=taxIdX") ~> institutionPublicRoutes ~> check {
         status mustBe StatusCodes.NotFound
+      }
+    }
+
+    "search by institution" in {
+      Get("/institutions?domain=aaa.com") ~> institutionPublicRoutes ~> check {
+        status mustBe StatusCodes.OK
+      }
+
+      Get("/institutions?domain=aaa.com&lei=AAA&respondentName=RespA&taxId=taxIdA") ~> institutionPublicRoutes ~> check {
+        status mustBe StatusCodes.OK
       }
     }
   }
