@@ -46,6 +46,7 @@ trait InstitutionSetup extends InstitutionEmailComponent {
       DBIOAction.seq(
         institutionsTable2018.schema.create,
         institutionsTable2019.schema.create,
+        institutionsTable2020.schema.create,
         institutionsTable2018 ++= Seq(
           instA,
           instB,
