@@ -6,11 +6,13 @@ cache:
     - $HOME/.sbt
     - $HOME/.ivy2
 
+
 language: scala
 
 scala: 2.12.10
 
 install:
+  - nvm install node
   - npm install newman
 
 jdk:
