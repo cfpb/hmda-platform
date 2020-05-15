@@ -1,5 +1,11 @@
 sudo: false
 
+env:
+  global:
+    - secure:
+
+travis encrypt MY_SECRET_ENV=super_secret --add env.global
+
 cache:
   directories:
     - $HOME/.m2/repository
@@ -10,16 +16,23 @@ language: scala
 
 scala: 2.12.10
 
+install:
+  - npm install newman
+
 jdk:
 - openjdk14
 
-script: 
+script:
   - sbt ++$TRAVIS_SCALA_VERSION clean coverage test
   - sbt ++$TRAVIS_SCALA_VERSION coverageReport
   - sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
-  
+
   # Trick to avoid unnecessary cache updates
   - find $HOME/.sbt -name "*.lock" | xargs rm
+
+  - sbt ++$TRAVIS_SCALA_VERSION "project hmda-platform" "reStart" & 
+  # newman tests - hmda-filing
+  - node_modules/.bin/newman run newman/tests/hmda-filing/tests/ci/CI_HMDA_API_Filing.postman_collection.json -e newman/tests/hmda-filing/configs/ci/CI_HMDA_ENV.postman_environment.json
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
