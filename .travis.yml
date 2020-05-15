@@ -10,14 +10,17 @@ language: scala
 
 scala: 2.12.10
 
+install:
+  - npm install newman
+
 jdk:
 - openjdk14
 
-script: 
+script:
   - sbt ++$TRAVIS_SCALA_VERSION clean coverage test
   - sbt ++$TRAVIS_SCALA_VERSION coverageReport
   - sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
-  
+
   # Trick to avoid unnecessary cache updates
   - find $HOME/.sbt -name "*.lock" | xargs rm
 
