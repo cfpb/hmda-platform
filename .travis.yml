@@ -7,8 +7,7 @@ cache:
     - $HOME/.ivy2
 
 env:
-  - CASSANDRA_CLUSTER_HOSTS=localhost
-  - APP_PORT=2551
+  - CASSANDRA_CLUSTER_HOSTS=localhost APP_PORT=2551
 
 language: scala
 
