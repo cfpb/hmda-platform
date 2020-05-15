@@ -63,7 +63,7 @@
               "pm.expect(pm.response.code).to.be.oneOf([200,201,400]);",
               "});",
               "",
-              "pm.test(\"Start A Submission Test\", function () {",
+              "pm.test(\"Start A Filing Test\", function () {",
               "let actualResponse = pm.response.json()",
               "let testData = pm.iterationData.get(\"testData\")",
               "let testDataChunk = testData[testNumber-1]",

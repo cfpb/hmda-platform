@@ -1,0 +1,612 @@
+{
+	"info": {
+		"_postman_id": "94285b2f-a7de-4aab-9430-c3952943503d",
+		"name": "CI HMDA Filing API Newman",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Filing API Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cde88b08-474a-4825-87ab-9707ed740aff",
+						"exec": [
+							"pm.test(\"Status code is 200\",function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+							"});",
+							"",
+							"pm.test(\"Filing API Health Check\", function () {",
+							"    let actualResponse = pm.response.json()",
+							"    if(pm.response.code==200){pm.expect(actualResponse.status).to.equal(\"OK\")}",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{URL-FILING}}",
+					"host": [
+						"{{URL-FILING}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create (PUT) Institution - 8081",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ee7779ba-3115-4f6c-89aa-ee3e6ce4f5cf",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"lei\", jsonData.lei);",
+							"",
+							"pm.test(\"Status code is 200, 201, 202\",function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200,201,202]);",
+							"});",
+							"",
+							"pm.test(\"(PUT) Create Institution\", function () {",
+							"    let actualResponse = pm.response.json();",
+							"    if(pm.response.code==200){pm.expect(actualResponse.lei).to.equal(pm.environment.get(\"lei\"))}",
+							"    if(pm.response.code==202){pm.expect(actualResponse.lei).to.equal(pm.environment.get(\"lei\"))}",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"activityYear\": 2018,\n    \"lei\": \"NEWMANLEITEST1234678\",\n    \"agency\": 9,\n    \"institutionType\": -1,\n    \"institutionId2017\": \"\",\n    \"taxId\": \"84-7652134\",\n    \"rssd\": -1,\n    \"emailDomains\": [\n        \"newmantestbank1.com\"\n    ],\n    \"respondent\": {\n        \"name\": \"Newman Test Bank\",\n        \"state\": \"\",\n        \"city\": \"\"\n    },\n    \"parent\": {\n        \"idRssd\": -1,\n        \"name\": \"\"\n    },\n    \"assets\": -1,\n    \"otherLenderCode\": -1,\n    \"topHolder\": {\n        \"idRssd\": -1,\n        \"name\": \"\"\n    },\n    \"hmdaFiler\": false,\n    \"quarterlyFiler\": false,\n    \"quarterlyFilerHasFiledQ1\": false,\n    \"quarterlyFilerHasFiledQ2\": false,\n    \"quarterlyFilerHasFiledQ3\": false\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL-ADMIN}}/institutions",
+					"host": [
+						"{{URL-ADMIN}}"
+					],
+					"path": [
+						"institutions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Read an institution - 8081",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6590799d-b17d-47d9-bba2-328181013336",
+						"exec": [
+							"pm.test(\"Status code is 200\",function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+							"});",
+							"",
+							"pm.test(\"Read an Institution\", function () {",
+							"    let actualResponse = pm.response.json();",
+							"    if(pm.response.code==200){pm.expect(actualResponse.lei).to.equal(pm.environment.get(\"lei\"))}",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{URL-ADMIN}}/institutions/{{lei}}/year/{{year}}",
+					"host": [
+						"{{URL-ADMIN}}"
+					],
+					"path": [
+						"institutions",
+						"{{lei}}",
+						"year",
+						"{{year}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Start filing for a year - 8080",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "3c745b1f-ab8a-4887-a88e-deccaf52e738",
+						"exec": [
+							"pm.test(\"Status code is 200 or 400\",function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200,400]);",
+							"});",
+							"",
+							"pm.test(\"Start A Filing Test\", function () {",
+							"    let actualResponse = pm.response.json();",
+							"    if(pm.response.code==200){pm.expect(actualResponse.filing.period.year).to.equal(pm.environment.get(\"year\"))}",
+							"    if(pm.response.code==400){pm.expect(actualResponse.message).to.equal(\"Filing \"+pm.environment.get(\"lei\")+\"-\"+pm.environment.get(\"year\")+\" already exists\")}",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{URL-FILING}}/institutions/{{lei}}/filings/{{year}}",
+					"host": [
+						"{{URL-FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{lei}}",
+						"filings",
+						"{{year}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a submission - 8080",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c698b9f4-ee63-43d3-81bf-4e660e8cf6bc",
+						"exec": [
+							"pm.test(\"Status code is 201\",function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([201]);",
+							"});",
+							"",
+							"pm.test(\"Create A Submission Test\", function () {",
+							"    let actualResponse = pm.response.json().id;",
+							"    if(pm.response.code==201){pm.expect(actualResponse.period.year.toString()).to.equal(pm.environment.get(\"year\"))}",
+							"    pm.environment.set(\"sequenceNumber\", actualResponse.sequenceNumber)",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{URL-FILING}}/institutions/{{lei}}/filings/{{year}}/submissions",
+					"host": [
+						"{{URL-FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{lei}}",
+						"filings",
+						"{{year}}",
+						"submissions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload file for submission - 8080",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "45520d06-19ef-40b1-b3f2-98f52d840365",
+						"exec": [
+							"pm.test(\"Status code is 202\", function() {",
+							"    pm.expect(pm.response.code).to.be.oneOf([202]);",
+							"});",
+							"",
+							"pm.test(\"Upload A Submission Test\", function () {",
+							"    setTimeout(function(){console.log(\"Sleeping for 30 seconds before next request.\");}, 30000);",
+							"    let actualResponse = pm.response.json()",
+							"    pm.expect(actualResponse.status.message).to.equal(\"Your file has been uploaded.\")",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/Users/StoutB/hmda/hmda-platform/newman/tests/hmda-filing/configs/2018/test_yes_m_yes_q/newmanBank_yes_M_yes_Q_2018.txt"
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL-FILING}}/institutions/{{lei}}/filings/{{year}}/submissions/{{sequenceNumber}}",
+					"host": [
+						"{{URL-FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{lei}}",
+						"filings",
+						"{{year}}",
+						"submissions",
+						"{{sequenceNumber}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Show latest submission - 8080",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6466e242-ab19-4f2e-b989-4b455d23b952",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.test(\"Status code is 200\", function() {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+							"});",
+							"",
+							"pm.test(\"Get Latest Submission Test\", function () {",
+							"    let actualResponse = pm.response.json()",
+							"    pm.expect(actualResponse.id.sequenceNumber).to.equal(pm.environment.get(\"sequenceNumber\"))",
+							"    pm.expect(actualResponse.status.code).to.equal(11)",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{URL-FILING}}/institutions/{{lei}}/filings/{{year}}/submissions/latest",
+					"host": [
+						"{{URL-FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{lei}}",
+						"filings",
+						"{{year}}",
+						"submissions",
+						"latest"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Verify Quality Edits",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "95c47b9f-ee51-44ed-9cf1-4e6262f6dcbe",
+						"exec": [
+							"pm.test(\"Status code is 200\", function() {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+							"});",
+							"",
+							"pm.test(\"Quality Edits Verification Test\", function () {",
+							"\tlet actualResponse = pm.response.json()",
+							"\tpm.expect(actualResponse.status.code).to.equal(13);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"verified\": true}"
+				},
+				"url": {
+					"raw": "{{URL-FILING}}/institutions/{{lei}}/filings/{{year}}/submissions/{{sequenceNumber}}/edits/quality",
+					"host": [
+						"{{URL-FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{lei}}",
+						"filings",
+						"{{year}}",
+						"submissions",
+						"{{sequenceNumber}}",
+						"edits",
+						"quality"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Verify Macro Edits",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "44298f7c-4034-47d4-831d-a471bceb6516",
+						"exec": [
+							"pm.test(\"Status code is 200\", function() {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+							"});",
+							"",
+							"pm.test(\"Macro Edits Verification Test\", function () {",
+							"\tlet actualResponse = pm.response.json()",
+							"\tpm.expect(actualResponse.status.code).to.equal(14);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"verified\": true}"
+				},
+				"url": {
+					"raw": "{{URL-FILING}}/institutions/{{lei}}/filings/{{year}}/submissions/{{sequenceNumber}}/edits/macro",
+					"host": [
+						"{{URL-FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{lei}}",
+						"filings",
+						"{{year}}",
+						"submissions",
+						"{{sequenceNumber}}",
+						"edits",
+						"macro"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Sign ",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "84f99876-d49a-42bd-ad22-84001a2d96ab",
+						"exec": [
+							"pm.test(\"Status code is 200\", function() {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+							"});",
+							"",
+							"pm.test(\"(POST) Sign A Submission Test\", function () {",
+							"\tlet actualResponse = pm.response.json()",
+							"\tpm.expect(actualResponse.status.code).to.equal(15);",
+							"\tpm.expect(actualResponse.status.message).to.equal(\"Your submission has been accepted.\")",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"signed\": true}"
+				},
+				"url": {
+					"raw": "{{URL-FILING}}/institutions/{{lei}}/filings/{{year}}/submissions/{{sequenceNumber}}/sign",
+					"host": [
+						"{{URL-FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{lei}}",
+						"filings",
+						"{{year}}",
+						"submissions",
+						"{{sequenceNumber}}",
+						"sign"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Sign",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6b8b28d3-561e-42d9-991f-c36a8dcd8633",
+						"exec": [
+							"pm.test(\"Status code is 200\", function() {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+							"});",
+							"",
+							"pm.test(\"(GET) Sign A Submission Test\", function () {",
+							"\tlet actualResponse = pm.response.json()",
+							"\tpm.expect(actualResponse.status.code).to.equal(15);",
+							"\tpm.expect(actualResponse.status.message).to.equal(\"Your submission has been accepted.\")",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"signed\": true}"
+				},
+				"url": {
+					"raw": "{{URL-FILING}}/institutions/{{lei}}/filings/{{year}}/submissions/{{sequenceNumber}}/sign",
+					"host": [
+						"{{URL-FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{lei}}",
+						"filings",
+						"{{year}}",
+						"submissions",
+						"{{sequenceNumber}}",
+						"sign"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"testNumber = pm.variables.get(\"testNumber\");",
+					"let testData = pm.environment.get(\"testData\")",
+					"console.log(testData)"
+				],
+				"id": "c835c83c-2d3e-4927-b6df-75fcc02ff82e"
+			}
+		}
+	],
+	"protocolProfileBehavior": {}
+}
