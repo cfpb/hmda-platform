@@ -293,7 +293,7 @@
 						{
 							"key": "file",
 							"type": "file",
-							"src": "/Users/StoutB/hmda/hmda-platform/newman/tests/hmda-filing/configs/2018/test_yes_m_yes_q/newmanBank_yes_M_yes_Q_2018.txt"
+							"src": "newman/tests/hmda-filing/configs/2018/test_yes_m_yes_q/newmanBank_yes_M_yes_Q_2018.txt"
 						}
 					],
 					"options": {

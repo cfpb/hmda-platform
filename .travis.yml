@@ -1,11 +1,5 @@
 sudo: false
 
-env:
-  global:
-    - secure:
-
-travis encrypt MY_SECRET_ENV=super_secret --add env.global
-
 cache:
   directories:
     - $HOME/.m2/repository
@@ -30,7 +24,7 @@ script:
   # Trick to avoid unnecessary cache updates
   - find $HOME/.sbt -name "*.lock" | xargs rm
 
-  - sbt ++$TRAVIS_SCALA_VERSION "project hmda-platform" "reStart" & 
+  - sbt ++$TRAVIS_SCALA_VERSION "project hmda-platform" "reStart" &
   # newman tests - hmda-filing
   - node_modules/.bin/newman run newman/tests/hmda-filing/tests/ci/CI_HMDA_API_Filing.postman_collection.json -e newman/tests/hmda-filing/configs/ci/CI_HMDA_ENV.postman_environment.json
 
