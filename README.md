@@ -51,7 +51,7 @@ The data is submitted in a flat pipe (`|`) delimited TXT file. The text file is 
 
 The [hmda-frontend](https://github.com/cfpb/hmda-frontend) uses Cypress to test the end-to-end filing process from the end user perspective. The GIF below shows the automated filing process via Cypree - no human intervention.
 
-![Cypress automated filing test](./readme-files/filing-2020-q1-cypress.gif)
+![Cypress automated filing test](https://github.com/cfpb/hmda-frontend/raw/master/readme-files/filing-2020-q1-cypress.gif)
 
 ## Technical Overview
 
