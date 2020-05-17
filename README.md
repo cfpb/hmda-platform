@@ -22,6 +22,7 @@ The Home Mortgage Disclosure Act (HMDA) Platform is a [Regulatory technology](ht
 ## Contents
 
 - [TS and LAR File Specs](#ts-and-lar-file-specs)
+- [End-to-End filing GIF](#end-to-end-filing-gif)
 - [Technical Overview](#technical-overview)
   * [Microservices](#microservices)
 - [HMDA Platform Technical Architecture](#hmda-platform-technical-architecture)
@@ -47,7 +48,7 @@ The data is submitted in a flat pipe (`|`) delimited TXT file. The text file is 
 - [Transmission  File Spec](https://github.com/cfpb/hmda-platform/blob/master/docs/v2/spec/2018_File_Spec_TS.csv)
 - [Loan Application Register File Spec](https://github.com/cfpb/hmda-platform/blob/master/docs/v2/spec/2018_File_Spec_LAR.csv)
 
-## Cypress GIF  
+## End-to-End filing GIF
 
 The [hmda-frontend](https://github.com/cfpb/hmda-frontend) uses Cypress to test the end-to-end filing process from the end user perspective. The GIF below shows the automated filing process via Cypree - no human intervention.
 
