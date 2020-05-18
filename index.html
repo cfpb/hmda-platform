@@ -301,6 +301,9 @@
                                   </li>
                               </ul>
                           </li>
+                          <li>
+                            <a href="#hmda-filing-api-endpoints-quarterly-filing" class="toc-h3 toc-link" data-title="Quarterly Filing">Quarterly Filing</a>
+                          </li>
                       </ul>
                   </li>
               </ul>
@@ -337,7 +340,7 @@
                     <a href="#hmda-public-api-check-digit" class="toc-h2 toc-link" data-title="Check Digit">Check Digit</a>
                       <ul class="toc-list-h3">
                           <li>
-                            <a href="#hmda-public-api-check-digit-check-digit-example" class="toc-h3 toc-link" data-title="Check Digit Example">Check Digit Example</a>
+                            <a href="#hmda-public-api-check-digit-check-digit-eample" class="toc-h3 toc-link" data-title="Check Digit Eample">Check Digit Eample</a>
                           </li>
                       </ul>
                   </li>
@@ -1394,6 +1397,42 @@
 <td>Please re-upload your file.</td>
 </tr>
 </tbody></table>
+<h3 id='hmda-filing-api-endpoints-quarterly-filing'>Quarterly Filing</h3>
+<blockquote>
+<p>Example</p>
+</blockquote>
+<pre class="highlight shell tab-shell"><code>curl -X GET <span class="se">\</span>
+  <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/quarter/Q1/submissions/latest"</span> <span class="se">\</span>
+  -H <span class="s1">'Authorization: Bearer {{access_token}}'</span> <span class="se">\</span>
+</code></pre>
+<blockquote>
+<p>JSON Response</p>
+</blockquote>
+<pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+    </span><span class="s2">"id"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="s2">"lei"</span><span class="p">:</span><span class="w"> </span><span class="s2">"B90YWS6AFX2LGWOXJ1LD"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"period"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="s2">"year"</span><span class="p">:</span><span class="w"> </span><span class="mi">2020</span><span class="p">,</span><span class="w">
+            </span><span class="s2">"quarter"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Q1"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="s2">"sequenceNumber"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="s2">"status"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="s2">"code"</span><span class="p">:</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your data has macro edits that need to be reviewed."</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded."</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="s2">"start"</span><span class="p">:</span><span class="w"> </span><span class="mi">1585750668652</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"end"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"fileName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;file_name&gt;"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"receipt"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"qualityVerified"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"macroVerified"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"qualityExists"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"macroExists"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+<p>All the endpoints are the same for quarterly filing with the addtion of <code>quarter/Q1/</code>, <code>quarter/Q2/</code> or <code>quarter/Q3/</code>.</p>
 <h1 id='hmda-public-api'>HMDA Public API</h1>
 <p>The following are HMDA Public API endpoints that do not require authorization. You may use these public endpoints to help prepare your data for sumbission.</p>
 
@@ -1813,7 +1852,7 @@
 </tbody></table>
 <h2 id='hmda-public-api-check-digit'>Check Digit</h2>
 <p>To use check digit on a csv file, use the <code>uli/validate/csv</code> and upload a csv. The respose will list the ULIs along with <code>true</code>/<code>false</code>.</p>
-<h3 id='hmda-public-api-check-digit-check-digit-example'>Check Digit Example</h3>
+<h3 id='hmda-public-api-check-digit-check-digit-eample'>Check Digit Eample</h3>
 <blockquote>
 <p>Example</p>
 </blockquote>
