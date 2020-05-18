@@ -160,8 +160,8 @@
 					"script": {
 						"id": "3c745b1f-ab8a-4887-a88e-deccaf52e738",
 						"exec": [
-							"pm.test(\"Status code is 200 or 400\",function () {",
-							"    pm.expect(pm.response.code).to.be.oneOf([200,400]);",
+							"pm.test(\"Status code is 200, 201 or 400\",function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200,201,400]);",
 							"});",
 							"",
 							"pm.test(\"Start A Filing Test\", function () {",
