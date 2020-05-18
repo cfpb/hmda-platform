@@ -20,9 +20,6 @@ install:
 jdk:
 - openjdk14
 
-before_script:
-  - sbt "project hmda-platform" "reStart" &
-
 script:
   - sbt ++$TRAVIS_SCALA_VERSION clean coverage test
   - sbt ++$TRAVIS_SCALA_VERSION coverageReport
@@ -31,6 +28,7 @@ script:
   # Trick to avoid unnecessary cache updates
   - find $HOME/.sbt -name "*.lock" | xargs rm
 
+  - sbt ++$TRAVIS_SCALA_VERSION  "project hmda-platform" "reStart" &
   - sleep 120
   - node_modules/.bin/newman run newman/tests/hmda-filing/tests/ci/CI_HMDA_API_Filing.postman_collection.json -e newman/tests/hmda-filing/configs/ci/CI_HMDA_ENV.postman_environment.json
 
