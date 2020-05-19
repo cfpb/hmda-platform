@@ -4,13 +4,25 @@
 
 ## Introduction
 
-The Home Mortgage Disclosure Act (HMDA) Platform is a [Regulatory technology](https://en.wikipedia.org/wiki/Regulatory_technology) application for financial institutions to submit mortgage information as described in the [Filing Instruction Guide (FIG)](https://s3.amazonaws.com/cfpb-hmda-public/prod/help/2020-hmda-fig.pdf). The HMDA-Platform parses data as submitted by mortgage leading institutions and validates the information for edits (Syntactical, Validity, Quality, and Macro as-per the instructions in the FIG) before submitting the data. The HMDA-Platform supports [quarterly](https://ffiec.cfpb.gov/documentation/2020/quarterly-filing-dates/) and [yearly](https://ffiec.cfpb.gov/documentation/2019/annual-filing-dates/) filing periods. For detailed information on Home Mortgage Disclosure Act (HMDA), checkout the [About HMDA page](https://www.consumerfinance.gov/policy-compliance/rulemaking/final-rules/regulation-c-home-mortgage-disclosure-act/) on the CFPB website.
+The [Home Mortgage Disclosure Act (HMDA) Platform](http://ffiec.cfpb.gov/) is a [Regulatory technology](https://en.wikipedia.org/wiki/Regulatory_technology) application for financial institutions to submit mortgage information as described in the [Filing Instruction Guide (FIG)](https://s3.amazonaws.com/cfpb-hmda-public/prod/help/2020-hmda-fig.pdf). The HMDA-Platform parses data as submitted by mortgage leading institutions and validates the information for edits (Syntactical, Validity, Quality, and Macro as-per the instructions in the FIG) before submitting the data. The HMDA-Platform supports [quarterly](https://ffiec.cfpb.gov/documentation/2020/quarterly-filing-dates/) and [yearly](https://ffiec.cfpb.gov/documentation/2019/annual-filing-dates/) filing periods. For detailed information on Home Mortgage Disclosure Act (HMDA), checkout the [About HMDA page](https://www.consumerfinance.gov/policy-compliance/rulemaking/final-rules/regulation-c-home-mortgage-disclosure-act/) on the CFPB website.
 
 [Please watch this short video](https://youtu.be/C_73Swgyc4g) to view how HMDA Platform transforms the data upload, validation, and submission process.
+
+## Linked Projects
+
+|  Project | Repo Link  | Description  | 
+|---|---|---|
+| Frontend  |  https://github.com/cfpb/hmda-frontend | ReactJS Front-end repository powering the [HMDA Platform](http://ffiec.cfpb.gov/)  
+| HMDA-Help  | https://github.com/cfpb/hmda-help  | ReactJS Front-end repository powering HMDA Help - used to resolve and troubleshoot issues in filing  |   
+| LARFT | https://github.com/cfpb/hmda-platform-larft  |  Repo for the [Public Facing LAR formatting tool](https://ffiec.cfpb.gov/tools/lar-formatting) |   
+| HMDA Test Files  | https://github.com/cfpb/hmda-test-files  | Repo for automatically generating various different test files for HMDA Data  |   
+| HMDA Census |  https://github.com/cfpb/hmda-census | ETL for geographic and Census data used by the HMDA Platform
+| HMDA Data Science | https://github.com/cfpb/HMDA_Data_Science_Kit | Repo for HMDA Data science work as well as Spark codebase for [Public Facing A&D Reports](https://ffiec.cfpb.gov/data-publication/disclosure-reports/2018)
 
 ## Contents
 
 - [TS and LAR File Specs](#ts-and-lar-file-specs)
+- [End-to-End filing GIF](#end-to-end-filing-gif)
 - [Technical Overview](#technical-overview)
   * [Microservices](#microservices)
 - [HMDA Platform Technical Architecture](#hmda-platform-technical-architecture)
@@ -35,6 +47,12 @@ The Home Mortgage Disclosure Act (HMDA) Platform is a [Regulatory technology](ht
 The data is submitted in a flat pipe (`|`) delimited TXT file. The text file is split into two parts: Transmission (TS) File -- first line in the file and Loan Application Register (LAR) -- all remaining lines of the file. Below are the links to the file specifications for data collected in years 2018 - current.
 - [Transmission  File Spec](https://github.com/cfpb/hmda-platform/blob/master/docs/v2/spec/2018_File_Spec_TS.csv)
 - [Loan Application Register File Spec](https://github.com/cfpb/hmda-platform/blob/master/docs/v2/spec/2018_File_Spec_LAR.csv)
+
+## End-to-End filing GIF
+
+The [hmda-frontend](https://github.com/cfpb/hmda-frontend) uses Cypress to test the end-to-end filing process from the end user perspective. The GIF below shows the automated filing process via Cypree - no human intervention.
+
+![Cypress automated filing test](https://github.com/cfpb/hmda-frontend/raw/master/readme-files/filing-2020-q1-cypress.gif)
 
 ## Technical Overview
 
