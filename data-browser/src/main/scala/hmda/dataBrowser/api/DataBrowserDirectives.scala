@@ -86,8 +86,11 @@ trait DataBrowserDirectives extends Settings {
   }
 
   def contentDispositionHeader(queries: List[QueryField], delimiter: Delimiter)(route: Route): Route = {
-    val queryName =
-      queries.map(q => q.name + "_" + q.values.mkString("-")).mkString("_")
+    val queryName = queries
+      .map(q => q.copy(values = q.values.sorted))
+      .sortBy(_.dbName)
+      .map(q => s"${q.name}_${q.values.mkString("-")}")
+      .mkString("_")
     val filename = queryName.length match {
       case x if x > 100 =>
         queryName.slice(0, 100) + md5HashString(queryName)
