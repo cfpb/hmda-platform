@@ -109,6 +109,8 @@ trait DataBrowserDirectives extends Settings {
       .via(csvStreamingSupport.framingRenderer)
   }
 
+
+
   private def extractMsaMds: Directive1[Option[QueryField]] =
     parameters("msamds".as(CsvSeq[Int]) ? Nil).flatMap {
       case Nil => provide(None)
@@ -172,6 +174,22 @@ trait DataBrowserDirectives extends Settings {
 
         case Right(_) =>
           None
+      }
+  }
+
+  private def extractAgeApplicant: Directive1[Option[QueryField]] = {
+    val name   = "ageApplicant"
+    val dbName = "age_applicant"
+    parameters("ageApplicant".as(CsvSeq[String]) ? Nil)
+      .map(validEthnicities)
+      .collect {
+        case Right(ethnicities) if ethnicities.nonEmpty && ethnicities.size == Ethnicity.values.size =>
+          Option(QueryField(name, ethnicities.map(_.entryName), dbName, isAllSelected = true))
+
+        case Right(ethnicities) if ethnicities.nonEmpty && ethnicities.size != Ethnicity.values.size =>
+          Option(QueryField(name, ethnicities.map(_.entryName), dbName, isAllSelected = false))
+
+        case Right(_) => None
       }
   }
 
@@ -361,7 +379,7 @@ trait DataBrowserDirectives extends Settings {
   def extractNonMandatoryQueryFields(innerRoute: List[QueryField] => Route): Route =
     (extractActions & extractRaces & extractSexes &
       extractLoanType & extractLoanPurpose & extractLienStatus &
-      extractConstructionMethod & extractDwellingCategories & extractLoanProduct & extractTotalUnits & extractEthnicities) {
+      extractConstructionMethod & extractDwellingCategories & extractLoanProduct & extractTotalUnits & extractEthnicities & extractAgeApplicant) {
       (
         actionsTaken,
         races,
@@ -373,7 +391,8 @@ trait DataBrowserDirectives extends Settings {
         dwellingCategories,
         loanProducts,
         totalUnits,
-        ethnicities
+        ethnicities,
+        ageApplicant
       ) =>
         val filteredfields =
           List(
@@ -387,7 +406,8 @@ trait DataBrowserDirectives extends Settings {
             dwellingCategories,
             loanProducts,
             totalUnits,
-            ethnicities
+            ethnicities,
+            ageApplicant
           ).flatten
         if (filteredfields.size > 2) {
           import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
