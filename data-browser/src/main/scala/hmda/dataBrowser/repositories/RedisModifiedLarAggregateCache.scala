@@ -55,11 +55,13 @@ class RedisModifiedLarAggregateCache(redisClient: Task[RedisAsyncCommands[String
 
   override def findFilers2017(filerFields: List[QueryField]): Task[Option[FilerInstitutionResponse2017]] = {
     val redisKey = key(filerFields)
+    println(redisKey)
     findAndParse[FilerInstitutionResponse2017](redisKey)
   }
 
   override def findFilers2018(filerFields: List[QueryField]): Task[Option[FilerInstitutionResponse2018]] = {
     val redisKey = key(filerFields)
+    println(redisKey)
     findAndParse[FilerInstitutionResponse2018](redisKey)
   }
 

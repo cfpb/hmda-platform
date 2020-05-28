@@ -1,4 +1,4 @@
-CREATE TABLE institutions2018 (
+CREATE TABLE institutions2018_snapshot (
     lei character varying NOT NULL,
     activity_year integer NOT NULL,
     agency integer NOT NULL,

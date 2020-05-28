@@ -169,8 +169,8 @@ class PostgresModifiedLarRepository(tableName: String, config: DatabaseConfig[Jd
   override def findFilers(filerFields: List[QueryField]): Task[Seq[FilerInformation2018]] = {
     val year = filerFields.find(_.name == "year").map(_.values.head.toInt)
     val institutionsTableName = year match { //will be needed when databrowser has to support multiple years
-      case Some(2018) => "institutions2018"
-      case _          => "institutions2018"
+      case Some(2018) => "institutions2018_snapshot"
+      case _          => "institutions2018_snapshot"
     }
     //do not include year in the WHERE clause because all entries in the table (modifiedlar2018_snapshot) have filing_year = 2018
     val queries = filerFields.filterNot(_.name == "year").map(field => in(field.dbName, field.values))
@@ -189,6 +189,7 @@ class PostgresModifiedLarRepository(tableName: String, config: DatabaseConfig[Jd
         ) a
           JOIN #${institutionsTableName} b ON a.lei = b.lei
          """.as[FilerInformation2018]
+    println(query)
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 

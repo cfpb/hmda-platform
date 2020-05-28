@@ -39,9 +39,11 @@ class DataBrowserQueryService(repo2018: ModifiedLarRepository2018, repo2017: Mod
   private def cacheResult[A: Codec](cacheLookup: Task[Option[A]], onMiss: Task[A], cacheUpdate: A => Task[A]): Task[A] =
     cacheLookup.flatMap {
       case None =>
+        println("cache miss")
         onMiss.flatMap(cacheUpdate)
 
       case Some(a) =>
+        println("cache hit")
         Task.now(a)
     }
 
