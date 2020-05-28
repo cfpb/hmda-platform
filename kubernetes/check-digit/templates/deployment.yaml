@@ -29,9 +29,12 @@ spec:
           volumeMounts:
             - name: tz-config
               mountPath: /etc/localtime          
-          security:
-            - readOnlyRootFilesystem: true
-              allowPrivilegeEscalation: false          
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL           
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: {{ .Values.service.name }}
