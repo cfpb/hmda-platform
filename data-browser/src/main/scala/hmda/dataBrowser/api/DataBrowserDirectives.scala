@@ -191,12 +191,15 @@ trait DataBrowserDirectives extends Settings {
       }
     }
 
-  private def extractCounties: Directive1[Option[QueryField]] =
+  private def extractCounties(year: String): Directive1[Option[QueryField]] =
     parameters("counties".as(CsvSeq[String]) ? Nil)
       .map(_.toList)
       .map(validateCounties)
       .collect {
-        case Right(counties) if counties.nonEmpty =>
+        case Right(counties) if counties.nonEmpty && year == "2017" =>
+          Option(QueryField(name = "countyCombined", values = counties, dbName = "countyCombined"))
+        
+        case Right(counties) if counties.nonEmpty => 
           Option(QueryField(name = "county", values = counties, dbName = "county"))
 
         case Right(_) =>
@@ -530,7 +533,7 @@ trait DataBrowserDirectives extends Settings {
 
   def extractYearsMsaMdsStatesAndCounties(innerRoute: QueryFields => Route): Route =
     (extractYears) { (years) => 
-      (extractMsaMds & extractStates(years.head.values.head) & extractCounties) { (msaMds, states, counties) =>
+      (extractMsaMds & extractStates(years.head.values.head) & extractCounties(years.head.values.head)) { (msaMds, states, counties) =>
         if (msaMds.nonEmpty && states.nonEmpty && counties.nonEmpty) {
           import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
           complete(ToResponseMarshallable((BadRequest, OnlyStatesOrMsaMdsOrCountiesOrLEIs())))
@@ -553,7 +556,7 @@ trait DataBrowserDirectives extends Settings {
     }
 
   def extractMsaAndStateAndCountyAndLEIBrowserFields(year: String, innerRoute: QueryFields => Route): Route =
-    (extractMsaMds & extractStates(year) & extractCounties & extractLEIs) { (msaMds, states, counties, leis) =>
+    (extractMsaMds & extractStates(year) & extractCounties(year) & extractLEIs) { (msaMds, states, counties, leis) =>
       if ((msaMds.nonEmpty && states.nonEmpty && counties.nonEmpty && leis.nonEmpty) || (msaMds.isEmpty && states.isEmpty && counties.isEmpty && leis.isEmpty)) {
         import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
         complete((BadRequest, OnlyStatesOrMsaMdsOrCountiesOrLEIs()))
@@ -563,7 +566,7 @@ trait DataBrowserDirectives extends Settings {
     }
 
   def extractMsaAndStateAndCountyAndARIDBrowserFields(year: String, innerRoute: QueryFields => Route): Route =
-    (extractMsaMds & extractStates(year) & extractCounties & extractARIDs) { (msaMds, states, counties, arids) =>
+    (extractMsaMds & extractStates(year) & extractCounties(year) & extractARIDs) { (msaMds, states, counties, arids) =>
       if ((msaMds.nonEmpty && states.nonEmpty && counties.nonEmpty && arids.nonEmpty) || (msaMds.isEmpty && states.isEmpty && counties.isEmpty && arids.isEmpty)) {
         import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
         complete((BadRequest, OnlyStatesOrMsaMdsOrCountiesOrLEIs()))
