@@ -178,19 +178,11 @@ trait DataBrowserDirectives extends Settings {
   }
 
   private def extractAgeApplicant: Directive1[Option[QueryField]] = {
-    val name   = "ageApplicant"
-    val dbName = "age_applicant"
-    parameters("ageApplicant".as(CsvSeq[String]) ? Nil)
-      .map(validEthnicities)
-      .collect {
-        case Right(ethnicities) if ethnicities.nonEmpty && ethnicities.size == Ethnicity.values.size =>
-          Option(QueryField(name, ethnicities.map(_.entryName), dbName, isAllSelected = true))
-
-        case Right(ethnicities) if ethnicities.nonEmpty && ethnicities.size != Ethnicity.values.size =>
-          Option(QueryField(name, ethnicities.map(_.entryName), dbName, isAllSelected = false))
-
-        case Right(_) => None
-      }
+    parameters("ageapplicant".as(CsvSeq[Int]) ? Nil).flatMap {
+      case Nil => provide(None)
+      case xs =>
+        provide(Option(QueryField(name = "ageapplicant", xs.map(_.toString), dbName = "age_applicant", isAllSelected = false)))
+    }
   }
 
   private def extractEthnicities: Directive1[Option[QueryField]] = {
