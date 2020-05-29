@@ -68,11 +68,9 @@ class PanelScheduler extends HmdaActor with PublisherComponent2018 with Publishe
 
   override def receive: Receive = {
     case PanelScheduler2018 =>
-      println("Panel test 2018")
       panelSync2018()
 
     case PanelScheduler2019 =>
-      println("Panel test 2019")
       panelSync2019()
 
   }
