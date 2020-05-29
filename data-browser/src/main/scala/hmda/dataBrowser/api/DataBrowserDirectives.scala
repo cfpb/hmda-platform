@@ -109,6 +109,8 @@ trait DataBrowserDirectives extends Settings {
       .via(csvStreamingSupport.framingRenderer)
   }
 
+
+
   private def extractMsaMds: Directive1[Option[QueryField]] =
     parameters("msamds".as(CsvSeq[Int]) ? Nil).flatMap {
       case Nil => provide(None)
@@ -173,6 +175,14 @@ trait DataBrowserDirectives extends Settings {
         case Right(_) =>
           None
       }
+  }
+
+  private def extractAgeApplicant: Directive1[Option[QueryField]] = {
+    parameters("ageapplicant".as(CsvSeq[Int]) ? Nil).flatMap {
+      case Nil => provide(None)
+      case xs =>
+        provide(Option(QueryField(name = "ageapplicant", xs.map(_.toString), dbName = "age_applicant", isAllSelected = false)))
+    }
   }
 
   private def extractEthnicities: Directive1[Option[QueryField]] = {
@@ -361,7 +371,7 @@ trait DataBrowserDirectives extends Settings {
   def extractNonMandatoryQueryFields(innerRoute: List[QueryField] => Route): Route =
     (extractActions & extractRaces & extractSexes &
       extractLoanType & extractLoanPurpose & extractLienStatus &
-      extractConstructionMethod & extractDwellingCategories & extractLoanProduct & extractTotalUnits & extractEthnicities) {
+      extractConstructionMethod & extractDwellingCategories & extractLoanProduct & extractTotalUnits & extractEthnicities & extractAgeApplicant) {
       (
         actionsTaken,
         races,
@@ -373,7 +383,8 @@ trait DataBrowserDirectives extends Settings {
         dwellingCategories,
         loanProducts,
         totalUnits,
-        ethnicities
+        ethnicities,
+        ageApplicant
       ) =>
         val filteredfields =
           List(
@@ -387,7 +398,8 @@ trait DataBrowserDirectives extends Settings {
             dwellingCategories,
             loanProducts,
             totalUnits,
-            ethnicities
+            ethnicities,
+            ageApplicant
           ).flatten
         if (filteredfields.size > 2) {
           import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
