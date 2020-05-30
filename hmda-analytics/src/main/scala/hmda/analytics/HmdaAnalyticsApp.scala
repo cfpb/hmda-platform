@@ -203,7 +203,6 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
             delete <- submissionId.period match {
               case Period(2018, None)    => larRepository2018.deleteByLei(lar.larIdentifier.LEI)
               case Period(2019, None)    => larRepository2019.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2020Q, None)   => larRepository2020.deleteByLei(lar.larIdentifie.LEI)
               case Period(2020, Some(_)) => larRepository2020.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
               case _                     => throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete LAR rows.")
 
@@ -253,10 +252,10 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         _ <- deleteLarRows
         _ = log.info(s"Done deleting data from LAR for  $submissionId")
 
-        _ <- insertLarRows
+        larInserted <- insertLarRows
         _ = log.info(s"Done inserting data into LAR for  $submissionId")
 
-        _   <- signDate
+        dateSigned   <- signDate
         res <- insertSubmissionHistory
       } yield res
     result.recover {
