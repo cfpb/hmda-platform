@@ -13,6 +13,9 @@ import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
+import hmda.census.records.CensusRecords
+import hmda.model.census.Census
+import hmda.model.publication.Msa
 import hmda.publisher.helper.LoanLimitLarHeader
 import hmda.publisher.query.component.{ PublisherComponent2018, PublisherComponent2019, PublisherComponent2020 }
 import hmda.publisher.query.lar.{ LarEntityImpl2018, LarEntityImpl2019, LarEntityImpl2020 }
@@ -47,6 +50,10 @@ class LarScheduler
   def larRepository2018 = new LarRepository2018(dbConfig)
   def larRepository2019 = new LarRepository2019(dbConfig)
   def larRepository2020 = new LarRepository2020(dbConfig)
+
+  val indexTractMap2018: Map[String, Census] = CensusRecords.indexedTract2018
+
+  val indexTractMap2019: Map[String, Census] = CensusRecords.indexedTract2019
 
   val awsConfig =
     ConfigFactory.load("application.conf").getConfig("private-aws")
@@ -84,6 +91,7 @@ class LarScheduler
     QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerLoanLimit2019")
     QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerQuarterly2020")
   }
+
 
   override def receive: Receive = {
 
@@ -152,11 +160,11 @@ class LarScheduler
 
       val resultsPSV: Future[MultipartUploadResult] =
         allResultsSource.zipWithIndex
-          .map(larEntity =>
-            if (larEntity._2 == 0)
-              LoanLimitHeader.concat(larEntity._1.toRegulatorLoanLimitPSV) + "\n"
-            else larEntity._1.toRegulatorLoanLimitPSV + "\n"
-          )
+          .map(
+            larEntity =>
+              if (larEntity._2 == 0)
+                LoanLimitHeader.concat(appendCensus(larEntity._1,2019) ) + "\n"
+              else appendCensus(larEntity._1,2019) + "\n")
           .map(s => ByteString(s))
           .runWith(s3Sink)
 
@@ -193,5 +201,26 @@ class LarScheduler
         case Failure(t) =>
           log.info("An error has occurred getting Quarterly LAR Data 2020 in Future: " + t.getMessage)
       }
+
+  }
+
+  def getCensus(hmdaGeoTract: String,year:Int): Msa = {
+
+    val  indexTractMap = year match {
+      case 2018 => indexTractMap2018
+      case 2019 => indexTractMap2019
+      case _ => indexTractMap2019
+    }
+    val censusResult= indexTractMap.getOrElse(hmdaGeoTract, Census())
+    val censusID =
+      if (censusResult.msaMd == 0) "-----" else censusResult.msaMd.toString
+    val censusName =
+      if (censusResult.name.isEmpty) "MSA/MD NOT AVAILABLE" else censusResult.name
+    Msa(censusID, censusName)
+  }
+
+  def appendCensus(lar: LarEntityImpl2019,year:Int): String = {
+    val msa = getCensus(lar.larPartOne.tract,year)
+    lar.appendMsa(msa)
   }
 }
