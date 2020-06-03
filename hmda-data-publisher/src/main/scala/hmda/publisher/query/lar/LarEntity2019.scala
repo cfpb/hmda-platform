@@ -140,7 +140,7 @@ case class LarPartFive2019(discountPoints: String = "",
                            totalUnits: Int = 0,
                            mfAffordable: String = "",
                            applicationSubmission: Int = 0)
-    extends ColumnDataFormatter {
+  extends ColumnDataFormatter {
 
   def toRegulatorPSV: String = {
     s"$discountPoints|$lenderCredits|$interestRate|$paymentPenalty|$debtToIncome|$loanValueRatio|$loanTerm|" +
@@ -230,5 +230,4 @@ case class LarEntityImpl2019(larPartOne: LarPartOne2019,
       larPartSix.toRegulatorPSV +
       larPartSeven.toRegulatorPSV ).replaceAll("(\r\n)|\r|\n", "")
 }
-
 
