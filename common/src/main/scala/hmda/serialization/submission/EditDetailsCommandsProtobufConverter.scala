@@ -7,7 +7,7 @@ import hmda.persistence.serialization.edit.details.commands.{ GetEditDetailsMess
 import hmda.persistence.serialization.submission.SubmissionIdMessage
 import hmda.serialization.submission.EditDetailsProtobufConverter._
 import hmda.serialization.submission.SubmissionProtobufConverter._
-
+// $COVERAGE-OFF$
 object EditDetailsCommandsProtobufConverter {
 
   def persistEditDetailsToProtobuf(cmd: PersistEditDetails, refResolver: ActorRefResolver): PersistEditDetailsMessage =
@@ -55,3 +55,4 @@ object EditDetailsCommandsProtobufConverter {
     )
 
 }
+// $COVERAGE-ON$

@@ -5,7 +5,7 @@ import hmda.messages.submission.HmdaRawDataCommands.AddLine
 import hmda.persistence.serialization.raw.data.commands.AddLineMessage
 import hmda.persistence.serialization.submission.SubmissionIdMessage
 import hmda.serialization.submission.SubmissionProtobufConverter._
-
+// $COVERAGE-OFF$
 object HmdaRawDataCommandsProtobufConverter {
 
   def addLineToProtobuf(cmd: AddLine, refResolver: ActorRefResolver): AddLineMessage =
@@ -29,3 +29,4 @@ object HmdaRawDataCommandsProtobufConverter {
     )
 
 }
+// $COVERAGE-ON$

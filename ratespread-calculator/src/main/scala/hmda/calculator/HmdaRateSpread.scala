@@ -2,7 +2,7 @@ package hmda.calculator
 
 import akka.actor.typed.ActorSystem
 import org.slf4j.LoggerFactory
-
+// $COVERAGE-OFF$
 object HmdaRateSpread extends App {
 
   val log = LoggerFactory.getLogger("hmda")
@@ -18,3 +18,4 @@ object HmdaRateSpread extends App {
 
   ActorSystem[Nothing](Guardian(), Guardian.name)
 }
+// $COVERAGE-ON$

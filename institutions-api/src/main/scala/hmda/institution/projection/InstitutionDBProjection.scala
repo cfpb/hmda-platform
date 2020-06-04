@@ -89,11 +89,6 @@ object InstitutionDBProjection extends InstitutionEmailComponent {
   }
 
   private def updateEmailsInSerial(emails: List[InstitutionEmailEntity]): Future[List[Int]] =
-    emails.foldLeft(Future(List.empty[Int])) { (previousInserts, nextEmail) =>
-      for {
-        completedInserts <- previousInserts
-        insertResult     <- updateEmails(nextEmail)
-      } yield completedInserts :+ insertResult
-    }
+    Future.traverse(emails)(updateEmails)
 
 }

@@ -16,6 +16,7 @@ import org.keycloak.representations.AccessToken
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 
+// $COVERAGE-OFF$
 class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment)(
   implicit system: ActorSystem[_],
   materializer: Materializer,
@@ -61,3 +62,4 @@ class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment)(
     else AuthKey()
   }
 }
+// $COVERAGE-ON$

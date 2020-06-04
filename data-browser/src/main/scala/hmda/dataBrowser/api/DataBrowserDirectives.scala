@@ -106,8 +106,11 @@ trait DataBrowserDirectives extends Settings {
   }
 
   def contentDispositionHeader(queries: List[QueryField], delimiter: Delimiter)(route: Route): Route = {
-    val queryName =
-      queries.map(q => q.name + "_" + q.values.mkString("-")).mkString("_")
+    val queryName = queries
+      .map(q => q.copy(values = q.values.sorted))
+      .sortBy(_.dbName)
+      .map(q => s"${q.name}_${q.values.mkString("-")}")
+      .mkString("_")
     val filename = queryName.length match {
       case x if x > 100 =>
         queryName.slice(0, 100) + md5HashString(queryName)
@@ -222,6 +225,14 @@ trait DataBrowserDirectives extends Settings {
         case Right(_) =>
           None
       }
+  }
+
+  private def extractAgeApplicant: Directive1[Option[QueryField]] = {
+    parameters("ageapplicant".as(CsvSeq[Int]) ? Nil).flatMap {
+      case Nil => provide(None)
+      case xs =>
+        provide(Option(QueryField(name = "ageapplicant", xs.map(_.toString), dbName = "age_applicant", isAllSelected = false)))
+    }
   }
 
   private def extractEthnicities: Directive1[Option[QueryField]] = {
@@ -452,7 +463,7 @@ trait DataBrowserDirectives extends Settings {
     (extractActions & extractRaces & extractSexes &
       extractLoanType & extractLoanPurpose(year) & extractLienStatus(year) &
       extractConstructionMethod & extractDwellingCategories &
-      extractLoanProduct & extractTotalUnits & extractEthnicities) {
+      extractLoanProduct & extractTotalUnits & extractEthnicities & extractAgeApplicant) {
       (
         actionsTaken,
         races,
@@ -464,7 +475,8 @@ trait DataBrowserDirectives extends Settings {
         dwellingCategories,
         loanProducts,
         totalUnits,
-        ethnicities
+        ethnicities,
+        ageApplicant
       ) =>
         val filteredfields =
           List(
@@ -478,7 +490,8 @@ trait DataBrowserDirectives extends Settings {
             dwellingCategories,
             loanProducts,
             totalUnits,
-            ethnicities
+            ethnicities,
+            ageApplicant
           ).flatten
         if (filteredfields.size > 2) {
           import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._

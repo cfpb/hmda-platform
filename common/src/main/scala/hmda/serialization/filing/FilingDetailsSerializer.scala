@@ -9,7 +9,7 @@ import hmda.persistence.serialization.filing.filingdetails.FilingDetailsMessage
 import hmda.persistence.serialization.filing.filingstate.FilingStateMessage
 import hmda.serialization.filing.FilingDetailsProtobufConverter._
 import hmda.serialization.filing.FilingStateProtobufConverter._
-
+// $COVERAGE-OFF$
 class FilingDetailsSerializer extends SerializerWithStringManifest {
   override def identifier: Int = 107
 
@@ -38,3 +38,4 @@ class FilingDetailsSerializer extends SerializerWithStringManifest {
 
     }
 }
+// $COVERAGE-ON$

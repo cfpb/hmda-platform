@@ -9,7 +9,7 @@ import akka.serialization.SerializerWithStringManifest
 import hmda.messages.submission.HmdaRawDataCommands.AddLine
 import hmda.persistence.serialization.raw.data.commands.AddLineMessage
 import hmda.serialization.submission.HmdaRawDataCommandsProtobufConverter._
-
+// $COVERAGE-OFF$
 class HmdaRawDataCommandsSerializer(system: ExtendedActorSystem) extends SerializerWithStringManifest {
 
   private val resolver = ActorRefResolver(system.toTyped)
@@ -35,3 +35,4 @@ class HmdaRawDataCommandsSerializer(system: ExtendedActorSystem) extends Seriali
         throw new NotSerializableException(s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
     }
 }
+// $COVERAGE-ON$

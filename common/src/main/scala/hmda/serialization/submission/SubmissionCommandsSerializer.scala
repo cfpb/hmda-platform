@@ -12,7 +12,7 @@ import hmda.persistence.serialization.submission.SubmissionMessage
 import hmda.persistence.serialization.submission.commands.SubmissionStopMessage
 import hmda.serialization.submission.SubmissionCommandsProtobufConverter._
 import hmda.serialization.submission.SubmissionProtobufConverter._
-
+// $COVERAGE-OFF$
 class SubmissionCommandsSerializer(system: ExtendedActorSystem) extends SerializerWithStringManifest {
 
   private val resolver = ActorRefResolver(system.toTyped)
@@ -59,3 +59,4 @@ class SubmissionCommandsSerializer(system: ExtendedActorSystem) extends Serializ
     }
 
 }
+// $COVERAGE-ON$

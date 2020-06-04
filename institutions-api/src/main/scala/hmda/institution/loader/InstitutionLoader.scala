@@ -15,7 +15,7 @@ import io.circe.syntax._
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext
-
+// $COVERAGE-OFF$
 object InstitutionLoader extends App {
 
   val config          = ConfigFactory.load()
@@ -105,3 +105,4 @@ object InstitutionLoader extends App {
     }
 
 }
+// $COVERAGE-ON$

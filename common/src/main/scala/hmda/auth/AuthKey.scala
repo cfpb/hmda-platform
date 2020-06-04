@@ -1,5 +1,6 @@
 package hmda.auth
 import io.circe.{Decoder, Encoder, HCursor, Json}
+// $COVERAGE-OFF$
 case class AuthKeys(keys: Seq[AuthKey] = Seq.empty)
 
 case class AuthKey(kid: String = "",
@@ -24,3 +25,4 @@ object AuthKey {
       use <- c.downField("use").as[String]
     } yield AuthKey(kid, kty, alg, use)
 }
+// $COVERAGE-ON$

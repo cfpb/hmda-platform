@@ -9,7 +9,7 @@ import hmda.api.http.directives.HmdaTimeDirectives._
 import hmda.api.http.routes.BaseHttpApi
 
 import scala.concurrent.ExecutionContext
-
+// $COVERAGE-OFF$
 object RateSpreadAPI {
   val name: String = "hmda-ratespread-api"
 
@@ -28,3 +28,4 @@ object RateSpreadAPI {
     Behaviors.empty
   }
 }
+// $COVERAGE-ON$

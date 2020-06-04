@@ -7,7 +7,7 @@ data:
   currentYear: "2018"
   quarterlyYearsAllowed: "2020"
   q1Start: "April 01"
-  q1End: "May 30"
+  q1End: "June 30"
   q2Start: "July 01"
   q2End: "September 30"
   q3Start: "October 01"

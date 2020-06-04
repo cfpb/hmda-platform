@@ -1,0 +1,1 @@
+(sbt ++$TRAVIS_SCALA_VERSION  "project hmda-platform" "run" &) && sleep 300 && node_modules/.bin/newman run newman/tests/hmda-filing/tests/ci/CI_HMDA_API_Filing.postman_collection.json -e newman/tests/hmda-filing/configs/ci/CI_HMDA_ENV.postman_environment.json
