@@ -64,65 +64,41 @@ class LarPublicScheduler extends HmdaActor with PublisherComponent2018 with Modi
   override def receive: Receive = {
 
     case LarPublicScheduler2018 =>
-      val fileNamePSV = "2018_lar.txt"
-
-      val allResultsPublisher: DatabasePublisher[ModifiedLarEntityImpl] =
-        mlarRepository2018.getAllLARs(getFilterList())
-
-      val allResultsSource: Source[ModifiedLarEntityImpl, NotUsed] =
-        Source.fromPublisher(allResultsPublisher)
-
-      //PSV Sync
-      val s3SinkPSV = S3
-        .multipartUpload(bucket, s"$environment/dynamic-data/2018/$fileNamePSV")
-        .withAttributes(S3Attributes.settings(s3Settings))
-
-      val resultsPSV: Future[MultipartUploadResult] =
-        allResultsSource.zipWithIndex
-          .map(mlarEntity =>
-            if (mlarEntity._2 == 0)
-              MLARHeader.concat(mlarEntity._1.toPublicPSV) + "\n"
-            else mlarEntity._1.toPublicPSV + "\n"
-          )
-          .map(s => ByteString(s))
-          .runWith(s3SinkPSV)
-
-      resultsPSV onComplete {
-        case Success(result) =>
-          log.info("Pushed to S3: " + s"$bucket/$environment/dynamic-data/2018/$fileNamePSV" + ".")
-        case Failure(t) =>
-          log.info("An error has occurred getting Public LAR Data in Future: " + t.getMessage)
-      }
+      larPublicStream("2018")
 
     case LarPublicScheduler2019 =>
-      val fileNamePSV = "2019_lar.txt"
+      larPublicStream("2019")
 
-      val allResultsPublisher: DatabasePublisher[ModifiedLarEntityImpl] =
-        mlarRepository2018.getAllLARs(getFilterList())
+  }
+  private def larPublicStream(year: String) = {
+    val fileNamePSV = year+"_lar.txt"
 
-      val allResultsSource: Source[ModifiedLarEntityImpl, NotUsed] =
-        Source.fromPublisher(allResultsPublisher)
+    val allResultsPublisher: DatabasePublisher[ModifiedLarEntityImpl] =
+      mlarRepository2018.getAllLARs(getFilterList())
 
-      //PSV Sync
-      val s3SinkPSV = S3
-        .multipartUpload(bucket, s"$environment/dynamic-data/2019/$fileNamePSV")
-        .withAttributes(S3Attributes.settings(s3Settings))
+    val allResultsSource: Source[ModifiedLarEntityImpl, NotUsed] =
+      Source.fromPublisher(allResultsPublisher)
 
-      val resultsPSV: Future[MultipartUploadResult] =
-        allResultsSource.zipWithIndex
-          .map(mlarEntity =>
-            if (mlarEntity._2 == 0)
-              MLARHeader.concat(mlarEntity._1.toPublicPSV) + "\n"
-            else mlarEntity._1.toPublicPSV + "\n"
-          )
-          .map(s => ByteString(s))
-          .runWith(s3SinkPSV)
+    //PSV Sync
+    val s3SinkPSV = S3
+      .multipartUpload(bucket, s"$environment/dynamic-data/"+year+"/$fileNamePSV")
+      .withAttributes(S3Attributes.settings(s3Settings))
 
-      resultsPSV onComplete {
-        case Success(result) =>
-          log.info("Pushed to S3: " + s"$bucket/$environment/dynamic-data/2019/$fileNamePSV" + ".")
-        case Failure(t) =>
-          log.info("An error has occurred getting Public LAR Data in Future: " + t.getMessage)
-      }
+    val resultsPSV: Future[MultipartUploadResult] =
+      allResultsSource.zipWithIndex
+        .map(mlarEntity =>
+          if (mlarEntity._2 == 0)
+            MLARHeader.concat(mlarEntity._1.toPublicPSV) + "\n"
+          else mlarEntity._1.toPublicPSV + "\n"
+        )
+        .map(s => ByteString(s))
+        .runWith(s3SinkPSV)
+
+    resultsPSV onComplete {
+      case Success(result) =>
+        log.info("Pushed to S3: " + s"$bucket/$environment/dynamic-data/"+year+"/$fileNamePSV" + ".")
+      case Failure(t) =>
+        log.info("An error has occurred getting Public LAR Data in Future: " + t.getMessage)
+    }
   }
 }
