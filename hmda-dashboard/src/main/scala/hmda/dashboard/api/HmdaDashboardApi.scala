@@ -4,11 +4,13 @@ import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
 import akka.actor.{ActorSystem, CoordinatedShutdown}
+import akka.http.scaladsl.server.Directives._
 import hmda.api.http.directives.HmdaTimeDirectives._
 import hmda.api.http.routes.BaseHttpApi
 import hmda.dashboard.Settings
 
 import scala.concurrent.ExecutionContextExecutor
+import scala.concurrent.duration._
 
 object HmdaDashboardApi extends Settings {
   val name: String = "hmda-dashboard"
@@ -18,10 +20,10 @@ object HmdaDashboardApi extends Settings {
     val log                                   = ctx.log
     val config                                = system.settings.config
     val shutdown                              = CoordinatedShutdown(system)
-
-    val routes = BaseHttpApi.routes(name)
     val host   = server.host
     val port   = server.port
+
+    val routes = BaseHttpApi.routes(name) ~ HmdaDashboardHttpApi.create(log, config)
     BaseHttpApi.runServer(shutdown, name)(timed(routes), host, port)
 
     Behaviors.ignore
