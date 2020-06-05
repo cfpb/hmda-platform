@@ -5,10 +5,12 @@ object Schedules {
   case object PanelScheduler2019
   case object LarScheduler2018
   case object LarPublicScheduler2018
+  case object LarPublicScheduler2019
   case object LarScheduler2019
   case object LarSchedulerLoanLimit2019
   case object TsScheduler2018
   case object TsPublicScheduler2018
+  case object TsPublicScheduler2019
   case object TsScheduler2019
   case object LarSchedulerQuarterly2020
   case object TsSchedulerQuarterly2020

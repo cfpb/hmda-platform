@@ -11,16 +11,16 @@ import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.publisher.helper.TSHeader
 import hmda.publisher.query.component.PublisherComponent2018
-import hmda.publisher.scheduler.schedules.Schedules.TsPublicScheduler2018
+import hmda.publisher.scheduler.schedules.Schedules.{TsPublicScheduler2018, TsPublicScheduler2019}
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.ts._
 import hmda.util.BankFilterUtils._
-import software.amazon.awssdk.auth.credentials.{ AwsBasicCredentials, StaticCredentialsProvider }
+import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.regions.providers.AwsRegionProvider
 
 import scala.concurrent.Future
-import scala.util.{ Failure, Success }
+import scala.util.{Failure, Success}
 
 class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with TSHeader {
 
@@ -53,35 +53,43 @@ class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with TSHea
   override def postStop(): Unit =
     QuartzSchedulerExtension(context.system).cancelJob("TsPublicScheduler2018")
 
+
   override def receive: Receive = {
 
     case TsPublicScheduler2018 =>
-      val fileNamePSV = "2018_ts.txt"
+      tsPublicStream("2018")
 
-      val s3SinkPSV =
-        S3.multipartUpload(bucket, s"$environment/dynamic-data/2018/$fileNamePSV")
-          .withAttributes(S3Attributes.settings(s3Settings))
+    case TsPublicScheduler2019 =>
+      tsPublicStream("2019")
 
-      val allResults: Future[Seq[TransmittalSheetEntity]] =
-        tsRepository2018.getAllSheets(getFilterList())
+  }
+  private def tsPublicStream(year: String) = {
+    val fileNamePSV = year+"_ts.txt"
 
-      //SYNC PSV
-      val resultsPSV: Future[MultipartUploadResult] = Source
-        .future(allResults)
-        .mapConcat(seek => seek.toList)
-        .zipWithIndex
-        .map(transmittalSheet =>
-          if (transmittalSheet._2 == 0) TSHeader.concat(transmittalSheet._1.toPublicPSV) + "\n"
-          else transmittalSheet._1.toPublicPSV + "\n"
-        )
-        .map(s => ByteString(s))
-        .runWith(s3SinkPSV)
+    val s3SinkPSV =
+      S3.multipartUpload(bucket, s"$environment/dynamic-data/"+year+"/$fileNamePSV")
+        .withAttributes(S3Attributes.settings(s3Settings))
 
-      resultsPSV onComplete {
-        case Success(result) =>
-          log.info("Pushed to S3: " + s"$bucket/$environment/dynamic-data/2018/$fileNamePSV" + ".")
-        case Failure(t) =>
-          println(" An error has occurred getting Public PSV TS Data 2018: " + t.getMessage)
-      }
+    val allResults: Future[Seq[TransmittalSheetEntity]] =
+      tsRepository2018.getAllSheets(getFilterList())
+
+    //SYNC PSV
+    val resultsPSV: Future[MultipartUploadResult] = Source
+      .future(allResults)
+      .mapConcat(seek => seek.toList)
+      .zipWithIndex
+      .map(transmittalSheet =>
+        if (transmittalSheet._2 == 0) TSHeader.concat(transmittalSheet._1.toPublicPSV) + "\n"
+        else transmittalSheet._1.toPublicPSV + "\n"
+      )
+      .map(s => ByteString(s))
+      .runWith(s3SinkPSV)
+
+    resultsPSV onComplete {
+      case Success(result) =>
+        log.info("Pushed to S3: " + s"$bucket/$environment/dynamic-data/"+year+"/$fileNamePSV" + ".")
+      case Failure(t) =>
+        println(" An error has occurred getting Public PSV TS Data "+year+": " + t.getMessage)
+    }
   }
 }

@@ -13,16 +13,16 @@ import hmda.actor.HmdaActor
 import hmda.publisher.helper.ModifiedLarHeader
 import hmda.publisher.query.component.PublisherComponent2018
 import hmda.publisher.query.lar.ModifiedLarEntityImpl
-import hmda.publisher.scheduler.schedules.Schedules.LarPublicScheduler2018
+import hmda.publisher.scheduler.schedules.Schedules.{LarPublicScheduler2018, LarPublicScheduler2019}
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
 import slick.basic.DatabasePublisher
-import software.amazon.awssdk.auth.credentials.{ AwsBasicCredentials, StaticCredentialsProvider }
+import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.regions.providers.AwsRegionProvider
 
 import scala.concurrent.Future
-import scala.util.{ Failure, Success }
+import scala.util.{Failure, Success}
 
 class LarPublicScheduler extends HmdaActor with PublisherComponent2018 with ModifiedLarHeader {
 
@@ -53,8 +53,13 @@ class LarPublicScheduler extends HmdaActor with PublisherComponent2018 with Modi
     QuartzSchedulerExtension(context.system)
       .schedule("LarPublicScheduler2018", self, LarPublicScheduler2018)
 
+  QuartzSchedulerExtension(context.system)
+    .schedule("LarPublicScheduler2019", self, LarPublicScheduler2019)
+
   override def postStop(): Unit =
     QuartzSchedulerExtension(context.system).cancelJob("LarPublicScheduler2018")
+    QuartzSchedulerExtension(context.system).cancelJob("LarPublicScheduler2019")
+
 
   override def receive: Receive = {
 
@@ -85,6 +90,37 @@ class LarPublicScheduler extends HmdaActor with PublisherComponent2018 with Modi
       resultsPSV onComplete {
         case Success(result) =>
           log.info("Pushed to S3: " + s"$bucket/$environment/dynamic-data/2018/$fileNamePSV" + ".")
+        case Failure(t) =>
+          log.info("An error has occurred getting Public LAR Data in Future: " + t.getMessage)
+      }
+
+    case LarPublicScheduler2019 =>
+      val fileNamePSV = "2019_lar.txt"
+
+      val allResultsPublisher: DatabasePublisher[ModifiedLarEntityImpl] =
+        mlarRepository2018.getAllLARs(getFilterList())
+
+      val allResultsSource: Source[ModifiedLarEntityImpl, NotUsed] =
+        Source.fromPublisher(allResultsPublisher)
+
+      //PSV Sync
+      val s3SinkPSV = S3
+        .multipartUpload(bucket, s"$environment/dynamic-data/2019/$fileNamePSV")
+        .withAttributes(S3Attributes.settings(s3Settings))
+
+      val resultsPSV: Future[MultipartUploadResult] =
+        allResultsSource.zipWithIndex
+          .map(mlarEntity =>
+            if (mlarEntity._2 == 0)
+              MLARHeader.concat(mlarEntity._1.toPublicPSV) + "\n"
+            else mlarEntity._1.toPublicPSV + "\n"
+          )
+          .map(s => ByteString(s))
+          .runWith(s3SinkPSV)
+
+      resultsPSV onComplete {
+        case Success(result) =>
+          log.info("Pushed to S3: " + s"$bucket/$environment/dynamic-data/2019/$fileNamePSV" + ".")
         case Failure(t) =>
           log.info("An error has occurred getting Public LAR Data in Future: " + t.getMessage)
       }
