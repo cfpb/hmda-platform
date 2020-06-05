@@ -3,10 +3,12 @@ package hmda.dashboard.api
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.server.directives.Credentials
 import akka.http.scaladsl.server.directives.RouteDirectives.complete
-import com.typesafe.config.{ Config, ConfigFactory }
+import akka.util.Timeout
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
+import com.typesafe.config.{Config, ConfigFactory}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import hmda.auth.OAuth2Authorization
 import hmda.dashboard.Settings
 import hmda.dashboard.models.HealthCheckStatus.Up
 import hmda.dashboard.models._
@@ -17,30 +19,33 @@ import org.slf4j.Logger
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
-import scala.util.{ Failure, Success }
+import scala.concurrent.ExecutionContext
+import scala.util.{Failure, Success}
 
 object HmdaDashboardHttpApi {
-  def create(log: Logger, config: Config): Route =
-    new HmdaDashboardHttpApi(log, config).hmdaDashboardRoutes
+  def create(log: Logger, config: Config)(implicit timeout: Timeout, ec: ExecutionContext): OAuth2Authorization => Route =
+    new HmdaDashboardHttpApi(log, config)(timeout, ec).hmdaDashboardRoutes _
 }
 
-private class HmdaDashboardHttpApi(log: Logger, config: Config) extends Settings {
+private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val timeout: Timeout, ec: ExecutionContext) extends Settings {
+
   val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("dashboard_db")
+  val hmdaAdminRole = config.getString("keycloak.hmda.admin.role")
   val bankFilter     = ConfigFactory.load("application.conf").getConfig("filter")
-  val bankFilterList =
-    bankFilter.getString("bank-filter-list").toUpperCase.split(",")
-  val repository =
-    new PostgresRepository(databaseConfig, bankFilterList)
+    val bankFilterList =
+      bankFilter.getString("bank-filter-list").toUpperCase.split(",")
+    val repository =
+      new PostgresRepository(databaseConfig, bankFilterList)
 
-  val healthCheck: HealthCheckService =
-    new HealthCheckService(repository)
+    val healthCheck: HealthCheckService =
+      new HealthCheckService(repository)
 
-  val query: QueryService =
-    new DashboardQueryService(repository)
+    val query: QueryService =
+      new DashboardQueryService(repository)
 
-  val hmdaDashboardRoutes: Route =
-    authenticateBasic(realm = "secure site", myUserPassAuthenticator) { userName =>
-      encodeResponse {
+    def hmdaDashboardReadPath(oAuth2Authorization: OAuth2Authorization): Route = {
+      oAuth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
+        withoutRequestTimeout {
         pathPrefix("dashboard") {
           pathPrefix("health") {
             onComplete(healthCheck.healthCheckStatus.runToFuture) {
@@ -49,7 +54,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config) extends Settings
                 complete(StatusCodes.OK)
 
               case Success(hs) =>
-                log.warn(s"Service degraded db=${hs.db}")
+                log.info(s"Service degraded db=${hs.db}")
                 complete(StatusCodes.ServiceUnavailable)
 
               case Failure(ex) =>
@@ -327,13 +332,18 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config) extends Settings
                   .runToFuture
               )
             }
+          }
         }
       }
     }
 
-  def myUserPassAuthenticator(credentials: Credentials): Option[String] =
-    credentials match {
-      case p @ Credentials.Provided(id) if p.verify(config.getString("admin.pass")) => Some(id)
-      case _                                                                        => None
+    def hmdaDashboardRoutes(oAuth2Authorization: OAuth2Authorization): Route = {
+      handleRejections(corsRejectionHandler) {
+        cors() {
+          encodeResponse {
+            hmdaDashboardReadPath(oAuth2Authorization)
+          }
+        }
+      }
     }
 }
