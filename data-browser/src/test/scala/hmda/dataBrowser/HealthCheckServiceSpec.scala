@@ -47,7 +47,7 @@ class HealthCheckServiceSpec
 
       (database.healthCheck _).expects().returns(Task.unit)
       (cache.healthCheck _).expects().returns(Task.unit)
-      (storage.retrieveDataUrl _).expects(exampleQuery, Commas).returns(Task.now(None))
+      (storage.retrieveDataUrl _).expects(exampleQuery, Commas, "2018").returns(Task.now(None))
 
       val futHealth = health.healthCheckStatus.runToFuture
       scheduler.tick()

@@ -21,3 +21,5 @@ object County {
 
   }
 }
+
+case class Count2017(county: String) extends AnyVal

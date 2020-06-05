@@ -6,8 +6,8 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import hmda.dataBrowser.api.DataBrowserHttpApi
 import hmda.dataBrowser.models.HealthCheckStatus.{ Down, Up }
-import hmda.dataBrowser.models.{ AggregationResponse, FilerInstitutionResponse, HealthCheckResponse, Statistic }
-import hmda.dataBrowser.repositories.{ PostgresModifiedLarRepository, RedisModifiedLarAggregateCache }
+import hmda.dataBrowser.models.{ AggregationResponse, FilerInstitutionResponse2018, HealthCheckResponse, Statistic }
+import hmda.dataBrowser.repositories._
 import hmda.dataBrowser.services.{ DataBrowserQueryService, HealthCheckService, S3FileService }
 import hmda.utils.EmbeddedPostgres
 import monix.eval.Task
@@ -29,14 +29,19 @@ class DataBrowserIntegrationSpec
 
   val fileStorage = mock[S3FileService]
 
-  val repository = {
+  val repository2018 = {
     val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("embedded-pg")
-    new PostgresModifiedLarRepository(database.tableName, databaseConfig)
+    new PostgresModifiedLarRepository(database.tableName2018, databaseConfig)
+  }
+
+  val repository2017 = {
+    val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("embedded-pg")
+    new PostgresModifiedLarRepository2017(database.tableName2017, databaseConfig)
   }
 
   val cache: RedisModifiedLarAggregateCache = mock[RedisModifiedLarAggregateCache]
 
-  val query = new DataBrowserQueryService(repository, cache)
+  val query = new DataBrowserQueryService(repository2018, repository2017, cache)
 
   val healthCheck: HealthCheckService = mock[HealthCheckService]
 
@@ -76,8 +81,8 @@ class DataBrowserIntegrationSpec
     }
 
     "respond to raw Pipe data requests" in {
-      (fileStorage.retrieveDataUrl _).expects(*, *).returns(Task.now(None))
-      (fileStorage.persistData _).expects(*, *, *).returns(Task.unit)
+      (fileStorage.retrieveDataUrl _).expects(*, *, "2018").returns(Task.now(None))
+      (fileStorage.persistData _).expects(*, *, "2018", *).returns(Task.unit)
 
       Get("/view/pipe?msamds=34980,23434&years=2018") ~> routes ~> check {
         response.status shouldBe StatusCodes.OK
@@ -85,8 +90,8 @@ class DataBrowserIntegrationSpec
     }
 
     "respond to raw CSV data requests" in {
-      (fileStorage.retrieveDataUrl _).expects(*, *).returns(Task.now(None))
-      (fileStorage.persistData _).expects(*, *, *).returns(Task.unit)
+      (fileStorage.retrieveDataUrl _).expects(*, *, "2018").returns(Task.now(None))
+      (fileStorage.persistData _).expects(*, *, "2018", *).returns(Task.unit)
 
       Get("/view/csv?msamds=34980,23434&years=2018") ~> routes ~> check {
         response.status shouldBe StatusCodes.OK
@@ -103,8 +108,8 @@ class DataBrowserIntegrationSpec
     }
 
     "respond to filer requests" in {
-      (cache.findFilers _).expects(*).returns(Task.now(None))
-      (cache.updateFilers _).expects(*, *).returns(Task.now(FilerInstitutionResponse(Nil)))
+      (cache.findFilers2018 _).expects(*).returns(Task.now(None))
+      (cache.updateFilers2018 _).expects(*, *).returns(Task.now(FilerInstitutionResponse2018(Nil)))
 
       Get("/view/filers?years=2018") ~> routes ~> check {
         response.status shouldBe StatusCodes.OK
@@ -112,7 +117,7 @@ class DataBrowserIntegrationSpec
     }
 
     "respond to failed filer requests due to a cache error" in {
-      (cache.findFilers _).expects(*).returns(Task.raiseError(new RuntimeException("BOOM")))
+      (cache.findFilers2018 _).expects(*).returns(Task.raiseError(new RuntimeException("BOOM")))
 
       Get("/view/filers?years=2018") ~> routes ~> check {
         response.status shouldBe StatusCodes.InternalServerError
@@ -131,8 +136,8 @@ class DataBrowserIntegrationSpec
     }
 
     "respond to nationwide raw pipe queries" in {
-      (fileStorage.retrieveDataUrl _).expects(*, *).returns(Task.now(None))
-      (fileStorage.persistData _).expects(*, *, *).returns(Task.unit)
+      (fileStorage.retrieveDataUrl _).expects(*, *, "2018").returns(Task.now(None))
+      (fileStorage.persistData _).expects(*, *, "2018", *).returns(Task.unit)
 
       Get(
         "/view/nationwide/pipe?years=2018&actions_taken=1,4"
@@ -142,8 +147,8 @@ class DataBrowserIntegrationSpec
     }
 
     "respond to nationwide raw csv queries" in {
-      (fileStorage.retrieveDataUrl _).expects(*, *).returns(Task.now(None))
-      (fileStorage.persistData _).expects(*, *, *).returns(Task.unit)
+      (fileStorage.retrieveDataUrl _).expects(*, *, "2018").returns(Task.now(None))
+      (fileStorage.persistData _).expects(*, *, "2018", *).returns(Task.unit)
 
       Get(
         "/view/nationwide/csv?years=2018&actions_taken=1,2,3,4,5,6,7,8&msamds=34980"

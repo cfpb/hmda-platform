@@ -2,15 +2,22 @@ package hmda.dataBrowser.services
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.dataBrowser.models._
-import hmda.dataBrowser.repositories.{ Cache, ModifiedLarRepository }
+import hmda.dataBrowser.repositories._
 import io.circe.Codec
 import monix.eval.Task
 
-class DataBrowserQueryService(repo: ModifiedLarRepository, cache: Cache) extends QueryService {
+class DataBrowserQueryService(repo2018: ModifiedLarRepository2018, repo2017: ModifiedLarRepository2017, cache: Cache) extends QueryService {
   override def fetchData(
-                          queries: List[QueryField]
-                        ): Source[ModifiedLarEntity, NotUsed] =
-    repo.find(queries)
+                          queryFields: QueryFields
+                        ): Source[ModifiedLarEntity, NotUsed] = {
+    repo2018.find(queryFields.queryFields)
+  }
+
+  override def fetchData2017(
+                          queryFields: QueryFields
+                        ): Source[ModifiedLarEntity2017, NotUsed] = {
+    repo2017.find(queryFields.queryFields)
+  }
 
   private def generateCombinations[T](x: List[List[T]]): List[List[T]] =
     x match {
@@ -32,15 +39,23 @@ class DataBrowserQueryService(repo: ModifiedLarRepository, cache: Cache) extends
   private def cacheResult[A: Codec](cacheLookup: Task[Option[A]], onMiss: Task[A], cacheUpdate: A => Task[A]): Task[A] =
     cacheLookup.flatMap {
       case None =>
+        println("cache miss")
         onMiss.flatMap(cacheUpdate)
 
       case Some(a) =>
+        println("cache hit")
         Task.now(a)
     }
 
   override def fetchAggregate(
-                               fields: List[QueryField]
+                               queryFields: QueryFields
                              ): Task[Seq[Aggregation]] = {
+    val repo = queryFields.year match {
+      case "2017" => repo2017
+      case "2018" => repo2018
+      case _ => repo2018
+    }
+    val fields = queryFields.queryFields
     val optState: Option[QueryField] =
       fields.filter(_.values.nonEmpty).find(_.name == "state")
     val optMsaMd: Option[QueryField] =
@@ -51,6 +66,8 @@ class DataBrowserQueryService(repo: ModifiedLarRepository, cache: Cache) extends
       fields.filter(_.values.nonEmpty).find(_.name == "year")
     val optLEI: Option[QueryField] =
       fields.filter(_.values.nonEmpty).find(_.name == "lei")
+    val optARID: Option[QueryField] =
+      fields.filter(_.values.nonEmpty).find(_.name == "arid")
 
     val rest = fields
       .filterNot(_.name == "state")
@@ -58,9 +75,10 @@ class DataBrowserQueryService(repo: ModifiedLarRepository, cache: Cache) extends
       .filterNot(_.name == "county")
       .filterNot(_.name == "year")
       .filterNot(_.name == "lei")
+      .filterNot(_.name == "arid")
 
     val queryFieldCombinations = permuteQueryFields(rest)
-      .map(eachList => optYear.toList ++ optState.toList ++ optMsaMd.toList ++ optCounty.toList ++ optLEI.toList ++ eachList)
+      .map(eachList => optYear.toList ++ optState.toList ++ optMsaMd.toList ++ optCounty.toList ++ optLEI.toList ++ optARID.toList ++ eachList)
       .map(eachCombination => eachCombination.sortBy(field => field.name))
 
     Task.gatherUnordered {
@@ -76,11 +94,30 @@ class DataBrowserQueryService(repo: ModifiedLarRepository, cache: Cache) extends
     }
   }
 
-  override def fetchFilers(fields: List[QueryField]): Task[FilerInstitutionResponse] =
+  override def fetchFilers(queryFields: QueryFields): Task[FilerInstitutionResponse2018] = {
+    val fields = queryFields.queryFields
+    val repo = queryFields.year match {
+      case "2018" => repo2018
+      case _ => repo2018
+    }
     cacheResult(
-      cacheLookup = cache.findFilers(fields),
-      onMiss = repo.findFilers(fields).map(FilerInstitutionResponse(_)),
-      cacheUpdate = cache.updateFilers(fields, _: FilerInstitutionResponse)
+      cacheLookup = cache.findFilers2018(fields),
+      onMiss = repo.findFilers(fields).map(FilerInstitutionResponse2018(_)),
+      cacheUpdate = cache.updateFilers2018(fields, _: FilerInstitutionResponse2018)
     )
+  }
+
+  override def fetchFilers2017(queryFields: QueryFields): Task[FilerInstitutionResponse2017] = {
+    val fields = queryFields.queryFields
+    val repo = queryFields.year match {
+      case "2017" => repo2017
+      case _ => repo2017
+    }
+    cacheResult(
+      cacheLookup = cache.findFilers2017(fields),
+      onMiss = repo.findFilers(fields).map(FilerInstitutionResponse2017(_)),
+      cacheUpdate = cache.updateFilers2017(fields, _: FilerInstitutionResponse2017)
+    )
+  }
 
 }

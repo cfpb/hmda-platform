@@ -4,3 +4,5 @@ case class QueryField(name: String = "",
                       values: Seq[String] = List.empty,
                       dbName: String = "",
                       isAllSelected: Boolean = false)
+
+case class QueryFields(year: String = "2018", queryFields: List[QueryField] = List.empty)

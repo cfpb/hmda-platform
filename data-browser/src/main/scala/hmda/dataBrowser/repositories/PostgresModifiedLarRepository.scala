@@ -2,14 +2,14 @@ package hmda.dataBrowser.repositories
 
 import akka.NotUsed
 import akka.stream.scaladsl.Source
-import hmda.dataBrowser.models.{ FilerInformation, ModifiedLarEntity, QueryField, Statistic }
+import hmda.dataBrowser.models.{ FilerInformation2018, ModifiedLarEntity, QueryField, Statistic }
 import monix.eval.Task
 import slick.basic.DatabaseConfig
 import slick.jdbc.{ JdbcProfile, ResultSetConcurrency, ResultSetType }
 
 // $COVERAGE-OFF$
 // Talks to Postgres using Slick
-class PostgresModifiedLarRepository(tableName: String, config: DatabaseConfig[JdbcProfile]) extends ModifiedLarRepository {
+class PostgresModifiedLarRepository(tableName: String, config: DatabaseConfig[JdbcProfile]) extends ModifiedLarRepository2018 {
 
   import config._
   import config.profile.api._
@@ -166,11 +166,11 @@ class PostgresModifiedLarRepository(tableName: String, config: DatabaseConfig[Jd
     Source.fromPublisher(publisher)
   }
 
-  override def findFilers(filerFields: List[QueryField]): Task[Seq[FilerInformation]] = {
+  override def findFilers(filerFields: List[QueryField]): Task[Seq[FilerInformation2018]] = {
     val year = filerFields.find(_.name == "year").map(_.values.head.toInt)
     val institutionsTableName = year match { //will be needed when databrowser has to support multiple years
-      case Some(2018) => "institutions2018"
-      case _          => "institutions2018"
+      case Some(2018) => "institutions2018_snapshot"
+      case _          => "institutions2018_snapshot"
     }
     //do not include year in the WHERE clause because all entries in the table (modifiedlar2018_snapshot) have filing_year = 2018
     val queries = filerFields.filterNot(_.name == "year").map(field => in(field.dbName, field.values))
@@ -188,7 +188,8 @@ class PostgresModifiedLarRepository(tableName: String, config: DatabaseConfig[Jd
           GROUP BY lei
         ) a
           JOIN #${institutionsTableName} b ON a.lei = b.lei
-         """.as[FilerInformation]
+         """.as[FilerInformation2018]
+    println(query)
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
@@ -198,6 +199,14 @@ class PostgresModifiedLarRepository(tableName: String, config: DatabaseConfig[Jd
       case Nil          => ""
       case head :: tail => whereAndOpt(head, tail: _*)
     }
+    println("2018 db query")
+    println(sql"""
+        SELECT
+          COUNT(loan_amount),
+          SUM(loan_amount)
+        FROM #${tableName}
+        #$filterCriteria
+        """)
     val query = sql"""
         SELECT
           COUNT(loan_amount),

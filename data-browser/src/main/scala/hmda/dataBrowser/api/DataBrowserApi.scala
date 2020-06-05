@@ -2,14 +2,14 @@ package hmda.dataBrowser.api
 
 import akka.actor.CoordinatedShutdown
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.scaladsl.adapter._
 import akka.actor.typed.{ Behavior, SupervisorStrategy }
+import akka.actor.typed.scaladsl.adapter._
 import akka.http.scaladsl.server.Directives._
-import akka.stream.Materializer
 import hmda.api.http.directives.HmdaTimeDirectives._
 import hmda.api.http.routes.BaseHttpApi
+import akka.stream.Materializer
 import hmda.dataBrowser.Settings
-import hmda.dataBrowser.repositories.{ PostgresModifiedLarRepository, RedisModifiedLarAggregateCache }
+import hmda.dataBrowser.repositories.{ PostgresModifiedLarRepository, PostgresModifiedLarRepository2017, RedisModifiedLarAggregateCache }
 import hmda.dataBrowser.services.{ DataBrowserQueryService, HealthCheckService, QueryService, S3FileService }
 import io.lettuce.core.api.async.RedisAsyncCommands
 import io.lettuce.core.{ ClientOptions, RedisClient }
@@ -38,9 +38,14 @@ object DataBrowserApi extends Settings {
           val host: String                  = server.host
           val port: Int                     = server.port
 
-          val repository = {
+          val repository2017 = {
             val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("databrowser_db")
-            new PostgresModifiedLarRepository(database.tableName, databaseConfig)
+            new PostgresModifiedLarRepository2017(database.tableName2017, databaseConfig)
+          }
+
+          val repository2018= {
+            val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("databrowser_db")
+            new PostgresModifiedLarRepository(database.tableName2018, databaseConfig)
           }
 
           // We make the creation of the Redis client effectful because it can fail and we would like to operate
@@ -67,11 +72,11 @@ object DataBrowserApi extends Settings {
 
           val cache = new RedisModifiedLarAggregateCache(redisClientTask, redis.ttl)
 
-          val query: QueryService = new DataBrowserQueryService(repository, cache)
+          val query: QueryService = new DataBrowserQueryService(repository2018, repository2017, cache)
 
           val fileCache = new S3FileService
 
-          val healthCheck: HealthCheckService = new HealthCheckService(repository, cache, fileCache)
+          val healthCheck: HealthCheckService = new HealthCheckService(repository2018, cache, fileCache)
 
           val routes = BaseHttpApi.routes(name) ~ DataBrowserHttpApi.create(log, fileCache, query, healthCheck)
           BaseHttpApi.runServer(shutdown, name)(timed(routes), host, port)

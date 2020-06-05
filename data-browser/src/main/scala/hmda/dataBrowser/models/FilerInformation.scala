@@ -3,13 +3,15 @@ package hmda.dataBrowser.models
 import io.circe.Codec
 import slick.jdbc.GetResult
 
-case class FilerInformation(lei: String, respondentName: String, count: Int, year: Int)
+trait FilerInformation
+
+case class FilerInformation2018(lei: String, respondentName: String, count: Int ,year: Int) extends FilerInformation
 
 // $COVERAGE-OFF$
-object FilerInformation {
-  implicit val getResult: GetResult[FilerInformation] = GetResult(r => FilerInformation(r.<<, r.<<, r.<<, r.<<))
+object FilerInformation2018 {
+  implicit val getResult: GetResult[FilerInformation2018] = GetResult(r => FilerInformation2018(r.<<, r.<<, r.<<, r.<<))
 
-  implicit val codec: Codec[FilerInformation] =
-    Codec.forProduct4("lei", "name", "count", "period")(FilerInformation.apply)(f => (f.lei, f.respondentName, f.count, f.year))
+  implicit val codec: Codec[FilerInformation2018] =
+    Codec.forProduct4("lei", "name", "count","period")(FilerInformation2018.apply)(f => (f.lei, f.respondentName, f.count, f.year))
 }
 // $COVERAGE-ON$
