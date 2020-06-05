@@ -252,10 +252,10 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         _ <- deleteLarRows
         _ = log.info(s"Done deleting data from LAR for  $submissionId")
 
-        _ <- insertLarRows
+        larInserted <- insertLarRows
         _ = log.info(s"Done inserting data into LAR for  $submissionId")
 
-        _   <- signDate
+        dateSigned   <- signDate
         res <- insertSubmissionHistory
       } yield res
     result.recover {
