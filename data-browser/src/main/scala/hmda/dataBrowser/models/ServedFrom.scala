@@ -19,11 +19,4 @@ object ServedFrom {
     case Database => "db"
     case Cache    => "cache"
   }
-
-  implicit val encoder: Encoder[ServedFrom] = (param: Parameters) => {
-    val kvs = param.inputs.map {
-      case FieldInfo(name, value) => name -> Json.fromString(value)
-    }
-    Json.obj(kvs: _*)
-  }
 }
