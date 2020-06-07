@@ -56,8 +56,15 @@ trait Settings {
     val environment: String = config.getString("server.s3.environment")
     val bucket: String      = config.getString("server.s3.public-bucket")
     val url: String         = config.getString("server.s3.url")
-    val filteredQueries: String =
-      config.getString("server.s3.routes.filtered-queries")
+    def tableSelector(year: Int): String = {
+      val selected = year match {
+        case 2017 => config.getString("server.s3.routes.filtered-queries.2017")
+        case 2018 => config.getString("server.s3.routes.filtered-queries.2018")
+        case 2019 => config.getString("server.s3.routes.filtered-queries.2019")
+        case _ => config.getString("server.s3.routes.filtered-queries.2019")
+      }
+      selected
+    }
   }
 }
 // $COVERAGE-OFF$
