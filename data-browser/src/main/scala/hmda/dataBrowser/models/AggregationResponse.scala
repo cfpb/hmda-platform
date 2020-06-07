@@ -44,10 +44,11 @@ object AggregationResponse {
   private object constants {
     val Parameters   = "parameters"
     val Aggregations = "aggregations"
+    val ServedFrom = "ServedFrom"
   }
 
   implicit val encoder: Encoder[AggregationResponse] =
-    Encoder.forProduct2(constants.Parameters, constants.Aggregations)(aggR => (aggR.parameters, aggR.aggregations))
+    Encoder.forProduct3(constants.Parameters, constants.Aggregations, constants.ServedFrom)(aggR => (aggR.parameters, aggR.aggregations, aggR.servedFrom))
 
   implicit val decoder: Decoder[AggregationResponse] = (c: HCursor) =>
     for {
