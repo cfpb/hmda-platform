@@ -31,7 +31,7 @@ class DataBrowserIntegrationSpec
 
   val repository2018 = {
     val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("embedded-pg")
-    new PostgresModifiedLarRepository(database.tableName2018, databaseConfig)
+    new PostgresModifiedLarRepository(databaseConfig, database.tableSelector)
   }
 
   val repository2017 = {
@@ -41,7 +41,7 @@ class DataBrowserIntegrationSpec
 
   val cache: RedisModifiedLarAggregateCache = mock[RedisModifiedLarAggregateCache]
 
-  val query = new DataBrowserQueryService(repository2018, repository2017, cache)
+  val query = new DataBrowserQueryService(repository2018, repository2017, cache, log)
 
   val healthCheck: HealthCheckService = mock[HealthCheckService]
 

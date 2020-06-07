@@ -17,18 +17,18 @@ import org.slf4j.Logger
 import scala.util.{ Failure, Success }
 
 object DataBrowserHttpApi {
-  def create(log: Logger, fileCache: S3FileService, query: QueryService, healthCheck: HealthCheckService) (
+  def create(log: Logger, fileCache: S3FileService, query: QueryService, healthCheck: HealthCheckService)(
     implicit mat: Materializer
   ): Route =
     new DataBrowserHttpApi(log, fileCache, query, healthCheck).dataBrowserRoutes
 }
 
-private class DataBrowserHttpApi(log: Logger, fileCache: S3FileService, query: QueryService, healthCheck: HealthCheckService){
+private class DataBrowserHttpApi(log: Logger, fileCache: S3FileService, query: QueryService, healthCheck: HealthCheckService) {
 
   val Csv          = "csv"
   val Pipe         = "pipe"
   val Aggregations = "aggregations"
-  
+
   def serveData(queries: QueryFields, delimiter: Delimiter, errorMessage: String, year: String): Route =
     onComplete(obtainDataSource(fileCache, query)(queries, delimiter, year).runToFuture) {
       case Failure(ex) =>
@@ -53,7 +53,7 @@ private class DataBrowserHttpApi(log: Logger, fileCache: S3FileService, query: Q
             complete(
               query
                 .fetchAggregate(countFields)
-                .map(aggs => AggregationResponse(Parameters.fromBrowserFields(countFields.queryFields), aggs))
+                .map { case (from, aggs) => AggregationResponse(Parameters.fromBrowserFields(countFields.queryFields), aggs, from) }
                 .runToFuture
             )
           }
@@ -64,32 +64,42 @@ private class DataBrowserHttpApi(log: Logger, fileCache: S3FileService, query: Q
               extractNationwideMandatoryYears { mandatoryFields =>
                 extractFieldsForRawQueries(mandatoryFields.year) { queryFields =>
                   //remove filters that have all options selected
-                  val allFields = QueryFields(mandatoryFields.year, (queryFields.queryFields ++ mandatoryFields.queryFields).filterNot { eachQueryField =>
-                    eachQueryField.isAllSelected
+                  val allFields = QueryFields(mandatoryFields.year, (queryFields.queryFields ++ mandatoryFields.queryFields).filterNot {
+                    eachQueryField => eachQueryField.isAllSelected
                   })
                   log.info("Nationwide [CSV]: " + allFields)
                   contentDispositionHeader(allFields.queryFields, Commas) {
-                    serveData(allFields, Commas, s"Failed to perform nationwide CSV query with the following queries: $allFields", allFields.year)
+                    serveData(
+                      allFields,
+                      Commas,
+                      s"Failed to perform nationwide CSV query with the following queries: $allFields",
+                      allFields.year
+                    )
                   }
                 }
               }
             } ~
               // GET /view/nationwide/pipe
-            (path(Pipe) & get) {
-              extractNationwideMandatoryYears { mandatoryFields =>
-                extractFieldsForRawQueries(mandatoryFields.year) { queryFields =>
-                  //remove filters that have all options selected
-                  val allFields = QueryFields(mandatoryFields.year, (queryFields.queryFields ++ mandatoryFields.queryFields).filterNot { eachQueryField =>
-                    eachQueryField.isAllSelected
-                  })
-                  log.info("Nationwide [Pipe]: " + allFields)
-                  contentDispositionHeader(allFields.queryFields, Pipes) {
-                    serveData(allFields, Pipes, s"Failed to perform nationwide PSV query with the following queries: $allFields", allFields.year)
+              (path(Pipe) & get) {
+                extractNationwideMandatoryYears { mandatoryFields =>
+                  extractFieldsForRawQueries(mandatoryFields.year) { queryFields =>
+                    //remove filters that have all options selected
+                    val allFields = QueryFields(mandatoryFields.year, (queryFields.queryFields ++ mandatoryFields.queryFields).filterNot {
+                      eachQueryField => eachQueryField.isAllSelected
+                    })
+                    log.info("Nationwide [Pipe]: " + allFields)
+                    contentDispositionHeader(allFields.queryFields, Pipes) {
+                      serveData(
+                        allFields,
+                        Pipes,
+                        s"Failed to perform nationwide PSV query with the following queries: $allFields",
+                        allFields.year
+                      )
+                    }
                   }
                 }
-              }
 
-            } ~
+              } ~
               // GET /view/nationwide/aggregations
               (path(Aggregations) & get) {
                 extractNationwideMandatoryYears { mandatoryFields =>
@@ -99,7 +109,7 @@ private class DataBrowserHttpApi(log: Logger, fileCache: S3FileService, query: Q
                     complete(
                       query
                         .fetchAggregate(allFields)
-                        .map(aggs => AggregationResponse(Parameters.fromBrowserFields(allFields.queryFields), aggs))
+                        .map { case (from, aggs) => AggregationResponse(Parameters.fromBrowserFields(allFields.queryFields), aggs, from) }
                         .runToFuture
                     )
                   }
@@ -116,7 +126,7 @@ private class DataBrowserHttpApi(log: Logger, fileCache: S3FileService, query: Q
                 complete(
                   query
                     .fetchAggregate(allFields)
-                    .map(aggs => AggregationResponse(Parameters.fromBrowserFields(allFields.queryFields), aggs))
+                    .map { case (from, aggs) => AggregationResponse(Parameters.fromBrowserFields(allFields.queryFields), aggs, from) }
                     .runToFuture
                 )
               }
@@ -129,7 +139,12 @@ private class DataBrowserHttpApi(log: Logger, fileCache: S3FileService, query: Q
                 val allFields = QueryFields(mandatoryFields.year, mandatoryFields.queryFields ++ remainingQueryFields.queryFields)
                 log.info("CSV: " + allFields)
                 contentDispositionHeader(allFields.queryFields, Commas) {
-                  serveData(allFields, Commas, s"Failed to fetch data for /view/csv with the following queries: ${allFields.queryFields}", allFields.year)
+                  serveData(
+                    allFields,
+                    Commas,
+                    s"Failed to fetch data for /view/csv with the following queries: ${allFields.queryFields}",
+                    allFields.year
+                  )
                 }
               }
             }
@@ -141,7 +156,12 @@ private class DataBrowserHttpApi(log: Logger, fileCache: S3FileService, query: Q
                 val allFields = QueryFields(mandatoryFields.year, mandatoryFields.queryFields ++ remainingQueryFields.queryFields)
                 log.info("PIPE: " + allFields)
                 contentDispositionHeader(allFields.queryFields, Pipes) {
-                  serveData(allFields, Pipes, s"Failed to fetch data for /view/pipe with the following queries: ${allFields.queryFields}", allFields.year)
+                  serveData(
+                    allFields,
+                    Pipes,
+                    s"Failed to fetch data for /view/pipe with the following queries: ${allFields.queryFields}",
+                    allFields.year
+                  )
                 }
               }
             }
@@ -154,22 +174,24 @@ private class DataBrowserHttpApi(log: Logger, fileCache: S3FileService, query: Q
             extractYearsMsaMdsStatesAndCounties { filerFields =>
               log.info("Filers: " + filerFields)
               filerFields.year match {
-                case "2017" => onComplete(query.fetchFilers2017(filerFields).runToFuture) {
-                  case Failure(ex) =>
-                    log.error("Failed to obtain filer information", ex)
-                    complete(StatusCodes.InternalServerError)
+                case "2017" =>
+                  onComplete(query.fetchFilers2017(filerFields).runToFuture) {
+                    case Failure(ex) =>
+                      log.error("Failed to obtain filer information", ex)
+                      complete(StatusCodes.InternalServerError)
 
-                  case Success(filerResponse) =>
-                    complete((StatusCodes.OK, filerResponse))
-                }
-                case "2018" => onComplete(query.fetchFilers(filerFields).runToFuture) {
-                  case Failure(ex) =>
-                    log.error("Failed to obtain filer information", ex)
-                    complete(StatusCodes.InternalServerError)
+                    case Success(filerResponse) =>
+                      complete((StatusCodes.OK, filerResponse))
+                  }
+                case _ =>
+                  onComplete(query.fetchFilers(filerFields).runToFuture) {
+                    case Failure(ex) =>
+                      log.error("Failed to obtain filer information", ex)
+                      complete(StatusCodes.InternalServerError)
 
-                  case Success(filerResponse) =>
-                    complete((StatusCodes.OK, filerResponse))
-                }
+                    case Success(filerResponse) =>
+                      complete((StatusCodes.OK, filerResponse))
+                  }
               }
             }
           }

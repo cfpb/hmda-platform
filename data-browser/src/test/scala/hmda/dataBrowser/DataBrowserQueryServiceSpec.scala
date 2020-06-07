@@ -14,6 +14,7 @@ import monix.execution.schedulers.TestScheduler
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{ Matchers, WordSpecLike }
+import org.slf4j.{ Logger, LoggerFactory }
 
 class DataBrowserQueryServiceSpec
   extends TestKit(ActorSystem("data-browser-query-service-spec"))
@@ -24,15 +25,16 @@ class DataBrowserQueryServiceSpec
   implicit val mat: Materializer        = Materializer(system)
   implicit val scheduler: TestScheduler = TestScheduler(ExecutionModel.SynchronousExecution)
 
-  val cache: Cache                = mock[Cache]
-  val repo: ModifiedLarRepository2018 = mock[ModifiedLarRepository2018]
+  val log: Logger                         = LoggerFactory.getLogger(getClass)
+  val cache: Cache                        = mock[Cache]
+  val repo: ModifiedLarRepositoryLatest   = mock[ModifiedLarRepositoryLatest]
   val repo2017: ModifiedLarRepository2017 = mock[ModifiedLarRepository2017]
-  val service                     = new DataBrowserQueryService(repo, repo2017, cache)
+  val service                             = new DataBrowserQueryService(repo, repo2017, cache, log)
 
   "DataBrowserQueryService" must {
     "call fetchData without using the cache" in {
       val expected = sampleMlar
-      (repo.find _).expects(*).returns(Source.single(expected))
+      (repo.find _).expects(*, *).returns(Source.single(expected))
       val source = service.fetchData(QueryFields("2018", Nil))
       val futRes = source.runWith(Sink.head)
 
@@ -83,28 +85,28 @@ class DataBrowserQueryServiceSpec
         // you might find this surprising that we expect the repository to be called but we are dealing with an effect
         // system and everything is lazy. Notice if we evaluated this effect, this test would fail
         (repo.findAndAggregate _)
-          .expects(*)
+          .expects(*, *)
           .returns(Task.raiseError(new Exception("You shouldn't be evaluating me on a cache hit")))
           .twice()
       }
-      val taskActual: Task[Seq[Aggregation]] = service.fetchAggregate(QueryFields("2018", query))
-      val futActual                          = taskActual.runToFuture
+      val taskActual: Task[(ServedFrom, Seq[Aggregation])] = service.fetchAggregate(QueryFields("2018", query))
+      val futActual                                        = taskActual.runToFuture
       scheduler.tick()
-      whenReady(futActual)(_ should contain theSameElementsAs List(a1, a2))
+      whenReady(futActual) { case (_, agg) => agg should contain theSameElementsAs List(a1, a2) }
     }
 
     "fetchFilers returns all the institution filers" in {
       val query = QueryFields("2018", List(QueryField("one", List("a"))))
 
-      val response = FilerInstitutionResponse2018(FilerInformation2018("example", "example", 1, 2018) :: Nil)
+      val response = FilerInstitutionResponse2018(FilerInformationLatest("example", "example", 1, 2018) :: Nil)
       (cache.findFilers2018 _).expects(query.queryFields).returns(Task.now(None))
-      (repo.findFilers _).expects(query.queryFields).returns(Task.now(response.institutions))
+      (repo.findFilers _).expects(query.queryFields, query.year.toInt).returns(Task.now(response.institutions))
       (cache.updateFilers2018 _).expects(*, *).returns(Task.now(response))
 
       val taskActual = service.fetchFilers(query)
       val futActual  = taskActual.runToFuture
       scheduler.tick()
-      whenReady(futActual)(_ shouldBe response)
+      whenReady(futActual) { case (_, filers) => filers shouldBe response }
     }
 
     def sampleMlar = ModifiedLarEntity(

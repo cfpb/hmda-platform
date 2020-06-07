@@ -4,7 +4,7 @@ import io.circe.Codec
 
 case class FilerInstitutionResponse2017(institutions: Seq[FilerInformation2017])
 
-case class FilerInstitutionResponse2018(institutions: Seq[FilerInformation2018])
+case class FilerInstitutionResponse2018(institutions: Seq[FilerInformationLatest])
 
 object FilerInstitutionResponse2017 {
   implicit val codec: Codec[FilerInstitutionResponse2017] =
