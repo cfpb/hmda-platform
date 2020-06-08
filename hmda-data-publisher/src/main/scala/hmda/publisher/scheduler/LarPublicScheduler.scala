@@ -11,7 +11,7 @@ import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.publisher.helper.ModifiedLarHeader
-import hmda.publisher.query.component.PublisherComponent2018
+import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019}
 import hmda.publisher.query.lar.ModifiedLarEntityImpl
 import hmda.publisher.scheduler.schedules.Schedules.{LarPublicScheduler2018, LarPublicScheduler2019}
 import hmda.query.DbConfiguration.dbConfig
@@ -24,12 +24,14 @@ import software.amazon.awssdk.regions.providers.AwsRegionProvider
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class LarPublicScheduler extends HmdaActor with PublisherComponent2018 with ModifiedLarHeader {
+class LarPublicScheduler extends HmdaActor with PublisherComponent2018 with PublisherComponent2019 with ModifiedLarHeader {
 
   implicit val ec           = context.system.dispatcher
   implicit val materializer = Materializer(context)
 
   def mlarRepository2018 = new ModifiedLarRepository2018(dbConfig)
+  def mlarRepository2019 = new ModifiedLarRepository2019(dbConfig)
+
 
   val awsConfig    = ConfigFactory.load("application.conf").getConfig("public-aws")
   val accessKeyId  = awsConfig.getString("public-access-key-id")
@@ -49,18 +51,16 @@ class LarPublicScheduler extends HmdaActor with PublisherComponent2018 with Modi
     .withS3RegionProvider(awsRegionProvider)
     .withListBucketApiVersion(ListBucketVersion2)
 
-  override def preStart(): Unit =
+  override def preStart(): Unit = {
     QuartzSchedulerExtension(context.system)
       .schedule("LarPublicScheduler2018", self, LarPublicScheduler2018)
-
-  QuartzSchedulerExtension(context.system)
-    .schedule("LarPublicScheduler2019", self, LarPublicScheduler2019)
-
-  override def postStop(): Unit =
+    QuartzSchedulerExtension(context.system)
+      .schedule("LarPublicScheduler2019", self, LarPublicScheduler2019)
+  }
+  override def postStop(): Unit = {
     QuartzSchedulerExtension(context.system).cancelJob("LarPublicScheduler2018")
     QuartzSchedulerExtension(context.system).cancelJob("LarPublicScheduler2019")
-
-
+  }
   override def receive: Receive = {
 
     case LarPublicScheduler2018 =>
@@ -74,14 +74,18 @@ class LarPublicScheduler extends HmdaActor with PublisherComponent2018 with Modi
     val fileNamePSV = year+"_lar.txt"
 
     val allResultsPublisher: DatabasePublisher[ModifiedLarEntityImpl] =
-      mlarRepository2018.getAllLARs(getFilterList())
+      year match {
+        case "2018" =>        mlarRepository2018.getAllLARs(getFilterList())
+        case "2019" =>       mlarRepository2019.getAllLARs(getFilterList())
+        case _ => throw new IllegalArgumentException(s"Unknown year selector value:  [$year]")
+      }
 
     val allResultsSource: Source[ModifiedLarEntityImpl, NotUsed] =
       Source.fromPublisher(allResultsPublisher)
 
     //PSV Sync
     val s3SinkPSV = S3
-      .multipartUpload(bucket, s"$environment/dynamic-data/"+year+"/$fileNamePSV")
+      .multipartUpload(bucket, s"$environment/dynamic-data/"+year+"/"+fileNamePSV)
       .withAttributes(S3Attributes.settings(s3Settings))
 
     val resultsPSV: Future[MultipartUploadResult] =
@@ -96,7 +100,7 @@ class LarPublicScheduler extends HmdaActor with PublisherComponent2018 with Modi
 
     resultsPSV onComplete {
       case Success(result) =>
-        log.info("Pushed to S3: " + s"$bucket/$environment/dynamic-data/"+year+"/$fileNamePSV" + ".")
+        log.info("Pushed to S3: " + s"$bucket/$environment/dynamic-data/"+year+"/"+fileNamePSV + ".")
       case Failure(t) =>
         log.info("An error has occurred getting Public LAR Data in Future: " + t.getMessage)
     }

@@ -10,7 +10,7 @@ import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.publisher.helper.TSHeader
-import hmda.publisher.query.component.PublisherComponent2018
+import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019}
 import hmda.publisher.scheduler.schedules.Schedules.{TsPublicScheduler2018, TsPublicScheduler2019}
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.ts._
@@ -22,11 +22,13 @@ import software.amazon.awssdk.regions.providers.AwsRegionProvider
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with TSHeader {
+class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with PublisherComponent2019 with TSHeader {
 
   implicit val ec           = context.system.dispatcher
   implicit val materializer = Materializer(context)
   def tsRepository2018      = new TransmittalSheetRepository2018(dbConfig)
+  def tsRepository2019      = new TransmittalSheetRepository2019(dbConfig)
+
 
   val awsConfig              = ConfigFactory.load("application.conf").getConfig("public-aws")
   val accessKeyId            = awsConfig.getString("public-access-key-id")
@@ -46,14 +48,18 @@ class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with TSHea
       .withS3RegionProvider(awsRegionProvider)
       .withListBucketApiVersion(ListBucketVersion2)
 
-  override def preStart(): Unit =
+  override def preStart(): Unit = {
     QuartzSchedulerExtension(context.system)
       .schedule("TsPublicScheduler2018", self, TsPublicScheduler2018)
 
-  override def postStop(): Unit =
+    QuartzSchedulerExtension(context.system)
+      .schedule("TsPublicScheduler2019", self, TsPublicScheduler2019)
+  }
+
+  override def postStop(): Unit = {
     QuartzSchedulerExtension(context.system).cancelJob("TsPublicScheduler2018")
-
-
+    QuartzSchedulerExtension(context.system).cancelJob("TsPublicScheduler2019")
+  }
   override def receive: Receive = {
 
     case TsPublicScheduler2018 =>
@@ -67,12 +73,16 @@ class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with TSHea
     val fileNamePSV = year+"_ts.txt"
 
     val s3SinkPSV =
-      S3.multipartUpload(bucket, s"$environment/dynamic-data/"+year+"/$fileNamePSV")
+      S3.multipartUpload(bucket, s"$environment/dynamic-data/"+year+"/"+fileNamePSV)
         .withAttributes(S3Attributes.settings(s3Settings))
 
     val allResults: Future[Seq[TransmittalSheetEntity]] =
-      tsRepository2018.getAllSheets(getFilterList())
+      year match {
+        case "2018" =>        tsRepository2018.getAllSheets(getFilterList())
+        case "2019" =>       tsRepository2019.getAllSheets(getFilterList())
+        case _ => throw new IllegalArgumentException(s"Unknown year selector value:  [$year]")
 
+      }
     //SYNC PSV
     val resultsPSV: Future[MultipartUploadResult] = Source
       .future(allResults)
@@ -87,7 +97,7 @@ class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with TSHea
 
     resultsPSV onComplete {
       case Success(result) =>
-        log.info("Pushed to S3: " + s"$bucket/$environment/dynamic-data/"+year+"/$fileNamePSV" + ".")
+        log.info("Pushed to S3: " + s"$bucket/$environment/dynamic-data/"+year+"/"+fileNamePSV + ".")
       case Failure(t) =>
         println(" An error has occurred getting Public PSV TS Data "+year+": " + t.getMessage)
     }
