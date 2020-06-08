@@ -46,7 +46,7 @@ object ModifiedLarPublisher {
   val region                    = config.getString("aws.region")
   val bucket                    = config.getString("aws.public-bucket")
   val environment               = config.getString("aws.environment")
-  val isGenerateS3File          = config.getBoolean("hmda.lar.modified.generateS3Files")
+  val isGenerateBothS3Files          = config.getBoolean("hmda.lar.modified.generateS3Files")
   val isCreateDispositionRecord = config.getBoolean("hmda.lar.modified.creteDispositionRecord")
   val isJustGenerateS3File = config.getBoolean("hmda.lar.modified.justGenerateS3File")
   val isJustGenerateS3FileHeader = config.getBoolean("hmda.lar.modified.justGenerateS3FileHeader")
@@ -84,8 +84,8 @@ object ModifiedLarPublisher {
 
             case PersistToS3AndPostgres(submissionId, respondTo) =>
               log.info(
-                s"Publishing Modified LAR for $submissionId with isGenerateS3File set to " + isGenerateS3File +
-                  "and isCreateDispositionRecord set to " + isCreateDispositionRecord
+                s"Publishing Modified LAR for $submissionId with isGenerateBothS3Files set to " + isGenerateBothS3Files +
+                  "and isCreateDispositionRecord set to " + isCreateDispositionRecord + " isJustGenerateS3File set to " + isJustGenerateS3File + " isJustGenerateS3FileHeader set to " + isJustGenerateS3FileHeader
               )
 
               val fileName       = s"${submissionId.lei.toUpperCase()}.txt"
@@ -162,19 +162,25 @@ object ModifiedLarPublisher {
                 mlarSource.toMat(postgresOut(2))(Keep.right)
 
               // write to both Postgres and S3
-              val graphWithS3 = mlarGraphS3
+              val graphWithS3AndPG = mlarGraphS3
 
               //only write to PG - do not generate S3 files
               val graphWithoutS3 = mlarGraphWithoutS3
 
-              val graphWithJustS3NoHeader = <how to get graph just for S3 file with no header>
+//              val graphWithJustS3NoHeader = <how to get graph just for S3 file with no header>
 
-              val graphWithJustS3WithHeader = <how to get graph with just S3 file with header>
+//              val graphWithJustS3WithHeader = <how to get graph with just S3 file with header>
 
               val finalResult: Future[Unit] = for {
                 _ <- removeLei
-                _ <- if (isGenerateS3File) graphWithS3.run()
-                else graphWithoutS3.run()
+                _ <- if (isGenerateBothS3Files)
+                      graphWithS3AndPG.run()
+                    else if (isJustGenerateS3File)
+                      graphWithS3AndPG.run()
+                    else if (isJustGenerateS3FileHeader)
+                      graphWithS3AndPG.run()
+                    else
+                      graphWithS3AndPG.run()
                 _ <- produceRecord(disclosureTopic, submissionId.lei, submissionId.toString, kafkaProducer)
               } yield ()
 
