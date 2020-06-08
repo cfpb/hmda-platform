@@ -48,6 +48,8 @@ object ModifiedLarPublisher {
   val environment               = config.getString("aws.environment")
   val isGenerateS3File          = config.getBoolean("hmda.lar.modified.generateS3Files")
   val isCreateDispositionRecord = config.getBoolean("hmda.lar.modified.creteDispositionRecord")
+  val isJustGenerateS3File = config.getBoolean("hmda.lar.modified.justGenerateS3File")
+  val isJustGenerateS3FileHeader = config.getBoolean("hmda.lar.modified.justGenerateS3FileHeader")
 
   val awsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccess))
   val awsRegionProvider: AwsRegionProvider = new AwsRegionProvider {
@@ -164,6 +166,10 @@ object ModifiedLarPublisher {
 
               //only write to PG - do not generate S3 files
               val graphWithoutS3 = mlarGraphWithoutS3
+
+              val graphWithJustS3NoHeader = <how to get graph just for S3 file with no header>
+
+              val graphWithJustS3WithHeader = <how to get graph with just S3 file with header>
 
               val finalResult: Future[Unit] = for {
                 _ <- removeLei
