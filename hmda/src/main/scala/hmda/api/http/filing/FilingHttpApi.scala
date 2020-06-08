@@ -66,11 +66,11 @@ private class FilingHttpApi(log: Logger, sharding: ClusterSharding)(implicit val
           pathEndOrSingleSlash {
             quarterlyFiler(lei, period) {
               // POST/institutions/<lei>/filings/<year>/quarters/<quarter>
-              extractUri { uri =>
+              (post & extractUri) { uri =>
                 createFilingForInstitution(lei, period, Option(quarter), uri)
               } ~
                 // GET /institutions/<lei>/filings/<year>/quarters/<quarter>
-                extractUri { uri =>
+                (get & extractUri) { uri =>
                   parameter('page.as[Int] ? 1)(pageNumber => getFilingForInstitution(lei, period, Option(quarter), uri, pageNumber))
                 }
             }
