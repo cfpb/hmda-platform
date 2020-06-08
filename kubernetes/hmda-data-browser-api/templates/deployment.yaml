@@ -96,12 +96,12 @@ spec:
                   key: aws-region
             - name: BROWSER_LOG_LEVEL
               value: {{.Values.databrowser.loglevel}}
-            - name: ROUTE_NATIONWIDE_CSV
-              value: {{.Values.databrowser.nationwideRouteCSV}}
-            - name: ROUTE_NATIONWIDE_PIPE
-              value: {{.Values.databrowser.nationwideRoutePipe}}
-            - name: DATABROWSER_PG_TABLE
+            - name: DATABROWSER_PG_TABLE_2017
+              value: intentionally_left_blank
+            - name: DATABROWSER_PG_TABLE_2018
               value: modifiedlar2018_snapshot
+            - name: DATABROWSER_PG_TABLE_2019
+              value: modifiedlar2019_snapshot
             - name: REDIS_HOSTNAME
               value: {{.Values.databrowser.redis}}
             - name: S3_PUBLIC_BUCKET
