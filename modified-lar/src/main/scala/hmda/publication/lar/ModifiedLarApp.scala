@@ -45,7 +45,7 @@ object ModifiedLarApp extends App {
       // bubble up failure if there is any (this is done to prevent a commit to Kafka from happening
       // when used in Kafka consumer Akka Stream
       futRes.map(result => result.status).flatMap {
-        case UploadSucceeded         => Future(Done.done())
+        case UploadSucceeded         => Future.successful(Done.done())
         case UploadFailed(exception) => Future.failed(exception)
       }
     }
@@ -95,7 +95,7 @@ object ModifiedLarApp extends App {
       .withGroupId(HmdaGroups.modifiedLarGroup)
       .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest")
 
-  val streamCompleted: Future[Done] =
+  val (control, streamCompleted) =
     Consumer
       .committableSource(consumerSettings, Subscriptions.topics(HmdaTopics.signTopic, HmdaTopics.modifiedLarTopic))
       .mapAsync(parallelism) { msg =>
@@ -103,23 +103,28 @@ object ModifiedLarApp extends App {
           log.info(s"Received a message - key: ${msg.record.key()}, value: ${msg.record.value()}")
           processKafkaRecord(msg.record.value().trim).map(_ => msg.committableOffset)
         }
-        akka.pattern.retry(() => processMsg(), 1, 90.seconds)(ec, classicSystem.scheduler)
+        akka.pattern.retry(
+          attempt = () => processMsg(),
+          attempts = 2,
+          delay = 90.seconds
+        )(ec, classicSystem.scheduler)
       }
-      .toMat(Committer.sink(CommitterSettings(classicSystem).withParallelism(parallelism * 2)))(Keep.both)
-      .mapMaterializedValue { case (control, completed) => control.drainAndShutdown(completed) }
+      .toMat(Committer.sink(CommitterSettings(classicSystem)))(Keep.both)
       .run()
 
   streamCompleted.onComplete {
     case Failure(exception) =>
       log.error("Kafka consumer infinite stream failed", exception)
-      classicSystem
-        .terminate()
+      control
+        .shutdown()
+        .flatMap(_ => classicSystem.terminate())
         .foreach(_ => sys.exit(1)) // The Cassandra connection stays up and prevents the app from shutting down even when the Kafka stream is not active, so we explicitly shut the application down
 
-    case Success(res) =>
+    case Success(_) =>
       log.error("Kafka consumer infinite stream completed, an infinite stream should not complete")
-      classicSystem
-        .terminate()
+      control
+        .shutdown()
+        .flatMap(_ => classicSystem.terminate())
         .foreach(_ => sys.exit(2))
   }
 
