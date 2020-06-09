@@ -71,8 +71,8 @@ class DataBrowserIntegrationSpec
     }
 
     "respond to aggregations" in {
-      (cache.find _).expects(*).returns(Task.now(None))
-      (cache.update _).expects(*, *).returns(Task(Statistic(1L, 1)))
+      (cache.find _).expects(*, *).returns(Task.now(None))
+      (cache.update _).expects(*, *, *).returns(Task(Statistic(1L, 1)))
 
       Get("/view/aggregations?msamds=34980,23434&actions_taken=5&years=2018") ~> routes ~> check {
         response.status shouldBe StatusCodes.OK
@@ -99,8 +99,8 @@ class DataBrowserIntegrationSpec
     }
 
     "response to count aggregation requests" in {
-      (cache.find _).expects(*).returns(Task.now(None))
-      (cache.update _).expects(*, *).returns(Task(Statistic(1L, 1)))
+      (cache.find _).expects(*, *).returns(Task.now(None))
+      (cache.update _).expects(*, *, *).returns(Task(Statistic(1L, 1)))
 
       Get("/view/count?years=2018&msamds=34980&states=CA") ~> routes ~> check {
         response.status shouldBe StatusCodes.OK
@@ -108,8 +108,8 @@ class DataBrowserIntegrationSpec
     }
 
     "respond to filer requests" in {
-      (cache.findFilers2018 _).expects(*).returns(Task.now(None))
-      (cache.updateFilers2018 _).expects(*, *).returns(Task.now(FilerInstitutionResponse2018(Nil)))
+      (cache.findFilers2018 _).expects(*, *).returns(Task.now(None))
+      (cache.updateFilers2018 _).expects(*, *, *).returns(Task.now(FilerInstitutionResponse2018(Nil)))
 
       Get("/view/filers?years=2018") ~> routes ~> check {
         response.status shouldBe StatusCodes.OK
@@ -117,7 +117,7 @@ class DataBrowserIntegrationSpec
     }
 
     "respond to failed filer requests due to a cache error" in {
-      (cache.findFilers2018 _).expects(*).returns(Task.raiseError(new RuntimeException("BOOM")))
+      (cache.findFilers2018 _).expects(*, *).returns(Task.raiseError(new RuntimeException("BOOM")))
 
       Get("/view/filers?years=2018") ~> routes ~> check {
         response.status shouldBe StatusCodes.InternalServerError
@@ -125,8 +125,8 @@ class DataBrowserIntegrationSpec
     }
 
     "respond to nationwide aggregation queries" in {
-      (cache.find _).expects(*).returns(Task.now(None))
-      (cache.update _).expects(*, *).returns(Task(Statistic(1L, 1)))
+      (cache.find _).expects(*, *).returns(Task.now(None))
+      (cache.update _).expects(*, *, *).returns(Task(Statistic(1L, 1)))
 
       Get(
         "/view/nationwide/aggregations?years=2018&actions_taken=4"

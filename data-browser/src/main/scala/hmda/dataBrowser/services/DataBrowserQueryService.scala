@@ -88,9 +88,9 @@ class DataBrowserQueryService(repoLatest: ModifiedLarRepositoryLatest, repo2017:
         val year = eachCombination.find(_.name == "year").map(_.values.head).getOrElse(queryFields.year).toInt
 
         cacheResult(
-          cacheLookup = cache.find(eachCombination),
+          cacheLookup = cache.find(eachCombination, year),
           onMiss = repo.findAndAggregate(eachCombination, year),
-          cacheUpdate = cache.update(eachCombination, _: Statistic)
+          cacheUpdate = cache.update(eachCombination, year, _: Statistic)
         ).map { case (from, statistic) => (from, Aggregation(statistic.count, statistic.sum, fieldInfos)) }
       }
     }.map(results =>
@@ -104,18 +104,18 @@ class DataBrowserQueryService(repoLatest: ModifiedLarRepositoryLatest, repo2017:
   override def fetchFilers(queryFields: QueryFields): Task[(ServedFrom, FilerInstitutionResponse2018)] = {
     val fields = queryFields.queryFields
     cacheResult(
-      cacheLookup = cache.findFilers2018(fields),
+      cacheLookup = cache.findFilers2018(fields, queryFields.year.toInt),
       onMiss = repoLatest.findFilers(fields, queryFields.year.toInt).map(FilerInstitutionResponse2018(_)),
-      cacheUpdate = cache.updateFilers2018(fields, _: FilerInstitutionResponse2018)
+      cacheUpdate = cache.updateFilers2018(fields, queryFields.year.toInt, _: FilerInstitutionResponse2018)
     )
   }
 
   override def fetchFilers2017(queryFields: QueryFields): Task[(ServedFrom, FilerInstitutionResponse2017)] = {
     val fields = queryFields.queryFields
     cacheResult(
-      cacheLookup = cache.findFilers2017(fields),
+      cacheLookup = cache.findFilers2017(fields, queryFields.year.toInt),
       onMiss = repo2017.findFilers(fields, queryFields.year.toInt).map(FilerInstitutionResponse2017(_)),
-      cacheUpdate = cache.updateFilers2017(fields, _: FilerInstitutionResponse2017)
+      cacheUpdate = cache.updateFilers2017(fields, queryFields.year.toInt, _: FilerInstitutionResponse2017)
     )
   }
 

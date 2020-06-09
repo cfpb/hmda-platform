@@ -39,8 +39,8 @@ class DataBrowserQueryServiceSpec
       val futRes = source.runWith(Sink.head)
 
       whenReady(futRes) { res =>
-        (cache.find _).expects(*).never()
-        (cache.findFilers2018 _).expects(*).never()
+        (cache.find _).expects(*, *).never()
+        (cache.findFilers2018 _).expects(*, *).never()
         res shouldBe expected
       }
     }
@@ -80,8 +80,8 @@ class DataBrowserQueryServiceSpec
 
       // simulate cache hits
       inAnyOrder {
-        (cache.find _).expects(List(QueryField("one", List("a")))).returns(Task.now(Some(e1)))
-        (cache.find _).expects(List(QueryField("one", List("b")))).returns(Task.now(Some(e2)))
+        (cache.find _).expects(List(QueryField("one", List("a"))), 2018).returns(Task.now(Some(e1)))
+        (cache.find _).expects(List(QueryField("one", List("b"))), 2018).returns(Task.now(Some(e2)))
         // you might find this surprising that we expect the repository to be called but we are dealing with an effect
         // system and everything is lazy. Notice if we evaluated this effect, this test would fail
         (repo.findAndAggregate _)
@@ -99,9 +99,9 @@ class DataBrowserQueryServiceSpec
       val query = QueryFields("2018", List(QueryField("one", List("a"))))
 
       val response = FilerInstitutionResponse2018(FilerInformationLatest("example", "example", 1, 2018) :: Nil)
-      (cache.findFilers2018 _).expects(query.queryFields).returns(Task.now(None))
+      (cache.findFilers2018 _).expects(query.queryFields, query.year.toInt).returns(Task.now(None))
       (repo.findFilers _).expects(query.queryFields, query.year.toInt).returns(Task.now(response.institutions))
-      (cache.updateFilers2018 _).expects(*, *).returns(Task.now(response))
+      (cache.updateFilers2018 _).expects(*, *, *).returns(Task.now(response))
 
       val taskActual = service.fetchFilers(query)
       val futActual  = taskActual.runToFuture

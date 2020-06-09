@@ -1,6 +1,6 @@
 package hmda.dataBrowser.repositories
 
-import hmda.dataBrowser.models.{ FilerInstitutionResponse2017, FilerInstitutionResponse2018, QueryField, Statistic }
+import hmda.dataBrowser.models.{ FilerInstitutionResponse2017, FilerInstitutionResponse2018, QueryField, QueryFields, Statistic }
 import io.lettuce.core.api.async.RedisAsyncCommands
 import monix.eval.Task
 
@@ -39,49 +39,58 @@ class RedisModifiedLarAggregateCache(redisClient: Task[RedisAsyncCommands[String
         .map(_ => ())
     }.onErrorFallbackTo(Task.unit)
 
-  private def key(queryFields: List[QueryField]): String = {
+  private def key(queryFields: List[QueryField], year: Int): String = {
     // ensure we get a stable sorting order so we form keys correctly in Redis
     val sortedQueryFields = queryFields.sortBy(_.name)
+    val yearKey           = s"YEAR:$year"
     val redisKey = sortedQueryFields
       .map(field => s"${field.name}:${field.values.mkString("|")}")
       .mkString(":")
-    s"$Prefix:$redisKey"
+    s"$Prefix:$redisKey$yearKey"
   }
 
-  override def find(queryFields: List[QueryField]): Task[Option[Statistic]] = {
-    val redisKey = key(queryFields)
+  override def find(queryFields: List[QueryField], year: Int): Task[Option[Statistic]] = {
+    val redisKey = key(queryFields, year)
     findAndParse[Statistic](redisKey)
   }
 
-  override def findFilers2017(filerFields: List[QueryField]): Task[Option[FilerInstitutionResponse2017]] = {
-    val redisKey = key(filerFields)
+  override def findFilers2017(filerFields: List[QueryField], year: Int): Task[Option[FilerInstitutionResponse2017]] = {
+    val redisKey = key(filerFields, year)
     println(redisKey)
     findAndParse[FilerInstitutionResponse2017](redisKey)
   }
 
-  override def findFilers2018(filerFields: List[QueryField]): Task[Option[FilerInstitutionResponse2018]] = {
-    val redisKey = key(filerFields)
+  override def findFilers2018(filerFields: List[QueryField], year: Int): Task[Option[FilerInstitutionResponse2018]] = {
+    val redisKey = key(filerFields, year)
     println(redisKey)
     findAndParse[FilerInstitutionResponse2018](redisKey)
   }
 
-  override def update(queryFields: List[QueryField], statistic: Statistic): Task[Statistic] = {
-    val redisKey = key(queryFields)
+  override def update(queryFields: List[QueryField], year: Int, statistic: Statistic): Task[Statistic] = {
+    val redisKey = key(queryFields, year)
     updateAndSetTTL(redisKey, statistic)
   }
 
-  override def updateFilers2017(queryFields: List[QueryField], filerInstitutionResponse: FilerInstitutionResponse2017): Task[FilerInstitutionResponse2017] = {
-    val redisKey = key(queryFields)
-    updateAndSetTTL(redisKey.toString, filerInstitutionResponse)
+  override def updateFilers2017(
+                                 queryFields: List[QueryField],
+                                 year: Int,
+                                 filerInstitutionResponse: FilerInstitutionResponse2017
+                               ): Task[FilerInstitutionResponse2017] = {
+    val redisKey = key(queryFields, year)
+    updateAndSetTTL(redisKey, filerInstitutionResponse)
   }
 
-  override def updateFilers2018(queryFields: List[QueryField], filerInstitutionResponse: FilerInstitutionResponse2018): Task[FilerInstitutionResponse2018] = {
-    val redisKey = key(queryFields)
-    updateAndSetTTL(redisKey.toString, filerInstitutionResponse)
+  override def updateFilers2018(
+                                 queryFields: List[QueryField],
+                                 year: Int,
+                                 filerInstitutionResponse: FilerInstitutionResponse2018
+                               ): Task[FilerInstitutionResponse2018] = {
+    val redisKey = key(queryFields, year)
+    updateAndSetTTL(redisKey, filerInstitutionResponse)
   }
 
-  override def invalidate(queryFields: List[QueryField]): Task[Unit] = {
-    val redisKey = key(queryFields)
+  override def invalidate(queryFields: List[QueryField], year: Int): Task[Unit] = {
+    val redisKey = key(queryFields, year)
     invalidateKey(redisKey)
   }
 
