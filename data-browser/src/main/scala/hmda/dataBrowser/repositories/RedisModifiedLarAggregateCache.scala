@@ -40,13 +40,15 @@ class RedisModifiedLarAggregateCache(redisClient: Task[RedisAsyncCommands[String
     }.onErrorFallbackTo(Task.unit)
 
   private def key(queryFields: List[QueryField], year: Int): String = {
+    // The year was originally a query field but it was split up later, we do this to preserve backwards compatibility
+    val yearQuery = QueryField(name = "year", year.toString :: Nil, dbName = "filing_year")
     // ensure we get a stable sorting order so we form keys correctly in Redis
-    val sortedQueryFields = queryFields.sortBy(_.name)
-    val yearKey           = s"YEAR:$year"
+    val sortedQueryFields = (yearQuery :: queryFields).sortBy(_.name)
     val redisKey = sortedQueryFields
       .map(field => s"${field.name}:${field.values.mkString("|")}")
       .mkString(":")
-    s"$Prefix:$redisKey$yearKey"
+
+    s"$Prefix:$redisKey"
   }
 
   override def find(queryFields: List[QueryField], year: Int): Task[Option[Statistic]] = {
