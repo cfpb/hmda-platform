@@ -101,12 +101,12 @@ class DataBrowserQueryService(repoLatest: ModifiedLarRepositoryLatest, repo2017:
     )
   }
 
-  override def fetchFilers(queryFields: QueryFields): Task[(ServedFrom, FilerInstitutionResponse2018)] = {
+  override def fetchFilers(queryFields: QueryFields): Task[(ServedFrom, FilerInstitutionResponseLatest)] = {
     val fields = queryFields.queryFields
     cacheResult(
       cacheLookup = cache.findFilers2018(fields, queryFields.year.toInt),
-      onMiss = repoLatest.findFilers(fields, queryFields.year.toInt).map(FilerInstitutionResponse2018(_)),
-      cacheUpdate = cache.updateFilers2018(fields, queryFields.year.toInt, _: FilerInstitutionResponse2018)
+      onMiss = repoLatest.findFilers(fields, queryFields.year.toInt).map(FilerInstitutionResponseLatest(_)),
+      cacheUpdate = cache.updateFilers2018(fields, queryFields.year.toInt, _: FilerInstitutionResponseLatest)
     )
   }
 

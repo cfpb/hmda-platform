@@ -180,8 +180,8 @@ private class DataBrowserHttpApi(log: Logger, fileCache: S3FileService, query: Q
                       log.error("Failed to obtain filer information", ex)
                       complete(StatusCodes.InternalServerError)
 
-                    case Success(filerResponse) =>
-                      complete((StatusCodes.OK, filerResponse))
+                    case Success(filerResponse @ (from, response2017)) =>
+                      complete((StatusCodes.OK, FilerInstitutionHttpResponse2017(response2017.institutions, from)))
                   }
                 case _ =>
                   onComplete(query.fetchFilers(filerFields).runToFuture) {
@@ -189,8 +189,8 @@ private class DataBrowserHttpApi(log: Logger, fileCache: S3FileService, query: Q
                       log.error("Failed to obtain filer information", ex)
                       complete(StatusCodes.InternalServerError)
 
-                    case Success(filerResponse) =>
-                      complete((StatusCodes.OK, filerResponse))
+                    case Success(filerResponse @ (from, latest)) =>
+                      complete((StatusCodes.OK, FilerInstitutionHttpResponseLatest(latest.institutions, from)))
                   }
               }
             }

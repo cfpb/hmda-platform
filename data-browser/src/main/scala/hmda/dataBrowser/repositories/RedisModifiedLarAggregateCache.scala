@@ -1,6 +1,6 @@
 package hmda.dataBrowser.repositories
 
-import hmda.dataBrowser.models.{ FilerInstitutionResponse2017, FilerInstitutionResponse2018, QueryField, QueryFields, Statistic }
+import hmda.dataBrowser.models.{ FilerInstitutionResponse2017, FilerInstitutionResponseLatest, QueryField, QueryFields, Statistic }
 import io.lettuce.core.api.async.RedisAsyncCommands
 import monix.eval.Task
 
@@ -62,10 +62,10 @@ class RedisModifiedLarAggregateCache(redisClient: Task[RedisAsyncCommands[String
     findAndParse[FilerInstitutionResponse2017](redisKey)
   }
 
-  override def findFilers2018(filerFields: List[QueryField], year: Int): Task[Option[FilerInstitutionResponse2018]] = {
+  override def findFilers2018(filerFields: List[QueryField], year: Int): Task[Option[FilerInstitutionResponseLatest]] = {
     val redisKey = key(filerFields, year)
     println(redisKey)
-    findAndParse[FilerInstitutionResponse2018](redisKey)
+    findAndParse[FilerInstitutionResponseLatest](redisKey)
   }
 
   override def update(queryFields: List[QueryField], year: Int, statistic: Statistic): Task[Statistic] = {
@@ -85,8 +85,8 @@ class RedisModifiedLarAggregateCache(redisClient: Task[RedisAsyncCommands[String
   override def updateFilers2018(
                                  queryFields: List[QueryField],
                                  year: Int,
-                                 filerInstitutionResponse: FilerInstitutionResponse2018
-                               ): Task[FilerInstitutionResponse2018] = {
+                                 filerInstitutionResponse: FilerInstitutionResponseLatest
+                               ): Task[FilerInstitutionResponseLatest] = {
     val redisKey = key(queryFields, year)
     updateAndSetTTL(redisKey, filerInstitutionResponse)
   }

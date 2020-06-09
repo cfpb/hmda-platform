@@ -6,7 +6,7 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import hmda.dataBrowser.api.DataBrowserHttpApi
 import hmda.dataBrowser.models.HealthCheckStatus.{ Down, Up }
-import hmda.dataBrowser.models.{ AggregationResponse, FilerInstitutionResponse2018, HealthCheckResponse, Statistic }
+import hmda.dataBrowser.models.{ AggregationResponse, FilerInstitutionResponseLatest, HealthCheckResponse, Statistic }
 import hmda.dataBrowser.repositories._
 import hmda.dataBrowser.services.{ DataBrowserQueryService, HealthCheckService, S3FileService }
 import hmda.utils.EmbeddedPostgres
@@ -109,7 +109,7 @@ class DataBrowserIntegrationSpec
 
     "respond to filer requests" in {
       (cache.findFilers2018 _).expects(*, *).returns(Task.now(None))
-      (cache.updateFilers2018 _).expects(*, *, *).returns(Task.now(FilerInstitutionResponse2018(Nil)))
+      (cache.updateFilers2018 _).expects(*, *, *).returns(Task.now(FilerInstitutionResponseLatest(Nil)))
 
       Get("/view/filers?years=2018") ~> routes ~> check {
         response.status shouldBe StatusCodes.OK

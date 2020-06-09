@@ -98,7 +98,7 @@ class DataBrowserQueryServiceSpec
     "fetchFilers returns all the institution filers" in {
       val query = QueryFields("2018", List(QueryField("one", List("a"))))
 
-      val response = FilerInstitutionResponse2018(FilerInformationLatest("example", "example", 1, 2018) :: Nil)
+      val response = FilerInstitutionResponseLatest(FilerInformationLatest("example", "example", 1, 2018) :: Nil)
       (cache.findFilers2018 _).expects(query.queryFields, query.year.toInt).returns(Task.now(None))
       (repo.findFilers _).expects(query.queryFields, query.year.toInt).returns(Task.now(response.institutions))
       (cache.updateFilers2018 _).expects(*, *, *).returns(Task.now(response))

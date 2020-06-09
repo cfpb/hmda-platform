@@ -279,7 +279,7 @@ class DataBrowserDirectivesSpec extends WordSpec with ScalatestRouteTest with Ma
 
       Get("/") ~> route ~> check {
         response.status shouldBe StatusCodes.BadRequest
-        responseAs[String].contains("must provide year parameter") shouldBe true
+        responseAs[String].contains("must provide years parameter") shouldBe true
       }
     }
 
@@ -297,7 +297,7 @@ class DataBrowserDirectivesSpec extends WordSpec with ScalatestRouteTest with Ma
 
       Get("/") ~> route ~> check {
         response.status shouldBe StatusCodes.BadRequest
-        responseAs[String].contains("must provide year parameter") shouldBe true
+        responseAs[String].contains("must provide years parameter") shouldBe true
       }
     }
 
