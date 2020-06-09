@@ -134,7 +134,7 @@ object ModifiedLarPublisher {
                     .insert(enriched, submissionId)
                 )
                   .toMat(Sink.ignore)(Keep.right)
-
+              val mlarHeader = Source.single(ByteString(ModifiedLoanApplicationRegister.header))
               val mlarGraphS3: RunnableGraph[Future[Done]] =
                 RunnableGraph.fromGraph(
                   GraphDSL.create(mlarSource, s3SinkWithHeader, s3Sink, postgresOut(2))((_, s3HeaderMat, s3NoHeaderMat, pgMat) =>
@@ -146,7 +146,7 @@ object ModifiedLarPublisher {
                   ) { implicit builder => (source, headerSink, noHeaderSink, pgSink) =>
                     import GraphDSL.Implicits._
 
-                    val mlarHeader = Source.single(ByteString(ModifiedLoanApplicationRegister.header))
+
                     val broadcast  = builder.add(Broadcast[ModifiedLoanApplicationRegister](3))
 
                     source.out ~> broadcast.in
@@ -167,18 +167,18 @@ object ModifiedLarPublisher {
               //only write to PG - do not generate S3 files
               val graphWithoutS3 = mlarGraphWithoutS3
 
-//              val graphWithJustS3NoHeader = <how to get graph just for S3 file with no header>
+              val graphWithJustS3NoHeader = mlarSource.via(serializeMlar).toMat(s3Sink)(Keep.right)
 
-//              val graphWithJustS3WithHeader = <how to get graph with just S3 file with header>
+              val graphWithJustS3WithHeader = mlarSource.via(serializeMlar).prepend(mlarHeader).toMat(s3SinkWithHeader)(Keep.right)
 
               val finalResult: Future[Unit] = for {
                 _ <- removeLei
                 _ <- if (isGenerateBothS3Files)
-                      graphWithS3AndPG.run()
+                      Future.sequence(List(graphWithJustS3NoHeader.run(), graphWithJustS3WithHeader.run()))
                     else if (isJustGenerateS3File)
-                      graphWithS3AndPG.run()
+                      graphWithJustS3NoHeader.run()
                     else if (isJustGenerateS3FileHeader)
-                      graphWithS3AndPG.run()
+                      graphWithJustS3WithHeader.run()
                     else
                       graphWithS3AndPG.run()
                 _ <- produceRecord(disclosureTopic, submissionId.lei, submissionId.toString, kafkaProducer)
