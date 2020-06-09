@@ -22,9 +22,12 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          security:
-            - readOnlyRootFilesystem: true
-              allowPrivilegeEscalation: false          
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL               
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http

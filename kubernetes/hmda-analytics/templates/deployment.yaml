@@ -29,9 +29,12 @@ spec:
           volumeMounts:
             - name: tz-config
               mountPath: /etc/localtime
-          security:
-            - readOnlyRootFilesystem: true
-              allowPrivilegeEscalation: false          
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL            
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: KAFKA_ANALYTICS_TOPIC
