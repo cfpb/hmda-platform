@@ -166,10 +166,10 @@ private class DataBrowserHttpApi(log: Logger, fileCache: S3FileService, query: Q
               }
             }
           } ~
-          // GET /view/filers?years=2018&states=<csv-states> -- GET LEIs for specific states
-          // GET /view/filers?years=2018&msamds=<csv-msamds> -- GET LEIs for specific msamds
-          // GET /view/filers?years=2018&counties=<csv-counties> -- GET LEIs for specific counties
-          // GET /view/filers?years=2018 -- GET all LEIs
+          // GET /view/filers?years=<year>>&states=<csv-states> -- GET LEIs for specific states
+          // GET /view/filers?years=<year>>&msamds=<csv-msamds> -- GET LEIs for specific msamds
+          // GET /view/filers?years=<year>>&counties=<csv-counties> -- GET LEIs for specific counties
+          // GET /view/filers?years=<year>> -- GET all LEIs
           (path("filers") & get) {
             extractYearsMsaMdsStatesAndCounties { filerFields =>
               log.info("Filers: " + filerFields)
