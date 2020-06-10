@@ -77,6 +77,7 @@ class PostgresModifiedLarRepository2017(tableName: String, config: DatabaseConfi
     else {
       val secondaries =
         remainingExpressions
+        //do not include year in the WHERE clause because all entries in the table (modifiedlar2018_snapshot) have filing_year = 2018
           .map(expr => s"AND $expr")
           .mkString(sep = " ")
       s"$primary $secondaries"

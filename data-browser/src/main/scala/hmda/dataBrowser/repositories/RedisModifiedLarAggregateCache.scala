@@ -9,12 +9,13 @@ import io.circe.parser._
 import io.circe.syntax._
 import cats.implicits._
 import io.circe.{ Decoder, Encoder }
+import org.slf4j.Logger
 
 import scala.concurrent.duration.FiniteDuration
 
 // $COVERAGE-OFF$
 // Talks to Redis via Redis4Cats
-class RedisModifiedLarAggregateCache(redisClient: Task[RedisAsyncCommands[String, String]], timeToLive: FiniteDuration) extends Cache {
+class RedisModifiedLarAggregateCache(redisClient: Task[RedisAsyncCommands[String, String]], logger: Logger, timeToLive: FiniteDuration) extends Cache {
   private val Prefix = "AGG"
 
   private def findAndParse[A: Decoder](key: String): Task[Option[A]] =
@@ -53,6 +54,7 @@ class RedisModifiedLarAggregateCache(redisClient: Task[RedisAsyncCommands[String
 
   override def find(queryFields: List[QueryField], year: Int): Task[Option[Statistic]] = {
     val redisKey = key(queryFields, year)
+    logger.info("Redis Key: " + redisKey)
     findAndParse[Statistic](redisKey)
   }
 
@@ -74,19 +76,19 @@ class RedisModifiedLarAggregateCache(redisClient: Task[RedisAsyncCommands[String
   }
 
   override def updateFilers2017(
-                                 queryFields: List[QueryField],
-                                 year: Int,
-                                 filerInstitutionResponse: FilerInstitutionResponse2017
-                               ): Task[FilerInstitutionResponse2017] = {
+    queryFields: List[QueryField],
+    year: Int,
+    filerInstitutionResponse: FilerInstitutionResponse2017
+  ): Task[FilerInstitutionResponse2017] = {
     val redisKey = key(queryFields, year)
     updateAndSetTTL(redisKey, filerInstitutionResponse)
   }
 
   override def updateFilers2018(
-                                 queryFields: List[QueryField],
-                                 year: Int,
-                                 filerInstitutionResponse: FilerInstitutionResponseLatest
-                               ): Task[FilerInstitutionResponseLatest] = {
+    queryFields: List[QueryField],
+    year: Int,
+    filerInstitutionResponse: FilerInstitutionResponseLatest
+  ): Task[FilerInstitutionResponseLatest] = {
     val redisKey = key(queryFields, year)
     updateAndSetTTL(redisKey, filerInstitutionResponse)
   }

@@ -67,7 +67,7 @@ object DataBrowserApi extends Settings {
             // client creation process is expensive and the client is able to recover internally when Redis comes back
           }
 
-          val cache = new RedisModifiedLarAggregateCache(redisClientTask, redis.ttl)
+          val cache = new RedisModifiedLarAggregateCache(redisClientTask, log, redis.ttl)
 
           val query: QueryService = new DataBrowserQueryService(repositoryLatest, repository2017, cache, log)
 

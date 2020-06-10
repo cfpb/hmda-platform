@@ -8,15 +8,15 @@ import monix.eval.Task
 import org.slf4j.Logger
 
 class DataBrowserQueryService(repoLatest: ModifiedLarRepositoryLatest, repo2017: ModifiedLarRepository2017, cache: Cache, log: Logger)
-  extends QueryService {
+    extends QueryService {
   override def fetchData(
-                          queryFields: QueryFields
-                        ): Source[ModifiedLarEntity, NotUsed] =
+    queryFields: QueryFields
+  ): Source[ModifiedLarEntity, NotUsed] =
     repoLatest.find(queryFields.queryFields, queryFields.year.toInt)
 
   override def fetchData2017(
-                              queryFields: QueryFields
-                            ): Source[ModifiedLarEntity2017, NotUsed] =
+    queryFields: QueryFields
+  ): Source[ModifiedLarEntity2017, NotUsed] =
     repo2017.find(queryFields.queryFields, queryFields.year.toInt)
 
   private def generateCombinations[T](x: List[List[T]]): List[List[T]] =
@@ -46,8 +46,8 @@ class DataBrowserQueryService(repoLatest: ModifiedLarRepositoryLatest, repo2017:
     }
 
   override def fetchAggregate(
-                               queryFields: QueryFields
-                             ): Task[(ServedFrom, Seq[Aggregation])] = {
+    queryFields: QueryFields
+  ): Task[(ServedFrom, Seq[Aggregation])] = {
     val repo = queryFields.year match {
       case "2017" => repo2017
       case _      => repoLatest

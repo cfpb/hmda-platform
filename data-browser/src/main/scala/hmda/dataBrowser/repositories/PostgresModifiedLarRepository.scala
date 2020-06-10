@@ -10,7 +10,7 @@ import slick.jdbc.{ JdbcProfile, ResultSetConcurrency, ResultSetType }
 // $COVERAGE-OFF$
 // Talks to Postgres using Slick
 class PostgresModifiedLarRepository(config: DatabaseConfig[JdbcProfile], tableSelector: Int => ModifiedLarTable)
-  extends ModifiedLarRepositoryLatest {
+    extends ModifiedLarRepositoryLatest {
 
   import config._
   import config.profile.api._

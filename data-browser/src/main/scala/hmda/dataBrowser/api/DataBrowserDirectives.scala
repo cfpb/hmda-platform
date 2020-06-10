@@ -41,22 +41,22 @@ trait DataBrowserDirectives extends Settings {
     EntityStreamingSupport.csv()
 
   /**
-   * This is an effectful function that calls out to S3 to check if data is cached or runs a query against the
-   * SQL database and then persists the data in S3
-   *
-   * The Left part of the Either indicates that the data isn't in S3 so this is a cache miss
-   * The Right part of the Either indicates a cache hit so the data is present in S3
-   *
-   * @param cache     the file service responsible for caching raw data
-   * @param db        the query service responsible for fetching raw data from the database
-   * @param queries   a list of query parameters
-   * @param delimiter either commas or pipes
-   * @return
-   */
+    * This is an effectful function that calls out to S3 to check if data is cached or runs a query against the
+    * SQL database and then persists the data in S3
+    *
+    * The Left part of the Either indicates that the data isn't in S3 so this is a cache miss
+    * The Right part of the Either indicates a cache hit so the data is present in S3
+    *
+    * @param cache     the file service responsible for caching raw data
+    * @param db        the query service responsible for fetching raw data from the database
+    * @param queries   a list of query parameters
+    * @param delimiter either commas or pipes
+    * @return
+    */
   def obtainDataSource(
-                        cache: FileService,
-                        db: QueryService
-                      )(queries: QueryFields, delimiter: Delimiter, year: String): Task[Either[Source[ByteString, NotUsed], String]] = {
+    cache: FileService,
+    db: QueryService
+  )(queries: QueryFields, delimiter: Delimiter, year: String): Task[Either[Source[ByteString, NotUsed], String]] = {
     val serializedData: Source[ByteString, NotUsed] = {
       queries.year match {
         case "2017" =>
