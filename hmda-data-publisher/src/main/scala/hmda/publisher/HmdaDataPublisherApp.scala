@@ -22,6 +22,8 @@ object HmdaDataPublisherApp extends App {
 
   val actorSystem = ActorSystem("hmda-data-publisher")
   val config      = actorSystem.settings.config
+
+
   config.getObject("akka.quartz.schedules").forEach((k, v) => log.info(s"$k = ${v.render()}"))
 
   actorSystem.actorOf(Props[PanelScheduler], "PanelScheduler")

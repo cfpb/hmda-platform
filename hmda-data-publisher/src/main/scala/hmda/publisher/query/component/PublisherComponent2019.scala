@@ -2,6 +2,7 @@ package hmda.publisher.query.component
 
 import java.sql.Timestamp
 
+import com.typesafe.config.ConfigFactory
 import hmda.publisher.query.lar.{LarEntityImpl2019, _}
 import hmda.publisher.query.panel.InstitutionEntity
 import hmda.query.DbConfiguration._
@@ -9,15 +10,23 @@ import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
 import slick.basic.{DatabaseConfig, DatabasePublisher}
 import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
-
+import hmda.publisher.helper.SnapshotCheck
 import scala.concurrent.Future
 
-trait PublisherComponent2019 {
+trait PublisherComponent2019  {
 
   import dbConfig.profile.api._
 
+  val pgTableConfig    = ConfigFactory.load("application.conf").getConfig("pg-tables")
+  val snapshotActive = pgTableConfig.getBoolean("activate")
+  val lar2019TableName = SnapshotCheck.check(pgTableConfig.getString("lar2019TableName"),snapshotActive)
+  val mlar2019TableName = SnapshotCheck.check(pgTableConfig.getString("mlar2019TableName"),snapshotActive)
+  val panel2019TableName = SnapshotCheck.check(pgTableConfig.getString("panel2019TableName"),snapshotActive)
+  val ts2019TableName = SnapshotCheck.check(pgTableConfig.getString("ts2019TableName"),snapshotActive)
+  val emailTableName = SnapshotCheck.check(pgTableConfig.getString("emailTableName"),snapshotActive)
+
   class InstitutionsTable(tag: Tag)
-      extends Table[InstitutionEntity](tag, "institutions2019") {
+      extends Table[InstitutionEntity](tag, panel2019TableName) {
     def lei = column[String]("lei", O.PrimaryKey)
     def activityYear = column[Int]("activity_year")
     def agency = column[Int]("agency")
@@ -102,7 +111,7 @@ trait PublisherComponent2019 {
 
 
   class TransmittalSheetTable(tag: Tag)
-      extends Table[TransmittalSheetEntity](tag, "transmittalsheet2019") {
+      extends Table[TransmittalSheetEntity](tag, ts2019TableName) {
 
     def lei = column[String]("lei", O.PrimaryKey)
     def id = column[Int]("id")
@@ -186,7 +195,7 @@ trait PublisherComponent2019 {
   }
 
   class LarTable(tag: Tag)
-      extends Table[LarEntityImpl2019](tag, "loanapplicationregister2019") {
+      extends Table[LarEntityImpl2019](tag, lar2019TableName) {
 
     def id = column[Int]("id")
     def lei = column[String]("lei")
@@ -517,7 +526,7 @@ trait PublisherComponent2019 {
   }
 
   class ModifiedLarTable(tag: Tag)
-    extends Table[ModifiedLarEntityImpl](tag, "modifiedlar2019") {
+    extends Table[ModifiedLarEntityImpl](tag, mlar2019TableName) {
 
     def id = column[Int]("id")
     def lei = column[String]("lei")
@@ -804,4 +813,6 @@ trait PublisherComponent2019 {
           .transactionally)
     }
   }
+
+  
 }
