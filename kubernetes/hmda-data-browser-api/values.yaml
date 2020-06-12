@@ -72,9 +72,6 @@ databrowser:
   name: databrowser
   loglevel: INFO
   s3Url: https://cfpb-hmda-public.s3.amazonaws.com
-  nationwideRouteCSV: data-browser/nationwide_all.csv
-  nationwideRoutePipe: data-browser/nationwide_all.txt
-  table: modifiedlar2018_snapshot
   redis: hmda-redis-master
   protocol: TCP
   port: 8070

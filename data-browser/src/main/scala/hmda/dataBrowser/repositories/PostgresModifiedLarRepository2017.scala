@@ -77,14 +77,14 @@ class PostgresModifiedLarRepository2017(tableName: String, config: DatabaseConfi
     else {
       val secondaries =
         remainingExpressions
-          //do not include year in the WHERE clause because all entries in the table (modifiedlar2018_snapshot) have filing_year = 2018
+        //do not include year in the WHERE clause because all entries in the table (modifiedlar2018_snapshot) have filing_year = 2018
           .map(expr => s"AND $expr")
           .mkString(sep = " ")
       s"$primary $secondaries"
     }
   }
 
-  override def find(browserFields: List[QueryField]): Source[ModifiedLarEntity2017, NotUsed] = {
+  override def find(browserFields: List[QueryField], year: Int): Source[ModifiedLarEntity2017, NotUsed] = {
     val queries = browserFields.map(field => in(field.dbName, field.values))
 
     val filterCriteria = queries match {
@@ -97,7 +97,7 @@ class PostgresModifiedLarRepository2017(tableName: String, config: DatabaseConfi
       FROM #${tableName}
       #$filterCriteria
       """)
-    
+
     val searchQuery = sql"""
       SELECT #${columns}
       FROM #${tableName}
@@ -115,11 +115,10 @@ class PostgresModifiedLarRepository2017(tableName: String, config: DatabaseConfi
     Source.fromPublisher(publisher)
   }
 
-  override def findFilers(filerFields: List[QueryField]): Task[Seq[FilerInformation2017]] = {
-    val year = filerFields.find(_.name == "year").map(_.values.head.toInt)
+  override def findFilers(filerFields: List[QueryField], year: Int): Task[Seq[FilerInformation2017]] = {
     val institutionsTableName = year match { //will be needed when databrowser has to support multiple years
-      case Some(2017) => "transmittalsheet2017_public_ultimate"
-      case _ => "transmittalsheet2017_public_ultimate"
+      case 2017 => "transmittalsheet2017_public_ultimate"
+      case _    => "transmittalsheet2017_public_ultimate"
     }
     //do not include year in the WHERE clause because all entries in the table (modifiedlar2018_snapshot) have filing_year = 2018
     val queries = filerFields.filterNot(_.name == "year").map(field => in(field.dbName, field.values))
@@ -129,7 +128,7 @@ class PostgresModifiedLarRepository2017(tableName: String, config: DatabaseConfi
     }
     val query =
       sql"""
-        SELECT a.arid, b.institution_name, a.lar_count, '#${year.getOrElse("2017")}'
+        SELECT a.arid, b.institution_name, a.lar_count, '#$year'
         from (
           SELECT arid, count(*) as lar_count
           FROM #${tableName}
@@ -141,20 +140,19 @@ class PostgresModifiedLarRepository2017(tableName: String, config: DatabaseConfi
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
-  override def findAndAggregate(browserFields: List[QueryField]): Task[Statistic] = {
+  override def findAndAggregate(browserFields: List[QueryField], year: Int): Task[Statistic] = {
     val queries = browserFields.map(field => in(field.dbName, field.values))
     val filterCriteria = queries match {
       case Nil          => ""
       case head :: tail => whereAndOpt(head, tail: _*)
     }
     println("2017 db query")
-    println (sql"""
+    println(sql"""
         SELECT
           COUNT(loan_amount),
           SUM(loan_amount)
         FROM #${tableName}
-        #$filterCriteria"""
-    )
+        #$filterCriteria""")
     val query = sql"""
         SELECT
           COUNT(loan_amount),

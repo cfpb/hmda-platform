@@ -15,3 +15,12 @@ The multi-year data is stored in PostgreSQL and cached in Redis + Object Stores.
 ## API Documentation
 
 The API documentation for the data-browser is available publicly. https://cfpb.github.io/hmda-platform/#data-browser-api 
+
+## Redis Keys
+
+Redis keys are supported for multiple years. Below is an example of redis key with states VA and MD and total_units 4 for year 2018 and 2019
+
+```
+GET 'AGG:state:VA|ME:total_units:4:year:2018'
+GET 'AGG:state:VA|ME:total_units:4:year:2019'
+```

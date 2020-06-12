@@ -5,13 +5,13 @@ import slick.jdbc.GetResult
 
 trait FilerInformation
 
-case class FilerInformation2018(lei: String, respondentName: String, count: Int ,year: Int) extends FilerInformation
+case class FilerInformationLatest(lei: String, respondentName: String, count: Int, year: Int) extends FilerInformation
 
 // $COVERAGE-OFF$
-object FilerInformation2018 {
-  implicit val getResult: GetResult[FilerInformation2018] = GetResult(r => FilerInformation2018(r.<<, r.<<, r.<<, r.<<))
+object FilerInformationLatest {
+  implicit val getResult: GetResult[FilerInformationLatest] = GetResult(r => FilerInformationLatest(r.<<, r.<<, r.<<, r.<<))
 
-  implicit val codec: Codec[FilerInformation2018] =
-    Codec.forProduct4("lei", "name", "count","period")(FilerInformation2018.apply)(f => (f.lei, f.respondentName, f.count, f.year))
+  implicit val codec: Codec[FilerInformationLatest] =
+    Codec.forProduct4("lei", "name", "count", "period")(FilerInformationLatest.apply)(f => (f.lei.trim, f.respondentName.trim, f.count, f.year))
 }
 // $COVERAGE-ON$
