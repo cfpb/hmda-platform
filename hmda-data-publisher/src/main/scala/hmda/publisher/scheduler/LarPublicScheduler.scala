@@ -10,7 +10,7 @@ import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.ModifiedLarHeader
+import hmda.publisher.helper.{ModifiedLarHeader, PGTableNameLoader, PublicAWSConfigLoader}
 import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019}
 import hmda.publisher.query.lar.ModifiedLarEntityImpl
 import hmda.publisher.scheduler.schedules.Schedules.{LarPublicScheduler2018, LarPublicScheduler2019}
@@ -24,7 +24,12 @@ import software.amazon.awssdk.regions.providers.AwsRegionProvider
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class LarPublicScheduler extends HmdaActor with PublisherComponent2018 with PublisherComponent2019 with ModifiedLarHeader {
+class LarPublicScheduler extends HmdaActor with
+  PublisherComponent2018 with
+  PublisherComponent2019 with
+  ModifiedLarHeader with
+  PGTableNameLoader with
+  PublicAWSConfigLoader {
 
   implicit val ec           = context.system.dispatcher
   implicit val materializer = Materializer(context)
@@ -33,22 +38,10 @@ class LarPublicScheduler extends HmdaActor with PublisherComponent2018 with Publ
   def mlarRepository2019 = new ModifiedLarRepository2019(dbConfig)
 
 
-  val awsConfig    = ConfigFactory.load("application.conf").getConfig("public-aws")
-  val accessKeyId  = awsConfig.getString("public-access-key-id")
-  val secretAccess = awsConfig.getString("public-secret-access-key ")
-  val region       = awsConfig.getString("public-region")
-  val bucket       = awsConfig.getString("public-s3-bucket")
-  val environment  = awsConfig.getString("public-environment")
-  val year         = awsConfig.getString("public-year")
-
-  val awsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccess))
-
-  val awsRegionProvider: AwsRegionProvider = () => Region.of(region)
-
   val s3Settings = S3Settings(context.system)
     .withBufferType(MemoryBufferType)
-    .withCredentialsProvider(awsCredentialsProvider)
-    .withS3RegionProvider(awsRegionProvider)
+    .withCredentialsProvider(awsCredentialsProviderPublic)
+    .withS3RegionProvider(awsRegionProviderPublic)
     .withListBucketApiVersion(ListBucketVersion2)
 
   override def preStart(): Unit = {
@@ -64,14 +57,29 @@ class LarPublicScheduler extends HmdaActor with PublisherComponent2018 with Publ
   override def receive: Receive = {
 
     case LarPublicScheduler2018 =>
-      larPublicStream("2018")
+      if (snapshotActive) {
+        val s3Path = "cfpb-hmda-export/dev/snapshot-temp/2018/2018_lar_snapshot.txt"
+        larPublicStream("2018", bucketPublic, s3Path)
+      }
+      else{
+        val fileNamePSV = "2018_lar.txt"
+        val s3Path = s"$environmentPublic/dynamic-data/2018/2018_lar.txt"
+        larPublicStream("2018", bucketPublic, s3Path)
+      }
 
     case LarPublicScheduler2019 =>
-      larPublicStream("2019")
+      if (snapshotActive) {
+        val s3Path = "cfpb-hmda-export/dev/snapshot-temp/2019/2019_lar_snapshot.txt"
+        larPublicStream("2019", bucketPublic, s3Path)
+      }
+      else{
+        val fileNamePSV = "2019_lar.txt"
+        val s3Path = s"$environmentPublic/dynamic-data/2019/2019_lar.txt"
+        larPublicStream("2019", bucketPublic, s3Path)
+      }
 
   }
-  private def larPublicStream(year: String) = {
-    val fileNamePSV = year+"_lar.txt"
+  private def larPublicStream(year: String, bucket: String, path: String) = {
 
     val allResultsPublisher: DatabasePublisher[ModifiedLarEntityImpl] =
       year match {
@@ -85,7 +93,7 @@ class LarPublicScheduler extends HmdaActor with PublisherComponent2018 with Publ
 
     //PSV Sync
     val s3SinkPSV = S3
-      .multipartUpload(bucket, s"$environment/dynamic-data/"+year+"/"+fileNamePSV)
+      .multipartUpload(bucket, path)
       .withAttributes(S3Attributes.settings(s3Settings))
 
     val resultsPSV: Future[MultipartUploadResult] =
@@ -100,7 +108,7 @@ class LarPublicScheduler extends HmdaActor with PublisherComponent2018 with Publ
 
     resultsPSV onComplete {
       case Success(result) =>
-        log.info("Pushed to S3: " + s"$bucket/$environment/dynamic-data/"+year+"/"+fileNamePSV + ".")
+        log.info("Pushed to S3: " + path + ".")
       case Failure(t) =>
         log.info("An error has occurred getting Public LAR Data in Future: " + t.getMessage)
     }
