@@ -8,7 +8,6 @@ import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
-import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.publisher.helper.{ModifiedLarHeader, PGTableNameLoader, PublicAWSConfigLoader}
 import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019}
@@ -17,10 +16,6 @@ import hmda.publisher.scheduler.schedules.Schedules.{LarPublicScheduler2018, Lar
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
 import slick.basic.DatabasePublisher
-import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.regions.providers.AwsRegionProvider
-
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
@@ -36,13 +31,6 @@ class LarPublicScheduler extends HmdaActor with
 
   def mlarRepository2018 = new ModifiedLarRepository2018(dbConfig)
   def mlarRepository2019 = new ModifiedLarRepository2019(dbConfig)
-
-
-  val s3Settings = S3Settings(context.system)
-    .withBufferType(MemoryBufferType)
-    .withCredentialsProvider(awsCredentialsProviderPublic)
-    .withS3RegionProvider(awsRegionProviderPublic)
-    .withListBucketApiVersion(ListBucketVersion2)
 
   override def preStart(): Unit = {
     QuartzSchedulerExtension(context.system)
@@ -69,16 +57,16 @@ class LarPublicScheduler extends HmdaActor with
 
     case LarPublicScheduler2019 =>
       if (snapshotActive) {
-        val s3Path = "cfpb-hmda-export/dev/snapshot-temp/2019/2019_lar_snapshot.txt"
+         val s3Path = "cfpb-hmda-export/dev/snapshot-temp/2019/2019_lar_snapshot.txt"
         larPublicStream("2019", bucketPublic, s3Path)
       }
       else{
-        val fileNamePSV = "2019_lar.txt"
+         val fileNamePSV = "2019_lar.txt"
         val s3Path = s"$environmentPublic/dynamic-data/2019/2019_lar.txt"
         larPublicStream("2019", bucketPublic, s3Path)
       }
-
   }
+
   private def larPublicStream(year: String, bucket: String, path: String) = {
 
     val allResultsPublisher: DatabasePublisher[ModifiedLarEntityImpl] =
@@ -110,7 +98,7 @@ class LarPublicScheduler extends HmdaActor with
       case Success(result) =>
         log.info("Pushed to S3: " + path + ".")
       case Failure(t) =>
-        log.info("An error has occurred getting Public LAR Data in Future: " + t.getMessage)
+        log.info("An error has occurred with: " + path + "; Getting Public LAR Data in Future: " + t.getMessage)
     }
   }
 }

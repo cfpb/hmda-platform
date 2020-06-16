@@ -9,7 +9,7 @@ import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.TSHeader
+import hmda.publisher.helper.{PublicAWSConfigLoader, TSHeader}
 import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019}
 import hmda.publisher.scheduler.schedules.Schedules.{TsPublicScheduler2018, TsPublicScheduler2019}
 import hmda.query.DbConfiguration.dbConfig
@@ -22,7 +22,7 @@ import software.amazon.awssdk.regions.providers.AwsRegionProvider
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with PublisherComponent2019 with TSHeader {
+class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with PublisherComponent2019 with TSHeader with PublicAWSConfigLoader {
 
   implicit val ec           = context.system.dispatcher
   implicit val materializer = Materializer(context)
@@ -30,22 +30,11 @@ class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with Publi
   def tsRepository2019      = new TransmittalSheetRepository2019(dbConfig)
 
 
-  val awsConfig              = ConfigFactory.load("application.conf").getConfig("public-aws")
-  val accessKeyId            = awsConfig.getString("public-access-key-id")
-  val secretAccess           = awsConfig.getString("public-secret-access-key ")
-  val region                 = awsConfig.getString("public-region")
-  val bucket                 = awsConfig.getString("public-s3-bucket")
-  val environment            = awsConfig.getString("public-environment")
-  val year                   = awsConfig.getString("public-year")
-  val awsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccess))
-
-  val awsRegionProvider: AwsRegionProvider = () => Region.of(region)
-
   val s3Settings =
     S3Settings(context.system)
       .withBufferType(MemoryBufferType)
-      .withCredentialsProvider(awsCredentialsProvider)
-      .withS3RegionProvider(awsRegionProvider)
+      .withCredentialsProvider(awsCredentialsProviderPublic)
+      .withS3RegionProvider(awsRegionProviderPublic)
       .withListBucketApiVersion(ListBucketVersion2)
 
   override def preStart(): Unit = {
@@ -63,18 +52,31 @@ class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with Publi
   override def receive: Receive = {
 
     case TsPublicScheduler2018 =>
-      tsPublicStream("2018")
+      if (snapshotActive) {
+        val s3Path = "cfpb-hmda-export/dev/snapshot-temp/2018/2018_ts_snapshot.txt"
+        tsPublicStream("2018", bucketPublic, s3Path)
+      }
+      else{
+        val s3Path = s"$environmentPublic/dynamic-data/2018/2018_ts.txt"
+        tsPublicStream("2018", bucketPublic, s3Path)
+      }
 
     case TsPublicScheduler2019 =>
-      tsPublicStream("2019")
+      if (snapshotActive) {
+        val s3Path = "cfpb-hmda-export/dev/snapshot-temp/2019/2019_ts_snapshot.txt"
+        tsPublicStream("2019", bucketPublic, s3Path)
+      }
+      else{
+        val s3Path = s"$environmentPublic/dynamic-data/2019/2019_ts.txt"
+        tsPublicStream("2019", bucketPublic, s3Path)
+      }
 
   }
-  private def tsPublicStream(year: String) = {
-    val fileNamePSV = year+"_ts.txt"
+  private def tsPublicStream(year: String, bucket: String, path: String) = {
 
     val s3SinkPSV =
-      S3.multipartUpload(bucket, s"$environment/dynamic-data/"+year+"/"+fileNamePSV)
-        .withAttributes(S3Attributes.settings(s3Settings))
+
+      S3.multipartUpload(bucket, path).withAttributes(S3Attributes.settings(s3Settings))
 
     val allResults: Future[Seq[TransmittalSheetEntity]] =
       year match {
@@ -97,9 +99,9 @@ class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with Publi
 
     resultsPSV onComplete {
       case Success(result) =>
-        log.info("Pushed to S3: " + s"$bucket/$environment/dynamic-data/"+year+"/"+fileNamePSV + ".")
+        log.info("Pushed to S3: " + path + ".")
       case Failure(t) =>
-        println(" An error has occurred getting Public PSV TS Data "+year+": " + t.getMessage)
+        log.info("An error has occurred with: " + path + "; Getting Public TS Data in Future: " + t.getMessage)
     }
   }
 }

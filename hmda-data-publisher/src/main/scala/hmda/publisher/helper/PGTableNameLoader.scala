@@ -28,4 +28,7 @@ trait PGTableNameLoader {
 
   //common table names
   val emailTableName: String = SnapshotCheck.check(pgTableConfig.getString("emailTableName"),snapshotActive)
+
+  println( "TABLE NAME: ",lar2019TableName)
+
 }
