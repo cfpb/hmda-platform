@@ -1,5 +1,6 @@
 package hmda.publisher.query.component
 
+import hmda.publisher.helper.PGTableNameLoader
 import hmda.publisher.query.panel.InstitutionEmailEntity
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.repository.TableRepository
@@ -8,12 +9,12 @@ import slick.jdbc.JdbcProfile
 
 import scala.concurrent.Future
 
-trait InstitutionEmailComponent {
+trait InstitutionEmailComponent extends PGTableNameLoader{
 
   import dbConfig.profile.api._
 
   class InstitutionEmailsTable(tag: Tag)
-    extends Table[InstitutionEmailEntity](tag, "institutions_emails_2018") with InstitutionEmailComponent {
+    extends Table[InstitutionEmailEntity](tag, emailTableName) with InstitutionEmailComponent {
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def lei = column[String]("lei")
     def emailDomain = column[String]("email_domain")
