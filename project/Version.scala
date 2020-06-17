@@ -27,7 +27,7 @@ object Version {
   val sprayresolver          = "0.9.1"
   val enumeratum             = "1.5.13"
   val enumeratumCirce        = "1.5.21"
-  val monix                  = "3.0.0"
+  val monix                  = "3.2.2"
   val lettuce                = "5.1.6.RELEASE"
   val java8Compat            = "0.9.0"
   val scalaMock              = "4.2.0"
