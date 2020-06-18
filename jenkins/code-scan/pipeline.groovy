@@ -10,20 +10,6 @@ pipeline {
     }
 
     stages {
-        stage('Init') {
-            steps {
-                script { 
-                    library identifier: "hmdaUtils@master", changelog: false, retriever: modernSCM (
-                        [
-                            $class: 'GitSCMSource',
-                            remote: 'https://github.cfpb.gov/HMDA-Operations/hmda-devops.git'
-                        ]
-                    )
-                }
-                sh 'env | sort'
-            }
-        }
-
         stage('Checkout') {
             steps {
                 script {
