@@ -22,7 +22,7 @@ jdk:
 - openjdk14
 
 script:
-  - \! grep -iRl "${INTERNALURL}" ./
+  - \\! grep -iRl "${INTERNALURL}" ./
   - sbt ++$TRAVIS_SCALA_VERSION clean coverage test
   - sbt ++$TRAVIS_SCALA_VERSION coverageReport
   - sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
