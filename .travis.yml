@@ -22,7 +22,7 @@ jdk:
 - openjdk14
 
 script:
-  - if [[ 'grep -iRl "cfpb" ./' ]]; then exit 1; fi
+  - if [[ 'grep -iRl "${INTERNALURL}" ./' ]]; then exit 1; fi
   - sbt ++$TRAVIS_SCALA_VERSION clean coverage test
   - sbt ++$TRAVIS_SCALA_VERSION coverageReport
   - sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
