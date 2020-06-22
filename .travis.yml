@@ -8,8 +8,7 @@ cache:
 
 env:
   - CASSANDRA_CLUSTER_HOSTS=localhost APP_PORT=2551
-  - secure: C97CnHdxfXwGe1wA5Y2VEW0JfVE2HZMAhPhvsKR9LM0kRu/EbTwp4PyHQM30zDAFT8apFTYnVuzzpdCCIQ5GUKt/TAi+1Ip06bcV5xVSSaaxRB0NqiRQi/nE418GoHP/wES0Q7DgA47YGPruaGKwonVo1OTXpsVgBbbVA25N7fQvmEzRdfyzt8nkj/0M4tNx+X9tmmqRhYe5TBzaKg5XhV1AE76+agYZj8ByUKa0YstHqd9XaZ1gr6Q7EYUILr1uoQSgPcfwIn/MGNElNV2a0lJiz/rIWtMCuyfiWtQbutm3izVRlYYNqzLwZiw/p8TLKCUdHqNrdKyFuYipFLyZ28huYraVoDnAcdDM5JPnkGn6mUYB2uNQZztb4AUN0os0zcOiqmSly0IUwPu0K6WWzjXWoK5LZFfN3CrghzLa7anypUwamUvDVbuhtwD34/oaTajEEqC1W1+R7q816rN5NRueGfrSBLqbboteQP+s15j0ponaRJGk2octbXSgc0htH36XBRo0RCy7EC5u0+L1TpKqOg3ypgeLy+oUbkhjXitvHobFCBU2MBKP/T4/DSm5Sen/2LcPxWbcLSfDsb/lbSX2nGhlAvKWMiCw/BwiOUBbTlGPufnx1n2IcWFGlq55A+uZcT8STpXe1Y+c4sZgff5uklQnoJE2ueOe2Z+nOos=
-
+  - secure: jUoroyWWu1OU5SSrosqPRAemQKvt2LoqwgdCw9hEzLfBjckW55rOTSRltJ02BBxVPT1A7gdZOhCV15ehj6ESl9WPGvNMXq3yqOIuotM9Xx9Z/SHvJWvA+GERnryBCTwyI7DCYev4GhEFEBTHvbxenssCKPotM33g031TrwIRhE7mo3zQGd72ACWeEp0fbke5ndYwz45rBdqMi1uo+dyjMe1mia7O67SwtFa++LrKR7bBoWgsTcY7FfaBmTX9j/ZpmZO4b4W+6ot28ZjwIHejtY3xVDJMXAQWv3vdoQ61bBbRBy2vGIJOiXr0ePDLIBVtGX2Im3ii5biiTsCZwlGv1teRVWa/p8nV7D+4lKX0TzLqSfArCoCyRuGs3FzHfTLkZmhSexdjJ57w4hxp5uf0BeZA2Dp5IaPXvmwjgebgPn+Tzh2nKi4M8ViXSbV5pEClmLGNs+xj2hLAe7eYDTlXrqpV8C7UQ8JN3KSCLLqYiv0bqINKRWN6mf0mr0SeaBQFJ0ZHLWsSBnChYaeGjSCXZcakUenEbEcZxJCAco96Au1quJhv28yq7imCuyHcxRFhL8YNrhsDi5ujBZGwM0v1c9EffxFZYfO6Id6D9V3TJvO2UE8w7/7VBhFU6Lkr/lYPN9QgDStPIyrvOq85j0jTZIShOO9EvGHN1KHvCjVpgHQ=
 language: scala
 
 scala: 2.12.10
@@ -22,6 +21,8 @@ jdk:
 - openjdk14
 
 script:
+  - echo INTERNALURL
+  - env
   - if [[ 'grep -iRl "${INTERNALURL}" ./' ]]; then exit 1; fi
   - sbt ++$TRAVIS_SCALA_VERSION clean coverage test
   - sbt ++$TRAVIS_SCALA_VERSION coverageReport
