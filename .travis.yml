@@ -21,8 +21,8 @@ jdk:
 - openjdk14
 
 script:
-  - echo INTERNALURL
-  - env
+  - echo ${INTERNALURL}
+  - env | sort
   - if [[ 'grep -iRl "${INTERNALURL}" ./' ]]; then exit 1; fi
   - sbt ++$TRAVIS_SCALA_VERSION clean coverage test
   - sbt ++$TRAVIS_SCALA_VERSION coverageReport
