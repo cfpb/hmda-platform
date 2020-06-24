@@ -26,6 +26,8 @@ class S3FileService(implicit mat: Materializer) extends FileService with Setting
       val content = formName(queries)
       s"${content}${fileEnding(delimiter)}"
     }
+    log.info("Persisting S3 Key: " + key)
+    log.info("bucket name: " + s3.bucket)
     // Content-Disposition is a friendly name that the user will see downloading the file
     // as opposed to the key which is an MD5 string
     // Note: don't use meta headers as it adds the x-amz- prefix to the header
@@ -51,6 +53,8 @@ class S3FileService(implicit mat: Materializer) extends FileService with Setting
 
   override def retrieveData(queries: List[QueryField], delimiter: Delimiter, year: String): Task[Option[Source[ByteString, NotUsed]]] = {
     val key = s3Key(queries, delimiter, year)
+    log.info("Retrieveing S3 Key: " + key)
+    log.info("Retrieveing bucket name: " + s3.bucket)
     Task
       .deferFuture(S3.download(s3.bucket, key).runWith(Sink.head))
       .map(opt => opt.map { case (source, _) => source })
