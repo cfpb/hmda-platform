@@ -31,3 +31,53 @@ helm install  --namespace=newman  \
 
 ### delete cronjob
  `kubectl delete -n newman cronjob --all`
+ 
+### Newman as a docker container
+* Run docker container
+```
+docker run -it -e KC_UN=$KC_UN -e KC_PW=$KC_PW -e KC_URL=$KC_URL -e KC_CLIENT_ID=$KC_CLIENT_ID \
+-e HOST_FILING=$HOST_FILING -e HOST_ADMIN=$HOST_ADMIN -e HOST_PUBLIC=$HOST_PUBLIC -e HMDA_ENV=$HMDA_ENV \
+-e MM_HOOK=$MM_HOOK hmda/newman-automation:latest /bin/sh
+```
+* Create newman bank
+```
+curl --location --request PUT 'http://localhost:8081/institutions' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "activityYear": 2019,
+    "lei": "NEWMANLEITEST1234678",
+    "agency": 9,
+    "institutionType": -1,
+    "institutionId2017": "",
+    "taxId": "84-7652134",
+    "rssd": -1,
+    "emailDomains": [
+        "newmantest.com"
+    ],
+    "respondent": {
+        "name": "Newman Bank",
+        "state": "",
+        "city": ""
+    },
+    "parent": {
+        "idRssd": -1,
+        "name": ""
+    },
+    "assets": 5,
+    "otherLenderCode": -1,
+    "topHolder": {
+        "idRssd": -1,
+        "name": ""
+    },
+    "hmdaFiler": true,
+    "quarterlyFiler": true,
+    "quarterlyFilerHasFiledQ1": false,
+    "quarterlyFilerHasFiledQ2": false,
+    "quarterlyFilerHasFiledQ3": false
+}'
+```
+* Run newmantest
+```
+ ./scripts/newmanFiling.sh $KC_UN $KC_PW $KC_URL $KC_CLIENT_ID $HOST_FILING $HOST_ADMIN \
+ $HOST_PUBLIC $HMDA_ENV $MM_HOOK $NEWMAN_NOTIFY
+```
