@@ -26,8 +26,8 @@ class S3FileService(implicit mat: Materializer) extends FileService with Setting
       val content = formName(queries)
       s"${content}${fileEnding(delimiter)}"
     }
-    log.info("Persisting S3 Key: " + key)
-    log.info("bucket name: " + s3.bucket)
+    log.debug("Key: " + key)
+    log.debug("Bucket: " + s3.bucket)
     // Content-Disposition is a friendly name that the user will see downloading the file
     // as opposed to the key which is an MD5 string
     // Note: don't use meta headers as it adds the x-amz- prefix to the header
