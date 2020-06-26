@@ -154,6 +154,7 @@ CREATE TABLE hmda_user.loanapplicationregister2020 (
     created_at timestamp without time zone DEFAULT now()
     msa_md character varying,
     msa_md_name character varying
+    created_at timestamp without time zone DEFAULT now(),
 );
 
 
