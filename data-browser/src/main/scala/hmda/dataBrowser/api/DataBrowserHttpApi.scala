@@ -41,6 +41,7 @@ private class DataBrowserHttpApi(log: Logger, fileCache: S3FileService, query: Q
         )
 
       case Success(Right(url)) =>
+        log.info("This is the URL for S3: " + url)
         redirect(Uri(url), StatusCodes.MovedPermanently)
     }
 
