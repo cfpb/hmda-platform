@@ -11,7 +11,7 @@
 `docker push  <docker-host>/<image-name>:<image-tag>`
 
 
-* From the kubernetes/newman directory create a K8 cron job that references this image 
+* From the kubernetes/newman directory create a K8 cron job that references this image
 
 `kubectl config use-context <dev-context>`
 
@@ -31,7 +31,7 @@ helm install  --namespace=newman  \
 
 ### delete cronjob
  `kubectl delete -n newman cronjob --all`
- 
+
 ### Newman as a docker container
 * Run docker container
 ```
@@ -41,7 +41,7 @@ docker run -it -e KC_UN=$KC_UN -e KC_PW=$KC_PW -e KC_URL=$KC_URL -e KC_CLIENT_ID
 ```
 * Create newman bank
 ```
-curl --location --request PUT 'http://localhost:8081/institutions' \
+curl --location --request PUT $HOST_ADMIN'/institutions' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "activityYear": 2019,
