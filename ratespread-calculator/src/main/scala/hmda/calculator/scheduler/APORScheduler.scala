@@ -117,7 +117,6 @@ object APORScheduler {
       S3.download(bucket, bucketKey)
         .withAttributes(s3Attributes)
 
-    println(s3FixedSource.toString())
     s3FixedSource
       .flatMapConcat(src =>{
         checkDownload(src,rateType)
