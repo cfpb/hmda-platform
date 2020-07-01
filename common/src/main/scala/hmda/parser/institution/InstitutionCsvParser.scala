@@ -19,7 +19,7 @@ object InstitutionCsvParser {
     val respondentCity      = values(10)
     val parentIdRssd        = values(11).toInt
     val parentName          = values(12)
-    val assets              = values(13).toInt
+    val assets              = values(13).toLong
     val otherLenderCode     = values(14).toInt
     val topHolderIdRssd     = values(15).toInt
     val topHolderName       = values(16)

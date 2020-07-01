@@ -14,7 +14,7 @@ public class Institution {
   private Set<String> emailDomains;
   private Respondent respondent;
   private Parent parent;
-  private Integer assets;
+  private Long assets;
   private Integer otherLenderCode;
   private TopHolder topHolder;
   private boolean hmdaFiler;
@@ -103,11 +103,11 @@ public class Institution {
     this.parent = parent;
   }
 
-  public Integer getAssets() {
+  public Long getAssets() {
     return assets;
   }
 
-  public void setAssets(Integer assets) {
+  public void setAssets(Long assets) {
     this.assets = assets;
   }
 
