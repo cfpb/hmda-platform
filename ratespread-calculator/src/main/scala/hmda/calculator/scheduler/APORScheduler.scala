@@ -24,7 +24,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
 object APORScheduler {
-  val downloadLogger = LoggerFactory.getLogger("hmda")
+  val logger = LoggerFactory.getLogger("hmda")
 
   val name: String = "APORScheduler"
 
@@ -47,7 +47,6 @@ object APORScheduler {
           .setup[Command] { ctx =>
             implicit val ec: ExecutionContext = ctx.executionContext
             implicit val mat: Materializer    = Materializer(ctx.system)
-            val log                           = ctx.log
             val config                        = ctx.system.settings.config
             val aporConfig                    = config.getConfig("hmda.apors")
             val fixedRateFileName             = aporConfig.getString("fixed.rate.fileName")
@@ -86,19 +85,19 @@ object APORScheduler {
                   Behaviors.same
 
                 case Command.FinishedFixedRate =>
-                  log.info("Loaded APOR data from S3 for: " + FixedRate + " from:  " + bucket + "/" + fixedBucketKey)
+                  logger.info("Loaded APOR data from S3 for: " + FixedRate + " from:  " + bucket + "/" + fixedBucketKey)
                   Behaviors.same
 
                 case Command.FinishedVariableRate =>
-                  log.info("Loaded APOR data from S3 for: " + VariableRate + " from:  " + bucket + "/" + variableBucketKey)
+                  logger.info("Loaded APOR data from S3 for: " + VariableRate + " from:  " + bucket + "/" + variableBucketKey)
                   Behaviors.same
               }
               .receiveSignal {
                 case (_, PostStop) =>
                   val result = quartz.cancelJob(APORScheduler.name)
                   if (result)
-                    log.info(s"${APORScheduler.name} was successfully stopped by the Quartz Scheduler due to receiving a PostStop signal")
-                  else log.error(s"${APORScheduler.name} was unable to be cancelled by Quartz due after receiving a PostStop signal")
+                    logger.info(s"${APORScheduler.name} was successfully stopped by the Quartz Scheduler due to receiving a PostStop signal")
+                  else logger.error(s"${APORScheduler.name} was unable to be cancelled by Quartz due after receiving a PostStop signal")
                   Behaviors.same[Command]
               }
           }
@@ -135,7 +134,7 @@ object APORScheduler {
 
   private def checkDownload(src: Option[(Source[ByteString, NotUsed], ObjectMetadata)],rateType: RateType){
     if(src ==None){
-      downloadLogger.error(s"${APORScheduler.name} had an error downloading APOR file for: "+ rateType)
+      logger.error(s"${APORScheduler.name} had an error downloading APOR file for: "+ rateType)
     }
   }
 }
