@@ -85,13 +85,16 @@ private class InstitutionAdminHttpApi(sharding: ClusterSharding, config: Config)
           entityAlreadyExists(StatusCodes.BadRequest, uri, s"Institution ${institution.LEI} already exists")
 
         case Success(None) =>
-          val fCreated: Future[InstitutionCreated] = institutionPersistence ? (ref => CreateInstitution(institution, ref))
+          val fCreated: Future[InstitutionEvent] = institutionPersistence ? (ref => CreateInstitution(institution, ref))
           onComplete(fCreated) {
             case Failure(error) =>
               failedResponse(StatusCodes.InternalServerError, uri, error)
 
             case Success(InstitutionCreated(i)) =>
               complete((StatusCodes.Created, i))
+
+            case Success(InstitutionWithLou(i)) =>
+              entityWithLou(StatusCodes.BadRequest, uri, s"Institution LEI is an LOU: ${institution.LEI}")
           }
       }
     }
