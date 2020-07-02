@@ -213,7 +213,7 @@ master:
   ##  - "--maxmemory-policy volatile-ttl"
   ##  - "--repl-backlog-size 1024mb"
   extraFlags:
-    - "--maxmemory 3gb"
+    - "--maxmemory 7gb"
     - "--maxmemory-policy allkeys-lru"
   ## Comma-separated list of Redis commands to disable
   ##

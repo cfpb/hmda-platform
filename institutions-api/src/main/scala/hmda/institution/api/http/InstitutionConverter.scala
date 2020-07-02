@@ -5,7 +5,7 @@ import hmda.model.institution._
 
 object InstitutionConverter {
 
-  def convert(entity: InstitutionEntity, emails: Seq[String]): Institution =
+  def convert(entity: InstitutionEntity, emails: Seq[String]): Institution = {
     Institution(
       entity.activityYear,
       entity.lei,
@@ -38,6 +38,7 @@ object InstitutionConverter {
       entity.quarterlyFilerHasFiledQ3
 
     )
+  }
 
   def convert(institution: Institution): InstitutionEntity =
     InstitutionEntity(

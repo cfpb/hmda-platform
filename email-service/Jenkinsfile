@@ -7,13 +7,6 @@ pipeline {
     stage('init') {
       steps {
         script {
-          library identifier: "hmdaUtils@master", retriever: modernSCM (
-              [
-                  $class: 'GitSCMSource',
-                  remote: 'https://github.cfpb.gov/HMDA-Operations/hmda-devops.git'
-              ]
-          )
-
           init.setEnvironment('email_service')
           init.checkForChanges('email-service')
         }

@@ -1,8 +1,9 @@
 package hmda.dataBrowser.api
 
+import akka.actor
 import akka.actor.CoordinatedShutdown
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ Behavior, SupervisorStrategy }
+import akka.actor.typed.{ ActorSystem, Behavior, SupervisorStrategy }
 import akka.actor.typed.scaladsl.adapter._
 import akka.http.scaladsl.server.Directives._
 import hmda.api.http.directives.HmdaTimeDirectives._
@@ -29,24 +30,20 @@ object DataBrowserApi extends Settings {
     Behaviors
       .supervise[Nothing] {
         Behaviors.setup[Nothing] { ctx =>
-          implicit val system               = ctx.system
-          implicit val classic              = system.toClassic
-          implicit val mat                  = Materializer(ctx)
-          implicit val ec: ExecutionContext = ctx.executionContext
-          val shutdown                      = CoordinatedShutdown(system)
-          val log                           = ctx.log
-          val host: String                  = server.host
-          val port: Int                     = server.port
+          implicit val system: ActorSystem[Nothing] = ctx.system
+          implicit val classic: actor.ActorSystem   = system.toClassic
+          implicit val mat: Materializer            = Materializer(ctx)
+          implicit val ec: ExecutionContext         = ctx.executionContext
+          val shutdown                              = CoordinatedShutdown(system)
+          val log                                   = ctx.log
+          val host: String                          = server.host
+          val port: Int                             = server.port
 
-          val repository2017 = {
-            val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("databrowser_db")
-            new PostgresModifiedLarRepository2017(database.tableName2017, databaseConfig)
-          }
+          val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("databrowser_db")
 
-          val repository2018= {
-            val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("databrowser_db")
-            new PostgresModifiedLarRepository(database.tableName2018, databaseConfig)
-          }
+          val repository2017 = new PostgresModifiedLarRepository2017(database.tableName2017, databaseConfig)
+
+          val repositoryLatest = new PostgresModifiedLarRepository(databaseConfig, database.tableSelector)
 
           // We make the creation of the Redis client effectful because it can fail and we would like to operate
           // the service even if the cache is down (we provide fallbacks in case we receive connection errors)
@@ -70,13 +67,13 @@ object DataBrowserApi extends Settings {
             // client creation process is expensive and the client is able to recover internally when Redis comes back
           }
 
-          val cache = new RedisModifiedLarAggregateCache(redisClientTask, redis.ttl)
+          val cache = new RedisModifiedLarAggregateCache(redisClientTask, log, redis.ttl)
 
-          val query: QueryService = new DataBrowserQueryService(repository2018, repository2017, cache)
+          val query: QueryService = new DataBrowserQueryService(repositoryLatest, repository2017, cache, log)
 
           val fileCache = new S3FileService
 
-          val healthCheck: HealthCheckService = new HealthCheckService(repository2018, cache, fileCache)
+          val healthCheck: HealthCheckService = new HealthCheckService(repositoryLatest, cache, fileCache)
 
           val routes = BaseHttpApi.routes(name) ~ DataBrowserHttpApi.create(log, fileCache, query, healthCheck)
           BaseHttpApi.runServer(shutdown, name)(timed(routes), host, port)

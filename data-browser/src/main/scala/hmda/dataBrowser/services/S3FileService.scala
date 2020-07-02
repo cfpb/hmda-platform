@@ -26,6 +26,8 @@ class S3FileService(implicit mat: Materializer) extends FileService with Setting
       val content = formName(queries)
       s"${content}${fileEnding(delimiter)}"
     }
+    log.debug("Key: " + key)
+    log.debug("Bucket: " + s3.bucket)
     // Content-Disposition is a friendly name that the user will see downloading the file
     // as opposed to the key which is an MD5 string
     // Note: don't use meta headers as it adds the x-amz- prefix to the header
@@ -51,6 +53,8 @@ class S3FileService(implicit mat: Materializer) extends FileService with Setting
 
   override def retrieveData(queries: List[QueryField], delimiter: Delimiter, year: String): Task[Option[Source[ByteString, NotUsed]]] = {
     val key = s3Key(queries, delimiter, year)
+    log.info("Retrieveing S3 Key: " + key)
+    log.info("Retrieveing bucket name: " + s3.bucket)
     Task
       .deferFuture(S3.download(s3.bucket, key).runWith(Sink.head))
       .map(opt => opt.map { case (source, _) => source })
@@ -75,10 +79,8 @@ class S3FileService(implicit mat: Materializer) extends FileService with Setting
 
   private def s3Key(queries: List[QueryField], delimiter: Delimiter, year: String): String = {
     val input = md5HashString(formName(queries))
-    val key = year match {
-      case "2018" => s"${s3.environment}/${s3.filteredQueries}/$input"
-      case _ => s"${s3.environment}/${year}/${s3.filteredQueries}/$input"
-    }
+    println ("This is the input: " + input)
+    val key = s"${s3.environment}/${s3.tableSelector(year.toInt)}/$input"
     s"$key${fileEnding(delimiter)}"
   }
 

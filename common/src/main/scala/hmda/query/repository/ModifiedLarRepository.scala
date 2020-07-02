@@ -27,8 +27,8 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
     */
   def msaMds(lei: String, filingYear: Int): Future[Vector[(String, String)]] =
     db.run {
-      sql"""SELECT DISTINCT msa_md, msa_md_name
-                         FROM #${fetchYearTable(filingYear)} WHERE lei = ${lei.toUpperCase} AND filing_year = ${filingYear} AND msa_md <> 0"""
+      sql"""SELECT  msa_md, case when msa_md = '99999' then 'NA' else max(msa_md_name) end
+                         FROM #${fetchYearTable(filingYear)} WHERE lei = ${lei.toUpperCase}  AND msa_md <> 0 group by msa_md order by msa_md"""
         .as[(String, String)]
     }
 
