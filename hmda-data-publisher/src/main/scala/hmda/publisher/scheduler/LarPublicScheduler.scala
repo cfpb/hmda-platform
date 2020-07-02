@@ -9,13 +9,14 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.{ModifiedLarHeader, PGTableNameLoader, PublicAWSConfigLoader}
+import hmda.publisher.helper.{ModifiedLarHeader, PGTableNameLoader, PublicAWSConfigLoader, SnapshotCheck}
 import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019}
 import hmda.publisher.query.lar.ModifiedLarEntityImpl
 import hmda.publisher.scheduler.schedules.Schedules.{LarPublicScheduler2018, LarPublicScheduler2019}
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
 import slick.basic.DatabasePublisher
+
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
@@ -32,6 +33,12 @@ class LarPublicScheduler extends HmdaActor with
   def mlarRepository2018 = new ModifiedLarRepository2018(dbConfig)
   def mlarRepository2019 = new ModifiedLarRepository2019(dbConfig)
 
+  val s3Settings = S3Settings(context.system)
+    .withBufferType(MemoryBufferType)
+    .withCredentialsProvider(awsCredentialsProviderPublic)
+    .withS3RegionProvider(awsRegionProviderPublic)
+    .withListBucketApiVersion(ListBucketVersion2)
+
   override def preStart(): Unit = {
     QuartzSchedulerExtension(context.system)
       .schedule("LarPublicScheduler2018", self, LarPublicScheduler2018)
@@ -45,23 +52,21 @@ class LarPublicScheduler extends HmdaActor with
   override def receive: Receive = {
 
     case LarPublicScheduler2018 =>
-      if (snapshotActive) {
-        val s3Path = "cfpb-hmda-export/dev/snapshot-temp/2018/2018_lar_snapshot.txt"
-        larPublicStream("2018", bucketPublic, s3Path)
+      if (SnapshotCheck.snapshotActive) {
+        val s3Path = "dev/snapshot-temp/2018/2018_lar_snapshot.txt"
+        larPublicStream("2018", "cfpb-hmda-export", s3Path)
       }
       else{
-        val fileNamePSV = "2018_lar.txt"
         val s3Path = s"$environmentPublic/dynamic-data/2018/2018_lar.txt"
         larPublicStream("2018", bucketPublic, s3Path)
       }
 
     case LarPublicScheduler2019 =>
-      if (snapshotActive) {
-         val s3Path = "cfpb-hmda-export/dev/snapshot-temp/2019/2019_lar_snapshot.txt"
-        larPublicStream("2019", bucketPublic, s3Path)
+      if (SnapshotCheck.snapshotActive) {
+         val s3Path = "dev/snapshot-temp/2019/2019_lar_snapshot.txt"
+        larPublicStream("2019", "cfpb-hmda-export", s3Path)
       }
       else{
-         val fileNamePSV = "2019_lar.txt"
         val s3Path = s"$environmentPublic/dynamic-data/2019/2019_lar.txt"
         larPublicStream("2019", bucketPublic, s3Path)
       }

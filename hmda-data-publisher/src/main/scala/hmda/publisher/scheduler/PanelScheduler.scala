@@ -6,25 +6,26 @@ import java.time.format.DateTimeFormatter
 import akka.stream.Materializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{ MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings }
+import akka.stream.alpakka.s3.{MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
-import hmda.publisher.query.component.{ InstitutionEmailComponent, PublisherComponent2018, PublisherComponent2019 }
-import hmda.publisher.query.panel.{ InstitutionAltEntity, InstitutionEmailEntity, InstitutionEntity }
-import hmda.publisher.scheduler.schedules.Schedules.{ PanelScheduler2018, PanelScheduler2019 }
+import hmda.publisher.helper.PrivateAWSConfigLoader
+import hmda.publisher.query.component.{InstitutionEmailComponent, PublisherComponent2018, PublisherComponent2019}
+import hmda.publisher.query.panel.{InstitutionAltEntity, InstitutionEmailEntity, InstitutionEntity}
+import hmda.publisher.scheduler.schedules.Schedules.{PanelScheduler2018, PanelScheduler2019}
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
-import software.amazon.awssdk.auth.credentials.{ AwsBasicCredentials, StaticCredentialsProvider }
+import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.regions.providers.AwsRegionProvider
 
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.{ Failure, Success }
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
-class PanelScheduler extends HmdaActor with PublisherComponent2018 with PublisherComponent2019 with InstitutionEmailComponent {
+class PanelScheduler extends HmdaActor with PublisherComponent2018 with PublisherComponent2019 with InstitutionEmailComponent with PrivateAWSConfigLoader {
 
   implicit val ec: ExecutionContext       = context.system.dispatcher
   implicit val materializer: Materializer = Materializer(context)
@@ -35,21 +36,12 @@ class PanelScheduler extends HmdaActor with PublisherComponent2018 with Publishe
 
   val awsConfig =
     ConfigFactory.load("application.conf").getConfig("private-aws")
-  val accessKeyId  = awsConfig.getString("private-access-key-id")
-  val secretAccess = awsConfig.getString("private-secret-access-key ")
-  val region       = awsConfig.getString("private-region")
-  val bucket       = awsConfig.getString("private-s3-bucket")
-  val environment  = awsConfig.getString("private-environment")
-  val year         = awsConfig.getString("private-year")
 
-  val awsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccess))
-
-  val awsRegionProvider: AwsRegionProvider = () => Region.of(region)
 
   val s3Settings = S3Settings(context.system)
     .withBufferType(MemoryBufferType)
-    .withCredentialsProvider(awsCredentialsProvider)
-    .withS3RegionProvider(awsRegionProvider)
+    .withCredentialsProvider(awsCredentialsProviderPrivate)
+    .withS3RegionProvider(awsRegionProviderPrivate)
     .withListBucketApiVersion(ListBucketVersion2)
 
   override def preStart(): Unit =
@@ -83,7 +75,7 @@ class PanelScheduler extends HmdaActor with PublisherComponent2018 with Publishe
     val formattedDate = fullDate.format(now)
     val fileName      = s"$formattedDate" + "2018_panel.txt"
     val s3Sink =
-      S3.multipartUpload(bucket, s"$environment/panel/$fileName")
+      S3.multipartUpload(bucketPrivate, s"$environmentPrivate/panel/$fileName")
         .withAttributes(S3Attributes.settings(s3Settings))
     val results: Future[MultipartUploadResult] = Source
       .future(allResults)
@@ -95,9 +87,9 @@ class PanelScheduler extends HmdaActor with PublisherComponent2018 with Publishe
 
     results onComplete {
       case Success(result) =>
-        log.info("Pushed to S3: " + s"$bucket/$environment/panel/$fileName" + ".")
+        log.info("Pushed to S3: " + s"$bucketPrivate/$environmentPrivate/panel/$fileName" + ".")
       case Failure(t) =>
-        println("An error has occurred getting Panel Data 2018: " + t.getMessage)
+        log.error("An error has occurred getting Panel Data 2018: " + t.getMessage)
     }
   }
 
@@ -109,7 +101,7 @@ class PanelScheduler extends HmdaActor with PublisherComponent2018 with Publishe
     val formattedDate = fullDate.format(now)
     val fileName      = s"$formattedDate" + "2019_panel.txt"
     val s3Sink =
-      S3.multipartUpload(bucket, s"$environment/panel/$fileName")
+      S3.multipartUpload(bucketPrivate, s"$environmentPrivate/panel/$fileName")
         .withAttributes(S3Attributes.settings(s3Settings))
     val results: Future[MultipartUploadResult] = Source
       .future(allResults)
@@ -121,10 +113,10 @@ class PanelScheduler extends HmdaActor with PublisherComponent2018 with Publishe
 
     results onComplete {
       case Success(result) =>
-        log.info("Pushed to S3: " + s"$bucket/$environment/panel/$fileName" + ".")
+        log.info("Pushed to S3: " + s"$bucketPrivate/$environmentPrivate/panel/$fileName" + ".")
 
       case Failure(t) =>
-        println("An error has occurred getting Panel Data 2019: " + t.getMessage)
+        log.error("An error has occurred getting Panel Data 2019: " + t.getMessage)
     }
   }
 

@@ -7,15 +7,13 @@ import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
-import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.{PublicAWSConfigLoader, TSHeader}
+import hmda.publisher.helper.{PublicAWSConfigLoader, SnapshotCheck, TSHeader}
 import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019}
 import hmda.publisher.scheduler.schedules.Schedules.{TsPublicScheduler2018, TsPublicScheduler2019}
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.ts._
 import hmda.util.BankFilterUtils._
-import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.regions.providers.AwsRegionProvider
 
@@ -52,9 +50,9 @@ class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with Publi
   override def receive: Receive = {
 
     case TsPublicScheduler2018 =>
-      if (snapshotActive) {
-        val s3Path = "cfpb-hmda-export/dev/snapshot-temp/2018/2018_ts_snapshot.txt"
-        tsPublicStream("2018", bucketPublic, s3Path)
+      if (SnapshotCheck.snapshotActive) {
+        val s3Path = "dev/snapshot-temp/2018/2018_ts_snapshot.txt"
+        tsPublicStream("2018", "cfpb-hmda-export", s3Path)
       }
       else{
         val s3Path = s"$environmentPublic/dynamic-data/2018/2018_ts.txt"
@@ -62,9 +60,9 @@ class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with Publi
       }
 
     case TsPublicScheduler2019 =>
-      if (snapshotActive) {
-        val s3Path = "cfpb-hmda-export/dev/snapshot-temp/2019/2019_ts_snapshot.txt"
-        tsPublicStream("2019", bucketPublic, s3Path)
+      if (SnapshotCheck.snapshotActive) {
+        val s3Path = "dev/snapshot-temp/2019/2019_ts_snapshot.txt"
+        tsPublicStream("2019", "cfpb-hmda-export", s3Path)
       }
       else{
         val s3Path = s"$environmentPublic/dynamic-data/2019/2019_ts.txt"
