@@ -13,7 +13,7 @@ case class InstitutionEntity(
   respondentCity: String = "",
   parentIdRssd: Int = -1,
   parentName: String = "",
-  assets: Int = 0,
+  assets: Long = 0,
   otherLenderCode: Int = -1,
   topHolderIdRssd: Int = -1,
   topHolderName: String = "",

@@ -139,6 +139,7 @@ CREATE TABLE hmda_user.modifiedlar2018 (
     percent_median_msa_income character varying,
     dwelling_category character varying,
     loan_product_type character varying
+    created_at timestamp without time zone DEFAULT now(),
 );
 
 

@@ -18,7 +18,7 @@ object Version {
   val keycloak               = "4.5.0.Final"
   val jboss                  = "3.3.2.Final"
   val httpcomponents         = "4.5.6"
-  val alpakkaS3              = "2.0.0-RC2"
+  val alpakkaS3              = "2.0.1"
   val alpakkaKafka           = "2.0.2"
   val alpakkaSlick           = "1.1.1"
   val embeddedKafka          = "2.4.1"

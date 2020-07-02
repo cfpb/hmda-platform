@@ -171,7 +171,12 @@ spec:
             valueFrom:
               configMapKeyRef:
                 name: schedule-configmap
-                key: publisher.panel.public.2018
+                key: publisher.ts.public.2019
+          - name: LAR_PUBLIC_SCHEDULE_2019
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.lar.public.2019
           - name: LAR_Scheduler_Quarterly_2020
             valueFrom:
               configMapKeyRef:

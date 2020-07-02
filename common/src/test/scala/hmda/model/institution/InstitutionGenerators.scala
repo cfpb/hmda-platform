@@ -17,7 +17,7 @@ object InstitutionGenerators {
       email           <- emailListGen
       respondent      <- institutionRespondentGen
       parent          <- institutionParentGen
-      assets          <- Gen.choose(Int.MinValue, Int.MaxValue)
+      assets          <- Gen.choose(Long.MinValue, Long.MaxValue)
       otherLenderCode <- Gen.choose(Int.MinValue, Int.MaxValue)
       topHolder       <- topHolderGen
       hmdaFiler       <- Gen.oneOf(true, false)

@@ -31,7 +31,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
     def respondentCity  = column[String]("respondent_city")
     def parentIdRssd    = column[Int]("parent_id_rssd")
     def parentName      = column[String]("parent_name")
-    def assets          = column[Int]("assets")
+    def assets          = column[Long]("assets")
     def otherLenderCode = column[Int]("other_lender_code")
     def topHolderIdRssd = column[Int]("topholder_id_rssd")
     def topHolderName   = column[String]("topholder_name")

@@ -42,7 +42,7 @@ object Institution {
         ("emailDomains", i.emailDomains.asJson),
         ("respondent", i.respondent.asJson),
         ("parent", i.parent.asJson),
-        ("assets", Json.fromInt(i.assets)),
+        ("assets", Json.fromLong(i.assets)),
         ("otherLenderCode", Json.fromInt(i.otherLenderCode)),
         ("topHolder", i.topHolder.asJson),
         ("hmdaFiler", Json.fromBoolean(i.hmdaFiler)),
@@ -67,7 +67,7 @@ object Institution {
         emailDomains           <- c.downField("emailDomains").as[List[String]]
         respondent             <- c.downField("respondent").as[Respondent]
         parent                 <- c.downField("parent").as[Parent]
-        assets                 <- c.downField("assets").as[Int]
+        assets                 <- c.downField("assets").as[Long]
         otherLenderCode        <- c.downField("otherLenderCode").as[Int]
         topHolder              <- c.downField("topHolder").as[TopHolder]
         hmdaFiler              <- c.downField("hmdaFiler").as[Boolean]
@@ -117,7 +117,7 @@ case class Institution(
   emailDomains: Seq[String],
   respondent: Respondent,
   parent: Parent,
-  assets: Int,
+  assets: Long,
   otherLenderCode: Int,
   topHolder: TopHolder,
   hmdaFiler: Boolean,
