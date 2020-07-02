@@ -1,0 +1,35 @@
+version: "3.1"
+services:
+  hmda-newman:
+    container_name: hmda-newman-one
+    image: hmda/newman-automation:latest
+    environment:
+      - KC_UN=${KC_UN}
+      - KC_PW=${KC_PW}
+      - KC_URL=${KC_URL}
+      - KC_CLIENT_ID=${KC_CLIENT_ID}
+      - HOST_FILING=${HOST_FILING}
+      - HOST_ADMIN=${HOST_ADMIN}
+      - HOST_PUBLIC=${HOST_PUBLIC}
+      - HMDA_ENV=${HMDA_ENV}
+      - MM_HOOK=${MM_HOOK}
+      - YEAR=2019
+    command:
+      ./scripts/run_one_newman.sh
+      ./scripts/newmanFiling.sh $KC_UN $KC_PW $KC_URL $KC_CLIENT_ID $HOST_FILING $HOST_ADMIN $HOST_PUBLIC $HMDA_ENV $MM_HOOK $NEWMAN_NOTIFY
+    volumes:
+      - ./src:/etc/newman
+
+
+
+# docker run -it \
+# -env KC_UN=$KC_UN \
+# -env KC_PW=$KC_PW \
+# -env KC_URL=$KC_URL \
+# -env KC_CLIENT_ID=$KC_CLIENT_ID \
+# -env HOST_FILING=$HOST_FILING \
+# -env HOST_ADMIN=$HOST_ADMIN \
+# -env HOST_PUBLIC=$HOST_PUBLIC \
+# -env HMDA_ENV=$HMDA_ENV \
+# -env MM_HOOK=$MM_HOOK \
+# newman-automation:latest /bin/bash
