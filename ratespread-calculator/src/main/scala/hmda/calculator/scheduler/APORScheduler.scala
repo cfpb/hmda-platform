@@ -3,26 +3,29 @@ package hmda.calculator.scheduler
 import akka.actor.typed.SupervisorStrategy
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{ Behavior, PostStop }
+import akka.actor.typed.{Behavior, PostStop}
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{ MemoryBufferType, ObjectMetadata, S3Attributes, S3Settings }
-import akka.stream.scaladsl.{ Flow, Framing, Sink, Source }
-import akka.stream.{ Attributes, Materializer }
+import akka.stream.alpakka.s3.{MemoryBufferType, ObjectMetadata, S3Attributes, S3Settings}
+import akka.stream.scaladsl.{Flow, Framing, Sink, Source}
+import akka.stream.{Attributes, Materializer}
 import akka.util.ByteString
-import akka.{ Done, NotUsed }
+import akka.{Done, NotUsed}
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
-import hmda.calculator.apor.{ AporListEntity, FixedRate, RateType, VariableRate }
+import hmda.calculator.apor.{AporListEntity, FixedRate, RateType, VariableRate}
 import hmda.calculator.parser.APORCsvParser
-import software.amazon.awssdk.auth.credentials.{ AwsBasicCredentials, StaticCredentialsProvider }
+import org.slf4j.LoggerFactory
+import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.regions.providers.AwsRegionProvider
-import scala.concurrent.duration._
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 
 object APORScheduler {
+  val logger = LoggerFactory.getLogger("hmda")
+
   val name: String = "APORScheduler"
 
   sealed trait Command
@@ -44,7 +47,6 @@ object APORScheduler {
           .setup[Command] { ctx =>
             implicit val ec: ExecutionContext = ctx.executionContext
             implicit val mat: Materializer    = Materializer(ctx.system)
-            val log                           = ctx.log
             val config                        = ctx.system.settings.config
             val aporConfig                    = config.getConfig("hmda.apors")
             val fixedRateFileName             = aporConfig.getString("fixed.rate.fileName")
@@ -83,19 +85,19 @@ object APORScheduler {
                   Behaviors.same
 
                 case Command.FinishedFixedRate =>
-                  log.info("Loaded APOR data from S3 for: " + FixedRate + " from:  " + bucket + "/" + fixedBucketKey)
+                  logger.info("Loaded APOR data from S3 for: " + FixedRate + " from:  " + bucket + "/" + fixedBucketKey)
                   Behaviors.same
 
                 case Command.FinishedVariableRate =>
-                  log.info("Loaded APOR data from S3 for: " + VariableRate + " from:  " + bucket + "/" + variableBucketKey)
+                  logger.info("Loaded APOR data from S3 for: " + VariableRate + " from:  " + bucket + "/" + variableBucketKey)
                   Behaviors.same
               }
               .receiveSignal {
                 case (_, PostStop) =>
                   val result = quartz.cancelJob(APORScheduler.name)
                   if (result)
-                    log.info(s"${APORScheduler.name} was successfully stopped by the Quartz Scheduler due to receiving a PostStop signal")
-                  else log.error(s"${APORScheduler.name} was unable to be cancelled by Quartz due after receiving a PostStop signal")
+                    logger.info(s"${APORScheduler.name} was successfully stopped by the Quartz Scheduler due to receiving a PostStop signal")
+                  else logger.error(s"${APORScheduler.name} was unable to be cancelled by Quartz due after receiving a PostStop signal")
                   Behaviors.same[Command]
               }
           }
@@ -106,6 +108,7 @@ object APORScheduler {
   private def framing: Flow[ByteString, ByteString, NotUsed] =
     Framing.delimiter(ByteString("\n"), maximumFrameLength = 65536, allowTruncation = true)
 
+
   private def loadAPOR(s3Attributes: Attributes, bucket: String, bucketKey: String, rateType: RateType)(
     implicit mat: Materializer
   ): Future[Done] = {
@@ -115,12 +118,22 @@ object APORScheduler {
         .withAttributes(s3Attributes)
 
     s3FixedSource
-      .flatMapConcat(_.get._1)
+      .flatMapConcat(src =>{
+        checkDownload(src,rateType)
+        src.get._1
+      }
+      )
       .via(framing)
       .drop(1)
       .map(s => s.utf8String)
       .map(s => APORCsvParser(s))
       .map(apor => AporListEntity.AporOperation(apor, rateType))
       .runWith(Sink.ignore)
+  }
+
+  private def checkDownload(src: Option[(Source[ByteString, NotUsed], ObjectMetadata)],rateType: RateType){
+    if(src ==None){
+      logger.error(s"${APORScheduler.name} had an error downloading APOR file for: "+ rateType)
+    }
   }
 }
