@@ -21,7 +21,7 @@ install:
   - npm install newman
 
 jdk:
-- openjdk14
+- openjdk15
 
 script:
   - sbt ++$TRAVIS_SCALA_VERSION -batch hmda-platform/docker:publishLocal
