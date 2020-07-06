@@ -2,7 +2,7 @@
 
 
 ## Build Node Docker Image:
-From the newman-tests directory build and push the following image to generate a docker container that can execute newman test scripts:
+From the `newman-tests` directory build and push the following image to generate a docker container that can execute `newman` test scripts:
 
 
 `docker build  . -t <docker-host>/<image-name>:<image-tag> -f <path to Dockerfile>`
@@ -10,7 +10,7 @@ From the newman-tests directory build and push the following image to generate a
 `docker push  <docker-host>/<image-name>:<image-tag>`
 
 ## Install on Kubernetes
-From the kubernetes/newman directory create a K8 cron job that references this image
+From the `kubernetes/newman` directory create a Kubernetes CronJob that references this image
 
 `kubectl config use-context <dev-context>`
 
@@ -34,11 +34,22 @@ kubectl delete -n newman cronjob --all
 
 ## Testing with Newman
 
+### Running Neman Locally:
+When running `newman` locally, running the tests will require the following variables:
+```sh
+HOST_FILING=
+HOST_ADMIN=
+HOST_PUBLIC=
+NEWMAN_YEAR=
+```
+
 ### Running Newman locally and Platform locally
 Start the platform locally and then run `./scripts/run_one_newman.sh`.
 
 ### Running Newman locally and Platform in Docker
 Start the platform with `docker-compose up hmda-platform` from the root folder of the project, then run `./scripts/run_one_newman.sh`.
+
+## Running Neman with `docker-compose`
 
 ### Running Newman and Platform in Docker
 Start with running `docker-compose up` from the root folder of the project followed by another `docker-compose up` from the `newman` folder.
