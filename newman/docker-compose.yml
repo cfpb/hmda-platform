@@ -4,18 +4,37 @@ services:
     container_name: hmda-newman-one
     image: hmda/newman-automation:latest
     environment:
-      - KC_UN=${KC_UN}
-      - KC_PW=${KC_PW}
-      - KC_URL=${KC_URL}
-      - KC_CLIENT_ID=${KC_CLIENT_ID}
-      - HOST_FILING=${HOST_FILING}
-      - HOST_ADMIN=${HOST_ADMIN}
-      - HOST_PUBLIC=${HOST_PUBLIC}
-      - HMDA_ENV=${HMDA_ENV}
-      - MM_HOOK=${MM_HOOK}
-      - YEAR=2019
+      HOST_FILING: hmda-platform_hmda-platform_1:8080
+      HOST_ADMIN: hmda-platform_hmda-platform_1:8081
+      HOST_PUBLIC: hmda-platform_hmda-platform_1:8082
+      NEWMAN_YEAR: 2019
     command:
       ./scripts/run_one_newman.sh
     volumes:
       - ./src:/etc/newman
+    networks:
+      default:
+          external:
+              name: hmda-platform_default 
+      
 
+# # - Newman 
+#   hmda-newman:
+#     container_name: hmda-newman-single
+#     image: hmda/newman-automation:latest
+#     environment:
+#       # - KC_UN: ${KC_UN}
+#       # - KC_PW: ${KC_PW}
+#       # - KC_URL: ${KC_URL}
+#       # - KC_CLIENT_ID: ${KC_CLIENT_ID}
+      
+#       # - HMDA_ENV: ${HMDA_ENV}
+#       # - MM_HOOK: ${MM_HOOK}
+#       # - YEAR: ${NEWMAN_YEAR}
+#     depends_on:
+#       - hmda-platform
+#     command:
+#       - "echo 'HELLO' "
+#     volumes:
+#       - ./wait-for-it.sh:/usr/bin/wait-for-it.sh
+#       - ./src:/etc/newman

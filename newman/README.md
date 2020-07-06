@@ -15,7 +15,7 @@
 
 `kubectl config use-context <dev-context>`
 
-```
+```sh
 helm install  --namespace=newman  \
 --set env.KC_UN=$KC_UN \
 --set env.KC_PW=$KC_PW \
@@ -34,7 +34,7 @@ helm install  --namespace=newman  \
 
 ### Newman as a docker container
 * Run docker container
-```
+```sh
 docker run -it -e KC_UN=$KC_UN -e KC_PW=$KC_PW -e KC_URL=$KC_URL -e KC_CLIENT_ID=$KC_CLIENT_ID \
 -e HOST_FILING=$HOST_FILING -e HOST_ADMIN=$HOST_ADMIN -e HOST_PUBLIC=$HOST_PUBLIC -e HMDA_ENV=$HMDA_ENV \
 -e MM_HOOK=$MM_HOOK hmda/newman-automation:latest /bin/sh
@@ -77,7 +77,13 @@ curl --location --request PUT $HOST_ADMIN'/institutions' \
 }'
 ```
 * Run newmantest
-```
+```sh
  ./scripts/newmanFiling.sh $KC_UN $KC_PW $KC_URL $KC_CLIENT_ID $HOST_FILING $HOST_ADMIN \
  $HOST_PUBLIC $HMDA_ENV $MM_HOOK $NEWMAN_NOTIFY
+```
+
+### Running via Docker Compose
+You can use `docker-compose` to run a single Newman filing test. If the `HOST_FILING` url is set to `http://localhost:8080`, the script will bypess getting an authentication token.
+```sh
+docker-compose up
 ```
