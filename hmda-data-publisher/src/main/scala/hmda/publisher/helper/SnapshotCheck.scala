@@ -7,14 +7,6 @@ object SnapshotCheck {
   val pgTableConfig    = ConfigFactory.load("application.conf").getConfig("pg-tables")
   val snapshotActive: Boolean = pgTableConfig.getBoolean("activate")
 
-  def check(value: String): String = {
-    if (snapshotActive) {
-      value +"_snapshot"
-    } else {
-      value
-    }
-  }
-
   def pathSelector(s3Path: String,fileName:String): String = {
     if(snapshotActive){
       val snapshotFile=fileName.replace(".txt","_snapshot.txt")

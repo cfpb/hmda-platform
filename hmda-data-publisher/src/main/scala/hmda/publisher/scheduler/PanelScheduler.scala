@@ -12,7 +12,7 @@ import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.PrivateAWSConfigLoader
+import hmda.publisher.helper.{PrivateAWSConfigLoader, SnapshotCheck}
 import hmda.publisher.query.component.{InstitutionEmailComponent, PublisherComponent2018, PublisherComponent2019}
 import hmda.publisher.query.panel.{InstitutionAltEntity, InstitutionEmailEntity, InstitutionEntity}
 import hmda.publisher.scheduler.schedules.Schedules.{PanelScheduler2018, PanelScheduler2019}
@@ -74,8 +74,12 @@ class PanelScheduler extends HmdaActor with PublisherComponent2018 with Publishe
     val now           = LocalDateTime.now().minusDays(1)
     val formattedDate = fullDate.format(now)
     val fileName      = s"$formattedDate" + "2018_panel.txt"
+
+    val s3Path = s"$environmentPrivate/panel/"
+    val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
+
     val s3Sink =
-      S3.multipartUpload(bucketPrivate, s"$environmentPrivate/panel/$fileName")
+      S3.multipartUpload(bucketPrivate, fullFilePath)
         .withAttributes(S3Attributes.settings(s3Settings))
     val results: Future[MultipartUploadResult] = Source
       .future(allResults)
@@ -87,7 +91,7 @@ class PanelScheduler extends HmdaActor with PublisherComponent2018 with Publishe
 
     results onComplete {
       case Success(result) =>
-        log.info("Pushed to S3: " + s"$bucketPrivate/$environmentPrivate/panel/$fileName" + ".")
+        log.info("Pushed to S3: " + s"$bucketPrivate/$fullFilePath" +".")
       case Failure(t) =>
         log.error("An error has occurred getting Panel Data 2018: " + t.getMessage)
     }
@@ -100,8 +104,11 @@ class PanelScheduler extends HmdaActor with PublisherComponent2018 with Publishe
     val now           = LocalDateTime.now().minusDays(1)
     val formattedDate = fullDate.format(now)
     val fileName      = s"$formattedDate" + "2019_panel.txt"
+    val s3Path = s"$environmentPrivate/panel/"
+    val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
+
     val s3Sink =
-      S3.multipartUpload(bucketPrivate, s"$environmentPrivate/panel/$fileName")
+      S3.multipartUpload(bucketPrivate, fullFilePath)
         .withAttributes(S3Attributes.settings(s3Settings))
     val results: Future[MultipartUploadResult] = Source
       .future(allResults)

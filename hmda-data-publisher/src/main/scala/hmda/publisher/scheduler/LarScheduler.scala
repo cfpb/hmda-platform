@@ -125,7 +125,7 @@ class LarScheduler
 
       results onComplete {
         case Success(result) =>
-          log.info("Pushed to S3: " +fullFilePath + ".")
+          log.info("Pushed to S3: " +bucketPrivate +"/" +fullFilePath + ".")
         case Failure(t) =>
           log.info("An error has occurred getting LAR Data 2019 in Future: " + t.getMessage)
       }
@@ -135,8 +135,7 @@ class LarScheduler
       val formattedDate = fullDate.format(now)
       val fileName      = "2019F_AGY_LAR_withFlag_" + s"$formattedDate" + "2019_lar.txt"
       val s3Path = s"$environmentPrivate/lar/"
-      val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName,snapshotActive)
-
+      val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
 
       val s3Sink = S3
         .multipartUpload(bucketPrivate, fullFilePath)
@@ -159,7 +158,7 @@ class LarScheduler
 
       resultsPSV onComplete {
         case Success(results) =>
-          log.info("Pushed to S3: " + fullFilePath + ".")
+          log.info("Pushed to S3: " +bucketPrivate +"/" + fullFilePath + ".")
         case Failure(t) =>
           log.info("An error has occurred getting LAR Data Loan Limit2019 in Future: " + t.getMessage)
       }
@@ -170,8 +169,12 @@ class LarScheduler
       val formattedDate    = fullDateQuarterly.format(now)
 
       val fileName = s"$formattedDate" + "quarterly_2020_lar.txt"
+
+      val s3Path = s"$environmentPrivate/lar/"
+      val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
+
       val s3Sink = S3
-        .multipartUpload(bucketPrivate, s"$environmentPrivate/lar/$fileName")
+        .multipartUpload(bucketPrivate, fullFilePath)
         .withAttributes(S3Attributes.settings(s3Settings))
 
       val allResultsPublisher: DatabasePublisher[LarEntityImpl2020] =
@@ -186,7 +189,7 @@ class LarScheduler
 
       results onComplete {
         case Success(result) =>
-          log.info("Pushed to S3: " + s"$bucketPrivate/$environmentPrivate/lar/$fileName" + ".")
+          log.info("Pushed to S3: " +bucketPrivate+ "/" +fullFilePath + ".")
         case Failure(t) =>
           log.info("An error has occurred getting Quarterly LAR Data 2020 in Future: " + t.getMessage)
       }

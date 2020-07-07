@@ -50,26 +50,17 @@ class LarPublicScheduler extends HmdaActor with
     QuartzSchedulerExtension(context.system).cancelJob("LarPublicScheduler2019")
   }
   override def receive: Receive = {
-
     case LarPublicScheduler2018 =>
-      if (SnapshotCheck.snapshotActive) {
-        val s3Path = "dev/snapshot-temp/2018/2018_lar_snapshot.txt"
-        larPublicStream("2018", "cfpb-hmda-export", s3Path)
-      }
-      else{
-        val s3Path = s"$environmentPublic/dynamic-data/2018/2018_lar.txt"
-        larPublicStream("2018", bucketPublic, s3Path)
-      }
+      val fileName      = "2018_lar.txt"
+      val s3Path = s"$environmentPublic/dynamic-data/2018/"
+      val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
+      larPublicStream("2018", "cfpb-hmda-export", fullFilePath)
 
     case LarPublicScheduler2019 =>
-      if (SnapshotCheck.snapshotActive) {
-         val s3Path = "dev/snapshot-temp/2019/2019_lar_snapshot.txt"
-        larPublicStream("2019", "cfpb-hmda-export", s3Path)
-      }
-      else{
-        val s3Path = s"$environmentPublic/dynamic-data/2019/2019_lar.txt"
-        larPublicStream("2019", bucketPublic, s3Path)
-      }
+      val fileName      = "2019_lar.txt"
+      val s3Path = s"$environmentPublic/dynamic-data/2019/"
+      val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
+      larPublicStream("2019", "cfpb-hmda-export", fullFilePath)
   }
 
   private def larPublicStream(year: String, bucket: String, path: String) = {
