@@ -98,7 +98,7 @@ class LarScheduler
 
       results onComplete {
         case Success(result) =>
-          log.info("Pushed to S3: " + fullFilePath + ".")
+          log.info("Pushed to S3: " +  s"$bucketPrivate/$fullFilePath"  + ".")
         case Failure(t) =>
           log.info("An error has occurred getting LAR Data in Future: " + t.getMessage)
       }
@@ -125,7 +125,7 @@ class LarScheduler
 
       results onComplete {
         case Success(result) =>
-          log.info("Pushed to S3: " +bucketPrivate +"/" +fullFilePath + ".")
+          log.info("Pushed to S3: " +  s"$bucketPrivate/$fullFilePath"  + ".")
         case Failure(t) =>
           log.info("An error has occurred getting LAR Data 2019 in Future: " + t.getMessage)
       }
@@ -158,7 +158,7 @@ class LarScheduler
 
       resultsPSV onComplete {
         case Success(results) =>
-          log.info("Pushed to S3: " +bucketPrivate +"/" + fullFilePath + ".")
+          log.info("Pushed to S3: " +  s"$bucketPrivate/$fullFilePath"  + ".")
         case Failure(t) =>
           log.info("An error has occurred getting LAR Data Loan Limit2019 in Future: " + t.getMessage)
       }
@@ -189,7 +189,7 @@ class LarScheduler
 
       results onComplete {
         case Success(result) =>
-          log.info("Pushed to S3: " +bucketPrivate+ "/" +fullFilePath + ".")
+          log.info("Pushed to S3: " +  s"$bucketPrivate/$fullFilePath"  + ".")
         case Failure(t) =>
           log.info("An error has occurred getting Quarterly LAR Data 2020 in Future: " + t.getMessage)
       }

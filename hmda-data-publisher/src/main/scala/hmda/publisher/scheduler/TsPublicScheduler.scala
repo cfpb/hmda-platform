@@ -50,16 +50,26 @@ class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with Publi
   override def receive: Receive = {
 
     case TsPublicScheduler2018 =>
-      val fileName      = "2018_ts.txt"
+      val fileName      = "2018_lar.txt"
       val s3Path = s"$environmentPublic/dynamic-data/2018/"
       val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
-      tsPublicStream("2018", "cfpb-hmda-export", fullFilePath)
+      if(SnapshotCheck.snapshotActive) {
+        tsPublicStream("2018", "cfpb-hmda-export", fullFilePath)
+      }
+      else{
+        tsPublicStream("2018", bucketPublic, fullFilePath)
+      }
 
     case TsPublicScheduler2019 =>
-      val fileName      = "2019_ts.txt"
+      val fileName      = "2019_lar.txt"
       val s3Path = s"$environmentPublic/dynamic-data/2019/"
       val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
-      tsPublicStream("2019", "cfpb-hmda-export", fullFilePath)
+      if(SnapshotCheck.snapshotActive) {
+        tsPublicStream("2019", "cfpb-hmda-export", fullFilePath)
+      }
+      else{
+        tsPublicStream("2019", bucketPublic, fullFilePath)
+      }
 
   }
   private def tsPublicStream(year: String, bucket: String, path: String) = {
@@ -89,7 +99,7 @@ class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with Publi
 
     resultsPSV onComplete {
       case Success(result) =>
-        log.info("Pushed to S3: " + path + ".")
+        log.info("Pushed to S3: " +  s"$bucket/$path"  + ".")
       case Failure(t) =>
         log.info("An error has occurred with: " + path + "; Getting Public TS Data in Future: " + t.getMessage)
     }

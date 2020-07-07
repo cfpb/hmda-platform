@@ -15,6 +15,8 @@ import scala.concurrent.Future
 
 trait PublisherComponent2019 extends PGTableNameLoader {
 
+
+
   import dbConfig.profile.api._
 
   class InstitutionsTable(tag: Tag)

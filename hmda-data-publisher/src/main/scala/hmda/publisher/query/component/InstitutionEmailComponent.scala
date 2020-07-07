@@ -11,6 +11,7 @@ import scala.concurrent.Future
 
 trait InstitutionEmailComponent extends PGTableNameLoader{
 
+
   import dbConfig.profile.api._
 
   class InstitutionEmailsTable(tag: Tag)

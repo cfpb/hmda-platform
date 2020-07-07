@@ -17,6 +17,8 @@ trait PublisherComponent2018 extends PGTableNameLoader{
 
   import dbConfig.profile.api._
 
+
+
   class InstitutionsTable(tag: Tag)
       extends Table[InstitutionEntity](tag,panel2018TableName) {
     def lei = column[String]("lei", O.PrimaryKey)

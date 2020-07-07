@@ -15,6 +15,8 @@ import scala.concurrent.Future
 
 trait PublisherComponent2020 extends PGTableNameLoader {
 
+
+
   import dbConfig.profile.api._
 
 

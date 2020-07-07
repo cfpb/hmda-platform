@@ -112,7 +112,7 @@ class TsScheduler extends HmdaActor with PublisherComponent2018 with PublisherCo
 
       results onComplete {
         case Success(result) =>
-          log.info("Pushed to S3: " +bucketPrivate+"/" +fullFilePath + ".")
+          log.info("Pushed to S3: " +  s"$bucketPrivate/$fullFilePath"  + ".")
 
         case Failure(t) =>
           log.error("An error has occurred getting TS Data 2019: " + t.getMessage)
@@ -134,7 +134,7 @@ class TsScheduler extends HmdaActor with PublisherComponent2018 with PublisherCo
 
       results onComplete {
         case Success(result) =>
-          log.info("Pushed to S3: " +bucketPrivate+"/" +fullFilePath + ".")
+          log.info("Pushed to S3: " +  s"$bucketPrivate/$fullFilePath"  + ".")
 
         case Failure(t) =>
           log.error("An error has occurred getting Quarterly TS Data 2020: " + t.getMessage)

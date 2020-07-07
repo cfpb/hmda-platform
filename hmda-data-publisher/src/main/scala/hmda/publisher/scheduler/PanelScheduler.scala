@@ -120,7 +120,7 @@ class PanelScheduler extends HmdaActor with PublisherComponent2018 with Publishe
 
     results onComplete {
       case Success(result) =>
-        log.info("Pushed to S3: " + s"$bucketPrivate/$environmentPrivate/panel/$fileName" + ".")
+        log.info("Pushed to S3: " + s"$bucketPrivate/$fullFilePath" + ".")
 
       case Failure(t) =>
         log.error("An error has occurred getting Panel Data 2019: " + t.getMessage)
