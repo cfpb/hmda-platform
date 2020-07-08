@@ -19,32 +19,15 @@ pipeline {
             usernameVariable: 'DOCKER_HUB_USER', passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
             withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dtr-ext-jenkins-service',
               usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
-                dockerBuild.dockerBuild('newman', './newman/docker/')
-                scanImage('hmda/newman', env.DOCKER_TAG)
+                dir("./newman") {
+                    dockerBuild.dockerBuild('newman', './docker/')
+                    scanImage('hmda/newman', env.DOCKER_TAG)
+                }
               }
             }
           }
         }
       }
-
-     stage('Deploy') {
-      agent {
-        docker {
-          image 'hmda/helm:2.16.6'
-          reuseNode true
-          args '--entrypoint=\'\''
-        }
-      }
-      steps {
-        script {
-          withCredentials([file(credentialsId: 'hmda-ops-kubeconfig', variable: 'KUBECONFIG')]) {
-            if (env.DOCKER_PUSH == 'true') {
-              helm.deploy('newman-allclear-cronjob', 'values.yaml')
-            }
-          }
-        }
-      }
-    }
 
   }
 
