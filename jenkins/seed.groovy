@@ -13,6 +13,7 @@ projects = [
     [name: "institutions-api", repo: "hmda-platform", jenkinsfilePath: "institutions-api/Jenkinsfile"],
     [name: "irs-publisher", repo: "hmda-platform", jenkinsfilePath: "irs-publisher/Jenkinsfile"],
     [name: "modified-lar", repo: "hmda-platform", jenkinsfilePath: "modified-lar/Jenkinsfile"],
+    [name: "newman", repo: "hmda-platform", jenkinsfilePath: "newman/Jenkinsfile"],
     [name: "rate-limit", repo: "hmda-platform", jenkinsfilePath: "rate-limit/Jenkinsfile"],
     [name: "ratespread-calculator", repo: "hmda-platform", jenkinsfilePath: "ratespread-calculator/Jenkinsfile"],
     [name: "theme-provider", repo: "hmda-platform", jenkinsfilePath: "kubernetes/keycloak/theme-provider/Jenkinsfile"]
