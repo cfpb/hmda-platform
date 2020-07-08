@@ -34,4 +34,5 @@ object Version {
   val guava                  = "27.1-jre"
   val awsSesSdk              = "1.11.635"
   val zeroAllocation         = "0.10.1"
+  val cormorant              = "0.3.0"
 }

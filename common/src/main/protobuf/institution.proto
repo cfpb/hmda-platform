@@ -22,6 +22,7 @@ message InstitutionMessage {
     bool quarterlyFilerHasFiledQ1 = 16;
     bool quarterlyFilerHasFiledQ2 = 17;
     bool quarterlyFilerHasFiledQ3 = 18;
+    string notes = 19;
 }
 
 message RespondentMessage {

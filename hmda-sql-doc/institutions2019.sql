@@ -49,7 +49,10 @@ CREATE TABLE hmda_beta_user.institutions2019 (
 
 );
 
-
+ALTER TABLE hmda_beta_user.institutions2019
+    ADD COLUMN notes text not null default '';
+ALTER TABLE hmda_beta_user.institutions2019
+    ALTER COLUMN notes DROP DEFAULT;
 ALTER TABLE hmda_beta_user.institutions2019 OWNER TO hmda_user;
 
 --

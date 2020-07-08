@@ -46,7 +46,10 @@ CREATE TABLE hmda_user.institutions2020 (
     quarterly_filer boolean default false NOT NULL,
 );
 
-
+ALTER TABLE hmda_user.institutions2020
+    ADD COLUMN notes text not null default '';
+ALTER TABLE hmda_user.institutions2020
+    ALTER COLUMN notes DROP DEFAULT;
 ALTER TABLE hmda_user.institutions2019 OWNER TO hmda_user;
 
 

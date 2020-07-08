@@ -25,6 +25,7 @@ object InstitutionGenerators {
       quarterlyFilerHasFiledQ1  <- Gen.oneOf(true, false)
       quarterlyFilerHasFiledQ2  <- Gen.oneOf(true, false)
       quarterlyFilerHasFiledQ3  <- Gen.oneOf(true, false)
+      notes                     <- Gen.asciiPrintableStr
 
     } yield {
       Institution(
@@ -45,8 +46,8 @@ object InstitutionGenerators {
         quarterlyFiler,
         quarterlyFilerHasFiledQ1,
         quarterlyFilerHasFiledQ2,
-        quarterlyFilerHasFiledQ3
-
+        quarterlyFilerHasFiledQ3,
+        notes
       )
     }
 
