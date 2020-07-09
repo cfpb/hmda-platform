@@ -94,7 +94,7 @@ private class InstitutionAdminHttpApi(sharding: ClusterSharding, config: Config)
               complete((StatusCodes.Created, i))
 
             case Success(InstitutionWithLou(i)) =>
-              entityWithLou(StatusCodes.BadRequest, uri, s"Institution LEI is an LOU: ${institution.LEI}")
+              entityWithLou(StatusCodes.PreconditionFailed, uri, s"Institution LEI is an LOU: ${institution.LEI}")
           }
       }
     }
