@@ -97,7 +97,7 @@ lazy val common = (project in file("common"))
       scalapb.gen() -> (sourceManaged in Compile).value
     ),
     Seq(
-      libraryDependencies ++= commonDeps ++ authDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps
+      libraryDependencies ++= commonDeps ++ authDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++ List(cormorant)
     )
   )
 

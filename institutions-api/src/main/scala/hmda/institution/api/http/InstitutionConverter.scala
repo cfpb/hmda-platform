@@ -35,8 +35,8 @@ object InstitutionConverter {
       entity.quarterlyFiler,
       entity.quarterlyFilerHasFiledQ1,
       entity.quarterlyFilerHasFiledQ2,
-      entity.quarterlyFilerHasFiledQ3
-
+      entity.quarterlyFilerHasFiledQ3,
+      entity.notes
     )
   }
 
@@ -62,7 +62,8 @@ object InstitutionConverter {
       institution.quarterlyFiler,
       institution.quarterlyFilerHasFiledQ1,
       institution.quarterlyFilerHasFiledQ2,
-      institution.quarterlyFilerHasFiledQ3
+      institution.quarterlyFilerHasFiledQ3,
+      notes = institution.notes
     )
 
   def emailsFromInstitution(institution: Institution): Seq[InstitutionEmailEntity] =

@@ -21,4 +21,12 @@ class InstitutionCsvParserSpec extends PropSpec with ScalaCheckPropertyChecks wi
     }
   }
 
+  property("Notes with special characters should work") {
+    val specialChars = Set('|', '"', '\n')
+    forAll(institutionGen.suchThat(_.notes.exists(specialChars.contains))) { institution =>
+      val csv = institution.toCSV
+      InstitutionCsvParser(csv) must equal(institution)
+    }
+  }
+
 }

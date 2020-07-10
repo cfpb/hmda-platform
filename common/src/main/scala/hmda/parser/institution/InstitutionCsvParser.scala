@@ -1,12 +1,15 @@
 package hmda.parser.institution
 
 import hmda.model.institution._
+import io.chrisdavenport.cormorant.parser.{CSVLikeParser}
+import io.chrisdavenport.cormorant
 
 object InstitutionCsvParser {
+  val parser: CSVLikeParser = new CSVLikeParser('|') {}
 
   def apply(s: String): Institution = {
-    val values              = s.split('|').map(_.trim).toList
-    val acticityYear        = values.head.toInt
+    val values              = cormorant.parser.parseRow(s, parser).toTry.get.l.map(_.x).toList
+    val activityYear        = values.head.toInt
     val lei                 = values(1)
     val agencyCode          = values(2).toInt
     val institutionTypeCode = values(3).toInt
@@ -28,12 +31,13 @@ object InstitutionCsvParser {
     val quarterlyFilerHasFiledQ1 = values(19)
     val quarterlyFilerHasFiledQ2 = values(20)
     val quarterlyFilerHasFiledQ3 = values(21)
+    val notes                    = values.lift.apply(22).getOrElse("") //TODO consider default value from env
 
     val emails =
       if (emailDomains.isEmpty) List() else emailDomains.split(',').toList
 
     Institution(
-      acticityYear,
+      activityYear,
       lei,
       Agency.valueOf(agencyCode.toInt),
       InstitutionType.valueOf(institutionTypeCode),
@@ -57,7 +61,8 @@ object InstitutionCsvParser {
       parseBoolean(quarterlyFiler),
       parseBoolean(quarterlyFilerHasFiledQ1),
       parseBoolean(quarterlyFilerHasFiledQ2),
-      parseBoolean(quarterlyFilerHasFiledQ3)
+      parseBoolean(quarterlyFilerHasFiledQ3),
+      notes
     )
   }
   def parseBoolean(i: String): Boolean =
