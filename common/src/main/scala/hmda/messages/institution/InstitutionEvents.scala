@@ -8,6 +8,7 @@ object InstitutionEvents {
 
   sealed trait InstitutionEvent                               extends Event
   final case class InstitutionCreated(i: Institution)         extends InstitutionEvent
+  final case class InstitutionWithLou(i: Institution)         extends InstitutionEvent
   final case class InstitutionModified(i: Institution)        extends InstitutionEvent
   final case class InstitutionDeleted(LEI: String, year: Int) extends InstitutionEvent
   final case class InstitutionNotExists(LEI: String)          extends InstitutionEvent

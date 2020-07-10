@@ -14,6 +14,9 @@ class InstitutionEventsSerializer extends SerializerWithStringManifest {
   final val InstitutionCreatedManifest =
     classOf[InstitutionCreated].getName
 
+  final val InstitutionWithLouManifest =
+    classOf[InstitutionWithLou].getName
+
   final val InstitutionModifiedManifest =
     classOf[InstitutionModified].getName
 
@@ -31,6 +34,8 @@ class InstitutionEventsSerializer extends SerializerWithStringManifest {
   override def toBinary(o: AnyRef): Array[Byte] = o match {
     case evt: InstitutionCreated =>
       institutionCreatedToProtobuf(evt).toByteArray
+    case evt: InstitutionWithLou =>
+      institutionWithLouToProtobuf(evt).toByteArray
     case evt: InstitutionModified =>
       institutionModifiedToProtobuf(evt).toByteArray
     case evt: InstitutionDeleted =>
@@ -47,6 +52,8 @@ class InstitutionEventsSerializer extends SerializerWithStringManifest {
     manifest match {
       case InstitutionCreatedManifest =>
         institutionCreatedFromProtobuf(InstitutionCreatedMessage.parseFrom(bytes))
+      case InstitutionWithLouManifest =>
+        institutionWithLouFromProtobuf(InstitutionWithLouMessage.parseFrom(bytes))
       case InstitutionModifiedManifest =>
         institutionModifiedFromProtobuf(InstitutionModifiedMessage.parseFrom(bytes))
       case InstitutionDeletedManifest =>

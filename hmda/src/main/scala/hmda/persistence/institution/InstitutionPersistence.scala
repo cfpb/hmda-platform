@@ -17,6 +17,7 @@ import hmda.messages.pubsub.HmdaTopics._
 import hmda.model.institution.{ Institution, InstitutionDetail }
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.publication.KafkaUtils._
+import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.Future
 
@@ -42,11 +43,20 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
     implicit val system: ActorSystem[_]     = ctx.system
     implicit val materializer: Materializer = Materializer(ctx)
     val config                              = system.settings.config
+    val louConfig = ConfigFactory.load("application.conf").getConfig("filter")
+    val louList =
+      louConfig.getString("lou-filter-list").toUpperCase.split(",")
 
     (state, cmd) =>
       cmd match {
         case CreateInstitution(i, replyTo) =>
-          if (state.institution.isEmpty) {
+          if (louList.contains(i.LEI)) {
+            Effect.none.thenRun { _ =>
+              log.warn(s"Institution Creation with LOU attempted: ${i.toString}")
+              replyTo ! InstitutionWithLou(i)
+            }
+          }
+          else if (state.institution.isEmpty) {
             Effect.persist(InstitutionCreated(i)).thenRun { _ =>
               log.debug(s"Institution Created: ${i.toString}")
               val event = InstitutionCreated(i)
@@ -120,6 +130,7 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
 
   override val eventHandler: (InstitutionState, InstitutionEvent) => InstitutionState = {
     case (state, InstitutionCreated(i))         => state.copy(Some(i))
+    case (state, InstitutionWithLou(i))         => state.copy(Some(i))
     case (state, InstitutionModified(i))        => modifyInstitution(i, state)
     case (state, InstitutionDeleted(lei, year)) => state.copy(None)
     case (state, evt @ FilingAdded(_))          => state.update(evt)

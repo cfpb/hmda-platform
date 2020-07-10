@@ -10,6 +10,10 @@ message InstitutionCreatedMessage {
     InstitutionMessage institution = 1;
 }
 
+message InstitutionWithLouMessage {
+    InstitutionMessage institution = 1;
+}
+
 message InstitutionModifiedMessage {
     InstitutionMessage institution = 1;
 }
@@ -33,5 +37,6 @@ message InstitutionKafkaEventMessage {
         InstitutionCreatedMessage institutionCreatedField = 2;
         InstitutionModifiedMessage institutionModifiedField = 3;
         InstitutionDeletedMessage institutionDeletedField = 4;
+        InstitutionWithLouMessage InstitutionWithLouField = 5;
     }
 }

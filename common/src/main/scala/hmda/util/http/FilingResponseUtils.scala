@@ -28,6 +28,12 @@ object FilingResponseUtils {
     complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
   }
 
+  def entityWithLou(status: StatusCode, uri: Uri, errorMessage: String): Route = {
+    val errorResponse =
+      ErrorResponse(status.intValue(), errorMessage, uri.path)
+    complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+  }
+
   def submissionNotAvailable(submissionId: SubmissionId, uri: Uri): Route = {
     val errorResponse = ErrorResponse(400, s"Submission ${submissionId.toString} not available for upload", uri.path)
     complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))

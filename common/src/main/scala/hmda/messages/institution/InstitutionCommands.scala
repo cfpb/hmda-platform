@@ -9,7 +9,7 @@ import hmda.model.institution.{ Institution, InstitutionDetail }
 object InstitutionCommands {
   sealed trait InstitutionCommand extends Command
 
-  final case class CreateInstitution(i: Institution, replyTo: ActorRef[InstitutionCreated]) extends InstitutionCommand
+  final case class CreateInstitution(i: Institution, replyTo: ActorRef[InstitutionEvent]) extends InstitutionCommand
 
   final case class ModifyInstitution(i: Institution, replyTo: ActorRef[InstitutionEvent]) extends InstitutionCommand
 
