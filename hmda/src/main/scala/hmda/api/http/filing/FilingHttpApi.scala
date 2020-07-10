@@ -138,16 +138,16 @@ private class FilingHttpApi(log: Logger, sharding: ClusterSharding)(implicit val
   def getFilingForInstitution(lei: String, period: Int, quarter: Option[String], uri: Uri, pageNumber: Int): Route =
     onComplete(obtainFilingDetails(lei, period, quarter)) {
       case Success((Some(_), Some(filingDetails))) =>
-
+        val sortedDetails = filingDetails.copy(submissions = filingDetails.submissions.sortBy(- _.id.sequenceNumber))
         // get all filings 
         if (pageNumber == 0)
-          complete(filingDetails)
+          complete(sortedDetails)
         else {
           val summary =
             FilingDetailsSummary(
-              filing = filingDetails.filing,
+              filing = sortedDetails.filing,
               submissions = Nil,
-              filingDetails.submissions.length,
+              sortedDetails.submissions.length,
               pageNumber,
               uri.path.toString()
             )
@@ -158,7 +158,7 @@ private class FilingHttpApi(log: Logger, sharding: ClusterSharding)(implicit val
           // in order to compute the correct fromIndex and correct count
           // then we put the actual adjusted data in
           val result = summary.copy(
-            submissions = filingDetails.submissions
+            submissions = sortedDetails.submissions
               .drop(summary.fromIndex)
               .take(summary.count)
           )
