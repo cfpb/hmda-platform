@@ -140,14 +140,9 @@ private class FilingHttpApi(log: Logger, sharding: ClusterSharding)(implicit val
       case Success((Some(_), Some(filingDetails))) =>
         val sortedDetails = filingDetails.copy(submissions = filingDetails.submissions.sortBy(- _.id.sequenceNumber))
         // get all filings 
-        if (pageNumber == 0) {
-
-
+        if (pageNumber == 0)
           complete(sortedDetails)
-        }
         else {
-
-
           val summary =
             FilingDetailsSummary(
               filing = sortedDetails.filing,
