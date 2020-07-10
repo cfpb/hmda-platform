@@ -2,6 +2,7 @@ package hmda.publisher.query.component
 
 import java.sql.Timestamp
 
+import hmda.publisher.helper.PGTableNameLoader
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
@@ -12,12 +13,14 @@ import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
 
 import scala.concurrent.Future
 
-trait PublisherComponent2018 {
+trait PublisherComponent2018 extends PGTableNameLoader{
 
   import dbConfig.profile.api._
 
+
+
   class InstitutionsTable(tag: Tag)
-      extends Table[InstitutionEntity](tag, "institutions2018") {
+      extends Table[InstitutionEntity](tag,panel2018TableName) {
     def lei = column[String]("lei", O.PrimaryKey)
     def activityYear = column[Int]("activity_year")
     def agency = column[Int]("agency")
@@ -101,7 +104,7 @@ trait PublisherComponent2018 {
   }
 
   class TransmittalSheetTable(tag: Tag)
-      extends Table[TransmittalSheetEntity](tag, "transmittalsheet2018") {
+      extends Table[TransmittalSheetEntity](tag, ts2018TableName) {
 
     def lei = column[String]("lei", O.PrimaryKey)
     def id = column[Int]("id")
@@ -186,7 +189,7 @@ trait PublisherComponent2018 {
   }
 
   class LarTable(tag: Tag)
-      extends Table[LarEntityImpl2018](tag, "loanapplicationregister2018") {
+      extends Table[LarEntityImpl2018](tag, lar2018TableName) {
 
     def id = column[Int]("id")
     def lei = column[String]("lei")
@@ -483,7 +486,7 @@ trait PublisherComponent2018 {
   }
 
   class ModifiedLarTable(tag: Tag)
-      extends Table[ModifiedLarEntityImpl](tag, "modifiedlar2018") {
+      extends Table[ModifiedLarEntityImpl](tag, mlar2018TableName) {
 
     def id = column[Int]("id")
     def lei = column[String]("lei")

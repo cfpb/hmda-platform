@@ -2,21 +2,25 @@ package hmda.publisher.query.component
 
 import java.sql.Timestamp
 
-import hmda.publisher.query.lar.{ LarEntityImpl2020, _ }
+import hmda.publisher.helper.PGTableNameLoader
+import hmda.publisher.query.lar.{LarEntityImpl2020, _}
 import hmda.publisher.query.panel.InstitutionEntity
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
-import slick.basic.{ DatabaseConfig, DatabasePublisher }
-import slick.jdbc.{ JdbcProfile, ResultSetConcurrency, ResultSetType }
+import slick.basic.{DatabaseConfig, DatabasePublisher}
+import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
 
 import scala.concurrent.Future
 
-trait PublisherComponent2020 {
+trait PublisherComponent2020 extends PGTableNameLoader {
+
+
 
   import dbConfig.profile.api._
 
-  class InstitutionsTable(tag: Tag) extends Table[InstitutionEntity](tag, "institutions2020") {
+
+  class InstitutionsTable(tag: Tag) extends Table[InstitutionEntity](tag, panel2020TableName) {
     def lei             = column[String]("lei", O.PrimaryKey)
     def activityYear    = column[Int]("activity_year")
     def agency          = column[Int]("agency")
@@ -94,7 +98,7 @@ trait PublisherComponent2020 {
       db.run(table.size.result)
   }
 
-  class TransmittalSheetTable(tag: Tag) extends Table[TransmittalSheetEntity](tag, "transmittalsheet2020") {
+  class TransmittalSheetTable(tag: Tag) extends Table[TransmittalSheetEntity](tag, ts2020TableName) {
 
     def lei             = column[String]("lei", O.PrimaryKey)
     def id              = column[Int]("id")
@@ -172,7 +176,7 @@ trait PublisherComponent2020 {
         db.run(table.filterNot(ts => (ts.lei.toUpperCase inSet bankIgnoreList) || ts.isQuarterly).result)
   }
 
-  class LarTable(tag: Tag) extends Table[LarEntityImpl2020](tag, "loanapplicationregister2020") {
+  class LarTable(tag: Tag) extends Table[LarEntityImpl2020](tag, lar2020TableName) {
 
     def id                         = column[Int]("id")
     def lei                        = column[String]("lei")
