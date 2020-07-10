@@ -54,7 +54,7 @@ class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with Publi
       val s3Path = s"$environmentPublic/dynamic-data/2018/"
       val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
       if(SnapshotCheck.snapshotActive) {
-        tsPublicStream("2018", "cfpb-hmda-export", fullFilePath)
+        tsPublicStream("2018", SnapshotCheck.snapshotBucket, fullFilePath)
       }
       else{
         tsPublicStream("2018", bucketPublic, fullFilePath)
@@ -65,12 +65,11 @@ class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with Publi
       val s3Path = s"$environmentPublic/dynamic-data/2019/"
       val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
       if(SnapshotCheck.snapshotActive) {
-        tsPublicStream("2019", "cfpb-hmda-export", fullFilePath)
+        tsPublicStream("2019", SnapshotCheck.snapshotBucket, fullFilePath)
       }
       else{
         tsPublicStream("2019", bucketPublic, fullFilePath)
       }
-
   }
   private def tsPublicStream(year: String, bucket: String, path: String) = {
 

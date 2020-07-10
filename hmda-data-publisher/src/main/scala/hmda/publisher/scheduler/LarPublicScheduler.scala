@@ -55,7 +55,7 @@ class LarPublicScheduler extends HmdaActor with
       val s3Path = s"$environmentPublic/dynamic-data/2018/"
       val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
       if(SnapshotCheck.snapshotActive) {
-        larPublicStream("2018", "cfpb-hmda-export", fullFilePath)
+        larPublicStream("2018", SnapshotCheck.snapshotBucket, fullFilePath)
       }
       else{
         larPublicStream("2018", bucketPublic, fullFilePath)
@@ -66,7 +66,7 @@ class LarPublicScheduler extends HmdaActor with
       val s3Path = s"$environmentPublic/dynamic-data/2019/"
       val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
       if(SnapshotCheck.snapshotActive) {
-        larPublicStream("2019", "cfpb-hmda-export", fullFilePath)
+        larPublicStream("2019", SnapshotCheck.snapshotBucket, fullFilePath)
       }
       else{
         larPublicStream("2019", bucketPublic, fullFilePath)

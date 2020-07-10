@@ -187,6 +187,71 @@ spec:
               configMapKeyRef:
                 name: schedule-configmap
                 key: publisher.ts.quarterly.2020
+          - name: LAR_2018_TABLE
+            valueFrom:
+              configMapKeyRef:
+                name: data-publisher-pgtables-configmap
+                key: publishertable.larTableName2018
+          - name: MODIFIED_LAR_2018_TABLE
+            valueFrom:
+              configMapKeyRef:
+                name: data-publisher-pgtables-configmap
+                key: publishertable.mlarTableName2018
+          - name: PANEL_2019_TABLE
+            valueFrom:
+              configMapKeyRef:
+                name: data-publisher-pgtables-configmap
+                key: publishertable.panelTableName2018
+          - name: TS_2018_TABLE
+            valueFrom:
+              configMapKeyRef:
+                name: data-publisher-pgtables-configmap
+                key: publishertable.tsTableName2018
+          - name: LAR_2019_TABLE
+            valueFrom:
+              configMapKeyRef:
+                name: data-publisher-pgtables-configmap
+                key: publishertable.larTableName2019
+          - name: MODIFIED_LAR_2019_TABLE
+            valueFrom:
+              configMapKeyRef:
+                name: data-publisher-pgtables-configmap
+                key: publishertable.mlarTableName2019
+          - name: PANEL_2019_TABLE
+            valueFrom:
+              configMapKeyRef:
+                name: data-publisher-pgtables-configmap
+                key: publishertable.panelTableName2019
+          - name: TS_2019_TABLE
+            valueFrom:
+              configMapKeyRef:
+                name: data-publisher-pgtables-configmap
+                key: publishertable.tsTableName2019
+          - name: LAR_2020_TABLE
+            valueFrom:
+              configMapKeyRef:
+                name: data-publisher-pgtables-configmap
+                key: publishertable.larTableName2020
+          - name: MODIFIED_LAR_2020_TABLE
+            valueFrom:
+              configMapKeyRef:
+                name: data-publisher-pgtables-configmap
+                key: publishertable.mlarTableName2020
+          - name: PANEL_2019_TABLE
+            valueFrom:
+              configMapKeyRef:
+                name: data-publisher-pgtables-configmap
+                key: publishertable.panelTableName2020
+          - name: TS_2020_TABLE
+            valueFrom:
+              configMapKeyRef:
+                name: data-publisher-pgtables-configmap
+                key: publishertable.tsTableName2020
+          - name: EMAIL_TABLE
+            valueFrom:
+              configMapKeyRef:
+                name: data-publisher-pgtables-configmap
+                key: publishertable.emailTable
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: snapshot-configmap
+data:
+  snapshot.active: false
+  snapshot.bucket: cfpb-hmda-export
+  snapshot.path: dev/snapshot-temp/
+}
+

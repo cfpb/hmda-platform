@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: data-publisher-pgtables-configmap
+data:
+  publishertable.tsTableName2018: "transmittalsheet2018"
+  publishertable.larTableName2018: "loanapplicationregister2018"
+  publishertable.mlarTableName2018: "modifiedlar2018"
+  publishertable.panelTableName2018: "institutions2018"
+  publishertable.tsTableName2019: "transmittalsheet2019"
+  publishertable.larTableName2019: "loanapplicationregister2019"
+  publishertable.mlarTableName2019: "modifiedlar2019"
+  publishertable.panelTableName2019: "institutions2019"
+  publishertable.tsTableName2020: "transmittalsheet2020"
+  publishertable.larTableName2020: "loanapplicationregister2020"
+  publishertable.mlarTableName2020: "modifiedlar2020"
+  publishertable.panelTableName2020: "institutions2020"
+  publishertable.emailTable: "institutions_emails_2018"
+
