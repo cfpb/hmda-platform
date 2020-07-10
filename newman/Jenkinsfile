@@ -1,0 +1,34 @@
+pipeline {
+  agent {
+    label 'hmdaops'
+  }
+
+  stages {
+    stage('init') {
+      steps {
+        script {
+          init.setEnvironment('newman')
+        }
+      }
+    }
+
+    stage('Build And Publish Docker Image') {
+      steps {
+        script {
+          withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub',
+            usernameVariable: 'DOCKER_HUB_USER', passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
+            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dtr-ext-jenkins-service',
+              usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
+                dir("./newman") {
+                    dockerBuild.dockerBuild('newman', './docker/')
+                    scanImage('hmda/newman', env.DOCKER_TAG)
+                }
+              }
+            }
+          }
+        }
+      }
+
+  }
+
+}

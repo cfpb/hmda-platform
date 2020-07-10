@@ -46,9 +46,15 @@ CREATE TABLE hmda_user.institutions2020 (
     quarterly_filer boolean default false NOT NULL,
 );
 
+ALTER TABLE hmda_user.institutions2020
+    ADD COLUMN notes text not null default '';
+ALTER TABLE hmda_user.institutions2020
+    ALTER COLUMN notes DROP DEFAULT;
+ALTER TABLE hmda_user.institutions2020 OWNER TO hmda_user;
+ALTER TABLE hmda_user.institutions2020 ADD COLUMN created_at TIMESTAMP;
+ALTER TABLE hmda_user.institutions2020 ALTER COLUMN created_at SET DEFAULT now();
 
-ALTER TABLE hmda_user.institutions2019 OWNER TO hmda_user;
-
+ALTER TABLE hmda_user.institutions2020 ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
 
 ALTER TABLE ONLY hmda_user.institutions2020
     ADD CONSTRAINT institutions2020_pkey PRIMARY KEY (lei);

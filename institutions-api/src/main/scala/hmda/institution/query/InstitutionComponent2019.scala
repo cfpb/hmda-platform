@@ -31,6 +31,7 @@ trait InstitutionComponent2019 {
     def quarterlyFilerHasFiledQ1  = column[Boolean]("quarterly_filer_has_filed_q1")
     def quarterlyFilerHasFiledQ2  = column[Boolean]("quarterly_filer_has_filed_q2")
     def quarterlyFilerHasFiledQ3  = column[Boolean]("quarterly_filer_has_filed_q3")
+    def notes                     = column[String]("notes")
 
     def * =
       (
@@ -54,7 +55,8 @@ trait InstitutionComponent2019 {
         quarterlyFiler,
         quarterlyFilerHasFiledQ1,
         quarterlyFilerHasFiledQ2,
-        quarterlyFilerHasFiledQ3
+        quarterlyFilerHasFiledQ3,
+        notes
       ) <> (InstitutionEntity.tupled, InstitutionEntity.unapply)
   }
 

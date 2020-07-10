@@ -46,7 +46,15 @@ CREATE TABLE hmda_user.institutions2018 (
     hmda_filer boolean DEFAULT false NOT NULL,
     quarterly_filer boolean default false NOT NULL
 );
+ALTER TABLE hmda_user.institutions2018
+    ADD COLUMN notes text not null default '';
+ALTER TABLE hmda_user.institutions2018
+    ALTER COLUMN notes DROP DEFAULT;
 
+ALTER TABLE hmda_user.institutions2018 ADD COLUMN created_at TIMESTAMP;
+ALTER TABLE hmda_user.institutions2018 ALTER COLUMN created_at SET DEFAULT now();
+
+ALTER TABLE hmda_user.institutions2018 ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
 
 ALTER TABLE hmda_user.institutions2018 OWNER TO hmda_user;
 

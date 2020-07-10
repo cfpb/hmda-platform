@@ -227,6 +227,14 @@ trait DataBrowserDirectives extends Settings {
       }
   }
 
+  private def extractAgeApplicant: Directive1[Option[QueryField]] = {
+    parameters("ageapplicant".as(CsvSeq[String]) ? Nil).flatMap {
+      case Nil => provide(None)
+      case xs =>
+        provide(Option(QueryField(name = "ageapplicant", xs.map(_.toString), dbName = "age_applicant", isAllSelected = false)))
+    }
+  }
+
   private def extractEthnicities: Directive1[Option[QueryField]] = {
     val name   = "ethnicities"
     val dbName = "ethnicity_categorization"
@@ -453,7 +461,7 @@ trait DataBrowserDirectives extends Settings {
     (extractActions & extractRaces & extractSexes &
       extractLoanType & extractLoanPurpose(year) & extractLienStatus(year) &
       extractConstructionMethod & extractDwellingCategories &
-      extractLoanProduct & extractTotalUnits & extractEthnicities) {
+      extractLoanProduct & extractTotalUnits & extractEthnicities & extractAgeApplicant) {
       (
         actionsTaken,
         races,
@@ -465,7 +473,8 @@ trait DataBrowserDirectives extends Settings {
         dwellingCategories,
         loanProducts,
         totalUnits,
-        ethnicities
+        ethnicities,
+        ageApplicant
       ) =>
         val filteredfields =
           List(
@@ -479,7 +488,8 @@ trait DataBrowserDirectives extends Settings {
             dwellingCategories,
             loanProducts,
             totalUnits,
-            ethnicities
+            ethnicities,
+            ageApplicant
           ).flatten
         if (filteredfields.size > 2) {
           import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -553,12 +563,12 @@ trait DataBrowserDirectives extends Settings {
     }
 
   def extractMsaAndStateAndCountyAndLEIBrowserFields(year: String, innerRoute: QueryFields => Route): Route =
-    (extractMsaMds & extractStates(year) & extractCounties(year) & extractLEIs) { (msaMds, states, counties, leis) =>
-      if ((msaMds.nonEmpty && states.nonEmpty && counties.nonEmpty && leis.nonEmpty) || (msaMds.isEmpty && states.isEmpty && counties.isEmpty && leis.isEmpty)) {
+    (extractMsaMds & extractStates(year) & extractCounties(year) & extractLEIs & extractAgeApplicant) { (msaMds, states, counties, leis, ageApplicant) =>
+      if ((msaMds.nonEmpty && states.nonEmpty && counties.nonEmpty && leis.nonEmpty) || (msaMds.isEmpty && states.isEmpty && counties.isEmpty && leis.isEmpty && ageApplicant.isEmpty )) {
         import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
         complete((BadRequest, OnlyStatesOrMsaMdsOrCountiesOrLEIs()))
       } else
-        innerRoute(QueryFields(year, List(msaMds, states, counties, leis).flatten))
+        innerRoute(QueryFields(year, List(msaMds, states, counties, leis, ageApplicant).flatten))
     }
 
   def extractMsaAndStateAndCountyAndARIDBrowserFields(year: String, innerRoute: QueryFields => Route): Route =

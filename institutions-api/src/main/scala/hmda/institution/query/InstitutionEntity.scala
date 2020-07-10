@@ -21,8 +21,8 @@ case class InstitutionEntity(
   quarterlyFiler: Boolean = false,
   quarterlyFilerHasFiledQ1: Boolean = false,
   quarterlyFilerHasFiledQ2: Boolean = false,
-  quarterlyFilerHasFiledQ3: Boolean = false
-
-                            ) {
+  quarterlyFilerHasFiledQ3: Boolean = false,
+  notes: String = ""
+) {
   def isEmpty: Boolean = lei == ""
 }

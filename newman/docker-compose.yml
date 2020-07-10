@@ -1,0 +1,14 @@
+version: "3.7"
+services:
+  hmda-newman:
+    container_name: hmda-newman-one
+    image: hmda/newman-automation:latest
+    environment:
+      HOST_FILING: http://host.docker.internal:8080
+      HOST_ADMIN: http://host.docker.internal:8081
+      HOST_PUBLIC: http://host.docker.internal:8082
+      NEWMAN_YEAR: 2019
+    command:
+      ./scripts/run_one_newman.sh
+    volumes:
+      - ./src:/etc/newman

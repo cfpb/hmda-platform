@@ -63,8 +63,8 @@ object InstitutionProtobufConverter {
       quarterlyFiler = i.quarterlyFiler,
       quarterlyFilerHasFiledQ1 = i.quarterlyFilerHasFiledQ1,
       quarterlyFilerHasFiledQ2 = i.quarterlyFilerHasFiledQ2,
-      quarterlyFilerHasFiledQ3 = i.quarterlyFilerHasFiledQ3
-
+      quarterlyFilerHasFiledQ3 = i.quarterlyFilerHasFiledQ3,
+      notes = i.notes
     )
 
   def institutionFromProtobuf(msg: InstitutionMessage): Institution =
@@ -86,7 +86,8 @@ object InstitutionProtobufConverter {
       quarterlyFiler = msg.quarterlyFiler,
       quarterlyFilerHasFiledQ1 = msg.quarterlyFilerHasFiledQ1,
       quarterlyFilerHasFiledQ2 = msg.quarterlyFilerHasFiledQ2,
-      quarterlyFilerHasFiledQ3 = msg.quarterlyFilerHasFiledQ3
+      quarterlyFilerHasFiledQ3 = msg.quarterlyFilerHasFiledQ3,
+      notes = msg.notes
     )
 
 }
