@@ -13,6 +13,7 @@ import akka.Done
 import akka.actor.typed.ActorSystem
 import org.apache.kafka.clients.producer.{ Producer => KafkaProducer }
 import hmda.messages.pubsub.HmdaTopics._
+import hmda.util.http.FilingResponseUtils._
 
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -35,7 +36,7 @@ private class PublishAdminHttpApi(sharding: ClusterSharding, config: Config)(imp
       }
     }
   
-  private def publishTopicPath(oAuth2Authorization: OAuth2Authorization): Route =
+  private def publishTopicPath(oAuth2Authorization: OAuth2Authorization): Route = {
     path("publish" / Segment / "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber) { (topic, lei, period, sequenceNumber) =>
         (extractUri & get)(uri =>
             oAuth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
@@ -44,10 +45,11 @@ private class PublishAdminHttpApi(sharding: ClusterSharding, config: Config)(imp
                     val publish = publishKafkaEvent(topic, submissionId, lei, stringKafkaProducer)
                     complete((StatusCodes.Created, s"Topic ${topic} with data, ${submissionId}, published"))
                 } else {
-                    failedResponse(StatusCodes.BadRequest, uri, s"Invalid Topic: ${topic}")
+                    invalidTopic(StatusCodes.BadRequest, topic, uri)
                 }
 
             }
+        )
         }
     }
 
