@@ -4,14 +4,14 @@ import akka.Done
 import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.adapter._
 import akka.kafka.scaladsl.Consumer.DrainingControl
-import akka.kafka.scaladsl.{ Committer, Consumer }
-import akka.kafka.{ CommitterSettings, ConsumerSettings, Subscriptions }
+import akka.kafka.scaladsl.{Committer, Consumer}
+import akka.kafka.{CommitterSettings, ConsumerSettings, Subscriptions}
 import akka.stream.Materializer
-import akka.stream.scaladsl.{ Keep, Sink, Source }
-import akka.util.{ ByteString, Timeout }
+import akka.stream.scaladsl.{Keep, Sink, Source}
+import akka.util.{ByteString, Timeout}
 import com.typesafe.config.ConfigFactory
 import hmda.analytics.query._
-import hmda.messages.pubsub.{ HmdaGroups, HmdaTopics }
+import hmda.messages.pubsub.{HmdaGroups, HmdaTopics}
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.submission.SubmissionId
 import hmda.model.filing.ts.TransmittalSheet
@@ -19,7 +19,7 @@ import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
 import hmda.publication.KafkaUtils.kafkaHosts
 import hmda.query.DbConfiguration.dbConfig
-import hmda.query.HmdaQuery.{ readRawData, readSubmission }
+import hmda.query.HmdaQuery.{readRawData, readSubmission}
 import hmda.query.ts.TransmittalSheetConverter
 import hmda.util.BankFilterUtils._
 import hmda.util.streams.FlowUtils.framing
@@ -57,6 +57,8 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
   val kafkaConfig = system.settings.config.getConfig("akka.kafka.consumer")
   val config      = ConfigFactory.load()
   val parallelism = config.getInt("hmda.analytics.parallelism")
+  val delete = config.getBoolean("hmda.analytics.delete")
+  val history = config.getBoolean("hmda.analytics.history")
 
   /**
    * Note: hmda-analytics microservice reads the JDBC_URL env var from inst-postgres-credentials secret.
@@ -90,13 +92,13 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
     .committableSource(consumerSettings, Subscriptions.topics(HmdaTopics.signTopic, HmdaTopics.analyticsTopic))
     .mapAsync(parallelism) { msg =>
       log.info(s"Processing: $msg")
-      processData(msg.record.value()).map(_ => msg.committableOffset)
+      processData(msg.record.value(), delete, history).map(_ => msg.committableOffset)
     }
     .toMat(Committer.sink(CommitterSettings(system).withParallelism(2)))(Keep.both)
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
-  def processData(msg: String): Future[Done] =
+  def processData(msg: String, delete: Boolean, history: Boolean): Future[Done] =
     Source
       .single(msg)
       .map(msg => SubmissionId(msg))
@@ -243,21 +245,29 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
     def result =
       for {
-        _ <- deleteTsRow
-        _ = log.info(s"Deleting data from TS for  $submissionId")
+        _ <- if(delete) {
+          _ = log.info(s"Deleting data from TS for  $submissionId")
+          deleteTsRow
+        } else null
 
         _ <- insertTsRow
         _ = log.info(s"Adding data into TS for  $submissionId")
 
-        _ <- deleteLarRows
-        _ = log.info(s"Done deleting data from LAR for  $submissionId")
+        _ <- if(delete) {
+          _ = log.info(s"Deleting data from LAR for  $submissionId")
+          deleteLarRows
+        } else null
 
         larInserted <- insertLarRows
-        _ = log.info(s"Done inserting data into LAR for  $submissionId")
+        _ = log.info(s"Done inserting data into LAR for  $submissionId ($larInserted)")
 
         dateSigned   <- signDate
-        res <- insertSubmissionHistory
-      } yield res
+        _ = log.info(s"Date signed $dateSigned")
+
+        if (history)
+          res <- insertSubmissionHistory
+
+      } yield null
     result.recover {
       case t: Throwable =>
         log.error("Error happened in inserting: ", t)
