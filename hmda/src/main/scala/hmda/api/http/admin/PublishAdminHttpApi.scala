@@ -37,20 +37,22 @@ private class PublishAdminHttpApi(sharding: ClusterSharding, config: Config)(imp
   
   private def publishTopicPath(oAuth2Authorization: OAuth2Authorization): Route =
     path("publish" / Segment / "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber) { (topic, lei, period, sequenceNumber) =>
-        oAuth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
-            val submissionId = s"$lei-$period-$sequenceNumber"
-            if (verifyTopic(topic)) {
-                val publish = publishKafkaEvent(topic, submissionId, lei, stringKafkaProducer)
-                complete((StatusCodes.Created, "Topic Published"))
-            } else {
-                complete((StatusCodes.BadRequest, "Invalid Topic"))
-            }
+        (extractUri & get)(uri =>
+            oAuth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
+                val submissionId = s"$lei-$period-$sequenceNumber"
+                if (verifyTopic(topic)) {
+                    val publish = publishKafkaEvent(topic, submissionId, lei, stringKafkaProducer)
+                    complete((StatusCodes.Created, s"Topic ${topic} with data, ${submissionId}, published"))
+                } else {
+                    failedResponse(StatusCodes.BadRequest, uri, s"Invalid Topic: ${topic}")
+                }
 
+            }
         }
     }
 
     private def verifyTopic(topic: String): Boolean = {
-        val validTopics = List(institutionTopic, signTopic, modifiedLarTopic, irsTopic, analyticsTopic)
+        val validTopics = List(signTopic, modifiedLarTopic, irsTopic, analyticsTopic)
         validTopics.contains(topic)
     }
 
