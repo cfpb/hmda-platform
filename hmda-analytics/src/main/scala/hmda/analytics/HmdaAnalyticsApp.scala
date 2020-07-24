@@ -246,7 +246,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
     def result =
       for {
         _ <- if(delete) {
-          _ = log.info(s"Deleting data from TS for  $submissionId")
+          log.info(s"Deleting data from TS for  $submissionId")
           deleteTsRow
         } else null
 
@@ -254,7 +254,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         _ = log.info(s"Adding data into TS for  $submissionId")
 
         _ <- if(delete) {
-          _ = log.info(s"Deleting data from LAR for  $submissionId")
+          log.info(s"Deleting data from LAR for  $submissionId")
           deleteLarRows
         } else null
 
@@ -264,8 +264,11 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         dateSigned   <- signDate
         _ = log.info(s"Date signed $dateSigned")
 
-        if (history)
-          res <- insertSubmissionHistory
+        _ <- if (history)
+         {
+           log.info(s"Inserting into submission history")
+           insertSubmissionHistory
+         } else null
 
       } yield null
     result.recover {
