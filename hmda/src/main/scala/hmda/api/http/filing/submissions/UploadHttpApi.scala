@@ -3,24 +3,26 @@ package hmda.api.http.filing.submissions
 import java.time.Instant
 
 import akka.NotUsed
-import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import akka.http.scaladsl.model.headers.RawHeader
-import akka.http.scaladsl.model.{ StatusCodes, Uri }
+import akka.http.scaladsl.model.ws.{Message, TextMessage}
+import akka.http.scaladsl.model.{StatusCodes, Uri}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import akka.stream.Materializer
-import akka.stream.scaladsl.{ Flow, Framing, Sink }
-import akka.util.{ ByteString, Timeout }
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{ cors, corsRejectionHandler }
+import akka.stream.scaladsl.Source.actorRef
+import akka.stream.scaladsl.{Flow, Framing, Sink}
+import akka.stream.{Materializer, OverflowStrategy}
+import akka.util.{ByteString, Timeout}
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.PathMatchers._
 import hmda.api.http.directives.QuarterlyFilingAuthorization._
 import hmda.api.http.model.ErrorResponse
 import hmda.auth.OAuth2Authorization
-import hmda.messages.submission.HmdaRawDataCommands.{ AddLine, HmdaRawDataCommand }
+import hmda.messages.submission.HmdaRawDataCommands.{AddLine, HmdaRawDataCommand}
 import hmda.messages.submission.HmdaRawDataEvents.HmdaRawDataEvent
 import hmda.messages.submission.SubmissionCommands.GetSubmission
-import hmda.messages.submission.SubmissionManagerCommands.{ SubmissionManagerCommand, UpdateSubmissionStatus }
+import hmda.messages.submission.SubmissionManagerCommands.{SubmissionManagerCommand, UpdateSubmissionStatus}
 import hmda.model.filing.submission._
 import hmda.persistence.submission.HmdaRawData.selectHmdaRawData
 import hmda.persistence.submission.SubmissionManager.selectSubmissionManager
@@ -29,8 +31,8 @@ import hmda.util.http.FilingResponseUtils._
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
 
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.{ Failure, Success }
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 object UploadHttpApi {
   def create(
@@ -43,6 +45,11 @@ object UploadHttpApi {
 private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(implicit ec: ExecutionContext, t: Timeout, mat: Materializer) {
   private val quarterlyFiler = quarterlyFilingAllowed(log, sharding) _
 
+
+
+
+
+
   def uploadRoutes(oAuth2Authorization: OAuth2Authorization): Route =
     handleRejections(corsRejectionHandler) {
       cors() {
@@ -54,6 +61,12 @@ private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(implicit ec:
       }
     }
 
+  val (wsActor, wsSource) = actorRef[Message](32, OverflowStrategy.dropNew)
+    .preMaterialize()
+
+  def wsStatusFlow(uuid: String): Flow[Message, Message, Any] =
+    Flow.fromSinkAndSource(Sink.ignore, wsSource)
+
   // POST <lei>/filings/<year>/submissions/<seqNr>
   // POST <lei>/filings/<year>/quarter/<q>/submissions/<seqNr>
   private def uploadHmdaFileRoute(oauth2Authorization: OAuth2Authorization): Route =
@@ -61,6 +74,11 @@ private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(implicit ec:
       (extractUri & post) { uri =>
         pathPrefix(Segment / "filings") { lei =>
           oauth2Authorization.authorizeTokenWithLei(lei) { _ =>
+            path("status"/IntNumber / "submissions" / IntNumber){(lei,year)=>
+              get {
+                handleWebSocketMessages(wsStatusFlow(lei+"-"+year))
+              }
+            }~
             path(IntNumber / "submissions" / IntNumber) { (year, seqNr) =>
               checkAndUploadSubmission(lei, year, None, seqNr, uri)
             } ~ path(IntNumber / "quarter" / Quarter / "submissions" / IntNumber) { (year, quarter, seqNr) =>
@@ -108,13 +126,18 @@ private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(implicit ec:
     val splitLines =
       Framing.delimiter(ByteString("\n"), 2048, allowTruncation = true)
 
+
     fileUpload("file") {
       case (metadata, byteSource) if metadata.fileName.toLowerCase.endsWith(".txt") =>
         val modified = submission.copy(status = Uploading)
         submissionManager ! UpdateSubmissionStatus(modified)
         val fUploaded = byteSource
           .via(splitLines)
-          .map(_.utf8String + "\n")
+          .zipWithIndex.map(larObj=>{
+          val info = s"LAR Position: ${larObj._2}"
+          wsActor ! TextMessage(info)
+          larObj._1.utf8String + "\n"}
+        )
           .via(uploadFile(submission.id, hmdaRaw))
           .runWith(Sink.ignore)
 
@@ -155,4 +178,5 @@ private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(implicit ec:
     val response: Future[HmdaRawDataEvent] = entityRef ? (ref => AddLine(submissionId, Instant.now.toEpochMilli, data, Some(ref)))
     response
   }
+
 }
