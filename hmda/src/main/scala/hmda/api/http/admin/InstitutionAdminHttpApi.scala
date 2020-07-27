@@ -181,9 +181,10 @@ private class InstitutionAdminHttpApi(sharding: ClusterSharding, config: Config)
     val fInstitutions = Future.sequence(institutionsF) 
     onComplete(fInstitutions) {
       case Success(i) =>
-        if (i.isEmpty) {
+        val institutions = i.filter(_ != None)
+        if (institutions.isEmpty) {
           complete(StatusCodes.NotFound)
-        } else complete(i)
+        } else complete(institutions)
       case Failure(e) =>
         val errorResponse = ErrorResponse(500, e.getLocalizedMessage, uri.path)
         complete((StatusCodes.InternalServerError, errorResponse))
