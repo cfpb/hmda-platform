@@ -147,9 +147,14 @@ private class InstitutionAdminHttpApi(sharding: ClusterSharding, config: Config)
     path("institutions" / Segment / "year" / IntNumber) { (lei, year) =>
       (extractUri & get) { uri =>
         getInstitution(lei, year, None, uri)
-      } ~
-        path("institutions" / Segment / "year" / IntNumber / "quarter" / Quarter) { (lei, year, quarter) =>
-          (extractUri & get)(uri => getInstitution(lei, year, Option(quarter), uri))
+    } }~
+    path("institutions" / Segment / "year" / IntNumber / "quarter" / Quarter) { (lei, year, quarter) =>
+      (extractUri & get)(uri => getInstitution(lei, year, Option(quarter), uri))
+    } ~
+    path("institutions" / Segment) { (lei) =>
+      (extractUri & get) { uri =>
+        getAllInstitutions(lei, uri)
+
         }
     }
   }
@@ -167,6 +172,21 @@ private class InstitutionAdminHttpApi(sharding: ClusterSharding, config: Config)
 
       case Success(None) =>
         complete(StatusCodes.NotFound)
+    }
+  }
+
+  private def getAllInstitutions(lei: String, uri: Uri): Route = {
+    val years = config.getString("hmda.rules.yearly-filing.years-allowed").split(",").toList
+    val institutionsF: List[Future[Option[Institution]]] = years.map(year => (selectInstitution(sharding, lei, year.toInt) ? GetInstitution))
+    val fInstitutions = Future.sequence(institutionsF) 
+    onComplete(fInstitutions) {
+      case Success(i) =>
+        if (i.isEmpty) {
+          complete(StatusCodes.NotFound)
+        } else complete(i)
+      case Failure(e) =>
+        val errorResponse = ErrorResponse(500, e.getLocalizedMessage, uri.path)
+        complete((StatusCodes.InternalServerError, errorResponse))
     }
   }
 
