@@ -1,21 +1,23 @@
 package hmda.institution.projection
 
+import java.time.Instant
+
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
 import com.typesafe.config.ConfigFactory
 import hmda.institution.api.http.InstitutionConverter
-import hmda.institution.query._
-import hmda.messages.institution.InstitutionEvents.{ InstitutionCreated, InstitutionDeleted, InstitutionEvent, InstitutionModified }
+import hmda.institution.query.{InstitutionNoteHistoryEntity, _}
+import hmda.messages.institution.InstitutionEvents.{InstitutionCreated, InstitutionDeleted, InstitutionEvent, InstitutionModified}
 import hmda.model.institution.Institution
 import hmda.query.DbConfiguration._
 import org.slf4j.LoggerFactory
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 sealed trait InstitutionProjectionCommand
 case class ProjectEvent(evt: InstitutionEvent) extends InstitutionProjectionCommand
 
-object InstitutionDBProjection extends InstitutionEmailComponent {
+object InstitutionDBProjection extends InstitutionEmailComponent with InstitutionNoteHistoryComponent {
 
   val config = ConfigFactory.load()
 
@@ -30,6 +32,7 @@ object InstitutionDBProjection extends InstitutionEmailComponent {
   implicit val institutionRepository2019   = new InstitutionRepository2019(dbConfig, "institutions2019")
   implicit val institutionRepository2020   = new InstitutionRepository2020(dbConfig, "institutions2020")
   implicit val institutionEmailsRepository = new InstitutionEmailsRepository(dbConfig)
+  implicit val institutionNotesHistoryRepository = new InstitutionNoteHistoryRepository(dbConfig,"institutions_history_notes")
 
   implicit val ec: ExecutionContext = ExecutionContext.global
   val log = LoggerFactory.getLogger("hmda")
@@ -72,7 +75,10 @@ object InstitutionDBProjection extends InstitutionEmailComponent {
 
   private def updateTables(inst: Institution): Future[List[Int]] = {
     val insertResult = {
+
+
       inst.activityYear match {
+
         case 2018 =>
           institutionRepository2018.insertOrUpdate(InstitutionConverter.convert(inst))
         case 2019 =>
@@ -81,14 +87,35 @@ object InstitutionDBProjection extends InstitutionEmailComponent {
           institutionRepository2020.insertOrUpdate(InstitutionConverter.convert(inst))
       }
     }
+
+    val institutionNoteHistoryEntity = generateHistoryID(inst.LEI,inst.activityYear.toString,inst.notes)
+    institutionNotesHistoryRepository.insertOrUpdate(institutionNoteHistoryEntity)
+
     val emails = InstitutionConverter.emailsFromInstitution(inst).toList
     for {
       institutionRow <- insertResult
       emailsRows     <- updateEmailsInSerial(emails)
     } yield emailsRows :+ institutionRow
+
+
   }
 
   private def updateEmailsInSerial(emails: List[InstitutionEmailEntity]): Future[List[Int]] =
     Future.traverse(emails)(updateEmails)
 
+  private def generateHistoryID(lei: String, year: String, notes:String): InstitutionNoteHistoryEntity = {
+
+    val timestamp = Instant.now().toEpochMilli
+
+    val historyID = lei + "-" + year + "-" + timestamp
+
+       InstitutionNoteHistoryEntity(
+         lei =lei,
+         historyID=historyID,
+         notes=notes
+       )
+  }
+
 }
+
+
