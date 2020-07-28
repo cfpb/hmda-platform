@@ -58,7 +58,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
   val config      = ConfigFactory.load()
   val parallelism = config.getInt("hmda.analytics.parallelism")
   val larDeletion = config.getBoolean("hmda.analytics.larDeletion")
-  val larInsertion = config.getBoolean("hmda.analytics.larInsertion")
+  val historyInsertion = config.getBoolean("hmda.analytics.historyInsertion")
   val tsDeletion = config.getBoolean("hmda.analytics.tsDeletion")
   /**
    * Note: hmda-analytics microservice reads the JDBC_URL env var from inst-postgres-credentials secret.
@@ -199,7 +199,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .take(1)
         .map(s => LarCsvParser(s, true))
         .map(_.getOrElse(LoanApplicationRegister()))
-        .filter(lar => lar.larIdentifier.LEI != "" && larDeletion)
+        .filter(lar => lar.larIdentifier.LEI != "" && historyInsertion)
         .mapAsync(1) { lar =>
           for {
             delete <- submissionId.period match {
@@ -268,7 +268,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         _ = log.info(s"Date signed $dateSigned")
 
         res <- insertSubmissionHistory
-        _ = if(larInsertion)
+        _ = if(historyInsertion)
               log.info(s"Inserting into submission history")
             else
               log.info(s"Skipping Insert Submission History")
