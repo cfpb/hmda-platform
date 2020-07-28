@@ -147,7 +147,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .take(1)
         .map(s => TsCsvParser(s, fromCassandra = true))
         .map(_.getOrElse(TransmittalSheet()))
-        .filter(t => t.LEI != "" && t.institutionName != "")
+        .filter(t => t.LEI != "" && t.institutionName != "" && historyInsertion)
         .map(ts => TransmittalSheetConverter(ts, submissionIdOption))
         .mapAsync(1) { ts =>
           for {
@@ -199,7 +199,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .take(1)
         .map(s => LarCsvParser(s, true))
         .map(_.getOrElse(LoanApplicationRegister()))
-        .filter(lar => lar.larIdentifier.LEI != "" && historyInsertion)
+        .filter(lar => lar.larIdentifier.LEI != "" && larDeletion)
         .mapAsync(1) { lar =>
           for {
             delete <- submissionId.period match {
