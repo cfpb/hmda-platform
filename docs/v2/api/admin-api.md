@@ -103,3 +103,11 @@ This endpoint deals with institution events. The identifier for each entity is t
     * `GET` Retrieves an institution by its identifier, the LEI (Legal Entity Identifier) and period (Year)
 
     The response is the institution in `JSON` format (see above for examples).
+
+## Publications
+
+This endpoint is to regenerate publications
+
+* `/publish/<kafka-topic>/institutions/<lei>/filings/<year>/submissions/<submission-id>`
+
+    * `POST` Creates a kafka topic to regenerate publications

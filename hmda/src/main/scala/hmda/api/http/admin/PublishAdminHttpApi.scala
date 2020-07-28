@@ -38,7 +38,7 @@ private class PublishAdminHttpApi(sharding: ClusterSharding, config: Config)(imp
   
   private def publishTopicPath(oAuth2Authorization: OAuth2Authorization): Route = {
     path("publish" / Segment / "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber) { (topic, lei, period, sequenceNumber) =>
-        (extractUri & get)(uri =>
+        (extractUri & post)(uri =>
             oAuth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
                 val submissionId = s"$lei-$period-$sequenceNumber"
                 if (verifyTopic(topic)) {
