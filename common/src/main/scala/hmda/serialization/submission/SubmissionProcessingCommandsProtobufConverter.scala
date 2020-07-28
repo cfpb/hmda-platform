@@ -11,9 +11,19 @@ import hmda.serialization.validation.ValidationProtobufConverter._
 // $COVERAGE-OFF$
 object SubmissionProcessingCommandsProtobufConverter {
 
+  def trackProgressToProtobuf(cmd: TrackProgress, refResolver: ActorRefResolver): TrackProgressMessage =
+    TrackProgressMessage(
+      refResolver.toSerializationFormat(cmd.replyTo)
+    )
+
   def startUploadToProtobuf(cmd: StartUpload): StartUploadMessage =
     StartUploadMessage(
       submissionIdToProtobuf(cmd.submissionId)
+    )
+
+  def trackProgressFromProtobuf(msg: TrackProgressMessage, refResolver: ActorRefResolver): TrackProgress =
+    TrackProgress(
+      refResolver.resolveActorRef(msg.replyTo)
     )
 
   def startUploadFromProtobuf(msg: StartUploadMessage): StartUpload =
@@ -60,7 +70,7 @@ object SubmissionProcessingCommandsProtobufConverter {
       msg: FieldParserErrorMessage): FieldParserError = {
     FieldParserError(
       msg.fieldName,
-      msg.inputValue,
+      msg.inputValue
     )
   }
 

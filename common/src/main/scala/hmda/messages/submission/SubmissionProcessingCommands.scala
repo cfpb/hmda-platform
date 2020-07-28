@@ -3,12 +3,15 @@ package hmda.messages.submission
 import akka.actor.typed.ActorRef
 import hmda.messages.CommonMessages.Command
 import hmda.messages.submission.SubmissionProcessingEvents._
+import hmda.messages.submission.ValidationProgressTrackerCommands.ValidationProgressTrackerCommand
 import hmda.model.filing.submission.{ SubmissionId, VerificationStatus }
 import hmda.model.processing.state.{ HmdaParserErrorState, HmdaValidationErrorState }
 import hmda.model.validation.{ MacroValidationError, ValidationError }
 
 object SubmissionProcessingCommands {
   sealed trait SubmissionProcessingCommand extends Command
+
+  case class TrackProgress(replyTo: ActorRef[ActorRef[ValidationProgressTrackerCommand]]) extends SubmissionProcessingCommand
 
   case class StartUpload(submissionId: SubmissionId) extends SubmissionProcessingCommand
 

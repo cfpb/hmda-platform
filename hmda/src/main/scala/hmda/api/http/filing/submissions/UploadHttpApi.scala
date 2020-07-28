@@ -3,6 +3,7 @@ package hmda.api.http.filing.submissions
 import java.time.Instant
 
 import akka.NotUsed
+import akka.actor.typed.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{ StatusCodes, Uri }
@@ -16,6 +17,7 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.PathMatchers._
 import hmda.api.http.directives.QuarterlyFilingAuthorization._
 import hmda.api.http.model.ErrorResponse
+import hmda.api.ws.WebSocketProgressTracker
 import hmda.auth.OAuth2Authorization
 import hmda.messages.submission.HmdaRawDataCommands.{ AddLine, HmdaRawDataCommand }
 import hmda.messages.submission.HmdaRawDataEvents.HmdaRawDataEvent
@@ -36,11 +38,16 @@ object UploadHttpApi {
   def create(
               log: Logger,
               sharding: ClusterSharding
-            )(implicit ec: ExecutionContext, t: Timeout, mat: Materializer): OAuth2Authorization => Route =
-    new UploadHttpApi(log, sharding)(ec, t, mat).uploadRoutes _
+            )(implicit ec: ExecutionContext, t: Timeout, system: ActorSystem[_], mat: Materializer): OAuth2Authorization => Route =
+    new UploadHttpApi(log, sharding)(ec, t, system, mat).uploadRoutes _
 }
 
-private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(implicit ec: ExecutionContext, t: Timeout, mat: Materializer) {
+private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(
+  implicit ec: ExecutionContext,
+  t: Timeout,
+  system: ActorSystem[_],
+  mat: Materializer
+) {
   private val quarterlyFiler = quarterlyFilingAllowed(log, sharding) _
 
   def uploadRoutes(oAuth2Authorization: OAuth2Authorization): Route =
@@ -58,8 +65,8 @@ private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(implicit ec:
   // POST <lei>/filings/<year>/quarter/<q>/submissions/<seqNr>
   private def uploadHmdaFileRoute(oauth2Authorization: OAuth2Authorization): Route =
     respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-      (extractUri & post) { uri =>
-        pathPrefix(Segment / "filings") { lei =>
+      pathPrefix(Segment / "filings") { lei =>
+        (extractUri & post) { uri =>
           oauth2Authorization.authorizeTokenWithLei(lei) { _ =>
             path(IntNumber / "submissions" / IntNumber) { (year, seqNr) =>
               checkAndUploadSubmission(lei, year, None, seqNr, uri)
@@ -69,6 +76,14 @@ private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(implicit ec:
               }
             }
           }
+        } ~ (extractUri & get) { _ =>
+          oauth2Authorization.authorizeTokenWithLei(lei)(_ =>
+            path(IntNumber / "submissions" / IntNumber / "progress")((year, seqNr) =>
+              handleWebSocketMessages(
+                WebSocketProgressTracker.websocketFlow(system, sharding, SubmissionId(lei, Period(year, None), seqNr))
+              )
+            )
+          )
         }
       }
     }

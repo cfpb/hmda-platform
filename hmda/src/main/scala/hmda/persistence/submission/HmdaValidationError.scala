@@ -4,14 +4,14 @@ import java.time.Instant
 
 import akka.actor.typed._
 import akka.actor.typed.scaladsl.AskPattern._
-import akka.actor.typed.scaladsl.{ ActorContext, Behaviors }
 import akka.actor.typed.scaladsl.adapter._
+import akka.actor.typed.scaladsl.{ ActorContext, Behaviors }
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import akka.pattern.ask
-import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
+import akka.persistence.typed.scaladsl.EventSourcedBehavior.{ CommandHandler, EventHandler }
 import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
+import akka.persistence.typed.{ PersistenceId, RecoveryCompleted }
 import akka.stream.Materializer
 import akka.stream.scaladsl.{ Sink, Source, _ }
 import akka.stream.typed.scaladsl.ActorFlow
@@ -26,12 +26,13 @@ import hmda.messages.submission.EditDetailsCommands.{ EditDetailsPersistenceComm
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents._
+import hmda.messages.submission.ValidationProgressTrackerCommands._
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums.LoanOriginated
 import hmda.model.filing.submission._
 import hmda.model.filing.ts.{ TransmittalLar, TransmittalSheet }
 import hmda.model.institution.Institution
-import hmda.model.processing.state.HmdaValidationErrorState
+import hmda.model.processing.state.{ HmdaValidationErrorState, ValidationProgress, ValidationType, VerificationType }
 import hmda.model.validation.{ MacroValidationError, QualityValidationError, SyntacticalValidationError, ValidationError }
 import hmda.parser.filing.ParserFlow._
 import hmda.parser.filing.lar.LarCsvParser
@@ -66,29 +67,40 @@ object HmdaValidationError
 
   override def behavior(entityId: String): Behavior[SubmissionProcessingCommand] =
     Behaviors.setup { ctx =>
+      // Initialization is done like this because of inheritance
+      val tracker = ctx.spawn(ValidationProgressTracker(HmdaValidationErrorState()), s"tracker-${ctx.self.path.name}")
+
       EventSourcedBehavior[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaValidationErrorState](
         persistenceId = PersistenceId.ofUniqueId(entityId),
         emptyState = HmdaValidationErrorState(),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
-      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000, keepNSnapshots = 10))
+      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000, keepNSnapshots = 10)).receiveSignal {
+        case (state, RecoveryCompleted) => tracker ! StateSnapshot(state)
+        case (_, PostStop)              => ctx.stop(tracker)
+      }
     }
 
   override def commandHandler(
                                ctx: ActorContext[SubmissionProcessingCommand]
                              ): CommandHandler[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaValidationErrorState] = { (state, cmd) =>
-    val log                                 = ctx.log
-    implicit val system: ActorSystem[_]     = ctx.system
-    implicit val materializer: Materializer = Materializer(ctx)
-    implicit val blockingEc: ExecutionContext =
-      system.dispatchers.lookup(DispatcherSelector.fromConfig("akka.blocking-quality-dispatcher"))
+    val log                                   = ctx.log
+    implicit val system: ActorSystem[_]       = ctx.system
+    implicit val materializer: Materializer   = Materializer(ctx)
+    implicit val blockingEc: ExecutionContext = system.dispatchers.lookup(DispatcherSelector.fromConfig("akka.blocking-quality-dispatcher"))
 
     val config                    = system.settings.config
     val futureTimeout             = config.getInt("hmda.actor.timeout")
     implicit val timeout: Timeout = Timeout(futureTimeout.seconds)
     val sharding                  = ClusterSharding(ctx.system)
+    // Look up is done like this because of inheritance (would have ideally passed it into commandHandler)
+    val tracker: ActorRef[ValidationProgressTrackerCommand] =
+      ctx.child(s"tracker-${ctx.self.path.name}").get.toClassic.toTyped[ValidationProgressTrackerCommand]
 
     cmd match {
+      case TrackProgress(replyTo) =>
+        Effect.reply(replyTo)(tracker)
+
       case StartSyntacticalValidity(submissionId) =>
         updateSubmissionStatus(sharding, submissionId, Validating, log)
         log.info(s"Syntactical / Validity validation started for $submissionId")
@@ -105,10 +117,9 @@ object HmdaValidationError
             .toMat(Sink.ignore)(Keep.right)
             .named("validateTs[Syntactical]-" + submissionId)
             .run()
-
-          tsLarErrors <- validateTsLar(ctx, submissionId, "syntactical-validity", validationContext)
+          tsLarErrors <- validateTsLar(ctx, tracker, submissionId, "syntactical-validity", validationContext)
           _           = log.info(s"Starting validateLar - Syntactical for $submissionId")
-          larSyntacticalValidityErrors <- validateLar("syntactical-validity", ctx, submissionId, validationContext)(
+          larSyntacticalValidityErrors <- validateLar("syntactical-validity", ctx, tracker, submissionId, validationContext)(
             system,
             materializer,
             blockingEc,
@@ -139,14 +150,21 @@ object HmdaValidationError
           }
         Effect
           .persist(SyntacticalValidityCompleted(submissionId, updatedStatus.code))
-          .thenRun(_ => updateSubmissionStatus(sharding, submissionId, updatedStatus, log))
+          .thenRun { _ =>
+            updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
+
+            // Update tracker status
+            val syntactical = ValidationType.Syntactical
+            if (updatedStatus == SyntacticalOrValidity) tracker ! ValidationDelta(syntactical, ValidationProgress.Completed)
+            else tracker ! ValidationDelta(syntactical, ValidationProgress.CompletedWithErrors)
+          }
 
       case StartQuality(submissionId) =>
         log.info(s"Quality validation started for $submissionId")
         val period = submissionId.period
         val fQuality = for {
 
-          larErrors <- validateLar("quality", ctx, submissionId, ValidationContext(filingPeriod = Some(period)))(
+          larErrors <- validateLar("quality", ctx, tracker, submissionId, ValidationContext(filingPeriod = Some(period)))(
             system,
             materializer,
             blockingEc,
@@ -179,7 +197,14 @@ object HmdaValidationError
           }
         Effect
           .persist(QualityCompleted(submissionId, updatedStatus.code))
-          .thenRun(_ => updateSubmissionStatus(sharding, submissionId, updatedStatus, log))
+          .thenRun { _ =>
+            updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
+
+            // Update tracker status
+            val quality = ValidationType.Quality
+            if (updatedStatus == Quality) tracker ! ValidationDelta(quality, ValidationProgress.Completed)
+            else tracker ! ValidationDelta(quality, ValidationProgress.CompletedWithErrors)
+          }
 
       case StartMacro(submissionId) =>
         log.info(s"Macro validation started for $submissionId")
@@ -207,8 +232,17 @@ object HmdaValidationError
           else if (!state.macroVerified) MacroErrors
           else if (state.qualityVerified) Verified
           else Macro
-        updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
-        Effect.persist(MacroCompleted(submissionId, updatedStatus.code))
+
+        Effect
+          .persist(MacroCompleted(submissionId, updatedStatus.code))
+          .thenRun { _ =>
+            updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
+
+            // Update tracker status
+            val macroStatus = ValidationType.Macro
+            if (updatedStatus == Verified || updatedStatus == Macro) tracker ! ValidationDelta(macroStatus, ValidationProgress.Completed)
+            else tracker ! ValidationDelta(macroStatus, ValidationProgress.CompletedWithErrors)
+          }
 
       case PersistHmdaRowValidatedError(submissionId, rowNumber, validationErrors, maybeReplyTo) =>
         val editDetailPersistence = sharding
@@ -255,9 +289,15 @@ object HmdaValidationError
               updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
               replyTo ! QualityVerified(submissionId, verified, updatedStatus)
               log.info(s"Verified Quality for $submissionId")
+
+              // Update tracker status
+              tracker ! VerifyDelta(VerificationType.Quality, verificationProgress = true)
             }
         } else {
           replyTo ! NotReadyToBeVerified(submissionId)
+
+          // Update tracker status
+          tracker ! VerifyDelta(VerificationType.Quality, verificationProgress = false)
           Effect.none
         }
 
@@ -272,9 +312,16 @@ object HmdaValidationError
               updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
               replyTo ! MacroVerified(submissionId, verified, updatedStatus)
               log.info(s"Verified Macro for $submissionId")
+
+              // Update tracker status
+              tracker ! VerifyDelta(VerificationType.Macro, verificationProgress = true)
             }
         } else {
           replyTo ! NotReadyToBeVerified(submissionId)
+
+          // Update tracker status
+          tracker ! VerifyDelta(VerificationType.Macro, verificationProgress = false)
+
           Effect.none
         }
 
@@ -303,13 +350,16 @@ object HmdaValidationError
               )
               setHmdaFilerFlag(submissionId.lei, submissionId.period, sharding)
               replyTo ! signed
+              tracker ! SignedDelta(true)
             }
           } else {
             replyTo ! SubmissionNotReadyToBeSigned(submissionId)
+            tracker ! SignedDelta(false)
             Effect.none
           }
         } else {
           replyTo ! SubmissionNotReadyToBeSigned(submissionId)
+          tracker ! SignedDelta(false)
           Effect.none
         }
 
@@ -330,7 +380,7 @@ object HmdaValidationError
     }
   }
 
-  override def eventHandler: (HmdaValidationErrorState, SubmissionProcessingEvent) => HmdaValidationErrorState = {
+  def eventHandler: EventHandler[HmdaValidationErrorState, SubmissionProcessingEvent] = {
     case (state, error @ HmdaRowValidatedError(_, _)) =>
       state.updateErrors(error)
     case (state, error @ HmdaMacroValidatedError(_)) =>
@@ -374,6 +424,7 @@ object HmdaValidationError
 
   private def validateTsLar(
                              ctx: ActorContext[SubmissionProcessingCommand],
+                             tracker: ActorRef[NumberOfLines],
                              submissionId: SubmissionId,
                              editType: String,
                              validationContext: ValidationContext
@@ -544,6 +595,7 @@ object HmdaValidationError
         for {
           header        <- headerResultTest
           rawLineResult <- checkForDistinctElements(RawLine)
+          _             = tracker ! NumberOfLines(rawLineResult.totalCount.toLong)
           s306Result    <- checkForDistinctElements(ULIActionTaken)
           res <- validateAndPersistErrors(
             TransmittalLar(
@@ -584,12 +636,13 @@ object HmdaValidationError
   private def validateLar(
                            editCheck: String,
                            ctx: ActorContext[SubmissionProcessingCommand],
+                           tracker: ActorRef[NumberOfLines],
                            submissionId: SubmissionId,
                            validationContext: ValidationContext
                          )(implicit system: ActorSystem[_], mat: Materializer, ec: ExecutionContext, t: Timeout): Future[Unit] = {
 
     def qualityChecks: Future[List[ValidationError]] =
-      if (editCheck == "quality") validateTsLar(ctx, submissionId, "quality", validationContext)
+      if (editCheck == "quality") validateTsLar(ctx, tracker, submissionId, "quality", validationContext)
       else Future.successful(Nil)
 
     def errorPersisting: Future[Done] =

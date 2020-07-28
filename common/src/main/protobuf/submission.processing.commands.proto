@@ -6,6 +6,10 @@ option optimize_for = SPEED;
 import "submission.proto";
 import "validation.proto";
 
+message TrackProgressMessage {
+    string replyTo = 1;
+}
+
 message StartUploadMessage {
     SubmissionIdMessage submissionId = 1;
 }
