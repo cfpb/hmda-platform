@@ -97,6 +97,70 @@ This endpoint deals with institution events. The identifier for each entity is t
     }
     ```
 
+* `/institutions/<id>`
+
+    * `GET` Retrieves a list of institutions by its identifier, the LEI (Legal Entity Identifier)
+
+    Example body, in `JSON` format:
+
+        ```json
+        [
+          {
+            "activityYear" : 2018,
+            "LEI" : "54930084UKLVMY22DS16",
+            "agency" : 1,
+            "institutionType" : 17,
+            "institutionId2017" : "12345",
+            "taxId" : "99-00000000",
+            "rssd" : 12345,
+            "emailDomains" : ["bank0.com"],
+            "respondent" : {
+              "name" : "xvavjuitZa",
+              "state" : "NC",
+              "city" : "Raleigh"
+            },
+            "parent" : {
+              "idRssd" : 1520162208,
+              "name" : "Parent Name"
+            },
+            "assets" : 450,
+            "otherLenderCode" : 1406639146,
+            "topHolder" : {
+              "idRssd" : 442825905,
+              "name" : "TopHolder Name"
+            },
+            "hmdaFiler" : true,
+            "quarterlyFiler" : false
+          },
+          {
+            "activityYear" : 2019,
+            "LEI" : "54930084UKLVMY22DS16",
+            "agency" : 1,
+            "institutionType" : 17,
+            "institutionId2017" : "12345",
+            "taxId" : "99-00000000",
+            "rssd" : 12345,
+            "emailDomains" : ["bank0.com"],
+            "respondent" : {
+              "name" : "xvavjuitZa",
+              "state" : "NC",
+              "city" : "Raleigh"
+            },
+            "parent" : {
+              "idRssd" : 1520162208,
+              "name" : "Parent Name"
+            },
+            "assets" : 450,
+            "otherLenderCode" : 1406639146,
+            "topHolder" : {
+              "idRssd" : 442825905,
+              "name" : "TopHolder Name"
+            },
+            "hmdaFiler" : true,
+            "quarterlyFiler" : false
+          }
+        ]
+        ```
 
 * `/institutions/<id>/period/<period>`
 
