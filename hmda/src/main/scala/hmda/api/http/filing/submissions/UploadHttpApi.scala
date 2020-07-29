@@ -76,15 +76,22 @@ private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(
               }
             }
           }
-        } ~ (extractUri & get) { _ =>
-          oauth2Authorization.authorizeTokenWithLei(lei)(_ =>
-            path(IntNumber / "submissions" / IntNumber / "progress")((year, seqNr) =>
-              handleWebSocketMessages(
-                WebSocketProgressTracker.websocketFlow(system, sharding, SubmissionId(lei, Period(year, None), seqNr))
+        } ~
+          // WEBSOCKET /institutions/<LEI>/filings/<year>/submissions/<seqNr>/progress
+          // WEBSOCKET /institutions/<LEI>/filings/<year>/quarter/<q>/submissions/<seqNr>/progress
+          (extractUri & get) { _ =>
+            oauth2Authorization.authorizeTokenWithLei(lei)(_ =>
+              path(IntNumber / "submissions" / IntNumber / "progress")((year, seqNr) =>
+                handleWebSocketMessages(
+                  WebSocketProgressTracker.websocketFlow(system, sharding, SubmissionId(lei, Period(year, None), seqNr))
+                )
+              ) ~ path(IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "progress")((year, quarter, seqNr) =>
+                handleWebSocketMessages(
+                  WebSocketProgressTracker.websocketFlow(system, sharding, SubmissionId(lei, Period(year, Option(quarter)), seqNr))
+                )
               )
             )
-          )
-        }
+          }
       }
     }
 

@@ -1,8 +1,6 @@
 package hmda.model.processing.state
 
 import hmda.model.filing.submission
-import io.circe.{ Encoder, Json }
-import io.circe.syntax._
 
 object ValidationProgressTrackerState {
   def initialize(s: HmdaValidationErrorState): ValidationProgressTrackerState = {
@@ -23,13 +21,6 @@ object ValidationProgressTrackerState {
 
     ValidationProgressTrackerState(syntacticalValidation, qualityValidation, macroValidation)
   }
-
-  implicit val encoder: Encoder[ValidationProgressTrackerState] = s =>
-    Json.obj(
-      "syntacticalProgress" := ValidationProgress.progress(s.syntacticalValidation),
-      "qualityProgress" := ValidationProgress.progress(s.qualityValidation),
-      "macroProgress" := ValidationProgress.progress(s.macroValidation)
-    )
 }
 
 case class ValidationProgressTrackerState(

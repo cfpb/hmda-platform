@@ -77,8 +77,13 @@ object HmdaValidationError
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
       ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000, keepNSnapshots = 10)).receiveSignal {
-        case (state, RecoveryCompleted) => tracker ! StateSnapshot(state)
-        case (_, PostStop)              => ctx.stop(tracker)
+        case (state, RecoveryCompleted) =>
+          // send a snapshot of the internal state to the tracker once the actor has completely hydrated from the journal
+          tracker ! StateSnapshot(state)
+
+        case (_, PostStop) =>
+          // tie the lifecycle of the tracker to the lifecycle of this actor
+          ctx.stop(tracker)
       }
     }
 

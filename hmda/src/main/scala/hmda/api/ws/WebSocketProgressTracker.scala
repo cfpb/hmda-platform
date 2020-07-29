@@ -10,6 +10,7 @@ import akka.stream.scaladsl.{ Flow, Sink, Source, SourceQueueWithComplete }
 import akka.stream.{ Materializer, OverflowStrategy }
 import akka.util.Timeout
 import hmda.api.ws.WebSocketProgressTracker.Protocol._
+import hmda.api.ws.model.TrackerResponse
 import hmda.messages.submission.SubmissionProcessingCommands
 import hmda.messages.submission.SubmissionProcessingCommands.TrackProgress
 import hmda.messages.submission.ValidationProgressTrackerCommands.{ Poll, Subscribe, ValidationProgressTrackerCommand }
@@ -20,7 +21,6 @@ import hmda.persistence.submission.HmdaValidationError
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
-
 import io.circe.syntax._
 
 /**
@@ -74,14 +74,20 @@ object WebSocketProgressTracker {
                      sharding: ClusterSharding,
                      submissionId: SubmissionId
                    ): Behavior[Protocol] =
-    register(HmdaValidationError.selectHmdaValidationError(sharding, submissionId))
+    register(HmdaValidationError.selectHmdaValidationError(sharding, submissionId), submissionId)
 
-  private def register(entity: EntityRef[SubmissionProcessingCommands.SubmissionProcessingCommand]): Behavior[Protocol] =
+  private def register(
+                        entity: EntityRef[SubmissionProcessingCommands.SubmissionProcessingCommand],
+                        submissionId: SubmissionId
+                      ): Behavior[Protocol] =
     Behaviors.setup { ctx =>
-      ctx.log.info(s"Starting websocket actor")
       implicit val timeout: Timeout     = Timeout(10.seconds)
       implicit val ec: ExecutionContext = ctx.executionContext
-      val trackerF                      = entity ? TrackProgress
+
+      ctx.log.info(s"Starting websocket actor used to track progress of $submissionId")
+
+      // we message the HmdaValidationError actor on startup asking for the ref to track progress
+      val trackerF = entity ? TrackProgress
       trackerF.onComplete {
         case Failure(exception) =>
           ctx.log.error("Failed to obtain a reference to the tracker", exception)
@@ -91,6 +97,9 @@ object WebSocketProgressTracker {
           ctx.self ! IncomingTrackerRef(tracker)
       }
 
+      // We use the SourceQueueWithComplete to send messages back to the user
+      // This represents the initial behavior and we stay here until we have a ref to the ValidationTracker actor
+      // We switch to the echo behavior as soon as we have the tracker actor ref and the queue to communicate back to the user
       def inner(
                  tracker: Option[ActorRef[ValidationProgressTrackerCommand]],
                  websocket: Option[SourceQueueWithComplete[Message]]
@@ -98,13 +107,13 @@ object WebSocketProgressTracker {
         Behaviors.receiveMessage {
           case IncomingTrackerRef(trackerRef) =>
             websocket match {
-              case Some(websocketRef) => echo(trackerRef, websocketRef)
+              case Some(websocketRef) => echo(trackerRef, websocketRef, submissionId)
               case None               => inner(Some(trackerRef), None)
             }
 
           case RegisterWsHandle(toWebsocket) =>
             tracker match {
-              case Some(trackerRef) => echo(trackerRef, toWebsocket)
+              case Some(trackerRef) => echo(trackerRef, toWebsocket, submissionId)
               case None             => inner(None, Some(toWebsocket))
             }
 
@@ -128,7 +137,8 @@ object WebSocketProgressTracker {
 
   private def echo(
                     tracker: ActorRef[ValidationProgressTrackerCommand],
-                    websocket: SourceQueueWithComplete[Message]
+                    websocket: SourceQueueWithComplete[Message],
+                    submissionId: SubmissionId
                   ): Behavior[Protocol] =
     Behaviors.setup { ctx =>
       ctx.log.info(s"Websocket actor initialized")
@@ -136,8 +146,8 @@ object WebSocketProgressTracker {
       tracker ! Subscribe(trackerAdaptedRef)
 
       Behaviors.receiveMessage {
-        case IncomingState(state) =>
-          websocket offer TextMessage.Strict(state.asJson.noSpaces)
+        case IncomingState(state: ValidationProgressTrackerState) =>
+          websocket offer TextMessage.Strict(TrackerResponse(submissionId, state).asJson.noSpaces)
           Behaviors.same
 
         case IncomingMessage(fromWebSocket) =>
