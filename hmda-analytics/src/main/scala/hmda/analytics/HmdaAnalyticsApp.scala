@@ -241,7 +241,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         }
         .runWith(Sink.ignore)
 
-    def result =
+    def result: Future[Done] =
       for {
         _ <- deleteTsRow
         _ = log.info(s"Deleting data from TS for  $submissionId")
@@ -257,6 +257,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
         dateSigned   <- signDate
         res <- insertSubmissionHistory
+        null
       } yield res
     result.recover {
       case t: Throwable =>

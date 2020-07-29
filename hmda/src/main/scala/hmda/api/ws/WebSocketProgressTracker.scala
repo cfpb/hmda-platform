@@ -21,6 +21,13 @@ import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
+import io.circe.syntax._
+
+/**
+ * The WebSocketProgressTracker actor is spawned for each websocket connection that wants to listen in on a file submission's
+ * validation progress. The main responsibility of this actor is to subscribe to the file's tracker and to receive updates
+ * for it. As soon as the websocket disconnects, this actor will shutdown
+ */
 object WebSocketProgressTracker {
   sealed trait Protocol
   object Protocol {
@@ -28,7 +35,6 @@ object WebSocketProgressTracker {
     case class IncomingMessage(msg: TextMessage.Strict)                                                              extends Protocol
     private[WebSocketProgressTracker] case class IncomingTrackerRef(ref: ActorRef[ValidationProgressTrackerCommand]) extends Protocol
     private[WebSocketProgressTracker] case class IncomingState(state: ValidationProgressTrackerState)                extends Protocol
-    case object Dummy                                                                                                extends Protocol
     case class Fail(t: Throwable)                                                                                    extends Protocol
     case object Complete                                                                                             extends Protocol
   }
@@ -126,14 +132,12 @@ object WebSocketProgressTracker {
                   ): Behavior[Protocol] =
     Behaviors.setup { ctx =>
       ctx.log.info(s"Websocket actor initialized")
-
       val trackerAdaptedRef: ActorRef[ValidationProgressTrackerState] = ctx.messageAdapter(s => IncomingState(s))
       tracker ! Subscribe(trackerAdaptedRef)
 
       Behaviors.receiveMessage {
         case IncomingState(state) =>
-          ctx.log.debug(s"state received from tracker: $state")
-          websocket offer TextMessage.Strict(state.toString)
+          websocket offer TextMessage.Strict(state.asJson.noSpaces)
           Behaviors.same
 
         case IncomingMessage(fromWebSocket) =>

@@ -32,7 +32,8 @@ import hmda.model.filing.lar.enums.LoanOriginated
 import hmda.model.filing.submission._
 import hmda.model.filing.ts.{ TransmittalLar, TransmittalSheet }
 import hmda.model.institution.Institution
-import hmda.model.processing.state.{ HmdaValidationErrorState, ValidationProgress, ValidationType, VerificationType }
+import hmda.model.processing.state.ValidationProgress.InProgress
+import hmda.model.processing.state.{ HmdaValidationErrorState, ValidationProgress, ValidationType }
 import hmda.model.validation.{ MacroValidationError, QualityValidationError, SyntacticalValidationError, ValidationError }
 import hmda.parser.filing.ParserFlow._
 import hmda.parser.filing.lar.LarCsvParser
@@ -110,16 +111,20 @@ object HmdaValidationError
         val fValidationContext =
           validationContext(period, sharding, ctx, submissionId)
 
+        tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(1))
+
         val fSyntacticalValidity = for {
           validationContext <- fValidationContext
-
+          _                 = tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(25))
           tsErrors <- validateTs(ctx, submissionId, validationContext)
             .toMat(Sink.ignore)(Keep.right)
             .named("validateTs[Syntactical]-" + submissionId)
             .run()
-          tsLarErrors <- validateTsLar(ctx, tracker, submissionId, "syntactical-validity", validationContext)
+          _           = tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(50))
+          tsLarErrors <- validateTsLar(ctx, submissionId, "syntactical-validity", validationContext)
           _           = log.info(s"Starting validateLar - Syntactical for $submissionId")
-          larSyntacticalValidityErrors <- validateLar("syntactical-validity", ctx, tracker, submissionId, validationContext)(
+          _           = tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(75))
+          larSyntacticalValidityErrors <- validateLar("syntactical-validity", ctx, submissionId, validationContext)(
             system,
             materializer,
             blockingEc,
@@ -127,6 +132,7 @@ object HmdaValidationError
           )
           _              = log.info(s"Starting validateAsycLar - Syntactical for $submissionId")
           larAsyncErrors <- validateAsyncLar("syntactical-validity", ctx, submissionId).runWith(Sink.ignore)
+          _              = tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(99))
           _              = log.info(s"Finished validateAsycLar - Syntactical for $submissionId")
         } yield (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
 
@@ -162,19 +168,21 @@ object HmdaValidationError
       case StartQuality(submissionId) =>
         log.info(s"Quality validation started for $submissionId")
         val period = submissionId.period
+        tracker ! ValidationDelta(ValidationType.Quality, InProgress(1))
         val fQuality = for {
-
-          larErrors <- validateLar("quality", ctx, tracker, submissionId, ValidationContext(filingPeriod = Some(period)))(
+          larErrors <- validateLar("quality", ctx, submissionId, ValidationContext(filingPeriod = Some(period)))(
             system,
             materializer,
             blockingEc,
             timeout
           )
+          _ = tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(50))
           _ = log.info(s"Finished ValidateLar Quality for $submissionId")
           _ = log.info(s"Started validateAsyncLar - Quality for $submissionId")
           larAsyncErrorsQuality <- validateAsyncLar("quality", ctx, submissionId)
             .runWith(Sink.ignore)
           _ = log.info(s"Finished ValidateAsyncLar Quality for $submissionId")
+          _ = tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(99))
         } yield (larErrors, larAsyncErrorsQuality)
 
         fQuality.onComplete {
@@ -208,7 +216,7 @@ object HmdaValidationError
 
       case StartMacro(submissionId) =>
         log.info(s"Macro validation started for $submissionId")
-
+        tracker ! ValidationDelta(ValidationType.Macro, InProgress(1))
         val fMacroEdits: Future[List[ValidationError]] =
           validateMacro(ctx, submissionId)
 
@@ -218,6 +226,7 @@ object HmdaValidationError
               ctx.self.toClassic ? PersistMacroError(submissionId, edit.asInstanceOf[MacroValidationError], None)
             })
             persistedEdits.onComplete(_ => ctx.self ! CompleteMacro(submissionId))
+            tracker ! ValidationDelta(ValidationType.Macro, InProgress(99))
           case Failure(e) =>
             log.error(e.getLocalizedMessage)
 
@@ -289,16 +298,9 @@ object HmdaValidationError
               updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
               replyTo ! QualityVerified(submissionId, verified, updatedStatus)
               log.info(s"Verified Quality for $submissionId")
-
-              // Update tracker status
-              tracker ! VerifyDelta(VerificationType.Quality, verificationProgress = true)
             }
         } else {
-          replyTo ! NotReadyToBeVerified(submissionId)
-
-          // Update tracker status
-          tracker ! VerifyDelta(VerificationType.Quality, verificationProgress = false)
-          Effect.none
+          Effect.reply(replyTo)(NotReadyToBeVerified(submissionId))
         }
 
       case VerifyMacro(submissionId, verified, replyTo) =>
@@ -312,17 +314,9 @@ object HmdaValidationError
               updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
               replyTo ! MacroVerified(submissionId, verified, updatedStatus)
               log.info(s"Verified Macro for $submissionId")
-
-              // Update tracker status
-              tracker ! VerifyDelta(VerificationType.Macro, verificationProgress = true)
             }
         } else {
-          replyTo ! NotReadyToBeVerified(submissionId)
-
-          // Update tracker status
-          tracker ! VerifyDelta(VerificationType.Macro, verificationProgress = false)
-
-          Effect.none
+          Effect.reply(replyTo)(NotReadyToBeVerified(submissionId))
         }
 
       case SignSubmission(submissionId, replyTo, email) =>
@@ -350,26 +344,19 @@ object HmdaValidationError
               )
               setHmdaFilerFlag(submissionId.lei, submissionId.period, sharding)
               replyTo ! signed
-              tracker ! SignedDelta(true)
             }
           } else {
-            replyTo ! SubmissionNotReadyToBeSigned(submissionId)
-            tracker ! SignedDelta(false)
-            Effect.none
+            Effect.reply(replyTo)(SubmissionNotReadyToBeSigned(submissionId))
           }
         } else {
-          replyTo ! SubmissionNotReadyToBeSigned(submissionId)
-          tracker ! SignedDelta(false)
-          Effect.none
+          Effect.reply(replyTo)(SubmissionNotReadyToBeSigned(submissionId))
         }
 
       case GetHmdaValidationErrorState(_, replyTo) =>
-        replyTo ! state
-        Effect.none
+        Effect.reply(replyTo)(state)
 
       case GetVerificationStatus(replyTo) =>
-        replyTo ! VerificationStatus(qualityVerified = state.qualityVerified, macroVerified = state.macroVerified)
-        Effect.none
+        Effect.reply(replyTo)(VerificationStatus(qualityVerified = state.qualityVerified, macroVerified = state.macroVerified))
 
       case HmdaParserStop =>
         log.info(s"Stopping ${ctx.self.path.name}")
@@ -424,7 +411,6 @@ object HmdaValidationError
 
   private def validateTsLar(
                              ctx: ActorContext[SubmissionProcessingCommand],
-                             tracker: ActorRef[NumberOfLines],
                              submissionId: SubmissionId,
                              editType: String,
                              validationContext: ValidationContext
@@ -595,7 +581,6 @@ object HmdaValidationError
         for {
           header        <- headerResultTest
           rawLineResult <- checkForDistinctElements(RawLine)
-          _             = tracker ! NumberOfLines(rawLineResult.totalCount.toLong)
           s306Result    <- checkForDistinctElements(ULIActionTaken)
           res <- validateAndPersistErrors(
             TransmittalLar(
@@ -636,13 +621,12 @@ object HmdaValidationError
   private def validateLar(
                            editCheck: String,
                            ctx: ActorContext[SubmissionProcessingCommand],
-                           tracker: ActorRef[NumberOfLines],
                            submissionId: SubmissionId,
                            validationContext: ValidationContext
                          )(implicit system: ActorSystem[_], mat: Materializer, ec: ExecutionContext, t: Timeout): Future[Unit] = {
 
     def qualityChecks: Future[List[ValidationError]] =
-      if (editCheck == "quality") validateTsLar(ctx, tracker, submissionId, "quality", validationContext)
+      if (editCheck == "quality") validateTsLar(ctx, submissionId, "quality", validationContext)
       else Future.successful(Nil)
 
     def errorPersisting: Future[Done] =

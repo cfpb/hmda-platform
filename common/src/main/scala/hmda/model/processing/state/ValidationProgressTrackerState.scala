@@ -1,6 +1,8 @@
 package hmda.model.processing.state
 
 import hmda.model.filing.submission
+import io.circe.{ Encoder, Json }
+import io.circe.syntax._
 
 object ValidationProgressTrackerState {
   def initialize(s: HmdaValidationErrorState): ValidationProgressTrackerState = {
@@ -19,26 +21,21 @@ object ValidationProgressTrackerState {
       else if (s.statusCode == submission.Verified.code) ValidationProgress.Completed
       else ValidationProgress.Waiting
 
-    ValidationProgressTrackerState(
-      syntacticalValidation,
-      qualityValidation,
-      macroValidation,
-      macroVerified = s.macroVerified,
-      qualityVerified = s.macroVerified,
-      submissionSigned = s.statusCode == submission.Signed.code,
-      totalLinesInFile = Long.MaxValue
-    )
+    ValidationProgressTrackerState(syntacticalValidation, qualityValidation, macroValidation)
   }
+
+  implicit val encoder: Encoder[ValidationProgressTrackerState] = s =>
+    Json.obj(
+      "syntacticalProgress" := ValidationProgress.progress(s.syntacticalValidation),
+      "qualityProgress" := ValidationProgress.progress(s.qualityValidation),
+      "macroProgress" := ValidationProgress.progress(s.macroValidation)
+    )
 }
 
 case class ValidationProgressTrackerState(
                                            syntacticalValidation: ValidationProgress,
                                            qualityValidation: ValidationProgress,
-                                           macroValidation: ValidationProgress,
-                                           macroVerified: Boolean,
-                                           qualityVerified: Boolean,
-                                           submissionSigned: Boolean,
-                                           totalLinesInFile: Long
+                                           macroValidation: ValidationProgress
                                          ) { self =>
   def fromSnapshot(s: HmdaValidationErrorState): ValidationProgressTrackerState = {
     val syntacticalValidation =
@@ -56,16 +53,10 @@ case class ValidationProgressTrackerState(
       else if (s.statusCode == submission.Verified.code) ValidationProgress.Completed
       else self.macroValidation
 
-    val submissionSigned =
-      s.statusCode == submission.Signed.code
-
     self.copy(
       syntacticalValidation,
       qualityValidation,
-      macroValidation,
-      s.macroVerified,
-      s.qualityVerified,
-      submissionSigned
+      macroValidation
     )
   }
 
@@ -91,9 +82,6 @@ case class ValidationProgressTrackerState(
     val adjustedProgress = adjustProgress(incoming = progress, self.macroValidation)
     self.copy(macroValidation = adjustedProgress)
   }
-
-  def updateLines(incoming: Long): ValidationProgressTrackerState =
-    self.copy(totalLinesInFile = incoming)
 }
 
 sealed trait ValidationType
@@ -110,14 +98,16 @@ object ValidationType {
 
 sealed trait ValidationProgress
 object ValidationProgress {
-  case object Waiting                       extends ValidationProgress
-  case class InProgress(linesFinished: Int) extends ValidationProgress
-  case object Completed                     extends ValidationProgress
-  case object CompletedWithErrors           extends ValidationProgress
-}
+  case object Waiting                    extends ValidationProgress
+  case class InProgress(percentage: Int) extends ValidationProgress
+  case object Completed                  extends ValidationProgress
+  case object CompletedWithErrors        extends ValidationProgress
 
-sealed trait VerificationType
-object VerificationType {
-  case object Quality extends VerificationType
-  case object Macro   extends VerificationType
+  def progress(v: ValidationProgress): Int =
+    v match {
+      case Waiting                => 0
+      case InProgress(percentage) => percentage
+      case Completed              => 100
+      case CompletedWithErrors    => 100
+    }
 }
