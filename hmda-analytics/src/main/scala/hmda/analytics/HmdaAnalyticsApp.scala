@@ -4,14 +4,14 @@ import akka.Done
 import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.adapter._
 import akka.kafka.scaladsl.Consumer.DrainingControl
-import akka.kafka.scaladsl.{ Committer, Consumer }
-import akka.kafka.{ CommitterSettings, ConsumerSettings, Subscriptions }
+import akka.kafka.scaladsl.{Committer, Consumer}
+import akka.kafka.{CommitterSettings, ConsumerSettings, Subscriptions}
 import akka.stream.Materializer
-import akka.stream.scaladsl.{ Keep, Sink, Source }
-import akka.util.{ ByteString, Timeout }
+import akka.stream.scaladsl.{Keep, Sink, Source}
+import akka.util.{ByteString, Timeout}
 import com.typesafe.config.ConfigFactory
 import hmda.analytics.query._
-import hmda.messages.pubsub.{ HmdaGroups, HmdaTopics }
+import hmda.messages.pubsub.{HmdaGroups, HmdaTopics}
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.submission.SubmissionId
 import hmda.model.filing.ts.TransmittalSheet
@@ -19,7 +19,7 @@ import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
 import hmda.publication.KafkaUtils.kafkaHosts
 import hmda.query.DbConfiguration.dbConfig
-import hmda.query.HmdaQuery.{ readRawData, readSubmission }
+import hmda.query.HmdaQuery.{readRawData, readSubmission}
 import hmda.query.ts.TransmittalSheetConverter
 import hmda.util.BankFilterUtils._
 import hmda.util.streams.FlowUtils.framing
@@ -57,7 +57,9 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
   val kafkaConfig = system.settings.config.getConfig("akka.kafka.consumer")
   val config      = ConfigFactory.load()
   val parallelism = config.getInt("hmda.analytics.parallelism")
-
+  val larDeletion = config.getBoolean("hmda.analytics.larDeletion")
+  val historyInsertion = config.getBoolean("hmda.analytics.historyInsertion")
+  val tsDeletion = config.getBoolean("hmda.analytics.tsDeletion")
   /**
    * Note: hmda-analytics microservice reads the JDBC_URL env var from inst-postgres-credentials secret.
    * In beta namespace this environment variable has currentSchema=hmda_beta_user appended to it to change the schema
@@ -121,15 +123,15 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .take(1)
         .map(s => TsCsvParser(s, fromCassandra = true))
         .map(_.getOrElse(TransmittalSheet()))
-        .filter(t => t.LEI != "" && t.institutionName != "")
+        .filter(t => t.LEI != "" && t.institutionName != "" && tsDeletion)
         .map(ts => TransmittalSheetConverter(ts, submissionIdOption))
         .mapAsync(1) { ts =>
           for {
             delete <- submissionId.period match {
-              case Period(2018, None)    => transmittalSheetRepository2018.deleteByLei(ts.lei)
-              case Period(2019, None)    => transmittalSheetRepository2019.deleteByLei(ts.lei)
+              case Period(2018, None) => transmittalSheetRepository2018.deleteByLei(ts.lei)
+              case Period(2019, None) => transmittalSheetRepository2019.deleteByLei(ts.lei)
               case Period(2020, Some(_)) => transmittalSheetRepository2020.deleteByLeiAndQuarter(lei = ts.lei)
-              case _                     => throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete TS rows.")
+              case _ => throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete TS rows.")
             }
           } yield delete
         }
@@ -145,11 +147,11 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .take(1)
         .map(s => TsCsvParser(s, fromCassandra = true))
         .map(_.getOrElse(TransmittalSheet()))
-        .filter(t => t.LEI != "" && t.institutionName != "")
+        .filter(t => t.LEI != "" && t.institutionName != "" && historyInsertion)
         .map(ts => TransmittalSheetConverter(ts, submissionIdOption))
         .mapAsync(1) { ts =>
           for {
-            signdate          <- signDate
+            signdate <- signDate
             submissionHistory <- submissionHistoryRepository.insert(ts.lei, submissionId, signdate)
           } yield submissionHistory
         }
@@ -197,14 +199,14 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .take(1)
         .map(s => LarCsvParser(s, true))
         .map(_.getOrElse(LoanApplicationRegister()))
-        .filter(lar => lar.larIdentifier.LEI != "")
+        .filter(lar => lar.larIdentifier.LEI != "" && larDeletion)
         .mapAsync(1) { lar =>
           for {
             delete <- submissionId.period match {
-              case Period(2018, None)    => larRepository2018.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2019, None)    => larRepository2019.deleteByLei(lar.larIdentifier.LEI)
+              case Period(2018, None) => larRepository2018.deleteByLei(lar.larIdentifier.LEI)
+              case Period(2019, None) => larRepository2019.deleteByLei(lar.larIdentifier.LEI)
               case Period(2020, Some(_)) => larRepository2020.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-              case _                     => throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete LAR rows.")
+              case _ => throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete LAR rows.")
 
             }
           } yield delete
@@ -241,24 +243,38 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         }
         .runWith(Sink.ignore)
 
-    def result: Future[Done] =
+    def result =
       for {
-        _ <- deleteTsRow
-        _ = log.info(s"Deleting data from TS for  $submissionId")
 
-        _ <- insertTsRow
-        _ = log.info(s"Adding data into TS for  $submissionId")
+        _ <- deleteTsRow
+        _ = if(tsDeletion)
+          log.info(s"Data removed from TS for  $submissionId ")
+        else
+          log.info(s"Skipping Delete TS")
 
         _ <- deleteLarRows
-        _ = log.info(s"Done deleting data from LAR for  $submissionId")
+        _ = if(larDeletion)
+          log.info(s"Data removed from LAR for  $submissionId")
+        else
+          log.info(s"Skipping Delete LAR")
 
-        larInserted <- insertLarRows
-        _ = log.info(s"Done inserting data into LAR for  $submissionId")
+        _ <- insertTsRow
+        _ = log.info(s"Data added into TS for  $submissionId")
+
+        _ <- insertLarRows
+        _ = log.info(s"Data added into LAR for  $submissionId")
 
         dateSigned   <- signDate
+        _ = log.info(s"Date signed $dateSigned")
+
         res <- insertSubmissionHistory
-        null
+        _ = if(historyInsertion)
+          log.info(s"Inserting into submission history")
+        else
+          log.info(s"Skipping Insert Submission History")
+
       } yield res
+
     result.recover {
       case t: Throwable =>
         log.error("Error happened in inserting: ", t)
