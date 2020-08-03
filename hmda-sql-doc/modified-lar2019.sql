@@ -193,6 +193,8 @@ ALTER TABLE ONLY hmda_user.modifiedlar2019
 
 CREATE INDEX modifiedlar2019_lei_idx ON hmda_user.modifiedlar2019 USING btree (lei);
 
+alter table modifiedlar2019
+add column uli character varying;
 
 -- Completed on 2019-06-05 11:44:50 EDT
 

@@ -154,13 +154,15 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
             sex_categorization,
             percent_median_msa_income,
             dwelling_category,
-            loan_product_type
+            loan_product_type,
+            uli
             )
 
 
           VALUES (
             ${input.mlar.id},
             ${input.mlar.lei},
+            ${input.mlar.uli},
             ${input.mlar.loanType},
             ${input.mlar.loanPurpose},
             ${input.mlar.preapproval},
@@ -263,7 +265,8 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
             ${input.mlar.sexCategorization},
             ${incomeCategorization(input.mlar.income, input.census.medianIncome)},
             ${input.mlar.dwellingCategorization},
-            ${input.mlar.loanProductTypeCategorization}
+            ${input.mlar.loanProductTypeCategorization},
+            ${input.mlar.uli}
           )
           """)
 
