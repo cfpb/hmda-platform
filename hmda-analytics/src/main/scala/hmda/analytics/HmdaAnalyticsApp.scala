@@ -248,15 +248,15 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
         _ <- deleteTsRow
         _ = if(tsDeletion)
-              log.info(s"Data removed from TS for  $submissionId ")
-            else
-              log.info(s"Skipping Delete TS")
+          log.info(s"Data removed from TS for  $submissionId ")
+        else
+          log.info(s"Skipping Delete TS")
 
         _ <- deleteLarRows
         _ = if(larDeletion)
-              log.info(s"Data removed from LAR for  $submissionId")
-            else
-              log.info(s"Skipping Delete LAR")
+          log.info(s"Data removed from LAR for  $submissionId")
+        else
+          log.info(s"Skipping Delete LAR")
 
         _ <- insertTsRow
         _ = log.info(s"Data added into TS for  $submissionId")
@@ -269,9 +269,9 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
         res <- insertSubmissionHistory
         _ = if(historyInsertion)
-              log.info(s"Inserting into submission history")
-            else
-              log.info(s"Skipping Insert Submission History")
+          log.info(s"Inserting into submission history")
+        else
+          log.info(s"Skipping Insert Submission History")
 
       } yield res
 
