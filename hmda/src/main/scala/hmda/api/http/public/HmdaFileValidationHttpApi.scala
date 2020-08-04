@@ -3,7 +3,7 @@ package hmda.api.http.public
 import akka.NotUsed
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.headers.RawHeader
-import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, StatusCodes }
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.scaladsl.{ Broadcast, Concat, Flow, GraphDSL, Sink, Source }
@@ -15,6 +15,7 @@ import hmda.model.validation.ValidationError
 import hmda.model.validation.LarValidationError
 import hmda.api.http.model.public.LarValidateRequest
 import hmda.api.http.model.filing.submissions.HmdaRowParsedErrorSummary
+import hmda.api.http.model.filing.submissions.ValidationErrorSummary
 import hmda.api.http.utils.ParserErrorUtils
 import hmda.model.validation.LarValidationError
 import hmda.model.validation.TsValidationError
@@ -32,101 +33,41 @@ import io.circe.generic.auto._
 import scala.util.{ Failure, Success }
 
 object HmdaFileValidationHttpApi {
-  def create(implicit mat: Materializer): Route = new HmdaFileValidationHttpApi().hmdaFileRoutes
+  def create(implicit mat: Materializer): Route = new HmdaFileValidationHttpApi().hmdaValidationFileRoutes
 }
 
 private class HmdaFileValidationHttpApi(implicit mat: Materializer) {
 
-  //hmda/parse
-  private val parseHmdaFileRoute =
-    path("parse") {
-      fileUpload("file") {
-        case (_, byteSource) =>
-          val processF =
-            byteSource.via(processHmdaFile).runWith(Sink.seq)
-          onComplete(processF) {
-            case Success(parsed) =>
-              val errorList = parsed.filter(_.isDefined)
-              complete(errorList)
-
-            case Failure(error) =>
-              complete(ToResponseMarshallable(StatusCodes.BadRequest -> error.getLocalizedMessage))
-          }
-        case _ =>
-          complete(ToResponseMarshallable(StatusCodes.BadRequest))
-      } ~
-        options(complete("OPTIONS"))
-    } ~
-      path("parse" / "csv") {
-        post {
-          respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-            fileUpload("file") {
-              case (_, byteSource) =>
-                val headerSource =
-                  Source.fromIterator(() => List("Row Number|Estimated ULI|Field Name|Input Value|Valid Values\n").toIterator)
-                val errors = byteSource
-                  .via(processHmdaFile)
-                  .filter(_.isDefined)
-                  .map {
-                    case Some(error) => error.toCsv
-                    case None        => ""
-                  }
-                  .map(s => ByteString(s))
-
-                val csvF = headerSource
-                  .map(s => ByteString(s))
-                  .concat(errors)
-                  .map(_.utf8String)
-                  .runWith(Sink.seq)
-
-                onComplete(csvF) {
-                  case Success(csv) =>
-                    complete(ToResponseMarshallable(HttpEntity(ContentTypes.`text/csv(UTF-8)`, csv.mkString("\n"))))
-                  case Failure(error) =>
-                    complete(ToResponseMarshallable(StatusCodes.BadRequest -> error.getLocalizedMessage))
-                }
-
-              case _ =>
-                complete(ToResponseMarshallable(StatusCodes.BadRequest))
-            }
-          }
-        } ~
-          options(complete("OPTIONS"))
-      }
-
   private val validateYearRoute =
     path("validate" / IntNumber ) { year =>
-      parameters('check.as[String] ? "all") { checkType =>
-        post {
-          respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+      post {
+        parameters('check.as[String] ? "all") { checkType =>
             fileUpload("file") {
-              case (_, byteSource) =>
-                entity(as[LarValidateRequest]) { req =>
-                  val processF =
-                    byteSource.via(processValidateHmdaFile(year, checkType)).runWith(Sink.seq)
+                case (_, byteSource) =>
+                    val processF =
+                    byteSource.via(processValidateHmdaFile(year.toInt, checkType)).runWith(Sink.seq)
                     onComplete(processF) {
-                    case Success(errorList) =>
-                      complete(errorList)
+                        case Success(errorList) =>
+                            val validationSummary = splitEitherList(errorList)
+                            complete(validationSummary)
 
-                    case Failure(error) =>
-                      complete(ToResponseMarshallable(StatusCodes.BadRequest -> error.getLocalizedMessage))
-                  }
-                }
-              case _ =>
+                        case Failure(error) =>
+                            complete(ToResponseMarshallable(StatusCodes.BadRequest -> error.getLocalizedMessage))
+                    }
+                case _ =>
                 complete(ToResponseMarshallable(StatusCodes.BadRequest))
             }
-          }
         }
       }
     }
 
-  def hmdaFileRoutes: Route =
+  def hmdaValidationFileRoutes: Route =
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          pathPrefix("hmda") {
-            parseHmdaFileRoute
-          }
+            pathPrefix("hmda") {
+                validateYearRoute
+            }
         }
       }
     }
@@ -226,51 +167,9 @@ private class HmdaFileValidationHttpApi(implicit mat: Materializer) {
     }
   }
 
-  private def processHmdaFile: Flow[ByteString, Option[HmdaRowParsedErrorSummary], NotUsed] =
-    Flow.fromGraph(GraphDSL.create() { implicit b =>
-      import GraphDSL.Implicits._
-
-      val bcast  = b.add(Broadcast[ByteString](2))
-      val concat = b.add(Concat[Option[HmdaRowParsedErrorSummary]](2))
-
-      bcast ~> processTsSource ~> concat.in(0)
-      bcast ~> processLarSource ~> concat.in(1)
-
-      FlowShape(bcast.in, concat.out)
-    })
-
-  private def processTsSource: Flow[ByteString, Option[HmdaRowParsedErrorSummary], NotUsed] =
-    Flow[ByteString]
-      .via(framing("\n"))
-      .map(_.utf8String)
-      .map(_.trim)
-      .take(1)
-      .zip(Source.fromIterator(() => Iterator.from(1)))
-      .map {
-        case (ts, index) =>
-          (index, TsCsvParser(ts))
-      }
-      .map {
-        case (i, Right(_)) => None
-        case (i, Left(errors)) =>
-          Some(ParserErrorUtils.parserValidationErrorSummaryConvertor(i, None, errors))
-      }
-
-  private def processLarSource: Flow[ByteString, Option[HmdaRowParsedErrorSummary], NotUsed] =
-    Flow[ByteString]
-      .via(framing("\n"))
-      .map(_.utf8String)
-      .drop(1)
-      .map(_.trim)
-      .zip(Source.fromIterator(() => Iterator.from(2)))
-      .map {
-        case (lar, index) =>
-          (index, lar, LarCsvParser(lar))
-      }
-      .map {
-        case (i, lar, Right(_)) => None
-        case (i, lar, Left(errors)) =>
-          Some(ParserErrorUtils.parserValidationErrorSummaryConvertor(i, Some(lar), errors))
-      }
+    def splitEitherList(el: Seq[Either[HmdaRowParsedErrorSummary, Option[List[ValidationError]]]]): ValidationErrorSummary = {
+         val (lefts, rights) = el.partition(_.isLeft)
+         ValidationErrorSummary(lefts.map(_.left.get), rights.map(_.right.get))
+       }
 
 }

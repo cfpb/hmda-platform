@@ -4,7 +4,7 @@ import akka.actor.typed.{ ActorSystem, Behavior }
 import akka.actor.{ CoordinatedShutdown, ActorSystem => ClassicActorSystem }
 import akka.actor.typed.scaladsl.Behaviors
 import akka.stream.Materializer
-import hmda.api.http.public.{ HmdaFileValidationHttpApi, LarValidationHttpApi, TsValidationHttpApi }
+import hmda.api.http.public.{ HmdaFileValidationHttpApi, LarValidationHttpApi, TsValidationHttpApi, HmdaFileParsingHttpApi }
 import hmda.api.http.routes.BaseHttpApi
 import hmda.api.http.directives.HmdaTimeDirectives._
 import scala.concurrent.ExecutionContext
@@ -25,7 +25,7 @@ object HmdaPublicApi {
     val config                               = system.settings.config
     val host: String                         = config.getString("hmda.http.publicHost")
     val port: Int                            = config.getInt("hmda.http.publicPort")
-    val routes                               = BaseHttpApi.routes(name) ~ TsValidationHttpApi.create ~ LarValidationHttpApi.create ~ HmdaFileValidationHttpApi.create
+    val routes                               = BaseHttpApi.routes(name) ~ TsValidationHttpApi.create ~ LarValidationHttpApi.create ~ HmdaFileValidationHttpApi.create ~ HmdaFileParsingHttpApi.create
 
     BaseHttpApi.runServer(shutdown, name)(timed(routes), host, port)
 

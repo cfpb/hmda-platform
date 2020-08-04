@@ -16,9 +16,9 @@ import org.scalatest.{ MustMatchers, WordSpec }
 
 import scala.concurrent.duration._
 
-class HmdaFileValidationHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest with FileUploadUtils {
+class HmdaFileParsingHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest with FileUploadUtils {
 
-  val hmdaFileRoutes: Route                   = HmdaFileValidationHttpApi.create
+  val hmdaFileRoutes: Route                   = HmdaFileParsingHttpApi.create
   val duration: FiniteDuration                = 5.seconds
   implicit val routeTimeout: RouteTestTimeout = RouteTestTimeout(duration.dilated)
 
