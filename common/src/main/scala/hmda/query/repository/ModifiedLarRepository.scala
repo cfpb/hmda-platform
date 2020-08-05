@@ -162,7 +162,6 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
           VALUES (
             ${input.mlar.id},
             ${input.mlar.lei},
-            ${input.mlar.uli},
             ${input.mlar.loanType},
             ${input.mlar.loanPurpose},
             ${input.mlar.preapproval},
