@@ -212,7 +212,8 @@ CREATE INDEX modifiedlar2018_state_filing_year_idx ON hmda_user.modifiedlar2018 
 CREATE INDEX modifiedlar2018_total_units_year_idx ON hmda_user.modifiedlar2018 USING btree (total_units);
 CREATE INDEX modifiedlar2018_median_age_year_idx ON hmda_user.modifiedlar2018 USING btree (median_age_calculated);
 
-
+alter table modifiedlar2018
+add column uli character varying;
 
 -- Completed on 2019-06-05 11:44:50 EDT
 

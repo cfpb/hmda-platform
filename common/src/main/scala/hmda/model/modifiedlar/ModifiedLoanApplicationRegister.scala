@@ -9,6 +9,7 @@ case class EnrichedModifiedLoanApplicationRegister(mlar: ModifiedLoanApplication
 
 case class ModifiedLoanApplicationRegister(
                                             id: Int,
+                                            uli: String, // Note: this must not be in toCSV method
                                             lei: String,
                                             loanType: Int,
                                             loanPurpose: Int,

@@ -50,6 +50,7 @@ object ModifiedLarCsvParser {
     val countyLoanLimitsByState = getcountyLoanLimitsByState(year)
     ModifiedLoanApplicationRegister(
       lar.larIdentifier.id,
+      lar.loan.ULI,
       lar.larIdentifier.LEI,
       lar.loan.loanType.code,
       lar.loan.loanPurpose.code,
