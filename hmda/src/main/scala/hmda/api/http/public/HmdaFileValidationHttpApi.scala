@@ -15,7 +15,7 @@ import hmda.model.validation.ValidationError
 import hmda.model.validation.LarValidationError
 import hmda.api.http.model.public.LarValidateRequest
 import hmda.api.http.model.filing.submissions.HmdaRowParsedErrorSummary
-import hmda.api.http.model.filing.submissions.ValidationErrorSummary
+import hmda.api.http.model.filing.submissions.{ ValidationErrorSummary, SingleValidationErrorSummary }
 import hmda.api.http.utils.ParserErrorUtils
 import hmda.model.validation.LarValidationError
 import hmda.model.validation.TsValidationError
@@ -29,6 +29,9 @@ import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
 import hmda.util.streams.FlowUtils._
 import io.circe.generic.auto._
+import hmda.model.filing.EditDescriptionLookup._
+import scala.collection.immutable._
+import hmda.validation.filing.ValidationFlow._
 
 import scala.util.{ Failure, Success }
 
@@ -48,7 +51,7 @@ private class HmdaFileValidationHttpApi(implicit mat: Materializer) {
                     byteSource.via(processValidateHmdaFile(year.toInt, checkType)).runWith(Sink.seq)
                     onComplete(processF) {
                         case Success(errorList) =>
-                            val validationSummary = splitEitherList(errorList)
+                            val validationSummary = splitEitherList(errorList, Period(year, None))
                             complete(validationSummary)
 
                         case Failure(error) =>
@@ -136,7 +139,7 @@ private class HmdaFileValidationHttpApi(implicit mat: Materializer) {
     maybeErrors match {
       case Right(l) => None
       case Left(errors) =>
-        Some(errors)
+        Some(addLarFieldInformation(lar, errors, Period(year, quarter)))
     }
   }
 
@@ -163,13 +166,20 @@ private class HmdaFileValidationHttpApi(implicit mat: Materializer) {
         None
 
       case Left(errors) =>
-        Some(errors)
+        Some(addTsFieldInformation(ts, errors, None, Period(year, quarter)))
     }
   }
 
-    def splitEitherList(el: Seq[Either[HmdaRowParsedErrorSummary, Option[List[ValidationError]]]]): ValidationErrorSummary = {
+    def splitEitherList(el: Seq[Either[HmdaRowParsedErrorSummary, Option[List[ValidationError]]]], period: Period): ValidationErrorSummary = {
          val (lefts, rights) = el.partition(_.isLeft)
-         ValidationErrorSummary(lefts.map(_.left.get), rights.map(_.right.get))
+         ValidationErrorSummary(
+             lefts.map(_.left.get), 
+             rights.map(_.right.get).filter(_.isDefined).map(_.get).map(_.map(validationErrorToSummary(_, period)))
+        )
        }
+
+    def validationErrorToSummary(ve: ValidationError, period: Period): SingleValidationErrorSummary = {
+    SingleValidationErrorSummary(ve.uli, ve.editName, lookupDescription(ve.editName, period), ve.fields)
+}
 
 }
