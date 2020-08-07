@@ -474,5 +474,43 @@ This documentation describes de public HMDA Platform HTTP API
     2|loan type is not numeric
     ```
 
+### Parsing
+
+* `hmda/validate/<year>`
+
+    * `POST` - Parses and validates a HMDA file.
+
+    Example response, in `JSON` format:
+
+    ```json
+    {
+        "parserErrors": [
+            {
+                "rowNumber": 1,
+                "estimatedULI": "Transmittal Sheet",
+                "errorMessages": [
+                    {
+                        "fieldName": "Calendar Quarter",
+                        "inputValue": "a",
+                        "validValues": "Integer"
+                    }
+                ]
+            }
+        ],
+        "validationErrors": [
+            [
+                {
+                    "uli": "B90YWS6AFX2LGWOXJ1LDNIXOQ6OO7BRA5SLR6FSJJ5R89",
+                    "editName": "V619-2",
+                    "editDescription": "\"The Action Taken Date must be in the reporting year.\"",
+                    "fields": {
+                        "Action Taken Date": "20180908",
+                        "Application Date": "NA"
+                    }
+                }
+            ]
+        ]
+    }
+    ```
 
 
