@@ -1,13 +1,13 @@
 [
   {
     "test-lei": "NEWMANLEITEST1234678",
-    "filing-year": "2020",
+    "filing-year": "2019",
     "testData": [
 
       {
         "testName": "create institution",
         "requestBody": {
-          "activityYear": 2020,
+          "activityYear": 2019,
           "lei": "NEWMANLEITEST1234678",
           "agency": 9,
           "institutionType": -1,
@@ -38,7 +38,7 @@
 "quarterlyFilerHasFiledQ2": false,
 "quarterlyFilerHasFiledQ3": false},
         "expectedResponse": {
-          "activityYear": 2020,
+          "activityYear": 2019,
           "lei": "NEWMANLEITEST1234678",
           "agency": 9,
           "institutionType": -1,
@@ -74,7 +74,7 @@
       {
         "testName": "institution get api call",
         "expectedResponse": {
-          "activityYear": 2020,
+          "activityYear": 2019,
           "lei": "NEWMANLEITEST1234678",
           "agency": 9,
           "institutionType": -1,
@@ -111,7 +111,7 @@
         "expectedResponse": {
           "filing": {
             "period": {
-              "year": 2020,
+              "year": 2019,
               "quarter": null
             },
             "lei": "NEWMANLEITEST1234678",
@@ -133,7 +133,7 @@
           "id": {
             "lei": "NEWMANLEITEST1234678",
             "period": {
-              "year": 2020,
+              "year": 2019,
               "quarter": null
             },
             "sequenceNumber": 1
@@ -152,11 +152,11 @@
       },
       {
         "testName": "filing psv upload test",
-        "sourceFile": "tests/hmda-filing/configs/2020/test_yes_m_yes_q/newmanBank_yes_M_yes_Q_2020.txt",
+        "sourceFile": "tests/hmda-filing/configs/2019/test_yes_m_yes_q/newmanBank_yes_M_yes_Q_2019.txt",
         "expectedResponse": {
           "id": {
             "lei": "NEWMANLEITEST1234678",
-            "period": "2020",
+            "period": "2019",
             "sequenceNumber": 7
           },
           "status": {
@@ -177,7 +177,7 @@
           "id": {
             "lei": "NEWMANLEITEST1234678",
             "period": {
-              "year": 2020,
+              "year": 2019,
               "quarter": null
             },
             "sequenceNumber": 12
@@ -189,7 +189,7 @@
           },
           "start": 1562662935676,
           "end": 0,
-          "fileName": "newmanBank_yes_M_yes_Q_2020.txt",
+          "fileName": "newmanBank_yes_M_yes_Q_2019.txt",
           "receipt": ""
         },
         "testNumber": 3
