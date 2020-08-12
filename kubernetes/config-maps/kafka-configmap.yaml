@@ -2,5 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: kafka-configmap
+  annotations:
+    reloader.stakater.com/match: "true"
 data:
   kafka.hosts: broker.kafka.l4lb.thisdcos.directory:9092

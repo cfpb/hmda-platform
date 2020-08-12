@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: {{ template "hmda-data-publisher.fullname" . }}
   labels:
+  annotations:
+    reloader.stakater.com/search: "true"
     app: {{ template "hmda-data-publisher.name" . }}
     chart: {{ template "hmda-data-publisher.chart" . }}
     release: {{ .Release.Name }}

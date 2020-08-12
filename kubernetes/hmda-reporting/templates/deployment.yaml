@@ -2,6 +2,8 @@ apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
   name: {{ include "hmda-reporting.fullname" . }}
+  annotations:
+    reloader.stakater.com/search: "true"
   labels:
     app: {{ include "hmda-reporting.name" . }}
     chart: {{ include "hmda-reporting.chart" . }}

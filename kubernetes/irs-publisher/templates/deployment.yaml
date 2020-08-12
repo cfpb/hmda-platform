@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "irs-publisher.fullname" . }}
   annotations:
+    reloader.stakater.com/search: "true"
     downscaler/uptime: Mon-Fri 10:00-23:00 UTC
   labels:
     app: {{ include "irs-publisher.name" . }}

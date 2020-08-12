@@ -2,6 +2,8 @@ apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
   name: {{ include "ratespread-calculator.fullname" . }}
+  annotations:
+    reloader.stakater.com/search: "true"
   labels:
     app: {{ include "ratespread-calculator.name" . }}
     chart: {{ include "ratespread-calculator.chart" . }}
