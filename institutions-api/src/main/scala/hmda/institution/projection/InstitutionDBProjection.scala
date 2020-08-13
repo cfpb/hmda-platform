@@ -119,6 +119,7 @@ object InstitutionDBProjection extends InstitutionEmailComponent with Institutio
          lei = inst.LEI,
          historyID = historyID,
          notes = inst.notes,
+         year =inst.activityYear.toString(),
          updatedPanel = instJSON
        )
   }

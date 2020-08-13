@@ -97,6 +97,15 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
       }
     }
 
+  private val institutionHistoryPath =
+    path("institutions" / Segment / "year" / IntNumber  / "history") { (lei, year) =>
+      (extractUri & get) { uri =>
+        isFilingAllowed(year, None) {
+          val f = institutionNoteHistoryRepository.findInstitutionHistory( year.toString,lei)
+          completeInstitutionsNoteHistoryFuture(f, uri)
+        }
+      }
+    }
 
   def completeInstitutionsNoteHistoryFuture(f: Future[Seq[InstitutionNoteHistoryEntity]], uri: Uri): Route =
     onComplete(f) {
@@ -113,15 +122,6 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
           val errorResponse = ErrorResponse(500, error.getLocalizedMessage, uri.path)
           complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
         }
-    }
-  private val getInstitutionHistory =
-    path("institutions" / Segment / "year" / IntNumber  / "history") { (lei, year) =>
-      (extractUri & get) { uri =>
-        isFilingAllowed(year, None) {
-            val f = institutionNoteHistoryRepository.findInstitutionHistory( year.toString,lei)
-            completeInstitutionsNoteHistoryFuture(f, uri)
-        }
-      }
     }
 
   private val institutionByDomainDefaultPath =
@@ -168,7 +168,7 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          institutionByIdPath ~ institutionByDomainPath ~ institutionByDomainDefaultPath /* ~ institutionLoaderCSVByYear*/
+          institutionByIdPath ~ institutionByDomainPath ~ institutionHistoryPath ~ institutionByDomainDefaultPath
         }
       }
     }
