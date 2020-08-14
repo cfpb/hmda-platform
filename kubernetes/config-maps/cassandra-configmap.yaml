@@ -2,6 +2,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: cassandra-configmap
+  annotations:
+    reloader.stakater.com/match: "true"
 data:
   cassandra-hosts: node-0-server.cassandra.autoip.dcos.thisdcos.directory
   cassandra-keyspace: hmda2_journal
