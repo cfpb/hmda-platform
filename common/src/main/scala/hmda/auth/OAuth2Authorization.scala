@@ -23,7 +23,10 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
   val clientId    = config.getString("keycloak.client.id")
   val runtimeMode = config.getString("hmda.runtime.mode")
 
-  def authorizeTokenWithRole(role: String): Directive1[VerifiedToken] =
+  def authorizeTokenWithLeiOrRole(lei: String, role: String): Directive1[VerifiedToken] =
+    handleRejections(authRejectionHandler) & (authorizeTokenWithLeiReject(lei) | authorizeTokenWithRoleReject(role))
+
+  def authorizeTokenWithRoleReject(role: String): Directive1[VerifiedToken] =
     authorizeToken flatMap {
       case t if t.roles.contains(role) =>
         provide(t)
@@ -31,11 +34,48 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
         if (runtimeMode == "dev" || runtimeMode == "docker-compose") {
           provide(VerifiedToken())
         } else {
-          complete(
-            (StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path("")))
-          ).toDirective[Tuple1[VerifiedToken]]
+          reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]]
         }
     }
+
+  protected def authRejectionHandler: RejectionHandler =
+    RejectionHandler
+      .newBuilder()
+      .handle({
+        case AuthorizationFailedRejection =>
+          complete(
+            (StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path("")))
+          )
+      })
+      .result()
+
+  protected def authorizeTokenWithLeiReject(lei: String): Directive1[VerifiedToken] =
+    authorizeToken flatMap {
+      case t if t.lei.nonEmpty =>
+        withLocalModeBypass {
+          val leiList = t.lei.split(',')
+          if (leiList.contains(lei)) {
+            provide(t)
+          } else {
+            logger.info(s"Providing reject for ${lei}")
+            reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]]
+          }
+        }
+
+      case _ =>
+        withLocalModeBypass {
+          logger.info("Rejecting request in authorizeTokenWithLei")
+          reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]]
+        }
+    }
+
+  protected def withLocalModeBypass(thunk: => Directive1[VerifiedToken]): Directive1[VerifiedToken] =
+    if (runtimeMode == "dev" || runtimeMode == "docker-compose") {
+      provide(VerifiedToken())
+    } else { thunk }
+
+  def authorizeTokenWithRole(role: String): Directive1[VerifiedToken] =
+    handleRejections(authRejectionHandler) & authorizeTokenWithRoleReject(role)
 
   def authorizeTokenWithLei(lei: String): Directive1[VerifiedToken] =
     authorizeToken flatMap {
