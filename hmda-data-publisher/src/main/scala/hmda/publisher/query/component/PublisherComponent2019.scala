@@ -504,11 +504,14 @@ trait PublisherComponent2019 extends PGTableNameLoader {
     def count(): Future[Int] = {
       db.run(table.size.result)
     }
+
+    def getAllLARsCount(bankIgnoreList: Array[String]): Future[Int] =
+      db.run(getAllLARsQuery(bankIgnoreList).size.result)
+
     def getAllLARs(
         bankIgnoreList: Array[String]): DatabasePublisher[LarEntityImpl2019] = {
       db.stream(
-        table
-          .filterNot(_.lei.toUpperCase inSet bankIgnoreList)
+        getAllLARsQuery(bankIgnoreList)
           .result
           .withStatementParameters(
             rsType = ResultSetType.ForwardOnly,
@@ -517,6 +520,8 @@ trait PublisherComponent2019 extends PGTableNameLoader {
           )
           .transactionally)
     }
+    protected def getAllLARsQuery(bankIgnoreList: Array[String]): Query[LarTable, LarEntityImpl2019, Seq] =
+      table.filterNot(_.lei.toUpperCase inSet bankIgnoreList)
   }
 
   class ModifiedLarTable(tag: Tag)
