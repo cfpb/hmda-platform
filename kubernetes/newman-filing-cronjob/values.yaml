@@ -4,7 +4,7 @@ jobs:
   # third cron
   - name: filing-tests
     image:
-      repository: dtr.cfpb.gov/hmda/newman-automation
+      repository: hmda/newman-automation
       tag: latest
       imagePullPolicy: Always
     # optional env vars

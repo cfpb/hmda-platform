@@ -1,7 +1,7 @@
 ## HMDA Newmen K8 Cron Jobs
 
 ### Create the job using helm
-helm install  --name=filing-cronjobs --namespace=automated-jobs  \
+helm install  --name=filing-cronjobs --namespace=monitoring  \
 --set env.KC_UN=$KC_UN \
 --set env.KC_PW=$KC_PW_PROD \
 --set env.KC_URL=$KC_URL_PROD \
@@ -19,7 +19,6 @@ helm install  --name=filing-cronjobs --namespace=automated-jobs  \
 kubectl get cronjobs
 
 
-### Delete Cron jobs 
+### Delete Cron jobs
 
 kubectl delete -n newman cronjob --all
-
