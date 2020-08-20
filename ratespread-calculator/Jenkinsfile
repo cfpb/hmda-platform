@@ -22,6 +22,7 @@ pipeline {
       }
       steps {
         sh """find . -name target -type d -prune -exec rm -rf {} \\;"""
+        sh """find . -name test -type d -prune -exec rm -rf {} \\;"""
         sh "sbt -Dsbt.global.base=.sbt -Dsbt.boot.directory=.sbt -Dsbt.ivy.home=.ivy2 -batch clean ratespread-calculator/docker:stage"
         sh "rm -rf data"
       }
