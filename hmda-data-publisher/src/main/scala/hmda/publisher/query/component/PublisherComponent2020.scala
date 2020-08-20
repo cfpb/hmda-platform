@@ -3,22 +3,19 @@ package hmda.publisher.query.component
 import java.sql.Timestamp
 
 import hmda.publisher.helper.PGTableNameLoader
-import hmda.publisher.query.lar.{LarEntityImpl2020, _}
+import hmda.publisher.query.lar.{ LarEntityImpl2020, _ }
 import hmda.publisher.query.panel.InstitutionEntity
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
-import slick.basic.{DatabaseConfig, DatabasePublisher}
-import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
+import slick.basic.{ DatabaseConfig, DatabasePublisher }
+import slick.jdbc.{ JdbcProfile, ResultSetConcurrency, ResultSetType }
 
 import scala.concurrent.Future
 
 trait PublisherComponent2020 extends PGTableNameLoader {
 
-
-
   import dbConfig.profile.api._
-
 
   class InstitutionsTable(tag: Tag) extends Table[InstitutionEntity](tag, panel2020TableName) {
     def lei             = column[String]("lei", O.PrimaryKey)
@@ -508,31 +505,28 @@ trait PublisherComponent2020 extends PGTableNameLoader {
       db.run(table.filter(_.lei === lei).delete)
     def count(): Future[Int] =
       db.run(table.size.result)
+
+    def getAllLARsCount(bankIgnoreList: Array[String], includeQuarterly: Boolean): Future[Int] =
+      db.run(getAllLARsQuery(bankIgnoreList, includeQuarterly).size.result)
+
     def getAllLARs(bankIgnoreList: Array[String], includeQuarterly: Boolean): DatabasePublisher[LarEntityImpl2020] =
+      db.stream(
+        getAllLARsQuery(bankIgnoreList, includeQuarterly)
+          .result
+          .withStatementParameters(
+            rsType = ResultSetType.ForwardOnly,
+            rsConcurrency = ResultSetConcurrency.ReadOnly,
+            fetchSize = 1000
+          )
+          .transactionally
+      )
+    protected def getAllLARsQuery(bankIgnoreList: Array[String], includeQuarterly: Boolean): Query[LarTable, LarEntityImpl2020, Seq] =
       if (includeQuarterly) {
-        db.stream(
-          table
-            .filterNot(lar => (lar.lei.toUpperCase inSet bankIgnoreList) && !lar.isQuarterly)
-            .result
-            .withStatementParameters(
-              rsType = ResultSetType.ForwardOnly,
-              rsConcurrency = ResultSetConcurrency.ReadOnly,
-              fetchSize = 1000
-            )
-            .transactionally
-        )
+        table
+          .filterNot(lar => (lar.lei.toUpperCase inSet bankIgnoreList) && !lar.isQuarterly)
       } else {
-        db.stream(
-          table
-            .filterNot(lar => (lar.lei.toUpperCase inSet bankIgnoreList) && lar.isQuarterly)
-            .result
-            .withStatementParameters(
-              rsType = ResultSetType.ForwardOnly,
-              rsConcurrency = ResultSetConcurrency.ReadOnly,
-              fetchSize = 1000
-            )
-            .transactionally
-        )
+        table
+          .filterNot(lar => (lar.lei.toUpperCase inSet bankIgnoreList) && lar.isQuarterly)
       }
   }
 

@@ -7,7 +7,7 @@ import akka.NotUsed
 import akka.stream.Materializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings}
+import akka.stream.alpakka.s3.{MemoryBufferType, MetaHeaders, MultipartUploadResult, S3Attributes, S3Settings}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
@@ -79,121 +79,81 @@ class LarScheduler
       val now = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDate.format(now)
       val fileName = s"$formattedDate" + "2018_lar.txt"
-      val s3Path = s"$environmentPrivate/lar/"
-      val fullFilePath= SnapshotCheck.pathSelector(s3Path,fileName)
 
-      val s3Sink = S3
-        .multipartUpload(bucketPrivate,fullFilePath )
-        .withAttributes(S3Attributes.settings(s3Settings))
+      val allResultsSource: Source[String, NotUsed] =
+        Source.fromPublisher(larRepository2019.getAllLARs(getFilterList()))
+          .map(larEntity => larEntity.toRegulatorPSV)
+      def countF: Future[Int] = larRepository2019.getAllLARsCount(getFilterList())
 
-      val allResultsPublisher: DatabasePublisher[LarEntityImpl2018] =
-        larRepository2018.getAllLARs(getFilterList())
-      val allResultsSource: Source[LarEntityImpl2018, NotUsed] =
-        Source.fromPublisher(allResultsPublisher)
-
-      val results: Future[MultipartUploadResult] = allResultsSource
-        .map(larEntity => larEntity.toRegulatorPSV + "\n")
-        .map(s => ByteString(s))
-        .runWith(s3Sink)
-
-      results onComplete {
-        case Success(result) =>
-          log.info("Pushed to S3: " +  s"$bucketPrivate/$fullFilePath"  + ".")
-        case Failure(t) =>
-          log.info("An error has occurred getting LAR Data in Future: " + t.getMessage)
-      }
+      publishPSVtoS3(fileName, allResultsSource, countF)
 
     case LarScheduler2019 =>
       val now           = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDate.format(now)
       val fileName = s"$formattedDate" + "2019_lar.txt"
-      val s3Path = s"$environmentPrivate/lar/"
-      val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
-      val s3Sink = S3
-        .multipartUpload(bucketPrivate, fullFilePath)
-        .withAttributes(S3Attributes.settings(s3Settings))
 
-      val allResultsPublisher: DatabasePublisher[LarEntityImpl2019] =
-        larRepository2019.getAllLARs(getFilterList())
-      val allResultsSource: Source[LarEntityImpl2019, NotUsed] =
-        Source.fromPublisher(allResultsPublisher)
+      val allResultsSource: Source[String, NotUsed] =
+        Source.fromPublisher(larRepository2019.getAllLARs(getFilterList()))
+          .map(larEntity => appendCensus(larEntity, 2019))
+          .prepend(Source.single(LoanLimitHeader))
+      def countF: Future[Int] = larRepository2019.getAllLARsCount(getFilterList())
 
-      val results: Future[MultipartUploadResult] = allResultsSource
-        .map(larEntity => larEntity.toRegulatorPSV + "\n")
-        .map(s => ByteString(s))
-        .runWith(s3Sink)
-
-      results onComplete {
-        case Success(result) =>
-          log.info("Pushed to S3: " +  s"$bucketPrivate/$fullFilePath"  + ".")
-        case Failure(t) =>
-          log.info("An error has occurred getting LAR Data 2019 in Future: " + t.getMessage)
-      }
+      publishPSVtoS3(fileName, allResultsSource, countF)
 
     case LarSchedulerLoanLimit2019 =>
       val now           = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDate.format(now)
       val fileName      = "2019F_AGY_LAR_withFlag_" + s"$formattedDate" + "2019_lar.txt"
-      val s3Path = s"$environmentPrivate/lar/"
-      val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
 
-      val s3Sink = S3
-        .multipartUpload(bucketPrivate, fullFilePath)
-        .withAttributes(S3Attributes.settings(s3Settings))
+      val allResultsSource: Source[String, NotUsed] =
+        Source.fromPublisher(larRepository2019.getAllLARs(getFilterList()))
+          .map(larEntity => appendCensus(larEntity, 2019))
+          .prepend(Source.single(LoanLimitHeader))
+      def countF: Future[Int] = larRepository2019.getAllLARsCount(getFilterList())
 
-      val allResultsPublisher: DatabasePublisher[LarEntityImpl2019] =
-        larRepository2019.getAllLARs(getFilterList())
-      val allResultsSource: Source[LarEntityImpl2019, NotUsed] =
-        Source.fromPublisher(allResultsPublisher)
-
-      val resultsPSV: Future[MultipartUploadResult] =
-        allResultsSource.zipWithIndex
-          .map(
-            larEntity =>
-              if (larEntity._2 == 0)
-                LoanLimitHeader.concat(appendCensus(larEntity._1,2019) ) + "\n"
-              else appendCensus(larEntity._1,2019) + "\n")
-          .map(s => ByteString(s))
-          .runWith(s3Sink)
-
-      resultsPSV onComplete {
-        case Success(results) =>
-          log.info("Pushed to S3: " +  s"$bucketPrivate/$fullFilePath"  + ".")
-        case Failure(t) =>
-          log.info("An error has occurred getting LAR Data Loan Limit2019 in Future: " + t.getMessage)
-      }
+      publishPSVtoS3(fileName, allResultsSource, countF)
 
     case LarSchedulerQuarterly2020 =>
       val includeQuarterly = true
       val now              = LocalDateTime.now().minusDays(1)
       val formattedDate    = fullDateQuarterly.format(now)
-
       val fileName = s"$formattedDate" + "quarterly_2020_lar.txt"
 
-      val s3Path = s"$environmentPrivate/lar/"
-      val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
+      val allResultsSource: Source[String, NotUsed] =
+        Source
+          .fromPublisher(larRepository2020.getAllLARs(getFilterList(), includeQuarterly))
+          .map(larEntity => larEntity.toRegulatorPSV)
+      def countF: Future[Int] = larRepository2020.getAllLARsCount(getFilterList(), includeQuarterly)
 
-      val s3Sink = S3
-        .multipartUpload(bucketPrivate, fullFilePath)
-        .withAttributes(S3Attributes.settings(s3Settings))
-
-      val allResultsPublisher: DatabasePublisher[LarEntityImpl2020] =
-        larRepository2020.getAllLARs(getFilterList(), includeQuarterly)
-      val allResultsSource: Source[LarEntityImpl2020, NotUsed] =
-        Source.fromPublisher(allResultsPublisher)
-
-      val results: Future[MultipartUploadResult] = allResultsSource
-        .map(larEntity => larEntity.toRegulatorPSV + "\n")
-        .map(s => ByteString(s))
-        .runWith(s3Sink)
-
-      results onComplete {
-        case Success(result) =>
-          log.info("Pushed to S3: " +  s"$bucketPrivate/$fullFilePath"  + ".")
-        case Failure(t) =>
-          log.info("An error has occurred getting Quarterly LAR Data 2020 in Future: " + t.getMessage)
-      }
+      publishPSVtoS3(fileName, allResultsSource, countF)
   }
+
+  def publishPSVtoS3(fileName: String, rows: Source[String, NotUsed], countF: => Future[Int]): Unit = {
+    val s3Path       = s"$environmentPrivate/lar/"
+    val fullFilePath = SnapshotCheck.pathSelector(s3Path, fileName)
+
+    val bytesStream: Source[ByteString, NotUsed] =
+      rows
+        .map(_ + "\n")
+        .map(s => ByteString(s))
+
+    val results = for {
+      count <- countF
+      s3Sink = S3
+        .multipartUpload(bucketPrivate, fullFilePath, metaHeaders = MetaHeaders(Map(LarScheduler.entriesCountMetaName -> count.toString)))
+        .withAttributes(S3Attributes.settings(s3Settings))
+      result <- bytesStream.runWith(s3Sink)
+    } yield result
+
+    results onComplete {
+      case Success(result) =>
+        log.info(s"Pushed to S3: $bucketPrivate/$fullFilePath.")
+      case Failure(t) =>
+        log.info(s"An error has occurred pushing LAR Data to $bucketPrivate/$fullFilePath: ${t.getMessage}")
+    }
+
+  }
+
 
   def getCensus(hmdaGeoTract: String,year:Int): Msa = {
 
@@ -214,4 +174,8 @@ class LarScheduler
     val msa = getCensus(lar.larPartOne.tract,year)
     lar.appendMsa(msa)
   }
+}
+
+object LarScheduler{
+  val entriesCountMetaName = "entries-count"
 }
