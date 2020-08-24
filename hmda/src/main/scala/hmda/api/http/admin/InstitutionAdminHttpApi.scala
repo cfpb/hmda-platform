@@ -32,12 +32,16 @@ private class InstitutionAdminHttpApi(sharding: ClusterSharding, config: Config)
   val hmdaAdminRole   = config.getString("keycloak.hmda.admin.role")
   val checkLEI        = true
   val checkAgencyCode = false
-
+  val rc: RequestReplicationClient = RequestReplicationClient.create(config, "hmda.institutions.edits.replication-address")
   def institutionAdminRoutes(oAuth2Authorization: OAuth2Authorization): Route =
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          institutionWritePath(oAuth2Authorization) ~ institutionReadPath(oAuth2Authorization)
+          rc.withRequestReplication {
+            institutionWritePath(oAuth2Authorization)
+          }
+           ~
+             institutionReadPath(oAuth2Authorization)
         }
       }
     }
