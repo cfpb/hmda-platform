@@ -39,9 +39,7 @@ private class InstitutionAdminHttpApi(sharding: ClusterSharding, config: Config)
         encodeResponse {
           rc.withRequestReplication {
             institutionWritePath(oAuth2Authorization)
-          }
-           ~
-             institutionReadPath(oAuth2Authorization)
+          } ~ institutionReadPath(oAuth2Authorization)
         }
       }
     }
