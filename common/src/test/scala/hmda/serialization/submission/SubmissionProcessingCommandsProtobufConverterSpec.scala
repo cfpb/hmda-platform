@@ -116,4 +116,16 @@ class SubmissionProcessingCommandsProtobufConverterSpec extends PropSpec with Sc
     }
   }
 
+  property("SignSubmission must serialize to protobuf and back") {
+    forAll(submissionIdGen, emailGen, Gen.asciiStr) { (submissionId, email, username) =>
+      val probe    = TestProbe[SubmissionSignedEvent]
+      val actorRef = probe.ref
+      val resolver = ActorRefResolver(typedSystem)
+      val cmd      = SignSubmission(submissionId, actorRef, email, username)
+      val protobuf = signSubmissionToProtobuf(cmd, actorRefResolver).toByteArray
+      signSubmissionFromProtobuf(SignSubmissionMessage.parseFrom(protobuf), actorRefResolver) mustBe cmd
+    }
+  }
+
+
 }

@@ -5,7 +5,7 @@ import io.circe.Encoder
 import io.circe.generic.semiauto._
 
 
-case class SignedResponse(email: String = "dev@email.com", timestamp: Long, receipt: String, status: SubmissionStatus)
+case class SignedResponse(email: String = "dev@email.com", timestamp: Long, receipt: String, status: SubmissionStatus, signerUsername: Option[String])
 
 object SignedResponse {
   implicit val encoder: Encoder[SignedResponse] = deriveEncoder[SignedResponse]

@@ -41,7 +41,7 @@ private class SignHttpApi(log: Logger, sharding: ClusterSharding)(implicit t: Ti
         } ~ (extractUri & post) { uri =>
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
-              entity(as[EditsSign])(editsSign => signSubmission(lei, year, None, seqNr, token.email, editsSign.signed, uri))
+              entity(as[EditsSign])(editsSign => signSubmission(lei, year, None, seqNr, token.email, editsSign.signed, uri, token.username))
             }
           }
         }
@@ -53,7 +53,7 @@ private class SignHttpApi(log: Logger, sharding: ClusterSharding)(implicit t: Ti
         } ~ (extractUri & post) { uri =>
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
-              entity(as[EditsSign])(editsSign => signSubmission(lei, year, Option(quarter), seqNr, token.email, editsSign.signed, uri))
+              entity(as[EditsSign])(editsSign => signSubmission(lei, year, Option(quarter), seqNr, token.email, editsSign.signed, uri, token.username))
             }
           }
         }
@@ -72,7 +72,7 @@ private class SignHttpApi(log: Logger, sharding: ClusterSharding)(implicit t: Ti
         submissionNotAvailable(submissionId, uri)
 
       case Success(Some(submission)) =>
-        val signed = SignedResponse(email, submission.end, submission.receipt, submission.status)
+        val signed = SignedResponse(email, submission.end, submission.receipt, submission.status, submission.signerUsername)
         complete(signed)
     }
   }
@@ -84,14 +84,15 @@ private class SignHttpApi(log: Logger, sharding: ClusterSharding)(implicit t: Ti
                               seqNr: Int,
                               email: String,
                               signed: Boolean,
-                              uri: Uri
+                              uri: Uri,
+                              username: String
                             ): Route = {
     log.info(s"inside signSubmission ${lei} and ${seqNr}")
     val submissionId = SubmissionId(lei, Period(year, quarter), seqNr)
     if (!signed) badRequest(submissionId, uri, "Illegal argument: signed = false")
     else {
       val hmdaValidationError                    = selectHmdaValidationError(sharding, submissionId)
-      val fSigned: Future[SubmissionSignedEvent] = hmdaValidationError ? (ref => SignSubmission(submissionId, ref, email))
+      val fSigned: Future[SubmissionSignedEvent] = hmdaValidationError ? (ref => SignSubmission(submissionId, ref, email, username))
       onComplete(fSigned) {
         case Failure(e) =>
           failedResponse(StatusCodes.InternalServerError, uri, e)
@@ -99,7 +100,7 @@ private class SignHttpApi(log: Logger, sharding: ClusterSharding)(implicit t: Ti
         case Success(submissionSignedEvent) =>
           submissionSignedEvent match {
             case signed @ SubmissionSigned(_, _, status) =>
-              val signedResponse = SignedResponse(email, signed.timestamp, signed.receipt, status)
+              val signedResponse = SignedResponse(email, signed.timestamp, signed.receipt, status, Some(username))
               complete(ToResponseMarshallable(signedResponse))
 
             case SubmissionNotReadyToBeSigned(id) =>
