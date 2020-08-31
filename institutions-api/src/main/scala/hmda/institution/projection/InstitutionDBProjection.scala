@@ -111,7 +111,6 @@ object InstitutionDBProjection extends InstitutionEmailComponent with Institutio
 
     val historyID = inst.LEI + "-" + inst.activityYear + "-" + timestamp
 
-     println(inst.toLoaderPSV)
        InstitutionNoteHistoryEntity(
          lei = inst.LEI,
          historyID = historyID,
