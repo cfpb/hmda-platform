@@ -11,8 +11,6 @@ import hmda.messages.institution.InstitutionEvents.{InstitutionCreated, Institut
 import hmda.model.institution.Institution
 import hmda.query.DbConfiguration._
 import org.slf4j.LoggerFactory
-import net.liftweb.json._
-import net.liftweb.json.Serialization.write
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -22,7 +20,6 @@ case class ProjectEvent(evt: InstitutionEvent) extends InstitutionProjectionComm
 object InstitutionDBProjection extends InstitutionEmailComponent with InstitutionNoteHistoryComponent {
 
   val config = ConfigFactory.load()
-  implicit val formats = DefaultFormats
 
   val name = "InstitutionDBProjector"
 
@@ -113,14 +110,14 @@ object InstitutionDBProjection extends InstitutionEmailComponent with Institutio
     val timestamp = Instant.now().toEpochMilli
 
     val historyID = inst.LEI + "-" + inst.activityYear + "-" + timestamp
-    val instJSON = write(inst)
 
+     println(inst.toLoaderPSV)
        InstitutionNoteHistoryEntity(
          lei = inst.LEI,
          historyID = historyID,
          notes = inst.notes,
          year =inst.activityYear.toString(),
-         updatedPanel = instJSON
+         updatedPanel = inst.toLoaderPSV
        )
   }
 }
