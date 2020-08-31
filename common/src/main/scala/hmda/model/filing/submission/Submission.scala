@@ -9,10 +9,11 @@ case class Submission(
                        start: Long = 0,
                        end: Long = 0,
                        fileName: String = "",
-                       receipt: String = ""
+                       receipt: String = "",
+                       signerUsername: Option[String] = None
                      ) {
   def isEmpty: Boolean =
-    id == SubmissionId() && status == Created && start == 0 && end == 0 && fileName == "" && receipt == ""
+    id == SubmissionId() && status == Created && start == 0 && end == 0 && fileName == "" && receipt == "" && signerUsername.isEmpty
 }
 
 object Submission {

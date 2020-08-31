@@ -10,7 +10,7 @@ message SubmissionMessage {
     int64 end = 4;
     string fileName = 5;
     string receipt = 6;
-
+    string signerUsername = 7;
 }
 
 message SubmissionIdMessage {
