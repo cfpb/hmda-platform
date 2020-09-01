@@ -100,10 +100,8 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
   private val institutionHistoryPath =
     path("institutions" / Segment / "year" / IntNumber  / "history") { (lei, year) =>
       (extractUri & get) { uri =>
-        isFilingAllowed(year, None) {
           val f = institutionNoteHistoryRepository.findInstitutionHistory( year.toString,lei)
           completeInstitutionsNoteHistoryFuture(f, uri)
-        }
       }
     }
 
