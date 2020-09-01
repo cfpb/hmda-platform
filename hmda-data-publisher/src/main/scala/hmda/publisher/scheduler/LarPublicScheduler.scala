@@ -16,6 +16,7 @@ import hmda.publisher.scheduler.schedules.Schedules.{LarPublicScheduler2018, Lar
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
 import slick.basic.DatabasePublisher
+import akka.stream.scaladsl.Compression
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -99,6 +100,7 @@ class LarPublicScheduler extends HmdaActor with
           else mlarEntity._1.toPublicPSV + "\n"
         )
         .map(s => ByteString(s))
+        .via(Compression.gzip)
         .runWith(s3SinkPSV)
 
     resultsPSV onComplete {

@@ -2,7 +2,7 @@ import Dependencies._
 import BuildSettings._
 import sbtassembly.AssemblyPlugin.autoImport.assemblyMergeStrategy
 
-lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson, embeddedPg, embeddedPgSupport, apacheCommonsIO, s3Mock, liftweb)
+lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson, embeddedPg, embeddedPgSupport, apacheCommonsIO, s3Mock)
 
 lazy val sparkDeps =
   Seq(
@@ -29,9 +29,12 @@ lazy val akkaDeps = Seq(
   akkaStreamsTestKit,
   akkaCors,
   akkaKafkaStreams,
-  embeddedKafka,
-  alpakkaS3,
-  akkaQuartzScheduler
+  embeddedKafka
+)
+
+lazy val pubDeps = Seq(
+  akkaQuartzScheduler,
+  alpakkaS3
 )
 
 lazy val akkaPersistenceDeps =
@@ -172,6 +175,7 @@ lazy val `institutions-api` = (project in file("institutions-api"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
+      libraryDependencies ++= pubDeps :+ liftweb,
       mainClass in Compile := Some("hmda.institution.HmdaInstitutionApi"),
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
@@ -201,6 +205,7 @@ lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
+      libraryDependencies ++= pubDeps,
       mainClass in Compile := Some("hmda.publisher.HmdaDataPublisherApp"),
       assemblyJarName in assembly := {
         s"${name.value}.jar"
@@ -262,6 +267,7 @@ lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
+      libraryDependencies ++= pubDeps,
       mainClass in Compile := Some("hmda.calculator.HmdaRateSpread"),
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
@@ -292,6 +298,7 @@ lazy val `modified-lar` = (project in file("modified-lar"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
+      libraryDependencies ++= pubDeps,
       mainClass in Compile := Some("hmda.publication.lar.ModifiedLarApp"),
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
@@ -442,7 +449,6 @@ lazy val `rate-limit` = (project in file("rate-limit"))
     dockerSettings,
     packageSettings
   )
-  .dependsOn(common % "compile->compile;test->test")
   .dependsOn(`hmda-protocol`)
 
 lazy val `data-browser` = (project in file("data-browser"))
@@ -454,7 +460,7 @@ lazy val `data-browser` = (project in file("data-browser"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
+      libraryDependencies ++=  pubDeps ++
         enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
