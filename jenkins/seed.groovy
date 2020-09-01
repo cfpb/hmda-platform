@@ -80,3 +80,27 @@ repositories.each{ repo ->
     }
 }
 
+
+multibranchPipelineJob('hmda-platform-api-docs') {
+    branchSources {
+        github {
+            id('hmda')
+            repoOwner('cfpb')
+            repository("hmda-platform-api-docs")
+            scanCredentialsId('cfpbhmdadeploybot-github')
+        }
+        orphanedItemStrategy {
+            discardOldItems {
+                daysToKeep(1)
+            }
+        }
+        factory {
+            workflowBranchProjectFactory {
+                scriptPath("Jenkinsfile")
+            }
+        }
+        triggers {
+            periodic(30)
+        }
+    }
+}
