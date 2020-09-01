@@ -2,7 +2,7 @@ import Dependencies._
 import BuildSettings._
 import sbtassembly.AssemblyPlugin.autoImport.assemblyMergeStrategy
 
-lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson, embeddedPg, embeddedPgSupport, apacheCommonsIO, s3Mock, liftweb)
+lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson, embeddedPg, embeddedPgSupport, apacheCommonsIO, s3Mock)
 
 lazy val sparkDeps =
   Seq(
@@ -183,6 +183,7 @@ lazy val `institutions-api` = (project in file("institutions-api"))
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
       },
+      libraryDependencies ++= commonDeps,
       assemblyJarName in assembly := {
         s"${name.value}.jar"
       }

@@ -78,8 +78,8 @@ object HmdaPlatform extends App {
     CassandraUtil.startEmbeddedCassandra()
     AkkaManagement(system).start()
     implicit val embeddedKafkaConfig: EmbeddedKafkaConfig = EmbeddedKafkaConfig(
-      9092,
-      2182,
+      sys.env.getOrElse("HMDA_LOCAL_KAFKA_PORT", "9092").toInt,
+      sys.env.getOrElse("HMDA_LOCAL_ZK_PORT", "2182").toInt,
       Map("offsets.topic.replication.factor" -> "1", "zookeeper.connection.timeout.ms" -> "20000")
     )
     EmbeddedKafka.start()
