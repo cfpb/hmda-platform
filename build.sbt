@@ -175,7 +175,7 @@ lazy val `institutions-api` = (project in file("institutions-api"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      libraryDependencies ++= pubDeps :+ liftweb,
+      libraryDependencies ++= pubDeps,
       mainClass in Compile := Some("hmda.institution.HmdaInstitutionApi"),
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
