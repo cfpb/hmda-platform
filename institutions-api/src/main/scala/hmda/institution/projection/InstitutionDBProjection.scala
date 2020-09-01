@@ -92,7 +92,8 @@ object InstitutionDBProjection extends InstitutionEmailComponent with Institutio
       }
     }
 
-    val institutionNoteHistoryEntity = generateHistoryID(inst)
+    val institutionNoteHistoryEntity: InstitutionNoteHistoryEntity = generateHistoryID(inst)
+    println ("This is updated panel: " + institutionNoteHistoryEntity.updatedPanel)
     institutionNotesHistoryRepository.insertOrUpdate(institutionNoteHistoryEntity)
 
     val emails = InstitutionConverter.emailsFromInstitution(inst).toList
@@ -111,13 +112,14 @@ object InstitutionDBProjection extends InstitutionEmailComponent with Institutio
 
     val historyID = inst.LEI + "-" + inst.activityYear + "-" + timestamp
 
+    import io.circe.syntax._
        InstitutionNoteHistoryEntity(
-         lei = inst.LEI,
-         historyID = historyID,
-         notes = inst.notes,
-         year =inst.activityYear.toString(),
-         updatedPanel = inst.toLoaderPSV
-       )
+       lei = inst.LEI,
+       historyID = historyID,
+       notes = inst.notes,
+       year = inst.activityYear.toString(),
+       updatedPanel = inst.asJson.noSpaces
+     )
   }
 }
 
