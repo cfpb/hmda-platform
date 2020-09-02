@@ -111,6 +111,7 @@ object InstitutionDBProjection extends InstitutionEmailComponent with Institutio
     val timestamp = Instant.now().toEpochMilli
 
     val historyID = inst.LEI + "-" + inst.activityYear + "-" + timestamp
+
     import io.circe.syntax._
        InstitutionNoteHistoryEntity(
        lei = inst.LEI,
