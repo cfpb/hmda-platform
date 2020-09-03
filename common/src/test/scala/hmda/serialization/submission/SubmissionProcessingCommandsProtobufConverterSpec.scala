@@ -4,8 +4,9 @@ import akka.actor.ActorSystem
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.ActorRefResolver
 import akka.actor.typed.scaladsl.adapter._
+import hmda.generators.CommonGenerators.emailGen
 import hmda.messages.submission.SubmissionProcessingCommands._
-import hmda.messages.submission.SubmissionProcessingEvents.SubmissionProcessingEvent
+import hmda.messages.submission.SubmissionProcessingEvents.{SubmissionProcessingEvent, SubmissionSignedEvent}
 import hmda.model.processing.state.HmdaParserErrorState
 import hmda.model.submission.SubmissionGenerator._
 import hmda.persistence.serialization.submission.processing.commands._
