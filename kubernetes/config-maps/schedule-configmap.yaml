@@ -16,5 +16,4 @@ data:
   publisher.ts.private.2018: 0 30 15 ? * SUN *
   publisher.ts.private.2019: 0 10 6 * * ?
   publisher.ts.public.2018: 0 30 10 ? * SUN *
-  publisher.ts.public.2018: 0 30 12 ? * SUN *
   publisher.ts.quarterly.2020: 0 10 2 * * ?
