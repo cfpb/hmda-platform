@@ -4,8 +4,9 @@ import akka.actor.ActorSystem
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.ActorRefResolver
 import akka.actor.typed.scaladsl.adapter._
+import hmda.generators.CommonGenerators.emailGen
 import hmda.messages.submission.SubmissionProcessingCommands._
-import hmda.messages.submission.SubmissionProcessingEvents.SubmissionProcessingEvent
+import hmda.messages.submission.SubmissionProcessingEvents.{SubmissionProcessingEvent, SubmissionSignedEvent}
 import hmda.model.processing.state.HmdaParserErrorState
 import hmda.model.submission.SubmissionGenerator._
 import hmda.persistence.serialization.submission.processing.commands._
@@ -115,5 +116,17 @@ class SubmissionProcessingCommandsProtobufConverterSpec extends PropSpec with Sc
       persistHmdaRowValidatedErrorFromProtobuf(PersistHmdaRowValidatedErrorMessage.parseFrom(protobuf), actorRefResolver) mustBe persistHmdaRowValidatedError
     }
   }
+
+  property("SignSubmission must serialize to protobuf and back") {
+    forAll(submissionIdGen, emailGen, Gen.asciiStr) { (submissionId, email, username) =>
+      val probe    = TestProbe[SubmissionSignedEvent]
+      val actorRef = probe.ref
+      val resolver = ActorRefResolver(typedSystem)
+      val cmd      = SignSubmission(submissionId, actorRef, email, username)
+      val protobuf = signSubmissionToProtobuf(cmd, actorRefResolver).toByteArray
+      signSubmissionFromProtobuf(SignSubmissionMessage.parseFrom(protobuf), actorRefResolver) mustBe cmd
+    }
+  }
+
 
 }

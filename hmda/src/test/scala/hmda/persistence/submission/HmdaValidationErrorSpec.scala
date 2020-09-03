@@ -113,12 +113,13 @@ class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
 
     "finish validation, verify and sign" in {
       val email = "bank@bankaddress.com"
+      val username = "some-user"
 
       hmdaValidationError ! VerifyQuality(submissionId, true, eventsProbe.ref)
       eventsProbe.expectMessage(NotReadyToBeVerified(submissionId))
       hmdaValidationError ! CompleteQuality(submissionId)
 
-      hmdaValidationError ! SignSubmission(submissionId, signedProbe.ref, email)
+      hmdaValidationError ! SignSubmission(submissionId, signedProbe.ref, email, username)
       signedProbe.expectMessage(SubmissionNotReadyToBeSigned(submissionId))
 
       hmdaValidationError ! VerifyQuality(submissionId, true, eventsProbe.ref)
@@ -127,7 +128,7 @@ class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
       hmdaValidationError ! VerifyMacro(submissionId, true, eventsProbe.ref)
       eventsProbe.expectMessage(MacroVerified(submissionId, true, Verified))
 
-      hmdaValidationError ! SignSubmission(submissionId, signedProbe.ref, email)
+      hmdaValidationError ! SignSubmission(submissionId, signedProbe.ref, email, username)
       signedProbe.expectMessageType[SubmissionSigned]
     }
   }

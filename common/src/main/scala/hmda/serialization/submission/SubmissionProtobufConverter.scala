@@ -13,7 +13,8 @@ object SubmissionProtobufConverter {
       submission.start,
       submission.end,
       submission.fileName,
-      submission.receipt
+      submission.receipt,
+      submission.signerUsername.getOrElse("")
     )
 
   def submissionFromProtobuf(submissionMessage: SubmissionMessage): Submission =
@@ -23,7 +24,8 @@ object SubmissionProtobufConverter {
       submissionMessage.start,
       submissionMessage.end,
       submissionMessage.fileName,
-      submissionMessage.receipt
+      submissionMessage.receipt,
+      Option(submissionMessage.signerUsername).filter(_.nonEmpty)
     )
 
   def submissionIdToProtobuf(submissionId: SubmissionId): Option[SubmissionIdMessage] =

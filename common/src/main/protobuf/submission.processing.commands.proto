@@ -109,6 +109,7 @@ message SignSubmissionMessage {
     SubmissionIdMessage submissionId = 1;
     string replyTo = 2;
     string email = 3;
+    string signerUsername = 4;
 }
 
 message GetVerificationStatusMessage {
