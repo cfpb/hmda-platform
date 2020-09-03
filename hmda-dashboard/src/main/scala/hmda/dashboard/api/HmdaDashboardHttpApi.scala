@@ -8,7 +8,6 @@ import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHand
 import com.typesafe.config.{Config, ConfigFactory}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.auth.OAuth2Authorization
-import hmda.dashboard.Settings
 import hmda.dashboard.models.HealthCheckStatus.Up
 import hmda.dashboard.models._
 import hmda.dashboard.repositories._
@@ -22,11 +21,11 @@ import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
 object HmdaDashboardHttpApi {
-  def create(log: Logger, config: Config)(implicit ec: ExecutionContext): Route =
+  def create(log: Logger, config: Config)(implicit ec: ExecutionContext): OAuth2Authorization => Route =
     new HmdaDashboardHttpApi(log, config)(ec).hmdaDashboardRoutes _
 }
 
-private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec: ExecutionContext) extends Settings {
+private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec: ExecutionContext) {
 
   val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("dashboard_db")
   val hmdaAdminRole = config.getString("keycloak.hmda.admin.role")
