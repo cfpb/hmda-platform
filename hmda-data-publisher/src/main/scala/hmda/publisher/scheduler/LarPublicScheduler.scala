@@ -52,7 +52,7 @@ class LarPublicScheduler extends HmdaActor with
   }
   override def receive: Receive = {
     case LarPublicScheduler2018 =>
-      val fileName      = "2018_lar.zip"
+      val fileName      = "2018_lar.txt.zip"
       val s3Path = s"$environmentPublic/dynamic-data/2018/"
       val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
       if(SnapshotCheck.snapshotActive) {
@@ -63,7 +63,7 @@ class LarPublicScheduler extends HmdaActor with
       }
 
     case LarPublicScheduler2019 =>
-      val fileName      = "2019_lar.zip"
+      val fileName      = "2019_lar.txt.zip"
       val s3Path = s"$environmentPublic/dynamic-data/2019/"
       val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
       if(SnapshotCheck.snapshotActive) {
