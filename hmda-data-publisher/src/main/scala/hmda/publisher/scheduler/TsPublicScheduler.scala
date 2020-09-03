@@ -50,7 +50,7 @@ class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with Publi
   override def receive: Receive = {
 
     case TsPublicScheduler2018 =>
-      val fileName      = "2018_lar.txt"
+      val fileName      = "2018_ts.zip"
       val s3Path = s"$environmentPublic/dynamic-data/2018/"
       val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
       if(SnapshotCheck.snapshotActive) {
@@ -61,7 +61,7 @@ class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with Publi
       }
 
     case TsPublicScheduler2019 =>
-      val fileName      = "2019_lar.txt"
+      val fileName      = "2019_ts.zip"
       val s3Path = s"$environmentPublic/dynamic-data/2019/"
       val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
       if(SnapshotCheck.snapshotActive) {
@@ -94,6 +94,7 @@ class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with Publi
         else transmittalSheet._1.toPublicPSV + "\n"
       )
       .map(s => ByteString(s))
+      .via(Compression.gzip)
       .runWith(s3SinkPSV)
 
     resultsPSV onComplete {
