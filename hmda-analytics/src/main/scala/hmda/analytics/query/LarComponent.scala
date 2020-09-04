@@ -151,7 +151,9 @@ trait LarComponent {
           ${le.tractOneToFourFamilyUnits},
           ${le.tractMedianAge},
           ${le.tractToMsaIncomePercent},
-          ${le.isQuarterly}
+          ${le.isQuarterly},
+          DEFAULT,
+          ${le.checksum}
         )
         """
       }
@@ -270,7 +272,9 @@ trait LarComponent {
           ${le.otherAusResult},
           ${le.reverseMortgage},
           ${le.lineOfCredits},
-          ${le.businessOrCommercial}
+          ${le.businessOrCommercial},
+          DEFAULT,
+          ${le.checksum}
         )
         """
       }
