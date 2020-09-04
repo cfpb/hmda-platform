@@ -34,7 +34,8 @@ lazy val akkaDeps = Seq(
 
 lazy val pubDeps = Seq(
   akkaQuartzScheduler,
-  alpakkaS3
+  alpakkaS3,
+  alpakkaFile
 )
 
 lazy val akkaPersistenceDeps =

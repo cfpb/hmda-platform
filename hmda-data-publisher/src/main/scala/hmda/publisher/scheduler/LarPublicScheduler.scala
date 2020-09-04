@@ -16,7 +16,8 @@ import hmda.publisher.scheduler.schedules.Schedules.{LarPublicScheduler2018, Lar
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
 import slick.basic.DatabasePublisher
-import akka.stream.scaladsl.Compression
+import akka.stream.alpakka.file.scaladsl.Archive
+import akka.stream.alpakka.file.ArchiveMetadata
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -52,30 +53,32 @@ class LarPublicScheduler extends HmdaActor with
   }
   override def receive: Receive = {
     case LarPublicScheduler2018 =>
-      val fileName      = "2018_lar.txt.zip"
+      val fileName      = "2018_lar.txt"
+      val zipDirectoryName = "2018_lar.zip"
       val s3Path = s"$environmentPublic/dynamic-data/2018/"
-      val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
+      val fullFilePath=  SnapshotCheck.pathSelector(s3Path,zipDirectoryName)
       if(SnapshotCheck.snapshotActive) {
-        larPublicStream("2018", SnapshotCheck.snapshotBucket, fullFilePath)
+        larPublicStream("2018", SnapshotCheck.snapshotBucket, fullFilePath, fileName)
       }
       else{
-        larPublicStream("2018", bucketPublic, fullFilePath)
+        larPublicStream("2018", bucketPublic, fullFilePath, fileName)
       }
 
     case LarPublicScheduler2019 =>
-      val fileName      = "2019_lar.txt.zip"
+      val fileName      = "2019_lar.txt"
+      val zipDirectoryName = "2018_lar.zip"
       val s3Path = s"$environmentPublic/dynamic-data/2019/"
-      val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
+      val fullFilePath=  SnapshotCheck.pathSelector(s3Path,zipDirectoryName)
       if(SnapshotCheck.snapshotActive) {
-        larPublicStream("2019", SnapshotCheck.snapshotBucket, fullFilePath)
+        larPublicStream("2019", SnapshotCheck.snapshotBucket, fullFilePath, fileName)
       }
       else{
-        larPublicStream("2019", bucketPublic, fullFilePath)
+        larPublicStream("2019", bucketPublic, fullFilePath, fileName)
       }
 
   }
 
-  private def larPublicStream(year: String, bucket: String, path: String) = {
+  private def larPublicStream(year: String, bucket: String, path: String, fileName: String) = {
 
     val allResultsPublisher: DatabasePublisher[ModifiedLarEntityImpl] =
       year match {
@@ -92,7 +95,7 @@ class LarPublicScheduler extends HmdaActor with
       .multipartUpload(bucket, path)
       .withAttributes(S3Attributes.settings(s3Settings))
 
-    val resultsPSV: Future[MultipartUploadResult] =
+    val fileStream: Source[ByteString, Any] =
       allResultsSource.zipWithIndex
         .map(mlarEntity =>
           if (mlarEntity._2 == 0)
@@ -100,8 +103,16 @@ class LarPublicScheduler extends HmdaActor with
           else mlarEntity._1.toPublicPSV + "\n"
         )
         .map(s => ByteString(s))
-        .via(Compression.gzip)
-        .runWith(s3SinkPSV)
+    
+    val zipStream = Source(
+      List (
+        (ArchiveMetadata(fileName), fileStream))
+    )
+
+    val resultsPSV: Future[MultipartUploadResult] =
+      zipStream
+      .via(Archive.zip())
+      .runWith(s3SinkPSV)
 
     resultsPSV onComplete {
       case Success(result) =>

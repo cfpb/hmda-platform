@@ -7,7 +7,7 @@ import akka.NotUsed
 import akka.stream.Materializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{MemoryBufferType, MetaHeaders, MultipartUploadResult, S3Attributes, S3Settings}
+import akka.stream.alpakka.s3.{MemoryBufferType, MetaHeaders, S3Attributes, S3Settings}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
@@ -17,13 +17,10 @@ import hmda.model.census.Census
 import hmda.model.publication.Msa
 import hmda.publisher.helper.{LoanLimitLarHeader, PrivateAWSConfigLoader, SnapshotCheck}
 import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020}
-import hmda.publisher.query.lar.{LarEntityImpl2018, LarEntityImpl2019, LarEntityImpl2020}
+import hmda.publisher.query.lar.LarEntityImpl2019
 import hmda.publisher.scheduler.schedules.Schedules.{LarScheduler2018, LarScheduler2019, LarSchedulerLoanLimit2019, LarSchedulerQuarterly2020}
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
-import slick.basic.DatabasePublisher
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.regions.providers.AwsRegionProvider
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
