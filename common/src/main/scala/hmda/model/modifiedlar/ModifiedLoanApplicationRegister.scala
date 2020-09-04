@@ -18,6 +18,7 @@ case class ModifiedLoanApplicationRegister(
                                             occupancy: Int,
                                             loanAmount: Int,
                                             actionTakenType: Int,
+                                            actionTakenDate: Int,
                                             state: String,
                                             county: String,
                                             tract: String,
