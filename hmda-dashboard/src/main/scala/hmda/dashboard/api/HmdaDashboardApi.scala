@@ -1,31 +1,36 @@
 package hmda.dashboard.api
 
-import akka.actor.typed.Behavior
+
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
-import akka.actor.{ActorSystem, CoordinatedShutdown}
-import akka.http.scaladsl.server.Directives._
+import akka.actor.typed.{ActorSystem, Behavior}
+import akka.actor.{CoordinatedShutdown, ActorSystem => ClassicActorSystem}
+import akka.stream.Materializer
 import hmda.api.http.directives.HmdaTimeDirectives._
 import hmda.api.http.routes.BaseHttpApi
-import hmda.dashboard.Settings
+import hmda.auth.OAuth2Authorization
 
-import scala.concurrent.ExecutionContextExecutor
-import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext
 
-object HmdaDashboardApi extends Settings {
+object HmdaDashboardApi {
   val name: String = "hmda-dashboard"
+
   def apply(): Behavior[Nothing] = Behaviors.setup[Nothing] { ctx =>
-    implicit val system: ActorSystem          = ctx.system.toClassic
-    implicit val ec: ExecutionContextExecutor = ctx.executionContext
+    implicit val system: ActorSystem[_] = ctx.system
+    implicit val classic: ClassicActorSystem = system.toClassic
+    implicit val mat: Materializer           = Materializer(ctx)
+    implicit val ec: ExecutionContext        = ctx.executionContext
     val log                                   = ctx.log
     val config                                = system.settings.config
+    val host: String                         = config.getString("server.bindings.address")
+    val port: Int                            = config.getInt("server.bindings.port")
     val shutdown                              = CoordinatedShutdown(system)
-    val host   = server.host
-    val port   = server.port
 
-    val routes = BaseHttpApi.routes(name) ~ HmdaDashboardHttpApi.create(log, config)
+    val oAuth2Authorization = OAuth2Authorization(log, config)
+    val dashboardRoutes = HmdaDashboardHttpApi.create(log, config)
+    val routes = dashboardRoutes(oAuth2Authorization)
+
     BaseHttpApi.runServer(shutdown, name)(timed(routes), host, port)
-
-    Behaviors.ignore
+    Behaviors.empty
   }
 }
