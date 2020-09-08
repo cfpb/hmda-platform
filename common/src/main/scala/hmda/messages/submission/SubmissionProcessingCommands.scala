@@ -72,7 +72,7 @@ object SubmissionProcessingCommands {
   case class VerifyMacro(submissionId: SubmissionId, verified: Boolean, replyTo: ActorRef[SubmissionProcessingEvent])
       extends SubmissionProcessingCommand
 
-  case class SignSubmission(submissionId: SubmissionId, replyTo: ActorRef[SubmissionSignedEvent], email: String)
+  case class SignSubmission(submissionId: SubmissionId, replyTo: ActorRef[SubmissionSignedEvent], email: String, signerUsername: String)
       extends SubmissionProcessingCommand
 
   case object HmdaParserStop extends SubmissionProcessingCommand

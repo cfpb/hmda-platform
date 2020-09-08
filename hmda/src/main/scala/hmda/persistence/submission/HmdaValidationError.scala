@@ -324,7 +324,7 @@ object HmdaValidationError
           Effect.reply(replyTo)(NotReadyToBeVerified(submissionId))
         }
 
-      case SignSubmission(submissionId, replyTo, email) =>
+      case SignSubmission(submissionId, replyTo, email, signerUsername) =>
         if (state.statusCode == Verified.code) {
           val timestamp = Instant.now().toEpochMilli
           val signed    = SubmissionSigned(submissionId, timestamp, Signed)
@@ -338,7 +338,8 @@ object HmdaValidationError
                 signed.timestamp,
                 s"${signed.submissionId}-${signed.timestamp}",
                 Signed,
-                log
+                log,
+                signerUsername
               )
               publishSignEvent(submissionId, email, signed.timestamp, config).map(signed =>
                 log.info(

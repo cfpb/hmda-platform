@@ -22,6 +22,7 @@ pipeline {
       }
       steps {
         sh """find . -name target -type d -prune -exec rm -rf {} \\;"""
+        sh """find . -name test -type d -prune -exec rm -rf {} \\;"""
         sh "sbt -Dsbt.global.base=.sbt -Dsbt.boot.directory=.sbt -Dsbt.ivy.home=.ivy2 -batch clean data-browser/docker:stage"
         sh "rm -rf data"
       }
@@ -34,7 +35,7 @@ pipeline {
             usernameVariable: 'DOCKER_HUB_USER', passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
             withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dtr-ext-jenkins-service',
               usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
-                dockerBuild.sbtBuild('data-browser')
+                dockerBuild.sbtBuild('hmda-data-browser-api', 'data-browser')
                 scanImage('hmda/data-browser', env.DOCKER_TAG)
             }
           }

@@ -42,7 +42,8 @@ object SubmissionGenerator {
       end <- Gen.choose(1483287071000L, 1514736671000L)
       fileName <- Gen.alphaStr
       receipt <- Gen.alphaStr
-    } yield Submission(id, status, start, end, fileName, receipt)
+      username <- Gen.option(Gen.asciiStr.filter(_.nonEmpty))
+    } yield Submission(id, status, start, end, fileName, receipt, username)
   }
 
 }

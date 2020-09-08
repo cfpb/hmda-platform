@@ -2,6 +2,8 @@ apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
   name: {{ template "email-service.fullname" . }}
+  annotations:
+    reloader.stakater.com/search: "true"
   labels:
     app: {{ template "email-service.name" . }}
     chart: {{ template "email-service.chart" . }}

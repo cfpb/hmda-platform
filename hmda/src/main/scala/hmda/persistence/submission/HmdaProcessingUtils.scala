@@ -59,7 +59,8 @@ object HmdaProcessingUtils {
                                         timestamp: Long,
                                         receipt: String,
                                         modified: SubmissionStatus,
-                                        log: Logger
+                                        log: Logger,
+                                        signerUsername: String
                                       )(
                                         implicit ec: ExecutionContext,
                                         timeout: Timeout
@@ -75,7 +76,7 @@ object HmdaProcessingUtils {
     for {
       potentialSubmission <- fSubmission
       submission = potentialSubmission
-        .map(e => e.copy(receipt = receipt, end = timestamp))
+        .map(e => e.copy(receipt = receipt, end = timestamp, signerUsername = Some(signerUsername)))
         .getOrElse(Submission())
     } yield {
       if (potentialSubmission.isEmpty) {

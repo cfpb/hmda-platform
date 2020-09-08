@@ -1,8 +1,10 @@
 package hmda
 
+import java.net.InetAddress
+
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.adapter._
-import akka.actor.{ ActorSystem => ClassicActorSystem }
+import akka.actor.{ActorSystem => ClassicActorSystem}
 import akka.cluster.typed.Cluster
 import akka.management.cluster.bootstrap.ClusterBootstrap
 import akka.management.scaladsl.AkkaManagement
@@ -11,9 +13,9 @@ import com.typesafe.config.ConfigFactory
 import hmda.api.HmdaApi
 import hmda.persistence.HmdaPersistence
 import hmda.persistence.util.CassandraUtil
-import hmda.publication.{ HmdaPublication, KafkaUtils }
+import hmda.publication.{HmdaPublication, KafkaUtils}
 import hmda.validation.HmdaValidation
-import net.manub.embeddedkafka.{ EmbeddedKafka, EmbeddedKafkaConfig }
+import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
 import org.slf4j.LoggerFactory
 
 // $COVERAGE-OFF$
@@ -52,6 +54,7 @@ object HmdaPlatform extends App {
 
     case "kubernetes" =>
       log.info(s"HOSTNAME: ${System.getenv("HOSTNAME")}")
+      log.info(s"HOSTADDRESS: " + InetAddress.getLocalHost().getHostAddress())
       ConfigFactory.parseResources("application-kubernetes.conf").resolve()
 
     case "dcos" =>
@@ -75,8 +78,8 @@ object HmdaPlatform extends App {
     CassandraUtil.startEmbeddedCassandra()
     AkkaManagement(system).start()
     implicit val embeddedKafkaConfig: EmbeddedKafkaConfig = EmbeddedKafkaConfig(
-      9092,
-      2182,
+      sys.env.getOrElse("HMDA_LOCAL_KAFKA_PORT", "9092").toInt,
+      sys.env.getOrElse("HMDA_LOCAL_ZK_PORT", "2182").toInt,
       Map("offsets.topic.replication.factor" -> "1", "zookeeper.connection.timeout.ms" -> "20000")
     )
     EmbeddedKafka.start()

@@ -183,6 +183,7 @@ lazy val `institutions-api` = (project in file("institutions-api"))
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
       },
+      libraryDependencies ++= commonDeps,
       assemblyJarName in assembly := {
         s"${name.value}.jar"
       }

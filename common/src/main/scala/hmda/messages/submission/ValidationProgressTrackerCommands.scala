@@ -4,6 +4,7 @@ import akka.actor.typed.ActorRef
 import hmda.messages.CommonMessages.Command
 import hmda.model.processing.state._
 
+
 object ValidationProgressTrackerCommands {
   sealed trait ValidationProgressTrackerCommand                   extends Command
   final case class StateSnapshot(state: HmdaValidationErrorState) extends ValidationProgressTrackerCommand

@@ -2,13 +2,15 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: schedule-configmap
+  annotations:
+    reloader.stakater.com/match: "true"
 data:
   publisher.lar.private.2018: 0 30 13 ? * SUN *
   publisher.lar.private.2019: 0 00 4 * * ?
   publisher.lar.private.cll.2019: 0 15 11 ? * MON *
   publisher.lar.public.2018: 0 30 8 ? * SUN *
   publisher.lar.public.2019: 0 30 9 ? * SUN *
-   publisher.lar.quarterly.2020: 0 10 1 * * ?
+  publisher.lar.quarterly.2020: 0 10 1 * * ?
   publisher.panel.private.2018: 0 0 15 ? * SUN *
   publisher.panel.private.2019: 0 40 5 * * ?
   publisher.ts.private.2018: 0 30 15 ? * SUN *

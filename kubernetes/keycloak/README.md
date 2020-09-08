@@ -7,7 +7,14 @@ In order to deploy Keycloak first add the codecentric helm repo:
 
 Then install keycloak adding the psql address in the command:
 
-`helm install codecentric/keycloak -f kubernetes/keycloak/values.yaml --name keycloak --set keycloak.persistence.dbHost=<psql host>`
+```sh
+helm upgrade --install --force --namespace=default \
+--values=kubernetes/keycloak/values.yaml \
+--set keycloak.persistence.dbHost=<psql-host> \
+--set keycloak.username=<psql-username> \
+--set keycloak.password=<psql-password> \
+keycloak stable/keycloak
+```
 
 Then add the Ambassador Service YAML:
 

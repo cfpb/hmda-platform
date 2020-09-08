@@ -2,6 +2,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: s3-configmap
+  annotations:
+    reloader.stakater.com/match: "true"
 data:
   aws-environment: dev
   s3-private-bucket: cfpb-hmda-export

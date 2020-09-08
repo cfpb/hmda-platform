@@ -32,12 +32,14 @@ private class InstitutionAdminHttpApi(sharding: ClusterSharding, config: Config)
   val hmdaAdminRole   = config.getString("keycloak.hmda.admin.role")
   val checkLEI        = true
   val checkAgencyCode = false
-
+  val rc: RequestReplicationClient = RequestReplicationClient.create(config, "hmda.institutions.edits.replication-address")
   def institutionAdminRoutes(oAuth2Authorization: OAuth2Authorization): Route =
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          institutionWritePath(oAuth2Authorization) ~ institutionReadPath
+          rc.withRequestReplication {
+            institutionWritePath(oAuth2Authorization)
+          } ~ institutionReadPath(oAuth2Authorization)
         }
       }
     }
@@ -72,6 +74,29 @@ private class InstitutionAdminHttpApi(sharding: ClusterSharding, config: Config)
         }
       }
     }
+
+  // GET institutions/<lei>/year/<year>
+  // GET institutions/<lei>/year/<year>/quarter/<quarter>
+  private def institutionReadPath (oAuth2Authorization: OAuth2Authorization): Route = {
+    path("institutions" / Segment / "year" / IntNumber) { (lei, year) =>
+      oAuth2Authorization.authorizeTokenWithLeiOrRole(lei, hmdaAdminRole) { _ =>
+        (extractUri & get) { uri =>
+          getInstitution(lei, year, None, uri)
+        }
+      }
+    } ~ path("institutions" / Segment / "year" / IntNumber / "quarter" / Quarter) { (lei, year, quarter) =>
+      oAuth2Authorization.authorizeTokenWithLeiOrRole(lei, hmdaAdminRole) { _ =>
+        (extractUri & get)(uri => getInstitution(lei, year, Option(quarter), uri))
+      }
+    } ~
+      path("institutions" / Segment) { lei =>
+        oAuth2Authorization.authorizeTokenWithLeiOrRole(lei, hmdaAdminRole) { _ =>
+          (extractUri & get) { uri =>
+            getAllInstitutions(lei, uri)
+          }
+        }
+      }
+  }
 
   private def postInstitution(institution: Institution, uri: Uri): Route = {
     val institutionPersistence = InstitutionPersistence.selectInstitution(sharding, institution.LEI, institution.activityYear)
@@ -141,23 +166,7 @@ private class InstitutionAdminHttpApi(sharding: ClusterSharding, config: Config)
     institutionPersistence ? (ref => ModifyInstitution(iFilerFlagsSet, ref))
   }
 
-  // GET institutions/<lei>/year/<year>
-  // GET institutions/<lei>/year/<year>/quarter/<quarter>
-  val institutionReadPath: Route = {
-    path("institutions" / Segment / "year" / IntNumber) { (lei, year) =>
-      (extractUri & get) { uri =>
-        getInstitution(lei, year, None, uri)
-    } }~
-    path("institutions" / Segment / "year" / IntNumber / "quarter" / Quarter) { (lei, year, quarter) =>
-      (extractUri & get)(uri => getInstitution(lei, year, Option(quarter), uri))
-    } ~
-    path("institutions" / Segment) { (lei) =>
-      (extractUri & get) { uri =>
-        getAllInstitutions(lei, uri)
 
-        }
-    }
-  }
 
   private def getInstitution(lei: String, year: Int, quarter: Option[String], uri: Uri): Route = {
     val institutionPersistence                    = selectInstitution(sharding, lei, year)

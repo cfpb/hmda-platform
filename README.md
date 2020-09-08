@@ -148,6 +148,21 @@ docker-compose up
 docker-compose up hmda-platform
 ```
 
+Additionally, there are several environment varialbes that can be configured/changed. The platform uses sensible defaults for each one. However, if required they can be overridden:
+
+```
+CASSANDRA_CLUSTER_HOSTS
+APP_PORT
+HMDA_HTTP_PORT
+HMDA_HTTP_ADMIN_PORT
+HMDA_HTTP_PUBLIC_PORT
+MANAGEMENT_PORT
+HMDA_CASSANDRA_LOCAL_PORT
+HMDA_LOCAL_KAFKA_PORT
+HMDA_LOCAL_ZK_PORT
+WS_PORT
+```
+
 ## Automated Testing
 
 The HMDA Platform takes a rigorous automated testing approach. In addtion to Travis and CodeCov, we've prepared a suite of [Newman](https://github.com/cfpb/hmda-platform/tree/master/newman) test scripts that perform end-to-end testing of the APIs on a recurring basis. The testing process for Newman is containerized and runs as a Kubernetes CronJob to act as a monitoring and alerting system. The platform and microservices are also testing for load by using [Locust](https://locust.io/).
