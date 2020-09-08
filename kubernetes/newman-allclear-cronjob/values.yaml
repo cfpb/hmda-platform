@@ -4,7 +4,7 @@ jobs:
   # third cron
   - name: allclear-tests
     image:
-      repository: dtr.cfpb.gov/hmda/newman-automation
+      repository: dtr-registry.cfpb.gov/hmda/newman-automation
       tag: latest
       imagePullPolicy: Always
     # optional env vars

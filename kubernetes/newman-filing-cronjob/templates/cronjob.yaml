@@ -8,6 +8,7 @@ apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
   name: "{{ $release_name }}-{{ $job.name }}"
+  namespace: monitoring
   labels:
     chart: "{{ $chart_name }}-{{ $chart_version }}"
 spec:
