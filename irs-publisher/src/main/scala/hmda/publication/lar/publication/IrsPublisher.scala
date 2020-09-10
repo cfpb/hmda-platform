@@ -47,12 +47,6 @@ object IrsPublisher {
 
   val awsRegionProvider: AwsRegionProvider = () => Region.of(region)
 
-  val s3Settings = S3Settings(config)
-    .withBufferType(MemoryBufferType)
-    .withCredentialsProvider(awsCredentialsProvider)
-    .withS3RegionProvider(awsRegionProvider)
-    .withListBucketApiVersion(ListBucketVersion2)
-
   def behavior(indexTractMap2018: Map[String, Census], indexTractMap2019: Map[String, Census]): Behavior[IrsPublisherCommand] =
     Behaviors.setup { ctx =>
       val log                   = ctx.log
@@ -63,15 +57,12 @@ object IrsPublisher {
 
       log.info(s"Started $name")
 
-      val s3Settings = S3Settings(
-        MemoryBufferType,
-        None,
-        awsCredentialsProvider,
-        awsRegionProvider,
-        false,
-        None,
-        ListBucketVersion2
-      )
+
+      val s3Settings = S3Settings(ctx.system.toClassic)
+        .withBufferType(MemoryBufferType)
+        .withCredentialsProvider(awsCredentialsProvider)
+        .withS3RegionProvider(awsRegionProvider)
+        .withListBucketApiVersion(ListBucketVersion2)
 
       def getCensus(hmdaGeoTract: String, year: Int): Msa = {
 
