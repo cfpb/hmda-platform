@@ -25,8 +25,6 @@ class PublisherComponent2018Spec
     with BeforeAndAfterEach
     with PublisherComponent2018
     with PatienceConfiguration {
-  import dbConfig._
-  import dbConfig.profile.api._
 
   val institutionRepo = new InstitutionRepository2018(dbConfig)
   val tsRepo          = new TransmittalSheetRepository2018(dbConfig)

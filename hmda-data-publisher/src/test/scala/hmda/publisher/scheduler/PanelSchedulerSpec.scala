@@ -26,7 +26,7 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.duration._
-import scala.concurrent.{ Await, Future }
+import scala.concurrent.Await
 
 class PanelSchedulerSpec
   extends TestKit(ActorSystem("panel-scheduler-spec"))

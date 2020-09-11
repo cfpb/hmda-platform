@@ -18,9 +18,6 @@ import hmda.publisher.query.panel.{InstitutionAltEntity, InstitutionEmailEntity,
 import hmda.publisher.scheduler.schedules.Schedules.{PanelScheduler2018, PanelScheduler2019}
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
-import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.regions.providers.AwsRegionProvider
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}

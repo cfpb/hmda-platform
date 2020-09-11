@@ -33,7 +33,6 @@ class TsPublicSchedulerSpec
     with EmbeddedPostgres
     with Eventually
     with BeforeAndAfterEach {
-  import dbConfig.profile.api._
 
   var s3mock: S3MockApplication = _
   val tsRepository              = new TransmittalSheetRepository2018(dbConfig)

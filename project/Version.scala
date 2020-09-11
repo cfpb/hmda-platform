@@ -21,6 +21,7 @@ object Version {
   val alpakkaS3              = "2.0.1"
   val alpakkaKafka           = "2.0.2"
   val alpakkaSlick           = "1.1.1"
+  val alpkakkaFile           = "2.0.1"
   val embeddedKafka          = "2.4.1"
   val akkaQuartzScheduler    = "1.8.3-akka-2.6.x"
   val cinnamonMetrics        = "2.13.3"

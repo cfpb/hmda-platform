@@ -26,9 +26,6 @@ class PublisherComponent2020Spec
     with PublisherComponent2020
     with PatienceConfiguration {
 
-  import dbConfig._
-  import dbConfig.profile.api._
-
   val institutionRepo = new InstitutionRepository2020(dbConfig)
   val tsRepo          = new TransmittalSheetRepository2020(dbConfig)
   val larRepo         = new LarRepository2020(dbConfig)

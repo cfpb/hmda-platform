@@ -14,8 +14,8 @@ import hmda.publisher.scheduler.schedules.Schedules.{TsPublicScheduler2018, TsPu
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.ts._
 import hmda.util.BankFilterUtils._
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.regions.providers.AwsRegionProvider
+import akka.stream.alpakka.file.scaladsl.Archive
+import akka.stream.alpakka.file.ArchiveMetadata
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -50,28 +50,30 @@ class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with Publi
   override def receive: Receive = {
 
     case TsPublicScheduler2018 =>
-      val fileName      = "2018_lar.txt"
+      val fileName      = "2018_ts.txt"
+      val zipDirectoryName = "2018_ts.zip"
       val s3Path = s"$environmentPublic/dynamic-data/2018/"
-      val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
+      val fullFilePath=  SnapshotCheck.pathSelector(s3Path,zipDirectoryName)
       if(SnapshotCheck.snapshotActive) {
-        tsPublicStream("2018", SnapshotCheck.snapshotBucket, fullFilePath)
+        tsPublicStream("2018", SnapshotCheck.snapshotBucket, fullFilePath, fileName)
       }
       else{
-        tsPublicStream("2018", bucketPublic, fullFilePath)
+        tsPublicStream("2018", bucketPublic, fullFilePath, fileName)
       }
 
     case TsPublicScheduler2019 =>
-      val fileName      = "2019_lar.txt"
+      val fileName      = "2019_ts.txt"
+      val zipDirectoryName = "2019_ts.zip"
       val s3Path = s"$environmentPublic/dynamic-data/2019/"
-      val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
+      val fullFilePath=  SnapshotCheck.pathSelector(s3Path,zipDirectoryName)
       if(SnapshotCheck.snapshotActive) {
-        tsPublicStream("2019", SnapshotCheck.snapshotBucket, fullFilePath)
+        tsPublicStream("2019", SnapshotCheck.snapshotBucket, fullFilePath, fileName)
       }
       else{
-        tsPublicStream("2019", bucketPublic, fullFilePath)
+        tsPublicStream("2019", bucketPublic, fullFilePath, fileName)
       }
   }
-  private def tsPublicStream(year: String, bucket: String, path: String) = {
+  private def tsPublicStream(year: String, bucket: String, path: String, fileName: String) = {
 
     val s3SinkPSV =
 
@@ -85,7 +87,7 @@ class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with Publi
 
       }
     //SYNC PSV
-    val resultsPSV: Future[MultipartUploadResult] = Source
+    val fileStream: Source[ByteString, Any] = Source
       .future(allResults)
       .mapConcat(seek => seek.toList)
       .zipWithIndex
@@ -94,6 +96,15 @@ class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with Publi
         else transmittalSheet._1.toPublicPSV + "\n"
       )
       .map(s => ByteString(s))
+
+    val zipStream = Source(
+      List (
+        (ArchiveMetadata(fileName), fileStream))
+    )
+
+    val resultsPSV: Future[MultipartUploadResult] =
+      zipStream
+      .via(Archive.zip())
       .runWith(s3SinkPSV)
 
     resultsPSV onComplete {

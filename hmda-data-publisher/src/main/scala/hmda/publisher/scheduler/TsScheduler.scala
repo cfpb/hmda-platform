@@ -18,9 +18,6 @@ import hmda.publisher.scheduler.schedules.Schedules.{TsScheduler2018, TsSchedule
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.ts._
 import hmda.util.BankFilterUtils._
-import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.regions.providers.AwsRegionProvider
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}

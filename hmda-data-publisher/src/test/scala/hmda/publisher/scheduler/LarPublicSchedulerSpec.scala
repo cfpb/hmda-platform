@@ -24,11 +24,11 @@ import software.amazon.awssdk.regions.providers.AwsRegionProvider
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
-import scala.concurrent.{ Await, Future }
+import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.duration._
 
-class LarSchedulerSpec
+class LarPublicSchedulerSpec
   extends TestKit(ActorSystem("lar-scheduler-spec"))
     with ImplicitSender
     with FreeSpecLike
@@ -39,7 +39,6 @@ class LarSchedulerSpec
     with PublisherComponent2020
     with EmbeddedPostgres
     with Eventually {
-  import dbConfig.profile.api._
 
   var s3mock: S3MockApplication = _
 
