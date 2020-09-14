@@ -91,7 +91,8 @@ lazy val `hmda-root` = (project in file("."))
     `hmda-data-publisher`,
     `hmda-reporting`,
     `ratespread-calculator`,
-    `data-browser`
+    `data-browser`,
+    `submission-errors`
   )
 
 lazy val common = (project in file("common"))
@@ -482,6 +483,17 @@ lazy val `data-browser` = (project in file("data-browser"))
     packageSettings
   )
   .dependsOn(common % "compile->compile;test->test")
+
+lazy val `submission-errors` = (project in file("submission-errors"))
+  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin)
+  .settings(hmdaBuildSettings)
+  .settings(
+    libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
+      enumeratumDeps :+ monix,
+    dockerSettings,
+    packageSettings
+  )
+  .dependsOn(common)
 
 lazy val `email-service` = (project in file("email-service"))
   .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin)
