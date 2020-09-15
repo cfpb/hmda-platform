@@ -24,7 +24,7 @@ trait LarComponent {
       }
 
     //for 2019 and beyond -- includes
-    def insert(le: LarEntity): Future[Int] =
+    def insert(le: LarEntity): Future[Int] = {
       config.db.run {
         sqlu"""INSERT INTO #${larTable}
         VALUES (
@@ -157,6 +157,7 @@ trait LarComponent {
         )
         """
       }
+    }
 
     //for 2018
     def insert(le: LarEntity2018): Future[Int] =

@@ -60,7 +60,7 @@ object LarConverter {
       .digest(lar.loan.ULI.getBytes())
       .map(0xFF & _)
       .map { "%02x".format(_) }.foldLeft(""){_ + _}
-    System.out.print("CHECKSUM: ")
+    System.out.print("CHECKSUM: -- ")
     System.out.println(checksum)
     LarEntity(
       lar.larIdentifier.id,
@@ -189,7 +189,7 @@ object LarConverter {
       isQuarterly,
       census.msaMd.toString,
       census.name,
-      checksum
+      checksum.toString
     )
   }
 
