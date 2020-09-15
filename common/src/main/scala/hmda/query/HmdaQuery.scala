@@ -35,6 +35,9 @@ object HmdaQuery {
   def eventEnvelopeByPersistenceId(persistenceId: String)(implicit system: ActorSystem[_]): Source[EventEnvelope, NotUsed] =
     readJournal(system).eventsByPersistenceId(persistenceId, 0L, Long.MaxValue)
 
+  def currentEventEnvelopeByPersistenceId(persistenceId: String)(implicit system: ActorSystem[_]): Source[EventEnvelope, NotUsed] =
+    readJournal(system).currentEventsByPersistenceId(persistenceId, 0L, Long.MaxValue)
+
   def eventsByPersistenceId(persistenceId: String)(implicit system: ActorSystem[_]): Source[Event, NotUsed] =
     readJournal(system)
       .currentEventsByPersistenceId(persistenceId, 0L, Long.MaxValue)
