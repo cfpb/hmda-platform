@@ -1,4 +1,3 @@
-
 package hmda.submissionerrors.repositories
 
 import java.sql.Timestamp
@@ -25,7 +24,7 @@ final case class AddSubmissionError(
                                      loanData: String
                                    )
 
-class PostgresSubmissionErrorRepository(config: DatabaseConfig[JdbcProfile], tableName: String) {
+class PostgresSubmissionErrorRepository(config: DatabaseConfig[JdbcProfile], tableName: String) extends SubmissionErrorRepository {
   import config.profile.api._
 
   object SubmissionErrorTable {
@@ -39,7 +38,7 @@ class PostgresSubmissionErrorRepository(config: DatabaseConfig[JdbcProfile], tab
     def submissionStatus = column[Int]("submission_status")
     def createdDate      = column[Timestamp]("created_date")
     def updatedDate      = column[Timestamp]("updated_date")
-    def editName         = column[String]("edit_names")
+    def editName         = column[String]("edit_name")
     def loanData         = column[String]("loan_data")
     def pk               = primaryKey("submission_error_pk", (lei, period, sequenceNumber))
 
@@ -50,6 +49,16 @@ class PostgresSubmissionErrorRepository(config: DatabaseConfig[JdbcProfile], tab
 
   private val tableQuery = TableQuery[SubmissionErrorTable](tag => SubmissionErrorTable(tableName)(tag))
 
+  private def submissionPresentDBIO(submissionId: SubmissionId): DBIO[Boolean] =
+    tableQuery
+      .filter(row =>
+        row.lei === submissionId.lei
+          && row.period === submissionId.period.toString
+          && row.sequenceNumber === submissionId.sequenceNumber
+      )
+      .exists
+      .result
+
   // Note: We use Task to delay execution to get more control on how the Slick database queries are executed
   // Note: Task is just a description of the program we would like to run, nothing is run yet until we call one
   // of the unsafeRun* methods
@@ -58,18 +67,7 @@ class PostgresSubmissionErrorRepository(config: DatabaseConfig[JdbcProfile], tab
   // one <* two just means run effect one then run effect two but discard the result of effect two and use the result of
   // effect one
   def submissionPresent(submissionId: SubmissionId): Task[Boolean] =
-    Task.fromFuture(
-      config.db.run(
-        tableQuery
-          .filter(row =>
-            row.lei === submissionId.lei
-              && row.period === submissionId.period.toString
-              && row.sequenceNumber === submissionId.sequenceNumber
-          )
-          .exists
-          .result
-      )
-    ) <* Task.shift
+    Task.fromFuture(config.db.run(submissionPresentDBIO(submissionId))) <* Task.shift
 
   def add(submissionId: SubmissionId, submissionStatus: Int, info: List[AddSubmissionError]): Task[Unit] = {
     import submissionId._
@@ -91,10 +89,11 @@ class PostgresSubmissionErrorRepository(config: DatabaseConfig[JdbcProfile], tab
       )
     )
 
-    // Note: We use insertOrUpdate because we could potentially reprocess a file and we don't want inserts to fail
-    // with a conflict error
     Task
-      .fromFuture(config.db.run(DBIO.sequence(records.map(tableQuery.insertOrUpdate))))
+      .deferFuture(config.db.run(submissionPresentDBIO(submissionId).flatMap {
+        case true  => DBIO.successful(0)
+        case false => tableQuery ++= records
+      }(config.db.ioExecutionContext)))
       .void <* Task.shift
   }
 }
