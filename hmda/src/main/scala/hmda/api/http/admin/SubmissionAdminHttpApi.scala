@@ -5,10 +5,10 @@ import akka.actor.typed.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.http.scaladsl.common.{CsvEntityStreamingSupport, EntityStreamingSupport}
 import akka.http.scaladsl.model.ContentTypes.`text/csv(UTF-8)`
-import akka.http.scaladsl.model.HttpEntity
-import akka.http.scaladsl.model.StatusCodes.{BadRequest, InternalServerError, NotFound, OK}
+import akka.http.scaladsl.model.StatusCodes.{InternalServerError, OK}
 import akka.http.scaladsl.model.headers.ContentDispositionTypes.attachment
 import akka.http.scaladsl.model.headers.`Content-Disposition`
+import akka.http.scaladsl.model.{HttpEntity, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.scaladsl.Source
@@ -18,7 +18,6 @@ import cats.data.ValidatedNec
 import cats.implicits._
 import com.typesafe.config.Config
 import hmda.api.http.admin.SubmissionAdminHttpApi.{pipeDelimitedFileStream, validateRawSubmissionId}
-import hmda.api.http.model.ErrorResponse
 import hmda.auth.OAuth2Authorization
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.model.filing.lar.LoanApplicationRegister
@@ -34,11 +33,11 @@ import org.slf4j.Logger
 import scala.util.{Failure, Success, Try}
 
 object SubmissionAdminHttpApi {
-  def create(config: Config, clusterSharding: ClusterSharding, log: Logger)(
+  def create(log: Logger, config: Config, clusterSharding: ClusterSharding)(
     implicit system: ActorSystem[_],
     timeout: Timeout
   ): OAuth2Authorization => Route =
-    new SubmissionAdminHttpApi(config, clusterSharding, log).routes
+    new SubmissionAdminHttpApi(log, config, clusterSharding).routes
 
   /**
    * Reads the existing file from the journal
@@ -94,7 +93,7 @@ object SubmissionAdminHttpApi {
   }
 }
 
-private class SubmissionAdminHttpApi(config: Config, clusterSharding: ClusterSharding, log: Logger)(
+private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterSharding: ClusterSharding)(
   implicit system: ActorSystem[_],
   timeout: Timeout
 ) {
@@ -109,7 +108,7 @@ private class SubmissionAdminHttpApi(config: Config, clusterSharding: ClusterSha
         validateRawSubmissionId(rawSubmissionId) match {
           case Invalid(reason) =>
             val formattedReasons = reason.mkString_(", ")
-            complete(BadRequest, ErrorResponse(BadRequest.intValue, formattedReasons, uri.path))
+            complete((StatusCodes.BadRequest,formattedReasons))
 
           case Valid(submissionId) =>
             val submissionRef    = SubmissionPersistence.selectSubmissionPersistence(clusterSharding, submissionId)
@@ -120,7 +119,7 @@ private class SubmissionAdminHttpApi(config: Config, clusterSharding: ClusterSha
                 complete(InternalServerError)
 
               case Success(None) =>
-                complete(NotFound, ErrorResponse(NotFound.intValue, s"Submission with $submissionId does not exist", uri.path))
+                complete((StatusCodes.NotFound,s"Submission with $submissionId does not exist"))
 
               case Success(Some(_)) =>
                 val csvSource = pipeDelimitedFileStream(submissionId).via(csvStreamingSupport.framingRenderer)

@@ -36,11 +36,10 @@ object HmdaAdminApi {
     val shutdown                             = CoordinatedShutdown(system)
 
     val oAuth2Authorization = OAuth2Authorization(log, config)
-    val institutionRoutes   = InstitutionAdminHttpApi.create(sharding, config)
+    val institutionRoutes   = InstitutionAdminHttpApi.create(config,sharding)
     val publishRoutes       = PublishAdminHttpApi.create(sharding, config)
-    val submissionRoutes    = SubmissionAdminHttpApi.create(config, sharding, log)
-    val routes              = BaseHttpApi.routes(name) ~ institutionRoutes(oAuth2Authorization) ~ submissionRoutes(oAuth2Authorization)
-    val routes              = BaseHttpApi.routes(name) ~ institutionRoutes(oAuth2Authorization) ~ publishRoutes(oAuth2Authorization)
+    val submissionRoutes    = SubmissionAdminHttpApi.create(log, config, sharding)
+    val routes              = BaseHttpApi.routes(name) ~ institutionRoutes(oAuth2Authorization)  ~ publishRoutes(oAuth2Authorization) ~ submissionRoutes(oAuth2Authorization)
 
     BaseHttpApi.runServer(shutdown, name)(timed(routes), host, port)
     Behaviors.empty

@@ -24,11 +24,11 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
 object InstitutionAdminHttpApi {
-  def create(sharding: ClusterSharding, config: Config)(implicit ec: ExecutionContext, t: Timeout): OAuth2Authorization => Route =
-    new InstitutionAdminHttpApi(sharding, config)(ec, t).institutionAdminRoutes _
+  def create(config: Config, sharding: ClusterSharding)(implicit ec: ExecutionContext, t: Timeout): OAuth2Authorization => Route =
+    new InstitutionAdminHttpApi(config, sharding)(ec, t).institutionAdminRoutes _
 }
 
-private class InstitutionAdminHttpApi(sharding: ClusterSharding, config: Config)(implicit ec: ExecutionContext, t: Timeout) {
+private class InstitutionAdminHttpApi(config: Config, sharding: ClusterSharding)(implicit ec: ExecutionContext, t: Timeout) {
   val hmdaAdminRole   = config.getString("keycloak.hmda.admin.role")
   val checkLEI        = true
   val checkAgencyCode = false
