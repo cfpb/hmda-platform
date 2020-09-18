@@ -5,7 +5,6 @@ import akka.actor.typed.ActorSystem
 import akka.persistence.query.EventEnvelope
 import akka.stream.scaladsl.{ Sink, Source }
 import hmda.messages.submission.HmdaRawDataEvents.LineAdded
-import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowValidatedError
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.submission.SubmissionId
 import hmda.parser.filing.lar.LarCsvParser
@@ -26,14 +25,28 @@ object ErrorLines {
     override def toString: String = s"$uli:$actionTaken:$actionTakenDate``"
   }
 
+  final case class ErrorResult(editName: EditName, loanDataRows: Vector[RowLoanData])
+
+  /**
+   * Depends on the results of Step 2 (ErrorInformation.obtainSubmissionErrors)
+   * This retrieves the raw data for each submission and then selects all the lines that have failed the validation
+   * (which takes place on the command side) that will be persisted into the database for review
+   *
+   * @param submissionId
+   * @param errorMap
+   * @param system
+   * @return a list of ErrorInformation
+   */
   def obtainLoanData(
                       submissionId: SubmissionId
-                    )(errorMap: Map[LineNumber, Set[EditName]])(implicit system: ActorSystem[_]): Task[List[(SubmissionId, EditName, List[RowLoanData])]] =
+                    )(errorMap: Map[LineNumber, Set[EditName]])(implicit system: ActorSystem[_]): Task[List[ErrorResult]] =
     Task
       .fromFuture(submissionRawData(submissionId).runWith(collectAndParseErrorLines(errorMap)))
-      .map(enrichedMap => enrichedMap.map { case (k, v) => (submissionId, k, v.toList) }.toList)
+      .map(enrichedMap => enrichedMap.toList.map { case (editNameKey, loanDatasValue) => ErrorResult(editNameKey, loanDatasValue) })
 
-  def submissionRawData(submissionId: SubmissionId)(implicit system: ActorSystem[_]): Source[(RawLine, LineNumber), NotUsed] =
+  private[streams] def submissionRawData(
+                                          submissionId: SubmissionId
+                                        )(implicit system: ActorSystem[_]): Source[(RawLine, LineNumber), NotUsed] =
     HmdaQuery
       .currentEventEnvelopeByPersistenceId(s"HmdaRawData-$submissionId")
       .collect {
@@ -43,9 +56,9 @@ object ErrorLines {
       .drop(1)                                                      // drop header
       .map { case (l, lineNumber) => (l.data, lineNumber) }
 
-  def collectAndParseErrorLines(
-                                 errorMap: Map[LineNumber, Set[EditName]]
-                               ): Sink[(RawLine, LineNumber), Future[Map[EditName, Vector[RowLoanData]]]] =
+  private[streams] def collectAndParseErrorLines(
+                                                  errorMap: Map[LineNumber, Set[EditName]]
+                                                ): Sink[(RawLine, LineNumber), Future[Map[EditName, Vector[RowLoanData]]]] =
     Sink.fold[Map[EditName, Vector[RowLoanData]], (RawLine, LineNumber)](Map.empty[EditName, Vector[RowLoanData]]) {
       case (acc, (rawData, lineNumber)) =>
         errorMap.get(lineNumber) match {

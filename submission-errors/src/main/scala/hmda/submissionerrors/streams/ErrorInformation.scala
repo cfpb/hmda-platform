@@ -18,10 +18,24 @@ object ErrorInformation {
   type EditName   = String
   type LineNumber = Long
 
+  /**
+   * This is responsible for fetching the line numbers that have failed validation for a given submission
+   * For example:
+   * Map(
+   *   line number 2  -> Set(Q614, Q617),
+   *   line number 16 -> Set(Q609)
+   * )
+   *
+   * @param submissionId is the submission ID
+   * @param system is the actor system needed to run the Akka Stream
+   * @return
+   */
   def obtainSubmissionErrors(submissionId: SubmissionId)(implicit system: ActorSystem[_]): Task[Map[LineNumber, Set[EditName]]] =
     Task.fromFuture(submissionRowError(submissionId).runWith(collectErrors))
 
-  def submissionRowError(submissionId: SubmissionId)(implicit system: ActorSystem[_]): Source[HmdaRowValidatedError, NotUsed] = {
+  private[streams] def submissionRowError(
+                                           submissionId: SubmissionId
+                                         )(implicit system: ActorSystem[_]): Source[HmdaRowValidatedError, NotUsed] = {
     val persistenceId = s"HmdaValidationError-$submissionId"
     HmdaQuery
       .currentEventEnvelopeByPersistenceId(persistenceId)
@@ -30,7 +44,24 @@ object ErrorInformation {
       }
   }
 
-  val collectErrors: Sink[HmdaRowValidatedError, Future[Map[LineNumber, Set[EditName]]]] =
+  /**
+   * Here is an example (simplified HmdaRowValidatedError):
+   * val source = Source(
+   *  HmdaRowValidatedError(line number = 1, edit names = Set(EditName1, EditName2),
+   *  HmdaRowValidatedError(line number = 4, edit names = Set(EditName1, EditName3)
+   * )
+   *
+   * val res = source.to(collectErrors).run // Connecting source to sink to create a graph and run it
+   *
+   * We would expect the result of running the stream to be a
+   * Future(
+   *   Map(
+   *      line number 1 -> Set(EditName1, EditName2),
+   *      line number 4 -> Set(EditName1, EditName3)
+   *    )
+   * )
+   */
+  private[streams] val collectErrors: Sink[HmdaRowValidatedError, Future[Map[LineNumber, Set[EditName]]]] =
     Sink.fold[Map[LineNumber, Set[EditName]], HmdaRowValidatedError](Map.empty[LineNumber, Set[EditName]]) { (acc, next) =>
       val lineNumber = next.rowNumber.toLong
       val editNames  = next.validationErrors.map(_.editName)

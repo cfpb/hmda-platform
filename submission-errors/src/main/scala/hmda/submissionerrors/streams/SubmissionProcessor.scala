@@ -9,6 +9,7 @@ import akka.stream.scaladsl.{ Flow, Keep, Sink }
 import cats.implicits._
 import hmda.model.filing.submission.SubmissionId
 import hmda.submissionerrors.repositories.{ AddSubmissionError, SubmissionErrorRepository }
+import hmda.submissionerrors.streams.ErrorLines.ErrorResult
 import hmda.utils.YearUtils
 import hmda.utils.YearUtils.Period
 import monix.eval.Task
@@ -121,7 +122,8 @@ object SubmissionProcessor {
           errorMap           <- ErrorInformation.obtainSubmissionErrors(submissionId)
           enrichedErrorLines <- ErrorLines.obtainLoanData(submissionId)(errorMap)
           dataToAdd = enrichedErrorLines.map {
-            case (_, editName, rowsLoanData) => AddSubmissionError(editName, rowsLoanData.mkString(","))
+            case ErrorResult(editName, rowsLoanData) =>
+              AddSubmissionError(editName, rowsLoanData.mkString(","))
           }
           _ <- repo.add(submissionId, status, dataToAdd)
         } yield ()

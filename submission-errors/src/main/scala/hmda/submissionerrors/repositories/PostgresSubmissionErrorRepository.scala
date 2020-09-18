@@ -40,7 +40,7 @@ class PostgresSubmissionErrorRepository(config: DatabaseConfig[JdbcProfile], tab
     def updatedDate      = column[Timestamp]("updated_date")
     def editName         = column[String]("edit_name")
     def loanData         = column[String]("loan_data")
-    def pk               = primaryKey("submission_error_pk", (lei, period, sequenceNumber))
+    def pk               = primaryKey("submission_error_pk", (lei, period, sequenceNumber, editName))
 
     override def * =
       (lei, period, sequenceNumber, submissionStatus, createdDate, updatedDate, editName, loanData)
@@ -62,12 +62,10 @@ class PostgresSubmissionErrorRepository(config: DatabaseConfig[JdbcProfile], tab
   // Note: We use Task to delay execution to get more control on how the Slick database queries are executed
   // Note: Task is just a description of the program we would like to run, nothing is run yet until we call one
   // of the unsafeRun* methods
-  // We use Task.shift because we don't want the rest of the computation to run on the database thread pool and
-  // instead we shift it to the default thread pool to reduce contention on the database
-  // one <* two just means run effect one then run effect two but discard the result of effect two and use the result of
-  // effect one
   def submissionPresent(submissionId: SubmissionId): Task[Boolean] =
-    Task.fromFuture(config.db.run(submissionPresentDBIO(submissionId))) <* Task.shift
+  // It is very important to ensure that whenever a Future is about to be created, we immediately wrap it in
+  // Task.deferFuture in order to delay immediate execution
+    Task.deferFuture(config.db.run(submissionPresentDBIO(submissionId)))
 
   def add(submissionId: SubmissionId, submissionStatus: Int, info: List[AddSubmissionError]): Task[Unit] = {
     import submissionId._
@@ -91,9 +89,9 @@ class PostgresSubmissionErrorRepository(config: DatabaseConfig[JdbcProfile], tab
 
     Task
       .deferFuture(config.db.run(submissionPresentDBIO(submissionId).flatMap {
-        case true  => DBIO.successful(0)
+        case true  => tableQuery ++= Nil
         case false => tableQuery ++= records
       }(config.db.ioExecutionContext)))
-      .void <* Task.shift
+      .void
   }
 }
