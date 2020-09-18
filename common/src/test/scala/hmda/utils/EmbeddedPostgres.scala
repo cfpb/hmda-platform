@@ -17,7 +17,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
  */
 trait EmbeddedPostgres extends BeforeAndAfterAll with BeforeAndAfterEach { self: Suite =>
   private val embeddedPg = new ru.yandex.qatools.embed.postgresql.EmbeddedPostgres(Version.V10_6)
-  val dbConfig           = DatabaseConfig.forConfig[JdbcProfile]("embedded-pg")
+  val dbHoconpath        = "embedded-pg"
+  val dbConfig           = DatabaseConfig.forConfig[JdbcProfile](dbHoconpath)
 
   def bootstrapSqlFile: String
 

@@ -14,21 +14,19 @@ import hmda.submissionerrors.streams.SubmissionProcessor.{ handleMessages, proce
 import monix.execution.Scheduler
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
-import slick.basic.DatabaseConfig
-import slick.jdbc.JdbcProfile
 
 object SubmissionErrorsApp extends App {
   val config         = ConfigFactory.load()
   val kafkaHosts     = config.getString("kafka.hosts")
   val kafkaTopic     = config.getString("kafka.topic")
   val databaseTable  = config.getString("dbconfig.table")
-  val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("submission-errors-db")
+  val databaseConfig = PostgresSubmissionErrorRepository.config("submission-errors-db")
 
   val classicSystem: ClassicActorSystem    = ClassicActorSystem("submission-errors-app", config)
   implicit val typedSystem: ActorSystem[_] = classicSystem.toTyped
   implicit val monixScheduler: Scheduler   = Scheduler(classicSystem.toTyped.executionContext)
 
-  val repo = new PostgresSubmissionErrorRepository(databaseConfig, databaseTable)
+  val repo = PostgresSubmissionErrorRepository.make(databaseConfig, databaseTable)
 
   val kafkaConsumerSettings: ConsumerSettings[String, String] =
     ConsumerSettings(

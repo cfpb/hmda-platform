@@ -123,7 +123,7 @@ object SubmissionProcessor {
           enrichedErrorLines <- ErrorLines.obtainLoanData(submissionId)(errorMap)
           dataToAdd = enrichedErrorLines.map {
             case ErrorResult(editName, rowsLoanData) =>
-              AddSubmissionError(editName, rowsLoanData.mkString(","))
+              AddSubmissionError(editName, rowsLoanData.map(_.toString))
           }
           _ <- repo.add(submissionId, status, dataToAdd)
         } yield ()

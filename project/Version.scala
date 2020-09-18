@@ -12,6 +12,7 @@ object Version {
   val cassandraPluginVersion = "0.101"
   val akkaClusterDowning     = "0.0.12"
   val slick                  = "3.3.2"
+  val slickPostgres          = "0.19.2"
   val postgres               = "42.2.5"
   val h2                     = "1.4.200"
   val embeddedPg             = "2.10"
