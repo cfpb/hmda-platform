@@ -136,17 +136,6 @@ class IntegrationSpec   extends AkkaCassandraPersistenceSpec
           responseAs[Submission]
         }
 
-      Get(s"/admin/hmdafile/${submissionYearly.id}") ~> submissionAdminRoute(oAuth2Authorization) ~> check {
-        status mustBe StatusCodes.OK
-        val futureLineCount =
-          response.entity.dataBytes
-            .via(FlowUtils.framing)
-            .map(_.utf8String)
-            .runWith(Sink.fold(0L)((acc, _) => acc + 1))
-
-        whenReady(futureLineCount)(actualLineCount => actualLineCount mustBe 1001)
-      }
-
       val uploadFileSubmission =
         Post(s"/institutions/${sampleInstitution.LEI}/filings/$period/submissions/${submissionYearly.id.sequenceNumber}", hmdaFile) ~> fileUploadRoute(
           oAuth2Authorization
