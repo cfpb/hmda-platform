@@ -85,7 +85,7 @@ object ModifiedLarPublisher {
             case PersistToS3AndPostgres(submissionId, respondTo) =>
               log.info(
                 s"Publishing Modified LAR for $submissionId with isGenerateBothS3Files set to " + isGenerateBothS3Files +
-                  "and isCreateDispositionRecord set to " + isCreateDispositionRecord + " isJustGenerateS3File set to " + isJustGenerateS3File + " isJustGenerateS3FileHeader set to " + isJustGenerateS3FileHeader
+                  " and isCreateDispositionRecord set to " + isCreateDispositionRecord + " isJustGenerateS3File set to " + isJustGenerateS3File + " isJustGenerateS3FileHeader set to " + isJustGenerateS3FileHeader
               )
 
               val fileName       = s"${submissionId.lei.toUpperCase()}.txt"
@@ -165,7 +165,7 @@ object ModifiedLarPublisher {
               val graphWithS3AndPG = mlarGraphS3
 
               //only write to PG - do not generate S3 files
-              val graphWithoutS3 = mlarGraphWithoutS3
+              val graphWithJustPG = mlarGraphWithoutS3
 
               val graphWithJustS3NoHeader = mlarSource.via(serializeMlar).toMat(s3Sink)(Keep.right)
 
@@ -174,13 +174,13 @@ object ModifiedLarPublisher {
               val finalResult: Future[Unit] = for {
                 _ <- removeLei
                 _ <- if (isGenerateBothS3Files)
-                      Future.sequence(List(graphWithJustS3NoHeader.run(), graphWithJustS3WithHeader.run()))
+                      graphWithS3AndPG.run()
                     else if (isJustGenerateS3File)
                       graphWithJustS3NoHeader.run()
                     else if (isJustGenerateS3FileHeader)
                       graphWithJustS3WithHeader.run()
-                    else
-                      graphWithS3AndPG.run()
+                    else //everything
+                      Future.sequence(List(graphWithJustS3NoHeader.run(), graphWithJustS3WithHeader.run(), graphWithJustPG.run()))
                 _ <- produceRecord(disclosureTopic, submissionId.lei, submissionId.toString, kafkaProducer)
               } yield ()
 
