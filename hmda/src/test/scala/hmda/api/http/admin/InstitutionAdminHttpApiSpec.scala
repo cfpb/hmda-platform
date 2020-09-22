@@ -35,7 +35,7 @@ class InstitutionAdminHttpApiSpec extends AkkaCassandraPersistenceSpec with Must
   val config: Config                       = typedSystem.settings.config
   implicit val timeout: Timeout            = Timeout(duration)
   val log: Logger                          = LoggerFactory.getLogger(getClass)
-  val institutionAdminRoutes               = InstitutionAdminHttpApi.create(sharding, config)
+  val institutionAdminRoutes               = InstitutionAdminHttpApi.create(config,sharding)
 
   override def beforeAll(): Unit = {
     super.beforeAll()
