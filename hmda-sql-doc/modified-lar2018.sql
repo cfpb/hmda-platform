@@ -215,6 +215,9 @@ CREATE INDEX modifiedlar2018_median_age_year_idx ON hmda_user.modifiedlar2018 US
 alter table modifiedlar2018
 add column uli character varying;
 
+alter table modifiedlar2018
+add column action_taken_date integer;
+
 -- Completed on 2019-06-05 11:44:50 EDT
 
 

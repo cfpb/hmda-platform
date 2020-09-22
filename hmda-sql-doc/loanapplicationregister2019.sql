@@ -158,6 +158,7 @@ CREATE TABLE hmda_user.loanapplicationregister2019 (
 
 
 ALTER TABLE hmda_user.loanapplicationregister2019 OWNER TO hmda_user;
+alter table loanapplicationregister2018 add column checksum varchar;
 
 -- Completed on 2019-06-18 12:27:11 EDT
 

@@ -2,10 +2,9 @@ package hmda.analytics.query
 
 import hmda.model.filing.lar.LarGenerators._
 import hmda.utils.EmbeddedPostgres
-import org.scalatest.{ AsyncWordSpec, BeforeAndAfter, MustMatchers }
+import org.scalatest.{AsyncWordSpec, BeforeAndAfter, MustMatchers}
 
 class LarComponentSpec extends AsyncWordSpec with LarComponent with EmbeddedPostgres with MustMatchers with BeforeAndAfter {
-  import dbConfig.profile.api._
 
   "LarComponent" must {
     "be able to persist and delete a 2019 LAR" in {

@@ -110,7 +110,8 @@ case class LarEntity2018(
     otherAusResult: String = "",
     reverseMortgage: Int = 0,
     lineOfCredits: Int = 0,
-    businessOrCommercial: Int = 0
-) {
+    businessOrCommercial: Int = 0,
+    checksum: String
+                        ) {
   def isEmpty: Boolean = lei == ""
 }

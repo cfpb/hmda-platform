@@ -24,7 +24,7 @@ trait LarComponent {
       }
 
     //for 2019 and beyond -- includes
-    def insert(le: LarEntity): Future[Int] =
+    def insert(le: LarEntity): Future[Int] = {
       config.db.run {
         sqlu"""INSERT INTO #${larTable}
         VALUES (
@@ -151,10 +151,13 @@ trait LarComponent {
           ${le.tractOneToFourFamilyUnits},
           ${le.tractMedianAge},
           ${le.tractToMsaIncomePercent},
-          ${le.isQuarterly}
+          ${le.isQuarterly},
+          DEFAULT,
+          ${le.checksum}
         )
         """
       }
+    }
 
     //for 2018
     def insert(le: LarEntity2018): Future[Int] =
@@ -270,7 +273,9 @@ trait LarComponent {
           ${le.otherAusResult},
           ${le.reverseMortgage},
           ${le.lineOfCredits},
-          ${le.businessOrCommercial}
+          ${le.businessOrCommercial},
+          DEFAULT,
+          ${le.checksum}
         )
         """
       }
