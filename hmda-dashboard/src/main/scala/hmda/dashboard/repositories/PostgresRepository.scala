@@ -40,8 +40,8 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     (year,mview) match {
       case (2018,false) => "loanapplicationregister2018"
       case (2019,false) => "loanapplicationregister2019"
-      case (2018,true) => "exemptions_2018"
-      case (2019,true) => "exemptions_2019"
+      case (2018,true) => "lar_mview_2018"
+      case (2019,true) => "lar_mview_2019"
       case _    => ""
     }
   }
@@ -55,9 +55,9 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   }
 
   def fetchTotalLars(year: Int): Task[Seq[TotalLars]] = {
-    val larTable = larTableSelector(year)
+    val tsTable = tsTableSelector(year)
     val query = sql"""
-        select count(*) from #${larTable} where upper(lei) NOT IN (#${filterList});
+        select SUM(total_lines) from #${tsTable} where upper(lei) NOT IN (#${filterList});
         """.as[TotalLars]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
