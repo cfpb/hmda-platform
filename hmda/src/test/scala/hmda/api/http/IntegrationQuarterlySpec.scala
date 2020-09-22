@@ -3,23 +3,21 @@ package hmda.api.http
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.cluster.typed.{ Cluster, Join }
+import akka.cluster.typed.{Cluster, Join}
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.model.StatusCodes.Created
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import akka.stream.scaladsl.{ Sink, Source }
+import akka.stream.scaladsl.Sink
 import akka.util.Timeout
-import hmda.api.http.admin.InstitutionAdminHttpApi
+import com.typesafe.config.Config
+import hmda.api.http.admin.{ InstitutionAdminHttpApi, SubmissionAdminHttpApi }
 import hmda.api.http.filing.submissions._
-import hmda.api.http.filing.{ FileUploadUtils, FilingHttpApi }
-import hmda.api.http.model.filing.submissions.{ EditsSign, EditsVerification }
-import hmda.auth.{ KeycloakTokenVerifier, OAuth2Authorization }
-import hmda.messages.submission.SubmissionProcessingCommands.{ CompleteMacro, CompleteQuality, CompleteSyntacticalValidity }
+import hmda.api.http.filing.{FileUploadUtils, FilingHttpApi}
+import hmda.api.http.model.filing.submissions.{EditsSign, EditsVerification}
+import hmda.auth.{KeycloakTokenVerifier, OAuth2Authorization}
+import hmda.messages.submission.SubmissionProcessingCommands.{CompleteMacro, CompleteQuality, CompleteSyntacticalValidity}
 import hmda.model.filing.FilingDetails
-import hmda.model.filing.lar.LarGenerators.larNGen
-import hmda.model.filing.submission.{ Submission, SubmissionId }
-import hmda.model.filing.ts.TransmittalSheet
-import hmda.model.filing.ts.TsGenerators.tsGen
+import hmda.model.filing.submission.{Submission, SubmissionId}
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators.institutionGen
 import hmda.persistence.AkkaCassandraPersistenceSpec
@@ -31,12 +29,12 @@ import io.circe.Encoder
 import io.circe.generic.semiauto._
 import org.keycloak.adapters.KeycloakDeploymentBuilder
 import org.scalatest.MustMatchers
-import org.scalatest.concurrent.Eventually
-import org.scalatest.time.{ Millis, Minutes, Span }
-import org.slf4j.{ Logger, LoggerFactory }
+import org.scalatest.concurrent.{ Eventually, ScalaFutures }
+import org.scalatest.time.{Millis, Minutes, Span}
+import org.slf4j.{Logger, LoggerFactory}
 
-import scala.concurrent.{ Await, ExecutionContext }
 import scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContext}
 import scala.util.Random
 
 class IntegrationQuarterlySpec
@@ -44,7 +42,8 @@ class IntegrationQuarterlySpec
     with MustMatchers
     with ScalatestRouteTest
     with FileUploadUtils
-    with Eventually {
+    with Eventually
+    with ScalaFutures {
 
   override implicit def patienceConfig: PatienceConfig = PatienceConfig(timeout = Span(2, Minutes), interval = Span(100, Millis))
 
@@ -54,8 +53,10 @@ class IntegrationQuarterlySpec
   implicit val timeout: Timeout            = Timeout(duration)
   val sharding: ClusterSharding            = ClusterSharding(typedSystem)
   val ec: ExecutionContext                 = system.dispatcher
+  val config: Config                       = system.settings.config
 
-  val institutionAdminRoute = InstitutionAdminHttpApi.create(sharding, system.settings.config)
+  val institutionAdminRoute = InstitutionAdminHttpApi.create(config, sharding)
+  val submissionAdminRoute  = SubmissionAdminHttpApi.create(log, config, sharding)
   val filingRoute           = FilingHttpApi.create(log, sharding)
   val submissionRoute       = SubmissionHttpApi.create(log, sharding)
   val editsRoute            = EditsHttpApi.create(log, sharding)
@@ -150,6 +151,17 @@ class IntegrationQuarterlySpec
           status mustBe StatusCodes.Accepted
           responseAs[Submission]
         }
+
+      Get(s"/admin/hmdafile/${submissionQuarterly.id}") ~> submissionAdminRoute(oAuth2Authorization) ~> check {
+        status mustBe StatusCodes.OK
+        val futureLineCount =
+          response.entity.dataBytes
+            .via(FlowUtils.framing)
+            .map(_.utf8String)
+            .runWith(Sink.fold(0L)((acc, _) => acc + 1))
+
+        whenReady(futureLineCount)(actualLineCount => actualLineCount mustBe 1001)
+      }
 
       val editsSummary =
         Get(

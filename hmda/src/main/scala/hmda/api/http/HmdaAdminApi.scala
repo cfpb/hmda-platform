@@ -2,13 +2,13 @@ package hmda.api.http
 
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{ ActorSystem, Behavior }
-import akka.actor.{ CoordinatedShutdown, ActorSystem => ClassicActorSystem }
+import akka.actor.typed.{ActorSystem, Behavior}
+import akka.actor.{CoordinatedShutdown, ActorSystem => ClassicActorSystem}
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.http.scaladsl.server.Directives._
 import akka.stream.Materializer
 import akka.util.Timeout
-import hmda.api.http.admin.{ InstitutionAdminHttpApi, PublishAdminHttpApi }
+import hmda.api.http.admin.{InstitutionAdminHttpApi, PublishAdminHttpApi, SubmissionAdminHttpApi}
 import hmda.api.http.directives.HmdaTimeDirectives._
 import hmda.api.http.routes.BaseHttpApi
 import hmda.auth.OAuth2Authorization
@@ -36,9 +36,10 @@ object HmdaAdminApi {
     val shutdown                             = CoordinatedShutdown(system)
 
     val oAuth2Authorization = OAuth2Authorization(log, config)
-    val institutionRoutes   = InstitutionAdminHttpApi.create(sharding, config)
+    val institutionRoutes   = InstitutionAdminHttpApi.create(config,sharding)
     val publishRoutes       = PublishAdminHttpApi.create(sharding, config)
-    val routes              = BaseHttpApi.routes(name) ~ institutionRoutes(oAuth2Authorization) ~ publishRoutes(oAuth2Authorization)
+    val submissionRoutes    = SubmissionAdminHttpApi.create(log, config, sharding)
+    val routes              = BaseHttpApi.routes(name) ~ institutionRoutes(oAuth2Authorization)  ~ publishRoutes(oAuth2Authorization) ~ submissionRoutes(oAuth2Authorization)
 
     BaseHttpApi.runServer(shutdown, name)(timed(routes), host, port)
     Behaviors.empty
