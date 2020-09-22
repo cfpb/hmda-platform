@@ -153,6 +153,8 @@ trait LarComponent {
           ${le.tractToMsaIncomePercent},
           ${le.isQuarterly},
           DEFAULT,
+          ${le.msa_md},
+          ${le.msa_md_name},
           ${le.checksum}
         )
         """
