@@ -9,6 +9,8 @@ import hmda.model.census.Census
 import com.typesafe.config.ConfigFactory
 import java.security.MessageDigest
 
+import hmda.util.conversion.LarStringFormatter
+
 object LarConverter {
 
   val config = ConfigFactory.load()
@@ -57,11 +59,9 @@ object LarConverter {
     val countyLoanLimitsByCounty = getcountyLoanLimitsByCounty(year)
     val countyLoanLimitsByState = getcountyLoanLimitsByState(year)
     val checksum = MessageDigest.getInstance("MD5")
-      .digest(lar.loan.ULI.getBytes())
+      .digest(LarStringFormatter.larString(lar).getBytes())
       .map(0xFF & _)
       .map { "%02x".format(_) }.foldLeft(""){_ + _}
-    System.out.print("CHECKSUM: -- ")
-    System.out.println(checksum)
     LarEntity(
       lar.larIdentifier.id,
       lar.larIdentifier.LEI,
@@ -189,7 +189,7 @@ object LarConverter {
       isQuarterly,
       census.msaMd.toString,
       census.name,
-      checksum.toString
+      checksum
     )
   }
 
