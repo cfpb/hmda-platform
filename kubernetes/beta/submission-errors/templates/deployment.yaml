@@ -1,0 +1,168 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ include "submission-errors.fullname" . }}
+  annotations:
+    downscaler/uptime: Mon-Fri 10:00-23:00 UTC
+    reloader.stakater.com/search: "true"
+  labels:
+    app: {{ include "submission-errors.name" . }}
+    chart: {{ include "submission-errors.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "submission-errors.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "submission-errors.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      volumes:
+        - name: tz-config
+          hostPath:
+            path: /usr/share/zoneinfo/America/New_York
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          volumeMounts:
+            - name: tz-config
+              mountPath: /etc/localtime
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL             
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            limits:
+              cpu: "4"
+              memory: "2200Mi"
+          env:
+            - name: PG_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: host
+            - name: PG_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: postgresql-configmap
+                  key: postgres.database
+            - name: PG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: username
+            - name: PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: password
+            - name: PG_SSL
+              valueFrom:
+                configMapKeyRef:
+                  name: postgresql-configmap
+                  key: postgres.ssl
+            - name: JDBC_URL
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: url
+            - name: CASSANDRA_CLUSTER_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-hosts
+            - name: CASSANDRA_CLUSTER_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: cassandra-credentials
+                  key: cassandra.username
+            - name: CASSANDRA_JOURNAL_KEYSPACE
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-keyspace
+            - name: CASSANDRA_SNAPSHOT_KEYSPACE
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-keyspace-snapshot
+            - name: CASSANDRA_CLUSTER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cassandra-credentials
+                  key: cassandra.password
+            - name: KAFKA_CLUSTER_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-configmap
+                  key: kafka.hosts
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: aws-access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: aws-secret-access-key
+            - name: AWS_ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: s3-configmap
+                  key: aws-environment
+            - name: BANK_FILTER_LIST
+              valueFrom:
+                configMapKeyRef:
+                  name: bank-filter-configmap
+                  key: bank-filter-list
+            - name: HTTP_CENSUS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: http-configmap
+                  key: census.host
+            - name: HTTP_CENSUS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: http-configmap
+                  key: census.port
+            - name: KAFKA_LOG_LEVEL
+              value: INFO
+            - name: KAFKA_MODIFIED_LAR_TOPIC
+              value: {{.Values.kafka.modifiedLarTopic}}
+            - name: KAFKA_SIGN_TOPIC
+              value: {{.Values.kafka.signTopic}}
+            - name: KAFKA_MODIFIED_LAR_GROUP
+              value: {{.Values.kafka.modifiedLarGroup}}
+            - name: IS_GENERATE_MLAR_S3_FIES
+              valueFrom:
+                configMapKeyRef:
+                  name: mlar-options-configmap
+                  key: generateMlarS3File
+            - name: IS_CREATE_DISPOSITION_KAFKA_RECORD
+              valueFrom:
+                configMapKeyRef:
+                  name: mlar-options-configmap
+                  key: createDispositionKafkaRecord
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
