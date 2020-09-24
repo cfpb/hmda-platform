@@ -60,16 +60,16 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                 complete(StatusCodes.InternalServerError)
             }
           } ~
-            path("total_filers" / IntNumber) { (year) =>
-              log.info(s"total filers for year=${year}")
+            path("total_filers" / Segment ) { (period) =>
+              log.info(s"total filers for period=${period}")
               complete(
                 query
-                  .fetchTotalFilers(year)
+                  .fetchTotalFilers(period)
                   .map(aggs => TotalFilersAggregationResponse(aggs))
                   .runToFuture
               )
             } ~
-            path("total_lars" / IntNumber) { (year) =>
+            path("total_lars" / Segment) { (year) =>
               log.info(s"total lars for year=${year}")
               complete(
                 query
@@ -78,7 +78,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("single_attempts" / IntNumber) { (year) =>
+            path("single_attempts" / Segment) { (year) =>
               log.info(s"single attempts for year=${year}")
               complete(
                 query
@@ -87,7 +87,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("multiple_attempts" / IntNumber) { (year) =>
+            path("multiple_attempts" / Segment) { (year) =>
               log.info(s"multiple attempts for year=${year}")
               complete(
                 query
@@ -96,7 +96,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("top_filers" / IntNumber / "year" / IntNumber) { (count, year) =>
+            path("top_filers" / IntNumber / "year" / Segment) { (count, year) =>
               log.info(s"top filers (${count}) for year=${year}")
               complete(
                 query
@@ -105,7 +105,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("signs_per_day" / IntNumber / "year" / IntNumber) { (days, year) =>
+            path("signs_per_day" / IntNumber / "year" / Segment) { (days, year) =>
               log.info(s"filers for last ${days} days for year=${year}")
               complete(
                 query
@@ -114,7 +114,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("filer_attempts" / IntNumber / "year" / IntNumber) { (count, year) =>
+            path("filer_attempts" / IntNumber / "year" / Segment) { (count, year) =>
               log.info(s"top ${count} filers  attempts for year=${year}")
               complete(
                 query
@@ -123,7 +123,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("total_ts" / IntNumber) { (year) =>
+            path("total_ts" / Segment) { (year) =>
               log.info(s"TS Records for year=${year}")
               complete(
                 query
@@ -132,7 +132,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("filers_by_agency" / IntNumber) { (year) =>
+            path("filers_by_agency" / Segment) { (year) =>
               log.info(s"Filers by agency code for year=${year}")
               complete(
                 query
@@ -141,7 +141,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("lar_by_agency" / IntNumber) { (year) =>
+            path("lar_by_agency" / Segment) { (year) =>
               log.info(s"Lar by agency code for year=${year}")
               complete(
                 query
@@ -150,16 +150,16 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("top_counties_lar" / IntNumber / "year" / IntNumber) { (count, year) =>
+            path("top_counties_lar" / IntNumber / "year" / Segment) { (count, year) =>
               log.info(s"Top ${count} counties for year=${year}")
               complete(
                 query
-                  .fetchTopCountiesLar(count, year)
+                  .fetchTopCountiesLar(year, count)
                   .map(aggs => TopCountiesLarAggregationResponse(aggs))
                   .runToFuture
               )
             } ~
-            path("lar_by_property" / IntNumber) { (year) =>
+            path("lar_by_property" / Segment) { (year) =>
               log.info(s"Lar count by property for year=${year}")
               complete(
                 query
@@ -168,7 +168,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("filers_using_exemption_by_agency" / IntNumber) { (year) =>
+            path("filers_using_exemption_by_agency" / Segment) { (year) =>
               log.info(s"Filers using exemption by agency for year=${year}")
               complete(
                 query
@@ -177,7 +177,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("denial_reason_counts_by_agency" / IntNumber) { (year) =>
+            path("denial_reason_counts_by_agency" / Segment) { (year) =>
               log.info(s"Denial Reason Counts By Agency for year=${year}")
               complete(
                 query
@@ -186,7 +186,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("lar_count_using_exemption_by_agency" / IntNumber) { (year) =>
+            path("lar_count_using_exemption_by_agency" / Segment) { (year) =>
               log.info(s"Lar Count Using Exemption By Agency for year=${year}")
               complete(
                 query
@@ -195,7 +195,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("open_end_credit_filers_by_agency" / IntNumber) { (year) => // TODO: fix
+            path("open_end_credit_filers_by_agency" / Segment) { (year) => // TODO: fix
               log.info(s"Open end credit By Agency for year=${year}")
               complete(
                 query
@@ -204,7 +204,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("open_end_credit_lar_count_by_agency" / IntNumber) { (year) => // TODO: fix
+            path("open_end_credit_lar_count_by_agency" / Segment) { (year) => // TODO: fix
               log.info(s"Open end credit Lar count By Agency for year=${year}")
               complete(
                 query
@@ -213,7 +213,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("filers_with_only_open_end_credit_transactions" / IntNumber) { (year) =>
+            path("filers_with_only_open_end_credit_transactions" / Segment) { (year) =>
               log.info(s"Filers With Only Open End Credit Transactions for year=${year}")
               complete(
                 query
@@ -222,7 +222,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("filers_with_only_closed_end_credit_transactions" / IntNumber) { (year) =>
+            path("filers_with_only_closed_end_credit_transactions" / Segment) { (year) =>
               log.info(s"Filers With Only Closed End Credit Transactions for year=${year}")
               complete(
                 query
@@ -231,7 +231,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("filer_list_only_open_end_transactions" / IntNumber) { (year) =>
+            path("filer_list_only_open_end_transactions" / Segment) { (year) =>
               log.info(s"Filers With Only Closed End Credit Transactions for year=${year}")
               complete(
                 query
@@ -240,7 +240,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("filers_claiming_exemption" / IntNumber) { (year) =>
+            path("filers_claiming_exemption" / Segment) { (year) =>
               log.info(s"Filers claiming exemptions for year=${year}")
               complete(
                 query
@@ -249,7 +249,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("list_quarterly_filers" / IntNumber) { (year) =>
+            path("list_quarterly_filers" / Segment) { (year) =>
               log.info(s"List quarterly filers for year=${year}")
               complete(
                 query
@@ -258,7 +258,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("filers_by_week_by_agency" / IntNumber / "week" / IntNumber) { (year, week) =>
+            path("filers_by_week_by_agency" / Segment / "week" / IntNumber) { (year, week) =>
               log.info(s"Filers for year=${year} for week=${week}")
               complete(
                 query
@@ -267,7 +267,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("lar_by_week_by_agency" / IntNumber / "week" / IntNumber) { (year, week) =>
+            path("lar_by_week_by_agency" / Segment / "week" / IntNumber) { (year, week) =>
               log.info(s"LAR for year=${year} for week=${week}")
               complete(
                 query
@@ -276,7 +276,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("list_filers_with_only_closed_end_credit_transactions" / IntNumber) { (year) =>
+            path("list_filers_with_only_closed_end_credit_transactions" / Segment) { (year) =>
               log.info(s"List filers with only closed end credit transactions for year=${year}")
               complete(
                 query
@@ -285,7 +285,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("filers_count_closed_end_originations_by_agency" / IntNumber / "thresh" / IntNumber) { (year, x) =>
+            path("filers_count_closed_end_originations_by_agency" / Segment / "thresh" / IntNumber) { (year, x) =>
               log.info(s"Fetch filers count closed end originations by agency for year=${year} with threshehold<${x}")
               complete(
                 query
@@ -294,7 +294,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("filers_count_closed_end_originations_by_agency_grater_or_equal" / IntNumber / "thresh" / IntNumber) { (year, x) =>
+            path("filers_count_closed_end_originations_by_agency_grater_or_equal" / Segment / "thresh" / IntNumber) { (year, x) =>
               log.info(s"Fetch filers count closed end originations by agency for year=${year} with threshehold=>${x}")
               complete(
                 query
@@ -303,7 +303,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("filers_count_open_end_originations_by_agency" / IntNumber / "thresh" / IntNumber) { (year, x) =>
+            path("filers_count_open_end_originations_by_agency" / Segment / "thresh" / IntNumber) { (year, x) =>
               log.info(s"Fetch filers count open end originations by agency for year=${year} with threshehold<${x}")
               complete(
                 query
@@ -312,7 +312,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("filers_count_open_end_originations_by_agency_grater_or_equal" / IntNumber / "thresh" / IntNumber) { (year, x) =>
+            path("filers_count_open_end_originations_by_agency_grater_or_equal" / Segment / "thresh" / IntNumber) { (year, x) =>
               log.info(s"Fetch filers count open end originations by agency for year=${year} with threshehold>=${x}")
               complete(
                 query
@@ -321,7 +321,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("top_institutions_count_open_end_credit" / IntNumber / "count" / IntNumber) { (year, x) =>
+            path("top_institutions_count_open_end_credit" / Segment / "count" / IntNumber) { (year, x) =>
               log.info(s"Top institutions count with open end credit for year=${year} limit=${x}")
               complete(
                 query
