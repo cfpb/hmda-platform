@@ -117,35 +117,19 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
       oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
         val fil = selectFiling(clusterSharding, lei, period, Some(""))
         val fLatest: Future[Option[Submission]] = fil ? (ref => GetLatestSignedSubmission(ref))
-        for {
-          latestSigned <- fLatest
-        } yield Option(latestSigned)
 
-        //How can I get the SubmissionId out of fLatest so that I can pass it to validateRawSubmissionId ?
-
-        validateRawSubmissionId(rawSubmissionId) match {
-          case Invalid(reason) =>
-            val formattedReasons = reason.mkString_(", ")
-            complete((StatusCodes.BadRequest,formattedReasons))
-
-          case Valid(submissionId) =>
-            val submissionRef    = SubmissionPersistence.selectSubmissionPersistence(clusterSharding, submissionId)
-            val submissionExists = submissionRef ? GetSubmission
-            onComplete(submissionExists) {
-              case Failure(exception) =>
-                log.error("Error whilst trying to check if the submission exists", exception)
-                complete(InternalServerError)
-
-              case Success(None) =>
-                complete((StatusCodes.NotFound,s"Submission with $submissionId does not exist"))
-
-              case Success(Some(_)) =>
-                val csvSource = pipeDelimitedFileStream(submissionId).via(csvStreamingSupport.framingRenderer)
-                // specify the filename for users that want to download
-                respondWithHeader(`Content-Disposition`(attachment, Map("filename" -> s"$submissionId.txt"))) {
-                  complete(OK, HttpEntity(`text/csv(UTF-8)`, csvSource))
-                }
+        onComplete(fLatest) {
+          case Success(latestSigned) =>
+            val submission: Submission = latestSigned.headOption.getOrElse(Submission())
+            val csvSource = pipeDelimitedFileStream(submission.id).via(csvStreamingSupport.framingRenderer)
+            // specify the filename for users that want to download
+            respondWithHeader(`Content-Disposition`(attachment, Map("filename" -> s"${submission.id}.txt"))) {
+              complete(OK, HttpEntity(`text/csv(UTF-8)`, csvSource))
             }
+
+          case Failure(exception) =>
+            log.error("Error whilst trying to check if the submission exists", exception)
+            complete(InternalServerError)
         }
       }
     }
