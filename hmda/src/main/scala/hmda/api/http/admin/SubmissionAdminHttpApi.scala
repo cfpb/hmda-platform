@@ -6,7 +6,7 @@ import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.http.scaladsl.common.{CsvEntityStreamingSupport, EntityStreamingSupport}
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.ContentTypes.`text/csv(UTF-8)`
-import akka.http.scaladsl.model.StatusCodes.{InternalServerError, OK}
+import akka.http.scaladsl.model.StatusCodes.{InternalServerError, NotFound, OK}
 import akka.http.scaladsl.model.headers.ContentDispositionTypes.attachment
 import akka.http.scaladsl.model.headers.`Content-Disposition`
 import akka.http.scaladsl.model.{HttpEntity, HttpResponse, StatusCodes, Uri}
@@ -113,7 +113,7 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
     EntityStreamingSupport.csv()
 
   val routes: OAuth2Authorization => Route = { (oauth2Authorization: OAuth2Authorization) =>
-    (extractUri & get & path("institutions" / Segment / "filings" / IntNumber / "submissions")) { (uri, lei, period) =>
+    (extractUri & get & path("admin" / Segment /"signed" / "hmdafile" / IntNumber )) { (uri, lei, period) =>
       oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
         val fil = selectFiling(clusterSharding, lei, period, Some(""))
         val fLatest: Future[Option[Submission]] = fil ? (ref => GetLatestSignedSubmission(ref))
@@ -129,7 +129,7 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
 
           case Failure(exception) =>
             log.error("Error whilst trying to check if the submission exists", exception)
-            complete(InternalServerError)
+            complete(NotFound)
         }
       }
     }
