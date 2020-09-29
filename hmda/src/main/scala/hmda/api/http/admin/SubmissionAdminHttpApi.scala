@@ -119,17 +119,17 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
         val fLatest: Future[Option[Submission]] = fil ? (ref => GetLatestSignedSubmission(ref))
 
         onComplete(fLatest) {
-          case Success(latestSigned) =>
-            val submission: Submission = latestSigned.headOption.getOrElse(Submission())
+          case Success(Some(submission)) =>
             val csvSource = pipeDelimitedFileStream(submission.id).via(csvStreamingSupport.framingRenderer)
             // specify the filename for users that want to download
             respondWithHeader(`Content-Disposition`(attachment, Map("filename" -> s"${submission.id}.txt"))) {
               complete(OK, HttpEntity(`text/csv(UTF-8)`, csvSource))
             }
-
+          case Success(None) =>
+            complete(NotFound)
           case Failure(exception) =>
             log.error("Error whilst trying to check if the submission exists", exception)
-            complete(NotFound)
+            complete(InternalServerError)
         }
       }
     }
