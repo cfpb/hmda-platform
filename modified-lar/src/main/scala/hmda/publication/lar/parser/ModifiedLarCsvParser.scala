@@ -50,6 +50,7 @@ object ModifiedLarCsvParser {
     val countyLoanLimitsByState = getcountyLoanLimitsByState(year)
     ModifiedLoanApplicationRegister(
       lar.larIdentifier.id,
+      year,
       lar.loan.ULI,
       lar.larIdentifier.LEI,
       lar.loan.loanType.code,
@@ -59,6 +60,7 @@ object ModifiedLarCsvParser {
       lar.loan.occupancy.code,
       roundToMidPoint(lar.loan.amount.toInt),
       lar.action.actionTakenType.code,
+      lar.action.actionTakenDate,
       lar.geography.state,
       lar.geography.county,
       lar.geography.tract,

@@ -130,7 +130,8 @@ CREATE TABLE loanapplicationregister2018
     reverse_mortgage integer,
     line_of_credits integer,
     business_or_commercial integer,
-    created_at timestamp default current_timestamp
+    created_at timestamp default current_timestamp,
+    checksum character varying
 );
 
 CREATE TABLE loanapplicationregister2019
@@ -261,7 +262,8 @@ CREATE TABLE loanapplicationregister2019
     is_quarterly                      boolean                     DEFAULT false NOT NULL,
     created_at                        timestamp without time zone DEFAULT now(),
     msa_md                            character varying,
-    msa_md_name                       character varying
+    msa_md_name                       character varying,
+    checksum                          character varying
 );
 
 CREATE TABLE submission_history

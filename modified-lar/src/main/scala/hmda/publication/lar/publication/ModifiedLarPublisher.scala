@@ -174,13 +174,13 @@ object ModifiedLarPublisher {
               val finalResult: Future[Unit] = for {
                 _ <- removeLei
                 _ <- if (isGenerateBothS3Files)
-                      graphWithS3AndPG.run()
-                    else if (isJustGenerateS3File)
-                      graphWithJustS3NoHeader.run()
-                    else if (isJustGenerateS3FileHeader)
-                      graphWithJustS3WithHeader.run()
-                    else //everything
-                      Future.sequence(List(graphWithJustS3NoHeader.run(), graphWithJustS3WithHeader.run(), graphWithJustPG.run()))
+                  graphWithS3AndPG.run()
+                else if (isJustGenerateS3File)
+                  graphWithJustS3NoHeader.run()
+                else if (isJustGenerateS3FileHeader)
+                  graphWithJustS3WithHeader.run()
+                else //everything
+                  Future.sequence(List(graphWithJustS3NoHeader.run(), graphWithJustS3WithHeader.run(), graphWithJustPG.run()))
                 _ <- produceRecord(disclosureTopic, submissionId.lei, submissionId.toString, kafkaProducer)
               } yield ()
 
