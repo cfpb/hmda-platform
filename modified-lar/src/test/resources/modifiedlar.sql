@@ -1,5 +1,6 @@
 CREATE TABLE modifiedlar2019 (
                                            id integer NOT NULL,
+                                           uli character varying not null,
                                            lei character varying NOT NULL,
                                            loan_type integer,
                                            loan_purpose integer,
@@ -109,6 +110,7 @@ CREATE TABLE modifiedlar2019 (
 
 CREATE TABLE modifiedlar2018 (
                                            id integer NOT NULL,
+                                           uli character varying not null,
                                            lei character varying NOT NULL,
                                            loan_type integer,
                                            loan_purpose integer,
