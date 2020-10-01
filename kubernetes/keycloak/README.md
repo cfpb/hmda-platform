@@ -1,4 +1,12 @@
-# Keycloak Deployment
+# Building Keycloak
+
+Keycloak is built from a modified version of the [dockerfile](https://repo1.dsop.io/dsop/opensource/keycloak/keycloak) published by Ironbank Containers. This Dockerfile is then modified to use the official OpenJDK on Dockerhub. The following changes are made to the dockerfile:
+
+1. The `BASE_IMAGE` args at the top are modified to point to the official OpenJDK image on Dockerhub.
+1. The base image `FROM` command is modified to remove the `BASE_REGISTRY` argument.
+1. The package mamager in the first `RUN` command is modified to use `apt` rather than `dnf`
+
+# Deploying Keycloak
 
 Keycloak is deployed using the [helm chart by Codecentric](https://github.com/codecentric/helm-charts/tree/master/charts/keycloak) and the `values.yaml` contained in this directory.
 
