@@ -171,6 +171,8 @@ trait PublisherComponent2020 extends PGTableNameLoader {
         db.run(table.filterNot(ts => (ts.lei.toUpperCase inSet bankIgnoreList) || !ts.isQuarterly).result)
       else
         db.run(table.filterNot(ts => (ts.lei.toUpperCase inSet bankIgnoreList) || ts.isQuarterly).result)
+
+    def getDistinctLeiCount: Future[Int] = db.run(table.map(_.lei.toUpperCase).distinct.length.result)
   }
 
   class LarTable(tag: Tag) extends Table[LarEntityImpl2020](tag, lar2020TableName) {
@@ -511,8 +513,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
 
     def getAllLARs(bankIgnoreList: Array[String], includeQuarterly: Boolean): DatabasePublisher[LarEntityImpl2020] =
       db.stream(
-        getAllLARsQuery(bankIgnoreList, includeQuarterly)
-          .result
+        getAllLARsQuery(bankIgnoreList, includeQuarterly).result
           .withStatementParameters(
             rsType = ResultSetType.ForwardOnly,
             rsConcurrency = ResultSetConcurrency.ReadOnly,
@@ -528,6 +529,8 @@ trait PublisherComponent2020 extends PGTableNameLoader {
         table
           .filterNot(lar => (lar.lei.toUpperCase inSet bankIgnoreList) && lar.isQuarterly)
       }
+
+    def getDistinctLeiCount: Future[Int] = db.run(table.map(_.lei.toUpperCase).distinct.length.result)
   }
 
 }
