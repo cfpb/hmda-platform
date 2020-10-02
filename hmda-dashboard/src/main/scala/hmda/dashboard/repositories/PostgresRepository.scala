@@ -180,7 +180,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   def fetchLarCountUsingExemptionByAgency(period: String): Task[Seq[LarCountUsingExemptionByAgency]] = {
     val larTable = larTableSelector(period, "lar_exemptions")
     val query = sql"""
-      select * from #${larTable} where upper(lei) NOT IN (#${filterList}) group by agency;
+      select agency, count(*) from #${larTable} where upper(lei) NOT IN (#${filterList}) group by agency;
       """.as[LarCountUsingExemptionByAgency]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
