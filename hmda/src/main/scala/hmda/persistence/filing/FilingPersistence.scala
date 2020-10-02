@@ -1,16 +1,17 @@
 package hmda.persistence.filing
 
-import akka.actor.typed.scaladsl.{ ActorContext, Behaviors }
-import akka.actor.typed.{ ActorRef, Behavior }
+import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
+import akka.actor.typed.{ActorRef, Behavior}
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef, EntityTypeKey }
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef, EntityTypeKey}
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
-import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
+import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
 import hmda.messages.filing.FilingCommands._
-import hmda.messages.filing.FilingEvents.{ FilingCreated, FilingEvent, SubmissionAdded, SubmissionUpdated }
+import hmda.messages.filing.FilingEvents.{FilingCreated, FilingEvent, SubmissionAdded, SubmissionUpdated}
 import hmda.messages.institution.InstitutionCommands.AddFiling
 import hmda.model.filing.FilingDetails
+import hmda.model.filing.submission.{Signed, SubmissionStatus}
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.utils.YearUtils
@@ -105,6 +106,15 @@ object FilingPersistence extends HmdaTypedPersistentActor[FilingCommand, FilingE
 
       case GetSubmissions(replyTo) =>
         replyTo ! state.submissions
+        Effect.none
+
+      //This method will be similar to GetLatestSubmission but will fetch the one with highest sequencenumber and status of Signed (15)
+      case GetLatestSignedSubmission(replyTo) =>
+        val maybeSignedSubmission = state.submissions
+          .filter(_.status == Signed )
+          .sortWith(_.id.sequenceNumber > _.id.sequenceNumber)
+          .headOption
+        replyTo ! maybeSignedSubmission
         Effect.none
 
       case FilingStop() =>
