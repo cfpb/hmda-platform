@@ -20,7 +20,6 @@ import hmda.publication.KafkaUtils
 import hmda.publication.KafkaUtils._
 import hmda.publication.lar.parser.ModifiedLarCsvParser
 import hmda.query.HmdaQuery
-import hmda.query.HmdaQuery._
 import hmda.query.repository.ModifiedLarRepository
 import software.amazon.awssdk.auth.credentials.{ AwsBasicCredentials, StaticCredentialsProvider }
 import software.amazon.awssdk.regions.Region
@@ -46,10 +45,8 @@ object ModifiedLarPublisher {
   val region                    = config.getString("aws.region")
   val bucket                    = config.getString("aws.public-bucket")
   val environment               = config.getString("aws.environment")
-  val isGenerateBothS3Files          = config.getBoolean("hmda.lar.modified.generateS3Files")
   val isCreateDispositionRecord = config.getBoolean("hmda.lar.modified.creteDispositionRecord")
   val isJustGenerateS3File = config.getBoolean("hmda.lar.modified.justGenerateS3File")
-  val isJustGenerateS3FileHeader = config.getBoolean("hmda.lar.modified.justGenerateS3FileHeader")
 
   val awsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccess))
   val awsRegionProvider: AwsRegionProvider = new AwsRegionProvider {
@@ -84,25 +81,20 @@ object ModifiedLarPublisher {
 
             case PersistToS3AndPostgres(submissionId, respondTo) =>
               log.info(
-                s"Publishing Modified LAR for $submissionId with isGenerateBothS3Files set to " + isGenerateBothS3Files +
-                  "and isCreateDispositionRecord set to " + isCreateDispositionRecord + " isJustGenerateS3File set to " + isJustGenerateS3File + " isJustGenerateS3FileHeader set to " + isJustGenerateS3FileHeader
+                s"Publishing Modified LAR for $submissionId withisCreateDispositionRecord set to " + isCreateDispositionRecord +
+                  " isJustGenerateS3File set to " + isJustGenerateS3File
               )
 
               val fileName       = s"${submissionId.lei.toUpperCase()}.txt"
-              val fileNameHeader = s"${submissionId.lei.toUpperCase()}_header.txt"
               val filingPeriod   = s"${submissionId.period}"
 
               val metaHeaders: Map[String, String] =
                 Map("Content-Disposition" -> "attachment", "filename" -> fileName)
 
               val s3Sink = S3
-                .multipartUpload(bucket, s"$environment/modified-lar/$filingPeriod/$fileName", metaHeaders = MetaHeaders(metaHeaders))
-                .withAttributes(S3Attributes.settings(s3Settings))
-
-              val s3SinkWithHeader = S3
                 .multipartUpload(
                   bucket,
-                  s"$environment/modified-lar/$filingPeriod/header/$fileNameHeader",
+                  s"$environment/modified-lar/$filingPeriod/$fileName",
                   metaHeaders = MetaHeaders(metaHeaders)
                 )
                 .withAttributes(S3Attributes.settings(s3Settings))
@@ -137,26 +129,24 @@ object ModifiedLarPublisher {
               val mlarHeader = Source.single(ByteString(ModifiedLoanApplicationRegister.header))
               val mlarGraphS3: RunnableGraph[Future[Done]] =
                 RunnableGraph.fromGraph(
-                  GraphDSL.create(mlarSource, s3SinkWithHeader, s3Sink, postgresOut(2))((_, s3HeaderMat, s3NoHeaderMat, pgMat) =>
+                  GraphDSL.create(mlarSource, s3Sink, postgresOut(2))((_, s3Mat, pgMat) =>
                     for {
-                      _ <- s3HeaderMat
-                      _ <- s3NoHeaderMat
+                      _ <- s3Mat
                       _ <- pgMat
                     } yield akka.Done.done()
-                  ) { implicit builder => (source, headerSink, noHeaderSink, pgSink) =>
+                  ) { implicit builder => (source, s3Sink, pgSink) =>
                     import GraphDSL.Implicits._
 
-
-                    val broadcast  = builder.add(Broadcast[ModifiedLoanApplicationRegister](3))
+                    val broadcast  = builder.add(Broadcast[ModifiedLoanApplicationRegister](2))
 
                     source.out ~> broadcast.in
-                    (broadcast.out(0) ~> serializeMlar).prepend(mlarHeader) ~> headerSink
-                    broadcast.out(1) ~> serializeMlar ~> noHeaderSink
-                    broadcast.out(2) ~> pgSink
-
+                    broadcast.out(0) ~> pgSink
+                    (broadcast.out(1) ~> serializeMlar).prepend(mlarHeader) ~> s3Sink
+                    
                     ClosedShape
                   }
-                )
+                  )
+
 
               def mlarGraphWithoutS3: RunnableGraph[Future[Done]] =
                 mlarSource.toMat(postgresOut(2))(Keep.right)
@@ -167,18 +157,12 @@ object ModifiedLarPublisher {
               //only write to PG - do not generate S3 files
               val graphWithoutS3 = mlarGraphWithoutS3
 
-              val graphWithJustS3NoHeader = mlarSource.via(serializeMlar).toMat(s3Sink)(Keep.right)
-
-              val graphWithJustS3WithHeader = mlarSource.via(serializeMlar).prepend(mlarHeader).toMat(s3SinkWithHeader)(Keep.right)
+              val graphWithJustS3 = mlarSource.via(serializeMlar).prepend(mlarHeader).toMat(s3Sink)(Keep.right)
 
               val finalResult: Future[Unit] = for {
                 _ <- removeLei
-                _ <- if (isGenerateBothS3Files)
-                      Future.sequence(List(graphWithJustS3NoHeader.run(), graphWithJustS3WithHeader.run()))
-                    else if (isJustGenerateS3File)
-                      graphWithJustS3NoHeader.run()
-                    else if (isJustGenerateS3FileHeader)
-                      graphWithJustS3WithHeader.run()
+                _ <- if (isJustGenerateS3File)
+                      graphWithJustS3.run()
                     else
                       graphWithS3AndPG.run()
                 _ <- produceRecord(disclosureTopic, submissionId.lei, submissionId.toString, kafkaProducer)
