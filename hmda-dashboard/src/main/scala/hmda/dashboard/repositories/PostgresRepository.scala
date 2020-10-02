@@ -39,15 +39,21 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     }
   }
 
-  def larTableSelector(period: String, mview: Boolean = false): String = {
+  def larTableSelector(period: String, mview: String = ""): String = {
     (period, mview) match {
-      case ("2018",false) => "loanapplicationregister2018"
-      case ("2019",false) => "loanapplicationregister2019"
-      case ("2018",true) => "lar_mview_2018"
-      case ("2019",true) => "lar_mview_2019"
-      case ("2020-Q1",false) => "lar2020_q1"
-      case ("2020-Q2",false) => "lar2020_q2"
-      case ("2020-Q3",false) => "lar2020_q3"
+      case ("2018","") => "loanapplicationregister2018"
+      case ("2019","") => "loanapplicationregister2019"
+      case ("2018","exemptions") => "exemptions_2018"
+      case ("2019","exemptions") => "exemptions_2019"
+      case ("2018","open_end_credit") => "open_end_credit_filers_by_agency_2018"
+      case ("2019","open_end_credit") => "open_end_credit_filers_by_agency_2019"
+      case ("2018","lar_exemptions") => "lar_count_using_exemption_by_agency_2018"
+      case ("2019","lar_exemptions") => "lar_count_using_exemption_by_agency_2019"
+      case ("2018","open_end_credit_lar") => "open_end_credit_lar_count_by_agency_2018"
+      case ("2019","open_end_credit_lar") => "open_end_credit_lar_count_by_agency_2019"
+      case ("2020-Q1","") => "lar2020_q1"
+      case ("2020-Q2","") => "lar2020_q2"
+      case ("2020-Q3","") => "lar2020_q3"
       case _    => ""
     }
   }
@@ -155,9 +161,10 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   }
 
   def fetchFilersUsingExemptionByAgency(period: String): Task[Seq[FilersUsingExemptionByAgency]] = {
-    val materializedView = larTableSelector(period, true)
+    val materializedView = larTableSelector(period, "exemptions")
     val query = sql"""
-      select agency, count (distinct lei) lei from  #${materializedView} where upper(lei) not in (#${filterList}) group by agency""".as[FilersUsingExemptionByAgency]
+      select agency, count (*) lei from  #${materializedView} where upper(lei) not in (#${filterList}) group by agency
+      """.as[FilersUsingExemptionByAgency]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
@@ -171,28 +178,25 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   }
 
   def fetchLarCountUsingExemptionByAgency(period: String): Task[Seq[LarCountUsingExemptionByAgency]] = {
-    val tsTable = tsTableSelector(period)
-    val larTable = larTableSelector(period)
+    val larTable = larTableSelector(period, "lar_exemptions")
     val query = sql"""
-      select agency as agency, count(*) from #${larTable} as lar left join #${tsTable} as ts on upper(lar.lei) = upper(ts.lei) where upper(ts.lei) not in (#${filterList}) and lar.street = 'exempt' or lar.city = 'exempt' or lar.zip = 'exempt' or rate_spread = 'exempt' or credit_score_applicant = '1111' or credit_score_co_applicant = '1111' or credit_score_type_applicant = '1111' or credit_score_type_co_applicant = '1111' or denial_reason1 = '1111' or total_loan_costs = 'exempt' or total_points = 'exempt' or origination_charges = 'exempt' or discount_points = 'exempt' or lender_credits = 'exempt' or interest_rate = 'exempt' or payment_penalty = 'exempt' or debt_to_incode = 'exempt' or loan_value_ratio = 'exempt' or loan_term = 'exempt' or rate_spread_intro = '1111' or baloon_payment = '1111' or insert_only_payment = '1111' or amortization = '1111' or other_amortization = '1111' or property_value = 'exempt' or application_submission = '1111' or lan_property_interest = '1111' or mf_affordable = 'exempt' or home_security_policy = '1111' or payable = '1111' or nmls = 'exempt' or aus1_result = '1111' or other_aus = '1111' or other_aus_result = '1111' or reverse_mortgage = '1111' or line_of_credits = '1111' or business_or_commercial = '1111' group by agency order by agency asc
+      select * from #${larTable} where upper(lei) NOT IN (#${filterList}) group by agency;
       """.as[LarCountUsingExemptionByAgency]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
   def fetchOpenEndCreditFilersByAgency(period: String): Task[Seq[OpenEndCreditByAgency]] = {
-    val tsTable = tsTableSelector(period)
-    val larTable = larTableSelector(period)
+    val larTable = larTableSelector(period, "open_end_credit")
     val query = sql"""
-      select agency ,count(ts.lei)from  #${tsTable} as ts where upper(ts.lei) NOT IN (#${filterList}) and upper(ts.lei) in ( select distinct(upper(lar.lei)) from #${larTable} as lar group by  lar.lei having sum(case when line_of_credits=1 then 1 else 0 end) >0)group by  ts.agency
+      select count(*) from #${larTable} where upper(lei) NOT IN (#${filterList}) group by agency;
       """.as[OpenEndCreditByAgency]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
   def fetchOpenEndCreditLarCountByAgency(period: String): Task[Seq[OpenEndCreditLarCountByAgency]] = {
-    val tsTable = tsTableSelector(period)
-    val larTable = larTableSelector(period)
+    val larTable = larTableSelector(period, "open_end_credit_lar")
     val query = sql"""
-      select ts.agency, count(lar.*) from #${tsTable} as ts left join #${larTable} as lar on upper(ts.lei) = upper(lar.lei) where line_of_credits = 1 and ts.lei NOT IN (#${filterList}) group by ts.agency
+      select agency, count(*) from where upper(lei) NOT IN (#${filterList}) group by agency;
       """.as[OpenEndCreditLarCountByAgency]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
@@ -202,7 +206,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     val larTable = larTableSelector(period)
     val query = sql"""
       select agency, count(*) from #${tsTable} as ts where lei NOT IN (#${filterList}) and upper(lei) in ( select upper(lei) from #${larTable} as lar group by lei having sum(case when line_of_credits=2 or line_of_credits=1111 then 1 else 0 end) <=0) group by ts.agency
-            """.as[FilersWithOnlyOpenEndCreditTransactions]
+      """.as[FilersWithOnlyOpenEndCreditTransactions]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
