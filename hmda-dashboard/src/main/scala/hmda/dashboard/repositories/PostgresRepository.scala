@@ -196,7 +196,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   def fetchOpenEndCreditLarCountByAgency(period: String): Task[Seq[OpenEndCreditLarCountByAgency]] = {
     val larTable = larTableSelector(period, "open_end_credit_lar")
     val query = sql"""
-      select agency, count(*) from where upper(lei) NOT IN (#${filterList}) group by agency;
+      select agency, count(*) from #${larTable} where upper(lei) NOT IN (#${filterList}) group by agency;
       """.as[OpenEndCreditLarCountByAgency]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
