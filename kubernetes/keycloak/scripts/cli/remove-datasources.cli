@@ -1,0 +1,15 @@
+embed-server --server-config=standalone.xml --std-out=discard
+batch
+data-source remove --name=ExampleDS
+/subsystem=ee/service=default-bindings:write-attribute(name=datasource,value=undefined)
+/subsystem=datasources/jdbc-driver=h2:remove()
+run-batch
+stop-embedded-server
+
+embed-server --server-config=standalone-ha.xml --std-out=discard
+batch
+data-source remove --name=ExampleDS
+/subsystem=ee/service=default-bindings:write-attribute(name=datasource,value=undefined)
+/subsystem=datasources/jdbc-driver=h2:remove()
+run-batch
+stop-embedded-server
