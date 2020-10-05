@@ -6,6 +6,8 @@ Keycloak is built from a modified version of the [dockerfile](https://repo1.dsop
 1. The base image `FROM` command is modified to remove the `BASE_REGISTRY` argument.
 1. The package mamager in the first `RUN` command is modified to use `apt` rather than `dnf`
 
+This Keycloak image can be built by running `docker build -t <registry>/keycloak .` from this directory.
+
 # Deploying Keycloak
 
 Keycloak is deployed using the [helm chart by Codecentric](https://github.com/codecentric/helm-charts/tree/master/charts/keycloak) and the `values.yaml` contained in this directory.
