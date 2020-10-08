@@ -22,7 +22,7 @@ import cats.implicits._
 import com.typesafe.config.Config
 import hmda.api.http.admin.SubmissionAdminHttpApi.{pipeDelimitedFileStream, validateRawSubmissionId}
 import hmda.auth.OAuth2Authorization
-import hmda.messages.filing.FilingCommands.GetLatestSignedSubmission
+import hmda.messages.filing.FilingCommands.{GetLatestSignedSubmission, GetOldestSignedSubmission}
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.submission.{Submission, SubmissionId}
@@ -113,7 +113,41 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
     EntityStreamingSupport.csv()
 
   val routes: OAuth2Authorization => Route = { (oauth2Authorization: OAuth2Authorization) =>
-    (extractUri & get & path("admin" / Segment /"signed" / "hmdafile" / IntNumber )) { (uri, lei, period) =>
+    (extractUri & get & path("admin" / Segment / "oldest" /"signed" / IntNumber )) { (uri, lei, period) =>
+      oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
+        val fil = selectFiling(clusterSharding, lei, period, Some(""))
+        val fOldestSigned: Future[Option[Submission]] = fil ? (ref => GetOldestSignedSubmission(ref))
+
+        onComplete(fOldestSigned) {
+          case Success(Some(submission)) =>
+            complete(ToResponseMarshallable(submission))
+          case Success(None) =>
+            complete(NotFound)
+          case Failure(exception) =>
+            log.error("Error whilst trying to check if the submission exists", exception)
+            complete(InternalServerError)
+        }
+      }
+    }
+
+    (extractUri & get & path("admin" / Segment / "latest" / "signed"  / IntNumber )) { (uri, lei, period) =>
+      oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
+        val fil = selectFiling(clusterSharding, lei, period, Some(""))
+        val fLatestSigned: Future[Option[Submission]] = fil ? (ref => GetLatestSignedSubmission(ref))
+
+        onComplete(fLatestSigned) {
+          case Success(Some(submission)) =>
+              complete(ToResponseMarshallable(submission))
+          case Success(None) =>
+            complete(NotFound)
+          case Failure(exception) =>
+            log.error("Error whilst trying to check if the submission exists", exception)
+            complete(InternalServerError)
+        }
+      }
+    }
+
+    (extractUri & get & path("admin" / Segment / "latest" / "signed" / "hmdafile" / IntNumber )) { (uri, lei, period) =>
       oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
         val fil = selectFiling(clusterSharding, lei, period, Some(""))
         val fLatest: Future[Option[Submission]] = fil ? (ref => GetLatestSignedSubmission(ref))

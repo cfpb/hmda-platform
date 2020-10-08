@@ -117,6 +117,15 @@ object FilingPersistence extends HmdaTypedPersistentActor[FilingCommand, FilingE
         replyTo ! maybeSignedSubmission
         Effect.none
 
+      //This method will be similar to GetLatestSubmission but will fetch the one with highest sequencenumber and status of Signed (15)
+      case GetOldestSignedSubmission(replyTo) =>
+        val maybeSignedSubmission = state.submissions
+          .filter(_.status == Signed )
+          .sortWith(_.id.sequenceNumber < _.id.sequenceNumber)
+          .headOption
+        replyTo ! maybeSignedSubmission
+        Effect.none
+
       case FilingStop() =>
         Effect.stop()
 
