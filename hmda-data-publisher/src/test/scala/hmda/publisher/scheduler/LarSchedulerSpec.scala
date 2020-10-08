@@ -14,6 +14,7 @@ import com.typesafe.config.Config
 import hmda.publisher.query.component.{ PublisherComponent2018, PublisherComponent2019, PublisherComponent2020 }
 import hmda.publisher.query.lar._
 import hmda.publisher.scheduler.schedules.Schedules
+import hmda.query.ts.TransmittalSheetEntity
 import hmda.utils.EmbeddedPostgres
 import org.scalatest.concurrent.{ Eventually, ScalaFutures }
 import org.scalatest.time.{ Millis, Minutes, Span }
@@ -46,6 +47,10 @@ class LarSchedulerSpec
   val larRepository2019 = new LarRepository2019(dbConfig)
   val larRepository2020 = new LarRepository2020(dbConfig)
 
+  val tsRepository2018 = new TransmittalSheetRepository2018(dbConfig)
+  val tsRepository2019 = new TransmittalSheetRepository2019(dbConfig)
+  val tsRepository2020 = new TransmittalSheetRepository2020(dbConfig)
+
   val awsConfig: Config    = system.settings.config.getConfig("private-aws")
   val accessKeyId: String  = awsConfig.getString("private-access-key-id")
   val secretAccess: String = awsConfig.getString("private-secret-access-key ")
@@ -71,6 +76,9 @@ class LarSchedulerSpec
     super.beforeAll()
     Await.ready(larRepository2018.createSchema(), 30.seconds)
     Await.ready(larRepository2019.createSchema(), 30.seconds)
+    Await.ready(tsRepository2018.createSchema(), 30.seconds)
+    Await.ready(tsRepository2019.createSchema(), 30.seconds)
+    Await.ready(tsRepository2020.createSchema(), 30.seconds)
 
     val properties: mutable.Map[String, Object] =
       mutable // S3 Mock mutates the map so we cannot use an immutable map :(
@@ -106,6 +114,8 @@ class LarSchedulerSpec
     whenReady(for {
       r1 <- larRepository2018.insert(data)
       r2 <- larRepository2018.insert(data.copy(larPartOne = data.larPartOne.copy(lei = "EXAMPLE-LEI-2")))
+      _  <- tsRepository2018.insert(TransmittalSheetEntity(lei = "EXAMPLE-LEI-1", totalLines = 1))
+      _  <- tsRepository2018.insert(TransmittalSheetEntity(lei = "EXAMPLE-LEI-2", totalLines = 1))
     } yield r1 + r2)(_ == 2)
 
     val actor = system.actorOf(Props[LarScheduler], "lar-scheduler")
@@ -117,14 +127,19 @@ class LarSchedulerSpec
     val key           = s"$environment/lar/$fileName"
 
     // it takes a while for the data to appear in S3 so keep rerunning the following block until the assertion is true
-    eventually {
+    val metadata = eventually {
       val result =
         S3.getObjectMetadata(bucket, key)
           .withAttributes(S3Attributes.settings(s3Settings))
           .runWith(Sink.head)
 
-      whenReady(result)(_ should not be empty)
+      whenReady(result) { metadataOpt =>
+        metadataOpt should not be empty
+        metadataOpt.get
+      }
     }
+    val rowCount = metadata.metadata.find(_.lowercaseName() == s"x-amz-meta-${LarScheduler.entriesCountMetaName}").map(_.value())
+    assert(rowCount.contains("2"))
 
     watch(actor)
     system.stop(actor)
@@ -145,6 +160,8 @@ class LarSchedulerSpec
     whenReady(for {
       r1 <- larRepository2019.insert(data)
       r2 <- larRepository2019.insert(data.copy(larPartOne = data.larPartOne.copy(lei = "EXAMPLE-LEI-2")))
+      _  <- tsRepository2019.insert(TransmittalSheetEntity(lei = "EXAMPLE-LEI-1", totalLines = 1))
+      _  <- tsRepository2019.insert(TransmittalSheetEntity(lei = "EXAMPLE-LEI-2", totalLines = 1))
     } yield r1 + r2)(_ == 2)
 
     val actor = system.actorOf(Props[LarScheduler], "lar-scheduler")
@@ -156,14 +173,19 @@ class LarSchedulerSpec
     val key           = s"$environment/lar/$fileName"
 
     // it takes a while for the data to appear in S3 so keep rerunning the following block until the assertion is true
-    eventually {
+    val metadata = eventually {
       val result =
         S3.getObjectMetadata(bucket, key)
           .withAttributes(S3Attributes.settings(s3Settings))
           .runWith(Sink.head)
 
-      whenReady(result)(_ should not be empty)
+      whenReady(result) { metadataOpt =>
+        metadataOpt should not be empty
+        metadataOpt.get
+      }
     }
+    val rowCount = metadata.metadata.find(_.lowercaseName() == s"x-amz-meta-${LarScheduler.entriesCountMetaName}").map(_.value())
+    assert(rowCount.contains("2"))
 
     watch(actor)
     system.stop(actor)
@@ -184,6 +206,8 @@ class LarSchedulerSpec
     whenReady(for {
       r1 <- larRepository2019.insert(data)
       r2 <- larRepository2019.insert(data.copy(larPartOne = data.larPartOne.copy(lei = "EXAMPLE-LEI-4")))
+      _  <- tsRepository2019.insert(TransmittalSheetEntity(lei = "EXAMPLE-LEI-3", totalLines = 1))
+      _  <- tsRepository2019.insert(TransmittalSheetEntity(lei = "EXAMPLE-LEI-4", totalLines = 1))
     } yield r1 + r2)(_ == 2)
 
     val now           = LocalDateTime.now().minusDays(1)
@@ -194,14 +218,20 @@ class LarSchedulerSpec
     val actor = system.actorOf(Props[LarScheduler], "lar-scheduler")
     actor ! Schedules.LarSchedulerLoanLimit2019
 
-    eventually {
+    val metadata = eventually {
       val result =
         S3.getObjectMetadata(bucket, key)
           .withAttributes(S3Attributes.settings(s3Settings))
           .runWith(Sink.head)
 
-      whenReady(result)(_ should not be empty)
+      whenReady(result) { metadataOpt =>
+        metadataOpt should not be empty
+        metadataOpt.get
+      }
     }
+    val rowCount = metadata.metadata.find(_.lowercaseName() == s"x-amz-meta-${LarScheduler.entriesCountMetaName}").map(_.value())
+    assert(rowCount.contains("2"))
+
     watch(actor)
     system.stop(actor)
     expectTerminated(actor)
@@ -218,7 +248,10 @@ class LarSchedulerSpec
       LarPartSeven2020()
     )
 
-    whenReady(larRepository2020.insert(data))(_ shouldBe 1)
+    whenReady(for {
+      r1 <- larRepository2020.insert(data)
+      _  <- tsRepository2020.insert(TransmittalSheetEntity(lei = "EXAMPLE-LEI", totalLines = 1))
+    } yield r1)(_ shouldBe 1)
 
     val now           = LocalDateTime.now().minusDays(1)
     val formattedDate = fullDateQuarterly.format(now)
@@ -228,14 +261,20 @@ class LarSchedulerSpec
     val actor = system.actorOf(Props[LarScheduler], "lar-scheduler")
     actor ! Schedules.LarSchedulerQuarterly2020
 
-    eventually {
+    val metadata = eventually {
       val result =
         S3.getObjectMetadata(bucket, key)
           .withAttributes(S3Attributes.settings(s3Settings))
           .runWith(Sink.head)
 
-      whenReady(result)(_ should not be empty)
+      whenReady(result) { metadataOpt =>
+        metadataOpt should not be empty
+        metadataOpt.get
+      }
     }
+    val rowCount = metadata.metadata.find(_.lowercaseName() == s"x-amz-meta-${LarScheduler.entriesCountMetaName}").map(_.value())
+    assert(rowCount.contains("1"))
+
     watch(actor)
     system.stop(actor)
     expectTerminated(actor)

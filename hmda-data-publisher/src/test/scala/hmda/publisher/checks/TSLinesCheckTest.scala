@@ -1,10 +1,9 @@
-package hmda.publisher.checks
+package hmda.publisher.validation
 
 import akka.actor.ActorSystem
 import akka.testkit.TestKit
 import hmda.publisher.query.component.PublisherComponent2018
 import hmda.publisher.query.lar._
-import hmda.publisher.validation.TSLinesCheck
 import hmda.query.ts.TransmittalSheetEntity
 import hmda.utils.EmbeddedPostgres
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
@@ -29,11 +28,8 @@ class TSLinesCheckTest
 
   override implicit def patienceConfig: PatienceConfig = PatienceConfig(timeout = Span(2, Minutes), interval = Span(100, Millis))
 
-  val check = new TSLinesCheck(dbConfig)
-
-  val tsRepo2018   = new check.TransmittalSheetRepository2018(dbConfig)
-  val larRepo2018  = new check.LarRepository2018(dbConfig)
-  val mlarRepo2018 = new check.ModifiedLarRepository2018(dbConfig)
+  val tsRepo2018  = new TransmittalSheetRepository2018(dbConfig)
+  val larRepo2018 = new LarRepository2018(dbConfig)
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -41,55 +37,91 @@ class TSLinesCheckTest
       Future.sequence(
         List(
           tsRepo2018.createSchema(),
-          larRepo2018.createSchema(),
-          mlarRepo2018.createSchema()
+          larRepo2018.createSchema()
         )
       ),
       30.seconds
     )
   }
 
-  "2018 check - no data in lar" in {
+  "no data in lar" in {
 
     val lei1 = "EXAMPLE-LEI"
     val ts1  = TransmittalSheetEntity(lei = lei1, totalLines = 10, submissionId = Some("sub1"))
 
+    val check = new TSLinesCheck(dbConfig, validationTSData2018, validationLarData2018)
+
     val test = for {
       _      <- tsRepo2018.insert(ts1)
-      result <- check.check("2018")
+      result <- check.check()
       _ = assert(
         result == Left(
-          """Error in data publishing for year 2018. Some of the LEIs has different counts of records in Transmittal Sheet table and in LAR table.
-            |LEI: EXAMPLE-LEI, submissionId: sub1, countFromTs: 10, countFromLar: null, larTableName: loanapplicationregister2018
-            |LEI: EXAMPLE-LEI, submissionId: sub1, countFromTs: 10, countFromLar: null, larTableName: modifiedlar2018"""".stripMargin
+          """Some of the LEIs has different counts of records in Transmittal Sheet table and in LAR table.
+            |LEI: EXAMPLE-LEI, submissionId: sub1, countFromTs: 10, countFromLar: null""".stripMargin
         )
       )
     } yield ()
 
-    whenReady(test)(_ => ())
+    test.futureValue
 
   }
 
-  "2018 check - different data in lar" in {
+  "different data in lar" in {
 
-    val lei1 = "EXAMPLE-LEI"
-    val ts1  = TransmittalSheetEntity(lei = lei1, totalLines = 10, submissionId = Some("sub1"))
+    val lei1  = "EXAMPLE-LEI"
+    val ts1   = TransmittalSheetEntity(lei = lei1, totalLines = 10, submissionId = Some("sub1"))
+    val check = new TSLinesCheck(dbConfig, validationTSData2018, validationLarData2018)
     val test = for {
       _      <- tsRepo2018.insert(ts1)
       _      <- larRepo2018.insert(dummyLar2018)
       _      <- larRepo2018.insert(dummyLar2018)
-      _      <- mlarRepo2018.insert(dummyMLar2018)
-      result <- check.check("2018")
+      result <- check.check()
       _ = assert(
         result == Left(
-          """Error in data publishing for year 2018. Some of the LEIs has different counts of records in Transmittal Sheet table and in LAR table.
-            |LEI: EXAMPLE-LEI, submissionId: sub1, countFromTs: 10, countFromLar: 2, larTableName: loanapplicationregister2018
-            |LEI: EXAMPLE-LEI, submissionId: sub1, countFromTs: 10, countFromLar: 1, larTableName: modifiedlar2018"""".stripMargin
+          """Some of the LEIs has different counts of records in Transmittal Sheet table and in LAR table.
+            |LEI: EXAMPLE-LEI, submissionId: sub1, countFromTs: 10, countFromLar: 2""".stripMargin
         )
       )
     } yield ()
 
-    whenReady(test)(_ => ())
+    test.futureValue
+
+  }
+
+  "matching data in lar - 0" in {
+
+    val lei1 = "EXAMPLE-LEI"
+    val ts1  = TransmittalSheetEntity(lei = lei1, totalLines = 0, submissionId = Some("sub1"))
+
+    val check = new TSLinesCheck(dbConfig, validationTSData2018, validationLarData2018)
+
+    val test = for {
+      _      <- tsRepo2018.insert(ts1)
+      result <- check.check()
+      _ = assert(
+        result == Right(())
+      )
+    } yield ()
+
+    test.futureValue
+
+  }
+
+  "matching data in lar - non 0" in {
+
+    val lei1  = "EXAMPLE-LEI"
+    val ts1   = TransmittalSheetEntity(lei = lei1, totalLines = 1, submissionId = Some("sub1"))
+    val check = new TSLinesCheck(dbConfig, validationTSData2018, validationLarData2018)
+    val test = for {
+      _      <- tsRepo2018.insert(ts1)
+      _      <- larRepo2018.insert(dummyLar2018)
+      result <- check.check()
+      _ = assert(
+        result == Right(())
+      )
+    } yield ()
+
+    test.futureValue
 
   }
 
@@ -102,13 +134,5 @@ class TSLinesCheckTest
     LarPartSix2018()
   )
 
-  def dummyMLar2018 = ModifiedLarEntityImpl(
-    ModifiedLarPartOne(filingYear = Some(2018), lei = "EXAMPLE-LEI"),
-    ModifiedLarPartTwo(),
-    ModifiedLarPartThree(),
-    ModifiedLarPartFour(),
-    ModifiedLarPartFive(),
-    ModifiedLarPartSix()
-  )
   override def bootstrapSqlFile: String = ""
 }

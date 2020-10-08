@@ -87,10 +87,10 @@ class LarScheduler
 
         val allResultsSource: Source[String, NotUsed] =
           Source
-            .fromPublisher(larRepository2019.getAllLARs(getFilterList()))
+            .fromPublisher(larRepository2018.getAllLARs(getFilterList()))
             .map(larEntity => larEntity.toRegulatorPSV)
 
-        def countF: Future[Int] = larRepository2019.getAllLARsCount(getFilterList())
+        def countF: Future[Int] = larRepository2018.getAllLARsCount(getFilterList())
 
         publishPSVtoS3(fileName, allResultsSource, countF)
       }

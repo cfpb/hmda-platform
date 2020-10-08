@@ -1,20 +1,20 @@
 package hmda.publisher.scheduler
 
-import akka.actor.{ ActorSystem, Props }
+import akka.actor.{ActorSystem, Props}
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{ MemoryBufferType, S3Attributes, S3Settings }
+import akka.stream.alpakka.s3.{MemoryBufferType, S3Attributes, S3Settings}
 import akka.stream.scaladsl.Sink
-import akka.testkit.{ ImplicitSender, TestKit }
+import akka.testkit.{ImplicitSender, TestKit}
 import com.adobe.testing.s3mock.S3MockApplication
 import hmda.publisher.query.component.PublisherComponent2018
 import hmda.publisher.scheduler.schedules.Schedules
 import hmda.query.ts.TransmittalSheetEntity
 import hmda.utils.EmbeddedPostgres
-import org.scalatest.concurrent.{ Eventually, ScalaFutures }
-import org.scalatest.time.{ Millis, Minute, Span }
-import org.scalatest.{ BeforeAndAfterEach, FreeSpecLike, Matchers }
-import software.amazon.awssdk.auth.credentials.{ AwsBasicCredentials, StaticCredentialsProvider }
+import org.scalatest.concurrent.{Eventually, ScalaFutures}
+import org.scalatest.time.{Millis, Minute, Span}
+import org.scalatest.{BeforeAndAfterEach, FreeSpecLike, Matchers}
+import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.regions.providers.AwsRegionProvider
 
@@ -36,6 +36,7 @@ class TsPublicSchedulerSpec
 
   var s3mock: S3MockApplication = _
   val tsRepository              = new TransmittalSheetRepository2018(dbConfig)
+  val mlarRepository            = new ModifiedLarRepository2018(dbConfig)
 
   override implicit def patienceConfig: PatienceConfig = PatienceConfig(timeout = Span(1, Minute), interval = Span(100, Millis))
 
@@ -44,6 +45,7 @@ class TsPublicSchedulerSpec
   override def beforeAll(): Unit = {
     super.beforeAll()
     Await.ready(tsRepository.createSchema(), 30.seconds)
+    Await.ready(mlarRepository.createSchema(), 30.seconds)
     val properties: mutable.Map[String, Object] =
       mutable // S3 Mock mutates the map so we cannot use an immutable map :(
         .Map(
@@ -83,7 +85,7 @@ class TsPublicSchedulerSpec
       .withS3RegionProvider(awsRegionProvider)
       .withListBucketApiVersion(ListBucketVersion2)
 
-    val fileNamePSV = "2018_ts.txt"
+    val fileNamePSV = "2018_ts.zip"
     val key         = s"$environment/dynamic-data/2018/$fileNamePSV"
 
     val actor = system.actorOf(Props[TsPublicScheduler], "ts-public-scheduler")
