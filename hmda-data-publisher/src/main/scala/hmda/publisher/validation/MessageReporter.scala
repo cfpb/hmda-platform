@@ -10,7 +10,7 @@ import io.circe.syntax._
 import scala.concurrent.Future
 
 /**
- * curl -i -X POST -H 'Content-Type: application/json' -d '{"text": "Hello, this is some text\nThis is more text. :tada:"}' https://mattermost.goraft.tech/hooks/8s3e7grnxfgh3eusqzqwfp4cty
+ * curl -i -X POST -H 'Content-Type: application/json' -d '{"text": "Hello, this is some text\nThis is more text. :tada:"}' https://mattermost.goraft.tech/hooks/xxx
  * @param mattermostUrl
  */
 class MessageReporter(mattermostUrl: String)(implicit as: ActorSystem) extends LazyLogging {
