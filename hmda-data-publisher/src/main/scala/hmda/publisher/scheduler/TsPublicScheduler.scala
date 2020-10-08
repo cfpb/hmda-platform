@@ -9,23 +9,32 @@ import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.actor.HmdaActor
 import hmda.publisher.helper.{ PublicAWSConfigLoader, SnapshotCheck, TSHeader }
-import hmda.publisher.query.component.{ PublisherComponent2018, PublisherComponent2019 }
+import hmda.publisher.query.component.{ PublisherComponent2018, PublisherComponent2019, PublisherComponent2020 }
 import hmda.publisher.scheduler.schedules.Schedules.{ TsPublicScheduler2018, TsPublicScheduler2019 }
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.ts._
 import hmda.util.BankFilterUtils._
 import akka.stream.alpakka.file.scaladsl.Archive
 import akka.stream.alpakka.file.ArchiveMetadata
+import hmda.publisher.validation.PublishingGuard
+import hmda.publisher.validation.PublishingGuard.{ Scope, Year }
 
 import scala.concurrent.Future
 import scala.util.{ Failure, Success }
 
-class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with PublisherComponent2019 with TSHeader with PublicAWSConfigLoader {
+class TsPublicScheduler
+  extends HmdaActor
+    with PublisherComponent2018
+    with PublisherComponent2019
+    with PublisherComponent2020
+    with TSHeader
+    with PublicAWSConfigLoader {
 
-  implicit val ec           = context.system.dispatcher
-  implicit val materializer = Materializer(context)
-  def tsRepository2018      = new TransmittalSheetRepository2018(dbConfig)
-  def tsRepository2019      = new TransmittalSheetRepository2019(dbConfig)
+  implicit val ec                      = context.system.dispatcher
+  implicit val materializer            = Materializer(context)
+  def tsRepository2018                 = new TransmittalSheetRepository2018(dbConfig)
+  def tsRepository2019                 = new TransmittalSheetRepository2019(dbConfig)
+  val publishingGuard: PublishingGuard = PublishingGuard.create(this)(context.system)
 
   val s3Settings =
     S3Settings(context.system)
@@ -49,25 +58,29 @@ class TsPublicScheduler extends HmdaActor with PublisherComponent2018 with Publi
   override def receive: Receive = {
 
     case TsPublicScheduler2018 =>
-      val fileName         = "2018_ts.txt"
-      val zipDirectoryName = "2018_ts.zip"
-      val s3Path           = s"$environmentPublic/dynamic-data/2018/"
-      val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
-      if (SnapshotCheck.snapshotActive) {
-        tsPublicStream("2018", SnapshotCheck.snapshotBucket, fullFilePath, fileName)
-      } else {
-        tsPublicStream("2018", bucketPublic, fullFilePath, fileName)
+      publishingGuard.runIfDataIsValid(Year.y2018, Scope.Public) {
+        val fileName         = "2018_ts.txt"
+        val zipDirectoryName = "2018_ts.zip"
+        val s3Path           = s"$environmentPublic/dynamic-data/2018/"
+        val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
+        if (SnapshotCheck.snapshotActive) {
+          tsPublicStream("2018", SnapshotCheck.snapshotBucket, fullFilePath, fileName)
+        } else {
+          tsPublicStream("2018", bucketPublic, fullFilePath, fileName)
+        }
       }
 
     case TsPublicScheduler2019 =>
-      val fileName         = "2019_ts.txt"
-      val zipDirectoryName = "2019_ts.zip"
-      val s3Path           = s"$environmentPublic/dynamic-data/2019/"
-      val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
-      if (SnapshotCheck.snapshotActive) {
-        tsPublicStream("2019", SnapshotCheck.snapshotBucket, fullFilePath, fileName)
-      } else {
-        tsPublicStream("2019", bucketPublic, fullFilePath, fileName)
+      publishingGuard.runIfDataIsValid(Year.y2018, Scope.Public) {
+        val fileName         = "2019_ts.txt"
+        val zipDirectoryName = "2019_ts.zip"
+        val s3Path           = s"$environmentPublic/dynamic-data/2019/"
+        val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
+        if (SnapshotCheck.snapshotActive) {
+          tsPublicStream("2019", SnapshotCheck.snapshotBucket, fullFilePath, fileName)
+        } else {
+          tsPublicStream("2019", bucketPublic, fullFilePath, fileName)
+        }
       }
   }
   private def tsPublicStream(year: String, bucket: String, path: String, fileName: String) = {

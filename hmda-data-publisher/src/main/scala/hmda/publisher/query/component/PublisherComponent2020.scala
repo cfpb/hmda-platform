@@ -5,6 +5,7 @@ import java.sql.Timestamp
 import hmda.publisher.helper.PGTableNameLoader
 import hmda.publisher.query.lar.{ LarEntityImpl2020, _ }
 import hmda.publisher.query.panel.InstitutionEntity
+import hmda.publisher.validation.{ LarData, TsData }
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
@@ -171,8 +172,6 @@ trait PublisherComponent2020 extends PGTableNameLoader {
         db.run(table.filterNot(ts => (ts.lei.toUpperCase inSet bankIgnoreList) || !ts.isQuarterly).result)
       else
         db.run(table.filterNot(ts => (ts.lei.toUpperCase inSet bankIgnoreList) || ts.isQuarterly).result)
-
-    def getDistinctLeiCount: Future[Int] = db.run(table.map(_.lei.toUpperCase).distinct.length.result)
   }
 
   class LarTable(tag: Tag) extends Table[LarEntityImpl2020](tag, lar2020TableName) {
@@ -530,7 +529,10 @@ trait PublisherComponent2020 extends PGTableNameLoader {
           .filterNot(lar => (lar.lei.toUpperCase inSet bankIgnoreList) && lar.isQuarterly)
       }
 
-    def getDistinctLeiCount: Future[Int] = db.run(table.map(_.lei.toUpperCase).distinct.length.result)
   }
+
+  val validationLarData2020: LarData = LarData[LarEntityImpl2020, LarTable](larTable2020)(_.lei)
+  val validationTSData2020: TsData =
+    TsData[TransmittalSheetEntity, TransmittalSheetTable](transmittalSheetTable2020)(_.lei, _.totalLines, _.submissionId)
 
 }

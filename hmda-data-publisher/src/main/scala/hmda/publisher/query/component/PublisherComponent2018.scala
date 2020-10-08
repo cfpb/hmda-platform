@@ -8,6 +8,7 @@ import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
 import hmda.publisher.query.lar.{ LarEntityImpl2018, _ }
 import hmda.publisher.query.panel.InstitutionEntity
+import hmda.publisher.validation.{ LarData, TsData }
 import slick.basic.{ DatabaseConfig, DatabasePublisher }
 import slick.jdbc.{ JdbcProfile, ResultSetConcurrency, ResultSetType }
 
@@ -169,8 +170,6 @@ trait PublisherComponent2018 extends PGTableNameLoader {
 
     def getAllSheets(bankIgnoreList: Array[String]): Future[Seq[TransmittalSheetEntity]] =
       db.run(table.filterNot(_.lei.toUpperCase inSet bankIgnoreList).result)
-
-    def getDistinctLeiCount: Future[Int] = db.run(table.map(_.lei.toUpperCase).distinct.length.result)
   }
 
   class LarTable(tag: Tag) extends Table[LarEntityImpl2018](tag, lar2018TableName) {
@@ -478,8 +477,6 @@ trait PublisherComponent2018 extends PGTableNameLoader {
     protected def getAllLARsQuery(bankIgnoreList: Array[String]): Query[LarTable, LarEntityImpl2018, Seq] =
       table.filterNot(_.lei.toUpperCase inSet bankIgnoreList)
 
-    def getDistinctLeiCount: Future[Int] = db.run(table.map(_.lei.toUpperCase).distinct.length.result)
-
   }
 
   class ModifiedLarTable(tag: Tag) extends Table[ModifiedLarEntityImpl](tag, mlar2018TableName) {
@@ -777,7 +774,12 @@ trait PublisherComponent2018 extends PGTableNameLoader {
           .transactionally
       )
 
-    def getDistinctLeiCount: Future[Int] = db.run(table.map(_.lei.toUpperCase).distinct.length.result)
   }
+
+  val validationLarData2018: LarData = LarData[LarEntityImpl2018, LarTable](larTable2018)(_.lei)
+  val validationMLarData2018: LarData =
+    LarData[ModifiedLarEntityImpl, ModifiedLarTable](mlarTable2018)(_.lei)
+  val validationTSData2018: TsData =
+    TsData[TransmittalSheetEntity, TransmittalSheetTable](transmittalSheetTable2018)(_.lei, _.totalLines, _.submissionId)
 
 }

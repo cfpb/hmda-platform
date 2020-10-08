@@ -1,4 +1,4 @@
-package hmda.publisher.checks
+package hmda.publisher.validation
 
 import cats.syntax.all._
 import hmda.publisher.query.component.{ PublisherComponent2018, PublisherComponent2019, PublisherComponent2020 }
@@ -23,7 +23,13 @@ class LeiCountCheck(dbConfig: DatabaseConfig[JdbcProfile])(implicit ec: Executio
   val mlarRepository2018 = new ModifiedLarRepository2018(dbConfig)
   val mlarRepository2019 = new ModifiedLarRepository2019(dbConfig)
 
-  def check(year: String, allowedErrorMargin: Int): Future[Either[String, Unit]] = {
+  def check(year: String): Future[Either[String, Unit]] = {
+
+    val allowedErrorMargin: Int = year match {
+      case "2018" => 5
+      case "2019" => 0
+      case "2020" => 0
+    }
 
     val larLeiCountF: Future[Int] = year match {
       case "2018" => larRepository2018.getDistinctLeiCount
@@ -51,13 +57,14 @@ class LeiCountCheck(dbConfig: DatabaseConfig[JdbcProfile])(implicit ec: Executio
       val mlarCount                                  = mlarCountOpt.getOrElse(larCount)
       def diffWithinMargin(count1: Int, count2: Int) = (count1 - count2).abs <= allowedErrorMargin
       val isOk =
-        diffWithinMargin(larCount, mlarCount) ||
-          diffWithinMargin(mlarCount, tsCount) ||
+        diffWithinMargin(larCount, mlarCount) &&
+          diffWithinMargin(mlarCount, tsCount) &&
           diffWithinMargin(tsCount, larCount)
       Either.cond(
         isOk,
         (),
-        s"Number of distinct LEIs in LAR, MLAR, and TS mismatch more than allowed error margin ($allowedErrorMargin). " +
+        s"Error in data publishing for year ${year}. " +
+          s"Number of distinct LEIs in LAR, MLAR, and TS mismatch more than allowed error margin ($allowedErrorMargin). " +
           s"LAR: $larCount, MLAR: ${mlarCountOpt.getOrElse("N/A")}, TS: $tsCount"
       )
     }

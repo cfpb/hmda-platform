@@ -5,6 +5,7 @@ import java.sql.Timestamp
 import hmda.publisher.helper.PGTableNameLoader
 import hmda.publisher.query.lar.{ LarEntityImpl2019, _ }
 import hmda.publisher.query.panel.InstitutionEntity
+import hmda.publisher.validation.{ LarData, TsData }
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
@@ -168,8 +169,6 @@ trait PublisherComponent2019 extends PGTableNameLoader {
 
     def getAllSheets(bankIgnoreList: Array[String]): Future[Seq[TransmittalSheetEntity]] =
       db.run(table.filterNot(_.lei.toUpperCase inSet bankIgnoreList).result)
-
-    def getDistinctLeiCount: Future[Int] = db.run(table.map(_.lei.toUpperCase).distinct.length.result)
   }
 
   class LarTable(tag: Tag) extends Table[LarEntityImpl2019](tag, lar2019TableName) {
@@ -513,8 +512,6 @@ trait PublisherComponent2019 extends PGTableNameLoader {
       )
     protected def getAllLARsQuery(bankIgnoreList: Array[String]): Query[LarTable, LarEntityImpl2019, Seq] =
       table.filterNot(_.lei.toUpperCase inSet bankIgnoreList)
-
-    def getDistinctLeiCount: Future[Int] = db.run(table.map(_.lei.toUpperCase).distinct.length.result)
   }
 
   class ModifiedLarTable(tag: Tag) extends Table[ModifiedLarEntityImpl](tag, mlar2019TableName) {
@@ -813,8 +810,12 @@ trait PublisherComponent2019 extends PGTableNameLoader {
           )
           .transactionally
       )
-
-    def getDistinctLeiCount: Future[Int] = db.run(table.map(_.lei.toUpperCase).distinct.length.result)
   }
+
+  val validationLarData2019: LarData = LarData[LarEntityImpl2019, LarTable](larTable2019)(_.lei)
+  val validationMLarData2019: LarData =
+    LarData[ModifiedLarEntityImpl, ModifiedLarTable](mlarTable2019)(_.lei)
+  val validationTSData2019: TsData =
+    TsData[TransmittalSheetEntity, TransmittalSheetTable](transmittalSheetTable2019)(_.lei, _.totalLines, _.submissionId)
 
 }
