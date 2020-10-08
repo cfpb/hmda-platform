@@ -8,7 +8,7 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.{ PublicAWSConfigLoader, SnapshotCheck, TSHeader }
+import hmda.publisher.helper.{ PrivateAWSConfigLoader, PublicAWSConfigLoader, S3Archiver, SnapshotCheck, TSHeader }
 import hmda.publisher.query.component.{ PublisherComponent2018, PublisherComponent2019, PublisherComponent2020 }
 import hmda.publisher.scheduler.schedules.Schedules.{ TsPublicScheduler2018, TsPublicScheduler2019 }
 import hmda.query.DbConfiguration.dbConfig
@@ -28,7 +28,8 @@ class TsPublicScheduler
     with PublisherComponent2019
     with PublisherComponent2020
     with TSHeader
-    with PublicAWSConfigLoader {
+    with PublicAWSConfigLoader
+    with PrivateAWSConfigLoader {
 
   implicit val ec                      = context.system.dispatcher
   implicit val materializer            = Materializer(context)
@@ -83,10 +84,10 @@ class TsPublicScheduler
         }
       }
   }
-  private def tsPublicStream(year: String, bucket: String, path: String, fileName: String) = {
+  private def tsPublicStream(year: String, bucket: String, key: String, fileName: String) = {
 
     val s3SinkPSV =
-      S3.multipartUpload(bucket, path).withAttributes(S3Attributes.settings(s3Settings))
+      S3.multipartUpload(bucket, key).withAttributes(S3Attributes.settings(s3Settings))
 
     val allResults: Future[Seq[TransmittalSheetEntity]] =
       year match {
@@ -110,16 +111,16 @@ class TsPublicScheduler
       List((ArchiveMetadata(fileName), fileStream))
     )
 
-    val resultsPSV: Future[MultipartUploadResult] =
-      zipStream
-        .via(Archive.zip())
-        .runWith(s3SinkPSV)
+    val resultsPSV = for {
+      _            <- S3Archiver.archiveFileIfExists(bucket, key, bucketPrivate, s3Settings)
+      uploadResult <- zipStream.via(Archive.zip()).runWith(s3SinkPSV)
+    } yield uploadResult
 
     resultsPSV onComplete {
       case Success(result) =>
-        log.info("Pushed to S3: " + s"$bucket/$path" + ".")
+        log.info("Pushed to S3: " + s"$bucket/$key" + ".")
       case Failure(t) =>
-        log.info("An error has occurred with: " + path + "; Getting Public TS Data in Future: " + t.getMessage)
+        log.info("An error has occurred with: " + key + "; Getting Public TS Data in Future: " + t.getMessage)
     }
   }
 }

@@ -2,6 +2,8 @@ package hmda.publisher.scheduler
 
 import akka.NotUsed
 import akka.stream.Materializer
+import akka.stream.alpakka.file.ArchiveMetadata
+import akka.stream.alpakka.file.scaladsl.Archive
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3._
 import akka.stream.alpakka.s3.scaladsl.S3
@@ -9,20 +11,17 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.{ ModifiedLarHeader, PGTableNameLoader, PublicAWSConfigLoader, SnapshotCheck }
-import hmda.publisher.query.component.{ PublisherComponent2018, PublisherComponent2019, PublisherComponent2020 }
+import hmda.publisher.helper._
+import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020}
 import hmda.publisher.query.lar.ModifiedLarEntityImpl
-import hmda.publisher.scheduler.schedules.Schedules.{ LarPublicScheduler2018, LarPublicScheduler2019 }
+import hmda.publisher.scheduler.schedules.Schedules.{LarPublicScheduler2018, LarPublicScheduler2019}
+import hmda.publisher.validation.PublishingGuard
+import hmda.publisher.validation.PublishingGuard.{Scope, Year}
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
 import slick.basic.DatabasePublisher
-import akka.stream.alpakka.file.scaladsl.Archive
-import akka.stream.alpakka.file.ArchiveMetadata
-import hmda.publisher.validation.PublishingGuard
-import hmda.publisher.validation.PublishingGuard.{ Scope, Year }
 
-import scala.concurrent.Future
-import scala.util.{ Failure, Success }
+import scala.util.{Failure, Success}
 
 class LarPublicScheduler
   extends HmdaActor
@@ -31,7 +30,8 @@ class LarPublicScheduler
     with PublisherComponent2020
     with ModifiedLarHeader
     with PGTableNameLoader
-    with PublicAWSConfigLoader {
+    with PublicAWSConfigLoader
+    with PrivateAWSConfigLoader {
 
   implicit val ec           = context.system.dispatcher
   implicit val materializer = Materializer(context)
@@ -85,7 +85,7 @@ class LarPublicScheduler
 
   }
 
-  private def larPublicStream(year: String, bucket: String, path: String, fileName: String): Unit = {
+  private def larPublicStream(year: String, bucket: String, key: String, fileName: String): Unit = {
 
     val allResultsPublisher: DatabasePublisher[ModifiedLarEntityImpl] =
       year match {
@@ -99,7 +99,7 @@ class LarPublicScheduler
 
     //PSV Sync
     val s3SinkPSV = S3
-      .multipartUpload(bucket, path)
+      .multipartUpload(bucket, key)
       .withAttributes(S3Attributes.settings(s3Settings))
 
     val fileStream: Source[ByteString, Any] =
@@ -113,16 +113,17 @@ class LarPublicScheduler
 
     val zipStream = Source(List((ArchiveMetadata(fileName), fileStream)))
 
-    val resultsPSV: Future[MultipartUploadResult] =
-      zipStream
-        .via(Archive.zip())
-        .runWith(s3SinkPSV)
+    val resultsPSV = for {
+      _            <- S3Archiver.archiveFileIfExists(bucket, key, bucketPrivate, s3Settings)
+      uploadResult <- zipStream.via(Archive.zip()).runWith(s3SinkPSV)
+    } yield uploadResult
 
     resultsPSV onComplete {
       case Success(result) =>
-        log.info("Pushed to S3: " + s"$bucket/$path" + ".")
+        log.info("Pushed to S3: " + s"$bucket/$key" + ".")
       case Failure(t) =>
-        log.info("An error has occurred with: " + path + "; Getting Public LAR Data in Future: " + t.getMessage)
+        log.info("An error has occurred with: " + key + "; Getting Public LAR Data in Future: " + t.getMessage)
     }
   }
+
 }

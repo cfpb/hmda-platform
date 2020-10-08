@@ -95,7 +95,9 @@ class PublishingGuard(
 
 object PublishingGuard {
 
-  def create(dbCompontnents: PublisherComponent2018 with PublisherComponent2019 with PublisherComponent2020)(implicit as: ActorSystem) = {
+  def create(
+              dbCompontnents: PublisherComponent2018 with PublisherComponent2019 with PublisherComponent2020
+            )(implicit as: ActorSystem): PublishingGuard = {
     import as.dispatcher
     val config      = ConfigFactory.load("application.conf")
     val msgReporter = new MessageReporter(config.getString("hmda.publisher.validation.reportingUrl"))
