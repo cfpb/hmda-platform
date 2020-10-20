@@ -29,8 +29,8 @@ class PublishingGuard(
           logger.debug(s"Data validation successful")
           Future(thunk)
         case Validated.Invalid(errs) =>
-          val message = errs.toList.mkString("\n")
-          logger.error(s"Data validation failed for year ${year}. Files won't be published. Message:\n${message}")
+          val message = s"Data validation failed for year ${year}. Files won't be published. Message:\n${errs.toList.mkString("\n")}"
+          logger.error(message)
           messageReporter.report(message)
       })
       .recoverWith {

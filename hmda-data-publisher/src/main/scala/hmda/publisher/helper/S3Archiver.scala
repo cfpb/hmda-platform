@@ -6,10 +6,11 @@ import akka.stream.Materializer
 import akka.stream.alpakka.s3.{ S3Attributes, S3Settings }
 import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.Sink
+import com.typesafe.scalalogging.LazyLogging
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-object S3Archiver {
+object S3Archiver extends LazyLogging{
 
   def archiveFileIfExists(srcBucket: String, srcKey: String, destBucket: String, s3Settings: S3Settings)(
     implicit ec: ExecutionContext,
@@ -34,9 +35,11 @@ object S3Archiver {
         .runWith(Sink.head)
       srcExists = metadataOpt.isDefined
       _ <- if (srcExists) {
+        logger.info("Archiving : " + destBucket + "/" + destKey)
         S3.multipartCopy(srcBucket, srcKey, destBucket, destKey)
           .withAttributes(S3Attributes.settings(s3Settings))
           .run()
       } else Future.unit
+
     } yield ()
 }
