@@ -51,8 +51,8 @@ private[engine] object LarEngine2020 extends ValidationEngine[LoanApplicationReg
     V623,
     V624,
     V625_1,
-    V625_2.withIndexedTracts(CensusRecords.indexedTract2019),
-    V626.withIndexedCounties(CensusRecords.indexedCounty2019),
+    V625_2.withIndexedTracts(CensusRecords.indexedTract2020),
+    V626.withIndexedCounties(CensusRecords.indexedCounty2020),
     V628_1,
     V628_2,
     V628_3,
@@ -232,13 +232,13 @@ private[engine] object LarEngine2020 extends ValidationEngine[LoanApplicationReg
     V713,
     V714,
     V715,
-    V716.withIndexedCounties(CensusRecords.indexedCounty2019)
+    V716.withIndexedCounties(CensusRecords.indexedCounty2020)
   )
 
   override val qualityChecks = Vector(
     Q601,
     Q602,
-    Q603.withIndexedSmallCounties(CensusRecords.indexedSmallCounty2019),
+    Q603.withIndexedSmallCounties(CensusRecords.indexedSmallCounty2020),
     Q605_1,
     Q605_2,
     quality2020.Q606,
