@@ -52,6 +52,7 @@ class LarScheduler
 
   val indexTractMap2018: Map[String, Census] = CensusRecords.indexedTract2018
   val indexTractMap2019: Map[String, Census] = CensusRecords.indexedTract2019
+  val indexTractMap2020: Map[String, Census] = CensusRecords.indexedTract2020
 
   val s3Settings = S3Settings(context.system)
     .withBufferType(MemoryBufferType)
@@ -178,7 +179,8 @@ class LarScheduler
     val indexTractMap = year match {
       case 2018 => indexTractMap2018
       case 2019 => indexTractMap2019
-      case _    => indexTractMap2019
+      case 2020 => indexTractMap2020
+      case _ => indexTractMap2020
     }
     val censusResult = indexTractMap.getOrElse(hmdaGeoTract, Census())
     val censusID =

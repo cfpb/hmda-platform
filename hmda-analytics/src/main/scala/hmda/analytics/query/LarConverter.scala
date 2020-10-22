@@ -18,6 +18,9 @@ object LarConverter {
   val censusFileName2019 =
     config.getString("hmda.census.fields.2019.filename")
 
+  val censusFileName2020 =
+    config.getString("hmda.census.fields.2020.filename")
+
   val censusTractMap: Map[String, Census] =
     CensusRecords.indexedTract2019
 

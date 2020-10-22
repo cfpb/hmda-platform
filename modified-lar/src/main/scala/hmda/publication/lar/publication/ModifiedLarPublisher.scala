@@ -2,32 +2,31 @@ package hmda.publication.lar.publication
 
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{ ActorRef, ActorSystem, Behavior, SupervisorStrategy }
+import akka.actor.typed.{ActorRef, ActorSystem, Behavior, SupervisorStrategy}
 import akka.stream._
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3._
 import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl._
 import akka.util.ByteString
-import akka.{ Done, NotUsed }
+import akka.{Done, NotUsed}
 import com.typesafe.config.ConfigFactory
 import hmda.messages.pubsub.HmdaTopics._
 import hmda.messages.submission.HmdaRawDataEvents.LineAdded
 import hmda.model.census.Census
 import hmda.model.filing.submission.SubmissionId
-import hmda.model.modifiedlar.{ EnrichedModifiedLoanApplicationRegister, ModifiedLoanApplicationRegister }
+import hmda.model.modifiedlar.{EnrichedModifiedLoanApplicationRegister, ModifiedLoanApplicationRegister}
 import hmda.publication.KafkaUtils
 import hmda.publication.KafkaUtils._
 import hmda.publication.lar.parser.ModifiedLarCsvParser
 import hmda.query.HmdaQuery
-import hmda.query.HmdaQuery._
 import hmda.query.repository.ModifiedLarRepository
-import software.amazon.awssdk.auth.credentials.{ AwsBasicCredentials, StaticCredentialsProvider }
+import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.regions.providers.AwsRegionProvider
 
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.{ Failure, Success }
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 sealed trait ModifiedLarCommand
 case class PersistToS3AndPostgres(submissionId: SubmissionId, respondTo: ActorRef[PersistModifiedLarResult]) extends ModifiedLarCommand
@@ -59,6 +58,7 @@ object ModifiedLarPublisher {
   def behavior(
                 indexTractMap2018: Map[String, Census],
                 indexTractMap2019: Map[String, Census],
+                indexTractMap2020: Map[String, Census],
                 modifiedLarRepo: ModifiedLarRepository,
                 readRawData: ActorSystem[_] => SubmissionId => Source[LineAdded, NotUsed] = as => id => HmdaQuery.readRawData(id)(as)
               ): Behavior[ModifiedLarCommand] =
@@ -124,7 +124,12 @@ object ModifiedLarPublisher {
 
               def postgresOut(parallelism: Int): Sink[ModifiedLoanApplicationRegister, Future[Done]] =
                 Flow[ModifiedLoanApplicationRegister].map { mlar =>
-                  val indexTractMap = if (submissionId.period.year == 2018) indexTractMap2018 else indexTractMap2019
+                  val indexTractMap = submissionId.period.year match {
+                    case 2018 => indexTractMap2018
+                    case 2019 => indexTractMap2019
+                    case 2020 => indexTractMap2020
+                    case _ => indexTractMap2020
+                  }
                   EnrichedModifiedLoanApplicationRegister(
                     mlar,
                     indexTractMap.getOrElse(mlar.tract, Census())
