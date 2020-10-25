@@ -562,24 +562,20 @@ object HmdaValidationError
                 "Total Number of LARs Found in File"    -> tsLar.larsCount.toString
               )
             )
-          case q600 @ QualityValidationError(uli, `q600`, fields) =>
-            q600.copyWithFields(
-              fields + (s"The following row numbers have the same ULI" -> tsLar.duplicateLineNumbers
-                .mkString(start = "Rows: ", sep = ",", end = ""))
-            )
+          case q600 @ QualityValidationError(uli, `q600`, fields) if validationError == q600 || validationError == q600_warning =>
+            if (validationError == q600_warning) {
+              q600.copyWithFields(
+                fields + (s"Some Warning Statement!!!! The following row numbers have the same ULI" -> tsLar.duplicateLineNumbers
+                  .mkString(start = "Rows: ", sep = ",", end = ""))
+              )
+            }
+            else {
+              q600.copyWithFields(
+                fields + (s"The following row numbers have the same ULI" -> tsLar.duplicateLineNumbers
+                  .mkString(start = "Rows: ", sep = ",", end = ""))
+              )
+            }
 
-          /**
-          * What we want is that:
-           * when Q600_warning is present then the above message changes also apprends the follow: Warning you also have duplicate uli, lei, action taken date, and action taken type
-           * when Q600_warning is not present then the message remains same as above
-           */
-
-          //Instead of this being its own case we would like to include this INTO Q600 as a warning
-          case q600_warning @ QualityValidationError(uli, `q600_warning`, fields) =>
-            q600_warning.copyWithFields(
-              fields + (s"This is some warning!!" -> tsLar.duplicateLineNumbers
-                .mkString(start = "Rows: ", sep = ",", end = ""))
-            )
           case rest =>
             rest
         }
