@@ -48,7 +48,7 @@ import hmda.utils.YearUtils.Period
 import hmda.validation.context.ValidationContext
 import hmda.validation.filing.MacroValidationFlow._
 import hmda.validation.filing.ValidationFlow._
-import hmda.validation.rules.lar.quality._2020.Q999
+import hmda.validation.rules.lar.quality._2020.Q600_warning
 import hmda.validation.rules.lar.quality.common.Q600
 import hmda.validation.rules.lar.syntactical.{S304, S305, S306}
 import net.openhft.hashing.LongHashFunction
@@ -542,14 +542,9 @@ object HmdaValidationError
         val s305 = S305.name
         val s304 = S304.name
         val q600 = Q600.name
-        val q999 = Q999.name
         val s306 = S306.name
+        val q600_warning = Q600_warning.name
         validationError match {
-          case q999 @ QualityValidationError(uli, `q999`, fields) =>
-            q999.copyWithFields(
-              fields + ("The following row numbers occur multiple times and have the same ULI with action type 1 (Loan Originated)" -> tsLar.duplicateLineNumbersUliActionType
-                .mkString(start = "Rows: ", sep = ",", end = ""))
-            )
           case s306 @ SyntacticalValidationError(_, `s306`, _, fields) => //This is newly added for S306
             s306.copyWithFields(
               fields + ("The following row numbers occur multiple times and have the same ULI with action type 1 (Loan Originated)" -> tsLar.duplicateLineNumbersUliActionType
@@ -573,6 +568,18 @@ object HmdaValidationError
                 .mkString(start = "Rows: ", sep = ",", end = ""))
             )
 
+          /**
+          * What we want is that:
+           * when Q600_warning is present then the above message changes also apprends the follow: Warning you also have duplicate uli, lei, action taken date, and action taken type
+           * when Q600_warning is not present then the message remains same as above
+           */
+
+          //Instead of this being its own case we would like to include this INTO Q600 as a warning
+          case q600_warning @ QualityValidationError(uli, `q600_warning`, fields) =>
+            q600_warning.copyWithFields(
+              fields + (s"This is some warning!!" -> tsLar.duplicateLineNumbers
+                .mkString(start = "Rows: ", sep = ",", end = ""))
+            )
           case rest =>
             rest
         }
