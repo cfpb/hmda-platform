@@ -538,7 +538,7 @@ object HmdaValidationError
       log.info(s"In validateAnPersistErrors for ${submissionId} for ${checkType}")
 
       // see addTsFieldInformation in ValidationFlow which does something similar
-      def enrichErrorInformation(tsLar: TransmittalLar, validationError: ValidationError): ValidationError = {
+      def enrichErrorInformation(tsLar: TransmittalLar, q600WarningPresent: Boolean, validationError: ValidationError): ValidationError = {
         val s305 = S305.name
         val s304 = S304.name
         val q600name = Q600.name
@@ -562,15 +562,13 @@ object HmdaValidationError
                 "Total Number of LARs Found in File"    -> tsLar.larsCount.toString
               )
             )
-          case q600 @ QualityValidationError(uli,name, fields) if name == q600name || name == q600_warning =>
-            if (name == q600_warning) {
-              println ("HEREHHEHREHEHRHEHRHEHR!!!!")
+          case q600 @ QualityValidationError(uli,`q600name`, fields)  =>
+            if (q600WarningPresent) {
               q600.copyWithFields(
-                fields + (s"Some Warning Statement!!!! The following row numbers have the same ULI" -> tsLar.duplicateLineNumbers
+                fields + (s"The following row numbers have the same ULI. WARNING: Additionally there are rows in your data that have a duplicate ULI, LEI, Action Taken, and Action Taken Date. This edit logic will be changed in 2021 and become a Syntactical edit " -> tsLar.duplicateLineNumbers
                   .mkString(start = "Rows: ", sep = ",", end = ""))
               )
             } else {
-              println("entered here as well")
               q600.copyWithFields(
                 fields + (s"The following row numbers have the same ULI" -> tsLar.duplicateLineNumbers
                   .mkString(start = "Rows: ", sep = ",", end = ""))
@@ -588,7 +586,8 @@ object HmdaValidationError
       validateTsLarEdits(tsLar, checkType, validationContext) match {
 
         case Left(errors: Seq[ValidationError]) =>
-          val enrichedErrors = errors.map(enrichErrorInformation(tsLar, _))
+          val q600WarningPresent = errors.exists(_.editName == Q600_warning.name)
+          val enrichedErrors = errors.map(enrichErrorInformation(tsLar, q600WarningPresent, _))
           val persisted: Future[HmdaRowValidatedError] =
             ctx.self ? ((ref: ActorRef[HmdaRowValidatedError]) => PersistHmdaRowValidatedError(submissionId, 1, enrichedErrors, Some(ref)))
           persisted.map(_ => enrichedErrors)
