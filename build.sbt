@@ -31,7 +31,8 @@ lazy val akkaDeps = Seq(
   akkaKafkaStreams,
   embeddedKafka,
   alpakkaS3,
-  akkaQuartzScheduler
+  akkaQuartzScheduler,
+  alpakkaFile
 )
 
 lazy val akkaPersistenceDeps =
@@ -203,6 +204,7 @@ lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
+      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps,
       mainClass in Compile := Some("hmda.publisher.HmdaDataPublisherApp"),
       assemblyJarName in assembly := {
         s"${name.value}.jar"
