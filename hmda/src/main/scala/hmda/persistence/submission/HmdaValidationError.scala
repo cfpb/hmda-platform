@@ -541,7 +541,7 @@ object HmdaValidationError
       def enrichErrorInformation(tsLar: TransmittalLar, validationError: ValidationError): ValidationError = {
         val s305 = S305.name
         val s304 = S304.name
-        val q600 = Q600.name
+        val q600name = Q600.name
         val s306 = S306.name
         val q600_warning = Q600_warning.name
         validationError match {
@@ -562,14 +562,15 @@ object HmdaValidationError
                 "Total Number of LARs Found in File"    -> tsLar.larsCount.toString
               )
             )
-          case q600 @ QualityValidationError(uli, `q600`, fields) if validationError == q600 || validationError == q600_warning =>
-            if (validationError == q600_warning) {
+          case q600 @ QualityValidationError(uli,name, fields) if name == q600name || name == q600_warning =>
+            if (name == q600_warning) {
+              println ("HEREHHEHREHEHRHEHRHEHR!!!!")
               q600.copyWithFields(
                 fields + (s"Some Warning Statement!!!! The following row numbers have the same ULI" -> tsLar.duplicateLineNumbers
                   .mkString(start = "Rows: ", sep = ",", end = ""))
               )
-            }
-            else {
+            } else {
+              println("entered here as well")
               q600.copyWithFields(
                 fields + (s"The following row numbers have the same ULI" -> tsLar.duplicateLineNumbers
                   .mkString(start = "Rows: ", sep = ",", end = ""))
