@@ -258,6 +258,15 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
+            path("quarterly_info" / Segment / "lei" / Segment) { (year, lei) =>
+              log.info(s"List quarterly details for period=${year} lei=${lei}")
+              complete(
+                query
+                  .fetchQuarterlyInfo(year, lei)
+                  .map(aggs => QuarterDetailsAggregationsResponse(aggs))
+                  .runToFuture
+              )
+            } ~
             path("filers_by_week_by_agency" / Segment / "week" / IntNumber) { (year, week) =>
               log.info(s"Filers for year=${year} for week=${week}")
               complete(

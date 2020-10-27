@@ -31,3 +31,4 @@
 29. /dashboard/filers_count_open_end_originations_by_agency/{{year}}/thresh/{{x}}
 30. /dashboard/filers_count_open_end_originations_by_agency_grater_or_equal/{{year}}/thresh/{{x}}
 31. /dashboard/top_institutions_count_open_end_credit/{{year}}/count/{{x}}
+32. /dashboard/quarterly_info/{{year}}/lei/{{lei}}
