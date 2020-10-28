@@ -71,17 +71,6 @@ class LarPublicScheduler
       }
 
     case LarPublicScheduler2019 =>
-<<<<<<< HEAD
-      val fileName      = "2019_lar.txt"
-      val zipDirectoryName = "2019_lar.zip"
-      val s3Path = s"$environmentPublic/dynamic-data/2019/"
-      val fullFilePath=  SnapshotCheck.pathSelector(s3Path,zipDirectoryName)
-      if(SnapshotCheck.snapshotActive) {
-        larPublicStream("2019", SnapshotCheck.snapshotBucket, fullFilePath, fileName)
-      }
-      else{
-        larPublicStream("2019", bucketPublic, fullFilePath, fileName)
-=======
       publishingGuard.runIfDataIsValid(Year.y2019, Scope.Public) {
         val fileName         = "2019_lar.txt"
         val zipDirectoryName = "2019_lar.zip"
@@ -92,7 +81,6 @@ class LarPublicScheduler
         } else {
           larPublicStream("2019", bucketPublic, fullFilePath, fileName)
         }
->>>>>>> baf6737f4c0821d146968829464aabc8ccff4e26
       }
 
   }
