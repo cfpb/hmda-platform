@@ -71,15 +71,32 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
   val histTableName    = config.getString("hmda.analytics.2018.historyTableName")
   val tsTableName2019  = config.getString("hmda.analytics.2019.tsTableName")
   val larTableName2019 = config.getString("hmda.analytics.2019.larTableName")
+
+  //2020 TS
   val tsTableName2020  = config.getString("hmda.analytics.2020.tsTableName")
+  val tsTableName2020Q1  = config.getString("hmda.analytics.2020.tsTableNameQ1")
+  val tsTableName2020Q2  = config.getString("hmda.analytics.2020.tsTableNameQ2")
+  val tsTableName2020Q3  = config.getString("hmda.analytics.2020.tsTableNameQ3")
+
+  //2020 LAR
   val larTableName2020 = config.getString("hmda.analytics.2020.larTableName")
+  val larTableName2020Q1 = config.getString("hmda.analytics.2020.larTableNameQ1")
+  val larTableName2020Q2 = config.getString("hmda.analytics.2020.larTableNameQ2")
+  val larTableName2020Q3 = config.getString("hmda.analytics.2020.larTableNameQ3")
+
 
   val transmittalSheetRepository2018 = new TransmittalSheetRepository(dbConfig, tsTableName2018)
   val transmittalSheetRepository2019 = new TransmittalSheetRepository(dbConfig, tsTableName2019)
   val transmittalSheetRepository2020 = new TransmittalSheetRepository(dbConfig, tsTableName2020)
+  val transmittalSheetRepository2020Q1 = new TransmittalSheetRepository(dbConfig, tsTableName2020Q1)
+  val transmittalSheetRepository2020Q2 = new TransmittalSheetRepository(dbConfig, tsTableName2020Q2)
+  val transmittalSheetRepository2020Q3 = new TransmittalSheetRepository(dbConfig, tsTableName2020Q3)
   val larRepository2018              = new LarRepository(dbConfig, larTableName2018)
   val larRepository2019              = new LarRepository(dbConfig, larTableName2019)
   val larRepository2020              = new LarRepository(dbConfig, larTableName2020)
+  val larRepository2020Q1              = new LarRepository(dbConfig, larTableName2020Q1)
+  val larRepository2020Q2              = new LarRepository(dbConfig, larTableName2020Q2)
+  val larRepository2020Q3              = new LarRepository(dbConfig, larTableName2020Q3)
   val submissionHistoryRepository    = new SubmissionHistoryRepository(dbConfig, histTableName)
 
   val consumerSettings: ConsumerSettings[String, String] =
@@ -130,7 +147,10 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
             delete <- submissionId.period match {
               case Period(2018, None) => transmittalSheetRepository2018.deleteByLei(ts.lei)
               case Period(2019, None) => transmittalSheetRepository2019.deleteByLei(ts.lei)
-              case Period(2020, Some(_)) => transmittalSheetRepository2020.deleteByLeiAndQuarter(lei = ts.lei)
+              case Period(2020, Some("Q1")) => transmittalSheetRepository2020Q1.deleteByLeiAndQuarter(lei = ts.lei)
+              case Period(2020, Some("Q2")) => transmittalSheetRepository2020Q2.deleteByLeiAndQuarter(lei = ts.lei)
+              case Period(2020, Some("Q3")) => transmittalSheetRepository2020Q3.deleteByLeiAndQuarter(lei = ts.lei)
+              case Period(2020, None) => transmittalSheetRepository2020.deleteByLeiAndQuarter(lei = ts.lei)
               case _ => throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete TS rows.")
             }
           } yield delete
@@ -177,7 +197,19 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
                 transmittalSheetRepository2018.insert(ts.copy(signDate = Some(signdate.getOrElse(0L))))
               case Period(2019, None) =>
                 transmittalSheetRepository2019.insert(ts.copy(signDate = Some(signdate.getOrElse(0L))))
-              case Period(2020, Some(_)) =>
+              case Period(2020, Some("Q1")) =>
+                transmittalSheetRepository2020Q1.insert(
+                  ts.copy(isQuarterly = Some(true), signDate = Some(signdate.getOrElse(0L)))
+                )
+              case Period(2020, Some("Q2")) =>
+                transmittalSheetRepository2020Q2.insert(
+                  ts.copy(isQuarterly = Some(true), signDate = Some(signdate.getOrElse(0L)))
+                )
+              case Period(2020, Some("Q3")) =>
+                transmittalSheetRepository2020Q3.insert(
+                  ts.copy(isQuarterly = Some(true), signDate = Some(signdate.getOrElse(0L)))
+                )
+              case Period(2020, None) =>
                 transmittalSheetRepository2020.insert(
                   ts.copy(isQuarterly = Some(true), signDate = Some(signdate.getOrElse(0L)))
                 )
@@ -205,7 +237,10 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
             delete <- submissionId.period match {
               case Period(2018, None) => larRepository2018.deleteByLei(lar.larIdentifier.LEI)
               case Period(2019, None) => larRepository2019.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2020, Some(_)) => larRepository2020.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2020, Some("Q1")) => larRepository2020Q1.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2020, Some("Q2")) => larRepository2020Q1.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2020, Some("Q3")) => larRepository2020Q1.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2020, None) => larRepository2020.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
               case _ => throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete LAR rows.")
 
             }
@@ -232,7 +267,19 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
                 larRepository2019.insert(
                   LarConverter(lar, 2019)
                 )
-              case Period(2020, Some(_)) =>
+              case Period(2020, Some("Q1")) =>
+                larRepository2020Q1.insert(
+                  LarConverter(lar = lar, 2020, isQuarterly = true)
+                )
+              case Period(2020, Some("Q2")) =>
+                larRepository2020Q2.insert(
+                  LarConverter(lar = lar, 2020, isQuarterly = true)
+                )
+              case Period(2020, Some("Q3")) =>
+                larRepository2020Q3.insert(
+                  LarConverter(lar = lar, 2020, isQuarterly = true)
+                )
+              case Period(2020, None) =>
                 larRepository2020.insert(
                   LarConverter(lar = lar, 2020, isQuarterly = true)
                 )

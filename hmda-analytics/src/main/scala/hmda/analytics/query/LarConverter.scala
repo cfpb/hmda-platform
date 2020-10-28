@@ -7,6 +7,9 @@ import hmda.census.records._
 import hmda.census.records.CountyLoanLimitRecords._
 import hmda.model.census.Census
 import com.typesafe.config.ConfigFactory
+import java.security.MessageDigest
+
+import hmda.util.conversion.LarStringFormatter
 
 object LarConverter {
 
@@ -14,6 +17,9 @@ object LarConverter {
 
   val censusFileName2019 =
     config.getString("hmda.census.fields.2019.filename")
+
+  val censusFileName2020 =
+    config.getString("hmda.census.fields.2020.filename")
 
   val censusTractMap: Map[String, Census] =
     CensusRecords.indexedTract2019
@@ -55,6 +61,10 @@ object LarConverter {
     val overallLoanLimit = getOverallLoanLimit(year)
     val countyLoanLimitsByCounty = getcountyLoanLimitsByCounty(year)
     val countyLoanLimitsByState = getcountyLoanLimitsByState(year)
+    val checksum = MessageDigest.getInstance("MD5")
+      .digest(LarStringFormatter.larString(lar).getBytes())
+      .map(0xFF & _)
+      .map { "%02x".format(_) }.foldLeft(""){_ + _}
     LarEntity(
       lar.larIdentifier.id,
       lar.larIdentifier.LEI,
@@ -181,7 +191,8 @@ object LarConverter {
       census.tracttoMsaIncomePercent,
       isQuarterly,
       census.msaMd.toString,
-      census.name
+      census.name,
+      checksum
     )
   }
 

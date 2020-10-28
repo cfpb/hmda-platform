@@ -5,6 +5,7 @@ import java.sql.Timestamp
 import hmda.publisher.helper.PGTableNameLoader
 import hmda.publisher.query.lar.{ LarEntityImpl2020, _ }
 import hmda.publisher.query.panel.InstitutionEntity
+import hmda.publisher.validation.{ LarData, TsData }
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
@@ -511,8 +512,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
 
     def getAllLARs(bankIgnoreList: Array[String], includeQuarterly: Boolean): DatabasePublisher[LarEntityImpl2020] =
       db.stream(
-        getAllLARsQuery(bankIgnoreList, includeQuarterly)
-          .result
+        getAllLARsQuery(bankIgnoreList, includeQuarterly).result
           .withStatementParameters(
             rsType = ResultSetType.ForwardOnly,
             rsConcurrency = ResultSetConcurrency.ReadOnly,
@@ -528,6 +528,11 @@ trait PublisherComponent2020 extends PGTableNameLoader {
         table
           .filterNot(lar => (lar.lei.toUpperCase inSet bankIgnoreList) && lar.isQuarterly)
       }
+
   }
+
+  val validationLarData2020: LarData = LarData[LarEntityImpl2020, LarTable](larTable2020)(_.lei)
+  val validationTSData2020: TsData =
+    TsData[TransmittalSheetEntity, TransmittalSheetTable](transmittalSheetTable2020)(_.lei, _.totalLines, _.submissionId)
 
 }

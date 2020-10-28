@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "hmda-data-publisher.fullname" . }}
@@ -254,6 +254,11 @@ spec:
               configMapKeyRef:
                 name: data-publisher-pgtables-configmap
                 key: publishertable.emailTable
+          - name: VALIDATION_REPORTING_URL
+            valueFrom:
+              configMapKeyRef:
+                name: webhook-configmap
+                key: mattermost.hmda
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}

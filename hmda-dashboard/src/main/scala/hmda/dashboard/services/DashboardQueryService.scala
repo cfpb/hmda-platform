@@ -5,93 +5,93 @@ import hmda.dashboard.repositories.PostgresRepository
 import monix.eval.Task
 
 class DashboardQueryService (repo: PostgresRepository) extends QueryService{
-    override def fetchTotalFilers(year: Int): Task[Seq[TotalFilers]] =
+    override def fetchTotalFilers(year: String): Task[Seq[TotalFilers]] =
     repo.fetchTotalFilers(year)
 
-  override def fetchTotalLars(year: Int): Task[Seq[TotalLars]] =
+  override def fetchTotalLars(year: String): Task[Seq[TotalLars]] =
     repo.fetchTotalLars(year)
 
-  override def fetchSingleAttempts(year: Int): Task[Seq[SingleAttempts]] =
+  override def fetchSingleAttempts(year: String): Task[Seq[SingleAttempts]] =
     repo.fetchSingleAttempts(year)
 
-  override def fetchMultipleAttempts(year: Int): Task[Seq[MultipleAttempts]] =
+  override def fetchMultipleAttempts(year: String): Task[Seq[MultipleAttempts]] =
     repo.fetchMultipleAttempts(year)
 
-  override def fetchTopFilers(count: Int, year: Int): Task[Seq[TopFilers]] =
+  override def fetchTopFilers(count: Int, year: String): Task[Seq[TopFilers]] =
     repo.fetchTopFilers(count,year)
 
-  override def fetchSignsForLastDays(days: Int, year: Int): Task[Seq[SignsForLastDays]] =
+  override def fetchSignsForLastDays(days: Int, year: String): Task[Seq[SignsForLastDays]] =
     repo.fetchSignsForLastDays(days,year)
 
-  override def fetchFilerAttempts(count: Int, year: Int): Task[Seq[FilerAttempts]] =
+  override def fetchFilerAttempts(count: Int, year: String): Task[Seq[FilerAttempts]] =
     repo.fetchFilerAttempts(count,year)
 
-  override def fetchTSRecordCount(year: Int): Task[Seq[TSRecordCount]] =
+  override def fetchTSRecordCount(year: String): Task[Seq[TSRecordCount]] =
     repo.fetchTSRecordCount(year)
 
-  override def fetchFilersByAgency(year: Int): Task[Seq[FilersByAgency]] =
+  override def fetchFilersByAgency(year: String): Task[Seq[FilersByAgency]] =
     repo.fetchFilersByAgency(year)
 
-  override def fetchLARByAgency(year: Int): Task[Seq[LarByAgency]] =
+  override def fetchLARByAgency(year: String): Task[Seq[LarByAgency]] =
     repo.fetchLARByAgency(year)
 
-  override def fetchTopCountiesLar(year: Int, count: Int): Task[Seq[TopCountiesLar]] =
+  override def fetchTopCountiesLar(year: String, count: Int): Task[Seq[TopCountiesLar]] =
     repo.fetchTopCountiesLar(year, count)
 
-  override def fetchLarCountByPropertyType(year: Int): Task[Seq[LarCountByPropertyType]] =
+  override def fetchLarCountByPropertyType(year: String): Task[Seq[LarCountByPropertyType]] =
     repo.fetchLarCountByPropertyType(year)
 
-  override def fetchFilersUsingExemptionsByAgency(year: Int): Task[Seq[FilersUsingExemptionByAgency]] =
+  override def fetchFilersUsingExemptionsByAgency(year: String): Task[Seq[FilersUsingExemptionByAgency]] =
     repo.fetchFilersUsingExemptionByAgency(year)
 
-  override def fetchDenialReasonCountsByAgency(year: Int): Task[Seq[DenialReasonCountsByAgency]] =
+  override def fetchDenialReasonCountsByAgency(year: String): Task[Seq[DenialReasonCountsByAgency]] =
     repo.fetchDenialReasonCountsByAgency(year)
 
-  override def fetchLarCountUsingExemptionByAgency(year: Int): Task[Seq[LarCountUsingExemptionByAgency]] =
+  override def fetchLarCountUsingExemptionByAgency(year: String): Task[Seq[LarCountUsingExemptionByAgency]] =
     repo.fetchLarCountUsingExemptionByAgency(year)
 
-  override def fetchOpenEndCreditFilersByAgency(year: Int): Task[Seq[OpenEndCreditByAgency]] =
+  override def fetchOpenEndCreditFilersByAgency(year: String): Task[Seq[OpenEndCreditByAgency]] =
     repo.fetchOpenEndCreditFilersByAgency(year)
 
-  override def fetchOpenEndCreditLarCountByAgency(year: Int): Task[Seq[OpenEndCreditLarCountByAgency]] =
+  override def fetchOpenEndCreditLarCountByAgency(year: String): Task[Seq[OpenEndCreditLarCountByAgency]] =
     repo.fetchOpenEndCreditLarCountByAgency(year)
 
-  override def fetchFilersWithOnlyOpenEndCreditTransactions(year: Int): Task[Seq[FilersWithOnlyOpenEndCreditTransactions]] =
+  override def fetchFilersWithOnlyOpenEndCreditTransactions(year: String): Task[Seq[FilersWithOnlyOpenEndCreditTransactions]] =
     repo.fetchFilersWithOnlyOpenEndCreditTransactions(year)
 
-  override def fetchFilersWithOnlyClosedEndCreditTransactions(year: Int): Task[Seq[FilersWithOnlyClosedEndCreditTransactions]] =
+  override def fetchFilersWithOnlyClosedEndCreditTransactions(year: String): Task[Seq[FilersWithOnlyClosedEndCreditTransactions]] =
     repo.fetchFilersWithOnlyClosedEndCreditTransactions((year))
 
-  override def fetchFilersListWithOnlyOpenEndCreditTransactions(year: Int): Task[Seq[FilersListWithOnlyOpenEndCredit]] =
+  override def fetchFilersListWithOnlyOpenEndCreditTransactions(year: String): Task[Seq[FilersListWithOnlyOpenEndCredit]] =
     repo.fetchFilersListWithOnlyOpenEndCreditTransactions(year)
 
-  override def fetchFilersClaimingExemption(year: Int) : Task[Seq[FilersClaimingExemption]] =
+  override def fetchFilersClaimingExemption(year: String) : Task[Seq[FilersClaimingExemption]] =
     repo.fetchFilersClaimingExemption(year)
 
-  override def fetchListQuarterlyFilers(year: Int): Task[Seq[ListQuarterlyFilers]] =
+  override def fetchListQuarterlyFilers(year: String): Task[Seq[ListQuarterlyFilers]] =
     repo.fetchListQuarterlyFilers(year)
 
-  override def fetchFilersByWeekByAgency(year: Int, week: Int): Task[Seq[FilersByWeekByAgency]] =
+  override def fetchFilersByWeekByAgency(year: String, week: Int): Task[Seq[FilersByWeekByAgency]] =
     repo.fetchFilersByWeekByAgency(year, week)
 
-  override def fetchLarByWeekByAgency(year: Int, week: Int): Task[Seq[LarByWeekByAgency]] =
+  override def fetchLarByWeekByAgency(year: String, week: Int): Task[Seq[LarByWeekByAgency]] =
     repo.fetchLarByWeekByAgency(year, week)
 
-  override def fetchListFilersWithOnlyClosedEndCreditTransactions(year: Int): Task[Seq[ListFilersWithOnlyClosedEndCreditTransactions]] =
+  override def fetchListFilersWithOnlyClosedEndCreditTransactions(year: String): Task[Seq[ListFilersWithOnlyClosedEndCreditTransactions]] =
     repo.fetchListFilersWithOnlyClosedEndCreditTransactions(year)
 
-  override def fetchFilersCountClosedEndOriginationsByAgency(year: Int, x: Int): Task[Seq[FilersCountClosedEndOriginationsByAgency]] =
+  override def fetchFilersCountClosedEndOriginationsByAgency(year: String, x: Int): Task[Seq[FilersCountClosedEndOriginationsByAgency]] =
     repo.fetchFilersCountClosedEndOriginationsByAgency(year, x)
 
-  override def fetchFilersCountClosedEndOriginationsByAgencyGraterOrEqual(year: Int, x: Int): Task[Seq[FilersCountClosedEndOriginationsByAgencyGraterOrEqual]] =
+  override def fetchFilersCountClosedEndOriginationsByAgencyGraterOrEqual(year: String, x: Int): Task[Seq[FilersCountClosedEndOriginationsByAgencyGraterOrEqual]] =
     repo.fetchFilersCountClosedEndOriginationsByAgencyGraterOrEqual(year, x)
 
-  override def fetchFilersCountOpenEndOriginationsByAgency(year: Int, x: Int): Task[Seq[FilersCountOpenEndOriginationsByAgency]] =
+  override def fetchFilersCountOpenEndOriginationsByAgency(year: String, x: Int): Task[Seq[FilersCountOpenEndOriginationsByAgency]] =
     repo.fetchFilersCountOpenEndOriginationsByAgency(year, x)
 
-  override def fetchFilersCountOpenEndOriginationsByAgencyGraterOrEqual(year: Int, x: Int): Task[Seq[FilersCountOpenEndOriginationsByAgencyGraterOrEqual]] =
+  override def fetchFilersCountOpenEndOriginationsByAgencyGraterOrEqual(year: String, x: Int): Task[Seq[FilersCountOpenEndOriginationsByAgencyGraterOrEqual]] =
     repo.fetchFilersCountOpenEndOriginationsByAgencyGraterOrEqual(year, x)
 
-  override def fetchTopInstitutionsCountOpenEndCredit(year: Int, x: Int): Task[Seq[TopInstitutionsCountOpenEndCredit]] =
+  override def fetchTopInstitutionsCountOpenEndCredit(year: String, x: Int): Task[Seq[TopInstitutionsCountOpenEndCredit]] =
     repo.fetchTopInstitutionsCountOpenEndCredit(year, x)
 }

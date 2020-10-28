@@ -1,10 +1,18 @@
 package hmda.analytics.query
 
+import java.security.MessageDigest
+
 import hmda.model.filing.lar.LoanApplicationRegister
+import hmda.util.conversion.LarStringFormatter
+
 
 object LarConverter2018 {
 
   def apply(lar: LoanApplicationRegister): LarEntity2018 = {
+    val checksum = MessageDigest.getInstance("MD5")
+      .digest(LarStringFormatter.larString(lar).getBytes())
+      .map(0xFF & _)
+      .map { "%02x".format(_) }.foldLeft(""){_ + _}
     LarEntity2018(
       lar.larIdentifier.id,
       lar.larIdentifier.LEI,
@@ -115,7 +123,8 @@ object LarConverter2018 {
       lar.ausResult.otherAusResult,
       lar.reverseMortgage.code,
       lar.lineOfCredit.code,
-      lar.businessOrCommercialPurpose.code
+      lar.businessOrCommercialPurpose.code,
+      checksum
     )
   }
 

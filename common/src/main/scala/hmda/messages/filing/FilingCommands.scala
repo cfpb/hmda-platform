@@ -20,6 +20,10 @@ object FilingCommands {
 
   final case class GetLatestSubmission(replyTo: ActorRef[Option[Submission]]) extends FilingCommand
 
+  final case class GetLatestSignedSubmission(replyTo: ActorRef[Option[Submission]]) extends FilingCommand
+
+  final case class GetOldestSignedSubmission(replyTo: ActorRef[Option[Submission]]) extends FilingCommand
+
   final case class GetSubmissionSummary(submissionId: SubmissionId, replyTo: ActorRef[Option[Submission]]) extends FilingCommand
 
   final case class UpdateSubmission(submission: Submission, replyTo: Option[ActorRef[Submission]]) extends FilingCommand

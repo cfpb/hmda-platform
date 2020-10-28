@@ -198,13 +198,13 @@ case class LarPartSeven2020(
                            )
 
 case class LarEntityImpl2020(
-                              larPartOne: LarPartOne2020,
-                              larPartTwo: LarPartTwo2020,
-                              larPartThree: LarPartThree2020,
-                              larPartFour: LarPartFour2020,
-                              larPartFive: LarPartFive2020,
-                              larPartSix: LarPartSix2020,
-                              larPartSeven: LarPartSeven2020
+                              larPartOne: LarPartOne2020 = LarPartOne2020(),
+                              larPartTwo: LarPartTwo2020 = LarPartTwo2020(),
+                              larPartThree: LarPartThree2020 = LarPartThree2020(),
+                              larPartFour: LarPartFour2020 = LarPartFour2020(),
+                              larPartFive: LarPartFive2020 = LarPartFive2020(),
+                              larPartSix: LarPartSix2020 = LarPartSix2020(),
+                              larPartSeven: LarPartSeven2020 = LarPartSeven2020()
                             ) {
 
   def toRegulatorPSV: String =

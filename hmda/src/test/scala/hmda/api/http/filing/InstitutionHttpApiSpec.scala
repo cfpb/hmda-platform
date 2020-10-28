@@ -32,7 +32,7 @@ import scala.concurrent.duration._
 
 class InstitutionHttpApiSpec extends AkkaCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest {
 
-  val duration = 10.seconds
+  val duration = 30.seconds
 
   implicit val routeTimeout = RouteTestTimeout(duration.dilated)
 
