@@ -255,6 +255,18 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
+  def fecthQuarterlyInfo(period: String, lei: String): Task[Seq[QuarterDetails]] = {
+    val larTable = larTableSelector(period)
+    val query = sql"""
+      select
+        (select count(*) as q1 from #${larTable} where date(action_taken_date::text) <= date('2020-03-31'::text) and upper(lei) = '#${lei}'),
+        (select count(*) as q2 from #${larTable} where date(action_taken_date::text) > date('2020-03-31'::text) and date(action_taken_date::text) <= date('2020-06-30'::text) and upper(lei) = '#${lei}'),
+        (select count(*) as q3 from #${larTable} where date(action_taken_date::text) > date('2020-06-30'::text) and date(action_taken_date::text) <= date('2020-09-30'::text) and upper(lei) = '#${lei}'),
+        (select count(*) as q4 from #${larTable} where date(action_taken_date::text) > date('2020-10-01'::text) and upper(lei) = '#${lei}')
+      """.as[QuarterDetails]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
   def fetchFilersByWeekByAgency(period: String, week: Int): Task[Seq[FilersByWeekByAgency]] = {
     val tsTable = tsTableSelector(period)
     val startDate = getDates(period.toInt+1, week)
