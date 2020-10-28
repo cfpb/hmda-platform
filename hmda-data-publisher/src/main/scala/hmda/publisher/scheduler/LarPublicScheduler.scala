@@ -66,7 +66,7 @@ class LarPublicScheduler extends HmdaActor with
 
     case LarPublicScheduler2019 =>
       val fileName      = "2019_lar.txt"
-      val zipDirectoryName = "2018_lar.zip"
+      val zipDirectoryName = "2019_lar.zip"
       val s3Path = s"$environmentPublic/dynamic-data/2019/"
       val fullFilePath=  SnapshotCheck.pathSelector(s3Path,zipDirectoryName)
       if(SnapshotCheck.snapshotActive) {

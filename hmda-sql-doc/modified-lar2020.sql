@@ -11,8 +11,6 @@ CREATE SCHEMA hmda_user AUTHORIZATION hmda_user;
 -- Dumped from database version 10.6
 -- Dumped by pg_dump version 10.5
 
--- Started on 2019-06-05 11:44:49 EDT
-
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -29,10 +27,10 @@ SET default_with_oids = false;
 
 --
 -- TOC entry 282 (class 1259 OID 22057)
--- Name: modifiedlar2018; Type: TABLE; Schema: hmda_user; Owner: hmda_user
+-- Name: modifiedlar2020; Type: TABLE; Schema: hmda_user; Owner: hmda_user
 --
 
-CREATE TABLE hmda_user.modifiedlar2018 (
+CREATE TABLE hmda_user.modifiedlar2020 (
     id integer NOT NULL,
     lei character varying NOT NULL,
     loan_type integer,
@@ -139,18 +137,17 @@ CREATE TABLE hmda_user.modifiedlar2018 (
     percent_median_msa_income character varying,
     dwelling_category character varying,
     loan_product_type character varying
-    created_at timestamp without time zone DEFAULT now(),
 );
 
 
-ALTER TABLE hmda_user.modifiedlar2018 OWNER TO hmda_user;
+ALTER TABLE hmda_user.modifiedlar2020 OWNER TO hmda_user;
 
 --
 -- TOC entry 285 (class 1259 OID 25533)
--- Name: modifiedlar2018_uniq_id_seq; Type: SEQUENCE; Schema: hmda_user; Owner: hmda_user
+-- Name: modifiedlar2020_uniq_id_seq; Type: SEQUENCE; Schema: hmda_user; Owner: hmda_user
 --
 
-CREATE SEQUENCE hmda_user.modifiedlar2018_uniq_id_seq
+CREATE SEQUENCE hmda_user.modifiedlar2020_uniq_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -159,63 +156,45 @@ CREATE SEQUENCE hmda_user.modifiedlar2018_uniq_id_seq
     CACHE 1;
 
 
-ALTER TABLE hmda_user.modifiedlar2018_uniq_id_seq OWNER TO hmda_user;
+ALTER TABLE hmda_user.modifiedlar2020_uniq_id_seq OWNER TO hmda_user;
 
 --
 -- TOC entry 5570 (class 0 OID 0)
 -- Dependencies: 285
--- Name: modifiedlar2018_uniq_id_seq; Type: SEQUENCE OWNED BY; Schema: hmda_user; Owner: hmda_user
+-- Name: modifiedlar2020_uniq_id_seq; Type: SEQUENCE OWNED BY; Schema: hmda_user; Owner: hmda_user
 --
 
-ALTER SEQUENCE hmda_user.modifiedlar2018_uniq_id_seq OWNED BY hmda_user.modifiedlar2018.uniq_id;
+ALTER SEQUENCE hmda_user.modifiedlar2020_uniq_id_seq OWNED BY hmda_user.modifiedlar2020.uniq_id;
 
 
 --
 -- TOC entry 5433 (class 2604 OID 57438)
--- Name: modifiedlar2018 uniq_id; Type: DEFAULT; Schema: hmda_user; Owner: hmda_user
+-- Name: modifiedlar2020 uniq_id; Type: DEFAULT; Schema: hmda_user; Owner: hmda_user
 --
 
-ALTER TABLE ONLY hmda_user.modifiedlar2018 ALTER COLUMN uniq_id SET DEFAULT nextval('hmda_user.modifiedlar2018_uniq_id_seq'::regclass);
+ALTER TABLE ONLY hmda_user.modifiedlar2020 ALTER COLUMN uniq_id SET DEFAULT nextval('hmda_user.modifiedlar2020_uniq_id_seq'::regclass);
 
 
 --
 -- TOC entry 5436 (class 2606 OID 25537)
--- Name: modifiedlar2018 modifiedlar2018_pkey; Type: CONSTRAINT; Schema: hmda_user; Owner: hmda_user
+-- Name: modifiedlar2020 modifiedlar2020_pkey; Type: CONSTRAINT; Schema: hmda_user; Owner: hmda_user
 --
 
-ALTER TABLE ONLY hmda_user.modifiedlar2018
-    ADD CONSTRAINT modifiedlar2018_pkey PRIMARY KEY (uniq_id);
+ALTER TABLE ONLY hmda_user.modifiedlar2020
+    ADD CONSTRAINT modifiedlar2020_pkey PRIMARY KEY (uniq_id);
 
 
 --
 -- TOC entry 5434 (class 1259 OID 58733)
--- Name: modifiedlar2018_lei_idx; Type: INDEX; Schema: hmda_user; Owner: hmda_user
+-- Name: modifiedlar2020_lei_idx; Type: INDEX; Schema: hmda_user; Owner: hmda_user
 --
 
-CREATE INDEX modifiedlar2018_lei_idx ON hmda_user.modifiedlar2018 USING btree (lei);
-CREATE INDEX modifiedlar2018_sex_categorization_idx ON hmda_user.modifiedlar2018 USING btree (sex_categorization);
-CREATE INDEX modifiedlar2018_race_categorization_idx ON hmda_user.modifiedlar2018 USING btree (race_categorization);
-CREATE INDEX modifiedlar2018_ethnicity_categorization_idx ON hmda_user.modifiedlar USING btree (ethnicity_categorization);
-CREATE INDEX modifiedlar2018_loan_product_type_idx ON hmda_user.modifiedlar2018 USING btree (loan_product_type);
-CREATE INDEX modifiedlar2018_msa_md_idx ON hmda_user.modifiedlar2018 USING btree (msa_md);
-CREATE INDEX modifiedlar2018_state_idx ON hmda_user.modifiedlar2018 USING btree (state);
-CREATE INDEX modifiedlar2018_action_taken_type_idx ON hmda_user.modifiedlar2018 USING btree (action_taken_type);
-CREATE INDEX modifiedlar2018_construction_method_idx ON hmda_user.modifiedlar2018 USING btree (construction_method);
-CREATE INDEX modifiedlar2018_dwelling_category_idx ON hmda_user.modifiedlar2018 USING btree (dwelling_category);
-CREATE INDEX modifiedlar2018_lien_status_idx ON hmda_user.modifiedlar2018 USING btree (lien_status);
-CREATE INDEX modifiedlar2018_loan_purpose_idx ON hmda_user.modifiedlar2018 USING btree (loan_purpose);
-CREATE INDEX modifiedlar2018_loan_type_idx ON hmda_user.modifiedlar2018 USING btree (loan_type);
-CREATE INDEX modifiedlar2018_filing_year_idx ON hmda_user.modifiedlar2018 USING btree (filing_year);
+CREATE INDEX modifiedlar2020_lei_idx ON hmda_user.modifiedlar2020 USING btree (lei);
 
-CREATE INDEX modifiedlar2018_msamd_filing_year_idx ON hmda_user.modifiedlar2018 USING btree (msa_md, filing_year);
-CREATE INDEX modifiedlar2018_state_filing_year_idx ON hmda_user.modifiedlar2018 USING btree (state, filing_year);
-CREATE INDEX modifiedlar2018_total_units_year_idx ON hmda_user.modifiedlar2018 USING btree (total_units);
-CREATE INDEX modifiedlar2018_median_age_year_idx ON hmda_user.modifiedlar2018 USING btree (median_age_calculated);
-
-alter table modifiedlar2018
+alter table modifiedlar2020
 add column uli character varying;
 
--- Completed on 2019-06-05 11:44:50 EDT
+-- Completed on 2020-06-05 11:44:50 EDT
 
 
 --

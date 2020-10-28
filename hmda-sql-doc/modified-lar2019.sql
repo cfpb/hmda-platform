@@ -132,7 +132,7 @@ CREATE TABLE hmda_user.modifiedlar2019 (
     conforming_loan_limit character varying,
     median_age integer,
     median_age_calculated character varying,
-    median_income_percentage integer,
+    median_income_percentage decimal,
     race_categorization character varying,
     sex_categorization character varying,
     ethnicity_categorization character varying,
