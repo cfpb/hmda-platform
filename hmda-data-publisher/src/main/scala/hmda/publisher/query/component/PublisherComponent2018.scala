@@ -593,7 +593,7 @@ trait PublisherComponent2018 extends PGTableNameLoader {
     def minorityPopulationPercent =
       column[Option[String]]("minority_population_percent")
     def ffiecMedFamIncome      = column[Option[String]]("ffiec_med_fam_income")
-    def medianIncomePercentage = column[Option[Int]]("median_income_percentage")
+    def medianIncomePercentage = column[Option[Double]]("median_income_percentage")
     def ownerOccupiedUnits     = column[Option[String]]("owner_occupied_units")
     def oneToFourFamUnits      = column[Option[String]]("one_to_four_fam_units")
     def medianAge              = column[Option[Int]]("median_age")

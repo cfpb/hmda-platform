@@ -179,7 +179,7 @@ case class ModifiedLarPartSix(aus5: Option[Int] = Some(0),
                               minorityPopulationPercent: Option[String] = Some(
                                 ""),
                               ffiecMedFamIncome: Option[String] = Some(""),
-                              medianIncomePercentage: Option[Int] = Some(0),
+                              medianIncomePercentage: Option[Double] = Some(0.0),
                               ownerOccupiedUnits: Option[String] = Some(""),
                               oneToFourFamUnits: Option[String] = Some(""),
                               medianAge: Option[Int] = Some(0))
