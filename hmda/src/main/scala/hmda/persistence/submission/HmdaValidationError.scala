@@ -5,24 +5,24 @@ import java.time.Instant
 import akka.actor.typed._
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.scaladsl.{ ActorContext, Behaviors }
+import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import akka.pattern.ask
-import akka.persistence.typed.scaladsl.EventSourcedBehavior.{ CommandHandler, EventHandler }
-import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
-import akka.persistence.typed.{ PersistenceId, RecoveryCompleted }
+import akka.persistence.typed.scaladsl.EventSourcedBehavior.{CommandHandler, EventHandler}
+import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
+import akka.persistence.typed.{PersistenceId, RecoveryCompleted}
 import akka.stream.Materializer
-import akka.stream.scaladsl.{ Sink, Source, _ }
+import akka.stream.scaladsl.{Sink, Source, _}
 import akka.stream.typed.scaladsl.ActorFlow
-import akka.util.{ ByteString, Timeout }
-import akka.{ Done, NotUsed }
+import akka.util.{ByteString, Timeout}
+import akka.{Done, NotUsed}
 import com.typesafe.config.Config
 import hmda.HmdaPlatform.stringKafkaProducer
-import hmda.messages.institution.InstitutionCommands.{ GetInstitution, ModifyInstitution }
+import hmda.messages.institution.InstitutionCommands.{GetInstitution, ModifyInstitution}
 import hmda.messages.institution.InstitutionEvents.InstitutionEvent
 import hmda.messages.pubsub.HmdaTopics._
-import hmda.messages.submission.EditDetailsCommands.{ EditDetailsPersistenceCommand, PersistEditDetails }
+import hmda.messages.submission.EditDetailsCommands.{EditDetailsPersistenceCommand, PersistEditDetails}
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents._
@@ -30,32 +30,33 @@ import hmda.messages.submission.ValidationProgressTrackerCommands._
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums.LoanOriginated
 import hmda.model.filing.submission._
-import hmda.model.filing.ts.{ TransmittalLar, TransmittalSheet }
+import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
 import hmda.model.institution.Institution
 import hmda.model.processing.state.ValidationProgress.InProgress
-import hmda.model.processing.state.{ HmdaValidationErrorState, ValidationProgress, ValidationType }
-import hmda.model.validation.{ MacroValidationError, QualityValidationError, SyntacticalValidationError, ValidationError }
+import hmda.model.processing.state.{HmdaValidationErrorState, ValidationProgress, ValidationType}
+import hmda.model.validation.{MacroValidationError, QualityValidationError, SyntacticalValidationError, ValidationError}
 import hmda.parser.filing.ParserFlow._
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.EditDetailsConverter._
-import hmda.persistence.submission.HmdaProcessingUtils.{ readRawData, updateSubmissionStatus, updateSubmissionStatusAndReceipt }
+import hmda.persistence.submission.HmdaProcessingUtils.{readRawData, updateSubmissionStatus, updateSubmissionStatusAndReceipt}
 import hmda.publication.KafkaUtils._
 import hmda.util.streams.FlowUtils.framing
 import hmda.utils.YearUtils.Period
 import hmda.validation.context.ValidationContext
 import hmda.validation.filing.MacroValidationFlow._
 import hmda.validation.filing.ValidationFlow._
+import hmda.validation.rules.lar.quality._2020.Q600_warning
 import hmda.validation.rules.lar.quality.common.Q600
-import hmda.validation.rules.lar.syntactical.{ S304, S305, S306 }
+import hmda.validation.rules.lar.syntactical.{S304, S305, S306}
 import net.openhft.hashing.LongHashFunction
 
 import scala.collection.immutable.ListMap
 import scala.concurrent.duration._
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.{ Failure, Success }
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 object HmdaValidationError
   extends HmdaTypedPersistentActor[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaValidationErrorState] {
@@ -450,6 +451,7 @@ object HmdaValidationError
                                 )
     sealed trait DistinctCheckType
     case object RawLine        extends DistinctCheckType
+    case object UniqueLar      extends DistinctCheckType
     case object ULI            extends DistinctCheckType
     case object ULIActionTaken extends DistinctCheckType
 
@@ -488,6 +490,10 @@ object HmdaValidationError
                       val hashed = hashString(rawLine)
                       List((checkAndUpdate(state, hashed), rowNumber, lar.loan.ULI))
 
+                    case UniqueLar =>
+                      val hashed = hashString(lar.larIdentifier.LEI + lar.loan.ULI.toUpperCase + lar.action.actionTakenType.code.toString.toUpperCase + lar.action.actionTakenDate.toString.toUpperCase)
+                      List((checkAndUpdate(state, hashed), rowNumber, lar.loan.ULI))
+
                     case ULI =>
                       val hashed = hashString(lar.loan.ULI.toUpperCase)
                       List((checkAndUpdate(state, hashed), rowNumber, lar.loan.ULI))
@@ -495,7 +501,7 @@ object HmdaValidationError
                     case ULIActionTaken => // For S306
                       // Only look at ULIs where the actionTakenType.code == 1
                       if (lar.action.actionTakenType == LoanOriginated) {
-                        val hashed = hashString(lar.action.actionTakenType.code.toString + lar.loan.ULI.toUpperCase())
+                        val hashed = hashString(lar.action.actionTakenType.code.toString.toUpperCase + lar.loan.ULI.toUpperCase())
                         List((checkAndUpdate(state, hashed), rowNumber, lar.loan.ULI))
                       } else Nil
                   }
@@ -532,11 +538,12 @@ object HmdaValidationError
       log.info(s"In validateAnPersistErrors for ${submissionId} for ${checkType}")
 
       // see addTsFieldInformation in ValidationFlow which does something similar
-      def enrichErrorInformation(tsLar: TransmittalLar, validationError: ValidationError): ValidationError = {
+      def enrichErrorInformation(tsLar: TransmittalLar, q600WarningPresent: Boolean, validationError: ValidationError): ValidationError = {
         val s305 = S305.name
         val s304 = S304.name
-        val q600 = Q600.name
+        val q600name = Q600.name
         val s306 = S306.name
+        val q600_warning = Q600_warning.name
         validationError match {
           case s306 @ SyntacticalValidationError(_, `s306`, _, fields) => //This is newly added for S306
             s306.copyWithFields(
@@ -555,11 +562,18 @@ object HmdaValidationError
                 "Total Number of LARs Found in File"    -> tsLar.larsCount.toString
               )
             )
-          case q600 @ QualityValidationError(uli, `q600`, fields) =>
-            q600.copyWithFields(
-              fields + (s"The following row numbers have the same ULI" -> tsLar.duplicateLineNumbers
-                .mkString(start = "Rows: ", sep = ",", end = ""))
-            )
+          case q600 @ QualityValidationError(uli,`q600name`, fields)  =>
+            if (q600WarningPresent) {
+              q600.copyWithFields(
+                fields + (s"The following row numbers have the same ULI. WARNING: Additionally there are rows in your data that have a duplicate ULI, LEI, Action Taken, and Action Taken Date. This edit logic will be changed in 2021 and become a Syntactical edit, unable to be bypassed until corrected " -> tsLar.duplicateLineNumbers
+                  .mkString(start = "Rows: ", sep = ",", end = ""))
+              )
+            } else {
+              q600.copyWithFields(
+                fields + (s"The following row numbers have the same ULI" -> tsLar.duplicateLineNumbers
+                  .mkString(start = "Rows: ", sep = ",", end = ""))
+              )
+            }
 
           case rest =>
             rest
@@ -567,12 +581,13 @@ object HmdaValidationError
       }
 
       log.info(
-        s"ValidateTsLar counts ${checkType} - ${submissionId}: TS Total Lines ${tsLar.ts.totalLines} Lars Count ${tsLar.larsCount} ${tsLar.larsDistinctCount} Distinct ULI Count ${tsLar.distinctUliCount}"
+        s"ValidateTsLar counts ${checkType} - ${submissionId}: TS Total Lines ${tsLar.ts.totalLines} Lars Count ${tsLar.larsCount} ${tsLar.larsDistinctCount} Distinct ULI Count ${tsLar.distinctUliCount} Unique LAR Count ${tsLar.uniqueLarsSpecificFields}"
       )
       validateTsLarEdits(tsLar, checkType, validationContext) match {
 
         case Left(errors: Seq[ValidationError]) =>
-          val enrichedErrors = errors.map(enrichErrorInformation(tsLar, _))
+          val q600WarningPresent = errors.exists(_.editName == Q600_warning.name)
+          val enrichedErrors = errors.map(enrichErrorInformation(tsLar, q600WarningPresent, _))
           val persisted: Future[HmdaRowValidatedError] =
             ctx.self ? ((ref: ActorRef[HmdaRowValidatedError]) => PersistHmdaRowValidatedError(submissionId, 1, enrichedErrors, Some(ref)))
           persisted.map(_ => enrichedErrors)
@@ -587,6 +602,7 @@ object HmdaValidationError
         for {
           header        <- headerResultTest
           rawLineResult <- checkForDistinctElements(RawLine)
+
           s306Result    <- checkForDistinctElements(ULIActionTaken)
           res <- validateAndPersistErrors(
             TransmittalLar(
@@ -594,6 +610,7 @@ object HmdaValidationError
               larsCount = rawLineResult.totalCount,
               uli = s306Result.uli,
               larsDistinctCount = rawLineResult.distinctCount,
+              uniqueLarsSpecificFields = -1,
               distinctUliCount = -1,
               duplicateLineNumbers = rawLineResult.duplicateLineNumbers.toList,
               distinctActionTakenUliCount = s306Result.distinctCount,
@@ -608,12 +625,14 @@ object HmdaValidationError
         for {
           header    <- headerResultTest
           uliResult <- checkForDistinctElements(ULI)
+          uniqueLarResul <- checkForDistinctElements(UniqueLar)
           res <- validateAndPersistErrors(
             TransmittalLar(
               ts = header,
               uli = uliResult.uli,
               larsCount = -1,
               larsDistinctCount = -1,
+              uniqueLarsSpecificFields = uniqueLarResul.distinctCount,
               distinctUliCount = uliResult.distinctCount,
               duplicateLineNumbers = uliResult.duplicateLineNumbers.toList
             ),
