@@ -17,7 +17,7 @@ import hmda.util.BankFilterUtils._
 import akka.stream.alpakka.file.scaladsl.Archive
 import akka.stream.alpakka.file.ArchiveMetadata
 import hmda.publisher.validation.PublishingGuard
-import hmda.publisher.validation.PublishingGuard.{ Scope, Year }
+import hmda.publisher.validation.PublishingGuard.{ Period, Scope }
 
 import scala.concurrent.Future
 import scala.util.{ Failure, Success }
@@ -59,7 +59,7 @@ class TsPublicScheduler
   override def receive: Receive = {
 
     case TsPublicScheduler2018 =>
-      publishingGuard.runIfDataIsValid(Year.y2018, Scope.Public) {
+      publishingGuard.runIfDataIsValid(Period.y2018, Scope.Public) {
         val fileName         = "2018_ts.txt"
         val zipDirectoryName = "2018_ts.zip"
         val s3Path           = s"$environmentPublic/dynamic-data/2018/"
@@ -72,7 +72,7 @@ class TsPublicScheduler
       }
 
     case TsPublicScheduler2019 =>
-      publishingGuard.runIfDataIsValid(Year.y2019, Scope.Public) {
+      publishingGuard.runIfDataIsValid(Period.y2018, Scope.Public) {
         val fileName         = "2019_ts.txt"
         val zipDirectoryName = "2019_ts.zip"
         val s3Path           = s"$environmentPublic/dynamic-data/2019/"

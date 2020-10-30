@@ -25,7 +25,7 @@ import hmda.publisher.scheduler.schedules.Schedules.{
   LarSchedulerQuarterly2020
 }
 import hmda.publisher.validation.PublishingGuard
-import hmda.publisher.validation.PublishingGuard.{ Scope, Year }
+import hmda.publisher.validation.PublishingGuard.{ Period, Scope }
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
 
@@ -48,11 +48,13 @@ class LarScheduler
   def larRepository2018                = new LarRepository2018(dbConfig)
   def larRepository2019                = new LarRepository2019(dbConfig)
   def larRepository2020                = new LarRepository2020(dbConfig)
+  def larRepository2020Q1              = new LarRepository2020Q1(dbConfig)
+  def larRepository2020Q2              = new LarRepository2020Q2(dbConfig)
+  def larRepository2020Q3              = new LarRepository2020Q3(dbConfig)
   val publishingGuard: PublishingGuard = PublishingGuard.create(this)(context.system)
 
   val indexTractMap2018: Map[String, Census] = CensusRecords.indexedTract2018
   val indexTractMap2019: Map[String, Census] = CensusRecords.indexedTract2019
-  val indexTractMap2020: Map[String, Census] = CensusRecords.indexedTract2020
 
   val s3Settings = S3Settings(context.system)
     .withBufferType(MemoryBufferType)
@@ -81,7 +83,7 @@ class LarScheduler
   override def receive: Receive = {
 
     case LarScheduler2018 =>
-      publishingGuard.runIfDataIsValid(Year.y2018, Scope.Private) {
+      publishingGuard.runIfDataIsValid(Period.y2018, Scope.Private) {
         val now           = LocalDateTime.now().minusDays(1)
         val formattedDate = fullDate.format(now)
         val fileName      = s"$formattedDate" + "2018_lar.txt"
@@ -97,7 +99,7 @@ class LarScheduler
       }
 
     case LarScheduler2019 =>
-      publishingGuard.runIfDataIsValid(Year.y2019, Scope.Private) {
+      publishingGuard.runIfDataIsValid(Period.y2019, Scope.Private) {
         val now           = LocalDateTime.now().minusDays(1)
         val formattedDate = fullDate.format(now)
         val fileName      = s"$formattedDate" + "2019_lar.txt"
@@ -114,7 +116,7 @@ class LarScheduler
       }
 
     case LarSchedulerLoanLimit2019 =>
-      publishingGuard.runIfDataIsValid(Year.y2019, Scope.Private) {
+      publishingGuard.runIfDataIsValid(Period.y2019, Scope.Private) {
         val now           = LocalDateTime.now().minusDays(1)
         val formattedDate = fullDate.format(now)
         val fileName      = "2019F_AGY_LAR_withFlag_" + s"$formattedDate" + "2019_lar.txt"
@@ -131,21 +133,24 @@ class LarScheduler
       }
 
     case LarSchedulerQuarterly2020 =>
-      publishingGuard.runIfDataIsValid(Year.y2020, Scope.Private) {
-        val includeQuarterly = true
-        val now              = LocalDateTime.now().minusDays(1)
-        val formattedDate    = fullDateQuarterly.format(now)
-        val fileName         = s"$formattedDate" + "quarterly_2020_lar.txt"
+      val includeQuarterly = true
+      val now              = LocalDateTime.now().minusDays(1)
+      val formattedDate    = fullDateQuarterly.format(now)
+      def publishQuarter[Table <: LarTableBase](quarter: Period, fileNameSuffix: String, repo: LarRepository2020Base[Table]) =
+        publishingGuard.runIfDataIsValid(quarter, Scope.Private) {
+          val fileName = formattedDate + fileNameSuffix
 
-        val allResultsSource: Source[String, NotUsed] =
-          Source
-            .fromPublisher(larRepository2020.getAllLARs(getFilterList(), includeQuarterly))
+          val allResultsSource: Source[String, NotUsed] = Source
+            .fromPublisher(repo.getAllLARs(getFilterList(), includeQuarterly))
             .map(larEntity => larEntity.toRegulatorPSV)
 
-        def countF: Future[Int] = larRepository2020.getAllLARsCount(getFilterList(), includeQuarterly)
+          def countF: Future[Int] = repo.getAllLARsCount(getFilterList(), includeQuarterly)
 
-        publishPSVtoS3(fileName, allResultsSource, countF)
-      }
+          publishPSVtoS3(fileName, allResultsSource, countF)
+        }
+      publishQuarter(Period.y2020Q1, "_quarter_1_2020_lar.txt", larRepository2020Q1)
+      publishQuarter(Period.y2020Q2, "_quarter_2_2020_lar.txt", larRepository2020Q2)
+      publishQuarter(Period.y2020Q3, "_quarter_3_2020_lar.txt", larRepository2020Q3)
   }
 
   def publishPSVtoS3(fileName: String, rows: Source[String, NotUsed], countF: => Future[Int]): Unit = {
@@ -179,8 +184,7 @@ class LarScheduler
     val indexTractMap = year match {
       case 2018 => indexTractMap2018
       case 2019 => indexTractMap2019
-      case 2020 => indexTractMap2020
-      case _ => indexTractMap2020
+      case _    => indexTractMap2019
     }
     val censusResult = indexTractMap.getOrElse(hmdaGeoTract, Census())
     val censusID =
