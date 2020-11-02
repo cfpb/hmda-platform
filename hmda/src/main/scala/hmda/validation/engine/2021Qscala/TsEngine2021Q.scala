@@ -22,7 +22,8 @@ private[engine] object TsEngine2021Q extends ValidationEngine[TransmittalSheet] 
     V606,
     V607,
     V718.withContext(ctx),
-    V717
+    V717,
+    V719
   )
 
 }
