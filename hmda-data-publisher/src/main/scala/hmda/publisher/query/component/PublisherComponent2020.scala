@@ -96,7 +96,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
       db.run(table.size.result)
   }
 
-  class TransmittalSheetTable(tag: Tag) extends Table[TransmittalSheetEntity](tag, ts2020TableName) {
+  abstract class TransmittalSheetTableBase(tag: Tag, tableName: String) extends Table[TransmittalSheetEntity](tag, tableName) {
 
     def lei             = column[String]("lei", O.PrimaryKey)
     def id              = column[Int]("id")
@@ -142,14 +142,20 @@ trait PublisherComponent2020 extends PGTableNameLoader {
       ) <> (TransmittalSheetEntity.tupled, TransmittalSheetEntity.unapply)
   }
 
-  val transmittalSheetTable2020 = TableQuery[TransmittalSheetTable]
+  class TransmittalSheetTable(tag: Tag)   extends TransmittalSheetTableBase(tag, ts2020TableName)
+  class TransmittalSheetTableQ1(tag: Tag) extends TransmittalSheetTableBase(tag, ts2020Q1TableName)
+  class TransmittalSheetTableQ2(tag: Tag) extends TransmittalSheetTableBase(tag, ts2020Q2TableName)
+  class TransmittalSheetTableQ3(tag: Tag) extends TransmittalSheetTableBase(tag, ts2020Q3TableName)
 
-  class TransmittalSheetRepository2020(val config: DatabaseConfig[JdbcProfile]) extends TableRepository[TransmittalSheetTable, String] {
+  val transmittalSheetTable2020   = TableQuery[TransmittalSheetTable]
+  val transmittalSheetTable2020Q1 = TableQuery[TransmittalSheetTableQ1]
+  val transmittalSheetTable2020Q2 = TableQuery[TransmittalSheetTableQ2]
+  val transmittalSheetTable2020Q3 = TableQuery[TransmittalSheetTableQ3]
 
-    override val table: config.profile.api.TableQuery[TransmittalSheetTable] =
-      transmittalSheetTable2020
+  class TSRepository2020Base[TsTable <: TransmittalSheetTableBase](val config: DatabaseConfig[JdbcProfile], val table: TableQuery[TsTable])
+    extends TableRepository[TsTable, String] {
 
-    override def getId(row: TransmittalSheetTable): config.profile.api.Rep[Id] =
+    override def getId(row: TsTable): config.profile.api.Rep[Id] =
       row.lei
 
     def createSchema() = db.run(table.schema.create)
@@ -174,7 +180,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
         db.run(table.filterNot(ts => (ts.lei.toUpperCase inSet bankIgnoreList) || ts.isQuarterly).result)
   }
 
-  class LarTable(tag: Tag) extends Table[LarEntityImpl2020](tag, lar2020TableName) {
+  abstract class LarTableBase(tag: Tag, tableName: String) extends Table[LarEntityImpl2020](tag, tableName) {
 
     def id                         = column[Int]("id")
     def lei                        = column[String]("lei")
@@ -480,12 +486,26 @@ trait PublisherComponent2020 extends PGTableNameLoader {
 
   }
 
-  val larTable2020 = TableQuery[LarTable]
+  class TransmittalSheetRepository2020(config: DatabaseConfig[JdbcProfile]) extends TSRepository2020Base(config, transmittalSheetTable2020)
+  class TransmittalSheetRepository2020Q1(config: DatabaseConfig[JdbcProfile])
+    extends TSRepository2020Base(config, transmittalSheetTable2020Q1)
+  class TransmittalSheetRepository2020Q2(config: DatabaseConfig[JdbcProfile])
+    extends TSRepository2020Base(config, transmittalSheetTable2020Q2)
+  class TransmittalSheetRepository2020Q3(config: DatabaseConfig[JdbcProfile])
+    extends TSRepository2020Base(config, transmittalSheetTable2020Q3)
 
-  class LarRepository2020(val config: DatabaseConfig[JdbcProfile]) extends TableRepository[LarTable, String] {
+  class LarTable(tag: Tag)   extends LarTableBase(tag, lar2020TableName)
+  class LarTableQ1(tag: Tag) extends LarTableBase(tag, lar2020Q1TableName)
+  class LarTableQ2(tag: Tag) extends LarTableBase(tag, lar2020Q2TableName)
+  class LarTableQ3(tag: Tag) extends LarTableBase(tag, lar2020Q3TableName)
 
-    override val table: config.profile.api.TableQuery[LarTable] =
-      larTable2020
+  val larTable2020   = TableQuery[LarTable]
+  val larTable2020Q1 = TableQuery[LarTableQ1]
+  val larTable2020Q2 = TableQuery[LarTableQ2]
+  val larTable2020Q3 = TableQuery[LarTableQ3]
+
+  class LarRepository2020Base[LarTable <: LarTableBase](val config: DatabaseConfig[JdbcProfile], val table: TableQuery[LarTable])
+    extends TableRepository[LarTable, String] {
 
     override def getId(row: LarTable): config.profile.api.Rep[Id] =
       row.lei
@@ -531,8 +551,24 @@ trait PublisherComponent2020 extends PGTableNameLoader {
 
   }
 
+  class LarRepository2020(config: DatabaseConfig[JdbcProfile])   extends LarRepository2020Base(config, larTable2020)
+  class LarRepository2020Q1(config: DatabaseConfig[JdbcProfile]) extends LarRepository2020Base(config, larTable2020Q1)
+  class LarRepository2020Q2(config: DatabaseConfig[JdbcProfile]) extends LarRepository2020Base(config, larTable2020Q2)
+  class LarRepository2020Q3(config: DatabaseConfig[JdbcProfile]) extends LarRepository2020Base(config, larTable2020Q3)
+
   val validationLarData2020: LarData = LarData[LarEntityImpl2020, LarTable](larTable2020)(_.lei)
   val validationTSData2020: TsData =
     TsData[TransmittalSheetEntity, TransmittalSheetTable](transmittalSheetTable2020)(_.lei, _.totalLines, _.submissionId)
+
+  val validationLarData2020Q1: LarData = LarData[LarEntityImpl2020, LarTableBase](larTable2020Q1)(_.lei)
+  val validationLarData2020Q2: LarData = LarData[LarEntityImpl2020, LarTableBase](larTable2020Q2)(_.lei)
+  val validationLarData2020Q3: LarData = LarData[LarEntityImpl2020, LarTableBase](larTable2020Q3)(_.lei)
+
+  val validationTSData2020Q1: TsData =
+    TsData[TransmittalSheetEntity, TransmittalSheetTableBase](transmittalSheetTable2020Q1)(_.lei, _.totalLines, _.submissionId)
+  val validationTSData2020Q2: TsData =
+    TsData[TransmittalSheetEntity, TransmittalSheetTableBase](transmittalSheetTable2020Q2)(_.lei, _.totalLines, _.submissionId)
+  val validationTSData2020Q3: TsData =
+    TsData[TransmittalSheetEntity, TransmittalSheetTableBase](transmittalSheetTable2020Q3)(_.lei, _.totalLines, _.submissionId)
 
 }

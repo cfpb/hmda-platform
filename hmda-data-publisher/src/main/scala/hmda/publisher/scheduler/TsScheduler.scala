@@ -16,7 +16,7 @@ import hmda.publisher.helper.{ PrivateAWSConfigLoader, SnapshotCheck }
 import hmda.publisher.query.component.{ PublisherComponent2018, PublisherComponent2019, PublisherComponent2020 }
 import hmda.publisher.scheduler.schedules.Schedules.{ TsScheduler2018, TsScheduler2019, TsSchedulerQuarterly2020 }
 import hmda.publisher.validation.PublishingGuard
-import hmda.publisher.validation.PublishingGuard.{ Scope, Year }
+import hmda.publisher.validation.PublishingGuard.{ Period, Scope }
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.ts._
 import hmda.util.BankFilterUtils._
@@ -39,6 +39,9 @@ class TsScheduler
   def tsRepository2018                 = new TransmittalSheetRepository2018(dbConfig)
   def tsRepository2019                 = new TransmittalSheetRepository2019(dbConfig)
   def tsRepository2020                 = new TransmittalSheetRepository2020(dbConfig)
+  def tsRepository2020Q1               = new TransmittalSheetRepository2020Q1(dbConfig)
+  def tsRepository2020Q2               = new TransmittalSheetRepository2020Q2(dbConfig)
+  def tsRepository2020Q3               = new TransmittalSheetRepository2020Q3(dbConfig)
   val publishingGuard: PublishingGuard = PublishingGuard.create(this)(context.system)
 
   val awsConfig =
@@ -80,7 +83,7 @@ class TsScheduler
   override def receive: Receive = {
 
     case TsScheduler2018 =>
-      publishingGuard.runIfDataIsValid(Year.y2018, Scope.Private) {
+      publishingGuard.runIfDataIsValid(Period.y2018, Scope.Private) {
         val now           = LocalDateTime.now().minusDays(1)
         val formattedDate = fullDate.format(now)
         val fileName      = s"$formattedDate" + "2018_ts.txt"
@@ -104,7 +107,7 @@ class TsScheduler
       }
 
     case TsScheduler2019 =>
-      publishingGuard.runIfDataIsValid(Year.y2019, Scope.Private) {
+      publishingGuard.runIfDataIsValid(Period.y2019, Scope.Private) {
         val now           = LocalDateTime.now().minusDays(1)
         val formattedDate = fullDate.format(now)
         val fileName      = s"$formattedDate" + "2019_ts.txt"
@@ -127,29 +130,32 @@ class TsScheduler
         }
       }
     case TsSchedulerQuarterly2020 =>
-      publishingGuard.runIfDataIsValid(Year.y2020, Scope.Private) {
-        val includeQuarterly = true;
-        val now              = LocalDateTime.now().minusDays(1)
-        val formattedDate    = fullDateQuarterly.format(now)
-        val fileName         = s"$formattedDate" + "quarterly_2020_ts.txt"
-        val s3Path           = s"$environmentPrivate/ts/"
-        val fullFilePath     = SnapshotCheck.pathSelector(s3Path, fileName)
-
-        val s3Sink =
-          S3.multipartUpload(bucketPrivate, fullFilePath)
-            .withAttributes(S3Attributes.settings(s3Settings))
-
-        val results: Future[MultipartUploadResult] =
-          uploadFileToS3(s3Sink, tsRepository2020.getAllSheets(getFilterList(), includeQuarterly))
-
-        results onComplete {
-          case Success(result) =>
-            log.info("Pushed to S3: " + s"$bucketPrivate/$fullFilePath" + ".")
-
-          case Failure(t) =>
-            log.error("An error has occurred getting Quarterly TS Data 2020: " + t.getMessage)
+      val includeQuarterly = true;
+      val now              = LocalDateTime.now().minusDays(1)
+      val formattedDate    = fullDateQuarterly.format(now)
+      val s3Path           = s"$environmentPrivate/ts/"
+      def handleQuarter[Table <: TransmittalSheetTableBase](year: Period, repo: TSRepository2020Base[Table], fileNameSuffix: String) =
+        publishingGuard.runIfDataIsValid(year, Scope.Private) {
+          val fileName     = formattedDate + fileNameSuffix
+          val fullFilePath = SnapshotCheck.pathSelector(s3Path, fileName)
+          val s3Sink =
+            S3.multipartUpload(bucketPrivate, fullFilePath)
+              .withAttributes(S3Attributes.settings(s3Settings))
+          def data: Future[Seq[TransmittalSheetEntity]] =
+            repo.getAllSheets(getFilterList(), includeQuarterly)
+          val results: Future[MultipartUploadResult] =
+            uploadFileToS3(s3Sink, data)
+          results onComplete {
+            case Success(result) =>
+              log.info("Pushed to S3: " + s"$bucketPrivate/$fullFilePath" + ".")
+            case Failure(t) =>
+              log.error("An error has occurred getting Quarterly TS Data 2020: " + t.getMessage)
+          }
         }
-      }
+      handleQuarter(Period.y2020Q1, tsRepository2020Q1, "_quarter_1_2020_ts.txt")
+      handleQuarter(Period.y2020Q2, tsRepository2020Q2, "_quarter_2_2020_ts.txt")
+      handleQuarter(Period.y2020Q3, tsRepository2020Q3, "_quarter_3_2020_ts.txt")
+
   }
 
 }
