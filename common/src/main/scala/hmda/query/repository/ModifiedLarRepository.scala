@@ -1,7 +1,10 @@
 package hmda.query.repository
 
+import java.security.MessageDigest
+
 import hmda.model.filing.submission.SubmissionId
 import hmda.model.modifiedlar.EnrichedModifiedLoanApplicationRegister
+import hmda.util.conversion.LarStringFormatter
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
@@ -156,7 +159,8 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
             percent_median_msa_income,
             dwelling_category,
             loan_product_type,
-            uli
+            uli,
+            checksum
             )
 
 
@@ -267,9 +271,16 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
             ${incomeCategorization(input.mlar.income, input.census.medianIncome)},
             ${input.mlar.dwellingCategorization},
             ${input.mlar.loanProductTypeCategorization},
-            ${input.mlar.uli}
+            ${input.mlar.uli},
+            ${checksum_calc(input)}
           )
           """)
+
+  private def checksum_calc(input: EnrichedModifiedLoanApplicationRegister): String =
+    MessageDigest.getInstance("MD5")
+      .digest(LarStringFormatter.larString(input).toUpperCase().getBytes())
+      .map(0xFF & _)
+      .map { "%02x".format(_) }.foldLeft(""){_ + _}
 
   private def safeConvertToInt(s: String): Option[Int] =
     Try(s.toInt).toOption

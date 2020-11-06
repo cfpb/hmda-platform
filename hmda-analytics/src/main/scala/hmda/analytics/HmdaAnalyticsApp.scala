@@ -121,11 +121,12 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
       .map(msg => SubmissionId(msg))
       .filter(institution => filterBankWithLogging(institution.lei))
       .mapAsync(1) { id =>
-        log.info(s"Adding data for  $id")
+        log.info(s"Adding data for $id")
         addTs(id)
       }
       .toMat(Sink.ignore)(Keep.right)
       .run()
+
   private def addTs(submissionId: SubmissionId): Future[Done] = {
     val submissionIdOption = Some(submissionId.toString)
 

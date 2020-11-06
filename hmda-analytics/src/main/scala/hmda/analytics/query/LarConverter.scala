@@ -62,7 +62,7 @@ object LarConverter {
     val countyLoanLimitsByCounty = getcountyLoanLimitsByCounty(year)
     val countyLoanLimitsByState = getcountyLoanLimitsByState(year)
     val checksum = MessageDigest.getInstance("MD5")
-      .digest(LarStringFormatter.larString(lar).getBytes())
+      .digest(LarStringFormatter.larString(lar).toUpperCase().getBytes())
       .map(0xFF & _)
       .map { "%02x".format(_) }.foldLeft(""){_ + _}
     LarEntity(

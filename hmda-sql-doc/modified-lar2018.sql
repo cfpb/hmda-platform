@@ -218,6 +218,9 @@ add column uli character varying;
 alter table modifiedlar2018
 add column action_taken_date integer;
 
+alter table modifiedlar2018 add column checksum varchar;
+
+
 -- Completed on 2019-06-05 11:44:50 EDT
 
 
