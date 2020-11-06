@@ -129,7 +129,7 @@ object HmdaValidationError
           _           = tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(50))
           tsLarErrors <- validateTsLar(ctx, submissionId, "syntactical-validity", validationContext)
           _           = log.info(s"Starting validateLar - Syntactical for $submissionId")
-          _           = tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(75))
+          _           = tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(95))
           larSyntacticalValidityErrors <- validateLar("syntactical-validity", ctx, submissionId, validationContext)(
             system,
             materializer,
