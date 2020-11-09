@@ -10,7 +10,7 @@ import slick.jdbc.JdbcProfile
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait InstitutionEmailComponent extends InstitutionComponent2018 with InstitutionComponent2019 with InstitutionComponent2020 {
+trait InstitutionEmailComponent extends InstitutionComponent2018 with InstitutionComponent2019 with InstitutionComponent2020 with InstitutionComponent2021 {
 
   import dbConfig.profile.api._
 
@@ -78,7 +78,9 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
     institutionEmailsRepository: InstitutionEmailsRepository,
     institutionRepository2018: InstitutionRepository2018,
     institutionRepository2019: InstitutionRepository2019,
-    institutionRepository2020: InstitutionRepository2020
+    institutionRepository2020: InstitutionRepository2020,
+    institutionRepository2021: InstitutionRepository2021
+
   ):  Future[Seq[Future[String]]]= {
 
     year match {
@@ -114,6 +116,18 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
           institutions.map(institution => appendLoaderEmailDomains(institution))
 
         }
+      case "2021" =>
+        def institutionQuery() =
+          institutionRepository2021.table.filterNot(_.lei.toUpperCase inSet bankFilterList)
+        val db = institutionRepository2018.db
+
+        for {
+          institutions  <- db.run(institutionQuery().result)
+        } yield {
+
+          institutions.map(institution => appendLoaderEmailDomains(institution))
+
+        }
     }
   }
 
@@ -136,7 +150,8 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
     institutionEmailsRepository: InstitutionEmailsRepository,
     institutionRepository2018: InstitutionRepository2018,
     institutionRepository2019: InstitutionRepository2019,
-    institutionRepository2020: InstitutionRepository2020
+    institutionRepository2020: InstitutionRepository2020,
+    institutionRepository2021: InstitutionRepository2021
   ): Future[Seq[Institution]] = {
 
     val emailDomain = extractDomain(email)
@@ -192,6 +207,21 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
           institutions.map { institution => mergeEmailIntoInstitutions(emails, institution)
           }
         }
+      case "2021" =>
+        def institutionQuery(leis: Seq[String]) =
+          institutionRepository2021.table.filter(_.lei inSet leis)
+
+        val db = institutionRepository2021.db
+
+        for {
+          emailEntities <- db.run(emailSingleQuery.result)
+          leis          = emailEntities.map(_.lei)
+          institutions  <- db.run(institutionQuery(leis).result)
+          emails        <- db.run(emailTotalQuery(leis).result)
+        } yield {
+          institutions.map { institution => mergeEmailIntoInstitutions(emails, institution)
+          }
+        }
     }
   }
 
@@ -200,7 +230,8 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
     institutionEmailsRepository: InstitutionEmailsRepository,
     institutionRepository2018: InstitutionRepository2018,
     institutionRepository2019: InstitutionRepository2019,
-    institutionRepository2020: InstitutionRepository2020
+    institutionRepository2020: InstitutionRepository2020,
+    institutionRepository2021: InstitutionRepository2021
   ): Future[Seq[Institution]] = {
 
     val emailDomain = extractDomain(email)
@@ -209,6 +240,9 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
 
     def emailTotalQuery(leis: Seq[String]) =
       institutionEmailsRepository.table.filter(_.lei inSet leis)
+
+    def institutionQuery2021(leis: Seq[String]) =
+      institutionRepository2021.table.filter(_.lei inSet leis)
 
     def institutionQuery2020(leis: Seq[String]) =
       institutionRepository2020.table.filter(_.lei inSet leis)
@@ -219,6 +253,7 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
     def institutionQuery2018(leis: Seq[String]) =
       institutionRepository2018.table.filter(_.lei inSet leis)
 
+    val db2021 = institutionRepository2021.db
     val db2020 = institutionRepository2020.db
     val db2019 = institutionRepository2019.db
     val db2018 = institutionRepository2018.db
@@ -241,10 +276,14 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
         db2018.run(institutionQuery2020(leis).result)
       else Future.successful(Seq.empty)
 
+      institutions2021 <- if (institutions2018.isEmpty && institutions2019.isEmpty)
+        db2021.run(institutionQuery2021(leis).result)
+      else Future.successful(Seq.empty)
+
       emails <- db2020.run(emailTotalQuery(leis).result)
     }
 
-      yield (institutions2020, institutions2019, institutions2018) match {
+      yield (institutions2021, institutions2020, institutions2019, institutions2018) match {
 
         case _ if (!institutions2019.isEmpty) => institutions2019.map {
           institution => mergeEmailIntoInstitutions(emails, institution)
@@ -257,6 +296,11 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
         case _ if (!institutions2020.isEmpty) => institutions2020.map {
           institution => mergeEmailIntoInstitutions(emails, institution)
         }
+
+        case _ if (!institutions2021.isEmpty) => institutions2021.map {
+          institution => mergeEmailIntoInstitutions(emails, institution)
+        }
+
       }
   }
 
@@ -271,7 +315,8 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
     institutionEmailsRepository: InstitutionEmailsRepository,
     institutionRepository2018: InstitutionRepository2018,
     institutionRepository2019: InstitutionRepository2019,
-    institutionRepository2020: InstitutionRepository2020
+    institutionRepository2020: InstitutionRepository2020,
+    institutionRepository2021: InstitutionRepository2021
   ): Future[Seq[Institution]] = {
     val emailFiltered = findByEmail(emailDomain, year)
     for {

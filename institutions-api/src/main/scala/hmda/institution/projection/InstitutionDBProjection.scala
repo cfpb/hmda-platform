@@ -32,6 +32,7 @@ object InstitutionDBProjection extends InstitutionEmailComponent with Institutio
   implicit val institutionRepository2018   = new InstitutionRepository2018(dbConfig, "institutions2018")
   implicit val institutionRepository2019   = new InstitutionRepository2019(dbConfig, "institutions2019")
   implicit val institutionRepository2020   = new InstitutionRepository2020(dbConfig, "institutions2020")
+  implicit val institutionRepository2021   = new InstitutionRepository2021(dbConfig, "institutions2021")
   implicit val institutionEmailsRepository = new InstitutionEmailsRepository(dbConfig)
   implicit val institutionNotesHistoryRepository = new InstitutionNoteHistoryRepository(dbConfig)
 
@@ -68,6 +69,8 @@ object InstitutionDBProjection extends InstitutionEmailComponent with Institutio
             institutionRepository2019.deleteById(lei)
           case 2020 =>
             institutionRepository2020.deleteById(lei)
+          case 2021 =>
+            institutionRepository2021.deleteById(lei)
         }
       case other => log.error(s"Unexpected event passed to Institution DB Projector: ${other}")
     }
@@ -80,15 +83,14 @@ object InstitutionDBProjection extends InstitutionEmailComponent with Institutio
 
       inst.activityYear match {
 
-        case 2018 =>{
+        case 2018 =>
           institutionRepository2018.insertOrUpdate(InstitutionConverter.convert(inst))
-        }
-        case 2019 =>{
+        case 2019 =>
           institutionRepository2019.insertOrUpdate(InstitutionConverter.convert(inst))
-        }
-        case 2020 =>{
+        case 2020 =>
           institutionRepository2020.insertOrUpdate(InstitutionConverter.convert(inst))
-        }
+        case 2021 =>
+          institutionRepository2021.insertOrUpdate(InstitutionConverter.convert(inst))
       }
     }
 
