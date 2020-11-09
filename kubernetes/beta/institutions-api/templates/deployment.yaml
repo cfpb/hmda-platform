@@ -112,14 +112,14 @@ spec:
             - name: {{ .Values.service.name }}
               containerPort: 9092
               protocol: {{ .Values.service.protocol }}
-          livenessProbe:
-            httpGet:
-              path: /
-              port: {{ .Values.service.port }}
-          readinessProbe:
-            httpGet:
-              path: /
-              port: {{ .Values.service.port }}
+#          livenessProbe:
+#            httpGet:
+#              path: /
+#              port: {{ .Values.service.port }}
+#          readinessProbe:
+#            httpGet:
+#              path: /
+#              port: {{ .Values.service.port }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
