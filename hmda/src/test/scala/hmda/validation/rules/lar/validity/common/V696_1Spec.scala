@@ -5,7 +5,8 @@ import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums.{
   DesktopUnderwriter,
   EmptyAUSValue,
-  InvalidAutomatedUnderwritingSystemCode
+  InvalidAutomatedUnderwritingSystemCode,
+  InternalProprietarySystem
 }
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
@@ -30,6 +31,10 @@ class V696_1Spec extends LarEditCheckSpec {
       val invalidLar2 = validLar.copy(
         AUS = validLar.AUS.copy(aus3 = new InvalidAutomatedUnderwritingSystemCode))
       invalidLar2.mustFail
+
+      val invalidLar3 = validLar.copy(
+        AUS = validLar.AUS.copy(aus3 = InternalProprietarySystem))
+      invalidLar3.mustFail
     }
   }
 }
