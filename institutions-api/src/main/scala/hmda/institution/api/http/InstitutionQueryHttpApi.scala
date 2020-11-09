@@ -30,7 +30,7 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
   implicit val institutionRepository2018   = new InstitutionRepository2018(dbConfig, "institutions2018")
   implicit val institutionRepository2019   = new InstitutionRepository2019(dbConfig, "institutions2019")
   implicit val institutionRepository2020   = new InstitutionRepository2020(dbConfig, "institutions2020")
-  implicit val institutionRepository2021   = new InstitutionRepository2021(dbConfig, "institutions2020")
+  implicit val institutionRepository2021   = new InstitutionRepository2021(dbConfig, "institutions2021")
   implicit val institutionEmailsRepository = new InstitutionEmailsRepository(dbConfig)
   implicit val institutionNoteHistoryRepository = new InstitutionNoteHistoryRepository(dbConfig)
 
