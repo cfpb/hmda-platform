@@ -5,7 +5,7 @@ import cats.data.{ Validated, ValidatedNel }
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
 import hmda.publisher.query.component.{ PublisherComponent2018, PublisherComponent2019, PublisherComponent2020 }
-import hmda.publisher.validation.PublishingGuard.{ Scope, Year }
+import hmda.publisher.validation.PublishingGuard.{ Period, Scope }
 import hmda.query.DbConfiguration
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
@@ -22,15 +22,15 @@ class PublishingGuard(
                        implicit ec: ExecutionContext
                      ) extends LazyLogging {
 
-  def runIfDataIsValid(year: Year, scope: Scope)(thunk: => Unit): Future[Unit] =
+  def runIfDataIsValid(year: Period, scope: Scope)(thunk: => Unit): Future[Unit] =
     validate(getChecks(year, scope))
       .flatMap({
         case Validated.Valid(_) =>
           logger.debug(s"Data validation successful")
           Future(thunk)
         case Validated.Invalid(errs) =>
-          val message = s"Data validation failed for year ${year}. Files won't be published. Message:\n${errs.toList.mkString("\n")}"
-          logger.error(message)
+          val message = errs.toList.mkString("\n")
+          logger.error(s"Data validation failed for year ${year}. Files won't be published. Message:\n${message}")
           messageReporter.report(message)
       })
       .recoverWith {
@@ -39,25 +39,31 @@ class PublishingGuard(
           messageReporter.report(s"Data validation failed with unexpected exception: $ex")
       }
 
-  private def getChecks(year: Year, scope: Scope): List[ValidationCheck] = {
+  private def getChecks(year: Period, scope: Scope): List[ValidationCheck] = {
     val leiCheckErrorMargin = year match {
-      case Year.y2018 => 5
-      case Year.y2019 => 0
-      case Year.y2020 => 0
-    }
-
-    val tsData = year match {
-      case Year.y2018 => db2018.validationTSData2018
-      case Year.y2019 => db2019.validationTSData2019
-      case Year.y2020 => db2020.validationTSData2020
+      case Period.y2018   => 5
+      case Period.y2019   => 0
+      case Period.y2020Q1 => 0
+      case Period.y2020Q2 => 0
+      case Period.y2020Q3 => 0
     }
 
     scope match {
       case Scope.Private =>
         val larData = year match {
-          case Year.y2018 => db2018.validationLarData2018
-          case Year.y2019 => db2019.validationLarData2019
-          case Year.y2020 => db2020.validationLarData2020
+          case Period.y2018   => db2018.validationLarData2018
+          case Period.y2019   => db2019.validationLarData2019
+          case Period.y2020Q1 => db2020.validationLarData2020Q1
+          case Period.y2020Q2 => db2020.validationLarData2020Q2
+          case Period.y2020Q3 => db2020.validationLarData2020Q3
+        }
+
+        val tsData = year match {
+          case Period.y2018   => db2018.validationTSData2018
+          case Period.y2019   => db2019.validationTSData2019
+          case Period.y2020Q1 => db2020.validationTSData2020Q1
+          case Period.y2020Q2 => db2020.validationTSData2020Q2
+          case Period.y2020Q3 => db2020.validationTSData2020Q3
         }
         List(
           new TSLinesCheck(dbConfig, tsData, larData),
@@ -66,9 +72,16 @@ class PublishingGuard(
       case Scope.Public =>
         // there is no modified lar table for 2020 and so no chcecks will run for this year and scope
         val larDataOpt = year match {
-          case Year.y2018 => Some(db2018.validationMLarData2018)
-          case Year.y2019 => Some(db2019.validationMLarData2019)
-          case Year.y2020 => None
+          case Period.y2018 => Some(db2018.validationMLarData2018)
+          case Period.y2019 => Some(db2019.validationMLarData2019)
+          case Period.y2020Q1 | Period.y2020Q1 | Period.y2020Q3 =>
+            throw new IllegalArgumentException("year 2020 is not supported to public publishers at the moment")
+        }
+        val tsData = year match {
+          case Period.y2018 => db2018.validationTSData2018
+          case Period.y2019 => db2019.validationTSData2019
+          case Period.y2020Q1 | Period.y2020Q1 | Period.y2020Q3 =>
+            throw new IllegalArgumentException("year 2020 is not supported to public publishers at the moment")
         }
         larDataOpt
           .map(larData =>
@@ -105,11 +118,13 @@ object PublishingGuard {
     new PublishingGuard(dbCompontnents, dbCompontnents, dbCompontnents, msgReporter, dbConfig)
   }
 
-  sealed trait Year
-  object Year {
-    case object y2018 extends Year
-    case object y2019 extends Year
-    case object y2020 extends Year
+  sealed trait Period
+  object Period {
+    case object y2018   extends Period
+    case object y2019   extends Period
+    case object y2020Q1 extends Period
+    case object y2020Q2 extends Period
+    case object y2020Q3 extends Period
   }
 
   sealed trait Scope

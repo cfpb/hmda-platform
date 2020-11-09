@@ -3,15 +3,31 @@ package hmda.publisher.validation
 import akka.actor.ActorSystem
 import akka.testkit.TestKit
 import hmda.publisher.query.component.PublisherComponent2018
-import hmda.publisher.query.lar._
+import hmda.publisher.query.lar.{
+  LarEntityImpl2018,
+  LarPartFive2018,
+  LarPartFour2018,
+  LarPartOne2018,
+  LarPartSix2018,
+  LarPartThree2018,
+  LarPartTwo2018,
+  ModifiedLarEntityImpl,
+  ModifiedLarPartFive,
+  ModifiedLarPartFour,
+  ModifiedLarPartOne,
+  ModifiedLarPartSix,
+  ModifiedLarPartThree,
+  ModifiedLarPartTwo
+}
+import hmda.publisher.query.panel.InstitutionEntity
 import hmda.query.ts.TransmittalSheetEntity
 import hmda.utils.EmbeddedPostgres
-import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
-import org.scalatest.time.{Millis, Minutes, Span}
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, FreeSpecLike, Matchers}
+import org.scalatest.concurrent.{ PatienceConfiguration, ScalaFutures }
+import org.scalatest.time.{ Millis, Minutes, Span }
+import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach, FreeSpecLike, FunSuite, Matchers }
 
 import scala.concurrent.duration.DurationInt
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{ Await, Future }
 
 class TSLinesCheckTest
   extends TestKit(ActorSystem("PublisherComponent2018Spec"))
