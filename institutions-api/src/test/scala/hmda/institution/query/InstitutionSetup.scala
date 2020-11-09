@@ -16,6 +16,8 @@ trait InstitutionSetup extends InstitutionEmailComponent {
     new InstitutionRepository2019(dbConfig, "institutions2019")
   implicit val institutionRepository2020 =
     new InstitutionRepository2020(dbConfig, "institutions2020")
+  implicit val institutionRepository2021 =
+    new InstitutionRepository2021(dbConfig, "institutions2021")
   implicit val emailRepository = new InstitutionEmailsRepository(dbConfig)
   val db                       = emailRepository.db
 
@@ -47,6 +49,7 @@ trait InstitutionSetup extends InstitutionEmailComponent {
         institutionsTable2018.schema.create,
         institutionsTable2019.schema.create,
         institutionsTable2020.schema.create,
+        institutionsTable2021.schema.create,
         institutionsTable2018 ++= Seq(
           instA,
           instB,
@@ -69,6 +72,7 @@ trait InstitutionSetup extends InstitutionEmailComponent {
     Await.result(institutionRepository2018.dropSchema(), duration)
     Await.result(institutionRepository2019.dropSchema(), duration)
     Await.result(institutionRepository2020.dropSchema(), duration)
+    Await.result(institutionRepository2021.dropSchema(), duration)
   }
 
 }
