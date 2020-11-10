@@ -193,6 +193,7 @@ CREATE INDEX modifiedlar2020_lei_idx ON hmda_user.modifiedlar2020 USING btree (l
 
 alter table modifiedlar2020
 add column uli character varying;
+alter table modifiedlar2020 add column checksum varchar;
 
 -- Completed on 2020-06-05 11:44:50 EDT
 

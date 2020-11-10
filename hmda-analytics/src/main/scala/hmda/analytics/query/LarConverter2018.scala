@@ -10,7 +10,7 @@ object LarConverter2018 {
 
   def apply(lar: LoanApplicationRegister): LarEntity2018 = {
     val checksum = MessageDigest.getInstance("MD5")
-      .digest(LarStringFormatter.larString(lar).getBytes())
+      .digest(LarStringFormatter.larString(lar).toUpperCase().getBytes())
       .map(0xFF & _)
       .map { "%02x".format(_) }.foldLeft(""){_ + _}
     LarEntity2018(
