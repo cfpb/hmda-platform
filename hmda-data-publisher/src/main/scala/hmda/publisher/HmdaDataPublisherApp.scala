@@ -1,6 +1,8 @@
 package hmda.publisher
 
+import akka.actor.typed.scaladsl.adapter.ClassicActorSystemOps
 import akka.actor.{ActorSystem, Props}
+import hmda.publisher.api.HmdaDataPublisherApi
 import hmda.publisher.helper.PGTableNameLoader
 import hmda.publisher.scheduler._
 import org.slf4j.LoggerFactory
@@ -41,13 +43,15 @@ object HmdaDataPublisherApp extends App with PGTableNameLoader {
 
   config.getObject("akka.quartz.schedules").forEach((k, v) => log.info(s"$k = ${v.render()}"))
 
-  actorSystem.actorOf(Props[PanelScheduler], "PanelScheduler")
-  actorSystem.actorOf(Props[LarScheduler], "LarScheduler")
-  actorSystem.actorOf(Props[TsScheduler], "TsScheduler")
-  actorSystem.actorOf(Props[LarPublicScheduler], "LarPublicScheduler")
-  actorSystem.actorOf(Props[TsPublicScheduler], "TsPublicScheduler")
+  val allSchedulers = AllSchedulers(
+    larPublicScheduler = actorSystem.actorOf(Props[LarPublicScheduler], "LarPublicScheduler"),
+    larScheduler = actorSystem.actorOf(Props[LarScheduler], "LarScheduler"),
+    panelScheduler = actorSystem.actorOf(Props[PanelScheduler], "PanelScheduler"),
+    tsPublicScheduler = actorSystem.actorOf(Props[TsPublicScheduler], "TsPublicScheduler"),
+    tsScheduler = actorSystem.actorOf(Props[TsScheduler], "TsScheduler"),
+  )
 
-
+  actorSystem.spawn[Nothing](HmdaDataPublisherApi(allSchedulers), HmdaDataPublisherApi.name)
 
 }
 // $COVERAGE-ON$

@@ -120,11 +120,13 @@ object PublishingGuard {
 
   sealed trait Period
   object Period {
+    sealed trait Quarter extends Period
+
     case object y2018   extends Period
     case object y2019   extends Period
-    case object y2020Q1 extends Period
-    case object y2020Q2 extends Period
-    case object y2020Q3 extends Period
+    case object y2020Q1 extends Period with Quarter
+    case object y2020Q2 extends Period with Quarter
+    case object y2020Q3 extends Period with Quarter
   }
 
   sealed trait Scope
