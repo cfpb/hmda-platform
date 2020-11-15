@@ -20,7 +20,8 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
     year match {
       case 2018 => "modifiedlar2018"
       case 2019 => "modifiedlar2019"
-      case _    => "modifiedlar2019"
+      case 2020 => "modifiedlar2020"
+      case _    => "modifiedlar2020"
     }
 
   /**
