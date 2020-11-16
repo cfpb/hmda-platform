@@ -21,11 +21,6 @@ object LarConverter {
   val censusFileName2020 =
     config.getString("hmda.census.fields.2020.filename")
 
-  val censusTractMap: Map[String, Census] =
-    CensusRecords.indexedTract2019
-
-  val censusRecords = CensusRecords.parseCensusFile(censusFileName2019)
-
   val countyLoanLimitFileName2018 =
       config.getString("hmda.countyLoanLimit.2018.fields.filename")
   val countyLoanLimitFileName2019 =
@@ -57,7 +52,7 @@ object LarConverter {
     year: Int,
     isQuarterly: Boolean = false
   ): LarEntity = {
-    val census = censusTractMap.getOrElse(lar.geography.tract, Census())
+    val census = CensusRecords.yearTractMap(year).getOrElse(lar.geography.tract, Census())
     val overallLoanLimit = getOverallLoanLimit(year)
     val countyLoanLimitsByCounty = getcountyLoanLimitsByCounty(year)
     val countyLoanLimitsByState = getcountyLoanLimitsByState(year)
