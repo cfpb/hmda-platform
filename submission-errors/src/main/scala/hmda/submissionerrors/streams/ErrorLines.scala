@@ -21,7 +21,7 @@ import scala.concurrent.Future
 object ErrorLines {
   type RawLine = String
 
-  final case class RowLoanData(uli: String, actionTaken: Int, actionTakenDate: Int) {
+  final case class RowLoanData(uli: String, actionTaken: Int, actionTakenDate: Int, applicationDate: String) {
     override def toString: String = s"$uli:$actionTaken:$actionTakenDate``"
   }
 
@@ -65,7 +65,7 @@ object ErrorLines {
           case Some(editNames) =>
             // only parse the line if we found that there was an error associated with it
             val lar      = LarCsvParser(rawData).getOrElse(LoanApplicationRegister())
-            val loanData = RowLoanData(lar.loan.ULI, lar.action.actionTakenType.code, lar.action.actionTakenDate)
+            val loanData = RowLoanData(lar.loan.ULI, lar.action.actionTakenType.code, lar.action.actionTakenDate, lar.loan.applicationDate)
             editNames.foldLeft(acc) { (acc, nextEditName) =>
               val updatedErrorListForEdit = acc.getOrElse(nextEditName, Vector.empty[RowLoanData]) :+ loanData
               acc + (nextEditName -> updatedErrorListForEdit)
