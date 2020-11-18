@@ -332,6 +332,15 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
+  def fetchLateFilers(period: String, lateDate: String) : Task[Seq[LateFilers]] = {
+    val tsTable = tsTableSelector(period)
+    val subHistMview = "submission_hist_mview"
+    val query = sql"""
+         select * from (select ts.agency, ts.institution_name, sh.lei, ts.total_lines, sh.sign_date_east :: date, sh.submission_id, rank() over( partition by sh.lei order by sh.sign_date_east asc) from #${subHistMview} as sh left join #${tsTable} as ts on upper(sh.lei) = upper(ts.lei) where upper(sh.lei) not in ( select distinct upper(lei) from #${subHistMview} as sh_sub where sh_sub.sign_date_utc < '#${lateDate}' and split_part(sh_sub.submission_id, '-', 2) = '#${period}' ) and split_part(sh.submission_id, '-', 2) = '#${period}' order by sh.lei, rank) sl where upper(sl.lei) not in (#${filterList}) and rank=1 order by sign_date_east desc;
+      """.as[LateFilers]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
   def healthCheck: Task[Unit] = {
     Task.deferFuture (db.run (sql"select 1".as[Int] ) ).guarantee (Task.shift).void
   }

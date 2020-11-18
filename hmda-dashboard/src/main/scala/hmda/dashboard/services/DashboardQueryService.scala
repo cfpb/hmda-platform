@@ -97,4 +97,7 @@ class DashboardQueryService (repo: PostgresRepository) extends QueryService{
 
   override def fetchTopInstitutionsCountOpenEndCredit(year: String, x: Int): Task[Seq[TopInstitutionsCountOpenEndCredit]] =
     repo.fetchTopInstitutionsCountOpenEndCredit(year, x)
+
+  override def fetchLateFilers(period: String, late: String): Task[Seq[LateFilers]] =
+    repo.fetchLateFilers(period, late)
 }
