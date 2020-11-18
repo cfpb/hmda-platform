@@ -12,7 +12,7 @@ import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.{PrivateAWSConfigLoader, SnapshotCheck}
+import hmda.publisher.helper.{PrivateAWSConfigLoader, S3Utils, SnapshotCheck}
 import hmda.publisher.query.component.{InstitutionEmailComponent, PublisherComponent2018, PublisherComponent2019}
 import hmda.publisher.query.panel.{InstitutionAltEntity, InstitutionEmailEntity, InstitutionEntity}
 import hmda.publisher.scheduler.schedules.Schedules.{PanelScheduler2018, PanelScheduler2019}
@@ -78,13 +78,13 @@ class PanelScheduler extends HmdaActor with PublisherComponent2018 with Publishe
     val s3Sink =
       S3.multipartUpload(bucketPrivate, fullFilePath)
         .withAttributes(S3Attributes.settings(s3Settings))
-    val results: Future[MultipartUploadResult] = Source
+    val source = Source
       .future(allResults)
       .mapConcat(seek => seek.toList)
       .mapAsync(1)(institution => appendEmailDomains2018(institution))
       .map(institution => institution.toPSV + "\n")
       .map(s => ByteString(s))
-      .runWith(s3Sink)
+    val results: Future[MultipartUploadResult] = S3Utils.uploadWithRetry(source, s3Sink)
 
     results onComplete {
       case Success(result) =>
@@ -107,13 +107,13 @@ class PanelScheduler extends HmdaActor with PublisherComponent2018 with Publishe
     val s3Sink =
       S3.multipartUpload(bucketPrivate, fullFilePath)
         .withAttributes(S3Attributes.settings(s3Settings))
-    val results: Future[MultipartUploadResult] = Source
+    val source = Source
       .future(allResults)
       .mapConcat(seek => seek.toList)
       .mapAsync(1)(institution => appendEmailDomains(institution))
       .map(institution => institution.toPSV + "\n")
       .map(s => ByteString(s))
-      .runWith(s3Sink)
+    val results: Future[MultipartUploadResult] = S3Utils.uploadWithRetry(source, s3Sink)
 
     results onComplete {
       case Success(result) =>
