@@ -3,16 +3,17 @@ package hmda.publication.lar
 import akka.Done
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{ ActorRef, ActorSystem }
-import akka.actor.{ ActorSystem => ClassicActorSystem }
-import akka.kafka.scaladsl.{ Committer, Consumer }
-import akka.kafka.{ CommitterSettings, ConsumerMessage, ConsumerSettings, Subscriptions }
+import akka.actor.typed.{ActorRef, ActorSystem}
+import akka.actor.{ActorSystem => ClassicActorSystem}
+import akka.kafka.scaladsl.{Committer, Consumer}
+import akka.kafka.{CommitterSettings, ConsumerMessage, ConsumerSettings, Subscriptions}
 import akka.stream.Materializer
 import akka.stream.scaladsl._
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.census.records._
-import hmda.messages.pubsub.{ HmdaGroups, HmdaTopics }
+import hmda.messages.HmdaMessageFilter
+import hmda.messages.pubsub.{HmdaGroups, HmdaTopics}
 import hmda.model.census.Census
 import hmda.model.filing.submission.SubmissionId
 import hmda.publication.KafkaUtils._
@@ -26,8 +27,8 @@ import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
 import scala.concurrent.duration._
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.{ Failure, Success }
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 // Entrypoint
 // $COVERAGE-OFF$
@@ -101,17 +102,18 @@ object ModifiedLarApp extends App {
   val (control, streamCompleted) =
     Consumer
       .committableSource(consumerSettings, Subscriptions.topics(HmdaTopics.signTopic, HmdaTopics.modifiedLarTopic))
-      .mapAsync(parallelism) { msg =>
-        def processMsg(): Future[ConsumerMessage.CommittableOffset] = {
-          log.info(s"Received a message - key: ${msg.record.key()}, value: ${msg.record.value()}")
-          processKafkaRecord(msg.record.value().trim).map(_ => msg.committableOffset)
-        }
-        akka.pattern.retry(
-          attempt = () => processMsg(),
-          attempts = 2,
-          delay = 90.seconds
-        )(ec, classicSystem.scheduler)
-      }
+      .mapAsync(parallelism)(
+        HmdaMessageFilter.processOnlyValidKeys { msg =>
+          def processMsg(): Future[ConsumerMessage.CommittableOffset] = {
+            log.info(s"Received a message - key: ${msg.record.key()}, value: ${msg.record.value()}")
+            processKafkaRecord(msg.record.value().trim).map(_ => msg.committableOffset)
+          }
+          akka.pattern.retry(
+            attempt = () => processMsg(),
+            attempts = 2,
+            delay = 90.seconds
+          )(ec, classicSystem.scheduler)
+      })
       .toMat(Committer.sink(CommitterSettings(classicSystem)))(Keep.both)
       .run()
 
