@@ -11,6 +11,7 @@ import akka.stream.scaladsl.{Keep, Sink, Source}
 import akka.util.{ByteString, Timeout}
 import com.typesafe.config.ConfigFactory
 import hmda.analytics.query._
+import hmda.messages.HmdaMessageFilter
 import hmda.messages.pubsub.{HmdaGroups, HmdaTopics}
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.submission.SubmissionId
@@ -107,10 +108,10 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
   Consumer
     .committableSource(consumerSettings, Subscriptions.topics(HmdaTopics.signTopic, HmdaTopics.analyticsTopic))
-    .mapAsync(parallelism) { msg =>
+    .mapAsync(parallelism)(HmdaMessageFilter.processOnlyValidKeys { msg =>
       log.info(s"Processing: $msg")
       processData(msg.record.value()).map(_ => msg.committableOffset)
-    }
+    })
     .toMat(Committer.sink(CommitterSettings(system).withParallelism(2)))(Keep.both)
     .mapMaterializedValue(DrainingControl.apply)
     .run()

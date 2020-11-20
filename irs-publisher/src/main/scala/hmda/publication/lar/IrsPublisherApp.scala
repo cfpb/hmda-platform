@@ -5,18 +5,19 @@ import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.adapter._
 import akka.kafka.scaladsl.Consumer
 import akka.kafka.scaladsl.Consumer.DrainingControl
-import akka.kafka.{ ConsumerSettings, Subscriptions }
+import akka.kafka.{ConsumerSettings, Subscriptions}
 import akka.pattern.ask
 import akka.stream.Materializer
-import akka.stream.scaladsl.{ Keep, Sink, Source }
+import akka.stream.scaladsl.{Keep, Sink, Source}
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.census.records.CensusRecords
-import hmda.messages.pubsub.{ HmdaGroups, HmdaTopics }
+import hmda.messages.HmdaMessageFilter
+import hmda.messages.pubsub.{HmdaGroups, HmdaTopics}
 import hmda.model.census.Census
 import hmda.model.filing.submission.SubmissionId
 import hmda.publication.KafkaUtils._
-import hmda.publication.lar.publication.{ IrsPublisher, PublishIrs }
+import hmda.publication.lar.publication.{IrsPublisher, PublishIrs}
 import hmda.util.BankFilterUtils._
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -62,7 +63,7 @@ object IrsPublisherApp extends App {
 
   Consumer
     .committableSource(consumerSettings, Subscriptions.topics(HmdaTopics.signTopic, HmdaTopics.irsTopic))
-    .mapAsync(parallelism)(msg => processData(msg.record.value()).map(_ => msg.committableOffset))
+    .mapAsync(parallelism)(HmdaMessageFilter.processOnlyValidKeys(msg => processData(msg.record.value()).map(_ => msg.committableOffset)))
     .mapAsync(parallelism * 2)(offset => offset.commitScaladsl())
     .toMat(Sink.seq)(Keep.both)
     .mapMaterializedValue(DrainingControl.apply)
