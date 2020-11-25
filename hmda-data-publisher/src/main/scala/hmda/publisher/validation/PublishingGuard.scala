@@ -77,7 +77,7 @@ class PublishingGuard(
         val larDataOpt = year match {
           case Period.y2018 => Some(db2018.validationMLarData2018)
           case Period.y2019 => Some(db2019.validationMLarData2019)
-          case Period.y2020Q1 | Period.y2020Q1 | Period.y2020Q3 =>
+          case Period.y2020Q1 | Period.y2020Q2 | Period.y2020Q3 =>
             throw new IllegalArgumentException("year 2020 is not supported to public publishers at the moment")
         }
         val tsData = year match {
