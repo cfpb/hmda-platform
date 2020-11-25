@@ -18,7 +18,7 @@ import hmda.model.publication.Msa
 import hmda.publisher.helper._
 import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020}
 import hmda.publisher.query.lar.LarEntityImpl2019
-import hmda.publisher.scheduler.schedules.Schedules.{LarScheduler2018, LarScheduler2019, LarSchedulerLoanLimit2019, LarSchedulerQuarterly2020}
+import hmda.publisher.scheduler.schedules.Schedules.{LarScheduler2018, LarScheduler2019, LarScheduler2020, LarSchedulerLoanLimit2019, LarSchedulerQuarterly2020}
 import hmda.publisher.validation.PublishingGuard
 import hmda.publisher.validation.PublishingGuard.{Period, Scope}
 import hmda.query.DbConfiguration.dbConfig
@@ -64,6 +64,9 @@ class LarScheduler
     QuartzSchedulerExtension(context.system)
       .schedule("LarScheduler2019", self, LarScheduler2019)
     QuartzSchedulerExtension(context.system)
+    QuartzSchedulerExtension(context.system)
+      .schedule("LarScheduler2020", self, LarScheduler2020)
+    QuartzSchedulerExtension(context.system)
       .schedule("LarSchedulerLoanLimit2019", self, LarSchedulerLoanLimit2019)
     QuartzSchedulerExtension(context.system)
       .schedule("LarSchedulerQuarterly2020", self, LarSchedulerQuarterly2020)
@@ -72,6 +75,7 @@ class LarScheduler
   override def postStop() = {
     QuartzSchedulerExtension(context.system).cancelJob("LarScheduler2018")
     QuartzSchedulerExtension(context.system).cancelJob("LarScheduler2019")
+    QuartzSchedulerExtension(context.system).cancelJob("LarScheduler2020")
     QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerLoanLimit2019")
     QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerQuarterly2020")
   }
@@ -99,12 +103,25 @@ class LarScheduler
         val now           = LocalDateTime.now().minusDays(1)
         val formattedDate = fullDate.format(now)
         val fileName      = s"$formattedDate" + "2019_lar.txt"
-
         val allResultsSource: Source[String, NotUsed] =
           Source
             .fromPublisher(larRepository2019.getAllLARs(getFilterList()))
-            .map(larEntity => appendCensus(larEntity, 2019))
-            .prepend(Source.single(LoanLimitHeader))
+            .map(larEntity => larEntity.toRegulatorPSV)
+
+        def countF: Future[Int] = larRepository2019.getAllLARsCount(getFilterList())
+
+        publishPSVtoS3(fileName, allResultsSource, countF)
+      }
+
+    case LarScheduler2020 =>
+      publishingGuard.runIfDataIsValid(Period.y2020, Scope.Private) {
+        val now           = LocalDateTime.now().minusDays(1)
+        val formattedDate = fullDate.format(now)
+        val fileName      = s"$formattedDate" + "2020_lar.txt"
+        val allResultsSource: Source[String, NotUsed] =
+          Source
+            .fromPublisher(larRepository2020.getAllLARs(getFilterList()))
+            .map(larEntity => larEntity.toRegulatorPSV)
 
         def countF: Future[Int] = larRepository2019.getAllLARsCount(getFilterList())
 

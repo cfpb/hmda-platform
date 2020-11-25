@@ -14,7 +14,7 @@ import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.publisher.helper.{PrivateAWSConfigLoader, QuarterTimeBarrier, S3Utils, SnapshotCheck}
 import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020}
-import hmda.publisher.scheduler.schedules.Schedules.{TsScheduler2018, TsScheduler2019, TsSchedulerQuarterly2020}
+import hmda.publisher.scheduler.schedules.Schedules.{TsScheduler2018, TsScheduler2019, TsScheduler2020, TsSchedulerQuarterly2020}
 import hmda.publisher.validation.PublishingGuard
 import hmda.publisher.validation.PublishingGuard.{Period, Scope}
 import hmda.query.DbConfiguration.dbConfig
@@ -131,6 +131,30 @@ class TsScheduler
             log.error("An error has occurred getting TS Data 2019: " + t.getMessage)
         }
       }
+
+    case TsScheduler2020 =>
+      publishingGuard.runIfDataIsValid(Period.y2020, Scope.Private) {
+        val now           = LocalDateTime.now().minusDays(1)
+        val formattedDate = fullDate.format(now)
+        val fileName      = s"$formattedDate" + "2020_ts.txt"
+        val s3Path        = s"$environmentPrivate/ts/"
+        val fullFilePath  = SnapshotCheck.pathSelector(s3Path, fileName)
+
+        val s3Sink =
+          S3.multipartUpload(bucketPrivate, fullFilePath)
+            .withAttributes(S3Attributes.settings(s3Settings))
+
+        val results: Future[MultipartUploadResult] =
+          uploadFileToS3(s3Sink, tsRepository2019.getAllSheets(getFilterList()))
+
+        results onComplete {
+          case Success(result) =>
+            log.info("Pushed to S3: " + s"$bucketPrivate/$fullFilePath" + ".")
+
+          case Failure(t) =>
+            log.error("An error has occurred getting TS Data 2020: " + t.getMessage)
+        }
+      }
     case TsSchedulerQuarterly2020 =>
       val includeQuarterly = true;
       val now              = LocalDateTime.now().minusDays(1)
@@ -146,7 +170,7 @@ class TsScheduler
                 .withAttributes(S3Attributes.settings(s3Settings))
 
             def data: Future[Seq[TransmittalSheetEntity]] =
-              repo.getAllSheets(getFilterList(), includeQuarterly)
+              repo.getAllSheets(getFilterList())
 
             val results: Future[MultipartUploadResult] =
               uploadFileToS3(s3Sink, data)
@@ -159,7 +183,6 @@ class TsScheduler
           }
         }
       }
-
       publishQuarter(Period.y2020Q1, tsRepository2020Q1, "_quarter_1_2020_ts.txt")
       publishQuarter(Period.y2020Q2, tsRepository2020Q2, "_quarter_2_2020_ts.txt")
       publishQuarter(Period.y2020Q3, tsRepository2020Q3, "_quarter_3_2020_ts.txt")

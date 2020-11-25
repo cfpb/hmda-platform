@@ -43,6 +43,7 @@ class PublishingGuard(
     val leiCheckErrorMargin = year match {
       case Period.y2018   => 5
       case Period.y2019   => 0
+      case Period.y2020   => 0
       case Period.y2020Q1 => 0
       case Period.y2020Q2 => 0
       case Period.y2020Q3 => 0
@@ -53,6 +54,7 @@ class PublishingGuard(
         val larData = year match {
           case Period.y2018   => db2018.validationLarData2018
           case Period.y2019   => db2019.validationLarData2019
+          case Period.y2020   => db2020.validationLarData2020
           case Period.y2020Q1 => db2020.validationLarData2020Q1
           case Period.y2020Q2 => db2020.validationLarData2020Q2
           case Period.y2020Q3 => db2020.validationLarData2020Q3
@@ -61,6 +63,7 @@ class PublishingGuard(
         val tsData = year match {
           case Period.y2018   => db2018.validationTSData2018
           case Period.y2019   => db2019.validationTSData2019
+          case Period.y2020   => db2020.validationTSData2020
           case Period.y2020Q1 => db2020.validationTSData2020Q1
           case Period.y2020Q2 => db2020.validationTSData2020Q2
           case Period.y2020Q3 => db2020.validationTSData2020Q3
@@ -124,6 +127,7 @@ object PublishingGuard {
 
     case object y2018   extends Period
     case object y2019   extends Period
+    case object y2020   extends Period
     case object y2020Q1 extends Period with Quarter
     case object y2020Q2 extends Period with Quarter
     case object y2020Q3 extends Period with Quarter

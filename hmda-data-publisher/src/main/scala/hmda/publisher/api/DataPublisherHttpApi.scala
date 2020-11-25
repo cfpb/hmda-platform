@@ -1,12 +1,11 @@
 package hmda.publisher.api
 
-import akka.actor.ActorRef
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.publisher.scheduler.AllSchedulers
-import hmda.publisher.scheduler.schedules.{ Schedule, Schedules }
+import hmda.publisher.scheduler.schedules.{Schedule, Schedules}
 
 import scala.concurrent.ExecutionContext
 
@@ -37,12 +36,14 @@ private class DataPublisherHttpApi(
       case Schedules.LarPublicScheduler2019    => larPublicScheduler
       case Schedules.LarScheduler2018          => larScheduler
       case Schedules.LarScheduler2019          => larScheduler
+      case Schedules.LarScheduler2020          => larScheduler
       case Schedules.LarSchedulerLoanLimit2019 => larScheduler
       case Schedules.LarSchedulerQuarterly2020 => larScheduler
       case Schedules.TsPublicScheduler2018     => tsPublicScheduler
       case Schedules.TsPublicScheduler2019     => tsPublicScheduler
       case Schedules.TsScheduler2018           => tsScheduler
       case Schedules.TsScheduler2019           => tsScheduler
+      case Schedules.TsScheduler2020           => tsScheduler
       case Schedules.TsSchedulerQuarterly2020  => tsScheduler
     }
     receiver ! msg
