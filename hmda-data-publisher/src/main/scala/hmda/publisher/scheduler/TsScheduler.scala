@@ -60,6 +60,8 @@ class TsScheduler
     QuartzSchedulerExtension(context.system)
       .schedule("TsScheduler2019", self, TsScheduler2019)
     QuartzSchedulerExtension(context.system)
+      .schedule("TsScheduler2020", self, TsScheduler2020)
+    QuartzSchedulerExtension(context.system)
       .schedule("TsSchedulerQuarterly2020", self, TsSchedulerQuarterly2020)
 
   }
@@ -67,6 +69,7 @@ class TsScheduler
   override def postStop(): Unit = {
     QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2018")
     QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2019")
+    QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2020")
     QuartzSchedulerExtension(context.system).cancelJob("TsSchedulerQuarterly2020")
   }
 
