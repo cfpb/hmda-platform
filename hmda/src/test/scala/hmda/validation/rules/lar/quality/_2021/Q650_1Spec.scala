@@ -1,12 +1,12 @@
-package hmda.validation.rules.lar.quality._2020
+package hmda.validation.rules.lar.quality._2021
 
 import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 
-class Q650Spec extends LarEditCheckSpec {
-  override def check: EditCheck[LoanApplicationRegister] = Q650
+class Q650_1Spec extends LarEditCheckSpec {
+  override def check: EditCheck[LoanApplicationRegister] = Q650_1
 
   property("Interest rate should not be greater than 0 but less than 0.5") {
     forAll(larGen) { lar =>
@@ -15,6 +15,12 @@ class Q650Spec extends LarEditCheckSpec {
       lar.copy(loan = lar.loan.copy(interestRate = "0.4")).mustFail
       lar.copy(loan = lar.loan.copy(interestRate = "NA")).mustPass
       lar.copy(loan = lar.loan.copy(interestRate = "Exempt")).mustPass
+    }
+  }
+
+  property("Interest rate should not be greater than 20") {
+    forAll(larGen) { lar =>
+      lar.copy(loan = lar.loan.copy(interestRate = "21.05")).mustFail
     }
   }
 }

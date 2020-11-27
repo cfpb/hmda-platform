@@ -9,7 +9,7 @@ import hmda.validation.rules.EditCheck
 import scala.util.Try
 
 object Q615_1 extends EditCheck[LoanApplicationRegister] {
-  override def name: String = "Q615_1"
+  override def name: String = "Q615-1"
 
   override def parent: String = "Q615"
 
