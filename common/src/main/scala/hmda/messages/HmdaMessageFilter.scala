@@ -1,7 +1,6 @@
 package hmda.messages
 
 import akka.kafka.ConsumerMessage.{ CommittableMessage, CommittableOffset }
-import akka.stream.scaladsl.Source
 import com.typesafe.scalalogging.StrictLogging
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -9,21 +8,21 @@ import scala.util.Try
 
 object HmdaMessageFilter extends StrictLogging {
 
-  case class StandardMsgKey(lei: String, year: Int, quarter: Option[String])
+  case class StandardMsgKey(lei: String, year: Int, quarter: Option[String], sequenceNumber: Option[String])
 
   def parse(key: String): Option[StandardMsgKey] = {
     Try {
-      // lei1:lei2-year-q1
-      val regex = "^(?<lei1>[A-Z0-9]+):(?<lei2>[A-Z0-9]+)-(?<year>[0-9]{4})(-(?<quarter>q[0-9]{1}))?$".r
+      // lei1:lei2-year-q1-seq_num
+      val regex = "^(?<lei1>[A-Z0-9]+):(?<lei2>[A-Z0-9]+)-(?<year>[0-9]{4})(-(?<quarter>[qQ][1-3]))?(-(?<seqNum>[0-9]+))?$".r
       for {
         onlyMatch <- regex.findFirstMatchIn(key)
         lei1 = onlyMatch.group("lei1")
         lei2 = onlyMatch.group("lei2")
-        year = onlyMatch.group("year")
+        year = onlyMatch.group("year").toInt
         quarterOpt = Option(onlyMatch.group("quarter"))
+        seqNum = Option(onlyMatch.group("seqNum"))
         _ <- if (lei1 == lei2) Some(()) else None
-        year <- Try(year.toInt).toOption
-      } yield StandardMsgKey(lei1, year, quarterOpt)
+      } yield StandardMsgKey(lei1, year, quarterOpt, seqNum)
     }.toOption.flatten // regex api is not the safest one and we don't want it to throw accidentally
   }
 
