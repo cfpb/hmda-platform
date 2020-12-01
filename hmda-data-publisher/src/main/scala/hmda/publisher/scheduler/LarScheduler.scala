@@ -133,12 +133,11 @@ class LarScheduler
         val now           = LocalDateTime.now().minusDays(1)
         val formattedDate = fullDate.format(now)
         val fileName      = "2019F_AGY_LAR_withFlag_" + s"$formattedDate" + "2019_lar.txt"
-
         val allResultsSource: Source[String, NotUsed] =
           Source
             .fromPublisher(larRepository2019.getAllLARs(getFilterList()))
             .map(larEntity => appendCensus(larEntity, 2019))
-            .prepend(Source.single(LoanLimitHeader))
+            .prepend(Source(List(LoanLimitHeader)))
 
         def countF: Future[Int] = larRepository2019.getAllLARsCount(getFilterList())
 
@@ -156,10 +155,10 @@ class LarScheduler
             val fileName = formattedDate + fileNameSuffix
 
             val allResultsSource: Source[String, NotUsed] = Source
-              .fromPublisher(repo.getAllLARs(getFilterList(), includeQuarterly))
+              .fromPublisher(repo.getAllLARs(getFilterList()))
               .map(larEntity => larEntity.toRegulatorPSV)
 
-            def countF: Future[Int] = repo.getAllLARsCount(getFilterList(), includeQuarterly)
+            def countF: Future[Int] = repo.getAllLARsCount(getFilterList())
 
             publishPSVtoS3(fileName, allResultsSource, countF)
           }

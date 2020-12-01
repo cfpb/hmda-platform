@@ -1,5 +1,6 @@
 package hmda.publisher.api
 
+import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
@@ -17,12 +18,14 @@ private class DataPublisherHttpApi(
   private val triggerScheduler =
     path("trigger" / Segment) { schedulerName =>
       post {
+        respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
         Schedules.withNameOption(schedulerName) match {
           case Some(schedule) =>
             triggerSchedule(schedule)
             complete(202 -> s"Schedule ${schedulerName} has been triggered")
           case None =>
             complete(404 -> s"Scheduler ${schedulerName} not found. Available: ${Schedules.values.map(_.entryName).mkString(", ")}")
+        }
         }
       }
     }
