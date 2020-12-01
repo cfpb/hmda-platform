@@ -7,7 +7,7 @@ import hmda.validation.dsl.ValidationResult
 import hmda.validation.rules.EditCheck
 
 object V695_2 extends EditCheck[LoanApplicationRegister] {
-  override def name: String = "V695_2"
+  override def name: String = "V695-2"
 
   override def parent: String = "V695"
 
