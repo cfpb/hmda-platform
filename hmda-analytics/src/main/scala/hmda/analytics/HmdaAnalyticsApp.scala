@@ -240,8 +240,8 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
               case Period(2018, None) => larRepository2018.deleteByLei(lar.larIdentifier.LEI)
               case Period(2019, None) => larRepository2019.deleteByLei(lar.larIdentifier.LEI)
               case Period(2020, Some("Q1")) => larRepository2020Q1.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-              case Period(2020, Some("Q2")) => larRepository2020Q1.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-              case Period(2020, Some("Q3")) => larRepository2020Q1.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2020, Some("Q2")) => larRepository2020Q2.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2020, Some("Q3")) => larRepository2020Q3.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
               case Period(2020, None) => larRepository2020.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
               case _ => throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete LAR rows.")
 
