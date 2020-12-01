@@ -46,7 +46,7 @@ class PublishingGuard(
       case Period.y2020   => 0
       case Period.y2020Q1 => 0
       case Period.y2020Q2 => 0
-      case Period.y2020Q3 => 1
+      case Period.y2020Q3 => 0
     }
 
     scope match {
