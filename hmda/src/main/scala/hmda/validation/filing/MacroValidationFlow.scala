@@ -89,7 +89,21 @@ object MacroValidationFlow {
           Q646,
           Q647(tsSource)
         )
-
+      case Period(2021, _) =>
+        List(
+          Q634,
+          Q635(totalCount),
+          Q636(totalCount),
+          Q637(totalCount),
+          Q638,
+          Q639,
+          Q640,
+          Q646,
+          Q647(tsSource)
+        )
+      case _ =>
+        List(
+        )
     }
 
   def macroValidation(
