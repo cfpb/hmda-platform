@@ -12,7 +12,7 @@ object SubmissionStatusMessages {
     "Your data has been analyzed for Syntactical and Validity Errors."
   val syntacticalValidityErrorMsg =
     "Your data has syntactical and/or validity edits that need to be reviewed."
-  val qualityMsg             = "Your data has been analyzed for Quality Errors."
+  val qualityMsg             = "Your data has been analyzed for Quality Edits."
   val qualityErrorMsg        = "Your data has quality edits that need to be reviewed."
   val validatedWithErrorsMsg = "Your data has edits that need to be reviewed."
   val macroMsg               = "Your data has been analyzed for macro errors."
@@ -39,7 +39,7 @@ object SubmissionStatusMessages {
   val syntactivalValidityErrorDescription =
     "Your file has been uploaded, but the filing process may not proceed until the file is corrected and re-uploaded."
   val qualityDescription =
-    "Your file has been analyzed, and does not contain quality errors."
+    "Your file has been analyzed, and does not contain quality edits."
   val qualityErrorDescription =
     "Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded."
   val macroDescription =
