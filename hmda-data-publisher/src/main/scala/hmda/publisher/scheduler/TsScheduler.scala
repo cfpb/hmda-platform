@@ -186,9 +186,9 @@ class TsScheduler
           }
         }
       }
-      publishQuarter(Period.y2020Q1, tsRepository2020Q1, "_quarter_1_2020_ts.txt")
-      publishQuarter(Period.y2020Q2, tsRepository2020Q2, "_quarter_2_2020_ts.txt")
-      publishQuarter(Period.y2020Q3, tsRepository2020Q3, "_quarter_3_2020_ts.txt")
+      publishQuarter(Period.y2020Q1, tsRepository2020Q1, "quarter_1_2020_ts.txt")
+      publishQuarter(Period.y2020Q2, tsRepository2020Q2, "quarter_2_2020_ts.txt")
+      publishQuarter(Period.y2020Q3, tsRepository2020Q3, "quarter_3_2020_ts.txt")
 
   }
 

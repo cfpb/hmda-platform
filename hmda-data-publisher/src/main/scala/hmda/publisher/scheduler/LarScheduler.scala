@@ -165,9 +165,9 @@ class LarScheduler
         }
       }
 
-      publishQuarter(Period.y2020Q1, "_quarter_1_2020_lar.txt", larRepository2020Q1)
-      publishQuarter(Period.y2020Q2, "_quarter_2_2020_lar.txt", larRepository2020Q2)
-      publishQuarter(Period.y2020Q3, "_quarter_3_2020_lar.txt", larRepository2020Q3)
+      publishQuarter(Period.y2020Q1, "quarter_1_2020_lar.txt", larRepository2020Q1)
+      publishQuarter(Period.y2020Q2, "quarter_2_2020_lar.txt", larRepository2020Q2)
+      publishQuarter(Period.y2020Q3, "quarter_3_2020_lar.txt", larRepository2020Q3)
   }
 
   def publishPSVtoS3(fileName: String, rows: Source[String, NotUsed], countF: => Future[Int]): Unit = {
