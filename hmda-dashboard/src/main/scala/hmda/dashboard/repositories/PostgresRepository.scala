@@ -255,14 +255,11 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
-  def fecthQuarterlyInfo(period: String, lei: String): Task[Seq[QuarterDetails]] = {
+  def fecthQuarterlyInfo(period: String): Task[Seq[QuarterDetails]] = {
+    val tsTable = tsTableSelector(period)
     val larTable = larTableSelector(period)
     val query = sql"""
-      select
-        (select count(*) as q1 from #${larTable} where date(action_taken_date::text) <= date('2020-03-31'::text) and upper(lei) = '#${lei}'),
-        (select count(*) as q2 from #${larTable} where date(action_taken_date::text) > date('2020-03-31'::text) and date(action_taken_date::text) <= date('2020-06-30'::text) and upper(lei) = '#${lei}'),
-        (select count(*) as q3 from #${larTable} where date(action_taken_date::text) > date('2020-06-30'::text) and date(action_taken_date::text) <= date('2020-09-30'::text) and upper(lei) = '#${lei}'),
-        (select count(*) as q4 from #${larTable} where date(action_taken_date::text) > date('2020-10-01'::text) and upper(lei) = '#${lei}')
+       select ts.institution_name, lar.lei, sum(case when date(action_taken_date::text) <= date('2020-03-31'::text) then 1 else 0 end) as q1, sum(case when date(action_taken_date::text) > date('2020-03-31'::text) and date(action_taken_date::text) <= date('2020-06-30'::text) then 1 else 0 end) as q2, sum(case when date(action_taken_date::text) > date('2020-06-30'::text) and date(action_taken_date::text) <= date('2020-09-30'::text) then 1 else 0 end) as q3, sum(case when date(action_taken_date::text) >= date('2020-10-01'::text) then 1 else 0 end) as q4 from #${larTable} lar, #${tsTable} ts where lar.lei = ts.lei group by ts.institution_name, lar.lei;
       """.as[QuarterDetails]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
@@ -329,6 +326,15 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     val query = sql"""
          select ts.agency ,upper(ts.lei) ,ts.institution_name from #${larTable} as lar left join #${tsTable} as ts on upper(lar.lei) = upper(ts.lei) where upper(ts.lei) not in (#${filterList}) group by ts.agency, upper(ts.lei) ,ts.institution_name order by rank() over(order by sum(case when line_of_credits=1 then 1 else 0 end) desc) asc limit #${x}
       """.as[TopInstitutionsCountOpenEndCredit]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchLateFilers(period: String, lateDate: String) : Task[Seq[LateFilers]] = {
+    val tsTable = tsTableSelector(period)
+    val subHistMview = "submission_hist_mview"
+    val query = sql"""
+         select * from (select ts.agency, ts.institution_name, sh.lei, ts.total_lines, sh.sign_date_east :: date, sh.submission_id, rank() over( partition by sh.lei order by sh.sign_date_east asc) from #${subHistMview} as sh left join #${tsTable} as ts on upper(sh.lei) = upper(ts.lei) where upper(sh.lei) not in ( select distinct upper(lei) from #${subHistMview} as sh_sub where sh_sub.sign_date_utc < '#${lateDate}' and split_part(sh_sub.submission_id, '-', 2) = '#${period}' ) and split_part(sh.submission_id, '-', 2) = '#${period}' order by sh.lei, rank) sl where upper(sl.lei) not in (#${filterList}) and rank=1 order by sign_date_east desc;
+      """.as[LateFilers]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 

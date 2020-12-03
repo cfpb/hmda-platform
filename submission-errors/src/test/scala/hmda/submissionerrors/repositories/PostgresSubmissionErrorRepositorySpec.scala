@@ -20,7 +20,7 @@ class PostgresSubmissionErrorRepositorySpec
   "PostgresSubmissionErrorRepository" should "persist error data into the repository" in {
     // Note: dbConfig comes from EmbeddedPostgres
     val dbConfig     = PostgresSubmissionErrorRepository.config(dbHoconpath)
-    val repo         = PostgresSubmissionErrorRepository.make(dbConfig, "submission_errors")
+    val repo         = PostgresSubmissionErrorRepository.make(dbConfig, "triggered_quality_edits")
     val submissionId = SubmissionId("EXAMPLE-LEI", Period(2018, None), sequenceNumber = 1)
 
     repo.submissionPresent(submissionId).runSyncUnsafe() shouldBe false

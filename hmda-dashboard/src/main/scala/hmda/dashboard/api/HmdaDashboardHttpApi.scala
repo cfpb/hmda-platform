@@ -8,6 +8,7 @@ import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHand
 import com.typesafe.config.{Config, ConfigFactory}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.auth.OAuth2Authorization
+import hmda.dashboard.api.DashboardDirectives._
 import hmda.dashboard.models.HealthCheckStatus.Up
 import hmda.dashboard.models._
 import hmda.dashboard.repositories._
@@ -258,11 +259,11 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
-            path("quarterly_info" / Segment / "lei" / Segment) { (year, lei) =>
-              log.info(s"List quarterly details for period=${year} lei=${lei}")
+            path("quarterly_info" / Segment ) { (year) =>
+              log.info(s"List quarterly details for period=${year}")
               complete(
                 query
-                  .fetchQuarterlyInfo(year, lei)
+                  .fetchQuarterlyInfo(year)
                   .map(aggs => QuarterDetailsAggregationsResponse(aggs))
                   .runToFuture
               )
@@ -338,6 +339,17 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .map(aggs => TopInstitutionsCountOpenEndCreditAggregationResponse(aggs))
                   .runToFuture
               )
+            } ~
+            path("late_filers" / Segment) { (period) =>
+              extractNationwideMandatoryYears { mandatoryFields =>
+                log.info(s"Fetching late filers for period=${period} with mandatoryFields=${mandatoryFields}")
+                complete {
+                  query
+                    .fetchLateFilers(period, mandatoryFields)
+                    .map(aggs => LateFilersAggregationResponse(aggs))
+                    .runToFuture
+                }
+              }
             }
           }
         }

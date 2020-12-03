@@ -197,6 +197,12 @@ case class LarPartSeven2020(
                              tractToMsaIncomePercent: Double = 0.0
                            )
 
+case class LarPartEight2020(
+                             conformingLoanLimit: String = "",
+                             ethnicityCategorization: String = "",
+
+                           )
+
 case class LarEntityImpl2020(
                               larPartOne: LarPartOne2020 = LarPartOne2020(),
                               larPartTwo: LarPartTwo2020 = LarPartTwo2020(),

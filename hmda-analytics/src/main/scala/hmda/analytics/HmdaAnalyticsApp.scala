@@ -11,6 +11,7 @@ import akka.stream.scaladsl.{Keep, Sink, Source}
 import akka.util.{ByteString, Timeout}
 import com.typesafe.config.ConfigFactory
 import hmda.analytics.query._
+import hmda.messages.HmdaMessageFilter
 import hmda.messages.pubsub.{HmdaGroups, HmdaTopics}
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.submission.SubmissionId
@@ -107,10 +108,10 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
   Consumer
     .committableSource(consumerSettings, Subscriptions.topics(HmdaTopics.signTopic, HmdaTopics.analyticsTopic))
-    .mapAsync(parallelism) { msg =>
+    .mapAsync(parallelism)(HmdaMessageFilter.processOnlyValidKeys { msg =>
       log.info(s"Processing: $msg")
       processData(msg.record.value()).map(_ => msg.committableOffset)
-    }
+    })
     .toMat(Committer.sink(CommitterSettings(system).withParallelism(2)))(Keep.both)
     .mapMaterializedValue(DrainingControl.apply)
     .run()
@@ -239,8 +240,8 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
               case Period(2018, None) => larRepository2018.deleteByLei(lar.larIdentifier.LEI)
               case Period(2019, None) => larRepository2019.deleteByLei(lar.larIdentifier.LEI)
               case Period(2020, Some("Q1")) => larRepository2020Q1.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-              case Period(2020, Some("Q2")) => larRepository2020Q1.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-              case Period(2020, Some("Q3")) => larRepository2020Q1.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2020, Some("Q2")) => larRepository2020Q2.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2020, Some("Q3")) => larRepository2020Q3.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
               case Period(2020, None) => larRepository2020.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
               case _ => throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete LAR rows.")
 

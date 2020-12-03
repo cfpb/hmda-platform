@@ -3,9 +3,9 @@ package hmda.validation.engine
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.lar.quality._2019._
-import hmda.validation.rules.lar.quality.{ _2020 => quality2020 }
+import hmda.validation.rules.lar.quality.{common, _2020 => quality2020}
 import hmda.validation.rules.lar.quality.common._
-import hmda.validation.rules.lar.syntactical.{ S300, S301 }
+import hmda.validation.rules.lar.syntactical.{S300, S301}
 import hmda.validation.rules.lar.validity._
 import hmda.validation.rules.lar.validity._2020
 import hmda.census.records.CensusRecords
@@ -281,7 +281,7 @@ private[engine] object LarEngine2020Q extends ValidationEngine[LoanApplicationRe
     quality2020.Q649_2,
     quality2020.Q651,
     quality2020.Q652,
-    quality2020.Q650,
+    common.Q650,
     quality2020.Q653_1,
     quality2020.Q653_2,
     quality2020.Q654

@@ -80,4 +80,15 @@ object CensusRecords {
         )
     }
 
+  def yearTractMap (year: Int) = {
+    year match {
+      case 2018 =>
+        indexedTract2018
+      case 2019 =>
+        indexedTract2019
+      case 2020 =>
+        indexedTract2020
+    }
+  }
+
 }

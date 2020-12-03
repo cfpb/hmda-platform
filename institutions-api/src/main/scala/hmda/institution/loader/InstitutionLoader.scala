@@ -5,14 +5,15 @@ import java.io.File
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
-import akka.stream.{ ActorMaterializer, Materializer }
-import akka.stream.scaladsl.{ FileIO, Sink }
+import akka.stream.Materializer
+import akka.stream.scaladsl.{FileIO, Sink}
 import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.FlowUtils
 import hmda.parser.institution.InstitutionCsvParser
 import io.circe.syntax._
 import org.slf4j.LoggerFactory
+import scala.concurrent.duration._
 
 import scala.concurrent.ExecutionContext
 // $COVERAGE-OFF$
@@ -78,6 +79,7 @@ object InstitutionLoader extends App {
     .map(i => request(i.asJson.noSpaces))
     .mapAsync(parallelism)(req => Http().singleRequest(req))
     .map { res =>
+      res.entity.toStrict(100.seconds)
       res.status match {
         case StatusCodes.BadRequest =>
           log.info(res.toString())

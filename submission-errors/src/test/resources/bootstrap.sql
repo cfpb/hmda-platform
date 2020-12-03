@@ -1,4 +1,4 @@
-CREATE TABLE submission_errors(
+CREATE TABLE triggered_quality_edits(
     lei               VARCHAR,
     period            VARCHAR,
     sequence_number   INT,
@@ -7,5 +7,5 @@ CREATE TABLE submission_errors(
     loan_data         TEXT ARRAY,
     created_date      TIMESTAMP,
     updated_date      TIMESTAMP,
-    CONSTRAINT submission_errors_pkey PRIMARY KEY (lei, period, sequence_number, edit_name)
+    CONSTRAINT triggered_quality_edits_pkey PRIMARY KEY (lei, period, sequence_number, edit_name)
 );

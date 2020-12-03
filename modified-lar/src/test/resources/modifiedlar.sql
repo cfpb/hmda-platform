@@ -105,7 +105,9 @@ CREATE TABLE modifiedlar2019 (
                                            ethnicity_categorization character varying,
                                            percent_median_msa_income character varying,
                                            dwelling_category character varying,
-                                           loan_product_type character varying
+                                           loan_product_type character varying,
+                                           action_taken_date integer,
+                                           checksum character varying
 );
 
 CREATE TABLE modifiedlar2018 (
@@ -215,5 +217,7 @@ CREATE TABLE modifiedlar2018 (
                                            ethnicity_categorization character varying,
                                            percent_median_msa_income character varying,
                                            dwelling_category character varying,
-                                           loan_product_type character varying
+                                           loan_product_type character varying,
+                                           action_taken_date integer,
+                                           checksum character varying
 );

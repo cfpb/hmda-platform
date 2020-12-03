@@ -54,10 +54,10 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
       case t if t.lei.nonEmpty =>
         withLocalModeBypass {
           val leiList = t.lei.split(',')
-          if (leiList.contains(lei)) {
+          if (leiList.contains(lei.trim())) {
             provide(t)
           } else {
-            logger.info(s"Providing reject for ${lei}")
+            logger.info(s"Providing reject for ${lei.trim()}")
             reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]]
           }
         }
@@ -84,10 +84,10 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
           provide(t)
         } else {
           val leiList = t.lei.split(',')
-          if (leiList.contains(lei)) {
+          if (leiList.contains(lei.trim())) {
             provide(t)
           } else {
-            logger.info(s"Providing reject for ${lei}")
+            logger.info(s"Providing reject for ${lei.trim()}")
             complete(
               (StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path("")))
             ).toDirective[Tuple1[VerifiedToken]]

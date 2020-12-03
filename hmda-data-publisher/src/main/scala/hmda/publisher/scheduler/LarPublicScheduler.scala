@@ -18,6 +18,7 @@ import hmda.publisher.helper.{
   PrivateAWSConfigLoader,
   PublicAWSConfigLoader,
   S3Archiver,
+  S3Utils,
   SnapshotCheck
 }
 import hmda.publisher.query.component.{ PublisherComponent2018, PublisherComponent2019, PublisherComponent2020 }
@@ -126,7 +127,8 @@ class LarPublicScheduler
 
     val resultsPSV = for {
       _            <- S3Archiver.archiveFileIfExists(bucket, key, bucketPrivate, s3Settings)
-      uploadResult <- zipStream.via(Archive.zip()).runWith(s3SinkPSV)
+      source       = zipStream.via(Archive.zip())
+      uploadResult <- S3Utils.uploadWithRetry(source, s3SinkPSV)
     } yield uploadResult
 
     resultsPSV onComplete {
