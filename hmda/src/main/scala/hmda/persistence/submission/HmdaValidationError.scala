@@ -526,7 +526,7 @@ object HmdaValidationError
 
       uploadProgram.onComplete {
         case Success(value) =>
-          log.info(s"Check [$checkType] for distinct elements has passed for $submissionId with $value")
+          log.info(s"Check [$checkType] for distinct elements has passed for $submissionId")
         case Failure(exception) =>
           log.error(s"Failed checking [$checkType] for distinct elements $submissionId", exception)
       }

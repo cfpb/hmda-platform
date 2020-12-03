@@ -173,11 +173,9 @@ trait PublisherComponent2020 extends PGTableNameLoader {
     def count(): Future[Int] =
       db.run(table.size.result)
 
-    def getAllSheets(bankIgnoreList: Array[String], includeQuarterly: Boolean): Future[Seq[TransmittalSheetEntity]] =
-      if (includeQuarterly)
-        db.run(table.filterNot(ts => (ts.lei.toUpperCase inSet bankIgnoreList) || !ts.isQuarterly).result)
-      else
-        db.run(table.filterNot(ts => (ts.lei.toUpperCase inSet bankIgnoreList) || ts.isQuarterly).result)
+    def getAllSheets(bankIgnoreList: Array[String]): Future[Seq[TransmittalSheetEntity]] =
+      db.run(table.filterNot(_.lei.toUpperCase inSet bankIgnoreList).result)
+
   }
 
   abstract class LarTableBase(tag: Tag, tableName: String) extends Table[LarEntityImpl2020](tag, tableName) {
@@ -527,12 +525,12 @@ trait PublisherComponent2020 extends PGTableNameLoader {
     def count(): Future[Int] =
       db.run(table.size.result)
 
-    def getAllLARsCount(bankIgnoreList: Array[String], includeQuarterly: Boolean): Future[Int] =
-      db.run(getAllLARsQuery(bankIgnoreList, includeQuarterly).size.result)
+    def getAllLARsCount(bankIgnoreList: Array[String]): Future[Int] =
+      db.run(getAllLARsQuery(bankIgnoreList).size.result)
 
-    def getAllLARs(bankIgnoreList: Array[String], includeQuarterly: Boolean): DatabasePublisher[LarEntityImpl2020] =
+    def getAllLARs(bankIgnoreList: Array[String]): DatabasePublisher[LarEntityImpl2020] =
       db.stream(
-        getAllLARsQuery(bankIgnoreList, includeQuarterly).result
+        getAllLARsQuery(bankIgnoreList).result
           .withStatementParameters(
             rsType = ResultSetType.ForwardOnly,
             rsConcurrency = ResultSetConcurrency.ReadOnly,
@@ -540,15 +538,8 @@ trait PublisherComponent2020 extends PGTableNameLoader {
           )
           .transactionally
       )
-    protected def getAllLARsQuery(bankIgnoreList: Array[String], includeQuarterly: Boolean): Query[LarTable, LarEntityImpl2020, Seq] =
-      if (includeQuarterly) {
-        table
-          .filterNot(lar => (lar.lei.toUpperCase inSet bankIgnoreList) && !lar.isQuarterly)
-      } else {
-        table
-          .filterNot(lar => (lar.lei.toUpperCase inSet bankIgnoreList) && lar.isQuarterly)
-      }
-
+    protected def getAllLARsQuery(bankIgnoreList: Array[String]): Query[LarTable, LarEntityImpl2020, Seq] =
+      table.filterNot(_.lei.toUpperCase inSet bankIgnoreList)
   }
 
   class LarRepository2020(config: DatabaseConfig[JdbcProfile])   extends LarRepository2020Base(config, larTable2020)

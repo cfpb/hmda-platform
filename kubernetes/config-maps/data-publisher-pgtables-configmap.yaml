@@ -16,4 +16,6 @@ data:
   publishertable.mlarTableName2020: "modifiedlar2020"
   publishertable.panelTableName2020: "institutions2020"
   publishertable.emailTable: "institutions_emails_2018"
-
+  publishertable.larTableName2020Q1: "lar2020_q1"
+  publishertable.larTableName2020Q2: "lar2020_q2"
+  publishertable.larTableName2020Q3: "lar2020_q3"

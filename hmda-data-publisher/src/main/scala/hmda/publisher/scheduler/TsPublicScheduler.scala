@@ -72,7 +72,7 @@ class TsPublicScheduler
       }
 
     case TsPublicScheduler2019 =>
-      publishingGuard.runIfDataIsValid(Period.y2018, Scope.Public) {
+      publishingGuard.runIfDataIsValid(Period.y2019, Scope.Public) {
         val fileName         = "2019_ts.txt"
         val zipDirectoryName = "2019_ts.zip"
         val s3Path           = s"$environmentPublic/dynamic-data/2019/"
