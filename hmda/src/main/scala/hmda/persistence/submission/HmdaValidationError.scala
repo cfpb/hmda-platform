@@ -543,7 +543,6 @@ object HmdaValidationError
         val s304 = S304.name
         val q600name = Q600.name
         val s306 = S306.name
-        val q600_warning = Q600_warning.name
         validationError match {
           case s306 @ SyntacticalValidationError(_, `s306`, _, fields) => //This is newly added for S306
             s306.copyWithFields(
