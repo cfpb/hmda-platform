@@ -255,14 +255,11 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
-  def fecthQuarterlyInfo(period: String, lei: String): Task[Seq[QuarterDetails]] = {
+  def fecthQuarterlyInfo(period: String): Task[Seq[QuarterDetails]] = {
+    val tsTable = tsTableSelector(period)
     val larTable = larTableSelector(period)
     val query = sql"""
-      select
-        (select count(*) as q1 from #${larTable} where date(action_taken_date::text) <= date('2020-03-31'::text) and upper(lei) = '#${lei}'),
-        (select count(*) as q2 from #${larTable} where date(action_taken_date::text) > date('2020-03-31'::text) and date(action_taken_date::text) <= date('2020-06-30'::text) and upper(lei) = '#${lei}'),
-        (select count(*) as q3 from #${larTable} where date(action_taken_date::text) > date('2020-06-30'::text) and date(action_taken_date::text) <= date('2020-09-30'::text) and upper(lei) = '#${lei}'),
-        (select count(*) as q4 from #${larTable} where date(action_taken_date::text) > date('2020-10-01'::text) and upper(lei) = '#${lei}')
+       select ts.institution_name, lar.lei, sum(case when date(action_taken_date::text) <= date('2020-03-31'::text) then 1 else 0 end) as q1, sum(case when date(action_taken_date::text) > date('2020-03-31'::text) and date(action_taken_date::text) <= date('2020-06-30'::text) then 1 else 0 end) as q2, sum(case when date(action_taken_date::text) > date('2020-06-30'::text) and date(action_taken_date::text) <= date('2020-09-30'::text) then 1 else 0 end) as q3, sum(case when date(action_taken_date::text) >= date('2020-10-01'::text) then 1 else 0 end) as q4 from #${larTable} lar, #${tsTable} ts where lar.lei = ts.lei group by ts.institution_name, lar.lei;
       """.as[QuarterDetails]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
