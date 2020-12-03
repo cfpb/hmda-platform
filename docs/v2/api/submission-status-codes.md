@@ -38,7 +38,7 @@ In order to track the status of a filing for a financial institution, the follow
 * `7`: `Your data is being analyzed.` - Your data has been uploaded and is being checked for any edits.
 * `8`: `Your data has been analyzed for Syntactical and Validity Errors.` - Your file has been analyzed and does not contain any Syntactical or Validity errors.
 * `9`: `Your data has syntactical and/or validity edits that need to be reviewed.` - Your file has been uploaded, but the filing process may not proceed until the file is corrected and re-uploaded.
-* `10`: `Your data has been analyzed for Quality Errors.` - Your file has been analyzed, and does not contain quality errors.
+* `10`: `Your data has been analyzed for Quality Edits.` - Your file has been analyzed, and does not contain quality edits.
 * `11`: `Your data has quality edits that need to be reviewed.` - Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded.
 * `12`: `Your data has been analyzed for macro errors. ` - Your file has been analyzed, and does not contain macro errors.
 * `13`: `Your data has macro edits that need to be reviewed.` - Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded.
