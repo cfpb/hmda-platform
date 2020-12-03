@@ -81,12 +81,12 @@ class PublisherComponent2020Spec
       result       <- findByLei("EXAMPLE-LEI")
       _            = result should have length 1
       _            = result.head shouldBe data
-      result       <- getAllSheets(Array.empty, includeQuarterly = false)
+      result       <- getAllSheets(Array.empty)
       _            = result should have length 1
       _            = result.head shouldBe data
       // note that we cannot insert quarterly entries through the Slick repository as it is misconfigured
-      result <- getAllSheets(Array.empty, includeQuarterly = true)
-      _      = result should have length 0
+      result <- getAllSheets(Array.empty)
+      _      = result should have length 1
       result <- count()
       _      = result shouldBe 1
       result <- deleteByLei("EXAMPLE-LEI")
@@ -115,10 +115,10 @@ class PublisherComponent2020Spec
       _      = result.head shouldBe data
       result <- count()
       _      = result shouldBe 1
-      result <- Source.fromPublisher(getAllLARs(Array.empty, includeQuarterly = false)).runWith(Sink.collection)
+      result <- Source.fromPublisher(getAllLARs(Array.empty)).runWith(Sink.collection)
       _      = result should have length 1
       _      = result.head shouldBe data
-      result <- Source.fromPublisher(getAllLARs(Array.empty, includeQuarterly = true)).runWith(Sink.collection)
+      result <- Source.fromPublisher(getAllLARs(Array.empty)).runWith(Sink.collection)
       _      = result should have length 1
       _      = result.head shouldBe data
       result <- deleteByLei("EXAMPLE-LEI")
