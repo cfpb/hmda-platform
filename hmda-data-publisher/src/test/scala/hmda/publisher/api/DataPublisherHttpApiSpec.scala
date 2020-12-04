@@ -2,19 +2,13 @@ package hmda.publisher.api
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.testkit.TestProbe
 import akka.util.Timeout
-import com.typesafe.config.ConfigFactory
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.model.institution.Institution
 import hmda.publisher.scheduler.AllSchedulers
 import hmda.publisher.scheduler.schedules.{Schedule, Schedules}
-import hmda.query.DbConfiguration._
-import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
+import org.scalatest.{MustMatchers, WordSpec}
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.DurationInt
 
 class DataPublisherHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest {
@@ -29,11 +23,13 @@ class DataPublisherHttpApiSpec extends WordSpec with MustMatchers with Scalatest
         case x @ Schedules.LarPublicScheduler2018    => testTrigger(x, _.larPublicScheduler)
         case x @ Schedules.LarPublicScheduler2019    => testTrigger(x, _.larPublicScheduler)
         case x @ Schedules.LarScheduler2019          => testTrigger(x, _.larScheduler)
+        case x @ Schedules.LarScheduler2020          => testTrigger(x, _.larScheduler)
         case x @ Schedules.LarSchedulerLoanLimit2019 => testTrigger(x, _.larScheduler)
         case x @ Schedules.TsScheduler2018           => testTrigger(x, _.tsScheduler)
         case x @ Schedules.TsPublicScheduler2018     => testTrigger(x, _.tsPublicScheduler)
         case x @ Schedules.TsPublicScheduler2019     => testTrigger(x, _.tsPublicScheduler)
         case x @ Schedules.TsScheduler2019           => testTrigger(x, _.tsScheduler)
+        case x @ Schedules.TsScheduler2020           => testTrigger(x, _.tsScheduler)
         case x @ Schedules.LarSchedulerQuarterly2020 => testTrigger(x, _.larScheduler)
         case x @ Schedules.TsSchedulerQuarterly2020  => testTrigger(x, _.tsScheduler)
       })
