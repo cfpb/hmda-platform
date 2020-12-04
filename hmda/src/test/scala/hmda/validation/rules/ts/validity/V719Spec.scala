@@ -12,8 +12,7 @@ class V719Spec extends TsEditCheckSpec {
     forAll(tsGen) { ts =>
       ts.copy(institutionName = "123").mustFail
       ts.copy(institutionName = "abcdef123").mustPass
-      ts.copy(institutionName = "abcdef@abc").mustFail
-      ts.copy(institutionName = "abcdef.abc").mustFail
+      ts.copy(institutionName = "bank 0").mustPass
     }
   }
 }
