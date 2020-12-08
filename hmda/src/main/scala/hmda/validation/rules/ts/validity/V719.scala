@@ -10,7 +10,7 @@ object V719 extends EditCheck[TransmittalSheet] {
   override def name: String = "V719"
 
   override def apply(ts: TransmittalSheet): ValidationResult = {
-    (ts.institutionName not numeric) and (ts.institutionName is alphaNumeric)
+    ts.institutionName not numeric
   }
 
 }

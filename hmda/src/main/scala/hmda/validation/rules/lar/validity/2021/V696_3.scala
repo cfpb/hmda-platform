@@ -8,7 +8,7 @@ import hmda.validation.rules.EditCheck
 import hmda.model.filing.lar.enums._
 
 object V696_3 extends EditCheck[LoanApplicationRegister] {
-  override def name: String = "V696_3"
+  override def name: String = "V696-3"
 
   override def parent: String = "V696"
 
