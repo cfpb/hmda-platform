@@ -119,6 +119,9 @@ object FilingPersistence extends HmdaTypedPersistentActor[FilingCommand, FilingE
 
       //This method will be similar to GetLatestSubmission but will fetch the one with highest sequencenumber and status of Signed (15)
       case GetOldestSignedSubmission(replyTo) =>
+        println ("inside oldest")
+        println (state.submissions)
+        println (state.submissions.size)
         val maybeSignedSubmission = state.submissions
           .filter(_.status == Signed )
           .sortWith(_.id.sequenceNumber < _.id.sequenceNumber)
@@ -146,6 +149,7 @@ object FilingPersistence extends HmdaTypedPersistentActor[FilingCommand, FilingE
 
   def selectFiling(sharding: ClusterSharding, lei: String, year: Int, quarter: Option[String]): EntityRef[FilingCommand] = {
     val period = YearUtils.period(year, quarter)
+    println("period: " + period)
     sharding.entityRefFor(FilingPersistence.typeKey, s"${FilingPersistence.name}-$lei-$period")
   }
 

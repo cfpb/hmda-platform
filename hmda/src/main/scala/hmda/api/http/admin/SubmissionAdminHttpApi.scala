@@ -113,9 +113,9 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
     EntityStreamingSupport.csv()
 
   val routes: OAuth2Authorization => Route = { (oauth2Authorization: OAuth2Authorization) =>
-    (extractUri & get & path("admin" / Segment / "oldest" /"signed" / IntNumber )) { (uri, lei, period) =>
+    (extractUri & get & path("institutions" / Segment / "signed" / "oldest"  / Segment )) { (uri, lei, period) =>
       oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
-        val fil = selectFiling(clusterSharding, lei, period, Some(""))
+        val fil = selectFiling(clusterSharding, lei, YearUtils.parsePeriod(period).right.get.year, YearUtils.parsePeriod(period).right.get.quarter)
         val fOldestSigned: Future[Option[Submission]] = fil ? (ref => GetOldestSignedSubmission(ref))
 
         onComplete(fOldestSigned) {
@@ -128,11 +128,9 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
             complete(InternalServerError)
         }
       }
-    }
-
-    (extractUri & get & path("admin" / Segment / "latest" / "signed"  / IntNumber )) { (uri, lei, period) =>
+    } ~ (extractUri & get & path("institutions" / Segment / "signed" / "latest"  / Segment )) { (uri, lei, period) =>
       oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
-        val fil = selectFiling(clusterSharding, lei, period, Some(""))
+        val fil = selectFiling(clusterSharding, lei, YearUtils.parsePeriod(period).right.get.year, YearUtils.parsePeriod(period).right.get.quarter)
         val fLatestSigned: Future[Option[Submission]] = fil ? (ref => GetLatestSignedSubmission(ref))
 
         onComplete(fLatestSigned) {
@@ -145,11 +143,9 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
             complete(InternalServerError)
         }
       }
-    }
-
-    (extractUri & get & path("admin" / Segment / "latest" / "signed" / "hmdafile" / IntNumber )) { (uri, lei, period) =>
+    } ~ (extractUri & get & path("institutions" / Segment / "hmdafile" / "latest" / Segment )) { (uri, lei, period) =>
       oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
-        val fil = selectFiling(clusterSharding, lei, period, Some(""))
+        val fil = selectFiling(clusterSharding, lei, YearUtils.parsePeriod(period).right.get.year, YearUtils.parsePeriod(period).right.get.quarter)
         val fLatest: Future[Option[Submission]] = fil ? (ref => GetLatestSignedSubmission(ref))
 
         onComplete(fLatest) {
@@ -166,9 +162,7 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
             complete(InternalServerError)
         }
       }
-    }
-
-    (extractUri & get & path("admin" / "hmdafile" / Segment)) { (uri, rawSubmissionId) =>
+    } ~ (extractUri & get & path("receipt" / Segment / "hmdafile")) { (uri, rawSubmissionId) =>
       oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
         validateRawSubmissionId(rawSubmissionId) match {
           case Invalid(reason) =>

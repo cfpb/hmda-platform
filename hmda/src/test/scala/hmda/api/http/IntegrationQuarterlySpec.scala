@@ -152,7 +152,7 @@ class IntegrationQuarterlySpec
           responseAs[Submission]
         }
 
-      Get(s"/admin/hmdafile/${submissionQuarterly.id}") ~> submissionAdminRoute(oAuth2Authorization) ~> check {
+      Get(s"/receipt/${submissionQuarterly.id}/hmdafile") ~> submissionAdminRoute(oAuth2Authorization) ~> check {
         status mustBe StatusCodes.OK
         val futureLineCount =
           response.entity.dataBytes
