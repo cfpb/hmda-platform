@@ -11,8 +11,8 @@ image:
 
 service:
   type: ClusterIP
-  port: 9099
-  targetPort: 9099
+  port: 9190
+  targetPort: 9190
   name: http-publisher
 
 grpc:
@@ -32,7 +32,7 @@ ingress:
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-  ContainerPort: 9099
+  ContainerPort: 9190
   hosts:
     - hmda-data-publisher.local
   tls: []

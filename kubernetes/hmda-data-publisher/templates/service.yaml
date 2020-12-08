@@ -1,0 +1,40 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hmda-data-publisher
+  labels:
+    service: hmda-data-publisher
+spec:
+  selector:
+    app: hmda-data-publisher
+  ports:
+    - port: 9190
+      protocol: TCP
+      targetPort: 9190
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: {{ include "hmda-data-publisher.fullname" . }}-ambassador
+  name: {{ include "hmda-data-publisher.fullname" . }}-ambassador
+  annotations:
+    getambassador.io/config: |
+      apiVersion: ambassador/v1
+      kind: Mapping
+      name: hmda_data_publisher_mapping
+      ambassador_id: ambassador-default-1
+      prefix: /trigger
+      rewrite: /trigger
+      service: {{ include "hmda-data-publisher.fullname" . }}:{{ .Values.service.port }}
+      timeout_ms: 300000
+spec:
+  clusterIP: None
+  ports:
+    - port: {{ .Values.service.port }}
