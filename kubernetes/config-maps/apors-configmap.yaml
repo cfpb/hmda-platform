@@ -3,6 +3,6 @@ kind: ConfigMap
 metadata:
   name: apors-configmap
 data:
-  fixed.rate.fileName: "YieldTableFixed.txt",
-  schedule: "0 0 0/2 * * ?",
+  fixed.rate.fileName: "YieldTableFixed.txt"
+  schedule: "0 0 0/2 * * ?"
   variable.rate.fileName: "YieldTableAdjustable.txt"
