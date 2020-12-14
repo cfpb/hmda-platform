@@ -16,7 +16,7 @@ object BankFilterUtils {
 
   def filterBankWithLogging(institutionLei: String): Boolean = {
     if (getFilterList().contains(institutionLei.toUpperCase)) {
-      log.info(s"Filtered out $institutionLei.toUpperCase")
+      log.info(s"Filtered out $institutionLei.toUpperCase()")
       false
     } else true
   }
