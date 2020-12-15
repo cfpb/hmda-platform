@@ -508,7 +508,7 @@ object HmdaValidationError
               }
           }
           .toMat(
-            Sink.fold(AggregationResult(totalCount = 0, distinctCount = 0, duplicateLineNumbers = Vector.empty, checkType, "empty-uli")) {
+            Sink.fold(AggregationResult(totalCount = 0, distinctCount = 0, duplicateLineNumbers = Vector.empty, checkType, submissionId.lei)) {
               // duplicate
               case (acc, (persisted, rowNumber, uliOnWhichErrorTriggered)) if !persisted =>
                 acc.copy(
