@@ -16,7 +16,7 @@ object V609 extends EditCheck[LoanApplicationRegister] {
     if (uli.length <= 22) {
       ValidationSuccess
     } else {
-      if (ULI.validateULI(uli)) {
+      if (ULI.validateULIViaEdits(uli)) {
         ValidationSuccess
       } else {
         ValidationFailure
