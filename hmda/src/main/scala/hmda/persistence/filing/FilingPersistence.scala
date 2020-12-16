@@ -11,7 +11,7 @@ import hmda.messages.filing.FilingCommands._
 import hmda.messages.filing.FilingEvents.{FilingCreated, FilingEvent, SubmissionAdded, SubmissionUpdated}
 import hmda.messages.institution.InstitutionCommands.AddFiling
 import hmda.model.filing.FilingDetails
-import hmda.model.filing.submission.{Signed, SubmissionStatus}
+import hmda.model.filing.submission.Signed
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.utils.YearUtils
@@ -149,7 +149,6 @@ object FilingPersistence extends HmdaTypedPersistentActor[FilingCommand, FilingE
 
   def selectFiling(sharding: ClusterSharding, lei: String, year: Int, quarter: Option[String]): EntityRef[FilingCommand] = {
     val period = YearUtils.period(year, quarter)
-    println("period: " + period)
     sharding.entityRefFor(FilingPersistence.typeKey, s"${FilingPersistence.name}-$lei-$period")
   }
 
