@@ -35,7 +35,6 @@ object ULI {
       println("NOT VALID LENGTH")
       false
     } else {
-      println("CALCULATE WHAT?!")
       calculateMod(convert(uli)) == 1
     }
 

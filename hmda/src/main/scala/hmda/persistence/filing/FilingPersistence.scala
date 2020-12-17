@@ -119,7 +119,6 @@ object FilingPersistence extends HmdaTypedPersistentActor[FilingCommand, FilingE
 
       //This method will be similar to GetLatestSubmission but will fetch the one with highest sequencenumber and status of Signed (15)
       case GetOldestSignedSubmission(replyTo) =>
-        println ("inside oldest")
         println (state.submissions)
         println (state.submissions.size)
         val maybeSignedSubmission = state.submissions
