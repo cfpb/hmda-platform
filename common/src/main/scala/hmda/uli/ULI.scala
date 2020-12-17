@@ -29,10 +29,8 @@ object ULI {
 
   def validateULIViaEdits(uli: String): Boolean =
     if (!isAlphanumeric(uli)) {
-      println("NO ALPHA")
       false
     } else if (!uliIsValidLength(uli)) {
-      println("NOT VALID LENGTH")
       false
     } else {
       calculateMod(convert(uli)) == 1
