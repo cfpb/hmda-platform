@@ -550,7 +550,7 @@ object HmdaValidationError
                 "Universal Loan Identifier (ULI)" -> tsLar.uli,
                 "The following row numbers occur multiple times and have the same ULI with action type 1 (Loan Originated)" -> tsLar.duplicateLineNumbersUliActionType
                   .mkString(start = "Rows: ", sep = ",", end = "")
-              ))
+              )).copy(uli=tsLar.ts.LEI)
           case s305 @ SyntacticalValidationError(_, `s305`, _, fields) =>
             s305.copyWithFields(
               fields + ("The following row numbers occur multiple times" -> tsLar.duplicateLineNumbers
