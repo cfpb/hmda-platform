@@ -9,6 +9,7 @@ import hmda.validation.rules.lar.syntactical.{S300, S301}
 import hmda.validation.rules.lar.validity._
 import hmda.validation.rules.lar.validity._2020
 import hmda.census.records.CensusRecords
+import hmda.validation.rules.lar.quality._2021.{Q650_1, Q650_2}
 import hmda.validation.rules.lar.validity._2020.V716
 
 private[engine] object LarEngine2021 extends ValidationEngine[LoanApplicationRegister] {
@@ -279,6 +280,8 @@ private[engine] object LarEngine2021 extends ValidationEngine[LoanApplicationReg
     Q644,
     Q645_1,
     Q645_2,
+    Q650_1,
+    Q650_2,
     quality2020.Q648,
     quality2020.Q649_1,
     quality2020.Q649_2,

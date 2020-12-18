@@ -15,6 +15,7 @@ object Q650_1 extends EditCheck[LoanApplicationRegister] {
 
   override def apply(lar: LoanApplicationRegister): ValidationResult ={
     val interest = Try(lar.loan.interestRate.toDouble).getOrElse(-1.0)
+
     when(interest is greaterThan(0.0)) {
       interest is greaterThanOrEqual(0.5)
     }

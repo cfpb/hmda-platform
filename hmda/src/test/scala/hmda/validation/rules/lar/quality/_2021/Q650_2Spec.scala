@@ -10,7 +10,7 @@ class Q650_2Spec extends LarEditCheckSpec {
 
   property("Interest rate should not be greater than 20") {
     forAll(larGen) { lar =>
-      lar.copy(loan = lar.loan.copy(interestRate = "21.05")).mustPass
+      lar.copy(loan = lar.loan.copy(interestRate = "21.05")).mustFail
     }
   }
 }
