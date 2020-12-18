@@ -566,7 +566,7 @@ object HmdaValidationError
           case q600 @ QualityValidationError(uli,`q600name`, fields)  =>
             if (q600WarningPresent) {
               q600.copyWithFields(
-                fields + (s"The following row numbers have the same ULI. WARNING: Additionally there are rows in your data that have a duplicate ULI, LEI, Action Taken, and Action Taken Date. This edit logic will be changed in 2021 and become a Syntactical edit, unable to be bypassed until corrected " -> tsLar.duplicateLineNumbers
+                fields + (s"The following row numbers have the same ULI. WARNING: Additionally there are rows in your data that have a duplicate ULI, LEI, Action Taken, and Action Taken Date. This edit logic will be changed in 2021 and become a Syntactical edit, unable to be bypassed until corrected." -> tsLar.duplicateLineNumbers
                   .mkString(start = "Rows: ", sep = ",", end = ""))
               )
             } else {

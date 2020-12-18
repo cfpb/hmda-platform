@@ -230,7 +230,7 @@ V715|If the Non-Amortizing Features exemption election is taken, Balloon Payment
 V716|The reported State and County are not a valid combination. If neither State nor County were reported NA, then the County must be located within the State.|County; State
 V717|An invalid Contact Person’s Email Address was provided. Please review the information below and update your file accordingly.|Contact Person's E-mail Address
 Q600|A duplicate ULI or NULI was reported.|Universal Loan Identifier (ULI)
-Q600-warning|There are rows in your data that have a duplicate ULI, LEI, Action Taken, and Action Taken Date. This edit logic will be changed in 2021 and become a Syntactical edit, unable to be bypassed until corrected|Universal Loan Identifier (ULI).
+Q600-warning|There are rows in your data that have a duplicate ULI, LEI, Action Taken, and Action Taken Date. This edit logic will be changed in 2021 and become a Syntactical edit, unable to be bypassed until corrected.|Universal Loan Identifier (ULI).
 Q601|Application Date occurs more than two years prior to Action Taken Date.|Application Date; Action Taken Date
 Q602|Street Address was reported NA, however City, State and Zip Code were provided.|Street Address; City; State; Zip Code
 Q603|The County has a population of greater than 30,000 according to the most recent decennial census and was not reported NA; however Census Tract was reported NA.|County; Census Tract
