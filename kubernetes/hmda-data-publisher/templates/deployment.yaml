@@ -264,7 +264,7 @@ spec:
               configMapKeyRef:
                 name: data-publisher-pgtables-configmap
                 key: publishertable.mlarTableName2020
-          - name: PANEL_2019_TABLE
+          - name: PANEL_2020_TABLE
             valueFrom:
               configMapKeyRef:
                 name: data-publisher-pgtables-configmap

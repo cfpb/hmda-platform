@@ -123,7 +123,7 @@ class LarScheduler
             .fromPublisher(larRepository2020.getAllLARs(getFilterList()))
             .map(larEntity => larEntity.toRegulatorPSV)
 
-        def countF: Future[Int] = larRepository2019.getAllLARsCount(getFilterList())
+        def countF: Future[Int] = larRepository2020.getAllLARsCount(getFilterList())
 
         publishPSVtoS3(fileName, allResultsSource, countF)
       }

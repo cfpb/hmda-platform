@@ -1,39 +1,27 @@
 package hmda.publisher.scheduler
 
-import java.nio.file.Path
-import java.time.Instant
-
 import akka.NotUsed
 import akka.stream.Materializer
+import akka.stream.alpakka.file.ArchiveMetadata
+import akka.stream.alpakka.file.scaladsl.Archive
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3._
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.scaladsl.{ Sink, Source }
+import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.{
-  ModifiedLarHeader,
-  PGTableNameLoader,
-  PrivateAWSConfigLoader,
-  PublicAWSConfigLoader,
-  S3Archiver,
-  S3Utils,
-  SnapshotCheck
-}
-import hmda.publisher.query.component.{ PublisherComponent2018, PublisherComponent2019, PublisherComponent2020 }
+import hmda.publisher.helper._
+import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020}
 import hmda.publisher.query.lar.ModifiedLarEntityImpl
-import hmda.publisher.scheduler.schedules.Schedules.{ LarPublicScheduler2018, LarPublicScheduler2019 }
+import hmda.publisher.scheduler.schedules.Schedules.{LarPublicScheduler2018, LarPublicScheduler2019}
+import hmda.publisher.validation.PublishingGuard
+import hmda.publisher.validation.PublishingGuard.{Period, Scope}
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
 import slick.basic.DatabasePublisher
-import akka.stream.alpakka.file.scaladsl.Archive
-import akka.stream.alpakka.file.ArchiveMetadata
-import hmda.publisher.validation.PublishingGuard
-import hmda.publisher.validation.PublishingGuard.{ Period, Scope }
 
-import scala.concurrent.Future
-import scala.util.{ Failure, Success }
+import scala.util.{Failure, Success}
 
 class LarPublicScheduler
   extends HmdaActor
@@ -85,7 +73,7 @@ class LarPublicScheduler
     case LarPublicScheduler2019 =>
       publishingGuard.runIfDataIsValid(Period.y2019, Scope.Public) {
         val fileName         = "2019_lar.txt"
-        val zipDirectoryName = "2018_lar.zip"
+        val zipDirectoryName = "2019_lar.zip"
         val s3Path           = s"$environmentPublic/dynamic-data/2019/"
         val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
         if (SnapshotCheck.snapshotActive) {
