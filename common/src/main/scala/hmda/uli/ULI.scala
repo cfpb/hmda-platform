@@ -27,6 +27,15 @@ object ULI {
       calculateMod(convert(uli)) == 1
     }
 
+  def validateULIViaEdits(uli: String): Boolean =
+    if (!isAlphanumeric(uli)) {
+      false
+    } else if (!uliIsValidLength(uli)) {
+      false
+    } else {
+      calculateMod(convert(uli)) == 1
+    }
+
   def isAlphanumeric(str: String): Boolean =
     str.forall(alphanumeric.contains(_))
 

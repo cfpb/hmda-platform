@@ -508,7 +508,7 @@ object HmdaValidationError
               }
           }
           .toMat(
-            Sink.fold(AggregationResult(totalCount = 0, distinctCount = 0, duplicateLineNumbers = Vector.empty, checkType, "empty-uli")) {
+            Sink.fold(AggregationResult(totalCount = 0, distinctCount = 0, duplicateLineNumbers = Vector.empty, checkType, submissionId.lei)) {
               // duplicate
               case (acc, (persisted, rowNumber, uliOnWhichErrorTriggered)) if !persisted =>
                 acc.copy(
@@ -546,9 +546,11 @@ object HmdaValidationError
         validationError match {
           case s306 @ SyntacticalValidationError(_, `s306`, _, fields) => //This is newly added for S306
             s306.copyWithFields(
-              fields + ("The following row numbers occur multiple times and have the same ULI with action type 1 (Loan Originated)" -> tsLar.duplicateLineNumbersUliActionType
-                .mkString(start = "Rows: ", sep = ",", end = ""))
-            )
+              ListMap(
+                "Universal Loan Identifier (ULI)" -> tsLar.uli,
+                "The following row numbers occur multiple times and have the same ULI with action type 1 (Loan Originated)" -> tsLar.duplicateLineNumbersUliActionType
+                  .mkString(start = "Rows: ", sep = ",", end = "")
+              )).copy(uli=tsLar.ts.LEI)
           case s305 @ SyntacticalValidationError(_, `s305`, _, fields) =>
             s305.copyWithFields(
               fields + ("The following row numbers occur multiple times" -> tsLar.duplicateLineNumbers
@@ -564,7 +566,7 @@ object HmdaValidationError
           case q600 @ QualityValidationError(uli,`q600name`, fields)  =>
             if (q600WarningPresent) {
               q600.copyWithFields(
-                fields + (s"The following row numbers have the same ULI. WARNING: Additionally there are rows in your data that have a duplicate ULI, LEI, Action Taken, and Action Taken Date. This edit logic will be changed in 2021 and become a Syntactical edit, unable to be bypassed until corrected " -> tsLar.duplicateLineNumbers
+                fields + (s"The following row numbers have the same ULI. WARNING: Additionally there are rows in your data that have a duplicate ULI, LEI, Action Taken, and Action Taken Date. This edit logic will be changed in 2021 and become a Syntactical edit, unable to be bypassed until corrected." -> tsLar.duplicateLineNumbers
                   .mkString(start = "Rows: ", sep = ",", end = ""))
               )
             } else {
