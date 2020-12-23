@@ -93,8 +93,8 @@ object HmdaValidationError
                              ): CommandHandler[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaValidationErrorState] = { (state, cmd) =>
     val log                                   = ctx.log
     implicit val system: ActorSystem[_]       = ctx.system
-    implicit val materializer: Materializer   = Materializer(ctx)
     implicit val blockingEc: ExecutionContext = system.dispatchers.lookup(DispatcherSelector.fromConfig("akka.blocking-quality-dispatcher"))
+    val materializer = implicitly[Materializer]
 
     val config                    = system.settings.config
     val futureTimeout             = config.getInt("hmda.actor.timeout")
@@ -103,6 +103,9 @@ object HmdaValidationError
     // Look up is done like this because of inheritance (would have ideally passed it into commandHandler)
     val tracker: ActorRef[ValidationProgressTrackerCommand] =
       ctx.child(s"tracker-${ctx.self.path.name}").get.toClassic.toTyped[ValidationProgressTrackerCommand]
+
+    // so It works even if current actor is passivated
+    def getSelf(subId: SubmissionId): EntityRef[SubmissionProcessingCommand] = selectHmdaValidationError(sharding, subId)
 
     cmd match {
       case TrackProgress(replyTo) =>
@@ -193,7 +196,7 @@ object HmdaValidationError
 
         fQuality.onComplete {
           case Success(_) =>
-            ctx.self ! CompleteQuality(submissionId)
+            getSelf(submissionId) ! CompleteQuality(submissionId)
           case Failure(e) =>
             updateSubmissionStatus(sharding, submissionId, Failed, log)
             log.error(e.getLocalizedMessage)
@@ -508,7 +511,7 @@ object HmdaValidationError
               }
           }
           .toMat(
-            Sink.fold(AggregationResult(totalCount = 0, distinctCount = 0, duplicateLineNumbers = Vector.empty, checkType, submissionId.lei)) {
+            Sink.fold(AggregationResult(totalCount = 0, distinctCount = 0, duplicateLineNumbers = Vector.empty, checkType, "empty-uli")) {
               // duplicate
               case (acc, (persisted, rowNumber, uliOnWhichErrorTriggered)) if !persisted =>
                 acc.copy(
@@ -546,11 +549,9 @@ object HmdaValidationError
         validationError match {
           case s306 @ SyntacticalValidationError(_, `s306`, _, fields) => //This is newly added for S306
             s306.copyWithFields(
-              ListMap(
-                "Universal Loan Identifier (ULI)" -> tsLar.uli,
-                "The following row numbers occur multiple times and have the same ULI with action type 1 (Loan Originated)" -> tsLar.duplicateLineNumbersUliActionType
-                  .mkString(start = "Rows: ", sep = ",", end = "")
-              )).copy(uli=tsLar.ts.LEI)
+              fields + ("The following row numbers occur multiple times and have the same ULI with action type 1 (Loan Originated)" -> tsLar.duplicateLineNumbersUliActionType
+                .mkString(start = "Rows: ", sep = ",", end = ""))
+            )
           case s305 @ SyntacticalValidationError(_, `s305`, _, fields) =>
             s305.copyWithFields(
               fields + ("The following row numbers occur multiple times" -> tsLar.duplicateLineNumbers
@@ -566,7 +567,7 @@ object HmdaValidationError
           case q600 @ QualityValidationError(uli,`q600name`, fields)  =>
             if (q600WarningPresent) {
               q600.copyWithFields(
-                fields + (s"The following row numbers have the same ULI. WARNING: Additionally there are rows in your data that have a duplicate ULI, LEI, Action Taken, and Action Taken Date. This edit logic will be changed in 2021 and become a Syntactical edit, unable to be bypassed until corrected." -> tsLar.duplicateLineNumbers
+                fields + (s"The following row numbers have the same ULI. WARNING: Additionally there are rows in your data that have a duplicate ULI, LEI, Action Taken, and Action Taken Date. This edit logic will be changed in 2021 and become a Syntactical edit, unable to be bypassed until corrected " -> tsLar.duplicateLineNumbers
                   .mkString(start = "Rows: ", sep = ",", end = ""))
               )
             } else {
