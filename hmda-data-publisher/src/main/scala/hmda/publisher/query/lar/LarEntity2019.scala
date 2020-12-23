@@ -1,6 +1,5 @@
 package hmda.publisher.query.lar
 
-import hmda.model.publication.Msa
 import hmda.util.conversion.ColumnDataFormatter
 
 case class LarPartOne2019(
@@ -194,11 +193,13 @@ case class LarPartSeven2019(
                              tractOccupiedUnits: Int = 0,
                              tractOneToFourFamilyUnits: Int = 0,
                              tractMedianAge: Int = 0,
-                             tractToMsaIncomePercent: Double = 0.0
+                             tractToMsaIncomePercent: Double = 0.0,
+                             msaMD: String = "",
+                             msaName: String = ""
                            ) {
   def toRegulatorPSV: String =
     s"|$conformingLoanLimit|$tractPopulation|$tractMinorityPopulationPercent|$tractMedianIncome|$tractToMsaIncomePercent|$tractOccupiedUnits" +
-      s"|$tractOneToFourFamilyUnits|$tractMedianAge|"
+      s"|$tractOneToFourFamilyUnits|$tractMedianAge|$msaMD|$msaName"
 }
 
 case class LarEntityImpl2019(
@@ -219,17 +220,7 @@ case class LarEntityImpl2019(
       larPartFive.toRegulatorPSV +
       larPartSix.toRegulatorPSV).replaceAll("(\r\n)|\r|\n", "")
 
-  def appendMsa(msa: Msa): String =
-    (larPartOne.toRegulatorPSV +
-      larPartTwo.toRegulatorPSV +
-      larPartThree.toRegulatorPSV +
-      larPartFour.toRegulatorPSV +
-      larPartFive.toRegulatorPSV +
-      larPartSix.toRegulatorPSV +
-      larPartSeven.toRegulatorPSV +
-      s"${msa.id}|${msa.name}").replaceAll("(\r\n)|\r|\n", "")
-
-  def toRegulatorLoanLimitPSV: String =
+  def toConformingLoanLimitPSV: String =
     (larPartOne.toRegulatorPSV +
       larPartTwo.toRegulatorPSV +
       larPartThree.toRegulatorPSV +

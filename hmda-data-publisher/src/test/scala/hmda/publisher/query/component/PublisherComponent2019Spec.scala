@@ -106,7 +106,6 @@ class PublisherComponent2019Spec
       LarPartSeven2019()
     )
     data.toRegulatorPSV
-    data.toRegulatorLoanLimitPSV
     val test = for {
       _      <- insert(data)
       result <- findByLei("EXAMPLE-LEI")

@@ -14,11 +14,9 @@ import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.actor.HmdaActor
 import hmda.census.records.CensusRecords
 import hmda.model.census.Census
-import hmda.model.publication.Msa
 import hmda.publisher.helper._
 import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020}
-import hmda.publisher.query.lar.LarEntityImpl2019
-import hmda.publisher.scheduler.schedules.Schedules.{LarScheduler2018, LarScheduler2019, LarScheduler2020, LarSchedulerLoanLimit2019, LarSchedulerQuarterly2020}
+import hmda.publisher.scheduler.schedules.Schedules._
 import hmda.publisher.validation.PublishingGuard
 import hmda.publisher.validation.PublishingGuard.{Period, Scope}
 import hmda.query.DbConfiguration.dbConfig
@@ -136,7 +134,7 @@ class LarScheduler
         val allResultsSource: Source[String, NotUsed] =
           Source
             .fromPublisher(larRepository2019.getAllLARs(getFilterList()))
-            .map(larEntity => appendCensus(larEntity, 2019))
+            .map(larEntity => larEntity.toConformingLoanLimitPSV)
             .prepend(Source(List(LoanLimitHeader)))
 
         def countF: Future[Int] = larRepository2019.getAllLARsCount(getFilterList())
@@ -194,26 +192,6 @@ class LarScheduler
         log.info(s"An error has occurred pushing LAR Data to $bucketPrivate/$fullFilePath: ${t.getMessage}")
     }
 
-  }
-
-  def getCensus(hmdaGeoTract: String, year: Int): Msa = {
-
-    val indexTractMap = year match {
-      case 2018 => indexTractMap2018
-      case 2019 => indexTractMap2019
-      case _    => indexTractMap2019
-    }
-    val censusResult = indexTractMap.getOrElse(hmdaGeoTract, Census())
-    val censusID =
-      if (censusResult.msaMd == 0) "-----" else censusResult.msaMd.toString
-    val censusName =
-      if (censusResult.name.isEmpty) "MSA/MD NOT AVAILABLE" else censusResult.name
-    Msa(censusID, censusName)
-  }
-
-  def appendCensus(lar: LarEntityImpl2019, year: Int): String = {
-    val msa = getCensus(lar.larPartOne.tract, year)
-    lar.appendMsa(msa)
   }
 }
 

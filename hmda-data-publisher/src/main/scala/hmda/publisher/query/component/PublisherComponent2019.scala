@@ -308,7 +308,8 @@ trait PublisherComponent2019 extends PGTableNameLoader {
     def tractMedianAge = column[Int]("tract_median_age_of_housing_units")
     def tractToMsaIncomePercent =
       column[Double]("tract_to_msa_income_percentage")
-
+    def msaMD       = column[String]("msa_md")
+    def msaName       = column[String]("msa_name")
     def * =
       (
         larPartOneProjection,
@@ -468,7 +469,9 @@ trait PublisherComponent2019 extends PGTableNameLoader {
         tractOccupiedUnits,
         tractOneToFourFamilyUnits,
         tractMedianAge,
-        tractToMsaIncomePercent
+        tractToMsaIncomePercent,
+        msaMD,
+        msaName
       ) <> ((LarPartSeven2019.apply _).tupled, LarPartSeven2019.unapply)
 
   }

@@ -194,14 +194,14 @@ case class LarPartSeven2020(
                              tractOccupiedUnits: Int = 0,
                              tractOneToFourFamilyUnits: Int = 0,
                              tractMedianAge: Int = 0,
-                             tractToMsaIncomePercent: Double = 0.0
-                           )
-
-case class LarPartEight2020(
-                             conformingLoanLimit: String = "",
-                             ethnicityCategorization: String = "",
-
-                           )
+                             tractToMsaIncomePercent: Double = 0.0,
+                             msaMD: String = "",
+                             msaName: String = ""
+                           ){
+  def toRegulatorPSV: String =
+    s"|$conformingLoanLimit|$tractPopulation|$tractMinorityPopulationPercent|$tractMedianIncome|$tractToMsaIncomePercent|$tractOccupiedUnits" +
+      s"|$tractOneToFourFamilyUnits|$tractMedianAge|$msaMD|$msaName"
+}
 
 case class LarEntityImpl2020(
                               larPartOne: LarPartOne2020 = LarPartOne2020(),
@@ -220,4 +220,13 @@ case class LarEntityImpl2020(
       larPartFour.toRegulatorPSV +
       larPartFive.toRegulatorPSV +
       larPartSix.toRegulatorPSV).replaceAll("(\r\n)|\r|\n", "")
+
+  def toConformingLoanLimitPSV: String =
+    (larPartOne.toRegulatorPSV +
+      larPartTwo.toRegulatorPSV +
+      larPartThree.toRegulatorPSV +
+      larPartFour.toRegulatorPSV +
+      larPartFive.toRegulatorPSV +
+      larPartSix.toRegulatorPSV +
+      larPartSeven.toRegulatorPSV).replaceAll("(\r\n)|\r|\n", "")
 }
