@@ -315,8 +315,8 @@ trait PublisherComponent2020 extends PGTableNameLoader {
     def tractMedianAge = column[Int]("tract_median_age_of_housing_units")
     def tractToMsaIncomePercent =
       column[Double]("tract_to_msa_income_percentage")
-    def msaMD       = column[String]("msa_md")
-    def msaName       = column[String]("msa_md_name")
+    def msaMD = column[Option[String]]("msa_md")
+    def msaMDName = column[Option[String]]("msa_md_name")
     // TODO: This is not actually used in the projection so creating a schema does not actually pick this field up
     // so don't use create Schema
     def isQuarterly = column[Option[Boolean]]("is_quarterly")
@@ -482,7 +482,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
         tractMedianAge,
         tractToMsaIncomePercent,
         msaMD,
-        msaName
+        msaMDName
       ) <> ((LarPartSeven2020.apply _).tupled, LarPartSeven2020.unapply)
 
   }

@@ -195,12 +195,12 @@ case class LarPartSeven2020(
                              tractOneToFourFamilyUnits: Int = 0,
                              tractMedianAge: Int = 0,
                              tractToMsaIncomePercent: Double = 0.0,
-                             msaMD: String = "",
-                             msaName: String = ""
-                           ){
+                             msaMD: Option[String] = Some(""),
+                             msaMDName: Option[String] = Some("")
+                           ) extends ColumnDataFormatter {
   def toRegulatorPSV: String =
     s"|$conformingLoanLimit|$tractPopulation|$tractMinorityPopulationPercent|$tractMedianIncome|$tractToMsaIncomePercent|$tractOccupiedUnits" +
-      s"|$tractOneToFourFamilyUnits|$tractMedianAge|$msaMD|$msaName"
+      s"|$tractOneToFourFamilyUnits|$tractMedianAge|${extractOpt(msaMD)}|${extractOpt(msaMDName)}"
 }
 
 case class LarEntityImpl2020(
