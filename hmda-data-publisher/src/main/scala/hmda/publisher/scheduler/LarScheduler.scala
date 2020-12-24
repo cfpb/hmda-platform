@@ -67,6 +67,8 @@ class LarScheduler
     QuartzSchedulerExtension(context.system)
       .schedule("LarSchedulerLoanLimit2019", self, LarSchedulerLoanLimit2019)
     QuartzSchedulerExtension(context.system)
+      .schedule("LarSchedulerLoanLimit2020", self, LarSchedulerLoanLimit2020)
+    QuartzSchedulerExtension(context.system)
       .schedule("LarSchedulerQuarterly2020", self, LarSchedulerQuarterly2020)
   }
 
@@ -75,6 +77,7 @@ class LarScheduler
     QuartzSchedulerExtension(context.system).cancelJob("LarScheduler2019")
     QuartzSchedulerExtension(context.system).cancelJob("LarScheduler2020")
     QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerLoanLimit2019")
+    QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerLoanLimit2020")
     QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerQuarterly2020")
   }
 
@@ -134,6 +137,22 @@ class LarScheduler
         val allResultsSource: Source[String, NotUsed] =
           Source
             .fromPublisher(larRepository2019.getAllLARs(getFilterList()))
+            .map(larEntity => larEntity.toConformingLoanLimitPSV)
+            .prepend(Source(List(LoanLimitHeader)))
+
+        def countF: Future[Int] = larRepository2019.getAllLARsCount(getFilterList())
+
+        publishPSVtoS3(fileName, allResultsSource, countF)
+      }
+
+    case LarSchedulerLoanLimit2020 =>
+      publishingGuard.runIfDataIsValid(Period.y2020, Scope.Private) {
+        val now           = LocalDateTime.now().minusDays(1)
+        val formattedDate = fullDate.format(now)
+        val fileName      = "2020F_AGY_LAR_withFlag_" + s"$formattedDate" + "2020_lar.txt"
+        val allResultsSource: Source[String, NotUsed] =
+          Source
+            .fromPublisher(larRepository2020.getAllLARs(getFilterList()))
             .map(larEntity => larEntity.toConformingLoanLimitPSV)
             .prepend(Source(List(LoanLimitHeader)))
 

@@ -47,7 +47,7 @@ class PublisherComponent2020Spec
 
   "InstitutionRepository2020 runthrough" in {
     import institutionRepo._
-    val data = InstitutionEntity("EXAMPLE-LEI", activityYear = 2019, institutionType = 1, taxId = "ABC", hmdaFiler = true)
+    val data = InstitutionEntity("EXAMPLE-LEI", activityYear = 2020, institutionType = 1, taxId = "ABC", hmdaFiler = true)
     data.toPSV
     val test = for {
       rowsInserted <- insert(data)

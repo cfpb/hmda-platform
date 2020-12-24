@@ -309,7 +309,7 @@ trait PublisherComponent2019 extends PGTableNameLoader {
     def tractToMsaIncomePercent =
       column[Double]("tract_to_msa_income_percentage")
     def msaMD       = column[String]("msa_md")
-    def msaName       = column[String]("msa_name")
+    def msaName       = column[String]("msa_md_name")
     def * =
       (
         larPartOneProjection,

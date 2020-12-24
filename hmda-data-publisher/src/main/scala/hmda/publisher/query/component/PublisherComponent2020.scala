@@ -316,7 +316,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
     def tractToMsaIncomePercent =
       column[Double]("tract_to_msa_income_percentage")
     def msaMD       = column[String]("msa_md")
-    def msaName       = column[String]("msa_name")
+    def msaName       = column[String]("msa_md_name")
     // TODO: This is not actually used in the projection so creating a schema does not actually pick this field up
     // so don't use create Schema
     def isQuarterly = column[Option[Boolean]]("is_quarterly")
