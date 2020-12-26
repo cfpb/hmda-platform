@@ -6,11 +6,12 @@ import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.cluster.typed.{Cluster, Join}
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.model.StatusCodes.Created
+import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Disposition`}
 import akka.http.scaladsl.testkit.{ScalatestRouteTest, WSProbe}
 import akka.stream.scaladsl.Sink
 import akka.util.Timeout
 import com.typesafe.config.Config
-import hmda.api.http.admin.{ InstitutionAdminHttpApi, SubmissionAdminHttpApi }
+import hmda.api.http.admin.{InstitutionAdminHttpApi, SubmissionAdminHttpApi}
 import hmda.api.http.filing.submissions._
 import hmda.api.http.filing.{FileUploadUtils, FilingHttpApi}
 import hmda.api.http.model.filing.submissions.{EditsSign, EditsVerification}
@@ -154,6 +155,12 @@ class IntegrationSpec   extends AkkaCassandraPersistenceSpec
       Get(s"/institutions/${sampleInstitution.LEI}/filings/${period.year}/submissions/${uploadFileSubmission.id.sequenceNumber}/edits/csv") ~> editsRoute(
         oAuth2Authorization
       ) ~> check {
+        val contentDisposition = header("content-disposition")
+        contentDisposition.isDefined mustBe true
+        contentDisposition.get mustBe `Content-Disposition`(
+          ContentDispositionTypes.attachment,
+          Map("filename" -> s"edits-summary-${sampleInstitution.LEI}-${period.year}--${uploadFileSubmission.id.sequenceNumber}.csv")
+        )
         status mustBe StatusCodes.OK
       }
 

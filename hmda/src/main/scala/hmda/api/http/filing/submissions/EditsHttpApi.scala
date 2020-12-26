@@ -4,37 +4,38 @@ import akka.NotUsed
 import akka.actor.typed.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, StatusCodes, Uri }
-import akka.http.scaladsl.server.Directives.{ encodeResponse, handleRejections, _ }
+import akka.http.scaladsl.model.headers.{ContentDispositionType, ContentDispositionTypes, `Content-Disposition`}
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse, StatusCodes, Uri}
+import akka.http.scaladsl.server.Directives.{encodeResponse, handleRejections, _}
 import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
-import akka.stream.scaladsl.{ Sink, Source }
-import akka.util.{ ByteString, Timeout }
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{ cors, corsRejectionHandler }
+import akka.stream.scaladsl.{Sink, Source}
+import akka.util.{ByteString, Timeout}
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.PathMatchers._
 import hmda.api.http.directives.QuarterlyFilingAuthorization._
 import hmda.api.http.model.filing.submissions._
 import hmda.auth.OAuth2Authorization
 import hmda.messages.submission.EditDetailsCommands.GetEditRowCount
-import hmda.messages.submission.EditDetailsEvents.{ EditDetailsAdded, EditDetailsPersistenceEvent, EditDetailsRowCounted }
-import hmda.messages.submission.SubmissionProcessingCommands.{ GetHmdaValidationErrorState, GetVerificationStatus }
+import hmda.messages.submission.EditDetailsEvents.{EditDetailsAdded, EditDetailsPersistenceEvent, EditDetailsRowCounted}
+import hmda.messages.submission.SubmissionProcessingCommands.{GetHmdaValidationErrorState, GetVerificationStatus}
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowValidatedError
 import hmda.model.filing.EditDescriptionLookup
-import hmda.model.filing.submission.{ SubmissionId, SubmissionStatus, VerificationStatus }
-import hmda.model.processing.state.{ EditSummary, HmdaValidationErrorState }
+import hmda.model.filing.submission.{SubmissionId, SubmissionStatus, VerificationStatus}
+import hmda.model.processing.state.{EditSummary, HmdaValidationErrorState}
 import hmda.model.validation._
 import hmda.persistence.submission.EditDetailsPersistence.selectEditDetailsPersistence
 import hmda.persistence.submission.HmdaValidationError.selectHmdaValidationError
-import hmda.persistence.submission.{ EditDetailsPersistence, HmdaValidationError }
+import hmda.persistence.submission.{EditDetailsPersistence, HmdaValidationError}
 import hmda.query.HmdaQuery._
 import hmda.util.http.FilingResponseUtils._
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.matching.Regex
-import scala.util.{ Failure, Success }
+import scala.util.{Failure, Success}
 
 object EditsHttpApi {
   def create(log: Logger, sharding: ClusterSharding)(
@@ -138,7 +139,15 @@ private class EditsHttpApi(log: Logger, sharding: ClusterSharding)(
       .concat(validationErrorEventStream(submissionId))
       .map(ByteString(_))
     log.info("Downloading edit report for: " + submissionId)
-    complete(HttpEntity.Chunked.fromData(ContentTypes.`text/csv(UTF-8)`, csv))
+    val response = HttpResponse(
+      entity = HttpEntity.Chunked.fromData(ContentTypes.`text/csv(UTF-8)`, csv),
+      headers = List(
+        `Content-Disposition`(
+          ContentDispositionTypes.attachment,
+          Map("filename" -> s"edits-summary-${lei}-${year}-${quarter.getOrElse("")}-${seqNr}.csv"))
+      )
+    )
+    complete(response)
   }
 
   // GET institutions/<lei>/filings/<year>/submissions/<submissionId>/edits/<edit>
