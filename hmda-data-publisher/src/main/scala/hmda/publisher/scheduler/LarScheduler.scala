@@ -17,8 +17,8 @@ import hmda.model.census.Census
 import hmda.model.publication.Msa
 import hmda.publisher.helper._
 import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020}
-import hmda.publisher.query.lar.LarEntityImpl2019
-import hmda.publisher.scheduler.schedules.Schedules.{LarScheduler2018, LarScheduler2019, LarScheduler2020, LarSchedulerLoanLimit2019, LarSchedulerQuarterly2020}
+import hmda.publisher.query.lar.{LarEntityImpl2019, LarEntityImpl2020}
+import hmda.publisher.scheduler.schedules.Schedules.{LarScheduler2018, LarScheduler2019, LarScheduler2020, LarSchedulerLoanLimit2019, LarSchedulerLoanLimit2020, LarSchedulerQuarterly2020}
 import hmda.publisher.validation.PublishingGuard
 import hmda.publisher.validation.PublishingGuard.{Period, Scope}
 import hmda.query.DbConfiguration.dbConfig
@@ -51,6 +51,8 @@ class LarScheduler
 
   val indexTractMap2018: Map[String, Census] = CensusRecords.indexedTract2018
   val indexTractMap2019: Map[String, Census] = CensusRecords.indexedTract2019
+  val indexTractMap2020: Map[String, Census] = CensusRecords.indexedTract2020
+
 
   val s3Settings = S3Settings(context.system)
     .withBufferType(MemoryBufferType)
@@ -69,6 +71,8 @@ class LarScheduler
     QuartzSchedulerExtension(context.system)
       .schedule("LarSchedulerLoanLimit2019", self, LarSchedulerLoanLimit2019)
     QuartzSchedulerExtension(context.system)
+      .schedule("LarSchedulerLoanLimit2020", self, LarSchedulerLoanLimit2020)
+    QuartzSchedulerExtension(context.system)
       .schedule("LarSchedulerQuarterly2020", self, LarSchedulerQuarterly2020)
   }
 
@@ -77,6 +81,7 @@ class LarScheduler
     QuartzSchedulerExtension(context.system).cancelJob("LarScheduler2019")
     QuartzSchedulerExtension(context.system).cancelJob("LarScheduler2020")
     QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerLoanLimit2019")
+    QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerLoanLimit2020")
     QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerQuarterly2020")
   }
 
@@ -136,10 +141,26 @@ class LarScheduler
         val allResultsSource: Source[String, NotUsed] =
           Source
             .fromPublisher(larRepository2019.getAllLARs(getFilterList()))
-            .map(larEntity => appendCensus(larEntity, 2019))
+            .map(larEntity => appendCensus2019(larEntity, 2019))
             .prepend(Source(List(LoanLimitHeader)))
 
         def countF: Future[Int] = larRepository2019.getAllLARsCount(getFilterList())
+
+        publishPSVtoS3(fileName, allResultsSource, countF)
+      }
+
+    case LarSchedulerLoanLimit2020 =>
+      publishingGuard.runIfDataIsValid(Period.y2020, Scope.Private) {
+        val now           = LocalDateTime.now().minusDays(1)
+        val formattedDate = fullDate.format(now)
+        val fileName      = "2020F_AGY_LAR_withFlag_" + s"$formattedDate" + "2020_lar.txt"
+        val allResultsSource: Source[String, NotUsed] =
+          Source
+            .fromPublisher(larRepository2020.getAllLARs(getFilterList()))
+            .map(larEntity => appendCensus2020(larEntity, 2020))
+            .prepend(Source(List(LoanLimitHeader)))
+
+        def countF: Future[Int] = larRepository2020.getAllLARsCount(getFilterList())
 
         publishPSVtoS3(fileName, allResultsSource, countF)
       }
@@ -201,7 +222,9 @@ class LarScheduler
     val indexTractMap = year match {
       case 2018 => indexTractMap2018
       case 2019 => indexTractMap2019
-      case _    => indexTractMap2019
+      case 2020    => indexTractMap2020
+      case _    => indexTractMap2020
+
     }
     val censusResult = indexTractMap.getOrElse(hmdaGeoTract, Census())
     val censusID =
@@ -211,7 +234,12 @@ class LarScheduler
     Msa(censusID, censusName)
   }
 
-  def appendCensus(lar: LarEntityImpl2019, year: Int): String = {
+  def appendCensus2019(lar: LarEntityImpl2019, year: Int): String = {
+    val msa = getCensus(lar.larPartOne.tract, year)
+    lar.appendMsa(msa)
+  }
+
+  def appendCensus2020(lar: LarEntityImpl2020, year: Int): String = {
     val msa = getCensus(lar.larPartOne.tract, year)
     lar.appendMsa(msa)
   }

@@ -31,7 +31,7 @@ class PublishingGuard(
         case Validated.Invalid(errs) =>
           val message = errs.toList.mkString("\n")
           logger.error(s"Data validation failed for year ${year}. Files won't be published. Message:\n${message}")
-          messageReporter.report(message)
+          messageReporter.report( s"Data validation failed for year ${year}. Files won't be published. Message:\n${message}")
       })
       .recoverWith {
         case ex =>
@@ -73,7 +73,7 @@ class PublishingGuard(
           new LeiCountCheck(dbConfig, tsData, larData, leiCheckErrorMargin)
         )
       case Scope.Public =>
-        // there is no modified lar table for 2020 and so no chcecks will run for this year and scope
+        // there is no modified lar table for 2020 and so no checks will run for this year and scope
         val larDataOpt = year match {
           case Period.y2018 => Some(db2018.validationMLarData2018)
           case Period.y2019 => Some(db2019.validationMLarData2019)
