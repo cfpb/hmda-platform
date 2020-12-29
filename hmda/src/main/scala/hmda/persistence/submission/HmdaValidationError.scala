@@ -93,8 +93,8 @@ object HmdaValidationError
                              ): CommandHandler[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaValidationErrorState] = { (state, cmd) =>
     val log                                   = ctx.log
     implicit val system: ActorSystem[_]       = ctx.system
-    implicit val materializer: Materializer   = Materializer(ctx)
     implicit val blockingEc: ExecutionContext = system.dispatchers.lookup(DispatcherSelector.fromConfig("akka.blocking-quality-dispatcher"))
+    val materializer = implicitly[Materializer]
 
     val config                    = system.settings.config
     val futureTimeout             = config.getInt("hmda.actor.timeout")
@@ -103,6 +103,9 @@ object HmdaValidationError
     // Look up is done like this because of inheritance (would have ideally passed it into commandHandler)
     val tracker: ActorRef[ValidationProgressTrackerCommand] =
       ctx.child(s"tracker-${ctx.self.path.name}").get.toClassic.toTyped[ValidationProgressTrackerCommand]
+
+    // so It works even if current actor is passivated
+    def getSelf(subId: SubmissionId): EntityRef[SubmissionProcessingCommand] = selectHmdaValidationError(sharding, subId)
 
     cmd match {
       case TrackProgress(replyTo) =>
@@ -144,7 +147,7 @@ object HmdaValidationError
 
         fSyntacticalValidity.onComplete {
           case Success(_) =>
-            ctx.self ! CompleteSyntacticalValidity(submissionId)
+            getSelf(submissionId) ! CompleteSyntacticalValidity(submissionId)
           case Failure(e) =>
             updateSubmissionStatus(sharding, submissionId, Failed, log)
             log.error(e.getLocalizedMessage)
@@ -193,7 +196,7 @@ object HmdaValidationError
 
         fQuality.onComplete {
           case Success(_) =>
-            ctx.self ! CompleteQuality(submissionId)
+            getSelf(submissionId) ! CompleteQuality(submissionId)
           case Failure(e) =>
             updateSubmissionStatus(sharding, submissionId, Failed, log)
             log.error(e.getLocalizedMessage)
@@ -651,6 +654,9 @@ object HmdaValidationError
                            validationContext: ValidationContext
                          )(implicit system: ActorSystem[_], mat: Materializer, ec: ExecutionContext, t: Timeout): Future[Unit] = {
 
+    val sharding = ClusterSharding(system)
+    val self: EntityRef[SubmissionProcessingCommand] = selectHmdaValidationError(sharding, submissionId)
+
     def qualityChecks: Future[List[ValidationError]] =
       if (editCheck == "quality") validateTsLar(ctx, submissionId, "quality", validationContext)
       else Future.successful(Nil)
@@ -664,10 +670,8 @@ object HmdaValidationError
           case (Left(errors), rowNumber) =>
             PersistHmdaRowValidatedError(submissionId, rowNumber, errors, None)
         }
-        .via(
-          ActorFlow.ask(ctx.self)((el, replyTo: ActorRef[HmdaRowValidatedError]) =>
-            PersistHmdaRowValidatedError(submissionId, el.rowNumber, el.validationErrors, Some(replyTo))
-          )
+        .mapAsync(1)(el =>
+          self ? ((replyTo: ActorRef[HmdaRowValidatedError]) => el.copy(replyTo = Some(replyTo)))
         )
         .named("errorPersisting" + submissionId)
         .runWith(Sink.ignore)
@@ -709,6 +713,9 @@ object HmdaValidationError
                                 ctx: ActorContext[SubmissionProcessingCommand],
                                 submissionId: SubmissionId
                               )(implicit system: ActorSystem[_], mat: Materializer, ec: ExecutionContext, t: Timeout): Source[HmdaRowValidatedError, NotUsed] = {
+    val sharding = ClusterSharding(system)
+    val self: EntityRef[SubmissionProcessingCommand] = selectHmdaValidationError(sharding, submissionId)
+
     val period = submissionId.period
     uploadConsumerRawStr(ctx, submissionId)
       .drop(1)
@@ -716,10 +723,9 @@ object HmdaValidationError
       .filter(_.isLeft)
       .map(_.left.get)
       .zip(Source.fromIterator(() => Iterator.from(2)))
-      .via(ActorFlow.ask(ctx.self) {
-        case ((message: Seq[ValidationError], index: Int), replyTo: ActorRef[HmdaRowValidatedError]) =>
-          PersistHmdaRowValidatedError(submissionId, index, message, Some(replyTo))
-      })
+      .mapAsync(1)(el =>
+        self ? ((replyTo: ActorRef[HmdaRowValidatedError]) => PersistHmdaRowValidatedError(submissionId, el._2, el._1, Some(replyTo))
+          ))
   }
 
   private def maybeTs(
