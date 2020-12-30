@@ -41,6 +41,7 @@ private class DataPublisherHttpApi(
       case Schedules.LarScheduler2019          => larScheduler
       case Schedules.LarScheduler2020          => larScheduler
       case Schedules.LarSchedulerLoanLimit2019 => larScheduler
+      case Schedules.LarSchedulerLoanLimit2020 => larScheduler
       case Schedules.LarSchedulerQuarterly2020 => larScheduler
       case Schedules.TsPublicScheduler2018     => tsPublicScheduler
       case Schedules.TsPublicScheduler2019     => tsPublicScheduler

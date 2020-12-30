@@ -25,6 +25,7 @@ class DataPublisherHttpApiSpec extends WordSpec with MustMatchers with Scalatest
         case x @ Schedules.LarScheduler2019          => testTrigger(x, _.larScheduler)
         case x @ Schedules.LarScheduler2020          => testTrigger(x, _.larScheduler)
         case x @ Schedules.LarSchedulerLoanLimit2019 => testTrigger(x, _.larScheduler)
+        case x @ Schedules.LarSchedulerLoanLimit2020 => testTrigger(x, _.larScheduler)
         case x @ Schedules.TsScheduler2018           => testTrigger(x, _.tsScheduler)
         case x @ Schedules.TsPublicScheduler2018     => testTrigger(x, _.tsPublicScheduler)
         case x @ Schedules.TsPublicScheduler2019     => testTrigger(x, _.tsPublicScheduler)
