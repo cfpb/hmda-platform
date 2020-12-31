@@ -1,5 +1,7 @@
 package hmda.util
+import java.time.LocalDate
 import java.time.format.DateTimeFormatterBuilder
+
 import cats.implicits._
 import java.time.temporal.ChronoField
 
@@ -32,7 +34,7 @@ object Filer {
       // note that we expect the user to fill in year the month and date, and we fill in the year
       val formatter = new DateTimeFormatterBuilder().appendPattern("MMMM dd yyyy").toFormatter
       // just a random year so we can get DAY_OF_YEAR to resolve to make quarterly range checks easier
-      val year = " 2099"
+      val year =  " " + LocalDate.now().getYear
       for {
         rawStart <- Try(hocon.getString("start")).toEither.left.map(_ => "failed to obtain start")
         rawEnd   <- Try(hocon.getString("end")).toEither.left.map(_ => "failed to obtain end")
