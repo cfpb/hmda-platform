@@ -8,9 +8,9 @@ object EmailUtils {
   val publicDomains = config.getString("hmda.email.publicDomains").split(",")
 
   def checkIfPublicDomain(domain: String): Boolean =
-    publicDomains.contains(domain)
+    publicDomains.contains(domain.toLowerCase())
 
   def checkListIfPublicDomain(domains: Seq[String]): Boolean =
-    !(domains.intersect(publicDomains).isEmpty)
+    !(domains.intersect(publicDomains.map(_.toLowerCase())).isEmpty)
 }
 // $COVERAGE-ON$

@@ -236,7 +236,7 @@ private class InstitutionAdminHttpApi(config: Config, sharding: ClusterSharding)
       complete((StatusCodes.BadRequest, "Incorrect lei format"))
     } else if (checkAgencyCode && !validAgencyCodeFormat(institution.agency.code)) {
       complete((StatusCodes.BadRequest, "Incorrect agency code format"))
-    } else if (checkListIfPublicDomain(institution.emailDomains)){
+    } else if (checkListIfPublicDomain(institution.emailDomains)) {
       complete((StatusCodes.BadRequest, "Email domain is a public domain"))
     } else route(institution, uri)
 }
