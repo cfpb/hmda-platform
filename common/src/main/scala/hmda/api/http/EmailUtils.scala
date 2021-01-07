@@ -11,6 +11,6 @@ object EmailUtils {
     publicDomains.contains(domain.toLowerCase())
 
   def checkListIfPublicDomain(domains: Seq[String]): Boolean =
-    !(domains.intersect(publicDomains.map(_.toLowerCase())).isEmpty)
+    !(domains.map(_.toLowerCase()).intersect(publicDomains).isEmpty)
 }
 // $COVERAGE-ON$
