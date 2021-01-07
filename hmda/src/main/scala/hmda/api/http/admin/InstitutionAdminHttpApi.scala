@@ -19,6 +19,7 @@ import hmda.model.institution.{ Agency, Institution }
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.institution.InstitutionPersistence.selectInstitution
 import hmda.util.http.FilingResponseUtils._
+import hmda.api.http.EmailUtils._
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
@@ -51,7 +52,9 @@ private class InstitutionAdminHttpApi(config: Config, sharding: ClusterSharding)
           (extractUri & post) { uri =>
             sanatizeInstitutionIdentifiers(institution, checkLEI, checkAgencyCode, uri, postInstitution)
           } ~
-            (extractUri & put)(uri => sanatizeInstitutionIdentifiers(institution, checkLEI, checkAgencyCode, uri, putInstitution)) ~
+            (extractUri & put){uri => 
+              sanatizeInstitutionIdentifiers(institution, checkLEI, checkAgencyCode, uri, putInstitution)
+          } ~
             (extractUri & delete) { uri =>
               val institutionPersistence = InstitutionPersistence.selectInstitution(sharding, institution.LEI, institution.activityYear)
               val fDeleted: Future[InstitutionEvent] =
@@ -233,5 +236,7 @@ private class InstitutionAdminHttpApi(config: Config, sharding: ClusterSharding)
       complete((StatusCodes.BadRequest, "Incorrect lei format"))
     } else if (checkAgencyCode && !validAgencyCodeFormat(institution.agency.code)) {
       complete((StatusCodes.BadRequest, "Incorrect agency code format"))
+    } else if (checkListIfPublicDomain(institution.emailDomains)){
+      complete((StatusCodes.BadRequest, "Email domain is a public domain"))
     } else route(institution, uri)
 }
