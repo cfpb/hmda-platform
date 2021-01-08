@@ -32,6 +32,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     year match {
       case "2018" => "transmittalsheet2018"
       case "2019" => "transmittalsheet2019"
+      case "2020" => "transmittalsheet2020"
       case "2020-Q1" => "ts2020_q1"
       case "2020-Q2" => "ts2020_q2"
       case "2020-Q3" => "ts2020_q3"
@@ -43,6 +44,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     (period, mview) match {
       case ("2018","") => "loanapplicationregister2018"
       case ("2019","") => "loanapplicationregister2019"
+      case ("2020","") => "loanapplicationregister2020"
       case ("2018","exemptions") => "exemptions_2018"
       case ("2019","exemptions") => "exemptions_2019"
       case ("2018","open_end_credit") => "open_end_credit_filers_by_agency_2018"
