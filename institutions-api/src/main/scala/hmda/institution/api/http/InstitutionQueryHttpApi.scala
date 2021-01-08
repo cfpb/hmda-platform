@@ -16,6 +16,7 @@ import hmda.utils.YearUtils._
 import io.circe.generic.auto._
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
+import hmda.api.http.EmailUtils._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -128,8 +129,12 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
   path("institutions") {
     (extractUri & get) { uri =>
       parameter('domain.as[String]) { domain =>
+        if (checkIfPublicDomain(domain)) {
+          returnNotFoundError(uri)
+        } else {
         val f = findByEmailAnyYear(domain)
         completeInstitutionsFuture(f, uri)
+        }
       } ~
         parameters(('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String])) {
           (domain, lei, respondentName, taxId) =>
@@ -156,8 +161,6 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
           complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
         }
     }
-
-
 
   private def returnNotFoundError(uri: Uri) = {
     val errorResponse = ErrorResponse(404, StatusCodes.NotFound.defaultMessage, uri.path)
