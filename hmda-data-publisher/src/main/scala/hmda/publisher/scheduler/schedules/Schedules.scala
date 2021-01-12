@@ -9,6 +9,7 @@ sealed trait Schedule extends EnumEntry
 object Schedules extends Enum[Schedule] {
   case object PanelScheduler2018        extends Schedule
   case object PanelScheduler2019        extends Schedule
+  case object PanelScheduler2020        extends Schedule
   case object LarScheduler2018          extends Schedule
   case object LarPublicScheduler2018    extends Schedule
   case object LarPublicScheduler2019    extends Schedule
