@@ -162,9 +162,9 @@ trait DataBrowserDirectives extends Settings {
         import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
         complete((BadRequest, "must provide years parameter"))
 
-      case xs if xs.exists(year => (year < 2017) || (year > 2019)) =>
+      case xs if xs.exists(year => (year < 2018) || (year > 2019)) => // TODO: Change this to 2017 when 2017 is released
         import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-        complete((BadRequest, s"must provide years in the range of 2017-2019, you have provided (${xs.mkString(", ")})"))
+        complete((BadRequest, s"must provide years in the range of 2018-2019, you have provided (${xs.mkString(", ")})"))
 
       case xs => provide(Option(QueryField(name = "year", xs.map(_.toString), dbName = "filing_year", isAllSelected = false)))
     }

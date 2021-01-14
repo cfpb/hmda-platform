@@ -245,7 +245,7 @@ class DataBrowserDirectivesSpec extends WordSpec with ScalatestRouteTest with Ma
       }
 
       Get("/?years=2017&msamds=34980&states=CA") ~> route ~> check {
-        response.status shouldBe StatusCodes.OK
+        response.status shouldBe StatusCodes.BadRequest
       }
     }
 
