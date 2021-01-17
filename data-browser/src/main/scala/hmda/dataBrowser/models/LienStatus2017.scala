@@ -2,7 +2,7 @@ package hmda.dataBrowser.models
 
 import enumeratum._
 import scala.collection.immutable
-
+// $COVERAGE-OFF$
 sealed abstract class LienStatus2017(override val entryName: String)
     extends EnumEntry
 
@@ -28,3 +28,4 @@ object LienStatus2017 extends Enum[LienStatus2017] {
       })
   }
 }
+// $COVERAGE-ON$

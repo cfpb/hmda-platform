@@ -1,7 +1,7 @@
 package hmda.dataBrowser.models
 
 import io.circe.{ Codec, Encoder }
-
+// $COVERAGE-OFF$
 object FilerInstitutionResponse2017 {
   implicit val codec: Codec[FilerInstitutionResponse2017] =
     Codec.forProduct1("institutions")(FilerInstitutionResponse2017.apply)(f => f.institutions)
@@ -26,3 +26,4 @@ object FilerInstitutionHttpResponseLatest {
     Encoder.forProduct2("institutions", "servedFrom")(f => (f.institutions, f.servedFrom))
 }
 case class FilerInstitutionHttpResponseLatest(institutions: Seq[FilerInformationLatest], servedFrom: ServedFrom)
+// $COVERAGE-ON$
