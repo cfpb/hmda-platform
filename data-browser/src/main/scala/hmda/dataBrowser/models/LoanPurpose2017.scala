@@ -1,8 +1,8 @@
 package hmda.dataBrowser.models
-
+// $COVERAGE-OFF$
 import enumeratum._
 import scala.collection.immutable
-// $COVERAGE-OFF$
+
 sealed abstract class LoanPurpose2017(override val entryName: String)
     extends EnumEntry
 

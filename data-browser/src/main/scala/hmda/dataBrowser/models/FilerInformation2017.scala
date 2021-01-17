@@ -1,8 +1,8 @@
 package hmda.dataBrowser.models
-
+// $COVERAGE-OFF$
 import io.circe.Codec
 import slick.jdbc.GetResult
-// $COVERAGE-OFF$
+
 case class FilerInformation2017(arid: String, respondentName: String, count: Int ,year: Int) extends FilerInformation
 
 object FilerInformation2017 {
