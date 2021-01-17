@@ -90,7 +90,8 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
           parameter('domain.as[String]) { domain =>
             val f = findByEmail(domain, year.toString)
             completeInstitutionsFuture(f, uri)
-          } ~ parameters(('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String])) {
+          } ~
+            parameters('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String])  {
               (domain, lei, respondentName, taxId) =>
                 val f = findByFields(lei, respondentName, taxId, domain, year.toString)
                 completeInstitutionsFuture(f, uri)
@@ -134,7 +135,8 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
             val f = findByEmailAnyYear(domain)
             completeInstitutionsFuture(f, uri)
           }
-        } ~ parameters(('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String])) {
+        } ~
+          parameters('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String]) {
             (domain, lei, respondentName, taxId) =>
               val f =
                 findByFields(lei, respondentName, taxId, domain, currentYear)
