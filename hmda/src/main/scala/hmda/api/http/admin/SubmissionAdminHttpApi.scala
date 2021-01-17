@@ -1,5 +1,5 @@
 package hmda.api.http.admin
-
+// $COVERAGE-OFF$
 import akka.NotUsed
 import akka.actor.typed.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
@@ -192,3 +192,4 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
     }
   }
 }
+// $COVERAGE-ON$

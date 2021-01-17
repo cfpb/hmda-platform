@@ -186,7 +186,7 @@ private class InstitutionAdminHttpApi(config: Config, sharding: ClusterSharding)
         complete(StatusCodes.NotFound)
     }
   }
-
+  // $COVERAGE-OFF$
   private def getAllInstitutions(lei: String, uri: Uri): Route = {
     val years = config.getString("hmda.rules.yearly-filing.years-allowed").split(",").toList
     val institutionsF: List[Future[Option[Institution]]] = years.map(year => (selectInstitution(sharding, lei, year.toInt) ? GetInstitution))
@@ -202,6 +202,7 @@ private class InstitutionAdminHttpApi(config: Config, sharding: ClusterSharding)
         complete((StatusCodes.InternalServerError, errorResponse))
     }
   }
+  // $COVERAGE-ON$
 
   private def validTaxIdFormat(taxIdOption: Option[String]): Boolean = {
     val taxId        = taxIdOption.getOrElse("")

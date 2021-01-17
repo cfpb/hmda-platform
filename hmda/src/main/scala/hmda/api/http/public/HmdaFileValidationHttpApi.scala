@@ -34,7 +34,7 @@ import scala.collection.immutable._
 import hmda.validation.filing.ValidationFlow._
 
 import scala.util.{ Failure, Success }
-
+// $COVERAGE-OFF$
 object HmdaFileValidationHttpApi {
   def create(implicit mat: Materializer): Route = new HmdaFileValidationHttpApi().hmdaValidationFileRoutes
 }
@@ -183,3 +183,4 @@ private class HmdaFileValidationHttpApi(implicit mat: Materializer) {
 }
 
 }
+// $COVERAGE-ON$

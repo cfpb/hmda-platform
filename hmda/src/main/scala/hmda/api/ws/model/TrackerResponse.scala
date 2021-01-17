@@ -1,5 +1,5 @@
 package hmda.api.ws.model
-
+// $COVERAGE-OFF$
 import hmda.model.filing.submission.SubmissionId
 import hmda.model.processing.state.{ ValidationProgress, ValidationProgressTrackerState }
 import io.circe.{ Encoder, Json }
@@ -31,3 +31,4 @@ object TrackerResponse {
   }
 }
 final case class TrackerResponse(submissionId: SubmissionId, state: ValidationProgressTrackerState)
+// $COVERAGE-ON$

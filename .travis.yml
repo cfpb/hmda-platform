@@ -21,7 +21,7 @@ install:
   - npm install newman
 
 jdk:
-- openjdk14
+- openjdk16
 
 script:
   - sbt ++$TRAVIS_SCALA_VERSION clean coverage test
