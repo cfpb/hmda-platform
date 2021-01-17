@@ -57,7 +57,7 @@ import scala.collection.immutable.ListMap
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
-
+// $COVERAGE-OFF$
 object HmdaValidationError
   extends HmdaTypedPersistentActor[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaValidationErrorState] with StrictLogging {
 
@@ -821,3 +821,4 @@ object HmdaValidationError
   def selectHmdaValidationError(sharding: ClusterSharding, submissionId: SubmissionId): EntityRef[SubmissionProcessingCommand] =
     sharding.entityRefFor(HmdaValidationError.typeKey, s"${HmdaValidationError.name}-$submissionId")
 }
+// $COVERAGE-ON$

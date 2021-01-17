@@ -16,7 +16,7 @@ import monix.eval.Task
 import monix.execution.Scheduler
 
 import scala.concurrent.Future
-
+// $COVERAGE-OFF$
 object SubmissionProcessor {
   sealed trait IncomingData
   object IncomingData {
@@ -132,3 +132,4 @@ object SubmissionProcessor {
         Task.unit
     }
 }
+// $COVERAGE-ON$

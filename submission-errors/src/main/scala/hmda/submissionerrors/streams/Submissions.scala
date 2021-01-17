@@ -12,7 +12,7 @@ import monix.eval.Task
 
 import scala.collection.SortedSet
 import scala.concurrent.Future
-
+// $COVERAGE-OFF$
 /**
  * Step 1: Obtain all the submissions for a given LEI and Period
  */
@@ -73,3 +73,4 @@ object Submissions {
       else acc
     }
 }
+// $COVERAGE-ON$

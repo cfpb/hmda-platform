@@ -2,7 +2,7 @@ package hmda.submissionerrors.repositories
 
 import com.github.tminglei.slickpg.{ ExPostgresProfile, PgArraySupport }
 import slick.basic.Capability
-
+// $COVERAGE-OFF$
 trait PostgresEnhancedProfile extends ExPostgresProfile with PgArraySupport {
   override protected def computeCapabilities: Set[Capability] =
     super.computeCapabilities + slick.jdbc.JdbcCapabilities.insertOrUpdate
@@ -16,3 +16,4 @@ trait PostgresEnhancedProfile extends ExPostgresProfile with PgArraySupport {
   }
 }
 object PostgresEnhancedProfile extends PostgresEnhancedProfile
+// $COVERAGE-ON$

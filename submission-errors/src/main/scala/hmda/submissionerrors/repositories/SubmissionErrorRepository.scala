@@ -2,7 +2,7 @@ package hmda.submissionerrors.repositories
 
 import hmda.model.filing.submission.SubmissionId
 import monix.eval.Task
-
+// $COVERAGE-OFF$
 trait SubmissionErrorRepository {
 
   /**
@@ -23,3 +23,4 @@ trait SubmissionErrorRepository {
    */
   def add(submissionId: SubmissionId, submissionStatus: Int, info: List[AddSubmissionError]): Task[Unit]
 }
+// $COVERAGE-ON$

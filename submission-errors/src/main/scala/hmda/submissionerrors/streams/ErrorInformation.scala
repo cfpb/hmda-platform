@@ -10,7 +10,7 @@ import hmda.query.HmdaQuery
 import monix.eval.Task
 
 import scala.concurrent.Future
-
+// $COVERAGE-OFF$
 /**
  * Step 2: Obtain all the errors for a given submission ID (LEI + Period + Sequence Number)
  */
@@ -70,3 +70,4 @@ object ErrorInformation {
       acc + (lineNumber -> updated)
     }
 }
+// $COVERAGE-ON$

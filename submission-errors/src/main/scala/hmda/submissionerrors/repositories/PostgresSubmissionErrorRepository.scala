@@ -6,7 +6,7 @@ import java.time.{ ZoneOffset, ZonedDateTime }
 import hmda.model.filing.submission.SubmissionId
 import monix.eval.Task
 import slick.basic.DatabaseConfig
-
+// $COVERAGE-OFF$
 final case class SubmissionErrorRecord(
                                         lei: String,
                                         period: String,
@@ -103,3 +103,4 @@ private[repositories] class PostgresSubmissionErrorRepository(config: DatabaseCo
       .void
   }
 }
+// $COVERAGE-ON$
