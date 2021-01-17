@@ -91,7 +91,7 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
             val f = findByEmail(domain, year.toString)
             completeInstitutionsFuture(f, uri)
           } ~
-            parameters(('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String])) {
+            parameters('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String])  {
               (domain, lei, respondentName, taxId) =>
                 val f = findByFields(lei, respondentName, taxId, domain, year.toString)
                 completeInstitutionsFuture(f, uri)
@@ -103,8 +103,8 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
   private val institutionHistoryPath =
     path("institutions" / Segment / "year" / IntNumber  / "history") { (lei, year) =>
       (extractUri & get) { uri =>
-          val f = institutionNoteHistoryRepository.findInstitutionHistory( year.toString,lei)
-          completeInstitutionsNoteHistoryFuture(f, uri)
+        val f = institutionNoteHistoryRepository.findInstitutionHistory( year.toString,lei)
+        completeInstitutionsNoteHistoryFuture(f, uri)
       }
     }
 
@@ -126,24 +126,24 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
     }
 
   private val institutionByDomainDefaultPath =
-  path("institutions") {
-    (extractUri & get) { uri =>
-      parameter('domain.as[String]) { domain =>
-        if (checkIfPublicDomain(domain)) {
-          returnNotFoundError(uri)
-        } else {
-        val f = findByEmailAnyYear(domain)
-        completeInstitutionsFuture(f, uri)
-        }
-      } ~
-        parameters(('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String])) {
-          (domain, lei, respondentName, taxId) =>
-            val f =
-              findByFields(lei, respondentName, taxId, domain, currentYear)
+    path("institutions") {
+      (extractUri & get) { uri =>
+        parameter('domain.as[String]) { domain =>
+          if (checkIfPublicDomain(domain)) {
+            returnNotFoundError(uri)
+          } else {
+            val f = findByEmailAnyYear(domain)
             completeInstitutionsFuture(f, uri)
-        }
+          }
+        } ~
+          parameters('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String]) {
+            (domain, lei, respondentName, taxId) =>
+              val f =
+                findByFields(lei, respondentName, taxId, domain, currentYear)
+              completeInstitutionsFuture(f, uri)
+          }
+      }
     }
-  }
 
   private def completeInstitutionsFuture(f: Future[Seq[Institution]], uri: Uri): Route =
     onComplete(f) {

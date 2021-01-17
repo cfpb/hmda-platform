@@ -95,7 +95,7 @@ trait DataBrowserDirectives extends Settings {
       .map(ByteString(_))
       .via(csvStreamingSupport.framingRenderer)
   }
-
+  // $COVERAGE-OFF$
   def csvSource2017(s: Source[ModifiedLarEntity2017, NotUsed]): Source[ByteString, NotUsed] = {
     val header  = Source.single(ModifiedLarEntity2017.header)
     val content = s.map(_.toCsv)
@@ -104,6 +104,7 @@ trait DataBrowserDirectives extends Settings {
       .map(ByteString(_))
       .via(csvStreamingSupport.framingRenderer)
   }
+  // $COVERAGE-ON$
 
   def contentDispositionHeader(queries: List[QueryField], delimiter: Delimiter)(route: Route): Route = {
     val queryName =
@@ -126,6 +127,7 @@ trait DataBrowserDirectives extends Settings {
       .via(csvStreamingSupport.framingRenderer)
   }
 
+  // $COVERAGE-OFF$
   def pipeSource2017(s: Source[ModifiedLarEntity2017, NotUsed]): Source[ByteString, NotUsed] = {
     val headerPipe  = Source.single(ModifiedLarEntity2017.headerPipe)
     val contentPipe = s.map(_.toPipe)
@@ -134,6 +136,7 @@ trait DataBrowserDirectives extends Settings {
       .map(ByteString(_))
       .via(csvStreamingSupport.framingRenderer)
   }
+  // $COVERAGE-ON$
 
   private def extractMsaMds: Directive1[Option[QueryField]] =
     parameters("msamds".as(CsvSeq[Int]) ? Nil).flatMap {
@@ -148,13 +151,14 @@ trait DataBrowserDirectives extends Settings {
       case xs =>
         provide(Option(QueryField(name = "lei", xs.map(_.toString), dbName = "lei", isAllSelected = false)))
     }
-
+  // $COVERAGE-OFF$
   private def extractARIDs: Directive1[Option[QueryField]] =
     parameters("arids".as(CsvSeq[String]) ? Nil).flatMap {
       case Nil => provide(None)
       case xs =>
         provide(Option(QueryField(name = "arid", xs.map(_.toString), dbName = "arid", isAllSelected = false)))
     }
+  // $COVERAGE-ON$
 
   private def extractYears: Directive1[Option[QueryField]] =
     parameters("years".as(CsvSeq[Int]) ? Nil).flatMap {
@@ -429,7 +433,7 @@ trait DataBrowserDirectives extends Settings {
           provide(None)
       }
     }
-
+  // $COVERAGE-OFF$
   private def extractPropertyType: Directive1[Option[QueryField]] =
     parameters("property_types".as(CsvSeq[String]) ? Nil).flatMap { rawPropertyTypes =>
       validateLoanType(rawPropertyTypes) match {
@@ -447,6 +451,7 @@ trait DataBrowserDirectives extends Settings {
           provide(None)
       }
     }
+  // $COVERAGE-ON$
 
   def extractNonMandatoryQueryFields(year: String)(innerRoute: QueryFields => Route): Route =
     year match {
@@ -497,6 +502,7 @@ trait DataBrowserDirectives extends Settings {
         } else innerRoute(QueryFields(year, filteredfields))
     }
 
+  // $COVERAGE-OFF$
   private def extractNonMandatoryQueryFields2017(year: String)(innerRoute: QueryFields => Route): Route =
     (extractActions & extractLoanPurpose(year) & extractLienStatus(year) & extractPropertyType & extractLoanType) {
       (
@@ -519,7 +525,7 @@ trait DataBrowserDirectives extends Settings {
           complete((BadRequest, TooManyFilterCriterias()))
         } else innerRoute(QueryFields(year, filteredfields))
     }
-
+  // $COVERAGE-ON$
   def extractCountFields(innerRoute: QueryFields => Route): Route =
     (extractYears) { (years) =>
       (extractMsaMds & extractStates(years.head.values.head)) { (msaMds, states) =>
@@ -562,6 +568,7 @@ trait DataBrowserDirectives extends Settings {
       }
     }
 
+  // $COVERAGE-OFF$
   def extractMsaAndStateAndCountyAndLEIBrowserFields(year: String, innerRoute: QueryFields => Route): Route =
     (extractMsaMds & extractStates(year) & extractCounties(year) & extractLEIs ) { (msaMds, states, counties, leis) =>
       if ((msaMds.nonEmpty && states.nonEmpty && counties.nonEmpty && leis.nonEmpty) || (msaMds.isEmpty && states.isEmpty && counties.isEmpty && leis.isEmpty  )) {
@@ -579,7 +586,7 @@ trait DataBrowserDirectives extends Settings {
       } else
         innerRoute(QueryFields(year, List(msaMds, states, counties, arids).flatten))
     }
-
+  // $COVERAGE-ON
   def extractNationwideMandatoryYears(innerRoute: QueryFields => Route): Route =
     (extractYears) { (years) =>
       if (years.nonEmpty)

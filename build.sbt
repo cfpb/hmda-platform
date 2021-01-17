@@ -47,7 +47,7 @@ lazy val akkaPersistenceDeps =
   )
 
 lazy val akkaHttpDeps =
-  Seq(akkaHttp, akkaHttp2, akkaHttpTestkit, akkaStreamsTestKit, akkaHttpCirce)
+  Seq(akkaHttp, akkaHttp2, akkaHttpTestkit, akkaStreamsTestKit, akkaHttpCirce, akkaHttpXml)
 lazy val circeDeps      = Seq(circe, circeGeneric, circeParser)
 lazy val enumeratumDeps = Seq(enumeratum, enumeratumCirce)
 
@@ -128,7 +128,8 @@ lazy val `hmda-platform` = (project in file("hmda"))
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
-      }
+      },
+      Revolver.enableDebugging(5006)
     ),
     dockerSettings,
     packageSettings

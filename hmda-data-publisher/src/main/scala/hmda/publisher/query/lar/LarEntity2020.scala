@@ -181,7 +181,7 @@ case class LarPartSix2020(
       s"$nmls|$aus1|$aus2|$aus3|$aus4|$aus5|$otheraus|$aus1Result|$aus2Result|$aus3Result|$aus4Result|$aus5Result|" +
       s"$otherAusResult|$reverseMortgage|$lineOfCredits|$businessOrCommercial"
 }
-
+// $COVERAGE-OFF$
 case class LarPartSeven2020(
                              conformingLoanLimit: String = "",
                              ethnicityCategorization: String = "",
@@ -201,6 +201,7 @@ case class LarPartSeven2020(
     s"|$conformingLoanLimit|$tractPopulation|$tractMinorityPopulationPercent|$tractMedianIncome|$tractToMsaIncomePercent|$tractOccupiedUnits" +
       s"|$tractOneToFourFamilyUnits|$tractMedianAge|"
 }
+// $COVERAGE-ON$
 
 
 

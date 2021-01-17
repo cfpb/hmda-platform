@@ -2,7 +2,6 @@ package hmda.rateLimit
 
 import akka.actor.{ ActorSystem, Props }
 import akka.event.Logging
-import akka.http.scaladsl.UseHttp2.Always
 import akka.http.scaladsl.model.{ HttpRequest, HttpResponse }
 import akka.http.scaladsl.{ Http, HttpConnectionContext }
 import akka.pattern.pipe

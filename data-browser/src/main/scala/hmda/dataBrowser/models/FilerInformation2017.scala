@@ -1,5 +1,5 @@
 package hmda.dataBrowser.models
-
+// $COVERAGE-OFF$
 import io.circe.Codec
 import slick.jdbc.GetResult
 
@@ -11,3 +11,4 @@ object FilerInformation2017 {
   implicit val codec: Codec[FilerInformation2017] =
     Codec.forProduct4("arid", "name", "count","period")(FilerInformation2017.apply)(f => (f.arid, f.respondentName, f.count, f.year))
 }
+// $COVERAGE-ON$

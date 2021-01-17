@@ -4,7 +4,7 @@ import hmda.model.filing.ts.TransmittalSheet
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.ts.syntactical.{ S300, S303, S302 }
 import hmda.validation.rules.ts.validity._
-
+// $COVERAGE-OFF$
 private[engine] object TsEngine2021Q extends ValidationEngine[TransmittalSheet] {
 
   override def syntacticalChecks(ctx: ValidationContext) = Vector(
@@ -27,3 +27,4 @@ private[engine] object TsEngine2021Q extends ValidationEngine[TransmittalSheet] 
   )
 
 }
+// $COVERAGE-ON$

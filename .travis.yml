@@ -24,7 +24,9 @@ jdk:
 - openjdk14
 
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION -batch hmda-platform/docker:publishLocal
+  - sbt ++$TRAVIS_SCALA_VERSION clean coverage test
+  - sbt ++$TRAVIS_SCALA_VERSION coverageReport
+  - sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
 
   # Trick to avoid unnecessary cache updates
   - find $HOME/.sbt -name "*.lock" | xargs rm

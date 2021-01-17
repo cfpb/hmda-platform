@@ -1,5 +1,5 @@
 package hmda.api.http.admin
-
+// $COVERAGE-OFF$
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
@@ -68,3 +68,4 @@ private class PublishAdminHttpApi(sharding: ClusterSharding, config: Config)(imp
         _ <- produceRecord(topic, lei, submissionId, stringKafkaProducer)
         } yield Done
 }
+// $COVERAGE-ON$

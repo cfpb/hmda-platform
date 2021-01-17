@@ -1,5 +1,5 @@
 package hmda.publisher.validation
-
+// $COVERAGE-OFF$
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
@@ -34,3 +34,4 @@ class LeiCountCheck(dbConfig: DatabaseConfig[JdbcProfile], tsData: TsData, larDa
   }
 
 }
+// $COVERAGE-ON$

@@ -1,5 +1,5 @@
 package hmda.api.ws
-
+// $COVERAGE-OFF$
 import akka.Done
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
@@ -168,3 +168,4 @@ object WebSocketProgressTracker {
       }
     }
 }
+// $COVERAGE-ON$
