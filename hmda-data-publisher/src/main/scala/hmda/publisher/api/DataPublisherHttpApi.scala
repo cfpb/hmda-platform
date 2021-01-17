@@ -19,13 +19,13 @@ private class DataPublisherHttpApi(
     path("trigger" / Segment) { schedulerName =>
       post {
         respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-        Schedules.withNameOption(schedulerName) match {
-          case Some(schedule) =>
-            triggerSchedule(schedule)
-            complete(202 -> s"Schedule ${schedulerName} has been triggered")
-          case None =>
-            complete(404 -> s"Scheduler ${schedulerName} not found. Available: ${Schedules.values.map(_.entryName).mkString(", ")}")
-        }
+          Schedules.withNameOption(schedulerName) match {
+            case Some(schedule) =>
+              triggerSchedule(schedule)
+              complete(202 -> s"Schedule ${schedulerName} has been triggered")
+            case None =>
+              complete(404 -> s"Scheduler ${schedulerName} not found. Available: ${Schedules.values.map(_.entryName).mkString(", ")}")
+          }
         }
       }
     }
@@ -35,6 +35,7 @@ private class DataPublisherHttpApi(
     val receiver = msg match {
       case Schedules.PanelScheduler2018        => panelScheduler
       case Schedules.PanelScheduler2019        => panelScheduler
+      case Schedules.PanelScheduler2020        => panelScheduler
       case Schedules.LarPublicScheduler2018    => larPublicScheduler
       case Schedules.LarPublicScheduler2019    => larPublicScheduler
       case Schedules.LarScheduler2018          => larScheduler
