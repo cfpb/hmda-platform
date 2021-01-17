@@ -1,7 +1,7 @@
 package hmda.dataBrowser.models
 
 import slick.jdbc.GetResult
-
+// $COVERAGE-OFF$
 case class ModifiedLarEntity2017(
     id: Int,
     respondentId: String,
@@ -118,3 +118,4 @@ object ModifiedLarEntity2017 {
       s"$filingYear|$respondentId|$agency|$loanType|$propertyType|$loanPurpose|$occupancy|$loanAmount|$preapproval|$actionTakenType|$msaMd|$state|$county|$tract|$ethnicityApplicant|$ethnicityCoApplicant|$raceApplicant1|$raceApplicant2|$raceApplicant3|$raceApplicant4|$raceApplicant5|$coRaceApplicant1|$coRaceApplicant2|$coRaceApplicant3|$coRaceApplicant4|$coRaceApplicant5|$sexApplicant|$sexCoApplicant|$income|$purchaserType|$denialReason1|$denialReason2|$denialReason3|$rateSpread|$hoepaStatus|$lienStatus|$population|$minorityPopulationPercent|$ffiecMedFamIncome|$tractToMsaIncomePct|$ownerOccupiedUnits|$oneToFourFamUnits"
   }
 }
+// $COVERAGE-ON$
