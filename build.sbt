@@ -128,7 +128,8 @@ lazy val `hmda-platform` = (project in file("hmda"))
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
-      }
+      },
+      Revolver.enableDebugging(5006)
     ),
     dockerSettings,
     packageSettings
