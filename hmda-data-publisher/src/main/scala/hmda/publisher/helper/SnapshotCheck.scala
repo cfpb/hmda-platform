@@ -1,5 +1,5 @@
 package hmda.publisher.helper
-
+// $COVERAGE-OFF$
 import com.typesafe.config.ConfigFactory
 
 object SnapshotCheck {
@@ -25,3 +25,4 @@ object SnapshotCheck {
     }
   }
 }
+// $COVERAGE-ON$

@@ -1,5 +1,5 @@
 package hmda.publisher.validation
-
+// $COVERAGE-OFF$
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpEntity, HttpMethods, HttpRequest}
@@ -40,3 +40,5 @@ class MessageReporter(mattermostUrl: String)(implicit as: ActorSystem) extends L
         )
     }
 }
+
+// $COVERAGE-ON$

@@ -22,7 +22,7 @@ import hmda.util.BankFilterUtils._
 import slick.basic.DatabasePublisher
 
 import scala.util.{Failure, Success}
-
+// $COVERAGE-OFF$
 class LarPublicScheduler
   extends HmdaActor
     with PublisherComponent2018
@@ -128,3 +128,4 @@ class LarPublicScheduler
   }
 
 }
+// $COVERAGE-ON$

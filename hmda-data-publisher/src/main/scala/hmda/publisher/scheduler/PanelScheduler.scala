@@ -1,5 +1,5 @@
 package hmda.publisher.scheduler
-
+// $COVERAGE-OFF$
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -181,3 +181,4 @@ class PanelScheduler extends HmdaActor with PublisherComponent2018 with Publishe
     )
   }
 }
+// $COVERAGE-ON$

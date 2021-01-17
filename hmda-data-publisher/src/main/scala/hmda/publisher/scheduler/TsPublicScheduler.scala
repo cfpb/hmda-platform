@@ -1,5 +1,5 @@
 package hmda.publisher.scheduler
-
+// $COVERAGE-OFF$
 import akka.stream.Materializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3._
@@ -125,3 +125,4 @@ class TsPublicScheduler
     }
   }
 }
+// $COVERAGE-ON$

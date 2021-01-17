@@ -1,5 +1,5 @@
 package hmda.publisher.scheduler
-
+// $COVERAGE-OFF$
 import java.time.{Clock, LocalDateTime}
 import java.time.format.DateTimeFormatter
 
@@ -193,3 +193,4 @@ class TsScheduler
   }
 
 }
+// $COVERAGE-ON$

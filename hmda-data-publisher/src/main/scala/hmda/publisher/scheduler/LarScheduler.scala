@@ -26,7 +26,7 @@ import hmda.util.BankFilterUtils._
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-
+// $COVERAGE-OFF$
 class LarScheduler
   extends HmdaActor
     with PublisherComponent2018
@@ -248,3 +248,4 @@ class LarScheduler
 object LarScheduler {
   val entriesCountMetaName = "entries-count"
 }
+// $COVERAGE-ON$

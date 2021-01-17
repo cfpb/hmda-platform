@@ -1,5 +1,5 @@
 package hmda.publisher.helper
-
+// $COVERAGE-OFF$
 import java.time.Instant
 
 import akka.stream.Materializer
@@ -43,3 +43,4 @@ object S3Archiver extends LazyLogging{
 
     } yield ()
 }
+// $COVERAGE-ON$
