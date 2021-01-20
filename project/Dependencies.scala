@@ -77,5 +77,8 @@ object Dependencies {
   lazy val awsSesSdk             = "com.amazonaws"             % "aws-java-sdk-ses"            % Version.awsSesSdk exclude ("commons-logging", "commons-logging")
   lazy val zeroAllocationHashing = "net.openhft"               % "zero-allocation-hashing"     % Version.zeroAllocation
   lazy val cormorant             = "io.chrisdavenport"         %% "cormorant-parser"           % Version.cormorant
+  lazy val cormorantGeneric      = "io.chrisdavenport"          %% "cormorant-generic"          % Version.cormorant
   lazy val alpakkaFile           = "com.lightbend.akka"        %% "akka-stream-alpakka-file"   % Version.alpkakkaFile
+  lazy val scalacheckShapeless   = "com.github.alexarchambault" %% "scalacheck-shapeless_1.14"  % Version.scalacheckShapeless % Test
+  lazy val diffx                 = "com.softwaremill.diffx"     %% "diffx-core"                 % Version.diffx % Test
 }
