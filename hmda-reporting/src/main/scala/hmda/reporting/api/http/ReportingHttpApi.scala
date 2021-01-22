@@ -62,6 +62,20 @@ private class ReportingHttpApi(config: Config)(implicit ec: ExecutionContext) ex
                   )
                   .toSet
               )
+          case 2020 =>
+            institutionRepository2020
+              .getFilteredFilers(bankFilterList)
+              .map(sheets =>
+                sheets
+                  .map(instituionEntity =>
+                    HmdaFiler(
+                      instituionEntity.lei.toUpperCase,
+                      instituionEntity.respondentName,
+                      instituionEntity.activityYear.toString
+                    )
+                  )
+                  .toSet
+              )
           case _ => Future(Set(HmdaFiler("", "", "")))
         }
 
