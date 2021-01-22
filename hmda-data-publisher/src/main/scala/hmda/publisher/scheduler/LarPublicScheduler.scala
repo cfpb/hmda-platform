@@ -1,6 +1,8 @@
 package hmda.publisher.scheduler
 
-import akka.NotUsed
+import java.time.Instant
+
+import akka.actor.typed.ActorRef
 import akka.stream.Materializer
 import akka.stream.alpakka.file.ArchiveMetadata
 import akka.stream.alpakka.file.scaladsl.Archive
@@ -12,18 +14,23 @@ import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.actor.HmdaActor
 import hmda.publisher.helper._
+import hmda.publisher.qa.{QAFilePersistor, QAFileSpec, QARepository}
 import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020}
 import hmda.publisher.query.lar.ModifiedLarEntityImpl
+import hmda.publisher.scheduler.schedules.Schedule
 import hmda.publisher.scheduler.schedules.Schedules.{LarPublicScheduler2018, LarPublicScheduler2019}
+import hmda.publisher.util.PublishingReporter
+import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 import hmda.publisher.validation.PublishingGuard
 import hmda.publisher.validation.PublishingGuard.{Period, Scope}
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
 import slick.basic.DatabasePublisher
 
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
-// $COVERAGE-OFF$
-class LarPublicScheduler
+
+class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFilePersistor: QAFilePersistor)
   extends HmdaActor
     with PublisherComponent2018
     with PublisherComponent2019
@@ -37,7 +44,9 @@ class LarPublicScheduler
   implicit val materializer = Materializer(context)
 
   def mlarRepository2018               = new ModifiedLarRepository2018(dbConfig)
+  def qaMlarRepository2018               = new QAModifiedLarRepository2018(dbConfig)
   def mlarRepository2019               = new ModifiedLarRepository2019(dbConfig)
+  def qaMlarRepository2019              = new QAModifiedLarRepository2019(dbConfig)
   val publishingGuard: PublishingGuard = PublishingGuard.create(this)(context.system)
 
   val s3Settings = S3Settings(context.system)
@@ -57,45 +66,44 @@ class LarPublicScheduler
     QuartzSchedulerExtension(context.system).cancelJob("LarPublicScheduler2019")
   }
   override def receive: Receive = {
-    case LarPublicScheduler2018 =>
+    case schedule @ LarPublicScheduler2018 =>
       publishingGuard.runIfDataIsValid(Period.y2018, Scope.Public) {
         val fileName         = "2018_lar.txt"
         val zipDirectoryName = "2018_lar.zip"
         val s3Path           = s"$environmentPublic/dynamic-data/2018/"
         val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
-        if (SnapshotCheck.snapshotActive) {
-          larPublicStream("2018", SnapshotCheck.snapshotBucket, fullFilePath, fileName)
-        } else {
-          larPublicStream("2018", bucketPublic, fullFilePath, fileName)
-        }
+        val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
+
+        for {
+          result <- larPublicStream(mlarRepository2018.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, schedule)
+          _ <- persistFileForQa(result.key, result.bucket, ModifiedLarEntityImpl.parseFromPSVUnsafe, qaMlarRepository2018)
+        } yield ()
+
+
       }
 
-    case LarPublicScheduler2019 =>
+    case schedule @ LarPublicScheduler2019 =>
       publishingGuard.runIfDataIsValid(Period.y2019, Scope.Public) {
         val fileName         = "2019_lar.txt"
-        val zipDirectoryName = "2019_lar.zip"
+        val zipDirectoryName = "2018_lar.zip"
         val s3Path           = s"$environmentPublic/dynamic-data/2019/"
         val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
-        if (SnapshotCheck.snapshotActive) {
-          larPublicStream("2019", SnapshotCheck.snapshotBucket, fullFilePath, fileName)
-        } else {
-          larPublicStream("2019", bucketPublic, fullFilePath, fileName)
-        }
-      }
+        val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
 
+        for {
+          result <- larPublicStream(mlarRepository2019.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, schedule)
+          _ <- persistFileForQa(result.key, result.bucket, ModifiedLarEntityImpl.parseFromPSVUnsafe, qaMlarRepository2019)
+        } yield ()
+      }
   }
 
-  private def larPublicStream(year: String, bucket: String, key: String, fileName: String): Unit = {
-
-    val allResultsPublisher: DatabasePublisher[ModifiedLarEntityImpl] =
-      year match {
-        case "2018" => mlarRepository2018.getAllLARs(getFilterList())
-        case "2019" => mlarRepository2019.getAllLARs(getFilterList())
-        case _      => throw new IllegalArgumentException(s"Unknown year selector value:  [$year]")
-      }
-
-    val allResultsSource: Source[ModifiedLarEntityImpl, NotUsed] =
-      Source.fromPublisher(allResultsPublisher)
+  private def larPublicStream(
+                               data: DatabasePublisher[ModifiedLarEntityImpl],
+                               bucket: String,
+                               key: String,
+                               fileName: String,
+                               schedule: Schedule
+                             ): Future[MultipartUploadResult] = {
 
     //PSV Sync
     val s3SinkPSV = S3
@@ -103,12 +111,9 @@ class LarPublicScheduler
       .withAttributes(S3Attributes.settings(s3Settings))
 
     val fileStream: Source[ByteString, Any] =
-      allResultsSource.zipWithIndex
-        .map(mlarEntity =>
-          if (mlarEntity._2 == 0)
-            MLARHeader.concat(mlarEntity._1.toPublicPSV) + "\n"
-          else mlarEntity._1.toPublicPSV + "\n"
-        )
+      Source.fromPublisher(data)
+        .map(_.toPublicPSV + "\n")
+        .prepend(Source.single(MLARHeader))
         .map(s => ByteString(s))
 
     val zipStream = Source(List((ArchiveMetadata(fileName), fileStream)))
@@ -119,13 +124,35 @@ class LarPublicScheduler
       uploadResult <- S3Utils.uploadWithRetry(source, s3SinkPSV)
     } yield uploadResult
 
+    def sendPublishingNotif(error: Option[String]): Unit = {
+      val status = error match {
+        case Some(value) => FilePublishingCompleted.Status.Error(value)
+        case None        => FilePublishingCompleted.Status.Success
+      }
+      publishingReporter ! FilePublishingCompleted(schedule, key, None, Instant.now(), status)
+    }
+
     resultsPSV onComplete {
       case Success(result) =>
+        sendPublishingNotif(None)
         log.info("Pushed to S3: " + s"$bucket/$key" + ".")
       case Failure(t) =>
+        sendPublishingNotif(Some(t.getMessage))
         log.info("An error has occurred with: " + key + "; Getting Public LAR Data in Future: " + t.getMessage)
     }
+    resultsPSV
+  }
+
+  private def persistFileForQa[T](s3ObjKey: String, bucket: String, parseLine: String => T, repository: QARepository[T]) = {
+    val spec = QAFileSpec(
+      bucket = bucket,
+      key = s3ObjKey,
+      s3Settings = s3Settings,
+      withHeaderLine = true,
+      parseLine = parseLine,
+      repository = repository
+    )
+    qaFilePersistor.fetchAndPersist(spec)
   }
 
 }
-// $COVERAGE-ON$

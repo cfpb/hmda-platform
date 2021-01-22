@@ -1,5 +1,6 @@
 package hmda.publisher.scheduler
-// $COVERAGE-OFF$
+
+import akka.actor.typed.ActorRef
 import akka.stream.Materializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3._
@@ -8,21 +9,26 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.{PrivateAWSConfigLoader, PublicAWSConfigLoader, S3Archiver, S3Utils, SnapshotCheck, TSHeader}
-import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020}
-import hmda.publisher.scheduler.schedules.Schedules.{TsPublicScheduler2018, TsPublicScheduler2019}
+import hmda.publisher.helper.{ PrivateAWSConfigLoader, PublicAWSConfigLoader, S3Archiver, S3Utils, SnapshotCheck, TSHeader }
+import hmda.publisher.query.component.{ PublisherComponent2018, PublisherComponent2019, PublisherComponent2020 }
+import hmda.publisher.scheduler.schedules.Schedules.{ TsPublicScheduler2018, TsPublicScheduler2019 }
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.ts._
 import hmda.util.BankFilterUtils._
 import akka.stream.alpakka.file.scaladsl.Archive
 import akka.stream.alpakka.file.ArchiveMetadata
+import hmda.publisher.qa.{ QAFilePersistor, QAFileSpec, QARepository }
+import hmda.publisher.scheduler.schedules.Schedule
+import hmda.publisher.util.PublishingReporter
 import hmda.publisher.validation.PublishingGuard
-import hmda.publisher.validation.PublishingGuard.{Period, Scope}
+import hmda.publisher.validation.PublishingGuard.{ Period, Scope }
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
+import java.time.Instant
+import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 
-class TsPublicScheduler
+class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFilePersistor: QAFilePersistor)
   extends HmdaActor
     with PublisherComponent2018
     with PublisherComponent2019
@@ -36,6 +42,8 @@ class TsPublicScheduler
   def tsRepository2018                 = new TransmittalSheetRepository2018(dbConfig)
   def tsRepository2019                 = new TransmittalSheetRepository2019(dbConfig)
   val publishingGuard: PublishingGuard = PublishingGuard.create(this)(context.system)
+  val qaRepo2018                       = createPublicQaTsRepository2018(dbConfig)
+  val qaRepo2019                       = createPublicQaTsRepository2019(dbConfig)
 
   val s3Settings =
     S3Settings(context.system)
@@ -58,33 +66,37 @@ class TsPublicScheduler
   }
   override def receive: Receive = {
 
-    case TsPublicScheduler2018 =>
+    case schedule @ TsPublicScheduler2018 =>
       publishingGuard.runIfDataIsValid(Period.y2018, Scope.Public) {
         val fileName         = "2018_ts.txt"
         val zipDirectoryName = "2018_ts.zip"
         val s3Path           = s"$environmentPublic/dynamic-data/2018/"
         val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
-        if (SnapshotCheck.snapshotActive) {
-          tsPublicStream("2018", SnapshotCheck.snapshotBucket, fullFilePath, fileName)
-        } else {
-          tsPublicStream("2018", bucketPublic, fullFilePath, fileName)
-        }
+        val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
+
+        val result = tsPublicStream("2018", bucket, fullFilePath, fileName, schedule)
+        result.foreach(r => persistFileForQa(r.key, r.bucket, qaRepo2018))
       }
 
-    case TsPublicScheduler2019 =>
+    case schedule @ TsPublicScheduler2019 =>
       publishingGuard.runIfDataIsValid(Period.y2019, Scope.Public) {
         val fileName         = "2019_ts.txt"
         val zipDirectoryName = "2019_ts.zip"
         val s3Path           = s"$environmentPublic/dynamic-data/2019/"
         val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
-        if (SnapshotCheck.snapshotActive) {
-          tsPublicStream("2019", SnapshotCheck.snapshotBucket, fullFilePath, fileName)
-        } else {
-          tsPublicStream("2019", bucketPublic, fullFilePath, fileName)
-        }
+        val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
+
+        val result = tsPublicStream("2019", bucket, fullFilePath, fileName, schedule)
+        result.foreach(r => persistFileForQa(r.key, r.bucket, qaRepo2019))
       }
   }
-  private def tsPublicStream(year: String, bucket: String, key: String, fileName: String) = {
+  private def tsPublicStream(
+                              year: String,
+                              bucket: String,
+                              key: String,
+                              fileName: String,
+                              schedule: Schedule
+                            ): Future[MultipartUploadResult] = {
 
     val s3SinkPSV =
       S3.multipartUpload(bucket, key).withAttributes(S3Attributes.settings(s3Settings))
@@ -100,11 +112,8 @@ class TsPublicScheduler
     val fileStream: Source[ByteString, Any] = Source
       .future(allResults)
       .mapConcat(seek => seek.toList)
-      .zipWithIndex
-      .map(transmittalSheet =>
-        if (transmittalSheet._2 == 0) TSHeader.concat(transmittalSheet._1.toPublicPSV) + "\n"
-        else transmittalSheet._1.toPublicPSV + "\n"
-      )
+      .map(_.toPublicPSV + "\n")
+      .prepend(Source.single(TSHeader))
       .map(s => ByteString(s))
 
     val zipStream = Source(
@@ -113,16 +122,31 @@ class TsPublicScheduler
 
     val resultsPSV = for {
       _            <- S3Archiver.archiveFileIfExists(bucket, key, bucketPrivate, s3Settings)
-      bytesStream = zipStream.via(Archive.zip())
+      bytesStream  = zipStream.via(Archive.zip())
       uploadResult <- S3Utils.uploadWithRetry(bytesStream, s3SinkPSV)
     } yield uploadResult
 
     resultsPSV onComplete {
       case Success(result) =>
+        publishingReporter ! FilePublishingCompleted(schedule, key, None, Instant.now, FilePublishingCompleted.Status.Success)
         log.info("Pushed to S3: " + s"$bucket/$key" + ".")
       case Failure(t) =>
+        publishingReporter ! FilePublishingCompleted(schedule, key, None, Instant.now, FilePublishingCompleted.Status.Error(t.getMessage))
         log.info("An error has occurred with: " + key + "; Getting Public TS Data in Future: " + t.getMessage)
     }
+    resultsPSV
   }
+
+  private def persistFileForQa(s3ObjKey: String, bucket: String, repository: QARepository[TransmittalSheetEntity]) = {
+    val spec = QAFileSpec(
+      bucket = bucket,
+      key = s3ObjKey,
+      s3Settings = s3Settings,
+      withHeaderLine = true,
+      parseLine = TransmittalSheetEntity.PublicParser.parseFromPSVUnsafe,
+      repository = repository
+    )
+    qaFilePersistor.fetchAndPersist(spec)
+  }
+
 }
-// $COVERAGE-ON$

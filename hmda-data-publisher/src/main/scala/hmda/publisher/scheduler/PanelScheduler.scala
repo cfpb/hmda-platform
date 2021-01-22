@@ -1,8 +1,10 @@
 package hmda.publisher.scheduler
-// $COVERAGE-OFF$
+
 import java.time.LocalDateTime
+import java.time.Instant
 import java.time.format.DateTimeFormatter
 
+import akka.actor.typed.ActorRef
 import akka.stream.Materializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.S3
@@ -13,16 +15,26 @@ import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.publisher.helper.{PrivateAWSConfigLoader, S3Utils, SnapshotCheck}
+import hmda.publisher.qa.{QAFilePersistor, QAFileSpec, QARepository}
 import hmda.publisher.query.component.{InstitutionEmailComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020}
 import hmda.publisher.query.panel.{InstitutionAltEntity, InstitutionEmailEntity, InstitutionEntity}
+import hmda.publisher.scheduler.schedules.Schedule
 import hmda.publisher.scheduler.schedules.Schedules.{PanelScheduler2018, PanelScheduler2019, PanelScheduler2020}
+import hmda.publisher.util.PublishingReporter
+import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
-class PanelScheduler extends HmdaActor with PublisherComponent2018 with PublisherComponent2019 with PublisherComponent2020 with InstitutionEmailComponent with PrivateAWSConfigLoader {
+class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFilePersistor: QAFilePersistor)
+  extends HmdaActor
+    with PublisherComponent2018
+    with PublisherComponent2019
+    with PublisherComponent2020
+    with InstitutionEmailComponent
+    with PrivateAWSConfigLoader {
 
   implicit val ec: ExecutionContext       = context.system.dispatcher
   implicit val materializer: Materializer = Materializer(context)
@@ -32,10 +44,13 @@ class PanelScheduler extends HmdaActor with PublisherComponent2018 with Publishe
   def institutionRepository2020           = new InstitutionRepository2020(dbConfig)
 
   def emailRepository                     = new InstitutionEmailsRepository2018(dbConfig)
+  def qaRepository2018                    = createQaPanelRepository2018(dbConfig)
+  def qaRepository2019                    = createQaPanelRepository2019(dbConfig)
+  def qaRepository2020                    = createQaPanelRepository2020(dbConfig)
+
 
   val awsConfig =
     ConfigFactory.load("application.conf").getConfig("private-aws")
-
 
   val s3Settings = S3Settings(context.system)
     .withBufferType(MemoryBufferType)
@@ -49,14 +64,11 @@ class PanelScheduler extends HmdaActor with PublisherComponent2018 with Publishe
         .schedule("PanelScheduler2018", self, PanelScheduler2018)
       QuartzSchedulerExtension(context.system)
         .schedule("PanelScheduler2019", self, PanelScheduler2019)
-      QuartzSchedulerExtension(context.system)
-        .schedule("PanelScheduler2020", self, PanelScheduler2020)
     } catch { case e: Throwable => println(e) }
 
   override def postStop(): Unit = {
     QuartzSchedulerExtension(context.system).cancelJob("PanelScheduler2018")
     QuartzSchedulerExtension(context.system).cancelJob("PanelScheduler2019")
-    QuartzSchedulerExtension(context.system).cancelJob("PanelScheduler2020")
 
   }
 
@@ -80,8 +92,8 @@ class PanelScheduler extends HmdaActor with PublisherComponent2018 with Publishe
     val formattedDate = fullDate.format(now)
     val fileName      = s"$formattedDate" + "2018_panel.txt"
 
-    val s3Path = s"$environmentPrivate/panel/"
-    val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
+    val s3Path       = s"$environmentPrivate/panel/"
+    val fullFilePath = SnapshotCheck.pathSelector(s3Path, fileName)
 
     val s3Sink =
       S3.multipartUpload(bucketPrivate, fullFilePath)
@@ -94,12 +106,8 @@ class PanelScheduler extends HmdaActor with PublisherComponent2018 with Publishe
       .map(s => ByteString(s))
     val results: Future[MultipartUploadResult] = S3Utils.uploadWithRetry(source, s3Sink)
 
-    results onComplete {
-      case Success(result) =>
-        log.info("Pushed to S3: " + s"$bucketPrivate/$fullFilePath" +".")
-      case Failure(t) =>
-        log.error("An error has occurred getting Panel Data 2018: " + t.getMessage)
-    }
+    results.onComplete(reportPublishingComplete(_, PanelScheduler2018, fullFilePath))
+    results.foreach(_ => persistFileForQa(fullFilePath, qaRepository2018))
   }
 
   private def panelSync2019(): Unit = {
@@ -109,8 +117,8 @@ class PanelScheduler extends HmdaActor with PublisherComponent2018 with Publishe
     val now           = LocalDateTime.now().minusDays(1)
     val formattedDate = fullDate.format(now)
     val fileName      = s"$formattedDate" + "2019_panel.txt"
-    val s3Path = s"$environmentPrivate/panel/"
-    val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
+    val s3Path        = s"$environmentPrivate/panel/"
+    val fullFilePath  = SnapshotCheck.pathSelector(s3Path, fileName)
 
     val s3Sink =
       S3.multipartUpload(bucketPrivate, fullFilePath)
@@ -123,13 +131,8 @@ class PanelScheduler extends HmdaActor with PublisherComponent2018 with Publishe
       .map(s => ByteString(s))
     val results: Future[MultipartUploadResult] = S3Utils.uploadWithRetry(source, s3Sink)
 
-    results onComplete {
-      case Success(result) =>
-        log.info("Pushed to S3: " + s"$bucketPrivate/$fullFilePath" + ".")
-
-      case Failure(t) =>
-        log.error("An error has occurred getting Panel Data 2019: " + t.getMessage)
-    }
+    results.onComplete(reportPublishingComplete(_, PanelScheduler2019, fullFilePath))
+    results.foreach(_ => persistFileForQa(fullFilePath, qaRepository2019))
   }
 
   private def panelSync2020(): Unit = {
@@ -139,8 +142,8 @@ class PanelScheduler extends HmdaActor with PublisherComponent2018 with Publishe
     val now           = LocalDateTime.now().minusDays(1)
     val formattedDate = fullDate.format(now)
     val fileName      = s"$formattedDate" + "2020_panel.txt"
-    val s3Path = s"$environmentPrivate/panel/"
-    val fullFilePath=  SnapshotCheck.pathSelector(s3Path,fileName)
+    val s3Path        = s"$environmentPrivate/panel/"
+    val fullFilePath  = SnapshotCheck.pathSelector(s3Path, fileName)
 
     val s3Sink =
       S3.multipartUpload(bucketPrivate, fullFilePath)
@@ -153,13 +156,8 @@ class PanelScheduler extends HmdaActor with PublisherComponent2018 with Publishe
       .map(s => ByteString(s))
     val results: Future[MultipartUploadResult] = S3Utils.uploadWithRetry(source, s3Sink)
 
-    results onComplete {
-      case Success(result) =>
-        log.info("Pushed to S3: " + s"$bucketPrivate/$fullFilePath" + ".")
-
-      case Failure(t) =>
-        log.error("An error has occurred getting Panel Data 2020: " + t.getMessage)
-    }
+    results.onComplete(reportPublishingComplete(_, PanelScheduler2020, fullFilePath))
+    results.foreach(_ => persistFileForQa(fullFilePath, qaRepository2020))
   }
 
   def appendEmailDomains2018(institution: InstitutionEntity): Future[InstitutionAltEntity] = {
@@ -218,5 +216,39 @@ class PanelScheduler extends HmdaActor with PublisherComponent2018 with Publishe
       )
     )
   }
+
+  protected def reportPublishingComplete(result: Try[Any], schedule: Schedule, fullFilePath: String): Unit =
+    result match {
+      case Success(result) =>
+        publishingReporter ! FilePublishingCompleted(
+          PanelScheduler2018,
+          fullFilePath,
+          None,
+          Instant.now,
+          FilePublishingCompleted.Status.Success
+        )
+        log.info("Pushed to S3: " + s"$bucketPrivate/$fullFilePath" + ".")
+      case Failure(t) =>
+        publishingReporter ! FilePublishingCompleted(
+          PanelScheduler2018,
+          fullFilePath,
+          None,
+          Instant.now,
+          FilePublishingCompleted.Status.Error(t.getMessage)
+        )
+        log.error(s"An error has occurred getting panel data for schedule ${schedule}: " + t.getMessage)
+    }
+
+  private def persistFileForQa(s3ObjKey: String, repository: QARepository[InstitutionAltEntity]) = {
+    val spec = QAFileSpec(
+      bucket = bucketPrivate,
+      key = s3ObjKey,
+      s3Settings = s3Settings,
+      withHeaderLine = false,
+      parseLine = InstitutionAltEntity.parseFromPSVUnsafe,
+      repository = repository
+    )
+    qaFilePersistor.fetchAndPersist(spec)
+  }
+
 }
-// $COVERAGE-ON$

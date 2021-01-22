@@ -5,7 +5,7 @@ import java.sql.Timestamp
 import hmda.publisher.helper.PGTableNameLoader
 import hmda.publisher.qa.{QAEntity, QARepository, QATableBase}
 import hmda.publisher.query.lar.{LarEntityImpl2020, _}
-import hmda.publisher.query.panel.InstitutionEntity
+import hmda.publisher.query.panel.{InstitutionAltEntity, InstitutionEntity}
 import hmda.publisher.validation.{LarData, TsData}
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
@@ -27,7 +27,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
     case object Q3    extends Year2020Period
   }
 
-  class InstitutionsTable(tag: Tag) extends Table[InstitutionEntity](tag, panel2020TableName) {
+  abstract class InstitutionsTableBase[T](tag: Tag, tableName: String) extends Table[T](tag, tableName) {
     def lei             = column[String]("lei", O.PrimaryKey)
     def activityYear    = column[Int]("activity_year")
     def agency          = column[Int]("agency")
@@ -45,7 +45,8 @@ trait PublisherComponent2020 extends PGTableNameLoader {
     def topHolderIdRssd = column[Int]("topholder_id_rssd")
     def topHolderName   = column[String]("topholder_name")
     def hmdaFiler       = column[Boolean]("hmda_filer")
-
+  }
+  class InstitutionsTable(tag: Tag) extends InstitutionsTableBase[InstitutionEntity](tag, panel2020TableName) {
     override def * =
       (
         lei,
@@ -68,6 +69,42 @@ trait PublisherComponent2020 extends PGTableNameLoader {
       ) <> (InstitutionEntity.tupled, InstitutionEntity.unapply)
   }
   val institutionsTable2020 = TableQuery[InstitutionsTable]
+
+  class QAInstitutionsTable(tag: Tag)
+    extends InstitutionsTableBase[QAEntity[InstitutionAltEntity]](tag, panel2020QATableName)
+      with QATableBase[InstitutionAltEntity] {
+    def emailDomains = column[String]("email_domains")
+    def institutionAltEntityProjection =
+      (
+        lei,
+        activityYear,
+        agency,
+        institutionType,
+        id2017,
+        taxId,
+        rssd,
+        respondentName,
+        respondentState,
+        respondentCity,
+        parentIdRssd,
+        parentName,
+        assets,
+        otherLenderCode,
+        topHolderIdRssd,
+        topHolderName,
+        hmdaFiler,
+        emailDomains
+      ) <> ((InstitutionAltEntity.apply _).tupled, InstitutionAltEntity.unapply)
+    def * =
+      (institutionAltEntityProjection, fileName) <> ((QAEntity.apply[InstitutionAltEntity] _).tupled, QAEntity
+        .unapply[InstitutionAltEntity] _)
+  }
+
+  def createQaPanelRepository2020(config: DatabaseConfig[JdbcProfile])(implicit ec: ExecutionContext) =
+    new QARepository.Default[InstitutionAltEntity, QAInstitutionsTable](
+      config,
+      TableQuery(tag => new QAInstitutionsTable(tag))
+    )(ec)
 
   class InstitutionRepository2020(val config: DatabaseConfig[JdbcProfile]) extends TableRepository[InstitutionsTable, String] {
 
