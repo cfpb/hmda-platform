@@ -1,7 +1,9 @@
 package hmda.publisher.query.lar
 
-import hmda.model.publication.Msa
+import hmda.util.PsvParsingCompanion
 import hmda.util.conversion.ColumnDataFormatter
+import io.chrisdavenport.cormorant
+import io.chrisdavenport.cormorant.CSV
 
 case class LarPartOne2020(
                            id: Int = 0,
@@ -33,6 +35,11 @@ case class LarPartOne2020(
       s"$zip|$county|$tract|"
 
 }
+
+object LarPartOne2020 extends PsvParsingCompanion[LarPartOne2020] {
+  override val psvReader: cormorant.Read[LarPartOne2020] = cormorant.generic.semiauto.deriveRead
+}
+
 case class LarPartTwo2020(
                            ethnicityApplicant1: String = "",
                            ethnicityApplicant2: String = "",
@@ -62,6 +69,10 @@ case class LarPartTwo2020(
       s"$otherHispanicCoApplicant|$ethnicityObservedApplicant|$ethnicityObservedCoApplicant|$raceApplicant1" +
       s"|$raceApplicant2|$raceApplicant3|$raceApplicant4|$raceApplicant5|"
 
+}
+
+object LarPartTwo2020 extends PsvParsingCompanion[LarPartTwo2020] {
+  override val psvReader: cormorant.Read[LarPartTwo2020] = cormorant.generic.semiauto.deriveRead
 }
 
 case class LarPartThree2020(
@@ -97,6 +108,10 @@ case class LarPartThree2020(
 
 }
 
+object LarPartThree2020 extends PsvParsingCompanion[LarPartThree2020] {
+  override val psvReader: cormorant.Read[LarPartThree2020] = cormorant.generic.semiauto.deriveRead
+}
+
 case class LarPartFour2020(
                             purchaserType: Int = 0,
                             rateSpread: String = "",
@@ -125,6 +140,10 @@ case class LarPartFour2020(
       s"$denialReason1|$denialReason2|$denialReason3|$denialReason4|" +
       s"$otherDenialReason|$totalLoanCosts|$totalPoints|$originationCharges|"
 
+}
+
+object LarPartFour2020 extends PsvParsingCompanion[LarPartFour2020] {
+  override val psvReader: cormorant.Read[LarPartFour2020] = cormorant.generic.semiauto.deriveRead
 }
 
 case class LarPartFive2020(
@@ -156,6 +175,10 @@ case class LarPartFive2020(
 
 }
 
+object LarPartFive2020 extends PsvParsingCompanion[LarPartFive2020] {
+  override val psvReader: cormorant.Read[LarPartFive2020] = cormorant.generic.semiauto.deriveRead
+}
+
 case class LarPartSix2020(
                            payable: Int = 0,
                            nmls: String = "",
@@ -181,7 +204,11 @@ case class LarPartSix2020(
       s"$nmls|$aus1|$aus2|$aus3|$aus4|$aus5|$otheraus|$aus1Result|$aus2Result|$aus3Result|$aus4Result|$aus5Result|" +
       s"$otherAusResult|$reverseMortgage|$lineOfCredits|$businessOrCommercial"
 }
-// $COVERAGE-OFF$
+
+object LarPartSix2020 extends PsvParsingCompanion[LarPartSix2020] {
+  override val psvReader: cormorant.Read[LarPartSix2020] = cormorant.generic.semiauto.deriveRead
+}
+
 case class LarPartSeven2020(
                              conformingLoanLimit: String = "",
                              ethnicityCategorization: String = "",
@@ -196,14 +223,20 @@ case class LarPartSeven2020(
                              tractOneToFourFamilyUnits: Int = 0,
                              tractMedianAge: Int = 0,
                              tractToMsaIncomePercent: Double = 0.0
-                           ){
-  def toRegulatorPSV: String =
-    s"|$conformingLoanLimit|$tractPopulation|$tractMinorityPopulationPercent|$tractMedianIncome|$tractToMsaIncomePercent|$tractOccupiedUnits" +
-      s"|$tractOneToFourFamilyUnits|$tractMedianAge|"
+                           )
+
+object LarPartSeven2020 extends PsvParsingCompanion[LarPartSeven2020] {
+  override val psvReader: cormorant.Read[LarPartSeven2020] = cormorant.generic.semiauto.deriveRead
 }
-// $COVERAGE-ON$
 
+case class LarPartEight2020(
+                             conformingLoanLimit: String = "",
+                             ethnicityCategorization: String = ""
+                           )
 
+object LarPartEight2020 extends PsvParsingCompanion[LarPartEight2020] {
+  override val psvReader: cormorant.Read[LarPartEight2020] = cormorant.generic.semiauto.deriveRead
+}
 
 case class LarEntityImpl2020(
                               larPartOne: LarPartOne2020 = LarPartOne2020(),
@@ -222,23 +255,19 @@ case class LarEntityImpl2020(
       larPartFour.toRegulatorPSV +
       larPartFive.toRegulatorPSV +
       larPartSix.toRegulatorPSV).replaceAll("(\r\n)|\r|\n", "")
+}
 
-  def appendMsa(msa: Msa): String =
-    (larPartOne.toRegulatorPSV +
-      larPartTwo.toRegulatorPSV +
-      larPartThree.toRegulatorPSV +
-      larPartFour.toRegulatorPSV +
-      larPartFive.toRegulatorPSV +
-      larPartSix.toRegulatorPSV +
-      larPartSeven.toRegulatorPSV +
-      s"${msa.id}|${msa.name}").replaceAll("(\r\n)|\r|\n", "")
-
-  def toRegulatorLoanLimitPSV: String =
-    (larPartOne.toRegulatorPSV +
-      larPartTwo.toRegulatorPSV +
-      larPartThree.toRegulatorPSV +
-      larPartFour.toRegulatorPSV +
-      larPartFive.toRegulatorPSV +
-      larPartSix.toRegulatorPSV +
-      larPartSeven.toRegulatorPSV).replaceAll("(\r\n)|\r|\n", "")
+object LarEntityImpl2020 extends PsvParsingCompanion[LarEntityImpl2020] {
+  override val psvReader: cormorant.Read[LarEntityImpl2020] = {
+    (a: CSV.Row) => {
+      (for {
+        (rest, p1) <- enforcePartialRead(LarPartOne2020.psvReader, a)
+        (rest, p2) <- enforcePartialRead(LarPartTwo2020.psvReader, rest)
+        (rest, p3) <- enforcePartialRead(LarPartThree2020.psvReader, rest)
+        (rest, p4) <- enforcePartialRead(LarPartFour2020.psvReader, rest)
+        (rest, p5) <- enforcePartialRead(LarPartFive2020.psvReader, rest)
+        p6         <- LarPartSix2020.psvReader.read(rest)
+      } yield LarEntityImpl2020(p1, p2, p3, p4, p5, p6)).map(Right(_))
+    }
+  }
 }

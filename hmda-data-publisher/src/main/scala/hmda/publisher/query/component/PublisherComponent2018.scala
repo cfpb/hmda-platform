@@ -1,24 +1,24 @@
 package hmda.publisher.query.component
 
 import java.sql.Timestamp
-
 import hmda.publisher.helper.PGTableNameLoader
+import hmda.publisher.qa.{ QAEntity, QARepository, QATableBase }
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
 import hmda.publisher.query.lar.{ LarEntityImpl2018, _ }
-import hmda.publisher.query.panel.InstitutionEntity
+import hmda.publisher.query.panel.{ InstitutionAltEntity, InstitutionEntity }
 import hmda.publisher.validation.{ LarData, TsData }
 import slick.basic.{ DatabaseConfig, DatabasePublisher }
 import slick.jdbc.{ JdbcProfile, ResultSetConcurrency, ResultSetType }
 
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 
 trait PublisherComponent2018 extends PGTableNameLoader {
 
   import dbConfig.profile.api._
 
-  class InstitutionsTable(tag: Tag) extends Table[InstitutionEntity](tag, panel2018TableName) {
+  abstract class InstitutionsTableBase[T](tag: Tag, tableName: String) extends Table[T](tag, tableName) {
     def lei             = column[String]("lei", O.PrimaryKey)
     def activityYear    = column[Int]("activity_year")
     def agency          = column[Int]("agency")
@@ -37,6 +37,8 @@ trait PublisherComponent2018 extends PGTableNameLoader {
     def topHolderName   = column[String]("topholder_name")
     def hmdaFiler       = column[Boolean]("hmda_filer")
 
+  }
+  class InstitutionsTable(tag: Tag) extends InstitutionsTableBase[InstitutionEntity](tag, panel2018TableName) {
     override def * =
       (
         lei,
@@ -59,6 +61,43 @@ trait PublisherComponent2018 extends PGTableNameLoader {
       ) <> (InstitutionEntity.tupled, InstitutionEntity.unapply)
   }
   val institutionsTable2018 = TableQuery[InstitutionsTable]
+
+  class QAInstitutionsTable(tag: Tag)
+    extends InstitutionsTableBase[QAEntity[InstitutionAltEntity]](tag, panel2018QATableName)
+      with QATableBase[InstitutionAltEntity] {
+    def emailDomains = column[String]("email_domains")
+    def institutionAltEntityProjection =
+      (
+        lei,
+        activityYear,
+        agency,
+        institutionType,
+        id2017,
+        taxId,
+        rssd,
+        respondentName,
+        respondentState,
+        respondentCity,
+        parentIdRssd,
+        parentName,
+        assets,
+        otherLenderCode,
+        topHolderIdRssd,
+        topHolderName,
+        hmdaFiler,
+        emailDomains
+      ) <> ((InstitutionAltEntity.apply _).tupled, InstitutionAltEntity.unapply)
+    def * =
+      (institutionAltEntityProjection, fileName) <> ((QAEntity.apply[InstitutionAltEntity] _).tupled, QAEntity
+        .unapply[InstitutionAltEntity] _)
+  }
+
+  def createQaPanelRepository2018(config: DatabaseConfig[JdbcProfile])(implicit ec: ExecutionContext) =
+    new QARepository.Default[InstitutionAltEntity, QAInstitutionsTable](
+      config,
+      TableQuery(tag => new QAInstitutionsTable(tag))
+    )(ec)
+
 
   class InstitutionRepository2018(val config: DatabaseConfig[JdbcProfile]) extends TableRepository[InstitutionsTable, String] {
 
@@ -96,7 +135,7 @@ trait PublisherComponent2018 extends PGTableNameLoader {
       db.run(table.size.result)
   }
 
-  class TransmittalSheetTable(tag: Tag) extends Table[TransmittalSheetEntity](tag, ts2018TableName) {
+  abstract class TransmittalSheetTableBase[T](tag: Tag, tableName: String) extends Table[T](tag, tableName) {
 
     def lei             = column[String]("lei", O.PrimaryKey)
     def id              = column[Int]("id")
@@ -118,7 +157,7 @@ trait PublisherComponent2018 extends PGTableNameLoader {
     def isQuarterly     = column[Option[Boolean]]("is_quarterly")
     def signDate        = column[Option[Long]]("sign_date")
 
-    override def * =
+    def transmittalSheetEntityProjection =
       (
         lei,
         id,
@@ -139,8 +178,11 @@ trait PublisherComponent2018 extends PGTableNameLoader {
         createdAt,
         isQuarterly,
         signDate
-      ) <> (TransmittalSheetEntity.tupled, TransmittalSheetEntity.unapply)
+      ) <> ((TransmittalSheetEntity.apply _).tupled, TransmittalSheetEntity.unapply)
 
+  }
+  class TransmittalSheetTable(tag: Tag) extends TransmittalSheetTableBase[TransmittalSheetEntity](tag, ts2018TableName) {
+    override def * = transmittalSheetEntityProjection
   }
 
   val transmittalSheetTable2018 = TableQuery[TransmittalSheetTable]
@@ -172,7 +214,26 @@ trait PublisherComponent2018 extends PGTableNameLoader {
       db.run(table.filterNot(_.lei.toUpperCase inSet bankIgnoreList).result)
   }
 
-  class LarTable(tag: Tag) extends Table[LarEntityImpl2018](tag, lar2018TableName) {
+  class QATransmittalSheetTable(tag: Tag, tableName: String)
+    extends TransmittalSheetTableBase[QAEntity[TransmittalSheetEntity]](tag, tableName)
+      with QATableBase[TransmittalSheetEntity] {
+    def * =
+      (transmittalSheetEntityProjection, fileName) <> ((QAEntity.apply[TransmittalSheetEntity] _).tupled, QAEntity
+        .unapply[TransmittalSheetEntity] _)
+  }
+  def createPublicQaTsRepository2018(config: DatabaseConfig[JdbcProfile])(implicit ec: ExecutionContext) =
+    new QARepository.Default[TransmittalSheetEntity, QATransmittalSheetTable](
+      config,
+      TableQuery(tag => new QATransmittalSheetTable(tag, ts2018PublicQATableName))
+    )(ec)
+
+  def createPrivateQaTsRepository2018(config: DatabaseConfig[JdbcProfile])(implicit ec: ExecutionContext) =
+    new QARepository.Default[TransmittalSheetEntity, QATransmittalSheetTable](
+      config,
+      TableQuery(tag => new QATransmittalSheetTable(tag, ts2018PrivateQATableName))
+    )(ec)
+
+  abstract class LarTableBase[T](tag: Tag, tableName: String) extends Table[T](tag, tableName) {
 
     def id                         = column[Int]("id")
     def lei                        = column[String]("lei")
@@ -292,7 +353,8 @@ trait PublisherComponent2018 extends PGTableNameLoader {
     def reverseMortgage       = column[Int]("reverse_mortgage")
     def lineOfCredits         = column[Int]("line_of_credits")
     def businessOrCommercial  = column[Int]("business_or_commercial")
-    def * =
+
+    def larEntityImpl2018Projection =
       (
         larPartOneProjection,
         larPartTwoProjection,
@@ -438,7 +500,17 @@ trait PublisherComponent2018 extends PGTableNameLoader {
 
   }
 
-  val larTable2018 = TableQuery[LarTable]
+  class LarTable(tag: Tag) extends LarTableBase[LarEntityImpl2018](tag, lar2018TableName) {
+    def * = larEntityImpl2018Projection
+  }
+
+  class QALarTable(tag: Tag)
+    extends LarTableBase[QAEntity[LarEntityImpl2018]](tag, lar2018QATableName)
+      with QATableBase[LarEntityImpl2018] {
+    def * = (larEntityImpl2018Projection, fileName) <> ((QAEntity.apply[LarEntityImpl2018] _).tupled, QAEntity.unapply[LarEntityImpl2018] _)
+  }
+  val larTable2018   = TableQuery[LarTable]
+  val qaLarTable2018 = TableQuery[QALarTable]
 
   class LarRepository2018(val config: DatabaseConfig[JdbcProfile]) extends TableRepository[LarTable, String] {
 
@@ -479,7 +551,10 @@ trait PublisherComponent2018 extends PGTableNameLoader {
 
   }
 
-  class ModifiedLarTable(tag: Tag) extends Table[ModifiedLarEntityImpl](tag, mlar2018TableName) {
+  class QALarRepository2018(config: DatabaseConfig[JdbcProfile])(implicit ec: ExecutionContext)
+    extends QARepository.Default[LarEntityImpl2018, QALarTable](config, qaLarTable2018)(ec)
+
+  abstract class ModifiedLarTableBase[T](tag: Tag, tableName: String) extends Table[T](tag, tableName) {
 
     def id                  = column[Int]("id")
     def lei                 = column[String]("lei")
@@ -603,7 +678,8 @@ trait PublisherComponent2018 extends PGTableNameLoader {
       column[Option[String]]("percent_median_msa_income")
     def msaMDName = column[Option[String]]("msa_md_name")
     def createdAt = column[Timestamp]("created_at")
-    def * =
+
+    def modifiedLarEntityImplProjection =
       (
         mlarPartOneProjection,
         mlarPartTwoProjection,
@@ -738,6 +814,10 @@ trait PublisherComponent2018 extends PGTableNameLoader {
       ) <> ((ModifiedLarPartSix.apply _).tupled, ModifiedLarPartSix.unapply)
   }
 
+  class ModifiedLarTable(tag: Tag) extends ModifiedLarTableBase[ModifiedLarEntityImpl](tag, mlar2018TableName) {
+    override def * = modifiedLarEntityImplProjection
+  }
+
   val mlarTable2018 = TableQuery[ModifiedLarTable]
 
   class ModifiedLarRepository2018(val config: DatabaseConfig[JdbcProfile]) extends TableRepository[ModifiedLarTable, String] {
@@ -775,6 +855,17 @@ trait PublisherComponent2018 extends PGTableNameLoader {
       )
 
   }
+
+  class QAModifiedLarTable(tag: Tag)
+    extends ModifiedLarTableBase[QAEntity[ModifiedLarEntityImpl]](tag, mlar2018QATableName)
+      with QATableBase[ModifiedLarEntityImpl] {
+    override def * =
+      (modifiedLarEntityImplProjection, fileName) <> ((QAEntity.apply[ModifiedLarEntityImpl] _).tupled, QAEntity
+        .unapply[ModifiedLarEntityImpl] _)
+  }
+  val qaMlarTable2018 = TableQuery[QAModifiedLarTable]
+  class QAModifiedLarRepository2018(config: DatabaseConfig[JdbcProfile])(implicit ec: ExecutionContext)
+    extends QARepository.Default[ModifiedLarEntityImpl, QAModifiedLarTable](config, qaMlarTable2018)(ec)
 
   val validationLarData2018: LarData = LarData[LarEntityImpl2018, LarTable](larTable2018)(_.lei)
   val validationMLarData2018: LarData =
