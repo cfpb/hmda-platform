@@ -55,6 +55,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
   def larRepository2020Q1              = createLarRepository2020(dbConfig, Year2020Period.Q1)
   def larRepository2020Q2              = createLarRepository2020(dbConfig, Year2020Period.Q2)
   def larRepository2020Q3              = createLarRepository2020(dbConfig, Year2020Period.Q3)
+
   def qaLarRepository2020              = createQaLarRepository2020(dbConfig, Year2020Period.Whole)
   def qaLarRepository2020Q1            = createQaLarRepository2020(dbConfig, Year2020Period.Q1)
   def qaLarRepository2020Q2            = createQaLarRepository2020(dbConfig, Year2020Period.Q2)
