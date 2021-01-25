@@ -49,6 +49,7 @@ trait PGTableNameLoader {
   val ts2020Q3QATableName: String = pgTableConfig.getString("ts2020Q3QATableName")
 
   val lar2020TableName: String   = pgTableConfig.getString("lar2020TableName")
+  val lar2020QALoanLimitTableName: String = pgTableConfig.getString("lar2020QALoanLimitTableName")
   val lar2020Q1TableName: String = pgTableConfig.getString("lar2020Q1TableName")
   val lar2020Q2TableName: String = pgTableConfig.getString("lar2020Q2TableName")
   val lar2020Q3TableName: String = pgTableConfig.getString("lar2020Q3TableName")
