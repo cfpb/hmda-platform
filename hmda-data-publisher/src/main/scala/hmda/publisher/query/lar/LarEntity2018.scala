@@ -1,9 +1,11 @@
 package hmda.publisher.query.lar
 
-import hmda.util.PsvParsingCompanion
 import hmda.util.conversion.ColumnDataFormatter
 import io.chrisdavenport.cormorant
 import io.chrisdavenport.cormorant.CSV
+import io.chrisdavenport.cormorant.implicits._
+import cormorant.generic.semiauto._
+import hmda.util.PsvParsingCompanion
 
 case class LarPartOne2018(
                            id: Int = 0,
