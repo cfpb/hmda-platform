@@ -5,7 +5,7 @@ import akka.actor.typed.ActorRef
 import akka.stream.Materializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{ MemoryBufferType, MetaHeaders, S3Attributes, S3Settings }
+import akka.stream.alpakka.s3.{MemoryBufferType, MetaHeaders, S3Attributes, S3Settings}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
@@ -14,22 +14,22 @@ import hmda.census.records.CensusRecords
 import hmda.model.census.Census
 import hmda.model.publication.Msa
 import hmda.publisher.helper._
-import hmda.publisher.qa.{ QAFilePersistor, QAFileSpec, QARepository }
-import hmda.publisher.query.component.{ PublisherComponent2018, PublisherComponent2019, PublisherComponent2020 }
-import hmda.publisher.query.lar.{ LarEntityImpl2018, LarEntityImpl2019, LarEntityImpl2019WithMsa, LarEntityImpl2020 }
+import hmda.publisher.qa.{QAFilePersistor, QAFileSpec, QARepository}
+import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020}
+import hmda.publisher.query.lar.{LarEntityImpl2018, LarEntityImpl2019, LarEntityImpl2019WithMsa, LarEntityImpl2020, LarEntityImpl2020WithMsa}
 import hmda.publisher.scheduler.schedules.Schedule
 import hmda.publisher.scheduler.schedules.Schedules._
 import hmda.publisher.util.PublishingReporter
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 import hmda.publisher.validation.PublishingGuard
-import hmda.publisher.validation.PublishingGuard.{ Period, Scope }
+import hmda.publisher.validation.PublishingGuard.{Period, Scope}
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
-
 import java.time.format.DateTimeFormatter
-import java.time.{ Clock, Instant, LocalDateTime }
+import java.time.{Clock, Instant, LocalDateTime}
+
 import scala.concurrent.Future
-import scala.util.{ Failure, Success }
+import scala.util.{Failure, Success}
 
 class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFilePersistor: QAFilePersistor)
   extends HmdaActor
@@ -49,6 +49,8 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
   def larRepository2019                = new LarRepository2019(dbConfig)
   def qaLarRepository2019              = new QALarRepository2019(dbConfig)
   def qaLarRepository2019LoanLimit     = new QALarRepository2019LoanLimit(dbConfig)
+  def qaLarRepository2020LoanLimit     = new QALarRepository2020LoanLimit(dbConfig)
+
   def larRepository2020                = createLarRepository2020(dbConfig, Year2020Period.Whole)
   def larRepository2020Q1              = createLarRepository2020(dbConfig, Year2020Period.Q1)
   def larRepository2020Q2              = createLarRepository2020(dbConfig, Year2020Period.Q2)
@@ -179,11 +181,11 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
             .map(larEntity => appendCensus2020(larEntity, 2020))
             .prepend(Source(List(LoanLimitHeader)))
 
-        def countF: Future[Int] = larRepository2019.getAllLARsCount(getFilterList())
+        def countF: Future[Int] = larRepository2020.getAllLARsCount(getFilterList())
 
         for {
           s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, schedule)
-          _         <- persistFileForQa(s3ObjName, LarEntityImpl2019WithMsa.parseFromPSVUnsafe, qaLarRepository2019LoanLimit)
+          _         <- persistFileForQa(s3ObjName, LarEntityImpl2020WithMsa.parseFromPSVUnsafe, qaLarRepository2020LoanLimit)
         } yield ()
       }
     case schedule @ LarSchedulerQuarterly2020 =>

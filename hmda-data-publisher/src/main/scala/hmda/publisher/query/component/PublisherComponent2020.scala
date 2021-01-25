@@ -2,6 +2,7 @@ package hmda.publisher.query.component
 
 import java.sql.Timestamp
 
+import hmda.model.publication.Msa
 import hmda.publisher.helper.PGTableNameLoader
 import hmda.publisher.qa.{QAEntity, QARepository, QATableBase}
 import hmda.publisher.query.lar.{LarEntityImpl2020, _}
@@ -637,5 +638,61 @@ trait PublisherComponent2020 extends PGTableNameLoader {
 
   def validationTSData2020(p: Year2020Period): TsData =
     TsData[TransmittalSheetEntity, RealTransmittalSheetTable](transmittalSheetTableQuery2020(p))(_.lei, _.totalLines, _.submissionId)
+  class QALarTableLoanLimit(tag: Tag)
+    extends LarTableBase[QAEntity[LarEntityImpl2020WithMsa]](tag, lar2020QALoanLimitTableName)
+      with QATableBase[LarEntityImpl2020WithMsa] {
+
+    object MsaColumns {
+      def id                   = column[String]("id")
+      def name                 = column[String]("name")
+      def totalLars            = column[Int]("total_lars")
+      def totalAmount          = column[BigDecimal]("total_amount")
+      def conv                 = column[Int]("conv")
+      def FHA                  = column[Int]("fha")
+      def VA                   = column[Int]("va")
+      def FSA                  = column[Int]("fsa")
+      def siteBuilt            = column[Int]("site_built")
+      def manufactured         = column[Int]("manufactured")
+      def oneToFour            = column[Int]("one_to_four")
+      def fivePlus             = column[Int]("five_plus")
+      def homePurchase         = column[Int]("home_purchase")
+      def homeImprovement      = column[Int]("home_improvement")
+      def refinancing          = column[Int]("refinancing")
+      def cashOutRefinancing   = column[Int]("cash_out_refinancing")
+      def otherPurpose         = column[Int]("other_purpose")
+      def notApplicablePurpose = column[Int]("not_applicable_purpose")
+    }
+
+    def msaProjection =
+      (
+        MsaColumns.id,
+        MsaColumns.name,
+        MsaColumns.totalLars,
+        MsaColumns.totalAmount,
+        MsaColumns.conv,
+        MsaColumns.FHA,
+        MsaColumns.VA,
+        MsaColumns.FSA,
+        MsaColumns.siteBuilt,
+        MsaColumns.manufactured,
+        MsaColumns.oneToFour,
+        MsaColumns.fivePlus,
+        MsaColumns.homePurchase,
+        MsaColumns.homeImprovement,
+        MsaColumns.refinancing,
+        MsaColumns.cashOutRefinancing,
+        MsaColumns.otherPurpose,
+        MsaColumns.notApplicablePurpose
+      ) <> ((Msa.apply _).tupled, Msa.unapply)
+
+    def larEntityImpl2020WithMsaProjection = (larEntityImpl2020Projection, msaProjection) <> ((LarEntityImpl2020WithMsa.apply _).tupled, LarEntityImpl2020WithMsa.unapply)
+
+    override def * = (larEntityImpl2020WithMsaProjection, fileName) <> ((QAEntity.apply[LarEntityImpl2020WithMsa] _).tupled, QAEntity.unapply[LarEntityImpl2020WithMsa] _)
+  }
+  val qaLarTable2020LoanLimit = TableQuery[QALarTableLoanLimit]
+
+  class QALarRepository2020LoanLimit(config: DatabaseConfig[JdbcProfile])(implicit ec: ExecutionContext)
+    extends QARepository.Default[LarEntityImpl2020WithMsa, QALarTableLoanLimit](config, qaLarTable2020LoanLimit)(ec)
+
 
 }

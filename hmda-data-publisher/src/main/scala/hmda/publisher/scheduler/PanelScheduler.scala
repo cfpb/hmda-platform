@@ -64,11 +64,14 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], q
         .schedule("PanelScheduler2018", self, PanelScheduler2018)
       QuartzSchedulerExtension(context.system)
         .schedule("PanelScheduler2019", self, PanelScheduler2019)
+      QuartzSchedulerExtension(context.system)
+        .schedule("PanelScheduler2020", self, PanelScheduler2020)
     } catch { case e: Throwable => println(e) }
 
   override def postStop(): Unit = {
     QuartzSchedulerExtension(context.system).cancelJob("PanelScheduler2018")
     QuartzSchedulerExtension(context.system).cancelJob("PanelScheduler2019")
+    QuartzSchedulerExtension(context.system).cancelJob("PanelScheduler2020")
 
   }
 
