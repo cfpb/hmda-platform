@@ -148,7 +148,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
             .withAttributes(S3Attributes.settings(s3Settings))
 
         val results: Future[MultipartUploadResult] =
-          uploadFileToS3(s3Sink, tsRepository2019.getAllSheets(getFilterList()))
+          uploadFileToS3(s3Sink, tsRepository2020.getAllSheets(getFilterList()))
 
         results.foreach(_ => persistFileForQa(fullFilePath, qaTsRepository2020))
         results.onComplete(reportPublishingResult(_, schedule, fullFilePath))

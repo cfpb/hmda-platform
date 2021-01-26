@@ -137,7 +137,7 @@ CREATE TABLE hmda_user.qa_mlar_table_2018
     race_categorization character varying COLLATE pg_catalog."default",
     sex_categorization character varying COLLATE pg_catalog."default",
     ethnicity_categorization character varying COLLATE pg_catalog."default",
-    uniq_id integer NOT NULL DEFAULT nextval('modifiedlar2019_uniq_id_seq'::regclass),
+    uniq_id integer ,
     percent_median_msa_income character varying COLLATE pg_catalog."default",
     dwelling_category character varying COLLATE pg_catalog."default",
     loan_product_type character varying COLLATE pg_catalog."default",
@@ -159,40 +159,3 @@ ALTER TABLE hmda_user.qa_mlar_table_2018
 -- TOC entry 285 (class 1259 OID 25533)
 -- Name: qa_mlar_table_2018_uniq_id_seq; Type: SEQUENCE; Schema: hmda_user; Owner: hmda_user
 --
-
-CREATE SEQUENCE hmda_user.qa_mlar_table_2018_uniq_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE hmda_user.qa_mlar_table_2018_uniq_id_seq OWNER TO hmda_user;
-
---
--- TOC entry 5570 (class 0 OID 0)
--- Dependencies: 285
--- Name: qa_mlar_table_2018_uniq_id_seq; Type: SEQUENCE OWNED BY; Schema: hmda_user; Owner: hmda_user
---
-
-ALTER SEQUENCE hmda_user.qa_mlar_table_2018_uniq_id_seq OWNED BY hmda_user.qa_mlar_table_2018.uniq_id;
-
-
---
--- TOC entry 5433 (class 2604 OID 57438)
--- Name: qa_mlar_table_2018 uniq_id; Type: DEFAULT; Schema: hmda_user; Owner: hmda_user
---
-
-ALTER TABLE ONLY hmda_user.qa_mlar_table_2018 ALTER COLUMN uniq_id SET DEFAULT nextval('hmda_user.qa_mlar_table_2018_uniq_id_seq'::regclass);
-
-
---
--- TOC entry 5436 (class 2606 OID 25537)
--- Name: qa_mlar_table_2018 qa_mlar_table_2018_pkey; Type: CONSTRAINT; Schema: hmda_user; Owner: hmda_user
---
-
-ALTER TABLE ONLY hmda_user.qa_mlar_table_2018
-    ADD CONSTRAINT qa_mlar_table_2018_pkey PRIMARY KEY (uniq_id);
-

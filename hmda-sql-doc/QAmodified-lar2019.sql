@@ -1,17 +1,4 @@
--- SCHEMA: hmda_user
 
--- DROP SCHEMA hmda_user ;
-
-CREATE SCHEMA hmda_user AUTHORIZATION hmda_user;
-
---
--- PostgreSQL database dump
---
-
--- Dumped from database version 10.6
--- Dumped by pg_dump version 10.5
-
--- Started on 2019-06-05 11:44:49 EDT
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -137,7 +124,7 @@ CREATE TABLE hmda_user.qa_mlar_table_2019 (
     race_categorization character varying COLLATE pg_catalog."default",
     sex_categorization character varying COLLATE pg_catalog."default",
     ethnicity_categorization character varying COLLATE pg_catalog."default",
-    uniq_id integer NOT NULL DEFAULT nextval('modifiedlar2019_uniq_id_seq'::regclass),
+    uniq_id integer ,
     percent_median_msa_income character varying COLLATE pg_catalog."default",
     dwelling_category character varying COLLATE pg_catalog."default",
     loan_product_type character varying COLLATE pg_catalog."default",
@@ -150,65 +137,3 @@ CREATE TABLE hmda_user.qa_mlar_table_2019 (
 
 
 ALTER TABLE hmda_user.qa_mlar_table_2019 OWNER TO hmda_user;
-
---
--- TOC entry 285 (class 1259 OID 25533)
--- Name: qa_mlar_table_2019_uniq_id_seq; Type: SEQUENCE; Schema: hmda_user; Owner: hmda_user
---
-
-CREATE SEQUENCE hmda_user.qa_mlar_table_2019_uniq_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE hmda_user.qa_mlar_table_2019_uniq_id_seq OWNER TO hmda_user;
-
---
--- TOC entry 5570 (class 0 OID 0)
--- Dependencies: 285
--- Name: qa_mlar_table_2019_uniq_id_seq; Type: SEQUENCE OWNED BY; Schema: hmda_user; Owner: hmda_user
---
-
-ALTER SEQUENCE hmda_user.qa_mlar_table_2019_uniq_id_seq OWNED BY hmda_user.qa_mlar_table_2019.uniq_id;
-
-
---
--- TOC entry 5433 (class 2604 OID 57438)
--- Name: qa_mlar_table_2019 uniq_id; Type: DEFAULT; Schema: hmda_user; Owner: hmda_user
---
-
-ALTER TABLE ONLY hmda_user.qa_mlar_table_2019 ALTER COLUMN uniq_id SET DEFAULT nextval('hmda_user.qa_mlar_table_2019_uniq_id_seq'::regclass);
-
-
---
--- TOC entry 5436 (class 2606 OID 25537)
--- Name: qa_mlar_table_2019 qa_mlar_table_2019_pkey; Type: CONSTRAINT; Schema: hmda_user; Owner: hmda_user
---
-
-ALTER TABLE ONLY hmda_user.qa_mlar_table_2019
-    ADD CONSTRAINT qa_mlar_table_2019_pkey PRIMARY KEY (uniq_id);
-
-
---
--- TOC entry 5434 (class 1259 OID 58733)
--- Name: qa_mlar_table_2019_lei_idx; Type: INDEX; Schema: hmda_user; Owner: hmda_user
---
-
-CREATE INDEX qa_mlar_table_2019_lei_idx ON hmda_user.qa_mlar_table_2019 USING btree (lei);
-
-alter table qa_mlar_table_2019
-add column uli character varying;
-
-alter table qa_mlar_table_2019 add column checksum varchar;
-
-
--- Completed on 2019-06-05 11:44:50 EDT
-
-
---
--- PostgreSQL database dump complete
---
