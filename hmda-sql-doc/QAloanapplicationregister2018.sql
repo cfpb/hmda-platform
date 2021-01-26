@@ -120,7 +120,7 @@ CREATE TABLE hmda_user.qa_lar_table_2018 (
     total_uits integer,
     mf_affordable character varying COLLATE pg_catalog."default",
     application_submission integer,
-    payable integer,
+    payable character varying COLLATE pg_catalog."default",
     nmls character varying COLLATE pg_catalog."default",
     aus1 character varying COLLATE pg_catalog."default",
     aus2 character varying COLLATE pg_catalog."default",

@@ -1,11 +1,4 @@
--- SCHEMA: hmda_user
 
--- DROP SCHEMA hmda_user ;
-
-CREATE SCHEMA hmda_user AUTHORIZATION hmda_user;
-
---
--- PostgreSQL database dump
 --
 
 -- Dumped from database version 10.6

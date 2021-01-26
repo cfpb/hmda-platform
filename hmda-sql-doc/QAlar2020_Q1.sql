@@ -128,7 +128,7 @@ CREATE TABLE hmda_user.qa_lar_table_2020_q1 (
     aus4 character varying COLLATE pg_catalog."default",
     aus5 character varying COLLATE pg_catalog."default",
     other_aus character varying COLLATE pg_catalog."default",
-    aus1_result integer,
+    aus1_result character varying COLLATE pg_catalog."default",
     aus2_result character varying COLLATE pg_catalog."default",
     aus3_result character varying COLLATE pg_catalog."default",
     aus4_result character varying COLLATE pg_catalog."default",

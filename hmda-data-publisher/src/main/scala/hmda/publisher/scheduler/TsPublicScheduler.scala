@@ -75,7 +75,7 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
         val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
 
         val result = tsPublicStream("2018", bucket, fullFilePath, fileName, schedule)
-        result.foreach(r => persistFileForQa(r.key, r.bucket, qaRepo2018))
+        //result.foreach(r => persistFileForQa(r.key, r.bucket, qaRepo2018))
       }
 
     case schedule @ TsPublicScheduler2019 =>
@@ -87,7 +87,7 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
         val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
 
         val result = tsPublicStream("2019", bucket, fullFilePath, fileName, schedule)
-        result.foreach(r => persistFileForQa(r.key, r.bucket, qaRepo2019))
+        //result.foreach(r => persistFileForQa(r.key, r.bucket, qaRepo2019))
       }
   }
   private def tsPublicStream(
