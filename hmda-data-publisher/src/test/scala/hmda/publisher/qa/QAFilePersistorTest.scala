@@ -89,15 +89,15 @@ class QAFilePersistorTest extends FreeSpec with BeforeAndAfterAll with ScalaFutu
   case class TestEntity(row: String)
 
   class TestQaRepository extends QARepository[TestEntity] {
-    var deletions                  = List[String]()
+    var deletions                  = List[Any]()
     var batches                    = List[(Seq[TestEntity], String)]()
     override def tableName: String = "qa_repo"
-    override def deletePreviousRecords(currentFileName: String): Future[Unit] = {
-      deletions = deletions :+ currentFileName
+    override def deletePreviousRecords(timeStamp: Long): Future[Unit] = {
+      deletions = deletions :+ timeStamp
       Future.unit
     }
 
-    override def saveAll(batch: Seq[TestEntity], fileName: String): Future[Unit] = {
+    override def saveAll(batch: Seq[TestEntity], fileName: String,timestamp: Long): Future[Unit] = {
       batches = batches :+ ((batch, fileName))
       Future.unit
     }
