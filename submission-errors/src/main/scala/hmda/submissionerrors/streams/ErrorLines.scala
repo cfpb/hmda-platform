@@ -13,7 +13,7 @@ import hmda.submissionerrors.streams.ErrorInformation._
 import monix.eval.Task
 
 import scala.concurrent.Future
-
+// $COVERAGE-OFF$
 /**
  * Step 3: Obtain all the lines that had edit errors (quality, syntax, macro, etc.) for each submission that will
  * be inserted into the database
@@ -75,3 +75,4 @@ object ErrorLines {
         }
     }
 }
+// $COVERAGE-ON$

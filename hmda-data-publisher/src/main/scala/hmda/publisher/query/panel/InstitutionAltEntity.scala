@@ -1,5 +1,5 @@
 package hmda.publisher.query.panel
-
+// $COVERAGE-OFF$
 case class InstitutionAltEntity(
                                  lei: String = "",
                                  activityYear: Int = 0,
@@ -39,3 +39,4 @@ case class InstitutionAltEntity(
       s"$assets|$otherLenderCode|$topHolderIdRssd|$topHolderName"
   // $COVERAGE-ON$
 }
+// $COVERAGE-ON$

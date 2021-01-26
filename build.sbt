@@ -47,7 +47,7 @@ lazy val akkaPersistenceDeps =
   )
 
 lazy val akkaHttpDeps =
-  Seq(akkaHttp, akkaHttp2, akkaHttpTestkit, akkaStreamsTestKit, akkaHttpCirce)
+  Seq(akkaHttp, akkaHttp2, akkaHttpTestkit, akkaStreamsTestKit, akkaHttpCirce, akkaHttpXml)
 lazy val circeDeps      = Seq(circe, circeGeneric, circeParser)
 lazy val enumeratumDeps = Seq(enumeratum, enumeratumCirce)
 
@@ -55,7 +55,7 @@ lazy val slickDeps = Seq(slick, slickHikariCP, postgres, h2)
 
 lazy val dockerSettings = Seq(
   Docker / maintainer := "Hmda-Ops",
-  dockerBaseImage := "openjdk:15-jdk-alpine3.11",
+  dockerBaseImage := "openjdk:16-jdk-alpine3.12",
   dockerRepository := Some("hmda")
 )
 
@@ -128,7 +128,8 @@ lazy val `hmda-platform` = (project in file("hmda"))
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
-      }
+      },
+      Revolver.enableDebugging(5006)
     ),
     dockerSettings,
     packageSettings

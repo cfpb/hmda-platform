@@ -4,7 +4,7 @@ import hmda.model.filing.ts.TransmittalLar
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.lar.quality.common.Q600
 import hmda.validation.rules.lar.syntactical.{ S304, S305, S306 }
-
+// $COVERAGE-OFF$
 private[engine] object TsLarEngine2021Q extends ValidationEngine[TransmittalLar] {
 
   override def syntacticalChecks(ctx: ValidationContext) = Vector(
@@ -18,3 +18,5 @@ private[engine] object TsLarEngine2021Q extends ValidationEngine[TransmittalLar]
   )
 
 }
+
+// $COVERAGE-ON$

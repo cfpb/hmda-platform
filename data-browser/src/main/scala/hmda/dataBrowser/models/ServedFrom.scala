@@ -1,5 +1,5 @@
 package hmda.dataBrowser.models
-
+// $COVERAGE-OFF$
 import io.circe.{Encoder, Json}
 
 sealed trait ServedFrom extends Product with Serializable { self =>
@@ -20,3 +20,4 @@ object ServedFrom {
     case Cache    => "cache"
   }
 }
+// $COVERAGE-ON$

@@ -32,7 +32,7 @@ object HmdaWSApi {
     val host: String  = config.getString("hmda.ws.host")
     val port: Int     = config.getInt("hmda.ws.port")
     val routes: Route = BaseWsApi.route(name) ~ SubmissionWsApi.routes
-    Http().bindAndHandle(routes, host, port).onComplete {
+    Http()(classicSystem).newServerAt(host, port).bindFlow(routes).onComplete {
       case Failure(exception) =>
         system.log.error(s"Failed to start $name HTTP server, shutting down", exception)
         system.terminate()

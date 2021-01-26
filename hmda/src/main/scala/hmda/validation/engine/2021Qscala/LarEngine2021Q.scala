@@ -1,5 +1,5 @@
 package hmda.validation.engine
-
+// $COVERAGE-OFF$
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.lar.quality._2019._
@@ -285,6 +285,8 @@ private[engine] object LarEngine2021Q extends ValidationEngine[LoanApplicationRe
     common.Q650,
     quality2020.Q653_1,
     quality2020.Q653_2,
-    quality2020.Q654
+    quality2020.Q654,
+    quality2021.Q655
   )
 }
+// $COVERAGE-ON$

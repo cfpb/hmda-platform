@@ -19,6 +19,8 @@ class DataPublisherHttpApiSpec extends WordSpec with MustMatchers with Scalatest
       Schedules.values.foreach({
         case Schedules.PanelScheduler2018            =>
         case x @ Schedules.PanelScheduler2019        => testTrigger(x, _.panelScheduler)
+        case x @ Schedules.PanelScheduler2020        => testTrigger(x, _.panelScheduler)
+        case x @ Schedules.PanelScheduler2020        => testTrigger(x, _.panelScheduler)
         case x @ Schedules.LarScheduler2018          => testTrigger(x, _.larScheduler)
         case x @ Schedules.LarPublicScheduler2018    => testTrigger(x, _.larPublicScheduler)
         case x @ Schedules.LarPublicScheduler2019    => testTrigger(x, _.larPublicScheduler)

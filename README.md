@@ -116,7 +116,12 @@ sbt:hmda-root> project hmda-platform
 sbt:hmda-platform> reStart
 
 ```
-
+## Build hmda-platform Docker image
+Docke Image is build via Docker plugin utilizing [sbt-native-packager](https://sbt-native-packager.readthedocs.io/en/stable/formats/docker.html#docker-plugin)
+```
+sbt -batch clean hmda-platform/docker:stage
+docker build --rm -t hmda-platform hmda/target/docker/stage
+```
 ## One-line Cloud Deployment to Dev/Prod
 
 The platform and all of the related microservices explained above are deployed on [Kubernetes](https://kubernetes.io/) using [Helm](https://helm.sh/). Each deployment is a single Helm command. Below is an example for the deployment of the email-service:

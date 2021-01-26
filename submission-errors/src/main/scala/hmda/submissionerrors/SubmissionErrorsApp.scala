@@ -14,7 +14,7 @@ import hmda.submissionerrors.streams.SubmissionProcessor.{ handleMessages, proce
 import monix.execution.Scheduler
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
-
+// $COVERAGE-OFF$
 object SubmissionErrorsApp extends App {
   val config         = ConfigFactory.load()
   val kafkaHosts     = config.getString("kafka.hosts")
@@ -56,3 +56,4 @@ object SubmissionErrorsApp extends App {
   CoordinatedShutdown(classicSystem)
     .addTask(CoordinatedShutdown.PhaseActorSystemTerminate, "stop-kafka-consumer")(() => killSwitch.shutdown())
 }
+// $COVERAGE-ON$

@@ -1,5 +1,5 @@
 package hmda.dataBrowser.models
-
+// $COVERAGE-OFF$
 import slick.jdbc.GetResult
 // $COVERAGE-OFF$
 case class ModifiedLarEntity2017(

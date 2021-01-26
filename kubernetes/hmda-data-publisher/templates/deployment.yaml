@@ -36,7 +36,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop:
-                - ALL           
+                - ALL
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
           - name: CASSANDRA_CLUSTER_HOSTS
@@ -164,6 +164,11 @@ spec:
               configMapKeyRef:
                 name: schedule-configmap
                 key: publisher.panel.private.2019
+          - name: PANEL_PRIVATE_SCHEDULE_2020
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.panel.private.2020
           - name: TS_PUBLIC_SCHEDULE_2018
             valueFrom:
               configMapKeyRef:

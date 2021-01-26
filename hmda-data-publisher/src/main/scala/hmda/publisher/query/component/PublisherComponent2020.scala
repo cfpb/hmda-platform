@@ -1,5 +1,5 @@
 package hmda.publisher.query.component
-
+// $COVERAGE-OFF$
 import java.sql.Timestamp
 
 import hmda.publisher.helper.PGTableNameLoader
@@ -563,3 +563,4 @@ trait PublisherComponent2020 extends PGTableNameLoader {
     TsData[TransmittalSheetEntity, TransmittalSheetTableBase](transmittalSheetTable2020Q3)(_.lei, _.totalLines, _.submissionId)
 
 }
+// $COVERAGE-ON$

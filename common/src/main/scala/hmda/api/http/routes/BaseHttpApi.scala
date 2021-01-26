@@ -25,7 +25,7 @@ object BaseHttpApi {
                  shutdown: CoordinatedShutdown,
                  name: String
                )(routes: Route, host: String, port: Int)(implicit system: ActorSystem, ec: ExecutionContext): Unit =
-    Http().bindAndHandle(routes, host, port).onComplete {
+    Http().newServerAt(host, port).bindFlow(routes).onComplete {
       case Failure(exception) =>
         system.log.error("Failed to start HTTP server, shutting down", exception)
         system.terminate()

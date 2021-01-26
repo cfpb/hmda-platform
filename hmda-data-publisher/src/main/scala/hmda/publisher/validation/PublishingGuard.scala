@@ -1,5 +1,5 @@
 package hmda.publisher.validation
-
+// $COVERAGE-OFF$
 import akka.actor.ActorSystem
 import cats.data.{ Validated, ValidatedNel }
 import com.typesafe.config.ConfigFactory
@@ -139,3 +139,4 @@ object PublishingGuard {
     case object Private extends Scope
   }
 }
+// $COVERAGE-ON$

@@ -1,5 +1,5 @@
 package hmda.api.http.admin
-
+// $COVERAGE-OFF$
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.headers.{Authorization, RawHeader}
 import akka.http.scaladsl.Http
@@ -97,3 +97,4 @@ class RealRequestReplicationClient(replicationAddress: String) extends RequestRe
 object NoopRequestReplicationClient$ extends RequestReplicationClient {
   override def withRequestReplication: Directive0 = Directives.pass
 }
+// $COVERAGE-ON$

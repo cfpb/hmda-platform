@@ -23,7 +23,7 @@ import org.slf4j.Logger
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
-
+// $COVERAGE-OFF$
 object InstitutionHttpApi {
   def create(log: Logger, sharding: ClusterSharding)(implicit timeout: Timeout, ec: ExecutionContext): OAuth2Authorization => Route =
     new InstitutionHttpApi(log, sharding)(timeout, ec).institutionRoutes _
@@ -117,3 +117,4 @@ private class InstitutionHttpApi(log: Logger, sharding: ClusterSharding)(implici
       }
     }
 }
+// $COVERAGE-ON$

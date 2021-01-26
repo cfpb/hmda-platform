@@ -6,7 +6,7 @@ import akka.actor.typed.{ Behavior, Terminated }
 import akka.actor.{ ActorRef => ClassicActorRef }
 import hmda.messages.submission.ValidationProgressTrackerCommands._
 import hmda.model.processing.state.{ HmdaValidationErrorState, ValidationProgressTrackerState, ValidationType }
-
+// $COVERAGE-OFF$
 /**
  * This actor is responsible for keeping track of the file's validation progress and is responsible for publishing
  * updates to interested parties (i.e. WebSocketProgressTracker actors that are created when a websocket connection
@@ -67,3 +67,4 @@ object ValidationProgressTracker {
   def apply(state: HmdaValidationErrorState): Behavior[ValidationProgressTrackerCommand] =
     behavior(ValidationProgressTrackerState.initialize(state), Set.empty)
 }
+// $COVERAGE-ON$

@@ -59,6 +59,7 @@ private class TsValidationHttpApi {
     }
 
   //ts/validate/<year>/quarter/<period>
+  // $COVERAGE-OFF$
   private val validateQuarterTsRoute =
     path("validate" / IntNumber / "quarter" / Quarter) { (year, quarter) =>
       parameters('check.as[String] ? "all") { checkType =>
@@ -76,6 +77,7 @@ private class TsValidationHttpApi {
         }
       }
     }
+  // $COVERAGE-ON$
 
   private def validate(ts: TransmittalSheet, checkType: String, year: Int, quarter: Option[String]): Route = {
     val ctx              = ValidationContext(filingPeriod = Some(Period(year, quarter)))

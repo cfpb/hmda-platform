@@ -42,7 +42,7 @@ javaOptions in Universal ++= Seq(
   "-Dcom.sun.management.jmxremote.port=1099",
   "-Dcom.sun.management.jmxremote.rmi.port=1099",
   "-Djava.rmi.server.hostname=127.0.0.1"
-//  ,"-agentpath:/opt/docker/YourKit-JavaProfiler-2019.8/bin/linux-x86-64/libyjpagent.so=port=10001,listen=all,dir=/opt/docker,sampling_settings_path=/ope/docker"
+  //  ,"-agentpath:/opt/docker/YourKit-JavaProfiler-2019.8/bin/linux-x86-64/libyjpagent.so=port=10001,listen=all,dir=/opt/docker,sampling_settings_path=/ope/docker"
 )
 
 javaOptions in reStart ++= (javaOptions in run).value

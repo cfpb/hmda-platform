@@ -11,7 +11,7 @@ import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
 import slick.basic.{ DatabaseConfig, DatabasePublisher }
 import slick.jdbc.{ JdbcProfile, ResultSetConcurrency, ResultSetType }
-
+// $COVERAGE-OFF$
 import scala.concurrent.Future
 
 trait PublisherComponent2019 extends PGTableNameLoader {
@@ -819,3 +819,4 @@ trait PublisherComponent2019 extends PGTableNameLoader {
     TsData[TransmittalSheetEntity, TransmittalSheetTable](transmittalSheetTable2019)(_.lei, _.totalLines, _.submissionId)
 
 }
+// $COVERAGE-ON$

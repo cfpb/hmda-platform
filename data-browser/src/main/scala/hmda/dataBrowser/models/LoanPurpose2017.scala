@@ -1,5 +1,5 @@
 package hmda.dataBrowser.models
-
+// $COVERAGE-OFF$
 import enumeratum._
 import scala.collection.immutable
 
@@ -27,3 +27,4 @@ object LoanPurpose2017 extends Enum[LoanPurpose2017] {
       })
   }
 }
+// $COVERAGE-ON$
