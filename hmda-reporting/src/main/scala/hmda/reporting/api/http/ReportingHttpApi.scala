@@ -29,6 +29,8 @@ private class ReportingHttpApi(config: Config)(implicit ec: ExecutionContext) ex
   private val repo                      = new ModifiedLarRepository(databaseConfig)
   private val institutionRepository2018 = new InstitutionRepository(databaseConfig, "institutions2018")
   private val institutionRepository2019 = new InstitutionRepository(databaseConfig, "institutions2019")
+  private val institutionRepository2020 = new InstitutionRepository(databaseConfig, "institutions2020")
+
   private val filerListRoute: Route = {
     path("filers" / IntNumber) { filingYear =>
       get {
@@ -93,6 +95,7 @@ private class ReportingHttpApi(config: Config)(implicit ec: ExecutionContext) ex
           year match {
             case 2018 => institutionRepository2018
             case 2019 => institutionRepository2019
+            case 2020 => institutionRepository2020
           }
         val resultset = for {
           msaMdsResult      <- repo.msaMds(lei, year)
