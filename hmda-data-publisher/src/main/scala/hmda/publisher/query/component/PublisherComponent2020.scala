@@ -643,7 +643,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
       with QATableBase[LarEntityImpl2020WithMsa] {
 
     object MsaColumns {
-      def id                   = column[String]("id")
+      def msaID                   = column[String]("msa_id")
       def name                 = column[String]("name")
       def totalLars            = column[Int]("total_lars")
       def totalAmount          = column[BigDecimal]("total_amount")
@@ -665,7 +665,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
 
     def msaProjection =
       (
-        MsaColumns.id,
+        MsaColumns.msaID,
         MsaColumns.name,
         MsaColumns.totalLars,
         MsaColumns.totalAmount,

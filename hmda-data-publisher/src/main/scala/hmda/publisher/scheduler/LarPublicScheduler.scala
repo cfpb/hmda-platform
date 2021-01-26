@@ -85,7 +85,7 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
     case schedule @ LarPublicScheduler2019 =>
       publishingGuard.runIfDataIsValid(Period.y2019, Scope.Public) {
         val fileName         = "2019_lar.txt"
-        val zipDirectoryName = "2018_lar.zip"
+        val zipDirectoryName = "2019_lar.zip"
         val s3Path           = s"$environmentPublic/dynamic-data/2019/"
         val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
         val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
