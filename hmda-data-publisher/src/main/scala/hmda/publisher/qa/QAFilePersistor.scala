@@ -20,6 +20,8 @@ class QAFilePersistor(notifier: MattermostNotifier)(implicit ec: ExecutionContex
   private val persistParallelism = 5
 
   def fetchAndPersist[T](spec: QAFileSpec[T]): Future[Unit] = {
+    val timeStamp          = System.currentTimeMillis()
+
     logger.debug(s"Fetching and saving file ${spec.filePath} for QA")
     fetchFile(spec)
       .via(Framing.delimiter(ByteString("\n"), maximumFrameLength = Int.MaxValue, allowTruncation = true))
@@ -27,9 +29,9 @@ class QAFilePersistor(notifier: MattermostNotifier)(implicit ec: ExecutionContex
       .drop(if (spec.withHeaderLine) 1 else 0)
       .map(spec.parseLine)
       .groupedWithin(persistBatchSize, 5.seconds)
-      .mapAsync(persistParallelism)(batch => spec.repository.saveAll(batch, spec.filePath).map(_ => batch.size))
+      .mapAsync(persistParallelism)(batch => spec.repository.saveAll(batch, spec.filePath,timeStamp).map(_ => batch.size))
       .runFold(0)(_ + _)
-      .flatTap(_ => spec.repository.deletePreviousRecords(spec.filePath))
+      .flatTap(_ => spec.repository.deletePreviousRecords(timeStamp))
       .attempt
       .flatMap { result =>
         val msg = result match {

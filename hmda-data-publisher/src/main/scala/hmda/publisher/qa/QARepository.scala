@@ -10,9 +10,9 @@ trait QARepository[-T] {
 
   def tableName: String
 
-  def deletePreviousRecords(currentFileName: String): Future[Unit]
+  def deletePreviousRecords(timeStamp: Long): Future[Unit]
 
-  def saveAll(batch: Seq[T], fileName: String): Future[Unit]
+  def saveAll(batch: Seq[T], fileName: String, timeStamp: Long): Future[Unit]
 
 }
 
@@ -25,17 +25,17 @@ object QARepository {
   ) extends QARepository[Entity] {
     override def tableName: String = table.baseTableRow.tableName
 
-    override def deletePreviousRecords(currentFileName: String): Future[Unit] =
-      config.db.run(table.filter(_.fileName =!= currentFileName).delete).map(_ => ())
+    override def deletePreviousRecords(timeStamp: Long): Future[Unit] =
+      config.db.run(table.filter(_.timeStamp =!= timeStamp).delete).map(_ => ())
 
-    override def saveAll(batch: Seq[Entity], fileName: String): Future[Unit] =
-      config.db.run(table ++= batch.map(r => QAEntity(r, fileName))).map(_ => ())
+    override def saveAll(batch: Seq[Entity], fileName: String,timeStamp:Long): Future[Unit] =
+      config.db.run(table ++= batch.map(r => QAEntity(r, fileName,timeStamp))).map(_ => ())
   }
 
   object NoOp extends QARepository[Any] {
     override def tableName: String                                            = "<noop>"
-    override def deletePreviousRecords(currentFileName: String): Future[Unit] = Future.unit
-    override def saveAll(batch: Seq[Any], fileName: String): Future[Unit]     = Future.unit
+    override def deletePreviousRecords(timeStamp: Long): Future[Unit] = Future.unit
+    override def saveAll(batch: Seq[Any], fileName: String, timeStamp: Long): Future[Unit]     = Future.unit
   }
 
 }

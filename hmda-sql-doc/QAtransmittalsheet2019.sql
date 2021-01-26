@@ -46,7 +46,8 @@ CREATE TABLE hmda_user.qa_ts_prv_table_2019 (
     submission_id character varying COLLATE pg_catalog."default",
     is_quarterly boolean NOT NULL DEFAULT false,
     sign_date bigint,
-    file_name character varying
+    file_name character varying,
+    time_stamp bigint
 
 );
 
@@ -57,9 +58,6 @@ ALTER TABLE hmda_user.qa_ts_prv_table_2019 OWNER TO hmda_user;
 -- TOC entry 5444 (class 2606 OID 20734)
 -- Name: qa_ts_prv_table_2019 ts2019_qa_prv_pkey; Type: CONSTRAINT; Schema: hmda_user; Owner: hmda_user
 --
-
-ALTER TABLE ONLY hmda_user.qa_ts_prv_table_2019
-    ADD CONSTRAINT ts2019_qa_prv_pkey PRIMARY KEY (lei);
 
 
 -- Completed on 2019-06-18 12:21:09 EDT

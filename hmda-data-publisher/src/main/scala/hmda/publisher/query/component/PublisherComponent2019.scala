@@ -90,7 +90,7 @@ trait PublisherComponent2019 extends PGTableNameLoader {
         emailDomains
       ) <> ((InstitutionAltEntity.apply _).tupled, InstitutionAltEntity.unapply)
     def * =
-      (institutionAltEntityProjection, fileName) <> ((QAEntity.apply[InstitutionAltEntity] _).tupled, QAEntity
+      (institutionAltEntityProjection, fileName,timeStamp) <> ((QAEntity.apply[InstitutionAltEntity] _).tupled, QAEntity
         .unapply[InstitutionAltEntity] _)
   }
 
@@ -217,7 +217,7 @@ trait PublisherComponent2019 extends PGTableNameLoader {
 
   class QATransmittalSheetTable(tag: Tag, tableName: String) extends TransmittalSheetTableBase[QAEntity[TransmittalSheetEntity]](tag, tableName)
     with QATableBase[TransmittalSheetEntity] {
-    override def * = (transmittalSheetEntityProjection, fileName) <> ((QAEntity.apply[TransmittalSheetEntity] _).tupled, QAEntity.unapply[TransmittalSheetEntity] _)
+    override def * = (transmittalSheetEntityProjection, fileName,timeStamp) <> ((QAEntity.apply[TransmittalSheetEntity] _).tupled, QAEntity.unapply[TransmittalSheetEntity] _)
   }
   def createPublicQaTsRepository2019(config: DatabaseConfig[JdbcProfile])(implicit ec: ExecutionContext) =
     new QARepository.Default[TransmittalSheetEntity, QATransmittalSheetTable](config, TableQuery(tag => new QATransmittalSheetTable(tag, ts2019PublicQATableName)))(ec)
@@ -533,7 +533,7 @@ trait PublisherComponent2019 extends PGTableNameLoader {
   class QaLarTable(tag: Tag)
     extends LarTableBase[QAEntity[LarEntityImpl2019]](tag, lar2019QATableName)
       with QATableBase[LarEntityImpl2019] {
-    def * = (larEntityImpl2019Projection, fileName) <> ((QAEntity.apply[LarEntityImpl2019] _).tupled, QAEntity.unapply[LarEntityImpl2019] _)
+    def * = (larEntityImpl2019Projection, fileName,timeStamp) <> ((QAEntity.apply[LarEntityImpl2019] _).tupled, QAEntity.unapply[LarEntityImpl2019] _)
   }
 
   class QALarTableLoanLimit(tag: Tag)
@@ -585,7 +585,7 @@ trait PublisherComponent2019 extends PGTableNameLoader {
 
     def larEntityImpl2019WithMsaProjection = (larEntityImpl2019Projection, msaProjection) <> ((LarEntityImpl2019WithMsa.apply _).tupled, LarEntityImpl2019WithMsa.unapply)
 
-    override def * = (larEntityImpl2019WithMsaProjection, fileName) <> ((QAEntity.apply[LarEntityImpl2019WithMsa] _).tupled, QAEntity.unapply[LarEntityImpl2019WithMsa] _)
+    override def * = (larEntityImpl2019WithMsaProjection, fileName,timeStamp) <> ((QAEntity.apply[LarEntityImpl2019WithMsa] _).tupled, QAEntity.unapply[LarEntityImpl2019WithMsa] _)
   }
 
   val larTable2019 = TableQuery[LarTable]
@@ -941,7 +941,7 @@ trait PublisherComponent2019 extends PGTableNameLoader {
   }
 
   class QAModifiedLarTable(tag: Tag) extends ModifiedLarTableBase[QAEntity[ModifiedLarEntityImpl]](tag, mlar2019QATableName) with QATableBase[ModifiedLarEntityImpl] {
-    override def * = (modifiedLarEntityImplProjection, fileName) <> ((QAEntity.apply[ModifiedLarEntityImpl] _).tupled, QAEntity.unapply[ModifiedLarEntityImpl] _)
+    override def * = (modifiedLarEntityImplProjection, fileName,timeStamp) <> ((QAEntity.apply[ModifiedLarEntityImpl] _).tupled, QAEntity.unapply[ModifiedLarEntityImpl] _)
   }
   val qaMlarTable2019 = TableQuery[QAModifiedLarTable]
   class QAModifiedLarRepository2019(config: DatabaseConfig[JdbcProfile])(implicit ec: ExecutionContext)

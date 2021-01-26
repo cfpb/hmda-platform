@@ -88,7 +88,7 @@ trait PublisherComponent2018 extends PGTableNameLoader {
         emailDomains
       ) <> ((InstitutionAltEntity.apply _).tupled, InstitutionAltEntity.unapply)
     def * =
-      (institutionAltEntityProjection, fileName) <> ((QAEntity.apply[InstitutionAltEntity] _).tupled, QAEntity
+      (institutionAltEntityProjection, fileName,timeStamp) <> ((QAEntity.apply[InstitutionAltEntity] _).tupled, QAEntity
         .unapply[InstitutionAltEntity] _)
   }
 
@@ -218,7 +218,7 @@ trait PublisherComponent2018 extends PGTableNameLoader {
     extends TransmittalSheetTableBase[QAEntity[TransmittalSheetEntity]](tag, tableName)
       with QATableBase[TransmittalSheetEntity] {
     def * =
-      (transmittalSheetEntityProjection, fileName) <> ((QAEntity.apply[TransmittalSheetEntity] _).tupled, QAEntity
+      (transmittalSheetEntityProjection, fileName,timeStamp) <> ((QAEntity.apply[TransmittalSheetEntity] _).tupled, QAEntity
         .unapply[TransmittalSheetEntity] _)
   }
   def createPublicQaTsRepository2018(config: DatabaseConfig[JdbcProfile])(implicit ec: ExecutionContext) =
@@ -507,7 +507,7 @@ trait PublisherComponent2018 extends PGTableNameLoader {
   class QALarTable(tag: Tag)
     extends LarTableBase[QAEntity[LarEntityImpl2018]](tag, lar2018QATableName)
       with QATableBase[LarEntityImpl2018] {
-    def * = (larEntityImpl2018Projection, fileName) <> ((QAEntity.apply[LarEntityImpl2018] _).tupled, QAEntity.unapply[LarEntityImpl2018] _)
+    def * = (larEntityImpl2018Projection, fileName,timeStamp) <> ((QAEntity.apply[LarEntityImpl2018] _).tupled, QAEntity.unapply[LarEntityImpl2018] _)
   }
   val larTable2018   = TableQuery[LarTable]
   val qaLarTable2018 = TableQuery[QALarTable]
@@ -860,7 +860,7 @@ trait PublisherComponent2018 extends PGTableNameLoader {
     extends ModifiedLarTableBase[QAEntity[ModifiedLarEntityImpl]](tag, mlar2018QATableName)
       with QATableBase[ModifiedLarEntityImpl] {
     override def * =
-      (modifiedLarEntityImplProjection, fileName) <> ((QAEntity.apply[ModifiedLarEntityImpl] _).tupled, QAEntity
+      (modifiedLarEntityImplProjection, fileName,timeStamp) <> ((QAEntity.apply[ModifiedLarEntityImpl] _).tupled, QAEntity
         .unapply[ModifiedLarEntityImpl] _)
   }
   val qaMlarTable2018 = TableQuery[QAModifiedLarTable]

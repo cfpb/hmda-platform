@@ -97,7 +97,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
         emailDomains
       ) <> ((InstitutionAltEntity.apply _).tupled, InstitutionAltEntity.unapply)
     def * =
-      (institutionAltEntityProjection, fileName) <> ((QAEntity.apply[InstitutionAltEntity] _).tupled, QAEntity
+      (institutionAltEntityProjection, fileName,timeStamp) <> ((QAEntity.apply[InstitutionAltEntity] _).tupled, QAEntity
         .unapply[InstitutionAltEntity] _)
   }
 
@@ -196,7 +196,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
   class QATransmittalSheetTable(tag: Tag, tableName: String)
     extends TransmittalSheetTableBase[QAEntity[TransmittalSheetEntity]](tag, tableName)
       with QATableBase[TransmittalSheetEntity] {
-    def * = (transmittalSheetEntityProjection, fileName) <> ((QAEntity.apply[TransmittalSheetEntity] _).tupled, QAEntity.unapply[TransmittalSheetEntity] _)
+    def * = (transmittalSheetEntityProjection, fileName,timeStamp) <> ((QAEntity.apply[TransmittalSheetEntity] _).tupled, QAEntity.unapply[TransmittalSheetEntity] _)
   }
 
   def transmittalSheetTableQuery2020(p: Year2020Period): TableQuery[RealTransmittalSheetTable] = {
@@ -565,7 +565,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
   class QALarTableBase(tag: Tag, tableName: String)
     extends LarTableBase[QAEntity[LarEntityImpl2020]](tag, tableName)
       with QATableBase[LarEntityImpl2020] {
-    def * = (larEntityImpl2020Projection, fileName) <> ((QAEntity.apply[LarEntityImpl2020] _).tupled, QAEntity.unapply[LarEntityImpl2020] _)
+    def * = (larEntityImpl2020Projection, fileName,timeStamp) <> ((QAEntity.apply[LarEntityImpl2020] _).tupled, QAEntity.unapply[LarEntityImpl2020] _)
   }
 
   def larTableQuery2020(p: Year2020Period) = {
@@ -687,7 +687,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
 
     def larEntityImpl2020WithMsaProjection = (larEntityImpl2020Projection, msaProjection) <> ((LarEntityImpl2020WithMsa.apply _).tupled, LarEntityImpl2020WithMsa.unapply)
 
-    override def * = (larEntityImpl2020WithMsaProjection, fileName) <> ((QAEntity.apply[LarEntityImpl2020WithMsa] _).tupled, QAEntity.unapply[LarEntityImpl2020WithMsa] _)
+    override def * = (larEntityImpl2020WithMsaProjection, fileName,timeStamp) <> ((QAEntity.apply[LarEntityImpl2020WithMsa] _).tupled, QAEntity.unapply[LarEntityImpl2020WithMsa] _)
   }
   val qaLarTable2020LoanLimit = TableQuery[QALarTableLoanLimit]
 
