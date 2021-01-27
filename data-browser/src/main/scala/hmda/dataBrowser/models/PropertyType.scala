@@ -6,6 +6,7 @@ import scala.collection.immutable
 sealed abstract class PropertyType(override val entryName: String)
     extends EnumEntry
 
+// $COVERAGE-OFF$
 object PropertyType extends Enum[PropertyType] {
   val values: immutable.IndexedSeq[PropertyType] = findValues
 
@@ -27,4 +28,6 @@ object PropertyType extends Enum[PropertyType] {
       })
   }
 }
-// $COVERAGE-ON$
+
+// $COVERAGE-OFF$
+
