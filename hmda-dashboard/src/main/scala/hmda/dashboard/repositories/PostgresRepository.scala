@@ -169,7 +169,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   def fetchFilersUsingExemptionByAgency(period: String): Task[Seq[FilersUsingExemptionByAgency]] = {
     val materializedView = larTableSelector(period, "exemptions")
     val query = sql"""
-      select agency, count (*) lei from  #${materializedView} where upper(lei) not in (#${filterList}) group by agency
+      select agency, count from  #${materializedView} ;
       """.as[FilersUsingExemptionByAgency]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
@@ -186,7 +186,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   def fetchLarCountUsingExemptionByAgency(period: String): Task[Seq[LarCountUsingExemptionByAgency]] = {
     val larTable = larTableSelector(period, "lar_exemptions")
     val query = sql"""
-      select agency, count(*) from #${larTable} where upper(lei) NOT IN (#${filterList}) group by agency;
+      select agency, count from #${larTable} ;
       """.as[LarCountUsingExemptionByAgency]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
