@@ -1,10 +1,11 @@
 package hmda.publisher.query.panel
 
 import com.softwaremill.diffx.Diff
+import hmda.publisher.query.lar.{LarEntityImpl2020, LarPartSeven2020}
 import hmda.utils.DiffxMatcher
-import org.scalacheck.ScalacheckShapeless._
-import org.scalatest.{MustMatchers, PropSpec}
+import org.scalatest.{FunSuite, MustMatchers, PropSpec}
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import org.scalacheck.ScalacheckShapeless._
 
 class InstitutionAltEntityTest extends PropSpec with ScalaCheckPropertyChecks with MustMatchers with DiffxMatcher {
 
