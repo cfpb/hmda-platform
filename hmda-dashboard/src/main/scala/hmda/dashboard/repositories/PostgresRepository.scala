@@ -106,6 +106,22 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
+  def fetchFilersByLar(period: String, min_lar: Int, max_lar: Int): Task[Seq[FilersByLar]] = {
+    val tsTable = tsTableSelector(period)
+    val query = sql"""
+      select institution_name, lei, total_lines from #${tsTable} where upper(LEI) NOT IN (#${filterList}) and total_lines > #${min_lar} and total_lines < #${max_lar} order by total_lines desc;
+      """.as[FilersByLar]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchFilersCountByLar(period: String, min_lar: Int, max_lar: Int): Task[Seq[FilersCountByLar]] = {
+    val tsTable = tsTableSelector(period)
+    val query = sql"""
+      select count(*) from #${tsTable} where upper(LEI) NOT IN (#${filterList}) and total_lines > #${min_lar} and total_lines < #${max_lar};
+      """.as[FilersCountByLar]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
   def fetchSignsForLastDays(days: Int, period: String): Task[Seq[SignsForLastDays]] = {
     val tsTable = tsTableSelector(period)
     val query = sql"""

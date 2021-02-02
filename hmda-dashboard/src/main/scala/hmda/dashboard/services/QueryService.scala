@@ -9,6 +9,8 @@ trait QueryService {
   def fetchSingleAttempts(period: String) : Task[Seq[SingleAttempts]]
   def fetchMultipleAttempts(period: String) : Task[Seq[MultipleAttempts]]
   def fetchTopFilers(count: Int, period: String) : Task[Seq[TopFilers]]
+  def fetchFilersByLar(period: String, min_lar: Int, max_lar: Int) : Task[Seq[FilersByLar]]
+  def fetchFilersCountByLar(period: String, min_lar: Int, max_lar: Int) : Task[Seq[FilersCountByLar]]
   def fetchSignsForLastDays(days: Int, period: String) : Task[Seq[SignsForLastDays]]
   def fetchFilerAttempts(count: Int, period: String) : Task[Seq[FilerAttempts]]
   def fetchTSRecordCount(period: String) : Task[Seq[TSRecordCount]]
