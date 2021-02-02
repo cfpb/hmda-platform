@@ -104,7 +104,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   def fetchTopFilers(count: Int, period: String): Task[Seq[TopFilers]] = {
     val tsTable = tsTableSelector(period)
     val query = sql"""
-      select institution_name, lei, total_lines from #${tsTable} where upper(LEI) NOT IN (#${filterList}) order by total_lines desc limit #${count};
+      select institution_name, lei, total_lines, city, state, date(to_timestamp(sign_date/1000)) as sign_date from #${tsTable} where upper(LEI) NOT IN (#${filterList}) order by total_lines desc limit #${count};
       """.as[TopFilers]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
