@@ -60,6 +60,12 @@ case object PreapprovalRequestApprovedButNotAccepted extends ActionTakenTypeEnum
     "Preapproval request approved but not accepted"
 }
 
+case object InvalidActionTakenTypeExemptCode extends ActionTakenTypeEnum {
+  override val code: Int = 1111
+  override val description: String =
+    "Invalid exemption code for loan field."
+}
+
 class InvalidActionTakenTypeCode(value: Int = -1) extends ActionTakenTypeEnum {
   override def code: Int           = value
   override def description: String = "Invalid code"

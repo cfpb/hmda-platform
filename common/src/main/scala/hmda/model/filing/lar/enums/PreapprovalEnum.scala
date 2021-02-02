@@ -23,6 +23,12 @@ case object PreapprovalNotRequested extends PreapprovalEnum {
   override val description: String = "Preapproval not requested"
 }
 
+case object InvalidPreapprovalExemptCode extends PreapprovalEnum {
+  override val code: Int = 1111
+  override val description: String =
+    "Invalid exemption code for loan field."
+}
+
 class InvalidPreapprovalCode(value: Int = -1) extends PreapprovalEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"

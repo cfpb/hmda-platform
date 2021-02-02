@@ -23,6 +23,12 @@ case object ManufacturedHome extends ConstructionMethodEnum {
   override val description: String = "Manufactured Home"
 }
 
+case object InvalidConstructionMethodExemptCode extends ConstructionMethodEnum {
+  override val code: Int = 1111
+  override val description: String =
+    "Invalid exemption code for loan field."
+}
+
 class InvalidConstructionMethodCode(value: Int = -1) extends ConstructionMethodEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"

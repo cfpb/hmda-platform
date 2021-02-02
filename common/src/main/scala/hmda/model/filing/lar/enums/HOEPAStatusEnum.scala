@@ -29,6 +29,7 @@ case object HOEPStatusANotApplicable extends HOEPAStatusEnum {
   override val description: String = "Not applicable"
 }
 
+
 class InvalidHoepaStatusCode(value: Int = -1) extends HOEPAStatusEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"

@@ -1,7 +1,7 @@
 package hmda.validation.rules.lar.quality._2021
 
 import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.lar.enums.EmptyAUSResultValue
+import hmda.model.filing.lar.enums._
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax.PredicateOps
 import hmda.validation.dsl.ValidationResult
@@ -14,23 +14,26 @@ object Q657 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q657"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult ={
-    (lar.loan.loanType.code  not equalTo(1111)) and
-      (lar.loan.loanPurpose.code  not equalTo(1111)) and
-      (lar.action.preapproval.code  not equalTo(1111)) and
-      (lar.loan.constructionMethod.code  not equalTo(1111)) and
-      (lar.loan.occupancy.code  not equalTo(1111)) and
-      (lar.action.actionTakenType.code  not equalTo(1111)) and
+    //check proeprty fields
+    (lar.property.totalUnits not equalTo(1111)) and
+
+    //check loan fields
+    (lar.loan.loanType  not equalTo(InvalidLoanTypeExemptCode)) and
+      (lar.loan.loanPurpose  not equalTo(InvalidLoanPurposeExemptCode)) and
+      (lar.loan.constructionMethod  not equalTo(InvalidConstructionMethodExemptCode)) and
+      (lar.loan.occupancy  not equalTo(InvalidOccupancyExemptCode)) and
+
+    //check action fields
+      (lar.action.preapproval  not equalTo(InvalidPreapprovalExemptCode)) and
+       (lar.action.actionTakenType  not equalTo(InvalidActionTakenTypeExemptCode)) and
+
+
       (lar.applicant.ethnicity.ethnicity1.code  not equalTo(1111)) and
       (lar.applicant.ethnicity.ethnicity2.code  not equalTo(1111)) and
       (lar.applicant.ethnicity.ethnicity3.code  not equalTo(1111)) and
       (lar.applicant.ethnicity.ethnicity4.code  not equalTo(1111)) and
       (lar.applicant.ethnicity.ethnicity5.code  not equalTo(1111))  and
       (lar.applicant.ethnicity.ethnicityObserved.code  not equalTo(1111))  and
-      (lar.coApplicant.ethnicity.ethnicity1.code  not equalTo(1111)) and
-      (lar.coApplicant.ethnicity.ethnicity2.code  not equalTo(1111)) and
-      (lar.coApplicant.ethnicity.ethnicity3.code  not equalTo(1111)) and
-      (lar.coApplicant.ethnicity.ethnicity4.code  not equalTo(1111)) and
-      (lar.coApplicant.ethnicity.ethnicity5.code  not equalTo(1111)) and
       (lar.coApplicant.ethnicity.ethnicityObserved.code  not equalTo(1111)) and
       (lar.applicant.race.race1.code  not equalTo(1111)) and
       (lar.applicant.race.race2.code  not equalTo(1111)) and
@@ -48,8 +51,9 @@ object Q657 extends EditCheck[LoanApplicationRegister] {
       (lar.coApplicant.sex.sexEnum.code  not equalTo(1111)) and
       (lar.applicant.sex.sexObservedEnum.code  not equalTo(1111))  and
       (lar.coApplicant.sex.sexObservedEnum.code  not equalTo(1111)) and
-      (lar.applicant.age not equalTo(1111)) and
-      (lar.purchaserType.code not equalTo(1111)) and
+        (lar.applicant.age not equalTo(1111)) and
+        (lar.coApplicant.age not equalTo(1111)) and
+       (lar.purchaserType.code not equalTo(1111)) and
       (lar.hoepaStatus.code not equalTo(1111)) and
       (lar.lienStatus.code not equalTo(1111)) and
       (lar.AUS.aus2.code not equalTo(1111)) and

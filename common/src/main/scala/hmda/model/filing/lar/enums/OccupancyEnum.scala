@@ -29,6 +29,12 @@ case object InvestmentProperty extends OccupancyEnum {
   override val description: String = "Investment Property"
 }
 
+case object InvalidOccupancyExemptCode extends OccupancyEnum {
+  override val code: Int = 1111
+  override val description: String =
+    "Invalid exemption code for loan field."
+}
+
 class InvalidOccupancyCode(value: Int = -1) extends OccupancyEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"
