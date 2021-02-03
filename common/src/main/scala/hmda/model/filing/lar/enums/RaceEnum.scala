@@ -133,6 +133,11 @@ case object RaceNoCoApplicant extends RaceEnum {
   override val description: String = "No co-applicant"
 }
 
+case object InvalidRaceExemptCode extends RaceEnum {
+  override val code: Int = 1111
+  override val description: String =
+    "Invalid exemption code for loan field."
+}
 
 class InvalidRaceCode(value: Int = -1) extends RaceEnum {
   override def code: Int           = value
