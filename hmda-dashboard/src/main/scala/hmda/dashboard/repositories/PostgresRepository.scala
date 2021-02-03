@@ -109,7 +109,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   def fetchFilersByLar(period: String, min_lar: Int, max_lar: Int): Task[Seq[FilersByLar]] = {
     val tsTable = tsTableSelector(period)
     val query = sql"""
-      select institution_name, lei, total_lines from #${tsTable} where upper(LEI) NOT IN (#${filterList}) and total_lines > #${min_lar} and total_lines < #${max_lar} order by total_lines desc;
+      select institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date from #${tsTable} where upper(LEI) NOT IN (#${filterList}) and total_lines > #${min_lar} and total_lines < #${max_lar} order by total_lines desc;
       """.as[FilersByLar]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
