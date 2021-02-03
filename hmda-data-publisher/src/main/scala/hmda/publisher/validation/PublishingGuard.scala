@@ -1,22 +1,23 @@
 package hmda.publisher.validation
-// $COVERAGE-OFF$
+
 import akka.actor.ActorSystem
-import cats.data.{ Validated, ValidatedNel }
+import cats.data.{Validated, ValidatedNel}
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
-import hmda.publisher.query.component.{ PublisherComponent2018, PublisherComponent2019, PublisherComponent2020 }
-import hmda.publisher.validation.PublishingGuard.{ Period, Scope }
+import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020}
+import hmda.publisher.util.MattermostNotifier
+import hmda.publisher.validation.PublishingGuard.{Period, Scope}
 import hmda.query.DbConfiguration
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 class PublishingGuard(
                        db2018: PublisherComponent2018,
                        db2019: PublisherComponent2019,
                        db2020: PublisherComponent2020,
-                       messageReporter: MessageReporter,
+                       messageReporter: MattermostNotifier,
                        dbConfig: DatabaseConfig[JdbcProfile]
                      )(
                        implicit ec: ExecutionContext
@@ -31,7 +32,7 @@ class PublishingGuard(
         case Validated.Invalid(errs) =>
           val message = errs.toList.mkString("\n")
           logger.error(s"Data validation failed for year ${year}. Files won't be published. Message:\n${message}")
-          messageReporter.report( s"Data validation failed for year ${year}. Files won't be published. Message:\n${message}")
+          messageReporter.report(message)
       })
       .recoverWith {
         case ex =>
@@ -54,26 +55,26 @@ class PublishingGuard(
         val larData = year match {
           case Period.y2018   => db2018.validationLarData2018
           case Period.y2019   => db2019.validationLarData2019
-          case Period.y2020   => db2020.validationLarData2020
-          case Period.y2020Q1 => db2020.validationLarData2020Q1
-          case Period.y2020Q2 => db2020.validationLarData2020Q2
-          case Period.y2020Q3 => db2020.validationLarData2020Q3
+          case Period.y2020   => db2020.validationLarData2020(db2020.Year2020Period.Whole)
+          case Period.y2020Q1 => db2020.validationLarData2020(db2020.Year2020Period.Q1)
+          case Period.y2020Q2 => db2020.validationLarData2020(db2020.Year2020Period.Q2)
+          case Period.y2020Q3 => db2020.validationLarData2020(db2020.Year2020Period.Q3)
         }
 
         val tsData = year match {
           case Period.y2018   => db2018.validationTSData2018
           case Period.y2019   => db2019.validationTSData2019
-          case Period.y2020   => db2020.validationTSData2020
-          case Period.y2020Q1 => db2020.validationTSData2020Q1
-          case Period.y2020Q2 => db2020.validationTSData2020Q2
-          case Period.y2020Q3 => db2020.validationTSData2020Q3
+          case Period.y2020   => db2020.validationTSData2020(db2020.Year2020Period.Whole)
+          case Period.y2020Q1 => db2020.validationTSData2020(db2020.Year2020Period.Q1)
+          case Period.y2020Q2 => db2020.validationTSData2020(db2020.Year2020Period.Q2)
+          case Period.y2020Q3 => db2020.validationTSData2020(db2020.Year2020Period.Q3)
         }
         List(
           new TSLinesCheck(dbConfig, tsData, larData),
           new LeiCountCheck(dbConfig, tsData, larData, leiCheckErrorMargin)
         )
       case Scope.Public =>
-        // there is no modified lar table for 2020 and so no checks will run for this year and scope
+        // there is no modified lar table for 2020 and so no chcecks will run for this year and scope
         val larDataOpt = year match {
           case Period.y2018 => Some(db2018.validationMLarData2018)
           case Period.y2019 => Some(db2019.validationMLarData2019)
@@ -116,7 +117,7 @@ object PublishingGuard {
             )(implicit as: ActorSystem): PublishingGuard = {
     import as.dispatcher
     val config      = ConfigFactory.load("application.conf")
-    val msgReporter = new MessageReporter(config.getString("hmda.publisher.validation.reportingUrl"))
+    val msgReporter = new MattermostNotifier(config.getString("hmda.publisher.validation.reportingUrl"))
     val dbConfig    = DbConfiguration.dbConfig
     new PublishingGuard(dbCompontnents, dbCompontnents, dbCompontnents, msgReporter, dbConfig)
   }
@@ -139,4 +140,3 @@ object PublishingGuard {
     case object Private extends Scope
   }
 }
-// $COVERAGE-ON$
