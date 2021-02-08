@@ -106,6 +106,15 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                   .runToFuture
               )
             } ~
+            path("filer_all_periods" / "lei" / Segment) { (lei) =>
+              log.info(s"all filing periods for lei=${lei}")
+              complete(
+                query
+                  .fetchFilerAllPeriods(lei)
+                  .map(aggs => FilerAllPeriodsAggregationResponse(aggs))
+                  .runToFuture
+              )
+            } ~
             path("filers_by_lar" / "year" / Segment / "min" / IntNumber / "max" / IntNumber) { (year, min_lar, max_lar) =>
               log.info(s"filers by lar for year=${year} min=${min_lar} max=${max_lar}")
               complete(

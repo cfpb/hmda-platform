@@ -17,6 +17,7 @@ trait QueryService {
   def fetchFilersByAgency(period: String) : Task[Seq[FilersByAgency]]
   def fetchLARByAgency(period: String) : Task[Seq[LarByAgency]]
   def fetchTopCountiesLar(period: String, count: Int) : Task[Seq[TopCountiesLar]]
+  def fetchFilerAllPeriods(lei: String) : Task [Seq[FilerAllPeriods]]
   def fetchLarCountByPropertyType(period: String) : Task[Seq[LarCountByPropertyType]]
   def fetchFilersUsingExemptionsByAgency(period: String) : Task[Seq[FilersUsingExemptionByAgency]]
   def fetchDenialReasonCountsByAgency(period: String) : Task[Seq[DenialReasonCountsByAgency]]

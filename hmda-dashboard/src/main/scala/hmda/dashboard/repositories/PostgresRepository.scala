@@ -106,6 +106,24 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
+  def fetchFilerAllPeriods(lei: String): Task[Seq[FilerAllPeriods]] = {
+    val tsTable_2018 = tsTableSelector("2018")
+    val tsTable_2019 = tsTableSelector("2019")
+    val tsTable_2020 = tsTableSelector("2020")
+    val tsTable_2020_q1 = tsTableSelector("2020-Q1")
+    val tsTable_2020_q2 = tsTableSelector("2020-Q2")
+    val tsTable_2020_q3 = tsTableSelector("2020-Q3")
+    val query = sql"""
+      select cast(year as varchar), institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2018} as ts2018  where ts2018.lei = '#${lei}' union all
+      select cast(year as varchar), institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2019} as ts2019  where ts2019.lei = '#${lei}' union all
+      select cast(year as varchar), institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2020} as ts2020  where ts2020.lei = '#${lei}' union all
+      select concat(year, '-', quarter) as year, institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2020_q1} as ts2020_q1  where ts2020_q1.lei = '#${lei}' union all
+      select concat(year, '-', quarter) as year, institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2020_q2} as ts2020_q2  where ts2020_q2.lei = '#${lei}' union all
+      select concat(year, '-', quarter) as year, institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2020_q3} as ts2020_q3  where ts2020_q3.lei = '#${lei}' ;
+      """.as[FilerAllPeriods]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
   def fetchFilersByLar(period: String, min_lar: Int, max_lar: Int): Task[Seq[FilersByLar]] = {
     val tsTable = tsTableSelector(period)
     val query = sql"""
