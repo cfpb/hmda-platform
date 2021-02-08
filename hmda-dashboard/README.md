@@ -34,3 +34,4 @@
 32. /dashboard/quarterly_info/{{year}}/lei/{{lei}}
 33. /dashboard/filers_by_lar/year/{{year}}/min/{{min}}/max/{{max}}
 34. /dashboard/filers_count_by_lar/year/{{year}}/min/{{min}}/max/{{max}}
+35. /dashboard/filer_all_periods/lei/{{lei}}
