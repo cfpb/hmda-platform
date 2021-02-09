@@ -114,12 +114,12 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     val tsTable_2020_q2 = tsTableSelector("2020-Q2")
     val tsTable_2020_q3 = tsTableSelector("2020-Q3")
     val query = sql"""
-      select cast(year as varchar), institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2018} as ts2018  where ts2018.lei = '#${lei}' union all
-      select cast(year as varchar), institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2019} as ts2019  where ts2019.lei = '#${lei}' union all
-      select cast(year as varchar), institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2020} as ts2020  where ts2020.lei = '#${lei}' union all
-      select concat(year, '-', quarter) as year, institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2020_q1} as ts2020_q1  where ts2020_q1.lei = '#${lei}' union all
-      select concat(year, '-', quarter) as year, institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2020_q2} as ts2020_q2  where ts2020_q2.lei = '#${lei}' union all
-      select concat(year, '-', quarter) as year, institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2020_q3} as ts2020_q3  where ts2020_q3.lei = '#${lei}' ;
+      select cast(year as varchar), institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2018} as ts2018  where upper(ts2018.lei) NOT IN (#${filterList}) and ts2018.lei = '#${lei}' union all
+      select cast(year as varchar), institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2019} as ts2019  where upper(ts2019.lei) NOT IN (#${filterList}) and ts2019.lei = '#${lei}' union all
+      select cast(year as varchar), institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2020} as ts2020  where upper(ts2020.lei) NOT IN (#${filterList}) and ts2020.lei = '#${lei}' union all
+      select concat(year, '-', quarter) as year, institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2020_q1} as ts2020_q1  where upper(ts2020_q1.lei) NOT IN (#${filterList}) and ts2020_q1.lei = '#${lei}' union all
+      select concat(year, '-', quarter) as year, institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2020_q2} as ts2020_q2  where upper(ts2020_q2.lei) NOT IN (#${filterList}) and ts2020_q2.lei = '#${lei}' union all
+      select concat(year, '-', quarter) as year, institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2020_q3} as ts2020_q3  where upper(ts2020_q3.lei) NOT IN (#${filterList}) and ts2020_q3.lei = '#${lei}' ;
       """.as[FilerAllPeriods]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
