@@ -100,9 +100,10 @@ lazy val common = (project in file("common"))
     ),
     Seq(
       libraryDependencies ++= commonDeps ++ authDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++ List(
-        cormorant, scalaMock
+        cormorant, scalaMock, scalacheckShapeless, diffx
       )
-    )
+    ),
+    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
   )
 
 lazy val `hmda-platform` = (project in file("hmda"))
@@ -205,7 +206,8 @@ lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++ enumeratumDeps,
+      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++ enumeratumDeps :+
+        scalaMock :+ cormorantGeneric :+ scalacheckShapeless :+ diffx,
       mainClass in Compile := Some("hmda.publisher.HmdaDataPublisherApp"),
       assemblyJarName in assembly := {
         s"${name.value}.jar"
@@ -222,7 +224,8 @@ lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
       }
     ),
     dockerSettings,
-    packageSettings
+    packageSettings,
+    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
   )
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(`hmda-protocol` % "compile->compile;test->test")

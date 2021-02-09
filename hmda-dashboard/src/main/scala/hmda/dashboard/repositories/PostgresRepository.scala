@@ -16,7 +16,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
 
   private val filterList = bankFilterList.mkString("'","','","'")
 
-  def getDates(y: Int, w: Int) : String = {
+  def getDates(y: Int, w: Int, s: Int = 0) : String = {
     val sdf = new SimpleDateFormat("YYYY-MM-dd")
     val cal = Calendar.getInstance
     cal.set(Calendar.YEAR, y)
@@ -24,7 +24,10 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     if (w == 1)
       cal.set(Calendar.DAY_OF_YEAR, 1)
     else
-      cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+      if (s != 0)
+        cal.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY)
+      else
+        cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
     sdf.format(cal.getTime)
   }
 
@@ -101,7 +104,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   def fetchTopFilers(count: Int, period: String): Task[Seq[TopFilers]] = {
     val tsTable = tsTableSelector(period)
     val query = sql"""
-      select institution_name, lei, total_lines from #${tsTable} where upper(LEI) NOT IN (#${filterList}) order by total_lines desc limit #${count};
+      select institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date from #${tsTable} where upper(LEI) NOT IN (#${filterList}) order by total_lines desc limit #${count};
       """.as[TopFilers]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
@@ -109,7 +112,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   def fetchSignsForLastDays(days: Int, period: String): Task[Seq[SignsForLastDays]] = {
     val tsTable = tsTableSelector(period)
     val query = sql"""
-      select date(to_timestamp(sign_date/1000)) as signdate, count(*) as numsign from  #${tsTable} where sign_date is not null and upper(lei) NOT IN (#${filterList}) group by date(to_timestamp(sign_date/1000)) order by signdate desc limit #${days};
+      select to_timestamp(sign_date/1000) as signdate, count(*) as numsign from  #${tsTable} where sign_date is not null and upper(lei) NOT IN (#${filterList}) group by date(to_timestamp(sign_date/1000)) order by signdate desc limit #${days};
       """.as[SignsForLastDays]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
@@ -273,7 +276,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   def fetchFilersByWeekByAgency(period: String, week: Int): Task[Seq[FilersByWeekByAgency]] = {
     val tsTable = tsTableSelector(period)
     val startDate = getDates(period.toInt+1, week)
-    val endDate = getDates(period.toInt+1, week+1)
+    val endDate = getDates(period.toInt+1, week, 1)
     val query = sql"""
        select ts.agency, sum(case when to_timestamp(sign_date/1000)::date between '#${startDate}' and '#${endDate}' then 1 else 0 end) as count from #${tsTable} as ts where upper(ts.lei) not in (#${filterList}) group by ts.agency
       """.as[FilersByWeekByAgency]
@@ -283,7 +286,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   def fetchLarByWeekByAgency(period: String, week: Int): Task[Seq[LarByWeekByAgency]] = {
     val tsTable = tsTableSelector(period)
     val startDate = getDates(period.toInt+1, week)
-    val endDate = getDates(period.toInt+1, week+1)
+    val endDate = getDates(period.toInt+1, week, 1)
     val query = sql"""
        select ts.agency ,sum(case when to_timestamp(sign_date/1000)::date between '#${startDate}' and '#${endDate}' then total_lines else 0 end) as count from #${tsTable} as ts where upper(ts.lei) not in (#${filterList}) group by ts.agency
       """.as[LarByWeekByAgency]
