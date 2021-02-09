@@ -12,7 +12,7 @@ class Q656Spec extends LarEditCheckSpec {
   val validExemptCode="Exempt"
   property("Exempt alphanumeric field should not have a value of 1111") {
     forAll(larGen) { lar =>
-    
+
       val appLar = lar.copy(loan = lar.loan.copy(ULI = invalidExemptCode))
         appLar.mustFail
 
