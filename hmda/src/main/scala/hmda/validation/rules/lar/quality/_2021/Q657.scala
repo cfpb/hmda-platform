@@ -13,10 +13,8 @@ object Q657 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q657"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult ={
-    
     val exemptCode= 1111
-    
-    //misc  fields
+
     (lar.property.totalUnits not equalTo(exemptCode)) and
     (lar.purchaserType not equalTo(InvalidPurchaserExemptCode)) and
       (lar.hoepaStatus not equalTo(InvalidHOEPAStatusExemptCode)) and

@@ -287,7 +287,9 @@ private[engine] object LarEngine2021Q extends ValidationEngine[LoanApplicationRe
     quality2020.Q653_2,
     quality2020.Q654,
     quality2021.Q655,
+    quality2021.Q656,
     quality2021.Q657
+
   )
 }
 // $COVERAGE-ON$
