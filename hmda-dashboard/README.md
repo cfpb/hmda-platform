@@ -35,3 +35,4 @@
 33. /dashboard/filers_by_lar/year/{{year}}/min/{{min}}/max/{{max}}
 34. /dashboard/filers_count_by_lar/year/{{year}}/min/{{min}}/max/{{max}}
 35. /dashboard/filer_all_periods/lei/{{lei}}
+36. /dashboard/voluntary_filers/{{year}}
