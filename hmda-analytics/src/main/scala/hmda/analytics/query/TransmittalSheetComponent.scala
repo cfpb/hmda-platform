@@ -57,7 +57,7 @@ trait TransmittalSheetComponent {
         createdAt,
         isQuarterly,
         signDate
-      ) <> (TransmittalSheetEntity.tupled, TransmittalSheetEntity.unapply)
+      ) <> ((TransmittalSheetEntity.apply _).tupled, TransmittalSheetEntity.unapply)
   }
 
   //only used for setup (testing) - TransmittalSheetSetup

@@ -1,28 +1,39 @@
 package hmda.util.conversion
 
-import java.time.ZoneId
+import java.time.{Instant, ZoneId}
 import java.time.format.DateTimeFormatter
 import java.util.Date
+import scala.util.Try
 
 trait ColumnDataFormatter {
 
   private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
   private val bomTypes = Seq("""\ufeff""", """ï»¿""", """\efbbbf""", """\ffe""");
+  private val nullMarker = "NULL"
 
   def dateToString(option: Option[Long]): String =
     if (option != null) {
-
       val epochLong = new Date(option.getOrElse(0L))
-
       if (epochLong.getTime.equals(0L)){
-        "NULL"
+        nullMarker
       } else {
         val entryTime = dateFormatter.format(epochLong.toInstant)
         entryTime
       }
     } else {
-      "NULL"
+      nullMarker
     }
+
+  def dateFromString(str: String): Option[Long] =
+    if (str != nullMarker) {
+      Try(Instant.from(dateFormatter.parse(str)))
+        .map(Date.from)
+        .map(_.getTime)
+        .toOption
+    } else {
+      None
+    }
+
 
   def extractOpt(option: Option[Any]): Any =
     option.getOrElse("")
