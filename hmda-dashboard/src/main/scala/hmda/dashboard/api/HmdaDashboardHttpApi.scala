@@ -350,6 +350,15 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                     .runToFuture
                 }
               }
+            } ~
+            path("voluntary_filers" / Segment) { (period) =>
+                log.info(s"Fetching voluntary filers for period=${period}")
+                complete {
+                  query
+                    .fetchVoluntaryFilers(period)
+                    .map(aggs => VoluntaryFilersAggregationResponse(aggs))
+                    .runToFuture
+              }
             }
           }
         }

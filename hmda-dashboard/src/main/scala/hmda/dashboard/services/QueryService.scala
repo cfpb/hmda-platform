@@ -36,4 +36,5 @@ trait QueryService {
   def fetchFilersCountOpenEndOriginationsByAgencyGraterOrEqual(period: String, x: Int) : Task[Seq[FilersCountOpenEndOriginationsByAgencyGraterOrEqual]]
   def fetchTopInstitutionsCountOpenEndCredit(period: String, x: Int) : Task[Seq[TopInstitutionsCountOpenEndCredit]]
   def fetchLateFilers(period: String, late: String) : Task[Seq[LateFilers]]
+  def fetchVoluntaryFilers(period: String) : Task[Seq[VoluntaryFilers]]
 }
