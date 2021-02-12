@@ -12,7 +12,6 @@ class Q657Spec extends LarEditCheckSpec {
   property("Non-exempt numeric field should not have a value of 1111") {
     forAll(larGen) { lar =>
 
-
       val appLar = lar.copy(loan = lar.loan.copy(loanType = InvalidLoanTypeExemptCode))
       appLar.mustFail
       appLar.copy(loan = lar.loan.copy(loanPurpose = InvalidLoanPurposeExemptCode)).mustFail
