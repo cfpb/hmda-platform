@@ -54,6 +54,9 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
       case ("2018","open_end_credit") => "open_end_credit_filers_by_agency_2018"
       case ("2019","open_end_credit") => "open_end_credit_filers_by_agency_2019"
       case ("2020","open_end_credit") => "open_end_credit_filers_by_agency_2020"
+      case ("2018","voluntary_filers") => "voluntary_filers2018"
+      case ("2019","voluntary_filers") => "voluntary_filers2019"
+      case ("2020","voluntary_filers") => "voluntary_filers2020"
       case ("2018","lar_exemptions") => "lar_count_using_exemption_by_agency_2018"
       case ("2019","lar_exemptions") => "lar_count_using_exemption_by_agency_2019"
       case ("2020","lar_exemptions") => "lar_count_using_exemption_by_agency_2020"
@@ -378,6 +381,14 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     val query = sql"""
          select * from (select ts.agency, ts.institution_name, sh.lei, ts.total_lines, sh.sign_date_east :: date, sh.submission_id, rank() over( partition by sh.lei order by sh.sign_date_east asc) from #${subHistMview} as sh left join #${tsTable} as ts on upper(sh.lei) = upper(ts.lei) where upper(sh.lei) not in ( select distinct upper(lei) from #${subHistMview} as sh_sub where sh_sub.sign_date_utc < '#${lateDate}' and split_part(sh_sub.submission_id, '-', 2) = '#${period}' ) and split_part(sh.submission_id, '-', 2) = '#${period}' order by sh.lei, rank) sl where upper(sl.lei) not in (#${filterList}) and rank=1 order by sign_date_east desc;
       """.as[LateFilers]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchVoluntaryFilers(period: String) : Task[Seq[VoluntaryFilers]] = {
+    val materializedView = larTableSelector(period, "voluntary_filers")
+    val query = sql"""
+      select * from  #${materializedView} ;
+      """.as[VoluntaryFilers]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
