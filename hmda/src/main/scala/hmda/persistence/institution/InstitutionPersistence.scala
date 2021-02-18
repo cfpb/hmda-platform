@@ -1,20 +1,20 @@
 package hmda.persistence.institution
 
 import akka.Done
-import akka.actor.typed.scaladsl.{ ActorContext, Behaviors }
-import akka.actor.typed.{ ActorRef, ActorSystem, Behavior }
+import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
+import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
-import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
+import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
 import akka.stream.Materializer
 import com.typesafe.config.Config
-import hmda.HmdaPlatform.institutionKafkaProducer
+import hmda.HmdaPlatform.{institutionKafkaProducer, log}
 import hmda.messages.institution.InstitutionCommands._
 import hmda.messages.institution.InstitutionEvents._
 import hmda.messages.pubsub.HmdaTopics._
-import hmda.model.institution.{ Institution, InstitutionDetail }
+import hmda.model.institution.{Institution, InstitutionDetail}
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.publication.KafkaUtils._
 import com.typesafe.config.ConfigFactory
@@ -158,7 +158,29 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
       }
     }
 
+  case class EntityId(lei: String, year: Int) {
+    def mkString = makeEntityId(lei, year)
+  }
+
+  def parseEntityId(entityIdStr: String): Option[EntityId] = {
+    val prefix = s"${InstitutionPersistence.name}-"
+    if(entityIdStr.startsWith(prefix)) {
+      val parts = entityIdStr.stripPrefix(prefix).split("-")
+      if(parts.size == 1) Some(EntityId(parts.head, 2018))
+      else if(parts.size == 2) Some(EntityId(parts(0), parts(1).toInt))
+      else {
+        log.error(s"Cant parse institution entity id: ${entityIdStr}")
+        None
+      }
+    } else {
+      None
+    }
+  }
+  def makeEntityId(lei: String, year: Int) = {
+    if (year == 2018) s"${InstitutionPersistence.name}-$lei"
+    else s"${InstitutionPersistence.name}-$lei-$year"
+  }
+
   def selectInstitution(sharding: ClusterSharding, lei: String, year: Int): EntityRef[InstitutionCommand] =
-    if (year == 2018) sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-$lei")
-    else sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-$lei-$year")
+    sharding.entityRefFor(InstitutionPersistence.typeKey, makeEntityId(lei, year))
 }
