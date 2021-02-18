@@ -517,10 +517,10 @@ sealed trait LarFormatValidator extends LarParser {
                          tract: String
                        ): LarParserValidationResult[Geography] =
     (
-      validateStr(street),
-      validateStr(city),
-      validateStr(state),
-      validateStr(zipCode),
+      validateStrOrNAOrExemptField(street,InvalidStreet(street)),
+      validateStrOrNAOrExemptField(city,InvalidCity(city)),
+      validateStrOrNAOrExemptField(state,InvalidStreet(state)),
+      validateStrOrNAOrExemptField(zipCode,InvalidZipcode(zipCode)),
       validateStr(county),
       validateStr(tract)
       ).mapN(Geography.apply)

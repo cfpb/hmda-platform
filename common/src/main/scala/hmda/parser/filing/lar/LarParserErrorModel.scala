@@ -384,10 +384,34 @@ object LarParserErrorModel {
   }
 
   case class InvalidBusinessOrCommercial(value: String)
-      extends ParserValidationError {
+    extends ParserValidationError {
     override def fieldName: String = "Buisness or Commercial Purpose"
     override def inputValue: String = value
   }
+
+  case class InvalidStreet(value: String) extends ParserValidationError {
+    override def fieldName: String = "Street"
+    override def inputValue: String = value
+  }
+
+  case class InvalidCity(value: String) extends ParserValidationError {
+    override def fieldName: String = "City"
+    override def inputValue: String = value
+  }
+
+  case class InvalidState(value: String) extends ParserValidationError {
+    override def fieldName: String = "State"
+    override def inputValue: String = value
+  }
+
+  case class InvalidZipcode(value: String) extends ParserValidationError {
+    override def fieldName: String = "Zipcode"
+    override def inputValue: String = value
+  }
+
+
+
+
 
 }
 // $COVERAGE-ON$
