@@ -10,7 +10,7 @@ class Q654Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = Q654
 
   property(
-    "DTI should be between 0 and 80") {
+    "DTI should be between 0 and 80 or NA/Exempt") {
     forAll(larGen) { lar =>
       lar.copy(income = "NA").mustPass
       lar.copy(income = "5").mustPass
@@ -20,8 +20,10 @@ class Q654Spec extends LarEditCheckSpec {
         relevantLar.copy(loan = relevantLar.loan.copy(debtToIncomeRatio = "0")).mustPass
         relevantLar.copy(loan = relevantLar.loan.copy(debtToIncomeRatio = "80")).mustPass
         relevantLar.copy(loan = relevantLar.loan.copy(debtToIncomeRatio = "80.01")).mustFail
-        relevantLar.copy(loan = relevantLar.loan.copy(debtToIncomeRatio = "NA")).mustFail
-      } 
+        relevantLar.copy(loan = relevantLar.loan.copy(debtToIncomeRatio = "NA")).mustPass
+        relevantLar.copy(loan = relevantLar.loan.copy(debtToIncomeRatio = "Exempt")).mustPass
+
+      }
 
     }
   }
@@ -33,5 +35,5 @@ class Q654Spec extends LarEditCheckSpec {
       }
     }
   }
-        
+
 }
