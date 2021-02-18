@@ -16,7 +16,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
 
   private val filterList = bankFilterList.mkString("'","','","'")
 
-  def getDates(y: Int, w: Int) : String = {
+  def getDates(y: Int, w: Int, s: Int = 0) : String = {
     val sdf = new SimpleDateFormat("YYYY-MM-dd")
     val cal = Calendar.getInstance
     cal.set(Calendar.YEAR, y)
@@ -24,7 +24,10 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     if (w == 1)
       cal.set(Calendar.DAY_OF_YEAR, 1)
     else
-      cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+      if (s != 0)
+        cal.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY)
+      else
+        cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
     sdf.format(cal.getTime)
   }
 
@@ -51,6 +54,9 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
       case ("2018","open_end_credit") => "open_end_credit_filers_by_agency_2018"
       case ("2019","open_end_credit") => "open_end_credit_filers_by_agency_2019"
       case ("2020","open_end_credit") => "open_end_credit_filers_by_agency_2020"
+      case ("2018","voluntary_filers") => "voluntary_filers2018"
+      case ("2019","voluntary_filers") => "voluntary_filers2019"
+      case ("2020","voluntary_filers") => "voluntary_filers2020"
       case ("2018","lar_exemptions") => "lar_count_using_exemption_by_agency_2018"
       case ("2019","lar_exemptions") => "lar_count_using_exemption_by_agency_2019"
       case ("2020","lar_exemptions") => "lar_count_using_exemption_by_agency_2020"
@@ -101,15 +107,49 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   def fetchTopFilers(count: Int, period: String): Task[Seq[TopFilers]] = {
     val tsTable = tsTableSelector(period)
     val query = sql"""
-      select institution_name, lei, total_lines from #${tsTable} where upper(LEI) NOT IN (#${filterList}) order by total_lines desc limit #${count};
+      select institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date from #${tsTable} where upper(LEI) NOT IN (#${filterList}) order by total_lines desc limit #${count};
       """.as[TopFilers]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchFilerAllPeriods(lei: String): Task[Seq[FilerAllPeriods]] = {
+    val tsTable_2018 = tsTableSelector("2018")
+    val tsTable_2019 = tsTableSelector("2019")
+    val tsTable_2020 = tsTableSelector("2020")
+    val tsTable_2020_q1 = tsTableSelector("2020-Q1")
+    val tsTable_2020_q2 = tsTableSelector("2020-Q2")
+    val tsTable_2020_q3 = tsTableSelector("2020-Q3")
+    val query = sql"""
+      select cast(year as varchar), institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2018} as ts2018  where upper(ts2018.lei) NOT IN (#${filterList}) and ts2018.lei = '#${lei}' union all
+      select cast(year as varchar), institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2019} as ts2019  where upper(ts2019.lei) NOT IN (#${filterList}) and ts2019.lei = '#${lei}' union all
+      select cast(year as varchar), institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2020} as ts2020  where upper(ts2020.lei) NOT IN (#${filterList}) and ts2020.lei = '#${lei}' union all
+      select concat(year, '-', quarter) as year, institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2020_q1} as ts2020_q1  where upper(ts2020_q1.lei) NOT IN (#${filterList}) and ts2020_q1.lei = '#${lei}' union all
+      select concat(year, '-', quarter) as year, institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2020_q2} as ts2020_q2  where upper(ts2020_q2.lei) NOT IN (#${filterList}) and ts2020_q2.lei = '#${lei}' union all
+      select concat(year, '-', quarter) as year, institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2020_q3} as ts2020_q3  where upper(ts2020_q3.lei) NOT IN (#${filterList}) and ts2020_q3.lei = '#${lei}' ;
+      """.as[FilerAllPeriods]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchFilersByLar(period: String, min_lar: Int, max_lar: Int): Task[Seq[FilersByLar]] = {
+    val tsTable = tsTableSelector(period)
+    val query = sql"""
+      select institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date from #${tsTable} where upper(LEI) NOT IN (#${filterList}) and total_lines > #${min_lar} and total_lines < #${max_lar} order by total_lines desc;
+      """.as[FilersByLar]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchFilersCountByLar(period: String, min_lar: Int, max_lar: Int): Task[Seq[FilersCountByLar]] = {
+    val tsTable = tsTableSelector(period)
+    val query = sql"""
+      select count(*) from #${tsTable} where upper(LEI) NOT IN (#${filterList}) and total_lines > #${min_lar} and total_lines < #${max_lar};
+      """.as[FilersCountByLar]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
   def fetchSignsForLastDays(days: Int, period: String): Task[Seq[SignsForLastDays]] = {
     val tsTable = tsTableSelector(period)
     val query = sql"""
-      select date(to_timestamp(sign_date/1000)) as signdate, count(*) as numsign from  #${tsTable} where sign_date is not null and upper(lei) NOT IN (#${filterList}) group by date(to_timestamp(sign_date/1000)) order by signdate desc limit #${days};
+      select to_timestamp(sign_date/1000) as signdate, count(*) as numsign from  #${tsTable} where sign_date is not null and upper(lei) NOT IN (#${filterList}) group by date(to_timestamp(sign_date/1000)) order by signdate desc limit #${days};
       """.as[SignsForLastDays]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
@@ -273,7 +313,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   def fetchFilersByWeekByAgency(period: String, week: Int): Task[Seq[FilersByWeekByAgency]] = {
     val tsTable = tsTableSelector(period)
     val startDate = getDates(period.toInt+1, week)
-    val endDate = getDates(period.toInt+1, week+1)
+    val endDate = getDates(period.toInt+1, week, 1)
     val query = sql"""
        select ts.agency, sum(case when to_timestamp(sign_date/1000)::date between '#${startDate}' and '#${endDate}' then 1 else 0 end) as count from #${tsTable} as ts where upper(ts.lei) not in (#${filterList}) group by ts.agency
       """.as[FilersByWeekByAgency]
@@ -283,7 +323,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   def fetchLarByWeekByAgency(period: String, week: Int): Task[Seq[LarByWeekByAgency]] = {
     val tsTable = tsTableSelector(period)
     val startDate = getDates(period.toInt+1, week)
-    val endDate = getDates(period.toInt+1, week+1)
+    val endDate = getDates(period.toInt+1, week, 1)
     val query = sql"""
        select ts.agency ,sum(case when to_timestamp(sign_date/1000)::date between '#${startDate}' and '#${endDate}' then total_lines else 0 end) as count from #${tsTable} as ts where upper(ts.lei) not in (#${filterList}) group by ts.agency
       """.as[LarByWeekByAgency]
@@ -341,6 +381,14 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     val query = sql"""
          select * from (select ts.agency, ts.institution_name, sh.lei, ts.total_lines, sh.sign_date_east :: date, sh.submission_id, rank() over( partition by sh.lei order by sh.sign_date_east asc) from #${subHistMview} as sh left join #${tsTable} as ts on upper(sh.lei) = upper(ts.lei) where upper(sh.lei) not in ( select distinct upper(lei) from #${subHistMview} as sh_sub where sh_sub.sign_date_utc < '#${lateDate}' and split_part(sh_sub.submission_id, '-', 2) = '#${period}' ) and split_part(sh.submission_id, '-', 2) = '#${period}' order by sh.lei, rank) sl where upper(sl.lei) not in (#${filterList}) and rank=1 order by sign_date_east desc;
       """.as[LateFilers]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  def fetchVoluntaryFilers(period: String) : Task[Seq[VoluntaryFilers]] = {
+    val materializedView = larTableSelector(period, "voluntary_filers")
+    val query = sql"""
+      select * from  #${materializedView} ;
+      """.as[VoluntaryFilers]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 

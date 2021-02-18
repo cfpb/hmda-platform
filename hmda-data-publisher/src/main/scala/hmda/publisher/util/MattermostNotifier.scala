@@ -1,5 +1,5 @@
-package hmda.publisher.validation
-// $COVERAGE-OFF$
+package hmda.publisher.util
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpEntity, HttpMethods, HttpRequest}
@@ -13,7 +13,7 @@ import scala.concurrent.Future
  * curl -i -X POST -H 'Content-Type: application/json' -d '{"text": "Hello, this is some text\nThis is more text. :tada:"}' https://mattermost.goraft.tech/hooks/xxx
  * @param mattermostUrl
  */
-class MessageReporter(mattermostUrl: String)(implicit as: ActorSystem) extends LazyLogging {
+class MattermostNotifier(mattermostUrl: String)(implicit as: ActorSystem) extends LazyLogging {
   import as.dispatcher
 
   def report(message: String): Future[Unit] =
@@ -40,5 +40,3 @@ class MessageReporter(mattermostUrl: String)(implicit as: ActorSystem) extends L
         )
     }
 }
-
-// $COVERAGE-ON$

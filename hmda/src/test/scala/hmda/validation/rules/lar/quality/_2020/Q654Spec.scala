@@ -22,9 +22,7 @@ class Q654Spec extends LarEditCheckSpec {
         relevantLar.copy(loan = relevantLar.loan.copy(debtToIncomeRatio = "80.01")).mustFail
         relevantLar.copy(loan = relevantLar.loan.copy(debtToIncomeRatio = "NA")).mustPass
         relevantLar.copy(loan = relevantLar.loan.copy(debtToIncomeRatio = "Exempt")).mustPass
-
-      }
-
+      } 
     }
   }
 

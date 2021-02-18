@@ -1,22 +1,24 @@
 package hmda.persistence.filing
 
-import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
-import akka.actor.typed.{ActorRef, Behavior}
+import akka.actor.typed.scaladsl.{ ActorContext, Behaviors }
+import akka.actor.typed.{ ActorRef, Behavior }
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef, EntityTypeKey}
+import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef, EntityTypeKey }
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
-import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
+import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
+import com.typesafe.scalalogging.LazyLogging
 import hmda.messages.filing.FilingCommands._
-import hmda.messages.filing.FilingEvents.{FilingCreated, FilingEvent, SubmissionAdded, SubmissionUpdated}
+import hmda.messages.filing.FilingEvents.{ FilingCreated, FilingEvent, SubmissionAdded, SubmissionUpdated }
 import hmda.messages.institution.InstitutionCommands.AddFiling
 import hmda.model.filing.FilingDetails
-import hmda.model.filing.submission.Signed
+import hmda.model.filing.submission.{ Signed, SubmissionStatus }
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.utils.YearUtils
+import hmda.utils.YearUtils.Period
 
-object FilingPersistence extends HmdaTypedPersistentActor[FilingCommand, FilingEvent, FilingState] {
+object FilingPersistence extends HmdaTypedPersistentActor[FilingCommand, FilingEvent, FilingState] with LazyLogging {
 
   override final val name = "Filing"
 
@@ -111,7 +113,7 @@ object FilingPersistence extends HmdaTypedPersistentActor[FilingCommand, FilingE
       //This method will be similar to GetLatestSubmission but will fetch the one with highest sequencenumber and status of Signed (15)
       case GetLatestSignedSubmission(replyTo) =>
         val maybeSignedSubmission = state.submissions
-          .filter(_.status == Signed )
+          .filter(_.status == Signed)
           .sortWith(_.id.sequenceNumber > _.id.sequenceNumber)
           .headOption
         replyTo ! maybeSignedSubmission
@@ -119,10 +121,11 @@ object FilingPersistence extends HmdaTypedPersistentActor[FilingCommand, FilingE
 
       //This method will be similar to GetLatestSubmission but will fetch the one with highest sequencenumber and status of Signed (15)
       case GetOldestSignedSubmission(replyTo) =>
-        println (state.submissions)
-        println (state.submissions.size)
+        println("inside oldest")
+        println(state.submissions)
+        println(state.submissions.size)
         val maybeSignedSubmission = state.submissions
-          .filter(_.status == Signed )
+          .filter(_.status == Signed)
           .sortWith(_.id.sequenceNumber < _.id.sequenceNumber)
           .headOption
         replyTo ! maybeSignedSubmission
@@ -146,9 +149,35 @@ object FilingPersistence extends HmdaTypedPersistentActor[FilingCommand, FilingE
   def startShardRegion(sharding: ClusterSharding): ActorRef[ShardingEnvelope[FilingCommand]] =
     super.startShardRegion(sharding, FilingStop())
 
-  def selectFiling(sharding: ClusterSharding, lei: String, year: Int, quarter: Option[String]): EntityRef[FilingCommand] = {
+  case class EntityId(lei: String, period: Period) {
+    def mkString: String = makeEntityId(lei, period.year, period.quarter)
+  }
+
+  def parseEntityId(entityId: String): Option[EntityId] = {
+    val prefix = s"${FilingPersistence.name}-"
+    if (entityId.startsWith(prefix)) {
+      try {
+        val Array(lei, periodStr) = entityId.stripPrefix(prefix).split("-", 2)
+        val period                = YearUtils.parsePeriod(periodStr).toTry.get
+        Some(EntityId(lei, period))
+      } catch {
+        case err: Throwable =>
+          logger.error(s"Failed to parse filling entity id: ${entityId}", err)
+          None
+      }
+    } else {
+      None
+    }
+  }
+
+  private def makeEntityId(lei: String, year: Int, quarter: Option[String]) = {
     val period = YearUtils.period(year, quarter)
-    sharding.entityRefFor(FilingPersistence.typeKey, s"${FilingPersistence.name}-$lei-$period")
+    println("period: " + period)
+    s"${FilingPersistence.name}-$lei-$period"
+  }
+
+  def selectFiling(sharding: ClusterSharding, lei: String, year: Int, quarter: Option[String]): EntityRef[FilingCommand] = {
+    sharding.entityRefFor(FilingPersistence.typeKey, makeEntityId(lei, year, quarter))
   }
 
 }

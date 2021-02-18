@@ -374,3 +374,139 @@ FROM
     LEFT JOIN loanapplicationregister2019 AS lar ON Upper(ts.lei) = Upper(lar.lei)
 WHERE
     line_of_credits = 1 with data;
+
+-- for voluntary filers 
+CREATE materialized VIEW hmda_user.voluntary_filers2018 tablespace pg_default 
+AS (SELECT 'Less than 100 closed end originated loans', 
+           Count(lei) AS lei_count, 
+           SUM(count) AS total_lar 
+    FROM   (SELECT lei, 
+                   Count(*) 
+            FROM   loanapplicationregister2018 
+            WHERE  action_taken_type = '1' 
+                   AND line_of_credits = '2' 
+            GROUP  BY lei 
+            HAVING Count(*) < 100) AS results) 
+   UNION ALL 
+   (SELECT 'Less than 200 open end originated loans', 
+           Count(lei) AS lei_count, 
+           SUM(count) AS total_lar 
+    FROM   (SELECT lei, 
+                   Count(*) 
+            FROM   loanapplicationregister2018 
+            WHERE  action_taken_type = '1' 
+                   AND line_of_credits = '1' 
+            GROUP  BY lei 
+            HAVING Count(*) < 200) AS results2) 
+   UNION ALL 
+   (SELECT 'Less than 500 open end originated loans', 
+           Count(lei) AS lei_count, 
+           SUM(count) AS total_lar 
+    FROM   (SELECT lei, 
+                   Count(*) 
+            FROM   loanapplicationregister2018 
+            WHERE  action_taken_type = '1' 
+                   AND line_of_credits = '1' 
+            GROUP  BY lei 
+            HAVING Count(*) < 500) AS results3) 
+   UNION ALL 
+   (SELECT 'Less than 100 originated loans - exempt', 
+           Count(lei) AS lei_count, 
+           SUM(count) AS total_lar 
+    FROM   (SELECT lei, 
+                   Count(*) 
+            FROM   loanapplicationregister2018 
+            WHERE  action_taken_type = '1' 
+                   AND line_of_credits = '1111' 
+            GROUP  BY lei 
+            HAVING Count(*) < 200) AS results4); 
+            
+CREATE materialized VIEW hmda_user.voluntary_filers2019 tablespace pg_default 
+AS (SELECT 'Less than 100 closed end originated loans', 
+           Count(lei) AS lei_count, 
+           SUM(count) AS total_lar 
+    FROM   (SELECT lei, 
+                   Count(*) 
+            FROM   loanapplicationregister2019 
+            WHERE  action_taken_type = '1' 
+                   AND line_of_credits = '2' 
+            GROUP  BY lei 
+            HAVING Count(*) < 100) AS results) 
+   UNION ALL 
+   (SELECT 'Less than 200 open end originated loans', 
+           Count(lei) AS lei_count, 
+           SUM(count) AS total_lar 
+    FROM   (SELECT lei, 
+                   Count(*) 
+            FROM   loanapplicationregister2019 
+            WHERE  action_taken_type = '1' 
+                   AND line_of_credits = '1' 
+            GROUP  BY lei 
+            HAVING Count(*) < 200) AS results2) 
+   UNION ALL 
+   (SELECT 'Less than 500 open end originated loans', 
+           Count(lei) AS lei_count, 
+           SUM(count) AS total_lar 
+    FROM   (SELECT lei, 
+                   Count(*) 
+            FROM   loanapplicationregister2019 
+            WHERE  action_taken_type = '1' 
+                   AND line_of_credits = '1' 
+            GROUP  BY lei 
+            HAVING Count(*) < 500) AS results3) 
+   UNION ALL 
+   (SELECT 'Less than 100 originated loans - exempt', 
+           Count(lei) AS lei_count, 
+           SUM(count) AS total_lar 
+    FROM   (SELECT lei, 
+                   Count(*) 
+            FROM   loanapplicationregister2019 
+            WHERE  action_taken_type = '1' 
+                   AND line_of_credits = '1111' 
+            GROUP  BY lei 
+            HAVING Count(*) < 200) AS results4);
+            
+           CREATE materialized VIEW hmda_user.voluntary_filers2020 tablespace pg_default 
+AS (SELECT 'Less than 100 closed end originated loans', 
+           Count(lei) AS lei_count, 
+           SUM(count) AS total_lar 
+    FROM   (SELECT lei, 
+                   Count(*) 
+            FROM   loanapplicationregister2020 
+            WHERE  action_taken_type = '1' 
+                   AND line_of_credits = '2' 
+            GROUP  BY lei 
+            HAVING Count(*) < 100) AS results) 
+   UNION ALL 
+   (SELECT 'Less than 200 open end originated loans', 
+           Count(lei) AS lei_count, 
+           SUM(count) AS total_lar 
+    FROM   (SELECT lei, 
+                   Count(*) 
+            FROM   loanapplicationregister2020 
+            WHERE  action_taken_type = '1' 
+                   AND line_of_credits = '1' 
+            GROUP  BY lei 
+            HAVING Count(*) < 200) AS results2) 
+   UNION ALL 
+   (SELECT 'Less than 500 open end originated loans', 
+           Count(lei) AS lei_count, 
+           SUM(count) AS total_lar 
+    FROM   (SELECT lei, 
+                   Count(*) 
+            FROM   loanapplicationregister2020 
+            WHERE  action_taken_type = '1' 
+                   AND line_of_credits = '1' 
+            GROUP  BY lei 
+            HAVING Count(*) < 500) AS results3) 
+   UNION ALL 
+   (SELECT 'Less than 100 originated loans - exempt', 
+           Count(lei) AS lei_count, 
+           SUM(count) AS total_lar 
+    FROM   (SELECT lei, 
+                   Count(*) 
+            FROM   loanapplicationregister2020 
+            WHERE  action_taken_type = '1' 
+                   AND line_of_credits = '1111' 
+            GROUP  BY lei 
+            HAVING Count(*) < 200) AS results4);
