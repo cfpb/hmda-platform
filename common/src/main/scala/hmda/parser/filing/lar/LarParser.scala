@@ -99,12 +99,8 @@ trait LarParser {
     str.validNel
 
   def validateStrOrNAOrExemptField(str: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
-    if(!str.equalsIgnoreCase("NA") || !str.equalsIgnoreCase("Exempt")){
       str.validNel
-    }
-    else{
-      validateNAOrExemptField(str, parserValidationError).map(x => x.toString)
-    }
+      //TODO: Enforce logic to validate NA / Exempt case match
 
   def validateLarCode[A](larCodeEnum: LarCodeEnum[A],
                          value: String,
