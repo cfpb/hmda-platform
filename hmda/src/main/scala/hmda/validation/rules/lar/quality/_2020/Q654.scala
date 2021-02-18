@@ -13,7 +13,8 @@ object Q654 extends EditCheck[LoanApplicationRegister] {
 
   override def apply(lar: LoanApplicationRegister): ValidationResult ={
     when(Try(lar.income.toInt).getOrElse(-1) is greaterThan(5) and (lar.action.actionTakenType is oneOf(LoanOriginated, ApplicationApprovedButNotAccepted, PreapprovalRequestApprovedButNotAccepted))) {
-        lar.loan.debtToIncomeRatio is between("0","80")
-    }
+      (lar.loan.debtToIncomeRatio  is equalTo("NA")) or
+        (lar.loan.debtToIncomeRatio  is equalTo("Exempt")) or
+        (lar.loan.debtToIncomeRatio is between("0","80"))    }
   }
 }
