@@ -13,18 +13,21 @@ object Q657 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q657"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult ={
-    val exemptCode= 1111
+    val invalidExemptCode= 1111
 
-    (lar.property.totalUnits not equalTo(exemptCode)) and
-    (lar.purchaserType not equalTo(InvalidPurchaserExemptCode)) and
+    (lar.property.totalUnits not equalTo(invalidExemptCode)) and
+      (lar.income  not equalTo(invalidExemptCode.toString)) and
+      (lar.purchaserType not equalTo(InvalidPurchaserExemptCode)) and
       (lar.hoepaStatus not equalTo(InvalidHOEPAStatusExemptCode)) and
       (lar.lienStatus not equalTo(InvalidLienStatusExemptCode)) and
-    (lar.loan.loanType  not equalTo(InvalidLoanTypeExemptCode)) and
+      (lar.loan.loanType  not equalTo(InvalidLoanTypeExemptCode)) and
       (lar.loan.loanPurpose  not equalTo(InvalidLoanPurposeExemptCode)) and
       (lar.loan.constructionMethod  not equalTo(InvalidConstructionMethodExemptCode)) and
       (lar.loan.occupancy  not equalTo(InvalidOccupancyExemptCode)) and
+      (lar.loan.amount  not equalTo(BigDecimal(invalidExemptCode))) and
+      (lar.loan.rateSpread  not equalTo(invalidExemptCode.toString)) and
       (lar.action.preapproval  not equalTo(InvalidPreapprovalExemptCode)) and
-       (lar.action.actionTakenType  not equalTo(InvalidActionTakenTypeExemptCode)) and
+      (lar.action.actionTakenType  not equalTo(InvalidActionTakenTypeExemptCode)) and
       (lar.applicant.ethnicity.ethnicity1  not equalTo(InvalidEthnicityExemptCode)) and
       (lar.applicant.ethnicity.ethnicity2  not equalTo(InvalidEthnicityExemptCode)) and
       (lar.applicant.ethnicity.ethnicity3  not equalTo(InvalidEthnicityExemptCode)) and
@@ -48,8 +51,8 @@ object Q657 extends EditCheck[LoanApplicationRegister] {
       (lar.coApplicant.sex.sexEnum  not equalTo(InvalidSexExemptCode)) and
       (lar.applicant.sex.sexObservedEnum  not equalTo(InvalidSexObservedExemptCode))  and
       (lar.coApplicant.sex.sexObservedEnum  not equalTo(InvalidSexObservedExemptCode)) and
-        (lar.applicant.age not equalTo(exemptCode)) and
-        (lar.coApplicant.age not equalTo(exemptCode)) and
+      (lar.applicant.age not equalTo(invalidExemptCode)) and
+      (lar.coApplicant.age not equalTo(invalidExemptCode)) and
       (lar.AUS.aus2 not equalTo(AUSExempt)) and
       (lar.AUS.aus3 not equalTo(AUSExempt)) and
       (lar.AUS.aus4 not equalTo(AUSExempt)) and
@@ -58,5 +61,6 @@ object Q657 extends EditCheck[LoanApplicationRegister] {
       (lar.ausResult.ausResult3 not equalTo(AUSResultExempt)) and
       (lar.ausResult.ausResult4 not equalTo(AUSResultExempt)) and
       (lar.ausResult.ausResult4 not equalTo(AUSResultExempt))
+
   }
 }
