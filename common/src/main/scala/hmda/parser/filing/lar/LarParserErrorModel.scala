@@ -390,7 +390,7 @@ object LarParserErrorModel {
   }
 
   case class InvalidStreet(value: String) extends ParserValidationError {
-    override def fieldName: String = "Street"
+    override def fieldName: String = "Street Address"
     override def inputValue: String = value
   }
 
@@ -405,7 +405,7 @@ object LarParserErrorModel {
   }
 
   case class InvalidZipcode(value: String) extends ParserValidationError {
-    override def fieldName: String = "Zipcode"
+    override def fieldName: String = "Zip Code"
     override def inputValue: String = value
   }
 
