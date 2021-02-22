@@ -6,7 +6,7 @@ case class FilersUsingExemptionByAgencyAggregationResponse(aggregations: Seq[Fil
 
 object FilersUsingExemptionByAgencyAggregationResponse {
   private object constants {
-    val Results = "results"
+    val Results = "estimated results"
   }
 
   implicit val encoder: Encoder[FilersUsingExemptionByAgencyAggregationResponse] =
