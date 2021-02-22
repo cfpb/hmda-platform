@@ -38,6 +38,12 @@ case object RHSOrFSAGuaranteed extends LoanTypeEnum {
     "USDA Rural Housing Service or Farm Service Agency guaranteed (RHS or FSA)"
 }
 
+case object InvalidLoanTypeExemptCode extends LoanTypeEnum {
+  override val code: Int = 1111
+  override val description: String =
+    "Invalid exemption code for loan field."
+}
+
 class InvalidLoanTypeCode(value: Int = -1) extends LoanTypeEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"

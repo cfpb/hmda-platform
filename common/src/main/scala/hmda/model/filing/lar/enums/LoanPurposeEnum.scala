@@ -47,6 +47,12 @@ case object LoanPurposeNotApplicable extends LoanPurposeEnum {
   override val description: String = "Not applicable"
 }
 
+case object InvalidLoanPurposeExemptCode extends LoanPurposeEnum {
+  override val code: Int = 1111
+  override val description: String =
+    "Invalid exemption code for loan field."
+}
+
 class InvalidLoanPurposeCode(value: Int = -1) extends LoanPurposeEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"

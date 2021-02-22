@@ -14,8 +14,8 @@ class Q655Spec extends LarEditCheckSpec {
       val relevantLar2 = lar.copy(property = lar.property.copy(totalUnits = 6))
       val nonrelevantLar = lar.copy(property = lar.property.copy(totalUnits = 4))
 
-      relevantLar1.copy(property = relevantLar1.property.copy(multiFamilyAffordableUnits = "Exempt")).mustFail
-      relevantLar1.copy(property = relevantLar1.property.copy(multiFamilyAffordableUnits = "NA")).mustPass
+      relevantLar1.copy(property = relevantLar1.property.copy(multiFamilyAffordableUnits = "Exempt")).mustPass
+      relevantLar1.copy(property = relevantLar1.property.copy(multiFamilyAffordableUnits = "NA")).mustFail
       relevantLar1.copy(property = relevantLar1.property.copy(multiFamilyAffordableUnits = "0")).mustPass
       relevantLar1.copy(property = relevantLar1.property.copy(multiFamilyAffordableUnits = "1")).mustPass
       relevantLar2.copy(property = relevantLar2.property.copy(multiFamilyAffordableUnits = "0")).mustPass

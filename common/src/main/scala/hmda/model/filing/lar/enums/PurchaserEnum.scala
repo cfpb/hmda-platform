@@ -79,6 +79,13 @@ case object OtherPurchaserType extends PurchaserEnum {
   override val description: String = "Other type of purchaser"
 }
 
+case object InvalidPurchaserExemptCode extends PurchaserEnum {
+  override val code: Int = 1111
+  override val description: String =
+    "Invalid exemption code for loan field."
+}
+
+
 class InvalidPurchaserCode(value: Int = -1) extends PurchaserEnum {
   override def code: Int           = value
   override def description: String = "Invalid Code"
