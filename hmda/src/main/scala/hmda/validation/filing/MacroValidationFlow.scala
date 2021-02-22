@@ -32,6 +32,8 @@ object MacroValidationFlow {
   final val q646Name = "Q646"
   final val q647Name = "Q647"
 
+  final val exemptCode = "Exempt"
+
   val config              = ConfigFactory.load()
   final val q634Threshold = config.getInt("edits.Q634.threshold")
   final val q634Ratio     = config.getDouble("edits.Q634.ratio")
@@ -313,7 +315,7 @@ object MacroValidationFlow {
         lar.denial.denialReason1 == ExemptDenialReason || lar.denial.denialReason2 == ExemptDenialReason || lar.denial.denialReason3 == ExemptDenialReason || lar.denial.denialReason4 == ExemptDenialReason ||
         lar.nonAmortizingFeatures.interestOnlyPayments == InterestOnlyPaymentExempt || lar.lineOfCredit == ExemptLineOfCredit || lar.property.manufacturedHomeLandPropertyInterest == ManufacturedHomeLoanPropertyInterestExempt ||
         lar.property.manufacturedHomeSecuredProperty == ManufacturedHomeSecuredExempt || lar.reverseMortgage == ExemptMortgageType || lar.nonAmortizingFeatures.negativeAmortization == NegativeAmortizationExempt || lar.nonAmortizingFeatures.otherNonAmortizingFeatures == OtherNonAmortizingFeaturesExempt ||
-        lar.payableToInstitution == PayableToInstitutionExempt
+        lar.payableToInstitution == PayableToInstitutionExempt || lar.loan.interestRate == exemptCode
     }
 
 }
