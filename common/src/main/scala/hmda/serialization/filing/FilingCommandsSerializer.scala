@@ -18,17 +18,18 @@ class FilingCommandsSerializer(system: ExtendedActorSystem) extends SerializerWi
 
   override def identifier: Int = 105
 
-  final val FilingManifest               = classOf[Filing].getName
-  final val CreateFilingManifest         = classOf[CreateFiling].getName
-  final val UpdateFilingStatusManifest   = classOf[UpdateFilingStatus].getName
-  final val GetFilingManifest            = classOf[GetFiling].getName
-  final val GetFilingDetailsManifest     = classOf[GetFilingDetails].getName
-  final val AddSubmissionManifest        = classOf[AddSubmission].getName
-  final val UpdateSubmissionManifest     = classOf[UpdateSubmission].getName
-  final val GetLatestSubmissionManifest  = classOf[GetLatestSubmission].getName
-  final val GetSubmissionSummaryManifest = classOf[GetSubmissionSummary].getName
-  final val GetSubmissionsManifest       = classOf[GetSubmissions].getName
-  final val FilingStopManifest           = classOf[FilingStop].getName
+  final val FilingManifest                        = classOf[Filing].getName
+  final val CreateFilingManifest                  = classOf[CreateFiling].getName
+  final val UpdateFilingStatusManifest            = classOf[UpdateFilingStatus].getName
+  final val GetFilingManifest                     = classOf[GetFiling].getName
+  final val GetFilingDetailsManifest              = classOf[GetFilingDetails].getName
+  final val AddSubmissionManifest                 = classOf[AddSubmission].getName
+  final val UpdateSubmissionManifest              = classOf[UpdateSubmission].getName
+  final val GetLatestSubmissionManifest           = classOf[GetLatestSubmission].getName
+  final val GetLatestSignedSubmissionManifest     = classOf[GetLatestSignedSubmission].getName
+  final val GetSubmissionSummaryManifest          = classOf[GetSubmissionSummary].getName
+  final val GetSubmissionsManifest                = classOf[GetSubmissions].getName
+  final val FilingStopManifest                    = classOf[FilingStop].getName
 
   override def manifest(o: AnyRef): String = o.getClass.getName
 
@@ -78,6 +79,8 @@ class FilingCommandsSerializer(system: ExtendedActorSystem) extends SerializerWi
         updateSubmissionFromProtobuf(bytes, resolver)
       case GetLatestSubmissionManifest =>
         getLatestSubmissionFromProtobuf(bytes, resolver)
+      case GetLatestSignedSubmissionManifest =>
+        getLatestSignedSubmissionFromProtobuf(bytes, resolver)
       case GetSubmissionSummaryManifest =>
         getSubmissionSummaryFromProtobuf(bytes, resolver)
       case GetSubmissionsManifest =>
