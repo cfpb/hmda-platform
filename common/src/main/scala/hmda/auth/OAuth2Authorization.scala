@@ -30,12 +30,12 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
   def authorizeTokenWithLeiOrRole(lei: String, role: String): Directive1[VerifiedToken] =
     withAccessLog
       .&(handleRejections(authRejectionHandler))
-      .&(authorizeTokenWithLeiReject(lei) | authorizeTokenWithRoleReject(role))
+      .&(authorizeTokenWithLeiReject(lei.trim()) | authorizeTokenWithRoleReject(role))
 
   def authorizeTokenWithLei(lei: String): Directive1[VerifiedToken] =
     withAccessLog
       .&(handleRejections(authRejectionHandler))
-      .&(authorizeTokenWithLeiReject(lei))
+      .&(authorizeTokenWithLeiReject(lei.trim()))
 
   def authorizeTokenWithRole(role: String): Directive1[VerifiedToken] =
     withAccessLog
