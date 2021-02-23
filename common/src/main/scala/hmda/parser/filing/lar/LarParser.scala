@@ -22,6 +22,15 @@ trait LarParser {
       case Failure(_) => parserValidationError.invalidNel
     }
 
+  def validateNAOrExemptField(str: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] = {
+    val naCode: String = "NA"
+    val exemptCode: String = "Exempt"
+    str match {
+      case value if (value == naCode || value == exemptCode ) => value.validNel
+      case _ => parserValidationError.invalidNel
+    }
+  }
+
   def validateBigDecimalField(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[BigDecimal] =
     Try(BigDecimal(value)) match {
       case Success(i) => i.validNel
@@ -88,6 +97,10 @@ trait LarParser {
 
   def validateStr(str: String): LarParserValidationResult[String] =
     str.validNel
+
+  def validateStrOrNAOrExemptField(str: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
+      str.validNel
+      //TODO: Enforce logic to validate NA / Exempt case match
 
   def validateLarCode[A](larCodeEnum: LarCodeEnum[A],
                          value: String,
