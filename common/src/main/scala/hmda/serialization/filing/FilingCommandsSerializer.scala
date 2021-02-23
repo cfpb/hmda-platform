@@ -27,6 +27,7 @@ class FilingCommandsSerializer(system: ExtendedActorSystem) extends SerializerWi
   final val UpdateSubmissionManifest              = classOf[UpdateSubmission].getName
   final val GetLatestSubmissionManifest           = classOf[GetLatestSubmission].getName
   final val GetLatestSignedSubmissionManifest     = classOf[GetLatestSignedSubmission].getName
+  final val GetOldestSignedSubmissionManifest     = classOf[GetOldestSignedSubmission].getName
   final val GetSubmissionSummaryManifest          = classOf[GetSubmissionSummary].getName
   final val GetSubmissionsManifest                = classOf[GetSubmissions].getName
   final val FilingStopManifest                    = classOf[FilingStop].getName
@@ -50,6 +51,10 @@ class FilingCommandsSerializer(system: ExtendedActorSystem) extends SerializerWi
       updateSubmissionToProtobuf(cmd, resolver).toByteArray
     case cmd: GetLatestSubmission =>
       getLatestSubmissionToProtobuf(cmd, resolver).toByteArray
+    case cmd: GetLatestSignedSubmission =>
+      getLatestSignedSubmissionToProtobuf(cmd, resolver).toByteArray
+    case cmd: GetOldestSignedSubmission =>
+      getOldestSignedSubmissionToProtobuf(cmd, resolver).toByteArray
     case cmd: GetSubmissionSummary =>
       getSubmissionSummaryToProtobuf(cmd, resolver).toByteArray
     case cmd: GetSubmissions =>
@@ -81,6 +86,8 @@ class FilingCommandsSerializer(system: ExtendedActorSystem) extends SerializerWi
         getLatestSubmissionFromProtobuf(bytes, resolver)
       case GetLatestSignedSubmissionManifest =>
         getLatestSignedSubmissionFromProtobuf(bytes, resolver)
+      case GetOldestSignedSubmissionManifest =>
+        getOldestSignedSubmissionFromProtobuf(bytes, resolver)
       case GetSubmissionSummaryManifest =>
         getSubmissionSummaryFromProtobuf(bytes, resolver)
       case GetSubmissionsManifest =>
