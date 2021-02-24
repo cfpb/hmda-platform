@@ -206,7 +206,7 @@ private class InstitutionAdminHttpApi(config: Config, sharding: ClusterSharding)
 
   private def validTaxIdFormat(taxIdOption: Option[String]): Boolean = {
     val taxId        = taxIdOption.getOrElse("")
-    val taxIdPattern = "[0-9]{2}\\-[0-9]{7}$".r
+    val taxIdPattern = "^[0-9]{2}\\-[0-9]{7}$".r
     taxId match {
       case taxIdPattern() => true
       case _              => false
@@ -214,7 +214,7 @@ private class InstitutionAdminHttpApi(config: Config, sharding: ClusterSharding)
   }
 
   private def validLeiFormat(lei: String): Boolean = {
-    val leiPattern = "[A-Z0-9]{20}$".r
+    val leiPattern = "^[A-Z0-9]{20}$".r
     lei match {
       case leiPattern() => true
       case _            => false
