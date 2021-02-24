@@ -6,7 +6,7 @@ case class LarCountUsingExemptionByAgencyAggregationResponse(aggregations: Seq[L
 
 object LarCountUsingExemptionByAgencyAggregationResponse {
   private object constants {
-    val Results = "results"
+    val Results = "estimated results"
   }
 
   implicit val encoder: Encoder[LarCountUsingExemptionByAgencyAggregationResponse] =

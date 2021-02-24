@@ -6,7 +6,7 @@ case class OpenEndCreditLarCountByAgencyAggregationResponse(aggregations: Seq[Op
 
 object OpenEndCreditLarCountByAgencyAggregationResponse {
   private object constants {
-    val Results = "results"
+    val Results = "estimated results"
   }
 
   implicit val encoder: Encoder[OpenEndCreditLarCountByAgencyAggregationResponse] =
