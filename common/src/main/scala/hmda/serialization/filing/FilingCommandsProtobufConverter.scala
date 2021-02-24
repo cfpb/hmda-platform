@@ -142,6 +142,30 @@ object FilingCommandsProtobufConverter {
     )
   }
 
+  def getLatestSignedSubmissionToProtobuf(cmd: GetLatestSignedSubmission, refResolver: ActorRefResolver): GetLatestSignedSubmissionMessage =
+    GetLatestSignedSubmissionMessage(
+      refResolver.toSerializationFormat(cmd.replyTo)
+    )
+
+  def getLatestSignedSubmissionFromProtobuf(bytes: Array[Byte], refResolver: ActorRefResolver): GetLatestSignedSubmission = {
+    val msg = GetLatestSignedSubmissionMessage.parseFrom(bytes)
+    GetLatestSignedSubmission(
+      refResolver.resolveActorRef(msg.replyTo)
+    )
+  }
+
+  def getOldestSignedSubmissionToProtobuf(cmd: GetOldestSignedSubmission, refResolver: ActorRefResolver): GetOldestSignedSubmissionMessage =
+    GetOldestSignedSubmissionMessage(
+      refResolver.toSerializationFormat(cmd.replyTo)
+    )
+
+  def getOldestSignedSubmissionFromProtobuf(bytes: Array[Byte], refResolver: ActorRefResolver): GetOldestSignedSubmission = {
+    val msg = GetOldestSignedSubmissionMessage.parseFrom(bytes)
+    GetOldestSignedSubmission(
+      refResolver.resolveActorRef(msg.replyTo)
+    )
+  }
+
   def getSubmissionsToProtobuf(cmd: GetSubmissions, refResolver: ActorRefResolver): GetSubmissionsMessage =
     GetSubmissionsMessage(
       refResolver.toSerializationFormat(cmd.replyTo)

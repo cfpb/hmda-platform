@@ -25,6 +25,14 @@ message GetFilingDetailsMessage {
     string replyTo = 1;
 }
 
+message GetLatestSignedSubmissionMessage {
+    string replyTo = 1;
+}
+
+message GetOldestSignedSubmissionMessage {
+    string replyTo = 1;
+}
+
 message AddSubmissionMessage {
     SubmissionMessage submission = 1;
     string replyTo = 2;
