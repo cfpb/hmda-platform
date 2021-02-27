@@ -63,7 +63,7 @@ object IrsPublisherApp extends App {
 
   Consumer
     .committableSource(consumerSettings, Subscriptions.topics(HmdaTopics.signTopic, HmdaTopics.irsTopic))
-    .mapAsync(parallelism)(HmdaMessageFilter.processOnlyValidKeys(msg => processData(msg.record.value()).map(_ => msg.committableOffset)))
+    .mapAsync(parallelism)(HmdaMessageFilter.processOnlyValidKeys(msg => processData(msg.record.value().stripLineEnd.trim()).map(_ => msg.committableOffset)))
     .mapAsync(parallelism * 2)(offset => offset.commitScaladsl())
     .toMat(Sink.seq)(Keep.both)
     .mapMaterializedValue(DrainingControl.apply)
