@@ -12,7 +12,7 @@ import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
 import hmda.api.http.model.HmdaServiceStatus
 import io.circe.generic.auto._
 import io.circe.syntax._
-
+import hmda.BuildInfo
 object BaseWsApi {
   def route(apiName: String): Route = cors() {
     rootPath(apiName)
@@ -32,7 +32,7 @@ object BaseWsApi {
           case "status" =>
             val now    = Instant.now.toString
             val host   = InetAddress.getLocalHost.getHostName
-            val status = HmdaServiceStatus("OK", name, now, host)
+            val status = HmdaServiceStatus("OK", name, now, host, BuildInfo.latestGitTag)
             TextMessage.Strict(status.asJson.toString)
 
           case _ => TextMessage.Strict("Message not supported")

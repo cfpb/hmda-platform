@@ -26,7 +26,7 @@ class BaseWSApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest {
 
         val hmdaStatus = messageJson
           .as[HmdaServiceStatus]
-          .getOrElse(HmdaServiceStatus("", "", "", ""))
+          .getOrElse(HmdaServiceStatus("", "", "", "",""))
         hmdaStatus.status mustBe "OK"
       }
     }
