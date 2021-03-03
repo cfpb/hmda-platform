@@ -6,7 +6,7 @@ case class LateFilersAggregationResponse(aggregations: Seq[LateFilers])
 
 object LateFilersAggregationResponse {
   private object constants {
-    val Results = "results"
+    val Results = "estimated results"
   }
 
   implicit val encoder: Encoder[LateFilersAggregationResponse] =
