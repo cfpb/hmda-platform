@@ -13,7 +13,7 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.HmdaServiceStatus
 import io.circe.generic.auto._
 import org.slf4j.{ Logger, LoggerFactory }
-
+import hmda.BuildInfo
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.util.{ Failure, Success }
@@ -64,7 +64,7 @@ object BaseHttpApi {
         complete {
           val now    = Instant.now.toString
           val host   = InetAddress.getLocalHost.getHostName
-          val status = HmdaServiceStatus("OK", name, now, host)
+          val status = HmdaServiceStatus("OK", name, now, host, BuildInfo.latestGitTag)
           log.debug(status.toString)
           status
         }

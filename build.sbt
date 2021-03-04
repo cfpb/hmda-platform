@@ -92,11 +92,18 @@ lazy val `hmda-root` = (project in file("."))
     `submission-errors`
   )
 
+val latestGitTag = settingKey[String]("The version of Scala used for building.")
+ThisBuild / latestGitTag := {
+  import scala.sys.process._
+  val tag: String = "git describe --tags".lineStream_!.head
+  tag
+}
+
 lazy val common = (project in file("common"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     PB.targets in Compile := Seq(
-      scalapb.gen() -> (sourceManaged in Compile).value
+      scalapb.gen() -> (sourceManaged in Compile).value / "protobuf"
     ),
     Seq(
       libraryDependencies ++= commonDeps ++ authDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++ List(
@@ -104,6 +111,11 @@ lazy val common = (project in file("common"))
       )
     ),
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
+  )
+  .enablePlugins(BuildInfoPlugin)
+  .settings(
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, latestGitTag),
+    buildInfoPackage := "hmda"
   )
 
 lazy val `hmda-platform` = (project in file("hmda"))
