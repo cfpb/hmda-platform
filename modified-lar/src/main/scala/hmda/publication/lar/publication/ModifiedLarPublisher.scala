@@ -13,6 +13,7 @@ import akka.{Done, NotUsed}
 import com.typesafe.config.ConfigFactory
 import hmda.messages.pubsub.HmdaTopics._
 import hmda.messages.submission.HmdaRawDataEvents.LineAdded
+import hmda.census.records.CensusRecords._
 import hmda.model.census.Census
 import hmda.model.filing.submission.SubmissionId
 import hmda.model.modifiedlar.{EnrichedModifiedLoanApplicationRegister, ModifiedLoanApplicationRegister}
@@ -124,15 +125,9 @@ object ModifiedLarPublisher {
 
               def postgresOut(parallelism: Int): Sink[ModifiedLoanApplicationRegister, Future[Done]] =
                 Flow[ModifiedLoanApplicationRegister].map { mlar =>
-                  val indexTractMap = submissionId.period.year match {
-                    case 2018 => indexTractMap2018
-                    case 2019 => indexTractMap2019
-                    case 2020 => indexTractMap2020
-                    case _ => indexTractMap2020
-                  }
                   EnrichedModifiedLoanApplicationRegister(
                     mlar,
-                    indexTractMap.getOrElse(mlar.tract, Census())
+                    getCensusOnTractandCounty(mlar.tract, mlar.county, mlar.year)
                   )
                 }.mapAsync(parallelism)(enriched =>
                   modifiedLarRepo

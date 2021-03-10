@@ -91,4 +91,34 @@ object CensusRecords {
     }
   }
 
+  def yearCountyMap (year: Int) = {
+    year match {
+      case 2018 =>
+        indexedCounty2018
+      case 2019 =>
+        indexedCounty2019
+      case 2020 =>
+        indexedCounty2020
+    }
+  }
+
+  def getCensusOnTractandCounty(tract: String, county: String, year: Int): Census = {
+    val tractMap = yearTractMap(year)
+    tractMap.getOrElse(tract, getCensusFromCounty(county,year))
+  }
+
+  private def getCensusFromCounty(county: String, year: Int): Census = {
+    val countyMap = yearCountyMap(year)
+    val countyCensus = countyMap.getOrElse(county, Census())
+    Census(
+      msaMd = countyCensus.msaMd, 
+      state = countyCensus.state,
+      county = countyCensus.county,
+      medianIncome = countyCensus.medianIncome,
+      smallCounty = countyCensus.smallCounty,
+      name = countyCensus.name
+    )
+  }
+
+
 }
