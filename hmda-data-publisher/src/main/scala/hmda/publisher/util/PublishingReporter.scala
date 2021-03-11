@@ -135,6 +135,8 @@ object PublishingReporter {
           case Schedules.TsScheduler2020           => 1
           case Schedules.LarSchedulerQuarterly2020 => 3
           case Schedules.TsSchedulerQuarterly2020  => 3
+          case Schedules.LarSchedulerQuarterly2021 => 3
+          case Schedules.TsSchedulerQuarterly2021  => 3
         }
         Expectation(s, numOfFiles)
       }
@@ -166,6 +168,8 @@ object PublishingReporter {
     case object y2019          extends ScheduleGroupId
     case object y2020          extends ScheduleGroupId
     case object y2020Quarterly extends ScheduleGroupId
+    case object y2021Quarterly extends ScheduleGroupId
+
 
     def forSchedule(s: Schedule): ScheduleGroupId = s match {
       case Schedules.PanelScheduler2018        => y2018
@@ -185,6 +189,8 @@ object PublishingReporter {
       case Schedules.TsScheduler2020           => y2020
       case Schedules.LarSchedulerQuarterly2020 => y2020Quarterly
       case Schedules.TsSchedulerQuarterly2020  => y2020Quarterly
+      case Schedules.LarSchedulerQuarterly2021 => y2021Quarterly
+      case Schedules.TsSchedulerQuarterly2021  => y2021Quarterly
     }
   }
 

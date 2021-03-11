@@ -59,6 +59,23 @@ trait PGTableNameLoader {
   val lar2020Q2QATableName: String = pgTableConfig.getString("lar2020Q2QATableName")
   val lar2020Q3QATableName: String = pgTableConfig.getString("lar2020Q3QATableName")
 
+  //2021 table names
+  val ts2021Q1TableName: String = pgTableConfig.getString("ts2021Q1TableName")
+  val ts2021Q2TableName: String = pgTableConfig.getString("ts2021Q2TableName")
+  val ts2021Q3TableName: String = pgTableConfig.getString("ts2021Q3TableName")
+
+  val lar2021Q1TableName: String = pgTableConfig.getString("lar2021Q1TableName")
+  val lar2021Q2TableName: String = pgTableConfig.getString("lar2021Q2TableName")
+  val lar2021Q3TableName: String = pgTableConfig.getString("lar2021Q3TableName")
+
+  val ts2021Q1QATableName: String = pgTableConfig.getString("ts2021Q1QATableName")
+  val ts2021Q2QATableName: String = pgTableConfig.getString("ts2021Q2QATableName")
+  val ts2021Q3QATableName: String = pgTableConfig.getString("ts2021Q3QATableName")
+
+  val lar2021Q1QATableName: String = pgTableConfig.getString("lar2021Q1QATableName")
+  val lar2021Q2QATableName: String = pgTableConfig.getString("lar2021Q2QATableName")
+  val lar2021Q3QATableName: String = pgTableConfig.getString("lar2021Q3QATableName")
+
   //common table names
   val emailTableName: String = pgTableConfig.getString("emailTableName")
 
