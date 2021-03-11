@@ -209,6 +209,16 @@ spec:
               configMapKeyRef:
                 name: schedule-configmap
                 key: publisher.ts.quarterly.2020
+          - name: LAR_Scheduler_Quarterly_2021
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.lar.quarterly.2021
+          - name: TS_Scheduler_Quarterly_2021
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.ts.quarterly.2021
           - name: LAR_2018_TABLE
             valueFrom:
               configMapKeyRef:
