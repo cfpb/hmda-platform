@@ -30,7 +30,7 @@ The [Home Mortgage Disclosure Act (HMDA) Platform](http://ffiec.cfpb.gov/) is a 
 - [Running with sbt](#running-with-sbt)
 - [One-line Cloud Deployment to Dev/Prod](#one-line-cloud-deployment-to-dev-prod)
 - [Docker Hub](#docker-hub)
-- [One-line Local Development Environment](#one-line-local-development-environment)
+- [One-line Local Development Environment (No Auth)](#one-line-local-development-environment-no-auth)
 - [Automated Testing](#automated-testing)
 - [Postman Collection](#postman-collection)
 - [API Documentation](#api-documentation)
@@ -141,14 +141,18 @@ kubernetes/hmda-platform
 
 All of the containers built by the HMDA Platform are released publicly via Docker Hub: https://hub.docker.com/u/hmda
 
-## One-line Local Development Environment
+## One-line Local Development Environment (No Auth)
 
 The platform and it's dependency services, Kafka, Cassandra and PostgreSQL, can run locally using [Docker Compose](https://docs.docker.com/compose/).
 
 ```shell
 # Bring up hmda-platform, hmda-analytics, institutions-api
 docker-compose up
+```
 
+The entire filing plaform can be spun up using a one line command. Using this locally running instance of Platform One, no authentication is needed. 
+
+```shell
 # Bring up the hmda-platform
 docker-compose up hmda-platform
 ```
