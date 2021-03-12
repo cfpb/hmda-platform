@@ -230,7 +230,7 @@ object LarConverter {
       case 2018 => overallLoanLimit2018
       case 2019 => overallLoanLimit2019
       case 2020 => overallLoanLimit2020
-      case 2021 => countyLoanLimitsByCounty2021
+      case 2021 => overallLoanLimit2021
 
     }
   }
