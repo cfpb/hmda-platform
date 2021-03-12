@@ -50,6 +50,9 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
   def tsRepository2020Q1               = createTransmittalSheetRepository2020(dbConfig, Year2020Period.Q1)
   def tsRepository2020Q2               = createTransmittalSheetRepository2020(dbConfig, Year2020Period.Q2)
   def tsRepository2020Q3               = createTransmittalSheetRepository2020(dbConfig, Year2020Period.Q3)
+  def tsRepository2021Q1               = createTransmittalSheetRepository2021(dbConfig, Year2021Period.Q1)
+  def tsRepository2021Q2               = createTransmittalSheetRepository2021(dbConfig, Year2021Period.Q2)
+  def tsRepository2021Q3               = createTransmittalSheetRepository2021(dbConfig, Year2021Period.Q3)
   def qaTsRepository2020               = createQaTransmittalSheetRepository2020(dbConfig, Year2020Period.Whole)
   def qaTsRepository2020Q1             = createQaTransmittalSheetRepository2020(dbConfig, Year2020Period.Q1)
   def qaTsRepository2020Q2             = createQaTransmittalSheetRepository2020(dbConfig, Year2020Period.Q2)
@@ -158,10 +161,11 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
         results.foreach(_ => persistFileForQa(fullFilePath, qaTsRepository2020))
         results.onComplete(reportPublishingResult(_, schedule, fullFilePath))
       }
-    case schedule @ TsSchedulerQuarterly2020 =>
-      val now           = LocalDateTime.now().minusDays(1)
+    case schedule @ TsSchedulerQuarterly2020 => {
+      val now = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDateQuarterly.format(now)
-      val s3Path        = s"$environmentPrivate/ts/"
+      val s3Path = s"$environmentPrivate/ts/"
+
       def publishQuarter[Table <: RealTransmittalSheetTable](
                                                               quarter: Period.Quarter,
                                                               repo: TSRepository2020Base[Table],
@@ -170,7 +174,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
                                                             ) =
         timeBarrier.runIfStillRelevant(quarter) {
           publishingGuard.runIfDataIsValid(quarter, Scope.Private) {
-            val fileName     = formattedDate + fileNameSuffix
+            val fileName = formattedDate + fileNameSuffix
             val fullFilePath = SnapshotCheck.pathSelector(s3Path, fileName)
             val s3Sink =
               S3.multipartUpload(bucketPrivate, fullFilePath)
@@ -187,14 +191,16 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
 
           }
         }
+
       publishQuarter(Period.y2020Q1, tsRepository2020Q1, "quarter_1_2020_ts.txt", qaTsRepository2020Q1)
       publishQuarter(Period.y2020Q2, tsRepository2020Q2, "quarter_2_2020_ts.txt", qaTsRepository2020Q2)
       publishQuarter(Period.y2020Q3, tsRepository2020Q3, "quarter_3_2020_ts.txt", qaTsRepository2020Q3)
-
-    case schedule @ TsSchedulerQuarterly2021 =>
-      val now           = LocalDateTime.now().minusDays(1)
+    }
+    case schedule @ TsSchedulerQuarterly2021 => {
+      val now = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDateQuarterly.format(now)
-      val s3Path        = s"$environmentPrivate/ts/"
+      val s3Path = s"$environmentPrivate/ts/"
+
       def publishQuarter[Table <: RealTransmittalSheetTable](
                                                               quarter: Period.Quarter,
                                                               repo: TSRepository2021Base[Table],
@@ -203,7 +209,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
                                                             ) =
         timeBarrier.runIfStillRelevant(quarter) {
           publishingGuard.runIfDataIsValid(quarter, Scope.Private) {
-            val fileName     = formattedDate + fileNameSuffix
+            val fileName = formattedDate + fileNameSuffix
             val fullFilePath = SnapshotCheck.pathSelector(s3Path, fileName)
             val s3Sink =
               S3.multipartUpload(bucketPrivate, fullFilePath)
@@ -220,10 +226,11 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
 
           }
         }
+
       publishQuarter(Period.y2021Q1, tsRepository2021Q1, "quarter_1_2021_ts.txt", qaTsRepository2021Q1)
       publishQuarter(Period.y2021Q2, tsRepository2021Q2, "quarter_2_2021_ts.txt", qaTsRepository2021Q2)
       publishQuarter(Period.y2021Q3, tsRepository2021Q3, "quarter_3_2021_ts.txt", qaTsRepository2021Q3)
-
+    }
   }
 
   private def persistFileForQa(s3ObjKey: String, repository: QARepository[TransmittalSheetEntity]) = {
