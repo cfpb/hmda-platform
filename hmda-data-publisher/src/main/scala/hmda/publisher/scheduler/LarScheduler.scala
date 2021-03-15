@@ -94,7 +94,6 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
       .schedule("LarSchedulerLoanLimit2019", self, LarSchedulerLoanLimit2019)
     QuartzSchedulerExtension(context.system)
       .schedule("LarSchedulerQuarterly2020", self, LarSchedulerQuarterly2020)
-
     QuartzSchedulerExtension(context.system)
       .schedule("LarSchedulerQuarterly2021", self, LarSchedulerQuarterly2021)
   }
@@ -111,11 +110,11 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
 
   override def receive: Receive = {
 
-    case schedule @ LarScheduler2018 =>
+    case schedule@LarScheduler2018 =>
       publishingGuard.runIfDataIsValid(Period.y2018, Scope.Private) {
-        val now           = LocalDateTime.now().minusDays(1)
+        val now = LocalDateTime.now().minusDays(1)
         val formattedDate = fullDate.format(now)
-        val fileName      = s"$formattedDate" + "2018_lar.txt"
+        val fileName = s"$formattedDate" + "2018_lar.txt"
 
         val allResultsSource: Source[String, NotUsed] =
           Source
@@ -126,15 +125,15 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
 
         for {
           s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, schedule)
-          _         <- persistFileForQa(s3ObjName, LarEntityImpl2018.parseFromPSVUnsafe, qaLarRepository2018)
+          _ <- persistFileForQa(s3ObjName, LarEntityImpl2018.parseFromPSVUnsafe, qaLarRepository2018)
         } yield ()
       }
 
-    case schedule @ LarScheduler2019 =>
+    case schedule@LarScheduler2019 =>
       publishingGuard.runIfDataIsValid(Period.y2019, Scope.Private) {
-        val now           = LocalDateTime.now().minusDays(1)
+        val now = LocalDateTime.now().minusDays(1)
         val formattedDate = fullDate.format(now)
-        val fileName      = s"$formattedDate" + "2019_lar.txt"
+        val fileName = s"$formattedDate" + "2019_lar.txt"
         val allResultsSource: Source[String, NotUsed] =
           Source
             .fromPublisher(larRepository2019.getAllLARs(getFilterList()))
@@ -144,15 +143,15 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
 
         for {
           s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, schedule)
-          _         <- persistFileForQa(s3ObjName, LarEntityImpl2019.parseFromPSVUnsafe, qaLarRepository2019)
+          _ <- persistFileForQa(s3ObjName, LarEntityImpl2019.parseFromPSVUnsafe, qaLarRepository2019)
         } yield ()
       }
 
-    case schedule @ LarScheduler2020 =>
+    case schedule@LarScheduler2020 =>
       publishingGuard.runIfDataIsValid(Period.y2020, Scope.Private) {
-        val now           = LocalDateTime.now().minusDays(1)
+        val now = LocalDateTime.now().minusDays(1)
         val formattedDate = fullDate.format(now)
-        val fileName      = s"$formattedDate" + "2020_lar.txt"
+        val fileName = s"$formattedDate" + "2020_lar.txt"
         val allResultsSource: Source[String, NotUsed] =
           Source
             .fromPublisher(larRepository2020.getAllLARs(getFilterList()))
@@ -162,15 +161,15 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
 
         for {
           s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, schedule)
-          _         <- persistFileForQa(s3ObjName, LarEntityImpl2020.parseFromPSVUnsafe, qaLarRepository2020)
+          _ <- persistFileForQa(s3ObjName, LarEntityImpl2020.parseFromPSVUnsafe, qaLarRepository2020)
         } yield ()
       }
 
-    case schedule @ LarSchedulerLoanLimit2019 =>
+    case schedule@LarSchedulerLoanLimit2019 =>
       publishingGuard.runIfDataIsValid(Period.y2019, Scope.Private) {
-        val now           = LocalDateTime.now().minusDays(1)
+        val now = LocalDateTime.now().minusDays(1)
         val formattedDate = fullDate.format(now)
-        val fileName      = "2019F_AGY_LAR_withFlag_" + s"$formattedDate" + "2019_lar.txt"
+        val fileName = "2019F_AGY_LAR_withFlag_" + s"$formattedDate" + "2019_lar.txt"
         val allResultsSource: Source[String, NotUsed] =
           Source
             .fromPublisher(larRepository2019.getAllLARs(getFilterList()))
@@ -181,15 +180,15 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
 
         for {
           s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, schedule)
-          _         <- persistFileForQa(s3ObjName, LarEntityImpl2019WithMsa.parseFromPSVUnsafe, qaLarRepository2019LoanLimit)
+          _ <- persistFileForQa(s3ObjName, LarEntityImpl2019WithMsa.parseFromPSVUnsafe, qaLarRepository2019LoanLimit)
         } yield ()
       }
 
-    case schedule @ LarSchedulerLoanLimit2020 =>
+    case schedule@LarSchedulerLoanLimit2020 =>
       publishingGuard.runIfDataIsValid(Period.y2020, Scope.Private) {
-        val now           = LocalDateTime.now().minusDays(1)
+        val now = LocalDateTime.now().minusDays(1)
         val formattedDate = fullDate.format(now)
-        val fileName      = "2020F_AGY_LAR_withFlag_" + s"$formattedDate" + "2020_lar.txt"
+        val fileName = "2020F_AGY_LAR_withFlag_" + s"$formattedDate" + "2020_lar.txt"
         val allResultsSource: Source[String, NotUsed] =
           Source
             .fromPublisher(larRepository2020.getAllLARs(getFilterList()))
@@ -200,51 +199,18 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
 
         for {
           s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, schedule)
-          _         <- persistFileForQa(s3ObjName, LarEntityImpl2020WithMsa.parseFromPSVUnsafe, qaLarRepository2020LoanLimit)
+          _ <- persistFileForQa(s3ObjName, LarEntityImpl2020WithMsa.parseFromPSVUnsafe, qaLarRepository2020LoanLimit)
         } yield ()
       }
-    case schedule @ LarSchedulerQuarterly2020 =>
-      val includeQuarterly = true
-      val now              = LocalDateTime.now().minusDays(1)
-      val formattedDate    = fullDateQuarterly.format(now)
+    case schedule@LarSchedulerQuarterly2020 =>
+      val now = LocalDateTime.now().minusDays(1)
+      val formattedDate = fullDateQuarterly.format(now)
 
       def publishQuarter2020[Table <: RealLarTable2020](
-                                                 quarter: Period.Quarter,
-                                                 fileNameSuffix: String,
-                                                 repo: LarRepository2020Base[Table],
-                                                 qaRepository: QARepository[LarEntityImpl2020]
-                                               ) =
-        timeBarrier.runIfStillRelevant(quarter) {
-          publishingGuard.runIfDataIsValid(quarter, Scope.Private) {
-            val fileName = formattedDate + fileNameSuffix
-
-            val allResultsSource: Source[String, NotUsed] = Source
-              .fromPublisher(repo.getAllLARs(getFilterList()))
-              .map(larEntity => larEntity.toRegulatorPSV)
-
-            def countF: Future[Int] = repo.getAllLARsCount(getFilterList())
-
-            publishPSVtoS3(fileName, allResultsSource, countF, schedule)
-            for {
-              s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, schedule)
-              _         <- persistFileForQa(s3ObjName, LarEntityImpl2020.parseFromPSVUnsafe, qaRepository)
-            } yield ()
-          }
-        }
-      publishQuarter2020(Period.y2020Q1, "quarter_1_2020_lar.txt", larRepository2020Q1, qaLarRepository2020Q1)
-      publishQuarter2020(Period.y2020Q2, "quarter_2_2020_lar.txt", larRepository2020Q2, qaLarRepository2020Q2)
-      publishQuarter2020(Period.y2020Q3, "quarter_3_2020_lar.txt", larRepository2020Q3, qaLarRepository2020Q3)
-
-    case schedule @ LarSchedulerQuarterly2021 =>
-      val includeQuarterly = true
-      val now              = LocalDateTime.now().minusDays(1)
-      val formattedDate    = fullDateQuarterly.format(now)
-
-      def publishQuarter2021[Table <: RealLarTable2021](
                                                          quarter: Period.Quarter,
                                                          fileNameSuffix: String,
-                                                         repo: LarRepository2021Base[Table],
-                                                         qaRepository: QARepository[LarEntityImpl2021]
+                                                         repo: LarRepository2020Base[Table],
+                                                         qaRepository: QARepository[LarEntityImpl2020]
                                                        ) =
         timeBarrier.runIfStillRelevant(quarter) {
           publishingGuard.runIfDataIsValid(quarter, Scope.Private) {
@@ -256,8 +222,39 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
 
             def countF: Future[Int] = repo.getAllLARsCount(getFilterList())
 
-            publishPSVtoS3(fileName, allResultsSource, countF, schedule)
             for {
+              s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, schedule)
+              _ <- persistFileForQa(s3ObjName, LarEntityImpl2020.parseFromPSVUnsafe, qaRepository)
+            } yield ()
+          }
+        }
+      publishQuarter2020(Period.y2020Q1, "quarter_1_2020_lar.txt", larRepository2020Q1, qaLarRepository2020Q1)
+      publishQuarter2020(Period.y2020Q2, "quarter_2_2020_lar.txt", larRepository2020Q2, qaLarRepository2020Q2)
+      publishQuarter2020(Period.y2020Q3, "quarter_3_2020_lar.txt", larRepository2020Q3, qaLarRepository2020Q3)
+
+    case schedule@LarSchedulerQuarterly2021 =>
+      val now              = LocalDateTime.now().minusDays(1)
+      val formattedDate    = fullDateQuarterly.format(now)
+
+      def publishQuarter2021[Table <: RealLarTable2021](
+                                                         quarter: Period.Quarter,
+                                                         fileNameSuffix: String,
+                                                         repo: LarRepository2021Base[Table],
+                                                         qaRepository: QARepository[LarEntityImpl2021]
+                                                       ) =
+        timeBarrier.runIfStillRelevant(quarter) {
+          publishingGuard.runIfDataIsValid(quarter, Scope.Private) {
+
+            val fileName = formattedDate + fileNameSuffix
+
+            val allResultsSource: Source[String, NotUsed] = Source
+              .fromPublisher(repo.getAllLARs(getFilterList()))
+              .map(larEntity => larEntity.toRegulatorPSV)
+
+            def countF: Future[Int] = repo.getAllLARsCount(getFilterList())
+
+            for {
+
               s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, schedule)
               _         <- persistFileForQa(s3ObjName, LarEntityImpl2021.parseFromPSVUnsafe, qaRepository)
             } yield ()
@@ -266,6 +263,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
       publishQuarter2021(Period.y2021Q1, "quarter_1_2021_lar.txt", larRepository2021Q1, qaLarRepository2021Q1)
       publishQuarter2021(Period.y2021Q2, "quarter_2_2021_lar.txt", larRepository2021Q2, qaLarRepository2021Q2)
       publishQuarter2021(Period.y2021Q3, "quarter_3_2021_lar.txt", larRepository2021Q3, qaLarRepository2021Q3)
+
   }
 
   // returns effective file name/s3 object key
