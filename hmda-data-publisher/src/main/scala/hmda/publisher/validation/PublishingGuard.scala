@@ -127,13 +127,16 @@ class PublishingGuard(
 object PublishingGuard {
 
   def create(
-              dbCompontnents: PublisherComponent2018 with PublisherComponent2019 with PublisherComponent2020
+              dbCompontnents: PublisherComponent2018
+                with PublisherComponent2019
+                with PublisherComponent2020
+                with PublisherComponent2021
             )(implicit as: ActorSystem): PublishingGuard = {
     import as.dispatcher
     val config      = ConfigFactory.load("application.conf")
     val msgReporter = new MattermostNotifier(config.getString("hmda.publisher.validation.reportingUrl"))
     val dbConfig    = DbConfiguration.dbConfig
-    new PublishingGuard(dbCompontnents, dbCompontnents, dbCompontnents, msgReporter, dbConfig)
+    new PublishingGuard(dbCompontnents, dbCompontnents, dbCompontnents,dbCompontnents, msgReporter, dbConfig)
   }
 
   sealed trait Period

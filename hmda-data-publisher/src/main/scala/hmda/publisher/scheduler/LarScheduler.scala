@@ -51,27 +51,24 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
   def qaLarRepository2019              = new QALarRepository2019(dbConfig)
   def qaLarRepository2019LoanLimit     = new QALarRepository2019LoanLimit(dbConfig)
   def qaLarRepository2020LoanLimit     = new QALarRepository2020LoanLimit(dbConfig)
-  def qaLarRepository2021LoanLimit     = new QALarRepository2021LoanLimit(dbConfig)
-
 
   def larRepository2020                = createLarRepository2020(dbConfig, Year2020Period.Whole)
   def larRepository2020Q1              = createLarRepository2020(dbConfig, Year2020Period.Q1)
   def larRepository2020Q2              = createLarRepository2020(dbConfig, Year2020Period.Q2)
   def larRepository2020Q3              = createLarRepository2020(dbConfig, Year2020Period.Q3)
 
-  def larRepository2021Q1              = createLarRepository2021(dbConfig, Year2021Period.Q1)
-  def larRepository2021Q2              = createLarRepository2021(dbConfig, Year2021Period.Q2)
-  def larRepository2021Q3              = createLarRepository2021(dbConfig, Year2021Period.Q3)
-
   def qaLarRepository2020              = createQaLarRepository2020(dbConfig, Year2020Period.Whole)
   def qaLarRepository2020Q1            = createQaLarRepository2020(dbConfig, Year2020Period.Q1)
   def qaLarRepository2020Q2            = createQaLarRepository2020(dbConfig, Year2020Period.Q2)
   def qaLarRepository2020Q3            = createQaLarRepository2020(dbConfig, Year2020Period.Q3)
 
+  def larRepository2021Q1              = createLarRepository2021(dbConfig, Year2021Period.Q1)
+  def larRepository2021Q2              = createLarRepository2021(dbConfig, Year2021Period.Q2)
+  def larRepository2021Q3              = createLarRepository2021(dbConfig, Year2021Period.Q3)
+
   def qaLarRepository2021Q1            = createQaLarRepository2021(dbConfig, Year2021Period.Q1)
   def qaLarRepository2021Q2            = createQaLarRepository2021(dbConfig, Year2021Period.Q2)
   def qaLarRepository2021Q3            = createQaLarRepository2021(dbConfig, Year2021Period.Q3)
-
   val publishingGuard: PublishingGuard = PublishingGuard.create(this)(context.system)
   val timeBarrier: QuarterTimeBarrier  = new QuarterTimeBarrier(Clock.systemDefaultZone())
 
@@ -206,7 +203,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
       val now              = LocalDateTime.now().minusDays(1)
       val formattedDate    = fullDateQuarterly.format(now)
 
-      def publishQuarter2020[Table <: RealLarTable](
+      def publishQuarter2020[Table <: RealLarTable2020](
                                                  quarter: Period.Quarter,
                                                  fileNameSuffix: String,
                                                  repo: LarRepository2020Base[Table],
@@ -233,18 +230,17 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
       publishQuarter2020(Period.y2020Q2, "quarter_2_2020_lar.txt", larRepository2020Q2, qaLarRepository2020Q2)
       publishQuarter2020(Period.y2020Q3, "quarter_3_2020_lar.txt", larRepository2020Q3, qaLarRepository2020Q3)
 
-
     case schedule @ LarSchedulerQuarterly2021 =>
       val includeQuarterly = true
       val now              = LocalDateTime.now().minusDays(1)
       val formattedDate    = fullDateQuarterly.format(now)
 
-      def publishQuarter2021[Table <: RealLarTable](
-                                                     quarter: Period.Quarter,
-                                                     fileNameSuffix: String,
-                                                     repo: LarRepository2021Base[Table],
-                                                     qaRepository: QARepository[LarEntityImpl2021]
-                                                   ) =
+      def publishQuarter2021[Table <: RealLarTable2021](
+                                                         quarter: Period.Quarter,
+                                                         fileNameSuffix: String,
+                                                         repo: LarRepository2021Base[Table],
+                                                         qaRepository: QARepository[LarEntityImpl2021]
+                                                       ) =
         timeBarrier.runIfStillRelevant(quarter) {
           publishingGuard.runIfDataIsValid(quarter, Scope.Private) {
             val fileName = formattedDate + fileNameSuffix
@@ -262,9 +258,9 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
             } yield ()
           }
         }
-      publishQuarter2021(Period.y2020Q1, "quarter_1_2021_lar.txt", larRepository2021Q1, qaLarRepository2021Q1)
-      publishQuarter2021(Period.y2020Q2, "quarter_2_2021_lar.txt", larRepository2021Q2, qaLarRepository2021Q2)
-      publishQuarter2021(Period.y2020Q3, "quarter_3_2021_lar.txt", larRepository2021Q3, qaLarRepository2021Q3)
+      publishQuarter2021(Period.y2021Q1, "quarter_1_2021_lar.txt", larRepository2021Q1, qaLarRepository2021Q1)
+      publishQuarter2021(Period.y2021Q2, "quarter_2_2021_lar.txt", larRepository2021Q2, qaLarRepository2021Q2)
+      publishQuarter2021(Period.y2021Q3, "quarter_3_2021_lar.txt", larRepository2021Q3, qaLarRepository2021Q3)
   }
 
   // returns effective file name/s3 object key
@@ -311,7 +307,6 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
       case 2018 => indexTractMap2018
       case 2019 => indexTractMap2019
       case 2020 => indexTractMap2020
-      case 2021 => indexTractMap2020
       case _    => indexTractMap2020
     }
     val censusResult = indexTractMap.getOrElse(hmdaGeoTract, Census())

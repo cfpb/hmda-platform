@@ -189,7 +189,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
       ) <> ((TransmittalSheetEntity.apply _).tupled, TransmittalSheetEntity.unapply)
   }
 
-  class RealTransmittalSheetTable(tag: Tag, tableName: String) extends TransmittalSheetTableBase[TransmittalSheetEntity](tag, tableName) {
+  class RealTransmittalSheetTable2020(tag: Tag, tableName: String) extends TransmittalSheetTableBase[TransmittalSheetEntity](tag, tableName) {
     override def * = transmittalSheetEntityProjection
   }
 
@@ -199,14 +199,14 @@ trait PublisherComponent2020 extends PGTableNameLoader {
     def * = (transmittalSheetEntityProjection, fileName,timeStamp) <> ((QAEntity.apply[TransmittalSheetEntity] _).tupled, QAEntity.unapply[TransmittalSheetEntity] _)
   }
 
-  def transmittalSheetTableQuery2020(p: Year2020Period): TableQuery[RealTransmittalSheetTable] = {
+  def transmittalSheetTableQuery2020(p: Year2020Period): TableQuery[RealTransmittalSheetTable2020] = {
     val tableName = p match {
       case Year2020Period.Whole => ts2020TableName
       case Year2020Period.Q1    => ts2020Q1TableName
       case Year2020Period.Q2    => ts2020Q2TableName
       case Year2020Period.Q3    => ts2020Q3TableName
     }
-    TableQuery(tag => new RealTransmittalSheetTable(tag, tableName))
+    TableQuery(tag => new RealTransmittalSheetTable2020(tag, tableName))
   }
 
   def qaTransmittalSheetTableQuery2020(p: Year2020Period): TableQuery[QATransmittalSheetTable] = {
@@ -219,7 +219,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
     TableQuery(tag => new QATransmittalSheetTable(tag, tableName))
   }
 
-  class TSRepository2020Base[TsTable <: RealTransmittalSheetTable](val config: DatabaseConfig[JdbcProfile], val table: TableQuery[TsTable])
+  class TSRepository2020Base[TsTable <: RealTransmittalSheetTable2020](val config: DatabaseConfig[JdbcProfile], val table: TableQuery[TsTable])
     extends TableRepository[TsTable, String] {
 
     override def getId(row: TsTable): config.profile.api.Rep[Id] =
@@ -558,11 +558,11 @@ trait PublisherComponent2020 extends PGTableNameLoader {
     new QARepository.Default[TransmittalSheetEntity, QATransmittalSheetTable](config, qaTransmittalSheetTableQuery2020(p))(ec)
 
 
-  class RealLarTable(tag: Tag, tableName: String) extends LarTableBase[LarEntityImpl2020](tag, tableName) {
+  class RealLarTable2020(tag: Tag, tableName: String) extends LarTableBase[LarEntityImpl2020](tag, tableName) {
     def * = larEntityImpl2020Projection
   }
 
-  class QALarTableBase(tag: Tag, tableName: String)
+  class QALarTableBase2020(tag: Tag, tableName: String)
     extends LarTableBase[QAEntity[LarEntityImpl2020]](tag, tableName)
       with QATableBase[LarEntityImpl2020] {
     def * = (larEntityImpl2020Projection, fileName,timeStamp) <> ((QAEntity.apply[LarEntityImpl2020] _).tupled, QAEntity.unapply[LarEntityImpl2020] _)
@@ -575,7 +575,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
       case Year2020Period.Q2    => lar2020Q2TableName
       case Year2020Period.Q3    => lar2020Q3TableName
     }
-    TableQuery(tag => new RealLarTable(tag, tableName))
+    TableQuery(tag => new RealLarTable2020(tag, tableName))
   }
 
   def qaLarTableQuery2020(p: Year2020Period) = {
@@ -585,10 +585,10 @@ trait PublisherComponent2020 extends PGTableNameLoader {
       case Year2020Period.Q2    => lar2020Q2QATableName
       case Year2020Period.Q3    => lar2020Q3QATableName
     }
-    TableQuery(tag => new QALarTableBase(tag, tableName))
+    TableQuery(tag => new QALarTableBase2020(tag, tableName))
   }
 
-  class LarRepository2020Base[LarTable <: RealLarTable](val config: DatabaseConfig[JdbcProfile], val table: TableQuery[LarTable])
+  class LarRepository2020Base[LarTable <: RealLarTable2020](val config: DatabaseConfig[JdbcProfile], val table: TableQuery[LarTable])
     extends TableRepository[LarTable, String] {
 
     override def getId(row: LarTable): config.profile.api.Rep[Id] =
@@ -632,12 +632,12 @@ trait PublisherComponent2020 extends PGTableNameLoader {
     new LarRepository2020Base(config, larTableQuery2020(p))
 
   def createQaLarRepository2020(config: DatabaseConfig[JdbcProfile], p: Year2020Period)(implicit ec: ExecutionContext) =
-    new QARepository.Default[LarEntityImpl2020, QALarTableBase](config, qaLarTableQuery2020(p))(ec)
+    new QARepository.Default[LarEntityImpl2020, QALarTableBase2020](config, qaLarTableQuery2020(p))(ec)
 
-  def validationLarData2020(p: Year2020Period): LarData = LarData[LarEntityImpl2020, RealLarTable](larTableQuery2020(p))(_.lei)
+  def validationLarData2020(p: Year2020Period): LarData = LarData[LarEntityImpl2020, RealLarTable2020](larTableQuery2020(p))(_.lei)
 
   def validationTSData2020(p: Year2020Period): TsData =
-    TsData[TransmittalSheetEntity, RealTransmittalSheetTable](transmittalSheetTableQuery2020(p))(_.lei, _.totalLines, _.submissionId)
+    TsData[TransmittalSheetEntity, RealTransmittalSheetTable2020](transmittalSheetTableQuery2020(p))(_.lei, _.totalLines, _.submissionId)
   class QALarTableLoanLimit(tag: Tag)
     extends LarTableBase[QAEntity[LarEntityImpl2020WithMsa]](tag, lar2020QALoanLimitTableName)
       with QATableBase[LarEntityImpl2020WithMsa] {
