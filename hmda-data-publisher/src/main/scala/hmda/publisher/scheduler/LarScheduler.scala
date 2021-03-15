@@ -94,6 +94,9 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
       .schedule("LarSchedulerLoanLimit2019", self, LarSchedulerLoanLimit2019)
     QuartzSchedulerExtension(context.system)
       .schedule("LarSchedulerQuarterly2020", self, LarSchedulerQuarterly2020)
+
+    QuartzSchedulerExtension(context.system)
+      .schedule("LarSchedulerQuarterly2021", self, LarSchedulerQuarterly2021)
   }
 
   override def postStop() = {
@@ -102,6 +105,8 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
     QuartzSchedulerExtension(context.system).cancelJob("LarScheduler2020")
     QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerLoanLimit2019")
     QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerQuarterly2020")
+    QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerQuarterly2021")
+
   }
 
   override def receive: Receive = {
