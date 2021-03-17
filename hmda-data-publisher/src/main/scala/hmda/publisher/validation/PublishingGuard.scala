@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import cats.data.{Validated, ValidatedNel}
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
-import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020}
+import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021}
 import hmda.publisher.util.MattermostNotifier
 import hmda.publisher.validation.PublishingGuard.{Period, Scope}
 import hmda.query.DbConfiguration
@@ -17,6 +17,7 @@ class PublishingGuard(
                        db2018: PublisherComponent2018,
                        db2019: PublisherComponent2019,
                        db2020: PublisherComponent2020,
+                       db2021: PublisherComponent2021,
                        messageReporter: MattermostNotifier,
                        dbConfig: DatabaseConfig[JdbcProfile]
                      )(
@@ -48,6 +49,9 @@ class PublishingGuard(
       case Period.y2020Q1 => 0
       case Period.y2020Q2 => 0
       case Period.y2020Q3 => 0
+      case Period.y2021Q1 => 0
+      case Period.y2021Q2 => 0
+      case Period.y2021Q3 => 0
     }
 
     scope match {
@@ -59,6 +63,9 @@ class PublishingGuard(
           case Period.y2020Q1 => db2020.validationLarData2020(db2020.Year2020Period.Q1)
           case Period.y2020Q2 => db2020.validationLarData2020(db2020.Year2020Period.Q2)
           case Period.y2020Q3 => db2020.validationLarData2020(db2020.Year2020Period.Q3)
+          case Period.y2021Q1 => db2021.validationLarData2021(db2021.Year2021Period.Q1)
+          case Period.y2021Q2 => db2021.validationLarData2021(db2021.Year2021Period.Q2)
+          case Period.y2021Q3 => db2021.validationLarData2021(db2021.Year2021Period.Q3)
         }
 
         val tsData = year match {
@@ -68,6 +75,9 @@ class PublishingGuard(
           case Period.y2020Q1 => db2020.validationTSData2020(db2020.Year2020Period.Q1)
           case Period.y2020Q2 => db2020.validationTSData2020(db2020.Year2020Period.Q2)
           case Period.y2020Q3 => db2020.validationTSData2020(db2020.Year2020Period.Q3)
+          case Period.y2021Q1 => db2021.validationTSData2021(db2021.Year2021Period.Q1)
+          case Period.y2021Q2 => db2021.validationTSData2021(db2021.Year2021Period.Q2)
+          case Period.y2021Q3 => db2021.validationTSData2021(db2021.Year2021Period.Q3)
         }
         List(
           new TSLinesCheck(dbConfig, tsData, larData),
@@ -80,12 +90,16 @@ class PublishingGuard(
           case Period.y2019 => Some(db2019.validationMLarData2019)
           case Period.y2020Q1 | Period.y2020Q2 | Period.y2020Q3 =>
             throw new IllegalArgumentException("year 2020 is not supported to public publishers at the moment")
+          case Period.y2021Q1 | Period.y2021Q2 | Period.y2021Q3 =>
+            throw new IllegalArgumentException("year 2021 is not supported to public publishers at the moment")
         }
         val tsData = year match {
           case Period.y2018 => db2018.validationTSData2018
           case Period.y2019 => db2019.validationTSData2019
           case Period.y2020Q1 | Period.y2020Q1 | Period.y2020Q3 =>
             throw new IllegalArgumentException("year 2020 is not supported to public publishers at the moment")
+          case Period.y2021Q1 | Period.y2021Q1 | Period.y2021Q3 =>
+            throw new IllegalArgumentException("year 2021 is not supported to public publishers at the moment")
         }
         larDataOpt
           .map(larData =>
@@ -113,13 +127,16 @@ class PublishingGuard(
 object PublishingGuard {
 
   def create(
-              dbCompontnents: PublisherComponent2018 with PublisherComponent2019 with PublisherComponent2020
+              dbCompontnents: PublisherComponent2018
+                with PublisherComponent2019
+                with PublisherComponent2020
+                with PublisherComponent2021
             )(implicit as: ActorSystem): PublishingGuard = {
     import as.dispatcher
     val config      = ConfigFactory.load("application.conf")
     val msgReporter = new MattermostNotifier(config.getString("hmda.publisher.validation.reportingUrl"))
     val dbConfig    = DbConfiguration.dbConfig
-    new PublishingGuard(dbCompontnents, dbCompontnents, dbCompontnents, msgReporter, dbConfig)
+    new PublishingGuard(dbCompontnents, dbCompontnents, dbCompontnents,dbCompontnents, msgReporter, dbConfig)
   }
 
   sealed trait Period
@@ -132,6 +149,9 @@ object PublishingGuard {
     case object y2020Q1 extends Period with Quarter
     case object y2020Q2 extends Period with Quarter
     case object y2020Q3 extends Period with Quarter
+    case object y2021Q1 extends Period with Quarter
+    case object y2021Q2 extends Period with Quarter
+    case object y2021Q3 extends Period with Quarter
   }
 
   sealed trait Scope

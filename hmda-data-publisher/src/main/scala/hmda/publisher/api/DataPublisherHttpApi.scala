@@ -44,12 +44,14 @@ private class DataPublisherHttpApi(
       case Schedules.LarSchedulerLoanLimit2019 => larScheduler
       case Schedules.LarSchedulerLoanLimit2020 => larScheduler
       case Schedules.LarSchedulerQuarterly2020 => larScheduler
+      case Schedules.LarSchedulerQuarterly2021 => larScheduler
       case Schedules.TsPublicScheduler2018     => tsPublicScheduler
       case Schedules.TsPublicScheduler2019     => tsPublicScheduler
       case Schedules.TsScheduler2018           => tsScheduler
       case Schedules.TsScheduler2019           => tsScheduler
       case Schedules.TsScheduler2020           => tsScheduler
       case Schedules.TsSchedulerQuarterly2020  => tsScheduler
+      case Schedules.TsSchedulerQuarterly2021  => tsScheduler
     }
     receiver ! msg
   }

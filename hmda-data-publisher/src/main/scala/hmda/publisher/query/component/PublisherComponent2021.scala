@@ -5,7 +5,7 @@ import java.sql.Timestamp
 import hmda.model.publication.Msa
 import hmda.publisher.helper.PGTableNameLoader
 import hmda.publisher.qa.{QAEntity, QARepository, QATableBase}
-import hmda.publisher.query.lar.{LarEntityImpl2020, _}
+import hmda.publisher.query.lar.{LarEntityImpl2021, _}
 import hmda.publisher.query.panel.{InstitutionAltEntity, InstitutionEntity}
 import hmda.publisher.validation.{LarData, TsData}
 import hmda.query.DbConfiguration._
@@ -16,16 +16,16 @@ import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait PublisherComponent2020 extends PGTableNameLoader {
+trait PublisherComponent2021 extends PGTableNameLoader {
 
   import dbConfig.profile.api._
 
-  sealed trait Year2020Period
-  object Year2020Period {
-    case object Whole extends Year2020Period
-    case object Q1    extends Year2020Period
-    case object Q2    extends Year2020Period
-    case object Q3    extends Year2020Period
+  sealed trait Year2021Period
+  object Year2021Period {
+    case object Whole extends Year2021Period
+    case object Q1    extends Year2021Period
+    case object Q2    extends Year2021Period
+    case object Q3    extends Year2021Period
   }
 
   abstract class InstitutionsTableBase[T](tag: Tag, tableName: String) extends Table[T](tag, tableName) {
@@ -47,7 +47,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
     def topHolderName   = column[String]("topholder_name")
     def hmdaFiler       = column[Boolean]("hmda_filer")
   }
-  class InstitutionsTable(tag: Tag) extends InstitutionsTableBase[InstitutionEntity](tag, panel2020TableName) {
+  class InstitutionsTable(tag: Tag) extends InstitutionsTableBase[InstitutionEntity](tag, panel2021TableName) {
     override def * =
       (
         lei,
@@ -69,10 +69,10 @@ trait PublisherComponent2020 extends PGTableNameLoader {
         hmdaFiler
       ) <> (InstitutionEntity.tupled, InstitutionEntity.unapply)
   }
-  val institutionsTable2020 = TableQuery[InstitutionsTable]
+  val institutionsTable2021 = TableQuery[InstitutionsTable]
 
   class QAInstitutionsTable(tag: Tag)
-    extends InstitutionsTableBase[QAEntity[InstitutionAltEntity]](tag, panel2020QATableName)
+    extends InstitutionsTableBase[QAEntity[InstitutionAltEntity]](tag, panel2021QATableName)
       with QATableBase[InstitutionAltEntity] {
     def emailDomains = column[String]("email_domains")
     def institutionAltEntityProjection =
@@ -101,16 +101,16 @@ trait PublisherComponent2020 extends PGTableNameLoader {
         .unapply[InstitutionAltEntity] _)
   }
 
-  def createQaPanelRepository2020(config: DatabaseConfig[JdbcProfile])(implicit ec: ExecutionContext) =
+  def createQaPanelRepository2021(config: DatabaseConfig[JdbcProfile])(implicit ec: ExecutionContext) =
     new QARepository.Default[InstitutionAltEntity, QAInstitutionsTable](
       config,
       TableQuery(tag => new QAInstitutionsTable(tag))
     )(ec)
 
-  class InstitutionRepository2020(val config: DatabaseConfig[JdbcProfile]) extends TableRepository[InstitutionsTable, String] {
+  class InstitutionRepository2021(val config: DatabaseConfig[JdbcProfile]) extends TableRepository[InstitutionsTable, String] {
 
     override val table: config.profile.api.TableQuery[InstitutionsTable] =
-      institutionsTable2020
+      institutionsTable2021
 
     override def getId(row: InstitutionsTable): config.profile.api.Rep[Id] =
       row.lei
@@ -189,7 +189,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
       ) <> ((TransmittalSheetEntity.apply _).tupled, TransmittalSheetEntity.unapply)
   }
 
-  class RealTransmittalSheetTable2020(tag: Tag, tableName: String) extends TransmittalSheetTableBase[TransmittalSheetEntity](tag, tableName) {
+  class RealTransmittalSheetTable2021(tag: Tag, tableName: String) extends TransmittalSheetTableBase[TransmittalSheetEntity](tag, tableName) {
     override def * = transmittalSheetEntityProjection
   }
 
@@ -199,27 +199,27 @@ trait PublisherComponent2020 extends PGTableNameLoader {
     def * = (transmittalSheetEntityProjection, fileName,timeStamp) <> ((QAEntity.apply[TransmittalSheetEntity] _).tupled, QAEntity.unapply[TransmittalSheetEntity] _)
   }
 
-  def transmittalSheetTableQuery2020(p: Year2020Period): TableQuery[RealTransmittalSheetTable2020] = {
+  def transmittalSheetTableQuery2021(p: Year2021Period): TableQuery[RealTransmittalSheetTable2021] = {
     val tableName = p match {
-      case Year2020Period.Whole => ts2020TableName
-      case Year2020Period.Q1    => ts2020Q1TableName
-      case Year2020Period.Q2    => ts2020Q2TableName
-      case Year2020Period.Q3    => ts2020Q3TableName
+      case Year2021Period.Whole => ts2021TableName
+      case Year2021Period.Q1    => ts2021Q1TableName
+      case Year2021Period.Q2    => ts2021Q2TableName
+      case Year2021Period.Q3    => ts2021Q3TableName
     }
-    TableQuery(tag => new RealTransmittalSheetTable2020(tag, tableName))
+    TableQuery(tag => new RealTransmittalSheetTable2021(tag, tableName))
   }
 
-  def qaTransmittalSheetTableQuery2020(p: Year2020Period): TableQuery[QATransmittalSheetTable] = {
+  def qaTransmittalSheetTableQuery2021(p: Year2021Period): TableQuery[QATransmittalSheetTable] = {
     val tableName = p match {
-      case Year2020Period.Whole => ts2020QATableName
-      case Year2020Period.Q1    => ts2020Q1QATableName
-      case Year2020Period.Q2    => ts2020Q2QATableName
-      case Year2020Period.Q3    => ts2020Q3QATableName
+      case Year2021Period.Whole => ts2021QATableName
+      case Year2021Period.Q1    => ts2021Q1QATableName
+      case Year2021Period.Q2    => ts2021Q2QATableName
+      case Year2021Period.Q3    => ts2021Q3QATableName
     }
     TableQuery(tag => new QATransmittalSheetTable(tag, tableName))
   }
 
-  class TSRepository2020Base[TsTable <: RealTransmittalSheetTable2020](val config: DatabaseConfig[JdbcProfile], val table: TableQuery[TsTable])
+  class TSRepository2021Base[TsTable <: RealTransmittalSheetTable2021](val config: DatabaseConfig[JdbcProfile], val table: TableQuery[TsTable])
     extends TableRepository[TsTable, String] {
 
     override def getId(row: TsTable): config.profile.api.Rep[Id] =
@@ -387,7 +387,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
     // so don't use create Schema
     def isQuarterly = column[Option[Boolean]]("is_quarterly")
 
-    def larEntityImpl2020Projection =
+    def larEntityImpl2021Projection =
       (
         larPartOneProjection,
         larPartTwoProjection,
@@ -396,7 +396,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
         larPartFiveProjection,
         larPartSixProjection,
         larPartSevenProjection
-      ) <> ((LarEntityImpl2020.apply _).tupled, LarEntityImpl2020.unapply)
+      ) <> ((LarEntityImpl2021.apply _).tupled, LarEntityImpl2021.unapply)
 
     def larPartOneProjection =
       (
@@ -418,7 +418,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
         zip,
         county,
         tract
-      ) <> ((LarPartOne2020.apply _).tupled, LarPartOne2020.unapply)
+      ) <> ((LarPartOne2021.apply _).tupled, LarPartOne2021.unapply)
 
     def larPartTwoProjection =
       (
@@ -441,7 +441,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
         raceApplicant3,
         raceApplicant4,
         raceApplicant5
-      ) <> ((LarPartTwo2020.apply _).tupled, LarPartTwo2020.unapply)
+      ) <> ((LarPartTwo2021.apply _).tupled, LarPartTwo2021.unapply)
 
     def larPartThreeProjection =
       (
@@ -465,7 +465,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
         ageApplicant,
         ageCoApplicant,
         income
-      ) <> ((LarPartThree2020.apply _).tupled, LarPartThree2020.unapply)
+      ) <> ((LarPartThree2021.apply _).tupled, LarPartThree2021.unapply)
 
     def larPartFourProjection =
       (
@@ -487,7 +487,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
         totalLoanCosts,
         totalPoints,
         originationCharges
-      ) <> ((LarPartFour2020.apply _).tupled, LarPartFour2020.unapply)
+      ) <> ((LarPartFour2021.apply _).tupled, LarPartFour2021.unapply)
 
     def larPartFiveProjection =
       (
@@ -509,7 +509,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
         totalUnits,
         mfAffordable,
         applicationSubmission
-      ) <> ((LarPartFive2020.apply _).tupled, LarPartFive2020.unapply)
+      ) <> ((LarPartFive2021.apply _).tupled, LarPartFive2021.unapply)
 
     def larPartSixProjection =
       (
@@ -530,7 +530,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
         reverseMortgage,
         lineOfCredits,
         businessOrCommercial
-      ) <> ((LarPartSix2020.apply _).tupled, LarPartSix2020.unapply)
+      ) <> ((LarPartSix2021.apply _).tupled, LarPartSix2021.unapply)
 
     def larPartSevenProjection =
       (
@@ -547,48 +547,48 @@ trait PublisherComponent2020 extends PGTableNameLoader {
         tractOneToFourFamilyUnits,
         tractMedianAge,
         tractToMsaIncomePercent
-      ) <> ((LarPartSeven2020.apply _).tupled, LarPartSeven2020.unapply)
+      ) <> ((LarPartSeven2021.apply _).tupled, LarPartSeven2021.unapply)
 
   }
 
-  def createTransmittalSheetRepository2020(config: DatabaseConfig[JdbcProfile], p: Year2020Period) =
-    new TSRepository2020Base(config, transmittalSheetTableQuery2020(p))
+  def createTransmittalSheetRepository2021(config: DatabaseConfig[JdbcProfile], p: Year2021Period) =
+    new TSRepository2021Base(config, transmittalSheetTableQuery2021(p))
 
-  def createQaTransmittalSheetRepository2020(config: DatabaseConfig[JdbcProfile], p: Year2020Period)(implicit ec: ExecutionContext) =
-    new QARepository.Default[TransmittalSheetEntity, QATransmittalSheetTable](config, qaTransmittalSheetTableQuery2020(p))(ec)
+  def createQaTransmittalSheetRepository2021(config: DatabaseConfig[JdbcProfile], p: Year2021Period)(implicit ec: ExecutionContext) =
+    new QARepository.Default[TransmittalSheetEntity, QATransmittalSheetTable](config, qaTransmittalSheetTableQuery2021(p))(ec)
 
 
-  class RealLarTable2020(tag: Tag, tableName: String) extends LarTableBase[LarEntityImpl2020](tag, tableName) {
-    def * = larEntityImpl2020Projection
+  class RealLarTable2021(tag: Tag, tableName: String) extends LarTableBase[LarEntityImpl2021](tag, tableName) {
+    def * = larEntityImpl2021Projection
   }
 
-  class QALarTableBase2020(tag: Tag, tableName: String)
-    extends LarTableBase[QAEntity[LarEntityImpl2020]](tag, tableName)
-      with QATableBase[LarEntityImpl2020] {
-    def * = (larEntityImpl2020Projection, fileName,timeStamp) <> ((QAEntity.apply[LarEntityImpl2020] _).tupled, QAEntity.unapply[LarEntityImpl2020] _)
+  class QALarTableBase2021(tag: Tag, tableName: String)
+    extends LarTableBase[QAEntity[LarEntityImpl2021]](tag, tableName)
+      with QATableBase[LarEntityImpl2021] {
+    def * = (larEntityImpl2021Projection, fileName,timeStamp) <> ((QAEntity.apply[LarEntityImpl2021] _).tupled, QAEntity.unapply[LarEntityImpl2021] _)
   }
 
-  def larTableQuery2020(p: Year2020Period) = {
+  def larTableQuery2021(p: Year2021Period) = {
     val tableName = p match {
-      case Year2020Period.Whole => lar2020TableName
-      case Year2020Period.Q1    => lar2020Q1TableName
-      case Year2020Period.Q2    => lar2020Q2TableName
-      case Year2020Period.Q3    => lar2020Q3TableName
+      case Year2021Period.Whole => lar2021TableName
+      case Year2021Period.Q1    => lar2021Q1TableName
+      case Year2021Period.Q2    => lar2021Q2TableName
+      case Year2021Period.Q3    => lar2021Q3TableName
     }
-    TableQuery(tag => new RealLarTable2020(tag, tableName))
+    TableQuery(tag => new RealLarTable2021(tag, tableName))
   }
 
-  def qaLarTableQuery2020(p: Year2020Period) = {
+  def qaLarTableQuery2021(p: Year2021Period) = {
     val tableName = p match {
-      case Year2020Period.Whole => lar2020QATableName
-      case Year2020Period.Q1    => lar2020Q1QATableName
-      case Year2020Period.Q2    => lar2020Q2QATableName
-      case Year2020Period.Q3    => lar2020Q3QATableName
+      case Year2021Period.Whole => lar2021QATableName
+      case Year2021Period.Q1    => lar2021Q1QATableName
+      case Year2021Period.Q2    => lar2021Q2QATableName
+      case Year2021Period.Q3    => lar2021Q3QATableName
     }
-    TableQuery(tag => new QALarTableBase2020(tag, tableName))
+    TableQuery(tag => new QALarTableBase2021(tag, tableName))
   }
 
-  class LarRepository2020Base[LarTable <: RealLarTable2020](val config: DatabaseConfig[JdbcProfile], val table: TableQuery[LarTable])
+  class LarRepository2021Base[LarTable <: RealLarTable2021](val config: DatabaseConfig[JdbcProfile], val table: TableQuery[LarTable])
     extends TableRepository[LarTable, String] {
 
     override def getId(row: LarTable): config.profile.api.Rep[Id] =
@@ -600,10 +600,10 @@ trait PublisherComponent2020 extends PGTableNameLoader {
     def dropSchema()   = db.run(table.schema.drop)
     // $COVERAGE-ON$
 
-    def insert(ts: LarEntityImpl2020): Future[Int] =
+    def insert(ts: LarEntityImpl2021): Future[Int] =
       db.run(table += ts)
 
-    def findByLei(lei: String): Future[Seq[LarEntityImpl2020]] =
+    def findByLei(lei: String): Future[Seq[LarEntityImpl2021]] =
       db.run(table.filter(_.lei === lei).result)
 
     def deleteByLei(lei: String): Future[Int] =
@@ -614,7 +614,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
     def getAllLARsCount(bankIgnoreList: Array[String]): Future[Int] =
       db.run(getAllLARsQuery(bankIgnoreList).size.result)
 
-    def getAllLARs(bankIgnoreList: Array[String]): DatabasePublisher[LarEntityImpl2020] =
+    def getAllLARs(bankIgnoreList: Array[String]): DatabasePublisher[LarEntityImpl2021] =
       db.stream(
         getAllLARsQuery(bankIgnoreList).result
           .withStatementParameters(
@@ -624,23 +624,23 @@ trait PublisherComponent2020 extends PGTableNameLoader {
           )
           .transactionally
       )
-    protected def getAllLARsQuery(bankIgnoreList: Array[String]): Query[LarTable, LarEntityImpl2020, Seq] =
+    protected def getAllLARsQuery(bankIgnoreList: Array[String]): Query[LarTable, LarEntityImpl2021, Seq] =
       table.filterNot(_.lei.toUpperCase inSet bankIgnoreList)
   }
 
-  def createLarRepository2020(config: DatabaseConfig[JdbcProfile], p: Year2020Period) =
-    new LarRepository2020Base(config, larTableQuery2020(p))
+  def createLarRepository2021(config: DatabaseConfig[JdbcProfile], p: Year2021Period) =
+    new LarRepository2021Base(config, larTableQuery2021(p))
 
-  def createQaLarRepository2020(config: DatabaseConfig[JdbcProfile], p: Year2020Period)(implicit ec: ExecutionContext) =
-    new QARepository.Default[LarEntityImpl2020, QALarTableBase2020](config, qaLarTableQuery2020(p))(ec)
+  def createQaLarRepository2021(config: DatabaseConfig[JdbcProfile], p: Year2021Period)(implicit ec: ExecutionContext) =
+    new QARepository.Default[LarEntityImpl2021, QALarTableBase2021](config, qaLarTableQuery2021(p))(ec)
 
-  def validationLarData2020(p: Year2020Period): LarData = LarData[LarEntityImpl2020, RealLarTable2020](larTableQuery2020(p))(_.lei)
+  def validationLarData2021(p: Year2021Period): LarData = LarData[LarEntityImpl2021, RealLarTable2021](larTableQuery2021(p))(_.lei)
 
-  def validationTSData2020(p: Year2020Period): TsData =
-    TsData[TransmittalSheetEntity, RealTransmittalSheetTable2020](transmittalSheetTableQuery2020(p))(_.lei, _.totalLines, _.submissionId)
+  def validationTSData2021(p: Year2021Period): TsData =
+    TsData[TransmittalSheetEntity, RealTransmittalSheetTable2021](transmittalSheetTableQuery2021(p))(_.lei, _.totalLines, _.submissionId)
   class QALarTableLoanLimit(tag: Tag)
-    extends LarTableBase[QAEntity[LarEntityImpl2020WithMsa]](tag, lar2020QALoanLimitTableName)
-      with QATableBase[LarEntityImpl2020WithMsa] {
+    extends LarTableBase[QAEntity[LarEntityImpl2021WithMsa]](tag, lar2021QALoanLimitTableName)
+      with QATableBase[LarEntityImpl2021WithMsa] {
 
     object MsaColumns {
       def msaID                   = column[String]("msa_id")
@@ -685,14 +685,14 @@ trait PublisherComponent2020 extends PGTableNameLoader {
         MsaColumns.notApplicablePurpose
       ) <> ((Msa.apply _).tupled, Msa.unapply)
 
-    def larEntityImpl2020WithMsaProjection = (larEntityImpl2020Projection, msaProjection) <> ((LarEntityImpl2020WithMsa.apply _).tupled, LarEntityImpl2020WithMsa.unapply)
+    def larEntityImpl2021WithMsaProjection = (larEntityImpl2021Projection, msaProjection) <> ((LarEntityImpl2021WithMsa.apply _).tupled, LarEntityImpl2021WithMsa.unapply)
 
-    override def * = (larEntityImpl2020WithMsaProjection, fileName,timeStamp) <> ((QAEntity.apply[LarEntityImpl2020WithMsa] _).tupled, QAEntity.unapply[LarEntityImpl2020WithMsa] _)
+    override def * = (larEntityImpl2021WithMsaProjection, fileName,timeStamp) <> ((QAEntity.apply[LarEntityImpl2021WithMsa] _).tupled, QAEntity.unapply[LarEntityImpl2021WithMsa] _)
   }
-  val qaLarTable2020LoanLimit = TableQuery[QALarTableLoanLimit]
+  val qaLarTable2021LoanLimit = TableQuery[QALarTableLoanLimit]
 
-  class QALarRepository2020LoanLimit(config: DatabaseConfig[JdbcProfile])(implicit ec: ExecutionContext)
-    extends QARepository.Default[LarEntityImpl2020WithMsa, QALarTableLoanLimit](config, qaLarTable2020LoanLimit)(ec)
+  class QALarRepository2021LoanLimit(config: DatabaseConfig[JdbcProfile])(implicit ec: ExecutionContext)
+    extends QARepository.Default[LarEntityImpl2021WithMsa, QALarTableLoanLimit](config, qaLarTable2021LoanLimit)(ec)
 
 
 }
