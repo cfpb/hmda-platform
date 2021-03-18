@@ -7,15 +7,16 @@ The HMDA [Postman](https://www.postman.com/) collection has everything you need 
 
 ## Variables
 
-The variables you will need to set in `HMDA_ENV.postman_environment` are:
+The variables you will need to set in `HMDA_ENV.postman_environment` are below. If you are running the platform locally, we've provided default values that you can input. The default values can be easily changed in the postman collection once imported
 
-- `HMDA_URL_FILING` 
-- `HMDA_TOKEN_URL`
-- `HMDA_USERNAME` Your username
-- `HMDA_PASSWORD` Your password
-- `LEI` The LEI you are filing for
-- `YEAR` The year you are filing for
-- `FILE` Full path to file for upload
+- `URL_ADMIN` (default to be used for localhost: `http://localhost:8081`)
+- `URL_FILING` (default to be used for localhost: `http://localhost:8080`)
+- `HMDA_TOKEN_URL` (not needed for localhost)
+- `HMDA_USERNAME` Your username (not needed for localhost)
+- `HMDA_PASSWORD` Your password (not needed for localhost)
+- `LEI` The LEI you are filing for (default to be used for localhost: `B90YWS6AFX2LGWOXJ1LD`)
+- `YEAR` The year you are filing for (default to be used for localhost: `2018`)
+- `FILE` Full path to file for upload 
 
 ### Notes about the fields
  
