@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "ff1fab16-688d-4df4-8532-b0cd5a1559c8",
+		"_postman_id": "26cf9a83-2331-496b-be7b-48c993e43575",
 		"name": "HMDA API Filing",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -36,7 +36,7 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "0202aefd-805b-404a-b064-c53d6997dfe7",
+						"id": "7f40fc9c-a127-45d6-bc7b-989668657423",
 						"exec": [
 							"var data = pm.response.json();",
 							"pm.environment.set(\"TOKEN\", data.access_token);"
@@ -88,17 +88,59 @@
 			"response": []
 		},
 		{
+			"name": "Create an Institution",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "bd3d0ed9-2dcc-4433-b2da-64e214184535",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"activityYear\": 2019,\n    \"lei\": \"B90YWS6AFX2LGWOXJ1LD\",\n    \"agency\": 9,\n    \"institutionType\": -1,\n    \"institutionId2017\": \"\",\n    \"taxId\": \"01-0123456\",\n    \"rssd\": -1,\n    \"emailDomains\": [\n        \"bank1.com\"\n    ],\n    \"respondent\": {\n        \"name\": \"Bank 0\",\n        \"state\": \"\",\n        \"city\": \"\"\n    },\n    \"parent\": {\n        \"idRssd\": -1,\n        \"name\": \"\"\n    },\n    \"assets\": -1,\n    \"otherLenderCode\": -1,\n    \"topHolder\": {\n        \"idRssd\": -1,\n        \"name\": \"\"\n    },\n    \"hmdaFiler\": false,\n    \"quarterlyFiler\": true,\n    \"quarterlyFilerHasFiledQ1\": false,\n    \"quarterlyFilerHasFiledQ2\": false,\n    \"quarterlyFilerHasFiledQ3\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL_ADMIN}}/institutions",
+					"host": [
+						"{{URL_ADMIN}}"
+					],
+					"path": [
+						"institutions"
+					]
+				},
+				"description": "Create institution on admin API"
+			},
+			"response": []
+		},
+		{
 			"name": "Start filing for a year",
 			"request": {
 				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{TOKEN}}",
-							"type": "string"
-						}
-					]
+					"type": "noauth"
 				},
 				"method": "POST",
 				"header": [
@@ -132,7 +174,7 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "ae599a1c-775e-486a-9420-54fca2013114",
+						"id": "7ccc3d22-c10f-4fae-b0f1-66f2b2b9e7a9",
 						"exec": [
 							"var jsonData = JSON.parse(responseBody);",
 							"postman.setEnvironmentVariable(\"SEQUENCE_NUMBER\", jsonData.id.sequenceNumber);"
@@ -143,19 +185,10 @@
 			],
 			"request": {
 				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{TOKEN}}",
-							"type": "string"
-						}
-					]
+					"type": "noauth"
 				},
 				"method": "POST",
-				"header": [
-
-				],
+				"header": [],
 				"body": {
 					"mode": "raw",
 					"raw": ""
@@ -217,14 +250,7 @@
 			"name": "Upload file for submission",
 			"request": {
 				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{TOKEN}}",
-							"type": "string"
-						}
-					]
+					"type": "noauth"
 				},
 				"method": "POST",
 				"header": [
@@ -241,7 +267,7 @@
 						{
 							"key": "file",
 							"type": "file",
-							"src": "{{FILE}}"
+							"src": []
 						}
 					],
 					"options": {
@@ -271,14 +297,7 @@
 			"name": "Edits Summary",
 			"request": {
 				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{TOKEN}}",
-							"type": "string"
-						}
-					]
+					"type": "noauth"
 				},
 				"method": "GET",
 				"header": [
@@ -311,14 +330,7 @@
 			"name": "Edits Detail",
 			"request": {
 				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{TOKEN}}",
-							"type": "string"
-						}
-					]
+					"type": "noauth"
 				},
 				"method": "GET",
 				"header": [
@@ -329,7 +341,7 @@
 					}
 				],
 				"url": {
-					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}/submissions/{{SEQUENCE_NUMBER}}/edits/{{EDIT_NUMBER}}",
+					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}/submissions/{{SEQUENCE_NUMBER}}/edits/Q614",
 					"host": [
 						"{{URL_FILING}}"
 					],
@@ -341,7 +353,7 @@
 						"submissions",
 						"{{SEQUENCE_NUMBER}}",
 						"edits",
-						"{{EDIT_NUMBER}}"
+						"Q614"
 					]
 				},
 				"description": "Edits Summary for a submission"
@@ -399,14 +411,7 @@
 			"name": "Verify Quality Edits",
 			"request": {
 				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{TOKEN}}",
-							"type": "string"
-						}
-					]
+					"type": "noauth"
 				},
 				"method": "POST",
 				"header": [
@@ -442,14 +447,7 @@
 			"name": "Verify Macro Edits",
 			"request": {
 				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{TOKEN}}",
-							"type": "string"
-						}
-					]
+					"type": "noauth"
 				},
 				"method": "POST",
 				"header": [
@@ -485,14 +483,7 @@
 			"name": "Sign ",
 			"request": {
 				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{TOKEN}}",
-							"type": "string"
-						}
-					]
+					"type": "noauth"
 				},
 				"method": "POST",
 				"header": [
@@ -530,14 +521,7 @@
 			},
 			"request": {
 				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{TOKEN}}",
-							"type": "string"
-						}
-					]
+					"type": "noauth"
 				},
 				"method": "GET",
 				"header": [
