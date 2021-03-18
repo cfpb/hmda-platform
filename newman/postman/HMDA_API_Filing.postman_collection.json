@@ -31,7 +31,7 @@
 			"response": []
 		},
 		{
-			"name": "Get Token",
+			"name": "Get Token (not needed for local development)",
 			"event": [
 				{
 					"listen": "test",
