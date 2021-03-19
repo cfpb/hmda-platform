@@ -63,6 +63,8 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
       case ("2018","open_end_credit_lar") => "open_end_credit_lar_count_by_agency_2018"
       case ("2019","open_end_credit_lar") => "open_end_credit_lar_count_by_agency_2019"
       case ("2020","open_end_credit_lar") => "open_end_credit_lar_count_by_agency_2020"
+      case ("2019","list_quarterly_filers") => "list_quarterly_filers_2019"
+      case ("2020","list_quarterly_filers") => "list_quarterly_filers_2020"
       case ("2020-Q1","") => "lar2020_q1"
       case ("2020-Q2","") => "lar2020_q2"
       case ("2020-Q3","") => "lar2020_q3"
@@ -293,10 +295,9 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   }
 
   def fetchListQuarterlyFilers(period: String): Task[Seq[ListQuarterlyFilers]] = {
-    val tsTable = tsTableSelector(period)
-    val larTable = larTableSelector(period)
+    val larTable = larTableSelector(period, "list_quarterly_filers")
     val query = sql"""
-      select lei, agency, institution_name from #${tsTable} where upper(lei) not in (#${filterList}) and upper(lei) in ( select distinct(upper(lei)) from #${larTable} group by lei having sum(case when action_taken_type != '6' then 1 else 0 end) >= 60000)
+        select * from #${larTable} order by sign_date_east desc;
       """.as[ListQuarterlyFilers]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }

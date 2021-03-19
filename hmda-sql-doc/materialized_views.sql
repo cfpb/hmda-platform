@@ -510,3 +510,45 @@ AS (SELECT 'Less than 100 closed end originated loans',
                    AND line_of_credits = '1111' 
             GROUP  BY lei 
             HAVING Count(*) < 200) AS results4);
+
+CREATE materialized VIEW hmda_user.list_quarterly_filers_2019 tablespace pg_default
+AS
+select
+	lei,
+	agency,
+	institution_name,
+	sign_date,
+	timezone('UTC'::text, to_timestamp((sign_date / 1000)::double precision)) AS sign_date_utc,
+    timezone('EST'::text, to_timestamp((sign_date / 1000)::double precision)) AS sign_date_east,
+    total_lines
+from
+	transmittalsheet2019
+where
+	upper(lei::text) <> ALL (ARRAY['BANK1LEIFORTEST12345'::text, 'BANK3LEIFORTEST12345'::text, 'BANK4LEIFORTEST12345'::text, '999999LE3ZOZXUS7W648'::text, '28133080042813308004'::text, 'B90YWS6AFX2LGWOXJ1LD'::text, 'FAKE0SWARM0BANK00000'::text, 'FAKE0SWARM0BANK00001'::text, 'FAKE0SWARM0BANK00002'::text, 'FAKE0SWARM0BANK00003'::text, 'NEWMANLEITEST1234678'::text, 'B90YWS6AFX2LGWOXJ1MD'::text, 'MEISSADIATESTBANK001'::text, 'MEISSADIATESTBANK002'::text, 'MEISSADIATESTBANK003'::text, 'DOWNPIPETEST12346789'::text, 'ABHINAYAATEST1234567'::text, 'BSTOUTTEST1234567891'::text, 'CHYNNATEST1234567891'::text, 'HABEEBNETEST12345678'::text, 'JAMALTEST12345678901'::text, 'JOSHIBTEST1234567812'::text, 'KGUDELTEST1234567812'::text, 'KIBRAEL1234567891234'::text, 'MATTTEST123456789012'::text, 'OMNIPRESENTTEST12345'::text, 'PATRICKHSITEST123456'::text, 'SPRYTESTBANK12345678'::text, '254900MPYMMUWMWZA335'::text, 'FRONTENDTESTBANK9999'::text])
+	and 	upper(lei) in ( select distinct(upper(lei))
+	from
+		loanapplicationregister2019
+	group by
+		lei
+	having sum(case when action_taken_type != '6' then 1 else 0 end) >= 60000);
+
+CREATE materialized VIEW hmda_user.list_quarterly_filers_2020 tablespace pg_default
+AS
+select
+	lei,
+	agency,
+	institution_name,
+	sign_date,
+	timezone('UTC'::text, to_timestamp((sign_date / 1000)::double precision)) AS sign_date_utc,
+    timezone('EST'::text, to_timestamp((sign_date / 1000)::double precision)) AS sign_date_east,
+    total_lines
+from
+	transmittalsheet2020
+where
+	upper(lei::text) <> ALL (ARRAY['BANK1LEIFORTEST12345'::text, 'BANK3LEIFORTEST12345'::text, 'BANK4LEIFORTEST12345'::text, '999999LE3ZOZXUS7W648'::text, '28133080042813308004'::text, 'B90YWS6AFX2LGWOXJ1LD'::text, 'FAKE0SWARM0BANK00000'::text, 'FAKE0SWARM0BANK00001'::text, 'FAKE0SWARM0BANK00002'::text, 'FAKE0SWARM0BANK00003'::text, 'NEWMANLEITEST1234678'::text, 'B90YWS6AFX2LGWOXJ1MD'::text, 'MEISSADIATESTBANK001'::text, 'MEISSADIATESTBANK002'::text, 'MEISSADIATESTBANK003'::text, 'DOWNPIPETEST12346789'::text, 'ABHINAYAATEST1234567'::text, 'BSTOUTTEST1234567891'::text, 'CHYNNATEST1234567891'::text, 'HABEEBNETEST12345678'::text, 'JAMALTEST12345678901'::text, 'JOSHIBTEST1234567812'::text, 'KGUDELTEST1234567812'::text, 'KIBRAEL1234567891234'::text, 'MATTTEST123456789012'::text, 'OMNIPRESENTTEST12345'::text, 'PATRICKHSITEST123456'::text, 'SPRYTESTBANK12345678'::text, '254900MPYMMUWMWZA335'::text, 'FRONTENDTESTBANK9999'::text])
+	and 	upper(lei) in ( select distinct(upper(lei))
+	from
+		loanapplicationregister2020
+	group by
+		lei
+	having sum(case when action_taken_type != '6' then 1 else 0 end) >= 60000);
