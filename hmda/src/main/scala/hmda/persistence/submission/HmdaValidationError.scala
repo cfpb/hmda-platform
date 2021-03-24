@@ -345,7 +345,8 @@ object HmdaValidationError
                 log,
                 signerUsername
               )
-              publishSignEvent(submissionId, email, signed.timestamp, config).map(signed =>
+
+              publishSignEvent(submissionId, email, signed.timestamp, config, beta).map(signed =>
                 log.info(
                   s"Published signed event for $submissionId. " +
                     s"${signTopic} (key: ${submissionId.lei}, value: ${submissionId.toString}. " +
