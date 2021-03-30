@@ -1,4 +1,4 @@
-# 2018 Modified LAR Data Dictionary 
+# 2020 Modified LAR Data Dictionary 
 
 Field Name|Field Data Type|Valid Values|Notes
 |----|-------------|----|----|
