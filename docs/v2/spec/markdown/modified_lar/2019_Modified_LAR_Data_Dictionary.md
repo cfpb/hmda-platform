@@ -24,8 +24,8 @@ Ethnicity of Co-Applicant or Co-Borrower: 2|Character Varying|1, 11, 12, 13, 14,
 Ethnicity of Co-Applicant or Co-Borrower: 3|Character Varying|1, 11, 12, 13, 14, 2|
 Ethnicity of Co-Applicant or Co-Borrower: 4|Character Varying|1, 11, 12, 13, 14, 2|
 Ethnicity of Co-Applicant or Co-Borrower: 5|Character Varying|1, 11, 12, 13, 14, 2|
-Ethnicity of Applicant or Borrower Collected on the Basis of Visual Observation or Surname]|Integer|1, 2, 3|
-Ethnicity of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname]|Integer|1, 2, 3, 4|
+Ethnicity of Applicant or Borrower Collected on the Basis of Visual Observation or Surname|Integer|1, 2, 3|
+Ethnicity of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname|Integer|1, 2, 3, 4|
 Race of Applicant or Borrower: 1|Character Varying|1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7|
 Race of Applicant or Borrower: 2|Character Varying|1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5|
 Race of Applicant or Borrower: 3|Character Varying|1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5|
