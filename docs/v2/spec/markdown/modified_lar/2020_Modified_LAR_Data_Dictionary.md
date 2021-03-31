@@ -2,7 +2,7 @@
 
 Field Name|Field Data Type|Valid Values|Notes
 |----|-------------|----|----|
-Record Identifier|Integer|2|
+Activity Year|Integer||
 Legal Entity Identifier (LEI)|Character Varying||
 Loan Type|Integer|1, 2, 3, 4|
 Loan Purpose|Integer|1, 2, 31, 32, 4, 5|
