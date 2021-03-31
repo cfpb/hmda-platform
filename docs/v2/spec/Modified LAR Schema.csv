@@ -1,5 +1,5 @@
 Data Field Number, Data Field Name, Data Field Type, Field Type Description, Valid Values, Descriptions and Examples, Data Point Name,
-1, Activity Year, Numeric, Integer, 2020, ,  ,
+1, Activity Year, Numeric, Integer, Example: 2020, ,  ,
 2, Legal Entity Identifier (LEI), Alphanumeric. Width is 20 characters, String,  , Example: 12121212121212121212, Legal Entity Identifier (LEI),
 3, Loan Type, Numeric, Integer, 1 2 3 4, Descriptions: 1. Conventional (not insured or guaranteed by FHA VA RHS or FSA) 2. Federal Housing Administration insured (FHA) 3. Veterans Affairs guaranteed (VA) 4. USDA Rural Housing Service or the Farm Service Agency guaranteed (RHS or FSA), Loan Type,
 4, Loan Purpose, Numeric, Integer, 1 2 31 32 4 5, Descriptions:  1. Home purchase 2. Home improvement 31. Refinancing  32. Cash-out refinancing 4. Other purpose 5. Not applicable, Loan Purpose,
