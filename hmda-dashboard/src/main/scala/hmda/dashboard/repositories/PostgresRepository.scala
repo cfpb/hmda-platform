@@ -295,9 +295,9 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   }
 
   def fetchListQuarterlyFilers(period: String): Task[Seq[ListQuarterlyFilers]] = {
-    val larTable = larTableSelector(period, "list_quarterly_filers")
+    val larTable = larTableSelector((period.toInt-1).toString, "list_quarterly_filers")
     val query = sql"""
-        select * from #${larTable} order by sign_date_east desc;
+        select *, (select COUNT(*) from ts#${period}_q1 where #${larTable}.lei = ts#${period}_q1.lei) as q1_filed, (select COUNT(*) from ts#${period}_q1 where #${larTable}.lei = ts#${period}_q1.lei) as q2_filed, (select COUNT(*) from ts#${period}_q1 where #${larTable}.lei = ts#${period}_q1.lei) as q3_filed from #${larTable} order by sign_date_east desc;
       """.as[ListQuarterlyFilers]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }

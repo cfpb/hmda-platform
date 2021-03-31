@@ -6,7 +6,7 @@ case class ListQuarterlyFilersAggregationResponse(aggregations: Seq[ListQuarterl
 
 object ListQuarterlyFilersAggregationResponse {
   private object constants {
-    val Results = "results"
+    val Results = "estimated results"
   }
 
   implicit val encoder: Encoder[ListQuarterlyFilersAggregationResponse] =
