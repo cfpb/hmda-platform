@@ -21,6 +21,15 @@ object BankFilterUtils {
     } else true
   }
 
+
+  def filterQuarterlyFilingAlt(submissionId: SubmissionId): Boolean = {
+    if (YearUtils.isQuarterlyFiling(submissionId)) {
+      println ("failed")
+      log.info(s"Filtered out $submissionId.toString().toUpperCase()")
+      false
+    } else true
+  }
+
   def filterQuarterlyFiling(submissionId: SubmissionId): Boolean =
     YearUtils.isQuarterlyFiling(submissionId)
 }
