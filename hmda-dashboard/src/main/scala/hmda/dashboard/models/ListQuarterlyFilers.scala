@@ -11,9 +11,9 @@ case class ListQuarterlyFilers(
                                 sign_date_utc: String,
                                 sign_date_east: String,
                                 total_lines: Int,
-                                q1_filed: Int,
-                                q2_filed: Int,
-                                q3_filed: Int
+                                q1_filed: Boolean,
+                                q2_filed: Boolean,
+                                q3_filed: Boolean
                               )
 
 object ListQuarterlyFilers {
