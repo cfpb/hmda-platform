@@ -74,7 +74,7 @@ object IrsPublisherApp extends App {
       .single(msg)
       .filter { msg =>
         val submissionId = SubmissionId(msg)
-        filterBankWithLogging(submissionId.lei) || filterQuarterlyFiling(submissionId)
+        filterBankWithLogging(submissionId.lei) && filterQuarterlyFilingAlt(submissionId)
       }
       .map { msg =>
         val submissionId = SubmissionId(msg)
