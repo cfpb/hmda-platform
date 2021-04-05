@@ -55,7 +55,7 @@ lazy val slickDeps = Seq(slick, slickHikariCP, postgres, h2)
 
 lazy val dockerSettings = Seq(
   Docker / maintainer := "Hmda-Ops",
-  dockerBaseImage := "openjdk:16-jdk-alpine3.12",
+  dockerBaseImage := "openjdk:17-jdk-alpine3.12",
   dockerRepository := Some("hmda")
 )
 
