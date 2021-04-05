@@ -230,6 +230,12 @@ object LarParserErrorModel {
     override def inputValue: String = value
   }
 
+  case class InvalidOtherDenial( value: String)
+    extends ParserValidationError {
+    override def fieldName: String = "Other Denial"
+    override def inputValue: String = value
+  }
+
   case class InvalidTotalLoanCosts(value: String)
       extends ParserValidationError {
     override def fieldName: String = "Total Loan Costs"
@@ -409,7 +415,15 @@ object LarParserErrorModel {
     override def inputValue: String = value
   }
 
+  case class InvalidCounty(value: String) extends ParserValidationError {
+    override def fieldName: String = "County"
+    override def inputValue: String = value
+  }
 
+  case class InvalidTract(value: String) extends ParserValidationError {
+    override def fieldName: String = "Tract"
+    override def inputValue: String = value
+  }
 
 
 
