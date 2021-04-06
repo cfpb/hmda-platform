@@ -48,6 +48,10 @@ spec:
                 - ALL       
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+            - name: PLATFORM_NAMESPACE
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.namespace
             - name: CURRENT_YEAR
               valueFrom:
                 configMapKeyRef:

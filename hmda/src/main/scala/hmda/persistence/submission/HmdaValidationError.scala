@@ -332,7 +332,11 @@ object HmdaValidationError
         if (state.statusCode == Verified.code) {
           val timestamp = Instant.now().toEpochMilli
           val signed    = SubmissionSigned(submissionId, timestamp, Signed)
-          if ((state.qualityVerified && state.macroVerified) || state
+          val currentNamespace = config.getString("hmda.currentNamespace")
+          if (currentNamespace != "default") { //signing the submission is not allowed on Beta namespace
+            Effect.reply(replyTo)(SubmissionNotReadyToBeSigned(submissionId))
+          }
+          else if ((state.qualityVerified && state.macroVerified) || state
             .noEditsFound() || (state.qualityVerified && state.`macro`.isEmpty) || (state.quality.isEmpty && state.macroVerified)) {
             Effect.persist(signed).thenRun { _ =>
               log.info(s"Submission $submissionId signed at ${Instant.ofEpochMilli(timestamp)}")
@@ -345,6 +349,7 @@ object HmdaValidationError
                 log,
                 signerUsername
               )
+
               publishSignEvent(submissionId, email, signed.timestamp, config).map(signed =>
                 log.info(
                   s"Published signed event for $submissionId. " +
