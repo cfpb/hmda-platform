@@ -105,8 +105,8 @@ object ModifiedLarApp extends App {
       .mapAsync(parallelism)(
         HmdaMessageFilter.processOnlyValidKeys { msg =>
           def processMsg(): Future[ConsumerMessage.CommittableOffset] = {
-            log.info(s"Received a message - key: ${msg.record.key()}, value: ${msg.record.value()}")
-            processKafkaRecord(msg.record.value().trim).map(_ => msg.committableOffset)
+            log.info(s"Received a message - key: ${msg.record.key().toUpperCase()}, value: ${msg.record.value().toUpperCase()}")
+            processKafkaRecord(msg.record.value().toUpperCase().trim).map(_ => msg.committableOffset)
           }
           akka.pattern.retry(
             attempt = () => processMsg(),
