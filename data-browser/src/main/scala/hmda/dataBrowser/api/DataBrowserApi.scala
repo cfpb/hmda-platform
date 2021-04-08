@@ -17,6 +17,7 @@ import io.lettuce.core.{ ClientOptions, RedisClient }
 import monix.eval.Task
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -75,11 +76,13 @@ object DataBrowserApi extends Settings {
 
           val healthCheck: HealthCheckService = new HealthCheckService(repositoryLatest, cache, fileCache)
 
-          val routes = BaseHttpApi.routes(name) ~ DataBrowserHttpApi.create(log, fileCache, query, healthCheck)
+          val routes = cors() {
+            BaseHttpApi.routes(name) ~ DataBrowserHttpApi.create(log, fileCache, query, healthCheck)
+          }
           BaseHttpApi.runServer(shutdown, name)(timed(routes), host, port)
           Behaviors.ignore
         }
       }
       .onFailure(SupervisorStrategy.restartWithBackoff(1.second, 30.seconds, 0.01))
 }
-// $COVERAGE-ON$
+// $COVERAGE-OFF$
