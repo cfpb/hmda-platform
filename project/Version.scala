@@ -7,7 +7,7 @@ object Version {
   val akkaHttp               = "10.2.2"
   val akkaHttpJson           = "1.35.2"
   val akkaClusterManagement  = "1.0.6"
-  val akkaCors               = "0.4.2"
+  val akkaCors               = "1.1.1"
   val circe                  = "0.12.3"
   val cassandraPluginVersion = "0.101"
   val akkaClusterDowning     = "0.0.12"
