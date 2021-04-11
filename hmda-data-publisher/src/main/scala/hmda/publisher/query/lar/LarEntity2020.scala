@@ -8,7 +8,7 @@ import cormorant.generic.semiauto._
 import hmda.publisher.query.lar.LarEntityImpl2020WithMsa.{enforcePartialRead, readNext}
 import hmda.util.PsvParsingCompanion
 import io.chrisdavenport.cormorant.CSV
-
+// $COVERAGE-OFF$
 case class LarPartOne2020(
                            id: Int = 0,
                            lei: String = "",
@@ -336,3 +336,4 @@ object LarEntityImpl2020WithMsa extends PsvParsingCompanion[LarEntityImpl2020Wit
     } yield LarEntityImpl2020WithMsa(lar.copy(larPartSeven = p7), Msa(msaId, msaName))).map(Right(_))
   }
 }
+// $COVERAGE-ON$

@@ -95,7 +95,6 @@ object InstitutionDBProjection extends InstitutionEmailComponent with Institutio
     }
 
     val institutionNoteHistoryEntity: InstitutionNoteHistoryEntity = generateHistoryID(inst)
-    println ("This is updated panel: " + institutionNoteHistoryEntity.updatedPanel)
     institutionNotesHistoryRepository.insertOrUpdate(institutionNoteHistoryEntity)
 
     val emails = InstitutionConverter.emailsFromInstitution(inst).toList
