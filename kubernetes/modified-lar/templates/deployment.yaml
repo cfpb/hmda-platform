@@ -147,6 +147,11 @@ spec:
                 configMapKeyRef:
                   name: mlar-options-configmap
                   key: generateMlarS3File
+            - name: IS_REGENERATE_MLAR
+              valueFrom:
+                configMapKeyRef:
+                  name: mlar-options-configmap
+                  key: regenerateMlarData
             - name: IS_CREATE_DISPOSITION_KAFKA_RECORD
               valueFrom:
                 configMapKeyRef:

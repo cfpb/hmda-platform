@@ -28,7 +28,7 @@ import scala.util.{Failure, Success}
 import java.time.Instant
 
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
-
+// $COVERAGE-OFF$
 class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFilePersistor: QAFilePersistor)
   extends HmdaActor
     with PublisherComponent2018
@@ -152,3 +152,4 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
   }
 
 }
+// $COVERAGE-ON$

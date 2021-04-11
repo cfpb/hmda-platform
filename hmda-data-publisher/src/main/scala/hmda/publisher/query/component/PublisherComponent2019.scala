@@ -16,7 +16,7 @@ import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
 import slick.lifted.MappedProjection
 
 import scala.concurrent.{ExecutionContext, Future}
-
+// $COVERAGE-OFF$
 trait PublisherComponent2019 extends PGTableNameLoader {
 
   import dbConfig.profile.api._
@@ -954,3 +954,4 @@ trait PublisherComponent2019 extends PGTableNameLoader {
     TsData[TransmittalSheetEntity, TransmittalSheetTable](transmittalSheetTable2019)(_.lei, _.totalLines, _.submissionId)
 
 }
+// $COVERAGE-ON$

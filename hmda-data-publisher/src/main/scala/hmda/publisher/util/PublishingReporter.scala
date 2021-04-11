@@ -12,7 +12,7 @@ import hmda.publisher.util.PublishingReporter.ScheduleGroupId.forSchedule
 import hmda.publisher.util.PublishingReporter.State.AddResult
 
 import scala.concurrent.duration.FiniteDuration
-
+// $COVERAGE-OFF$
 class PublishingReporter(context: ActorContext[PublishingReporter.Command], reporter: MattermostNotifier, groupTimeout: FiniteDuration)(
   state: PublishingReporter.State
 ) extends AbstractBehavior[PublishingReporter.Command](context) {
@@ -197,3 +197,4 @@ object PublishingReporter {
   def apply(msgReporter: MattermostNotifier, groupTimeout: FiniteDuration): Behavior[Command] =
     Behaviors.setup(context => new PublishingReporter(context, msgReporter, groupTimeout)(State.empty))
 }
+// $COVERAGE-ON$

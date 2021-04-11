@@ -29,7 +29,7 @@ import slick.basic.DatabasePublisher
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-
+// $COVERAGE-OFF$
 class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFilePersistor: QAFilePersistor)
   extends HmdaActor
     with PublisherComponent2018
@@ -157,3 +157,4 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
   }
 
 }
+// $COVERAGE-ON$

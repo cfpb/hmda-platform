@@ -12,7 +12,7 @@ import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
 import scala.concurrent.{ExecutionContext, Future}
-
+// $COVERAGE-OFF$
 class PublishingGuard(
                        db2018: PublisherComponent2018,
                        db2019: PublisherComponent2019,
@@ -160,3 +160,4 @@ object PublishingGuard {
     case object Private extends Scope
   }
 }
+// $COVERAGE-ON$
