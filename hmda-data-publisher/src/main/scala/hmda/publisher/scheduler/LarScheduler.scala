@@ -30,7 +30,7 @@ import java.time.{Clock, Instant, LocalDateTime}
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-
+// $COVERAGE-OFF$
 class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFilePersistor: QAFilePersistor)
   extends HmdaActor
     with PublisherComponent2018
@@ -346,3 +346,4 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
 object LarScheduler {
   val entriesCountMetaName = "entries-count"
 }
+// $COVERAGE-ON$

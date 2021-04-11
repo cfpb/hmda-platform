@@ -1,7 +1,7 @@
 package hmda.publisher.scheduler
 
 import akka.actor.ActorRef
-
+// $COVERAGE-OFF$
 case class AllSchedulers(
                           larPublicScheduler: ActorRef,
                           larScheduler: ActorRef,
@@ -9,3 +9,4 @@ case class AllSchedulers(
                           tsPublicScheduler: ActorRef,
                           tsScheduler: ActorRef
                         )
+// $COVERAGE-ON$

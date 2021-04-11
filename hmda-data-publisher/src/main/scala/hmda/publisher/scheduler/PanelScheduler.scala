@@ -27,7 +27,7 @@ import hmda.util.BankFilterUtils._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
-
+// $COVERAGE-OFF$
 class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFilePersistor: QAFilePersistor)
   extends HmdaActor
     with PublisherComponent2018
@@ -255,3 +255,4 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], q
   }
 
 }
+// $COVERAGE-ON$

@@ -28,7 +28,7 @@ import hmda.util.BankFilterUtils._
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
-
+// $COVERAGE-OFF$
 class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFilePersistor: QAFilePersistor)
   extends HmdaActor
     with PublisherComponent2018
@@ -273,3 +273,4 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
     }
 
 }
+// $COVERAGE-ON$

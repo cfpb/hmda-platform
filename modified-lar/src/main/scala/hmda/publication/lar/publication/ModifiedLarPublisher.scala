@@ -47,6 +47,7 @@ object ModifiedLarPublisher {
   val bucket                    = config.getString("aws.public-bucket")
   val environment               = config.getString("aws.environment")
   val isGenerateBothS3Files          = config.getBoolean("hmda.lar.modified.generateS3Files")
+  val regenerateMlar = config.getBoolean("hmda.lar.modified.regenerateMlar")
   val isCreateDispositionRecord = config.getBoolean("hmda.lar.modified.creteDispositionRecord")
   val isJustGenerateS3File = config.getBoolean("hmda.lar.modified.justGenerateS3File")
   val isJustGenerateS3FileHeader = config.getBoolean("hmda.lar.modified.justGenerateS3FileHeader")
@@ -172,7 +173,10 @@ object ModifiedLarPublisher {
               val graphWithJustS3WithHeader = mlarSource.via(serializeMlar).prepend(mlarHeader).toMat(s3SinkWithHeader)(Keep.right)
 
               val finalResult: Future[Unit] = for {
-                _ <- if (isGenerateBothS3Files) {
+                _ <- if (regenerateMlar) {
+                  graphWithS3AndPG.run()
+                }
+                else if (isGenerateBothS3Files) {
                   removeLei
                   graphWithS3AndPG.run()
                 } else if (isJustGenerateS3File)

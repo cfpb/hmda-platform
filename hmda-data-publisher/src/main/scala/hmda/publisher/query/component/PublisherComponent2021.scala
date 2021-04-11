@@ -15,7 +15,7 @@ import slick.basic.{DatabaseConfig, DatabasePublisher}
 import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
 
 import scala.concurrent.{ExecutionContext, Future}
-
+// $COVERAGE-OFF$
 trait PublisherComponent2021 extends PGTableNameLoader {
 
   import dbConfig.profile.api._
@@ -696,3 +696,4 @@ trait PublisherComponent2021 extends PGTableNameLoader {
 
 
 }
+// $COVERAGE-ON$

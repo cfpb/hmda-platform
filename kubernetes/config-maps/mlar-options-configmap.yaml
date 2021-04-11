@@ -5,3 +5,4 @@ metadata:
 data:
   generateMlarS3File: "false"
   createDispositionKafkaRecord: "false"
+  regenerateMlarData: "false"
