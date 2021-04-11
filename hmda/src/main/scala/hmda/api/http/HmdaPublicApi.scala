@@ -10,6 +10,7 @@ import hmda.api.http.directives.HmdaTimeDirectives._
 import scala.concurrent.ExecutionContext
 import akka.http.scaladsl.server.Directives._
 import akka.actor.typed.scaladsl.adapter._
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
 // This is just a Guardian for starting up the API
 // $COVERAGE-OFF$
@@ -25,7 +26,10 @@ object HmdaPublicApi {
     val config                               = system.settings.config
     val host: String                         = config.getString("hmda.http.publicHost")
     val port: Int                            = config.getInt("hmda.http.publicPort")
-    val routes                               = BaseHttpApi.routes(name) ~ TsValidationHttpApi.create ~ LarValidationHttpApi.create ~ HmdaFileValidationHttpApi.create ~ HmdaFileParsingHttpApi.create
+    val routes                               = cors() {
+      BaseHttpApi.routes(name) ~ TsValidationHttpApi.create ~ LarValidationHttpApi.create ~ HmdaFileValidationHttpApi.create ~ HmdaFileParsingHttpApi.create
+    }
+
 
     BaseHttpApi.runServer(shutdown, name)(timed(routes), host, port)
 
