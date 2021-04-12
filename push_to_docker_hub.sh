@@ -7,6 +7,7 @@ echo "$TRAVIS_PULL_REQUEST_BRANCH <-- TRAVIS_PULL_REQUEST_BRANCH"
 echo "$TRAVIS_BRANCH <-- TRAVIS_BRANCH"
 echo "$TRAVIS_TAG <-- TRAVIS_TAG"
 echo "Username: $DOCKER_USERNAME"
+echo "CASSANDRA_CLUSTER_HOSTS: $CASSANDRA_CLUSTER_HOSTS"
 echo $DOCKER_USERNAME
 if [ "$TRAVIS_BRANCH" == "master" ] && [ ! -z "${TRAVIS_PULL_REQUEST_BRANCH}" ] ; then
     echo "Pushing master branch to latest tag on Docker Hub"
