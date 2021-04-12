@@ -6,6 +6,7 @@ echo "Script for pushing to docker hub"
 echo "$TRAVIS_PULL_REQUEST_BRANCH <-- TRAVIS_PULL_REQUEST_BRANCH"
 echo "$TRAVIS_BRANCH <-- TRAVIS_BRANCH"
 echo "$TRAVIS_TAG <-- TRAVIS_TAG"
+echo "Username: $DOCKER_USERNAME"
 if [ "$TRAVIS_BRANCH" == "master" ] && [ ! -z "${TRAVIS_PULL_REQUEST_BRANCH}" ] ; then
     echo "Pushing master branch to latest tag on Docker Hub"
     docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
