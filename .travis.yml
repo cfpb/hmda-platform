@@ -24,15 +24,15 @@ jdk:
 - openjdk14
 
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION clean coverage test
-  - sbt ++$TRAVIS_SCALA_VERSION coverageReport
-  - sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
-
-  # Trick to avoid unnecessary cache updates
-  - find $HOME/.sbt -name "*.lock" | xargs rm
-
-  - ./run_travis.sh
+  - bash ./push_to_docker_hub.sh
+#  - sbt ++$TRAVIS_SCALA_VERSION clean coverage test
+#  - sbt ++$TRAVIS_SCALA_VERSION coverageReport
+#  - sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
+#
+#  # Trick to avoid unnecessary cache updates
+#  - find $HOME/.sbt -name "*.lock" | xargs rm
+#
+#  - ./run_travis.sh
 
 after_success:
-  - bash ./push_to_docker_hub.sh
   - bash <(curl -s https://codecov.io/bash)
