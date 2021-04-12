@@ -24,20 +24,15 @@ jdk:
 - openjdk14
 
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION clean coverage test
-  - sbt ++$TRAVIS_SCALA_VERSION coverageReport
-  - sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
+#  - sbt ++$TRAVIS_SCALA_VERSION clean coverage test
+#  - sbt ++$TRAVIS_SCALA_VERSION coverageReport
+#  - sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
+#
+#  # Trick to avoid unnecessary cache updates
+#  - find $HOME/.sbt -name "*.lock" | xargs rm
 
-  # Trick to avoid unnecessary cache updates
-  - find $HOME/.sbt -name "*.lock" | xargs rm
-
-  - ./run_travis.sh
+#  - ./run_travis.sh
 
 after_success:
-  - if [[ "$TRAVIS_BRANCH" == "push-to-dockerhub-from-travis" ]]; then
-    docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD ;
-    sbt -batch hmda-platform/docker:publishLocal
-    docker tag hmda/hmda-platform:latest hmda/hmda-platform:latest
-    docker push hmda/hmda-platform:latest
-    fi
+  - bash ./push_to_docker_hub.sh
   - bash <(curl -s https://codecov.io/bash)
