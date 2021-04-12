@@ -34,4 +34,10 @@ script:
   - ./run_travis.sh
 
 after_success:
+  - if [[ "$TRAVIS_BRANCH" == "push-to-dockerhub-from-travis" ]]; then
+    docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD ;
+    sbt -batch hmda-platform/docker:publishLocal
+    docker tag hmda/hmda-platform:latest hmda/hmda-platform:latest
+    docker push hmda/hmda-platform:latest
+    fi
   - bash <(curl -s https://codecov.io/bash)
