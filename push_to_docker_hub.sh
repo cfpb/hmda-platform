@@ -2,6 +2,7 @@
 
 set -e
 
+echo "Script for pushing to docker hub"
 echo "$TRAVIS_PULL_REQUEST_BRANCH <-- TRAVIS_PULL_REQUEST_BRANCH"
 echo "$TRAVIS_BRANCH <-- TRAVIS_BRANCH"
 echo "$TRAVIS_TAG <-- TRAVIS_TAG"
