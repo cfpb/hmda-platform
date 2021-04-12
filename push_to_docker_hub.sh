@@ -9,7 +9,7 @@ echo "$TRAVIS_TAG <-- TRAVIS_TAG"
 echo "Username: $DOCKER_USERNAME"
 echo "CASSANDRA_CLUSTER_HOSTS: $CASSANDRA_CLUSTER_HOSTS"
 echo $DOCKER_USERNAME
-if [ "$TRAVIS_BRANCH" == "master" ] && [ ! -z "${TRAVIS_PULL_REQUEST_BRANCH}" ] ; then
+if [ "$TRAVIS_BRANCH" == "master" ] && [ -z "${TRAVIS_PULL_REQUEST_BRANCH}" ] ; then
     echo "Pushing master branch to latest tag on Docker Hub"
     docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
     sbt -batch hmda-platform/docker:publishLocal
