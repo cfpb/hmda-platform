@@ -28,7 +28,7 @@ The [Home Mortgage Disclosure Act (HMDA) Platform](http://ffiec.cfpb.gov/) is a 
 - [HMDA Platform Technical Architecture](#hmda-platform-technical-architecture)
 - [HMDA Data Browser Technical Architecture](#hmda-data-browser-technical-architecture)
 - [Running with sbt](#running-with-sbt)
-- [One-line Cloud Deployment to Dev/Prod](#one-line-cloud-deployment-to-dev-prod)
+- [One-line Cloud Deployment to Dev/Prod](#one-line-cloud-deployment-to-devprod)
 - [Docker Hub](#docker-hub)
 - [One-line Local Development Environment (No Auth)](#one-line-local-development-environment-no-auth)
 - [Automated Testing](#automated-testing)
