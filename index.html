@@ -370,8 +370,10 @@
 </tr>
 </tbody></table>
 <h3 id='data-browser-hmda-data-endpoints-aggregation-example'>Aggregation Example</h3>
+<p>Get an aggregation, in JSON format, of HMDA Data reported in 2018 in Maryland, with action takens 5, <code>File closed for incompleteness</code>, or 6, <code>Purchased loan</code>, where the reported race was Asian.</p>
+
 <blockquote>
-<p>Example</p>
+<p>Example Request</p>
 </blockquote>
 <div class="highlight"><pre class="highlight shell tab-shell"><code>  curl <span class="s2">"https://ffiec.cfpb.gov/v2/data-browser-api/view/aggregations?states=MD&amp;years=2018&amp;actions_taken=5,6&amp;races=Asian"</span>
 </code></pre></div>
@@ -429,13 +431,15 @@
 </tr>
 </tbody></table>
 <h3 id='data-browser-hmda-data-endpoints-csv-example'>CSV Example</h3>
+<p>Get a CSV containing all HMDA data reported in 2018 in California, Maryland, or DC, with action taken 5, <code>File closed for incompleteness</code>.</p>
+
 <blockquote>
-<p>Example</p>
+<p>Example Request</p>
 </blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>  curl <span class="nt">-L</span> <span class="s2">"https://ffiec.cfpb.gov/v2/data-browser-api/view/csv?states=CA,MD,DC&amp;years=2018&amp;actions_taken=5"</span>
+<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-L</span> <span class="s2">"https://ffiec.cfpb.gov/v2/data-browser-api/view/csv?states=CA,MD,DC&amp;years=2018&amp;actions_taken=5"</span>
 </code></pre></div>
 <blockquote>
-<p><img src="images/DataBrowserCsvExample.png"></p>
+<p>CSV Response <img src="images/DataBrowserCsvExample.png" alt="alt text" /></p>
 </blockquote>
 
 <p><code>GET</code> CSV file with the following parameters</p>
@@ -488,8 +492,10 @@
 </tr>
 </tbody></table>
 <h3 id='data-browser-hmda-filers-hmda-filers-example'>HMDA Filers Example</h3>
+<p>The example to the right allows you to get a list of filers from 2018 that reported HMDA Data in Maryland and DC.</p>
+
 <blockquote>
-<p>Example</p>
+<p>Example Request</p>
 </blockquote>
 <div class="highlight"><pre class="highlight shell tab-shell"><code> curl <span class="s2">"https://ffiec.cfpb.gov/v2/data-browser-api/view/filers?states=MD,DC&amp;years=2018"</span>
 </code></pre></div>
@@ -540,7 +546,7 @@
 <p>For local development, no authorization is needed. See <a href="https://github.com/cfpb/hmda-platform#one-line-local-development-environment-no-auth">One-line Local Development Environment (No Auth)</a> for more info.</p>
 
 <blockquote>
-<p>Example</p>
+<p>Example Request</p>
 </blockquote>
 <div class="highlight"><pre class="highlight shell tab-shell"><code>  curl <span class="nt">-X</span> POST <span class="se">\</span>
   <span class="s2">"https://ffiec.cfpb.gov/auth/realms/hmda2/protocol/openid-connect/token"</span> <span class="se">\</span>
@@ -588,7 +594,7 @@
 the submission status often throughout the process of uploading and checking edits for a submission.</p>
 <h4 id='hmda-filing-filing-process-submission-status-submission-status-codes'>Submission Status Codes</h4>
 <blockquote>
-<p>Example</p>
+<p>JSOn Status Code Example</p>
 </blockquote>
 <div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
   </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
@@ -698,8 +704,11 @@ the submission status often throughout the process of uploading and checking edi
 </tr>
 </tbody></table>
 <h2 id='hmda-filing-endpoints'>Endpoints</h2><h3 id='hmda-filing-endpoints-start-a-filing'>Start a Filing</h3>
+<p>For evey filing period, you must begin by starting a filing. This only needs to be done once per filing season. In the production HMDA filing application this will have already been creaed. 
+The <code>POST</code> will result in a <code>200</code> only for the first time it&#39;s called. If the filing for the given filing period already exists, the <code>POST</code> will return a <code>400</code>.</p>
+
 <blockquote>
-<p>Example</p>
+<p>Example Request</p>
 </blockquote>
 <div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> POST <span class="se">\</span>
   <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2019"</span> <span class="se">\</span>
@@ -723,9 +732,6 @@ the submission status often throughout the process of uploading and checking edi
     </span><span class="nl">"submissions"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></code></pre></div>
-<p>For evey filing period, you must begin by starting a filing. This only needs to be done once per filing season. In the production HMDA filing application this will have already been creaed. 
-The <code>POST</code> will result in a <code>200</code> only for the first time it&#39;s called. If the filing for the given filing period already exists, the <code>POST</code> will return a <code>400</code>.</p>
-
 <table><thead>
 <tr>
 <th></th>
@@ -749,7 +755,7 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 <p>This endpoint can be used to confirm that a filing exists for the relevant period.</p>
 
 <blockquote>
-<p>Example</p>
+<p>Example Request</p>
 </blockquote>
 <div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> GET <span class="se">\</span>
   <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2019"</span> <span class="se">\</span>
@@ -793,15 +799,15 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h3 id='hmda-filing-endpoints-create-a-submission'>Create a Submission</h3>
+<p>A submission must be created for each file upload. More than one submission can be created for a filing period. The most recent submission will be considered the latest submission. Each <code>POST</code> on the submission endpoint will return a new submission number.</p>
+
 <blockquote>
-<p>Example</p>
+<p>Example Request</p>
 </blockquote>
 <div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> POST <span class="se">\</span>
   <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions"</span> <span class="se">\</span>
   <span class="nt">-H</span> <span class="s1">'Authorization: Bearer {{access_token}}'</span> <span class="se">\</span>
 </code></pre></div>
-<p>A submission must be created for each file upload. More than one submission can be created for a filing period. The most recent submission will be considered the latest submission. Each <code>POST</code> on the submission endpoint will return a new submission number.</p>
-
 <blockquote>
 <p>JSON Response</p>
 </blockquote>
@@ -845,7 +851,7 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 <p>Returns details about the last created submission including it&#39;s sequence number and status.</p>
 
 <blockquote>
-<p>Example</p>
+<p>Example Request</p>
 </blockquote>
 <div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> GET <span class="se">\</span>
   <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/latest"</span> <span class="se">\</span>
@@ -895,8 +901,10 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h3 id='hmda-filing-endpoints-upload-a-file'>Upload a File</h3>
+<p>Upload a file to a submission.</p>
+
 <blockquote>
-<p>Example</p>
+<p>Example Request</p>
 </blockquote>
 <div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> POST <span class="se">\</span>
   <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2019/submissions/10"</span> <span class="se">\</span>
@@ -948,8 +956,10 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h3 id='hmda-filing-endpoints-view-parsing-errors'>View Parsing Errors</h3>
+<p>Returns a list of all parsing errors triggered by the file uploaded to a submission.</p>
+
 <blockquote>
-<p>Example</p>
+<p>Example Request</p>
 </blockquote>
 <div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> POST <span class="se">\</span>
   <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/10/parseErrors"</span> <span class="se">\</span>
@@ -1001,7 +1011,7 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 <p>Returns a summary of all edits triggered by an upload in a submission.</p>
 
 <blockquote>
-<p>Example</p>
+<p>Example Request</p>
 </blockquote>
 <div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> GET <span class="se">\</span>
   <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/edits"</span> <span class="se">\</span>
@@ -1071,7 +1081,7 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 <p>Returns more information about a specific edit including a list of lines that triggered the edit and the relevant fields from those lines.</p>
 
 <blockquote>
-<p>Example</p>
+<p>Example Request</p>
 </blockquote>
 <div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> GET <span class="se">\</span>
   <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/edits/Q631"</span> <span class="se">\</span>
@@ -1129,8 +1139,10 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h3 id='hmda-filing-endpoints-verify-quality-edits'>Verify Quality Edits</h3>
+<p>Verify that the uploaded data is correct and that the reported quality edits are not relevent to the submission.</p>
+
 <blockquote>
-<p>Example</p>
+<p>Example Request</p>
 </blockquote>
 <div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> POST <span class="se">\</span>
   <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/sequenceNumber/edits/quality"</span> <span class="se">\</span>
@@ -1173,8 +1185,10 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h3 id='hmda-filing-endpoints-verify-macro-edits'>Verify Macro Edits</h3>
+<p>Verify that the uploaded data is correct and that the reported macro edits are not relevent to the submission.</p>
+
 <blockquote>
-<p>Example</p>
+<p>Example Request</p>
 </blockquote>
 <div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> POST <span class="se">\</span>
   <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/sequenceNumber/edits/macro"</span> <span class="se">\</span>
@@ -1217,8 +1231,10 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h3 id='hmda-filing-endpoints-sign-a-submission'>Sign a Submission</h3>
+<p>Sign and complete a HMDA submission.</p>
+
 <blockquote>
-<p>Example</p>
+<p>Example Request</p>
 </blockquote>
 <div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> POST <span class="se">\</span>
   <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/55/sign"</span> <span class="se">\</span>
@@ -1264,7 +1280,7 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tbody></table>
 <h3 id='hmda-filing-endpoints-get-sign-receipt'>Get Sign receipt</h3>
 <blockquote>
-<p>Example</p>
+<p>Example Request</p>
 </blockquote>
 <div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> GET <span class="se">\</span>
   <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/10/sign"</span> <span class="se">\</span>
@@ -1307,7 +1323,7 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 <p>All the endpoints are the same for quarterly filing with the addtion of <code>quarter/Q1/</code>, <code>quarter/Q2/</code> or <code>quarter/Q3/</code> after the filing parameter and before the submission parameter.</p>
 
 <blockquote>
-<p>Example</p>
+<p>Example Request</p>
 </blockquote>
 <div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> GET <span class="se">\</span>
   <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/quarter/Q1/submissions/latest"</span> <span class="se">\</span>
@@ -1717,14 +1733,14 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 <p>This endpoint runs parsing on a HMDA file. The endpoint returns a list of parsing errors in JSON format. If the file is valid it returns and empty list.</p>
 
 <blockquote>
-<p>Example</p>
+<p>Example Request</p>
 </blockquote>
 <div class="highlight"><pre class="highlight shell tab-shell"><code>  curl <span class="nt">-X</span> OPTIONS <span class="se">\</span>
   <span class="s2">"https://ffiec.cfpb.gov/v2/public/hmda/parse"</span> <span class="se">\</span>
   <span class="nt">-F</span> <span class="nv">file</span><span class="o">=</span>@&lt;PATH&gt;/&lt;FILENAME&gt;.txt
 </code></pre></div>
 <blockquote>
-<p>Response</p>
+<p>JSON Response</p>
 </blockquote>
 <div class="highlight"><pre class="highlight json tab-json"><code><span class="w">  </span><span class="p">{</span><span class="w">
     </span><span class="nl">"validated"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
@@ -1759,14 +1775,14 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 <p><em>Note:</em> Some edit checks require institution data. These checks are not run in any public APIs. Macro edits are also not run as the check runs line by line.</p>
 
 <blockquote>
-<p>Example</p>
+<p>Example Request</p>
 </blockquote>
 <div class="highlight"><pre class="highlight shell tab-shell"><code>  curl <span class="nt">-X</span> OPTIONS <span class="se">\</span>
   <span class="s2">"https://ffiec.cfpb.gov/v2/public/hmda/validate"</span> <span class="se">\</span>
   <span class="nt">-F</span> <span class="nv">file</span><span class="o">=</span>@&lt;PATH&gt;/&lt;FILENAME&gt;.txt
 </code></pre></div>
 <blockquote>
-<p>Response</p>
+<p>JSON Response</p>
 </blockquote>
 <div class="highlight"><pre class="highlight json tab-json"><code><span class="w">  </span><span class="p">{</span><span class="w">
     </span><span class="nl">"parserErrors"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
@@ -1873,7 +1889,7 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 <p><code>POST</code> <code>https://ffiec.cfpb.gov/public/rateSpread</code></p>
 
 <blockquote>
-<p>Example</p>
+<p>Example Request</p>
 </blockquote>
 <div class="highlight"><pre class="highlight shell tab-shell"><code>  curl <span class="nt">-X</span> POST <span class="s2">"https://ffiec.cfpb.gov/public/rateSpread"</span> <span class="nt">-H</span> <span class="s2">"Content-Type: application/json"</span> <span class="nt">-d</span> <span class="s1">'{ "actionTakenType": 1, "loanTerm": 30, "amortizationType": "FixedRate", "apr": 6.0, "lockInDate": "2017-11-20", "reverseMortgage": 2 }'</span>
 </code></pre></div>
@@ -1921,7 +1937,7 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 <p><code>POST</code> <code>https://ffiec.cfpb.gov/public/rateSpread/csv</code></p>
 
 <blockquote>
-<p>Example</p>
+<p>Example Request</p>
 </blockquote>
 <div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> POST <span class="s2">"https://ffiec.cfpb.gov/public/rateSpread/csv"</span> <span class="nt">-F</span> <span class="nv">file</span><span class="o">=</span>&lt;file.csv&gt;
 </code></pre></div>
@@ -2021,22 +2037,28 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h2 id='check-digit-batch-check-digit-generation'>Batch Check Digit Generation</h2>
+<p><code>POST</code> request to get batch check digits.</p>
+
 <blockquote>
-<p>Example</p>
+<p>Example Request</p>
 </blockquote>
 <div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> POST <span class="se">\</span>
 <span class="s2">"https://ffiec.cfpb.gov/v2/public/uli/validate/csv"</span> <span class="se">\</span>
 <span class="nt">-F</span> <span class="nv">file</span><span class="o">=</span>@&lt;PATH&gt;/check_digit_sample_file.csv
 </code></pre></div>
 <blockquote>
-<p>Response</p>
+<p>Example Request Payload</p>
+</blockquote>
+<div class="highlight"><pre class="highlight plaintext"><code>B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R87
+95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS
+</code></pre></div>
+<blockquote>
+<p>CSV Response</p>
 </blockquote>
 <div class="highlight"><pre class="highlight plaintext"><code>loanId,checkDigit,uli
 B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R87,51,B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R8751
 95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS,92,95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92
 </code></pre></div>
-<p><code>POST</code> request to get batch check digits.</p>
-
 <table><thead>
 <tr>
 <th></th>
@@ -2061,22 +2083,22 @@ B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R87,51,B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SL
 </tr>
 </tbody></table>
 <h2 id='check-digit-single-check-digit-validation'>Single Check Digit Validation</h2>
+<p><code>POST</code> request to validate a single check digit.</p>
+
 <blockquote>
-<p>Example</p>
+<p>Example Request</p>
 </blockquote>
 <div class="highlight"><pre class="highlight shell tab-shell"><code>  curl POST <span class="s1">'https://ffiec.cfpb.gov/v2/public/uli/validate'</span> <span class="se">\</span>
   <span class="nt">--header</span> <span class="s1">'Content-Type: application/json'</span> <span class="se">\</span>
   <span class="nt">--data-raw</span> <span class="s1">'{"uli": "EILKZAIZF6TX4HB8ZDX33H54"}'</span>
 </code></pre></div>
 <blockquote>
-<p>Response</p>
+<p>JSON Response</p>
 </blockquote>
 <div class="highlight"><pre class="highlight json tab-json"><code><span class="w">  </span><span class="p">{</span><span class="w">
     </span><span class="nl">"isValid"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
   </span><span class="p">}</span><span class="w">
 </span></code></pre></div>
-<p><code>POST</code> request to validate a single check digit.</p>
-
 <table><thead>
 <tr>
 <th></th>
@@ -2100,12 +2122,24 @@ B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R87,51,B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SL
 <td>JSON</td>
 </tr>
 </tbody></table>
-<h2 id='check-digit-batch-check-digit-validation'>Batch Check Digit Validation</h2><div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> POST <span class="se">\</span>
+<h2 id='check-digit-batch-check-digit-validation'>Batch Check Digit Validation</h2>
+<p><code>POST</code> request to batch validate check digits.</p>
+
+<blockquote>
+<p>Example Request</p>
+</blockquote>
+<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> POST <span class="se">\</span>
 <span class="s2">"https://ffiec.cfpb.gov/v2/public/uli/validate/csv"</span> <span class="se">\</span>
 <span class="nt">-F</span> <span class="nv">file</span><span class="o">=</span>@&lt;PATH&gt;/check_digit_sample_file.csv
 </code></pre></div>
 <blockquote>
-<p>Response</p>
+<p>Example Request Payload</p>
+</blockquote>
+<div class="highlight"><pre class="highlight plaintext"><code>95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92
+B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R89
+</code></pre></div>
+<blockquote>
+<p>CSV Response</p>
 </blockquote>
 <div class="highlight"><pre class="highlight plaintext"><code>uli,isValid
 95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92,true
@@ -2134,21 +2168,6 @@ B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R89,false
 <tr>
 <td>Return</td>
 <td>CSV</td>
-</tr>
-</tbody></table>
-
-<p><code>check_digit_sample_file.csv</code></p>
-
-<table><thead>
-<tr>
-<th></th>
-</tr>
-</thead><tbody>
-<tr>
-<td>95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92</td>
-</tr>
-<tr>
-<td>B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R89</td>
 </tr>
 </tbody></table>
 
