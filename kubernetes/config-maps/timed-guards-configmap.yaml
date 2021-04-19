@@ -5,7 +5,7 @@ metadata:
   annotations:
     reloader.stakater.com/match: "true"
 data:
-  yearsAllowed: "2018,2019,2020"
+  yearsAllowed: "2018,2019,2020,2021"
   currentYear: "2020"
   quarterlyYearsAllowed: "2020,2021"
   q1Start: "April 01"
