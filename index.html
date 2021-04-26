@@ -2003,16 +2003,27 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 
 <p>This endpoint multiple ULIs with check digits in CSV format and returns whether they is valid in CSV format.</p>
 <h2 id='check-digit-single-check-digit-generation'>Single Check Digit Generation</h2>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre>
+<b> Request:</b>
+curl POST 'https://ffiec.cfpb.gov/v2/public/uli/checkDigit' \
+--header 'Content-Type: application/json' \
+--data-raw '{loanId: "EILKZAIZF6TX4HB8ZDX33H"}'
+
+<b>JSON Response:</b>
+
+{
+    "loanId":"EILKZAIZF6TX4HB8ZDX33H",
+    "checkDigit":"54",
+    "uli":"EILKZAIZF6TX4HB8ZDX33H54"
+}
+</pre>
+
 <p><code>POST</code> request to get a single check digit.</p>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>curl POST <span class="s1">'https://ffiec.cfpb.gov/v2/public/uli/checkDigit'</span> <span class="se">\</span>
-<span class="nt">--header</span> <span class="s1">'Content-Type: application/json'</span> <span class="se">\</span>
-<span class="nt">--data-raw</span> <span class="s1">'{loanId: "EILKZAIZF6TX4HB8ZDX33H"}'</span>
-</code></pre></div><div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
-    </span><span class="nl">"loanId"</span><span class="p">:</span><span class="s2">"EILKZAIZF6TX4HB8ZDX33H"</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"checkDigit"</span><span class="p">:</span><span class="s2">"54"</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"uli"</span><span class="p">:</span><span class="s2">"EILKZAIZF6TX4HB8ZDX33H54"</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre></div>
+
 <table><thead>
 <tr>
 <th></th>
@@ -2037,28 +2048,31 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h2 id='check-digit-batch-check-digit-generation'>Batch Check Digit Generation</h2>
-<p><code>POST</code> request to get batch check digits.</p>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
 
-<blockquote>
-<p>Example Request</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> POST <span class="se">\</span>
-<span class="s2">"https://ffiec.cfpb.gov/v2/public/uli/validate/csv"</span> <span class="se">\</span>
-<span class="nt">-F</span> <span class="nv">file</span><span class="o">=</span>@&lt;PATH&gt;/check_digit_sample_file.csv
-</code></pre></div>
-<blockquote>
-<p>Example Request Payload</p>
-</blockquote>
-<div class="highlight"><pre class="highlight plaintext"><code>B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R87
+<pre>
+<b> Request: </b>
+curl -X POST \
+"https://ffiec.cfpb.gov/v2/public/uli/validate/csv" \
+-F file=@&ltPATH&gt/check_digit_sample_file.csv
+
+<b> Request Payload: </b>
+
+B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R87
 95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS
-</code></pre></div>
-<blockquote>
-<p>CSV Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight plaintext"><code>loanId,checkDigit,uli
+
+<b> CSV Response: </b>
+
+
+loanId,checkDigit,uli
 B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R87,51,B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R8751
 95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS,92,95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92
-</code></pre></div>
+</pre>
+
+<p><code>POST</code> request to get batch check digits.</p>
+
 <table><thead>
 <tr>
 <th></th>
@@ -2083,22 +2097,26 @@ B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R87,51,B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SL
 </tr>
 </tbody></table>
 <h2 id='check-digit-single-check-digit-validation'>Single Check Digit Validation</h2>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre>
+<b>Request:</b>
+
+curl POST 'https://ffiec.cfpb.gov/v2/public/uli/validate' \
+--header 'Content-Type: application/json' \
+--data-raw '{"uli": "EILKZAIZF6TX4HB8ZDX33H54"}'
+
+<b>JSON Response:</b>
+
+{
+  "isValid": true
+}
+</pre>
+
 <p><code>POST</code> request to validate a single check digit.</p>
 
-<blockquote>
-<p>Example Request</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>  curl POST <span class="s1">'https://ffiec.cfpb.gov/v2/public/uli/validate'</span> <span class="se">\</span>
-  <span class="nt">--header</span> <span class="s1">'Content-Type: application/json'</span> <span class="se">\</span>
-  <span class="nt">--data-raw</span> <span class="s1">'{"uli": "EILKZAIZF6TX4HB8ZDX33H54"}'</span>
-</code></pre></div>
-<blockquote>
-<p>JSON Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="w">  </span><span class="p">{</span><span class="w">
-    </span><span class="nl">"isValid"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
-  </span><span class="p">}</span><span class="w">
-</span></code></pre></div>
 <table><thead>
 <tr>
 <th></th>
@@ -2123,28 +2141,30 @@ B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R87,51,B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SL
 </tr>
 </tbody></table>
 <h2 id='check-digit-batch-check-digit-validation'>Batch Check Digit Validation</h2>
-<p><code>POST</code> request to batch validate check digits.</p>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
 
-<blockquote>
-<p>Example Request</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> POST <span class="se">\</span>
-<span class="s2">"https://ffiec.cfpb.gov/v2/public/uli/validate/csv"</span> <span class="se">\</span>
-<span class="nt">-F</span> <span class="nv">file</span><span class="o">=</span>@&lt;PATH&gt;/check_digit_sample_file.csv
-</code></pre></div>
-<blockquote>
-<p>Example Request Payload</p>
-</blockquote>
-<div class="highlight"><pre class="highlight plaintext"><code>95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92
+<pre>
+<b>Request:</b>
+
+curl -X POST \
+"https://ffiec.cfpb.gov/v2/public/uli/validate/csv" \
+-F file=@&ltPATH&gt/check_digit_sample_file.csv
+
+<b>Request Payload</b>
+
+95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92
 B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R89
-</code></pre></div>
-<blockquote>
-<p>CSV Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight plaintext"><code>uli,isValid
+
+
+<b>CSV Response</b>
+
+uli,isValid
 95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92,true
 B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R89,false
-</code></pre></div>
+</pre>
+
 <p><code>POST</code> request to batch validate check digits.</p>
 
 <table><thead>
