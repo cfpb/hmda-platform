@@ -117,11 +117,9 @@
                           </li>
                           <li>
                             <a href="#hmda-filing-filing-process-submission-status" class="toc-h3 toc-link" data-title="Submission Status">Submission Status</a>
-                              <ul class="toc-list-h4">
-                                  <li>
-                                    <a href="#hmda-filing-filing-process-submission-status-submission-status-codes" class="toc-h4 toc-link" data-title="Submission Status Codes">Submission Status Codes</a>
-                                  </li>
-                              </ul>
+                          </li>
+                          <li>
+                            <a href="#hmda-filing-filing-process-submission-status-codes" class="toc-h3 toc-link" data-title="Submission Status Codes">Submission Status Codes</a>
                           </li>
                       </ul>
                   </li>
@@ -156,7 +154,7 @@
                             <a href="#hmda-filing-endpoints-verify-quality-edits" class="toc-h3 toc-link" data-title="Verify Quality Edits">Verify Quality Edits</a>
                           </li>
                           <li>
-                            <a href="#hmda-filing-endpoints-verify-macro-edits" class="toc-h3 toc-link" data-title="Verify Macro Edits">Verify Macro Edits</a>
+                            <a href="#hmda-filing-endpoints-verify-macro-edits" class="toc-h3 toc-link" data-title="<strong>Verify Macro Edits</strong>"><strong>Verify Macro Edits</strong></a>
                           </li>
                           <li>
                             <a href="#hmda-filing-endpoints-sign-a-submission" class="toc-h3 toc-link" data-title="Sign a Submission">Sign a Submission</a>
@@ -370,41 +368,46 @@
 </tr>
 </tbody></table>
 <h3 id='data-browser-hmda-data-endpoints-aggregation-example'>Aggregation Example</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre>
+<b>Request:</b>
+
+curl "https://ffiec.cfpb.gov/v2/data-browser-api/view/aggregations?states=MD&years=2018&actions_taken=5,6&races=Asian"
+
+<b>JSON Response:</b>
+
+  ```json
+  {
+    "parameters": {
+        "state": "MD",
+        "actions_taken": "5,6",
+        "races": "Asian"
+    },
+    "aggregations": [
+        {
+            "count": 679,
+            "sum": 1.90835E8,
+            "actions_taken": "5",
+            "races": "Asian",
+            "state": "MD"
+        },
+        {
+            "count": 716,
+            "sum": 2.5435E8,
+            "actions_taken": "6",
+            "races": "Asian",
+            "state": "MD"
+        }
+    ],
+    "servedFrom": "cache"
+}
+</pre>
+
 <p>Get an aggregation, in JSON format, of HMDA Data reported in 2018 in Maryland, with action takens 5, <code>File closed for incompleteness</code>, or 6, <code>Purchased loan</code>, where the reported race was Asian.</p>
 
-<blockquote>
-<p>Example Request</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>  curl <span class="s2">"https://ffiec.cfpb.gov/v2/data-browser-api/view/aggregations?states=MD&amp;years=2018&amp;actions_taken=5,6&amp;races=Asian"</span>
-</code></pre></div>
-<blockquote>
-<p>JSON Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="w">  </span><span class="p">{</span><span class="w">
-    </span><span class="nl">"parameters"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"state"</span><span class="p">:</span><span class="w"> </span><span class="s2">"MD"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"actions_taken"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5,6"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"races"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Asian"</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"aggregations"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
-        </span><span class="p">{</span><span class="w">
-            </span><span class="nl">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">679</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"sum"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.90835E8</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"actions_taken"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5"</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"races"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Asian"</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"state"</span><span class="p">:</span><span class="w"> </span><span class="s2">"MD"</span><span class="w">
-        </span><span class="p">},</span><span class="w">
-        </span><span class="p">{</span><span class="w">
-            </span><span class="nl">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">716</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"sum"</span><span class="p">:</span><span class="w"> </span><span class="mf">2.5435E8</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"actions_taken"</span><span class="p">:</span><span class="w"> </span><span class="s2">"6"</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"races"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Asian"</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"state"</span><span class="p">:</span><span class="w"> </span><span class="s2">"MD"</span><span class="w">
-        </span><span class="p">}</span><span class="w">
-    </span><span class="p">],</span><span class="w">
-    </span><span class="nl">"servedFrom"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cache"</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre></div>
 <p><code>GET</code> JSON with the following parameters</p>
 
 <table><thead>
@@ -431,16 +434,21 @@
 </tr>
 </tbody></table>
 <h3 id='data-browser-hmda-data-endpoints-csv-example'>CSV Example</h3>
-<p>Get a CSV containing all HMDA data reported in 2018 in California, Maryland, or DC, with action taken 5, <code>File closed for incompleteness</code>.</p>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
 
-<blockquote>
-<p>Example Request</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-L</span> <span class="s2">"https://ffiec.cfpb.gov/v2/data-browser-api/view/csv?states=CA,MD,DC&amp;years=2018&amp;actions_taken=5"</span>
-</code></pre></div>
-<blockquote>
-<p>CSV Response <img src="images/DataBrowserCsvExample.png" alt="alt text" /></p>
-</blockquote>
+<pre>
+<b>Request:</b>
+
+curl -L "https://ffiec.cfpb.gov/v2/data-browser-api/view/csv?states=CA,MD,DC&years=2018&actions_taken=5"
+
+<b>CSV Response:</b>
+
+[alt text](images/DataBrowserCsvExample.png)
+</pre>
+
+<p>Get a CSV containing all HMDA data reported in 2018 in California, Maryland, or DC, with action taken 5, <code>File closed for incompleteness</code>.</p>
 
 <p><code>GET</code> CSV file with the following parameters</p>
 
@@ -492,31 +500,35 @@
 </tr>
 </tbody></table>
 <h3 id='data-browser-hmda-filers-hmda-filers-example'>HMDA Filers Example</h3>
+<blockquote>
+<p><strong>Example Request and Response:</strong></p>
+</blockquote>
+
+<pre>
+<b>Request:</b>
+
+ curl "https://ffiec.cfpb.gov/v2/data-browser-api/view/filers?states=MD,DC&years=2018"
+
+<b>JSON Response:</b>
+
+ {
+  "institutions":[
+     {
+        "lei":"lei",
+        "name":"institution name",
+        "period":2018
+     },
+     {
+        "lei":"lei",
+        "name":"institution name",
+        "period":2018
+     }
+  ]
+}
+</pre>
+
 <p>The example to the right allows you to get a list of filers from 2018 that reported HMDA Data in Maryland and DC.</p>
 
-<blockquote>
-<p>Example Request</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code> curl <span class="s2">"https://ffiec.cfpb.gov/v2/data-browser-api/view/filers?states=MD,DC&amp;years=2018"</span>
-</code></pre></div>
-<blockquote>
-<p>JSON Format Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="w"> </span><span class="p">{</span><span class="w">
-  </span><span class="nl">"institutions"</span><span class="p">:[</span><span class="w">
-     </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"lei"</span><span class="p">:</span><span class="s2">"lei"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"institution name"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"period"</span><span class="p">:</span><span class="mi">2018</span><span class="w">
-     </span><span class="p">},</span><span class="w">
-     </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"lei"</span><span class="p">:</span><span class="s2">"lei"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"institution name"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"period"</span><span class="p">:</span><span class="mi">2018</span><span class="w">
-     </span><span class="p">}</span><span class="w">
-  </span><span class="p">]</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre></div>
 <p><code>GET</code> with the following parameters</p>
 
 <table><thead>
@@ -534,24 +546,22 @@
 <td>MD, DC</td>
 </tr>
 </tbody></table>
-
-<p><br></p>
 <h1 id='hmda-filing'>HMDA Filing</h1>
 <p>The following documentation addresses the process for filing a HMDA file and the associated APIs.</p>
 
 <p>This API is what powers the <a href="https://ffiec.cfpb.gov/filing/">HMDA Filing Platform application</a></p>
 <h2 id='hmda-filing-authorization'>Authorization</h2>
-<p>To file HMDA data using the API, an <em>bearer</em> authorization token is required for all api calls. To acquire an authorization token use the <code>/auth</code> endpoint with your username and password as payload.</p>
+<blockquote>
+<p><strong>Example Request</strong></p>
+</blockquote>
+<div class="highlight"><pre class="highlight plaintext"><code>  curl -X POST \
+  "https://ffiec.cfpb.gov/auth/realms/hmda2/protocol/openid-connect/token" \
+  -d 'client_id=hmda2-api&amp;grant_type=password&amp;username={{username}}%40{{bank_domain}}&amp;password={{password}}'
+</code></pre></div>
+<p>To file HMDA data using the API, a <em>bearer</em> authorization token is required for all api calls. To acquire an authorization token use the <code>/auth</code> endpoint with your username and password as payload.</p>
 
 <p>For local development, no authorization is needed. See <a href="https://github.com/cfpb/hmda-platform#one-line-local-development-environment-no-auth">One-line Local Development Environment (No Auth)</a> for more info.</p>
 
-<blockquote>
-<p>Example Request</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>  curl <span class="nt">-X</span> POST <span class="se">\</span>
-  <span class="s2">"https://ffiec.cfpb.gov/auth/realms/hmda2/protocol/openid-connect/token"</span> <span class="se">\</span>
-  <span class="nt">-d</span> <span class="s1">'client_id=hmda2-api&amp;grant_type=password&amp;username={{username}}%40{{bank_domain}}&amp;password={{password}}'</span>
-</code></pre></div>
 <table><thead>
 <tr>
 <th></th>
@@ -580,9 +590,9 @@
 
 <ol>
 <li>Create a Filing: These are unique per institution per filing season and are created by the HMDA-Ops teams in preperation for each filing season.</li>
-<li>Create a Submission: Submissions are the primary object in a HMDA Filing. They are created within a filing and each is able to accept a single file upload. Many submissions can be created for a filing and they carry an id which is incrimented.</li>
+<li>Create a Submission: Submissions are the primary object in a HMDA Filing. They are created within a filing and each is able to accept a single file upload. Many submissions can be created for a filing and they carry an id which is incremented.</li>
 <li>Upload a File: A file is then uploaded to the submission which was created. Only one file can be uploaded to a submission. To upload a new file you must create a new submission.</li>
-<li>Check the status of the Submission the file was uploaded to: If parsing syntactical or validity edits are triggered a new file must be uploaded.</li>
+<li>Check the status of the Submission the file was uploaded to: If parsing errors, syntactical edits or validity edits are triggered a new file must be uploaded.</li>
 <li>Validate Quality Edits: Review triggered Quality Edits and confirm the submitted data are correct.</li>
 <li>Validate Macro Edits: Review triggered Macro Edits and confirm the submitted data are correct.</li>
 <li>Sign the Submission: Perform final review of the data and complete the HMDA filing.</li>
@@ -592,27 +602,27 @@
 <h3 id='hmda-filing-filing-process-submission-status'>Submission Status</h3>
 <p>As a submission represents a HMDA filing the submission status is the best way to see the state of a HMDA filing. It will be useful to query for 
 the submission status often throughout the process of uploading and checking edits for a submission.</p>
-<h4 id='hmda-filing-filing-process-submission-status-submission-status-codes'>Submission Status Codes</h4>
+<h3 id='hmda-filing-filing-process-submission-status-codes'>Submission Status Codes</h3>
 <blockquote>
-<p>JSOn Status Code Example</p>
+<p><strong>JSON Status Code Example</strong></p>
 </blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
-  </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-    </span><span class="nl">"lei"</span><span class="p">:</span><span class="w"> </span><span class="s2">"12345abc"</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"period"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2018"</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"sequenceNumber"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w">
-  </span><span class="p">},</span><span class="w">
-  </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-    </span><span class="nl">"code"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"No data has been uploaded yet."</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The filing period is open and available to accept HMDA data. Make sure your data is in a pipe-delimited text file."</span><span class="w">
-  </span><span class="p">},</span><span class="w">
-  </span><span class="nl">"start"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
-  </span><span class="nl">"end"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
-  </span><span class="nl">"fileName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"test.txt"</span><span class="p">,</span><span class="w">
-  </span><span class="nl">"receipt"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre></div>
+<div class="highlight"><pre class="highlight plaintext"><code>{
+  "id": {
+    "lei": "12345abc",
+    "period": "2018",
+    "sequenceNumber": 3
+  },
+  "status": {
+    "code": 1,
+    "message": "No data has been uploaded yet.",
+    "description": "The filing period is open and available to accept HMDA data. Make sure your data is in a pipe-delimited text file."
+  },
+  "start": 0,
+  "end": 0,
+  "fileName": "test.txt",
+  "receipt": ""
+}
+</code></pre></div>
 <p>In order to track the status of a filing for a financial institution, the following states are captured by the backend:</p>
 
 <table><thead>
@@ -704,34 +714,38 @@ the submission status often throughout the process of uploading and checking edi
 </tr>
 </tbody></table>
 <h2 id='hmda-filing-endpoints'>Endpoints</h2><h3 id='hmda-filing-endpoints-start-a-filing'>Start a Filing</h3>
-<p>For evey filing period, you must begin by starting a filing. This only needs to be done once per filing season. In the production HMDA filing application this will have already been creaed. 
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre>
+<b>Request:</b>
+
+curl -X POST \
+  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2019" \
+  -H 'Authorization: Bearer  {{access_token}}' \
+
+<b>JSON Response:</b>
+
+{
+    "filing": {
+        "period": "2018",
+        "lei": "B90YWS6AFX2LGWOXJ1LD",
+        "status": {
+            "code": 2,
+            "message": "in-progress"
+        },
+        "filingRequired": true,
+        "start": 1572378187454,
+        "end": 0
+    },
+    "submissions": []
+}
+</pre>
+
+<p>For evey filing period, you must begin by starting a filing. This only needs to be done once per filing season. In the production HMDA filing application this will have already been created. 
 The <code>POST</code> will result in a <code>200</code> only for the first time it&#39;s called. If the filing for the given filing period already exists, the <code>POST</code> will return a <code>400</code>.</p>
 
-<blockquote>
-<p>Example Request</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> POST <span class="se">\</span>
-  <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2019"</span> <span class="se">\</span>
-  <span class="nt">-H</span> <span class="s1">'Authorization: Bearer  {{access_token}}'</span> <span class="se">\</span>
-</code></pre></div>
-<blockquote>
-<p>JSON Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
-    </span><span class="nl">"filing"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"period"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2018"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"lei"</span><span class="p">:</span><span class="w"> </span><span class="s2">"B90YWS6AFX2LGWOXJ1LD"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-            </span><span class="nl">"code"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"in-progress"</span><span class="w">
-        </span><span class="p">},</span><span class="w">
-        </span><span class="nl">"filingRequired"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"start"</span><span class="p">:</span><span class="w"> </span><span class="mi">1572378187454</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"end"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"submissions"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre></div>
 <table><thead>
 <tr>
 <th></th>
@@ -752,33 +766,36 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h3 id='hmda-filing-endpoints-get-a-filing'>Get a Filing</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre>
+<b>Request:</b>
+curl -X GET \
+  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2019" \
+  -H 'Authorization: Bearer  {{access_token}}' \
+
+<b>JSON Response:</b>
+
+{
+    "filing": {
+        "period": "2018",
+        "lei": "B90YWS6AFX2LGWOXJ1LD",
+        "status": {
+            "code": 2,
+            "message": "in-progress"
+        },
+        "filingRequired": true,
+        "start": 1572378187454,
+        "end": 0
+    },
+    "submissions": []
+}
+</pre>
+
 <p>This endpoint can be used to confirm that a filing exists for the relevant period.</p>
 
-<blockquote>
-<p>Example Request</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> GET <span class="se">\</span>
-  <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2019"</span> <span class="se">\</span>
-  <span class="nt">-H</span> <span class="s1">'Authorization: Bearer  {{access_token}}'</span> <span class="se">\</span>
-</code></pre></div>
-<blockquote>
-<p>JSON Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
-    </span><span class="nl">"filing"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"period"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2018"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"lei"</span><span class="p">:</span><span class="w"> </span><span class="s2">"B90YWS6AFX2LGWOXJ1LD"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-            </span><span class="nl">"code"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"in-progress"</span><span class="w">
-        </span><span class="p">},</span><span class="w">
-        </span><span class="nl">"filingRequired"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"start"</span><span class="p">:</span><span class="w"> </span><span class="mi">1572378187454</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"end"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"submissions"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre></div>
 <table><thead>
 <tr>
 <th></th>
@@ -799,35 +816,40 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h3 id='hmda-filing-endpoints-create-a-submission'>Create a Submission</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre>
+<b>Request:</b>
+
+curl -X POST \
+  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions" \
+  -H 'Authorization: Bearer {{access_token}}' \
+```
+
+<b>JSON Response:</b>
+
+{
+    "id": {
+        "lei": "B90YWS6AFX2LGWOXJ1LD",
+        "period": "2018",
+        "sequenceNumber": 10
+    },
+    "status": {
+        "code": 1,
+        "message": "No data has been uploaded yet.",
+        "description": "The filing period is open and available to accept HMDA data. Make sure your data is in a pipe-delimited text file."
+    },
+    "start": 1572358820303,
+    "end": 0,
+    "fileName": "",
+    "receipt": ""
+}
+</pre>
+
 <p>A submission must be created for each file upload. More than one submission can be created for a filing period. The most recent submission will be considered the latest submission. Each <code>POST</code> on the submission endpoint will return a new submission number.</p>
 
-<blockquote>
-<p>Example Request</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> POST <span class="se">\</span>
-  <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions"</span> <span class="se">\</span>
-  <span class="nt">-H</span> <span class="s1">'Authorization: Bearer {{access_token}}'</span> <span class="se">\</span>
-</code></pre></div>
-<blockquote>
-<p>JSON Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
-    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"lei"</span><span class="p">:</span><span class="w"> </span><span class="s2">"B90YWS6AFX2LGWOXJ1LD"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"period"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2018"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"sequenceNumber"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"code"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"No data has been uploaded yet."</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The filing period is open and available to accept HMDA data. Make sure your data is in a pipe-delimited text file."</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"start"</span><span class="p">:</span><span class="w"> </span><span class="mi">1572358820303</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"end"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"fileName"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"receipt"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre></div>
 <table><thead>
 <tr>
 <th></th>
@@ -848,39 +870,43 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h3 id='hmda-filing-endpoints-get-the-latest-submission'>Get the Latest Submission</h3>
+<blockquote>
+<p>Example Request and Response</p>
+</blockquote>
+
+<pre>
+<b>Request:</b>
+
+curl -X GET \
+  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/latest" \
+  -H 'Authorization: Bearer {{access_token}}' \
+
+<b>JSON Response:</b>
+
+{
+    "id": {
+        "lei": "B90YWS6AFX2LGWOXJ1LD",
+        "period": "2018",
+        "sequenceNumber": 10
+    },
+    "status": {
+        "code": 13,
+        "message": "Your data has macro edits that need to be reviewed.",
+        "description": "Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded."
+    },
+    "start": 1572372016130,
+    "end": 0,
+    "fileName": "clean_file_10.txt",
+    "receipt": "",
+    "qualityVerified": false,
+    "macroVerified": false,
+    "qualityExists": true,
+    "macroExists": true
+}
+</pre>
+
 <p>Returns details about the last created submission including it&#39;s sequence number and status.</p>
 
-<blockquote>
-<p>Example Request</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> GET <span class="se">\</span>
-  <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/latest"</span> <span class="se">\</span>
-  <span class="nt">-H</span> <span class="s1">'Authorization: Bearer {{access_token}}'</span> <span class="se">\</span>
-</code></pre></div>
-<blockquote>
-<p>JSON Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
-    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"lei"</span><span class="p">:</span><span class="w"> </span><span class="s2">"B90YWS6AFX2LGWOXJ1LD"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"period"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2018"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"sequenceNumber"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"code"</span><span class="p">:</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your data has macro edits that need to be reviewed."</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded."</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"start"</span><span class="p">:</span><span class="w"> </span><span class="mi">1572372016130</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"end"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"fileName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"clean_file_10.txt"</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"receipt"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"qualityVerified"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"macroVerified"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"qualityExists"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"macroExists"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre></div>
 <table><thead>
 <tr>
 <th></th>
@@ -901,37 +927,41 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h3 id='hmda-filing-endpoints-upload-a-file'>Upload a File</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre>
+<b>Request:</b>
+
+curl -X POST \
+  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2019/submissions/10" \
+  -H 'Authorization: Bearer {{access_token}}' \
+  -H 'content-type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW' \
+  -F file=<file.csv>
+
+<b>JSON Response:</b>
+
+{
+    "id": {
+        "lei": "B90YWS6AFX2LGWOXJ1LD",
+        "period": "2018",
+        "sequenceNumber": 10
+    },
+    "status":{
+        "code": 3,
+        "message": "Your file has been uploaded.",
+        "description": "Your data is ready to be analyzed."
+    },
+    "start": 1572372016130,
+    "end": 0,
+    "fileName": "",
+    "receipt": ""
+}
+</pre>
+
 <p>Upload a file to a submission.</p>
 
-<blockquote>
-<p>Example Request</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> POST <span class="se">\</span>
-  <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2019/submissions/10"</span> <span class="se">\</span>
-  <span class="nt">-H</span> <span class="s1">'Authorization: Bearer {{access_token}}'</span> <span class="se">\</span>
-  <span class="nt">-H</span> <span class="s1">'content-type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW'</span> <span class="se">\</span>
-  <span class="nt">-F</span> <span class="nv">file</span><span class="o">=</span>&lt;file.csv&gt;
-</code></pre></div>
-<blockquote>
-<p>JSON Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
-    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"lei"</span><span class="p">:</span><span class="w"> </span><span class="s2">"B90YWS6AFX2LGWOXJ1LD"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"period"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2018"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"sequenceNumber"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"status"</span><span class="p">:{</span><span class="w">
-        </span><span class="nl">"code"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your file has been uploaded."</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your data is ready to be analyzed."</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"start"</span><span class="p">:</span><span class="w"> </span><span class="mi">1572372016130</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"end"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"fileName"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"receipt"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre></div>
 <table><thead>
 <tr>
 <th></th>
@@ -956,38 +986,42 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h3 id='hmda-filing-endpoints-view-parsing-errors'>View Parsing Errors</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre>
+<b>Request:</b>
+
+curl -X POST \
+  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/10/parseErrors" \
+  -H 'Authorization: Bearer {{access_token}}'
+
+<b>JSON Response:</b>
+
+{
+    "transmittalSheetErrors": [],
+    "larErrors": [],
+    "count": 0,
+    "total": 0,
+    "status": {
+        "code": 5,
+        "message": "Your data has formatting errors.",
+        "description": "Review these errors and update your file. Then, upload the corrected file."
+    },
+    "_links": {
+        "href": "/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/parseErrors{rel}",
+        "self": "?page=1",
+        "first": "?page=1",
+        "prev": "?page=1",
+        "next": "?page=0",
+        "last": "?page=0"
+    }
+}
+</pre>
+
 <p>Returns a list of all parsing errors triggered by the file uploaded to a submission.</p>
 
-<blockquote>
-<p>Example Request</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> POST <span class="se">\</span>
-  <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/10/parseErrors"</span> <span class="se">\</span>
-  <span class="nt">-H</span> <span class="s1">'Authorization: Bearer {{access_token}}'</span>
-</code></pre></div>
-<blockquote>
-<p>JSON Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
-    </span><span class="nl">"transmittalSheetErrors"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
-    </span><span class="nl">"larErrors"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
-    </span><span class="nl">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"code"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your data has formatting errors."</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Review these errors and update your file. Then, upload the corrected file."</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"_links"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"href"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/parseErrors{rel}"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"self"</span><span class="p">:</span><span class="w"> </span><span class="s2">"?page=1"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"first"</span><span class="p">:</span><span class="w"> </span><span class="s2">"?page=1"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"prev"</span><span class="p">:</span><span class="w"> </span><span class="s2">"?page=1"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"next"</span><span class="p">:</span><span class="w"> </span><span class="s2">"?page=0"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"last"</span><span class="p">:</span><span class="w"> </span><span class="s2">"?page=0"</span><span class="w">
-    </span><span class="p">}</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre></div>
 <table><thead>
 <tr>
 <th></th>
@@ -1008,56 +1042,60 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h3 id='hmda-filing-endpoints-view-all-edits'>View All Edits</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre>
+<b>Request:</b>
+
+curl -X GET \
+  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/edits" \
+  -H 'Authorization: Bearer {{access_token}}'
+
+<b>JSON Response:</b>
+
+{
+    "syntactical": {
+        "edits": []
+    },
+    "validity": {
+        "edits": []
+    },
+    "quality": {
+        "edits": [
+            {
+                "edit": "Q630",
+                "description": "If Total Units is greater than or equal to 5, then HOEPA Status generally should equal 3."
+            },
+            {
+                "edit": "Q631",
+                "description": "If Loan Type equals 2, 3 or 4, then Total Units generally should be less than or equal to 4."
+            }
+        ],
+        "verified": false
+    },
+    "macro": {
+        "edits": [
+            {
+                "edit": "Q637",
+                "description": "No more than 15% of the loans in the file should report Action Taken equals 5. Your data indicates a percentage outside of this range."
+            }
+        ],
+        "verified": false
+    },
+    "status": {
+        "code": 13,
+        "message": "Your data has macro edits that need to be reviewed.",
+        "description": "Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded.",
+        "qualityVerified": false,
+        "macroVerified": false
+    }
+}
+</pre>
+
 <p>Returns a summary of all edits triggered by an upload in a submission.</p>
 
-<blockquote>
-<p>Example Request</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> GET <span class="se">\</span>
-  <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/edits"</span> <span class="se">\</span>
-  <span class="nt">-H</span> <span class="s1">'Authorization: Bearer {{access_token}}'</span>
-</code></pre></div>
-<blockquote>
-<p>JSON Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
-    </span><span class="nl">"syntactical"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"edits"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"validity"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"edits"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"quality"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"edits"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
-            </span><span class="p">{</span><span class="w">
-                </span><span class="nl">"edit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Q630"</span><span class="p">,</span><span class="w">
-                </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"If Total Units is greater than or equal to 5, then HOEPA Status generally should equal 3."</span><span class="w">
-            </span><span class="p">},</span><span class="w">
-            </span><span class="p">{</span><span class="w">
-                </span><span class="nl">"edit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Q631"</span><span class="p">,</span><span class="w">
-                </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"If Loan Type equals 2, 3 or 4, then Total Units generally should be less than or equal to 4."</span><span class="w">
-            </span><span class="p">}</span><span class="w">
-        </span><span class="p">],</span><span class="w">
-        </span><span class="nl">"verified"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"macro"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"edits"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
-            </span><span class="p">{</span><span class="w">
-                </span><span class="nl">"edit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Q637"</span><span class="p">,</span><span class="w">
-                </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"No more than 15% of the loans in the file should report Action Taken equals 5. Your data indicates a percentage outside of this range."</span><span class="w">
-            </span><span class="p">}</span><span class="w">
-        </span><span class="p">],</span><span class="w">
-        </span><span class="nl">"verified"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"code"</span><span class="p">:</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your data has macro edits that need to be reviewed."</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded."</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"qualityVerified"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"macroVerified"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
-    </span><span class="p">}</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre></div>
 <table><thead>
 <tr>
 <th></th>
@@ -1078,47 +1116,51 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h3 id='hmda-filing-endpoints-view-edit-details'>View Edit Details</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre>
+<b>Request:</b>
+
+curl -X GET \
+  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/edits/Q631" \
+  -H 'Authorization: Bearer {{access_token}}'
+
+<b>JSON Response</b>
+
+{
+    "edit": "Q631",
+    "rows": [
+        {
+           "id": "B90YWS6AFX2LGWOXJ1LDHHXWCDPM0ZEHW08FFTXGRXT62",
+           "fields": [
+               {
+                   "name": "Loan Type",
+                   "value": "3"
+               },
+               {
+                   "name": "Total Units",
+                   "value": "16"
+               }
+           ]
+       }
+   ],
+   "count": 20,
+   "total": 54,
+   "_links": {
+       "href": "/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/edits/Q631{rel}",
+       "self": "?page=1",
+       "first": "?page=1",
+       "prev": "?page=1",
+       "next": "?page=2",
+       "last": "?page=3"
+   }
+}
+</pre>
+
 <p>Returns more information about a specific edit including a list of lines that triggered the edit and the relevant fields from those lines.</p>
 
-<blockquote>
-<p>Example Request</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> GET <span class="se">\</span>
-  <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/edits/Q631"</span> <span class="se">\</span>
-  <span class="nt">-H</span> <span class="s1">'Authorization: Bearer {{access_token}}'</span>
-</code></pre></div>
-<blockquote>
-<p>JSON Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
-    </span><span class="nl">"edit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Q631"</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"rows"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
-        </span><span class="p">{</span><span class="w">
-           </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"B90YWS6AFX2LGWOXJ1LDHHXWCDPM0ZEHW08FFTXGRXT62"</span><span class="p">,</span><span class="w">
-           </span><span class="nl">"fields"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
-               </span><span class="p">{</span><span class="w">
-                   </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Loan Type"</span><span class="p">,</span><span class="w">
-                   </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"3"</span><span class="w">
-               </span><span class="p">},</span><span class="w">
-               </span><span class="p">{</span><span class="w">
-                   </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Total Units"</span><span class="p">,</span><span class="w">
-                   </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"16"</span><span class="w">
-               </span><span class="p">}</span><span class="w">
-           </span><span class="p">]</span><span class="w">
-       </span><span class="p">}</span><span class="w">
-   </span><span class="p">],</span><span class="w">
-   </span><span class="nl">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w">
-   </span><span class="nl">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">54</span><span class="p">,</span><span class="w">
-   </span><span class="nl">"_links"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-       </span><span class="nl">"href"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/edits/Q631{rel}"</span><span class="p">,</span><span class="w">
-       </span><span class="nl">"self"</span><span class="p">:</span><span class="w"> </span><span class="s2">"?page=1"</span><span class="p">,</span><span class="w">
-       </span><span class="nl">"first"</span><span class="p">:</span><span class="w"> </span><span class="s2">"?page=1"</span><span class="p">,</span><span class="w">
-       </span><span class="nl">"prev"</span><span class="p">:</span><span class="w"> </span><span class="s2">"?page=1"</span><span class="p">,</span><span class="w">
-       </span><span class="nl">"next"</span><span class="p">:</span><span class="w"> </span><span class="s2">"?page=2"</span><span class="p">,</span><span class="w">
-       </span><span class="nl">"last"</span><span class="p">:</span><span class="w"> </span><span class="s2">"?page=3"</span><span class="w">
-   </span><span class="p">}</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre></div>
 <table><thead>
 <tr>
 <th></th>
@@ -1139,28 +1181,33 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h3 id='hmda-filing-endpoints-verify-quality-edits'>Verify Quality Edits</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre>
+<b>Request:</b>
+
+curl -X POST \
+  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/sequenceNumber/edits/quality" \
+  -H 'Authorization: Bearer {{access_token}}' \
+  -d '{"verified": true}'
+```
+
+<b>JSON Response:</b>
+
+{
+    "verified": true,
+    "status": {
+        "code": 13,
+        "message": "Your data has macro edits that need to be reviewed.",
+        "description": "Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded."
+    }
+}
+</pre>
+
 <p>Verify that the uploaded data is correct and that the reported quality edits are not relevent to the submission.</p>
 
-<blockquote>
-<p>Example Request</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> POST <span class="se">\</span>
-  <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/sequenceNumber/edits/quality"</span> <span class="se">\</span>
-  <span class="nt">-H</span> <span class="s1">'Authorization: Bearer {{access_token}}'</span> <span class="se">\</span>
-  <span class="nt">-d</span> <span class="s1">'{"verified": true}'</span>
-</code></pre></div>
-<blockquote>
-<p>JSON Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
-    </span><span class="nl">"verified"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"code"</span><span class="p">:</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your data has macro edits that need to be reviewed."</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded."</span><span class="w">
-    </span><span class="p">}</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre></div>
 <table><thead>
 <tr>
 <th></th>
@@ -1184,29 +1231,33 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 <td><code>{&quot;verified&quot;: true}</code></td>
 </tr>
 </tbody></table>
-<h3 id='hmda-filing-endpoints-verify-macro-edits'>Verify Macro Edits</h3>
+<h3 id='hmda-filing-endpoints-verify-macro-edits'><strong>Verify Macro Edits</strong></h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre>
+<b>Request:</b>
+
+curl -X POST \
+  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/sequenceNumber/edits/macro" \
+  -H 'Authorization: Bearer {{access_token}}' \
+  -d '{"verified": true}'
+
+<b>JSON Response:</b>
+
+{
+    "verified": true,
+    "status": {
+        "code": 14,
+        "message": "Your data is ready for submission.",
+        "description": "Your financial institution has certified that the data is correct, but it has not been submitted yet."
+    }
+}
+</pre>
+
 <p>Verify that the uploaded data is correct and that the reported macro edits are not relevent to the submission.</p>
 
-<blockquote>
-<p>Example Request</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> POST <span class="se">\</span>
-  <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/sequenceNumber/edits/macro"</span> <span class="se">\</span>
-  <span class="nt">-H</span> <span class="s1">'Authorization: Bearer {{access_token}}'</span> <span class="se">\</span>
-  <span class="nt">-d</span> <span class="s1">'{"verified": true}'</span>
-</code></pre></div>
-<blockquote>
-<p>JSON Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
-    </span><span class="nl">"verified"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"code"</span><span class="p">:</span><span class="w"> </span><span class="mi">14</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your data is ready for submission."</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your financial institution has certified that the data is correct, but it has not been submitted yet."</span><span class="w">
-    </span><span class="p">}</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre></div>
 <table><thead>
 <tr>
 <th></th>
@@ -1231,30 +1282,34 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h3 id='hmda-filing-endpoints-sign-a-submission'>Sign a Submission</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre>
+<b>Request:</b>
+
+curl -X POST \
+  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/55/sign" \
+  -H 'Authorization: Bearer {{access_token}}' \
+  -d '{"verified": true}'
+
+<b>JSON Response</b>
+
+{
+    "email": "user@example.com",
+    "timestamp": 1572375004080,
+    "receipt": "B90YWS6AFX2LGWOXJ1LD-2018-10-1572375004080",
+    "status": {
+        "code": 15,
+        "message": "Your submission has been accepted.",
+        "description": "This completes your HMDA filing process for this year. If you need to upload a new HMDA file, the previously completed filing will not be overridden until all edits have been cleared and verified, and the new file has been submitted."
+    }
+}
+</pre>
+
 <p>Sign and complete a HMDA submission.</p>
 
-<blockquote>
-<p>Example Request</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> POST <span class="se">\</span>
-  <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/55/sign"</span> <span class="se">\</span>
-  <span class="nt">-H</span> <span class="s1">'Authorization: Bearer {{access_token}}'</span> <span class="se">\</span>
-  <span class="nt">-d</span> <span class="s1">'{"verified": true}'</span>
-</code></pre></div>
-<blockquote>
-<p>JSON Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
-    </span><span class="nl">"email"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user@example.com"</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="mi">1572375004080</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"receipt"</span><span class="p">:</span><span class="w"> </span><span class="s2">"B90YWS6AFX2LGWOXJ1LD-2018-10-1572375004080"</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"code"</span><span class="p">:</span><span class="w"> </span><span class="mi">15</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your submission has been accepted."</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"This completes your HMDA filing process for this year. If you need to upload a new HMDA file, the previously completed filing will not be overridden until all edits have been cleared and verified, and the new file has been submitted."</span><span class="w">
-    </span><span class="p">}</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre></div>
 <table><thead>
 <tr>
 <th></th>
@@ -1280,26 +1335,30 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tbody></table>
 <h3 id='hmda-filing-endpoints-get-sign-receipt'>Get Sign receipt</h3>
 <blockquote>
-<p>Example Request</p>
+<p><strong>Example Request and Response</strong></p>
 </blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> GET <span class="se">\</span>
-  <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/10/sign"</span> <span class="se">\</span>
-  <span class="nt">-H</span> <span class="s1">'Authorization: Bearer {{access_token}}'</span>
-</code></pre></div>
-<blockquote>
-<p>JSON Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
-    </span><span class="nl">"email"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user@example.com"</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="mi">1572375004080</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"receipt"</span><span class="p">:</span><span class="w"> </span><span class="s2">"B90YWS6AFX2LGWOXJ1LD-2018-55-1572375004080"</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"code"</span><span class="p">:</span><span class="w"> </span><span class="mi">15</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your submission has been accepted."</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"This completes your HMDA filing process for this year. If you need to upload a new HMDA file, the previously completed filing will not be overridden until all edits have been cleared and verified, and the new file has been submitted."</span><span class="w">
-    </span><span class="p">}</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre></div>
+
+<pre>
+<b>Request:</b>
+
+curl -X GET \
+  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/10/sign" \
+  -H 'Authorization: Bearer {{access_token}}'
+
+<b>JSON Response:</b>
+
+{
+    "email": "user@example.com",
+    "timestamp": 1572375004080,
+    "receipt": "B90YWS6AFX2LGWOXJ1LD-2018-55-1572375004080",
+    "status": {
+        "code": 15,
+        "message": "Your submission has been accepted.",
+        "description": "This completes your HMDA filing process for this year. If you need to upload a new HMDA file, the previously completed filing will not be overridden until all edits have been cleared and verified, and the new file has been submitted."
+    }
+}
+</pre>
+
 <table><thead>
 <tr>
 <th></th>
@@ -1320,83 +1379,92 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h2 id='hmda-filing-quarterly-filing'>Quarterly Filing</h2>
-<p>All the endpoints are the same for quarterly filing with the addtion of <code>quarter/Q1/</code>, <code>quarter/Q2/</code> or <code>quarter/Q3/</code> after the filing parameter and before the submission parameter.</p>
+<blockquote>
+<p><strong>Example Request and Request</strong></p>
+</blockquote>
 
-<blockquote>
-<p>Example Request</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> GET <span class="se">\</span>
-  <span class="s2">"https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/quarter/Q1/submissions/latest"</span> <span class="se">\</span>
-  <span class="nt">-H</span> <span class="s1">'Authorization: Bearer {{access_token}}'</span> <span class="se">\</span>
-</code></pre></div>
-<blockquote>
-<p>JSON Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
-    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"lei"</span><span class="p">:</span><span class="w"> </span><span class="s2">"B90YWS6AFX2LGWOXJ1LD"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"period"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-            </span><span class="nl">"year"</span><span class="p">:</span><span class="w"> </span><span class="mi">2020</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"quarter"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Q1"</span><span class="w">
-        </span><span class="p">},</span><span class="w">
-        </span><span class="nl">"sequenceNumber"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"code"</span><span class="p">:</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your data has macro edits that need to be reviewed."</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded."</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"start"</span><span class="p">:</span><span class="w"> </span><span class="mi">1585750668652</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"end"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"fileName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;file_name&gt;"</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"receipt"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"qualityVerified"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"macroVerified"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"qualityExists"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"macroExists"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre></div><h1 id='public-data-verification'>Public Data Verification</h1>
+<pre>
+<b>Request:</b>
+
+curl -X GET \
+  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/quarter/Q1/submissions/latest" \
+  -H 'Authorization: Bearer {{access_token}}' \
+
+<b>JSON Response:</b>
+
+{
+    "id": {
+        "lei": "B90YWS6AFX2LGWOXJ1LD",
+        "period": {
+            "year": 2020,
+            "quarter": "Q1"
+        },
+        "sequenceNumber": 10
+    },
+    "status": {
+        "code": 13,
+        "message": "Your data has macro edits that need to be reviewed.",
+        "description": "Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded."
+    },
+    "start": 1585750668652,
+    "end": 0,
+    "fileName": "<file_name>",
+    "receipt": "",
+    "qualityVerified": false,
+    "macroVerified": false,
+    "qualityExists": true,
+    "macroExists": false
+}
+</pre>
+
+<p>All the endpoints are the same for quarterly filing with the addtion of <code>quarter/Q1/</code>, <code>quarter/Q2/</code> or <code>quarter/Q3/</code> after the filing parameter and before the submission parameter.</p>
+<h1 id='public-data-verification'>Public Data Verification</h1>
 <p>The following are HMDA Public API endpoints that do not require authentication. You may use these public endpoints to help prepare your data for sumbission.</p>
 <h2 id='public-data-verification-single-ts-verification'>Single TS Verification</h2>
 <p>These endpoints are used to parse and run edits on a TS. Use <code>parse</code> to check for parsing errors and <code>validate/{{year}}</code> to check for syntactical, validity, and quality edits.</p>
 <h3 id='public-data-verification-single-ts-verification-parse-ts'>Parse TS</h3>
-<p>This endpoint runs parsing on a Transmittal Sheet (TS). The endpoint returns a list of parsing errors in JSON format. If the TS is valid it the parsed TS object in JSON format.</p>
+<blockquote>
+<p>Example Request and Response</p>
+</blockquote>
 
-<blockquote>
-<p>Example</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>  curl <span class="nt">-X</span> POST <span class="se">\</span>
-  <span class="s2">"https://ffiec.cfpb.gov/v2/public/ts/parse"</span> <span class="se">\</span>
-  <span class="nt">-H</span> <span class="s1">'Content-Type: application/json'</span> <span class="se">\</span>
-  <span class="nt">-d</span> <span class="s1">'{
+<pre>
+<b>Request:</b>
+
+  curl -X POST \
+  "https://ffiec.cfpb.gov/v2/public/ts/parse" \
+  -H 'Content-Type: application/json' \
+  -d '{
   "ts" : "1|Bank 0|2018|4|Jane|111-111-1111|janesmith@bank.com|123 Main St|Washington|DC|20001|9|100|99-999999|10Bx939c5543TqA1144M"
-}'</span>
-</code></pre></div>
-<blockquote>
-<p>Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="w">  </span><span class="p">{</span><span class="w">
-      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-      </span><span class="nl">"institutionName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Bank 0"</span><span class="p">,</span><span class="w">
-      </span><span class="nl">"year"</span><span class="p">:</span><span class="w"> </span><span class="mi">2018</span><span class="p">,</span><span class="w">
-      </span><span class="nl">"quarter"</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w">
-      </span><span class="nl">"contact"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Jane"</span><span class="p">,</span><span class="w">
-          </span><span class="nl">"phone"</span><span class="p">:</span><span class="w"> </span><span class="s2">"111-111-1111"</span><span class="p">,</span><span class="w">
-          </span><span class="nl">"email"</span><span class="p">:</span><span class="w"> </span><span class="s2">"janesmith@bank.com"</span><span class="p">,</span><span class="w">
-          </span><span class="nl">"address"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-              </span><span class="nl">"street"</span><span class="p">:</span><span class="w"> </span><span class="s2">"123 Main St"</span><span class="p">,</span><span class="w">
-              </span><span class="nl">"city"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Washington"</span><span class="p">,</span><span class="w">
-              </span><span class="nl">"state"</span><span class="p">:</span><span class="w"> </span><span class="s2">"DC"</span><span class="p">,</span><span class="w">
-              </span><span class="nl">"zipCode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"20001"</span><span class="w">
-          </span><span class="p">}</span><span class="w">
-      </span><span class="p">},</span><span class="w">
-      </span><span class="nl">"agency"</span><span class="p">:</span><span class="w"> </span><span class="mi">9</span><span class="p">,</span><span class="w">
-      </span><span class="nl">"totalLines"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w">
-      </span><span class="nl">"taxId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"99-999999"</span><span class="p">,</span><span class="w">
-      </span><span class="nl">"LEI"</span><span class="p">:</span><span class="w"> </span><span class="s2">"10Bx939c5543TqA1144M"</span><span class="w">
-  </span><span class="p">}</span><span class="w">
-</span></code></pre></div>
+}'
+
+<b>JSON Response:</b>
+
+  {
+      "id": 1,
+      "institutionName": "Bank 0",
+      "year": 2018,
+      "quarter": 4,
+      "contact": {
+          "name": "Jane",
+          "phone": "111-111-1111",
+          "email": "janesmith@bank.com",
+          "address": {
+              "street": "123 Main St",
+              "city": "Washington",
+              "state": "DC",
+              "zipCode": "20001"
+          }
+      },
+      "agency": 9,
+      "totalLines": 100,
+      "taxId": "99-999999",
+      "LEI": "10Bx939c5543TqA1144M"
+  }
+</pre>
+  
+
+<p>This endpoint runs parsing on a Transmittal Sheet (TS). The endpoint returns a list of parsing errors in JSON format. If the TS is valid, the parsed TS object is returned in JSON format.</p>
+
 <table><thead>
 <tr>
 <th></th>
@@ -1421,35 +1489,39 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h3 id='public-data-verification-single-ts-verification-validate-ts'>Validate TS</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre>
+<b>Request:</b>
+
+  curl -X POST \
+  "https://ffiec.cfpb.gov/v2/public/ts/validate/2018" \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "ts" : "1|Bank 0|2018|4|Jane|111-111-1111|janesmith@bank.com|123 Main St|Washington|DC|20001|9|100|99-999999|10Bx939c5543TqA1144M"
+}'
+
+<b>JSON Response:</b>
+
+{
+    "syntactical": {
+        "errors": []
+    },
+    "validity": {
+        "errors": []
+    },
+    "quality": {
+        "errors": []
+    }
+}
+</pre>
+
 <p>This endpoint runs parsing and a specific year&#39;s edit checks on a Transmittal Sheet (TS). It returns edit details if the TS is able to be parsed or parsing errors if not.</p>
 
 <p><em>Note:</em> Some edit checks require institution data. These checks are not run in any public APIs.</p>
 
-<blockquote>
-<p>Example</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>  curl <span class="nt">-X</span> POST <span class="se">\</span>
-  <span class="s2">"https://ffiec.cfpb.gov/v2/public/ts/validate/2018"</span> <span class="se">\</span>
-  <span class="nt">-H</span> <span class="s1">'Content-Type: application/json'</span> <span class="se">\</span>
-  <span class="nt">-d</span> <span class="s1">'{
-  "ts" : "1|Bank 0|2018|4|Jane|111-111-1111|janesmith@bank.com|123 Main St|Washington|DC|20001|9|100|99-999999|10Bx939c5543TqA1144M"
-}'</span>
-</code></pre></div>
-<blockquote>
-<p>Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="w">  </span><span class="p">{</span><span class="w">
-      </span><span class="nl">"syntactical"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-          </span><span class="nl">"errors"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
-      </span><span class="p">},</span><span class="w">
-      </span><span class="nl">"validity"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-          </span><span class="nl">"errors"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
-      </span><span class="p">},</span><span class="w">
-      </span><span class="nl">"quality"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-          </span><span class="nl">"errors"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
-      </span><span class="p">}</span><span class="w">
-  </span><span class="p">}</span><span class="w">
-</span></code></pre></div>
 <table><thead>
 <tr>
 <th></th>
@@ -1476,169 +1548,173 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 <h2 id='public-data-verification-single-lar-verification'>Single LAR Verification</h2>
 <p>These endpoints are used to parse and and run edits on a LAR. Use <code>parse</code> to check for parsing errors and <code>validate/{{year}}</code> to check for syntactical, validity, and quality edits.</p>
 <h3 id='public-data-verification-single-lar-verification-parse-a-lar'>Parse a LAR</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre>
+<b>Request:</b>
+
+  curl -X POST \
+  "https://ffiec.cfpb.gov/v2/public/lar/parse" \
+  -H 'Content-Type: application/json' \
+  -d '{ "lar": "2|10Bx939c5543TqA1144M|10Bx939c5543TqA1144M999143X38|20180721|1|1|1|1|1|110500|1|20180721|123 Main St|Beverly Hills|CA|90210|06037|06037264000|1|1|1|1|1||1|1|1|1|1||3|3|5|7|7|7|7||||5|7|7|7|7||||3|3|1|1|3|3|30|30|36|1|0.428|1|1|750|750|1|9|1|9|10|10|10|10||2399.04|NA|NA|NA|NA|4.125|NA|42.95|80.05|360|NA|1|2|1|1|350500|1|1|5|NA|1|1|12345|1|1|1|1|1||1|1|1|1|1||1|1|1"
+}'
+
+<b>Response:</b>
+
+  {
+    "larIdentifier": {
+        "id": 2,
+        "LEI": "10BX939C5543TQA1144M",
+        "NMLSRIdentifier": "12345"
+    },
+    "loan": {
+        "ULI": "10Bx939c5543TqA1144M999143X38",
+        "applicationDate": "20180721",
+        "loanType": 1,
+        "loanPurpose": 1,
+        "constructionMethod": 1,
+        "occupancy": 1,
+        "amount": 110500.0,
+        "loanTerm": "360",
+        "rateSpread": "0.428",
+        "interestRate": "4.125",
+        "prepaymentPenaltyTerm": "NA",
+        "debtToIncomeRatio": "42.95",
+        "combinedLoanToValueRatio": "80.05",
+        "introductoryRatePeriod": "NA"
+    },
+    "larAction": {
+        "preapproval": 1,
+        "actionTakenType": 1,
+        "actionTakenDate": 20180721
+    },
+    "geography": {
+        "street": "123 Main St",
+        "city": "Beverly Hills",
+        "state": "CA",
+        "zipCode": "90210",
+        "county": "06037",
+        "tract": "06037264000"
+    },
+    "applicant": {
+        "ethnicity": {
+            "ethnicity1": 1,
+            "ethnicity2": 1,
+            "ethnicity3": 1,
+            "ethnicity4": 1,
+            "ethnicity5": 1,
+            "otherHispanicOrLatino": "",
+            "ethnicityObserved": 3
+        },
+        "race": {
+            "race1": 5,
+            "race2": 7,
+            "race3": 7,
+            "race4": 7,
+            "race5": 7,
+            "otherNativeRace": "",
+            "otherAsianRace": "",
+            "otherPacificIslanderRace": "",
+            "raceObserved": 3
+        },
+        "sex": {
+            "sex": 1,
+            "sexObserved": 3
+        },
+        "age": 30,
+        "creditScore": 750,
+        "creditScoreType": 1,
+        "otherCreditScoreModel": "9"
+    },
+    "coApplicant": {
+        "ethnicity": {
+            "ethnicity1": 1,
+            "ethnicity2": 1,
+            "ethnicity3": 1,
+            "ethnicity4": 1,
+            "ethnicity5": 1,
+            "otherHispanicOrLatino": "",
+            "ethnicityObserved": 3
+        },
+        "race": {
+            "race1": 5,
+            "race2": 7,
+            "race3": 7,
+            "race4": 7,
+            "race5": 7,
+            "otherNativeRace": "",
+            "otherAsianRace": "",
+            "otherPacificIslanderRace": "",
+            "raceObserved": 3
+        },
+        "sex": {
+            "sex": 1,
+            "sexObserved": 3
+        },
+        "age": 30,
+        "creditScore": 750,
+        "creditScoreType": 1,
+        "otherCreditScoreModel": "9"
+    },
+    "income": "36",
+    "purchaserType": 1,
+    "hoepaStatus": 1,
+    "lienStatus": 1,
+    "denial": {
+        "denialReason1": 10,
+        "denialReason2": 10,
+        "denialReason3": 10,
+        "denialReason4": 10,
+        "otherDenialReason": ""
+    },
+    "loanDisclosure": {
+        "totalLoanCosts": "2399.04",
+        "totalPointsAndFees": "NA",
+        "originationCharges": "NA",
+        "discountPoints": "NA",
+        "lenderCredits": "NA"
+    },
+    "nonAmortizingFeatures": {
+        "balloonPayment": 1,
+        "interestOnlyPayment": 2,
+        "negativeAmortization": 1,
+        "otherNonAmortizingFeatures": 1
+    },
+    "property": {
+        "propertyValue": "350500.0",
+        "manufacturedHomeSecuredProperty": 1,
+        "manufacturedHomeLandPropertyInterest": 1,
+        "totalUnits": 5,
+        "multiFamilyAffordableUnits": "NA"
+    },
+    "applicationSubmission": 1,
+    "payableToInstitution": 1,
+    "AUS": {
+        "aus1": 1,
+        "aus2": 1,
+        "aus3": 1,
+        "aus4": 1,
+        "aus5": 1,
+        "otherAUS": ""
+    },
+    "ausResult": {
+        "ausResult1": 1,
+        "ausResult2": 1,
+        "ausResult3": 1,
+        "ausResult4": 1,
+        "ausResult5": 1,
+        "otherAusResult": ""
+    },
+    "reverseMortgage": 1,
+    "lineOfCredit": 1,
+    "businessOrCommercialPurpose": 1
+}
+</pre>
+
 <p>This endpoint runs parsing on a single Loan Application Register (LAR). The endpoint returns a list of parsing errors in JSON format. If the LAR is valid it returns the parsed LAR object in JSON format.</p>
 
-<blockquote>
-<p>Example</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>  curl <span class="nt">-X</span> POST <span class="se">\</span>
-  <span class="s2">"https://ffiec.cfpb.gov/v2/public/lar/parse"</span> <span class="se">\</span>
-  <span class="nt">-H</span> <span class="s1">'Content-Type: application/json'</span> <span class="se">\</span>
-  <span class="nt">-d</span> <span class="s1">'{ "lar": "2|10Bx939c5543TqA1144M|10Bx939c5543TqA1144M999143X38|20180721|1|1|1|1|1|110500|1|20180721|123 Main St|Beverly Hills|CA|90210|06037|06037264000|1|1|1|1|1||1|1|1|1|1||3|3|5|7|7|7|7||||5|7|7|7|7||||3|3|1|1|3|3|30|30|36|1|0.428|1|1|750|750|1|9|1|9|10|10|10|10||2399.04|NA|NA|NA|NA|4.125|NA|42.95|80.05|360|NA|1|2|1|1|350500|1|1|5|NA|1|1|12345|1|1|1|1|1||1|1|1|1|1||1|1|1"
-}'</span>
-</code></pre></div>
-<blockquote>
-<p>Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="w">  </span><span class="p">{</span><span class="w">
-    </span><span class="nl">"larIdentifier"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"LEI"</span><span class="p">:</span><span class="w"> </span><span class="s2">"10BX939C5543TQA1144M"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"NMLSRIdentifier"</span><span class="p">:</span><span class="w"> </span><span class="s2">"12345"</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"loan"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"ULI"</span><span class="p">:</span><span class="w"> </span><span class="s2">"10Bx939c5543TqA1144M999143X38"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"applicationDate"</span><span class="p">:</span><span class="w"> </span><span class="s2">"20180721"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"loanType"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"loanPurpose"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"constructionMethod"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"occupancy"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"amount"</span><span class="p">:</span><span class="w"> </span><span class="mf">110500.0</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"loanTerm"</span><span class="p">:</span><span class="w"> </span><span class="s2">"360"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"rateSpread"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0.428"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"interestRate"</span><span class="p">:</span><span class="w"> </span><span class="s2">"4.125"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"prepaymentPenaltyTerm"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NA"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"debtToIncomeRatio"</span><span class="p">:</span><span class="w"> </span><span class="s2">"42.95"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"combinedLoanToValueRatio"</span><span class="p">:</span><span class="w"> </span><span class="s2">"80.05"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"introductoryRatePeriod"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NA"</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"larAction"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"preapproval"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"actionTakenType"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"actionTakenDate"</span><span class="p">:</span><span class="w"> </span><span class="mi">20180721</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"geography"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"street"</span><span class="p">:</span><span class="w"> </span><span class="s2">"123 Main St"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"city"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Beverly Hills"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"state"</span><span class="p">:</span><span class="w"> </span><span class="s2">"CA"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"zipCode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"90210"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"county"</span><span class="p">:</span><span class="w"> </span><span class="s2">"06037"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"tract"</span><span class="p">:</span><span class="w"> </span><span class="s2">"06037264000"</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"applicant"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"ethnicity"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-            </span><span class="nl">"ethnicity1"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"ethnicity2"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"ethnicity3"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"ethnicity4"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"ethnicity5"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"otherHispanicOrLatino"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"ethnicityObserved"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w">
-        </span><span class="p">},</span><span class="w">
-        </span><span class="nl">"race"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-            </span><span class="nl">"race1"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"race2"</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"race3"</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"race4"</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"race5"</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"otherNativeRace"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"otherAsianRace"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"otherPacificIslanderRace"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"raceObserved"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w">
-        </span><span class="p">},</span><span class="w">
-        </span><span class="nl">"sex"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-            </span><span class="nl">"sex"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"sexObserved"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w">
-        </span><span class="p">},</span><span class="w">
-        </span><span class="nl">"age"</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"creditScore"</span><span class="p">:</span><span class="w"> </span><span class="mi">750</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"creditScoreType"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"otherCreditScoreModel"</span><span class="p">:</span><span class="w"> </span><span class="s2">"9"</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"coApplicant"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"ethnicity"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-            </span><span class="nl">"ethnicity1"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"ethnicity2"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"ethnicity3"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"ethnicity4"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"ethnicity5"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"otherHispanicOrLatino"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"ethnicityObserved"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w">
-        </span><span class="p">},</span><span class="w">
-        </span><span class="nl">"race"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-            </span><span class="nl">"race1"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"race2"</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"race3"</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"race4"</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"race5"</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"otherNativeRace"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"otherAsianRace"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"otherPacificIslanderRace"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"raceObserved"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w">
-        </span><span class="p">},</span><span class="w">
-        </span><span class="nl">"sex"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-            </span><span class="nl">"sex"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"sexObserved"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w">
-        </span><span class="p">},</span><span class="w">
-        </span><span class="nl">"age"</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"creditScore"</span><span class="p">:</span><span class="w"> </span><span class="mi">750</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"creditScoreType"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"otherCreditScoreModel"</span><span class="p">:</span><span class="w"> </span><span class="s2">"9"</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"income"</span><span class="p">:</span><span class="w"> </span><span class="s2">"36"</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"purchaserType"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"hoepaStatus"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"lienStatus"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"denial"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"denialReason1"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"denialReason2"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"denialReason3"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"denialReason4"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"otherDenialReason"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"loanDisclosure"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"totalLoanCosts"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2399.04"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"totalPointsAndFees"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NA"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"originationCharges"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NA"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"discountPoints"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NA"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"lenderCredits"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NA"</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"nonAmortizingFeatures"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"balloonPayment"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"interestOnlyPayment"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"negativeAmortization"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"otherNonAmortizingFeatures"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"property"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"propertyValue"</span><span class="p">:</span><span class="w"> </span><span class="s2">"350500.0"</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"manufacturedHomeSecuredProperty"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"manufacturedHomeLandPropertyInterest"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"totalUnits"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"multiFamilyAffordableUnits"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NA"</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"applicationSubmission"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"payableToInstitution"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"AUS"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"aus1"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"aus2"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"aus3"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"aus4"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"aus5"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"otherAUS"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"ausResult"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"ausResult1"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"ausResult2"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"ausResult3"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"ausResult4"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"ausResult5"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-        </span><span class="nl">"otherAusResult"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"reverseMortgage"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"lineOfCredit"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"businessOrCommercialPurpose"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre></div>
 <table><thead>
 <tr>
 <th></th>
@@ -1663,47 +1739,49 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h3 id='public-data-verification-single-lar-verification-validate-a-lar'>Validate a LAR</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre>
+<b>Request</b>
+  curl -X POST \
+  "https://ffiec.cfpb.gov/v2/public/lar/validate/2018" \
+  -H 'Content-Type: application/json' \
+  -d '{"lar": ""2|B90YWS6AFX2LGWOXJ1LD|B90YWS6AFX2LGWOXJ1LD0KQ78F1Q02LVT4VCYK1G3D253|20180613|3|2|2|2|3|218910|5|20181031|1234 Hocus Potato Way|Tatertown|NM|14755|35003|35003976400|1|13||11||KE0NW|1|||||NA2IJJ7VBBQ15DTFRNK1PVWOPOXL3NH1PHUMN7S2J4|2|2|7|||||E120FYAU7BTSC3P51IL87C97W3N9VT791BMJI57RLJQSHOFDTUD7PQSPGHQ69D7I2P8JBDCBUIGRLX2BUS7SJR|DOOOI8UXY9PZDSRVFKP91CUQG95E88Y22KDR1AI3|1K1JINAYSIHCWBGJW3KOHU5D5TSK1Z61SUT5M9WQVWOHX|27|24|41|43|2|MS1LKLX7XZRKL23TV01I49RADZGUN0QY5AG9H4BJCVFTA4ZQ1EJUS1376QJXD87ZZDN5EFZIUWB8SK5EU34RVGOVTE|Y083OZN1VFT6B2XGL397ABL0Z4EV4CD45I7ZJ7FRSXXL4BRMKVPR5UCVV0K6IDLP7WLCBZAQ5KXT69PNE9PWQKCPKJB|UV0FTHG00G8WM65I7591IJYP9TEMXMDCVGZYRJTBUBBKEZI65HGL9ML|3|2|2|2|1|1|75|4|NA|0|NA|3|2|8888|8888|9||9||10|||||NA|NA|NA|NA|NA|NA|32|NA|NA|256|29|1111|1111|1111|1111|NA|3|2|16|Exempt|2|2|NA|3|1|5|1||DOREBESQSW1QT58SD2OZTHQUGXLSKCAJYZ63NJE2MUIAFQL4KW6PU26YSU786GT0IMCWWKCN25Y7KU0VLU0PPKWR8G6DKWI9BANPIE9I2ZZ5XDUX0TBAY4XFRFQZF087WS9ESTAKIV5V9HSZ2VXW7J5JMGPP4CGYA51BK68T57NN4KTKJVXIQMFXBTN5E3LGKKX3LITQ4C7OPFJ|7|6|5|5|||1111|2|1111""
+}'
+
+<b>JSON Response</b>
+  {
+    "syntactical": {
+        "errors": []
+    },
+    "validity": {
+        "errors": []
+    },
+    "quality": {
+        "errors": [
+            {
+                "edit": "Q618",
+                "description": "\"If Construction Method equals 2, then Manufactured Home Secured Property Type generally should not be 3.\""
+            },
+            {
+                "edit": "Q631",
+                "description": "\"If Loan Type equals 2, 3 or 4, then Total Units generally should be less than or equal to 4.\""
+            },
+            {
+                "edit": "Q632",
+                "description": "\"If Automated Underwriting System: 1; Automated Underwriting System: 2; Automated Underwriting System: 3; Automated Underwriting System: 4; or Automated Underwriting System: 5 equals 3, then the corresponding Automated Underwriting System Result: 1; Automated Underwriting System Result: 2; Automated Underwriting System Result: 3; Automated Underwriting System Result: 4; or Automated Underwriting System Result: 5 should equal 8 or 13.\""
+            }
+        ]
+    }
+}
+</pre>
+
 <p>This endpoint runs parsing and a specific year&#39;s edit checks on a Loan Application Register (LAR). It returns edit details if the LAR is able to be parsed or parsing errors if not.</p>
 
 <p><em>Note:</em> Some edit checks require institution data. These checks are not run in any public APIs. Macro edits are also not run this endpoint checks only a single LAR.</p>
 
-<blockquote>
-<p>Example</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>  curl <span class="nt">-X</span> POST <span class="se">\</span>
-  <span class="s2">"https://ffiec.cfpb.gov/v2/public/lar/validate/2018"</span> <span class="se">\</span>
-  <span class="nt">-H</span> <span class="s1">'Content-Type: application/json'</span> <span class="se">\</span>
-  <span class="nt">-d</span> <span class="s1">'{"lar": ""2|B90YWS6AFX2LGWOXJ1LD|B90YWS6AFX2LGWOXJ1LD0KQ78F1Q02LVT4VCYK1G3D253|20180613|3|2|2|2|3|218910|5|20181031|1234 Hocus Potato Way|Tatertown|NM|14755|35003|35003976400|1|13||11||KE0NW|1|||||NA2IJJ7VBBQ15DTFRNK1PVWOPOXL3NH1PHUMN7S2J4|2|2|7|||||E120FYAU7BTSC3P51IL87C97W3N9VT791BMJI57RLJQSHOFDTUD7PQSPGHQ69D7I2P8JBDCBUIGRLX2BUS7SJR|DOOOI8UXY9PZDSRVFKP91CUQG95E88Y22KDR1AI3|1K1JINAYSIHCWBGJW3KOHU5D5TSK1Z61SUT5M9WQVWOHX|27|24|41|43|2|MS1LKLX7XZRKL23TV01I49RADZGUN0QY5AG9H4BJCVFTA4ZQ1EJUS1376QJXD87ZZDN5EFZIUWB8SK5EU34RVGOVTE|Y083OZN1VFT6B2XGL397ABL0Z4EV4CD45I7ZJ7FRSXXL4BRMKVPR5UCVV0K6IDLP7WLCBZAQ5KXT69PNE9PWQKCPKJB|UV0FTHG00G8WM65I7591IJYP9TEMXMDCVGZYRJTBUBBKEZI65HGL9ML|3|2|2|2|1|1|75|4|NA|0|NA|3|2|8888|8888|9||9||10|||||NA|NA|NA|NA|NA|NA|32|NA|NA|256|29|1111|1111|1111|1111|NA|3|2|16|Exempt|2|2|NA|3|1|5|1||DOREBESQSW1QT58SD2OZTHQUGXLSKCAJYZ63NJE2MUIAFQL4KW6PU26YSU786GT0IMCWWKCN25Y7KU0VLU0PPKWR8G6DKWI9BANPIE9I2ZZ5XDUX0TBAY4XFRFQZF087WS9ESTAKIV5V9HSZ2VXW7J5JMGPP4CGYA51BK68T57NN4KTKJVXIQMFXBTN5E3LGKKX3LITQ4C7OPFJ|7|6|5|5|||1111|2|1111""
-}'</span>
-</code></pre></div>
-<blockquote>
-<p>Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="w">  </span><span class="p">{</span><span class="w">
-    </span><span class="nl">"syntactical"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"errors"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"validity"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"errors"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="nl">"quality"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"errors"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
-            </span><span class="p">{</span><span class="w">
-                </span><span class="nl">"edit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Q618"</span><span class="p">,</span><span class="w">
-                </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"</span><span class="se">\"</span><span class="s2">If Construction Method equals 2, then Manufactured Home Secured Property Type generally should not be 3.</span><span class="se">\"</span><span class="s2">"</span><span class="w">
-            </span><span class="p">},</span><span class="w">
-            </span><span class="p">{</span><span class="w">
-                </span><span class="nl">"edit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Q631"</span><span class="p">,</span><span class="w">
-                </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"</span><span class="se">\"</span><span class="s2">If Loan Type equals 2, 3 or 4, then Total Units generally should be less than or equal to 4.</span><span class="se">\"</span><span class="s2">"</span><span class="w">
-            </span><span class="p">},</span><span class="w">
-            </span><span class="p">{</span><span class="w">
-                </span><span class="nl">"edit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Q632"</span><span class="p">,</span><span class="w">
-                </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"</span><span class="se">\"</span><span class="s2">If Automated Underwriting System: 1; Automated Underwriting System: 2; Automated Underwriting System: 3; Automated Underwriting System: 4; or Automated Underwriting System: 5 equals 3, then the corresponding Automated Underwriting System Result: 1; Automated Underwriting System Result: 2; Automated Underwriting System Result: 3; Automated Underwriting System Result: 4; or Automated Underwriting System Result: 5 should equal 8 or 13.</span><span class="se">\"</span><span class="s2">"</span><span class="w">
-            </span><span class="p">}</span><span class="w">
-        </span><span class="p">]</span><span class="w">
-    </span><span class="p">}</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre></div>
 <table><thead>
 <tr>
 <th></th>
@@ -1730,22 +1808,26 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 <h2 id='public-data-verification-full-hmda-file-verification'>Full HMDA File Verification</h2>
 <p>The following endpoints can be used to parse and run edit checks on a full HMDA file.</p>
 <h3 id='public-data-verification-full-hmda-file-verification-parse-a-hmda-file'>Parse a HMDA File</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre>
+<b>Request:</b>
+
+curl -X OPTIONS \
+"https://ffiec.cfpb.gov/v2/public/hmda/parse" \
+-F file=&ltPATH&gt/&ltFILENAME&gt.txt
+
+<b>JSON Response:</b>
+
+{
+  "validated": []
+}
+</pre>
+
 <p>This endpoint runs parsing on a HMDA file. The endpoint returns a list of parsing errors in JSON format. If the file is valid it returns and empty list.</p>
 
-<blockquote>
-<p>Example Request</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>  curl <span class="nt">-X</span> OPTIONS <span class="se">\</span>
-  <span class="s2">"https://ffiec.cfpb.gov/v2/public/hmda/parse"</span> <span class="se">\</span>
-  <span class="nt">-F</span> <span class="nv">file</span><span class="o">=</span>@&lt;PATH&gt;/&lt;FILENAME&gt;.txt
-</code></pre></div>
-<blockquote>
-<p>JSON Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="w">  </span><span class="p">{</span><span class="w">
-    </span><span class="nl">"validated"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
-  </span><span class="p">}</span><span class="w">
-</span></code></pre></div>
 <table><thead>
 <tr>
 <th></th>
@@ -1770,49 +1852,53 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h3 id='public-data-verification-full-hmda-file-verification-validate-a-hmda-file'>Validate a HMDA File</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre>
+<b>Request:</b>
+
+curl -X OPTIONS \
+"https://ffiec.cfpb.gov/v2/public/hmda/validate" \
+-F file=@&ltPATH&gt/&ltFILENAME&gt.txt
+
+<b>JSON Response:</b>
+
+{
+  "parserErrors": [
+      {
+          "rowNumber": 1,
+          "estimatedULI": "Transmittal Sheet",
+          "errorMessages": [
+              {
+                  "fieldName": "Calendar Quarter",
+                  "inputValue": "a",
+                  "validValues": "Integer"
+              }
+          ]
+      }
+  ],
+  "validationErrors": [
+      [
+          {
+              "uli": "B90YWS6AFX2LGWOXJ1LDNIXOQ6OO7BRA5SLR6FSJJ5R89",
+              "editName": "V619-2",
+              "editDescription": "\"The Action Taken Date must be in the reporting year.\"",
+              "fields": {
+                  "Action Taken Date": "20180908",
+                  "Application Date": "NA"
+              }
+          }
+      ]
+  ]
+}
+</pre>
+
 <p>This endpoint runs parsing and a specific year&#39;s edit checks on a HMDA file. This endpoint runs checks row by row and so can return both parsing and edit check information if some rows pass parsing and others do not.</p>
 
 <p><em>Note:</em> Some edit checks require institution data. These checks are not run in any public APIs. Macro edits are also not run as the check runs line by line.</p>
 
-<blockquote>
-<p>Example Request</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>  curl <span class="nt">-X</span> OPTIONS <span class="se">\</span>
-  <span class="s2">"https://ffiec.cfpb.gov/v2/public/hmda/validate"</span> <span class="se">\</span>
-  <span class="nt">-F</span> <span class="nv">file</span><span class="o">=</span>@&lt;PATH&gt;/&lt;FILENAME&gt;.txt
-</code></pre></div>
-<blockquote>
-<p>JSON Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="w">  </span><span class="p">{</span><span class="w">
-    </span><span class="nl">"parserErrors"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
-        </span><span class="p">{</span><span class="w">
-            </span><span class="nl">"rowNumber"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"estimatedULI"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Transmittal Sheet"</span><span class="p">,</span><span class="w">
-            </span><span class="nl">"errorMessages"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
-                </span><span class="p">{</span><span class="w">
-                    </span><span class="nl">"fieldName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Calendar Quarter"</span><span class="p">,</span><span class="w">
-                    </span><span class="nl">"inputValue"</span><span class="p">:</span><span class="w"> </span><span class="s2">"a"</span><span class="p">,</span><span class="w">
-                    </span><span class="nl">"validValues"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Integer"</span><span class="w">
-                </span><span class="p">}</span><span class="w">
-            </span><span class="p">]</span><span class="w">
-        </span><span class="p">}</span><span class="w">
-    </span><span class="p">],</span><span class="w">
-    </span><span class="nl">"validationErrors"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
-        </span><span class="p">[</span><span class="w">
-            </span><span class="p">{</span><span class="w">
-                </span><span class="nl">"uli"</span><span class="p">:</span><span class="w"> </span><span class="s2">"B90YWS6AFX2LGWOXJ1LDNIXOQ6OO7BRA5SLR6FSJJ5R89"</span><span class="p">,</span><span class="w">
-                </span><span class="nl">"editName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"V619-2"</span><span class="p">,</span><span class="w">
-                </span><span class="nl">"editDescription"</span><span class="p">:</span><span class="w"> </span><span class="s2">"</span><span class="se">\"</span><span class="s2">The Action Taken Date must be in the reporting year.</span><span class="se">\"</span><span class="s2">"</span><span class="p">,</span><span class="w">
-                </span><span class="nl">"fields"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-                    </span><span class="nl">"Action Taken Date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"20180908"</span><span class="p">,</span><span class="w">
-                    </span><span class="nl">"Application Date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NA"</span><span class="w">
-                </span><span class="p">}</span><span class="w">
-            </span><span class="p">}</span><span class="w">
-        </span><span class="p">]</span><span class="w">
-    </span><span class="p">]</span><span class="w">
-  </span><span class="p">}</span><span class="w">
-</span></code></pre></div>
 <table><thead>
 <tr>
 <th></th>
@@ -1884,20 +1970,25 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h2 id='rate-spread-single-ratespread'>Single Ratespread</h2>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre>
+<b>Request:</b>
+
+curl -X POST "https://ffiec.cfpb.gov/public/rateSpread" -H "Content-Type: application/json" -d '{ "actionTakenType": 1, "loanTerm": 30, "amortizationType": "FixedRate", "apr": 6.0, "lockInDate": "2017-11-20", "reverseMortgage": 2 }'
+
+<b>JSON Response:</b>
+
+{"rateSpread":"2.010"}
+
+</pre>
+
 <p>This endpoint accepts loan data in JSON format and returns a JSON object containing the associated ratespread.</p>
 
 <p><code>POST</code> <code>https://ffiec.cfpb.gov/public/rateSpread</code></p>
 
-<blockquote>
-<p>Example Request</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>  curl <span class="nt">-X</span> POST <span class="s2">"https://ffiec.cfpb.gov/public/rateSpread"</span> <span class="nt">-H</span> <span class="s2">"Content-Type: application/json"</span> <span class="nt">-d</span> <span class="s1">'{ "actionTakenType": 1, "loanTerm": 30, "amortizationType": "FixedRate", "apr": 6.0, "lockInDate": "2017-11-20", "reverseMortgage": 2 }'</span>
-</code></pre></div>
-<blockquote>
-<p>JSON Response</p>
-</blockquote>
-<div class="highlight"><pre class="highlight json tab-json"><code><span class="w">  </span><span class="p">{</span><span class="nl">"rateSpread"</span><span class="p">:</span><span class="s2">"2.010"</span><span class="p">}</span><span class="w">
-</span></code></pre></div>
 <p>The JSON example contains the following parameters:</p>
 
 <table><thead>
@@ -1932,22 +2023,26 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h2 id='rate-spread-batch-ratespreads'>Batch Ratespreads</h2>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre>
+<b>Request:</b>
+
+curl -X POST "https://ffiec.cfpb.gov/public/rateSpread/csv" -F file=<file.csv>
+
+<b>CSV Response:</b>
+
+action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,rate_spread
+1,30,FixedRate,6.0,2017-11-20,2,2.010
+1,30,VariableRate,6.0,2017-11-20,2,2.150
+</pre>
+
 <p>In order to batch caluculate ratespreads the <code>csv</code> endpoint can be used. This endpoint accepts a CSV file of ratespread data and returns a CSV file with a new column for the ratespread.</p>
 
 <p><code>POST</code> <code>https://ffiec.cfpb.gov/public/rateSpread/csv</code></p>
 
-<blockquote>
-<p>Example Request</p>
-</blockquote>
-<div class="highlight"><pre class="highlight shell tab-shell"><code>curl <span class="nt">-X</span> POST <span class="s2">"https://ffiec.cfpb.gov/public/rateSpread/csv"</span> <span class="nt">-F</span> <span class="nv">file</span><span class="o">=</span>&lt;file.csv&gt;
-</code></pre></div>
-<blockquote>
-<p>CSV file with an added column for rate_spread calculated for each row</p>
-</blockquote>
-<div class="highlight"><pre class="highlight plaintext"><code>action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,rate_spread
-1,30,FixedRate,6.0,2017-11-20,2,2.010
-1,30,VariableRate,6.0,2017-11-20,2,2.150
-</code></pre></div>
 <p>The CSV file example contains the following contents:</p>
 
 <table><thead>
@@ -1983,13 +2078,13 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 
 <p><code>POST https://ffiec.cfpb.gov/v2/public/uli/checkDigit</code></p>
 
-<p>This endpoint takes a single ULI in JSON format and returns a single two digit check digit in JSON format. </p>
+<p>This endpoint takes a single ULI in JSON format and returns a single two-digit check digit in JSON format. </p>
 
 <p><strong>Batch Checkdigit Generation</strong></p>
 
 <p><code>POST https://ffiec.cfpb.gov/v2/public/uli/checkDigit/csv</code></p>
 
-<p>This endpoint takes multiple ULIs in CSV format and returns two digit check digits in CSV format.</p>
+<p>This endpoint takes multiple ULIs in CSV format and returns two-digit check digits in CSV format.</p>
 
 <p><strong>Single Checkdigit Validation</strong></p>
 
@@ -2001,7 +2096,7 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 
 <p><code>POST https://ffiec.cfpb.gov/v2/public/uli/validate/csv</code></p>
 
-<p>This endpoint multiple ULIs with check digits in CSV format and returns whether they is valid in CSV format.</p>
+<p>This endpoint accepts multiple ULIs, with checkdigits, in CSV format and returns whether they are valid in CSV format.</p>
 <h2 id='check-digit-single-check-digit-generation'>Single Check Digit Generation</h2>
 <blockquote>
 <p><strong>Example Request and Response</strong></p>
@@ -2009,6 +2104,7 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 
 <pre>
 <b> Request:</b>
+
 curl POST 'https://ffiec.cfpb.gov/v2/public/uli/checkDigit' \
 --header 'Content-Type: application/json' \
 --data-raw '{loanId: "EILKZAIZF6TX4HB8ZDX33H"}'
@@ -2022,7 +2118,7 @@ curl POST 'https://ffiec.cfpb.gov/v2/public/uli/checkDigit' \
 }
 </pre>
 
-<p><code>POST</code> request to get a single check digit.</p>
+<p><code>POST</code> request to generate a single check digit.</p>
 
 <table><thead>
 <tr>
@@ -2053,25 +2149,24 @@ curl POST 'https://ffiec.cfpb.gov/v2/public/uli/checkDigit' \
 </blockquote>
 
 <pre>
-<b> Request: </b>
+<b> Request:</b>
 curl -X POST \
 "https://ffiec.cfpb.gov/v2/public/uli/validate/csv" \
 -F file=@&ltPATH&gt/check_digit_sample_file.csv
 
-<b> Request Payload: </b>
+<b> Request Payload:</b>
 
 B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R87
 95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS
 
-<b> CSV Response: </b>
-
+<b> CSV Response:</b>
 
 loanId,checkDigit,uli
 B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R87,51,B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R8751
 95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS,92,95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92
 </pre>
 
-<p><code>POST</code> request to get batch check digits.</p>
+<p><code>POST</code> request to generate batch check digits.</p>
 
 <table><thead>
 <tr>
@@ -2156,7 +2251,6 @@ curl -X POST \
 
 95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92
 B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R89
-
 
 <b>CSV Response</b>
 
