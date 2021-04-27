@@ -43,7 +43,7 @@ private class PublishAdminHttpApi(sharding: ClusterSharding, config: Config)(imp
                 val submissionId = s"$lei-$period-$sequenceNumber"
                 if (verifyTopic(topic)) {
                     val publish = publishKafkaEvent(topic, submissionId, lei, stringKafkaProducer)
-                    complete((StatusCodes.Created, s"Topic ${topic} with data, ${submissionId}, published"))
+                    complete((StatusCodes.Created, s"Topic ${topic} with data, ${lei}-${period}-${submissionId}, published"))
                 } else {
                     invalidTopic(StatusCodes.BadRequest, topic, uri)
                 }
