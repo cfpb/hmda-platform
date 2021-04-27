@@ -16,7 +16,6 @@ class QuarterTimeBarrier(clock: Clock) {
       now.isEqual(QuarterTimeBarrier.getFirstDateForQuarter(quarter))) {
       Some(thunk)
     } else {
-      log.info("Data Publisher QuarterTimeBarrier, quarterly filing closed for: " + quarter + "\n")
       None
     }
   }
