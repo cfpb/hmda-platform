@@ -13,6 +13,10 @@ object DateGenerator {
     fullDate.format(now)
   }
 
+  def deleteTestBanks = {
+    val delete_test_banks = s"delete ${lei} from modifiedlar2018"
+  }
+
   def currentQuarterlyDate = {
     val now = LocalDateTime.now().minusDays(1)
     fullDateQuarterly.format(now)
