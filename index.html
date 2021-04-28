@@ -272,7 +272,7 @@
 
 <p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/view/aggregations</code> </p>
 
-<p>This endpoint is used to generated JSON reports on an LEI and/or geography subset. The year parameter as well at least of a geographic and/or LEI parameter are required when calling this endpoint.</p>
+<p>This endpoint is used to generated JSON reports on an LEI and/or geography subset. The year filter, along with either a geographic or LEI filter, are required when calling this endpoint.</p>
 
 <ul>
 <li><strong>Nationwide</strong> <strong>CSV</strong></li>
@@ -288,7 +288,7 @@
 
 <p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/view/csv</code></p>
 
-<p>This endpoint is used to download raw HMDA data given the applied filters in csv format. The file will be streamed. The year parameter as well at least of a geographic and/or LEI parameter are required when calling this endpoint.</p>
+<p>This endpoint is used to download raw HMDA data given the applied filters in csv format. The file will be streamed. The year filter, along with either a geographic or LEI filter, are required when calling this endpoint.</p>
 <h3 id='data-browser-hmda-data-endpoints-supported-geographic-filters'>Supported Geographic Filters</h3>
 <table><thead>
 <tr>
@@ -379,7 +379,6 @@ curl "https://ffiec.cfpb.gov/v2/data-browser-api/view/aggregations?states=MD&yea
 
 <b>JSON Response:</b>
 
-  ```json
   {
     "parameters": {
         "state": "MD",
@@ -826,7 +825,6 @@ curl -X GET \
 curl -X POST \
   "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions" \
   -H 'Authorization: Bearer {{access_token}}' \
-```
 
 <b>JSON Response:</b>
 
@@ -1192,7 +1190,6 @@ curl -X POST \
   "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/sequenceNumber/edits/quality" \
   -H 'Authorization: Bearer {{access_token}}' \
   -d '{"verified": true}'
-```
 
 <b>JSON Response:</b>
 
@@ -1748,7 +1745,7 @@ curl -X GET \
   curl -X POST \
   "https://ffiec.cfpb.gov/v2/public/lar/validate/2018" \
   -H 'Content-Type: application/json' \
-  -d '{"lar": ""2|B90YWS6AFX2LGWOXJ1LD|B90YWS6AFX2LGWOXJ1LD0KQ78F1Q02LVT4VCYK1G3D253|20180613|3|2|2|2|3|218910|5|20181031|1234 Hocus Potato Way|Tatertown|NM|14755|35003|35003976400|1|13||11||KE0NW|1|||||NA2IJJ7VBBQ15DTFRNK1PVWOPOXL3NH1PHUMN7S2J4|2|2|7|||||E120FYAU7BTSC3P51IL87C97W3N9VT791BMJI57RLJQSHOFDTUD7PQSPGHQ69D7I2P8JBDCBUIGRLX2BUS7SJR|DOOOI8UXY9PZDSRVFKP91CUQG95E88Y22KDR1AI3|1K1JINAYSIHCWBGJW3KOHU5D5TSK1Z61SUT5M9WQVWOHX|27|24|41|43|2|MS1LKLX7XZRKL23TV01I49RADZGUN0QY5AG9H4BJCVFTA4ZQ1EJUS1376QJXD87ZZDN5EFZIUWB8SK5EU34RVGOVTE|Y083OZN1VFT6B2XGL397ABL0Z4EV4CD45I7ZJ7FRSXXL4BRMKVPR5UCVV0K6IDLP7WLCBZAQ5KXT69PNE9PWQKCPKJB|UV0FTHG00G8WM65I7591IJYP9TEMXMDCVGZYRJTBUBBKEZI65HGL9ML|3|2|2|2|1|1|75|4|NA|0|NA|3|2|8888|8888|9||9||10|||||NA|NA|NA|NA|NA|NA|32|NA|NA|256|29|1111|1111|1111|1111|NA|3|2|16|Exempt|2|2|NA|3|1|5|1||DOREBESQSW1QT58SD2OZTHQUGXLSKCAJYZ63NJE2MUIAFQL4KW6PU26YSU786GT0IMCWWKCN25Y7KU0VLU0PPKWR8G6DKWI9BANPIE9I2ZZ5XDUX0TBAY4XFRFQZF087WS9ESTAKIV5V9HSZ2VXW7J5JMGPP4CGYA51BK68T57NN4KTKJVXIQMFXBTN5E3LGKKX3LITQ4C7OPFJ|7|6|5|5|||1111|2|1111""
+  -d '{"lar": "2|B90YWS6AFX2LGWOXJ1LD|B90YWS6AFX2LGWOXJ1LD0KQ78F1Q02LVT4VCYK1G3D253|20180613|3|2|2|2|3|218910|5|20181031|1234 Hocus Potato Way|Tatertown|NM|14755|35003|35003976400|1|13||11||KE0NW|1|||||NA2IJJ7VBBQ15DTFRNK1PVWOPOXL3NH1PHUMN7S2J4|2|2|7|||||E120FYAU7BTSC3P51IL87C97W3N9VT791BMJI57RLJQSHOFDTUD7PQSPGHQ69D7I2P8JBDCBUIGRLX2BUS7SJR|DOOOI8UXY9PZDSRVFKP91CUQG95E88Y22KDR1AI3|1K1JINAYSIHCWBGJW3KOHU5D5TSK1Z61SUT5M9WQVWOHX|27|24|41|43|2|MS1LKLX7XZRKL23TV01I49RADZGUN0QY5AG9H4BJCVFTA4ZQ1EJUS1376QJXD87ZZDN5EFZIUWB8SK5EU34RVGOVTE|Y083OZN1VFT6B2XGL397ABL0Z4EV4CD45I7ZJ7FRSXXL4BRMKVPR5UCVV0K6IDLP7WLCBZAQ5KXT69PNE9PWQKCPKJB|UV0FTHG00G8WM65I7591IJYP9TEMXMDCVGZYRJTBUBBKEZI65HGL9ML|3|2|2|2|1|1|75|4|NA|0|NA|3|2|8888|8888|9||9||10|||||NA|NA|NA|NA|NA|NA|32|NA|NA|256|29|1111|1111|1111|1111|NA|3|2|16|Exempt|2|2|NA|3|1|5|1||DOREBESQSW1QT58SD2OZTHQUGXLSKCAJYZ63NJE2MUIAFQL4KW6PU26YSU786GT0IMCWWKCN25Y7KU0VLU0PPKWR8G6DKWI9BANPIE9I2ZZ5XDUX0TBAY4XFRFQZF087WS9ESTAKIV5V9HSZ2VXW7J5JMGPP4CGYA51BK68T57NN4KTKJVXIQMFXBTN5E3LGKKX3LITQ4C7OPFJ|7|6|5|5|||1111|2|1111"
 }'
 
 <b>JSON Response</b>
