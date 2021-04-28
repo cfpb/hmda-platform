@@ -336,11 +336,11 @@
 </tr>
 <tr>
 <td>dwelling_categories</td>
-<td>Single Family (1-4 Units):Site-Built<br>Multifamily:Site-Built<br>Single Family (1-4 Units):Manufactured<br>Multifamily:Manufactured</td>
+<td>Single Family (1-4 Units):Site-Built,<br>Multifamily:Site-Built,<br>Single Family (1-4 Units):Manufactured<br>Multifamily:Manufactured</td>
 </tr>
 <tr>
 <td>ethnicities</td>
-<td>Hispanic or Latino<br>Not Hispanic or Latino<br>Joint<br>Ethnicity Not Available<br>Free Form Text Only</td>
+<td>Hispanic or Latino<br>Not Hispanic or Latino,<br>Joint,<br>Ethnicity Not Available,<br>Free Form Text Only</td>
 </tr>
 <tr>
 <td>lien_statuses</td>
@@ -348,7 +348,7 @@
 </tr>
 <tr>
 <td>loan_products</td>
-<td>Conventional:First Lien<br>FHA:First Lien<br>VA:First Lien<br>FSA/RHS:First Lien<br>Conventional:Subordinate Lien<br>FHA:Subordinate Lien<br>VA:Subordinate Lien<br>FSA/RHS:Subordinate Lien</td>
+<td>Conventional:First Lien,<br>FHA:First Lien,<br>VA:First Lien,<br>FSA/RHS:First Lien,<br>Conventional:Subordinate Lien,<br>FHA:Subordinate Lien,<br>VA:Subordinate Lien,<br>FSA/RHS:Subordinate Lien</td>
 </tr>
 <tr>
 <td>loan_purposes</td>
@@ -360,11 +360,11 @@
 </tr>
 <tr>
 <td>races</td>
-<td>Asian<br>Native Hawaiian or Other Pacific Islander<br>Free Form Text Only<br>Race Not Available<br>American Indian or Alaska Native<br>Black or African American<br>2 or more minority races<br>White<br>Joint</td>
+<td>Asian,<br>Native Hawaiian or Other Pacific Islander,<br>Free Form Text Only,<br>Race Not Available,<br>American Indian or Alaska Native,<br>Black or African American,<br>2 or more minority races,<br>White,<br>Joint</td>
 </tr>
 <tr>
 <td>sexes</td>
-<td>Male<br>Female<br>Joint<br>Sex Not Available</td>
+<td>Male,<br>Female,<br>Joint,<br>Sex Not Available</td>
 </tr>
 <tr>
 <td>total_units</td>
@@ -409,7 +409,7 @@ curl "https://ffiec.cfpb.gov/v2/data-browser-api/view/aggregations?states=MD&yea
 }
 </pre>
 
-<p>Get an aggregation, in JSON format, of HMDA Data reported in 2018 in Maryland, with action takens 5, <code>File closed for incompleteness</code>, or 6, <code>Purchased loan</code>, where the reported race was Asian.</p>
+<p>Get an aggregation, in JSON format, of HMDA Data reported in 2018 in Maryland, with action takens <code>5 - File closed for incompleteness</code>, or <code>6 - Purchased loan</code>, where the reported race was Asian.</p>
 
 <p><code>GET</code> JSON with the following parameters</p>
 
@@ -451,7 +451,7 @@ curl -L "https://ffiec.cfpb.gov/v2/data-browser-api/view/csv?states=CA,MD,DC&yea
 <img src="images/DataBrowserCsvExample.png">
 </pre>
 
-<p>Get a CSV containing all HMDA data reported in 2018 in California, Maryland, or DC, with action taken 5, <code>File closed for incompleteness</code>.</p>
+<p>Get a CSV containing all HMDA data reported in 2018 in California, Maryland, or DC, with action taken <code>5 - File closed for incompleteness</code>.</p>
 
 <p><code>GET</code> CSV file with the following parameters</p>
 
