@@ -39,6 +39,9 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
       case "2020-Q1" => "ts2020_q1"
       case "2020-Q2" => "ts2020_q2"
       case "2020-Q3" => "ts2020_q3"
+      case "2021-Q1" => "ts2021_q1"
+      case "2021-Q2" => "ts2021_q2"
+      case "2021-Q3" => "ts2021_q3"
       case _    => ""
     }
   }
@@ -68,6 +71,9 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
       case ("2020-Q1","") => "lar2020_q1"
       case ("2020-Q2","") => "lar2020_q2"
       case ("2020-Q3","") => "lar2020_q3"
+      case ("2021-Q1","") => "lar2021_q1"
+      case ("2021-Q2","") => "lar2021_q2"
+      case ("2021-Q3","") => "lar2021_q3"
       case _    => ""
     }
   }
