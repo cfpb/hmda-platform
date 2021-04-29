@@ -164,33 +164,55 @@ object PublishingReporter {
 
   sealed trait ScheduleGroupId
   object ScheduleGroupId {
-    case object y2018          extends ScheduleGroupId
-    case object y2019          extends ScheduleGroupId
-    case object y2020          extends ScheduleGroupId
-    case object y2020Quarterly extends ScheduleGroupId
-    case object y2021Quarterly extends ScheduleGroupId
+    case object PanelScheduler2018Id          extends ScheduleGroupId
+    case object PanelScheduler2019Id          extends ScheduleGroupId
+    case object PanelScheduler2020Id          extends ScheduleGroupId
+    case object LarScheduler2018Id            extends ScheduleGroupId
+    case object LarPublicScheduler2018Id      extends ScheduleGroupId
+
+    case object LarPublicScheduler2019Id          extends ScheduleGroupId
+    case object LarScheduler2019Id          extends ScheduleGroupId
+    case object LarScheduler2020Id          extends ScheduleGroupId
+    case object LarSchedulerLoanLimit2019Id extends ScheduleGroupId
+    case object LarSchedulerLoanLimit2020Id extends ScheduleGroupId
+
+    case object TsScheduler2018Id          extends ScheduleGroupId
+    case object TsPublicScheduler2018Id          extends ScheduleGroupId
+    case object TsPublicScheduler2019Id          extends ScheduleGroupId
+    case object TsScheduler2019Id extends ScheduleGroupId
+    case object TsScheduler2020Id extends ScheduleGroupId
+
+    case object LarSchedulerQuarterly2020Id          extends ScheduleGroupId
+    case object TsSchedulerQuarterly2020Id          extends ScheduleGroupId
+    case object LarSchedulerQuarterly2021Id          extends ScheduleGroupId
+    case object TsSchedulerQuarterly2021Id extends ScheduleGroupId
+
 
 
     def forSchedule(s: Schedule): ScheduleGroupId = s match {
-      case Schedules.PanelScheduler2018        => y2018
-      case Schedules.PanelScheduler2019        => y2019
-      case Schedules.PanelScheduler2020        => y2020
-      case Schedules.LarScheduler2018          => y2018
-      case Schedules.LarPublicScheduler2018    => y2018
-      case Schedules.LarPublicScheduler2019    => y2019
-      case Schedules.LarScheduler2019          => y2019
-      case Schedules.LarScheduler2020          => y2020
-      case Schedules.LarSchedulerLoanLimit2019 => y2019
-      case Schedules.LarSchedulerLoanLimit2020 => y2020
-      case Schedules.TsScheduler2018           => y2018
-      case Schedules.TsPublicScheduler2018     => y2018
-      case Schedules.TsPublicScheduler2019     => y2019
-      case Schedules.TsScheduler2019           => y2019
-      case Schedules.TsScheduler2020           => y2020
-      case Schedules.LarSchedulerQuarterly2020 => y2020Quarterly
-      case Schedules.TsSchedulerQuarterly2020  => y2020Quarterly
-      case Schedules.LarSchedulerQuarterly2021 => y2021Quarterly
-      case Schedules.TsSchedulerQuarterly2021  => y2021Quarterly
+
+      case Schedules.PanelScheduler2018        => PanelScheduler2018Id
+      case Schedules.PanelScheduler2019        => PanelScheduler2019Id
+      case Schedules.PanelScheduler2020        => PanelScheduler2020Id
+      case Schedules.LarScheduler2018          => LarScheduler2018Id
+      case Schedules.LarPublicScheduler2018    => LarPublicScheduler2018Id
+
+      case Schedules.LarPublicScheduler2019    => LarPublicScheduler2019Id
+      case Schedules.LarScheduler2019          => LarScheduler2019Id
+      case Schedules.LarScheduler2020          => LarScheduler2020Id
+      case Schedules.LarSchedulerLoanLimit2019 => LarSchedulerLoanLimit2019Id
+      case Schedules.LarSchedulerLoanLimit2020 => LarSchedulerLoanLimit2020Id
+
+      case Schedules.TsScheduler2018           => TsScheduler2018Id
+      case Schedules.TsPublicScheduler2018     => TsPublicScheduler2018Id
+      case Schedules.TsPublicScheduler2019     => TsPublicScheduler2019Id
+      case Schedules.TsScheduler2019           => TsScheduler2019Id
+      case Schedules.TsScheduler2020           => TsScheduler2020Id
+
+      case Schedules.LarSchedulerQuarterly2020 => LarSchedulerQuarterly2020Id
+      case Schedules.TsSchedulerQuarterly2020  => TsSchedulerQuarterly2020Id
+      case Schedules.LarSchedulerQuarterly2021 => LarSchedulerQuarterly2021Id
+      case Schedules.TsSchedulerQuarterly2021  => TsSchedulerQuarterly2021Id
     }
   }
 
