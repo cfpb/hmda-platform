@@ -1,7 +1,8 @@
 package hmda.dataBrowser.api
 
 import akka.http.scaladsl.model.ContentTypes._
-import akka.http.scaladsl.model.{ HttpEntity, StatusCodes, Uri }
+import akka.http.scaladsl.model.headers.RawHeader
+import akka.http.scaladsl.model.{HttpEntity, StatusCodes, Uri}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.RouteDirectives.complete
@@ -14,7 +15,7 @@ import hmda.dataBrowser.services._
 import monix.execution.Scheduler.Implicits.global
 import org.slf4j.Logger
 
-import scala.util.{ Failure, Success }
+import scala.util.{Failure, Success}
 
 object DataBrowserHttpApi {
   def create(log: Logger, fileCache: S3FileService, query: QueryService, healthCheck: HealthCheckService)(
@@ -119,20 +120,20 @@ private class DataBrowserHttpApi(log: Logger, fileCache: S3FileService, query: Q
           } ~
           // GET /view/aggregations
           (path(Aggregations) & get) {
-            extractMsaAndStateAndCountyAndInstitutionIdentifierBrowserFields { mandatoryFields =>
-              log.info("Aggregations: " + mandatoryFields)
-              extractFieldsForAggregation(mandatoryFields.year) { remainingQueryFields =>
-                val allFields = QueryFields(mandatoryFields.year, mandatoryFields.queryFields ++ remainingQueryFields.queryFields)
+              extractMsaAndStateAndCountyAndInstitutionIdentifierBrowserFields { mandatoryFields =>
+                log.info("Aggregations: " + mandatoryFields)
+                extractFieldsForAggregation(mandatoryFields.year) { remainingQueryFields =>
+                  val allFields = QueryFields(mandatoryFields.year, mandatoryFields.queryFields ++ remainingQueryFields.queryFields)
 
-                complete(
-                  query
-                    .fetchAggregate(allFields)
-                    .map { case (from, aggs) => AggregationResponse(Parameters.fromBrowserFields(allFields.queryFields), aggs, from) }
-                    .runToFuture
-                )
+                  complete(
+                    query
+                      .fetchAggregate(allFields)
+                      .map { case (from, aggs) => AggregationResponse(Parameters.fromBrowserFields(allFields.queryFields), aggs, from) }
+                      .runToFuture
+                  )
+                }
               }
-            }
-          } ~
+            } ~
           // GET /view/csv
           (path(Csv) & get) {
             extractMsaAndStateAndCountyAndInstitutionIdentifierBrowserFields { mandatoryFields =>
