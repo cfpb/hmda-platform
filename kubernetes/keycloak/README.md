@@ -28,4 +28,4 @@ keycloak codecentric/keycloak
 
 Then add the Ambassador Service YAML:
 
-`kubectl apply -f keycloak-ambassador.yaml`
+`kubectl apply -f kubernetes/keycloak/keycloak-ambassador.yaml`
