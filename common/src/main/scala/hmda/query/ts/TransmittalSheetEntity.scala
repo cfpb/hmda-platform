@@ -41,6 +41,10 @@ case class TransmittalSheetEntity(
     s"$year|$quarter|$lei|$taxId|$agency|" +
       s"$institutionName|$state|$city|$zipCode|$totalLines"
 
+  def toPublicCSV: String =
+    s"$year,$quarter,$lei,$taxId,$agency," +
+      s"${escapeCommas(institutionName)},$state,$city,$zipCode,$totalLines"
+
 }
 
 object TransmittalSheetEntity {

@@ -73,6 +73,11 @@ trait ColumnDataFormatter {
     } else {
       value
     }
+
+  // on conversion of institution names to CSV, we must wrap names that include commas to avoid parsing issues in double quotes
+  def escapeCommas(value: String): String = (s""""$value"""")
+
+
   def validNum(str: String): Boolean =
     !throwsNFE(BigDecimal(str).bigDecimal.toPlainString)
 

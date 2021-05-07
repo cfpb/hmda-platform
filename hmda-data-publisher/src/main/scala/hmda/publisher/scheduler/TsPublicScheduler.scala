@@ -11,7 +11,7 @@ import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.actor.HmdaActor
 import hmda.publisher.helper.{PrivateAWSConfigLoader, PublicAWSConfigLoader, S3Archiver, S3Utils, SnapshotCheck, TSHeader}
 import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021}
-import hmda.publisher.scheduler.schedules.Schedules.{TsPublicScheduler2018, TsPublicScheduler2019}
+import hmda.publisher.scheduler.schedules.Schedules.{TsPublicScheduler2018, TsPublicScheduler2019, TsPublicScheduler2020}
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.ts._
 import hmda.util.BankFilterUtils._
@@ -43,9 +43,12 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
   implicit val materializer            = Materializer(context)
   def tsRepository2018                 = new TransmittalSheetRepository2018(dbConfig)
   def tsRepository2019                 = new TransmittalSheetRepository2019(dbConfig)
+  def tsRepository2020                 = createTransmittalSheetRepository2020(dbConfig, Year2020Period.Whole)
+
   val publishingGuard: PublishingGuard = PublishingGuard.create(this)(context.system)
   val qaRepo2018                       = createPublicQaTsRepository2018(dbConfig)
   val qaRepo2019                       = createPublicQaTsRepository2019(dbConfig)
+  def qaRepo2020               = createQaTransmittalSheetRepository2020(dbConfig,Year2020Period.Whole)
 
   val s3Settings =
     S3Settings(context.system)
@@ -60,11 +63,15 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
 
     QuartzSchedulerExtension(context.system)
       .schedule("TsPublicScheduler2019", self, TsPublicScheduler2019)
+    QuartzSchedulerExtension(context.system)
+      .schedule("TsPublicScheduler2020", self, TsPublicScheduler2020)
   }
 
   override def postStop(): Unit = {
     QuartzSchedulerExtension(context.system).cancelJob("TsPublicScheduler2018")
     QuartzSchedulerExtension(context.system).cancelJob("TsPublicScheduler2019")
+    QuartzSchedulerExtension(context.system).cancelJob("TsPublicScheduler2020")
+
   }
   override def receive: Receive = {
 
@@ -91,6 +98,18 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
         val result = tsPublicStream("2019", bucket, fullFilePath, fileName, schedule)
         //result.foreach(r => persistFileForQa(r.key, r.bucket, qaRepo2019))
       }
+
+    case schedule @ TsPublicScheduler2020 =>
+      publishingGuard.runIfDataIsValid(Period.y2020, Scope.Public) {
+        val fileName         = "2020_ts.txt"
+        val zipDirectoryName = "2020_ts.zip"
+        val s3Path           = s"$environmentPublic/dynamic-data/2019/"
+        val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
+        val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
+
+        val result = tsPublicStream("2020", bucket, fullFilePath, fileName, schedule)
+        //result.foreach(r => persistFileForQa(r.key, r.bucket, qaRepo2020))
+      }
   }
   private def tsPublicStream(
                               year: String,
@@ -107,6 +126,7 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
       year match {
         case "2018" => tsRepository2018.getAllSheets(getFilterList())
         case "2019" => tsRepository2019.getAllSheets(getFilterList())
+        case "2020" => tsRepository2020.getAllSheets(getFilterList())
         case _      => throw new IllegalArgumentException(s"Unknown year selector value:  [$year]")
 
       }
