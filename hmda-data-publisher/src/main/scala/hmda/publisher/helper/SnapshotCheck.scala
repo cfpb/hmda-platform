@@ -11,7 +11,18 @@ object SnapshotCheck {
 
 
   def pathSelector(s3Path: String,fileName:String): String = {
-      snapshotPath+fileName
+    if(snapshotActive){
+      if (fileName.takeRight(3) == "zip"){
+        val snapshotFile=fileName.replace(".zip","_snapshot.zip")
+        snapshotPath+snapshotFile
+      }
+      else{
+        val snapshotFile=fileName.replace(".txt","_snapshot.txt")
+        snapshotPath+snapshotFile
+      }
+    }else{
+      s3Path+fileName
+    }
   }
 }
 // $COVERAGE-ON$
