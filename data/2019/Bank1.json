@@ -4,13 +4,13 @@
     "agency": 9,
     "institutionType": -1,
     "institutionId2017": "",
-    "taxId": "02-1234567",
+    "taxId": "01-0123456",
     "rssd": -1,
     "emailDomains": [
         "bank1.com"
     ],
     "respondent": {
-        "name": "Bank 1",
+        "name": "Bank 0",
         "state": "",
         "city": ""
     },
@@ -24,5 +24,9 @@
         "idRssd": -1,
         "name": ""
     },
-    "hmdaFiler": false
+    "hmdaFiler": false,
+    "quarterlyFiler": true,
+    "quarterlyFilerHasFiledQ1": false,
+    "quarterlyFilerHasFiledQ2": false,
+    "quarterlyFilerHasFiledQ3": false
 }
