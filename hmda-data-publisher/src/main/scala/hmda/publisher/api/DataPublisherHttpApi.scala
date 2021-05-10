@@ -38,6 +38,7 @@ private class DataPublisherHttpApi(
       case Schedules.PanelScheduler2020        => panelScheduler
       case Schedules.LarPublicScheduler2018    => larPublicScheduler
       case Schedules.LarPublicScheduler2019    => larPublicScheduler
+      case Schedules.LarPublicScheduler2020    => larPublicScheduler
       case Schedules.LarScheduler2018          => larScheduler
       case Schedules.LarScheduler2019          => larScheduler
       case Schedules.LarScheduler2020          => larScheduler
@@ -47,6 +48,7 @@ private class DataPublisherHttpApi(
       case Schedules.LarSchedulerQuarterly2021 => larScheduler
       case Schedules.TsPublicScheduler2018     => tsPublicScheduler
       case Schedules.TsPublicScheduler2019     => tsPublicScheduler
+      case Schedules.TsPublicScheduler2020     => tsPublicScheduler
       case Schedules.TsScheduler2018           => tsScheduler
       case Schedules.TsScheduler2019           => tsScheduler
       case Schedules.TsScheduler2020           => tsScheduler

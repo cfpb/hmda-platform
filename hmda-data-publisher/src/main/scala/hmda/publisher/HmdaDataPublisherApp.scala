@@ -50,7 +50,7 @@ object HmdaDataPublisherApp extends App with PGTableNameLoader {
 
   val mattermostNotifier = new MattermostNotifier(config.getString("hmda.publisher.validation.reportingUrl"))
   val publishingReporter = {
-    val groupReportingTimeout = 3.minutes // TODO move to config
+    val groupReportingTimeout = 1.minutes // TODO move to config
     actorSystem.spawn(PublishingReporter(mattermostNotifier, groupReportingTimeout), "PublishingReporter")
   }
   val qaFilePersistor = new QAFilePersistor(mattermostNotifier)

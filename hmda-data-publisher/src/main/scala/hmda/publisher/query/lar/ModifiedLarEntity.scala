@@ -39,6 +39,12 @@ case class ModifiedLarPartOne(
       s"${extractOpt(raceCategorization)}|${extractOpt(sexCategorization)}|${extractOpt(actionTakenType)}|${extractOpt(purchaserType)}|" +
       s"${extractOpt(preapproval)}|${extractOpt(loanType)}|${extractOpt(loanPurpose)}|${extractOpt(lienStatus)}|"
 
+  def toPublicCSV: String =
+    s"${extractOpt(filingYear)},$lei,${extractOpt(msaMd)},${extractOpt(state)},${extractOpt(county)}," +
+      s"${extractOpt(tract)},${extractOpt(conformingLoanLimit)},${extractOpt(loanProductType)},${extractOpt(dwellingCategory)},${extractOpt(ethnicityCategorization)}," +
+      s"${extractOpt(raceCategorization)},${extractOpt(sexCategorization)},${extractOpt(actionTakenType)},${extractOpt(purchaserType)}," +
+      s"${extractOpt(preapproval)},${extractOpt(loanType)},${extractOpt(loanPurpose)},${extractOpt(lienStatus)},"
+
 }
 object ModifiedLarPartOne extends PsvParsingCompanion[ModifiedLarPartOne] {
   override val psvReader: cormorant.Read[ModifiedLarPartOne] = { (a: CSV.Row) =>
@@ -120,6 +126,14 @@ case class ModifiedLarPartTwo(
       s"${extractOpt(lenderCredits)}|${extractOpt(loanTerm)}|${extractOpt(paymentPenalty)}|${extractOpt(rateSpreadIntro)}" +
       s"|${extractOpt(amortization)}|${extractOpt(insertOnlyPayment)}|"
 
+  def toPublicCSV: String =
+    s"${extractOpt(reverseMortgage)},${extractOpt(lineOfCredits)},${extractOpt(businessOrCommercial)}," +
+      BigDecimal.valueOf(loanAmount).bigDecimal.toPlainString +
+      s",${extractOpt(loanValueRatio)},${extractOpt(interestRate)},${extractOpt(rateSpread)},${extractOpt(hoepaStatus)}," +
+      s"${extractOpt(totalLoanCosts)},${extractOpt(totalPoints)},${extractOpt(originationCharges)},${extractOpt(discountPoints)}," +
+      s"${extractOpt(lenderCredits)},${extractOpt(loanTerm)},${extractOpt(paymentPenalty)},${extractOpt(rateSpreadIntro)}" +
+      s",${extractOpt(amortization)},${extractOpt(insertOnlyPayment)},"
+
 }
 object ModifiedLarPartTwo extends PsvParsingCompanion[ModifiedLarPartTwo] {
   override val psvReader: cormorant.Read[ModifiedLarPartTwo] = cormorant.generic.semiauto.deriveRead
@@ -155,6 +169,16 @@ case class ModifiedLarPartThree(
       s"${extractOpt(creditScoreTypeCoApplicant)}|${extractOpt(ethnicityApplicant1)}|${extractOpt(ethnicityApplicant2)}" +
       s"|${extractOpt(ethnicityApplicant3)}|${extractOpt(ethnicityApplicant4)}|"
 
+  def toPublicCSV: String =
+    s"${extractOpt(baloonPayment)}," +
+      s"${extractOpt(otherAmortization)}," +
+      toBigDecimalString(propertyValue) + "," +
+      s"${extractOpt(constructionMethod)},${extractOpt(occupancyType)}," +
+      s"${extractOpt(homeSecurityPolicy)},${extractOpt(landPropertyInterest)},${extractOpt(totalUnits)},${extractOpt(mfAffordable)}," +
+      s"${extractOpt(income)},${extractOpt(debtToIncome)},${extractOpt(creditScoreTypeApplicant)}," +
+      s"${extractOpt(creditScoreTypeCoApplicant)},${extractOpt(ethnicityApplicant1)},${extractOpt(ethnicityApplicant2)}" +
+      s",${extractOpt(ethnicityApplicant3)},${extractOpt(ethnicityApplicant4)},"
+
 }
 object ModifiedLarPartThree extends PsvParsingCompanion[ModifiedLarPartThree] {
   override val psvReader: cormorant.Read[ModifiedLarPartThree] = cormorant.generic.semiauto.deriveRead
@@ -186,6 +210,13 @@ case class ModifiedLarPartFour(
       s"${extractOpt(raceApplicant1)}|${extractOpt(raceApplicant2)}|" +
       s"${extractOpt(raceApplicant3)}|${extractOpt(raceApplicant4)}|${extractOpt(raceApplicant5)}|${extractOpt(raceCoApplicant1)}|" +
       s"${extractOpt(raceCoApplicant2)}|${extractOpt(raceCoApplicant3)}|${extractOpt(raceCoApplicant4)}|"
+
+  def toPublicCSV: String =
+    s"${extractOpt(ethnicityApplicant5)},${extractOpt(ethnicityCoApplicant1)},${extractOpt(ethnicityCoApplicant2)},${extractOpt(ethnicityCoApplicant3)}," +
+      s"${extractOpt(ethnicityCoApplicant4)},${extractOpt(ethnicityCoApplicant5)},${extractOpt(ethnicityObservedApplicant)},${extractOpt(ethnicityObservedCoApplicant)}," +
+      s"${extractOpt(raceApplicant1)},${extractOpt(raceApplicant2)}," +
+      s"${extractOpt(raceApplicant3)},${extractOpt(raceApplicant4)},${extractOpt(raceApplicant5)},${extractOpt(raceCoApplicant1)}," +
+      s"${extractOpt(raceCoApplicant2)},${extractOpt(raceCoApplicant3)},${extractOpt(raceCoApplicant4)},"
 
 }
 object ModifiedLarPartFour extends PsvParsingCompanion[ModifiedLarPartFour] {
@@ -219,6 +250,13 @@ case class ModifiedLarPartFive(
       s"${extractOpt(ageApplicant)}|${extractOpt(ageCoApplicant)}|${extractOpt(applicantAgeGreaterThan62)}|${extractOpt(coapplicantAgeGreaterThan62)}|${extractOpt(applicationSubmission)}|" +
       s"${extractOpt(payable)}|${extractOpt(aus1)}|${extractOpt(aus2)}|${extractOpt(aus3)}|${extractOpt(aus4)}|"
 
+  def toPublicCSV: String =
+    s"${extractOpt(raceCoApplicant5)},${extractOpt(raceObservedApplicant)},${extractOpt(raceObservedCoApplicant)},${extractOpt(sexApplicant)},${extractOpt(
+      sexCoApplicant
+    )},${extractOpt(observedSexApplicant)},${extractOpt(observedSexCoApplicant)}," +
+      s"${extractOpt(ageApplicant)},${extractOpt(ageCoApplicant)},${extractOpt(applicantAgeGreaterThan62)},${extractOpt(coapplicantAgeGreaterThan62)},${extractOpt(applicationSubmission)}," +
+      s"${extractOpt(payable)},${extractOpt(aus1)},${extractOpt(aus2)},${extractOpt(aus3)},${extractOpt(aus4)},"
+
 }
 object ModifiedLarPartFive extends PsvParsingCompanion[ModifiedLarPartFive] {
   override val psvReader: cormorant.Read[ModifiedLarPartFive] = cormorant.generic.semiauto.deriveRead
@@ -245,6 +283,12 @@ case class ModifiedLarPartSix(
       s"${extractOpt(minorityPopulationPercent)}|${extractOpt(ffiecMedFamIncome)}|${extractOpt(medianIncomePercentage)}|" +
       s"${extractOpt(ownerOccupiedUnits)}|${extractOpt(oneToFourFamUnits)}|${extractOpt(medianAge)}"
 
+  def toPublicCSV: String =
+    s"${extractOpt(aus5)}," +
+      s"${extractOpt(denialReason1)},${extractOpt(denialReason2)},${extractOpt(denialReason3)},${extractOpt(denialReason4)},${extractOpt(population)}," +
+      s"${extractOpt(minorityPopulationPercent)},${extractOpt(ffiecMedFamIncome)},${extractOpt(medianIncomePercentage)}," +
+      s"${extractOpt(ownerOccupiedUnits)},${extractOpt(oneToFourFamUnits)},${extractOpt(medianAge)}"
+
 }
 object ModifiedLarPartSix extends PsvParsingCompanion[ModifiedLarPartSix] {
   override val psvReader: cormorant.Read[ModifiedLarPartSix] = cormorant.generic.semiauto.deriveRead
@@ -266,6 +310,14 @@ case class ModifiedLarEntityImpl(
       mlarPartFour.toPublicPSV +
       mlarPartFive.toPublicPSV +
       mlarPartSix.toPublicPSV).replaceAll("(\r\n)|\r|\n", "")
+
+  def toPublicCSV: String =
+    (mlarPartOne.toPublicCSV +
+      mlarPartTwo.toPublicCSV +
+      mlarPartThree.toPublicCSV +
+      mlarPartFour.toPublicCSV +
+      mlarPartFive.toPublicCSV +
+      mlarPartSix.toPublicCSV).replaceAll("(\r\n)|\r|\n", "")
 
 }
 

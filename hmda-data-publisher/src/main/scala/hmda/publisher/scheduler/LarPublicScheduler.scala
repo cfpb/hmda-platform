@@ -18,7 +18,7 @@ import hmda.publisher.qa.{QAFilePersistor, QAFileSpec, QARepository}
 import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021}
 import hmda.publisher.query.lar.ModifiedLarEntityImpl
 import hmda.publisher.scheduler.schedules.Schedule
-import hmda.publisher.scheduler.schedules.Schedules.{LarPublicScheduler2018, LarPublicScheduler2019}
+import hmda.publisher.scheduler.schedules.Schedules.{LarPublicScheduler2018, LarPublicScheduler2019, LarPublicScheduler2020}
 import hmda.publisher.util.PublishingReporter
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 import hmda.publisher.validation.PublishingGuard
@@ -48,6 +48,9 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
   def qaMlarRepository2018               = new QAModifiedLarRepository2018(dbConfig)
   def mlarRepository2019               = new ModifiedLarRepository2019(dbConfig)
   def qaMlarRepository2019              = new QAModifiedLarRepository2019(dbConfig)
+  def mlarRepository2020               = new ModifiedLarRepository2020(dbConfig)
+  def qaMlarRepository2020              = new QAModifiedLarRepository2020(dbConfig)
+
   val publishingGuard: PublishingGuard = PublishingGuard.create(this)(context.system)
 
   val s3Settings = S3Settings(context.system)
@@ -61,10 +64,14 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
       .schedule("LarPublicScheduler2018", self, LarPublicScheduler2018)
     QuartzSchedulerExtension(context.system)
       .schedule("LarPublicScheduler2019", self, LarPublicScheduler2019)
+    QuartzSchedulerExtension(context.system)
+      .schedule("LarPublicScheduler2020", self, LarPublicScheduler2020)
   }
   override def postStop(): Unit = {
     QuartzSchedulerExtension(context.system).cancelJob("LarPublicScheduler2018")
     QuartzSchedulerExtension(context.system).cancelJob("LarPublicScheduler2019")
+    QuartzSchedulerExtension(context.system).cancelJob("LarPublicScheduler2020")
+
   }
   override def receive: Receive = {
     case schedule @ LarPublicScheduler2018 =>
@@ -94,6 +101,21 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
         for {
           result <- larPublicStream(mlarRepository2019.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, schedule)
          // _ <- persistFileForQa(result.key, result.bucket, ModifiedLarEntityImpl.parseFromPSVUnsafe, qaMlarRepository2019)
+        } yield ()
+      }
+
+
+    case schedule @ LarPublicScheduler2020 =>
+      publishingGuard.runIfDataIsValid(Period.y2020, Scope.Public) {
+        val fileName         = "2020_lar.txt"
+        val zipDirectoryName = "2020_lar.zip"
+        val s3Path           = s"$environmentPublic/dynamic-data/2020/"
+        val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
+        val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
+
+        for {
+          result <- larPublicStream(mlarRepository2020.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, schedule)
+          // _ <- persistFileForQa(result.key, result.bucket, ModifiedLarEntityImpl.parseFromPSVUnsafe, qaMlarRepository2020)
         } yield ()
       }
   }
