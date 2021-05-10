@@ -7,7 +7,7 @@
     "taxId": "01-0123456",
     "rssd": -1,
     "emailDomains": [
-        "bank0.com"
+        "bank1.com"
     ],
     "respondent": {
         "name": "Bank 0",
@@ -24,5 +24,9 @@
         "idRssd": -1,
         "name": ""
     },
-    "hmdaFiler": false
+    "hmdaFiler": false,
+    "quarterlyFiler": true,
+    "quarterlyFilerHasFiledQ1": false,
+    "quarterlyFilerHasFiledQ2": false,
+    "quarterlyFilerHasFiledQ3": false
 }
