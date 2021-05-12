@@ -11,7 +11,6 @@ echo "CASSANDRA_CLUSTER_HOSTS: $CASSANDRA_CLUSTER_HOSTS"
 if [ "$TRAVIS_BRANCH" == "master" ] && [ -z "${TRAVIS_PULL_REQUEST_BRANCH}" ] ; then
     echo "Pushing master branch to latest tag on Docker Hub"
     docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
-    sbt -batch hmda-platform/docker:publishLocal
     docker tag hmda/hmda-platform:latest hmda/hmda-platform:latest
     docker push hmda/hmda-platform:latest
 fi
