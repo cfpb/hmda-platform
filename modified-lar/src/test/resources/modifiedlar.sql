@@ -1,4 +1,4 @@
-CREATE TABLE modifiedlar2019 (
+CREATE TABLE modifiedlar2019_qa_trial (
                                            id integer NOT NULL,
                                            uli character varying not null,
                                            lei character varying NOT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE modifiedlar2019 (
                                            preapproval integer,
                                            construction_method character varying,
                                            occupancy_type integer,
-                                           loan_amount numeric,
+                                           loan_amount character varying,
                                            action_taken_type integer,
                                            state character varying,
                                            county character varying,
@@ -110,7 +110,7 @@ CREATE TABLE modifiedlar2019 (
                                            checksum character varying
 );
 
-CREATE TABLE modifiedlar2018 (
+CREATE TABLE modifiedlar2018_qa_trial (
                                            id integer NOT NULL,
                                            uli character varying not null,
                                            lei character varying NOT NULL,
@@ -119,7 +119,7 @@ CREATE TABLE modifiedlar2018 (
                                            preapproval integer,
                                            construction_method character varying,
                                            occupancy_type integer,
-                                           loan_amount numeric,
+                                           loan_amount character varying,
                                            action_taken_type integer,
                                            state character varying,
                                            county character varying,

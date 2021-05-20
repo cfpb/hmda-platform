@@ -17,7 +17,7 @@ case class ModifiedLoanApplicationRegister(
                                             preapproval: Int,
                                             constructionMethod: Int,
                                             occupancy: Int,
-                                            loanAmount: Int,
+                                            loanAmount: String,
                                             actionTakenType: Int,
                                             actionTakenDate: Int,
                                             state: String,
@@ -106,7 +106,7 @@ case class ModifiedLoanApplicationRegister(
   with ColumnDataFormatter {
   override def toCSV: String =
     (s"$year|$lei|$loanType|$loanPurpose|$preapproval|$constructionMethod|$occupancy|" +
-      BigDecimal.valueOf(loanAmount).bigDecimal.toPlainString +
+      loanAmount +
       s"|" +
       s"$actionTakenType|$state|$county|$tract|$ethnicity1|" +
       s"$ethnicity2|" +

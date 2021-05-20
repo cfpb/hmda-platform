@@ -2,13 +2,15 @@ package hmda.publication.lar.parser
 
 import hmda.model.filing.lar._
 import Math._
-import com.typesafe.config.ConfigFactory
 
+import com.typesafe.config.ConfigFactory
 import hmda.model.modifiedlar.ModifiedLoanApplicationRegister
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.model.census.CountyLoanLimit
 import hmda.census.records.CountyLoanLimitRecords._
 import hmda.parser.derivedFields._
+
+import scala.math.BigDecimal.RoundingMode
 
 object ModifiedLarCsvParser {
   val config = ConfigFactory.load()
@@ -58,7 +60,7 @@ object ModifiedLarCsvParser {
       lar.action.preapproval.code,
       lar.loan.constructionMethod.code,
       lar.loan.occupancy.code,
-      roundToMidPoint(lar.loan.amount.toInt),
+      roundToBigIntMidPoint(lar.loan.amount),
       lar.action.actionTakenType.code,
       lar.action.actionTakenDate,
       lar.geography.state,
@@ -211,6 +213,11 @@ object ModifiedLarCsvParser {
   private def roundToMidPoint(x: Int): Int = {
     val rounded = 10000 * Math.floor(x / 10000) + 5000
     rounded.toDouble.toInt
+  }
+
+  private def roundToBigIntMidPoint(x: BigDecimal): String = {
+    val rounded = 10000 * (x/10000).setScale(2, RoundingMode.FLOOR)  + 5000
+    rounded.toBigInt.toString
   }
 
   private def getcountyLoanLimitsByCounty(year: Int) = {

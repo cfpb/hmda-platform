@@ -24,7 +24,7 @@ case class ModifiedLarEntity(
     reverseMortgage: Int,
     lineOfCredits: Int,
     businessOrCommercial: Int,
-    loanAmount: Double,
+    loanAmount: BigInt,
     loanValueRatio: String,
     interestRate: String,
     rateSpread: String,
