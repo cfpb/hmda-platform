@@ -173,9 +173,8 @@ object ModifiedLarPublisher {
               val graphWithJustS3WithHeader = mlarSource.via(serializeMlar).prepend(mlarHeader).toMat(s3SinkWithHeader)(Keep.right)
 
               val finalResult: Future[Unit] = for {
-                _ <- if (regenerateMlar) {
+                _ <- if (regenerateMlar)
                   graphWithS3AndPG.run()
-                }
                 else if (isGenerateBothS3Files) {
                   removeLei
                   graphWithS3AndPG.run()
