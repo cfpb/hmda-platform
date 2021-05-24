@@ -1,6 +1,7 @@
 import Dependencies._
 import BuildSettings._
 import sbtassembly.AssemblyPlugin.autoImport.assemblyMergeStrategy
+import com.typesafe.sbt.packager.docker._
 
 lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson, embeddedPg, embeddedPgSupport, apacheCommonsIO, s3Mock)
 
@@ -56,7 +57,12 @@ lazy val slickDeps = Seq(slick, slickHikariCP, postgres, h2)
 lazy val dockerSettings = Seq(
   Docker / maintainer := "Hmda-Ops",
   dockerBaseImage := "openjdk:17-jdk-alpine3.12",
-  dockerRepository := Some("hmda")
+  dockerRepository := Some("hmda"),
+  dockerCommands := dockerCommands.value.flatMap {
+              case cmd@Cmd("FROM",_) => List(cmd, Cmd("RUN", "apk update && apk upgrade "),
+                  Cmd("RUN", "rm /var/cache/apk/*"))
+              case other => List(other)
+                        }
 )
 
 lazy val packageSettings = Seq(
