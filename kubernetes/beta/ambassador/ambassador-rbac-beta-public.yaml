@@ -257,7 +257,7 @@ spec:
     categories:
     - ambassador-crds
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ambassador
@@ -287,7 +287,7 @@ spec:
       serviceAccountName: ambassador-beta
       containers:
       - name: ambassador
-        image: quay.io/datawire/ambassador:1.0.0
+        image: quay.io/datawire/ambassador:1.13.3
         resources:
           limits:
             cpu: 1

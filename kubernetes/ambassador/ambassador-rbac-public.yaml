@@ -288,7 +288,7 @@ spec:
       serviceAccountName: ambassador
       containers:
       - name: ambassador
-        image: quay.io/datawire/ambassador:1.0.0
+        image: quay.io/datawire/ambassador:1.13.3
         resources:
           limits:
             cpu: 1
