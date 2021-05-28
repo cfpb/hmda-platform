@@ -142,6 +142,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
       },
+      envVars in reStart ++= Map("CASSANDRA_CLUSTER_HOSTS" -> "localhost", "APP_PORT" -> "2551"),
       addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full)
     ),
     dockerSettings,

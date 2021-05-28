@@ -1,4 +1,4 @@
-CREATE TABLE modifiedlar2019_qa_trial (
+CREATE TABLE modifiedlar2019 (
                                            id integer NOT NULL,
                                            uli character varying not null,
                                            lei character varying NOT NULL,
@@ -110,7 +110,7 @@ CREATE TABLE modifiedlar2019_qa_trial (
                                            checksum character varying
 );
 
-CREATE TABLE modifiedlar2018_qa_trial (
+CREATE TABLE modifiedlar2018 (
                                            id integer NOT NULL,
                                            uli character varying not null,
                                            lei character varying NOT NULL,

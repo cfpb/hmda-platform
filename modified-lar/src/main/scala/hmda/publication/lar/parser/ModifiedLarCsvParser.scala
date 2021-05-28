@@ -216,7 +216,7 @@ object ModifiedLarCsvParser {
   }
 
   private def roundToBigIntMidPoint(x: BigDecimal): String = {
-    val rounded = 10000 * (x/10000).setScale(2, RoundingMode.FLOOR)  + 5000
+    val rounded = 10000 * (x/10000).setScale(0, RoundingMode.FLOOR)  + 5000
     rounded.toBigInt.toString
   }
 
