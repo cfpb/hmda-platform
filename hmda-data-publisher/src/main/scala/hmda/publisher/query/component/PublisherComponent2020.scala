@@ -699,7 +699,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
     def preapproval         = column[Option[Int]]("preapproval")
     def constructionMethod  = column[Option[String]]("construction_method")
     def occupancyType       = column[Option[Int]]("occupancy_type")
-    def loanAmount          = column[Double]("loan_amount")
+    def loanAmount          = column[Option[String]]("loan_amount")
     def actionTakenType     = column[Option[Int]]("action_taken_type")
     def state               = column[Option[String]]("state")
     def county              = column[Option[String]]("county")
