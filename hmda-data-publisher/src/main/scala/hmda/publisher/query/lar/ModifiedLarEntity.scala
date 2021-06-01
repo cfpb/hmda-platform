@@ -101,7 +101,7 @@ case class ModifiedLarPartTwo(
                                reverseMortgage: Option[Int] = Some(0),
                                lineOfCredits: Option[Int] = Some(0),
                                businessOrCommercial: Option[Int] = Some(0),
-                               loanAmount: Double = 0.0,
+                               loanAmount: Option[String] = Some(""),
                                loanValueRatio: Option[String] = Some(""),
                                interestRate: Option[String] = Some(""),
                                rateSpread: Option[String] = Some(""),
@@ -120,7 +120,7 @@ case class ModifiedLarPartTwo(
 
   def toPublicPSV: String =
     s"${extractOpt(reverseMortgage)}|${extractOpt(lineOfCredits)}|${extractOpt(businessOrCommercial)}|" +
-      BigDecimal.valueOf(loanAmount).bigDecimal.toPlainString +
+      s"${extractOpt(loanAmount)}" +
       s"|${extractOpt(loanValueRatio)}|${extractOpt(interestRate)}|${extractOpt(rateSpread)}|${extractOpt(hoepaStatus)}|" +
       s"${extractOpt(totalLoanCosts)}|${extractOpt(totalPoints)}|${extractOpt(originationCharges)}|${extractOpt(discountPoints)}|" +
       s"${extractOpt(lenderCredits)}|${extractOpt(loanTerm)}|${extractOpt(paymentPenalty)}|${extractOpt(rateSpreadIntro)}" +
@@ -128,7 +128,7 @@ case class ModifiedLarPartTwo(
 
   def toPublicCSV: String =
     s"${extractOpt(reverseMortgage)},${extractOpt(lineOfCredits)},${extractOpt(businessOrCommercial)}," +
-      BigDecimal.valueOf(loanAmount).bigDecimal.toPlainString +
+      s"${extractOpt(loanAmount)}" +
       s",${extractOpt(loanValueRatio)},${extractOpt(interestRate)},${extractOpt(rateSpread)},${extractOpt(hoepaStatus)}," +
       s"${extractOpt(totalLoanCosts)},${extractOpt(totalPoints)},${extractOpt(originationCharges)},${extractOpt(discountPoints)}," +
       s"${extractOpt(lenderCredits)},${extractOpt(loanTerm)},${extractOpt(paymentPenalty)},${extractOpt(rateSpreadIntro)}" +
