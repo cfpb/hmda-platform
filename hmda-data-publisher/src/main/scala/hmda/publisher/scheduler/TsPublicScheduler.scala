@@ -103,7 +103,7 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
       publishingGuard.runIfDataIsValid(Period.y2020, Scope.Public) {
         val fileName         = "2020_ts.txt"
         val zipDirectoryName = "2020_ts.zip"
-        val s3Path           = s"$environmentPublic/dynamic-data/2019/"
+        val s3Path           = s"$environmentPublic/dynamic-data/2020/"
         val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
         val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
 
