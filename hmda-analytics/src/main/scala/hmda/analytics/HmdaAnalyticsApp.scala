@@ -345,13 +345,13 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         _ = if(tsDeletion)
           log.info(s"Data removed from TS for  $submissionId ")
         else
-          log.info(s"Skipping Delete TS")
+          log.info(s"Skipping Delete TS -- no deletion needed")
 
         _ <- deleteLarRows
         _ = if(larDeletion)
           log.info(s"Data removed from LAR for  $submissionId")
         else
-          log.info(s"Skipping Delete LAR")
+          log.info(s"Skipping Delete LAR -- no deletion needed")
 
         _ <- insertTsRow
         _ = log.info(s"Data added into TS for  $submissionId")
