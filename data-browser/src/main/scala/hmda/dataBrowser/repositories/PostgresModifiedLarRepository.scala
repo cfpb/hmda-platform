@@ -169,6 +169,7 @@ class PostgresModifiedLarRepository(config: DatabaseConfig[JdbcProfile], tableSe
     val institutionsTableName = year match { //will be needed when data browser has to support multiple years
       case 2018 => "institutions2018_snapshot"
       case 2019 => "institutions2019_snapshot"
+      case 2020 => "institutions2020_snapshot"
       case _    => "institutions2019_snapshot"
     }
 
