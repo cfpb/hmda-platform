@@ -105,6 +105,8 @@ spec:
               value: modifiedlar2018_snapshot_beta
             - name: DATABROWSER_PG_TABLE_2019
               value: modifiedlar2019_snapshot_beta
+            - name: DATABROWSER_PG_TABLE_2020
+              value: modifiedlar2020_snapshot_beta
             - name: REDIS_HOSTNAME
               value: {{.Values.databrowser.redis}}
             - name: S3_PUBLIC_BUCKET
