@@ -25,6 +25,7 @@ class V696_1Spec extends LarEditCheckSpec {
         lar.copy(AUS = lar.AUS.copy(aus1 = EmptyAUSValue)).mustFail
         lar.copy(AUS = lar.AUS.copy(aus2 = AUSExempt)).mustFail
         lar.copy(AUS = lar.AUS.copy(aus2 = AUSNotApplicable)).mustFail
+        lar.copy(AUS = lar.AUS.copy(aus1 = InternalProprietarySystem)).mustPass
     }
   }
 }
