@@ -27,7 +27,7 @@ trait LarParser {
     val exemptCode: String = "Exempt"
     str match {
       case value if (value.equalsIgnoreCase( naCode) || value.equalsIgnoreCase( exemptCode )) =>{
-        if (value == naCode || value == exemptCode ) {
+        if (value.equalsIgnoreCase(naCode) || value.equalsIgnoreCase(exemptCode) ) {
           true
         } else {
           false
