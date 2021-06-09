@@ -1,8 +1,7 @@
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: pod-reader-binding-beta
-  namespace: beta
 subjects:
   - kind: ServiceAccount
     name: {{.Values.service.account.name}}
@@ -10,5 +9,4 @@ subjects:
 roleRef:
   kind: ClusterRole
   name: pod-reader-beta
-  namespace: beta
   apiGroup: rbac.authorization.k8s.io
