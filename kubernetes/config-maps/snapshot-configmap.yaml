@@ -6,5 +6,3 @@ data:
   snapshot.active: false
   snapshot.bucket: cfpb-hmda-export
   snapshot.path: dev/snapshot-temp/
-}
-
