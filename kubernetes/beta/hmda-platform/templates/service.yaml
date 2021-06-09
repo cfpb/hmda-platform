@@ -33,7 +33,6 @@ metadata:
 spec:
   selector:
     app: hmda-platform-beta
-  type: ClusterIP
   ports:
   - name: {{ .Values.filing.name }}
     protocol: {{ .Values.filing.protocol }}
