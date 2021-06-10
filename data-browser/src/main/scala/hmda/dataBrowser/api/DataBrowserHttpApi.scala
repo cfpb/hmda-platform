@@ -42,7 +42,6 @@ private class DataBrowserHttpApi(log: Logger, fileCache: S3FileService, query: Q
         )
 
       case Success(Right(url)) =>
-        log.info("This is the URL for S3: " + url)
         redirect(Uri(url), StatusCodes.MovedPermanently)
     }
 
@@ -74,7 +73,7 @@ private class DataBrowserHttpApi(log: Logger, fileCache: S3FileService, query: Q
                     serveData(
                       allFields,
                       Commas,
-                      s"Failed to perform nationwide CSV query with the following queries: $allFields",
+                      s"Failed to perform nationwide CSV match with the following queries: $allFields",
                       allFields.year
                     )
                   }
