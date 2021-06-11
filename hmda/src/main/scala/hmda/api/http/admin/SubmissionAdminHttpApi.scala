@@ -57,16 +57,13 @@ object SubmissionAdminHttpApi {
       .readRawData(submissionId)
       .take(1)
       .map(_.data)
-      .map(header => TsCsvParser(header, fromCassandra = true).getOrElse(TransmittalSheet()))
-      .map(_.toCSV)
+      .map(tsLine => tsLine) // check for missing lei?
       .map(ByteString(_)) ++
       HmdaProcessingUtils
         .readRawData(submissionId)
         .drop(1) // drop the header which is the first line of the file
         .map(_.data)
-        .map(eachLine => LarCsvParser(eachLine).getOrElse(LoanApplicationRegister()))
-        .filter(lar => lar.larIdentifier.LEI != "")
-        .map(_.toCSV)
+        .map(singleLARLine => singleLARLine) // check for missing lei?
         .map(ByteString(_))
 
   def validateRawSubmissionId(rawSubmissionId: String): ValidatedNec[String, SubmissionId] = {
