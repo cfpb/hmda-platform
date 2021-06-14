@@ -57,13 +57,13 @@ object SubmissionAdminHttpApi {
       .readRawData(submissionId)
       .take(1)
       .map(_.data)
-      .map(tsLine => tsLine) // check for missing lei?
+      .map(tsLine => tsLine.replaceAll("(\r\n)|\r|\n", "")) // check for missing lei?
       .map(ByteString(_)) ++
       HmdaProcessingUtils
         .readRawData(submissionId)
         .drop(1) // drop the header which is the first line of the file
         .map(_.data)
-        .map(singleLARLine => singleLARLine) // check for missing lei?
+        .map(singleLARLine => singleLARLine.replaceAll("(\r\n)|\r|\n", "")) // check for missing lei?
         .map(ByteString(_))
 
   def validateRawSubmissionId(rawSubmissionId: String): ValidatedNec[String, SubmissionId] = {
