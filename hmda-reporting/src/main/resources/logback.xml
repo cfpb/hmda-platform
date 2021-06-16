@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%d][%-5level][%thread] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="STDOUT" />
+    </appender>
+
+    <root level="${HMDA_REPORTING_LEVEL:-INFO}">
+        <appender-ref ref="ASYNC" />
+    </root>
+    <logger name="logger.slick.session" level="INFO"/>
+    <logger name="slick.jdbc.DriverDataSource" level="INFO"/>
+    <logger name="slick.basic.BasicBackend.stream" level="INFO"/>
+    <logger name="slick.basic.BasicBackend.action" level="INFO"/>
+</configuration>
