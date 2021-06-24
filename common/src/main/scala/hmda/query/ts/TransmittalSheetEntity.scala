@@ -43,7 +43,7 @@ case class TransmittalSheetEntity(
 
   def toPublicCSV: String =
     s"$year,$quarter,$lei,$taxId,$agency," +
-      s"${escapeCommas(institutionName)},$state,$city,$zipCode,$totalLines"
+      s"${escapeCommas(institutionName)},$state,${escapeCommas(city)},$zipCode,$totalLines"
 
 }
 
