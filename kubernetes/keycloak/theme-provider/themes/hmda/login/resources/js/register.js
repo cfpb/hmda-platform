@@ -117,7 +117,7 @@
                   "<span>Sorry, we couldn't find that email domain. For help getting registered, please fill out and submit </span>"
                 ),
                 getHelpFormLink(),
-                $('<span>.</span>')
+                $("<span>.</span> You must use a financial institution's domain to register, personal email domains are not accepted.")
               )
             )
         }
