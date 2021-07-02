@@ -31,7 +31,7 @@ spec:
           - /bin/sh
           - -c
           - --
-        image: dtr-registry.cfpb.gov/hmda/hmda-data-browser-api:hmda_init-2
+        image: dtr-registry.cfpb.gov/hmda/hmda-data-browser-api:hmda_init
         imagePullPolicy: IfNotPresent
         name: openjdk-init
         resources: {}
