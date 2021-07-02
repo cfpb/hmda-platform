@@ -50,7 +50,7 @@ trait Settings {
   object redis {
     private val host: String = config.getString("redis.hostname")
     private val port: Int    = config.getInt("redis.port")
-    val url                  = s"redis://$host:$port"
+    val url                  = s"rediss://$host:$port"
     val ttl: FiniteDuration  = getDuration("redis.ttl")
   }
 
