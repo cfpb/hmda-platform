@@ -32,12 +32,68 @@ spec:
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
       serviceAccountName: {{ .Values.service.account.name }}
+#      initContainers:
+#      - args:
+#          - openssl pkcs12 -export -inkey certs/cass-key/cass-key
+#            -out server.p12 -name cass-tls -CAfile certs/ca-cert/ca-crt -caname root
+#            -passin pass:changeit -passout pass:changeit && keytool -importkeystore
+#            -deststorepass changeit -destkeypass changeit -destkeystore /opt/openjdk-16/lib/security/cacerts
+#            -srckeystore server.p12 -srcstoretype PKCS12 -srcstorepass changeit -alias
+#            cass-tls
+#        command:
+#          - /bin/sh
+#          - -c
+#          - --
+#        image: dtr-registry.cfpb.gov/hmda/hmda-platform:hmda_init
+#        imagePullPolicy: IfNotPresent
+#        name: openjdk-init
+#        resources: {}
+#        terminationMessagePath: /dev/termination-log
+#        terminationMessagePolicy: File
+#        volumeMounts:
+#          - mountPath: /opt/openjdk-16/lib/security
+#            name: jks
+#            subPath: cacerts
+#          - mountPath: certs/ca-cert
+#            name: ca-cert
+#            readOnly: true
+#          - mountPath: certs/cass-key
+#            name: cass-key
+#            readOnly: true
+#      restartPolicy: Always
+#      schedulerName: default-scheduler
+#      securityContext: {}
+#      terminationGracePeriodSeconds: 30
+#      volumes:
+#        - name: tz-config
+#          hostPath:
+#            path: /usr/share/zoneinfo/America/New_York
+#        - emptyDir: {}
+#          name: jks
+#        - name: ca-cert
+#          secret:
+#            defaultMode: 420
+#            items:
+#              - key: ca.crt
+#                path: ca-crt
+#            secretName: cass-tls-secret
+#        - name: cass-key
+#          secret:
+#            defaultMode: 420
+#            items:
+#              - key: cass.key
+#                path: cass-key
+#            secretName: cass-tls-secret
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         volumeMounts:
           - name: tz-config
             mountPath: /etc/localtime
+#          - mountPath: /etc/tls
+#            name: jks
+#            readOnly: true
+#            subPath: cacerts
         resources:
 {{ toYaml .Values.resources | indent 12 }}
         securityContext:
@@ -48,6 +104,11 @@ spec:
               - ALL              
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
+#        - name: _JAVA_OPTIONS
+#          value: >
+#            -Djavax.net.ssl.trustStore=/etc/tls/cacerts
+#            -Djavax.net.ssl.trustStorePassword=changeit
+#            -Dhttps.protocols=SSLv3,TLSv1,TLSv1.1,TLSv1.2
         - name: PLATFORM_NAMESPACE
           valueFrom:
               fieldRef:

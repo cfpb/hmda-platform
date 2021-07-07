@@ -20,7 +20,7 @@ image:
 
 hmda:
   actorSystemName: hmda2
-  runtimeMode: kubernetes
+  runtimeMode: kind
   podNamespace: default
   apiNamespace: hmda-api
   serviceNamespace: default.svc.cluster.local
