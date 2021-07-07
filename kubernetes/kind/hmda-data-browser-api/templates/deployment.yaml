@@ -1,0 +1,226 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hmda-data-browser-api.fullname" . }}
+  labels:
+    app: {{ include "hmda-data-browser-api.name" . }}
+    chart: {{ include "hmda-data-browser-api.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "hmda-data-browser-api.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "hmda-data-browser-api.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      initContainers:
+      - args:
+          - openssl pkcs12 -export -in certs/redis-cert/redis-crt -inkey certs/redis-key/redis-key
+            -out server.p12 -name redis-tls -CAfile certs/ca-cert/ca-crt -caname root
+            -passin pass:changeit -passout pass:changeit && keytool -importkeystore
+            -deststorepass changeit -destkeypass changeit -destkeystore /opt/openjdk-16/lib/security/cacerts
+            -srckeystore server.p12 -srcstoretype PKCS12 -srcstorepass changeit -alias
+            redis-tls
+        command:
+          - /bin/sh
+          - -c
+          - --
+        image: dtr-registry.cfpb.gov/hmda/hmda-data-browser-api:hmda_init
+        imagePullPolicy: IfNotPresent
+        name: openjdk-init
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+          - mountPath: /opt/openjdk-16/lib/security
+            name: jks
+            subPath: cacerts
+          - mountPath: certs/ca-cert
+            name: ca-cert
+            readOnly: true
+          - mountPath: certs/redis-cert
+            name: redis-cert
+            readOnly: true
+          - mountPath: certs/redis-dh
+            name: redis-dh
+            readOnly: true
+          - mountPath: certs/redis-key
+            name: redis-key
+            readOnly: true
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: tz-config
+          hostPath:
+            path: /usr/share/zoneinfo/America/New_York
+        - emptyDir: {}
+          name: jks
+        - name: ca-cert
+          secret:
+            defaultMode: 420
+            items:
+              - key: ca.crt
+                path: ca-crt
+            secretName: redis-tls-secret
+        - name: redis-cert
+          secret:
+            defaultMode: 420
+            items:
+              - key: redis.crt
+                path: redis-crt
+            secretName: redis-tls-secret
+        - name: redis-dh
+          secret:
+            defaultMode: 420
+            items:
+              - key: redis.dh
+                path: redis-dh
+            secretName: redis-tls-secret
+        - name: redis-key
+          secret:
+            defaultMode: 420
+            items:
+              - key: redis.key
+                path: redis-key
+            secretName: redis-tls-secret
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          volumeMounts:
+            - name: tz-config
+              mountPath: /etc/localtime
+            - mountPath: /etc/tls
+              name: jks
+              readOnly: true
+              subPath: cacerts
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL     
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: _JAVA_OPTIONS
+              value: >
+                -Djavax.net.ssl.trustStore=/etc/tls/cacerts
+                -Djavax.net.ssl.trustStorePassword=changeit
+                -Dhttps.protocols=SSLv3,TLSv1,TLSv1.1,TLSv1.2
+            - name: PG_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: host
+            - name: PG_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: postgresql-configmap
+                  key: postgres.database
+            - name: PG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: username
+            - name: PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: password
+            - name: PG_SSL
+              valueFrom:
+                configMapKeyRef:
+                  name: postgresql-configmap
+                  key: postgres.ssl
+            - name: JDBC_URL
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: url
+            - name: BANK_FILTER_LIST
+              valueFrom:
+                configMapKeyRef:
+                  name: bank-filter-configmap
+                  key: bank-filter-list
+            - name: KAFKA_CLUSTER_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-configmap
+                  key: kafka.hosts
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: aws-access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: aws-secret-access-key
+            - name: AWS_ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: s3-configmap
+                  key: aws-environment
+            - name: AWS_REGION
+              valueFrom:
+                configMapKeyRef:
+                  name: s3-configmap
+                  key: aws-region
+            - name: BROWSER_LOG_LEVEL
+              value: {{.Values.databrowser.loglevel}}
+            - name: DATABROWSER_PG_TABLE_2017
+              value: intentionally_left_blank
+            - name: DATABROWSER_PG_TABLE_2018
+              value: modifiedlar2018_snapshot
+            - name: DATABROWSER_PG_TABLE_2019
+              value: modifiedlar2019_snapshot
+            - name: DATABROWSER_PG_TABLE_2020
+              value: modifiedlar2020_snapshot
+            - name: REDIS_HOSTNAME
+              value: {{.Values.databrowser.redis}}
+            - name: REDIS_PROTOCOL
+              value: "rediss"
+            - name: S3_PUBLIC_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: s3-configmap
+                  key: s3-public-bucket
+            - name: REDIS_PASS
+              valueFrom:
+                secretKeyRef:
+                  key: redis-password
+                  name: redis-password
+            - name: S3_URL
+              value: {{.Values.databrowser.s3Url}}
+            - name: COMMIT_ID
+              value: {{ .Values.image.commitId }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.databrowser.port }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.databrowser.port }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
