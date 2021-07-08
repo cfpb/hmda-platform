@@ -333,11 +333,10 @@ object HmdaValidationError
           val timestamp = Instant.now().toEpochMilli
           val signed    = SubmissionSigned(submissionId, timestamp, Signed)
           val currentNamespace = config.getString("hmda.currentNamespace")
-//          if (currentNamespace != "default" && currentNamespace != "cass-operator") { //signing the submission is not allowed on Beta namespace
-//            Effect.reply(replyTo)(SubmissionNotReadyToBeSigned(submissionId))
-//          }
-//          else
-            if ((state.qualityVerified && state.macroVerified) || state
+          if (currentNamespace != "default") { //signing the submission is not allowed on Beta namespace
+            Effect.reply(replyTo)(SubmissionNotReadyToBeSigned(submissionId))
+          }
+          else if ((state.qualityVerified && state.macroVerified) || state
             .noEditsFound() || (state.qualityVerified && state.`macro`.isEmpty) || (state.quality.isEmpty && state.macroVerified)) {
             Effect.persist(signed).thenRun { _ =>
               log.info(s"Submission $submissionId signed at ${Instant.ofEpochMilli(timestamp)}")
@@ -351,13 +350,13 @@ object HmdaValidationError
                 signerUsername
               )
 
-//              publishSignEvent(submissionId, email, signed.timestamp, config).map(signed =>
-//                log.info(
-//                  s"Published signed event for $submissionId. " +
-//                    s"${signTopic} (key: ${submissionId.lei}, value: ${submissionId.toString}. " +
-//                    s"${emailTopic} (key: ${submissionId.toString}, value: ${email})"
-//                )
-//              )
+              publishSignEvent(submissionId, email, signed.timestamp, config).map(signed =>
+                log.info(
+                  s"Published signed event for $submissionId. " +
+                    s"${signTopic} (key: ${submissionId.lei}, value: ${submissionId.toString}. " +
+                    s"${emailTopic} (key: ${submissionId.toString}, value: ${email})"
+                )
+              )
               setHmdaFilerFlag(submissionId.lei, submissionId.period, sharding)
               replyTo ! signed
             }

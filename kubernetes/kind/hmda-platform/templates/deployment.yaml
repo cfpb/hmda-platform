@@ -36,9 +36,10 @@ spec:
             -passout pass:changeit && keytool -importkeystore
             -deststorepass changeit -destkeypass changeit -destkeystore /opt/openjdk-16/lib/security/cacerts
             -srckeystore server.p12 -srcstoretype PKCS12 -srcstorepass changeit -alias
-            cass-tls && keytool -deststorepass changeit -destkeypass changeit
-            -destkeystore /opt/openjdk-16/lib/security/cacerts -alias StrimmziCARoot -import
-            -file certs/strimzi-ca/strimzi-ca
+            cass-tls -noprompt
+#            && keytool -deststorepass changeit -destkeypass changeit
+#            -destkeystore /opt/openjdk-16/lib/security/cacerts -alias StrimmziCARoot -import
+#            -file certs/strimzi-ca/strimzi-ca -noprompt
 #            && keytool -deststorepass changeit -destkeypass changeit
 #            -destkeystore /opt/openjdk-16/lib/security/cacerts -alias StrimmziCARoot -import
 #            -file certs/strimzi-ca/strimzi-ca
@@ -142,9 +143,7 @@ spec:
             -Djavax.net.ssl.trustStorePassword=changeit
             -Dhttps.protocols=SSLv3,TLSv1,TLSv1.1,TLSv1.2
         - name: PLATFORM_NAMESPACE
-          valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
+          value: default
         - name: CURRENT_YEAR
           valueFrom:
             configMapKeyRef:
