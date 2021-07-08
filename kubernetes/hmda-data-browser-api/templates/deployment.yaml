@@ -72,11 +72,6 @@ spec:
                 configMapKeyRef:
                   name: bank-filter-configmap
                   key: bank-filter-list
-            - name: KAFKA_CLUSTER_HOSTS
-              valueFrom:
-                configMapKeyRef:
-                  name: kafka-configmap
-                  key: kafka.hosts
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
