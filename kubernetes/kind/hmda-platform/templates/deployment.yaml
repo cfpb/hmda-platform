@@ -36,7 +36,12 @@ spec:
             -passout pass:changeit && keytool -importkeystore
             -deststorepass changeit -destkeypass changeit -destkeystore /opt/openjdk-16/lib/security/cacerts
             -srckeystore server.p12 -srcstoretype PKCS12 -srcstorepass changeit -alias
-            cass-tls
+            cass-tls && keytool -deststorepass changeit -destkeypass changeit
+            -destkeystore /opt/openjdk-16/lib/security/cacerts -alias StrimmziCARoot -import
+            -file certs/strimzi-ca/strimzi-ca
+#            && keytool -deststorepass changeit -destkeypass changeit
+#            -destkeystore /opt/openjdk-16/lib/security/cacerts -alias StrimmziCARoot -import
+#            -file certs/strimzi-ca/strimzi-ca
         command:
           - /bin/sh
           - -c
@@ -56,6 +61,15 @@ spec:
             readOnly: true
           - mountPath: certs/cass-key
             name: cass-key
+            readOnly: true
+          - mountPath: certs/strimzi-ca
+            name: strimzi-ca
+            readOnly: true
+          - mountPath: certs/strimzi-p12
+            name: strimzi-p12
+            readOnly: true
+          - mountPath: certs/strimzi-password
+            name: strimzi-password
             readOnly: true
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -81,6 +95,27 @@ spec:
               - key: key
                 path: cass-key
             secretName: dc2-ca-keystore
+        - name: strimzi-ca
+          secret:
+            defaultMode: 420
+            items:
+              - key: ca.crt
+                path: strimzi-ca
+            secretName: my-cluster-cluster-ca-cert
+        - name: strimzi-p12
+          secret:
+            defaultMode: 420
+            items:
+              - key: ca.crt
+                path: strimzi-p12
+            secretName: my-cluster-cluster-ca-cert
+        - name: strimzi-password
+          secret:
+            defaultMode: 420
+            items:
+              - key: ca.crt
+                path: strimzi-password
+            secretName: my-cluster-cluster-ca-cert
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -230,6 +265,10 @@ spec:
             -Djavax.net.ssl.trustStore=/etc/keystore/node-keystore.jks
             -Djavax.net.ssl.trustStorePassword=changeit
             -Dhttps.protocols=SSLv3,TLSv1,TLSv1.1,TLSv1.2
+        - name: TRUSTSTORE_PATH
+          value: "/etc/tls/cacerts"
+        - name: TRUSTSTORE_PASSWORD
+          value: "changeit"
 #        livenessProbe:
 #          tcpSocket:
 #            port: {{ .Values.bootstrap.port }}
