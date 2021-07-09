@@ -1,0 +1,163 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: hmda-bootstrap
+spec:
+  # by setting the clusterIp to None we are a "headless service"
+  # and thus the svc ("service") DNS record for the single IP but the IPs of all nodes that we select
+  #
+  # In other words:
+  #  POD=$(kubectl get pods | grep hmda | grep Running | head -n1 | awk '{ print $1 }')
+  #  $ kubectl exec -it $POD -- nslookup hmda-service.default.svc.cluster.local
+  #  Server:		10.0.0.10
+  #  Address:	10.0.0.10#53
+  #
+  #  Name:	hmda-service.default.svc.cluster.local
+  #  Address: 172.17.0.7
+  #  Name:	hmda-service.default.svc.cluster.local
+  #  Address: 172.17.0.8
+  #  Name:	hmda-service.default.svc.cluster.local
+  clusterIP: None
+  selector:
+    app: hmda
+  ports:
+  - protocol: {{ .Values.bootstrap.protocol }}
+    port: {{ .Values.bootstrap.port }}
+    targetPort: {{ .Values.bootstrap.port }}
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Values.service.name }}
+spec:
+  selector:
+    app: hmda-platform
+  type: NodePort
+  ports:
+  - name: {{ .Values.filing.name }}
+    protocol: {{ .Values.filing.protocol }}
+    port: {{ .Values.filing.port }}
+    targetPort: {{ .Values.filing.port }}
+  - name: {{ .Values.admin.name }}
+    protocol: {{ .Values.admin.protocol }}
+    port: {{ .Values.admin.port }}
+    targetPort: {{ .Values.admin.port }}
+  - name: {{ .Values.public.name }}
+    protocol: {{ .Values.public.protocol }}
+    port: {{ .Values.public.port }}
+    targetPort: {{ .Values.public.port }}
+  - name: {{ .Values.cluster.name }}
+    protocol: {{ .Values.cluster.protocol }}
+    port: {{ .Values.cluster.port }}
+    targetPort: {{ .Values.cluster.port }}
+  - name: {{ .Values.websockets.name }}
+    protocol: {{ .Values.websockets.protocol }}
+    port: {{ .Values.websockets.port }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: ambassador-hmda-admin
+  name: ambassador-hmda-admin
+  annotations:
+    getambassador.io/config: |
+      apiVersion: ambassador/v1
+      kind: Mapping
+      name: hmda_admin_mapping
+      ambassador_id: ambassador-default-1
+      prefix: /v2/admin/
+      service: {{ .Values.service.name }}:{{ .Values.admin.port }}
+spec:
+  clusterIP: None  
+  ports:
+    - port: {{ .Values.admin.port }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: ambassador-hmda-filing
+  name: ambassador-hmda-filing
+  annotations:
+    getambassador.io/config: |
+      apiVersion: ambassador/v1
+      kind: Mapping
+      name: hmda_filing_mapping
+      ambassador_id: ambassador-default-1
+      prefix: /v2/filing/
+      service: {{ .Values.service.name }}:{{ .Values.filing.port }}
+      timeout_ms: 60000
+spec:
+  clusterIP: None  
+  ports:
+    - port: {{ .Values.filing.port }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: ambassador-hmda-public
+  name: ambassador-hmda-public
+  annotations:
+    getambassador.io/config: |
+      apiVersion: ambassador/v1
+      kind: Mapping
+      name: hmda_public_mapping
+      ambassador_id: ambassador-default-1
+      prefix: /v2/public/
+      service: {{ .Values.service.name }}:{{ .Values.public.port }}
+spec:
+  clusterIP: None  
+  ports:
+    - port: {{ .Values.public.port }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: ambassador-hmda-cluster
+  name: ambassador-hmda-cluster
+  annotations:
+    getambassador.io/config: |
+      apiVersion: ambassador/v1
+      kind: Mapping
+      name: hmda_cluster_mapping
+      ambassador_id: ambassador-default-1
+      prefix: /v2/cluster/
+      rewrite: /cluster/members
+      service: {{ .Values.service.name }}:{{ .Values.cluster.port }}
+spec:
+  clusterIP: None  
+  ports:
+    - port: {{ .Values.cluster.port }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: ambassador-hmda-ws
+  name: ambassador-hmda-ws
+  annotations:
+    getambassador.io/config: |
+      apiVersion: ambassador/v1
+      kind: Mapping
+      name: hmda_ws_mapping
+      ambassador_id: ambassador-default-1
+      prefix: /v2/ws/status/
+      timeout_ms: 380000
+      retry_policy:
+        num_retries: 10
+        retry_on: 5xx
+      service: {{ .Values.service.name }}:{{ .Values.websockets.port }}
+      use_websocket: true
+spec:
+  clusterIP: None  
+  ports:
+    - port: {{ .Values.websockets.port }}

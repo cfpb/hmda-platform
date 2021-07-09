@@ -52,6 +52,9 @@ object HmdaPlatform extends App {
     case "dev-node" =>
       ConfigFactory.parseResources("application-dev.conf").resolve()
 
+    case "kind" =>
+      ConfigFactory.parseResources("application-kind.conf").resolve()
+
     case "kubernetes" =>
       log.info(s"HOSTNAME: ${System.getenv("HOSTNAME")}")
       log.info(s"HOSTADDRESS: " + InetAddress.getLocalHost().getHostAddress())
@@ -69,7 +72,7 @@ object HmdaPlatform extends App {
   implicit val mat     = Materializer(system)
   implicit val cluster = Cluster(system)
 
-  if (runtimeMode == "dcos" || runtimeMode == "kubernetes" || runtimeMode == "docker-compose") {
+  if (runtimeMode == "dcos" || runtimeMode == "kubernetes" || runtimeMode == "docker-compose" || runtimeMode == "kind") {
     ClusterBootstrap(system).start()
     AkkaManagement(system).start()
   }
