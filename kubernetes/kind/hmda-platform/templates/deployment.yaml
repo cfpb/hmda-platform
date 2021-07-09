@@ -37,12 +37,9 @@ spec:
             -deststorepass changeit -destkeypass changeit -destkeystore /opt/openjdk-16/lib/security/cacerts
             -srckeystore server.p12 -srcstoretype PKCS12 -srcstorepass changeit -alias
             cass-tls -noprompt
-#            && keytool -deststorepass changeit -destkeypass changeit
-#            -destkeystore /opt/openjdk-16/lib/security/cacerts -alias StrimmziCARoot -import
-#            -file certs/strimzi-ca/strimzi-ca -noprompt
-#            && keytool -deststorepass changeit -destkeypass changeit
-#            -destkeystore /opt/openjdk-16/lib/security/cacerts -alias StrimmziCARoot -import
-#            -file certs/strimzi-ca/strimzi-ca
+            && keytool -deststorepass changeit -destkeypass changeit
+            -destkeystore /opt/openjdk-16/lib/security/cacerts -alias StrimmziCARoot -import
+            -file certs/strimzi-ca/strimzi-ca -noprompt
         command:
           - /bin/sh
           - -c
