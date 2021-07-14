@@ -8,12 +8,32 @@ The [Home Mortgage Disclosure Act (HMDA) Platform](http://ffiec.cfpb.gov/) is a 
 
 [Please watch this short video](https://youtu.be/C_73Swgyc4g) to view how HMDA Platform transforms the data upload, validation, and submission process.
 
+## Other Documentation
+
+The documentation on Github is primarily intended for a developer audience who plans on inspecting, editing, and running the underlying application code. Links to other HMDA documentation for other audiences can be found below.
+
+### API Documentation and User Guidance
+
+- [HMDA APIs - Overview](https://cfpb.github.io/hmda-platform/#hmda-api-documentation)
+- [HMDA Data Browser API](https://cfpb.github.io/hmda-platform/#data-browser)
+- [HMDA Filing API](https://cfpb.github.io/hmda-platform/#hmda-filing)
+- [HMDA Public API](https://cfpb.github.io/hmda-platform/#public-data-verification)
+- [HMDA Rate Spread API](https://cfpb.github.io/hmda-platform/#rate-spread)
+- [HMDA Check Digit API](https://cfpb.github.io/hmda-platform/#check-digit)
+
+### Tool Specific Documentation and User Guidance
+
+- [Filing Instructions Guide (FIG)](https://ffiec.cfpb.gov/documentation/2021/fig/): Additional documentation for filing HMDA data.
+
+- [HMDA Publications](https://ffiec.cfpb.gov/documentation/2021/publications/): Additional documentation for using the Modified Lar, Snapshot, and Dynamic data sets as well as the Aggregate and Disclosure Reports
+
+- [HMDA Tools](https://ffiec.cfpb.gov/documentation/2021/tools/): Additional documentation for using the Data Browser, Rate Spread, Check Digit, Lar Formatting Tool, and File Format Verification Tool.
+
 ## Linked Projects
 
 |  Project | Repo Link  | Description  | 
 |---|---|---|
-| Frontend  |  https://github.com/cfpb/hmda-frontend | ReactJS Front-end repository powering the [HMDA Platform](http://ffiec.cfpb.gov/)  
-| HMDA-Help  | https://github.com/cfpb/hmda-help  | ReactJS Front-end repository powering HMDA Help - used to resolve and troubleshoot issues in filing  |   
+| Frontend  |  https://github.com/cfpb/hmda-frontend | ReactJS Front-end repository powering the [HMDA Platform](http://ffiec.cfpb.gov/)   
 | LARFT | https://github.com/cfpb/hmda-platform-larft  |  Repo for the [Public Facing LAR formatting tool](https://ffiec.cfpb.gov/tools/lar-formatting) |   
 | HMDA Test Files  | https://github.com/cfpb/hmda-test-files  | Repo for automatically generating various different test files for HMDA Data  |   
 | HMDA Census |  https://github.com/cfpb/hmda-census | ETL for geographic and Census data used by the HMDA Platform
@@ -44,13 +64,13 @@ The [Home Mortgage Disclosure Act (HMDA) Platform](http://ffiec.cfpb.gov/) is a 
 
 ## TS and LAR File Specs
 
-The data is submitted in a flat pipe (`|`) delimited TXT file. The text file is split into two parts: Transmission (TS) File -- first line in the file and Loan Application Register (LAR) -- all remaining lines of the file. Below are the links to the file specifications for data collected in years 2018 - current.
-- [Transmission  File Spec](https://github.com/cfpb/hmda-platform/blob/master/docs/v2/spec/2018_File_Spec_TS.csv)
-- [Loan Application Register File Spec](https://github.com/cfpb/hmda-platform/blob/master/docs/v2/spec/2018_File_Spec_LAR.csv)
+The data is submitted in a flat pipe (`|`) delimited TXT file. The text file is split into two parts: Transmission (TS) Sheet -- the first line in the file which includes financial institution data and Loan Application Register (LAR) -- all remaining lines of the file, which includes information about individual loan applications. Below are the links to the file specifications for data collected in years 2018 - current.
+- [Transmission Sheet Spec](https://github.com/cfpb/hmda-platform/blob/master/docs/v2/spec/2018_File_Spec_TS.csv)
+- [Loan Application Register Spec](https://github.com/cfpb/hmda-platform/blob/master/docs/v2/spec/2018_File_Spec_LAR.csv)
 
 ## End-to-End filing GIF
 
-The [hmda-frontend](https://github.com/cfpb/hmda-frontend) uses Cypress to test the end-to-end filing process from the end user perspective. The GIF below shows the automated filing process via Cypree - no human intervention.
+The [hmda-frontend](https://github.com/cfpb/hmda-frontend) uses Cypress to test the end-to-end filing process from the end user perspective. The GIF below shows the automated filing process via Cypres - no human intervention.
 
 ![Cypress automated filing test](https://github.com/cfpb/hmda-frontend/raw/master/readme-files/filing-2020-q1-cypress.gif)
 
@@ -143,7 +163,7 @@ kubernetes/hmda-platform
 
 ## Docker Hub
 
-All of the containers built by the HMDA Platform are released publicly via Docker Hub: https://hub.docker.com/u/hmda
+All of the containers built by the HMDA Platform are released publicly via Docker Hub: https://hub.docker.com/u/hmda.
 
 ## One-line Local Development Environment (No Auth)
 
@@ -154,14 +174,14 @@ The platform and it's dependency services, Kafka, Cassandra and PostgreSQL, can 
 docker-compose up
 ```
 
-The entire filing plaform can be spun up using a one line command. Using this locally running instance of Platform One, no authentication is needed. 
+The entire filing platform can be launched using a one line command. No authentication is needed when using this locally running instance of the HMDA Platform. 
 
 ```shell
 # Bring up the hmda-platform
 docker-compose up hmda-platform
 ```
 
-Additionally, there are several environment varialbes that can be configured/changed. The platform uses sensible defaults for each one. However, if required they can be overridden:
+Additionally, there are several environment variables that can be configured/changed. The platform uses sensible defaults for each one. However, if required they can be overridden:
 
 ```
 CASSANDRA_CLUSTER_HOSTS
@@ -178,7 +198,7 @@ WS_PORT
 
 ## Automated Testing
 
-The HMDA Platform takes a rigorous automated testing approach. In addtion to Travis and CodeCov, we've prepared a suite of [Newman](https://github.com/cfpb/hmda-platform/tree/master/newman) test scripts that perform end-to-end testing of the APIs on a recurring basis. The testing process for Newman is containerized and runs as a Kubernetes CronJob to act as a monitoring and alerting system. The platform and microservices are also testing for load by using [Locust](https://locust.io/).
+The HMDA Platform takes a rigorous automated testing approach. In addition to Travis and CodeCov, we've prepared a suite of [Newman](https://github.com/cfpb/hmda-platform/tree/master/newman) test scripts that perform end-to-end testing of the APIs on a recurring basis. The testing process for Newman is containerized and runs as a Kubernetes CronJob to act as a monitoring and alerting system. The platform and microservices are also testing for load by using [Locust](https://locust.io/).
 
 ## Postman Collection
 
@@ -226,7 +246,6 @@ We use GitHub issues in this repository to track features, bugs, and enhancement
 
 Related projects
   - https://github.com/cfpb/hmda-frontend - ReactJS Front-end repository powering the [HMDA Platform](http://ffiec.cfpb.gov/)
-  - https://github.com/cfpb/hmda-help - ReactJS Front-end repository powering HMDA Help - used to resolve and troubleshoot issues in filing
   - https://github.com/cfpb/hmda-platform-larft - Repo for the [Public Facing LAR formatting tool](https://ffiec.cfpb.gov/tools/lar-formatting)
   - https://github.com/cfpb/hmda-test-files - Repo for automatically generating various different test files for HMDA Data
   - https://github.com/cfpb/hmda-census - ETL for geographic and Census data used by the HMDA Platform
