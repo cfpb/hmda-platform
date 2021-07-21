@@ -1,0 +1,66 @@
+# Sized to work on 3 k8s workers nodes with 1 core / 4 GB RAM
+# See neighboring example-cassdc-full.yaml for docs for each parameter
+apiVersion: cassandra.datastax.com/v1beta1
+kind: CassandraDatacenter
+metadata:
+  name: dc2
+spec:
+  clusterName: cluster2
+  serverType: cassandra
+  serverVersion: "3.11.10"
+  managementApiAuth:
+    insecure: {}
+  size: 1
+  storageConfig:
+    cassandraDataVolumeClaimSpec:
+      storageClassName: server-storage
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+
+  config:
+    logback-xml:
+      root-log-level: ALL
+      # systemlog-appender-level:ALL
+    cassandra-env-sh:
+      jmxremote_authenticate: true
+    cassandra-yaml:
+      authenticator: org.apache.cassandra.auth.PasswordAuthenticator
+      authorizer: org.apache.cassandra.auth.CassandraAuthorizer
+      role_manager: org.apache.cassandra.auth.CassandraRoleManager
+      native_transport_port_ssl: 9142
+      server_encryption_options:
+        internode_encryption: all
+        keystore: /etc/encryption/node-keystore.jks
+        keystore_password: dc2
+        truststore: /etc/encryption/node-keystore.jks
+        truststore_password: dc2
+        require_client_auth: true
+          # require_endpoint_verification: true
+      client_encryption_options:
+        enabled: true
+        optional: false
+        keystore: /etc/encryption/node-keystore.jks
+        keystore_password: dc2
+          # require_client_auth: true
+        truststore: /etc/encryption/node-keystore.jks
+        truststore_password: dc2
+    jvm-options:
+      initial_heap_size: "800M"
+      max_heap_size: "800M"
+      additional-jvm-opts:
+        # As the database comes up for the first time, set system keyspaces to RF=3
+        - "-Ddse.system_distributed_replication_dc_names=dc2"
+        - "-Ddse.system_distributed_replication_per_dc=3"
+        - "-Djavax.net.debug=ssl"
+        - "-Dcom.sun.management.jmxremote.ssl=true"
+        - "-Djavax.net.ssl.keyStore=/etc/encryption/node-keystore.jks"
+        - "-Djavax.net.ssl.keyStorePassword=dc2"
+        - "-Djavax.net.ssl.trustStore=/etc/encryption/node-keystore.jks"
+        - "-Djavax.net.ssl.trustStorePassword=dc2"
+        - "-Dcom.sun.management.jmxremote.registry.ssl=true"
+        - "-Dcom.sun.management.jmxremote.ssl.need.client.auth=true"
+        # - "-Dcom.sun.management.jmxremote.ssl.enabled.protocols=TLSv1.2,TLSv1.1,TLSv1"
+          # - "-Dcom.sun.management.jmxremote.ssl.enabled.cipher.suites=TLS_RSA_WITH_AES_256_CBC_SHA"

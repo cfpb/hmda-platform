@@ -1,0 +1,15 @@
+apiVersion: v1
+data:
+  currentYear: "2020"
+  q1End: June 30
+  q1Start: April 01
+  q2End: September 30
+  q2Start: July 01
+  q3End: December 31
+  q3Start: October 01
+  quarterlyYearsAllowed: 2020,2021
+  yearsAllowed: 2018,2019,2020,2021
+kind: ConfigMap
+metadata:
+  name: timed-guards
+  namespace: cass-operator
