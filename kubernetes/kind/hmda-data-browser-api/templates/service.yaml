@@ -1,0 +1,41 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Values.service.name }}
+spec:
+  selector:
+    app: hmda-data-browser-api
+  type: ClusterIP
+  ports:
+  - name: {{ .Values.databrowser.name }}
+    protocol: {{ .Values.databrowser.protocol }}
+    port: {{ .Values.databrowser.port }}
+    targetPort: {{ .Values.databrowser.port }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: ambassador-hmda-data-browser-api
+  name: ambassador-hmda-data-browser-api
+  annotations:
+    getambassador.io/config: |
+      apiVersion: ambassador/v1
+      kind: Mapping
+      name: hmda_databrowser_mapping
+      ambassador_id: ambassador-default-1
+      prefix: /v2/data-browser-api/
+      service: {{ .Values.service.name }}:{{ .Values.databrowser.port }}
+      timeout_ms: 3800000
+      retry_policy:
+        num_retries: 10
+        retry_on: 5xx
+      labels:
+        ambassador:
+         - string_request_label:
+           - hmda-reporting
+spec:
+  clusterIP: None  
+  ports:
+    - port: {{ .Values.databrowser.port }}
