@@ -13,6 +13,6 @@ object S306 extends EditCheck[TransmittalLar] {
   override def name: String = "S306"
 
   override def apply(tsLar: TransmittalLar): ValidationResult =
-    tsLar.duplicateLineNumbersUliActionType.length is equalTo(0)
+    tsLar.duplicateUliToLineNumbersUliActionType.size is equalTo(0)
 
 }
