@@ -7,6 +7,13 @@ object BuildSettings {
   val buildVersion      = "2.0.0"
   val buildScalaVersion = "2.12.11"
 
+  lazy val dockerPublishLocalSkipTestsCommand = Command.command("dockerPublishLocalSkipTests") { state =>
+    var s = state
+    s = Command.process("set test in Test := {}", s)
+    s = Command.process("docker:publishLocal", s)
+    s
+  }
+
   val hmdaBuildSettings = Defaults.coreDefaultSettings ++
     Seq(
       organization := buildOrganization,
@@ -16,7 +23,7 @@ object BuildSettings {
       aggregate in assembly := false,
       parallelExecution in Test := true,
       fork in Test := true,
-      resolvers += Resolver.bintrayRepo("tanukkii007", "maven")
+      resolvers += Resolver.bintrayRepo("tanukkii007", "maven"),
+      commands += dockerPublishLocalSkipTestsCommand
     )
-
 }
