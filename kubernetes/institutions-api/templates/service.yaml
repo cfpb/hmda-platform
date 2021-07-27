@@ -8,7 +8,6 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPort }}
@@ -27,24 +26,15 @@ metadata:
   name: institutions-api-ambassador
   annotations:
     getambassador.io/config: |
-      apiVersion: ambassador/v1
+      apiVersion: ambassador/v2
       kind: Mapping
       name: institution_api_mapping
       ambassador_id: ambassador-default-1
       method: GET
-      prefix: /v2/public/institutions/
-      rewrite: /institutions/
-      service: {{ template "institutions-api.fullname" .}}:{{ .Values.service.port }}
-      ---
-      apiVersion: ambassador/v1
-      kind: Mapping
-      name: institution_api_search_mapping
-      ambassador_id: ambassador-default-1
-      method: GET
-      prefix: /v2/public/institutions?
-      rewrite: /institutions?
+      prefix: /v2/public/institutions
+      rewrite: /institutions
       service: {{ template "institutions-api.fullname" .}}:{{ .Values.service.port }}
 spec:
-  clusterIP: None  
+  clusterIP: None
   ports:
     - port: {{ .Values.service.port }}
