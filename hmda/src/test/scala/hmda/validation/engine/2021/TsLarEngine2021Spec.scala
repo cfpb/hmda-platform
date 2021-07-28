@@ -28,7 +28,7 @@ class TsLarEngine2021Spec extends WordSpec with ScalaCheckPropertyChecks with Mu
           )
           .sample
           .getOrElse(ts)
-        val tsLar: TransmittalLar = TransmittalLar(ts.copy(totalLines = 10), "example-ULI", 10, 10, 10,10, 1, Nil, Nil)
+        val tsLar: TransmittalLar = TransmittalLar(ts.copy(totalLines = 10), "example-ULI", 10, 10, 10,10, 1, Map.empty, Map.empty)
         val testContext           = ValidationContext(None, Some(Period(2020, None)))
         val validation            = checkAll(tsLar, ts.id.toString, testContext, TsValidationError)
         validation.leftMap(errors => errors.toList mustBe empty)
@@ -38,7 +38,7 @@ class TsLarEngine2021Spec extends WordSpec with ScalaCheckPropertyChecks with Mu
     "capture errors" in {
       forAll(tsGen) { ts =>
         eventually {
-          val tsLar: TransmittalLar = TransmittalLar(ts, "example-ULI", 10, 10, 10, 9, 1, List(1), List(1))
+          val tsLar: TransmittalLar = TransmittalLar(ts, "example-ULI", 10, 10, 10, 9, 1, Map("example-ULI" -> List(1)), Map("example-ULI" -> List(1)))
           val testContext           = ValidationContext(None, Some(Period(2021, None)))
           val validation            = checkAll(tsLar, ts.id.toString, testContext, TsValidationError)
           validation.leftMap(errors => errors.toList must not be empty)

@@ -7,5 +7,5 @@ case class TransmittalLar(ts: TransmittalSheet,
                           uniqueLarsSpecificFields: Long = 0L,
                           distinctUliCount: Long = 0L,
                           distinctActionTakenUliCount: Long = 0L,
-                          duplicateLineNumbers: List[Int] = Nil,
-                          duplicateLineNumbersUliActionType: List[Int] = Nil)
+                          duplicateUliToLineNumbers: Map[String, List[Int]] = Map.empty,
+                          duplicateUliToLineNumbersUliActionType: Map[String, List[Int]] = Map.empty)

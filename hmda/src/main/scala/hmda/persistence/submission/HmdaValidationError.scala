@@ -45,6 +45,7 @@ import hmda.persistence.submission.HmdaProcessingUtils.{readRawData, updateSubmi
 import hmda.publication.KafkaUtils._
 import hmda.util.streams.FlowUtils.framing
 import hmda.utils.YearUtils.Period
+import hmda.validation.aggregate.DistinctElements
 import hmda.validation.context.ValidationContext
 import hmda.validation.filing.MacroValidationFlow._
 import hmda.validation.filing.ValidationFlow._
@@ -333,7 +334,7 @@ object HmdaValidationError
           val timestamp = Instant.now().toEpochMilli
           val signed    = SubmissionSigned(submissionId, timestamp, Signed)
           val currentNamespace = config.getString("hmda.currentNamespace")
-          if (currentNamespace == "beta") { //signing the submission is not allowed on Beta namespace
+          if (currentNamespace != "default") { //signing the submission is not allowed on Beta namespace
             Effect.reply(replyTo)(SubmissionNotReadyToBeSigned(submissionId))
           }
           else if ((state.qualityVerified && state.macroVerified) || state
@@ -448,100 +449,12 @@ object HmdaValidationError
         .named("headerResult[Syntactical]-" + submissionId)
         .run()
 
-    case class AggregationResult(
-                                  totalCount: Int,
-                                  distinctCount: Int,
-                                  duplicateLineNumbers: Vector[Int],
-                                  checkType: DistinctCheckType,
-                                  uli: String
-                                )
-    sealed trait DistinctCheckType
-    case object RawLine        extends DistinctCheckType
-    case object UniqueLar      extends DistinctCheckType
-    case object ULI            extends DistinctCheckType
-    case object ULIActionTaken extends DistinctCheckType
-
-    def checkForDistinctElements(checkType: DistinctCheckType): Future[AggregationResult] = {
-      // checks the state, if the element is already there, it will return false
-      // if its not then it will add it and return true
-      def checkAndUpdate(state: scala.collection.mutable.Set[Long], incoming: Long): Boolean =
-        if (state.contains(incoming)) false
-        else {
-          state += incoming
-          true
-        }
-
-      val uploadProgram: Future[AggregationResult] =
-        uploadConsumerRawStr(submissionId)
-          .drop(1) // header
-          .via(framing("\n"))
-          .map(_.utf8String)
-          .map(_.trim)
-          .zip(Source.fromIterator(() => Iterator.from(2))) // rows start from #1 but we dropped the header line so we start at #2
-          .map {
-            case (line, rowNumber) => (LarCsvParser(line), line, rowNumber)
-          }
-          .collect {
-            case (Right(parsed), line, rowNumber) => (parsed, line, rowNumber)
-          }
-          .statefulMapConcat { () =>
-            // state is initialized once when stream is initialized and then reused for the remainder of the stream
-            val state: scala.collection.mutable.Set[Long] = scala.collection.mutable.HashSet.empty[Long]
-
-            (each: (LoanApplicationRegister, String, Int)) =>
-              each match {
-                case (lar: LoanApplicationRegister, rawLine: String, rowNumber: Int) =>
-                  checkType match {
-                    case RawLine =>
-                      val hashed = hashString(rawLine)
-                      List((checkAndUpdate(state, hashed), rowNumber, lar.loan.ULI))
-
-                    case UniqueLar =>
-                      val hashed = hashString(lar.larIdentifier.LEI + lar.loan.ULI.toUpperCase + lar.action.actionTakenType.code.toString.toUpperCase + lar.action.actionTakenDate.toString.toUpperCase)
-                      List((checkAndUpdate(state, hashed), rowNumber, lar.loan.ULI))
-
-                    case ULI =>
-                      val hashed = hashString(lar.loan.ULI.toUpperCase)
-                      List((checkAndUpdate(state, hashed), rowNumber, lar.loan.ULI))
-
-                    case ULIActionTaken => // For S306
-                      // Only look at ULIs where the actionTakenType.code == 1
-                      if (lar.action.actionTakenType == LoanOriginated) {
-                        val hashed = hashString(lar.action.actionTakenType.code.toString.toUpperCase + lar.loan.ULI.toUpperCase())
-                        List((checkAndUpdate(state, hashed), rowNumber, lar.loan.ULI))
-                      } else Nil
-                  }
-              }
-          }
-          .toMat(
-            Sink.fold(AggregationResult(totalCount = 0, distinctCount = 0, duplicateLineNumbers = Vector.empty, checkType, submissionId.lei)) {
-              // duplicate
-              case (acc, (persisted, rowNumber, uliOnWhichErrorTriggered)) if !persisted =>
-                acc.copy(
-                  acc.totalCount + 1,
-                  acc.distinctCount,
-                  acc.duplicateLineNumbers :+ rowNumber,
-                  uli = uliOnWhichErrorTriggered
-                ) //the ULI field here is shown as the "id" in /submissions/1/edits/Q600
-              // no duplicate
-              case (acc, _) => acc.copy(totalCount = acc.totalCount + 1, distinctCount = acc.distinctCount + 1)
-            }
-          )(Keep.right)
-          .named(s"checkForDistinctElements[$checkType]-" + submissionId)
-          .run()
-
-      uploadProgram.onComplete {
-        case Success(value) =>
-          logger.info(s"Check [$checkType] for distinct elements has passed for $submissionId")
-        case Failure(exception) =>
-          logger.error(s"Failed checking [$checkType] for distinct elements $submissionId", exception)
-      }
-      uploadProgram
-    }
-
     def validateAndPersistErrors(tsLar: TransmittalLar, checkType: String, vc: ValidationContext): Future[List[ValidationError]] = {
 
       logger.info(s"In validateAnPersistErrors for ${submissionId} for ${checkType}")
+
+      def ulisWithLineNumbers(uliToLineNumbers: Map[String, List[Int]]): String =
+        uliToLineNumbers.map { case (uli, lineNumbers) => s"Rows: ${lineNumbers.mkString(",")} with ULI: $uli"}.mkString(",")
 
       // see addTsFieldInformation in ValidationFlow which does something similar
       def enrichErrorInformation(tsLar: TransmittalLar, q600WarningPresent: Boolean, validationError: ValidationError): ValidationError = {
@@ -554,13 +467,13 @@ object HmdaValidationError
             s306.copyWithFields(
               ListMap(
                 "Universal Loan Identifier (ULI)" -> tsLar.uli,
-                "The following row numbers occur multiple times and have the same ULI with action type 1 (Loan Originated)" -> tsLar.duplicateLineNumbersUliActionType
-                  .mkString(start = "Rows: ", sep = ",", end = "")
+                "The following row numbers occur multiple times and have the same ULI with action type 1 (Loan Originated)" ->
+                  ulisWithLineNumbers(tsLar.duplicateUliToLineNumbersUliActionType)
               )).copy(uli=tsLar.ts.LEI)
           case s305 @ SyntacticalValidationError(_, `s305`, _, fields) =>
             s305.copyWithFields(
-              fields + ("The following row numbers occur multiple times" -> tsLar.duplicateLineNumbers
-                .mkString(start = "Rows: ", sep = ",", end = ""))
+              fields + ("The following ULIs at the given row numbers occur multiple times" ->
+                ulisWithLineNumbers(tsLar.duplicateUliToLineNumbers))
             )
           case s304 @ SyntacticalValidationError(_, `s304`, _, fields) =>
             s304.copyWithFields(
@@ -572,13 +485,13 @@ object HmdaValidationError
           case q600 @ QualityValidationError(uli,`q600name`, fields)  =>
             if (q600WarningPresent) {
               q600.copyWithFields(
-                fields + (s"The following row numbers have the same ULI. WARNING: Additionally there are rows in your data that have a duplicate ULI, LEI, Action Taken, and Action Taken Date. This edit logic will be changed in 2021 and become a Syntactical edit, unable to be bypassed until corrected." -> tsLar.duplicateLineNumbers
-                  .mkString(start = "Rows: ", sep = ",", end = ""))
+                fields + (s"The following row numbers have the same ULI. WARNING: Additionally there are rows in your data that have a duplicate ULI, LEI, Action Taken, and Action Taken Date. This edit logic will be changed in 2021 and become a Syntactical edit, unable to be bypassed until corrected." ->
+                  ulisWithLineNumbers(tsLar.duplicateUliToLineNumbers))
               )
             } else {
               q600.copyWithFields(
-                fields + (s"The following row numbers have the same ULI" -> tsLar.duplicateLineNumbers
-                  .mkString(start = "Rows: ", sep = ",", end = ""))
+                fields + (s"The following row numbers have the same ULI" ->
+                  ulisWithLineNumbers(tsLar.duplicateUliToLineNumbers))
               )
             }
 
@@ -608,9 +521,8 @@ object HmdaValidationError
       case "syntactical-validity" =>
         for {
           header        <- headerResultTest
-          rawLineResult <- checkForDistinctElements(RawLine)
-
-          s306Result    <- checkForDistinctElements(ULIActionTaken)
+          rawLineResult <- DistinctElements(DistinctElements.CheckType.RawLine, uploadConsumerRawStr(submissionId), submissionId)
+          s306Result    <- DistinctElements(DistinctElements.CheckType.ULIActionTaken, uploadConsumerRawStr(submissionId), submissionId)
           res <- validateAndPersistErrors(
             TransmittalLar(
               ts = header,
@@ -619,9 +531,9 @@ object HmdaValidationError
               larsDistinctCount = rawLineResult.distinctCount,
               uniqueLarsSpecificFields = -1,
               distinctUliCount = -1,
-              duplicateLineNumbers = rawLineResult.duplicateLineNumbers.toList,
+              duplicateUliToLineNumbers = rawLineResult.uliToDuplicateLineNumbers.mapValues(_.toList),
               distinctActionTakenUliCount = s306Result.distinctCount,
-              duplicateLineNumbersUliActionType = s306Result.duplicateLineNumbers.toList
+              duplicateUliToLineNumbersUliActionType = s306Result.uliToDuplicateLineNumbers.mapValues(_.toList)
             ),
             editType,
             validationContext
@@ -631,8 +543,8 @@ object HmdaValidationError
       case "quality" =>
         for {
           header    <- headerResultTest
-          uliResult <- checkForDistinctElements(ULI)
-          uniqueLarResul <- checkForDistinctElements(UniqueLar)
+          uliResult <- DistinctElements(DistinctElements.CheckType.ULI, uploadConsumerRawStr(submissionId), submissionId)
+          uniqueLarResul <- DistinctElements(DistinctElements.CheckType.UniqueLar, uploadConsumerRawStr(submissionId), submissionId)
           res <- validateAndPersistErrors(
             TransmittalLar(
               ts = header,
@@ -641,7 +553,7 @@ object HmdaValidationError
               larsDistinctCount = -1,
               uniqueLarsSpecificFields = uniqueLarResul.distinctCount,
               distinctUliCount = uliResult.distinctCount,
-              duplicateLineNumbers = uliResult.duplicateLineNumbers.toList
+              duplicateUliToLineNumbers = uliResult.uliToDuplicateLineNumbers.mapValues(_.toList)
             ),
             editType,
             validationContext
