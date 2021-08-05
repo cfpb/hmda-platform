@@ -59,10 +59,10 @@ lazy val dockerSettings = Seq(
   dockerBaseImage := "openjdk:17-jdk-alpine3.12",
   dockerRepository := Some("hmda"),
   dockerCommands := dockerCommands.value.flatMap {
-              case cmd@Cmd("FROM",_) => List(cmd, Cmd("RUN", "apk update && apk upgrade "),
-                  Cmd("RUN", "rm /var/cache/apk/*"))
-              case other => List(other)
-                        }
+    case cmd@Cmd("FROM",_) => List(cmd, Cmd("RUN", "apk update && apk upgrade "),
+      Cmd("RUN", "rm /var/cache/apk/*"))
+    case other => List(other)
+  }
 )
 
 lazy val packageSettings = Seq(
@@ -98,11 +98,18 @@ lazy val `hmda-root` = (project in file("."))
     `submission-errors`
   )
 
-val latestGitTag = settingKey[String]("The version of Scala used for building.")
+val latestGitTag = settingKey[String]("The latest git tag.")
 ThisBuild / latestGitTag := {
   import scala.sys.process._
-  val tag: String = "git describe --tags".lineStream_!.head
-  tag
+
+  val hasTags = "git tag".lineStream_!.nonEmpty
+
+  if (hasTags) {
+    "git describe --tags".lineStream_!.head
+  } else {
+    Keys.sLog.value.warn("No git tags in the checkout, using '-' for build info.")
+    "-"
+  }
 }
 
 lazy val common = (project in file("common"))
