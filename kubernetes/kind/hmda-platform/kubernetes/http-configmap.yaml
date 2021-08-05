@@ -6,4 +6,4 @@ data:
 kind: ConfigMap
 metadata:
   name: http-configmap
-  namespace: cass-operator
+  namespace: hmda-kind

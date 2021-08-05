@@ -1,5 +1,11 @@
 # HMDA-Platform, Cassandra and Strimzi with TLS
 
+**tl;dr** To run the hmda-platform with TLS we need to start an init container with the certs for Cassandra and Strimzi mounted. Then create a java keystore and mount it on the hmda-platform container.
+
+**Future _ToDo_s:**
+- Separate Cassandra, Strimzi and Platofrm to different namespace using KMS to manage certs
+- Abstract the helm commands so they could be used for any environment
+
 **NOTE:** I have Docker configured with 8GB Ram and 6 CPUs. YMMV
 
 ### Build init container
@@ -13,17 +19,22 @@ docker push dtr-registry.cfpb.gov/hmda/hmda-platform:hmda_init
 kind create cluster --config kind-config.yaml
 ```
 
+### Create namespace
+```sh
+kubectl create namespace hmda-kind
+```
+
 ### Deploy Cassandra
 ```sh
 # Install the operator
-kubectl create -f https://raw.githubusercontent.com/k8ssandra/cass-operator/v1.7.0/docs/user/cass-operator-manifests.yaml --context kind-kind
+kubectl create -f https://raw.githubusercontent.com/k8ssandra/hmda-kind/v1.7.0/docs/user/hmda-kind-manifests.yaml --context kind-kind
 
 # Install storageclass (may have some errors)
-kubectl create -f https://raw.githubusercontent.com/k8ssandra/cass-operator/master/operator/k8s-flavors/kind/rancher-local-path-storage.yaml --context kind-kind
+kubectl create -f https://raw.githubusercontent.com/k8ssandra/hmda-kind/master/operator/k8s-flavors/kind/rancher-local-path-storage.yaml --context kind-kind
 
 # Create dc2 cluster
 # This will take a few (~7 mins)
-kubectl create -n cass-operator -f dc2.yaml --context kind-kind
+kubectl create -n hmda-kind -f dc2.yaml --context kind-kind
 ```
 
 ### Deploy Kafka
@@ -32,17 +43,17 @@ helm repo add strimzi https://strimzi.io/charts/
 
 # Install the operator
 # This will take a few  (~3mins)
-helm install strimzi strimzi/strimzi-kafka-operator --namespace cass-operator
+helm install strimzi strimzi/strimzi-kafka-operator --namespace hmda-kind
 
 # Create cluster
 # This will take a few  (~3mins)
-kubectl apply -f strimzi-kafka-cluster.yaml --context kind-kind --namespace cass-operator
+kubectl apply -f strimzi-kafka-cluster.yaml --context kind-kind --namespace hmda-kind
 ```
 
 ### Deploy akhq (Optional)
 ```sh
 helm repo add akhq https://akhq.io/
-cd akhq && helm install akhq . --namespace cass-operator && cd ..
+cd akhq && helm install akhq . --namespace hmda-kind && cd ..
 ```
 
 ### Apply `configmaps`
@@ -57,7 +68,7 @@ kubectl apply -f kubernetes/timed-guards.yaml
 ```sh
 # from the hmda-platform folder
 helm upgrade --install --force \
---namespace=cass-operator \
+--namespace=hmda-kind \
 --values=kubernetes/kind/hmda-platform/helm/values.yaml \
 --set image.repository=dtr-registry.cfpb.gov/hmda/hmda-platform \
 --set image.tag=kind-tls-build \
@@ -71,7 +82,7 @@ kubernetes/kind/hmda-platform/helm
 kubectl apply -f centos-pod.yaml
 
 # exec into pod
-kubectl -n cass-operator  exec -it pod/$(kubectl get pods -n cass-operator | grep centos | awk '{print $1}' | head -n 1)  -- bash
+kubectl -n hmda-kind  exec -it pod/$(kubectl get pods -n hmda-kind | grep centos | awk '{print $1}' | head -n 1)  -- bash
 
 # Check the platform status
 curl hmda-platform:8080

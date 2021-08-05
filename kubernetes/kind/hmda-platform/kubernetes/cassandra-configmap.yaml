@@ -6,4 +6,4 @@ data:
 kind: ConfigMap
 metadata:
   name: cassandra-configmap
-  namespace: cass-operator
+  namespace: hmda-kind

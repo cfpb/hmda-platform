@@ -4,4 +4,4 @@ data:
 kind: ConfigMap
 metadata:
   name: kafka-configmap
-  namespace: cass-operator
+  namespace: hmda-kind

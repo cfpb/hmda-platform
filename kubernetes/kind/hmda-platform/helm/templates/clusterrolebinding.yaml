@@ -5,7 +5,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: {{.Values.service.account.name}}
-    namespace: cass-operator
+    namespace: hmda-kind
 roleRef:
   kind: ClusterRole
   name: pod-reader-{{ .Release.Name }}

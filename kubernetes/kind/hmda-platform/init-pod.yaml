@@ -5,7 +5,7 @@ metadata:
   labels:
     run: hmda-init
   name: hmda-init
-  namespace: cass-operator
+  namespace: hmda-kind
 spec:
   containers:
   - image: dtr-registry.cfpb.gov/hmda/hmda-platform:hmda_init

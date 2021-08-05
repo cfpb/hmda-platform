@@ -6,7 +6,7 @@ metadata:
   labels:
     app: {{ template "hmda-platform.name" . }}
   name: {{ template "hmda-platform.fullname" . }}
-  namespace: cass-operator
+  namespace: hmda-kind
 spec:
   replicas: 3
   selector:

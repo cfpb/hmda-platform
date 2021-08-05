@@ -5,7 +5,7 @@ metadata:
   labels:
     run: strimzi-pod
   name: strimzi-pod
-  namespace: cass-operator
+  namespace: hmda-kind
 spec:
   containers:
   - image: strimzi/kafka

@@ -5,7 +5,7 @@ metadata:
   labels:
     run: centos
   name: centos
-  namespace: cass-operator
+  namespace: hmda-kind
 spec:
   containers:
   - image: centos:8
