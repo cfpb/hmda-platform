@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: hmda-init
+  name: hmda-init
+  namespace: hmda-kind
+spec:
+  containers:
+  - image: dtr-registry.cfpb.gov/hmda/hmda-platform:hmda_init
+    name: hmda-init
+    command: ["/bin/sleep", "3650d"]
+    resources: {}
+    volumeMounts:
+      - mountPath: /opt/openjdk-16/lib/security
+        name: jks
+        subPath: cacerts
+      - mountPath: certs/ca-cert
+        name: ca-cert
+        readOnly: true
+      - mountPath: certs/cass-key
+        name: cass-key
+        readOnly: true
+      - mountPath: certs/strimzi-ca
+        name: strimzi-ca
+        readOnly: true
+      - mountPath: certs/strimzi-p12
+        name: strimzi-p12
+        readOnly: true
+      - mountPath: certs/strimzi-password
+        name: strimzi-password
+        readOnly: true
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+  volumes:
+    - name: tz-config
+      hostPath:
+        path: /usr/share/zoneinfo/America/New_York
+    - emptyDir: {}
+      name: jks
+    - name: ca-cert
+      secret:
+        defaultMode: 420
+        items:
+          - key: cert
+            path: cass-cert
+        secretName: dc2-ca-keystore
+    - name: cass-key
+      secret:
+        defaultMode: 420
+        items:
+          - key: key
+            path: cass-key
+        secretName: dc2-ca-keystore
+    - name: strimzi-ca
+      secret:
+        defaultMode: 420
+        items:
+          - key: ca.crt
+            path: strimzi-ca
+        secretName: my-cluster-cluster-ca-cert
+    - name: strimzi-p12
+      secret:
+        defaultMode: 420
+        items:
+          - key: ca.crt
+            path: strimzi-p12
+        secretName: my-cluster-cluster-ca-cert
+    - name: strimzi-password
+      secret:
+        defaultMode: 420
+        items:
+          - key: ca.crt
+            path: strimzi-password
+        secretName: my-cluster-cluster-ca-cert
+status: {}

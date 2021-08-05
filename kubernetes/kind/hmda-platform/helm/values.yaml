@@ -1,0 +1,110 @@
+# Default values for hmda-platform.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+namespace: default
+
+keycloak:
+  auth.url: https://192.168.99.100:8443/auth
+
+rbac:
+  enabled: false
+
+replicaCount: 3
+
+image:
+  repository: hmda/hmda-platform
+  tag: v2.7.2
+  pullPolicy: Always
+  commitId: 
+
+hmda:
+  actorSystemName: hmda2
+  runtimeMode: kind
+  podNamespace: default
+  apiNamespace: hmda-api
+  serviceNamespace: default.svc.cluster.local
+
+kafka:
+  institutionsTopic: institution
+  modifiedLarTopic: hmda-modified-lar
+  irsTopic: hmda-irs
+  analyticsTopic: hmda-analytics
+  signTopic: hmda-sign
+  disclosureTopic: hmda-spark-disclosure
+
+
+service:
+  type: ClusterIP
+  account:
+    name: hmda-service-account-default
+  name: hmda-platform
+
+#ambassador:
+#  port: 80
+#  service:
+#    type: NodePort
+
+remoting:
+  name: remoting
+  protocol: TCP
+  port: 2551
+
+filing:
+  name: filing
+  protocol: TCP
+  port: 8080
+
+admin:
+  name: admin
+  protocol: TCP
+  port: 8081
+
+public:
+  name: public
+  protocol: TCP
+  port: 8082
+
+cluster:
+  name: management
+  protocol: TCP
+  port: 8558
+
+bootstrap:
+  name: bootstrap
+  protocol: TCP
+  port: 8558
+
+websockets:
+  name: websockets
+  protocol: TCP
+  port: 9080
+
+grpc:
+  check_digit:
+    port: 60080
+    host: check-digit-grpc.default.svc.cluster.local
+  census:
+    port: 60081
+    host: census-api-grpc.default.svc.cluster.local
+
+
+ingress:
+  enabled: false
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  path: /
+  hosts:
+    - hmda-platform.local
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+nodeSelector: {}
+
+tolerations: []
+
+logs:
+  cassandra: TRACE

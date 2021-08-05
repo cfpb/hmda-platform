@@ -1,0 +1,287 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    reloader.stakater.com/search: "true"
+  labels:
+    app: {{ template "hmda-platform.name" . }}
+  name: {{ template "hmda-platform.fullname" . }}
+  namespace: hmda-kind
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: {{ template "hmda-platform.name" . }}
+      release: {{ .Release.Name }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: {{ template "hmda-platform.name" . }}
+        release: {{ .Release.Name }}
+        actorSystemName: {{ .Values.hmda.actorSystemName }}
+    spec:
+      affinity:
+{{ toYaml .Values.affinity | indent 8 }}
+      serviceAccountName: {{ .Values.service.account.name }}
+      initContainers:
+      - args:
+          - openssl pkcs12 -export -in certs/ca-cert/cass-cert
+            -inkey certs/cass-key/cass-key -out server.p12 -name cass-tls
+            -CAfile certs/ca-cert/cass-cert -caname root -passin pass:changeit
+            -passout pass:changeit && keytool -importkeystore
+            -deststorepass changeit -destkeypass changeit -destkeystore /opt/openjdk-16/lib/security/cacerts
+            -srckeystore server.p12 -srcstoretype PKCS12 -srcstorepass changeit -alias
+            cass-tls -noprompt
+            && keytool -deststorepass changeit -destkeypass changeit
+            -destkeystore /opt/openjdk-16/lib/security/cacerts -alias StrimmziCARoot -import
+            -file certs/strimzi-ca/strimzi-ca -noprompt
+        command:
+          - /bin/sh
+          - -c
+          - --
+        image: dtr-registry.cfpb.gov/hmda/hmda-platform:hmda_init
+        imagePullPolicy: IfNotPresent
+        name: openjdk-init
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+          - mountPath: /opt/openjdk-16/lib/security
+            name: jks
+            subPath: cacerts
+          - mountPath: certs/ca-cert
+            name: ca-cert
+            readOnly: true
+          - mountPath: certs/cass-key
+            name: cass-key
+            readOnly: true
+          - mountPath: certs/strimzi-ca
+            name: strimzi-ca
+            readOnly: true
+          - mountPath: certs/strimzi-p12
+            name: strimzi-p12
+            readOnly: true
+          - mountPath: certs/strimzi-password
+            name: strimzi-password
+            readOnly: true
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: tz-config
+          hostPath:
+            path: /usr/share/zoneinfo/America/New_York
+        - emptyDir: {}
+          name: jks
+        - name: ca-cert
+          secret:
+            defaultMode: 420
+            items:
+              - key: cert
+                path: cass-cert
+            secretName: dc2-ca-keystore
+        - name: cass-key
+          secret:
+            defaultMode: 420
+            items:
+              - key: key
+                path: cass-key
+            secretName: dc2-ca-keystore
+        - name: strimzi-ca
+          secret:
+            defaultMode: 420
+            items:
+              - key: ca.crt
+                path: strimzi-ca
+            secretName: my-cluster-cluster-ca-cert
+        - name: strimzi-p12
+          secret:
+            defaultMode: 420
+            items:
+              - key: ca.crt
+                path: strimzi-p12
+            secretName: my-cluster-cluster-ca-cert
+        - name: strimzi-password
+          secret:
+            defaultMode: 420
+            items:
+              - key: ca.crt
+                path: strimzi-password
+            secretName: my-cluster-cluster-ca-cert
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        volumeMounts:
+          - name: tz-config
+            mountPath: /etc/localtime
+          - mountPath: /etc/tls
+            name: jks
+            readOnly: true
+            subPath: cacerts
+        resources:
+{{ toYaml .Values.resources | indent 12 }}
+        securityContext:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL              
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: _JAVA_OPTIONS
+          value: >
+            -Djavax.net.ssl.trustStore=/etc/tls/cacerts
+            -Djavax.net.ssl.trustStorePassword=changeit
+            -Dhttps.protocols=SSLv3,TLSv1,TLSv1.1,TLSv1.2
+        - name: PLATFORM_NAMESPACE
+          value: default
+        - name: CURRENT_YEAR
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: currentYear
+        - name: RULES_YEARLY_FILING_YEARS_ALLOWED
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: yearsAllowed
+        - name: RULES_QF_FILING_YEARS_ALLOWED
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: quarterlyYearsAllowed
+        - name: RULES_QF_Q1_START
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: q1Start
+        - name: RULES_QF_Q1_END
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: q1End
+        - name: RULES_QF_Q2_START
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: q2Start
+        - name: RULES_QF_Q2_END
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: q2End
+        - name: RULES_QF_Q3_START
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: q3Start
+        - name: RULES_QF_Q3_END
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: q3End
+        - name: KAFKA_INSTITUTIONS_TOPIC
+          value: {{.Values.kafka.institutionsTopic}}
+        - name: KAFKA_SIGN_TOPIC
+          value: {{.Values.kafka.signTopic}}
+        - name: COMMIT_ID
+          value: {{ .Values.image.commitId }}
+        - name: HMDA_RUNTIME_MODE
+          value: {{ .Values.hmda.runtimeMode }}
+        - name: KUBERNETES_HMDA_POD_NAMESPACE
+          value: {{.Values.hmda.podNamespace}}
+        - name: KUBERNETES_HMDA_SERVICE_NAME
+          value: {{.Values.hmda.apiNamespace}}
+        - name: KUBERNETES_HMDA_SERVICE_NAMESPACE
+          value: {{.Values.hmda.serviceNamespace}}
+        - name: KUBERNETES_HMDA_POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: HOST_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        - name: CASSANDRA_CLUSTER_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              name: cassandra-configmap
+              key: cassandra-hosts
+        - name: CASSANDRA_JOURNAL_KEYSPACE
+          valueFrom:
+            configMapKeyRef:
+              name: cassandra-configmap
+              key: cassandra-keyspace
+        - name: CASSANDRA_SNAPSHOT_KEYSPACE
+          valueFrom:
+            configMapKeyRef:
+              name: cassandra-configmap
+              key: cassandra-keyspace-snapshot
+        - name: CASSANDRA_CLUSTER_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: cluster2-superuser
+              key: username
+        - name: CASSANDRA_CLUSTER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cluster2-superuser
+              key: password
+        - name: CASSANDRA_LOG_LEVEL
+          value: {{ .Values.logs.cassandra }}
+        - name: KEYCLOAK_AUTH_URL
+          valueFrom:
+            configMapKeyRef:
+              name: http-configmap
+              key: auth.url
+        - name: KAFKA_CLUSTER_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              name: kafka-configmap
+              key: kafka.hosts
+        - name: HTTP_CENSUS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: http-configmap
+              key: census.host
+        - name: HTTP_CENSUS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: http-configmap
+              key: census.port
+        - name: _JAVA_OPTIONS
+          value: >
+            -Djavax.net.ssl.trustStore=/etc/keystore/node-keystore.jks
+            -Djavax.net.ssl.trustStorePassword=changeit
+            -Dhttps.protocols=SSLv3,TLSv1,TLSv1.1,TLSv1.2
+        - name: TRUSTSTORE_PATH
+          value: "/etc/tls/cacerts"
+        - name: TRUSTSTORE_PASSWORD
+          value: "changeit"
+#        livenessProbe:
+#          tcpSocket:
+#            port: {{ .Values.bootstrap.port }}
+#        readinessProbe:
+#          httpGet:
+#            path: /ready
+#            port: {{ .Values.bootstrap.name }}
+        ports:
+        # akka remoting
+        - name: {{ .Values.remoting.name }}
+          containerPort: {{ .Values.remoting.port }}
+          protocol: {{ .Values.remoting.protocol }}
+        # akka-management bootstrap
+        - name: {{ .Values.bootstrap.name }}
+          containerPort: {{ .Values.bootstrap.port }}
+          protocol: {{ .Values.bootstrap.protocol }}
+        # external http
+        - name: {{ .Values.cluster.name }}
+          containerPort: {{ .Values.cluster.port }}
+          protocol: {{ .Values.cluster.protocol }}

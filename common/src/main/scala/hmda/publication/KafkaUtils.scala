@@ -6,11 +6,14 @@ import akka.actor.typed.scaladsl.adapter._
 import akka.kafka.ProducerSettings
 import akka.kafka.scaladsl.Producer
 import akka.stream.Materializer
-import akka.stream.scaladsl.{ Keep, Source }
+import akka.stream.scaladsl.{Keep, Source}
 import com.typesafe.config.ConfigFactory
 import hmda.messages.institution.InstitutionEvents.InstitutionKafkaEvent
 import hmda.serialization.kafka.InstitutionKafkaEventsSerializer
-import org.apache.kafka.clients.producer.{ ProducerRecord, Producer => KafkaProducer }
+import org.apache.kafka.clients.CommonClientConfigs
+import org.apache.kafka.clients.producer.{ProducerRecord, Producer => KafkaProducer}
+import org.apache.kafka.common.config.SslConfigs
+import org.apache.kafka.common.security.auth.SecurityProtocol
 import org.apache.kafka.common.serialization.StringSerializer
 
 import scala.concurrent.Future
@@ -19,6 +22,9 @@ object KafkaUtils {
 
   val config     = ConfigFactory.load()
   val kafkaHosts = config.getString("kafka.hosts")
+  val truststoreLocation = config.getString("kafka.ssl.truststore.location")
+  val truststorePassword = config.getString("kafka.ssl.truststore.password")
+  val endpointIdAlgo = config.getString("kafka.ssl.endpoint")
 
   def getStringKafkaProducer(system: ActorSystem[_]): KafkaProducer[String, String] = {
 
@@ -26,6 +32,7 @@ object KafkaUtils {
     val producerSettings =
       ProducerSettings(kafkaConfig, new StringSerializer, new StringSerializer)
         .withBootstrapServers(kafkaHosts)
+        .withProperties(getKafkaConfig)
 
     producerSettings.createKafkaProducer()
   }
@@ -34,7 +41,21 @@ object KafkaUtils {
     val producerSettings =
       ProducerSettings(system.toClassic, new StringSerializer, new InstitutionKafkaEventsSerializer)
         .withBootstrapServers(kafkaHosts)
+        .withProperties(getKafkaConfig)
     producerSettings.createKafkaProducer()
+  }
+
+  private def getKafkaConfig: Map[String, String] = {
+    if (!truststoreLocation.isEmpty && !truststorePassword.isEmpty) {
+      Map(
+        CommonClientConfigs.SECURITY_PROTOCOL_CONFIG -> SecurityProtocol.SSL.name,
+        SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG -> truststoreLocation,
+        SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG -> truststorePassword,
+        SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG -> endpointIdAlgo
+      )
+    } else {
+      Map()
+    }
   }
 
   def produceInstitutionRecord(

@@ -1,0 +1,7 @@
+apiVersion: v1
+data:
+  kafka.hosts: my-cluster-kafka-bootstrap:9093
+kind: ConfigMap
+metadata:
+  name: kafka-configmap
+  namespace: hmda-kind

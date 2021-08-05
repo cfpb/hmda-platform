@@ -1,0 +1,9 @@
+apiVersion: v1
+data:
+  cassandra-hosts: cluster2-dc2-all-pods-service:9142
+  cassandra-keyspace: hmda2_journal
+  cassandra-keyspace-snapshot: hmda2_snapshot
+kind: ConfigMap
+metadata:
+  name: cassandra-configmap
+  namespace: hmda-kind

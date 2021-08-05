@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: strimzi-pod
+  name: strimzi-pod
+  namespace: hmda-kind
+spec:
+  containers:
+  - image: strimzi/kafka
+    name: strimzi-pod
+    command: ["/bin/sleep", "3650d"]
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}

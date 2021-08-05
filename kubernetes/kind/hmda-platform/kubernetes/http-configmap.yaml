@@ -1,0 +1,9 @@
+apiVersion: v1
+data:
+  auth.url: ""
+  census.host: ""
+  census.port: "9093"
+kind: ConfigMap
+metadata:
+  name: http-configmap
+  namespace: hmda-kind
