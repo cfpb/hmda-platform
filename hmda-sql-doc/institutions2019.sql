@@ -26,7 +26,7 @@ SET default_with_oids = false;
 -- Name: institutions2019; Type: TABLE; Schema: hmda_user; Owner: hmda_user
 --
 
-CREATE TABLE hmda_beta_user.institutions2019 (
+CREATE TABLE hmda_user.institutions2019 (
     lei character varying NOT NULL,
     activity_year integer NOT NULL,
     agency integer NOT NULL,
@@ -49,15 +49,15 @@ CREATE TABLE hmda_beta_user.institutions2019 (
 
 );
 
-ALTER TABLE hmda_beta_user.institutions2019
+ALTER TABLE hmda_user.institutions2019
     ADD COLUMN notes text not null default '';
-ALTER TABLE hmda_beta_user.institutions2019
+ALTER TABLE hmda_user.institutions2019
     ALTER COLUMN notes DROP DEFAULT;
 ALTER TABLE hmda_user.institutions2019 ADD COLUMN created_at TIMESTAMP;
 ALTER TABLE hmda_user.institutions2019 ALTER COLUMN created_at SET DEFAULT now();
 
-ALTER TABLE hmda_user.institutions2019 ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
-ALTER TABLE hmda_beta_user.institutions2019 OWNER TO hmda_user;
+ALTER TABLE hmda_user.institutions2019 ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE hmda_user.institutions2019 OWNER TO hmda_user;
 
 
 
@@ -66,7 +66,7 @@ ALTER TABLE hmda_beta_user.institutions2019 OWNER TO hmda_user;
 -- Name: institutions2019 institutions2019_pkey; Type: CONSTRAINT; Schema: hmda_user; Owner: hmda_user
 --
 
-ALTER TABLE ONLY hmda_beta_user.institutions2019
+ALTER TABLE ONLY hmda_user.institutions2019
     ADD CONSTRAINT institutions2019_pkey PRIMARY KEY (lei);
 
 

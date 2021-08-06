@@ -29,7 +29,7 @@ SET default_with_oids = false;
 CREATE TABLE hmda_user.institutions_history_notes (
     id integer NOT NULL,
     lei character varying NOT NULL,
-    history_id,
+    history_id character varying NOT NULL,
     notes character varying NOT NULL
 );
 

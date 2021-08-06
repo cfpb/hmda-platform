@@ -34,6 +34,7 @@ SET default_with_oids = false;
 
 CREATE TABLE hmda_user.modifiedlar2018 (
     id integer NOT NULL,
+    uniq_id integer NOT NULL,
     lei character varying NOT NULL,
     loan_type integer,
     loan_purpose integer,
@@ -139,7 +140,6 @@ CREATE TABLE hmda_user.modifiedlar2018 (
     percent_median_msa_income character varying,
     dwelling_category character varying,
     loan_product_type character varying
-    created_at timestamp without time zone DEFAULT now(),
 );
 
 
@@ -195,7 +195,7 @@ ALTER TABLE ONLY hmda_user.modifiedlar2018
 CREATE INDEX modifiedlar2018_lei_idx ON hmda_user.modifiedlar2018 USING btree (lei);
 CREATE INDEX modifiedlar2018_sex_categorization_idx ON hmda_user.modifiedlar2018 USING btree (sex_categorization);
 CREATE INDEX modifiedlar2018_race_categorization_idx ON hmda_user.modifiedlar2018 USING btree (race_categorization);
-CREATE INDEX modifiedlar2018_ethnicity_categorization_idx ON hmda_user.modifiedlar USING btree (ethnicity_categorization);
+CREATE INDEX modifiedlar2018_ethnicity_categorization_idx ON hmda_user.modifiedlar2018 USING btree (ethnicity_categorization);
 CREATE INDEX modifiedlar2018_loan_product_type_idx ON hmda_user.modifiedlar2018 USING btree (loan_product_type);
 CREATE INDEX modifiedlar2018_msa_md_idx ON hmda_user.modifiedlar2018 USING btree (msa_md);
 CREATE INDEX modifiedlar2018_state_idx ON hmda_user.modifiedlar2018 USING btree (state);
@@ -212,13 +212,13 @@ CREATE INDEX modifiedlar2018_state_filing_year_idx ON hmda_user.modifiedlar2018 
 CREATE INDEX modifiedlar2018_total_units_year_idx ON hmda_user.modifiedlar2018 USING btree (total_units);
 CREATE INDEX modifiedlar2018_median_age_year_idx ON hmda_user.modifiedlar2018 USING btree (median_age_calculated);
 
-alter table modifiedlar2018
+alter table hmda_user.modifiedlar2018
 add column uli character varying;
 
-alter table modifiedlar2018
+alter table hmda_user.modifiedlar2018
 add column action_taken_date integer;
 
-alter table modifiedlar2018 add column checksum varchar;
+alter table hmda_user.modifiedlar2018 add column checksum varchar;
 
 
 -- Completed on 2019-06-05 11:44:50 EDT
