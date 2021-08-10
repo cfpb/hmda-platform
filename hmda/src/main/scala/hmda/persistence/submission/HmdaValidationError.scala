@@ -181,13 +181,13 @@ object HmdaValidationError
             blockingEc,
             timeout
           )
-          _ = tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(50))
+          _ = tracker ! ValidationDelta(ValidationType.Quality, InProgress(50))
           _ = log.info(s"Finished ValidateLar Quality for $submissionId")
           _ = log.info(s"Started validateAsyncLar - Quality for $submissionId")
           larAsyncErrorsQuality <- validateAsyncLar("quality", ctx, submissionId)
             .runWith(Sink.ignore)
           _ = log.info(s"Finished ValidateAsyncLar Quality for $submissionId")
-          _ = tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(99))
+          _ = tracker ! ValidationDelta(ValidationType.Quality, InProgress(99))
         } yield (larErrors, larAsyncErrorsQuality)
 
         fQuality.onComplete {

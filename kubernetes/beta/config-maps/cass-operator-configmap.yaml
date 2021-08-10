@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cassandra-configmap
+data:
+  cassandra-hosts: cluster1-dc1-service.cass-operator
+  cassandra-keyspace: hmda2_journal_beta
+  cassandra-keyspace-snapshot: hmda2_snapshot_beta
