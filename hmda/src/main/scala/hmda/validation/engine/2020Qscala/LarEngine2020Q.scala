@@ -9,6 +9,7 @@ import hmda.validation.rules.lar.syntactical.{S300, S301}
 import hmda.validation.rules.lar.validity._
 import hmda.validation.rules.lar.validity._2020
 import hmda.census.records.CensusRecords
+import hmda.validation.rules.lar.validity._2020.V716
 
 private[engine] object LarEngine2020Q extends ValidationEngine[LoanApplicationRegister] {
 
@@ -52,6 +53,7 @@ private[engine] object LarEngine2020Q extends ValidationEngine[LoanApplicationRe
     V625_1,
     V625_2.withIndexedTracts(CensusRecords.indexedTract2020),
     V626.withIndexedCounties(CensusRecords.indexedCounty2020),
+    V627.withIndexedCounties(CensusRecords.indexedCounty2020),
     V628_1,
     V628_2,
     V628_3,
@@ -230,7 +232,8 @@ private[engine] object LarEngine2020Q extends ValidationEngine[LoanApplicationRe
     V712,
     V713,
     V714,
-    V715
+    V715,
+    V716.withIndexedCounties(CensusRecords.indexedCounty2020)
   )
 
   override val qualityChecks = Vector(
