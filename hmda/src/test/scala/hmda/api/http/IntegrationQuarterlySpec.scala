@@ -56,7 +56,7 @@ class IntegrationQuarterlySpec
   val config: Config                       = system.settings.config
 
   val institutionAdminRoute = InstitutionAdminHttpApi.create(config, sharding)
-  val submissionAdminRoute  = SubmissionAdminHttpApi.create(log, config, sharding)
+  val submissionAdminRoute  = SubmissionAdminHttpApi.create(log, config, sharding, duration)
   val filingRoute           = FilingHttpApi.create(log, sharding)
   val submissionRoute       = SubmissionHttpApi.create(log, sharding)
   val editsRoute            = EditsHttpApi.create(log, sharding)
