@@ -21,21 +21,22 @@ import cats.implicits._
 import com.typesafe.config.Config
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.admin.SubmissionAdminHttpApi.{lineCount, pipeDelimitedFileStream, validateRawSubmissionId}
-import hmda.api.http.model.admin.{LeiSubmissionSummaryResponse, SubmissionSummaryResponse}
+import hmda.api.http.model.admin.{LeiSubmissionSummaryResponse, SubmissionSummaryResponse, YearlySubmissionSummaryResponse}
 import hmda.auth.OAuth2Authorization
 import hmda.messages.filing.FilingCommands.{GetLatestSignedSubmission, GetOldestSignedSubmission}
-import hmda.messages.submission.EditDetailsEvents.EditDetailsAdded
 import hmda.messages.submission.HmdaRawDataEvents.LineAdded
 import hmda.messages.submission.SubmissionCommands.GetSubmission
+import hmda.messages.submission.SubmissionProcessingCommands.GetHmdaValidationErrorState
 import hmda.model.filing.submission.{Submission, SubmissionId}
 import hmda.persistence.filing.FilingPersistence.selectFiling
-import hmda.persistence.submission.{EditDetailsPersistence, HmdaProcessingUtils, SubmissionPersistence}
+import hmda.persistence.submission.HmdaValidationError.selectHmdaValidationError
+import hmda.persistence.submission.{HmdaProcessingUtils, SubmissionPersistence}
 import hmda.query.HmdaQuery
-import hmda.query.HmdaQuery.eventsByPersistenceId
 import hmda.utils.YearUtils
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
 
+import scala.collection.immutable.ListMap
 import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
@@ -134,17 +135,6 @@ private class LeiSubmissionSummary(log: Logger, clusterSharding: ClusterSharding
     }
   }
 
-  private def editCount(submissionId: SubmissionId): Future[Int] = {
-    val persistenceId = s"${EditDetailsPersistence.name}-$submissionId"
-
-    eventsByPersistenceId(persistenceId)
-      .collect {
-        case evt: EditDetailsAdded => evt
-      }
-      .toMat(Sink.fold[Int, EditDetailsAdded](0)((acc, _) => acc + 1))(Keep.right)
-      .run()
-  }
-
   private def submissionSummary(submissionId: SubmissionId): Future[Option[SubmissionSummaryResponse]] = {
     val submissionRef = SubmissionPersistence.selectSubmissionPersistence(clusterSharding, submissionId)
     (submissionRef ? GetSubmission).flatMap {
@@ -152,11 +142,24 @@ private class LeiSubmissionSummary(log: Logger, clusterSharding: ClusterSharding
       case Some(submission) =>
         for {
           lines <- SubmissionAdminHttpApi.lineCount(submissionId)
-          edits <- editCount(submissionId)
+          hmdaValidationError = selectHmdaValidationError(clusterSharding, submissionId)
+          edits <- hmdaValidationError ? (ref => GetHmdaValidationErrorState(submissionId, ref))
         } yield {
-          Some(SubmissionSummaryResponse(submissionId.toString, submission.status.code, lines, edits))
+          Some(SubmissionSummaryResponse(submissionId.toString, submission.status.code, lines,
+            edits.validity.size, edits.syntactical.size, edits.quality.size, edits.`macro`.size))
         }
     }
+  }
+
+  private def yearlySubmissionSummary(submissionIds: List[SubmissionId]): Future[YearlySubmissionSummaryResponse] = {
+    Source(submissionIds)
+      .mapAsync(1)(submissionSummary)
+      .collect {
+        case Some(submissionSummary) => submissionSummary
+      }
+      .toMat(Sink.seq)(Keep.right)
+      .run()
+      .map(submissionSummaries => YearlySubmissionSummaryResponse(submissionIds.size, submissionSummaries.toList.sortBy(_.submissionId)))
   }
 
   def leiSubmissionSummaryStream: Source[LeiSubmissionSummaryResponse, NotUsed] = {
@@ -164,14 +167,12 @@ private class LeiSubmissionSummary(log: Logger, clusterSharding: ClusterSharding
       .mapConcat(identity)
       .mapAsync(1) { case (lei, submissionIds) =>
         log.info(s"For lei: $lei, found submission count: ${submissionIds.size}")
-        Source(submissionIds.toList)
-          .mapAsync(1)(submissionSummary)
-          .collect {
-            case Some(submissionSummary) => submissionSummary
-          }
+
+        Source(submissionIds.groupBy(_.period.year))
+          .mapAsync(1) { case (year, submissionIds) => yearlySubmissionSummary(submissionIds.toList).map(year -> _) }
           .toMat(Sink.seq)(Keep.right)
           .run()
-          .map(submissionSummaries => LeiSubmissionSummaryResponse(lei, submissionIds.size, submissionSummaries.toList))
+          .map(yearlySummaries => LeiSubmissionSummaryResponse(lei, ListMap(yearlySummaries.sortBy(_._1).map { case (k, v) => (k.toString, v) }: _*)))
       }
   }
 }
@@ -303,6 +304,7 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
             .leiSubmissionSummaryStream
             .toMat(Sink.seq)(Keep.right)
             .run()
+            .map(_.sortBy(_.lei))
 
           onComplete(leiSubmissionSummaries) {
             case Failure(exception) =>
