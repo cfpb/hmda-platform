@@ -128,7 +128,8 @@ private class LeiSubmissionSummary(log: Logger, clusterSharding: ClusterSharding
         }
       }
   }
-
+  //TODO: In this method we know we will only be sending ONE lei. But the way this method is coded at the moment it will keep looping over all Submissions even after finding the one that matches
+  //TODO Continued: I feel this method can be optimized for running. It should stop at finding the first instance or maybe there is even a better way to do this?
   private def submissionIdsStreamForLei (lei: String): Source[SubmissionId, NotUsed] = {
     val submissionPrefix = SubmissionPersistence.name + "-"
 
@@ -137,12 +138,9 @@ private class LeiSubmissionSummary(log: Logger, clusterSharding: ClusterSharding
       .currentPersistenceIds()
       .mapConcat { persistenceId =>
         if (persistenceId.startsWith(submissionPrefix+lei)) {
-          println("Printing the one passed in: " + persistenceId)
-          println("stripPrefix: " + persistenceId.stripPrefix(submissionPrefix))
           validateRawSubmissionId(persistenceId.stripPrefix(submissionPrefix)) match {
             case Valid(submissionId) => List(submissionId)
             case Invalid(e) =>
-              println("can't parse yo")
               log.error(s"Cannot parse submission id from persistence id: $persistenceId, because: $e")
               Nil
           }
@@ -191,20 +189,6 @@ private class LeiSubmissionSummary(log: Logger, clusterSharding: ClusterSharding
       .toMat(Sink.seq)(Keep.right)
       .run()
       .map(submissionSummaries => YearlySubmissionSummaryResponse(submissionIds.size, submissionSummaries.toList.sortBy(_.submissionId)))
-  }
-
-  def leiSubmissionSummaryStreamForLei(lei: String): Source[LeiSubmissionSummaryResponse, NotUsed] = {
-    Source.future(submissionsForLei(lei))
-      .mapConcat(identity)
-      .mapAsync(1) { case (lei, submissionIds) =>
-        log.info(s"For lei: $lei, found submission count: ${submissionIds.size}")
-
-        Source(submissionIds.groupBy(_.period.year))
-          .mapAsync(1) { case (year, submissionIds) => yearlySubmissionSummary(submissionIds.toList).map(year -> _) }
-          .toMat(Sink.seq)(Keep.right)
-          .run()
-          .map(yearlySummaries => LeiSubmissionSummaryResponse(lei, ListMap(yearlySummaries.sortBy(_._1).map { case (k, v) => (k.toString, v) }: _*)))
-      }
   }
 
   def leiSubmissionSummaryStreamForLei(lei: String): Source[LeiSubmissionSummaryResponse, NotUsed] = {
@@ -396,7 +380,7 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
       }
     }
     // TODO: this endpoint will get a CSV list of LEI's and return data only for the lei's that are part of the CSV list.
-//    ~ (get & path("validate" / "csv" / "leis" / "submissions" / "count")) { csvLeis =>
+//    ~ (get & path("validate" / "batch" / "leis" / "all" / "submissions" / "count")) { csvLeis =>
 //      oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
 //        withRequestTimeout(countTimeout) {
 //          val leiSubmissionSummaries = new LeiSubmissionSummary(log, clusterSharding)
