@@ -68,6 +68,10 @@ metadata:
       kind: Mapping
       name: hmda_admin_mapping
       ambassador_id: ambassador-default-1
+      timeout_ms: 0
+      idle_timeout_ms: 0
+      cluster_idle_timeout_ms: 0
+      connect_timeout_ms: 0
       prefix: /v2/admin/
       service: {{ .Values.service.name }}:{{ .Values.admin.port }}
 spec:

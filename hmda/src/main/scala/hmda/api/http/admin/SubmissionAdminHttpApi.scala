@@ -115,6 +115,7 @@ private class LeiSubmissionSummary(log: Logger, clusterSharding: ClusterSharding
       .readJournal(system)
       .currentPersistenceIds()
       .mapConcat { persistenceId =>
+        println (persistenceId)
         if (persistenceId.startsWith(submissionPrefix)) {
           validateRawSubmissionId(persistenceId.stripPrefix(submissionPrefix)) match {
             case Valid(submissionId) => List(submissionId)
@@ -126,6 +127,34 @@ private class LeiSubmissionSummary(log: Logger, clusterSharding: ClusterSharding
           Nil
         }
       }
+  }
+  //TODO: In this method we know we will only be sending ONE lei. But the way this method is coded at the moment it will keep looping over all Submissions even after finding the one that matches
+  //TODO Continued: I feel this method can be optimized for running. It should stop at finding the first instance or maybe there is even a better way to do this?
+  private def submissionIdsStreamForLei (lei: String): Source[SubmissionId, NotUsed] = {
+    val submissionPrefix = SubmissionPersistence.name + "-"
+
+    HmdaQuery
+      .readJournal(system)
+      .currentPersistenceIds()
+      .mapConcat { persistenceId =>
+        if (persistenceId.startsWith(submissionPrefix+lei)) {
+          validateRawSubmissionId(persistenceId.stripPrefix(submissionPrefix)) match {
+            case Valid(submissionId) => List(submissionId)
+            case Invalid(e) =>
+              log.error(s"Cannot parse submission id from persistence id: $persistenceId, because: $e")
+              Nil
+          }
+        } else {
+          Nil
+        }
+      }
+  }
+
+  private def submissionsForLei(lei: String): Future[Map[String, Iterable[SubmissionId]]] = {
+    submissionIdsStreamForLei(lei).toMat(Sink.seq)(Keep.right).run().map { submissionIds =>
+      log.info(s"Found submission ids count: ${submissionIds.size}")
+      submissionIds.groupBy(_.lei)
+    }
   }
 
   private def submissionsByLei: Future[Map[String, Iterable[SubmissionId]]] = {
@@ -160,6 +189,20 @@ private class LeiSubmissionSummary(log: Logger, clusterSharding: ClusterSharding
       .toMat(Sink.seq)(Keep.right)
       .run()
       .map(submissionSummaries => YearlySubmissionSummaryResponse(submissionIds.size, submissionSummaries.toList.sortBy(_.submissionId)))
+  }
+
+  def leiSubmissionSummaryStreamForLei(lei: String): Source[LeiSubmissionSummaryResponse, NotUsed] = {
+    Source.future(submissionsForLei(lei))
+      .mapConcat(identity)
+      .mapAsync(1) { case (lei, submissionIds) =>
+        log.info(s"For lei: $lei, found submission count: ${submissionIds.size}")
+
+        Source(submissionIds.groupBy(_.period.year))
+          .mapAsync(1) { case (year, submissionIds) => yearlySubmissionSummary(submissionIds.toList).map(year -> _) }
+          .toMat(Sink.seq)(Keep.right)
+          .run()
+          .map(yearlySummaries => LeiSubmissionSummaryResponse(lei, ListMap(yearlySummaries.sortBy(_._1).map { case (k, v) => (k.toString, v) }: _*)))
+      }
   }
 
   def leiSubmissionSummaryStream: Source[LeiSubmissionSummaryResponse, NotUsed] = {
@@ -297,7 +340,7 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
           }
         }
       }
-    } ~ (get & path("validate" / "leis" / "submissions" / "count")) {
+    } ~ (get & path("validate" / "all" /"leis" / "submissions" / "count")) {
       oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
         withRequestTimeout(countTimeout) {
           val leiSubmissionSummaries = new LeiSubmissionSummary(log, clusterSharding)
@@ -316,7 +359,48 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
           }
         }
       }
+    } ~ (get & path("validate" / Segment / "submissions" / "count")) { lei =>
+      oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
+        withRequestTimeout(countTimeout) {
+          val leiSubmissionSummaries = new LeiSubmissionSummary(log, clusterSharding)
+            .leiSubmissionSummaryStreamForLei(lei)
+            .toMat(Sink.seq)(Keep.right)
+            .run()
+            .map(_.sortBy(_.lei))
+
+          onComplete(leiSubmissionSummaries) {
+            case Failure(exception) =>
+              log.error("Error whilst trying to validate lei submission counts", exception)
+              complete(InternalServerError)
+
+            case Success(result) =>
+              complete(result)
+          }
+        }
+      }
     }
+    // TODO: this endpoint will get a CSV list of LEI's and return data only for the lei's that are part of the CSV list.
+//    ~ (get & path("validate" / "batch" / "leis" / "all" / "submissions" / "count")) { csvLeis =>
+//      oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
+//        withRequestTimeout(countTimeout) {
+//          val leiSubmissionSummaries = new LeiSubmissionSummary(log, clusterSharding)
+//            .leiSubmissionSummaryStreamForLei()
+//            .toMat(Sink.seq)(Keep.right)
+//            .run()
+//            .map(_.sortBy(_.lei))
+//
+//          onComplete(leiSubmissionSummaries) {
+//            case Failure(exception) =>
+//              log.error("Error whilst trying to validate lei submission counts", exception)
+//              complete(InternalServerError)
+//
+//            case Success(result) =>
+//              complete(result)
+//          }
+//        }
+//      }
+//    }
+
   }
 }
 // $COVERAGE-ON$
