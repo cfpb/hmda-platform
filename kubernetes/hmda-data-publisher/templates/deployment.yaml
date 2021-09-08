@@ -184,11 +184,21 @@ spec:
               configMapKeyRef:
                 name: schedule-configmap
                 key: publisher.ts.public.2019
+          - name: TS_PUBLIC_SCHEDULE_2020
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.ts.public.2020
           - name: LAR_PUBLIC_SCHEDULE_2019
             valueFrom:
               configMapKeyRef:
                 name: schedule-configmap
                 key: publisher.lar.public.2019
+          - name: LAR_PUBLIC_SCHEDULE_2020
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.lar.public.2020
           - name: PANEL_PUBLIC_SCHEDULE_2018
             valueFrom:
               configMapKeyRef:
