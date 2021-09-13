@@ -378,6 +378,15 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
                 }
               }
             } ~
+            path("late_filers" / Segment / Segment) { (period, quarter) =>
+              log.info(s"Fetching late filers for period=$period, quarter=$quarter")
+              complete {
+                query
+                  .fetchLateFilersByQuarter(period, quarter)
+                  .map(aggs => LateFilersAggregationResponse(aggs))
+                  .runToFuture
+              }
+            } ~
             path("voluntary_filers" / Segment) { (period) =>
                 log.info(s"Fetching voluntary filers for period=${period}")
                 complete {

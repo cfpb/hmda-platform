@@ -110,6 +110,9 @@ class DashboardQueryService (repo: PostgresRepository) extends QueryService{
   override def fetchLateFilers(period: String, late: String): Task[Seq[LateFilers]] =
     repo.fetchLateFilers(period, late)
 
+  override def fetchLateFilersByQuarter(period: String, quarter: String): Task[Seq[LateFilers]] =
+    repo.fetchLateFilersByQuarter(period, quarter)
+
   override def fetchVoluntaryFilers(period: String): Task[Seq[VoluntaryFilers]] =
     repo.fetchVoluntaryFilers(period)
 }
