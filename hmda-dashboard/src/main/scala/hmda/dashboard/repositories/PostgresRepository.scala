@@ -402,8 +402,8 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
         from #${subHistMview} as sh left join #${tsTable} as ts on upper(sh.lei) = upper(ts.lei)
         where upper(sh.lei) not in (
             select distinct upper(lei) from #${subHistMview} as sh_sub
-            where split_part(sh.submission_id, '-', 2) = '#${year}'
-              and upper(split_part(sh.submission_id, '-', 3)) = '#${quarter}'
+            where split_part(sh_sub.submission_id, '-', 2) = '#${year}'
+              and upper(split_part(sh_sub.submission_id, '-', 3)) = '#${quarter}'
               and sh_sub.sign_date_utc < '#${lateDate}' :: timestamp
           )
           and split_part(sh.submission_id, '-', 2) = '#${year}'
