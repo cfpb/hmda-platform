@@ -5,7 +5,7 @@ metadata:
   annotations:
     getambassador.io/config: |
       ---
-      apiVersion: ambassador/v0
+      apiVersion: ambassador/v1
       kind: RateLimitService
       name: {{ template "rate-limit.name" . }}
       service: "{{ template "rate-limit.name" . }}:{{ .Values.grpc.port }}"
