@@ -25,7 +25,7 @@ SET default_with_oids = false;
 -- Name: institutions2020; Type: TABLE; Schema: hmda_user; Owner: hmda_user
 --
 
-CREATE TABLE hmda_user.institutions2020 (
+CREATE TABLE hmda_user.institutions2021 (
     lei character varying NOT NULL,
     activity_year integer NOT NULL,
     agency integer NOT NULL,
@@ -43,21 +43,21 @@ CREATE TABLE hmda_user.institutions2020 (
     topholder_id_rssd integer NOT NULL,
     topholder_name character varying NOT NULL,
     hmda_filer boolean NOT NULL,
-    quarterly_filer boolean default false NOT NULL,
+    quarterly_filer boolean default false NOT NULL
 );
 
-ALTER TABLE hmda_user.institutions2020
+ALTER TABLE hmda_user.institutions2021
     ADD COLUMN notes text not null default '';
-ALTER TABLE hmda_user.institutions2020
+ALTER TABLE hmda_user.institutions2021
     ALTER COLUMN notes DROP DEFAULT;
-ALTER TABLE hmda_user.institutions2020 OWNER TO hmda_user;
-ALTER TABLE hmda_user.institutions2020 ADD COLUMN created_at TIMESTAMP;
-ALTER TABLE hmda_user.institutions2020 ALTER COLUMN created_at SET DEFAULT now();
+ALTER TABLE hmda_user.institutions2021 OWNER TO hmda_user;
+ALTER TABLE hmda_user.institutions2021 ADD COLUMN created_at TIMESTAMP;
+ALTER TABLE hmda_user.institutions2021 ALTER COLUMN created_at SET DEFAULT now();
 
-ALTER TABLE hmda_user.institutions2020 ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+ALTER TABLE hmda_user.institutions2021 ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
-ALTER TABLE ONLY hmda_user.institutions2020
-    ADD CONSTRAINT institutions2020_pkey PRIMARY KEY (lei);
+ALTER TABLE ONLY hmda_user.institutions2021
+    ADD CONSTRAINT institutions2021_pkey PRIMARY KEY (lei);
 
 
 
