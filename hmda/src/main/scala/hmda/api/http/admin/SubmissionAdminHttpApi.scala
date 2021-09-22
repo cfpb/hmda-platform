@@ -434,14 +434,6 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
           }
         }
       }
-      ~ (post & path("validate" / "batch" / "leis" / "all" / "submissions" / "count")) {
-        oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
-
-          entityAsCsv { leis =>
-            validateLeisCount(Some(leis))
-          }
-        }
-      }
     } ~ (post & path("validate" / "batch" / "leis" / "latest" / "submissions" / "signed" / "count")) {
       oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
 
