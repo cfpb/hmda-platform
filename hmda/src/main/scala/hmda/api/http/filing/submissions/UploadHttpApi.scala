@@ -19,7 +19,7 @@ import hmda.api.http.directives.QuarterlyFilingAuthorization._
 import hmda.api.http.model.ErrorResponse
 import hmda.api.ws.WebSocketProgressTracker
 import hmda.auth.OAuth2Authorization
-import hmda.messages.submission.HmdaRawDataCommands.{ AddLine, HmdaRawDataCommand }
+import hmda.messages.submission.HmdaRawDataCommands.{ AddLines, HmdaRawDataCommand }
 import hmda.messages.submission.HmdaRawDataEvents.HmdaRawDataEvent
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.messages.submission.SubmissionManagerCommands.{ SubmissionManagerCommand, UpdateSubmissionStatus }
@@ -170,11 +170,12 @@ private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(
 
   private def uploadFile(submissionId: SubmissionId, hmdaRaw: EntityRef[HmdaRawDataCommand]): Flow[String, HmdaRawDataEvent, NotUsed] =
     Flow[String]
-      .mapAsync(5)(line => persistLine(hmdaRaw, submissionId, line))
+      .grouped(100)
+      .mapAsync(1)(lines => persistLines(hmdaRaw, submissionId, lines))
 
-  private def persistLine(entityRef: EntityRef[HmdaRawDataCommand], submissionId: SubmissionId, data: String): Future[HmdaRawDataEvent] = {
+  private def persistLines(entityRef: EntityRef[HmdaRawDataCommand], submissionId: SubmissionId, data: Seq[String]): Future[HmdaRawDataEvent] = {
 
-    val response: Future[HmdaRawDataEvent] = entityRef ? (ref => AddLine(submissionId, Instant.now.toEpochMilli, data, Some(ref)))
+    val response: Future[HmdaRawDataEvent] = entityRef ? (ref => AddLines(submissionId, Instant.now.toEpochMilli, data, Some(ref)))
     response
   }
 }

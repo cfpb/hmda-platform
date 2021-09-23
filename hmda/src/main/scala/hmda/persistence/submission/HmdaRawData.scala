@@ -7,7 +7,7 @@ import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
 import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
-import hmda.messages.submission.HmdaRawDataCommands.{ AddLine, HmdaRawDataCommand, StopRawData }
+import hmda.messages.submission.HmdaRawDataCommands.{ AddLines, HmdaRawDataCommand, StopRawData }
 import hmda.messages.submission.HmdaRawDataEvents.{ HmdaRawDataEvent, LineAdded }
 import hmda.model.filing.submission.SubmissionId
 import hmda.model.processing.state.HmdaRawDataState
@@ -32,13 +32,13 @@ object HmdaRawData extends HmdaTypedPersistentActor[HmdaRawDataCommand, HmdaRawD
                              ): CommandHandler[HmdaRawDataCommand, HmdaRawDataEvent, HmdaRawDataState] = { (_, cmd) =>
     val log = ctx.log
     cmd match {
-      case AddLine(_, timestamp, data, maybeReplyTo) =>
-        val evt = LineAdded(timestamp, data)
-        Effect.persist(evt).thenRun { _ =>
+      case AddLines(_, timestamp, data, maybeReplyTo) =>
+        val evts = data.map(LineAdded(timestamp, _))
+        Effect.persist(evts.toList).thenRun { _ =>
           log.debug(s"Persisted: $data")
           maybeReplyTo match {
             case Some(replyTo) =>
-              replyTo ! evt
+              evts.foreach(replyTo ! _)
             case None => //Do Nothing
           }
         }

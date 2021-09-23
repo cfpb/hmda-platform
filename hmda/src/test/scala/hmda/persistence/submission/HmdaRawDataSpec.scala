@@ -8,7 +8,7 @@ import hmda.persistence.AkkaCassandraPersistenceSpec
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.cluster.typed.{ Cluster, Join }
-import hmda.messages.submission.HmdaRawDataCommands.AddLine
+import hmda.messages.submission.HmdaRawDataCommands.AddLines
 import hmda.messages.submission.HmdaRawDataEvents.{ HmdaRawDataEvent, LineAdded }
 import hmda.model.filing.submission.SubmissionId
 import hmda.utils.YearUtils.Period
@@ -32,9 +32,10 @@ class HmdaRawDataSpec extends AkkaCassandraPersistenceSpec {
 
       val timestamp = Instant.now.toEpochMilli
 
-      hmdaRawData ! AddLine(submissionId, timestamp, "data", Some(hmdaRawProbe.ref))
+      hmdaRawData ! AddLines(submissionId, timestamp, List("data1", "data2"), Some(hmdaRawProbe.ref))
 
-      hmdaRawProbe.expectMessage(LineAdded(timestamp, "data"))
+      hmdaRawProbe.expectMessage(LineAdded(timestamp, "data1"))
+      hmdaRawProbe.expectMessage(LineAdded(timestamp, "data2"))
     }
   }
 
