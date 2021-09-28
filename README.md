@@ -139,7 +139,7 @@ sbt "project hmda-platform" dockerPublishLocalSkipTests
 The platform and all of the related microservices explained above are deployed on [Kubernetes](https://kubernetes.io/) using [Helm](https://helm.sh/). Each deployment is a single Helm command. Below is an example for the deployment of the email-service:
 
 ```shell
-helm upgrade --install --force \                                        
+helm upgrade --install --force \                            
 --namespace=default \
 --values=kubernetes/hmda-platform/values.yaml \
 --set image.repository=hmda/hmda-platform \
