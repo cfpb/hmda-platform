@@ -1,21 +1,21 @@
 package hmda.uli.api.http
 
-import akka.event.{ LoggingAdapter, NoLogging }
+import akka.event.{LoggingAdapter, NoLogging}
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
-import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
+import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
 import akka.http.scaladsl.model.Uri.Path
-import akka.http.scaladsl.model.headers.{ HttpOrigin, Origin }
+import akka.http.scaladsl.model.headers.{HttpOrigin, Origin}
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.model.ErrorResponse
-import hmda.uli.api.model.ULIModel._
+import hmda.uli.api.model.ULIModel.{ULIBatchValidated, _}
 import hmda.util.http.FileUploadUtils
 import hmda.uli.api.model.ULIValidationErrorMessages._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import akka.http.scaladsl.unmarshalling.Unmarshaller._
-import org.slf4j.{ Logger, LoggerFactory }
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.duration._
 
@@ -89,7 +89,8 @@ class ULIHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll w
         status mustBe StatusCodes.OK
         responseAs[LoanCheckDigitResponse].loanIds mustBe Seq(
           ULI("10Bx939c5543TqA1144M999143X", "38", "10Bx939c5543TqA1144M999143X38"),
-          ULI("10Cx939c5543TqA1144M999143X", "10", "10Cx939c5543TqA1144M999143X10")
+          ULI("10Cx939c5543TqA1144M999143X", "10", "10Cx939c5543TqA1144M999143X10"),
+          ULI("##!d23e(", "Error", "Loan ID is not between 21 and 43 characters long")
         )
       }
     }
@@ -140,9 +141,11 @@ class ULIHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll w
       Post("/uli/validate", uliFile) ~> uliHttpRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[ULIBatchValidatedResponse].ulis mustBe Seq(
-          ULIBatchValidated("10Cx939c5543TqA1144M999143X10", true),
-          ULIBatchValidated("10Bx939c5543TqA1144M999143X38", true),
-          ULIBatchValidated("10Bx939c5543TqA1144M999133X38", false)
+          ULIBatchValidated("10Cx939c5543TqA1144M999143X10", "true"),
+          ULIBatchValidated("10Bx939c5543TqA1144M999143X38", "true"),
+          ULIBatchValidated("10Bx939c5543TqA1144M999133X38", "false") ,
+          ULIBatchValidated("#%)WQD!", "ULI is not alphanumeric")
+
         )
       }
     }
