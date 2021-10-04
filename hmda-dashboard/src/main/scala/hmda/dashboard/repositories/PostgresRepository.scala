@@ -392,10 +392,11 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
-  def fetchLateFilersByQuarter(period: String): Task[Seq[LateFilers]] = {
+  def fetchLateFilersByQuarter(period: String, cutoff: String): Task[Seq[LateFilers]] = {
     val tsTable = tsTableSelector(period)
     val subHistMview = "submission_hist_mview"
-    val (year, quarter, lateDate) = getQuarterLateFilersInfo(period)
+    val (year, quarter, quarterLateDate) = getQuarterLateFilersInfo(period)
+    val lateDate = if (cutoff.nonEmpty) cutoff else quarterLateDate
     val query = sql"""
       select * from (
         select ts.agency, ts.institution_name, sh.lei, ts.total_lines, sh.sign_date_east :: date, sh.submission_id, rank() over(partition by sh.lei order by sh.sign_date_east asc)
