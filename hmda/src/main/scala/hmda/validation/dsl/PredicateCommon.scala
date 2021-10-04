@@ -38,6 +38,8 @@ object PredicateCommon {
     Try(lessThanOrEqual(BigDecimal(upper)).check(BigDecimal(x))).getOrElse(false) && Try(greaterThanOrEqual(BigDecimal(lower)).check(BigDecimal(x))).getOrElse(false)
   }
 
+  def containedIn[A](domain: Set[A]): Predicate[A] = domain.contains(_: A)
+
   def containedIn[A](domain: Seq[A]): Predicate[A] = domain.contains(_: A)
 
   def numeric[A]: Predicate[A] = (_: A) match {
