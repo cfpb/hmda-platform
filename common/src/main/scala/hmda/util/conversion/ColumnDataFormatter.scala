@@ -38,12 +38,25 @@ trait ColumnDataFormatter {
   def extractOpt(option: Option[Any]): Any =
     option.getOrElse("")
 
-  def controlCharacterFilter(value: String): String =
-    if (!value.isEmpty) {
-      value.filter(_ >= ' ').toString
-    } else {
-      value
+  def controlCharacterFilter(value: String): String = {
+    val chars = value.toCharArray
+    val charsCount = chars.length
+    var i = 0
+    var j = 0 // the index where the next non-control character should be copied
+    while (i < charsCount) {
+      if (chars(i) >= ' ') {
+        if (i != j) chars(j) = chars(i) // only copying if there were any non-control characters
+        j += 1
+      }
+
+      i += 1
     }
+
+    if (i != j) {
+      // something has been removed
+      new String(chars, 0, j)
+    } else value
+  }
 
   def removeTrailingLARPipe(value: String): String = {
     if (!value.isEmpty && value.count(_ == '|') == 110 && value.endsWith("|")) {
