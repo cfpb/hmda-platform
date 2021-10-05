@@ -13,7 +13,7 @@ object V626 {
 }
 
 class V626 private (indexedCounties: Map[String, Census]) extends EditCheck[LoanApplicationRegister] {
-  private val countyKeys = indexedCounties.keys.toSet
+  private val countyKeys: Set[String] = indexedCounties.keys.toSet
 
   override def name: String = "V626"
 
@@ -22,7 +22,7 @@ class V626 private (indexedCounties: Map[String, Census]) extends EditCheck[Loan
       (
         lar.geography.county.length is equalTo(5) and
           (
-            lar.geography.county is containedIn(countyKeys)
+            lar.geography.county is containedInSet(countyKeys)
             )
         )
 }
