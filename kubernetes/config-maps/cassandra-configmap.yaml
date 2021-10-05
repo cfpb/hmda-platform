@@ -5,6 +5,6 @@ metadata:
   annotations:
     reloader.stakater.com/match: "true"
 data:
-  cassandra-hosts: node-0-server.cassandra.autoip.dcos.thisdcos.directory
+  cassandra-hosts: cluster1-dc1-service.cass-operator
   cassandra-keyspace: hmda2_journal
   cassandra-keyspace-snapshot: hmda2_snapshot
