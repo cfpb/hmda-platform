@@ -21,7 +21,7 @@ import hmda.parser.filing.ts.TsCsvParser
 import hmda.publication.KafkaUtils.kafkaHosts
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.HmdaQuery.{readRawData, readSubmission}
-import hmda.query.ts.TransmittalSheetConverter
+import hmda.query.ts.{TransmittalSheetConverter, TransmittalSheetEntity}
 import hmda.util.BankFilterUtils._
 import hmda.util.streams.FlowUtils.framing
 import hmda.utils.YearUtils.Period
@@ -211,47 +211,33 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .filter(t => t.LEI != "" && t.institutionName != "")
         .map(ts => TransmittalSheetConverter(ts, submissionIdOption))
         .mapAsync(1) { ts =>
+          val (repo, enforceQuarterly) = submissionId.period match {
+            case Period(2018, None) => (transmittalSheetRepository2018, false)
+            case Period(2019, None) => (transmittalSheetRepository2019, false)
+            case Period(2020, Some("Q1")) => (transmittalSheetRepository2020Q1, true)
+            case Period(2020, Some("Q2")) => (transmittalSheetRepository2020Q2, true)
+            case Period(2020, Some("Q3")) => (transmittalSheetRepository2020Q3, true)
+            case Period(2020, None) => (transmittalSheetRepository2020, false)
+            case Period(2021, Some("Q1")) => (transmittalSheetRepository2021Q1, true)
+            case Period(2021, Some("Q2")) => (transmittalSheetRepository2021Q2, true)
+            case Period(2021, Some("Q3")) => (transmittalSheetRepository2021Q3, true)
+            case _ =>
+              throw new IllegalArgumentException(s"Unable to discern period from $submissionId to insert TS rows.")
+          }
+
           for {
             signdate <- signDate
-            insertorupdate <- submissionId.period match {
-              case Period(2018, None) =>
-                transmittalSheetRepository2018.insert(ts.copy(signDate = Some(signdate.getOrElse(0L))))
-              case Period(2019, None) =>
-                transmittalSheetRepository2019.insert(ts.copy(signDate = Some(signdate.getOrElse(0L))))
-              case Period(2020, Some("Q1")) =>
-                transmittalSheetRepository2020Q1.insert(
-                  ts.copy(isQuarterly = Some(true), signDate = Some(signdate.getOrElse(0L)))
-                )
-              case Period(2020, Some("Q2")) =>
-                transmittalSheetRepository2020Q2.insert(
-                  ts.copy(isQuarterly = Some(true), signDate = Some(signdate.getOrElse(0L)))
-                )
-              case Period(2020, Some("Q3")) =>
-                transmittalSheetRepository2020Q3.insert(
-                  ts.copy(isQuarterly = Some(true), signDate = Some(signdate.getOrElse(0L)))
-                )
-              case Period(2020, None) =>
-                transmittalSheetRepository2020.insert(
-                  ts.copy(isQuarterly = Some(true), signDate = Some(signdate.getOrElse(0L)))
-                )
-              case Period(2021, Some("Q1")) =>
-                transmittalSheetRepository2021Q1.insert(
-                  ts.copy(isQuarterly = Some(true), signDate = Some(signdate.getOrElse(0L)))
-                )
-              case Period(2021, Some("Q2")) =>
-                transmittalSheetRepository2021Q2.insert(
-                  ts.copy(isQuarterly = Some(true), signDate = Some(signdate.getOrElse(0L)))
-                )
-              case Period(2021, Some("Q3")) =>
-                transmittalSheetRepository2021Q3.insert(
-                  ts.copy(isQuarterly = Some(true), signDate = Some(signdate.getOrElse(0L)))
-                )
-              case _ =>
-                throw new IllegalArgumentException(s"Unable to discern period from $submissionId to insert TS rows.")
-            }
+            insertorupdate <- repo.insert(copyTs(ts, Some(signdate.getOrElse(0L)), enforceQuarterly))
           } yield insertorupdate
         }
         .runWith(Sink.ignore)
+
+    def copyTs(ts: TransmittalSheetEntity, signdate: Option[Long], enforceQuarterly: Boolean): TransmittalSheetEntity =
+      if (enforceQuarterly) {
+        ts.copy(lei = ts.lei.toUpperCase, signDate = signdate, isQuarterly = Some(true))
+      } else {
+        ts.copy(lei = ts.lei.toUpperCase, signDate = signdate)
+      }
 
     def deleteLarRows: Future[Done] =
       readRawData(submissionId)
