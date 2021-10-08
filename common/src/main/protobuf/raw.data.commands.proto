@@ -11,3 +11,10 @@ message AddLineMessage {
     string data = 3;
     string maybeReplyTo = 4;
 }
+
+message AddLinesMessage {
+    SubmissionIdMessage submissionId = 1;
+    int64 timestamp = 2;
+    repeated string data = 3;
+    string maybeReplyTo = 4;
+}

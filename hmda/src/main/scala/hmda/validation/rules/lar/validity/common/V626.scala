@@ -13,14 +13,16 @@ object V626 {
 }
 
 class V626 private (indexedCounties: Map[String, Census]) extends EditCheck[LoanApplicationRegister] {
+  private val countyKeys: Set[String] = indexedCounties.keys.toSet
+
   override def name: String = "V626"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult =
     lar.geography.county is equalTo("NA") or
       (
-        lar.geography.county.size is equalTo(5) and
+        lar.geography.county.length is equalTo(5) and
           (
-            lar.geography.county is containedIn(indexedCounties.keys.toList)
-          )
-      )
+            lar.geography.county is containedInSet(countyKeys)
+            )
+        )
 }

@@ -1,8 +1,8 @@
 package hmda.persistence.submission
 
 import java.time.Instant
-
 import akka.actor.typed._
+import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.scaladsl.adapter._
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.cluster.sharding.typed.ShardingEnvelope
@@ -121,28 +121,30 @@ object HmdaValidationError
         val fValidationContext =
           validationContext(period, sharding, submissionId)
 
-        tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(1))
+        tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(1), Set())
 
         val fSyntacticalValidity = for {
           validationContext <- fValidationContext
-          _                 = tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(25))
+          _                 = tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(25), Set())
           tsErrors <- validateTs(ctx, submissionId, validationContext)
-            .toMat(Sink.ignore)(Keep.right)
+            .mapConcat(_.validationErrors)
+            .toMat(Sink.seq)(Keep.right)
             .named("validateTs[Syntactical]-" + submissionId)
             .run()
-          _           = tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(50))
+          _           = tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(50), tsErrors.map(_.editName).toSet)
           tsLarErrors <- validateTsLar(submissionId, "syntactical-validity", validationContext, getSelf(submissionId))
+          _           = tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(90), tsLarErrors.map(_.editName).toSet)
           _           = log.info(s"Starting validateLar - Syntactical for $submissionId")
-          _           = tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(95))
           larSyntacticalValidityErrors <- validateLar("syntactical-validity", ctx, submissionId, validationContext)(
             system,
             materializer,
             blockingEc,
             timeout
           )
+          _              = tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(95), larSyntacticalValidityErrors.map(_.editName).toSet)
           _              = log.info(s"Starting validateAsycLar - Syntactical for $submissionId")
-          larAsyncErrors <- validateAsyncLar("syntactical-validity", submissionId).runWith(Sink.ignore)
-          _              = tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(99))
+          larAsyncErrors <- validateAsyncLar("syntactical-validity", submissionId).mapConcat(_.validationErrors).runWith(Sink.seq)
+          _              = tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(99), larAsyncErrors.map(_.editName).toSet)
           _              = log.info(s"Finished validateAsycLar - Syntactical for $submissionId")
         } yield (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
 
@@ -171,14 +173,14 @@ object HmdaValidationError
 
             // Update tracker status
             val syntactical = ValidationType.Syntactical
-            if (updatedStatus == SyntacticalOrValidity) tracker ! ValidationDelta(syntactical, ValidationProgress.Completed)
-            else tracker ! ValidationDelta(syntactical, ValidationProgress.CompletedWithErrors)
+            if (updatedStatus == SyntacticalOrValidity) tracker ! ValidationDelta(syntactical, ValidationProgress.Completed, Set())
+            else tracker ! ValidationDelta(syntactical, ValidationProgress.CompletedWithErrors, Set())
           }
 
       case StartQuality(submissionId) =>
         log.info(s"Quality validation started for $submissionId")
         val period = submissionId.period
-        tracker ! ValidationDelta(ValidationType.Quality, InProgress(1))
+        tracker ! ValidationDelta(ValidationType.Quality, InProgress(1), Set())
         val fQuality = for {
           larErrors <- validateLar("quality", ctx, submissionId, ValidationContext(filingPeriod = Some(period)))(
             system,
@@ -186,13 +188,14 @@ object HmdaValidationError
             blockingEc,
             timeout
           )
-          _ = tracker ! ValidationDelta(ValidationType.Quality, InProgress(50))
+          _ = tracker ! ValidationDelta(ValidationType.Quality, InProgress(50), larErrors.map(_.editName).toSet)
           _ = log.info(s"Finished ValidateLar Quality for $submissionId")
           _ = log.info(s"Started validateAsyncLar - Quality for $submissionId")
           larAsyncErrorsQuality <- validateAsyncLar("quality", submissionId)
-            .runWith(Sink.ignore)
+            .mapConcat(_.validationErrors)
+            .runWith(Sink.seq)
           _ = log.info(s"Finished ValidateAsyncLar Quality for $submissionId")
-          _ = tracker ! ValidationDelta(ValidationType.Quality, InProgress(99))
+          _ = tracker ! ValidationDelta(ValidationType.Quality, InProgress(99), larAsyncErrorsQuality.map(_.editName).toSet)
         } yield (larErrors, larAsyncErrorsQuality)
 
         fQuality.onComplete {
@@ -220,13 +223,13 @@ object HmdaValidationError
 
             // Update tracker status
             val quality = ValidationType.Quality
-            if (updatedStatus == Quality) tracker ! ValidationDelta(quality, ValidationProgress.Completed)
-            else tracker ! ValidationDelta(quality, ValidationProgress.CompletedWithErrors)
+            if (updatedStatus == Quality) tracker ! ValidationDelta(quality, ValidationProgress.Completed, Set())
+            else tracker ! ValidationDelta(quality, ValidationProgress.CompletedWithErrors, Set())
           }
 
       case StartMacro(submissionId) =>
         log.info(s"Macro validation started for $submissionId")
-        tracker ! ValidationDelta(ValidationType.Macro, InProgress(1))
+        tracker ! ValidationDelta(ValidationType.Macro, InProgress(1), Set())
         val fMacroEdits: Future[List[ValidationError]] =
           validateMacro(ctx, submissionId)
 
@@ -236,7 +239,7 @@ object HmdaValidationError
               ctx.self.toClassic ? PersistMacroError(submissionId, edit.asInstanceOf[MacroValidationError], None)
             })
             persistedEdits.onComplete(_ => ctx.self ! CompleteMacro(submissionId))
-            tracker ! ValidationDelta(ValidationType.Macro, InProgress(99))
+            tracker ! ValidationDelta(ValidationType.Macro, InProgress(99), edits.map(_.editName).toSet)
           case Failure(e) =>
             log.error(e.getLocalizedMessage)
 
@@ -259,8 +262,8 @@ object HmdaValidationError
 
             // Update tracker status
             val macroStatus = ValidationType.Macro
-            if (updatedStatus == Verified || updatedStatus == Macro) tracker ! ValidationDelta(macroStatus, ValidationProgress.Completed)
-            else tracker ! ValidationDelta(macroStatus, ValidationProgress.CompletedWithErrors)
+            if (updatedStatus == Verified || updatedStatus == Macro) tracker ! ValidationDelta(macroStatus, ValidationProgress.Completed, Set())
+            else tracker ! ValidationDelta(macroStatus, ValidationProgress.CompletedWithErrors, Set())
           }
 
       case PersistHmdaRowValidatedError(submissionId, rowNumber, validationErrors, maybeReplyTo) =>
@@ -567,7 +570,7 @@ object HmdaValidationError
                            ctx: ActorContext[SubmissionProcessingCommand],
                            submissionId: SubmissionId,
                            validationContext: ValidationContext
-                         )(implicit system: ActorSystem[_], mat: Materializer, ec: ExecutionContext, t: Timeout): Future[Unit] = {
+                         )(implicit system: ActorSystem[_], mat: Materializer, ec: ExecutionContext, t: Timeout): Future[List[ValidationError]] = {
 
     val sharding = ClusterSharding(system)
     val self: EntityRef[SubmissionProcessingCommand] = selectHmdaValidationError(sharding, submissionId)
@@ -576,7 +579,7 @@ object HmdaValidationError
       if (editCheck == "quality") validateTsLar(submissionId, "quality", validationContext, self)
       else Future.successful(Nil)
 
-    def errorPersisting: Future[Done] =
+    def errorPersisting: Future[Seq[ValidationError]] =
       uploadConsumerRawStr(submissionId)
         .drop(1)
         .via(validateLarFlow(editCheck, validationContext))
@@ -589,12 +592,13 @@ object HmdaValidationError
           self ? ((replyTo: ActorRef[HmdaRowValidatedError]) => el.copy(replyTo = Some(replyTo)))
         )
         .named("errorPersisting" + submissionId)
-        .runWith(Sink.ignore)
+        .mapConcat(_.validationErrors)
+        .runWith(Sink.seq)
 
     for {
-      _ <- qualityChecks
-      _ <- errorPersisting
-    } yield ()
+      qualityErrors <- qualityChecks
+      errors <- errorPersisting
+    } yield qualityErrors ++ errors.toList
   }
 
   private def validateMacro(
