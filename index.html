@@ -1,9 +1,8 @@
 
-<link href="images/favicon-57.png" rel="icon" type="image/png" />
-
 <!doctype html>
 <html>
   <head>
+    <link href="images/favicon-57.png" rel="icon" type="image/png" />
     <meta charset="utf-8">
     <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -12,38 +11,190 @@
     <style>
       .highlight table td { padding: 5px; }
 .highlight table pre { margin: 0; }
-.highlight, .highlight .w {
-  color: #444444;
+.highlight .gh {
+  color: #999999;
+}
+.highlight .sr {
+  color: #f6aa11;
+}
+.highlight .go {
+  color: #888888;
+}
+.highlight .gp {
+  color: #555555;
+}
+.highlight .gs {
+}
+.highlight .gu {
+  color: #aaaaaa;
+}
+.highlight .nb {
+  color: #f6aa11;
+}
+.highlight .cm {
+  color: #75715e;
 }
 .highlight .cp {
-  color: #CC00A3;
+  color: #75715e;
+}
+.highlight .c1 {
+  color: #75715e;
 }
 .highlight .cs {
-  color: #CC00A3;
+  color: #75715e;
 }
-.highlight .c, .highlight .ch, .highlight .cd, .highlight .cm, .highlight .cpf, .highlight .c1 {
-  color: #FF0000;
+.highlight .c, .highlight .cd {
+  color: #75715e;
+}
+.highlight .err {
+  color: #960050;
+}
+.highlight .gr {
+  color: #960050;
+}
+.highlight .gt {
+  color: #960050;
+}
+.highlight .gd {
+  color: #49483e;
+}
+.highlight .gi {
+  color: #49483e;
+}
+.highlight .ge {
+  color: #49483e;
 }
 .highlight .kc {
-  color: #C34E00;
+  color: #66d9ef;
 }
 .highlight .kd {
-  color: #0000FF;
+  color: #66d9ef;
 }
 .highlight .kr {
-  color: #007575;
+  color: #66d9ef;
 }
-.highlight .k, .highlight .kn, .highlight .kp, .highlight .kt, .highlight .kv {
-  color: #0000FF;
+.highlight .no {
+  color: #66d9ef;
 }
-.highlight .s, .highlight .sb, .highlight .sc, .highlight .dl, .highlight .sd, .highlight .s2, .highlight .se, .highlight .sh, .highlight .si, .highlight .sx, .highlight .sr, .highlight .s1, .highlight .ss {
-  color: #009C00;
+.highlight .kt {
+  color: #66d9ef;
 }
-.highlight .sa {
-  color: #0000FF;
+.highlight .mf {
+  color: #ae81ff;
 }
-.highlight .nb, .highlight .bp {
-  color: #C34E00;
+.highlight .mh {
+  color: #ae81ff;
+}
+.highlight .il {
+  color: #ae81ff;
+}
+.highlight .mi {
+  color: #ae81ff;
+}
+.highlight .mo {
+  color: #ae81ff;
+}
+.highlight .m, .highlight .mb, .highlight .mx {
+  color: #ae81ff;
+}
+.highlight .sc {
+  color: #ae81ff;
+}
+.highlight .se {
+  color: #ae81ff;
+}
+.highlight .ss {
+  color: #ae81ff;
+}
+.highlight .sd {
+  color: #e6db74;
+}
+.highlight .s2 {
+  color: #e6db74;
+}
+.highlight .sb {
+  color: #e6db74;
+}
+.highlight .sh {
+  color: #e6db74;
+}
+.highlight .si {
+  color: #e6db74;
+}
+.highlight .sx {
+  color: #e6db74;
+}
+.highlight .s1 {
+  color: #e6db74;
+}
+.highlight .s {
+  color: #e6db74;
+}
+.highlight .na {
+  color: #a6e22e;
+}
+.highlight .nc {
+  color: #a6e22e;
+}
+.highlight .nd {
+  color: #a6e22e;
+}
+.highlight .ne {
+  color: #a6e22e;
+}
+.highlight .nf {
+  color: #a6e22e;
+}
+.highlight .vc {
+  color: #ffffff;
+}
+.highlight .nn {
+  color: #ffffff;
+}
+.highlight .nl {
+  color: #ffffff;
+}
+.highlight .ni {
+  color: #ffffff;
+}
+.highlight .bp {
+  color: #ffffff;
+}
+.highlight .vg {
+  color: #ffffff;
+}
+.highlight .vi {
+  color: #ffffff;
+}
+.highlight .nv {
+  color: #ffffff;
+}
+.highlight .w {
+  color: #ffffff;
+}
+.highlight {
+  color: #ffffff;
+}
+.highlight .n, .highlight .py, .highlight .nx {
+  color: #ffffff;
+}
+.highlight .ow {
+  color: #f92672;
+}
+.highlight .nt {
+  color: #f92672;
+}
+.highlight .k, .highlight .kv {
+  color: #f92672;
+}
+.highlight .kn {
+  color: #f92672;
+}
+.highlight .kp {
+  color: #f92672;
+}
+.highlight .o {
+  color: #f92672;
 }
     </style>
     <link href="stylesheets/screen.css" rel="stylesheet" media="screen" />
@@ -55,155 +206,160 @@
     <a href="#" id="nav-button">
       <span>
         NAV
-        <img src="images/navbar.png" alt="" />
+        <img src="images/navbar.png" alt="Navbar" />
       </span>
     </a>
     <div class="toc-wrapper">
-      <a href="/"><img src="images/ffiec-logo.svg" class="logo" alt="" /></a>
+      <a href="/"><img src="images/ffiec-logo.svg" class="logo" alt="FFIEC Logo" /></a>
       <ul id="toc" class="toc-list-h1">
           <li>
             <a href="#hmda-api-documentation" class="toc-h1 toc-link" data-title="HMDA API Documentation">HMDA API Documentation</a>
           </li>
           <li>
-            <a href="#data-browser" class="toc-h1 toc-link" data-title="Data Browser">Data Browser</a>
+            <a href="#hmda-filing-api" class="toc-h1 toc-link" data-title="HMDA Filing API">HMDA Filing API</a>
               <ul class="toc-list-h2">
                   <li>
-                    <a href="#data-browser-hmda-data-endpoints" class="toc-h2 toc-link" data-title="HMDA Data Endpoints">HMDA Data Endpoints</a>
+                    <a href="#hmda-filing-api-authorization" class="toc-h2 toc-link" data-title="Authorization">Authorization</a>
+                  </li>
+                  <li>
+                    <a href="#hmda-filing-api-postman-collection" class="toc-h2 toc-link" data-title="Postman Collection">Postman Collection</a>
+                  </li>
+                  <li>
+                    <a href="#hmda-filing-api-filing-process" class="toc-h2 toc-link" data-title="Filing Process">Filing Process</a>
                       <ul class="toc-list-h3">
                           <li>
-                            <a href="#data-browser-hmda-data-endpoints-hmda-data-endpoints" class="toc-h3 toc-link" data-title="HMDA Data Endpoints">HMDA Data Endpoints</a>
+                            <a href="#hmda-filing-api-filing-process-object-hierarchy" class="toc-h3 toc-link" data-title="Object Hierarchy">Object Hierarchy</a>
                           </li>
                           <li>
-                            <a href="#data-browser-hmda-data-endpoints-supported-geographic-filters" class="toc-h3 toc-link" data-title="Supported Geographic Filters">Supported Geographic Filters</a>
-                          </li>
-                          <li>
-                            <a href="#data-browser-hmda-data-endpoints-hmda-data-filters" class="toc-h3 toc-link" data-title="HMDA Data Filters">HMDA Data Filters</a>
-                          </li>
-                          <li>
-                            <a href="#data-browser-hmda-data-endpoints-aggregation-example" class="toc-h3 toc-link" data-title="Aggregation Example">Aggregation Example</a>
-                          </li>
-                          <li>
-                            <a href="#data-browser-hmda-data-endpoints-csv-example" class="toc-h3 toc-link" data-title="CSV Example">CSV Example</a>
+                            <a href="#hmda-filing-api-filing-process-submission-status" class="toc-h3 toc-link" data-title="Submission Status">Submission Status</a>
+                              <ul class="toc-list-h4">
+                                  <li>
+                                    <a href="#hmda-filing-api-filing-process-submission-status-submission-status-codes" class="toc-h4 toc-link" data-title="Submission Status Codes">Submission Status Codes</a>
+                                  </li>
+                              </ul>
                           </li>
                       </ul>
                   </li>
                   <li>
-                    <a href="#data-browser-hmda-filers" class="toc-h2 toc-link" data-title="HMDA Filers">HMDA Filers</a>
+                    <a href="#hmda-filing-api-endpoints" class="toc-h2 toc-link" data-title="Endpoints">Endpoints</a>
                       <ul class="toc-list-h3">
                           <li>
-                            <a href="#data-browser-hmda-filers-hmda-filer-parameters" class="toc-h3 toc-link" data-title="HMDA Filer Parameters">HMDA Filer Parameters</a>
+                            <a href="#hmda-filing-api-endpoints-start-a-filing" class="toc-h3 toc-link" data-title="Start a Filing">Start a Filing</a>
                           </li>
                           <li>
-                            <a href="#data-browser-hmda-filers-hmda-filers-example" class="toc-h3 toc-link" data-title="HMDA Filers Example">HMDA Filers Example</a>
+                            <a href="#hmda-filing-api-endpoints-get-a-filing" class="toc-h3 toc-link" data-title="Get a Filing">Get a Filing</a>
+                          </li>
+                          <li>
+                            <a href="#hmda-filing-api-endpoints-create-a-submission" class="toc-h3 toc-link" data-title="Create a Submission">Create a Submission</a>
+                          </li>
+                          <li>
+                            <a href="#hmda-filing-api-endpoints-get-the-latest-submission" class="toc-h3 toc-link" data-title="Get the Latest Submission">Get the Latest Submission</a>
+                          </li>
+                          <li>
+                            <a href="#hmda-filing-api-endpoints-upload-a-file" class="toc-h3 toc-link" data-title="Upload a File">Upload a File</a>
+                          </li>
+                          <li>
+                            <a href="#hmda-filing-api-endpoints-view-parsing-errors" class="toc-h3 toc-link" data-title="View Parsing Errors">View Parsing Errors</a>
+                          </li>
+                          <li>
+                            <a href="#hmda-filing-api-endpoints-view-all-edits" class="toc-h3 toc-link" data-title="View All Edits">View All Edits</a>
+                          </li>
+                          <li>
+                            <a href="#hmda-filing-api-endpoints-view-edit-details" class="toc-h3 toc-link" data-title="View Edit Details">View Edit Details</a>
+                          </li>
+                          <li>
+                            <a href="#hmda-filing-api-endpoints-verify-quality-edits" class="toc-h3 toc-link" data-title="Verify Quality Edits">Verify Quality Edits</a>
+                          </li>
+                          <li>
+                            <a href="#hmda-filing-api-endpoints-verify-macro-edits" class="toc-h3 toc-link" data-title="Verify Macro Edits">Verify Macro Edits</a>
+                          </li>
+                          <li>
+                            <a href="#hmda-filing-api-endpoints-sign-a-submission" class="toc-h3 toc-link" data-title="Sign a Submission">Sign a Submission</a>
+                          </li>
+                          <li>
+                            <a href="#hmda-filing-api-endpoints-get-sign-receipt" class="toc-h3 toc-link" data-title="Get Sign receipt">Get Sign receipt</a>
+                          </li>
+                      </ul>
+                  </li>
+                  <li>
+                    <a href="#hmda-filing-api-quarterly-filing" class="toc-h2 toc-link" data-title="Quarterly Filing">Quarterly Filing</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
+            <a href="#hmda-public-verification-api" class="toc-h1 toc-link" data-title="HMDA Public Verification API">HMDA Public Verification API</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#hmda-public-verification-api-single-ts-verification" class="toc-h2 toc-link" data-title="Single TS Verification">Single TS Verification</a>
+                      <ul class="toc-list-h3">
+                          <li>
+                            <a href="#hmda-public-verification-api-single-ts-verification-parse-ts" class="toc-h3 toc-link" data-title="Parse TS">Parse TS</a>
+                          </li>
+                          <li>
+                            <a href="#hmda-public-verification-api-single-ts-verification-validate-ts" class="toc-h3 toc-link" data-title="Validate TS">Validate TS</a>
+                          </li>
+                      </ul>
+                  </li>
+                  <li>
+                    <a href="#hmda-public-verification-api-single-lar-verification" class="toc-h2 toc-link" data-title="Single LAR Verification">Single LAR Verification</a>
+                      <ul class="toc-list-h3">
+                          <li>
+                            <a href="#hmda-public-verification-api-single-lar-verification-parse-a-lar" class="toc-h3 toc-link" data-title="Parse a LAR">Parse a LAR</a>
+                          </li>
+                          <li>
+                            <a href="#hmda-public-verification-api-single-lar-verification-validate-a-lar" class="toc-h3 toc-link" data-title="Validate a LAR">Validate a LAR</a>
+                          </li>
+                      </ul>
+                  </li>
+                  <li>
+                    <a href="#hmda-public-verification-api-full-hmda-file-verification" class="toc-h2 toc-link" data-title="Full HMDA File Verification">Full HMDA File Verification</a>
+                      <ul class="toc-list-h3">
+                          <li>
+                            <a href="#hmda-public-verification-api-full-hmda-file-verification-parse-a-hmda-file" class="toc-h3 toc-link" data-title="Parse a HMDA File">Parse a HMDA File</a>
+                          </li>
+                          <li>
+                            <a href="#hmda-public-verification-api-full-hmda-file-verification-validate-a-hmda-file" class="toc-h3 toc-link" data-title="Validate a HMDA File">Validate a HMDA File</a>
                           </li>
                       </ul>
                   </li>
               </ul>
           </li>
           <li>
-            <a href="#hmda-filing" class="toc-h1 toc-link" data-title="HMDA Filing">HMDA Filing</a>
+            <a href="#data-browser-api" class="toc-h1 toc-link" data-title="Data Browser API">Data Browser API</a>
               <ul class="toc-list-h2">
                   <li>
-                    <a href="#hmda-filing-authorization" class="toc-h2 toc-link" data-title="Authorization">Authorization</a>
-                  </li>
-                  <li>
-                    <a href="#hmda-filing-postman-collection" class="toc-h2 toc-link" data-title="Postman Collection">Postman Collection</a>
-                  </li>
-                  <li>
-                    <a href="#hmda-filing-filing-process" class="toc-h2 toc-link" data-title="Filing Process">Filing Process</a>
+                    <a href="#data-browser-api-hmda-data-endpoints" class="toc-h2 toc-link" data-title="HMDA Data Endpoints">HMDA Data Endpoints</a>
                       <ul class="toc-list-h3">
                           <li>
-                            <a href="#hmda-filing-filing-process-object-hierarchy" class="toc-h3 toc-link" data-title="Object Hierarchy">Object Hierarchy</a>
+                            <a href="#data-browser-api-hmda-data-endpoints-hmda-data-endpoints" class="toc-h3 toc-link" data-title="HMDA Data Endpoints">HMDA Data Endpoints</a>
                           </li>
                           <li>
-                            <a href="#hmda-filing-filing-process-submission-status" class="toc-h3 toc-link" data-title="Submission Status">Submission Status</a>
+                            <a href="#data-browser-api-hmda-data-endpoints-supported-geographic-filters" class="toc-h3 toc-link" data-title="Supported Geographic Filters">Supported Geographic Filters</a>
                           </li>
                           <li>
-                            <a href="#hmda-filing-filing-process-submission-status-codes" class="toc-h3 toc-link" data-title="Submission Status Codes">Submission Status Codes</a>
+                            <a href="#data-browser-api-hmda-data-endpoints-hmda-data-filters" class="toc-h3 toc-link" data-title="HMDA Data Filters">HMDA Data Filters</a>
+                          </li>
+                          <li>
+                            <a href="#data-browser-api-hmda-data-endpoints-aggregation-example" class="toc-h3 toc-link" data-title="Aggregation Example">Aggregation Example</a>
+                          </li>
+                          <li>
+                            <a href="#data-browser-api-hmda-data-endpoints-csv-example" class="toc-h3 toc-link" data-title="CSV Example">CSV Example</a>
                           </li>
                       </ul>
                   </li>
                   <li>
-                    <a href="#hmda-filing-endpoints" class="toc-h2 toc-link" data-title="Endpoints">Endpoints</a>
+                    <a href="#data-browser-api-hmda-filers" class="toc-h2 toc-link" data-title="HMDA Filers">HMDA Filers</a>
                       <ul class="toc-list-h3">
                           <li>
-                            <a href="#hmda-filing-endpoints-start-a-filing" class="toc-h3 toc-link" data-title="Start a Filing">Start a Filing</a>
+                            <a href="#data-browser-api-hmda-filers-hmda-filer-parameters" class="toc-h3 toc-link" data-title="HMDA Filer Parameters">HMDA Filer Parameters</a>
                           </li>
                           <li>
-                            <a href="#hmda-filing-endpoints-get-a-filing" class="toc-h3 toc-link" data-title="Get a Filing">Get a Filing</a>
-                          </li>
-                          <li>
-                            <a href="#hmda-filing-endpoints-create-a-submission" class="toc-h3 toc-link" data-title="Create a Submission">Create a Submission</a>
-                          </li>
-                          <li>
-                            <a href="#hmda-filing-endpoints-get-the-latest-submission" class="toc-h3 toc-link" data-title="Get the Latest Submission">Get the Latest Submission</a>
-                          </li>
-                          <li>
-                            <a href="#hmda-filing-endpoints-upload-a-file" class="toc-h3 toc-link" data-title="Upload a File">Upload a File</a>
-                          </li>
-                          <li>
-                            <a href="#hmda-filing-endpoints-view-parsing-errors" class="toc-h3 toc-link" data-title="View Parsing Errors">View Parsing Errors</a>
-                          </li>
-                          <li>
-                            <a href="#hmda-filing-endpoints-view-all-edits" class="toc-h3 toc-link" data-title="View All Edits">View All Edits</a>
-                          </li>
-                          <li>
-                            <a href="#hmda-filing-endpoints-view-edit-details" class="toc-h3 toc-link" data-title="View Edit Details">View Edit Details</a>
-                          </li>
-                          <li>
-                            <a href="#hmda-filing-endpoints-verify-quality-edits" class="toc-h3 toc-link" data-title="Verify Quality Edits">Verify Quality Edits</a>
-                          </li>
-                          <li>
-                            <a href="#hmda-filing-endpoints-verify-macro-edits" class="toc-h3 toc-link" data-title="Verify Macro Edits">Verify Macro Edits</a>
-                          </li>
-                          <li>
-                            <a href="#hmda-filing-endpoints-sign-a-submission" class="toc-h3 toc-link" data-title="Sign a Submission">Sign a Submission</a>
-                          </li>
-                          <li>
-                            <a href="#hmda-filing-endpoints-get-sign-receipt" class="toc-h3 toc-link" data-title="Get Sign receipt">Get Sign receipt</a>
+                            <a href="#data-browser-api-hmda-filers-hmda-filers-example" class="toc-h3 toc-link" data-title="HMDA Filers Example">HMDA Filers Example</a>
                           </li>
                       </ul>
                   </li>
                   <li>
-                    <a href="#hmda-filing-quarterly-filing" class="toc-h2 toc-link" data-title="Quarterly Filing">Quarterly Filing</a>
-                  </li>
-              </ul>
-          </li>
-          <li>
-            <a href="#public-data-verification" class="toc-h1 toc-link" data-title="Public Data Verification">Public Data Verification</a>
-              <ul class="toc-list-h2">
-                  <li>
-                    <a href="#public-data-verification-single-ts-verification" class="toc-h2 toc-link" data-title="Single TS Verification">Single TS Verification</a>
-                      <ul class="toc-list-h3">
-                          <li>
-                            <a href="#public-data-verification-single-ts-verification-parse-ts" class="toc-h3 toc-link" data-title="Parse TS">Parse TS</a>
-                          </li>
-                          <li>
-                            <a href="#public-data-verification-single-ts-verification-validate-ts" class="toc-h3 toc-link" data-title="Validate TS">Validate TS</a>
-                          </li>
-                      </ul>
-                  </li>
-                  <li>
-                    <a href="#public-data-verification-single-lar-verification" class="toc-h2 toc-link" data-title="Single LAR Verification">Single LAR Verification</a>
-                      <ul class="toc-list-h3">
-                          <li>
-                            <a href="#public-data-verification-single-lar-verification-parse-a-lar" class="toc-h3 toc-link" data-title="Parse a LAR">Parse a LAR</a>
-                          </li>
-                          <li>
-                            <a href="#public-data-verification-single-lar-verification-validate-a-lar" class="toc-h3 toc-link" data-title="Validate a LAR">Validate a LAR</a>
-                          </li>
-                      </ul>
-                  </li>
-                  <li>
-                    <a href="#public-data-verification-full-hmda-file-verification" class="toc-h2 toc-link" data-title="Full HMDA File Verification">Full HMDA File Verification</a>
-                      <ul class="toc-list-h3">
-                          <li>
-                            <a href="#public-data-verification-full-hmda-file-verification-parse-a-hmda-file" class="toc-h3 toc-link" data-title="Parse a HMDA File">Parse a HMDA File</a>
-                          </li>
-                          <li>
-                            <a href="#public-data-verification-full-hmda-file-verification-validate-a-hmda-file" class="toc-h3 toc-link" data-title="Validate a HMDA File">Validate a HMDA File</a>
-                          </li>
-                      </ul>
+                    <a href="#data-browser-api-errors" class="toc-h2 toc-link" data-title="Errors">Errors</a>
                   </li>
               </ul>
           </li>
@@ -228,19 +384,25 @@
             <a href="#check-digit" class="toc-h1 toc-link" data-title="Check Digit">Check Digit</a>
               <ul class="toc-list-h2">
                   <li>
-                    <a href="#check-digit-check-digit-endpoints" class="toc-h2 toc-link" data-title="Check Digit Endpoints">Check Digit Endpoints</a>
+                    <a href="#check-digit-batch-ratespreads-check-digit-endpoints" class="toc-h2 toc-link" data-title="Check Digit Endpoints">Check Digit Endpoints</a>
                   </li>
                   <li>
-                    <a href="#check-digit-single-check-digit-generation" class="toc-h2 toc-link" data-title="Single Check Digit Generation">Single Check Digit Generation</a>
+                    <a href="#check-digit-batch-ratespreads-single-check-digit-generation" class="toc-h2 toc-link" data-title="Single Check Digit Generation">Single Check Digit Generation</a>
                   </li>
                   <li>
-                    <a href="#check-digit-batch-check-digit-generation" class="toc-h2 toc-link" data-title="Batch Check Digit Generation">Batch Check Digit Generation</a>
+                    <a href="#check-digit-batch-ratespreads-batch-check-digit-generation" class="toc-h2 toc-link" data-title="Batch Check Digit Generation">Batch Check Digit Generation</a>
                   </li>
                   <li>
-                    <a href="#check-digit-single-check-digit-validation" class="toc-h2 toc-link" data-title="Single Check Digit Validation">Single Check Digit Validation</a>
+                    <a href="#check-digit-batch-ratespreads-batch-check-digit-generation-bad-request" class="toc-h2 toc-link" data-title="Batch Check Digit Generation (Bad Request)">Batch Check Digit Generation (Bad Request)</a>
                   </li>
                   <li>
-                    <a href="#check-digit-batch-check-digit-validation" class="toc-h2 toc-link" data-title="Batch Check Digit Validation">Batch Check Digit Validation</a>
+                    <a href="#check-digit-batch-ratespreads-single-check-digit-validation" class="toc-h2 toc-link" data-title="Single Check Digit Validation">Single Check Digit Validation</a>
+                  </li>
+                  <li>
+                    <a href="#check-digit-batch-ratespreads-batch-check-digit-validation" class="toc-h2 toc-link" data-title="Batch Check Digit Validation">Batch Check Digit Validation</a>
+                  </li>
+                  <li>
+                    <a href="#check-digit-batch-ratespreads-batch-check-digit-validation-bad-request" class="toc-h2 toc-link" data-title="Batch Check Digit Validation(Bad Request)">Batch Check Digit Validation(Bad Request)</a>
                   </li>
               </ul>
           </li>
@@ -251,320 +413,26 @@
       <div class="content">
         <h1 id='hmda-api-documentation'>HMDA API Documentation</h1>
 <p>The HMDA Platform API helps to prepare and test your HMDA data by allowing you to calculate rate spread, check a single LAR for formatting errors, generate/validate a check digit, and more.</p>
-<h1 id='data-browser'>Data Browser</h1>
-<p>The data browser api enables developers to interact with HMDA data. The API will return either a JSON report of the data or CSV of the raw data.</p>
-
-<p>This API is what powers the <a href="https://ffiec.cfpb.gov/data-browser/">HMDA Data Browser application</a></p>
-
-<p><em>Note:</em> depending on the query, queries may take a while to return and data may be too large for conventional spread sheet applications.</p>
-<h2 id='data-browser-hmda-data-endpoints'>HMDA Data Endpoints</h2><h3 id='data-browser-hmda-data-endpoints-hmda-data-endpoints'>HMDA Data Endpoints</h3>
-<ul>
-<li><strong>Nationwide</strong> <strong>Aggregations</strong></li>
-</ul>
-
-<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/view/nationwide/aggregations</code> </p>
-
-<p>This endpoint is used to generated JSON reports on the full dataset. The year parameter is required when calling this endpoint.</p>
-
-<ul>
-<li><strong>Aggregations</strong></li>
-</ul>
-
-<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/view/aggregations</code> </p>
-
-<p>This endpoint is used to generated JSON reports on an LEI and/or geography subset. The year filter, along with either a geographic or LEI filter, are required when calling this endpoint.</p>
-
-<ul>
-<li><strong>Nationwide</strong> <strong>CSV</strong></li>
-</ul>
-
-<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/view/nationwide/csv</code></p>
-
-<p>This endpoint is used to download raw HMDA data given the applied filters in csv format. The file will be streamed. The year parameter is required when calling this endpoint.</p>
-
-<ul>
-<li><strong>CSV</strong></li>
-</ul>
-
-<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/view/csv</code></p>
-
-<p>This endpoint is used to download raw HMDA data given the applied filters in csv format. The file will be streamed. The year filter, along with either a geographic or LEI filter, are required when calling this endpoint.</p>
-<h3 id='data-browser-hmda-data-endpoints-supported-geographic-filters'>Supported Geographic Filters</h3>
-<table><thead>
-<tr>
-<th>Geography</th>
-<th>Variable Name</th>
-<th>Format</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>MSA/MD</td>
-<td>msamds</td>
-<td>Five Digit MSA/MD Code</td>
-</tr>
-<tr>
-<td>State</td>
-<td>states</td>
-<td>Two Letter State Abbreviation (Eg. AL for Alabama)</td>
-</tr>
-<tr>
-<td>County</td>
-<td>counties</td>
-<td>Five Digit County FIPS Code</td>
-</tr>
-</tbody></table>
-<h3 id='data-browser-hmda-data-endpoints-hmda-data-filters'>HMDA Data Filters</h3>
-<p>HMDA Data requests support the following filtering parameters. Multiple options are acceptable.</p>
-
-<table><thead>
-<tr>
-<th>Variable Name</th>
-<th>Options</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>years</td>
-<td>2018,2019</td>
-</tr>
-<tr>
-<td>actions_taken</td>
-<td>1,2,3,4,5,6,7,8</td>
-</tr>
-<tr>
-<td>construction_methods</td>
-<td>1,2</td>
-</tr>
-<tr>
-<td>dwelling_categories</td>
-<td>Single Family (1-4 Units):Site-Built,<br>Multifamily:Site-Built,<br>Single Family (1-4 Units):Manufactured<br>Multifamily:Manufactured</td>
-</tr>
-<tr>
-<td>ethnicities</td>
-<td>Hispanic or Latino<br>Not Hispanic or Latino,<br>Joint,<br>Ethnicity Not Available,<br>Free Form Text Only</td>
-</tr>
-<tr>
-<td>lien_statuses</td>
-<td>1,2</td>
-</tr>
-<tr>
-<td>loan_products</td>
-<td>Conventional:First Lien,<br>FHA:First Lien,<br>VA:First Lien,<br>FSA/RHS:First Lien,<br>Conventional:Subordinate Lien,<br>FHA:Subordinate Lien,<br>VA:Subordinate Lien,<br>FSA/RHS:Subordinate Lien</td>
-</tr>
-<tr>
-<td>loan_purposes</td>
-<td>1,2,31,32,4,5</td>
-</tr>
-<tr>
-<td>loan_types</td>
-<td>1,2,3,4</td>
-</tr>
-<tr>
-<td>races</td>
-<td>Asian,<br>Native Hawaiian or Other Pacific Islander,<br>Free Form Text Only,<br>Race Not Available,<br>American Indian or Alaska Native,<br>Black or African American,<br>2 or more minority races,<br>White,<br>Joint</td>
-</tr>
-<tr>
-<td>sexes</td>
-<td>Male,<br>Female,<br>Joint,<br>Sex Not Available</td>
-</tr>
-<tr>
-<td>total_units</td>
-<td>1,2,3,4,5-24,25-49,50-99,100-149,&gt;149</td>
-</tr>
-</tbody></table>
-<h3 id='data-browser-hmda-data-endpoints-aggregation-example'>Aggregation Example</h3>
-<blockquote>
-<p><strong>Example Request and Response</strong></p>
-</blockquote>
-
-<pre>
-<b>Request:</b>
-
-curl "https://ffiec.cfpb.gov/v2/data-browser-api/view/aggregations?states=MD&years=2018&actions_taken=5,6&races=Asian"
-
-<b>JSON Response:</b>
-
-  {
-    "parameters": {
-        "state": "MD",
-        "actions_taken": "5,6",
-        "races": "Asian"
-    },
-    "aggregations": [
-        {
-            "count": 679,
-            "sum": 1.90835E8,
-            "actions_taken": "5",
-            "races": "Asian",
-            "state": "MD"
-        },
-        {
-            "count": 716,
-            "sum": 2.5435E8,
-            "actions_taken": "6",
-            "races": "Asian",
-            "state": "MD"
-        }
-    ],
-    "servedFrom": "cache"
-}
-</pre>
-
-<p>Get an aggregation, in JSON format, of HMDA Data reported in 2018 in Maryland, with action takens <code>5 - File closed for incompleteness</code>, or <code>6 - Purchased loan</code>, where the reported race was Asian.</p>
-
-<p><code>GET</code> JSON with the following parameters</p>
-
-<table><thead>
-<tr>
-<th>var</th>
-<th>value</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>years</td>
-<td>2018</td>
-</tr>
-<tr>
-<td>states</td>
-<td>MD</td>
-</tr>
-<tr>
-<td>actions_taken</td>
-<td>5,6</td>
-</tr>
-<tr>
-<td>races</td>
-<td>Asian</td>
-</tr>
-</tbody></table>
-<h3 id='data-browser-hmda-data-endpoints-csv-example'>CSV Example</h3>
-<blockquote>
-<p><strong>Example Request and Response</strong></p>
-</blockquote>
-
-<pre>
-<b>Request:</b>
-
-curl -L "https://ffiec.cfpb.gov/v2/data-browser-api/view/csv?states=CA,MD,DC&years=2018&actions_taken=5"
-
-<b>CSV Response:</b>
-
-<img src="images/DataBrowserCsvExample.png">
-</pre>
-
-<p>Get a CSV containing all HMDA data reported in 2018 in California, Maryland, or DC, with action taken <code>5 - File closed for incompleteness</code>.</p>
-
-<p><code>GET</code> CSV file with the following parameters</p>
-
-<table><thead>
-<tr>
-<th>var</th>
-<th>value</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>states</td>
-<td>CA, MD, DC</td>
-</tr>
-<tr>
-<td>years</td>
-<td>2018</td>
-</tr>
-<tr>
-<td>action_taken</td>
-<td>5</td>
-</tr>
-</tbody></table>
-<h2 id='data-browser-hmda-filers'>HMDA Filers</h2>
-<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/view/filers</code></p>
-
-<p>This endpoint can be used to fetch list of financial institutions present in the HMDA dataset. The year parameter is required when calling this endpoint.</p>
-<h3 id='data-browser-hmda-filers-hmda-filer-parameters'>HMDA Filer Parameters</h3>
-<table><thead>
-<tr>
-<th>Parameter Name</th>
-<th>Options</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>years</td>
-<td>CSV list of years (example: 2018,2019)</td>
-</tr>
-<tr>
-<td>states</td>
-<td>two letter state code</td>
-</tr>
-<tr>
-<td>msamds</td>
-<td>5 digit integer code</td>
-</tr>
-<tr>
-<td>counties</td>
-<td>5 digit integer code</td>
-</tr>
-</tbody></table>
-<h3 id='data-browser-hmda-filers-hmda-filers-example'>HMDA Filers Example</h3>
-<blockquote>
-<p><strong>Example Request and Response:</strong></p>
-</blockquote>
-
-<pre>
-<b>Request:</b>
-
- curl "https://ffiec.cfpb.gov/v2/data-browser-api/view/filers?states=MD,DC&years=2018"
-
-<b>JSON Response:</b>
-
- {
-  "institutions":[
-     {
-        "lei":"lei",
-        "name":"institution name",
-        "period":2018
-     },
-     {
-        "lei":"lei",
-        "name":"institution name",
-        "period":2018
-     }
-  ]
-}
-</pre>
-
-<p>The example to the right allows you to get a list of filers from 2018 that reported HMDA Data in Maryland and DC.</p>
-
-<p><code>GET</code> with the following parameters</p>
-
-<table><thead>
-<tr>
-<th>var</th>
-<th>value</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>years</td>
-<td>2018</td>
-</tr>
-<tr>
-<td>states</td>
-<td>MD, DC</td>
-</tr>
-</tbody></table>
-<h1 id='hmda-filing'>HMDA Filing</h1>
+<h1 id='hmda-filing-api'>HMDA Filing API</h1>
 <p>The following documentation addresses the process for filing a HMDA file and the associated APIs.</p>
 
 <p>This API is what powers the <a href="https://ffiec.cfpb.gov/filing/">HMDA Filing Platform application</a></p>
-<h2 id='hmda-filing-authorization'>Authorization</h2>
-<blockquote>
-<p><strong>Example Request</strong></p>
-</blockquote>
-<div class="highlight"><pre class="highlight plaintext"><code>  curl -X POST \
-  "https://ffiec.cfpb.gov/auth/realms/hmda2/protocol/openid-connect/token" \
-  -d 'client_id=hmda2-api&amp;grant_type=password&amp;username={{username}}%40{{bank_domain}}&amp;password={{password}}'
-</code></pre></div>
+<h2 id='hmda-filing-api-authorization'>Authorization</h2>
 <p>To file HMDA data using the API, a <em>bearer</em> authorization token is required for all api calls. To acquire an authorization token use the <code>/auth</code> endpoint with your username and password as payload.</p>
 
 <p>For local development, no authorization is needed. See <a href="https://github.com/cfpb/hmda-platform#one-line-local-development-environment-no-auth">One-line Local Development Environment (No Auth)</a> for more info.</p>
 
+<p style="background: #ffe4c4; padding-top: 10px; padding-bottom: 10px;">
+<b><u>Please note:</u></b> When connecting to authenticated services on the <b>HMDA Beta</b> platform, acquire your <i>bearer</i> token from the endpoint <code>https://ffiec.cfpb.gov/auth/realms/hmda2/protocol/openid-connect/token</code>. 
+</p>
+
+<blockquote>
+<p>Example</p>
+</blockquote>
+<pre class="highlight plaintext"><code>  curl -X POST \
+  "https://ffiec.cfpb.gov/auth/realms/hmda2/protocol/openid-connect/token" \
+  -d 'client_id=hmda2-api&amp;grant_type=password&amp;username={{username}}%40{{bank_domain}}&amp;password={{password}}'
+</code></pre>
 <table><thead>
 <tr>
 <th></th>
@@ -584,32 +452,32 @@ curl -L "https://ffiec.cfpb.gov/v2/data-browser-api/view/csv?states=CA,MD,DC&yea
 <td>client_id=hmda2-api <br> grant_type=password <br> username={{username}}%40{{bank_domain}} <br> password={{password}}</td>
 </tr>
 </tbody></table>
-<h2 id='hmda-filing-postman-collection'>Postman Collection</h2>
+<h2 id='hmda-filing-api-postman-collection'>Postman Collection</h2>
 <p>The <a href="https://github.com/cfpb/hmda-platform/tree/master/newman/postman">HMDA Postman Collection</a> has been prepared to simplify the process of using the HMDA Platform Filing APIs.</p>
 
 <p><a href="https://www.postman.com/product/api-client/">Postman</a> is a client side application that allows users to easily construct API calls and import external API collections.</p>
-<h2 id='hmda-filing-filing-process'>Filing Process</h2>
+<h2 id='hmda-filing-api-filing-process'>Filing Process</h2>
 <p>Submission of a HMDA file flows in the following steps which are mirriored in the submission status codes:</p>
 
 <ol>
 <li>Create a Filing: These are unique per institution per filing season and are created by the HMDA-Ops teams in preperation for each filing season.</li>
-<li>Create a Submission: Submissions are the primary object in a HMDA Filing. They are created within a filing and each is able to accept a single file upload. Many submissions can be created for a filing and they carry an id which is incremented.</li>
+<li>Create a Submission: Submissions are the primary object in a HMDA Filing. They are created within a filing and each is able to accept a single file upload. Many submissions can be created for a filing and they carry an id which is incrimented.</li>
 <li>Upload a File: A file is then uploaded to the submission which was created. Only one file can be uploaded to a submission. To upload a new file you must create a new submission.</li>
-<li>Check the status of the Submission the file was uploaded to: If parsing errors, syntactical edits or validity edits are triggered a new file must be uploaded.</li>
+<li>Check the status of the Submission the file was uploaded to: If parsing syntactical or validity edits are triggered a new file must be uploaded.</li>
 <li>Validate Quality Edits: Review triggered Quality Edits and confirm the submitted data are correct.</li>
 <li>Validate Macro Edits: Review triggered Macro Edits and confirm the submitted data are correct.</li>
 <li>Sign the Submission: Perform final review of the data and complete the HMDA filing.</li>
 </ol>
-<h3 id='hmda-filing-filing-process-object-hierarchy'>Object Hierarchy</h3>
-<p><img src="images/filingObjectHierarchy.png"></p>
-<h3 id='hmda-filing-filing-process-submission-status'>Submission Status</h3>
+<h3 id='hmda-filing-api-filing-process-object-hierarchy'>Object Hierarchy</h3>
+<p><img src="../images/filingObjectHierarchy.png"></p>
+<h3 id='hmda-filing-api-filing-process-submission-status'>Submission Status</h3>
 <p>As a submission represents a HMDA filing the submission status is the best way to see the state of a HMDA filing. It will be useful to query for 
 the submission status often throughout the process of uploading and checking edits for a submission.</p>
-<h3 id='hmda-filing-filing-process-submission-status-codes'>Submission Status Codes</h3>
+<h4 id='hmda-filing-api-filing-process-submission-status-submission-status-codes'>Submission Status Codes</h4>
 <blockquote>
-<p><strong>JSON Status Code Example</strong></p>
+<p><strong>Example</strong></p>
 </blockquote>
-<div class="highlight"><pre class="highlight plaintext"><code>{
+<pre class="highlight plaintext"><code>{
   "id": {
     "lei": "12345abc",
     "period": "2018",
@@ -625,7 +493,7 @@ the submission status often throughout the process of uploading and checking edi
   "fileName": "test.txt",
   "receipt": ""
 }
-</code></pre></div>
+</code></pre>
 <p>In order to track the status of a filing for a financial institution, the following states are captured by the backend:</p>
 
 <table><thead>
@@ -716,37 +584,35 @@ the submission status often throughout the process of uploading and checking edi
 <td>Please re-upload your file.</td>
 </tr>
 </tbody></table>
-<h2 id='hmda-filing-endpoints'>Endpoints</h2><h3 id='hmda-filing-endpoints-start-a-filing'>Start a Filing</h3>
+<h2 id='hmda-filing-api-endpoints'>Endpoints</h2><h3 id='hmda-filing-api-endpoints-start-a-filing'>Start a Filing</h3>
 <blockquote>
 <p><strong>Example Request and Response</strong></p>
 </blockquote>
 
-<pre>
+<p><pre><code class="text">
 <b>Request:</b>
-
 curl -X POST \
-  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2019" \
-  -H 'Authorization: Bearer  {{access_token}}' \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2019&quot; \
+  -H &#39;Authorization: Bearer  {{access_token}}&#39; \</p>
 
-<b>JSON Response:</b>
-
+<p><b>JSON Response:</b>
 {
-    "filing": {
-        "period": "2018",
-        "lei": "B90YWS6AFX2LGWOXJ1LD",
-        "status": {
-            "code": 2,
-            "message": "in-progress"
+    &quot;filing&quot;: {
+        &quot;period&quot;: &quot;2018&quot;,
+        &quot;lei&quot;: &quot;B90YWS6AFX2LGWOXJ1LD&quot;,
+        &quot;status&quot;: {
+            &quot;code&quot;: 2,
+            &quot;message&quot;: &quot;in-progress&quot;
         },
-        "filingRequired": true,
-        "start": 1572378187454,
-        "end": 0
+        &quot;filingRequired&quot;: true,
+        &quot;start&quot;: 1572378187454,
+        &quot;end&quot;: 0
     },
-    "submissions": []
+    &quot;submissions&quot;: []
 }
-</pre>
+</pre></code></p>
 
-<p>For evey filing period, you must begin by starting a filing. This only needs to be done once per filing season. In the production HMDA filing application this will have already been created. 
+<p>For evey filing period, you must begin by starting a filing. This only needs to be done once per filing season. In the production HMDA filing application this will have already been creaed. 
 The <code>POST</code> will result in a <code>200</code> only for the first time it&#39;s called. If the filing for the given filing period already exists, the <code>POST</code> will return a <code>400</code>.</p>
 
 <table><thead>
@@ -768,36 +634,35 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 <td><code>Authorization: Bearer {{access_token}}</code></td>
 </tr>
 </tbody></table>
-<h3 id='hmda-filing-endpoints-get-a-filing'>Get a Filing</h3>
+<h3 id='hmda-filing-api-endpoints-get-a-filing'>Get a Filing</h3>
+<p>This endpoint can be used to confirm that a filing exists for the relevant period.</p>
+
 <blockquote>
 <p><strong>Example Request and Response</strong></p>
 </blockquote>
 
-<pre>
+<p><pre><code class="text">
 <b>Request:</b>
 curl -X GET \
-  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2019" \
-  -H 'Authorization: Bearer  {{access_token}}' \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2019&quot; \
+  -H &#39;Authorization: Bearer  {{access_token}}&#39; \</p>
 
-<b>JSON Response:</b>
-
+<p><b>JSON Response:</b>
 {
-    "filing": {
-        "period": "2018",
-        "lei": "B90YWS6AFX2LGWOXJ1LD",
-        "status": {
-            "code": 2,
-            "message": "in-progress"
+    &quot;filing&quot;: {
+        &quot;period&quot;: &quot;2018&quot;,
+        &quot;lei&quot;: &quot;B90YWS6AFX2LGWOXJ1LD&quot;,
+        &quot;status&quot;: {
+            &quot;code&quot;: 2,
+            &quot;message&quot;: &quot;in-progress&quot;
         },
-        "filingRequired": true,
-        "start": 1572378187454,
-        "end": 0
+        &quot;filingRequired&quot;: true,
+        &quot;start&quot;: 1572378187454,
+        &quot;end&quot;: 0
     },
-    "submissions": []
+    &quot;submissions&quot;: []
 }
-</pre>
-
-<p>This endpoint can be used to confirm that a filing exists for the relevant period.</p>
+</pre></code></p>
 
 <table><thead>
 <tr>
@@ -818,37 +683,37 @@ curl -X GET \
 <td><code>Authorization: Bearer {{access_token}}</code></td>
 </tr>
 </tbody></table>
-<h3 id='hmda-filing-endpoints-create-a-submission'>Create a Submission</h3>
+<h3 id='hmda-filing-api-endpoints-create-a-submission'>Create a Submission</h3>
 <blockquote>
 <p><strong>Example Request and Response</strong></p>
 </blockquote>
 
-<pre>
+<p><pre><code class="text">
 <b>Request:</b>
-
 curl -X POST \
-  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions" \
-  -H 'Authorization: Bearer {{access_token}}' \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions&quot; \
+  -H &#39;Authorization: Bearer {{access_token}}&#39; \</p>
 
-<b>JSON Response:</b>
+<p>A submission must be created for each file upload. More than one submission can be created for a filing period. The most recent submission will be considered the latest submission. Each <code>POST</code> on the submission endpoint will return a new submission number.</p>
 
+<p><b>JSON Response:</b>
 {
-    "id": {
-        "lei": "B90YWS6AFX2LGWOXJ1LD",
-        "period": "2018",
-        "sequenceNumber": 10
+    &quot;id&quot;: {
+        &quot;lei&quot;: &quot;B90YWS6AFX2LGWOXJ1LD&quot;,
+        &quot;period&quot;: &quot;2018&quot;,
+        &quot;sequenceNumber&quot;: 10
     },
-    "status": {
-        "code": 1,
-        "message": "No data has been uploaded yet.",
-        "description": "The filing period is open and available to accept HMDA data. Make sure your data is in a pipe-delimited text file."
+    &quot;status&quot;: {
+        &quot;code&quot;: 1,
+        &quot;message&quot;: &quot;No data has been uploaded yet.&quot;,
+        &quot;description&quot;: &quot;The filing period is open and available to accept HMDA data. Make sure your data is in a pipe-delimited text file.&quot;
     },
-    "start": 1572358820303,
-    "end": 0,
-    "fileName": "",
-    "receipt": ""
+    &quot;start&quot;: 1572358820303,
+    &quot;end&quot;: 0,
+    &quot;fileName&quot;: &quot;&quot;,
+    &quot;receipt&quot;: &quot;&quot;
 }
-</pre>
+</pre></code></p>
 
 <p>A submission must be created for each file upload. More than one submission can be created for a filing period. The most recent submission will be considered the latest submission. Each <code>POST</code> on the submission endpoint will return a new submission number.</p>
 
@@ -871,41 +736,39 @@ curl -X POST \
 <td>{{access_token}}</td>
 </tr>
 </tbody></table>
-<h3 id='hmda-filing-endpoints-get-the-latest-submission'>Get the Latest Submission</h3>
+<h3 id='hmda-filing-api-endpoints-get-the-latest-submission'>Get the Latest Submission</h3>
 <blockquote>
-<p>Example Request and Response</p>
+<p><strong>Example Request and Response</strong></p>
 </blockquote>
 
-<pre>
+<p><pre><code class="text">
 <b>Request:</b>
-
 curl -X GET \
-  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/latest" \
-  -H 'Authorization: Bearer {{access_token}}' \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/latest&quot; \
+  -H &#39;Authorization: Bearer {{access_token}}&#39; \</p>
 
-<b>JSON Response:</b>
-
+<p><b>JSON Response:</b>
 {
-    "id": {
-        "lei": "B90YWS6AFX2LGWOXJ1LD",
-        "period": "2018",
-        "sequenceNumber": 10
+    &quot;id&quot;: {
+        &quot;lei&quot;: &quot;B90YWS6AFX2LGWOXJ1LD&quot;,
+        &quot;period&quot;: &quot;2018&quot;,
+        &quot;sequenceNumber&quot;: 10
     },
-    "status": {
-        "code": 13,
-        "message": "Your data has macro edits that need to be reviewed.",
-        "description": "Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded."
+    &quot;status&quot;: {
+        &quot;code&quot;: 13,
+        &quot;message&quot;: &quot;Your data has macro edits that need to be reviewed.&quot;,
+        &quot;description&quot;: &quot;Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded.&quot;
     },
-    "start": 1572372016130,
-    "end": 0,
-    "fileName": "clean_file_10.txt",
-    "receipt": "",
-    "qualityVerified": false,
-    "macroVerified": false,
-    "qualityExists": true,
-    "macroExists": true
+    &quot;start&quot;: 1572372016130,
+    &quot;end&quot;: 0,
+    &quot;fileName&quot;: &quot;clean_file_10.txt&quot;,
+    &quot;receipt&quot;: &quot;&quot;,
+    &quot;qualityVerified&quot;: false,
+    &quot;macroVerified&quot;: false,
+    &quot;qualityExists&quot;: true,
+    &quot;macroExists&quot;: true
 }
-</pre>
+</pre></code></p>
 
 <p>Returns details about the last created submission including it&#39;s sequence number and status.</p>
 
@@ -928,39 +791,37 @@ curl -X GET \
 <td><code>Authorization: Bearer {{access_token}}</code></td>
 </tr>
 </tbody></table>
-<h3 id='hmda-filing-endpoints-upload-a-file'>Upload a File</h3>
+<h3 id='hmda-filing-api-endpoints-upload-a-file'>Upload a File</h3>
 <blockquote>
-<p><strong>Example Request and Response</strong></p>
+<p>Example Request and Response</p>
 </blockquote>
 
-<pre>
+<p><pre><code class="text">
 <b>Request:</b>
-
 curl -X POST \
-  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2019/submissions/10" \
-  -H 'Authorization: Bearer {{access_token}}' \
-  -H 'content-type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW' \
-  -F file=<file.csv>
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2019/submissions/10&quot; \
+  -H &#39;Authorization: Bearer {{access_token}}&#39; \
+  -H &#39;content-type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW&#39; \
+  -F file=<file.csv></p>
 
-<b>JSON Response:</b>
-
+<p><b>JSON Response:</b>
 {
-    "id": {
-        "lei": "B90YWS6AFX2LGWOXJ1LD",
-        "period": "2018",
-        "sequenceNumber": 10
+    &quot;id&quot;: {
+        &quot;lei&quot;: &quot;B90YWS6AFX2LGWOXJ1LD&quot;,
+        &quot;period&quot;: &quot;2018&quot;,
+        &quot;sequenceNumber&quot;: 10
     },
-    "status":{
-        "code": 3,
-        "message": "Your file has been uploaded.",
-        "description": "Your data is ready to be analyzed."
+    &quot;status&quot;:{
+        &quot;code&quot;: 3,
+        &quot;message&quot;: &quot;Your file has been uploaded.&quot;,
+        &quot;description&quot;: &quot;Your data is ready to be analyzed.&quot;
     },
-    "start": 1572372016130,
-    "end": 0,
-    "fileName": "",
-    "receipt": ""
+    &quot;start&quot;: 1572372016130,
+    &quot;end&quot;: 0,
+    &quot;fileName&quot;: &quot;&quot;,
+    &quot;receipt&quot;: &quot;&quot;
 }
-</pre>
+</pre></code></p>
 
 <p>Upload a file to a submission.</p>
 
@@ -987,40 +848,38 @@ curl -X POST \
 <td>LAR file</td>
 </tr>
 </tbody></table>
-<h3 id='hmda-filing-endpoints-view-parsing-errors'>View Parsing Errors</h3>
+<h3 id='hmda-filing-api-endpoints-view-parsing-errors'>View Parsing Errors</h3>
 <blockquote>
 <p><strong>Example Request and Response</strong></p>
 </blockquote>
 
-<pre>
+<p><pre><code class="text">
 <b>Request:</b>
-
 curl -X POST \
-  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/10/parseErrors" \
-  -H 'Authorization: Bearer {{access_token}}'
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/10/parseErrors&quot; \
+  -H &#39;Authorization: Bearer {{access_token}}&#39;</p>
 
-<b>JSON Response:</b>
-
+<p><b>JSON Response</b>
 {
-    "transmittalSheetErrors": [],
-    "larErrors": [],
-    "count": 0,
-    "total": 0,
-    "status": {
-        "code": 5,
-        "message": "Your data has formatting errors.",
-        "description": "Review these errors and update your file. Then, upload the corrected file."
+    &quot;transmittalSheetErrors&quot;: [],
+    &quot;larErrors&quot;: [],
+    &quot;count&quot;: 0,
+    &quot;total&quot;: 0,
+    &quot;status&quot;: {
+        &quot;code&quot;: 5,
+        &quot;message&quot;: &quot;Your data has formatting errors.&quot;,
+        &quot;description&quot;: &quot;Review these errors and update your file. Then, upload the corrected file.&quot;
     },
-    "_links": {
-        "href": "/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/parseErrors{rel}",
-        "self": "?page=1",
-        "first": "?page=1",
-        "prev": "?page=1",
-        "next": "?page=0",
-        "last": "?page=0"
+    &quot;_links&quot;: {
+        &quot;href&quot;: &quot;/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/parseErrors{rel}&quot;,
+        &quot;self&quot;: &quot;?page=1&quot;,
+        &quot;first&quot;: &quot;?page=1&quot;,
+        &quot;prev&quot;: &quot;?page=1&quot;,
+        &quot;next&quot;: &quot;?page=0&quot;,
+        &quot;last&quot;: &quot;?page=0&quot;
     }
 }
-</pre>
+</pre></code></p>
 
 <p>Returns a list of all parsing errors triggered by the file uploaded to a submission.</p>
 
@@ -1043,58 +902,56 @@ curl -X POST \
 <td><code>Authorization: Bearer {{access_token}}</code></td>
 </tr>
 </tbody></table>
-<h3 id='hmda-filing-endpoints-view-all-edits'>View All Edits</h3>
+<h3 id='hmda-filing-api-endpoints-view-all-edits'>View All Edits</h3>
 <blockquote>
 <p><strong>Example Request and Response</strong></p>
 </blockquote>
 
-<pre>
+<p><pre><code class="text">
 <b>Request:</b>
-
 curl -X GET \
-  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/edits" \
-  -H 'Authorization: Bearer {{access_token}}'
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/edits&quot; \
+  -H &#39;Authorization: Bearer {{access_token}}&#39;</p>
 
-<b>JSON Response:</b>
-
+<p><b>JSON Response:</b>
 {
-    "syntactical": {
-        "edits": []
+    &quot;syntactical&quot;: {
+        &quot;edits&quot;: []
     },
-    "validity": {
-        "edits": []
+    &quot;validity&quot;: {
+        &quot;edits&quot;: []
     },
-    "quality": {
-        "edits": [
+    &quot;quality&quot;: {
+        &quot;edits&quot;: [
             {
-                "edit": "Q630",
-                "description": "If Total Units is greater than or equal to 5, then HOEPA Status generally should equal 3."
+                &quot;edit&quot;: &quot;Q630&quot;,
+                &quot;description&quot;: &quot;If Total Units is greater than or equal to 5, then HOEPA Status generally should equal 3.&quot;
             },
             {
-                "edit": "Q631",
-                "description": "If Loan Type equals 2, 3 or 4, then Total Units generally should be less than or equal to 4."
+                &quot;edit&quot;: &quot;Q631&quot;,
+                &quot;description&quot;: &quot;If Loan Type equals 2, 3 or 4, then Total Units generally should be less than or equal to 4.&quot;
             }
         ],
-        "verified": false
+        &quot;verified&quot;: false
     },
-    "macro": {
-        "edits": [
+    &quot;macro&quot;: {
+        &quot;edits&quot;: [
             {
-                "edit": "Q637",
-                "description": "No more than 15% of the loans in the file should report Action Taken equals 5. Your data indicates a percentage outside of this range."
+                &quot;edit&quot;: &quot;Q637&quot;,
+                &quot;description&quot;: &quot;No more than 15% of the loans in the file should report Action Taken equals 5. Your data indicates a percentage outside of this range.&quot;
             }
         ],
-        "verified": false
+        &quot;verified&quot;: false
     },
-    "status": {
-        "code": 13,
-        "message": "Your data has macro edits that need to be reviewed.",
-        "description": "Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded.",
-        "qualityVerified": false,
-        "macroVerified": false
+    &quot;status&quot;: {
+        &quot;code&quot;: 13,
+        &quot;message&quot;: &quot;Your data has macro edits that need to be reviewed.&quot;,
+        &quot;description&quot;: &quot;Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded.&quot;,
+        &quot;qualityVerified&quot;: false,
+        &quot;macroVerified&quot;: false
     }
 }
-</pre>
+</pre></code></p>
 
 <p>Returns a summary of all edits triggered by an upload in a submission.</p>
 
@@ -1117,49 +974,47 @@ curl -X GET \
 <td><code>Authorization: Bearer {{access_token}}</code></td>
 </tr>
 </tbody></table>
-<h3 id='hmda-filing-endpoints-view-edit-details'>View Edit Details</h3>
+<h3 id='hmda-filing-api-endpoints-view-edit-details'>View Edit Details</h3>
 <blockquote>
 <p><strong>Example Request and Response</strong></p>
 </blockquote>
 
-<pre>
+<p><pre><code class="text">
 <b>Request:</b>
-
 curl -X GET \
-  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/edits/Q631" \
-  -H 'Authorization: Bearer {{access_token}}'
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/edits/Q631&quot; \
+  -H &#39;Authorization: Bearer {{access_token}}&#39;</p>
 
-<b>JSON Response</b>
-
+<p><b>JSON Response:</b>
 {
-    "edit": "Q631",
-    "rows": [
+    &quot;edit&quot;: &quot;Q631&quot;,
+    &quot;rows&quot;: [
         {
-           "id": "B90YWS6AFX2LGWOXJ1LDHHXWCDPM0ZEHW08FFTXGRXT62",
-           "fields": [
+           &quot;id&quot;: &quot;B90YWS6AFX2LGWOXJ1LDHHXWCDPM0ZEHW08FFTXGRXT62&quot;,
+           &quot;fields&quot;: [
                {
-                   "name": "Loan Type",
-                   "value": "3"
+                   &quot;name&quot;: &quot;Loan Type&quot;,
+                   &quot;value&quot;: &quot;3&quot;
                },
                {
-                   "name": "Total Units",
-                   "value": "16"
+                   &quot;name&quot;: &quot;Total Units&quot;,
+                   &quot;value&quot;: &quot;16&quot;
                }
            ]
        }
    ],
-   "count": 20,
-   "total": 54,
-   "_links": {
-       "href": "/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/edits/Q631{rel}",
-       "self": "?page=1",
-       "first": "?page=1",
-       "prev": "?page=1",
-       "next": "?page=2",
-       "last": "?page=3"
+   &quot;count&quot;: 20,
+   &quot;total&quot;: 54,
+   &quot;_links&quot;: {
+       &quot;href&quot;: &quot;/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/edits/Q631{rel}&quot;,
+       &quot;self&quot;: &quot;?page=1&quot;,
+       &quot;first&quot;: &quot;?page=1&quot;,
+       &quot;prev&quot;: &quot;?page=1&quot;,
+       &quot;next&quot;: &quot;?page=2&quot;,
+       &quot;last&quot;: &quot;?page=3&quot;
    }
 }
-</pre>
+</pre></code></p>
 
 <p>Returns more information about a specific edit including a list of lines that triggered the edit and the relevant fields from those lines.</p>
 
@@ -1182,30 +1037,28 @@ curl -X GET \
 <td><code>Authorization: Bearer {{access_token}}</code></td>
 </tr>
 </tbody></table>
-<h3 id='hmda-filing-endpoints-verify-quality-edits'>Verify Quality Edits</h3>
+<h3 id='hmda-filing-api-endpoints-verify-quality-edits'>Verify Quality Edits</h3>
 <blockquote>
 <p><strong>Example Request and Response</strong></p>
 </blockquote>
 
-<pre>
+<p><pre><code class="text">
 <b>Request:</b>
-
 curl -X POST \
-  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/sequenceNumber/edits/quality" \
-  -H 'Authorization: Bearer {{access_token}}' \
-  -d '{"verified": true}'
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/sequenceNumber/edits/quality&quot; \
+  -H &#39;Authorization: Bearer {{access_token}}&#39; \
+  -d &#39;{&quot;verified&quot;: true}&#39;</p>
 
-<b>JSON Response:</b>
-
+<p><b>JSON Response:</b>
 {
-    "verified": true,
-    "status": {
-        "code": 13,
-        "message": "Your data has macro edits that need to be reviewed.",
-        "description": "Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded."
+    &quot;verified&quot;: true,
+    &quot;status&quot;: {
+        &quot;code&quot;: 13,
+        &quot;message&quot;: &quot;Your data has macro edits that need to be reviewed.&quot;,
+        &quot;description&quot;: &quot;Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded.&quot;
     }
 }
-</pre>
+</pre></code></p>
 
 <p>Verify that the uploaded data is correct and that the reported quality edits are not relevent to the submission.</p>
 
@@ -1232,30 +1085,28 @@ curl -X POST \
 <td><code>{&quot;verified&quot;: true}</code></td>
 </tr>
 </tbody></table>
-<h3 id='hmda-filing-endpoints-verify-macro-edits'>Verify Macro Edits</h3>
+<h3 id='hmda-filing-api-endpoints-verify-macro-edits'>Verify Macro Edits</h3>
 <blockquote>
 <p><strong>Example Request and Response</strong></p>
 </blockquote>
 
-<pre>
+<p><pre><code class="text">
 <b>Request:</b>
-
 curl -X POST \
-  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/sequenceNumber/edits/macro" \
-  -H 'Authorization: Bearer {{access_token}}' \
-  -d '{"verified": true}'
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/sequenceNumber/edits/macro&quot; \
+  -H &#39;Authorization: Bearer {{access_token}}&#39; \
+  -d &#39;{&quot;verified&quot;: true}&#39;</p>
 
-<b>JSON Response:</b>
-
+<p><b>JSON Response:</b>
 {
-    "verified": true,
-    "status": {
-        "code": 14,
-        "message": "Your data is ready for submission.",
-        "description": "Your financial institution has certified that the data is correct, but it has not been submitted yet."
+    &quot;verified&quot;: true,
+    &quot;status&quot;: {
+        &quot;code&quot;: 14,
+        &quot;message&quot;: &quot;Your data is ready for submission.&quot;,
+        &quot;description&quot;: &quot;Your financial institution has certified that the data is correct, but it has not been submitted yet.&quot;
     }
 }
-</pre>
+</pre></code></p>
 
 <p>Verify that the uploaded data is correct and that the reported macro edits are not relevent to the submission.</p>
 
@@ -1282,32 +1133,30 @@ curl -X POST \
 <td><code>{&quot;verified&quot;: true}</code></td>
 </tr>
 </tbody></table>
-<h3 id='hmda-filing-endpoints-sign-a-submission'>Sign a Submission</h3>
+<h3 id='hmda-filing-api-endpoints-sign-a-submission'>Sign a Submission</h3>
 <blockquote>
 <p><strong>Example Request and Response</strong></p>
 </blockquote>
 
-<pre>
+<p><pre><code class="text">
 <b>Request:</b>
-
 curl -X POST \
-  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/55/sign" \
-  -H 'Authorization: Bearer {{access_token}}' \
-  -d '{"verified": true}'
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/55/sign&quot; \
+  -H &#39;Authorization: Bearer {{access_token}}&#39; \
+  -d &#39;{&quot;verified&quot;: true}&#39;</p>
 
-<b>JSON Response</b>
-
+<p><b>JSON Response:</b>
 {
-    "email": "user@example.com",
-    "timestamp": 1572375004080,
-    "receipt": "B90YWS6AFX2LGWOXJ1LD-2018-10-1572375004080",
-    "status": {
-        "code": 15,
-        "message": "Your submission has been accepted.",
-        "description": "This completes your HMDA filing process for this year. If you need to upload a new HMDA file, the previously completed filing will not be overridden until all edits have been cleared and verified, and the new file has been submitted."
+    &quot;email&quot;: &quot;user@example.com&quot;,
+    &quot;timestamp&quot;: 1572375004080,
+    &quot;receipt&quot;: &quot;B90YWS6AFX2LGWOXJ1LD-2018-10-1572375004080&quot;,
+    &quot;status&quot;: {
+        &quot;code&quot;: 15,
+        &quot;message&quot;: &quot;Your submission has been accepted.&quot;,
+        &quot;description&quot;: &quot;This completes your HMDA filing process for this year. If you need to upload a new HMDA file, the previously completed filing will not be overridden until all edits have been cleared and verified, and the new file has been submitted.&quot;
     }
 }
-</pre>
+</pre></code></p>
 
 <p>Sign and complete a HMDA submission.</p>
 
@@ -1334,31 +1183,29 @@ curl -X POST \
 <td><code>{&quot;signed&quot;: true}</code></td>
 </tr>
 </tbody></table>
-<h3 id='hmda-filing-endpoints-get-sign-receipt'>Get Sign receipt</h3>
+<h3 id='hmda-filing-api-endpoints-get-sign-receipt'>Get Sign receipt</h3>
 <blockquote>
-<p><strong>Example Request and Response</strong></p>
+<p>Example Request and Response</p>
 </blockquote>
 
-<pre>
+<p><pre><code class="text">
 <b>Request:</b>
-
 curl -X GET \
-  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/10/sign" \
-  -H 'Authorization: Bearer {{access_token}}'
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/10/sign&quot; \
+  -H &#39;Authorization: Bearer {{access_token}}&#39;</p>
 
-<b>JSON Response:</b>
-
+<p><b>JSON Response:</b>
 {
-    "email": "user@example.com",
-    "timestamp": 1572375004080,
-    "receipt": "B90YWS6AFX2LGWOXJ1LD-2018-55-1572375004080",
-    "status": {
-        "code": 15,
-        "message": "Your submission has been accepted.",
-        "description": "This completes your HMDA filing process for this year. If you need to upload a new HMDA file, the previously completed filing will not be overridden until all edits have been cleared and verified, and the new file has been submitted."
+    &quot;email&quot;: &quot;user@example.com&quot;,
+    &quot;timestamp&quot;: 1572375004080,
+    &quot;receipt&quot;: &quot;B90YWS6AFX2LGWOXJ1LD-2018-55-1572375004080&quot;,
+    &quot;status&quot;: {
+        &quot;code&quot;: 15,
+        &quot;message&quot;: &quot;Your submission has been accepted.&quot;,
+        &quot;description&quot;: &quot;This completes your HMDA filing process for this year. If you need to upload a new HMDA file, the previously completed filing will not be overridden until all edits have been cleared and verified, and the new file has been submitted.&quot;
     }
 }
-</pre>
+</pre></code></p>
 
 <table><thead>
 <tr>
@@ -1379,92 +1226,88 @@ curl -X GET \
 <td><code>Authorization: Bearer {{access_token}}</code></td>
 </tr>
 </tbody></table>
-<h2 id='hmda-filing-quarterly-filing'>Quarterly Filing</h2>
+<h2 id='hmda-filing-api-quarterly-filing'>Quarterly Filing</h2>
 <blockquote>
-<p><strong>Example Request and Request</strong></p>
+<p><strong>Example Request and Response</strong></p>
 </blockquote>
 
-<pre>
+<p><pre><code class="text">
 <b>Request:</b>
-
 curl -X GET \
-  "https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/quarter/Q1/submissions/latest" \
-  -H 'Authorization: Bearer {{access_token}}' \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/quarter/Q1/submissions/latest&quot; \
+  -H &#39;Authorization: Bearer {{access_token}}&#39; \</p>
 
-<b>JSON Response:</b>
-
+<p><b>JSON Response:</b>
 {
-    "id": {
-        "lei": "B90YWS6AFX2LGWOXJ1LD",
-        "period": {
-            "year": 2020,
-            "quarter": "Q1"
+    &quot;id&quot;: {
+        &quot;lei&quot;: &quot;B90YWS6AFX2LGWOXJ1LD&quot;,
+        &quot;period&quot;: {
+            &quot;year&quot;: 2020,
+            &quot;quarter&quot;: &quot;Q1&quot;
         },
-        "sequenceNumber": 10
+        &quot;sequenceNumber&quot;: 10
     },
-    "status": {
-        "code": 13,
-        "message": "Your data has macro edits that need to be reviewed.",
-        "description": "Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded."
+    &quot;status&quot;: {
+        &quot;code&quot;: 13,
+        &quot;message&quot;: &quot;Your data has macro edits that need to be reviewed.&quot;,
+        &quot;description&quot;: &quot;Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded.&quot;
     },
-    "start": 1585750668652,
-    "end": 0,
-    "fileName": "<file_name>",
-    "receipt": "",
-    "qualityVerified": false,
-    "macroVerified": false,
-    "qualityExists": true,
-    "macroExists": false
+    &quot;start&quot;: 1585750668652,
+    &quot;end&quot;: 0,
+    &quot;fileName&quot;: &quot;<file_name>&quot;,
+    &quot;receipt&quot;: &quot;&quot;,
+    &quot;qualityVerified&quot;: false,
+    &quot;macroVerified&quot;: false,
+    &quot;qualityExists&quot;: true,
+    &quot;macroExists&quot;: false
 }
-</pre>
+</pre></code></p>
 
 <p>All the endpoints are the same for quarterly filing with the addtion of <code>quarter/Q1/</code>, <code>quarter/Q2/</code> or <code>quarter/Q3/</code> after the filing parameter and before the submission parameter.</p>
-<h1 id='public-data-verification'>Public Data Verification</h1>
+<h1 id='hmda-public-verification-api'>HMDA Public Verification API</h1>
 <p>The following are HMDA Public API endpoints that do not require authentication. You may use these public endpoints to help prepare your data for sumbission.</p>
-<h2 id='public-data-verification-single-ts-verification'>Single TS Verification</h2>
+<h2 id='hmda-public-verification-api-single-ts-verification'>Single TS Verification</h2>
 <p>These endpoints are used to parse and run edits on a TS. Use <code>parse</code> to check for parsing errors and <code>validate/{{year}}</code> to check for syntactical, validity, and quality edits.</p>
-<h3 id='public-data-verification-single-ts-verification-parse-ts'>Parse TS</h3>
+<h3 id='hmda-public-verification-api-single-ts-verification-parse-ts'>Parse TS</h3>
 <blockquote>
-<p>Example Request and Response</p>
+<p><strong>Example Request and Response</strong></p>
 </blockquote>
 
-<pre>
-<b>Request:</b>
+<p><pre><code class="text">
+  <b>Request:</b></p>
 
-  curl -X POST \
-  "https://ffiec.cfpb.gov/v2/public/ts/parse" \
-  -H 'Content-Type: application/json' \
-  -d '{
-  "ts" : "1|Bank 0|2018|4|Jane|111-111-1111|janesmith@bank.com|123 Main St|Washington|DC|20001|9|100|99-999999|10Bx939c5543TqA1144M"
-}'
+<p>curl -X POST \
+  &quot;https://ffiec.cfpb.gov/v2/public/ts/parse&quot; \
+  -H &#39;Content-Type: application/json&#39; \
+  -d &#39;{
+  &quot;ts&quot; : &quot;1|Bank 0|2018|4|Jane|111-111-1111|janesmith@bank.com|123 Main St|Washington|DC|20001|9|100|99-999999|10Bx939c5543TqA1144M&quot;
+}&#39;</p>
 
-<b>JSON Response:</b>
-
+<p><b>JSON Response:</b>
   {
-      "id": 1,
-      "institutionName": "Bank 0",
-      "year": 2018,
-      "quarter": 4,
-      "contact": {
-          "name": "Jane",
-          "phone": "111-111-1111",
-          "email": "janesmith@bank.com",
-          "address": {
-              "street": "123 Main St",
-              "city": "Washington",
-              "state": "DC",
-              "zipCode": "20001"
+      &quot;id&quot;: 1,
+      &quot;institutionName&quot;: &quot;Bank 0&quot;,
+      &quot;year&quot;: 2018,
+      &quot;quarter&quot;: 4,
+      &quot;contact&quot;: {
+          &quot;name&quot;: &quot;Jane&quot;,
+          &quot;phone&quot;: &quot;111-111-1111&quot;,
+          &quot;email&quot;: &quot;janesmith@bank.com&quot;,
+          &quot;address&quot;: {
+              &quot;street&quot;: &quot;123 Main St&quot;,
+              &quot;city&quot;: &quot;Washington&quot;,
+              &quot;state&quot;: &quot;DC&quot;,
+              &quot;zipCode&quot;: &quot;20001&quot;
           }
       },
-      "agency": 9,
-      "totalLines": 100,
-      "taxId": "99-999999",
-      "LEI": "10Bx939c5543TqA1144M"
+      &quot;agency&quot;: 9,
+      &quot;totalLines&quot;: 100,
+      &quot;taxId&quot;: &quot;99-999999&quot;,
+      &quot;LEI&quot;: &quot;10Bx939c5543TqA1144M&quot;
   }
-</pre>
-  
+  </pre></code></p>
 
-<p>This endpoint runs parsing on a Transmittal Sheet (TS). The endpoint returns a list of parsing errors in JSON format. If the TS is valid, the parsed TS object is returned in JSON format.</p>
+<p>This endpoint runs parsing on a Transmittal Sheet (TS). The endpoint returns a list of parsing errors in JSON format. If the TS is valid it the parsed TS object in JSON format.</p>
 
 <table><thead>
 <tr>
@@ -1489,35 +1332,34 @@ curl -X GET \
 <td>JSON</td>
 </tr>
 </tbody></table>
-<h3 id='public-data-verification-single-ts-verification-validate-ts'>Validate TS</h3>
+<h3 id='hmda-public-verification-api-single-ts-verification-validate-ts'>Validate TS</h3>
 <blockquote>
 <p><strong>Example Request and Response</strong></p>
 </blockquote>
 
-<pre>
-<b>Request:</b>
+<p><pre><code class="text">
+  <b>Request:</b></p>
 
-  curl -X POST \
-  "https://ffiec.cfpb.gov/v2/public/ts/validate/2018" \
-  -H 'Content-Type: application/json' \
-  -d '{
-  "ts" : "1|Bank 0|2018|4|Jane|111-111-1111|janesmith@bank.com|123 Main St|Washington|DC|20001|9|100|99-999999|10Bx939c5543TqA1144M"
-}'
+<p>curl -X POST \
+  &quot;https://ffiec.cfpb.gov/v2/public/ts/validate/2018&quot; \
+  -H &#39;Content-Type: application/json&#39; \
+  -d &#39;{
+  &quot;ts&quot; : &quot;1|Bank 0|2018|4|Jane|111-111-1111|janesmith@bank.com|123 Main St|Washington|DC|20001|9|100|99-999999|10Bx939c5543TqA1144M&quot;
+}&#39;</p>
 
-<b>JSON Response:</b>
-
-{
-    "syntactical": {
-        "errors": []
-    },
-    "validity": {
-        "errors": []
-    },
-    "quality": {
-        "errors": []
+<p><b>JSON Response:</b>
+    {
+        &quot;syntactical&quot;: {
+            &quot;errors&quot;: []
+        },
+        &quot;validity&quot;: {
+            &quot;errors&quot;: []
+        },
+        &quot;quality&quot;: {
+            &quot;errors&quot;: []
+        }
     }
-}
-</pre>
+    </pre></code></p>
 
 <p>This endpoint runs parsing and a specific year&#39;s edit checks on a Transmittal Sheet (TS). It returns edit details if the TS is able to be parsed or parsing errors if not.</p>
 
@@ -1546,173 +1388,171 @@ curl -X GET \
 <td>JSON</td>
 </tr>
 </tbody></table>
-<h2 id='public-data-verification-single-lar-verification'>Single LAR Verification</h2>
+<h2 id='hmda-public-verification-api-single-lar-verification'>Single LAR Verification</h2>
 <p>These endpoints are used to parse and and run edits on a LAR. Use <code>parse</code> to check for parsing errors and <code>validate/{{year}}</code> to check for syntactical, validity, and quality edits.</p>
-<h3 id='public-data-verification-single-lar-verification-parse-a-lar'>Parse a LAR</h3>
+<h3 id='hmda-public-verification-api-single-lar-verification-parse-a-lar'>Parse a LAR</h3>
 <blockquote>
 <p><strong>Example Request and Response</strong></p>
 </blockquote>
 
-<pre>
+<p><pre><code class="text">
 <b>Request:</b>
-
   curl -X POST \
-  "https://ffiec.cfpb.gov/v2/public/lar/parse" \
-  -H 'Content-Type: application/json' \
-  -d '{ "lar": "2|10Bx939c5543TqA1144M|10Bx939c5543TqA1144M999143X38|20180721|1|1|1|1|1|110500|1|20180721|123 Main St|Beverly Hills|CA|90210|06037|06037264000|1|1|1|1|1||1|1|1|1|1||3|3|5|7|7|7|7||||5|7|7|7|7||||3|3|1|1|3|3|30|30|36|1|0.428|1|1|750|750|1|9|1|9|10|10|10|10||2399.04|NA|NA|NA|NA|4.125|NA|42.95|80.05|360|NA|1|2|1|1|350500|1|1|5|NA|1|1|12345|1|1|1|1|1||1|1|1|1|1||1|1|1"
-}'
+  &quot;https://ffiec.cfpb.gov/v2/public/lar/parse&quot; \
+  -H &#39;Content-Type: application/json&#39; \
+  -d &#39;{ &quot;lar&quot;: &quot;2|10Bx939c5543TqA1144M|10Bx939c5543TqA1144M999143X38|20180721|1|1|1|1|1|110500|1|20180721|123 Main St|Beverly Hills|CA|90210|06037|06037264000|1|1|1|1|1||1|1|1|1|1||3|3|5|7|7|7|7||||5|7|7|7|7||||3|3|1|1|3|3|30|30|36|1|0.428|1|1|750|750|1|9|1|9|10|10|10|10||2399.04|NA|NA|NA|NA|4.125|NA|42.95|80.05|360|NA|1|2|1|1|350500|1|1|5|NA|1|1|12345|1|1|1|1|1||1|1|1|1|1||1|1|1&quot;
+}&#39;</p>
 
-<b>Response:</b>
-
+<p><b>JSON Response:</b>
   {
-    "larIdentifier": {
-        "id": 2,
-        "LEI": "10BX939C5543TQA1144M",
-        "NMLSRIdentifier": "12345"
+    &quot;larIdentifier&quot;: {
+        &quot;id&quot;: 2,
+        &quot;LEI&quot;: &quot;10BX939C5543TQA1144M&quot;,
+        &quot;NMLSRIdentifier&quot;: &quot;12345&quot;
     },
-    "loan": {
-        "ULI": "10Bx939c5543TqA1144M999143X38",
-        "applicationDate": "20180721",
-        "loanType": 1,
-        "loanPurpose": 1,
-        "constructionMethod": 1,
-        "occupancy": 1,
-        "amount": 110500.0,
-        "loanTerm": "360",
-        "rateSpread": "0.428",
-        "interestRate": "4.125",
-        "prepaymentPenaltyTerm": "NA",
-        "debtToIncomeRatio": "42.95",
-        "combinedLoanToValueRatio": "80.05",
-        "introductoryRatePeriod": "NA"
+    &quot;loan&quot;: {
+        &quot;ULI&quot;: &quot;10Bx939c5543TqA1144M999143X38&quot;,
+        &quot;applicationDate&quot;: &quot;20180721&quot;,
+        &quot;loanType&quot;: 1,
+        &quot;loanPurpose&quot;: 1,
+        &quot;constructionMethod&quot;: 1,
+        &quot;occupancy&quot;: 1,
+        &quot;amount&quot;: 110500.0,
+        &quot;loanTerm&quot;: &quot;360&quot;,
+        &quot;rateSpread&quot;: &quot;0.428&quot;,
+        &quot;interestRate&quot;: &quot;4.125&quot;,
+        &quot;prepaymentPenaltyTerm&quot;: &quot;NA&quot;,
+        &quot;debtToIncomeRatio&quot;: &quot;42.95&quot;,
+        &quot;combinedLoanToValueRatio&quot;: &quot;80.05&quot;,
+        &quot;introductoryRatePeriod&quot;: &quot;NA&quot;
     },
-    "larAction": {
-        "preapproval": 1,
-        "actionTakenType": 1,
-        "actionTakenDate": 20180721
+    &quot;larAction&quot;: {
+        &quot;preapproval&quot;: 1,
+        &quot;actionTakenType&quot;: 1,
+        &quot;actionTakenDate&quot;: 20180721
     },
-    "geography": {
-        "street": "123 Main St",
-        "city": "Beverly Hills",
-        "state": "CA",
-        "zipCode": "90210",
-        "county": "06037",
-        "tract": "06037264000"
+    &quot;geography&quot;: {
+        &quot;street&quot;: &quot;123 Main St&quot;,
+        &quot;city&quot;: &quot;Beverly Hills&quot;,
+        &quot;state&quot;: &quot;CA&quot;,
+        &quot;zipCode&quot;: &quot;90210&quot;,
+        &quot;county&quot;: &quot;06037&quot;,
+        &quot;tract&quot;: &quot;06037264000&quot;
     },
-    "applicant": {
-        "ethnicity": {
-            "ethnicity1": 1,
-            "ethnicity2": 1,
-            "ethnicity3": 1,
-            "ethnicity4": 1,
-            "ethnicity5": 1,
-            "otherHispanicOrLatino": "",
-            "ethnicityObserved": 3
+    &quot;applicant&quot;: {
+        &quot;ethnicity&quot;: {
+            &quot;ethnicity1&quot;: 1,
+            &quot;ethnicity2&quot;: 1,
+            &quot;ethnicity3&quot;: 1,
+            &quot;ethnicity4&quot;: 1,
+            &quot;ethnicity5&quot;: 1,
+            &quot;otherHispanicOrLatino&quot;: &quot;&quot;,
+            &quot;ethnicityObserved&quot;: 3
         },
-        "race": {
-            "race1": 5,
-            "race2": 7,
-            "race3": 7,
-            "race4": 7,
-            "race5": 7,
-            "otherNativeRace": "",
-            "otherAsianRace": "",
-            "otherPacificIslanderRace": "",
-            "raceObserved": 3
+        &quot;race&quot;: {
+            &quot;race1&quot;: 5,
+            &quot;race2&quot;: 7,
+            &quot;race3&quot;: 7,
+            &quot;race4&quot;: 7,
+            &quot;race5&quot;: 7,
+            &quot;otherNativeRace&quot;: &quot;&quot;,
+            &quot;otherAsianRace&quot;: &quot;&quot;,
+            &quot;otherPacificIslanderRace&quot;: &quot;&quot;,
+            &quot;raceObserved&quot;: 3
         },
-        "sex": {
-            "sex": 1,
-            "sexObserved": 3
+        &quot;sex&quot;: {
+            &quot;sex&quot;: 1,
+            &quot;sexObserved&quot;: 3
         },
-        "age": 30,
-        "creditScore": 750,
-        "creditScoreType": 1,
-        "otherCreditScoreModel": "9"
+        &quot;age&quot;: 30,
+        &quot;creditScore&quot;: 750,
+        &quot;creditScoreType&quot;: 1,
+        &quot;otherCreditScoreModel&quot;: &quot;9&quot;
     },
-    "coApplicant": {
-        "ethnicity": {
-            "ethnicity1": 1,
-            "ethnicity2": 1,
-            "ethnicity3": 1,
-            "ethnicity4": 1,
-            "ethnicity5": 1,
-            "otherHispanicOrLatino": "",
-            "ethnicityObserved": 3
+    &quot;coApplicant&quot;: {
+        &quot;ethnicity&quot;: {
+            &quot;ethnicity1&quot;: 1,
+            &quot;ethnicity2&quot;: 1,
+            &quot;ethnicity3&quot;: 1,
+            &quot;ethnicity4&quot;: 1,
+            &quot;ethnicity5&quot;: 1,
+            &quot;otherHispanicOrLatino&quot;: &quot;&quot;,
+            &quot;ethnicityObserved&quot;: 3
         },
-        "race": {
-            "race1": 5,
-            "race2": 7,
-            "race3": 7,
-            "race4": 7,
-            "race5": 7,
-            "otherNativeRace": "",
-            "otherAsianRace": "",
-            "otherPacificIslanderRace": "",
-            "raceObserved": 3
+        &quot;race&quot;: {
+            &quot;race1&quot;: 5,
+            &quot;race2&quot;: 7,
+            &quot;race3&quot;: 7,
+            &quot;race4&quot;: 7,
+            &quot;race5&quot;: 7,
+            &quot;otherNativeRace&quot;: &quot;&quot;,
+            &quot;otherAsianRace&quot;: &quot;&quot;,
+            &quot;otherPacificIslanderRace&quot;: &quot;&quot;,
+            &quot;raceObserved&quot;: 3
         },
-        "sex": {
-            "sex": 1,
-            "sexObserved": 3
+        &quot;sex&quot;: {
+            &quot;sex&quot;: 1,
+            &quot;sexObserved&quot;: 3
         },
-        "age": 30,
-        "creditScore": 750,
-        "creditScoreType": 1,
-        "otherCreditScoreModel": "9"
+        &quot;age&quot;: 30,
+        &quot;creditScore&quot;: 750,
+        &quot;creditScoreType&quot;: 1,
+        &quot;otherCreditScoreModel&quot;: &quot;9&quot;
     },
-    "income": "36",
-    "purchaserType": 1,
-    "hoepaStatus": 1,
-    "lienStatus": 1,
-    "denial": {
-        "denialReason1": 10,
-        "denialReason2": 10,
-        "denialReason3": 10,
-        "denialReason4": 10,
-        "otherDenialReason": ""
+    &quot;income&quot;: &quot;36&quot;,
+    &quot;purchaserType&quot;: 1,
+    &quot;hoepaStatus&quot;: 1,
+    &quot;lienStatus&quot;: 1,
+    &quot;denial&quot;: {
+        &quot;denialReason1&quot;: 10,
+        &quot;denialReason2&quot;: 10,
+        &quot;denialReason3&quot;: 10,
+        &quot;denialReason4&quot;: 10,
+        &quot;otherDenialReason&quot;: &quot;&quot;
     },
-    "loanDisclosure": {
-        "totalLoanCosts": "2399.04",
-        "totalPointsAndFees": "NA",
-        "originationCharges": "NA",
-        "discountPoints": "NA",
-        "lenderCredits": "NA"
+    &quot;loanDisclosure&quot;: {
+        &quot;totalLoanCosts&quot;: &quot;2399.04&quot;,
+        &quot;totalPointsAndFees&quot;: &quot;NA&quot;,
+        &quot;originationCharges&quot;: &quot;NA&quot;,
+        &quot;discountPoints&quot;: &quot;NA&quot;,
+        &quot;lenderCredits&quot;: &quot;NA&quot;
     },
-    "nonAmortizingFeatures": {
-        "balloonPayment": 1,
-        "interestOnlyPayment": 2,
-        "negativeAmortization": 1,
-        "otherNonAmortizingFeatures": 1
+    &quot;nonAmortizingFeatures&quot;: {
+        &quot;balloonPayment&quot;: 1,
+        &quot;interestOnlyPayment&quot;: 2,
+        &quot;negativeAmortization&quot;: 1,
+        &quot;otherNonAmortizingFeatures&quot;: 1
     },
-    "property": {
-        "propertyValue": "350500.0",
-        "manufacturedHomeSecuredProperty": 1,
-        "manufacturedHomeLandPropertyInterest": 1,
-        "totalUnits": 5,
-        "multiFamilyAffordableUnits": "NA"
+    &quot;property&quot;: {
+        &quot;propertyValue&quot;: &quot;350500.0&quot;,
+        &quot;manufacturedHomeSecuredProperty&quot;: 1,
+        &quot;manufacturedHomeLandPropertyInterest&quot;: 1,
+        &quot;totalUnits&quot;: 5,
+        &quot;multiFamilyAffordableUnits&quot;: &quot;NA&quot;
     },
-    "applicationSubmission": 1,
-    "payableToInstitution": 1,
-    "AUS": {
-        "aus1": 1,
-        "aus2": 1,
-        "aus3": 1,
-        "aus4": 1,
-        "aus5": 1,
-        "otherAUS": ""
+    &quot;applicationSubmission&quot;: 1,
+    &quot;payableToInstitution&quot;: 1,
+    &quot;AUS&quot;: {
+        &quot;aus1&quot;: 1,
+        &quot;aus2&quot;: 1,
+        &quot;aus3&quot;: 1,
+        &quot;aus4&quot;: 1,
+        &quot;aus5&quot;: 1,
+        &quot;otherAUS&quot;: &quot;&quot;
     },
-    "ausResult": {
-        "ausResult1": 1,
-        "ausResult2": 1,
-        "ausResult3": 1,
-        "ausResult4": 1,
-        "ausResult5": 1,
-        "otherAusResult": ""
+    &quot;ausResult&quot;: {
+        &quot;ausResult1&quot;: 1,
+        &quot;ausResult2&quot;: 1,
+        &quot;ausResult3&quot;: 1,
+        &quot;ausResult4&quot;: 1,
+        &quot;ausResult5&quot;: 1,
+        &quot;otherAusResult&quot;: &quot;&quot;
     },
-    "reverseMortgage": 1,
-    "lineOfCredit": 1,
-    "businessOrCommercialPurpose": 1
+    &quot;reverseMortgage&quot;: 1,
+    &quot;lineOfCredit&quot;: 1,
+    &quot;businessOrCommercialPurpose&quot;: 1
 }
-</pre>
+</pre></code></p>
 
 <p>This endpoint runs parsing on a single Loan Application Register (LAR). The endpoint returns a list of parsing errors in JSON format. If the LAR is valid it returns the parsed LAR object in JSON format.</p>
 
@@ -1739,45 +1579,45 @@ curl -X GET \
 <td>JSON</td>
 </tr>
 </tbody></table>
-<h3 id='public-data-verification-single-lar-verification-validate-a-lar'>Validate a LAR</h3>
+<h3 id='hmda-public-verification-api-single-lar-verification-validate-a-lar'>Validate a LAR</h3>
 <blockquote>
 <p><strong>Example Request and Response</strong></p>
 </blockquote>
 
-<pre>
-<b>Request</b>
+<p><pre><code class="text">
+  <b>Request:</b>
   curl -X POST \
-  "https://ffiec.cfpb.gov/v2/public/lar/validate/2018" \
-  -H 'Content-Type: application/json' \
-  -d '{"lar": "2|B90YWS6AFX2LGWOXJ1LD|B90YWS6AFX2LGWOXJ1LD0KQ78F1Q02LVT4VCYK1G3D253|20180613|3|2|2|2|3|218910|5|20181031|1234 Hocus Potato Way|Tatertown|NM|14755|35003|35003976400|1|13||11||KE0NW|1|||||NA2IJJ7VBBQ15DTFRNK1PVWOPOXL3NH1PHUMN7S2J4|2|2|7|||||E120FYAU7BTSC3P51IL87C97W3N9VT791BMJI57RLJQSHOFDTUD7PQSPGHQ69D7I2P8JBDCBUIGRLX2BUS7SJR|DOOOI8UXY9PZDSRVFKP91CUQG95E88Y22KDR1AI3|1K1JINAYSIHCWBGJW3KOHU5D5TSK1Z61SUT5M9WQVWOHX|27|24|41|43|2|MS1LKLX7XZRKL23TV01I49RADZGUN0QY5AG9H4BJCVFTA4ZQ1EJUS1376QJXD87ZZDN5EFZIUWB8SK5EU34RVGOVTE|Y083OZN1VFT6B2XGL397ABL0Z4EV4CD45I7ZJ7FRSXXL4BRMKVPR5UCVV0K6IDLP7WLCBZAQ5KXT69PNE9PWQKCPKJB|UV0FTHG00G8WM65I7591IJYP9TEMXMDCVGZYRJTBUBBKEZI65HGL9ML|3|2|2|2|1|1|75|4|NA|0|NA|3|2|8888|8888|9||9||10|||||NA|NA|NA|NA|NA|NA|32|NA|NA|256|29|1111|1111|1111|1111|NA|3|2|16|Exempt|2|2|NA|3|1|5|1||DOREBESQSW1QT58SD2OZTHQUGXLSKCAJYZ63NJE2MUIAFQL4KW6PU26YSU786GT0IMCWWKCN25Y7KU0VLU0PPKWR8G6DKWI9BANPIE9I2ZZ5XDUX0TBAY4XFRFQZF087WS9ESTAKIV5V9HSZ2VXW7J5JMGPP4CGYA51BK68T57NN4KTKJVXIQMFXBTN5E3LGKKX3LITQ4C7OPFJ|7|6|5|5|||1111|2|1111"
-}'
+  &quot;https://ffiec.cfpb.gov/v2/public/lar/validate/2018&quot; \
+  -H &#39;Content-Type: application/json&#39; \
+  -d &#39;{&quot;lar&quot;: &quot;&quot;2|B90YWS6AFX2LGWOXJ1LD|B90YWS6AFX2LGWOXJ1LD0KQ78F1Q02LVT4VCYK1G3D253|20180613|3|2|2|2|3|218910|5|20181031|1234 Hocus Potato Way|Tatertown|NM|14755|35003|35003976400|1|13||11||KE0NW|1|||||NA2IJJ7VBBQ15DTFRNK1PVWOPOXL3NH1PHUMN7S2J4|2|2|7|||||E120FYAU7BTSC3P51IL87C97W3N9VT791BMJI57RLJQSHOFDTUD7PQSPGHQ69D7I2P8JBDCBUIGRLX2BUS7SJR|DOOOI8UXY9PZDSRVFKP91CUQG95E88Y22KDR1AI3|1K1JINAYSIHCWBGJW3KOHU5D5TSK1Z61SUT5M9WQVWOHX|27|24|41|43|2|MS1LKLX7XZRKL23TV01I49RADZGUN0QY5AG9H4BJCVFTA4ZQ1EJUS1376QJXD87ZZDN5EFZIUWB8SK5EU34RVGOVTE|Y083OZN1VFT6B2XGL397ABL0Z4EV4CD45I7ZJ7FRSXXL4BRMKVPR5UCVV0K6IDLP7WLCBZAQ5KXT69PNE9PWQKCPKJB|UV0FTHG00G8WM65I7591IJYP9TEMXMDCVGZYRJTBUBBKEZI65HGL9ML|3|2|2|2|1|1|75|4|NA|0|NA|3|2|8888|8888|9||9||10|||||NA|NA|NA|NA|NA|NA|32|NA|NA|256|29|1111|1111|1111|1111|NA|3|2|16|Exempt|2|2|NA|3|1|5|1||DOREBESQSW1QT58SD2OZTHQUGXLSKCAJYZ63NJE2MUIAFQL4KW6PU26YSU786GT0IMCWWKCN25Y7KU0VLU0PPKWR8G6DKWI9BANPIE9I2ZZ5XDUX0TBAY4XFRFQZF087WS9ESTAKIV5V9HSZ2VXW7J5JMGPP4CGYA51BK68T57NN4KTKJVXIQMFXBTN5E3LGKKX3LITQ4C7OPFJ|7|6|5|5|||1111|2|1111&quot;&quot;
+}&#39;</p>
 
-<b>JSON Response</b>
+<p><b>JSON Response:</b>
   {
-    "syntactical": {
-        "errors": []
+    &quot;syntactical&quot;: {
+        &quot;errors&quot;: []
     },
-    "validity": {
-        "errors": []
+    &quot;validity&quot;: {
+        &quot;errors&quot;: []
     },
-    "quality": {
-        "errors": [
+    &quot;quality&quot;: {
+        &quot;errors&quot;: [
             {
-                "edit": "Q618",
-                "description": "\"If Construction Method equals 2, then Manufactured Home Secured Property Type generally should not be 3.\""
+                &quot;edit&quot;: &quot;Q618&quot;,
+                &quot;description&quot;: &quot;\&quot;If Construction Method equals 2, then Manufactured Home Secured Property Type generally should not be 3.\&quot;&quot;
             },
             {
-                "edit": "Q631",
-                "description": "\"If Loan Type equals 2, 3 or 4, then Total Units generally should be less than or equal to 4.\""
+                &quot;edit&quot;: &quot;Q631&quot;,
+                &quot;description&quot;: &quot;\&quot;If Loan Type equals 2, 3 or 4, then Total Units generally should be less than or equal to 4.\&quot;&quot;
             },
             {
-                "edit": "Q632",
-                "description": "\"If Automated Underwriting System: 1; Automated Underwriting System: 2; Automated Underwriting System: 3; Automated Underwriting System: 4; or Automated Underwriting System: 5 equals 3, then the corresponding Automated Underwriting System Result: 1; Automated Underwriting System Result: 2; Automated Underwriting System Result: 3; Automated Underwriting System Result: 4; or Automated Underwriting System Result: 5 should equal 8 or 13.\""
+                &quot;edit&quot;: &quot;Q632&quot;,
+                &quot;description&quot;: &quot;\&quot;If Automated Underwriting System: 1; Automated Underwriting System: 2; Automated Underwriting System: 3; Automated Underwriting System: 4; or Automated Underwriting System: 5 equals 3, then the corresponding Automated Underwriting System Result: 1; Automated Underwriting System Result: 2; Automated Underwriting System Result: 3; Automated Underwriting System Result: 4; or Automated Underwriting System Result: 5 should equal 8 or 13.\&quot;&quot;
             }
         ]
     }
 }
-</pre>
+</pre></code></p>
 
 <p>This endpoint runs parsing and a specific year&#39;s edit checks on a Loan Application Register (LAR). It returns edit details if the LAR is able to be parsed or parsing errors if not.</p>
 
@@ -1806,26 +1646,24 @@ curl -X GET \
 <td>JSON</td>
 </tr>
 </tbody></table>
-<h2 id='public-data-verification-full-hmda-file-verification'>Full HMDA File Verification</h2>
+<h2 id='hmda-public-verification-api-full-hmda-file-verification'>Full HMDA File Verification</h2>
 <p>The following endpoints can be used to parse and run edit checks on a full HMDA file.</p>
-<h3 id='public-data-verification-full-hmda-file-verification-parse-a-hmda-file'>Parse a HMDA File</h3>
+<h3 id='hmda-public-verification-api-full-hmda-file-verification-parse-a-hmda-file'>Parse a HMDA File</h3>
 <blockquote>
 <p><strong>Example Request and Response</strong></p>
 </blockquote>
 
-<pre>
-<b>Request:</b>
+<p><pre><code class="text">
+  <b>Request:</b>
+  curl -X OPTIONS \
+  &quot;https://ffiec.cfpb.gov/v2/public/hmda/parse&quot; \
+  -F file=@<PATH>/<FILENAME>.txt</p>
 
-curl -X OPTIONS \
-"https://ffiec.cfpb.gov/v2/public/hmda/parse" \
--F file=&ltPATH&gt/&ltFILENAME&gt.txt
-
-<b>JSON Response:</b>
-
-{
-  "validated": []
-}
-</pre>
+<p><b>JSON Response:</b>
+  {
+    &quot;validated&quot;: []
+  }
+  </pre></code></p>
 
 <p>This endpoint runs parsing on a HMDA file. The endpoint returns a list of parsing errors in JSON format. If the file is valid it returns and empty list.</p>
 
@@ -1852,49 +1690,47 @@ curl -X OPTIONS \
 <td>JSON</td>
 </tr>
 </tbody></table>
-<h3 id='public-data-verification-full-hmda-file-verification-validate-a-hmda-file'>Validate a HMDA File</h3>
+<h3 id='hmda-public-verification-api-full-hmda-file-verification-validate-a-hmda-file'>Validate a HMDA File</h3>
 <blockquote>
 <p><strong>Example Request and Response</strong></p>
 </blockquote>
 
-<pre>
-<b>Request:</b>
+<p><pre><code class="text">
+  <b>Request:</b>
+  curl -X OPTIONS \
+  &quot;https://ffiec.cfpb.gov/v2/public/hmda/validate&quot; \
+  -F file=@<PATH>/<FILENAME>.txt</p>
 
-curl -X OPTIONS \
-"https://ffiec.cfpb.gov/v2/public/hmda/validate" \
--F file=@&ltPATH&gt/&ltFILENAME&gt.txt
-
-<b>JSON Response:</b>
-
-{
-  "parserErrors": [
-      {
-          "rowNumber": 1,
-          "estimatedULI": "Transmittal Sheet",
-          "errorMessages": [
-              {
-                  "fieldName": "Calendar Quarter",
-                  "inputValue": "a",
-                  "validValues": "Integer"
-              }
-          ]
-      }
-  ],
-  "validationErrors": [
-      [
-          {
-              "uli": "B90YWS6AFX2LGWOXJ1LDNIXOQ6OO7BRA5SLR6FSJJ5R89",
-              "editName": "V619-2",
-              "editDescription": "\"The Action Taken Date must be in the reporting year.\"",
-              "fields": {
-                  "Action Taken Date": "20180908",
-                  "Application Date": "NA"
-              }
-          }
-      ]
-  ]
-}
-</pre>
+<p><b>JSON Response:</b> 
+  {
+    &quot;parserErrors&quot;: [
+        {
+            &quot;rowNumber&quot;: 1,
+            &quot;estimatedULI&quot;: &quot;Transmittal Sheet&quot;,
+            &quot;errorMessages&quot;: [
+                {
+                    &quot;fieldName&quot;: &quot;Calendar Quarter&quot;,
+                    &quot;inputValue&quot;: &quot;a&quot;,
+                    &quot;validValues&quot;: &quot;Integer&quot;
+                }
+            ]
+        }
+    ],
+    &quot;validationErrors&quot;: [
+        [
+            {
+                &quot;uli&quot;: &quot;B90YWS6AFX2LGWOXJ1LDNIXOQ6OO7BRA5SLR6FSJJ5R89&quot;,
+                &quot;editName&quot;: &quot;V619-2&quot;,
+                &quot;editDescription&quot;: &quot;\&quot;The Action Taken Date must be in the reporting year.\&quot;&quot;,
+                &quot;fields&quot;: {
+                    &quot;Action Taken Date&quot;: &quot;20180908&quot;,
+                    &quot;Application Date&quot;: &quot;NA&quot;
+                }
+            }
+        ]
+    ]
+  }
+  </pre></code></p>
 
 <p>This endpoint runs parsing and a specific year&#39;s edit checks on a HMDA file. This endpoint runs checks row by row and so can return both parsing and edit check information if some rows pass parsing and others do not.</p>
 
@@ -1923,6 +1759,311 @@ curl -X OPTIONS \
 <td>JSON</td>
 </tr>
 </tbody></table>
+<h1 id='data-browser-api'>Data Browser API</h1>
+<p>The data browser api enables developers to interact with HMDA data. The API will return either a JSON report of the data or CSV of the raw data.</p>
+
+<p>This API is what powers the <a href="https://ffiec.cfpb.gov/data-browser/">HMDA Data Browser application</a></p>
+
+<p><em>Note:</em> depending on the query, queries may take a while to return and data may be too large for conventional spread sheet applications.</p>
+<h2 id='data-browser-api-hmda-data-endpoints'>HMDA Data Endpoints</h2><h3 id='data-browser-api-hmda-data-endpoints-hmda-data-endpoints'>HMDA Data Endpoints</h3>
+<ul>
+<li><strong>Nationwide</strong> <strong>Aggregations</strong></li>
+</ul>
+
+<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/view/nationwide/aggregations</code> </p>
+
+<p>This endpoint is used to generated JSON reports on the full dataset. The year parameter is required when calling this endpoint.</p>
+
+<ul>
+<li><strong>Aggregations</strong></li>
+</ul>
+
+<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/view/aggregations</code> </p>
+
+<p>This endpoint is used to generated JSON reports on an LEI and/or geography subset. The year parameter as well at least of a geographic and/or LEI parameter are required when calling this endpoint.</p>
+
+<ul>
+<li><strong>Nationwide</strong> <strong>CSV</strong></li>
+</ul>
+
+<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/view/nationwide/csv</code></p>
+
+<p>This endpoint is used to download raw HMDA data given the applied filters in csv format. The file will be streamed. The year parameter is required when calling this endpoint.</p>
+
+<ul>
+<li><strong>CSV</strong></li>
+</ul>
+
+<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/view/csv</code></p>
+
+<p>This endpoint is used to download raw HMDA data given the applied filters in csv format. The file will be streamed. The year parameter as well at least of a geographic and/or LEI parameter are required when calling this endpoint.</p>
+<h3 id='data-browser-api-hmda-data-endpoints-supported-geographic-filters'>Supported Geographic Filters</h3>
+<table><thead>
+<tr>
+<th>Geography</th>
+<th>Format</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>MSA/MD</td>
+<td>Five Digit MSA/MD Code</td>
+</tr>
+<tr>
+<td>State</td>
+<td>Two Letter State Abbreviation (Eg. AL for Alabama)</td>
+</tr>
+<tr>
+<td>County</td>
+<td>Five Digit County FIPS Code</td>
+</tr>
+</tbody></table>
+<h3 id='data-browser-api-hmda-data-endpoints-hmda-data-filters'>HMDA Data Filters</h3>
+<p>HMDA Data requests support the following filtering parameters. Multiple options are acceptable.</p>
+
+<table><thead>
+<tr>
+<th>Variable Name</th>
+<th>Options</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>years</td>
+<td>2018,2019</td>
+</tr>
+<tr>
+<td>actions_taken</td>
+<td>1,2,3,4,5,6,7,8</td>
+</tr>
+<tr>
+<td>construction_methods</td>
+<td>1,2</td>
+</tr>
+<tr>
+<td>dwelling_categories</td>
+<td>Single Family (1-4 Units):Site-Built<br>Multifamily:Site-Built<br>Single Family (1-4 Units):Manufactured<br>Multifamily:Manufactured</td>
+</tr>
+<tr>
+<td>ethnicities</td>
+<td>Hispanic or Latino<br>Not Hispanic or Latino<br>Joint<br>Ethnicity Not Available<br>Free Form Text Only</td>
+</tr>
+<tr>
+<td>lien_statuses</td>
+<td>1,2</td>
+</tr>
+<tr>
+<td>loan_products</td>
+<td>Conventional:First Lien<br>FHA:First Lien<br>VA:First Lien<br>FSA/RHS:First Lien<br>Conventional:Subordinate Lien<br>FHA:Subordinate Lien<br>VA:Subordinate Lien<br>FSA/RHS:Subordinate Lien</td>
+</tr>
+<tr>
+<td>loan_purposes</td>
+<td>1,2,31,32,4,5</td>
+</tr>
+<tr>
+<td>loan_types</td>
+<td>1,2,3,4</td>
+</tr>
+<tr>
+<td>races</td>
+<td>Asian<br>Native Hawaiian or Other Pacific Islander<br>Free Form Text Only<br>Race Not Available<br>American Indian or Alaska Native<br>Black or African American<br>2 or more minority races<br>White<br>Joint</td>
+</tr>
+<tr>
+<td>sexes</td>
+<td>Male<br>Female<br>Joint<br>Sex Not Available</td>
+</tr>
+<tr>
+<td>total_units</td>
+<td>1,2,3,4,5-24,25-49,50-99,100-149,&gt;149</td>
+</tr>
+</tbody></table>
+<h3 id='data-browser-api-hmda-data-endpoints-aggregation-example'>Aggregation Example</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre><code class="text">
+  <b>Request:</b>
+  curl "https://ffiec.cfpb.gov/v2/view/aggregations?states=MD&years=2018&actions_taken=5,6&races=White,Asian,Joint"
+
+  <b>JSON Response:</b>
+  {
+    "parameters": {
+        "state": "MD",
+        "actions_taken": "5,6",
+        "races": "Asian"
+    },
+    "aggregations": [
+        {
+            "count": 679,
+            "sum": 1.90835E8,
+            "actions_taken": "5",
+            "races": "Asian",
+            "state": "MD"
+        },
+        {
+            "count": 716,
+            "sum": 2.5435E8,
+            "actions_taken": "6",
+            "races": "Asian",
+            "state": "MD"
+        }
+    ],
+    "servedFrom": "cache"
+}
+</code></pre>
+
+<p>Get an aggregation, in JSON format, of HMDA Data reported in 2018 in Maryland, with action takens <code>5 - File closed for incompleteness</code>, or <code>6 - Purchased loan</code>, where the reported race was Asian.</p>
+
+<p><code>GET</code> JSON with the following parameters</p>
+
+<table><thead>
+<tr>
+<th>var</th>
+<th>value</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>years</td>
+<td>2018</td>
+</tr>
+<tr>
+<td>states</td>
+<td>MD</td>
+</tr>
+<tr>
+<td>actions_taken</td>
+<td>5,6</td>
+</tr>
+<tr>
+<td>races</td>
+<td>Asian</td>
+</tr>
+</tbody></table>
+<h3 id='data-browser-api-hmda-data-endpoints-csv-example'>CSV Example</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre><code class="text">
+  <b>Request:</b>
+  curl -L "https://ffiec.cfpb.gov/v2/view/csv?states=CA,MD,DC&years=2018&actions_taken=5"
+
+  <b>CSV Response:</b>
+  <img src="../images/DataBrowserCsvExample.png" class="lang-specific shell">
+</code></pre>
+
+<p>Get a CSV containing all HMDA data reported in 2018 in California, Maryland, or DC, with action taken <code>5 - File closed for incompleteness</code>.</p>
+
+<p><code>GET</code> CSV file with the following parameters</p>
+
+<table><thead>
+<tr>
+<th>var</th>
+<th>value</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>states</td>
+<td>CA, MD, DC</td>
+</tr>
+<tr>
+<td>years</td>
+<td>2018</td>
+</tr>
+<tr>
+<td>action_taken</td>
+<td>5</td>
+</tr>
+</tbody></table>
+<h2 id='data-browser-api-hmda-filers'>HMDA Filers</h2>
+<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/view/filers</code></p>
+
+<p>This endpoint can be used to fetch list of financial instituions present in the HMDA dataset. The year parameter is required when calling this endpoint.</p>
+<h3 id='data-browser-api-hmda-filers-hmda-filer-parameters'>HMDA Filer Parameters</h3>
+<table><thead>
+<tr>
+<th>Parameter Name</th>
+<th>Options</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>years</td>
+<td>CSV list of years (example: 2018,2019)</td>
+</tr>
+<tr>
+<td>states</td>
+<td>two letter state code</td>
+</tr>
+<tr>
+<td>msamds</td>
+<td>5 digit integer code</td>
+</tr>
+<tr>
+<td>counties</td>
+<td>5 digit integer code</td>
+</tr>
+</tbody></table>
+<h3 id='data-browser-api-hmda-filers-hmda-filers-example'>HMDA Filers Example</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre><code class="text">
+  <b>Request:</b>
+  curl "https://ffiec.cfpb.gov/v2/view/filers?states=MD,DC&years=2018"
+
+  <b>JSON Format Response:</b>
+  {
+    "institutions":[
+      {
+          "lei":"lei",
+          "name":"institution name",
+          "period":2018
+      },
+      {
+          "lei":"lei",
+          "name":"institution name",
+          "period":2018
+      }
+    ]
+  }
+</code></pre>
+
+<p><code>GET</code> with the following parameters</p>
+
+<table><thead>
+<tr>
+<th>var</th>
+<th>value</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>years</td>
+<td>2018</td>
+</tr>
+<tr>
+<td>states</td>
+<td>MD, DC</td>
+</tr>
+</tbody></table>
+<h2 id='data-browser-api-errors'>Errors</h2>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre><code class="text">
+  <b>Request:</b>
+  curl "https://ffiec.cfpb.gov/v2/view/csv"
+
+  <b>JSON Response:</b>
+  {
+      "errorType": "provide-atleast-msamds-or-states",
+      "message": "Provide year and either states or msamds or both"
+  }
+</code></pre>
+
+<p>Incorrect calls will result in an error. For example the following call will result in an error since there is no state(s)/msamds and years provided.</p>
+
+<p><br></p>
 <h1 id='rate-spread'>Rate Spread</h1><h2 id='rate-spread-rate-spread-api'>Rate Spread API</h2>
 <p>The following endpoints allow users to provide loan information and returns the associated ratespread either one at a time in JSON format or in a batch in CSV format.</p>
 
@@ -1975,16 +2116,15 @@ curl -X OPTIONS \
 <p><strong>Example Request and Response</strong></p>
 </blockquote>
 
-<pre>
-<b>Request:</b>
+<p><pre><code class="text">
+  <b>Request:</b></p>
 
-curl -X POST "https://ffiec.cfpb.gov/public/rateSpread" -H "Content-Type: application/json" -d '{ "actionTakenType": 1, "loanTerm": 30, "amortizationType": "FixedRate", "apr": 6.0, "lockInDate": "2017-11-20", "reverseMortgage": 2 }'
+<p>curl -X POST &quot;https://ffiec.cfpb.gov/public/rateSpread&quot; -H &quot;Content-Type: application/json&quot; -d &#39;{ &quot;actionTakenType&quot;: 1, &quot;loanTerm&quot;: 30, &quot;amortizationType&quot;: &quot;FixedRate&quot;, &quot;apr&quot;: 6.0, &quot;lockInDate&quot;: &quot;2017-11-20&quot;, &quot;reverseMortgage&quot;: 2 }&#39;</p>
 
-<b>JSON Response:</b>
+<p><b>JSON Response:</b></p>
 
-{"rateSpread":"2.010"}
-
-</pre>
+<p>{&quot;rateSpread&quot;:&quot;2.010&quot;}
+  </code></pre></p>
 
 <p>This endpoint accepts loan data in JSON format and returns a JSON object containing the associated ratespread.</p>
 
@@ -2028,17 +2168,17 @@ curl -X POST "https://ffiec.cfpb.gov/public/rateSpread" -H "Content-Type: applic
 <p><strong>Example Request and Response</strong></p>
 </blockquote>
 
-<pre>
+<pre><code class="text">
 <b>Request:</b>
 
 curl -X POST "https://ffiec.cfpb.gov/public/rateSpread/csv" -F file=<file.csv>
 
-<b>CSV Response:</b>
+<b>CSV Response file with an added column for rate_spread calculated for each row:</b>
 
 action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,rate_spread
 1,30,FixedRate,6.0,2017-11-20,2,2.010
 1,30,VariableRate,6.0,2017-11-20,2,2.150
-</pre>
+</code></pre>
 
 <p>In order to batch caluculate ratespreads the <code>csv</code> endpoint can be used. This endpoint accepts a CSV file of ratespread data and returns a CSV file with a new column for the ratespread.</p>
 
@@ -2074,18 +2214,18 @@ action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,
 <p>The following endpoints allow users to generate and validate check digits either one at a time in JSON format or in a batch in CSV format.</p>
 
 <p>This API is what powers the <a href="https://ffiec.cfpb.gov/tools/check-digit">Check Digit Tool</a>.</p>
-<h2 id='check-digit-check-digit-endpoints'>Check Digit Endpoints</h2>
+<h3 id='check-digit-batch-ratespreads-check-digit-endpoints'>Check Digit Endpoints</h3>
 <p><strong>Single Checkdigit Generation</strong></p>
 
 <p><code>POST https://ffiec.cfpb.gov/v2/public/uli/checkDigit</code></p>
 
-<p>This endpoint takes a single ULI in JSON format and returns a single two-digit check digit in JSON format. </p>
+<p>This endpoint takes a single ULI in JSON format and returns a single two digit check digit in JSON format. </p>
 
 <p><strong>Batch Checkdigit Generation</strong></p>
 
 <p><code>POST https://ffiec.cfpb.gov/v2/public/uli/checkDigit/csv</code></p>
 
-<p>This endpoint takes multiple ULIs in CSV format and returns two-digit check digits in CSV format.</p>
+<p>This endpoint takes multiple ULIs in CSV format and returns two digit check digits in CSV format.</p>
 
 <p><strong>Single Checkdigit Validation</strong></p>
 
@@ -2097,29 +2237,27 @@ action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,
 
 <p><code>POST https://ffiec.cfpb.gov/v2/public/uli/validate/csv</code></p>
 
-<p>This endpoint accepts multiple ULIs, with checkdigits, in CSV format and returns whether they are valid in CSV format.</p>
-<h2 id='check-digit-single-check-digit-generation'>Single Check Digit Generation</h2>
+<p>This endpoint multiple ULIs with check digits in CSV format and returns whether they is valid in CSV format.</p>
+<h3 id='check-digit-batch-ratespreads-single-check-digit-generation'>Single Check Digit Generation</h3>
 <blockquote>
 <p><strong>Example Request and Response</strong></p>
 </blockquote>
 
-<pre>
-<b> Request:</b>
+<pre><code class="text">
+  <b>Request:</b>
+  curl POST 'https://ffiec.cfpb.gov/v2/public/uli/checkDigit' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{loanId: "EILKZAIZF6TX4HB8ZDX33H"}'
 
-curl POST 'https://ffiec.cfpb.gov/v2/public/uli/checkDigit' \
---header 'Content-Type: application/json' \
---data-raw '{loanId: "EILKZAIZF6TX4HB8ZDX33H"}'
-
-<b>JSON Response:</b>
-
-{
+  <b>JSON Response:</b>
+  {
     "loanId":"EILKZAIZF6TX4HB8ZDX33H",
     "checkDigit":"54",
     "uli":"EILKZAIZF6TX4HB8ZDX33H54"
-}
-</pre>
+  }
+  </code></pre>
 
-<p><code>POST</code> request to generate a single check digit.</p>
+<p><code>POST</code> request to get a single check digit.</p>
 
 <table><thead>
 <tr>
@@ -2144,30 +2282,28 @@ curl POST 'https://ffiec.cfpb.gov/v2/public/uli/checkDigit' \
 <td>JSON</td>
 </tr>
 </tbody></table>
-<h2 id='check-digit-batch-check-digit-generation'>Batch Check Digit Generation</h2>
+<h3 id='check-digit-batch-ratespreads-batch-check-digit-generation'>Batch Check Digit Generation</h3>
 <blockquote>
 <p><strong>Example Request and Response</strong></p>
 </blockquote>
 
-<pre>
-<b> Request:</b>
-curl -X POST \
-"https://ffiec.cfpb.gov/v2/public/uli/validate/csv" \
--F file=@&ltPATH&gt/check_digit_sample_file.csv
+<pre><code class="text">
+  <b>Request:</b>
+  curl -X POST \
+  "https://ffiec.cfpb.gov/v2/public/uli/validate/csv" \
+  -F file=@<PATH>/check_digit_sample_file.csv
 
-<b> Request Payload:</b>
+  <b>Request Payload:</b>
+  B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R87
+  95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS
 
-B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R87
-95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS
+  <b>CSV Response:</b>
+  loanId,checkDigit,uli
+  B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R87,51,B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R8751
+  95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS,92,95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92
+</code></pre>
 
-<b> CSV Response:</b>
-
-loanId,checkDigit,uli
-B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R87,51,B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R8751
-95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS,92,95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92
-</pre>
-
-<p><code>POST</code> request to generate batch check digits.</p>
+<p><code>POST</code> request to get batch check digits.</p>
 
 <table><thead>
 <tr>
@@ -2192,24 +2328,77 @@ B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R87,51,B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SL
 <td>CSV</td>
 </tr>
 </tbody></table>
-<h2 id='check-digit-single-check-digit-validation'>Single Check Digit Validation</h2>
+<h3 id='check-digit-batch-ratespreads-batch-check-digit-generation-bad-request'>Batch Check Digit Generation (Bad Request)</h3>
 <blockquote>
 <p><strong>Example Request and Response</strong></p>
 </blockquote>
 
-<pre>
-<b>Request:</b>
+<pre><code class="text">
+  <b>Request:</b>
+  curl -X POST \
+  "https://ffiec.cfpb.gov/v2/public/uli/validate/csv" \
+  -F file=@<PATH>/check_digit_sample_file.csv
 
-curl POST 'https://ffiec.cfpb.gov/v2/public/uli/validate' \
---header 'Content-Type: application/json' \
---data-raw '{"uli": "EILKZAIZF6TX4HB8ZDX33H54"}'
+  <b>Request Payload:</b>
+  BANK1LTEST123451150
+  BANK1LEIFORTEST123458001
+  BANK1LEIFORTEST123458003
+  BANK1LEIFO!TEST123458234
+  BANK343434733473438000034343473347343800000
+  TESTT343434_3347343800001
 
-<b>JSON Response:</b>
 
-{
-  "isValid": true
-}
-</pre>
+  <b>CSV Response:</b>
+  loanId,checkDigit,uli
+  BANK1LTEST123451150,Error,Loan ID is not between 21 and 43 characters long
+  BANK1LEIFORTEST123458001,26,BANK1LEIFORTEST12345800126
+  BANK1LEIFORTEST123458003,20,BANK1LEIFORTEST12345800320
+  BANK1LEIFO!TEST123458234,Error,Loan ID is not alphanumeric
+  BANK343434733473438000034343473347343800000,79,BANK34343473347343800003434347334734380000079
+  TESTT343434_3347343800001,Error,Loan ID is not alphanumeric
+</code></pre>
+
+<p><code>POST</code> request to get batch check digits.</p>
+
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Method</td>
+<td><code>POST</code></td>
+</tr>
+<tr>
+<td>URL</td>
+<td><code>https://ffiec.cfpb.gov/v2/public/uli/checkDigit/csv</code></td>
+</tr>
+<tr>
+<td>Payload</td>
+<td>CSV file as shown bellow</td>
+</tr>
+<tr>
+<td>Return</td>
+<td>CSV</td>
+</tr>
+</tbody></table>
+<h3 id='check-digit-batch-ratespreads-single-check-digit-validation'>Single Check Digit Validation</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre><code class="text">
+  <b>Request:</b>
+  curl POST 'https://ffiec.cfpb.gov/v2/public/uli/validate' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{"uli": "EILKZAIZF6TX4HB8ZDX33H54"}'
+
+  <b>JSON Response:</b>
+  {
+    "isValid": true
+  }
+</code></pre>
 
 <p><code>POST</code> request to validate a single check digit.</p>
 
@@ -2236,29 +2425,80 @@ curl POST 'https://ffiec.cfpb.gov/v2/public/uli/validate' \
 <td>JSON</td>
 </tr>
 </tbody></table>
-<h2 id='check-digit-batch-check-digit-validation'>Batch Check Digit Validation</h2>
+<h3 id='check-digit-batch-ratespreads-batch-check-digit-validation'>Batch Check Digit Validation</h3>
 <blockquote>
 <p><strong>Example Request and Response</strong></p>
 </blockquote>
 
-<pre>
-<b>Request:</b>
+<pre><code class="text">
+  <b>Request:</b>
+  curl -X POST \
+  "https://ffiec.cfpb.gov/v2/public/uli/validate/csv" \
+  -F file=@<PATH>/check_digit_sample_file.csv
+  
+  <b>Request Payload:</b>
+  95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92
+  B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R89
+  
+  <b>CSV Response:</b>
+  uli,isValid
+  95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92,true
+  B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R89,false
+</code></pre>
 
-curl -X POST \
-"https://ffiec.cfpb.gov/v2/public/uli/validate/csv" \
--F file=@&ltPATH&gt/check_digit_sample_file.csv
+<p><code>POST</code> request to batch validate check digits.</p>
 
-<b>Request Payload</b>
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Method</td>
+<td><code>POST</code></td>
+</tr>
+<tr>
+<td>URL</td>
+<td><code>https://ffiec.cfpb.gov/v2/public/uli/validate/csv</code></td>
+</tr>
+<tr>
+<td>Payload</td>
+<td>CSV file as shown bellow</td>
+</tr>
+<tr>
+<td>Return</td>
+<td>CSV</td>
+</tr>
+</tbody></table>
+<h3 id='check-digit-batch-ratespreads-batch-check-digit-validation-bad-request'>Batch Check Digit Validation(Bad Request)</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
 
-95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92
-B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R89
-
-<b>CSV Response</b>
-
-uli,isValid
-95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92,true
-B90YWS6AFX2LGWOXJ1LDNIXOQ6O0000SLR6FSJJ5R89,false
-</pre>
+<pre><code class="text">
+  <b>Request:</b>
+  curl -X POST \
+  "https://ffiec.cfpb.gov/v2/public/uli/validate/csv" \
+  -F file=@<PATH>/check_digit_sample_file.csv
+  
+  <b>Request Payload:</b>
+  BANK1LEIF345115014
+  BANK1LEIFORTEST12345800126
+  BANK1LEIFOR@#EST12345800320
+  BANK1LEIFORTEST12345823406
+  BANK34343473*4734380000037
+  BANK3434347334734380000131BANK3434347334734380000131BANK3434347334734380000131
+  
+  <b>CSV Response:</b>
+  uli,isValid
+  BANK1LEIF345115014,ULI is not between 23 and 45 characters long
+  BANK1LEIFORTEST12345800126,true
+  BANK1LEIFOR@#EST12345800320,ULI is not alphanumeric
+  BANK1LEIFORTEST12345823406,true
+  BANK34343473*4734380000037,ULI is not alphanumeric
+  BANK3434347334734380000131BANK3434347334734380000131BANK3434347334734380000131,ULI is not between 23 and 45 characters long  
+</code></pre>
 
 <p><code>POST</code> request to batch validate check digits.</p>
 
