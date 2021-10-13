@@ -30,18 +30,18 @@ object ValidationProgressTracker {
             publishUpdate(subscribers, newState)
             behavior(newState, subscribers)
 
-          case ValidationDelta(ValidationType.Quality, validationProgress) =>
-            val newState = state.updateQuality(validationProgress)
+          case ValidationDelta(ValidationType.Quality, validationProgress, editNames) =>
+            val newState = state.updateQuality(validationProgress, editNames)
             publishUpdate(subscribers, newState)
             behavior(newState, subscribers)
 
-          case ValidationDelta(ValidationType.Syntactical, validationProgress) =>
-            val newState = state.updateSyntactical(validationProgress)
+          case ValidationDelta(ValidationType.Syntactical, validationProgress, editNames) =>
+            val newState = state.updateSyntactical(validationProgress, editNames)
             publishUpdate(subscribers, newState)
             behavior(newState, subscribers)
 
-          case ValidationDelta(ValidationType.Macro, validationProgress) =>
-            val newState = state.updateMacro(validationProgress)
+          case ValidationDelta(ValidationType.Macro, validationProgress, editNames) =>
+            val newState = state.updateMacro(validationProgress, editNames)
             publishUpdate(subscribers, newState)
             behavior(newState, subscribers)
 

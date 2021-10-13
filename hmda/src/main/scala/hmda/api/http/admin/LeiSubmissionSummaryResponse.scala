@@ -11,6 +11,11 @@ object LeiSubmissionSummaryResponse {
   implicit val codec: Codec[LeiSubmissionSummaryResponse] = deriveCodec[LeiSubmissionSummaryResponse]
 }
 
+case class LeiLatestSubmissionSummaryResponse(lei: String, latestSubmission: SubmissionSummaryResponse)
+object LeiLatestSubmissionSummaryResponse {
+  implicit val codec: Codec[LeiLatestSubmissionSummaryResponse] = deriveCodec[LeiLatestSubmissionSummaryResponse]
+}
+
 case class YearlySubmissionSummaryResponse(totalSubmissions: Int, submissions: List[SubmissionSummaryResponse])
 object YearlySubmissionSummaryResponse {
   implicit val codec: Codec[YearlySubmissionSummaryResponse] = deriveCodec[YearlySubmissionSummaryResponse]

@@ -32,6 +32,7 @@ SET default_with_oids = false;
 
 CREATE TABLE hmda_user.modifiedlar2020 (
     id integer NOT NULL,
+    uniq_id integer NOT NULL,
     lei character varying NOT NULL,
     loan_type integer,
     loan_purpose integer,
@@ -191,9 +192,9 @@ ALTER TABLE ONLY hmda_user.modifiedlar2020
 
 CREATE INDEX modifiedlar2020_lei_idx ON hmda_user.modifiedlar2020 USING btree (lei);
 
-alter table modifiedlar2020
+alter table hmda_user.modifiedlar2020
 add column uli character varying;
-alter table modifiedlar2020 add column checksum varchar;
+alter table hmda_user.modifiedlar2020 add column checksum varchar;
 
 -- Completed on 2020-06-05 11:44:50 EDT
 

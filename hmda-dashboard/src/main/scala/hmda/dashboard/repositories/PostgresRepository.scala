@@ -392,6 +392,51 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
+  def fetchLateFilersByQuarter(period: String, cutoff: String): Task[Seq[LateFilers]] = {
+    val tsTable = tsTableSelector(period)
+    val subHistMview = "submission_hist_mview"
+    val (year, quarter, quarterLateDate) = getQuarterLateFilersInfo(period)
+    val lateDate = if (cutoff.nonEmpty) cutoff else quarterLateDate
+    val query = sql"""
+      select * from (
+        select ts.agency, ts.institution_name, sh.lei, ts.total_lines, sh.sign_date_east :: date, sh.submission_id, rank() over(partition by sh.lei order by sh.sign_date_east asc)
+        from #${subHistMview} as sh left join #${tsTable} as ts on upper(sh.lei) = upper(ts.lei)
+        where upper(sh.lei) not in (
+            select distinct upper(lei) from #${subHistMview} as sh_sub
+            where split_part(sh_sub.submission_id, '-', 2) = '#${year}'
+              and upper(split_part(sh_sub.submission_id, '-', 3)) = '#${quarter}'
+              and sh_sub.sign_date_utc < '#${lateDate}' :: timestamp
+          )
+          and split_part(sh.submission_id, '-', 2) = '#${year}'
+          and upper(split_part(sh.submission_id, '-', 3)) = '#${quarter}'
+          and sh.sign_date_utc >= '#${lateDate}' :: timestamp
+        order by sh.lei, rank
+      ) sl
+      where upper(sl.lei) not in (#${filterList}) and rank=1
+      order by sign_date_east desc;
+    """.as[LateFilers]
+    Task.deferFuture(db.run(query)).guarantee(Task.shift)
+  }
+
+  private def getQuarterLateFilersInfo(period: String): (String, String, String) = {
+    val parsedPeriod = period.split('-')
+    if (parsedPeriod.length != 2) {
+      throw new IllegalArgumentException(s"Received invalid period: $period, expected 'yyyy-qq'")
+    }
+    val Array(year, quarter) = parsedPeriod
+    if (!year.matches("^\\d{4}$")) {
+      throw new IllegalArgumentException(s"Received invalid year: $year, expected 4 digit year")
+    }
+    val normalizedQuarter = quarter.toUpperCase
+    val lateDate = normalizedQuarter match {
+      case "Q1" => s"${year}-06-01"
+      case "Q2" => s"${year}-08-31"
+      case "Q3" => s"${year}-11-30"
+      case _ => throw new IllegalArgumentException(s"Received invalid quarter: $normalizedQuarter")
+    }
+    (year, normalizedQuarter, lateDate)
+  }
+
   def fetchVoluntaryFilers(period: String) : Task[Seq[VoluntaryFilers]] = {
     val materializedView = larTableSelector(period, "voluntary_filers")
     val query = sql"""

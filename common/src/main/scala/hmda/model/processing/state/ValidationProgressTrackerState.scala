@@ -4,29 +4,18 @@ import hmda.model.filing.submission
 
 object ValidationProgressTrackerState {
   def initialize(s: HmdaValidationErrorState): ValidationProgressTrackerState = {
-    val syntacticalValidation =
-      if (s.statusCode == submission.SyntacticalOrValidityErrors.code) ValidationProgress.CompletedWithErrors
-      else if (s.statusCode == submission.SyntacticalOrValidity.code) ValidationProgress.Completed
-      else ValidationProgress.Waiting
-
-    val qualityValidation =
-      if (s.statusCode == submission.QualityErrors.code) ValidationProgress.CompletedWithErrors
-      else if (s.statusCode == submission.Quality.code) ValidationProgress.Completed
-      else ValidationProgress.Waiting
-
-    val macroValidation =
-      if (s.statusCode == submission.MacroErrors.code) ValidationProgress.CompletedWithErrors
-      else if (s.statusCode == submission.Verified.code) ValidationProgress.Completed
-      else ValidationProgress.Waiting
-
-    ValidationProgressTrackerState(syntacticalValidation, qualityValidation, macroValidation)
+    ValidationProgressTrackerState(ValidationProgress.Waiting, Set(), ValidationProgress.Waiting, Set(), ValidationProgress.Waiting, Set())
+      .fromSnapshot(s)
   }
 }
 
 case class ValidationProgressTrackerState(
                                            syntacticalValidation: ValidationProgress,
+                                           syntacticalEdits: Set[String],
                                            qualityValidation: ValidationProgress,
-                                           macroValidation: ValidationProgress
+                                           qualityEdits: Set[String],
+                                           macroValidation: ValidationProgress,
+                                           macroEdits: Set[String]
                                          ) { self =>
   def fromSnapshot(s: HmdaValidationErrorState): ValidationProgressTrackerState = {
     val syntacticalValidation =
@@ -45,9 +34,9 @@ case class ValidationProgressTrackerState(
       else self.macroValidation
 
     self.copy(
-      syntacticalValidation,
-      qualityValidation,
-      macroValidation
+      syntacticalValidation, s.syntactical.map(_.editName),
+      qualityValidation, s.quality.map(_.editName),
+      macroValidation, s.`macro`.map(_.editName)
     )
   }
 
@@ -59,19 +48,19 @@ case class ValidationProgressTrackerState(
       case ValidationProgress.CompletedWithErrors => ValidationProgress.CompletedWithErrors
     }
 
-  def updateQuality(progress: ValidationProgress): ValidationProgressTrackerState = {
+  def updateQuality(progress: ValidationProgress, editNames: Set[String]): ValidationProgressTrackerState = {
     val adjustedProgress = adjustProgress(incoming = progress, existing = self.qualityValidation)
-    self.copy(qualityValidation = adjustedProgress)
+    self.copy(qualityValidation = adjustedProgress, qualityEdits = qualityEdits ++ editNames)
   }
 
-  def updateSyntactical(progress: ValidationProgress): ValidationProgressTrackerState = {
+  def updateSyntactical(progress: ValidationProgress, editNames: Set[String]): ValidationProgressTrackerState = {
     val adjustedProgress = adjustProgress(incoming = progress, self.syntacticalValidation)
-    self.copy(syntacticalValidation = adjustedProgress)
+    self.copy(syntacticalValidation = adjustedProgress, syntacticalEdits = syntacticalEdits ++ editNames)
   }
 
-  def updateMacro(progress: ValidationProgress): ValidationProgressTrackerState = {
+  def updateMacro(progress: ValidationProgress, editNames: Set[String]): ValidationProgressTrackerState = {
     val adjustedProgress = adjustProgress(incoming = progress, self.macroValidation)
-    self.copy(macroValidation = adjustedProgress)
+    self.copy(macroValidation = adjustedProgress, macroEdits = macroEdits ++ editNames)
   }
 }
 

@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak
+  namespace: default
+data:
+  keycloak.cli: >
+    embed-server --std-out=echo
+
+    batch
+
+
+    # Makes node identifier unique getting rid of a warning in the logs
+
+    /subsystem=transactions:write-attribute(name=node-identifier,
+    value=${jboss.node.name})
+
+
+
+    # Allow log level to be configured via environment variable
+
+    /subsystem=logging/console-handler=CONSOLE:write-attribute(name=level,
+    value=${env.WILDFLY_LOGLEVEL:DEBUG})
+
+    /subsystem=logging/root-logger=ROOT:write-attribute(name=level,
+    value=${env.WILDFLY_LOGLEVEL:DEBUG})
+
+
+    # Log only to console
+
+    /subsystem=logging/root-logger=ROOT:write-attribute(name=handlers,
+    value=[CONSOLE])
+
+
+
+    /socket-binding-group=standard-sockets/socket-binding=proxy-https:add(port=443)
+
+    /subsystem=undertow/server=default-server/http-listener=default:write-attribute(name=redirect-socket,
+    value=proxy-https)
+
+    /subsystem=undertow/server=default-server/http-listener=default:write-attribute(name=proxy-address-forwarding,
+    value=true)
+
+
+
+    # Configure datasource to use explicit query timeout in seconds
+
+    /subsystem=datasources/data-source=KeycloakDS/:write-attribute(name=query-timeout,value=${env.DB_QUERY_TIMEOUT:300})
+
+
+    # Configure datasource to connection before use
+
+    /subsystem=datasources/data-source=KeycloakDS/:write-attribute(name=validate-on-match,value=${env.DB_VALIDATE_ON_MATCH:true})
+
+
+    # Configure datasource to try all other connections before failing
+
+    /subsystem=datasources/data-source=KeycloakDS/:write-attribute(name=use-fast-fail,value=${env.DB_USE_CAST_FAIL:false})
+
+
+
+    # Statements for our custom spi
+
+    /subsystem=keycloak-server/spi=form-action:add()
+
+    /subsystem=keycloak-server/spi=form-action/provider=registration-institution-action:add(properties={institutionSearchUri
+    => "${env.INSTITUTION_SEARCH_URI}", institutionSearchValidateSsl =>
+    "${env.INSTITUTION_SEARCH_VALIDATE_SSL}"}, enabled=true)
+
+
+
+    run-batch
+
+    stop-embedded-server
+  keycloak.sh: >
+    #!/usr/bin/env bash
+
+
+    set -eu
+
+
+    /opt/jboss/keycloak/bin/jboss-cli.sh --file=/scripts/keycloak.cli
+
+
+    exec /opt/jboss/tools/docker-entrypoint.sh -b 0.0.0.0
+    -Dkeycloak.import=/realm/realm.json -c standalone.xml
+
+    exit "$?"

@@ -151,15 +151,14 @@ CREATE TABLE hmda_user.loanapplicationregister2020 (
     tract_median_age_of_housing_units integer,
     tract_to_msa_income_percentage float,
     is_quarterly boolean DEFAULT false NOT NULL, -- New for 2020 and beyond quarterly filing
-    created_at timestamp without time zone DEFAULT now()
+    created_at timestamp without time zone DEFAULT now(),
     msa_md character varying,
     msa_md_name character varying
-    created_at timestamp without time zone DEFAULT now(),
 );
 
 
 ALTER TABLE hmda_user.loanapplicationregister2020 OWNER TO hmda_user;
-alter table loanapplicationregister2020 add column checksum varchar;
+alter table hmda_user.loanapplicationregister2020 add column checksum varchar;
 
 -- Completed on 2019-06-18 12:27:11 EDT
 
