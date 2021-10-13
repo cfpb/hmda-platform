@@ -20,6 +20,7 @@ import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.institution.InstitutionPersistence.selectInstitution
 import hmda.util.http.FilingResponseUtils._
 import hmda.api.http.EmailUtils._
+import hmda.auth._
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
@@ -47,7 +48,7 @@ private class InstitutionAdminHttpApi(config: Config, sharding: ClusterSharding)
 
   private def institutionWritePath(oAuth2Authorization: OAuth2Authorization): Route =
     path("institutions") {
-      oAuth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
+      oAuth2Authorization.authorizeTokenWithRule(AdminOnly) { _ =>
         entity(as[Institution]) { institution =>
           (extractUri & post) { uri =>
             sanatizeInstitutionIdentifiers(institution, checkLEI, checkAgencyCode, uri, postInstitution)
@@ -82,18 +83,18 @@ private class InstitutionAdminHttpApi(config: Config, sharding: ClusterSharding)
   // GET institutions/<lei>/year/<year>/quarter/<quarter>
   private def institutionReadPath (oAuth2Authorization: OAuth2Authorization): Route = {
     path("institutions" / Segment / "year" / IntNumber) { (lei, year) =>
-      oAuth2Authorization.authorizeTokenWithLeiOrRole(lei, hmdaAdminRole) { _ =>
+      oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
         (extractUri & get) { uri =>
           getInstitution(lei, year, None, uri)
         }
       }
     } ~ path("institutions" / Segment / "year" / IntNumber / "quarter" / Quarter) { (lei, year, quarter) =>
-      oAuth2Authorization.authorizeTokenWithLeiOrRole(lei, hmdaAdminRole) { _ =>
+      oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
         (extractUri & get)(uri => getInstitution(lei, year, Option(quarter), uri))
       }
     } ~
       path("institutions" / Segment) { lei =>
-        oAuth2Authorization.authorizeTokenWithLeiOrRole(lei, hmdaAdminRole) { _ =>
+        oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
           (extractUri & get) { uri =>
             getAllInstitutions(lei, uri)
           }

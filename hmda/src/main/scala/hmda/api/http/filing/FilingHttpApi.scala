@@ -25,6 +25,7 @@ import hmda.persistence.filing.FilingPersistence._
 import hmda.persistence.institution.InstitutionPersistence._
 import hmda.util.http.FilingResponseUtils._
 import org.slf4j.Logger
+import hmda.auth._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -49,7 +50,7 @@ private class FilingHttpApi(log: Logger, sharding: ClusterSharding)(implicit val
   def filingReadPath(oAuth2Authorization: OAuth2Authorization): Route =
     respondWithDefaultHeader(RawHeader("Cache-Control", "no-cache")) {
       path("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
-        oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+        oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
           pathEndOrSingleSlash {
             // POST/institutions/<lei>/filings/<year>
             (post & extractUri) { uri =>
@@ -62,7 +63,7 @@ private class FilingHttpApi(log: Logger, sharding: ClusterSharding)(implicit val
           }
         }
       } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter) { (lei, period, quarter) =>
-        oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+        oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
           pathEndOrSingleSlash {
             quarterlyFiler(lei, period) {
               // POST/institutions/<lei>/filings/<year>/quarters/<quarter>

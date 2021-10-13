@@ -20,6 +20,7 @@ import hmda.persistence.submission.SubmissionPersistence.selectSubmissionPersist
 import hmda.util.http.FilingResponseUtils._
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
+import hmda.auth._
 
 import scala.concurrent.Future
 import scala.util.{ Failure, Success }
@@ -37,22 +38,22 @@ private class SignHttpApi(log: Logger, sharding: ClusterSharding)(implicit t: Ti
     pathPrefix("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
       pathPrefix("submissions" / IntNumber / "sign") { seqNr =>
         (extractUri & get) { uri =>
-          oAuth2Authorization.authorizeTokenWithLei(lei)(token => getSubmissionForSigning(lei, year, None, seqNr, token.email, uri))
+          oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei)(token => getSubmissionForSigning(lei, year, None, seqNr, token.email, uri))
         } ~ (extractUri & post) { uri =>
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-            oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
+            oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { token =>
               entity(as[EditsSign])(editsSign => signSubmission(lei, year, None, seqNr, token.email, editsSign.signed, uri, token.username))
             }
           }
         }
       } ~ pathPrefix("quarter" / Segment / "submissions" / IntNumber / "sign") { (quarter, seqNr) =>
         (extractUri & get) { uri =>
-          oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
+          oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { token =>
             getSubmissionForSigning(lei, year, Option(quarter), seqNr, token.email, uri)
           }
         } ~ (extractUri & post) { uri =>
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-            oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
+            oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { token =>
               entity(as[EditsSign])(editsSign => signSubmission(lei, year, Option(quarter), seqNr, token.email, editsSign.signed, uri, token.username))
             }
           }

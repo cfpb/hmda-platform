@@ -20,6 +20,7 @@ import hmda.persistence.submission.{ HmdaParserError, SubmissionPersistence }
 import hmda.util.http.FilingResponseUtils._
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
+import hmda.auth._
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
@@ -34,10 +35,10 @@ private class ParseErrorHttpApi(log: Logger, sharding: ClusterSharding)(implicit
 
   // GET institutions/<lei>/filings/<year>/submissions/<submissionId>/parseErrors
   // GET institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/parseErrors
-  def parseErrorPath(oauth2Authorization: OAuth2Authorization): Route = (extractUri & get) { uri =>
+  def parseErrorPath(oAuth2Authorization: OAuth2Authorization): Route = (extractUri & get) { uri =>
     parameters('page.as[Int] ? 1) { page =>
       pathPrefix("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
-        oauth2Authorization.authorizeTokenWithLei(lei) { _ =>
+        oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
           path("submissions" / IntNumber / "parseErrors") { seqNr =>
             checkSubmission(lei, year, None, seqNr, page, uri)
           } ~ path("quarter" / Quarter / "submissions" / IntNumber / "parseErrors") { (quarter, seqNr) =>

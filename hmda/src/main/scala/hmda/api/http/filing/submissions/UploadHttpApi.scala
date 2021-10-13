@@ -30,6 +30,7 @@ import hmda.persistence.submission.SubmissionPersistence.selectSubmissionPersist
 import hmda.util.http.FilingResponseUtils._
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
+import hmda.auth._
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
@@ -63,11 +64,11 @@ private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(
 
   // POST <lei>/filings/<year>/submissions/<seqNr>
   // POST <lei>/filings/<year>/quarter/<q>/submissions/<seqNr>
-  private def uploadHmdaFileRoute(oauth2Authorization: OAuth2Authorization): Route =
+  private def uploadHmdaFileRoute(oAuth2Authorization: OAuth2Authorization): Route =
     respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
       pathPrefix(Segment / "filings") { lei =>
         (extractUri & post) { uri =>
-          oauth2Authorization.authorizeTokenWithLei(lei) { _ =>
+          oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
             path(IntNumber / "submissions" / IntNumber) { (year, seqNr) =>
               checkAndUploadSubmission(lei, year, None, seqNr, uri)
             } ~ path(IntNumber / "quarter" / Quarter / "submissions" / IntNumber) { (year, quarter, seqNr) =>
@@ -80,7 +81,7 @@ private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(
           // WEBSOCKET /institutions/<LEI>/filings/<year>/submissions/<seqNr>/progress
           // WEBSOCKET /institutions/<LEI>/filings/<year>/quarter/<q>/submissions/<seqNr>/progress
           (extractUri & get) { _ =>
-            oauth2Authorization.authorizeTokenWithLei(lei)(_ =>
+            oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei)(_ =>
               path(IntNumber / "submissions" / IntNumber / "progress")((year, seqNr) =>
                 handleWebSocketMessages(
                   WebSocketProgressTracker.websocketFlow(system, sharding, SubmissionId(lei, Period(year, None), seqNr))

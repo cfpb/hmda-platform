@@ -32,6 +32,7 @@ import hmda.query.HmdaQuery._
 import hmda.util.http.FilingResponseUtils._
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
+import hmda.auth._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.matching.Regex
@@ -60,7 +61,7 @@ private class EditsHttpApi(log: Logger, sharding: ClusterSharding)(
   def editsSummaryPath(oAuth2Authorization: OAuth2Authorization): Route =
     pathPrefix("institutions" / Segment) { lei =>
       (extractUri & get) { uri =>
-        oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+        oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
           path("filings" / IntNumber / "submissions" / IntNumber / "edits") { (year, seqNr) =>
             getEdits(lei, year, None, seqNr, uri)
           } ~ path("filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "edits") { (year, quarter, seqNr) =>
@@ -120,7 +121,7 @@ private class EditsHttpApi(log: Logger, sharding: ClusterSharding)(
   //institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/edits/csv
   def editsSummaryCsvPath(oAuth2Authorization: OAuth2Authorization): Route =
     pathPrefix("institutions" / Segment) { lei =>
-      oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+      oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
         path("filings" / IntNumber / "submissions" / IntNumber / "edits" / "csv") { (year, seqNr) =>
           csvEditSummaryStream(lei, year, None, seqNr)
         } ~ path("filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "edits" / "csv") { (year, quarter, seqNr) =>
@@ -157,7 +158,7 @@ private class EditsHttpApi(log: Logger, sharding: ClusterSharding)(
     pathPrefix("institutions" / Segment) { lei =>
       (extractUri & get) { uri =>
         parameters('page.as[Int] ? 1) { page =>
-          oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+          oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
             path("filings" / IntNumber / "submissions" / IntNumber / "edits" / editNameRegex) { (year, seqNr, editName) =>
               getEditDetails(lei, year, None, seqNr, page, editName, uri)
             } ~ path("filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "edits" / editNameRegex) {

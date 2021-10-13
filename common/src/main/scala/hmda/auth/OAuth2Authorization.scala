@@ -27,20 +27,13 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
   val clientId    = config.getString("keycloak.client.id")
   val runtimeMode = config.getString("hmda.runtime.mode")
 
-  def authorizeTokenWithLeiOrRole(lei: String, role: String): Directive1[VerifiedToken] =
-    withAccessLog
-      .&(handleRejections(authRejectionHandler))
-      .&(authorizeTokenWithLeiReject(lei.trim()) | authorizeTokenWithRoleReject(role))
-
-  def authorizeTokenWithLei(lei: String): Directive1[VerifiedToken] =
-    withAccessLog
-      .&(handleRejections(authRejectionHandler))
-      .&(authorizeTokenWithLeiReject(lei.trim()))
-
-  def authorizeTokenWithRole(role: String): Directive1[VerifiedToken] =
-    withAccessLog
-      .&(handleRejections(authRejectionHandler))
-      .&(authorizeTokenWithRoleReject(role))
+  def authorizeTokenWithRule(authRule: AuthRule, comparator: String = ""): Directive1[VerifiedToken] =
+    authorizeToken flatMap {
+      case token =>
+        withAccessLog
+          .&(handleRejections(authRejectionHandler(authRule.rejectMessage)))
+          .&(authorizeTokenWithRuleReject(authRule.rule(token, comparator)))
+    }
 
   def logAccessLog(uri: Uri, token: () => Option[VerifiedToken])(request: HttpRequest)(r: RouteResult): Unit = {
     val result = r match {
@@ -60,9 +53,9 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
       logRequestResult(LoggingMagnet(_ => logAccessLog(uri, () => Option(ref.get()))))))
   }
 
-  protected def authorizeTokenWithRoleReject(role: String): Directive1[VerifiedToken] =
+  protected def authorizeTokenWithRuleReject(passing: Boolean): Directive1[VerifiedToken] =
     authorizeToken flatMap {
-      case t if t.roles.contains(role) =>
+      case t if passing =>
         provide(t)
       case _ =>
         withLocalModeBypass {
@@ -70,13 +63,13 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
         }
     }
 
-  protected def authRejectionHandler: RejectionHandler =
+  protected def authRejectionHandler(rejectionMessage: String = "Authorization Token could not be verified"): RejectionHandler =
     RejectionHandler
       .newBuilder()
       .handle({
         case AuthorizationFailedRejection =>
           complete(
-            (StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, "Authorization Token could not be verified", Path("")))
+            (StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, rejectionMessage, Path("")))
           )
       })
       .result()

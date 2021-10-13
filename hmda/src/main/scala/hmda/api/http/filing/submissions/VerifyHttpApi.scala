@@ -26,6 +26,7 @@ import hmda.persistence.submission.{ HmdaValidationError, SubmissionPersistence 
 import hmda.util.http.FilingResponseUtils._
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
+import hmda.auth._
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.matching.Regex
@@ -47,7 +48,7 @@ private class VerifyHttpApi(log: Logger, sharding: ClusterSharding)(implicit ec:
     (extractUri & post) { uri =>
       respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
         pathPrefix("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
-          oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+          oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
             path("submissions" / IntNumber / "edits" / editTypeRegex) { (seqNr, editType) =>
               entity(as[EditsVerification]) { editsVerification =>
                 verify(lei, year, None, seqNr, editType, editsVerification.verified, uri)
