@@ -1770,7 +1770,7 @@ curl -X GET \
 <li><strong>Nationwide</strong> <strong>Aggregations</strong></li>
 </ul>
 
-<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/view/nationwide/aggregations</code> </p>
+<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/data-browser-api/view/nationwide/aggregations</code> </p>
 
 <p>This endpoint is used to generated JSON reports on the full dataset. The year parameter is required when calling this endpoint.</p>
 
@@ -1778,7 +1778,7 @@ curl -X GET \
 <li><strong>Aggregations</strong></li>
 </ul>
 
-<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/view/aggregations</code> </p>
+<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/data-browser-api/view/aggregations</code> </p>
 
 <p>This endpoint is used to generated JSON reports on an LEI and/or geography subset. The year parameter as well at least of a geographic and/or LEI parameter are required when calling this endpoint.</p>
 
@@ -1786,7 +1786,7 @@ curl -X GET \
 <li><strong>Nationwide</strong> <strong>CSV</strong></li>
 </ul>
 
-<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/view/nationwide/csv</code></p>
+<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/data-browser-api/view/nationwide/csv</code></p>
 
 <p>This endpoint is used to download raw HMDA data given the applied filters in csv format. The file will be streamed. The year parameter is required when calling this endpoint.</p>
 
@@ -1794,7 +1794,7 @@ curl -X GET \
 <li><strong>CSV</strong></li>
 </ul>
 
-<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/view/csv</code></p>
+<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/data-browser-api/view/csv</code></p>
 
 <p>This endpoint is used to download raw HMDA data given the applied filters in csv format. The file will be streamed. The year parameter as well at least of a geographic and/or LEI parameter are required when calling this endpoint.</p>
 <h3 id='data-browser-api-hmda-data-endpoints-supported-geographic-filters'>Supported Geographic Filters</h3>
@@ -1882,7 +1882,7 @@ curl -X GET \
 
 <pre><code class="text">
   <b>Request:</b>
-  curl "https://ffiec.cfpb.gov/v2/view/aggregations?states=MD&years=2018&actions_taken=5,6&races=White,Asian,Joint"
+  curl "https://ffiec.cfpb.gov/v2/data-browser-api/view/aggregations?states=MD&years=2018&actions_taken=5,6&races=White,Asian,Joint"
 
   <b>JSON Response:</b>
   {
@@ -1945,7 +1945,7 @@ curl -X GET \
 
 <pre><code class="text">
   <b>Request:</b>
-  curl -L "https://ffiec.cfpb.gov/v2/view/csv?states=CA,MD,DC&years=2018&actions_taken=5"
+  curl -L "https://ffiec.cfpb.gov/v2/data-browser-api/view/csv?states=CA,MD,DC&years=2018&actions_taken=5"
 
   <b>CSV Response:</b>
   <img src="../images/DataBrowserCsvExample.png" class="lang-specific shell">
@@ -1975,7 +1975,7 @@ curl -X GET \
 </tr>
 </tbody></table>
 <h2 id='data-browser-api-hmda-filers'>HMDA Filers</h2>
-<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/view/filers</code></p>
+<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/data-browser-api/view/filers</code></p>
 
 <p>This endpoint can be used to fetch list of financial instituions present in the HMDA dataset. The year parameter is required when calling this endpoint.</p>
 <h3 id='data-browser-api-hmda-filers-hmda-filer-parameters'>HMDA Filer Parameters</h3>
@@ -2009,7 +2009,7 @@ curl -X GET \
 
 <pre><code class="text">
   <b>Request:</b>
-  curl "https://ffiec.cfpb.gov/v2/view/filers?states=MD,DC&years=2018"
+  curl "https://ffiec.cfpb.gov/v2/data-browser-api/view/filers?states=MD,DC&years=2018"
 
   <b>JSON Format Response:</b>
   {
@@ -2052,7 +2052,7 @@ curl -X GET \
 
 <pre><code class="text">
   <b>Request:</b>
-  curl "https://ffiec.cfpb.gov/v2/view/csv"
+  curl "https://ffiec.cfpb.gov/v2/data-browser-api/view/csv"
 
   <b>JSON Response:</b>
   {
