@@ -51,6 +51,9 @@ private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(
 ) {
   private val quarterlyFiler = quarterlyFilingAllowed(log, sharding) _
 
+  val config           = system.settings.config
+  val currentNamespace = config.getString("hmda.currentNamespace")
+
   def uploadRoutes(oAuth2Authorization: OAuth2Authorization): Route =
     handleRejections(corsRejectionHandler) {
       cors() {
@@ -69,11 +72,13 @@ private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(
       pathPrefix(Segment / "filings") { lei =>
         (extractUri & post) { uri =>
           oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
-            path(IntNumber / "submissions" / IntNumber) { (year, seqNr) =>
-              checkAndUploadSubmission(lei, year, None, seqNr, uri)
-            } ~ path(IntNumber / "quarter" / Quarter / "submissions" / IntNumber) { (year, quarter, seqNr) =>
-              quarterlyFiler(lei, year) {
-                checkAndUploadSubmission(lei, year, Option(quarter), seqNr, uri)
+            oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { _ =>
+              path(IntNumber / "submissions" / IntNumber) { (year, seqNr) =>
+                checkAndUploadSubmission(lei, year, None, seqNr, uri)
+              } ~ path(IntNumber / "quarter" / Quarter / "submissions" / IntNumber) { (year, quarter, seqNr) =>
+                quarterlyFiler(lei, year) {
+                  checkAndUploadSubmission(lei, year, Option(quarter), seqNr, uri)
+                }
               }
             }
           }

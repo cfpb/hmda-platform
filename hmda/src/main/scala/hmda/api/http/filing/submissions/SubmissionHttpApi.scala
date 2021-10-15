@@ -59,18 +59,27 @@ private class SubmissionHttpApi(log: Logger, sharding: ClusterSharding)(
   mat: Materializer
 ) {
 
+  val config           = system.settings.config
+  val currentNamespace = config.getString("hmda.currentNamespace")
+
   val quarterlyFiler = quarterlyFilingAllowed(log, sharding) _
 
   def submissionCreatePath(oAuth2Authorization: OAuth2Authorization): Route =
     respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
       extractUri { uri =>
         path("institutions" / Segment / "filings" / IntNumber / "submissions") { (lei, year) =>
-          oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei)(_ => createSubmissionIfValid(lei, year, None, uri))
+          oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ => 
+            oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { _ =>
+              createSubmissionIfValid(lei, year, None, uri)
+            }
+          }
         } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter / "submissions") { (lei, year, quarter) =>
           oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
-            pathEndOrSingleSlash {
-              quarterlyFiler(lei, year) {
-                createSubmissionIfValid(lei, year, Option(quarter), uri)
+            oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { _ =>
+              pathEndOrSingleSlash {
+                quarterlyFiler(lei, year) {
+                  createSubmissionIfValid(lei, year, Option(quarter), uri)
+                }
               }
             }
           }

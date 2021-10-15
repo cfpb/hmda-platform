@@ -1,5 +1,6 @@
 package hmda.api.http.filing.submissions
 
+import akka.actor.typed.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.headers.RawHeader
@@ -26,11 +27,20 @@ import scala.concurrent.Future
 import scala.util.{ Failure, Success }
 
 object SignHttpApi {
-  def create(log: Logger, sharding: ClusterSharding)(implicit t: Timeout): OAuth2Authorization => Route =
-    new SignHttpApi(log, sharding)(t).signRoutes _
+  def create(
+    log: Logger, 
+    sharding: ClusterSharding
+    )(implicit t: Timeout, system: ActorSystem[_]): OAuth2Authorization => Route =
+    new SignHttpApi(log, sharding)(t, system).signRoutes _
 }
 
-private class SignHttpApi(log: Logger, sharding: ClusterSharding)(implicit t: Timeout) {
+private class SignHttpApi(log: Logger, sharding: ClusterSharding)(
+  implicit t: Timeout,
+  system: ActorSystem[_]
+) {
+
+  val config           = system.settings.config
+  val currentNamespace = config.getString("hmda.currentNamespace")
 
   // GET & POST institutions/<lei>/filings/<year>/submissions/<submissionId>/sign
   // GET & POST institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/sign
@@ -42,7 +52,9 @@ private class SignHttpApi(log: Logger, sharding: ClusterSharding)(implicit t: Ti
         } ~ (extractUri & post) { uri =>
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { token =>
-              entity(as[EditsSign])(editsSign => signSubmission(lei, year, None, seqNr, token.email, editsSign.signed, uri, token.username))
+              oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+                entity(as[EditsSign])(editsSign => signSubmission(lei, year, None, seqNr, token.email, editsSign.signed, uri, token.username))
+              }
             }
           }
         }
@@ -54,7 +66,9 @@ private class SignHttpApi(log: Logger, sharding: ClusterSharding)(implicit t: Ti
         } ~ (extractUri & post) { uri =>
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { token =>
-              entity(as[EditsSign])(editsSign => signSubmission(lei, year, Option(quarter), seqNr, token.email, editsSign.signed, uri, token.username))
+              oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { _ =>
+                entity(as[EditsSign])(editsSign => signSubmission(lei, year, Option(quarter), seqNr, token.email, editsSign.signed, uri, token.username))
+              }
             }
           }
         }
