@@ -2,15 +2,24 @@ package hmda.util
 
 import cats.data.NonEmptyList
 import cats.syntax.all._
+import com.typesafe.config.ConfigFactory
 import io.chrisdavenport.cormorant
 import io.chrisdavenport.cormorant.parser.CSVLikeParser
 import io.chrisdavenport.cormorant.{CSV, Error, Get}
 
+private object PsvParsingCompanion {
+  private final val QUOTE = "\""
+  private final val ESCAPED_QUOTE = "\"\""
+  private final val FIELD_REGEX_PROP = "psv.fieldRegex"
+  private final val FIELD_QUOTED_REPLACEMENT_PROP = "psv.quotedReplacement"
+}
 trait PsvParsingCompanion[T] {
+  import PsvParsingCompanion._
   val psvReader: cormorant.Read[T]
+  private val config = ConfigFactory.load()
   def parseFromPSV(str: String): Either[cormorant.Error, T] = {
     val parser: CSVLikeParser = new CSVLikeParser('|') {}
-    cormorant.parser.parseRow(str, parser).flatMap(psvReader.read)
+    cormorant.parser.parseRow(quoteFieldsInPSV(str), parser).flatMap(psvReader.read)
   }
   def parseFromPSVUnsafe(str: String): T = parseFromPSV(str) match {
     case Left(value)  => throw value
@@ -35,4 +44,13 @@ trait PsvParsingCompanion[T] {
         case None => t.asRight
       }
     )
+
+  private def quoteFieldsInPSV(psvLine: String): String =
+    if (psvLine.nonEmpty && psvLine.contains(QUOTE)) {
+      psvLine
+        .replaceAll(QUOTE, ESCAPED_QUOTE)
+        .replaceAll(config.getString(FIELD_REGEX_PROP), config.getString(FIELD_QUOTED_REPLACEMENT_PROP))
+    } else {
+      psvLine
+    }
 }
