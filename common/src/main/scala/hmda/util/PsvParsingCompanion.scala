@@ -8,15 +8,15 @@ import io.chrisdavenport.cormorant.parser.CSVLikeParser
 import io.chrisdavenport.cormorant.{CSV, Error, Get}
 
 private object PsvParsingCompanion {
+  private final val config = ConfigFactory.load()
   private final val QUOTE = "\""
   private final val ESCAPED_QUOTE = "\"\""
-  private final val FIELD_REGEX_PROP = "psv.fieldRegex"
-  private final val FIELD_QUOTED_REPLACEMENT_PROP = "psv.quotedReplacement"
+  private final val FIELD_REGEX = config.getString("psv.fieldRegex")
+  private final val FIELD_QUOTED_REPLACEMENT = config.getString("psv.quotedReplacement")
 }
 trait PsvParsingCompanion[T] {
   import PsvParsingCompanion._
   val psvReader: cormorant.Read[T]
-  private val config = ConfigFactory.load()
   def parseFromPSV(str: String): Either[cormorant.Error, T] = {
     val parser: CSVLikeParser = new CSVLikeParser('|') {}
     cormorant.parser.parseRow(quoteFieldsInPSV(str), parser).flatMap(psvReader.read)
@@ -49,7 +49,7 @@ trait PsvParsingCompanion[T] {
     if (psvLine.nonEmpty && psvLine.contains(QUOTE)) {
       psvLine
         .replaceAll(QUOTE, ESCAPED_QUOTE)
-        .replaceAll(config.getString(FIELD_REGEX_PROP), config.getString(FIELD_QUOTED_REPLACEMENT_PROP))
+        .replaceAll(FIELD_REGEX, FIELD_QUOTED_REPLACEMENT)
     } else {
       psvLine
     }
