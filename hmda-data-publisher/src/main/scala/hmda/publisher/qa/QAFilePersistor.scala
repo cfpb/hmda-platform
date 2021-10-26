@@ -32,7 +32,7 @@ class QAFilePersistor(notifier: MattermostNotifier)(implicit ec: ExecutionContex
           spec.parseLine(line)
         } catch {
           case e: Throwable =>
-            logger.error(s"Failed to parse line: $line", e)
+            logger.debug(s"Failed to parse line: $line", e)
             throw e
         }
       )
