@@ -71,14 +71,14 @@ private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(
     respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
       pathPrefix(Segment / "filings") { lei =>
         (extractUri & post) { uri =>
-          oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
-            oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { _ =>
-              path(IntNumber / "submissions" / IntNumber) { (year, seqNr) =>
-                checkAndUploadSubmission(lei, year, None, seqNr, uri)
-              } ~ path(IntNumber / "quarter" / Quarter / "submissions" / IntNumber) { (year, quarter, seqNr) =>
-                quarterlyFiler(lei, year) {
-                  checkAndUploadSubmission(lei, year, Option(quarter), seqNr, uri)
-                }
+          println("upload path")
+          oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { _ =>
+            println("upload path inner")
+            path(IntNumber / "submissions" / IntNumber) { (year, seqNr) =>
+              checkAndUploadSubmission(lei, year, None, seqNr, uri)
+            } ~ path(IntNumber / "quarter" / Quarter / "submissions" / IntNumber) { (year, quarter, seqNr) =>
+              quarterlyFiler(lei, year) {
+                checkAndUploadSubmission(lei, year, Option(quarter), seqNr, uri)
               }
             }
           }
@@ -87,15 +87,17 @@ private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(
           // WEBSOCKET /institutions/<LEI>/filings/<year>/quarter/<q>/submissions/<seqNr>/progress
           (extractUri & get) { _ =>
             oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei)(_ =>
-              path(IntNumber / "submissions" / IntNumber / "progress")((year, seqNr) =>
-                handleWebSocketMessages(
-                  WebSocketProgressTracker.websocketFlow(system, sharding, SubmissionId(lei, Period(year, None), seqNr))
+              oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { _ =>
+                path(IntNumber / "submissions" / IntNumber / "progress")((year, seqNr) =>
+                  handleWebSocketMessages(
+                    WebSocketProgressTracker.websocketFlow(system, sharding, SubmissionId(lei, Period(year, None), seqNr))
+                  )
+                ) ~ path(IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "progress")((year, quarter, seqNr) =>
+                  handleWebSocketMessages(
+                    WebSocketProgressTracker.websocketFlow(system, sharding, SubmissionId(lei, Period(year, Option(quarter)), seqNr))
+                  )
                 )
-              ) ~ path(IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "progress")((year, quarter, seqNr) =>
-                handleWebSocketMessages(
-                  WebSocketProgressTracker.websocketFlow(system, sharding, SubmissionId(lei, Period(year, Option(quarter)), seqNr))
-                )
-              )
+              }
             )
           }
       }

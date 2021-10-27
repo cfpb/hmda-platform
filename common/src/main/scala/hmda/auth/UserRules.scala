@@ -1,7 +1,5 @@
 package hmda.auth
 
-case class AuthRuleChecker(rule: AuthRule, token: VerifiedToken, comparator: String = "")
-
 trait AuthRule {
     def rule(token: VerifiedToken, comparator: String): Boolean
     def rejectMessage: String
@@ -10,19 +8,21 @@ trait AuthRule {
 object LEISpecificOrAdmin extends AuthRule {
     def rule(token: VerifiedToken, comparator: String): Boolean = {
         val lei = comparator
-        if (token.roles.contains("hmdaAdmin")) true
-        else
+        if (token.roles.contains("hmda-admin")) true
+        else {
             if (token.lei.nonEmpty){
-            val leiList = token.lei.split(',')
-            leiList.contains(lei.trim())
+                val leiList = token.lei.split(',')
+                leiList.contains(lei.trim())
             } else false
+        }
     }
+
     def rejectMessage = "Your user is not authorized to access this LEI"
 }
 
 object AdminOnly extends AuthRule {
     def rule(token: VerifiedToken, comparator: String = ""): Boolean = {  
-        token.roles.contains("hmdaAdmin")
+        token.roles.contains("hmda-admin")
     }
 
     def rejectMessage = "Only HMDA Administrators may access this resource"

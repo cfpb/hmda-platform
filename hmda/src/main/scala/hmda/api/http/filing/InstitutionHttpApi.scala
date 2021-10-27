@@ -1,6 +1,7 @@
 package hmda.api.http.filing
 
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
+import akka.actor.typed.ActorSystem
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.Uri
 import akka.http.scaladsl.server.Directives._
@@ -20,28 +21,39 @@ import hmda.persistence.filing.FilingPersistence.selectFiling
 import hmda.persistence.institution.InstitutionPersistence.selectInstitution
 import hmda.util.http.FilingResponseUtils._
 import org.slf4j.Logger
-import hmda.auth._
+import hmda.auth.{ LEISpecificOrAdmin, BetaOnlyUser}
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 // $COVERAGE-OFF$
 object InstitutionHttpApi {
-  def create(log: Logger, sharding: ClusterSharding)(implicit timeout: Timeout, ec: ExecutionContext): OAuth2Authorization => Route =
-    new InstitutionHttpApi(log, sharding)(timeout, ec).institutionRoutes _
+  def create(log: Logger, sharding: ClusterSharding)(implicit timeout: Timeout, system: ActorSystem[_], ec: ExecutionContext): OAuth2Authorization => Route =
+    new InstitutionHttpApi(log, sharding)(timeout, system, ec).institutionRoutes _
 }
 
-private class InstitutionHttpApi(log: Logger, sharding: ClusterSharding)(implicit val timeout: Timeout, ec: ExecutionContext) {
+private class InstitutionHttpApi(log: Logger, sharding: ClusterSharding)(implicit val timeout: Timeout, system: ActorSystem[_], ec: ExecutionContext) {
   private val quarterlyFiler = quarterlyFilingAllowed(log, sharding) _
+
+  val config           = system.settings.config
+  val currentNamespace = config.getString("hmda.currentNamespace")
 
   // GET /institutions/<lei>/year/<y>
   // GET /institutions/<lei>/year/<y>/quarter/<q>
   def institutionReadPath(oAuth2Authorization: OAuth2Authorization): Route =
-    pathPrefix("institutions" / Segment / "year" / IntNumber) { (lei, year) =>
-      oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
-        (extractUri & get) { uri =>
-          pathEndOrSingleSlash {
-            obtainAllFilingDetailsRoute(lei, year, uri)
-          } ~ path("quarter" / Quarter) { quarter =>
+    path("institutions" / Segment / "year" / IntNumber) { (lei, year) =>
+      (extractUri & get) { uri =>
+        oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
+          oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+            pathEndOrSingleSlash {
+              obtainAllFilingDetailsRoute(lei, year, uri)
+            }
+          }
+        }
+      }
+    } ~ path("institutions" / Segment / "year" / IntNumber / "quarter" / Quarter) { (lei, year, quarter) =>
+      (extractUri & get) { uri =>
+        oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
+          oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
             quarterlyFiler(lei, year) {
               obtainFilingDetailsRoute(lei, year, Option(quarter), uri)
             }

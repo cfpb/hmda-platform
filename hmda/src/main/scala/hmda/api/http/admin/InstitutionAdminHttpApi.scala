@@ -35,6 +35,7 @@ private class InstitutionAdminHttpApi(config: Config, sharding: ClusterSharding)
   val checkLEI        = true
   val checkAgencyCode = false
   val rc: RequestReplicationClient = RequestReplicationClient.create(config, "hmda.institutions.edits.replication-address")
+  val currentNamespace = config.getString("hmda.currentNamespace")
   def institutionAdminRoutes(oAuth2Authorization: OAuth2Authorization): Route =
     handleRejections(corsRejectionHandler) {
       cors() {
@@ -84,19 +85,25 @@ private class InstitutionAdminHttpApi(config: Config, sharding: ClusterSharding)
   private def institutionReadPath (oAuth2Authorization: OAuth2Authorization): Route = {
     path("institutions" / Segment / "year" / IntNumber) { (lei, year) =>
       oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
-        (extractUri & get) { uri =>
-          getInstitution(lei, year, None, uri)
+        oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+          (extractUri & get) { uri =>
+            getInstitution(lei, year, None, uri)
+          }
         }
       }
     } ~ path("institutions" / Segment / "year" / IntNumber / "quarter" / Quarter) { (lei, year, quarter) =>
       oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
-        (extractUri & get)(uri => getInstitution(lei, year, Option(quarter), uri))
+        oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+          (extractUri & get)(uri => getInstitution(lei, year, Option(quarter), uri))
+        }
       }
     } ~
       path("institutions" / Segment) { lei =>
         oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
-          (extractUri & get) { uri =>
-            getAllInstitutions(lei, uri)
+          oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+            (extractUri & get) { uri =>
+              getAllInstitutions(lei, uri)
+            }
           }
         }
       }

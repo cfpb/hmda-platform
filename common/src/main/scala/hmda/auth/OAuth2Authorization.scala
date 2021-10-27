@@ -15,91 +15,69 @@ import org.keycloak.adapters.KeycloakDeploymentBuilder
 import org.keycloak.representations.adapters.config.AdapterConfig
 import org.slf4j.Logger
 
-import java.util.concurrent.atomic.AtomicReference
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext
 // $COVERAGE-OFF$
 class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
 
-  private val tokenAttributeRefKey = AttributeKey[AtomicReference[VerifiedToken]]("tokenRef")
-
   val config      = ConfigFactory.load()
   val clientId    = config.getString("keycloak.client.id")
   val runtimeMode = config.getString("hmda.runtime.mode")
 
-  def authorizeTokenWithRule(authRule: AuthRule, comparator: String = ""): Directive1[VerifiedToken] =
-    authorizeToken flatMap {
-      case token =>
-        withAccessLog
-          .&(handleRejections(authRejectionHandler(authRule.rejectMessage)))
-          .&(authorizeTokenWithRuleReject(authRule.rule(token, comparator)))
+  def authorizeTokenWithRule(authRule: AuthRule, comparator: String = ""): Directive1[VerifiedToken] = {
+    withLocalModeBypass {
+      authorizeToken flatMap {
+        case token =>
+          withAccessLog(token)
+            .&(handleRejections(authRejectionHandler(authRule.rejectMessage)))
+            .&(authorizeTokenWithRuleReject(authRule.rule(token, comparator), token))
+        case _ =>
+            reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]]
+      }
     }
+  }
 
-  def logAccessLog(uri: Uri, token: () => Option[VerifiedToken])(request: HttpRequest)(r: RouteResult): Unit = {
+  def logAccessLog(uri: Uri, token: VerifiedToken)(request: HttpRequest)(r: RouteResult): Unit = {
     val result = r match {
       case RouteResult.Complete(response)   => s"completed(${response.status.intValue()})"
       case RouteResult.Rejected(_) => s"rejected"
     }
     logger.debug(s"""Access attempt:
                     |uri = ${uri}
-                    |username = ${token().map(_.username).getOrElse("unknown")}
+                    |username = ${token.username}
                     |result = ${result}""".stripMargin)
   }
 
-  def withAccessLog: Directive[Unit] = {
-    // this is a hack, but a simplest way to save the token down the road and read it on the way back
-    val ref = new AtomicReference[VerifiedToken]()
-    (extractUri & mapRequest(_.addAttribute(tokenAttributeRefKey, ref))).flatMap((uri =>
-      logRequestResult(LoggingMagnet(_ => logAccessLog(uri, () => Option(ref.get()))))))
+  def withAccessLog(token: VerifiedToken): Directive[Unit] = {
+    (extractUri).flatMap((uri =>
+      logRequestResult(LoggingMagnet(_ => logAccessLog(uri, token)))))
   }
 
-  protected def authorizeTokenWithRuleReject(passing: Boolean): Directive1[VerifiedToken] =
-    authorizeToken flatMap {
-      case t if passing =>
-        provide(t)
-      case _ =>
-        withLocalModeBypass {
-          reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]]
-        }
-    }
+  protected def authorizeTokenWithRuleReject(passing: Boolean, token: VerifiedToken): Directive1[VerifiedToken] = {
+        if (passing) provide(token)
+        else reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]]
+  }
 
-  protected def authRejectionHandler(rejectionMessage: String = "Authorization Token could not be verified"): RejectionHandler =
+  protected def authRejectionHandler(rejectionMessage: String): RejectionHandler = {
+    println("authRejectioHandler")
     RejectionHandler
       .newBuilder()
       .handle({
         case AuthorizationFailedRejection =>
+          println("providing message")
           complete(
             (StatusCodes.Forbidden, ErrorResponse(StatusCodes.Forbidden.intValue, rejectionMessage, Path("")))
           )
       })
       .result()
-
-  protected def authorizeTokenWithLeiReject(lei: String): Directive1[VerifiedToken] =
-    authorizeToken flatMap {
-      case t if t.lei.nonEmpty =>
-        withLocalModeBypass {
-          val leiList = t.lei.split(',')
-          if (leiList.contains(lei.trim())) {
-            provide(t)
-          } else {
-            logger.info(s"Providing reject for ${lei.trim()}")
-            reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]]
-          }
-        }
-
-      case _ =>
-        withLocalModeBypass {
-          logger.info("Rejecting request in authorizeTokenWithLei")
-          reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]]
-        }
-    }
+  }
 
   protected def withLocalModeBypass(thunk: => Directive1[VerifiedToken]): Directive1[VerifiedToken] =
     if (runtimeMode == "dev" || runtimeMode == "docker-compose" || runtimeMode == "kind") {
       provide(VerifiedToken())
     } else { thunk }
 
-  protected def authorizeToken: Directive1[VerifiedToken] =
+  protected def authorizeToken: Directive1[VerifiedToken] = {
     bearerToken.flatMap {
       case Some(token) =>
         onComplete(tokenVerifier.verifyToken(token)).flatMap {
@@ -117,10 +95,7 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
               t.getResourceAccess().get(clientId).getRoles.asScala.toSeq,
               lei
             )
-            attribute(tokenAttributeRefKey).flatMap(tokenRef => {
-              tokenRef.set(verifiedToken)
-              provide(verifiedToken)
-            })
+            provide(verifiedToken)
           }.recover {
             case ex: Throwable =>
               logger.error("Authorization Token could not be verified", ex)
@@ -137,6 +112,7 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
           StandardRoute(r).toDirective[Tuple1[VerifiedToken]]
         }
     }
+  }
 
   private def bearerToken: Directive1[Option[String]] =
     for {
