@@ -120,7 +120,7 @@ lazy val common = (project in file("common"))
     ),
     Seq(
       libraryDependencies ++= commonDeps ++ authDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++ List(
-        cormorant, scalaMock, scalacheckShapeless, diffx
+        cormorant, cormorantGeneric, scalaMock, scalacheckShapeless, diffx
       )
     ),
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
