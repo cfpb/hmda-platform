@@ -20,7 +20,7 @@ import hmda.persistence.filing.FilingPersistence.selectFiling
 import hmda.persistence.institution.InstitutionPersistence.selectInstitution
 import hmda.util.http.FilingResponseUtils._
 import org.slf4j.Logger
-import hmda.auth._
+import hmda.auth.LEISpecificOrAdmin
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
@@ -37,8 +37,8 @@ private class InstitutionHttpApi(log: Logger, sharding: ClusterSharding)(implici
   // GET /institutions/<lei>/year/<y>/quarter/<q>
   def institutionReadPath(oAuth2Authorization: OAuth2Authorization): Route =
     pathPrefix("institutions" / Segment / "year" / IntNumber) { (lei, year) =>
-      oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
-        (extractUri & get) { uri =>
+      (extractUri & get) { uri =>
+        oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
           pathEndOrSingleSlash {
             obtainAllFilingDetailsRoute(lei, year, uri)
           } ~ path("quarter" / Quarter) { quarter =>

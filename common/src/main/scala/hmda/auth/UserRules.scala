@@ -1,7 +1,5 @@
 package hmda.auth
 
-case class AuthRuleChecker(rule: AuthRule, token: VerifiedToken, comparator: String = "")
-
 trait AuthRule {
     def rule(token: VerifiedToken, comparator: String): Boolean
     def rejectMessage: String
@@ -10,7 +8,7 @@ trait AuthRule {
 object LEISpecificOrAdmin extends AuthRule {
     def rule(token: VerifiedToken, comparator: String): Boolean = {
         val lei = comparator
-        if (token.roles.contains("hmdaAdmin")) true
+        if (token.roles.contains("hmda-admin")) true
         else
             if (token.lei.nonEmpty){
             val leiList = token.lei.split(',')
@@ -22,7 +20,7 @@ object LEISpecificOrAdmin extends AuthRule {
 
 object AdminOnly extends AuthRule {
     def rule(token: VerifiedToken, comparator: String = ""): Boolean = {  
-        token.roles.contains("hmdaAdmin")
+        token.roles.contains("hmda-admin")
     }
 
     def rejectMessage = "Only HMDA Administrators may access this resource"
@@ -30,10 +28,8 @@ object AdminOnly extends AuthRule {
 
 object BetaOnlyUser extends AuthRule {   
     def rule(token: VerifiedToken, comparator: String): Boolean = {
-        val currentNamespace = comparator
-        if (token.roles.contains("betaUser")) {
-            currentNamespace == "beta"
-        } else true
+        println("beta rule activated")
+        false
     }
 
     def rejectMessage = "Your user is only authorized to access the Beta Submission Platform"

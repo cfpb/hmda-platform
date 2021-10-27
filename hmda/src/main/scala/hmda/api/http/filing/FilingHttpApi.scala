@@ -50,9 +50,10 @@ private class FilingHttpApi(log: Logger, sharding: ClusterSharding)(implicit val
   def filingReadPath(oAuth2Authorization: OAuth2Authorization): Route =
     respondWithDefaultHeader(RawHeader("Cache-Control", "no-cache")) {
       path("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
-        oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
+        //oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
           pathEndOrSingleSlash {
             // POST/institutions/<lei>/filings/<year>
+                          // GET/institutions/<lei>/filings/<year>
             (post & extractUri) { uri =>
               createFilingForInstitution(lei, year, None, uri)
             } ~
@@ -61,7 +62,7 @@ private class FilingHttpApi(log: Logger, sharding: ClusterSharding)(implicit val
                 parameter('page.as[Int] ? 1)(pageNumber => getFilingForInstitution(lei, year, None, uri, pageNumber))
               }
           }
-        }
+        //}
       } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter) { (lei, period, quarter) =>
         oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
           pathEndOrSingleSlash {

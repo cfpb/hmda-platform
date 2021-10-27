@@ -27,13 +27,21 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
   val clientId    = config.getString("keycloak.client.id")
   val runtimeMode = config.getString("hmda.runtime.mode")
 
-  def authorizeTokenWithRule(authRule: AuthRule, comparator: String = ""): Directive1[VerifiedToken] =
+  def authorizeTokenWithRule(authRule: AuthRule, comparator: String = ""): Directive1[VerifiedToken] = {
+    println(authRule.rejectMessage)
     authorizeToken flatMap {
       case token =>
+        println(token)
         withAccessLog
           .&(handleRejections(authRejectionHandler(authRule.rejectMessage)))
           .&(authorizeTokenWithRuleReject(authRule.rule(token, comparator)))
+      case _ =>
+        println("token not found")
+        withLocalModeBypass {
+          reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]]
+        }
     }
+  }
 
   def logAccessLog(uri: Uri, token: () => Option[VerifiedToken])(request: HttpRequest)(r: RouteResult): Unit = {
     val result = r match {
@@ -55,8 +63,14 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
 
   protected def authorizeTokenWithRuleReject(passing: Boolean): Directive1[VerifiedToken] =
     authorizeToken flatMap {
-      case t if passing =>
-        provide(t)
+      case t =>
+        println("passing is" + passing)
+        if (passing) provide(t)
+        else {
+          withLocalModeBypass {
+            reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]]
+          }
+        }
       case _ =>
         withLocalModeBypass {
           reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]]
