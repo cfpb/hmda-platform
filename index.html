@@ -279,10 +279,75 @@
                           <li>
                             <a href="#hmda-filing-api-endpoints-get-sign-receipt" class="toc-h3 toc-link" data-title="Get Sign receipt">Get Sign receipt</a>
                           </li>
+                          <li>
+                            <a href="#hmda-filing-api-endpoints-get-submission-summary" class="toc-h3 toc-link" data-title="Get Submission Summary">Get Submission Summary</a>
+                          </li>
                       </ul>
                   </li>
                   <li>
                     <a href="#hmda-filing-api-quarterly-filing" class="toc-h2 toc-link" data-title="Quarterly Filing">Quarterly Filing</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
+            <a href="#beta-hmda-filing-api" class="toc-h1 toc-link" data-title="Beta HMDA Filing API">Beta HMDA Filing API</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#beta-hmda-filing-api-authorization" class="toc-h2 toc-link" data-title="Authorization">Authorization</a>
+                  </li>
+                  <li>
+                    <a href="#beta-hmda-filing-api-postman-collection" class="toc-h2 toc-link" data-title="Postman Collection">Postman Collection</a>
+                  </li>
+                  <li>
+                    <a href="#beta-hmda-filing-api-filing-process" class="toc-h2 toc-link" data-title="Filing Process">Filing Process</a>
+                      <ul class="toc-list-h3">
+                          <li>
+                            <a href="#beta-hmda-filing-api-filing-process-object-hierarchy" class="toc-h3 toc-link" data-title="Object Hierarchy">Object Hierarchy</a>
+                          </li>
+                          <li>
+                            <a href="#beta-hmda-filing-api-filing-process-submission-status" class="toc-h3 toc-link" data-title="Submission Status">Submission Status</a>
+                              <ul class="toc-list-h4">
+                                  <li>
+                                    <a href="#beta-hmda-filing-api-filing-process-submission-status-submission-status-codes" class="toc-h4 toc-link" data-title="Submission Status Codes">Submission Status Codes</a>
+                                  </li>
+                              </ul>
+                          </li>
+                      </ul>
+                  </li>
+                  <li>
+                    <a href="#beta-hmda-filing-api-endpoints" class="toc-h2 toc-link" data-title="Endpoints">Endpoints</a>
+                      <ul class="toc-list-h3">
+                          <li>
+                            <a href="#beta-hmda-filing-api-endpoints-start-a-filing" class="toc-h3 toc-link" data-title="Start a Filing">Start a Filing</a>
+                          </li>
+                          <li>
+                            <a href="#beta-hmda-filing-api-endpoints-get-a-filing" class="toc-h3 toc-link" data-title="Get a Filing">Get a Filing</a>
+                          </li>
+                          <li>
+                            <a href="#beta-hmda-filing-api-endpoints-create-a-submission" class="toc-h3 toc-link" data-title="Create a Submission">Create a Submission</a>
+                          </li>
+                          <li>
+                            <a href="#beta-hmda-filing-api-endpoints-get-the-latest-submission" class="toc-h3 toc-link" data-title="Get the Latest Submission">Get the Latest Submission</a>
+                          </li>
+                          <li>
+                            <a href="#beta-hmda-filing-api-endpoints-upload-a-file" class="toc-h3 toc-link" data-title="Upload a File">Upload a File</a>
+                          </li>
+                          <li>
+                            <a href="#beta-hmda-filing-api-endpoints-view-parsing-errors" class="toc-h3 toc-link" data-title="View Parsing Errors">View Parsing Errors</a>
+                          </li>
+                          <li>
+                            <a href="#beta-hmda-filing-api-endpoints-view-all-edits" class="toc-h3 toc-link" data-title="View All Edits">View All Edits</a>
+                          </li>
+                          <li>
+                            <a href="#beta-hmda-filing-api-endpoints-view-edit-details" class="toc-h3 toc-link" data-title="View Edit Details">View Edit Details</a>
+                          </li>
+                          <li>
+                            <a href="#beta-hmda-filing-api-endpoints-verify-quality-edits" class="toc-h3 toc-link" data-title="Verify Quality Edits">Verify Quality Edits</a>
+                          </li>
+                          <li>
+                            <a href="#beta-hmda-filing-api-endpoints-verify-macro-edits" class="toc-h3 toc-link" data-title="Verify Macro Edits">Verify Macro Edits</a>
+                          </li>
+                      </ul>
                   </li>
               </ul>
           </li>
@@ -422,10 +487,6 @@
 
 <p>For local development, no authorization is needed. See <a href="https://github.com/cfpb/hmda-platform#one-line-local-development-environment-no-auth">One-line Local Development Environment (No Auth)</a> for more info.</p>
 
-<p style="background: #ffe4c4; padding-top: 10px; padding-bottom: 10px;">
-<b><u>Please note:</u></b> When connecting to authenticated services on the <b>HMDA Beta</b> platform, acquire your <i>bearer</i> token from the endpoint <code>https://ffiec.cfpb.gov/auth/realms/hmda2/protocol/openid-connect/token</code>. 
-</p>
-
 <blockquote>
 <p>Example</p>
 </blockquote>
@@ -480,7 +541,7 @@ the submission status often throughout the process of uploading and checking edi
 <pre class="highlight plaintext"><code>{
   "id": {
     "lei": "12345abc",
-    "period": "2018",
+    "period": "2020",
     "sequenceNumber": 3
   },
   "status": {
@@ -592,13 +653,13 @@ the submission status often throughout the process of uploading and checking edi
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X POST \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2019&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}&quot; \
   -H &#39;Authorization: Bearer  {{access_token}}&#39; \</p>
 
 <p><b>JSON Response:</b>
 {
     &quot;filing&quot;: {
-        &quot;period&quot;: &quot;2018&quot;,
+        &quot;period&quot;: &quot;2020&quot;,
         &quot;lei&quot;: &quot;B90YWS6AFX2LGWOXJ1LD&quot;,
         &quot;status&quot;: {
             &quot;code&quot;: 2,
@@ -644,13 +705,13 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X GET \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2019&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}&quot; \
   -H &#39;Authorization: Bearer  {{access_token}}&#39; \</p>
 
 <p><b>JSON Response:</b>
 {
     &quot;filing&quot;: {
-        &quot;period&quot;: &quot;2018&quot;,
+        &quot;period&quot;: &quot;2020&quot;,
         &quot;lei&quot;: &quot;B90YWS6AFX2LGWOXJ1LD&quot;,
         &quot;status&quot;: {
             &quot;code&quot;: 2,
@@ -691,7 +752,7 @@ curl -X GET \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X POST \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39; \</p>
 
 <p>A submission must be created for each file upload. More than one submission can be created for a filing period. The most recent submission will be considered the latest submission. Each <code>POST</code> on the submission endpoint will return a new submission number.</p>
@@ -700,7 +761,7 @@ curl -X POST \
 {
     &quot;id&quot;: {
         &quot;lei&quot;: &quot;B90YWS6AFX2LGWOXJ1LD&quot;,
-        &quot;period&quot;: &quot;2018&quot;,
+        &quot;period&quot;: &quot;2020&quot;,
         &quot;sequenceNumber&quot;: 10
     },
     &quot;status&quot;: {
@@ -744,14 +805,14 @@ curl -X POST \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X GET \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/latest&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/latest&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39; \</p>
 
 <p><b>JSON Response:</b>
 {
     &quot;id&quot;: {
         &quot;lei&quot;: &quot;B90YWS6AFX2LGWOXJ1LD&quot;,
-        &quot;period&quot;: &quot;2018&quot;,
+        &quot;period&quot;: &quot;2020&quot;,
         &quot;sequenceNumber&quot;: 10
     },
     &quot;status&quot;: {
@@ -799,7 +860,7 @@ curl -X GET \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X POST \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2019/submissions/10&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/10&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39; \
   -H &#39;content-type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW&#39; \
   -F file=<file.csv></p>
@@ -808,7 +869,7 @@ curl -X POST \
 {
     &quot;id&quot;: {
         &quot;lei&quot;: &quot;B90YWS6AFX2LGWOXJ1LD&quot;,
-        &quot;period&quot;: &quot;2018&quot;,
+        &quot;period&quot;: &quot;2020&quot;,
         &quot;sequenceNumber&quot;: 10
     },
     &quot;status&quot;:{
@@ -856,7 +917,7 @@ curl -X POST \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X POST \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/10/parseErrors&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/10/parseErrors&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39;</p>
 
 <p><b>JSON Response</b>
@@ -871,7 +932,7 @@ curl -X POST \
         &quot;description&quot;: &quot;Review these errors and update your file. Then, upload the corrected file.&quot;
     },
     &quot;_links&quot;: {
-        &quot;href&quot;: &quot;/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/parseErrors{rel}&quot;,
+        &quot;href&quot;: &quot;/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/24/parseErrors{rel}&quot;,
         &quot;self&quot;: &quot;?page=1&quot;,
         &quot;first&quot;: &quot;?page=1&quot;,
         &quot;prev&quot;: &quot;?page=1&quot;,
@@ -910,7 +971,7 @@ curl -X POST \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X GET \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/edits&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/24/edits&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39;</p>
 
 <p><b>JSON Response:</b>
@@ -982,7 +1043,7 @@ curl -X GET \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X GET \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/edits/Q631&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/24/edits/Q631&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39;</p>
 
 <p><b>JSON Response:</b>
@@ -1006,7 +1067,7 @@ curl -X GET \
    &quot;count&quot;: 20,
    &quot;total&quot;: 54,
    &quot;_links&quot;: {
-       &quot;href&quot;: &quot;/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/24/edits/Q631{rel}&quot;,
+       &quot;href&quot;: &quot;/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/24/edits/Q631{rel}&quot;,
        &quot;self&quot;: &quot;?page=1&quot;,
        &quot;first&quot;: &quot;?page=1&quot;,
        &quot;prev&quot;: &quot;?page=1&quot;,
@@ -1045,7 +1106,7 @@ curl -X GET \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X POST \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/sequenceNumber/edits/quality&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/edits/quality&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39; \
   -d &#39;{&quot;verified&quot;: true}&#39;</p>
 
@@ -1093,7 +1154,7 @@ curl -X POST \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X POST \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/sequenceNumber/edits/macro&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/edits/macro&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39; \
   -d &#39;{&quot;verified&quot;: true}&#39;</p>
 
@@ -1141,7 +1202,7 @@ curl -X POST \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X POST \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/55/sign&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/sign&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39; \
   -d &#39;{&quot;verified&quot;: true}&#39;</p>
 
@@ -1149,7 +1210,7 @@ curl -X POST \
 {
     &quot;email&quot;: &quot;user@example.com&quot;,
     &quot;timestamp&quot;: 1572375004080,
-    &quot;receipt&quot;: &quot;B90YWS6AFX2LGWOXJ1LD-2018-10-1572375004080&quot;,
+    &quot;receipt&quot;: &quot;B90YWS6AFX2LGWOXJ1LD-{{year}}-10-1572375004080&quot;,
     &quot;status&quot;: {
         &quot;code&quot;: 15,
         &quot;message&quot;: &quot;Your submission has been accepted.&quot;,
@@ -1191,18 +1252,94 @@ curl -X POST \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X GET \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/10/sign&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/sign&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39;</p>
 
 <p><b>JSON Response:</b>
 {
     &quot;email&quot;: &quot;user@example.com&quot;,
     &quot;timestamp&quot;: 1572375004080,
-    &quot;receipt&quot;: &quot;B90YWS6AFX2LGWOXJ1LD-2018-55-1572375004080&quot;,
+    &quot;receipt&quot;: &quot;B90YWS6AFX2LGWOXJ1LD-{{year}}-55-1572375004080&quot;,
     &quot;status&quot;: {
         &quot;code&quot;: 15,
         &quot;message&quot;: &quot;Your submission has been accepted.&quot;,
         &quot;description&quot;: &quot;This completes your HMDA filing process for this year. If you need to upload a new HMDA file, the previously completed filing will not be overridden until all edits have been cleared and verified, and the new file has been submitted.&quot;
+    }
+}
+</pre></code></p>
+
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Method</td>
+<td><code>GET</code></td>
+</tr>
+<tr>
+<td>Endpoint</td>
+<td><code>https://ffiec.cfpb.gov/v2/filing/{{year}}/submissions/{{sequenceNumber}}/sign</code></td>
+</tr>
+<tr>
+<td>Headers</td>
+<td><code>Authorization: Bearer {{access_token}}</code></td>
+</tr>
+</tbody></table>
+<h3 id='hmda-filing-api-endpoints-get-submission-summary'>Get Submission Summary</h3>
+<blockquote>
+<p>Example Request and Response</p>
+</blockquote>
+
+<p><pre><code class="text">
+<b>Request:</b>
+curl -X GET \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/summary&#39;&quot; \
+  -H &#39;Authorization: Bearer {{access_token}}&#39;</p>
+
+<p><b>JSON Response:</b>
+{
+    &quot;submission&quot;: {
+        &quot;id&quot;: {
+            &quot;lei&quot;: &quot;B90YWS6AFX2LGWOXJ1LD&quot;,
+            &quot;period&quot;: {
+                &quot;year&quot;: &quot;2020&quot;
+                &quot;quarter&quot;: null
+            },
+            &quot;sequenceNumber&quot;: 20
+        },
+        &quot;status&quot;: {
+            &quot;code&quot;: 15,
+            &quot;message&quot;: &quot;Your submission has been accepted.&quot;,
+            &quot;description&quot;: &quot;This completes your HMDA filing process for this year. If you need to upload a new HMDA file, the previously completed filing will not be overridden until all edits have been cleared and verified, and the new file has been submitted.&quot;
+        },
+        &quot;start&quot;: 1634228617589,
+        &quot;end&quot;: 1634229085705,
+        &quot;fileName&quot;: &quot;clean_file_5_rows_Bank0_2020.txt&quot;,
+        &quot;receipt&quot;: &quot;B90YWS6AFX2LGWOXJ1LD-2020-26-1634229085705&quot;,
+        &quot;signerUsername&quot;: &quot;test@testerbank.com&quot;
+    },
+    &quot;ts&quot;: {
+        &quot;id&quot;: 1,
+        &quot;institutionName&quot;: &quot;Bank0&quot;,
+        &quot;year&quot;: &quot;2020&quot;
+        &quot;quarter&quot;: 4,
+        &quot;contact&quot;: {
+            &quot;name&quot;: &quot;Mr. Smug Pockets&quot;,
+            &quot;phone&quot;: &quot;555-555-5555&quot;,
+            &quot;email&quot;: &quot;pockets@ficus.com&quot;,
+            &quot;address&quot;: {
+                &quot;street&quot;: &quot;1234 Hocus Potato Way&quot;,
+                &quot;city&quot;: &quot;Tatertown&quot;,
+                &quot;state&quot;: &quot;UT&quot;,
+                &quot;zipCode&quot;: &quot;84096&quot;
+            }
+        },
+        &quot;agency&quot;: 9,
+        &quot;totalLines&quot;: 5,
+        &quot;taxId&quot;: &quot;01-0123456&quot;,
+        &quot;LEI&quot;: &quot;B90YWS6AFX2LGWOXJ1LD&quot;
     }
 }
 </pre></code></p>
@@ -1234,7 +1371,7 @@ curl -X GET \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X GET \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/quarter/Q1/submissions/latest&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/quarter/Q1/submissions/latest&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39; \</p>
 
 <p><b>JSON Response:</b>
@@ -1242,7 +1379,7 @@ curl -X GET \
     &quot;id&quot;: {
         &quot;lei&quot;: &quot;B90YWS6AFX2LGWOXJ1LD&quot;,
         &quot;period&quot;: {
-            &quot;year&quot;: 2020,
+            &quot;year&quot;: &quot;2020&quot;
             &quot;quarter&quot;: &quot;Q1&quot;
         },
         &quot;sequenceNumber&quot;: 10
@@ -1262,6 +1399,728 @@ curl -X GET \
     &quot;macroExists&quot;: false
 }
 </pre></code></p>
+
+<p>All the endpoints are the same for quarterly filing with the addtion of <code>quarter/Q1/</code>, <code>quarter/Q2/</code> or <code>quarter/Q3/</code> after the filing parameter and before the submission parameter.</p>
+<h1 id='beta-hmda-filing-api'>Beta HMDA Filing API</h1>
+<p>The following documentation addresses the process for testing in the HMDA Platform Beta environment and the associated Beta APIs.</p>
+
+<p>The <a href="https://ffiec.beta.cfpb.gov/filing">HMDA Beta Filing Platform</a> serves as a test environment for the latest builds of the Hmda Platform backend service and Frontend UI. It is in no way linked to the official submission of filing data.</p>
+<h2 id='beta-hmda-filing-api-authorization'>Authorization</h2>
+<p>To test a HMDA filing using the Beta API, a <em>bearer</em> authorization token is required for all Beta API calls. To acquire an authorization token use the <code>/auth</code> endpoint with your username and password as payload.</p>
+
+<p>For local development, no authorization is needed. See <a href="https://github.com/cfpb/hmda-platform#one-line-local-development-environment-no-auth">One-line Local Development Environment (No Auth)</a> for more info.</p>
+
+<p style="background: #ffe4c4; padding-top: 10px; padding-bottom: 10px;">
+<b><u>Please note:</u></b> When testing the filing process via the  <b>HMDA Beta</b> platform, this filing process is for test purposes only and is <b>NOT</b> acknowledged as an official filing. If you wish to submit <b>official data</b> to the HMDA Platform, please use the  
+production platform application: https://ffiec.cfpb.gov/filing.
+
+</p>
+
+<blockquote>
+<p>Example</p>
+</blockquote>
+<pre class="highlight plaintext"><code>  curl -X POST \
+  "https://ffiec.beta.cfpb.gov/auth/realms/hmda2/protocol/openid-connect/token" \
+  -d 'client_id=hmda2-api&amp;grant_type=password&amp;username={{username}}%40{{bank_domain}}&amp;password={{password}}'
+</code></pre>
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Method</td>
+<td><code>POST</code></td>
+</tr>
+<tr>
+<td>URL</td>
+<td><code>https://ffiec.beta.cfpb.gov/auth/realms/hmda2/protocol/openid-connect/token</code></td>
+</tr>
+<tr>
+<td>Payload</td>
+<td>client_id=hmda2-api <br> grant_type=password <br> username={{username}}%40{{bank_domain}} <br> password={{password}}</td>
+</tr>
+</tbody></table>
+<h2 id='beta-hmda-filing-api-postman-collection'>Postman Collection</h2>
+<p>The <a href="https://github.com/cfpb/hmda-platform/tree/master/newman/postman">HMDA Postman Collection</a> has been prepared to simplify the process of using the HMDA Platform Filing Beta APIs.</p>
+
+<p><a href="https://www.postman.com/product/api-client/">Postman</a> is a client side application that allows users to easily construct Beta API calls and import external Beta API collections.</p>
+<h2 id='beta-hmda-filing-api-filing-process'>Filing Process</h2>
+<p>Submission of a HMDA file flows in the following steps which are mirriored in the submission status codes:</p>
+
+<p style="background: #ffe4c4; padding-top: 10px; padding-bottom: 10px;">
+<b><u>Please note:</u></b> When testing the filing process via the  <b>HMDA Beta</b> platform, the signing of submissions via the HMDA Beta platform is <b>prohibted</b> as it is not considered an official submission of data and to avoid any confusion in this regard. 
+</p>
+
+<ol>
+<li>Create a Filing: These are unique per institution per filing season and are created by the HMDA-Ops teams in preperation for each filing season.</li>
+<li>Create a Submission: Submissions are the primary object in a HMDA Filing. They are created within a filing and each is able to accept a single file upload. Many submissions can be created for a filing and they carry an id which is incrimented.</li>
+<li>Upload a File: A file is then uploaded to the submission which was created. Only one file can be uploaded to a submission. To upload a new file you must create a new submission.</li>
+<li>Check the status of the Submission the file was uploaded to: If parsing syntactical or validity edits are triggered a new file must be uploaded.</li>
+<li>Validate Quality Edits: Review triggered Quality Edits and confirm the submitted data are correct.</li>
+<li>Validate Macro Edits: Review triggered Macro Edits and confirm the submitted data are correct.</li>
+</ol>
+<h3 id='beta-hmda-filing-api-filing-process-object-hierarchy'>Object Hierarchy</h3>
+<p><img src="../images/filingObjectHierarchy.png"></p>
+<h3 id='beta-hmda-filing-api-filing-process-submission-status'>Submission Status</h3>
+<p>As a submission represents a HMDA filing the submission status is the best way to see the state of a HMDA filing. It will be useful to query for 
+the submission status often throughout the process of uploading and checking edits for a submission.</p>
+<h4 id='beta-hmda-filing-api-filing-process-submission-status-submission-status-codes'>Submission Status Codes</h4>
+<blockquote>
+<p><strong>Example</strong></p>
+</blockquote>
+<pre class="highlight plaintext"><code>{
+  "id": {
+    "lei": "12345abc",
+    "period": "2020",
+    "sequenceNumber": 3
+  },
+  "status": {
+    "code": 1,
+    "message": "No data has been uploaded yet.",
+    "description": "The filing period is open and available to accept HMDA data. Make sure your data is in a pipe-delimited text file."
+  },
+  "start": 0,
+  "end": 0,
+  "fileName": "test.txt",
+  "receipt": ""
+}
+</code></pre>
+<p>In order to track the status of a filing for a financial institution, the following states are captured by the backend:</p>
+
+<table><thead>
+<tr>
+<th>Code</th>
+<th>Message</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>1</td>
+<td>No data has been uploaded yet.</td>
+<td>The filing period is open and available to accept HMDA data. Make sure your data is in a pipe-delimited text file.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Your file is uploading.</td>
+<td>Your file is currently being uploaded to the HMDA Platform.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Your file has been uploaded.</td>
+<td>Your data is ready to be analyzed.</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Checking the formatting of your data.</td>
+<td>Your file is being analyzed to ensure that it meets formatting requirements specified in the HMDA Filing Instructions Guide.</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Your data has formatting errors.</td>
+<td>Review these errors and update your file. Then, upload the corrected file.</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Your data is formatted correctly.</td>
+<td>Your file meets the formatting requirements specified in the HMDA Filing Instructions Guide. Your data will now be analyzed for any edits.</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Your data is being analyzed.</td>
+<td>Your data has been uploaded and is being checked for any edits.</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Your data has been analyzed for Syntactical and Validity Errors.</td>
+<td>Your file has been analyzed and does not contain any Syntactical or Validity errors.</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Your data has syntactical and/or validity edits that need to be reviewed.</td>
+<td>Your file has been uploaded, but the filing process may not proceed until the file is corrected and re-uploaded.</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Your data has been analyzed for Quality Errors.</td>
+<td>Your file has been analyzed, and does not contain quality errors.</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Your data has quality edits that need to be reviewed.</td>
+<td>Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded.</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Your data has been analyzed for macro errors.</td>
+<td>Your file has been analyzed, and does not contain macro errors.</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Your data has macro edits that need to be reviewed.</td>
+<td>Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded.</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Your data is ready for submission.</td>
+<td>Your financial institution has certified that the data is correct, but it has not been submitted yet.</td>
+</tr>
+<tr>
+<td>-1</td>
+<td>An error occurred while submitting the data.</td>
+<td>Please re-upload your file.</td>
+</tr>
+</tbody></table>
+<h2 id='beta-hmda-filing-api-endpoints'>Endpoints</h2><h3 id='beta-hmda-filing-api-endpoints-start-a-filing'>Start a Filing</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<p><pre><code class="text">
+<b>Request:</b>
+curl -X POST \
+  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}&quot; \
+  -H &#39;Authorization: Bearer  {{access_token}}&#39; \</p>
+
+<p><b>JSON Response:</b>
+{
+    &quot;filing&quot;: {
+        &quot;period&quot;: &quot;2020&quot;,
+        &quot;lei&quot;: &quot;B90YWS6AFX2LGWOXJ1LD&quot;,
+        &quot;status&quot;: {
+            &quot;code&quot;: 2,
+            &quot;message&quot;: &quot;in-progress&quot;
+        },
+        &quot;filingRequired&quot;: true,
+        &quot;start&quot;: 1572378187454,
+        &quot;end&quot;: 0
+    },
+    &quot;submissions&quot;: []
+}
+</pre></code></p>
+
+<p>For evey filing period, you must begin by starting a filing. This only needs to be done once per filing season. In the production HMDA filing application this will have already been creaed. 
+The <code>POST</code> will result in a <code>200</code> only for the first time it&#39;s called. If the filing for the given filing period already exists, the <code>POST</code> will return a <code>400</code>.</p>
+
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Method</td>
+<td><code>POST</code></td>
+</tr>
+<tr>
+<td>Endpoint</td>
+<td><code>https://ffiec.beta.cfpb.gov/v2/filing/{{year}}</code></td>
+</tr>
+<tr>
+<td>Headers</td>
+<td><code>Authorization: Bearer {{access_token}}</code></td>
+</tr>
+</tbody></table>
+<h3 id='beta-hmda-filing-api-endpoints-get-a-filing'>Get a Filing</h3>
+<p>This endpoint can be used to confirm that a filing exists for the relevant period.</p>
+
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<p><pre><code class="text">
+<b>Request:</b>
+curl -X GET \
+  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}&quot; \
+  -H &#39;Authorization: Bearer  {{access_token}}&#39; \</p>
+
+<p><b>JSON Response:</b>
+{
+    &quot;filing&quot;: {
+        &quot;period&quot;: &quot;2020&quot;,
+        &quot;lei&quot;: &quot;B90YWS6AFX2LGWOXJ1LD&quot;,
+        &quot;status&quot;: {
+            &quot;code&quot;: 2,
+            &quot;message&quot;: &quot;in-progress&quot;
+        },
+        &quot;filingRequired&quot;: true,
+        &quot;start&quot;: 1572378187454,
+        &quot;end&quot;: 0
+    },
+    &quot;submissions&quot;: []
+}
+</pre></code></p>
+
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Method</td>
+<td><code>GET</code></td>
+</tr>
+<tr>
+<td>Endpoint</td>
+<td><code>https://ffiec.beta.cfpb.gov/v2/filing/{{year}}</code></td>
+</tr>
+<tr>
+<td>Headers</td>
+<td><code>Authorization: Bearer {{access_token}}</code></td>
+</tr>
+</tbody></table>
+<h3 id='beta-hmda-filing-api-endpoints-create-a-submission'>Create a Submission</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<p><pre><code class="text">
+<b>Request:</b>
+curl -X POST \
+  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions&quot; \
+  -H &#39;Authorization: Bearer {{access_token}}&#39; \</p>
+
+<p>A submission must be created for each file upload. More than one submission can be created for a filing period. The most recent submission will be considered the latest submission. Each <code>POST</code> on the submission endpoint will return a new submission number.</p>
+
+<p><b>JSON Response:</b>
+{
+    &quot;id&quot;: {
+        &quot;lei&quot;: &quot;B90YWS6AFX2LGWOXJ1LD&quot;,
+        &quot;period&quot;: &quot;2020&quot;,
+        &quot;sequenceNumber&quot;: 10
+    },
+    &quot;status&quot;: {
+        &quot;code&quot;: 1,
+        &quot;message&quot;: &quot;No data has been uploaded yet.&quot;,
+        &quot;description&quot;: &quot;The filing period is open and available to accept HMDA data. Make sure your data is in a pipe-delimited text file.&quot;
+    },
+    &quot;start&quot;: 1572358820303,
+    &quot;end&quot;: 0,
+    &quot;fileName&quot;: &quot;&quot;,
+    &quot;receipt&quot;: &quot;&quot;
+}
+</pre></code></p>
+
+<p>A submission must be created for each file upload. More than one submission can be created for a filing period. The most recent submission will be considered the latest submission. Each <code>POST</code> on the submission endpoint will return a new submission number.</p>
+
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Method</td>
+<td><code>POST</code></td>
+</tr>
+<tr>
+<td>Endpoint</td>
+<td><code>https://ffiec.beta.cfpb.gov/v2/filing/{{year}}/submissions</code></td>
+</tr>
+<tr>
+<td>Headers</td>
+<td>{{access_token}}</td>
+</tr>
+</tbody></table>
+<h3 id='beta-hmda-filing-api-endpoints-get-the-latest-submission'>Get the Latest Submission</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<p><pre><code class="text">
+<b>Request:</b>
+curl -X GET \
+  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/latest&quot; \
+  -H &#39;Authorization: Bearer {{access_token}}&#39; \</p>
+
+<p><b>JSON Response:</b>
+{
+    &quot;id&quot;: {
+        &quot;lei&quot;: &quot;B90YWS6AFX2LGWOXJ1LD&quot;,
+        &quot;period&quot;: &quot;2020&quot;,
+        &quot;sequenceNumber&quot;: 10
+    },
+    &quot;status&quot;: {
+        &quot;code&quot;: 13,
+        &quot;message&quot;: &quot;Your data has macro edits that need to be reviewed.&quot;,
+        &quot;description&quot;: &quot;Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded.&quot;
+    },
+    &quot;start&quot;: 1572372016130,
+    &quot;end&quot;: 0,
+    &quot;fileName&quot;: &quot;clean_file_10.txt&quot;,
+    &quot;receipt&quot;: &quot;&quot;,
+    &quot;qualityVerified&quot;: false,
+    &quot;macroVerified&quot;: false,
+    &quot;qualityExists&quot;: true,
+    &quot;macroExists&quot;: true
+}
+</pre></code></p>
+
+<p>Returns details about the last created submission including it&#39;s sequence number and status.</p>
+
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Method</td>
+<td><code>GET</code></td>
+</tr>
+<tr>
+<td>Endpoint</td>
+<td><code>https://ffiec.beta.cfpb.gov/v2/filing/{{year}}/submissions/latest</code></td>
+</tr>
+<tr>
+<td>Headers</td>
+<td><code>Authorization: Bearer {{access_token}}</code></td>
+</tr>
+</tbody></table>
+<h3 id='beta-hmda-filing-api-endpoints-upload-a-file'>Upload a File</h3>
+<blockquote>
+<p>Example Request and Response</p>
+</blockquote>
+
+<p><pre><code class="text">
+<b>Request:</b>
+curl -X POST \
+  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}&quot; \
+  -H &#39;Authorization: Bearer {{access_token}}&#39; \
+  -H &#39;content-type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW&#39; \
+  -F file=<file.csv></p>
+
+<p><b>JSON Response:</b>
+{
+    &quot;id&quot;: {
+        &quot;lei&quot;: &quot;B90YWS6AFX2LGWOXJ1LD&quot;,
+        &quot;period&quot;: &quot;2020&quot;,
+        &quot;sequenceNumber&quot;: 10
+    },
+    &quot;status&quot;:{
+        &quot;code&quot;: 3,
+        &quot;message&quot;: &quot;Your file has been uploaded.&quot;,
+        &quot;description&quot;: &quot;Your data is ready to be analyzed.&quot;
+    },
+    &quot;start&quot;: 1572372016130,
+    &quot;end&quot;: 0,
+    &quot;fileName&quot;: &quot;&quot;,
+    &quot;receipt&quot;: &quot;&quot;
+}
+</pre></code></p>
+
+<p>Upload a file to a submission.</p>
+
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Method</td>
+<td><code>POST</code></td>
+</tr>
+<tr>
+<td>Endpoint</td>
+<td><code>https://ffiec.beta.cfpb.gov/v2/filing/{{year}}/submissions/{{sequenceNumber}}</code></td>
+</tr>
+<tr>
+<td>Headers</td>
+<td><code>Authorization: Bearer {{access_token}}</code>, <code>&#39;Content-Type&#39;: multipart/form-data</code></td>
+</tr>
+<tr>
+<td>Payload</td>
+<td>LAR file</td>
+</tr>
+</tbody></table>
+<h3 id='beta-hmda-filing-api-endpoints-view-parsing-errors'>View Parsing Errors</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<p><pre><code class="text">
+<b>Request:</b>
+curl -X POST \
+  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/parseErrors&quot; \
+  -H &#39;Authorization: Bearer {{access_token}}&#39;</p>
+
+<p><b>JSON Response</b>
+{
+    &quot;transmittalSheetErrors&quot;: [],
+    &quot;larErrors&quot;: [],
+    &quot;count&quot;: 0,
+    &quot;total&quot;: 0,
+    &quot;status&quot;: {
+        &quot;code&quot;: 5,
+        &quot;message&quot;: &quot;Your data has formatting errors.&quot;,
+        &quot;description&quot;: &quot;Review these errors and update your file. Then, upload the corrected file.&quot;
+    },
+    &quot;_links&quot;: {
+        &quot;href&quot;: &quot;/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/24/parseErrors{rel}&quot;,
+        &quot;self&quot;: &quot;?page=1&quot;,
+        &quot;first&quot;: &quot;?page=1&quot;,
+        &quot;prev&quot;: &quot;?page=1&quot;,
+        &quot;next&quot;: &quot;?page=0&quot;,
+        &quot;last&quot;: &quot;?page=0&quot;
+    }
+}
+</pre></code></p>
+
+<p>Returns a list of all parsing errors triggered by the file uploaded to a submission.</p>
+
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Method</td>
+<td><code>GET</code></td>
+</tr>
+<tr>
+<td>Endpoint</td>
+<td><code>https://ffiec.beta.cfpb.gov/v2/filing/{{year}}/submissions/{{sequenceNumber}}/parseErrors</code></td>
+</tr>
+<tr>
+<td>Headers</td>
+<td><code>Authorization: Bearer {{access_token}}</code></td>
+</tr>
+</tbody></table>
+<h3 id='beta-hmda-filing-api-endpoints-view-all-edits'>View All Edits</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<p><pre><code class="text">
+<b>Request:</b>
+curl -X GET \
+  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/edits&quot; \
+  -H &#39;Authorization: Bearer {{access_token}}&#39;</p>
+
+<p><b>JSON Response:</b>
+{
+    &quot;syntactical&quot;: {
+        &quot;edits&quot;: []
+    },
+    &quot;validity&quot;: {
+        &quot;edits&quot;: []
+    },
+    &quot;quality&quot;: {
+        &quot;edits&quot;: [
+            {
+                &quot;edit&quot;: &quot;Q630&quot;,
+                &quot;description&quot;: &quot;If Total Units is greater than or equal to 5, then HOEPA Status generally should equal 3.&quot;
+            },
+            {
+                &quot;edit&quot;: &quot;Q631&quot;,
+                &quot;description&quot;: &quot;If Loan Type equals 2, 3 or 4, then Total Units generally should be less than or equal to 4.&quot;
+            }
+        ],
+        &quot;verified&quot;: false
+    },
+    &quot;macro&quot;: {
+        &quot;edits&quot;: [
+            {
+                &quot;edit&quot;: &quot;Q637&quot;,
+                &quot;description&quot;: &quot;No more than 15% of the loans in the file should report Action Taken equals 5. Your data indicates a percentage outside of this range.&quot;
+            }
+        ],
+        &quot;verified&quot;: false
+    },
+    &quot;status&quot;: {
+        &quot;code&quot;: 13,
+        &quot;message&quot;: &quot;Your data has macro edits that need to be reviewed.&quot;,
+        &quot;description&quot;: &quot;Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded.&quot;,
+        &quot;qualityVerified&quot;: false,
+        &quot;macroVerified&quot;: false
+    }
+}
+</pre></code></p>
+
+<p>Returns a summary of all edits triggered by an upload in a submission.</p>
+
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Method</td>
+<td><code>GET</code></td>
+</tr>
+<tr>
+<td>Endpoint</td>
+<td><code>https://ffiec.beta.cfpb.gov/v2/filing/{{year}}/submissions/{{sequenceNumber}}/edits</code></td>
+</tr>
+<tr>
+<td>Headers</td>
+<td><code>Authorization: Bearer {{access_token}}</code></td>
+</tr>
+</tbody></table>
+<h3 id='beta-hmda-filing-api-endpoints-view-edit-details'>View Edit Details</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<p><pre><code class="text">
+<b>Request:</b>
+curl -X GET \
+  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/edits/Q631&quot; \
+  -H &#39;Authorization: Bearer {{access_token}}&#39;</p>
+
+<p><b>JSON Response:</b>
+{
+    &quot;edit&quot;: &quot;Q631&quot;,
+    &quot;rows&quot;: [
+        {
+           &quot;id&quot;: &quot;B90YWS6AFX2LGWOXJ1LDHHXWCDPM0ZEHW08FFTXGRXT62&quot;,
+           &quot;fields&quot;: [
+               {
+                   &quot;name&quot;: &quot;Loan Type&quot;,
+                   &quot;value&quot;: &quot;3&quot;
+               },
+               {
+                   &quot;name&quot;: &quot;Total Units&quot;,
+                   &quot;value&quot;: &quot;16&quot;
+               }
+           ]
+       }
+   ],
+   &quot;count&quot;: 20,
+   &quot;total&quot;: 54,
+   &quot;_links&quot;: {
+       &quot;href&quot;: &quot;/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/edits/Q631{rel}&quot;,
+       &quot;self&quot;: &quot;?page=1&quot;,
+       &quot;first&quot;: &quot;?page=1&quot;,
+       &quot;prev&quot;: &quot;?page=1&quot;,
+       &quot;next&quot;: &quot;?page=2&quot;,
+       &quot;last&quot;: &quot;?page=3&quot;
+   }
+}
+</pre></code></p>
+
+<p>Returns more information about a specific edit including a list of lines that triggered the edit and the relevant fields from those lines.</p>
+
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Method</td>
+<td><code>GET</code></td>
+</tr>
+<tr>
+<td>Endpoint</td>
+<td><code>https://ffiec.beta.cfpb.gov/v2/filing/{{year}}/submissions/{{sequenceNumber}}/edits/{{edit_code}}</code></td>
+</tr>
+<tr>
+<td>Headers</td>
+<td><code>Authorization: Bearer {{access_token}}</code></td>
+</tr>
+</tbody></table>
+<h3 id='beta-hmda-filing-api-endpoints-verify-quality-edits'>Verify Quality Edits</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<p><pre><code class="text">
+<b>Request:</b>
+curl -X POST \
+  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/edits/quality&quot; \
+  -H &#39;Authorization: Bearer {{access_token}}&#39; \
+  -d &#39;{&quot;verified&quot;: true}&#39;</p>
+
+<p><b>JSON Response:</b>
+{
+    &quot;verified&quot;: true,
+    &quot;status&quot;: {
+        &quot;code&quot;: 13,
+        &quot;message&quot;: &quot;Your data has macro edits that need to be reviewed.&quot;,
+        &quot;description&quot;: &quot;Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded.&quot;
+    }
+}
+</pre></code></p>
+
+<p>Verify that the uploaded data is correct and that the reported quality edits are not relevent to the submission.</p>
+
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Method</td>
+<td><code>POST</code></td>
+</tr>
+<tr>
+<td>Endpoint</td>
+<td><code>https://ffiec.beta.cfpb.gov/v2/filing/{{year}}/submissions/{{sequenceNumber}}/edits/quality</code></td>
+</tr>
+<tr>
+<td>Headers</td>
+<td><code>Authorization: Bearer {{access_token}}</code></td>
+</tr>
+<tr>
+<td>Body</td>
+<td><code>{&quot;verified&quot;: true}</code></td>
+</tr>
+</tbody></table>
+<h3 id='beta-hmda-filing-api-endpoints-verify-macro-edits'>Verify Macro Edits</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<p><pre><code class="text">
+<b>Request:</b>
+curl -X POST \
+  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/edits/macro&quot; \
+  -H &#39;Authorization: Bearer {{access_token}}&#39; \
+  -d &#39;{&quot;verified&quot;: true}&#39;</p>
+
+<p><b>JSON Response:</b>
+{
+    &quot;verified&quot;: true,
+    &quot;status&quot;: {
+        &quot;code&quot;: 14,
+        &quot;message&quot;: &quot;Your data is ready for submission.&quot;,
+        &quot;description&quot;: &quot;Your financial institution has certified that the data is correct, but it has not been submitted yet.&quot;
+    }
+}
+</pre></code></p>
+
+<p>Verify that the uploaded data is correct and that the reported macro edits are not relevent to the submission.</p>
+
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Method</td>
+<td><code>POST</code></td>
+</tr>
+<tr>
+<td>Endpoint</td>
+<td><code>https://ffiec.beta.cfpb.gov/v2/filing/{{year}}/submissions/{{sequenceNumber}}/edits/macro</code></td>
+</tr>
+<tr>
+<td>Headers</td>
+<td><code>Authorization: Bearer {{access_token}}</code></td>
+</tr>
+<tr>
+<td>Body</td>
+<td><code>{&quot;verified&quot;: true}</code></td>
+</tr>
+</tbody></table>
 
 <p>All the endpoints are the same for quarterly filing with the addtion of <code>quarter/Q1/</code>, <code>quarter/Q2/</code> or <code>quarter/Q3/</code> after the filing parameter and before the submission parameter.</p>
 <h1 id='hmda-public-verification-api'>HMDA Public Verification API</h1>
