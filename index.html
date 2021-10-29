@@ -1402,17 +1402,16 @@ curl -X GET \
 
 <p>All the endpoints are the same for quarterly filing with the addtion of <code>quarter/Q1/</code>, <code>quarter/Q2/</code> or <code>quarter/Q3/</code> after the filing parameter and before the submission parameter.</p>
 <h1 id='beta-hmda-filing-api'>Beta HMDA Filing API</h1>
-<p>The following documentation addresses the process for testing in the HMDA Platform Beta environment and the associated Beta APIs.</p>
+<p>The following documentation addresses the process for testing on the Beta HMDA Filing Platform and with its associated Beta Platform APIs.</p>
 
-<p>The <a href="https://ffiec.beta.cfpb.gov/filing">HMDA Beta Filing Platform</a> serves as a test environment for the latest builds of the Hmda Platform backend service and Frontend UI. It is in no way linked to the official submission of filing data.</p>
+<p>The <a href="https://ffiec.beta.cfpb.gov/filing">Beta HMDA Filing Platform</a> serves as a test environment for pre-release builds of the HMDA Platform backend services and user interface. No data submitted to the Beta HMDA Platform will be considered for regulatory compliance.</p>
 <h2 id='beta-hmda-filing-api-authorization'>Authorization</h2>
-<p>To test a HMDA filing using the Beta API, a <em>bearer</em> authorization token is required for all Beta API calls. To acquire an authorization token use the <code>/auth</code> endpoint with your username and password as payload.</p>
+<p>To test a HMDA Filing using the Beta Platform API, a <em>bearer</em> authorization token is required for all Beta Platform API calls. To acquire an authorization token use the <code>/auth</code> endpoint with your username and password as payload.</p>
 
 <p>For local development, no authorization is needed. See <a href="https://github.com/cfpb/hmda-platform#one-line-local-development-environment-no-auth">One-line Local Development Environment (No Auth)</a> for more info.</p>
 
 <p style="background: #ffe4c4; padding-top: 10px; padding-bottom: 10px;">
-<b><u>Please note:</u></b> When testing the filing process via the  <b>HMDA Beta</b> platform, this filing process is for test purposes only and is <b>NOT</b> acknowledged as an official filing. If you wish to submit <b>official data</b> to the HMDA Platform, please use the  
-production platform application: https://ffiec.cfpb.gov/filing.
+<b><u>Please note:</u></b> When testing the filing process via the <b>Beta HMDA Filing Platform</b>, this filing process is for test purposes only and is <b>NOT</b> acknowledged as an official Filing. If you wish to submit <b>official regulatory data</b> to the HMDA Platform, please use the official application: <a href='https://ffiec.cfpb.gov/filing'>https://ffiec.cfpb.gov/filing</a>.
 
 </p>
 
@@ -1443,29 +1442,28 @@ production platform application: https://ffiec.cfpb.gov/filing.
 </tr>
 </tbody></table>
 <h2 id='beta-hmda-filing-api-postman-collection'>Postman Collection</h2>
-<p>The <a href="https://github.com/cfpb/hmda-platform/tree/master/newman/postman">HMDA Postman Collection</a> has been prepared to simplify the process of using the HMDA Platform Filing Beta APIs.</p>
+<p>The <a href="https://github.com/cfpb/hmda-platform/tree/master/newman/postman">HMDA Postman Collection</a> has been prepared to simplify the process of using the Beta HMDA Filing Platform APIs.</p>
 
-<p><a href="https://www.postman.com/product/api-client/">Postman</a> is a client side application that allows users to easily construct Beta API calls and import external Beta API collections.</p>
+<p><a href="https://www.postman.com/product/api-client/">Postman</a> is a client side application that allows users to easily construct Beta HMDA Platform API calls and import external Beta Platform API collections.</p>
 <h2 id='beta-hmda-filing-api-filing-process'>Filing Process</h2>
-<p>Submission of a HMDA file flows in the following steps which are mirriored in the submission status codes:</p>
+<p>Submission of HMDA data follows these steps which are mirrored in the Submission status codes:</p>
 
 <p style="background: #ffe4c4; padding-top: 10px; padding-bottom: 10px;">
-<b><u>Please note:</u></b> When testing the filing process via the  <b>HMDA Beta</b> platform, the signing of submissions via the HMDA Beta platform is <b>prohibted</b> as it is not considered an official submission of data and to avoid any confusion in this regard. 
+<b><u>Please note:</u></b> The filing process via the <b>HMDA Beta</b> platform is for testing purposes only. Signing of Submissions to the Beta Platform is <b>disabled</b> to reinforce the fact that these are not official submissions. 
 </p>
 
 <ol>
-<li>Create a Filing: These are unique per institution per filing season and are created by the HMDA-Ops teams in preperation for each filing season.</li>
-<li>Create a Submission: Submissions are the primary object in a HMDA Filing. They are created within a filing and each is able to accept a single file upload. Many submissions can be created for a filing and they carry an id which is incrimented.</li>
-<li>Upload a File: A file is then uploaded to the submission which was created. Only one file can be uploaded to a submission. To upload a new file you must create a new submission.</li>
-<li>Check the status of the Submission the file was uploaded to: If parsing syntactical or validity edits are triggered a new file must be uploaded.</li>
-<li>Validate Quality Edits: Review triggered Quality Edits and confirm the submitted data are correct.</li>
-<li>Validate Macro Edits: Review triggered Macro Edits and confirm the submitted data are correct.</li>
+<li>Create a Filing: There is one Filing per institution, per filing season and it is created by the HMDA Operations team in preperation for each filing season.</li>
+<li>Create a Submission: Submissions are the primary object in a HMDA Filing. They are created within a Filing and each Submission is able to accept a single file upload. Many Submissions can be created for a Filing and they carry an id which is sequentially incremented.</li>
+<li>Upload a File: A file is then uploaded to the Submission which was created. Only one file can be uploaded to a Submission. To upload a new file you must create a new Submission.</li>
+<li>Check the status of the Submission: If a Submission triggers Syntactical or Validity Edits, a corrected file must be uploaded.</li>
+<li>Validate Quality Edits: Review any Quality Edits that have been triggered and confirm that the submitted data are correct.</li>
+<li>Validate Macro Edits: Review any Macro Edits that have been triggered and confirm that the submitted data are correct.</li>
 </ol>
 <h3 id='beta-hmda-filing-api-filing-process-object-hierarchy'>Object Hierarchy</h3>
 <p><img src="../images/filingObjectHierarchy.png"></p>
 <h3 id='beta-hmda-filing-api-filing-process-submission-status'>Submission Status</h3>
-<p>As a submission represents a HMDA filing the submission status is the best way to see the state of a HMDA filing. It will be useful to query for 
-the submission status often throughout the process of uploading and checking edits for a submission.</p>
+<p>The Submission status is the best way to check the state of a Filing. It will be useful to query the Submission status often throughout the process of file upload and Edit validation.</p>
 <h4 id='beta-hmda-filing-api-filing-process-submission-status-submission-status-codes'>Submission Status Codes</h4>
 <blockquote>
 <p><strong>Example</strong></p>
@@ -1487,7 +1485,7 @@ the submission status often throughout the process of uploading and checking edi
   "receipt": ""
 }
 </code></pre>
-<p>In order to track the status of a filing for a financial institution, the following states are captured by the backend:</p>
+<p>In order to track the status of a Filing for a financial institution, the following states are captured by the backend:</p>
 
 <table><thead>
 <tr>
@@ -1600,8 +1598,8 @@ curl -X POST \
 }
 </pre></code></p>
 
-<p>For evey filing period, you must begin by starting a filing. This only needs to be done once per filing season. In the production HMDA filing application this will have already been creaed. 
-The <code>POST</code> will result in a <code>200</code> only for the first time it&#39;s called. If the filing for the given filing period already exists, the <code>POST</code> will return a <code>400</code>.</p>
+<p>For evey filing period, you must begin by starting a Filing. This only needs to be done once per filing season. On the official HMDA Filing Platform this Filing will have already been created by the HMDA Operations team. 
+The <code>POST</code> will result in a <code>200</code> only for the first time it&#39;s called. If the Filing for the given filing period already exists, the <code>POST</code> will return a <code>400</code>.</p>
 
 <table><thead>
 <tr>
@@ -1623,7 +1621,7 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 </tbody></table>
 <h3 id='beta-hmda-filing-api-endpoints-get-a-filing'>Get a Filing</h3>
-<p>This endpoint can be used to confirm that a filing exists for the relevant period.</p>
+<p>This endpoint can be used to confirm that a Filing exists for the relevant period.</p>
 
 <blockquote>
 <p><strong>Example Request and Response</strong></p>
@@ -1682,7 +1680,7 @@ curl -X POST \
   &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39; \</p>
 
-<p>A submission must be created for each file upload. More than one submission can be created for a filing period. The most recent submission will be considered the latest submission. Each <code>POST</code> on the submission endpoint will return a new submission number.</p>
+<p>A Submission must be created for each file upload. More than one Submission can be created for a filing period. The most recent Submission will be considered the latest Submission. Each <code>POST</code> on the Submission endpoint will return a new Submission <code>sequenceNumber</code>.</p>
 
 <p><b>JSON Response:</b>
 {
@@ -1703,7 +1701,7 @@ curl -X POST \
 }
 </pre></code></p>
 
-<p>A submission must be created for each file upload. More than one submission can be created for a filing period. The most recent submission will be considered the latest submission. Each <code>POST</code> on the submission endpoint will return a new submission number.</p>
+<p>A new Submission must be created for each file upload. More than one Submission can be created for a filing period. The most recent Submission will be considered the Latest Submission. Each <code>POST</code> on the Submission endpoint will return a new Submission <code>sequenceNumber</code>.</p>
 
 <table><thead>
 <tr>
@@ -1758,7 +1756,7 @@ curl -X GET \
 }
 </pre></code></p>
 
-<p>Returns details about the last created submission including it&#39;s sequence number and status.</p>
+<p>Returns details about the last created Submission including its sequence number and status.</p>
 
 <table><thead>
 <tr>
@@ -1811,7 +1809,7 @@ curl -X POST \
 }
 </pre></code></p>
 
-<p>Upload a file to a submission.</p>
+<p>Upload a file to a Submission.</p>
 
 <table><thead>
 <tr>
@@ -1869,7 +1867,7 @@ curl -X POST \
 }
 </pre></code></p>
 
-<p>Returns a list of all parsing errors triggered by the file uploaded to a submission.</p>
+<p>Returns a list of all parsing errors triggered by the file uploaded to a Submission.</p>
 
 <table><thead>
 <tr>
@@ -1941,7 +1939,7 @@ curl -X GET \
 }
 </pre></code></p>
 
-<p>Returns a summary of all edits triggered by an upload in a submission.</p>
+<p>Returns a summary of all Edits triggered by an upload in a Submission.</p>
 
 <table><thead>
 <tr>
@@ -2004,7 +2002,7 @@ curl -X GET \
 }
 </pre></code></p>
 
-<p>Returns more information about a specific edit including a list of lines that triggered the edit and the relevant fields from those lines.</p>
+<p>Returns detailed information about a specific Edit including a list of lines that triggered the Edit and the relevant fields from those lines.</p>
 
 <table><thead>
 <tr>
@@ -2048,7 +2046,7 @@ curl -X POST \
 }
 </pre></code></p>
 
-<p>Verify that the uploaded data is correct and that the reported quality edits are not relevent to the submission.</p>
+<p>Verify that the uploaded data is correct and that the reported Quality Edits are not relevent to the Submission.</p>
 
 <table><thead>
 <tr>
@@ -2096,7 +2094,7 @@ curl -X POST \
 }
 </pre></code></p>
 
-<p>Verify that the uploaded data is correct and that the reported macro edits are not relevent to the submission.</p>
+<p>Verify that the uploaded data is correct and that the reported Macro Edits are not relevent to the Submission.</p>
 
 <table><thead>
 <tr>
@@ -2122,7 +2120,7 @@ curl -X POST \
 </tr>
 </tbody></table>
 
-<p>All the endpoints are the same for quarterly filing with the addtion of <code>quarter/Q1/</code>, <code>quarter/Q2/</code> or <code>quarter/Q3/</code> after the filing parameter and before the submission parameter.</p>
+<p>All the endpoints are the same for quarterly filing with the addtion of <code>quarter/Q1/</code>, <code>quarter/Q2/</code> or <code>quarter/Q3/</code> after the filing parameter and before the Submission parameter.</p>
 <h1 id='hmda-public-verification-api'>HMDA Public Verification API</h1>
 <p>The following are HMDA Public API endpoints that do not require authentication. You may use these public endpoints to help prepare your data for sumbission.</p>
 <h2 id='hmda-public-verification-api-single-ts-verification'>Single TS Verification</h2>
@@ -2629,7 +2627,7 @@ curl -X POST \
 <li><strong>Nationwide</strong> <strong>Aggregations</strong></li>
 </ul>
 
-<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/view/nationwide/aggregations</code> </p>
+<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/data-browser-api/view/nationwide/aggregations</code> </p>
 
 <p>This endpoint is used to generated JSON reports on the full dataset. The year parameter is required when calling this endpoint.</p>
 
@@ -2637,7 +2635,7 @@ curl -X POST \
 <li><strong>Aggregations</strong></li>
 </ul>
 
-<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/view/aggregations</code> </p>
+<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/data-browser-api/view/aggregations</code> </p>
 
 <p>This endpoint is used to generated JSON reports on an LEI and/or geography subset. The year parameter as well at least of a geographic and/or LEI parameter are required when calling this endpoint.</p>
 
@@ -2645,7 +2643,7 @@ curl -X POST \
 <li><strong>Nationwide</strong> <strong>CSV</strong></li>
 </ul>
 
-<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/view/nationwide/csv</code></p>
+<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/data-browser-api/view/nationwide/csv</code></p>
 
 <p>This endpoint is used to download raw HMDA data given the applied filters in csv format. The file will be streamed. The year parameter is required when calling this endpoint.</p>
 
@@ -2653,7 +2651,7 @@ curl -X POST \
 <li><strong>CSV</strong></li>
 </ul>
 
-<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/view/csv</code></p>
+<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/data-browser-api/view/csv</code></p>
 
 <p>This endpoint is used to download raw HMDA data given the applied filters in csv format. The file will be streamed. The year parameter as well at least of a geographic and/or LEI parameter are required when calling this endpoint.</p>
 <h3 id='data-browser-api-hmda-data-endpoints-supported-geographic-filters'>Supported Geographic Filters</h3>
@@ -2741,7 +2739,7 @@ curl -X POST \
 
 <pre><code class="text">
   <b>Request:</b>
-  curl "https://ffiec.cfpb.gov/v2/view/aggregations?states=MD&years=2018&actions_taken=5,6&races=White,Asian,Joint"
+  curl "https://ffiec.cfpb.gov/v2/data-browser-api/view/aggregations?states=MD&years=2018&actions_taken=5,6&races=White,Asian,Joint"
 
   <b>JSON Response:</b>
   {
@@ -2804,7 +2802,7 @@ curl -X POST \
 
 <pre><code class="text">
   <b>Request:</b>
-  curl -L "https://ffiec.cfpb.gov/v2/view/csv?states=CA,MD,DC&years=2018&actions_taken=5"
+  curl -L "https://ffiec.cfpb.gov/v2/data-browser-api/view/csv?states=CA,MD,DC&years=2018&actions_taken=5"
 
   <b>CSV Response:</b>
   <img src="../images/DataBrowserCsvExample.png" class="lang-specific shell">
@@ -2834,7 +2832,7 @@ curl -X POST \
 </tr>
 </tbody></table>
 <h2 id='data-browser-api-hmda-filers'>HMDA Filers</h2>
-<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/view/filers</code></p>
+<p><code>GET https://ffiec.cfpb.gov/v2/data-browser-api/data-browser-api/view/filers</code></p>
 
 <p>This endpoint can be used to fetch list of financial instituions present in the HMDA dataset. The year parameter is required when calling this endpoint.</p>
 <h3 id='data-browser-api-hmda-filers-hmda-filer-parameters'>HMDA Filer Parameters</h3>
@@ -2868,7 +2866,7 @@ curl -X POST \
 
 <pre><code class="text">
   <b>Request:</b>
-  curl "https://ffiec.cfpb.gov/v2/view/filers?states=MD,DC&years=2018"
+  curl "https://ffiec.cfpb.gov/v2/data-browser-api/view/filers?states=MD,DC&years=2018"
 
   <b>JSON Format Response:</b>
   {
@@ -2911,7 +2909,7 @@ curl -X POST \
 
 <pre><code class="text">
   <b>Request:</b>
-  curl "https://ffiec.cfpb.gov/v2/view/csv"
+  curl "https://ffiec.cfpb.gov/v2/data-browser-api/view/csv"
 
   <b>JSON Response:</b>
   {
