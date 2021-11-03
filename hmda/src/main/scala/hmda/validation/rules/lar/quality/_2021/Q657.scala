@@ -60,7 +60,7 @@ object Q657 extends EditCheck[LoanApplicationRegister] {
       (lar.ausResult.ausResult2 not equalTo(AUSResultExempt)) and
       (lar.ausResult.ausResult3 not equalTo(AUSResultExempt)) and
       (lar.ausResult.ausResult4 not equalTo(AUSResultExempt)) and
-      (lar.ausResult.ausResult4 not equalTo(AUSResultExempt))
+      (lar.ausResult.ausResult5 not equalTo(AUSResultExempt))
 
   }
 }
