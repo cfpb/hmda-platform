@@ -28,16 +28,16 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
   val runtimeMode = config.getString("hmda.runtime.mode")
 
   def authorizeTokenWithRule(authRule: AuthRule, comparator: String = ""): Directive1[VerifiedToken] = {
-    println(authRule.rejectMessage)
     authorizeToken flatMap {
-      case token =>
-        println(token)
-        withAccessLog
-          .&(handleRejections(authRejectionHandler(authRule.rejectMessage)))
-          .&(authorizeTokenWithRuleReject(authRule.rule(token, comparator)))
-      case _ =>
-        println("token not found")
+      case token if token.lei.nonEmpty=>
         withLocalModeBypass {
+          withAccessLog
+            .&(handleRejections(authRejectionHandler(authRule.rejectMessage)))
+            .&(authorizeTokenWithRuleReject(authRule.rule(token, comparator), token))
+        }
+      case _ =>
+        withLocalModeBypass {
+          println("token not found")
           reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]]
         }
     }
@@ -61,20 +61,9 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
       logRequestResult(LoggingMagnet(_ => logAccessLog(uri, () => Option(ref.get()))))))
   }
 
-  protected def authorizeTokenWithRuleReject(passing: Boolean): Directive1[VerifiedToken] =
-    authorizeToken flatMap {
-      case t =>
-        println("passing is" + passing)
-        if (passing) provide(t)
-        else {
-          withLocalModeBypass {
-            reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]]
-          }
-        }
-      case _ =>
-        withLocalModeBypass {
-          reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]]
-        }
+  protected def authorizeTokenWithRuleReject(passing: Boolean, token: VerifiedToken): Directive1[VerifiedToken] = {
+        if (passing) provide(token)
+        else (reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]])
     }
 
   protected def authRejectionHandler(rejectionMessage: String = "Authorization Token could not be verified"): RejectionHandler =
@@ -113,11 +102,13 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
       provide(VerifiedToken())
     } else { thunk }
 
-  protected def authorizeToken: Directive1[VerifiedToken] =
+  protected def authorizeToken: Directive1[VerifiedToken] = {
     bearerToken.flatMap {
       case Some(token) =>
         onComplete(tokenVerifier.verifyToken(token)).flatMap {
+          println("on complete")
           _.map { t =>
+            println("getting lei and token")
             val lei: String = t.getOtherClaims.asScala
               .get("lei")
               .map(_.toString)
@@ -131,6 +122,8 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
               t.getResourceAccess().get(clientId).getRoles.asScala.toSeq,
               lei
             )
+            println("lei: " + lei)
+            println("verified token: " + verifiedToken)
             attribute(tokenAttributeRefKey).flatMap(tokenRef => {
               tokenRef.set(verifiedToken)
               provide(verifiedToken)
@@ -143,6 +136,7 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
         }
       case None =>
         withLocalModeBypass {
+          println("case none")
           val r: Route = (extractRequest { req =>
             import scala.compat.java8.OptionConverters._
             logger.error("No bearer token, authz header [{}]" + req.getHeader("authorization").asScala)
@@ -151,6 +145,7 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
           StandardRoute(r).toDirective[Tuple1[VerifiedToken]]
         }
     }
+  }
 
   private def bearerToken: Directive1[Option[String]] =
     for {

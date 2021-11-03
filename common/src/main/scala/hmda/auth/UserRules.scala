@@ -8,6 +8,7 @@ trait AuthRule {
 object LEISpecificOrAdmin extends AuthRule {
     def rule(token: VerifiedToken, comparator: String): Boolean = {
         val lei = comparator
+        println("at LEI rule")
         if (token.roles.contains("hmda-admin")) true
         else
             if (token.lei.nonEmpty){
@@ -15,6 +16,7 @@ object LEISpecificOrAdmin extends AuthRule {
             leiList.contains(lei.trim())
             } else false
     }
+
     def rejectMessage = "Your user is not authorized to access this LEI"
 }
 
@@ -28,8 +30,11 @@ object AdminOnly extends AuthRule {
 
 object BetaOnlyUser extends AuthRule {   
     def rule(token: VerifiedToken, comparator: String): Boolean = {
-        println("beta rule activated")
-        false
+        println("at beta route")
+        val currentNamespace = comparator
+        if (token.roles.contains("betaUser")) {
+            currentNamespace == "beta"
+        } else true
     }
 
     def rejectMessage = "Your user is only authorized to access the Beta Submission Platform"
