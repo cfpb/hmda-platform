@@ -15,8 +15,8 @@ import hmda.model.census.Census
 import hmda.model.publication.Msa
 import hmda.publisher.helper._
 import hmda.publisher.qa.{QAFilePersistor, QAFileSpec, QARepository}
-import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021}
-import hmda.publisher.query.lar.{LarEntityImpl2018, LarEntityImpl2019, LarEntityImpl2019WithMsa, LarEntityImpl2020, LarEntityImpl2020WithMsa, LarEntityImpl2021}
+import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022}
+import hmda.publisher.query.lar.{LarEntityImpl2018, LarEntityImpl2019, LarEntityImpl2019WithMsa, LarEntityImpl2020, LarEntityImpl2020WithMsa, LarEntityImpl2021, LarEntityImpl2021WithMsa, LarEntityImpl2022}
 import hmda.publisher.scheduler.schedules.Schedule
 import hmda.publisher.scheduler.schedules.Schedules._
 import hmda.publisher.util.PublishingReporter
@@ -25,9 +25,9 @@ import hmda.publisher.validation.PublishingGuard
 import hmda.publisher.validation.PublishingGuard.{Period, Scope}
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
+
 import java.time.format.DateTimeFormatter
 import java.time.{Clock, Instant, LocalDateTime}
-
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 // $COVERAGE-OFF$
@@ -37,6 +37,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
     with PublisherComponent2019
     with PublisherComponent2020
     with PublisherComponent2021
+    with PublisherComponent2022
     with LoanLimitLarHeader
     with PrivateAWSConfigLoader {
 
@@ -45,36 +46,59 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
   private val fullDate          = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   private val fullDateQuarterly = DateTimeFormatter.ofPattern("yyyy-MM-dd_")
 
+  // Regulator File Scheduler Repos Annual
   def larRepository2018                = new LarRepository2018(dbConfig)
-  def qaLarRepository2018              = new QALarRepository2018(dbConfig)
   def larRepository2019                = new LarRepository2019(dbConfig)
-  def qaLarRepository2019              = new QALarRepository2019(dbConfig)
-  def qaLarRepository2019LoanLimit     = new QALarRepository2019LoanLimit(dbConfig)
-  def qaLarRepository2020LoanLimit     = new QALarRepository2020LoanLimit(dbConfig)
-
   def larRepository2020                = createLarRepository2020(dbConfig, Year2020Period.Whole)
+  def larRepository2021                = createLarRepository2021(dbConfig, Year2021Period.Whole)
+
+  // Regulator File Scheduler Repos Quarterly
   def larRepository2020Q1              = createLarRepository2020(dbConfig, Year2020Period.Q1)
   def larRepository2020Q2              = createLarRepository2020(dbConfig, Year2020Period.Q2)
   def larRepository2020Q3              = createLarRepository2020(dbConfig, Year2020Period.Q3)
-
-  def qaLarRepository2020              = createQaLarRepository2020(dbConfig, Year2020Period.Whole)
-  def qaLarRepository2020Q1            = createQaLarRepository2020(dbConfig, Year2020Period.Q1)
-  def qaLarRepository2020Q2            = createQaLarRepository2020(dbConfig, Year2020Period.Q2)
-  def qaLarRepository2020Q3            = createQaLarRepository2020(dbConfig, Year2020Period.Q3)
 
   def larRepository2021Q1              = createLarRepository2021(dbConfig, Year2021Period.Q1)
   def larRepository2021Q2              = createLarRepository2021(dbConfig, Year2021Period.Q2)
   def larRepository2021Q3              = createLarRepository2021(dbConfig, Year2021Period.Q3)
 
+  def larRepository2022Q1              = createLarRepository2022(dbConfig, Year2022Period.Q1)
+  def larRepository2022Q2              = createLarRepository2022(dbConfig, Year2022Period.Q2)
+  def larRepository2022Q3              = createLarRepository2022(dbConfig, Year2022Period.Q3)
+
+
+
+  //QA File Scheduler Repo Annual
+  def qaLarRepository2019LoanLimit     = new QALarRepository2019LoanLimit(dbConfig)
+  def qaLarRepository2020LoanLimit     = new QALarRepository2020LoanLimit(dbConfig)
+  def qaLarRepository2021LoanLimit     = new QALarRepository2021LoanLimit(dbConfig)
+
+  def qaLarRepository2018              = new QALarRepository2018(dbConfig)
+  def qaLarRepository2019              = new QALarRepository2019(dbConfig)
+  def qaLarRepository2020              = createQaLarRepository2020(dbConfig, Year2020Period.Whole)
+  def qaLarRepository2021              = createQaLarRepository2021(dbConfig, Year2021Period.Whole)
+
+
+  //QA File Scheduler Repo Quarterly
+  def qaLarRepository2020Q1            = createQaLarRepository2020(dbConfig, Year2020Period.Q1)
+  def qaLarRepository2020Q2            = createQaLarRepository2020(dbConfig, Year2020Period.Q2)
+  def qaLarRepository2020Q3            = createQaLarRepository2020(dbConfig, Year2020Period.Q3)
+
   def qaLarRepository2021Q1            = createQaLarRepository2021(dbConfig, Year2021Period.Q1)
   def qaLarRepository2021Q2            = createQaLarRepository2021(dbConfig, Year2021Period.Q2)
   def qaLarRepository2021Q3            = createQaLarRepository2021(dbConfig, Year2021Period.Q3)
+
+  def qaLarRepository2022Q1            = createQaLarRepository2022(dbConfig, Year2022Period.Q1)
+  def qaLarRepository2022Q2            = createQaLarRepository2022(dbConfig, Year2022Period.Q2)
+  def qaLarRepository2022Q3            = createQaLarRepository2022(dbConfig, Year2022Period.Q3)
+
   val publishingGuard: PublishingGuard = PublishingGuard.create(this)(context.system)
   val timeBarrier: QuarterTimeBarrier  = new QuarterTimeBarrier(Clock.systemDefaultZone())
 
   val indexTractMap2018: Map[String, Census] = CensusRecords.indexedTract2018
   val indexTractMap2019: Map[String, Census] = CensusRecords.indexedTract2019
   val indexTractMap2020: Map[String, Census] = CensusRecords.indexedTract2020
+  val indexTractMap2021: Map[String, Census] = CensusRecords.indexedTract2021
+
 
   val s3Settings = S3Settings(context.system)
     .withBufferType(MemoryBufferType)
@@ -88,23 +112,32 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
     QuartzSchedulerExtension(context.system)
       .schedule("LarScheduler2019", self, LarScheduler2019)
     QuartzSchedulerExtension(context.system)
-    QuartzSchedulerExtension(context.system)
       .schedule("LarScheduler2020", self, LarScheduler2020)
     QuartzSchedulerExtension(context.system)
+      .schedule("LarScheduler2021", self, LarScheduler2020)
+    QuartzSchedulerExtension(context.system)
       .schedule("LarSchedulerLoanLimit2019", self, LarSchedulerLoanLimit2019)
+    QuartzSchedulerExtension(context.system)
+      .schedule("LarSchedulerLoanLimit2020", self, LarSchedulerLoanLimit2020)
+    QuartzSchedulerExtension(context.system)
+      .schedule("LarSchedulerLoanLimit2021", self, LarSchedulerLoanLimit2021)
     QuartzSchedulerExtension(context.system)
       .schedule("LarSchedulerQuarterly2020", self, LarSchedulerQuarterly2020)
     QuartzSchedulerExtension(context.system)
       .schedule("LarSchedulerQuarterly2021", self, LarSchedulerQuarterly2021)
+    QuartzSchedulerExtension(context.system)
+      .schedule("LarSchedulerQuarterly2022", self, LarSchedulerQuarterly2022)
   }
 
   override def postStop() = {
     QuartzSchedulerExtension(context.system).cancelJob("LarScheduler2018")
     QuartzSchedulerExtension(context.system).cancelJob("LarScheduler2019")
     QuartzSchedulerExtension(context.system).cancelJob("LarScheduler2020")
+    QuartzSchedulerExtension(context.system).cancelJob("LarScheduler2021")
     QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerLoanLimit2019")
-    QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerQuarterly2020")
-    QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerQuarterly2021")
+    QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerLoanLimit2020")
+    QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerLoanLimit2021")
+    QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerQuarterly2022")
 
   }
 
@@ -165,6 +198,24 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
         } yield ()
       }
 
+    case schedule@LarScheduler2021 =>
+      publishingGuard.runIfDataIsValid(Period.y2021, Scope.Private) {
+        val now = LocalDateTime.now().minusDays(1)
+        val formattedDate = fullDate.format(now)
+        val fileName = s"$formattedDate" + "2021_lar.txt"
+        val allResultsSource: Source[String, NotUsed] =
+          Source
+            .fromPublisher(larRepository2021.getAllLARs(getFilterList()))
+            .map(larEntity => larEntity.toRegulatorPSV)
+
+        def countF: Future[Int] = larRepository2021.getAllLARsCount(getFilterList())
+
+        for {
+          s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, schedule)
+          _ <- persistFileForQa(s3ObjName, LarEntityImpl2021.parseFromPSVUnsafe, qaLarRepository2021)
+        } yield ()
+      }
+
     case schedule@LarSchedulerLoanLimit2019 =>
       publishingGuard.runIfDataIsValid(Period.y2019, Scope.Private) {
         val now = LocalDateTime.now().minusDays(1)
@@ -200,6 +251,24 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
         for {
           s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, schedule)
           _ <- persistFileForQa(s3ObjName, LarEntityImpl2020WithMsa.parseFromPSVUnsafe, qaLarRepository2020LoanLimit)
+        } yield ()
+      }
+    case schedule@LarSchedulerLoanLimit2021 =>
+      publishingGuard.runIfDataIsValid(Period.y2021, Scope.Private) {
+        val now = LocalDateTime.now().minusDays(1)
+        val formattedDate = fullDate.format(now)
+        val fileName = "2021F_AGY_LAR_withFlag_" + s"$formattedDate" + "2021_lar.txt"
+        val allResultsSource: Source[String, NotUsed] =
+          Source
+            .fromPublisher(larRepository2021.getAllLARs(getFilterList()))
+            .map(larEntity => appendCensus2021(larEntity, 2021))
+            .prepend(Source(List(LoanLimitHeader)))
+
+        def countF: Future[Int] = larRepository2021.getAllLARsCount(getFilterList())
+
+        for {
+          s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, schedule)
+          _ <- persistFileForQa(s3ObjName, LarEntityImpl2021WithMsa.parseFromPSVUnsafe, qaLarRepository2021LoanLimit)
         } yield ()
       }
     case schedule@LarSchedulerQuarterly2020 =>
@@ -264,7 +333,39 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
       publishQuarter2021(Period.y2021Q2, "quarter_2_2021_lar.txt", larRepository2021Q2, qaLarRepository2021Q2)
       publishQuarter2021(Period.y2021Q3, "quarter_3_2021_lar.txt", larRepository2021Q3, qaLarRepository2021Q3)
 
+    case schedule@LarSchedulerQuarterly2022 =>
+      val now              = LocalDateTime.now().minusDays(1)
+      val formattedDate    = fullDateQuarterly.format(now)
+
+      def publishQuarter2022[Table <: RealLarTable2022](
+                                                         quarter: Period.Quarter,
+                                                         fileNameSuffix: String,
+                                                         repo: LarRepository2022Base[Table],
+                                                         qaRepository: QARepository[LarEntityImpl2022]
+                                                       ) =
+        timeBarrier.runIfStillRelevant(quarter) {
+          publishingGuard.runIfDataIsValid(quarter, Scope.Private) {
+
+            val fileName = formattedDate + fileNameSuffix
+
+            val allResultsSource: Source[String, NotUsed] = Source
+              .fromPublisher(repo.getAllLARs(getFilterList()))
+              .map(larEntity => larEntity.toRegulatorPSV)
+
+            def countF: Future[Int] = repo.getAllLARsCount(getFilterList())
+
+            for {
+
+              s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, schedule)
+              _         <- persistFileForQa(s3ObjName, LarEntityImpl2022.parseFromPSVUnsafe, qaRepository)
+            } yield ()
+          }
+        }
+      publishQuarter2022(Period.y2022Q1, "quarter_1_2022_lar.txt", larRepository2022Q1, qaLarRepository2022Q1)
+      publishQuarter2022(Period.y2022Q2, "quarter_2_2022_lar.txt", larRepository2022Q2, qaLarRepository2022Q2)
+      publishQuarter2022(Period.y2022Q3, "quarter_3_2022_lar.txt", larRepository2022Q3, qaLarRepository2022Q3)
   }
+
 
   // returns effective file name/s3 object key
   def publishPSVtoS3(fileName: String, rows: Source[String, NotUsed], countF: => Future[Int], schedule: Schedule): Future[String] = {
@@ -326,6 +427,11 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
   }
 
   def appendCensus2020(lar: LarEntityImpl2020, year: Int): String = {
+    val msa = getCensus(lar.larPartOne.tract, year)
+    lar.appendMsa(msa).toRegulatorPSV
+  }
+
+  def appendCensus2021(lar: LarEntityImpl2021, year: Int): String = {
     val msa = getCensus(lar.larPartOne.tract, year)
     lar.appendMsa(msa).toRegulatorPSV
   }
