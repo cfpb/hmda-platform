@@ -1,7 +1,6 @@
 package hmda.publisher.scheduler
 
 import java.time.Instant
-
 import akka.actor.typed.ActorRef
 import akka.stream.Materializer
 import akka.stream.alpakka.file.ArchiveMetadata
@@ -15,7 +14,7 @@ import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.actor.HmdaActor
 import hmda.publisher.helper._
 import hmda.publisher.qa.{QAFilePersistor, QAFileSpec, QARepository}
-import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021}
+import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022}
 import hmda.publisher.query.lar.ModifiedLarEntityImpl
 import hmda.publisher.scheduler.schedules.Schedule
 import hmda.publisher.scheduler.schedules.Schedules.{LarPublicScheduler2018, LarPublicScheduler2019, LarPublicScheduler2020}
@@ -36,6 +35,7 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
     with PublisherComponent2019
     with PublisherComponent2020
     with PublisherComponent2021
+    with PublisherComponent2022
     with ModifiedLarHeader
     with PGTableNameLoader
     with PublicAWSConfigLoader

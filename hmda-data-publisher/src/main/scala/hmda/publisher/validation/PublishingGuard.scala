@@ -103,7 +103,7 @@ class PublishingGuard(
           case Period.y2021Q1 | Period.y2021Q2 | Period.y2021Q3 =>
             throw new IllegalArgumentException("year 2021 is not supported to public publishers at the moment")
           case Period.y2022Q1 | Period.y2022Q2 | Period.y2022Q3 =>
-            throw new IllegalArgumentException("year 2021 is not supported to public publishers at the moment")
+            throw new IllegalArgumentException("year 2022 is not supported to public publishers at the moment")
         }
         val tsData = year match {
           case Period.y2018 => db2018.validationTSData2018
@@ -114,6 +114,8 @@ class PublishingGuard(
             throw new IllegalArgumentException("year 2020 is not supported to public publishers at the moment")
           case Period.y2021Q1 | Period.y2021Q1 | Period.y2021Q3 =>
             throw new IllegalArgumentException("year 2021 is not supported to public publishers at the moment")
+          case Period.y2022Q1 | Period.y2022Q2 | Period.y2022Q3 =>
+            throw new IllegalArgumentException("year 2022 is not supported to public publishers at the moment")
         }
         larDataOpt
           .map(larData =>
@@ -151,7 +153,7 @@ object PublishingGuard {
     val config      = ConfigFactory.load("application.conf")
     val msgReporter = new MattermostNotifier(config.getString("hmda.publisher.validation.reportingUrl"))
     val dbConfig    = DbConfiguration.dbConfig
-    new PublishingGuard(dbCompontnents, dbCompontnents, dbCompontnents,dbCompontnents, msgReporter, dbConfig)
+    new PublishingGuard(dbCompontnents, dbCompontnents, dbCompontnents,dbCompontnents,dbCompontnents, msgReporter, dbConfig)
   }
 
   sealed trait Period
@@ -162,6 +164,7 @@ object PublishingGuard {
     case object y2019   extends Period
     case object y2020   extends Period
     case object y2021   extends Period
+    case object y2022   extends Period
     case object y2020Q1 extends Period with Quarter
     case object y2020Q2 extends Period with Quarter
     case object y2020Q3 extends Period with Quarter

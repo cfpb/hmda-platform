@@ -10,7 +10,7 @@ import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.actor.HmdaActor
 import hmda.publisher.helper.{PrivateAWSConfigLoader, PublicAWSConfigLoader, S3Archiver, S3Utils, SnapshotCheck, TSHeader}
-import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021}
+import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022}
 import hmda.publisher.scheduler.schedules.Schedules.{TsPublicScheduler2018, TsPublicScheduler2019, TsPublicScheduler2020}
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.ts._
@@ -26,7 +26,6 @@ import hmda.publisher.validation.PublishingGuard.{Period, Scope}
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 import java.time.Instant
-
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 // $COVERAGE-OFF$
 class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFilePersistor: QAFilePersistor)
@@ -35,6 +34,7 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
     with PublisherComponent2019
     with PublisherComponent2020
     with PublisherComponent2021
+    with PublisherComponent2022
     with TSHeader
     with PublicAWSConfigLoader
     with PrivateAWSConfigLoader {
