@@ -32,6 +32,7 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
   implicit val institutionRepository2019   = new InstitutionRepository2019(dbConfig, "institutions2019")
   implicit val institutionRepository2020   = new InstitutionRepository2020(dbConfig, "institutions2020")
   implicit val institutionRepository2021   = new InstitutionRepository2021(dbConfig, "institutions2021")
+  implicit val institutionRepository2022   = new InstitutionRepository2022(dbConfig, "institutions2022")
   implicit val institutionEmailsRepository = new InstitutionEmailsRepository(dbConfig)
   implicit val institutionNoteHistoryRepository = new InstitutionNoteHistoryRepository(dbConfig)
 
@@ -40,6 +41,9 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
   if (createSchema) {
     institutionRepository2018.createSchema()
     institutionRepository2019.createSchema()
+    institutionRepository2020.createSchema()
+    institutionRepository2021.createSchema()
+    institutionRepository2022.createSchema()
     institutionEmailsRepository.createSchema()
   }
 
@@ -53,7 +57,8 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
             case 2018 => institutionRepository2018.findById(lei)
             case 2020 => institutionRepository2020.findById(lei)
             case 2021 => institutionRepository2021.findById(lei)
-            case _    => institutionRepository2019.findById(lei)
+            case 2022 => institutionRepository2022.findById(lei)
+            case _    => institutionRepository2021.findById(lei)
           }
 
           val fEmails = institutionEmailsRepository.findByLei(lei)

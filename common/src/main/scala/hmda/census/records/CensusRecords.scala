@@ -84,7 +84,7 @@ object CensusRecords {
     }
 
   val (indexedTract2021: Map[String, Census], indexedCounty2021: Map[String, Census], indexedSmallCounty2021: Map[String, Census]) =
-    parseCensusFile(censusFileName2020).foldLeft((Map[String, Census](), Map[String, Census](), Map[String, Census]())) {
+    parseCensusFile(censusFileName2021).foldLeft((Map[String, Census](), Map[String, Census](), Map[String, Census]())) {
       case ((m1, m2, m3), c) =>
         (
           m1 + (c.toHmdaTract  -> c),
@@ -121,7 +121,7 @@ object CensusRecords {
       case 2021 =>
         indexedTract2021
       case _ =>
-        indexedTract2020
+        indexedTract2021
     }
   }
 
