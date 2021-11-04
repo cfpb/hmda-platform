@@ -221,6 +221,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
             case Period(2021, Some("Q1")) => (transmittalSheetRepository2021Q1, true)
             case Period(2021, Some("Q2")) => (transmittalSheetRepository2021Q2, true)
             case Period(2021, Some("Q3")) => (transmittalSheetRepository2021Q3, true)
+            case Period(2021, None) => (transmittalSheetRepository2020, false)
             case _ =>
               throw new IllegalArgumentException(s"Unable to discern period from $submissionId to insert TS rows.")
           }
