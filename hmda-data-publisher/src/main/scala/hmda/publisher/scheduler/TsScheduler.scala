@@ -2,7 +2,6 @@ package hmda.publisher.scheduler
 
 import java.time.{Clock, Instant, LocalDateTime}
 import java.time.format.DateTimeFormatter
-
 import akka.actor.typed.ActorRef
 import akka.stream.Materializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
@@ -15,9 +14,9 @@ import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.publisher.helper.{PrivateAWSConfigLoader, QuarterTimeBarrier, S3Utils, SnapshotCheck}
 import hmda.publisher.qa.{QAFilePersistor, QAFileSpec, QARepository}
-import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021}
+import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022}
 import hmda.publisher.scheduler.schedules.Schedule
-import hmda.publisher.scheduler.schedules.Schedules.{TsScheduler2018, TsScheduler2019, TsScheduler2020, TsSchedulerQuarterly2020, TsSchedulerQuarterly2021}
+import hmda.publisher.scheduler.schedules.Schedules.{TsScheduler2018, TsScheduler2019, TsScheduler2020, TsScheduler2021, TsSchedulerQuarterly2020, TsSchedulerQuarterly2021, TsSchedulerQuarterly2022}
 import hmda.publisher.util.PublishingReporter
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 import hmda.publisher.validation.PublishingGuard
@@ -35,6 +34,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
     with PublisherComponent2019
     with PublisherComponent2020
     with PublisherComponent2021
+    with PublisherComponent2022
     with PrivateAWSConfigLoader {
 
   implicit val ec               = context.system.dispatcher
@@ -42,25 +42,45 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
   private val fullDate          = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   private val fullDateQuarterly = DateTimeFormatter.ofPattern("yyyy-MM-dd_")
 
+
+  // Regulator File Scheduler Repos Annual
   def tsRepository2018                 = new TransmittalSheetRepository2018(dbConfig)
-  def qaTsRepository2018               = createPrivateQaTsRepository2018(dbConfig)
   def tsRepository2019                 = new TransmittalSheetRepository2019(dbConfig)
-  def qaTsRepository2019               = createPrivateQaTsRepository2019(dbConfig)
   def tsRepository2020                 = createTransmittalSheetRepository2020(dbConfig, Year2020Period.Whole)
+  def tsRepository2021                 = createTransmittalSheetRepository2021(dbConfig, Year2021Period.Whole)
+
+  // Regulator File Scheduler Repos Quarterly
   def tsRepository2020Q1               = createTransmittalSheetRepository2020(dbConfig, Year2020Period.Q1)
   def tsRepository2020Q2               = createTransmittalSheetRepository2020(dbConfig, Year2020Period.Q2)
   def tsRepository2020Q3               = createTransmittalSheetRepository2020(dbConfig, Year2020Period.Q3)
-  def qaTsRepository2020               = createQaTransmittalSheetRepository2020(dbConfig, Year2020Period.Whole)
-  def qaTsRepository2020Q1             = createQaTransmittalSheetRepository2020(dbConfig, Year2020Period.Q1)
-  def qaTsRepository2020Q2             = createQaTransmittalSheetRepository2020(dbConfig, Year2020Period.Q2)
-  def qaTsRepository2020Q3             = createQaTransmittalSheetRepository2020(dbConfig, Year2020Period.Q3)
 
   def tsRepository2021Q1               = createTransmittalSheetRepository2021(dbConfig, Year2021Period.Q1)
   def tsRepository2021Q2               = createTransmittalSheetRepository2021(dbConfig, Year2021Period.Q2)
   def tsRepository2021Q3               = createTransmittalSheetRepository2021(dbConfig, Year2021Period.Q3)
+
+  def tsRepository2022Q1               = createTransmittalSheetRepository2022(dbConfig, Year2022Period.Q1)
+  def tsRepository2022Q2               = createTransmittalSheetRepository2022(dbConfig, Year2022Period.Q2)
+  def tsRepository2022Q3               = createTransmittalSheetRepository2022(dbConfig, Year2022Period.Q3)
+
+  //QA File Scheduler Repo Annual
+  def qaTsRepository2018               = createPrivateQaTsRepository2018(dbConfig)
+  def qaTsRepository2019               = createPrivateQaTsRepository2019(dbConfig)
+  def qaTsRepository2020               = createQaTransmittalSheetRepository2020(dbConfig, Year2020Period.Whole)
+  def qaTsRepository2021               = createQaTransmittalSheetRepository2021(dbConfig, Year2021Period.Whole)
+
+
+  //QA File Scheduler Repo Quarterly
+  def qaTsRepository2020Q1             = createQaTransmittalSheetRepository2020(dbConfig, Year2020Period.Q1)
+  def qaTsRepository2020Q2             = createQaTransmittalSheetRepository2020(dbConfig, Year2020Period.Q2)
+  def qaTsRepository2020Q3             = createQaTransmittalSheetRepository2020(dbConfig, Year2020Period.Q3)
+
   def qaTsRepository2021Q1             = createQaTransmittalSheetRepository2021(dbConfig, Year2021Period.Q1)
   def qaTsRepository2021Q2             = createQaTransmittalSheetRepository2021(dbConfig, Year2021Period.Q2)
   def qaTsRepository2021Q3             = createQaTransmittalSheetRepository2021(dbConfig, Year2021Period.Q3)
+
+  def qaTsRepository2022Q1             = createQaTransmittalSheetRepository2022(dbConfig, Year2022Period.Q1)
+  def qaTsRepository2022Q2             = createQaTransmittalSheetRepository2022(dbConfig, Year2022Period.Q2)
+  def qaTsRepository2022Q3             = createQaTransmittalSheetRepository2022(dbConfig, Year2022Period.Q3)
 
   val publishingGuard: PublishingGuard = PublishingGuard.create(this)(context.system)
   val timeBarrier: QuarterTimeBarrier  = new QuarterTimeBarrier(Clock.systemDefaultZone())
@@ -82,19 +102,26 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
     QuartzSchedulerExtension(context.system)
       .schedule("TsScheduler2020", self, TsScheduler2020)
     QuartzSchedulerExtension(context.system)
+      .schedule("TsScheduler2021", self, TsScheduler2021)
+    QuartzSchedulerExtension(context.system)
       .schedule("TsSchedulerQuarterly2020", self, TsSchedulerQuarterly2020)
 
     QuartzSchedulerExtension(context.system)
       .schedule("TsSchedulerQuarterly2021", self, TsSchedulerQuarterly2021)
 
+    QuartzSchedulerExtension(context.system)
+      .schedule("TsSchedulerQuarterly2022", self, TsSchedulerQuarterly2022)
   }
 
   override def postStop(): Unit = {
     QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2018")
     QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2019")
     QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2020")
+    QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2021")
+
     QuartzSchedulerExtension(context.system).cancelJob("TsSchedulerQuarterly2020")
     QuartzSchedulerExtension(context.system).cancelJob("TsSchedulerQuarterly2021")
+    QuartzSchedulerExtension(context.system).cancelJob("TsSchedulerQuarterly2022")
 
   }
 
@@ -168,6 +195,25 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
         results.foreach(_ => persistFileForQa(fullFilePath, qaTsRepository2020))
         results.onComplete(reportPublishingResult(_, schedule, fullFilePath))
       }
+    case schedule @ TsScheduler2021 =>
+      publishingGuard.runIfDataIsValid(Period.y2021, Scope.Private) {
+        val now           = LocalDateTime.now().minusDays(1)
+        val formattedDate = fullDate.format(now)
+        val fileName      = s"$formattedDate" + "2021_ts.txt"
+        val s3Path        = s"$environmentPrivate/ts/"
+        val fullFilePath  = SnapshotCheck.pathSelector(s3Path, fileName)
+
+        val s3Sink =
+          S3.multipartUpload(bucketPrivate, fullFilePath)
+            .withAttributes(S3Attributes.settings(s3Settings))
+
+        val results: Future[MultipartUploadResult] =
+          uploadFileToS3(s3Sink, tsRepository2021.getAllSheets(getFilterList()))
+
+        results.foreach(_ => persistFileForQa(fullFilePath, qaTsRepository2021))
+        results.onComplete(reportPublishingResult(_, schedule, fullFilePath))
+      }
+
     case schedule @ TsSchedulerQuarterly2020 =>
       val now           = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDateQuarterly.format(now)
@@ -235,7 +281,39 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
       publishQuarter(Period.y2021Q1, tsRepository2021Q1, "quarter_1_2021_ts.txt", qaTsRepository2021Q1)
       publishQuarter(Period.y2021Q2, tsRepository2021Q2, "quarter_2_2021_ts.txt", qaTsRepository2021Q2)
       publishQuarter(Period.y2021Q3, tsRepository2021Q3, "quarter_3_2021_ts.txt", qaTsRepository2021Q3)
+    case schedule @ TsSchedulerQuarterly2022 =>
+      val now           = LocalDateTime.now().minusDays(1)
+      val formattedDate = fullDateQuarterly.format(now)
+      val s3Path        = s"$environmentPrivate/ts/"
+      def publishQuarter[Table <: RealTransmittalSheetTable2022](
+                                                                  quarter: Period.Quarter,
+                                                                  repo: TSRepository2022Base[Table],
+                                                                  fileNameSuffix: String,
+                                                                  qaRepository: QARepository[TransmittalSheetEntity]
+                                                                ) =
+        timeBarrier.runIfStillRelevant(quarter) {
+          publishingGuard.runIfDataIsValid(quarter, Scope.Private) {
+            val fileName     = formattedDate + fileNameSuffix
+            val fullFilePath = SnapshotCheck.pathSelector(s3Path, fileName)
+            val s3Sink =
+              S3.multipartUpload(bucketPrivate, fullFilePath)
+                .withAttributes(S3Attributes.settings(s3Settings))
 
+            def data: Future[Seq[TransmittalSheetEntity]] =
+              repo.getAllSheets(getFilterList())
+
+            val results: Future[MultipartUploadResult] =
+              uploadFileToS3(s3Sink, data)
+
+            results.foreach(_ => persistFileForQa(fullFilePath, qaRepository))
+            results.onComplete(reportPublishingResult(_, schedule, fullFilePath))
+
+          }
+        }
+
+      publishQuarter(Period.y2022Q1, tsRepository2022Q1, "quarter_1_2022_ts.txt", qaTsRepository2022Q1)
+      publishQuarter(Period.y2022Q2, tsRepository2022Q2, "quarter_2_2022_ts.txt", qaTsRepository2022Q2)
+      publishQuarter(Period.y2022Q3, tsRepository2022Q3, "quarter_3_2022_ts.txt", qaTsRepository2022Q3)
   }
 
   private def persistFileForQa(s3ObjKey: String, repository: QARepository[TransmittalSheetEntity]) = {

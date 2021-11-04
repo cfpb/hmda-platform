@@ -87,6 +87,32 @@ trait PGTableNameLoader {
   val lar2021Q2QATableName: String = pgTableConfig.getString("lar2021Q2QATableName")
   val lar2021Q3QATableName: String = pgTableConfig.getString("lar2021Q3QATableName")
 
+
+  val lar2022TableName: String   = pgTableConfig.getString("lar2022TableName")
+  val lar2022QALoanLimitTableName: String = pgTableConfig.getString("lar2022QALoanLimitTableName")
+  val lar2022Q1TableName: String = pgTableConfig.getString("lar2022Q1TableName")
+  val lar2022Q2TableName: String = pgTableConfig.getString("lar2022Q2TableName")
+  val lar2022Q3TableName: String = pgTableConfig.getString("lar2022Q3TableName")
+
+  val lar2022QATableName: String   = pgTableConfig.getString("lar2022QATableName")
+  val lar2022Q1QATableName: String = pgTableConfig.getString("lar2022Q1QATableName")
+  val lar2022Q2QATableName: String = pgTableConfig.getString("lar2022Q2QATableName")
+  val lar2022Q3QATableName: String = pgTableConfig.getString("lar2022Q3QATableName")
+
+
+  val panel2022TableName: String   = pgTableConfig.getString("panel2022TableName")
+  val panel2022QATableName: String = pgTableConfig.getString("panel2022QATableName")
+
+  val ts2022TableName: String   = pgTableConfig.getString("ts2022TableName")
+  val ts2022Q1TableName: String = pgTableConfig.getString("ts2022Q1TableName")
+  val ts2022Q2TableName: String = pgTableConfig.getString("ts2022Q2TableName")
+  val ts2022Q3TableName: String = pgTableConfig.getString("ts2022Q3TableName")
+
+  val ts2022QATableName: String   = pgTableConfig.getString("ts2022QATableName")
+  val ts2022Q1QATableName: String = pgTableConfig.getString("ts2022Q1QATableName")
+  val ts2022Q2QATableName: String = pgTableConfig.getString("ts2022Q2QATableName")
+  val ts2022Q3QATableName: String = pgTableConfig.getString("ts2022Q3QATableName")
+
   //common table names
   val emailTableName: String = pgTableConfig.getString("emailTableName")
 
