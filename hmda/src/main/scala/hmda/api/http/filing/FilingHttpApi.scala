@@ -2,6 +2,7 @@ package hmda.api.http.filing
 
 import java.time.Instant
 
+import akka.actor.typed.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{StatusCodes, Uri}
@@ -31,12 +32,15 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 object FilingHttpApi {
-  def create(log: Logger, sharding: ClusterSharding)(implicit ec: ExecutionContext, t: Timeout): OAuth2Authorization => Route =
-    new FilingHttpApi(log, sharding)(ec, t).filingRoutes _
+  def create(log: Logger, sharding: ClusterSharding)(implicit ec: ExecutionContext, system: ActorSystem[_], t: Timeout): OAuth2Authorization => Route =
+    new FilingHttpApi(log, sharding)(ec, system, t).filingRoutes _
 }
 
-private class FilingHttpApi(log: Logger, sharding: ClusterSharding)(implicit val ec: ExecutionContext, t: Timeout) {
+private class FilingHttpApi(log: Logger, sharding: ClusterSharding)(implicit val ec: ExecutionContext, system: ActorSystem[_], t: Timeout) {
   private val quarterlyFiler = quarterlyFilingAllowed(log, sharding) _
+
+  val config           = system.settings.config
+  val currentNamespace = config.getString("hmda.currentNamespace")
 
   def filingRoutes(oAuth2Authorization: OAuth2Authorization): Route =
     handleRejections(corsRejectionHandler) {
@@ -50,31 +54,34 @@ private class FilingHttpApi(log: Logger, sharding: ClusterSharding)(implicit val
   def filingReadPath(oAuth2Authorization: OAuth2Authorization): Route =
     respondWithDefaultHeader(RawHeader("Cache-Control", "no-cache")) {
       path("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
-        //oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
-          pathEndOrSingleSlash {
-            // POST/institutions/<lei>/filings/<year>
-                          // GET/institutions/<lei>/filings/<year>
-            (post & extractUri) { uri =>
-              createFilingForInstitution(lei, year, None, uri)
-            } ~
-              // GET/institutions/<lei>/filings/<year>
-              (get & extractUri) { uri =>
-                parameter('page.as[Int] ? 1)(pageNumber => getFilingForInstitution(lei, year, None, uri, pageNumber))
-              }
+        oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
+          oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+            pathEndOrSingleSlash {
+              // POST/institutions/<lei>/filings/<year>
+              (post & extractUri) { uri =>
+                createFilingForInstitution(lei, year, None, uri)
+              } ~
+                // GET/institutions/<lei>/filings/<year>
+                (get & extractUri) { uri =>
+                  parameter('page.as[Int] ? 1)(pageNumber => getFilingForInstitution(lei, year, None, uri, pageNumber))
+                }
+            }
           }
-        //}
+        }
       } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter) { (lei, period, quarter) =>
         oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
-          pathEndOrSingleSlash {
-            quarterlyFiler(lei, period) {
-              // POST/institutions/<lei>/filings/<year>/quarters/<quarter>
-              (post & extractUri) { uri =>
-                createFilingForInstitution(lei, period, Option(quarter), uri)
-              } ~
-                // GET /institutions/<lei>/filings/<year>/quarters/<quarter>
-                (get & extractUri) { uri =>
-                  parameter('page.as[Int] ? 1)(pageNumber => getFilingForInstitution(lei, period, Option(quarter), uri, pageNumber))
-                }
+          oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+            pathEndOrSingleSlash {
+              quarterlyFiler(lei, period) {
+                // POST/institutions/<lei>/filings/<year>/quarters/<quarter>
+                (post & extractUri) { uri =>
+                  createFilingForInstitution(lei, period, Option(quarter), uri)
+                } ~
+                  // GET /institutions/<lei>/filings/<year>/quarters/<quarter>
+                  (get & extractUri) { uri =>
+                    parameter('page.as[Int] ? 1)(pageNumber => getFilingForInstitution(lei, period, Option(quarter), uri, pageNumber))
+                  }
+              }
             }
           }
         }

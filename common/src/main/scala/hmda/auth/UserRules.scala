@@ -8,13 +8,13 @@ trait AuthRule {
 object LEISpecificOrAdmin extends AuthRule {
     def rule(token: VerifiedToken, comparator: String): Boolean = {
         val lei = comparator
-        println("at LEI rule")
         if (token.roles.contains("hmda-admin")) true
-        else
+        else {
             if (token.lei.nonEmpty){
-            val leiList = token.lei.split(',')
-            leiList.contains(lei.trim())
+                val leiList = token.lei.split(',')
+                leiList.contains(lei.trim())
             } else false
+        }
     }
 
     def rejectMessage = "Your user is not authorized to access this LEI"

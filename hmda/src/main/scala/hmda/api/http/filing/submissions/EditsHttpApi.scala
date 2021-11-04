@@ -54,6 +54,8 @@ private class EditsHttpApi(log: Logger, sharding: ClusterSharding)(
   mat: Materializer
 ) {
 
+  val config           = system.settings.config
+  val currentNamespace = config.getString("hmda.currentNamespace")
   private val quarterlyFiler = quarterlyFilingAllowed(log, sharding) _
 
   //GET institutions/<lei>/filings/<year>/submissions/<submissionId>/edits
@@ -62,12 +64,14 @@ private class EditsHttpApi(log: Logger, sharding: ClusterSharding)(
     pathPrefix("institutions" / Segment) { lei =>
       (extractUri & get) { uri =>
         oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
-          path("filings" / IntNumber / "submissions" / IntNumber / "edits") { (year, seqNr) =>
-            getEdits(lei, year, None, seqNr, uri)
-          } ~ path("filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "edits") { (year, quarter, seqNr) =>
-            pathEndOrSingleSlash {
-              quarterlyFiler(lei, year) {
-                getEdits(lei, year, Option(quarter), seqNr, uri)
+          oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+            path("filings" / IntNumber / "submissions" / IntNumber / "edits") { (year, seqNr) =>
+              getEdits(lei, year, None, seqNr, uri)
+            } ~ path("filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "edits") { (year, quarter, seqNr) =>
+              pathEndOrSingleSlash {
+                quarterlyFiler(lei, year) {
+                  getEdits(lei, year, Option(quarter), seqNr, uri)
+                }
               }
             }
           }
@@ -122,12 +126,14 @@ private class EditsHttpApi(log: Logger, sharding: ClusterSharding)(
   def editsSummaryCsvPath(oAuth2Authorization: OAuth2Authorization): Route =
     pathPrefix("institutions" / Segment) { lei =>
       oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
-        path("filings" / IntNumber / "submissions" / IntNumber / "edits" / "csv") { (year, seqNr) =>
-          csvEditSummaryStream(lei, year, None, seqNr)
-        } ~ path("filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "edits" / "csv") { (year, quarter, seqNr) =>
-          pathEndOrSingleSlash {
-            quarterlyFiler(lei, year) {
-              csvEditSummaryStream(lei, year, Option(quarter), seqNr)
+        oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+          path("filings" / IntNumber / "submissions" / IntNumber / "edits" / "csv") { (year, seqNr) =>
+            csvEditSummaryStream(lei, year, None, seqNr)
+          } ~ path("filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "edits" / "csv") { (year, quarter, seqNr) =>
+            pathEndOrSingleSlash {
+              quarterlyFiler(lei, year) {
+                csvEditSummaryStream(lei, year, Option(quarter), seqNr)
+              }
             }
           }
         }
@@ -159,15 +165,17 @@ private class EditsHttpApi(log: Logger, sharding: ClusterSharding)(
       (extractUri & get) { uri =>
         parameters('page.as[Int] ? 1) { page =>
           oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
-            path("filings" / IntNumber / "submissions" / IntNumber / "edits" / editNameRegex) { (year, seqNr, editName) =>
-              getEditDetails(lei, year, None, seqNr, page, editName, uri)
-            } ~ path("filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "edits" / editNameRegex) {
-              (year, quarter, seqNr, editName) =>
-                pathEndOrSingleSlash {
-                  quarterlyFiler(lei, year) {
-                    getEditDetails(lei, year, Option(quarter), seqNr, page, editName, uri)
+            oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+              path("filings" / IntNumber / "submissions" / IntNumber / "edits" / editNameRegex) { (year, seqNr, editName) =>
+                getEditDetails(lei, year, None, seqNr, page, editName, uri)
+              } ~ path("filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "edits" / editNameRegex) {
+                (year, quarter, seqNr, editName) =>
+                  pathEndOrSingleSlash {
+                    quarterlyFiler(lei, year) {
+                      getEditDetails(lei, year, Option(quarter), seqNr, page, editName, uri)
+                    }
                   }
-                }
+              }
             }
           }
         }

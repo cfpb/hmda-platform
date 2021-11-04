@@ -61,7 +61,9 @@ private class SignHttpApi(log: Logger, sharding: ClusterSharding)(
       } ~ pathPrefix("quarter" / Segment / "submissions" / IntNumber / "sign") { (quarter, seqNr) =>
         (extractUri & get) { uri =>
           oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { token =>
-            getSubmissionForSigning(lei, year, Option(quarter), seqNr, token.email, uri)
+            oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+              getSubmissionForSigning(lei, year, Option(quarter), seqNr, token.email, uri)
+            }
           }
         } ~ (extractUri & post) { uri =>
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {

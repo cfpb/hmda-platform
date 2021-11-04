@@ -151,13 +151,19 @@ private class SubmissionHttpApi(log: Logger, sharding: ClusterSharding)(
     respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
       (extractUri & get) { uri =>
         path("institutions" / Segment / "filings" / IntNumber / "submissions" / IntNumber / "summary") { (lei, year, seqNr) =>
-          oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei)(_ => getSubmissionSummary(lei, year, None, seqNr, uri))
+          oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei){_ => 
+            oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+              getSubmissionSummary(lei, year, None, seqNr, uri)
+            }
+          }
         } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "summary") {
           (lei, year, quarter, seqNr) =>
             oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
-              pathEndOrSingleSlash {
-                quarterlyFiler(lei, year) {
-                  getSubmissionSummary(lei, year, Option(quarter), seqNr, uri)
+              oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+                pathEndOrSingleSlash {
+                  quarterlyFiler(lei, year) {
+                    getSubmissionSummary(lei, year, Option(quarter), seqNr, uri)
+                  }
                 }
               }
             }
@@ -209,13 +215,19 @@ private class SubmissionHttpApi(log: Logger, sharding: ClusterSharding)(
     respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
       (extractUri & get) { uri =>
         path("institutions" / Segment / "filings" / IntNumber / "submissions" / "latest") { (lei, year) =>
-          oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei)(_ => getLatestSubmission(lei, year, None, uri))
+          oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei){ _ => 
+            oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+              getLatestSubmission(lei, year, None, uri)
+            }
+          }
         } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter / "submissions" / "latest") {
           (lei, year, quarter) =>
             oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
-              pathEndOrSingleSlash {
-                quarterlyFiler(lei, year) {
-                  getLatestSubmission(lei, year, Option(quarter), uri)
+              oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+                pathEndOrSingleSlash {
+                  quarterlyFiler(lei, year) {
+                    getLatestSubmission(lei, year, Option(quarter), uri)
+                  }
                 }
               }
             }
