@@ -2,10 +2,10 @@ package hmda.dataBrowser
 
 import java.math.BigInteger
 import java.security.MessageDigest
-
 import com.typesafe.config.{ Config, ConfigFactory }
 import hmda.dataBrowser.models.ModifiedLarTable
 
+import java.net.URLEncoder
 import scala.concurrent.duration._
 // $COVERAGE-OFF$
 trait Settings {
@@ -51,8 +51,17 @@ trait Settings {
     private val host: String = config.getString("redis.hostname")
     private val port: Int    = config.getInt("redis.port")
     private val protocol: String = config.getString("redis.protocol")
-    val url                  = s"$protocol://$host:$port"
+    private val password: String = config.getString("redis.password")
+    val url: String = getUrl
     val ttl: FiniteDuration  = getDuration("redis.ttl")
+    private def getUrl: String = {
+      if (password.nonEmpty) {
+        val encodedPw = URLEncoder.encode(password, "UTF-8")
+        s"$protocol://${encodedPw}@$host:$port"
+      } else {
+        s"$protocol://$host:$port"
+      }
+    }
   }
 
   object s3 {
