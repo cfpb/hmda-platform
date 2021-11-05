@@ -12,7 +12,7 @@ CREATE SCHEMA hmda_user AUTHORIZATION hmda_user;
 -- Dumped by pg_dump version 10.5
 
 -- Started on 2019-06-05 11:44:49 EDT
--- file for 2018
+-- file for 2021
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
