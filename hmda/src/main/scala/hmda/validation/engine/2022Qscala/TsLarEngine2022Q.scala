@@ -1,4 +1,4 @@
-package hmda.validation.engine.2022Qscala
+package hmda.validation.engine
 
 import hmda.model.filing.ts.TransmittalLar
 import hmda.validation.context.ValidationContext
