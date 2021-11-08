@@ -12,7 +12,8 @@ package object engine {
       case (2020, Some(_)) => TsEngine2020Q
       case (2021, None)    => TsEngine2021
       case (2021, Some(_)) => TsEngine2021Q
-      case _               => TsEngine2020 // TODO: determine what engine to pick if the user enters a year that is not covered
+      case (2022, Some(_)) => TsEngine2022Q
+      case _               => TsEngine2021 // TODO: determine what engine to pick if the user enters a year that is not covered
     }
 
   def selectTsLarEngine(year: Int, quarter: Option[String]): ValidationEngine[TransmittalLar] =
@@ -23,8 +24,9 @@ package object engine {
       case (2020, Some(_)) => TsLarEngine2020Q
       case (2021, None)    => TsLarEngine2021
       case (2021, Some(_)) => TsLarEngine2021Q
+      case (2022, Some(_)) => TsLarEngine2022Q
       case _ =>
-        TsLarEngine2020 // TODO: determine what engine to pick if the user enters a year that is not covered
+        TsLarEngine2021 // TODO: determine what engine to pick if the user enters a year that is not covered
     }
 
   def selectLarEngine(year: Int, quarter: Option[String]): ValidationEngine[LoanApplicationRegister] =
@@ -35,7 +37,8 @@ package object engine {
       case (2020, Some(_)) => LarEngine2020Q
       case (2021, None)    => LarEngine2021
       case (2021, Some(_)) => LarEngine2021Q
+      case (2022, Some(_)) => LarEngine2022Q
       case _ =>
-        LarEngine2020 // TODO: determine what engine to pick if the user enters a year that is not covered
+        LarEngine2021 // TODO: determine what engine to pick if the user enters a year that is not covered
     }
 }
