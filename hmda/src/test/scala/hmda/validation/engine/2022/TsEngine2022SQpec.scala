@@ -1,7 +1,4 @@
-package hmda.validation.engine.2022.2021
-
-2022.2021
-
+package hmda.validation.engine
 import hmda.model.filing.ts.TsGenerators._
 import hmda.model.validation.{SyntacticalValidationError, TsValidationError, ValidityValidationError}
 import hmda.utils.YearUtils.Period

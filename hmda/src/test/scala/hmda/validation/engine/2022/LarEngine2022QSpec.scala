@@ -1,6 +1,4 @@
-package hmda.validation.engine.2022.2021
-
-2022.2021
+package hmda.validation.engine
 
 import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.enums._
