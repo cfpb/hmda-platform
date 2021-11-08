@@ -45,21 +45,21 @@ private class HmdaFileValidationHttpApi(implicit mat: Materializer) {
     path("validate" / IntNumber ) { year =>
       post {
         parameters('check.as[String] ? "all") { checkType =>
-            fileUpload("file") {
-                case (_, byteSource) =>
-                    val processF =
-                    byteSource.via(processValidateHmdaFile(year.toInt, checkType)).runWith(Sink.seq)
-                    onComplete(processF) {
-                        case Success(errorList) =>
-                            val validationSummary = splitEitherList(errorList, Period(year, None))
-                            complete(validationSummary)
+          fileUpload("file") {
+            case (_, byteSource) =>
+              val processF =
+                byteSource.via(processValidateHmdaFile(year.toInt, checkType)).runWith(Sink.seq)
+              onComplete(processF) {
+                case Success(errorList) =>
+                  val validationSummary = splitEitherList(errorList, Period(year, None))
+                  complete(validationSummary)
 
-                        case Failure(error) =>
-                            complete(ToResponseMarshallable(StatusCodes.BadRequest -> error.getLocalizedMessage))
-                    }
-                case _ =>
-                complete(ToResponseMarshallable(StatusCodes.BadRequest))
-            }
+                case Failure(error) =>
+                  complete(ToResponseMarshallable(StatusCodes.BadRequest -> error.getLocalizedMessage))
+              }
+            case _ =>
+              complete(ToResponseMarshallable(StatusCodes.BadRequest))
+          }
         }
       }
     }
@@ -68,9 +68,9 @@ private class HmdaFileValidationHttpApi(implicit mat: Materializer) {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-            pathPrefix("hmda") {
-                validateYearRoute
-            }
+          pathPrefix("hmda") {
+            validateYearRoute
+          }
         }
       }
     }
@@ -170,17 +170,17 @@ private class HmdaFileValidationHttpApi(implicit mat: Materializer) {
     }
   }
 
-    def splitEitherList(el: Seq[Either[HmdaRowParsedErrorSummary, Option[List[ValidationError]]]], period: Period): ValidationErrorSummary = {
-         val (lefts, rights) = el.partition(_.isLeft)
-         ValidationErrorSummary(
-             lefts.map(_.left.get), 
-             rights.map(_.right.get).filter(_.isDefined).map(_.get).map(_.map(validationErrorToSummary(_, period)))
-        )
-       }
+  def splitEitherList(el: Seq[Either[HmdaRowParsedErrorSummary, Option[List[ValidationError]]]], period: Period): ValidationErrorSummary = {
+    val (lefts, rights) = el.partition(_.isLeft)
+    ValidationErrorSummary(
+      lefts.map(_.left.get),
+      rights.map(_.right.get).filter(_.isDefined).map(_.get).map(_.map(validationErrorToSummary(_, period)))
+    )
+  }
 
-    def validationErrorToSummary(ve: ValidationError, period: Period): SingleValidationErrorSummary = {
+  def validationErrorToSummary(ve: ValidationError, period: Period): SingleValidationErrorSummary = {
     SingleValidationErrorSummary(ve.uli, ve.editName, lookupDescription(ve.editName, period), ve.fields)
-}
+  }
 
 }
 // $COVERAGE-ON$
