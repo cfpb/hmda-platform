@@ -40,16 +40,22 @@ private class InstitutionHttpApi(log: Logger, sharding: ClusterSharding)(implici
   // GET /institutions/<lei>/year/<y>
   // GET /institutions/<lei>/year/<y>/quarter/<q>
   def institutionReadPath(oAuth2Authorization: OAuth2Authorization): Route =
-    pathPrefix("institutions" / Segment / "year" / IntNumber) { (lei, year) =>
+    path("institutions" / Segment / "year" / IntNumber) { (lei, year) =>
       (extractUri & get) { uri =>
         oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
           oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
             pathEndOrSingleSlash {
               obtainAllFilingDetailsRoute(lei, year, uri)
-            } ~ path("quarter" / Quarter) { quarter =>
-              quarterlyFiler(lei, year) {
-                obtainFilingDetailsRoute(lei, year, Option(quarter), uri)
-              }
+            }
+          }
+        }
+      }
+    } ~ path("institutions" / Segment / "year" / IntNumber / "quarter" / Quarter) { (lei, year, quarter) =>
+      (extractUri & get) { uri =>
+        oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
+          oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+            quarterlyFiler(lei, year) {
+              obtainFilingDetailsRoute(lei, year, Option(quarter), uri)
             }
           }
         }

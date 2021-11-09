@@ -58,7 +58,7 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
         else reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]]
   }
 
-  protected def authRejectionHandler(rejectionMessage: String = "Authorization Token could not be verified"): RejectionHandler = {
+  protected def authRejectionHandler(rejectionMessage: String): RejectionHandler = {
     println("authRejectioHandler")
     RejectionHandler
       .newBuilder()
@@ -82,7 +82,6 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
       case Some(token) =>
         onComplete(tokenVerifier.verifyToken(token)).flatMap {
           _.map { t =>
-            println("getting lei and token")
             val lei: String = t.getOtherClaims.asScala
               .get("lei")
               .map(_.toString)
@@ -105,7 +104,6 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
         }
       case None =>
         withLocalModeBypass {
-          println("case none")
           val r: Route = (extractRequest { req =>
             import scala.compat.java8.OptionConverters._
             logger.error("No bearer token, authz header [{}]" + req.getHeader("authorization").asScala)

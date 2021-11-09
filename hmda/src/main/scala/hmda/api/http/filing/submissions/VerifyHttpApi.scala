@@ -50,17 +50,23 @@ private class VerifyHttpApi(log: Logger, sharding: ClusterSharding)(implicit ec:
   // POST institutions/<lei>/filings/<year>/submissions/<submissionId>/edits/<quality|macro>
   // POST institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/edits/<quality|macro>
   def verifyPath(oAuth2Authorization: OAuth2Authorization): Route =
-    (extractUri & post) { uri =>
-      respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-        pathPrefix("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
-          oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
-            oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { _ =>
-              path("submissions" / IntNumber / "edits" / editTypeRegex) { (seqNr, editType) =>
-                entity(as[EditsVerification]) { editsVerification =>
-                  verify(lei, year, None, seqNr, editType, editsVerification.verified, uri)
+        path("institutions" / Segment / "filings" / IntNumber / "submissions" / IntNumber / "edits" / editTypeRegex) { (lei, year, seqNr, editType) =>
+          (extractUri & post) { uri =>
+            respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+              oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
+                oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { _ =>
+                  entity(as[EditsVerification]) { editsVerification =>
+                    verify(lei, year, None, seqNr, editType, editsVerification.verified, uri)
+                  }
                 }
-              } ~ path("quarter" / Quarter / "submissions" / IntNumber / "edits" / editTypeRegex) { (quarter, seqNr, editType) =>
-                pathEndOrSingleSlash {
+              }
+            }
+          }
+        } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "edits" / editTypeRegex) { (lei, year, quarter, seqNr, editType) =>
+          (extractUri & post) { uri =>
+            respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+              oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
+                oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { _ =>
                   quarterlyFiler(lei, year) {
                     entity(as[EditsVerification]) { editsVerification =>
                       verify(lei, year, Option(quarter), seqNr, editType, editsVerification.verified, uri)
@@ -71,8 +77,6 @@ private class VerifyHttpApi(log: Logger, sharding: ClusterSharding)(implicit ec:
             }
           }
         }
-      }
-    }
 
   private def verify(lei: String, year: Int, quarter: Option[String], seqNr: Int, editType: String, verified: Boolean, uri: Uri): Route = {
     val submissionId                            = SubmissionId(lei, Period(year, quarter), seqNr)

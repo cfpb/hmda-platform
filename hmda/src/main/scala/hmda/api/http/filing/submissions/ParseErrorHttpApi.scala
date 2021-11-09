@@ -40,23 +40,25 @@ private class ParseErrorHttpApi(log: Logger, sharding: ClusterSharding)(implicit
   // GET institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/parseErrors
   def parseErrorPath(oAuth2Authorization: OAuth2Authorization): Route = (extractUri & get) { uri =>
     parameters('page.as[Int] ? 1) { page =>
-      pathPrefix("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
+      path("institutions" / Segment / "filings" / IntNumber / "submissions" / IntNumber / "parseErrors") { (lei, year, seqNr) =>
         oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
           oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
-            path("submissions" / IntNumber / "parseErrors") { seqNr =>
-              checkSubmission(lei, year, None, seqNr, page, uri)
-            } ~ path("quarter" / Quarter / "submissions" / IntNumber / "parseErrors") { (quarter, seqNr) =>
-              pathEndOrSingleSlash {
-                quarterlyFiler(lei, year) {
-                  checkSubmission(lei, year, Option(quarter), seqNr, page, uri)
+            checkSubmission(lei, year, None, seqNr, page, uri)
+          }
+        }
+      } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "parseErrors") { (lei, year, quarter, seqNr) =>
+            oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
+              oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+                pathEndOrSingleSlash {
+                  quarterlyFiler(lei, year) {
+                    checkSubmission(lei, year, Option(quarter), seqNr, page, uri)
+                  }
                 }
               }
             }
           }
-        }
       }
     }
-  }
 
   private def checkSubmission(lei: String, year: Int, quarter: Option[String], seqNr: Int, page: Int, uri: Uri) = {
     val submissionId                            = SubmissionId(lei, Period(year, quarter), seqNr)

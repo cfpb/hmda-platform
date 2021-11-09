@@ -8,13 +8,10 @@ trait AuthRule {
 object LEISpecificOrAdmin extends AuthRule {
     def rule(token: VerifiedToken, comparator: String): Boolean = {
         val lei = comparator
-        println("LEI or Admin")
-        println("lei is: " + lei)
         if (token.roles.contains("hmda-admin")) true
         else {
             if (token.lei.nonEmpty){
                 val leiList = token.lei.split(',')
-                println("token leis: " + leiList)
                 leiList.contains(lei.trim())
             } else false
         }
@@ -33,10 +30,7 @@ object AdminOnly extends AuthRule {
 
 object BetaOnlyUser extends AuthRule {   
     def rule(token: VerifiedToken, comparator: String): Boolean = {
-        println("at beta route")
         val currentNamespace = comparator
-        println("current namespace: " + currentNamespace)
-        println("token roles: " + token.roles)
         if (token.roles.contains("betaUser")) {
             currentNamespace == "beta"
         } else true

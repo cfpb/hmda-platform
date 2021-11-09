@@ -45,10 +45,13 @@ private class SignHttpApi(log: Logger, sharding: ClusterSharding)(
   // GET & POST institutions/<lei>/filings/<year>/submissions/<submissionId>/sign
   // GET & POST institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/sign
   def signPath(oAuth2Authorization: OAuth2Authorization): Route =
-    pathPrefix("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
-      pathPrefix("submissions" / IntNumber / "sign") { seqNr =>
+      path("institutions" / Segment / "filings" / IntNumber / "submissions" / IntNumber / "sign") { (lei, year, seqNr) =>
         (extractUri & get) { uri =>
-          oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei)(token => getSubmissionForSigning(lei, year, None, seqNr, token.email, uri))
+          oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { token => 
+            oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+              getSubmissionForSigning(lei, year, None, seqNr, token.email, uri)
+            }
+          }
         } ~ (extractUri & post) { uri =>
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { token =>
@@ -58,7 +61,7 @@ private class SignHttpApi(log: Logger, sharding: ClusterSharding)(
             }
           }
         }
-      } ~ pathPrefix("quarter" / Segment / "submissions" / IntNumber / "sign") { (quarter, seqNr) =>
+      } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Segment / "submissions" / IntNumber / "sign") { (lei, year, quarter, seqNr) =>
         (extractUri & get) { uri =>
           oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { token =>
             oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
@@ -75,7 +78,6 @@ private class SignHttpApi(log: Logger, sharding: ClusterSharding)(
           }
         }
       }
-    }
 
   private def getSubmissionForSigning(lei: String, year: Int, quarter: Option[String], seqNr: Int, email: String, uri: Uri): Route = {
     val submissionId                            = SubmissionId(lei, Period(year, quarter), seqNr)

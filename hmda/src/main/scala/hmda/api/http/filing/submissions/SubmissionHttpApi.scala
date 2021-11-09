@@ -65,15 +65,19 @@ private class SubmissionHttpApi(log: Logger, sharding: ClusterSharding)(
   val quarterlyFiler = quarterlyFilingAllowed(log, sharding) _
 
   def submissionCreatePath(oAuth2Authorization: OAuth2Authorization): Route =
-    respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-      extractUri { uri =>
-        path("institutions" / Segment / "filings" / IntNumber / "submissions") { (lei, year) =>
+    path("institutions" / Segment / "filings" / IntNumber / "submissions") { (lei, year) =>
+      respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+        (extractUri & post) { uri =>
           oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ => 
             oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { _ =>
               createSubmissionIfValid(lei, year, None, uri)
             }
           }
-        } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter / "submissions") { (lei, year, quarter) =>
+        }
+      }
+    } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter / "submissions") { (lei, year, quarter) =>
+      respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+        (extractUri & post) { uri =>
           oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
             oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { _ =>
               pathEndOrSingleSlash {
@@ -148,28 +152,32 @@ private class SubmissionHttpApi(log: Logger, sharding: ClusterSharding)(
   }
 
   def submissionSummaryPath(oAuth2Authorization: OAuth2Authorization): Route =
-    respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-      (extractUri & get) { uri =>
         path("institutions" / Segment / "filings" / IntNumber / "submissions" / IntNumber / "summary") { (lei, year, seqNr) =>
-          oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei){_ => 
-            oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
-              getSubmissionSummary(lei, year, None, seqNr, uri)
+          respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+            (extractUri & get) { uri =>
+              oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ => 
+                oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+                  getSubmissionSummary(lei, year, None, seqNr, uri)
+                }
+              }
             }
           }
         } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "summary") {
           (lei, year, quarter, seqNr) =>
-            oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
-              oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
-                pathEndOrSingleSlash {
-                  quarterlyFiler(lei, year) {
-                    getSubmissionSummary(lei, year, Option(quarter), seqNr, uri)
+            respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+              (extractUri & get) { uri =>
+                oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
+                  oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+                    pathEndOrSingleSlash {
+                      quarterlyFiler(lei, year) {
+                        getSubmissionSummary(lei, year, Option(quarter), seqNr, uri)
+                      }
+                    }
                   }
                 }
               }
             }
-        }
-      }
-    }
+          }
 
   private def getSubmissionSummary(lei: String, year: Int, quarter: Option[String], seqNr: Int, uri: Uri): Route = {
     val submissionId                         = SubmissionId(lei, Period(year, quarter), seqNr)
@@ -212,28 +220,35 @@ private class SubmissionHttpApi(log: Logger, sharding: ClusterSharding)(
   }
 
   def latestSubmissionPath(oAuth2Authorization: OAuth2Authorization): Route =
-    respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-      (extractUri & get) { uri =>
         path("institutions" / Segment / "filings" / IntNumber / "submissions" / "latest") { (lei, year) =>
-          oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei){ _ => 
-            oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
-              getLatestSubmission(lei, year, None, uri)
+          (extractUri & get) { uri =>
+            //println("get latest")
+            respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+              oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei){ token => 
+                //println("passed LEISpecificorAdmin")
+                oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+                  //println("passed BetaOnlyUser")
+                  getLatestSubmission(lei, year, None, uri)
+                }
+              }
             }
           }
         } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter / "submissions" / "latest") {
           (lei, year, quarter) =>
-            oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
-              oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
-                pathEndOrSingleSlash {
-                  quarterlyFiler(lei, year) {
-                    getLatestSubmission(lei, year, Option(quarter), uri)
+            (extractUri & get) { uri =>
+              respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+                oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
+                  oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+                    pathEndOrSingleSlash {
+                      quarterlyFiler(lei, year) {
+                        getLatestSubmission(lei, year, Option(quarter), uri)
+                      }
+                    }
                   }
                 }
               }
             }
-        }
-      }
-    }
+          }
 
   private def getLatestSubmission(lei: String, period: Int, quarter: Option[String], uri: Uri): Route = {
     val fil                                 = selectFiling(sharding, lei, period, quarter)
