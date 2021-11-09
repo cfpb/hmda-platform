@@ -10,7 +10,7 @@ RUN rm -rf data
 
 FROM alpine:latest
 
-ENV SPI_USER="spi" \
+ENV SPI_USER="spi-provider" \
     SPI_USER_ID="1000"
 
 RUN apk update --no-cache
