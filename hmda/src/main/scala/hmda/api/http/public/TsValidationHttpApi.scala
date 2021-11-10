@@ -61,22 +61,22 @@ private class TsValidationHttpApi {
   //ts/validate/<year>/quarter/<period>
   // $COVERAGE-OFF$
   private val validateQuarterTsRoute =
-    path("validate" / IntNumber / "quarter" / Quarter) { (year, quarter) =>
-      parameters('check.as[String] ? "all") { checkType =>
-        post {
-          respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-            entity(as[TsValidateRequest]) { req =>
-              TsCsvParser(req.ts) match {
-                case Right(ts) =>
-                  validate(ts, checkType, year, Some(quarter))
-                case Left(errors) =>
-                  completeWithParsingErrors(None, errors)
-              }
+  path("validate" / IntNumber / "quarter" / Quarter) { (year, quarter) =>
+    parameters('check.as[String] ? "all") { checkType =>
+      post {
+        respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+          entity(as[TsValidateRequest]) { req =>
+            TsCsvParser(req.ts) match {
+              case Right(ts) =>
+                validate(ts, checkType, year, Some(quarter))
+              case Left(errors) =>
+                completeWithParsingErrors(None, errors)
             }
           }
         }
       }
     }
+  }
   // $COVERAGE-ON$
 
   private def validate(ts: TransmittalSheet, checkType: String, year: Int, quarter: Option[String]): Route = {

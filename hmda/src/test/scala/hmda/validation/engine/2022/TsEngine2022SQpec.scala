@@ -1,5 +1,4 @@
 package hmda.validation.engine
-
 import hmda.model.filing.ts.TsGenerators._
 import hmda.model.validation.{SyntacticalValidationError, TsValidationError, ValidityValidationError}
 import hmda.utils.YearUtils.Period
@@ -9,7 +8,7 @@ import org.scalacheck.Gen
 import org.scalatest.{MustMatchers, PropSpec}
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-class TsEngine2021SQpec extends PropSpec with ScalaCheckPropertyChecks with MustMatchers {
+class TsEngine2022SQpec extends PropSpec with ScalaCheckPropertyChecks with MustMatchers {
   val tsGen2020Quarterly = for {
     ts      <- tsGen
     quarter <- Gen.chooseNum[Int](1, 3)
