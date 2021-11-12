@@ -16,7 +16,7 @@ spec:
   selector:
     service: ambassador
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: ambassador-beta
@@ -50,7 +50,7 @@ metadata:
   name: ambassador-beta
   namespace: beta
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: ambassador-beta
@@ -62,200 +62,6 @@ subjects:
 - kind: ServiceAccount
   name: ambassador-beta
   namespace: beta
----
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
-  name: authservices.getambassador.io
-  namespace: beta
-spec:
-  group: getambassador.io
-  version: v1
-  versions:
-  - name: v1
-    served: true
-    storage: true
-  scope: Namespaced
-  names:
-    plural: authservices
-    singular: authservice
-    kind: AuthService
-    categories:
-    - ambassador-crds
----
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
-  name: consulresolvers.getambassador.io
-  namespace: beta
-spec:
-  group: getambassador.io
-  version: v1
-  versions:
-  - name: v1
-    served: true
-    storage: true
-  scope: Namespaced
-  names:
-    plural: consulresolvers
-    singular: consulresolver
-    kind: ConsulResolver
----
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
-  name: kubernetesendpointresolvers.getambassador.io
-  namespace: beta
-spec:
-  group: getambassador.io
-  version: v1
-  versions:
-  - name: v1
-    served: true
-    storage: true
-  scope: Namespaced
-  names:
-    plural: kubernetesendpointresolvers
-    singular: kubernetesendpointresolver
-    kind: KubernetesEndpointResolver
----
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
-  name: kubernetesserviceresolvers.getambassador.io
-  namespace: beta
-spec:
-  group: getambassador.io
-  version: v1
-  versions:
-  - name: v1
-    served: true
-    storage: true
-  scope: Namespaced
-  names:
-    plural: kubernetesserviceresolvers
-    singular: kubernetesserviceresolver
-    kind: KubernetesServiceResolver
----
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
-  name: mappings.getambassador.io
-  namespace: beta
-spec:
-  group: getambassador.io
-  version: v1
-  versions:
-  - name: v1
-    served: true
-    storage: true
-  scope: Namespaced
-  names:
-    plural: mappings
-    singular: mapping
-    kind: Mapping
-    categories:
-    - ambassador-crds
----
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
-  name: modules.getambassador.io
-  namespace: beta
-spec:
-  group: getambassador.io
-  version: v1
-  versions:
-  - name: v1
-    served: true
-    storage: true
-  scope: Namespaced
-  names:
-    plural: modules
-    singular: module
-    kind: Module
-    categories:
-    - ambassador-crds
----
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
-  name: ratelimitservices.getambassador.io
-  namespace: beta
-spec:
-  group: getambassador.io
-  version: v1
-  versions:
-  - name: v1
-    served: true
-    storage: true
-  scope: Namespaced
-  names:
-    plural: ratelimitservices
-    singular: ratelimitservice
-    kind: RateLimitService
-    categories:
-    - ambassador-crds
----
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
-  name: tcpmappings.getambassador.io
-  namespace: beta
-spec:
-  group: getambassador.io
-  version: v1
-  versions:
-  - name: v1
-    served: true
-    storage: true
-  scope: Namespaced
-  names:
-    plural: tcpmappings
-    singular: tcpmapping
-    kind: TCPMapping
-    categories:
-    - ambassador-crds
----
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
-  name: tlscontexts.getambassador.io
-  namespace: beta
-spec:
-  group: getambassador.io
-  version: v1
-  versions:
-  - name: v1
-    served: true
-    storage: true
-  scope: Namespaced
-  names:
-    plural: tlscontexts
-    singular: tlscontext
-    kind: TLSContext
-    categories:
-    - ambassador-crds
----
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
-  name: tracingservices.getambassador.io
-  namespace: beta
-spec:
-  group: getambassador.io
-  version: v1
-  versions:
-  - name: v1
-    served: true
-    storage: true
-  scope: Namespaced
-  names:
-    plural: tracingservices
-    singular: tracingservice
-    kind: TracingService
-    categories:
-    - ambassador-crds
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -276,18 +82,18 @@ spec:
         service: ambassador
     spec:
       affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              labelSelector:
-                matchLabels:
-                  service: ambassador
-              topologyKey: kubernetes.io/hostname
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-group
+                    operator: In
+                    values:
+                      - ambassador
       serviceAccountName: ambassador-beta
       containers:
       - name: ambassador
-        image: quay.io/datawire/ambassador:1.13.3
+        image: quay.io/datawire/ambassador:1.14.2
         resources:
           limits:
             cpu: 1
