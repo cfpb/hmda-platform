@@ -290,7 +290,9 @@ private[engine] object LarEngine2022Q extends ValidationEngine[LoanApplicationRe
     quality2020.Q654,
     quality2021.Q655,
     quality2021.Q656,
-    quality2021.Q657
+    quality2021.Q657,
+    quality2021.Q659_1,
+    quality2021.Q659_2
 
   )
 }
