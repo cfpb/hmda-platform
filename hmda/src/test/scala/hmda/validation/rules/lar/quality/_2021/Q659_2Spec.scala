@@ -6,7 +6,7 @@ import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 
 class Q659_2Spec extends LarEditCheckSpec {
-  override def check: EditCheck[LoanApplicationRegister] = Q659_1
+  override def check: EditCheck[LoanApplicationRegister] = Q659_2
 
   val invalidExemptCodes = List("999", "99999")
   property("Exempt field should not have a value of 999, or 99999") {
@@ -17,7 +17,9 @@ class Q659_2Spec extends LarEditCheckSpec {
         lar.copy(geography = lar.geography.copy(street = invalidExemptCode)).mustFail
         lar.copy(income = invalidExemptCode).mustFail
         lar.copy(loan = lar.loan.copy(rateSpread = invalidExemptCode)).mustFail
+        lar.copy(loan = lar.loan.copy(rateSpread = s"$invalidExemptCode.0")).mustFail
         lar.copy(loanDisclosure = lar.loanDisclosure.copy(totalLoanCosts = invalidExemptCode)).mustFail
+        lar.copy(loanDisclosure = lar.loanDisclosure.copy(totalLoanCosts = s"$invalidExemptCode.0")).mustFail
         lar.copy(property = lar.property.copy(multiFamilyAffordableUnits = invalidExemptCode)).mustFail
         lar.copy(larIdentifier = lar.larIdentifier.copy(NMLSRIdentifier = invalidExemptCode)).mustFail
       })
