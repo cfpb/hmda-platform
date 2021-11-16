@@ -116,6 +116,10 @@ sbt:hmda-root> project hmda-platform
 sbt:hmda-platform> reStart
 
 ```
+## Access locally build platform
+[hmda-admin-api](http://localhost:8081)   
+[hmda-filing-api](http://localhost:8080)   
+[hmda-public-api](http://localhost:8082)   
 ## Build hmda-platform Docker image
 Docke Image is build via Docker plugin utilizing [sbt-native-packager](https://sbt-native-packager.readthedocs.io/en/stable/formats/docker.html#docker-plugin)
 ```
