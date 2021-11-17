@@ -1,4 +1,4 @@
-[Upstream Mailhog](https://artifacthub.io/packages/helm/codecentric/mailhog)    
+[Mailhog](https://artifacthub.io/packages/helm/codecentric/mailhog)    
 
 Install
 ```
