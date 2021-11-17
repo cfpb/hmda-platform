@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata: 
+  labels: 
+    service: mailhog-ambassador
+  name: mailhog-ambassador
+  annotations:
+    getambassador.io/config: |
+      apiVersion: ambassador/v1
+      ambassador_id: ambassador-default-1
+      kind: Mapping
+      name: mailhog_mapping
+      prefix: /mail/
+      rewrite: /
+      service: mailhog:8025
+spec:
+  clusterIP: None
