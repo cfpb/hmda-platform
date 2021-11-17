@@ -1,3 +1,5 @@
+[Upstream Mailhog](https://artifacthub.io/packages/helm/codecentric/mailhog)    
+
 Install
 ```
 helm repo add codecentric https://codecentric.github.io/helm-charts
