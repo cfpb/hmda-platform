@@ -26,7 +26,7 @@ helm upgrade --install --force \
 --set metrics.extraArgs.skip-tls-verification=true \
 --set metrics.enabled=true \
 --set master.livenessProbe.enabled=false \
--f values.yaml \
+-f kubernetes/redis/values.yaml \
 hmda-redis \
 bitnami/redis
 
