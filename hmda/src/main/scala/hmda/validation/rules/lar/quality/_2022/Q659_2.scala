@@ -34,6 +34,7 @@ object Q659_2 extends EditCheck[LoanApplicationRegister] {
       lar.loan.loanTerm.trim,
       lar.loan.introductoryRatePeriod.trim,
       lar.property.multiFamilyAffordableUnits.trim,
+      lar.property.propertyValue.trim,
       lar.larIdentifier.NMLSRIdentifier.trim
     )
 
