@@ -2,17 +2,16 @@ apiVersion: v1
 kind: Service
 metadata: 
   labels: 
-    service: maildev-ambassador
-  name: maildev-ambassador
+    service: mailhog-ambassador
+  name: mailhog-ambassador
   annotations:
     getambassador.io/config: |
       apiVersion: ambassador/v1
+      ambassador_id: ambassador-default-1
       kind: Mapping
-      name: maildev_mapping
+      name: mailhog_mapping
       prefix: /mail/
       rewrite: /
-      service: maildev:80
+      service: mailhog:8025
 spec:
   clusterIP: None
-  ports:
-    - port: 80

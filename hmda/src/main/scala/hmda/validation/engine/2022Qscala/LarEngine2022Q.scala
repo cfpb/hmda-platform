@@ -291,6 +291,7 @@ private[engine] object LarEngine2022Q extends ValidationEngine[LoanApplicationRe
     quality2021.Q655,
     quality2021.Q656,
     quality2021.Q657,
+    quality2022.Q658,
     quality2022.Q659_1,
     quality2022.Q659_2
 
