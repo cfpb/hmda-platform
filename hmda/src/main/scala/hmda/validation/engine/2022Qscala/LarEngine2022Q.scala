@@ -10,6 +10,7 @@ import hmda.validation.rules.lar.syntactical.{S300, S301}
 import hmda.validation.rules.lar.validity._
 import hmda.validation.rules.lar.validity._2020
 import hmda.census.records.CensusRecords
+import hmda.validation.rules.lar.validity._2022
 
 private[engine] object LarEngine2022Q extends ValidationEngine[LoanApplicationRegister] {
 
@@ -232,7 +233,9 @@ private[engine] object LarEngine2022Q extends ValidationEngine[LoanApplicationRe
     V712,
     V713,
     V714,
-    V715
+    V715,
+    _2022.V720_1,
+    _2022.V720_2
   )
 
   override val qualityChecks = Vector(

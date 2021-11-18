@@ -231,6 +231,8 @@ V715|If the Non-Amortizing Features exemption election is taken, Balloon Payment
 V717|An invalid Contact Person’s Email Address was provided.|Contact Person's E-mail Address
 V718|An invalid Calendar Quarter was reported.|Calendar Quarter
 V719|The required format for Financial Institution Name is alphanumeric. The Financial Institution Name field contains only numbers and no letters.|Financial Institution Name
+V720-1|An invalid Credit Score was reported. Please review the information below and update your file accordingly: If Applicant or Borrower, Name and Version of Credit Scoring Model is 1, 2, 3, 4, 5, 6, or 11, Credit Score of Applicant or Borrower should be 280 or above.|Applicant or Borrower, Name and Version of Credit Scoring Model; Credit Score of Applicant or Borrower
+V720-2|An invalid Credit Score was reported. Please review the information below and update your file accordingly: If Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model is 1, 2, 3, 4, 5, 6, or 11, Credit Score of Co-Applicant or Co-Borrower should be 280 or above.|Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model; Credit Score of Co-Applicant or Co-Borrower
 Q600|A duplicate ULI or NULI was reported.|Universal Loan Identifier (ULI)
 Q601|Application Date occurs more than two years prior to Action Taken Date.|Application Date; Action Taken Date
 Q602|Street Address was reported NA, however City, State and Zip Code were provided.|Street Address; City; State; Zip Code
