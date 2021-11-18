@@ -1,6 +1,7 @@
 package hmda.validation.rules.lar.validity._2022
 
 import hmda.model.filing.lar.LoanApplicationRegister
+import hmda.model.filing.lar.enums._
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.dsl.ValidationResult
@@ -13,9 +14,16 @@ object V720_2 extends EditCheck[LoanApplicationRegister] {
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
 
-    val scoringModels = List(1, 2, 3, 4, 5, 6, 11)
-
-    when (lar.coApplicant.creditScoreType.code is containedIn(scoringModels)) {
+    val scoringModels = List(
+      EquifaxBeacon5,
+      ExperianFairIsaac,
+      FICORiskScoreClassic04,
+      FICORiskScoreClassic98,
+      VantageScore2,
+      VantageScore3,
+      FICOScore9
+    )
+    when (lar.coApplicant.creditScoreType is containedIn(scoringModels)) {
       lar.coApplicant.creditScore is greaterThanOrEqual(280)
     }
   }
