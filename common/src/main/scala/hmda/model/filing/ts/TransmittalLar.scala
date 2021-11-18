@@ -8,4 +8,5 @@ case class TransmittalLar(ts: TransmittalSheet,
                           distinctUliCount: Long = 0L,
                           distinctActionTakenUliCount: Long = 0L,
                           duplicateUliToLineNumbers: Map[String, List[Int]] = Map.empty,
-                          duplicateUliToLineNumbersUliActionType: Map[String, List[Int]] = Map.empty)
+                          duplicateUliToLineNumbersUliActionType: Map[String, List[Int]] = Map.empty,
+                          allActionTakenDatesWithinQuarter: Boolean = true)

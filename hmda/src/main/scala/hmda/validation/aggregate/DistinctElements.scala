@@ -2,18 +2,21 @@ package hmda.validation.aggregate
 
 import akka.NotUsed
 import akka.stream.Materializer
-import akka.stream.scaladsl.{ Keep, Sink, Source }
+import akka.stream.scaladsl.{Keep, Sink, Source}
 import akka.util.ByteString
 import com.typesafe.scalalogging.StrictLogging
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums.LoanOriginated
 import hmda.model.filing.submission.SubmissionId
 import hmda.parser.filing.lar.LarCsvParser
+import hmda.util.QuarterTimeBarrier
 import hmda.util.streams.FlowUtils.framing
+import hmda.utils.YearUtils.isQuarterlyFiling
 import net.openhft.hashing.LongHashFunction
 
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.{ Failure, Success }
+import java.time.Clock
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 object DistinctElements extends StrictLogging {
   case class Result(
@@ -21,8 +24,7 @@ object DistinctElements extends StrictLogging {
                      distinctCount: Int,
                      uliToDuplicateLineNumbers: Map[String, Vector[Int]],
                      checkType: CheckType,
-                     uli: String
-                   )
+                     uli: String)
 
   sealed trait CheckType
   object CheckType {
@@ -30,6 +32,7 @@ object DistinctElements extends StrictLogging {
     case object UniqueLar      extends CheckType
     case object ULI            extends CheckType
     case object ULIActionTaken extends CheckType
+    case object AllActionTakenDatesInQuarter extends CheckType
   }
 
   private def hashString(s: String): Long = LongHashFunction.xx().hashChars(s)
@@ -88,6 +91,16 @@ object DistinctElements extends StrictLogging {
                       val hashed = hashString(lar.action.actionTakenType.code.toString.toUpperCase + lar.loan.ULI.toUpperCase())
                       List((checkAndUpdate(state, hashed), rowNumber, lar.loan.ULI))
                     } else Nil
+
+                  case CheckType.AllActionTakenDatesInQuarter => // For S307
+                    // Check if Action Taken Date is within the current quarter
+                    if (isQuarterlyFiling(submissionId) &&
+                      !QuarterTimeBarrier.actionTakenWithinQuarter(lar.action.actionTakenDate,submissionId.period )){
+                      val hashed = hashString(
+                        lar.larIdentifier.LEI + lar.loan.ULI.toUpperCase + lar.action.actionTakenDate.toString.toUpperCase
+                      )
+                      List((checkAndUpdate(state, hashed), rowNumber, lar.loan.ULI))
+                    } else Nil
                 }
             }
         }
@@ -104,6 +117,7 @@ object DistinctElements extends StrictLogging {
                   acc.uliToDuplicateLineNumbers.getOrElse(uliOnWhichErrorTriggered, Vector.empty) :+ rowNumber
                 ),
                 uli = uliOnWhichErrorTriggered
+
               ) //the ULI field here is shown as the "id" in /submissions/1/edits/Q600
             // no duplicate
             case (acc, _) => acc.copy(totalCount = acc.totalCount + 1, distinctCount = acc.distinctCount + 1)

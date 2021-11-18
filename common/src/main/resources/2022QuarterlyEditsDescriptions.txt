@@ -6,6 +6,7 @@ S303|The reported Federal Agency; Federal Taxpayer Identification Number; and Le
 S304|The reported Total Number of Entries Contained in Submission does not match the total number of LARs in the HMDA file.|Total Number of Entries Contained in Submission
 S305|A duplicate transaction has been reported. Please review and update your file accordingly.|All data fields in the LAR
 S306|If Action Taken equals 1, a duplicate ULI cannot be reported.|Universal Loan Identifier (ULI)
+S307|The HMDA File does not contain any covered loans or applications with a final action taken date in the quarter being reported. The HMDA file must contain one or more records with an action taken date in the quarter being reported.|Calendar Quarter; Calendar Year
 V600|The required format for LEI is alphanumeric with 20 characters, and it cannot be left blank.|Legal Entity Identifier (LEI)
 V601|Financial Institution Name, Contact Person's Name, Contact Person's E-mail Address, Contact Person's Office Street Address, and Contact Person's Office City are required and must not be left blank. |Financial Institution Name; Contact Person's Name; Contact Person's E-mail Address; Contact Person's Office Street Address; Contact Person's Office City
 V602|Calendar Quarter must equal 4, and cannot be left blank.|Calendar Quarter

@@ -51,7 +51,7 @@ import hmda.validation.filing.MacroValidationFlow._
 import hmda.validation.filing.ValidationFlow._
 import hmda.validation.rules.lar.quality._2020.Q600_warning
 import hmda.validation.rules.lar.quality.common.Q600
-import hmda.validation.rules.lar.syntactical.{S304, S305, S306}
+import hmda.validation.rules.lar.syntactical.{S304, S305, S306, S307}
 import net.openhft.hashing.LongHashFunction
 
 import scala.collection.immutable.ListMap
@@ -465,6 +465,7 @@ object HmdaValidationError
         val s304 = S304.name
         val q600name = Q600.name
         val s306 = S306.name
+        val s307 = S307.name
         validationError match {
           case s306 @ SyntacticalValidationError(_, `s306`, _, fields) => //This is newly added for S306
             s306.copyWithFields(
@@ -526,6 +527,7 @@ object HmdaValidationError
           header        <- headerResultTest
           rawLineResult <- DistinctElements(DistinctElements.CheckType.RawLine, uploadConsumerRawStr(submissionId), submissionId)
           s306Result    <- DistinctElements(DistinctElements.CheckType.ULIActionTaken, uploadConsumerRawStr(submissionId), submissionId)
+          s307Result    <- DistinctElements(DistinctElements.CheckType.AllActionTakenDatesInQuarter, uploadConsumerRawStr(submissionId), submissionId)
           res <- validateAndPersistErrors(
             TransmittalLar(
               ts = header,
@@ -536,7 +538,8 @@ object HmdaValidationError
               distinctUliCount = -1,
               duplicateUliToLineNumbers = rawLineResult.uliToDuplicateLineNumbers.mapValues(_.toList),
               distinctActionTakenUliCount = s306Result.distinctCount,
-              duplicateUliToLineNumbersUliActionType = s306Result.uliToDuplicateLineNumbers.mapValues(_.toList)
+              duplicateUliToLineNumbersUliActionType = s306Result.uliToDuplicateLineNumbers.mapValues(_.toList),
+              allActionTakenDatesWithinQuarter = if(s307Result.totalCount > 0) false else true
             ),
             editType,
             validationContext
@@ -547,17 +550,16 @@ object HmdaValidationError
         for {
           header    <- headerResultTest
           uliResult <- DistinctElements(DistinctElements.CheckType.ULI, uploadConsumerRawStr(submissionId), submissionId)
-          uniqueLarResul <- DistinctElements(DistinctElements.CheckType.UniqueLar, uploadConsumerRawStr(submissionId), submissionId)
+          uniqueLarResult <- DistinctElements(DistinctElements.CheckType.UniqueLar, uploadConsumerRawStr(submissionId), submissionId)
           res <- validateAndPersistErrors(
             TransmittalLar(
               ts = header,
               uli = uliResult.uli,
               larsCount = -1,
               larsDistinctCount = -1,
-              uniqueLarsSpecificFields = uniqueLarResul.distinctCount,
+              uniqueLarsSpecificFields = uniqueLarResult.distinctCount,
               distinctUliCount = uliResult.distinctCount,
-              duplicateUliToLineNumbers = uliResult.uliToDuplicateLineNumbers.mapValues(_.toList)
-            ),
+              duplicateUliToLineNumbers = uliResult.uliToDuplicateLineNumbers.mapValues(_.toList)),
             editType,
             validationContext
           )
