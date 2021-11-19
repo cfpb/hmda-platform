@@ -7,8 +7,7 @@ import hmda.validation.rules.lar.quality._2019._
 import hmda.validation.rules.lar.quality.{common, _2020 => quality2020, _2021 => quality2021, _2022 => quality2022}
 import hmda.validation.rules.lar.quality.common._
 import hmda.validation.rules.lar.syntactical.{S300, S301}
-import hmda.validation.rules.lar.validity._
-import hmda.validation.rules.lar.validity._2020
+import hmda.validation.rules.lar.validity.{_2020, _2022, _}
 import hmda.census.records.CensusRecords
 
 private[engine] object LarEngine2022Q extends ValidationEngine[LoanApplicationRegister] {
@@ -232,7 +231,13 @@ private[engine] object LarEngine2022Q extends ValidationEngine[LoanApplicationRe
     V712,
     V713,
     V714,
-    V715
+    V715,
+    _2022.V721_1,
+    _2022.V721_2,
+    _2022.V720_1,
+    _2022.V720_2,
+    _2022.V662_1,
+    _2022.V662_2
   )
 
   override val qualityChecks = Vector(
@@ -291,7 +296,9 @@ private[engine] object LarEngine2022Q extends ValidationEngine[LoanApplicationRe
     quality2021.Q655,
     quality2021.Q656,
     quality2021.Q657,
-    quality2022.Q658
+    quality2022.Q658,
+    quality2022.Q659_1,
+    quality2022.Q659_2
   )
 }
 // $COVERAGE-ON$

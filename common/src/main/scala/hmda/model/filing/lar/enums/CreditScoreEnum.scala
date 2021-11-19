@@ -3,7 +3,7 @@ package hmda.model.filing.lar.enums
 sealed trait CreditScoreEnum extends LarEnum
 
 object CreditScoreEnum extends LarCodeEnum[CreditScoreEnum] {
-  override val values = List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1111)
+  override val values = List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 1111)
 
   override def valueOf(code: Int): CreditScoreEnum =
     code match {
@@ -17,6 +17,7 @@ object CreditScoreEnum extends LarCodeEnum[CreditScoreEnum] {
       case 8    => OtherCreditScoreModel
       case 9    => CreditScoreNotApplicable
       case 10   => CreditScoreNoCoApplicant
+      case 11   => FICOScore9
       case 1111 => CreditScoreExempt
       case other    => new InvalidCreditScoreCode(other)
     }
@@ -70,6 +71,11 @@ case object CreditScoreNotApplicable extends CreditScoreEnum {
 case object CreditScoreNoCoApplicant extends CreditScoreEnum {
   override val code: Int           = 10
   override val description: String = "No co-applicant"
+}
+
+case object FICOScore9 extends CreditScoreEnum {
+  override def code: Int           = 11
+  override def description: String = "FICO Score 9"
 }
 
 case object CreditScoreExempt extends CreditScoreEnum {
