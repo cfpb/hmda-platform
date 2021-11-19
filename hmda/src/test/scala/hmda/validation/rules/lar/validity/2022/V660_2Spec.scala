@@ -1,4 +1,4 @@
-package hmda.validation.rules.lar.validity
+package hmda.validation.rules.lar.validity._2022
 
 import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister
@@ -11,22 +11,14 @@ class V660_2Spec extends LarEditCheckSpec {
 
   property("Credit score type must be valid") {
     forAll(larGen) { lar =>
-      lar
-        .copy(
-          applicant =
-             lar.applicant.copy(creditScoreType = OneOrMoreCreditScoreModels))
-          .mustPass
+      whenever(lar.applicant.creditScoreType != CreditScoreNoCoApplicant) {
+        lar.mustPass
+      }
 
       lar
         .copy(
           applicant =
             lar.applicant.copy(creditScoreType = CreditScoreNoCoApplicant))
-        .mustFail
-      
-      lar
-        .copy(
-          applicant =
-            lar.applicant.copy(creditScoreType = FICOScore9))
         .mustFail
     }
   }
