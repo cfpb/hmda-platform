@@ -12,6 +12,21 @@ object V665_2 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V665"
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult =
-    lar.coApplicant.creditScoreType not equalTo(new InvalidCreditScoreCode)
+  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+
+    val scoringModels = List(
+      EquifaxBeacon5,
+      ExperianFairIsaac,
+      FICORiskScoreClassic04,
+      FICORiskScoreClassic98,
+      VantageScore2,
+      VantageScore3,
+      OneOrMoreCreditScoreModels,
+      OtherCreditScoreModel,
+      CreditScoreNotApplicable,
+      CreditScoreNoCoApplicant,
+      CreditScoreExempt
+    )
+    lar.coApplicant.creditScoreType is containedIn(scoringModels)
+  }
 }
