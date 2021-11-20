@@ -18,6 +18,14 @@ object YearUtils {
       case _    => false
     }
 
+  def isValidQuarterTS(quarter: Int): Boolean =
+    quarter match {
+      case 1 => true
+      case 2 => true
+      case 3 => true
+      case _ => false
+    }
+
   def period(year: Int, quarter: Option[String]): String =
     quarter.fold(ifEmpty = s"$year")(quarter => s"$year-$quarter")
 
