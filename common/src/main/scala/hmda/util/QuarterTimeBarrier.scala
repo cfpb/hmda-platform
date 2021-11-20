@@ -81,8 +81,8 @@ object QuarterTimeBarrier {
         case Period(2021, Some("Q3")) =>  actionTakenDateLocal.isAfter(q32021EndDate)
 
         case Period(2022, Some("Q1")) => actionTakenDateLocal.isAfter(q12022EndDate)
-        case Period(2022, Some("Q2")) =>  actionTakenDateLocal.isAfter(q22021EndDate)
-        case Period(2022, Some("Q3")) => actionTakenDateLocal.isAfter(q32021EndDate)
+        case Period(2022, Some("Q2")) =>  actionTakenDateLocal.isAfter(q22022EndDate)
+        case Period(2022, Some("Q3")) => actionTakenDateLocal.isAfter(q32022EndDate)
       }
     }
 }
