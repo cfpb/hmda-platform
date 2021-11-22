@@ -1,15 +1,15 @@
 package hmda.validation.engine
 // $COVERAGE-OFF$
-import hmda.census.records.CensusRecords
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.context.ValidationContext
-import hmda.validation.rules.lar.quality._2019._
-import hmda.validation.rules.lar.quality._2021.{Q650_1, Q650_2}
+import hmda.validation.rules.lar.quality._2021._
+import hmda.validation.rules.lar.quality.{common, _2020 => quality2020, _2021 => quality2021}
 import hmda.validation.rules.lar.quality.common._
-import hmda.validation.rules.lar.quality.{_2020 => quality2020, _2021 => quality2021}
 import hmda.validation.rules.lar.syntactical.{S300, S301}
-import hmda.validation.rules.lar.validity.{_2020, _}
-import hmda.validation.rules.lar.validity._2020.V716
+import hmda.validation.rules.lar.validity._
+import hmda.validation.rules.lar.validity._2020._
+import hmda.census.records.CensusRecords
+import hmda.validation.rules.lar.quality._2019._
 
 private[engine] object LarEngine2021 extends ValidationEngine[LoanApplicationRegister] {
 
@@ -51,8 +51,9 @@ private[engine] object LarEngine2021 extends ValidationEngine[LoanApplicationReg
     V623,
     V624,
     V625_1,
-    V625_2.withIndexedTracts(CensusRecords.indexedTract2020),
-    V626.withIndexedCounties(CensusRecords.indexedCounty2020),
+    V625_2.withIndexedTracts(CensusRecords.indexedTract2021),
+    V626.withIndexedCounties(CensusRecords.indexedCounty2021),
+    V627.withIndexedCounties(CensusRecords.indexedCounty2021),
     V628_1,
     V628_2,
     V628_3,
@@ -233,13 +234,13 @@ private[engine] object LarEngine2021 extends ValidationEngine[LoanApplicationReg
     V713,
     V714,
     V715,
-    V716.withIndexedCounties(CensusRecords.indexedCounty2019)
+    _2020.V716.withIndexedCounties(CensusRecords.indexedCounty2021)
   )
 
   override val qualityChecks = Vector(
     Q601,
     Q602,
-    Q603.withIndexedSmallCounties(CensusRecords.indexedSmallCounty2019),
+    Q603.withIndexedSmallCounties(CensusRecords.indexedSmallCounty2021),
     Q605_1,
     Q605_2,
     quality2020.Q606,
@@ -279,11 +280,11 @@ private[engine] object LarEngine2021 extends ValidationEngine[LoanApplicationReg
     Q644,
     Q645_1,
     Q645_2,
-    Q650_1,
-    Q650_2,
     quality2020.Q648,
     quality2020.Q649_1,
     quality2020.Q649_2,
+    quality2021.Q650_1,
+    quality2021.Q650_2,
     quality2020.Q651,
     quality2020.Q652,
     quality2020.Q653_1,
