@@ -13,7 +13,7 @@ object V660_2 extends EditCheck[LoanApplicationRegister] {
   override def parent: String = "V660"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult =
-    lar.applicant.creditScoreType not oneOf(
+    lar.applicant.creditScoreType is oneOf(
       EquifaxBeacon5,
       ExperianFairIsaac,
       FICORiskScoreClassic04,
@@ -22,6 +22,7 @@ object V660_2 extends EditCheck[LoanApplicationRegister] {
       VantageScore3,
       OneOrMoreCreditScoreModels,
       OtherCreditScoreModel,
-      CreditScoreNotApplicable
+      CreditScoreNotApplicable,
+      CreditScoreExempt
     )
 }
