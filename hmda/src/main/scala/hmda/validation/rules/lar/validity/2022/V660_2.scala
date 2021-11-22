@@ -1,4 +1,4 @@
-package hmda.validation.rules.lar.validity
+package hmda.validation.rules.lar.validity._2022
 
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
@@ -13,15 +13,16 @@ object V660_2 extends EditCheck[LoanApplicationRegister] {
   override def parent: String = "V660"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult =
-    lar.applicant.creditScoreType not oneOf(
-      EquifaxBeacon5,
-      ExperianFairIsaac,
-      FICORiskScoreClassic04,
-      FICORiskScoreClassic98,
-      VantageScore2,
-      VantageScore3,
-      OneOrMoreCreditScoreModels,
-      OtherCreditScoreModel,
-      CreditScoreNotApplicable
+    lar.applicant.creditScoreType is oneOf(
+        EquifaxBeacon5,
+        ExperianFairIsaac,
+        FICORiskScoreClassic04,
+        FICORiskScoreClassic98,
+        VantageScore2,
+        VantageScore3,
+        OneOrMoreCreditScoreModels,
+        OtherCreditScoreModel,
+        CreditScoreNotApplicable,
+        FICOScore9
     )
 }

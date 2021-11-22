@@ -116,7 +116,7 @@ private[engine] object LarEngine2022Q extends ValidationEngine[LoanApplicationRe
     V658_2,
     V659,
     V660_1,
-    V660_2,
+    _2022.V660_2,
     V661,
     V662_1,
     V662_2,
