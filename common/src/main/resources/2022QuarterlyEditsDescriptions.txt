@@ -15,7 +15,7 @@ V605|The required format for the Contact Person's ZIP Code is 12345-1010 or 1234
 V606|The required format for the Total Number of Entries Contained in Submission is a whole number that is greater than zero, and it cannot be left blank.|Total Number of Entries Contained in Submission
 V607|The required format for the Federal Taxpayer Identification Number is 99-9999999, and it cannot be left blank.|Federal Taxpayer Identification Number
 V608-1|If your institution is reporting a ULI, the required format for ULI is alphanumeric with at least 23 characters and up to 45 characters, and it cannot be left blank.|Universal Loan Identifier (ULI)
-V608-2|The required format for NULI is alphanumeric with at least 1 character and no more than 22 characters, and it cannot be left blank.|Universal Loan Identifier (ULI)
+V608-2|The required format for NULI is alphanumeric with at least 1 character and no more than 22 characters, and it cannot be NA, Exempt, 1111 or left blank.|Universal Loan Identifier (ULI)
 V609|Based on the check digit calculation, the ULI contains a transcription error.|Universal Loan Identifier (ULI)
 V610-1|Application Date must be either a valid date using YYYYMMDD format or NA, and cannot be left blank.|Application Date; Action Taken
 V610-2|If Action Taken equals 6, then Application Date must be NA, and the reverse must be true.|Application Date; Action Taken

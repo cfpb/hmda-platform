@@ -20,7 +20,7 @@ private[engine] object LarEngine2022Q extends ValidationEngine[LoanApplicationRe
   override def validityChecks(ctx: ValidationContext) = Vector(
     V600,
     V608_1,
-    V608_2,
+    _2022.V608_2,
     V609,
     V610_1,
     V610_2,
