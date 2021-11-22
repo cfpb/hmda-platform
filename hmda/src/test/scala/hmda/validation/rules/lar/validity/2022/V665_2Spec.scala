@@ -11,7 +11,24 @@ class V665_2Spec extends LarEditCheckSpec {
 
   property("Co-applicant Credit score type must be valid") {
     forAll(larGen) { lar =>
-      lar.mustPass
+      lar
+        .copy(
+          coApplicant =
+            lar.coApplicant.copy(creditScoreType = FICORiskScoreClassic98 ))
+        .mustPass
+
+      lar
+        .copy(
+          coApplicant =
+            lar.coApplicant.copy(creditScoreType =  VantageScore2 ))
+        .mustPass
+
+      lar
+        .copy(
+          coApplicant =
+            lar.coApplicant.copy(creditScoreType = OtherCreditScoreModel ))
+        .mustPass
+
 
       lar
         .copy(

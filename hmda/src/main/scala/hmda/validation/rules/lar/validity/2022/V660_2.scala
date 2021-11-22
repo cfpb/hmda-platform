@@ -23,6 +23,7 @@ object V660_2 extends EditCheck[LoanApplicationRegister] {
         OneOrMoreCreditScoreModels,
         OtherCreditScoreModel,
         CreditScoreNotApplicable,
-        FICOScore9
+        FICOScore9,
+      CreditScoreExempt
     )
 }
