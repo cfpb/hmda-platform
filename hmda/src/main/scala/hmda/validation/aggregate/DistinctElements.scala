@@ -9,6 +9,7 @@ import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums.LoanOriginated
 import hmda.model.filing.submission.SubmissionId
 import hmda.parser.filing.lar.LarCsvParser
+import hmda.util.QuarterTimeBarrier
 import hmda.util.streams.FlowUtils.framing
 import net.openhft.hashing.LongHashFunction
 
@@ -30,6 +31,8 @@ object DistinctElements extends StrictLogging {
     case object UniqueLar      extends CheckType
     case object ULI            extends CheckType
     case object ULIActionTaken extends CheckType
+    case object ActionTakenWithinRangeCounter extends CheckType
+    case object ActionTakenGreaterThanRangeCounter extends CheckType
   }
 
   private def hashString(s: String): Long = LongHashFunction.xx().hashChars(s)
@@ -88,15 +91,33 @@ object DistinctElements extends StrictLogging {
                       val hashed = hashString(lar.action.actionTakenType.code.toString.toUpperCase + lar.loan.ULI.toUpperCase())
                       List((checkAndUpdate(state, hashed), rowNumber, lar.loan.ULI))
                     } else Nil
+
+                  case CheckType.ActionTakenWithinRangeCounter =>
+                    // Only look at LARs with an Action Taken Date within range of the target quarter
+                    if (QuarterTimeBarrier.actionTakenInQuarterRange(lar.action.actionTakenDate, submissionId.period)) {
+                      val hashed = hashString(lar.action.actionTakenType.code.toString.toUpperCase + lar.action.actionTakenDate.toString + lar.loan.ULI.toUpperCase())
+                      List((checkAndUpdate(state, hashed), rowNumber, lar.loan.ULI))
+                    } else Nil
+
+                  case CheckType.ActionTakenGreaterThanRangeCounter =>
+                    // Only look at LARs with an Action Taken Date greater than the end date of the quarter
+                    if (QuarterTimeBarrier.actionTakenGreaterThanRange(lar.action.actionTakenDate, submissionId.period)) {
+                      val hashed = hashString(lar.action.actionTakenType.code.toString.toUpperCase + lar.action.actionTakenDate.toString + lar.loan.ULI.toUpperCase())
+                      List((checkAndUpdate(state, hashed), rowNumber, lar.loan.ULI))
+                    } else Nil
                 }
             }
+
         }
         .toMat(
+
           Sink.fold(
             Result(totalCount = 0, distinctCount = 0, uliToDuplicateLineNumbers = Map.empty, checkType, submissionId.lei)
           ) {
+
             // duplicate
             case (acc, (persisted, rowNumber, uliOnWhichErrorTriggered)) if !persisted =>
+
               acc.copy(
                 totalCount = acc.totalCount + 1,
                 uliToDuplicateLineNumbers = acc.uliToDuplicateLineNumbers.updated(

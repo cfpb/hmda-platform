@@ -51,7 +51,7 @@ import hmda.validation.filing.MacroValidationFlow._
 import hmda.validation.filing.ValidationFlow._
 import hmda.validation.rules.lar.quality._2020.Q600_warning
 import hmda.validation.rules.lar.quality.common.Q600
-import hmda.validation.rules.lar.syntactical.{S304, S305, S306}
+import hmda.validation.rules.lar.syntactical.{S304, S305, S306, S307}
 import net.openhft.hashing.LongHashFunction
 
 import scala.collection.immutable.ListMap
@@ -526,6 +526,9 @@ object HmdaValidationError
           header        <- headerResultTest
           rawLineResult <- DistinctElements(DistinctElements.CheckType.RawLine, uploadConsumerRawStr(submissionId), submissionId)
           s306Result    <- DistinctElements(DistinctElements.CheckType.ULIActionTaken, uploadConsumerRawStr(submissionId), submissionId)
+          actionTakenWithinRangeResults    <- DistinctElements(DistinctElements.CheckType.ActionTakenWithinRangeCounter, uploadConsumerRawStr(submissionId), submissionId)
+          actionTakenGreaterThanRangeResults   <- DistinctElements(DistinctElements.CheckType.ActionTakenGreaterThanRangeCounter, uploadConsumerRawStr(submissionId), submissionId)
+
           res <- validateAndPersistErrors(
             TransmittalLar(
               ts = header,
@@ -536,7 +539,9 @@ object HmdaValidationError
               distinctUliCount = -1,
               duplicateUliToLineNumbers = rawLineResult.uliToDuplicateLineNumbers.mapValues(_.toList),
               distinctActionTakenUliCount = s306Result.distinctCount,
-              duplicateUliToLineNumbersUliActionType = s306Result.uliToDuplicateLineNumbers.mapValues(_.toList)
+              duplicateUliToLineNumbersUliActionType = s306Result.uliToDuplicateLineNumbers.mapValues(_.toList),
+              actionTakenDatesWithinRange = actionTakenWithinRangeResults.totalCount,
+              actionTakenDatesGreaterThanRange = actionTakenGreaterThanRangeResults.totalCount
             ),
             editType,
             validationContext
@@ -547,17 +552,16 @@ object HmdaValidationError
         for {
           header    <- headerResultTest
           uliResult <- DistinctElements(DistinctElements.CheckType.ULI, uploadConsumerRawStr(submissionId), submissionId)
-          uniqueLarResul <- DistinctElements(DistinctElements.CheckType.UniqueLar, uploadConsumerRawStr(submissionId), submissionId)
+          uniqueLarResult <- DistinctElements(DistinctElements.CheckType.UniqueLar, uploadConsumerRawStr(submissionId), submissionId)
           res <- validateAndPersistErrors(
             TransmittalLar(
               ts = header,
               uli = uliResult.uli,
               larsCount = -1,
               larsDistinctCount = -1,
-              uniqueLarsSpecificFields = uniqueLarResul.distinctCount,
+              uniqueLarsSpecificFields = uniqueLarResult.distinctCount,
               distinctUliCount = uliResult.distinctCount,
-              duplicateUliToLineNumbers = uliResult.uliToDuplicateLineNumbers.mapValues(_.toList)
-            ),
+              duplicateUliToLineNumbers = uliResult.uliToDuplicateLineNumbers.mapValues(_.toList)),
             editType,
             validationContext
           )
