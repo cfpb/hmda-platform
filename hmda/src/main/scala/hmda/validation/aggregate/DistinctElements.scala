@@ -2,7 +2,7 @@ package hmda.validation.aggregate
 
 import akka.NotUsed
 import akka.stream.Materializer
-import akka.stream.scaladsl.{Keep, Sink, Source}
+import akka.stream.scaladsl.{ Keep, Sink, Source }
 import akka.util.ByteString
 import com.typesafe.scalalogging.StrictLogging
 import hmda.model.filing.lar.LoanApplicationRegister
@@ -13,8 +13,8 @@ import hmda.util.QuarterTimeBarrier
 import hmda.util.streams.FlowUtils.framing
 import net.openhft.hashing.LongHashFunction
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.{ Failure, Success }
 
 object DistinctElements extends StrictLogging {
   case class Result(
@@ -94,15 +94,15 @@ object DistinctElements extends StrictLogging {
 
                   case CheckType.ActionTakenWithinRangeCounter =>
                     // Only look at LARs with an Action Taken Date within range of the target quarter
-                    if (QuarterTimeBarrier.actionTakenInQuarterRange(lar.action.actionTakenDate,submissionId.period)) {
-                      val hashed = hashString(lar.action.actionTakenType.code.toString.toUpperCase+lar.action.actionTakenDate.toString + lar.loan.ULI.toUpperCase())
+                    if (QuarterTimeBarrier.actionTakenInQuarterRange(lar.action.actionTakenDate, submissionId.period)) {
+                      val hashed = hashString(lar.action.actionTakenType.code.toString.toUpperCase + lar.action.actionTakenDate.toString + lar.loan.ULI.toUpperCase())
                       List((checkAndUpdate(state, hashed), rowNumber, lar.loan.ULI))
                     } else Nil
 
                   case CheckType.ActionTakenGreaterThanRangeCounter =>
                     // Only look at LARs with an Action Taken Date greater than the end date of the quarter
-                    if (QuarterTimeBarrier.actionTakenGreaterThanRange(lar.action.actionTakenDate,submissionId.period)) {
-                      val hashed = hashString(lar.action.actionTakenType.code.toString.toUpperCase+lar.action.actionTakenDate.toString + lar.loan.ULI.toUpperCase())
+                    if (QuarterTimeBarrier.actionTakenGreaterThanRange(lar.action.actionTakenDate, submissionId.period)) {
+                      val hashed = hashString(lar.action.actionTakenType.code.toString.toUpperCase + lar.action.actionTakenDate.toString + lar.loan.ULI.toUpperCase())
                       List((checkAndUpdate(state, hashed), rowNumber, lar.loan.ULI))
                     } else Nil
                 }
@@ -120,7 +120,7 @@ object DistinctElements extends StrictLogging {
 
               acc.copy(
                 totalCount = acc.totalCount + 1,
-                 uliToDuplicateLineNumbers = acc.uliToDuplicateLineNumbers.updated(
+                uliToDuplicateLineNumbers = acc.uliToDuplicateLineNumbers.updated(
                   uliOnWhichErrorTriggered,
                   acc.uliToDuplicateLineNumbers.getOrElse(uliOnWhichErrorTriggered, Vector.empty) :+ rowNumber
                 ),

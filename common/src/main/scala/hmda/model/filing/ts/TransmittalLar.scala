@@ -9,5 +9,5 @@ case class TransmittalLar(ts: TransmittalSheet,
                           distinctActionTakenUliCount: Long = 0L,
                           duplicateUliToLineNumbers: Map[String, List[Int]] = Map.empty,
                           duplicateUliToLineNumbersUliActionType: Map[String, List[Int]] = Map.empty,
-                          actionTakenDatesWithinRange:Long= 0L,
-                          actionTakenDatesGreaterThanRange: Long=0L)
+                          actionTakenDatesWithinRange: Long = 0L,
+                          actionTakenDatesGreaterThanRange: Long = 0L)

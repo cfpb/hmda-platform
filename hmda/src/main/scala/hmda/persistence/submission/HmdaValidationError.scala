@@ -465,7 +465,6 @@ object HmdaValidationError
         val s304 = S304.name
         val q600name = Q600.name
         val s306 = S306.name
-        val s307 = S307.name
         validationError match {
           case s306 @ SyntacticalValidationError(_, `s306`, _, fields) => //This is newly added for S306
             s306.copyWithFields(
@@ -528,7 +527,7 @@ object HmdaValidationError
           rawLineResult <- DistinctElements(DistinctElements.CheckType.RawLine, uploadConsumerRawStr(submissionId), submissionId)
           s306Result    <- DistinctElements(DistinctElements.CheckType.ULIActionTaken, uploadConsumerRawStr(submissionId), submissionId)
           actionTakenWithinRangeResults    <- DistinctElements(DistinctElements.CheckType.ActionTakenWithinRangeCounter, uploadConsumerRawStr(submissionId), submissionId)
-          actionTakenGreaterThanRangeResuts   <- DistinctElements(DistinctElements.CheckType.ActionTakenGreaterThanRangeCounter, uploadConsumerRawStr(submissionId), submissionId)
+          actionTakenGreaterThanRangeResults   <- DistinctElements(DistinctElements.CheckType.ActionTakenGreaterThanRangeCounter, uploadConsumerRawStr(submissionId), submissionId)
 
           res <- validateAndPersistErrors(
             TransmittalLar(
@@ -542,7 +541,7 @@ object HmdaValidationError
               distinctActionTakenUliCount = s306Result.distinctCount,
               duplicateUliToLineNumbersUliActionType = s306Result.uliToDuplicateLineNumbers.mapValues(_.toList),
               actionTakenDatesWithinRange = actionTakenWithinRangeResults.totalCount,
-              actionTakenDatesGreaterThanRange = actionTakenGreaterThanRangeResuts.totalCount
+              actionTakenDatesGreaterThanRange = actionTakenGreaterThanRangeResults.totalCount
             ),
             editType,
             validationContext
