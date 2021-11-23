@@ -10,6 +10,6 @@ object S307 extends EditCheck[TransmittalLar] {
   override def name: String = "S307"
 
   override def apply(tsLar: TransmittalLar): ValidationResult =
-    (tsLar.actionTakenDatesWithinRange is greaterThan(0)) and
-      (tsLar.actionTakenDatesGreaterThanRange is equalTo(0))
+    (tsLar.actionTakenDatesWithinRange is greaterThan(0L)) and
+      (tsLar.actionTakenDatesGreaterThanRange is equalTo(0L))
 }
