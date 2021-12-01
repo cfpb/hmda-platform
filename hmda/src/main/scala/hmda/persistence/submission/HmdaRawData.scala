@@ -38,7 +38,7 @@ object HmdaRawData extends HmdaTypedPersistentActor[HmdaRawDataCommand, HmdaRawD
           log.debug(s"Persisted: $data")
           maybeReplyTo match {
             case Some(replyTo) =>
-              evts.foreach(replyTo ! _)
+              replyTo ! evts
             case None => //Do Nothing
           }
         }

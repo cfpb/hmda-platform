@@ -168,14 +168,13 @@ private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(
     }
   }
 
-  private def uploadFile(submissionId: SubmissionId, hmdaRaw: EntityRef[HmdaRawDataCommand]): Flow[String, HmdaRawDataEvent, NotUsed] =
+  private def uploadFile(submissionId: SubmissionId, hmdaRaw: EntityRef[HmdaRawDataCommand]): Flow[String, Seq[HmdaRawDataEvent], NotUsed] =
     Flow[String]
       .grouped(100)
       .mapAsync(1)(lines => persistLines(hmdaRaw, submissionId, lines))
 
-  private def persistLines(entityRef: EntityRef[HmdaRawDataCommand], submissionId: SubmissionId, data: Seq[String]): Future[HmdaRawDataEvent] = {
-
-    val response: Future[HmdaRawDataEvent] = entityRef ? (ref => AddLines(submissionId, Instant.now.toEpochMilli, data, Some(ref)))
+  private def persistLines(entityRef: EntityRef[HmdaRawDataCommand], submissionId: SubmissionId, data: Seq[String]): Future[Seq[HmdaRawDataEvent]] = {
+    val response: Future[Seq[HmdaRawDataEvent]] = entityRef ? (ref => AddLines(submissionId, Instant.now.toEpochMilli, data, Some(ref)))
     response
   }
 }

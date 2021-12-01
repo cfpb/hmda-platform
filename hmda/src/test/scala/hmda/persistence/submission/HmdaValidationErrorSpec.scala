@@ -64,11 +64,11 @@ class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec with ScalaFut
       StreamConverters
         .fromInputStream(() => getClass.getResourceAsStream("/error_test_files/trigger_s304_s305.txt"))
         .via(framing("\n"))
-        .mapAsync(1)(data => hmdaRawData ? ((ref: ActorRef[HmdaRawDataEvent]) =>
+        .mapAsync(1)(data => hmdaRawData ? ((ref: ActorRef[Seq[HmdaRawDataEvent]]) =>
           AddLines(submissionId, Instant.now.toEpochMilli, List(data.utf8String), Some(ref))))
         .run()
         .futureValue
-
+      
       import ValidationProgress._
 
       // subscribe to progress updates; we expect an initial progress message, where no validation stage has yet started

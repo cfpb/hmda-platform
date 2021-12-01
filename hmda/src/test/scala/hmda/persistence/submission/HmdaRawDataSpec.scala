@@ -20,7 +20,7 @@ class HmdaRawDataSpec extends AkkaCassandraPersistenceSpec {
   val sharding = ClusterSharding(typedSystem)
   HmdaRawData.startShardRegion(sharding)
 
-  val hmdaRawProbe = TestProbe[HmdaRawDataEvent]
+  val hmdaRawProbe = TestProbe[Seq[HmdaRawDataEvent]]
 
   val submissionId = SubmissionId("12345", Period(2018, None), 1)
 
@@ -34,8 +34,7 @@ class HmdaRawDataSpec extends AkkaCassandraPersistenceSpec {
 
       hmdaRawData ! AddLines(submissionId, timestamp, List("data1", "data2"), Some(hmdaRawProbe.ref))
 
-      hmdaRawProbe.expectMessage(LineAdded(timestamp, "data1"))
-      hmdaRawProbe.expectMessage(LineAdded(timestamp, "data2"))
+      hmdaRawProbe.expectMessage(Seq(LineAdded(timestamp, "data1"), LineAdded(timestamp, "data2")))
     }
   }
 
