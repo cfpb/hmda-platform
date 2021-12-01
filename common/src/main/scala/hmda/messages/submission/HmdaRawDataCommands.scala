@@ -9,7 +9,7 @@ object HmdaRawDataCommands {
 
   sealed trait HmdaRawDataCommand extends Command
 
-  case class AddLines(submissionId: SubmissionId, timestamp: Long, data: Seq[String], maybeReplyTo: Option[ActorRef[HmdaRawDataEvent]])
+  case class AddLines(submissionId: SubmissionId, timestamp: Long, data: Seq[String], maybeReplyTo: Option[ActorRef[Seq[HmdaRawDataEvent]]])
     extends HmdaRawDataCommand
 
   case object StopRawData extends HmdaRawDataCommand
