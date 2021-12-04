@@ -190,8 +190,8 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
               case Period(2020, Some("Q1")) => transmittalSheetRepository2020Q1.deleteByLeiAndQuarter(lei = ts.lei)
               case Period(2020, Some("Q2")) => transmittalSheetRepository2020Q2.deleteByLeiAndQuarter(lei = ts.lei)
               case Period(2020, Some("Q3")) => transmittalSheetRepository2020Q3.deleteByLeiAndQuarter(lei = ts.lei)
-              case Period(2020, None) => transmittalSheetRepository2020.deleteByLeiAndQuarter(lei = ts.lei)
-              case Period(2021, None) => transmittalSheetRepository2021.deleteByLeiAndQuarter(lei = ts.lei)
+              case Period(2020, None) => transmittalSheetRepository2020.deleteByLei(lei = ts.lei)
+              case Period(2021, None) => transmittalSheetRepository2021.deleteByLei(lei = ts.lei)
               case Period(2021, Some("Q1")) => transmittalSheetRepository2021Q1.deleteByLeiAndQuarter(lei = ts.lei)
               case Period(2021, Some("Q2")) => transmittalSheetRepository2021Q2.deleteByLeiAndQuarter(lei = ts.lei)
               case Period(2021, Some("Q3")) => transmittalSheetRepository2021Q3.deleteByLeiAndQuarter(lei = ts.lei)
@@ -289,8 +289,8 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
               case Period(2020, Some("Q1")) => larRepository2020Q1.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
               case Period(2020, Some("Q2")) => larRepository2020Q2.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
               case Period(2020, Some("Q3")) => larRepository2020Q3.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-              case Period(2020, None) => larRepository2020.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-              case Period(2021, None) => larRepository2021.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2020, None) => larRepository2020.deleteByLei(lar.larIdentifier.LEI)
+              case Period(2021, None) => larRepository2021.deleteByLei(lar.larIdentifier.LEI)
               case Period(2021, Some("Q1")) => larRepository2021Q1.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
               case Period(2021, Some("Q2")) => larRepository2021Q2.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
               case Period(2021, Some("Q3")) => larRepository2021Q3.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
@@ -337,11 +337,11 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
                 )
               case Period(2020, None) =>
                 larRepository2020.insert(
-                  LarConverter(lar = lar, 2020, isQuarterly = true)
+                  LarConverter(lar = lar, 2020)
                 )
               case Period(2021, None) =>
                 larRepository2021.insert(
-                  LarConverter(lar = lar, 2021, isQuarterly = true)
+                  LarConverter(lar = lar, 2021)
                 )
               case Period(2021, Some("Q1")) =>
                 larRepository2021Q1.insert(
