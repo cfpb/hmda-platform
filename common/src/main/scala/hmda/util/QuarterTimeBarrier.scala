@@ -49,6 +49,7 @@ object QuarterTimeBarrier {
       case Period(2020, Some("Q2")) => actionTakenDateLocal.isBetween(q12020EndDate, q22020EndDate)
       // Action Taken Date is after Q2 2020 Ends and on/before Q3 2020 filing ends
       case Period(2020, Some("Q3")) => actionTakenDateLocal.isBetween(q22020EndDate, q32020EndDate)
+      case Period(2020, None) => true
 
       //Action Taken Date is on of before the end date of Q1 2021
       case Period(2021, Some("Q1")) => actionTakenDateLocal.isOnOrBefore(q12021EndDate)
@@ -56,7 +57,7 @@ object QuarterTimeBarrier {
       case Period(2021, Some("Q2")) => actionTakenDateLocal.isBetween(q12021EndDate, q22021EndDate)
       // Action Taken Date is after Q2 2021 Ends and on/before Q3 2021 filing ends
       case Period(2021, Some("Q3")) => actionTakenDateLocal.isBetween(q22021EndDate, q32021EndDate)
-
+      case Period(2021, None) => true
 
       //Action Taken Date is on of before the end date of Q1 2022
       case Period(2022, Some("Q1")) => actionTakenDateLocal.isOnOrBefore(q12022EndDate)
@@ -64,6 +65,11 @@ object QuarterTimeBarrier {
       case Period(2022, Some("Q2")) => actionTakenDateLocal.isBetween(q12022EndDate, q22022EndDate)
       // Action Taken Date is after Q2 2022 Ends and on/before Q3 2022 filing ends
       case Period(2022, Some("Q3")) => actionTakenDateLocal.isBetween(q22022EndDate, q32022EndDate)
+      case Period(2022, None) => true
+
+
+
+
     }
   }
 
@@ -73,14 +79,18 @@ object QuarterTimeBarrier {
         case Period(2020, Some("Q1")) => actionTakenDateLocal.isAfter(q12020EndDate)
         case Period(2020, Some("Q2")) => actionTakenDateLocal.isAfter(q22020EndDate)
         case Period(2020, Some("Q3")) => actionTakenDateLocal.isAfter(q32020EndDate)
+        case Period(2020, None) => false
 
         case Period(2021, Some("Q1")) => actionTakenDateLocal.isAfter(q12021EndDate)
         case Period(2021, Some("Q2")) =>  actionTakenDateLocal.isAfter(q22021EndDate)
         case Period(2021, Some("Q3")) =>  actionTakenDateLocal.isAfter(q32021EndDate)
+        case Period(2021, None) => false
 
         case Period(2022, Some("Q1")) => actionTakenDateLocal.isAfter(q12022EndDate)
         case Period(2022, Some("Q2")) =>  actionTakenDateLocal.isAfter(q22022EndDate)
         case Period(2022, Some("Q3")) => actionTakenDateLocal.isAfter(q32022EndDate)
+        case Period(2022, None) => false
+
       }
     }
 }
