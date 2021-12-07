@@ -1,28 +1,27 @@
 package hmda.api.http.filing.submissions
 
 import java.time.Instant
-
 import akka.NotUsed
 import akka.actor.typed.ActorSystem
-import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import akka.http.scaladsl.model.headers.RawHeader
-import akka.http.scaladsl.model.{ StatusCodes, Uri }
+import akka.http.scaladsl.model.{StatusCodes, Uri}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
-import akka.stream.scaladsl.{ Flow, Framing, Sink }
-import akka.util.{ ByteString, Timeout }
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{ cors, corsRejectionHandler }
+import akka.stream.scaladsl.{Flow, Framing, Sink}
+import akka.util.{ByteString, Timeout}
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.PathMatchers._
 import hmda.api.http.directives.QuarterlyFilingAuthorization._
 import hmda.api.http.model.ErrorResponse
 import hmda.api.ws.WebSocketProgressTracker
 import hmda.auth.OAuth2Authorization
-import hmda.messages.submission.HmdaRawDataCommands.{ AddLines, HmdaRawDataCommand }
-import hmda.messages.submission.HmdaRawDataEvents.HmdaRawDataEvent
+import hmda.messages.submission.HmdaRawDataCommands.{AddLines, HmdaRawDataCommand}
+import hmda.messages.submission.HmdaRawDataReplies.LinesAdded
 import hmda.messages.submission.SubmissionCommands.GetSubmission
-import hmda.messages.submission.SubmissionManagerCommands.{ SubmissionManagerCommand, UpdateSubmissionStatus }
+import hmda.messages.submission.SubmissionManagerCommands.{SubmissionManagerCommand, UpdateSubmissionStatus}
 import hmda.model.filing.submission._
 import hmda.persistence.submission.HmdaRawData.selectHmdaRawData
 import hmda.persistence.submission.SubmissionManager.selectSubmissionManager
@@ -31,8 +30,8 @@ import hmda.util.http.FilingResponseUtils._
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
 
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.{ Failure, Success }
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 object UploadHttpApi {
   def create(
@@ -168,13 +167,13 @@ private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(
     }
   }
 
-  private def uploadFile(submissionId: SubmissionId, hmdaRaw: EntityRef[HmdaRawDataCommand]): Flow[String, Seq[HmdaRawDataEvent], NotUsed] =
+  private def uploadFile(submissionId: SubmissionId, hmdaRaw: EntityRef[HmdaRawDataCommand]): Flow[String, LinesAdded, NotUsed] =
     Flow[String]
       .grouped(100)
       .mapAsync(1)(lines => persistLines(hmdaRaw, submissionId, lines))
 
-  private def persistLines(entityRef: EntityRef[HmdaRawDataCommand], submissionId: SubmissionId, data: Seq[String]): Future[Seq[HmdaRawDataEvent]] = {
-    val response: Future[Seq[HmdaRawDataEvent]] = entityRef ? (ref => AddLines(submissionId, Instant.now.toEpochMilli, data, Some(ref)))
+  private def persistLines(entityRef: EntityRef[HmdaRawDataCommand], submissionId: SubmissionId, data: Seq[String]): Future[LinesAdded] = {
+    val response: Future[LinesAdded] = entityRef ? (ref => AddLines(submissionId, Instant.now.toEpochMilli, data, Some(ref)))
     response
   }
 }

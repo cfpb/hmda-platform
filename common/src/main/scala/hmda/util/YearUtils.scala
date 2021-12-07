@@ -30,6 +30,8 @@ object YearUtils {
     quarter.fold(ifEmpty = s"$year")(quarter => s"$year-$quarter")
 
   case class Period(year: Int, quarter: Option[String]) {
+    println ("Year is: " + year)
+    println ("quarter is: " + quarter)
     override def toString: String = {
       quarter match {
         case Some(quarter) =>
