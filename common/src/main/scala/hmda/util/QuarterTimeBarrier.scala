@@ -43,6 +43,9 @@ object QuarterTimeBarrier {
   def actionTakenInQuarterRange(actionTakenDate: Int, period: Period):Boolean= {
     val actionTakenDateLocal = LocalDate.parse(actionTakenDate.toString, formatter)
     period match {
+      case Period(2018, None) => true
+      case Period(2019, None) => true
+        
       //Action Taken Date is on of before the end date of Q1 2020
       case Period(2020, Some("Q1")) => actionTakenDateLocal.isOnOrBefore(q12020EndDate)
       // Action Taken Date is after Q1 2020 Ends and on/before Q2 2020 filing ends
@@ -76,6 +79,9 @@ object QuarterTimeBarrier {
     def actionTakenGreaterThanRange(actionTakenDate: Int, period: Period):Boolean={
       val actionTakenDateLocal = LocalDate.parse(actionTakenDate.toString,formatter)
       period match {
+        case Period(2018, None) => false
+        case Period(2019, None) => false
+
         case Period(2020, Some("Q1")) => actionTakenDateLocal.isAfter(q12020EndDate)
         case Period(2020, Some("Q2")) => actionTakenDateLocal.isAfter(q22020EndDate)
         case Period(2020, Some("Q3")) => actionTakenDateLocal.isAfter(q32020EndDate)
