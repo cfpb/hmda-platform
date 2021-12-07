@@ -36,6 +36,8 @@ object YearUtils {
           s"$year-$quarter"
         case None =>
           year.toString
+        case _ =>
+          year.toString
       }
     }
   }

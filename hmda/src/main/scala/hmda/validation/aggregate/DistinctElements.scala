@@ -135,7 +135,7 @@ object DistinctElements extends StrictLogging {
 
     uploadProgram.onComplete {
       case Success(value) =>
-        logger.info(s"Check [$checkType] for distinct elements has passed for $submissionId")
+        logger.info(s"Check [$checkType] for newsest commit distinct elements has passed for $submissionId")
       case Failure(exception) =>
         logger.error(s"Failed checking [$checkType] for distinct elements $submissionId", exception)
     }

@@ -172,7 +172,6 @@ object FilingPersistence extends HmdaTypedPersistentActor[FilingCommand, FilingE
 
   private def makeEntityId(lei: String, year: Int, quarter: Option[String]) = {
     val period = YearUtils.period(year, quarter)
-    println("period: " + period)
     s"${FilingPersistence.name}-$lei-$period"
   }
 
