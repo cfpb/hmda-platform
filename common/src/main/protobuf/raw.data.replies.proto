@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.serialization";
+option optimize_for = SPEED;
+
+import "raw.data.events.proto";
+
+message LinesAddedMessage {
+    repeated LineAddedMessage lines = 1;
+}

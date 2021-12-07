@@ -10,7 +10,7 @@ import akka.stream.Materializer
 import akka.stream.scaladsl.StreamConverters
 import akka.util.Timeout
 import hmda.messages.submission.HmdaRawDataCommands.AddLines
-import hmda.messages.submission.HmdaRawDataEvents.HmdaRawDataEvent
+import hmda.messages.submission.HmdaRawDataReplies.LinesAdded
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents._
 import hmda.messages.submission.ValidationProgressTrackerCommands
@@ -64,7 +64,7 @@ class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec with ScalaFut
       StreamConverters
         .fromInputStream(() => getClass.getResourceAsStream("/error_test_files/trigger_s304_s305.txt"))
         .via(framing("\n"))
-        .mapAsync(1)(data => hmdaRawData ? ((ref: ActorRef[HmdaRawDataEvent]) =>
+        .mapAsync(1)(data => hmdaRawData ? ((ref: ActorRef[LinesAdded]) =>
           AddLines(submissionId, Instant.now.toEpochMilli, List(data.utf8String), Some(ref))))
         .run()
         .futureValue
