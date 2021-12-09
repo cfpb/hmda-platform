@@ -106,7 +106,7 @@ object CensusRecords {
       case 2021 =>
         indexedTract2021
       case _ =>
-        indexedTract2020
+        indexedTract2021
     }
   }
 
