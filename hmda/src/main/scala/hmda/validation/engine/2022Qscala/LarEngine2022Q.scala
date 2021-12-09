@@ -235,9 +235,7 @@ private[engine] object LarEngine2022Q extends ValidationEngine[LoanApplicationRe
     _2022.V721_1,
     _2022.V721_2,
     _2022.V720_1,
-    _2022.V720_2,
-    _2022.V662_1,
-    _2022.V662_2
+    _2022.V720_2
   )
 
   override val qualityChecks = Vector(
