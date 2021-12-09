@@ -411,7 +411,8 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
       case 2018 => indexTractMap2018
       case 2019 => indexTractMap2019
       case 2020 => indexTractMap2020
-      case _    => indexTractMap2020
+      case 2021 => indexTractMap2021
+      case _    => indexTractMap2021
     }
     val censusResult = indexTractMap.getOrElse(hmdaGeoTract, Census())
     val censusID =
