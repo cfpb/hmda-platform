@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: timed-guards
 data:
-  yearsAllowed: "2018,2019,2020,2021"
+  yearsAllowed: "2019,2020,2021"
   currentYear: "2020"
   quarterlyYearsAllowed: "2020,2021"
   q1Start: "December 10"
