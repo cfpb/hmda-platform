@@ -81,4 +81,8 @@ object Dependencies {
   lazy val alpakkaFile           = "com.lightbend.akka"         %% "akka-stream-alpakka-file"   % Version.alpkakkaFile
   lazy val scalacheckShapeless   = "com.github.alexarchambault" %% "scalacheck-shapeless_1.14"  % Version.scalacheckShapeless % Test
   lazy val diffx                 = "com.softwaremill.diffx"     %% "diffx-core"                 % Version.diffx % Test
+
+  // overriding the log4j-slf4j bridge used by spring, transitively brought in by s3mock
+  // this is needed because of CVE-2021-44228 https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228
+  lazy val log4jToSlf4j          = "org.apache.logging.log4j"   % "log4j-to-slf4j"              % Version.log4j % Test
 }
