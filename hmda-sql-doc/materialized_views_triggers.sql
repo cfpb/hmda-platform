@@ -33,6 +33,17 @@ BEGIN
 END;
 $function$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION refresh_mviews_2021() RETURNS trigger AS $function$
+BEGIN
+  REFRESH MATERIALIZED VIEW exemptions_2021;
+  REFRESH MATERIALIZED VIEW lar_count_using_exemption_by_agency_2021;
+  REFRESH MATERIALIZED VIEW open_end_credit_filers_by_agency_2021;
+  REFRESH MATERIALIZED VIEW open_end_credit_lar_count_by_agency_2021;
+  REFRESH MATERIALIZED VIEW submission_hist_mview;
+  RETURN NULL;
+END;
+$function$ LANGUAGE plpgsql;
+
 CREATE TRIGGER refresh_mviews_2018
 AFTER INSERT OR UPDATE OR DELETE ON hmda_user.loanapplicationregister2018 
 FOR EACH STATEMENT
@@ -48,6 +59,11 @@ AFTER INSERT OR UPDATE OR DELETE ON hmda_user.loanapplicationregister2020
 FOR EACH STATEMENT
 EXECUTE PROCEDURE refresh_mviews_2020();
 
+CREATE TRIGGER refresh_mviews_2021
+AFTER INSERT OR UPDATE OR DELETE ON hmda_user.loanapplicationregister2021
+FOR EACH STATEMENT
+EXECUTE PROCEDURE refresh_mviews_2021();
+
 /* 
  * See all triggers
  */
@@ -59,4 +75,5 @@ SELECT * FROM information_schema.triggers;
 DROP TRIGGER refresh_mviews_2018 on loanapplicationregister2018;
 DROP TRIGGER refresh_mviews_2019 on loanapplicationregister2019;
 DROP TRIGGER refresh_mviews_2020 on loanapplicationregister2020;
+DROP TRIGGER refresh_mviews_2021 on loanapplicationregister2021;
 
