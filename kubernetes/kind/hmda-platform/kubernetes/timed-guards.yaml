@@ -8,7 +8,7 @@ data:
   q3End: December 31
   q3Start: October 01
   quarterlyYearsAllowed: 2020,2021
-  yearsAllowed: 2018,2019,2020,2021
+  yearsAllowed: 2019,2020,2021
 kind: ConfigMap
 metadata:
   name: timed-guards
