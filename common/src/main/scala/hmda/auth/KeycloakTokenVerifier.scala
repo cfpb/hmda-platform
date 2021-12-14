@@ -27,7 +27,7 @@ class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment)(
   val realm   = config.getString("keycloak.realm")
   val authUrl = config.getString("keycloak.auth.server.url")
   val timeout = config.getInt("hmda.http.timeout").seconds
-  val fKid = getKid(keycloakDeployment)
+  var fKid = getKid(keycloakDeployment)
 
   override def verifyToken(token: String): Future[AccessToken] = {
     fKid.map { kid =>
@@ -36,6 +36,11 @@ class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment)(
         keycloakDeployment.getPublicKeyLocator.getPublicKey(kid, keycloakDeployment),
         keycloakDeployment.getRealmInfoUrl
       )
+    } recover {
+      case _ => {
+        fKid = getKid(keycloakDeployment)
+        throw new UninitializedFieldError("failed to get keycloak public key")
+      }
     }
   }
 
