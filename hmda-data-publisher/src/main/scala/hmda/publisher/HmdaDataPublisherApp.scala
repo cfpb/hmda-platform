@@ -43,7 +43,9 @@ object HmdaDataPublisherApp extends App with PGTableNameLoader {
   log.info("Using LAR 2020 Table: " + lar2020TableName + "\n")
   log.info("Using MLAR 2020 Table: " + mlar2020TableName + "\n")
   log.info("Using PANEl 2020 Table: " + panel2020TableName + "\n")
+  log.info("Using PANEl 2021 Table: " + panel2021TableName + "\n")
   log.info("Using TS 2020 Table: " + ts2020TableName + "\n")
+  log.info("Using TS 2021 Table: " + ts2021TableName + "\n")
   log.info("Using EMAIL Table: " + emailTableName + "\n")
 
   config.getObject("akka.quartz.schedules").forEach((k, v) => log.info(s"$k = ${v.render()}"))
