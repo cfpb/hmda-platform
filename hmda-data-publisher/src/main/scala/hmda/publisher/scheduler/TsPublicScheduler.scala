@@ -75,7 +75,7 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
   }
   override def receive: Receive = {
 
-    case schedule @ TsPublicScheduler2018 =>
+    case TsPublicScheduler2018 =>
       publishingGuard.runIfDataIsValid(Period.y2018, Scope.Public) {
         val fileName         = "2018_ts.txt"
         val zipDirectoryName = "2018_ts.zip"
@@ -83,11 +83,11 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
         val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
         val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
 
-        val result = tsPublicStream("2018", bucket, fullFilePath, fileName, schedule)
+        val result = tsPublicStream("2018", bucket, fullFilePath, fileName, TsPublicScheduler2018)
         //result.foreach(r => persistFileForQa(r.key, r.bucket, qaRepo2018))
       }
 
-    case schedule @ TsPublicScheduler2019 =>
+    case TsPublicScheduler2019 =>
       publishingGuard.runIfDataIsValid(Period.y2019, Scope.Public) {
         val fileName         = "2019_ts.txt"
         val zipDirectoryName = "2019_ts.zip"
@@ -95,11 +95,11 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
         val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
         val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
 
-        val result = tsPublicStream("2019", bucket, fullFilePath, fileName, schedule)
+        val result = tsPublicStream("2019", bucket, fullFilePath, fileName, TsPublicScheduler2019)
         //result.foreach(r => persistFileForQa(r.key, r.bucket, qaRepo2019))
       }
 
-    case schedule @ TsPublicScheduler2020 =>
+    case TsPublicScheduler2020 =>
       publishingGuard.runIfDataIsValid(Period.y2020, Scope.Public) {
         val fileName         = "2020_ts.txt"
         val zipDirectoryName = "2020_ts.zip"
@@ -107,7 +107,7 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
         val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
         val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
 
-        val result = tsPublicStream("2020", bucket, fullFilePath, fileName, schedule)
+        val result = tsPublicStream("2020", bucket, fullFilePath, fileName, TsPublicScheduler2020)
         //result.foreach(r => persistFileForQa(r.key, r.bucket, qaRepo2020))
       }
   }

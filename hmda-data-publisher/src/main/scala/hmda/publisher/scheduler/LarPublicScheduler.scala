@@ -74,7 +74,7 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
 
   }
   override def receive: Receive = {
-    case schedule @ LarPublicScheduler2018 =>
+    case LarPublicScheduler2018 =>
       publishingGuard.runIfDataIsValid(Period.y2018, Scope.Public) {
         val fileName         = "2018_lar.txt"
         val zipDirectoryName = "2018_lar.zip"
@@ -83,14 +83,14 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
         val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
 
         for {
-          result <- larPublicStream(mlarRepository2018.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, schedule)
+          result <- larPublicStream(mlarRepository2018.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, LarPublicScheduler2018)
           //_ <- persistFileForQa(result.key, result.bucket, ModifiedLarEntityImpl.parseFromPSVUnsafe, qaMlarRepository2018)
         } yield ()
 
 
       }
 
-    case schedule @ LarPublicScheduler2019 =>
+    case LarPublicScheduler2019 =>
       publishingGuard.runIfDataIsValid(Period.y2019, Scope.Public) {
         val fileName         = "2019_lar.txt"
         val zipDirectoryName = "2019_lar.zip"
@@ -99,13 +99,13 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
         val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
 
         for {
-          result <- larPublicStream(mlarRepository2019.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, schedule)
+          result <- larPublicStream(mlarRepository2019.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, LarPublicScheduler2019)
          // _ <- persistFileForQa(result.key, result.bucket, ModifiedLarEntityImpl.parseFromPSVUnsafe, qaMlarRepository2019)
         } yield ()
       }
 
 
-    case schedule @ LarPublicScheduler2020 =>
+    case LarPublicScheduler2020 =>
       publishingGuard.runIfDataIsValid(Period.y2020, Scope.Public) {
         val fileName         = "2020_lar.txt"
         val zipDirectoryName = "2020_lar.zip"
@@ -114,7 +114,7 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
         val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
 
         for {
-          result <- larPublicStream(mlarRepository2020.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, schedule)
+          result <- larPublicStream(mlarRepository2020.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, LarPublicScheduler2020)
           // _ <- persistFileForQa(result.key, result.bucket, ModifiedLarEntityImpl.parseFromPSVUnsafe, qaMlarRepository2020)
         } yield ()
       }

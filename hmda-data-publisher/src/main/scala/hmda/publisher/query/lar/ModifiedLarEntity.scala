@@ -1,13 +1,10 @@
 package hmda.publisher.query.lar
 
-import hmda.publisher.query.lar.LarEntityImpl2020.enforcePartialRead
 import hmda.util.conversion.ColumnDataFormatter
 import io.chrisdavenport.cormorant
 import io.chrisdavenport.cormorant.CSV
 import io.chrisdavenport.cormorant.implicits._
 import cormorant.generic.semiauto._
-import hmda.model.publication.Msa
-import hmda.publisher.query.lar.LarEntityImpl2019WithMsa.{enforcePartialRead, readNext}
 import hmda.util.PsvParsingCompanion
 
 case class ModifiedLarPartOne(

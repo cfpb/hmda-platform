@@ -13,7 +13,6 @@ import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
 import slick.basic.{DatabaseConfig, DatabasePublisher}
 import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
-import slick.lifted.MappedProjection
 
 import scala.concurrent.{ExecutionContext, Future}
 // $COVERAGE-OFF$
