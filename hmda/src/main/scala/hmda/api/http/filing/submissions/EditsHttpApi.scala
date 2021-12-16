@@ -4,7 +4,7 @@ import akka.NotUsed
 import akka.actor.typed.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.headers.{ContentDispositionType, ContentDispositionTypes, `Content-Disposition`}
+import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Disposition`}
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse, StatusCodes, Uri}
 import akka.http.scaladsl.server.Directives.{encodeResponse, handleRejections, _}
 import akka.http.scaladsl.server.Route

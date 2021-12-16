@@ -1,7 +1,6 @@
 package hmda.dataBrowser.api
 
 import akka.http.scaladsl.model.ContentTypes._
-import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{HttpEntity, StatusCodes, Uri}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
@@ -18,9 +17,7 @@ import org.slf4j.Logger
 import scala.util.{Failure, Success}
 
 object DataBrowserHttpApi {
-  def create(log: Logger, fileCache: S3FileService, query: QueryService, healthCheck: HealthCheckService)(
-    implicit mat: Materializer
-  ): Route =
+  def create(log: Logger, fileCache: S3FileService, query: QueryService, healthCheck: HealthCheckService): Route =
     new DataBrowserHttpApi(log, fileCache, query, healthCheck).dataBrowserRoutes
 }
 

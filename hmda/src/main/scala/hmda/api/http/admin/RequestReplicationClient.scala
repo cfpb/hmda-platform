@@ -3,9 +3,8 @@ package hmda.api.http.admin
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.headers.{Authorization, RawHeader}
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.Uri.Authority
-import akka.http.scaladsl.model.{HttpRequest, HttpResponse, Uri}
-import akka.http.scaladsl.server.{Directive, Directive0, Directives, Route, RouteResult}
+import akka.http.scaladsl.model.{HttpRequest, Uri}
+import akka.http.scaladsl.server.{Directive, Directive0, Directives, RouteResult}
 import akka.http.scaladsl.server.Directives._
 import hmda.api.http.admin.RequestReplicationClient.{InternalReplicationErrorResultCode, ResultCodeHeaderName}
 import org.slf4j.LoggerFactory
@@ -14,7 +13,6 @@ import cats.instances.future._
 import com.typesafe.config.Config
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
 
 trait RequestReplicationClient {
   def withRequestReplication: Directive0

@@ -3,7 +3,7 @@ package hmda.query.ts
 import hmda.parser.filing.ts.TsCsvParser.dateFromString
 import hmda.util.PsvParsingCompanion
 import hmda.util.conversion.ColumnDataFormatter
-import io.chrisdavenport.cormorant.{CSV, Read}
+import io.chrisdavenport.cormorant.CSV
 import io.chrisdavenport.cormorant
 import io.chrisdavenport.cormorant.implicits._
 

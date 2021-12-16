@@ -12,7 +12,6 @@ import akka.http.scaladsl.server.Route
 import akka.stream.scaladsl.{Flow, Source}
 import akka.util.ByteString
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.parser.institution.InstitutionCsvParser.parseBoolean
 import hmda.uli.api.model.ULIModel._
 import hmda.uli.api.model.ULIValidationErrorMessages.{invalidLoanIdLengthMessage, nonAlpanumericLoanIdMessage}
 import hmda.uli.validation.ULI._

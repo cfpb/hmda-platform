@@ -1,6 +1,6 @@
 package hmda.dataBrowser.repositories
 
-import hmda.dataBrowser.models.{ FilerInstitutionResponse2017, FilerInstitutionResponseLatest, QueryField, QueryFields, Statistic }
+import hmda.dataBrowser.models.{ FilerInstitutionResponse2017, FilerInstitutionResponseLatest, QueryField, Statistic }
 import io.lettuce.core.api.async.RedisAsyncCommands
 import monix.eval.Task
 
