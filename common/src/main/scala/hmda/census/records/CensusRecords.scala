@@ -12,8 +12,6 @@ object CensusRecords {
       .drop(1)
       .map { s =>
         val values = s.split("\\|", -1).map(_.trim).toList
-        println("WTF "+values(0))
-
         Census(
           collectionYear = values(0).toInt,
           msaMd = if (values(1).isEmpty) 0 else values(1).toInt,
