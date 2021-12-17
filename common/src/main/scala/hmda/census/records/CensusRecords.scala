@@ -12,14 +12,16 @@ object CensusRecords {
       .drop(1)
       .map { s =>
         val values = s.split("\\|", -1).map(_.trim).toList
+        println("WTF "+values(0))
+
         Census(
           collectionYear = values(0).toInt,
           msaMd = if (values(1).isEmpty) 0 else values(1).toInt,
           state = values(2),
           county = values(3),
           tract = values(4),
-          medianIncome = values(5).toInt,
-          population = values(6).toInt,
+          medianIncome = if (values(5).isEmpty) 0 else values(5).toInt,
+          population =  if (values(6).isEmpty) 0 else  values(6).toInt,
           minorityPopulationPercent = if (values(7).isEmpty) 0.0 else values(7).toDouble,
           occupiedUnits = if (values(8).isEmpty) 0 else values(8).toInt,
           oneToFourFamilyUnits = if (values(9).isEmpty) 0 else values(9).toInt,
@@ -138,7 +140,7 @@ object CensusRecords {
       case 2021 =>
         indexedTract2021
       case 2022 =>
-        indexedTract2021
+        indexedTract2022
       case _ =>
         indexedTract2021
     }

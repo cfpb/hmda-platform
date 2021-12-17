@@ -1,4 +1,3 @@
-
 Collection Year|MSA/MD|State|County|Census Tract|FFIEC Median Family Income|Population|Minority Population %|Number of Owner Occupied Units|Number of 1 to 4 Family Units|Tract MFI|Tract to MSA Income %|Median Age|Small County|MSA/MD Name
 2022||01|001|0201.00|||||||||T|
 2022||01|001|0202.00|||||||||T|
