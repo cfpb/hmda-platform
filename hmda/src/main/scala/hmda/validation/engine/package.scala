@@ -43,6 +43,6 @@ package object engine {
       case (2022, Some(_)) => LarEngine2022Q
       case (2022, None)    => LarEngine2022
       case _ =>
-        LarEngine2022 // TODO: determine what engine to pick if the user enters a year that is not covered
+        LarEngine2021 // TODO: determine what engine to pick if the user enters a year that is not covered
     }
 }
