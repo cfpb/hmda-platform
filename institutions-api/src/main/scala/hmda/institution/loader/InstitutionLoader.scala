@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory
 import scala.concurrent.duration._
 
 import scala.concurrent.ExecutionContext
+import scala.util.{ Failure, Success }
 // $COVERAGE-OFF$
 object InstitutionLoader extends App {
 
@@ -69,7 +70,7 @@ object InstitutionLoader extends App {
 
   source
     .via(FlowUtils.framing)
-    .drop(1)
+//    .drop(1)
     .map(line => line.utf8String)
     .map(x => InstitutionCsvParser(x))
     .filter { i =>
@@ -79,10 +80,13 @@ object InstitutionLoader extends App {
     .map(i => request(i.asJson.noSpaces))
     .mapAsync(parallelism)(req => Http().singleRequest(req))
     .map { res =>
-      res.entity.toStrict(100.seconds)
+      val response = res.entity.toStrict(100.seconds)
       res.status match {
         case StatusCodes.BadRequest =>
-          log.info(res.toString())
+          response.map(_.data.utf8String).onComplete {
+            case Success(data) => log.info(f"bad request response: [$data]")
+            case Failure(e) => log.error("failed to get bad request response.", e)
+          }
           badRequestCount += 1
         case StatusCodes.Created  => createdCount += 1
         case StatusCodes.Accepted => acceptedCount += 1
@@ -99,7 +103,7 @@ object InstitutionLoader extends App {
       if (totalCount != 0) {
         log.info(s"${createdCount} institutions created (${createdCount * 100 / totalCount}%)")
         log.info(s"${acceptedCount} institutions accepted (${acceptedCount * 100 / totalCount}%)")
-        log.info(s"${badRequestCount} institutions already exist (${badRequestCount * 100 / totalCount}%)")
+        log.info(s"${badRequestCount} institutions failed (${badRequestCount * 100 / totalCount}%)")
         log.info(s"${notFoundCount} institutions not found (${notFoundCount * 100 / totalCount}%)")
         log.info(s"${count - totalCount} institutions filtered out (${(count - totalCount) * 100 / totalCount}%)")
       }
