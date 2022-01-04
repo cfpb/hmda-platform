@@ -13,104 +13,66 @@ object CensusRecords {
       .map { s =>
         val values = s.split("\\|", -1).map(_.trim).toList
         Census(
-          collectionYear = values(0).toInt,
+          collectionYear = values.head.toInt,
           msaMd = if (values(1).isEmpty) 0 else values(1).toInt,
           state = values(2),
           county = values(3),
           tract = values(4),
           medianIncome = if (values(5).isEmpty) 0 else values(5).toInt,
-          population =  if (values(6).isEmpty) 0 else  values(6).toInt,
+          population = if (values(6).isEmpty) 0 else values(6).toInt,
           minorityPopulationPercent = if (values(7).isEmpty) 0.0 else values(7).toDouble,
           occupiedUnits = if (values(8).isEmpty) 0 else values(8).toInt,
           oneToFourFamilyUnits = if (values(9).isEmpty) 0 else values(9).toInt,
           tractMfi = if (values(10).isEmpty) 0 else values(10).toInt,
           tracttoMsaIncomePercent = if (values(11).isEmpty) 0.0 else values(11).toDouble,
           medianAge = if (values(12).isEmpty) -1 else values(12).toInt,
-          smallCounty = if (!values(13).isEmpty && values(13) == "S") true else false,
+          smallCounty = if (values(13).nonEmpty && values(13) == "S") true else false,
           name = values(14)
         )
       }
       .toList
   }
-  
-  val config = ConfigFactory.load()
 
-  val censusFileName2018 =
-      config.getString("hmda.census.fields.2018.filename")
+  private val config = ConfigFactory.load()
 
-  val censusFileName2019 =
-      config.getString("hmda.census.fields.2019.filename")
+  private val censusFileName2018 = config.getString("hmda.census.fields.2018.filename")
+  private val censusFileName2019 = config.getString("hmda.census.fields.2019.filename")
+  private val censusFileName2020 = config.getString("hmda.census.fields.2020.filename")
+  private val censusFileName2021 = config.getString("hmda.census.fields.2021.filename")
+  private val censusFileName2022 = config.getString("hmda.census.fields.2022.filename")
 
-  val censusFileName2020 =
-    config.getString("hmda.census.fields.2020.filename")
+  val (
+    indexedTract2018: Map[String, Census],
+    indexedCounty2018: Map[String, Census],
+    indexedSmallCounty2018: Map[String, Census]
+    ) = getCensus(censusFileName2018)
 
-  val censusFileName2021 =
-    config.getString("hmda.census.fields.2021.filename")
+  val (
+    indexedTract2019: Map[String, Census],
+    indexedCounty2019: Map[String, Census],
+    indexedSmallCounty2019: Map[String, Census]
+    ) = getCensus(censusFileName2019)
 
-  val censusFileName2022 =
-    config.getString("hmda.census.fields.2022.filename")
 
-  val (indexedTract2018: Map[String, Census], indexedCounty2018: Map[String, Census], indexedSmallCounty2018: Map[String, Census]) =
-    parseCensusFile(censusFileName2018).foldLeft((Map[String, Census](), Map[String, Census](), Map[String, Census]())) {
-      case ((m1, m2, m3), c) =>
-        (
-          m1 + (c.toHmdaTract  -> c),
-          m2 + (c.toHmdaCounty -> c),
-          if (c.smallCounty)
-            m3 + (c.toHmdaCounty -> c)
-          else m3
-        )
-    }
+  val (
+    indexedTract2020: Map[String, Census],
+    indexedCounty2020: Map[String, Census],
+    indexedSmallCounty2020: Map[String, Census]
+    ) = getCensus(censusFileName2020)
 
-  val (indexedTract2019: Map[String, Census], indexedCounty2019: Map[String, Census], indexedSmallCounty2019: Map[String, Census]) =
-    parseCensusFile(censusFileName2019).foldLeft((Map[String, Census](), Map[String, Census](), Map[String, Census]())) {
-      case ((m1, m2, m3), c) =>
-        (
-          m1 + (c.toHmdaTract  -> c),
-          m2 + (c.toHmdaCounty -> c),
-          if (c.smallCounty)
-            m3 + (c.toHmdaCounty -> c)
-          else m3
-        )
-    }
+  val (
+    indexedTract2021: Map[String, Census],
+    indexedCounty2021: Map[String, Census],
+    indexedSmallCounty2021: Map[String, Census]
+    ) = getCensus(censusFileName2021)
 
-  val (indexedTract2020: Map[String, Census], indexedCounty2020: Map[String, Census], indexedSmallCounty2020: Map[String, Census]) =
-    parseCensusFile(censusFileName2020).foldLeft((Map[String, Census](), Map[String, Census](), Map[String, Census]())) {
-      case ((m1, m2, m3), c) =>
-        (
-          m1 + (c.toHmdaTract  -> c),
-          m2 + (c.toHmdaCounty -> c),
-          if (c.smallCounty)
-            m3 + (c.toHmdaCounty -> c)
-          else m3
-        )
-    }
+  val (
+    indexedTract2022: Map[String, Census],
+    indexedCounty2022: Map[String, Census],
+    indexedSmallCounty2022: Map[String, Census]
+    ) = getCensus(censusFileName2022)
 
-  val (indexedTract2021: Map[String, Census], indexedCounty2021: Map[String, Census], indexedSmallCounty2021: Map[String, Census]) =
-    parseCensusFile(censusFileName2021).foldLeft((Map[String, Census](), Map[String, Census](), Map[String, Census]())) {
-      case ((m1, m2, m3), c) =>
-        (
-          m1 + (c.toHmdaTract  -> c),
-          m2 + (c.toHmdaCounty -> c),
-          if (c.smallCounty)
-            m3 + (c.toHmdaCounty -> c)
-          else m3
-        )
-    }
-
-  val (indexedTract2022: Map[String, Census], indexedCounty2022: Map[String, Census], indexedSmallCounty2022: Map[String, Census]) =
-    parseCensusFile(censusFileName2022).foldLeft((Map[String, Census](), Map[String, Census](), Map[String, Census]())) {
-      case ((m1, m2, m3), c) =>
-        (
-          m1 + (c.toHmdaTract  -> c),
-          m2 + (c.toHmdaCounty -> c),
-          if (c.smallCounty)
-            m3 + (c.toHmdaCounty -> c)
-          else m3
-        )
-    }
-
-  def yearTractMap (year: Int) = {
+  def yearTractMap(year: Int): Map[String, Census] = {
     year match {
       case 2018 =>
         indexedTract2018
@@ -127,7 +89,7 @@ object CensusRecords {
     }
   }
 
-  def yearCountyMap (year: Int) = {
+  def yearCountyMap(year: Int): Map[String, Census] = {
     year match {
       case 2018 =>
         indexedCounty2018
@@ -146,14 +108,14 @@ object CensusRecords {
 
   def getCensusOnTractandCounty(tract: String, county: String, year: Int): Census = {
     val tractMap = yearTractMap(year)
-    tractMap.getOrElse(tract, getCensusFromCounty(county,year))
+    tractMap.getOrElse(tract, getCensusFromCounty(county, year))
   }
 
   private def getCensusFromCounty(county: String, year: Int): Census = {
     val countyMap = yearCountyMap(year)
     val countyCensus = countyMap.getOrElse(county, Census())
     Census(
-      msaMd = countyCensus.msaMd, 
+      msaMd = countyCensus.msaMd,
       state = countyCensus.state,
       county = countyCensus.county,
       medianIncome = countyCensus.medianIncome,
@@ -162,5 +124,16 @@ object CensusRecords {
     )
   }
 
+  private def getCensus(fileName: String): (Map[String, Census], Map[String, Census], Map[String, Census]) =
+    parseCensusFile(fileName).foldLeft((Map[String, Census](), Map[String, Census](), Map[String, Census]())) {
+      case ((m1, m2, m3), c) =>
+        (
+          m1 + (c.toHmdaTract -> c),
+          m2 + (c.toHmdaCounty -> c),
+          if (c.smallCounty)
+            m3 + (c.toHmdaCounty -> c)
+          else m3
+        )
+    }
 
 }
