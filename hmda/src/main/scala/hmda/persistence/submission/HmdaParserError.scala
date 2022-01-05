@@ -76,8 +76,8 @@ object HmdaParserError extends HmdaTypedPersistentActor[SubmissionProcessingComm
           .onComplete {
             case Success(_) =>
               ctx.asScala.self ! CompleteParsing(submissionId)
-            case Failure(_) =>
-              log.error(s"Uploading failed for $submissionId")
+            case Failure(e) =>
+              log.error(s"Uploading failed for $submissionId", e)
           }
 
         Effect.none
