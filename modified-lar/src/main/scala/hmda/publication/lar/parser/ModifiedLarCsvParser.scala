@@ -181,7 +181,7 @@ object ModifiedLarCsvParser {
   }
 
   private def converDebtToIncomeRatio(ratio: String): String = ratio match {
-    case x if x == "NA" || x == "Exempt" => x
+    case x if x == "NA" || x == "Exempt"|| x==""  => x
     case _ =>
       ratio.toDouble.toInt match {
         case x if x < 20                 => "<20%"
@@ -205,7 +205,7 @@ object ModifiedLarCsvParser {
   private def convertMultifamilyAffordableUnits(multifamilyUnits: String,
                                                 totalUnits: Int): String =
     multifamilyUnits match {
-      case x if x == "NA" || x == "Exempt" => x
+      case x if x == "NA" || x == "Exempt" || x=="" => x
       case _ =>
         val percentage = (multifamilyUnits.toFloat / totalUnits.toFloat) * 100
         round(percentage).toString
@@ -213,7 +213,7 @@ object ModifiedLarCsvParser {
 
   private def convertPropertyValue(propertyValue: String): String =
     propertyValue match {
-      case x if x == "NA" || x == "Exempt" => x
+      case x if x == "NA" || x == "Exempt" || x=="" => x
       case x                               => roundToMidPoint(x.toDouble.toInt).toString
     }
 

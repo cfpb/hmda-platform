@@ -114,7 +114,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
     QuartzSchedulerExtension(context.system)
       .schedule("LarScheduler2020", self, LarScheduler2020)
     QuartzSchedulerExtension(context.system)
-      .schedule("LarScheduler2021", self, LarScheduler2020)
+      .schedule("LarScheduler2021", self, LarScheduler2021)
     QuartzSchedulerExtension(context.system)
       .schedule("LarSchedulerLoanLimit2019", self, LarSchedulerLoanLimit2019)
     QuartzSchedulerExtension(context.system)

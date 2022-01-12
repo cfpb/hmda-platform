@@ -39,5 +39,6 @@ object Version {
   val cormorant              = "0.3.0"
   val kantantCsv             = "0.6.1"
   val scalacheckShapeless    = "1.2.3"
-  val diffx    = "0.4.0"
+  val diffx                  = "0.4.0"
+  val log4j                  = "2.15.0"
 }

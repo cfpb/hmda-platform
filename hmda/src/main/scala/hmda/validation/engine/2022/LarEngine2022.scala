@@ -4,13 +4,13 @@ package hmda.validation.engine
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.lar.quality._2019._
-import hmda.validation.rules.lar.quality.{_2020 => quality2020, _2021 => quality2021, _2022 => quality2022}
+import hmda.validation.rules.lar.quality.{common, _2020 => quality2020, _2021 => quality2021, _2022 => quality2022}
 import hmda.validation.rules.lar.quality.common._
 import hmda.validation.rules.lar.syntactical.{S300, S301}
 import hmda.validation.rules.lar.validity.{_2020, _2022, _}
 import hmda.census.records.CensusRecords
 
-private[engine] object LarEngine2022Q extends ValidationEngine[LoanApplicationRegister] {
+private[engine] object LarEngine2022 extends ValidationEngine[LoanApplicationRegister] {
 
   override def syntacticalChecks(ctx: ValidationContext) = Vector(
     S300,
@@ -52,6 +52,7 @@ private[engine] object LarEngine2022Q extends ValidationEngine[LoanApplicationRe
     V625_1,
     V625_2.withIndexedTracts(CensusRecords.indexedTract2022),
     V626.withIndexedCounties(CensusRecords.indexedCounty2022),
+    V627.withIndexedCounties(CensusRecords.indexedCounty2022),
     V628_1,
     V628_2,
     V628_3,
@@ -232,6 +233,7 @@ private[engine] object LarEngine2022Q extends ValidationEngine[LoanApplicationRe
     V713,
     V714,
     V715,
+    _2020.V716.withIndexedCounties(CensusRecords.indexedCounty2022),
     _2022.V721_1,
     _2022.V721_2,
     _2022.V720_1,

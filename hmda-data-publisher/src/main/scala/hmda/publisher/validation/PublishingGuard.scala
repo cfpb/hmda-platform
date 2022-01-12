@@ -66,6 +66,7 @@ class PublishingGuard(
           case Period.y2018   => db2018.validationLarData2018
           case Period.y2019   => db2019.validationLarData2019
           case Period.y2020   => db2020.validationLarData2020(db2020.Year2020Period.Whole)
+          case Period.y2021   => db2021.validationLarData2021(db2021.Year2021Period.Whole)
           case Period.y2020Q1 => db2020.validationLarData2020(db2020.Year2020Period.Q1)
           case Period.y2020Q2 => db2020.validationLarData2020(db2020.Year2020Period.Q2)
           case Period.y2020Q3 => db2020.validationLarData2020(db2020.Year2020Period.Q3)
@@ -82,12 +83,16 @@ class PublishingGuard(
           case Period.y2018   => db2018.validationTSData2018
           case Period.y2019   => db2019.validationTSData2019
           case Period.y2020   => db2020.validationTSData2020(db2020.Year2020Period.Whole)
+          case Period.y2021   => db2021.validationTSData2021(db2021.Year2021Period.Whole)
           case Period.y2020Q1 => db2020.validationTSData2020(db2020.Year2020Period.Q1)
           case Period.y2020Q2 => db2020.validationTSData2020(db2020.Year2020Period.Q2)
           case Period.y2020Q3 => db2020.validationTSData2020(db2020.Year2020Period.Q3)
           case Period.y2021Q1 => db2021.validationTSData2021(db2021.Year2021Period.Q1)
           case Period.y2021Q2 => db2021.validationTSData2021(db2021.Year2021Period.Q2)
           case Period.y2021Q3 => db2021.validationTSData2021(db2021.Year2021Period.Q3)
+          case Period.y2022Q1 => db2022.validationTSData2022(db2022.Year2022Period.Q1)
+          case Period.y2022Q2 => db2022.validationTSData2022(db2022.Year2022Period.Q2)
+          case Period.y2022Q3 => db2022.validationTSData2022(db2022.Year2022Period.Q3)
           case p => throw new IllegalArgumentException("Illegal period used for fetching ts data: " + p.toString)
         }
         List(

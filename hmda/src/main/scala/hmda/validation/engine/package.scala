@@ -13,6 +13,8 @@ package object engine {
       case (2021, None)    => TsEngine2021
       case (2021, Some(_)) => TsEngine2021Q
       case (2022, Some(_)) => TsEngine2022Q
+      case (2022, None) => TsEngine2022
+
       case _               => TsEngine2021 // TODO: determine what engine to pick if the user enters a year that is not covered
     }
 
@@ -25,6 +27,7 @@ package object engine {
       case (2021, None)    => TsLarEngine2021
       case (2021, Some(_)) => TsLarEngine2021Q
       case (2022, Some(_)) => TsLarEngine2022Q
+      case (2022, None)    => TsLarEngine2022
       case _ =>
         TsLarEngine2021 // TODO: determine what engine to pick if the user enters a year that is not covered
     }
@@ -38,6 +41,7 @@ package object engine {
       case (2021, None)    => LarEngine2021
       case (2021, Some(_)) => LarEngine2021Q
       case (2022, Some(_)) => LarEngine2022Q
+      case (2022, None)    => LarEngine2022
       case _ =>
         LarEngine2021 // TODO: determine what engine to pick if the user enters a year that is not covered
     }

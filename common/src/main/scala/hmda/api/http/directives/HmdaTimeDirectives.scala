@@ -29,11 +29,11 @@ object HmdaTimeDirectives {
         val responseTime = end - start
         log.info(s"[${resp.status.intValue()}] ${request.method.name} ${request.uri} took: $responseTime ms")
 
-      case Success(Rejected(_)) =>
-        log.debug("Request was rejected, not timing it")
+      case Success(Rejected(r)) =>
+        log.debug("Request was rejected, not timing it, reject reasons: {}", r)
 
-      case Failure(_) =>
-        log.debug("Request failed, not timing it")
+      case Failure(e) =>
+        log.error("Request failed, not timing it", e)
     }
   }
 
@@ -42,7 +42,9 @@ object HmdaTimeDirectives {
     extractRequestContext.flatMap { ctx =>
       val onDone = onRequest(ctx.request)
       mapInnerRoute { inner =>
+        var timedOut = false
         withRequestTimeoutResponse { _ =>
+          timedOut = true
           onDone(Success(Complete(timeoutResponse)))
           timeoutResponse
         } {
@@ -50,6 +52,9 @@ object HmdaTimeDirectives {
             resultFuture.map {
               case c @ Complete(response) =>
                 Complete(response.mapEntity { entity =>
+                  if (timedOut) {
+                    log.warn("request {} {} timed out, was responded early, actual response: {}", ctx.request.method.name, ctx.request.uri, response)
+                  }
                   if (entity.isKnownEmpty()) {
                     onDone(Success(c))
                     entity
