@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-public-key-configmap
+data:
+  keycloak.publicKey.modulus: ""
+  keycloak.publicKey.exponent: ""

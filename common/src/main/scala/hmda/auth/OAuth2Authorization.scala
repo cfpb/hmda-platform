@@ -109,31 +109,24 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
   protected def authorizeToken: Directive1[VerifiedToken] =
     bearerToken.flatMap {
       case Some(token) =>
-        onComplete(tokenVerifier.verifyToken(token)).flatMap {
-          _.map { t =>
-            val lei: String = t.getOtherClaims.asScala
-              .get("lei")
-              .map(_.toString)
-              .getOrElse("")
-            val verifiedToken = VerifiedToken(
-              token,
-              t.getId,
-              t.getName,
-              t.getPreferredUsername,
-              t.getEmail,
-              t.getResourceAccess().get(clientId).getRoles.asScala.toSeq,
-              lei
-            )
-            attribute(tokenAttributeRefKey).flatMap(tokenRef => {
-              tokenRef.set(verifiedToken)
-              provide(verifiedToken)
-            })
-          }.recover {
-            case ex: Throwable =>
-              logger.error("Authorization Token could not be verified", ex)
-              reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]]
-          }.get
-        }
+        val t = tokenVerifier.verifyToken(token)
+        val lei: String = t.getOtherClaims.asScala
+          .get("lei")
+          .map(_.toString)
+          .getOrElse("")
+        val verifiedToken = VerifiedToken(
+          token,
+          t.getId,
+          t.getName,
+          t.getPreferredUsername,
+          t.getEmail,
+          t.getResourceAccess().get(clientId).getRoles.asScala.toSeq,
+          lei
+        )
+        attribute(tokenAttributeRefKey).flatMap(tokenRef => {
+          tokenRef.set(verifiedToken)
+          provide(verifiedToken)
+        })
       case None =>
         withLocalModeBypass {
           val r: Route = (extractRequest { req =>

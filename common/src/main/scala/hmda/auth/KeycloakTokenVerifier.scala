@@ -1,20 +1,24 @@
 package hmda.auth
 
 import akka.actor.typed.ActorSystem
-import akka.actor.typed.scaladsl.adapter._
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.HttpRequest
 import akka.stream.Materializer
 import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 import io.circe.generic.auto._
 import io.circe.parser.decode
-import org.keycloak.RSATokenVerifier
 import org.keycloak.adapters.KeycloakDeployment
 import org.keycloak.representations.AccessToken
+import java.security.KeyFactory
+import org.keycloak.jose.jws.AlgorithmType
+import org.keycloak.adapters.KeycloakDeployment
+import java.math.BigInteger
+import java.security.spec.RSAPublicKeySpec
+import java.security.KeyFactory
+import java.util.Base64
+import org.keycloak.TokenVerifier
 
 import scala.concurrent.duration._
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
 
 // $COVERAGE-OFF$
 class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment)(
@@ -27,37 +31,17 @@ class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment)(
   val realm   = config.getString("keycloak.realm")
   val authUrl = config.getString("keycloak.auth.server.url")
   val timeout = config.getInt("hmda.http.timeout").seconds
-  var fKid = getKid(keycloakDeployment)
+  
+  val keyFactory = KeyFactory.getInstance(AlgorithmType.RSA.toString)
+  val urlDecoder = Base64.getUrlDecoder
+  val modulus = new BigInteger(1, urlDecoder.decode(config.getString("keycloak.publicKey.modulus")))
+  val publicExponent = new BigInteger(1, urlDecoder.decode(config.getString("keycloak.publicKey.exponent")))
+  val publicKey = keyFactory.generatePublic(new RSAPublicKeySpec(modulus, publicExponent))
 
-  override def verifyToken(token: String): Future[AccessToken] = {
-    fKid.map { kid =>
-      RSATokenVerifier.verifyToken(
-        token,
-        keycloakDeployment.getPublicKeyLocator.getPublicKey(kid, keycloakDeployment),
-        keycloakDeployment.getRealmInfoUrl
-      )
-    } recover {
-      case _ => {
-        fKid = getKid(keycloakDeployment)
-        throw new UninitializedFieldError("failed to get keycloak public key")
-      }
-    }
-  }
-
-  private def getKid(keycloakDeployment: KeycloakDeployment): Future[String] = {
-    val certUrl =
-      s"${authUrl}realms/$realm/protocol/openid-connect/certs"
-    val fResponse     = Http()(system.toClassic).singleRequest(HttpRequest(uri = certUrl))
-    val fStrictEntity = fResponse.map(response => response.entity.toStrict(timeout))
-    val f = for {
-      _ <- fResponse
-      s <- fStrictEntity
-      e <- s.map(_.dataBytes)
-      r = e
-        .runFold(ByteString.empty) { case (acc, b) => acc ++ b }
-        .map(parseAuthKey)
-    } yield r
-    f.flatMap(a => a.map(_.kid))
+  def verifyToken(token: String): AccessToken = {
+    val tokenVerifier = TokenVerifier.create(token, classOf[AccessToken])
+      .withDefaultChecks()
+    tokenVerifier.publicKey(publicKey).verify().getToken
   }
 
   private def parseAuthKey(line: ByteString): AuthKey = {
