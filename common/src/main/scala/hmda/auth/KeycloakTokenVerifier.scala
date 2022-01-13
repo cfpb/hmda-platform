@@ -39,7 +39,7 @@ class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment)(
   val publicKey = keyFactory.generatePublic(new RSAPublicKeySpec(modulus, publicExponent))
 
   def verifyToken(token: String): AccessToken = {
-    val tokenVerifier = TokenVerifier.create(token, classOf[AccessToken])
+    val tokenVerifier = TokenVerifier.create(token, classOf[AccessToken]).realmUrl(realm)
       .withDefaultChecks()
     tokenVerifier.publicKey(publicKey).verify().getToken
   }
