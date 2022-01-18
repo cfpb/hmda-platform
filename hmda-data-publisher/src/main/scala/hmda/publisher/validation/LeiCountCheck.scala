@@ -29,8 +29,8 @@ class LeiCountCheck(dbConfig: DatabaseConfig[JdbcProfile], tsData: TsData, larDa
       Either.cond(
         isOk,
         (),
-        s"Number of distinct LEIs in LAR and TS mismatch by more than allowed error margin ($allowedErrorMargin). " +
-          s"LAR: $larCount, TS: $tsCount"
+        s"Number of distinct LEIs in LAR, TS, and Panel mismatch by more than allowed error margin ($allowedErrorMargin). " +
+          s"LAR: $larCount, TS: $tsCount, Panel: $panelCount"
       )
     }
 
