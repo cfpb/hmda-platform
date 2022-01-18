@@ -6,8 +6,6 @@ import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax.PredicateOps
 import hmda.validation.dsl.ValidationResult
 import hmda.validation.rules.EditCheck
-import hmda.validation.rules.lar.validity._2020.V696_2.{ausOtherList, invalidAUSResult}
-
 
 object Q657 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q657"

@@ -8,7 +8,6 @@ import hmda.calculator.api.RateSpreadResponse
 import hmda.calculator.api.model.RateSpreadRequest
 
 import scala.collection.mutable
-import scala.collection.mutable.Map
 import scala.util.{ Failure, Success, Try }
 
 object APORCommands {

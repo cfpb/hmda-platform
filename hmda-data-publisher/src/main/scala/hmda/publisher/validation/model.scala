@@ -1,6 +1,6 @@
 package hmda.publisher.validation
 
-import slick.lifted.{ AbstractTable, Query, Rep, TableQuery }
+import slick.lifted.{ AbstractTable, Query, Rep }
 
 // abstraction for transmittal sheet tables to use in validation checks. Abstracts over years
 trait TsData {

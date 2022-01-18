@@ -12,7 +12,7 @@ import hmda.messages.filing.FilingCommands._
 import hmda.messages.filing.FilingEvents.{ FilingCreated, FilingEvent, SubmissionAdded, SubmissionUpdated }
 import hmda.messages.institution.InstitutionCommands.AddFiling
 import hmda.model.filing.FilingDetails
-import hmda.model.filing.submission.{ Signed, SubmissionStatus }
+import hmda.model.filing.submission.Signed
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.utils.YearUtils

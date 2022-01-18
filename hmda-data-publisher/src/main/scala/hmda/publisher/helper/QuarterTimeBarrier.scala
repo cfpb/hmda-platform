@@ -2,7 +2,6 @@ package hmda.publisher.helper
 
 import java.time.{Clock, LocalDate}
 
-import hmda.publisher.HmdaDataPublisherApp.log
 import hmda.publisher.validation.PublishingGuard.Period
 import hmda.util.BankFilterUtils.config
 import hmda.util.Filer

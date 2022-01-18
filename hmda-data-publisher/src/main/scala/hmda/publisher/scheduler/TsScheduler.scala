@@ -139,7 +139,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
 
   override def receive: Receive = {
 
-    case schedule @ TsScheduler2018 =>
+    case TsScheduler2018 =>
       publishingGuard.runIfDataIsValid(Period.y2018, Scope.Private) {
         val now           = LocalDateTime.now().minusDays(1)
         val formattedDate = fullDate.format(now)
@@ -155,10 +155,10 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
           uploadFileToS3(s3Sink, tsRepository2018.getAllSheets(getFilterList()))
 
         results.foreach(_ => persistFileForQa(fullFilePath, qaTsRepository2018))
-        results.onComplete(reportPublishingResult(_, schedule, fullFilePath))
+        results.onComplete(reportPublishingResult(_, TsScheduler2018, fullFilePath))
       }
 
-    case schedule @ TsScheduler2019 =>
+    case TsScheduler2019 =>
       publishingGuard.runIfDataIsValid(Period.y2019, Scope.Private) {
         val now           = LocalDateTime.now().minusDays(1)
         val formattedDate = fullDate.format(now)
@@ -174,10 +174,10 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
           uploadFileToS3(s3Sink, tsRepository2019.getAllSheets(getFilterList()))
 
         results.foreach(_ => persistFileForQa(fullFilePath, qaTsRepository2019))
-        results.onComplete(reportPublishingResult(_, schedule, fullFilePath))
+        results.onComplete(reportPublishingResult(_, TsScheduler2019, fullFilePath))
       }
 
-    case schedule @ TsScheduler2020 =>
+    case TsScheduler2020 =>
       publishingGuard.runIfDataIsValid(Period.y2020, Scope.Private) {
         val now           = LocalDateTime.now().minusDays(1)
         val formattedDate = fullDate.format(now)
@@ -193,9 +193,9 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
           uploadFileToS3(s3Sink, tsRepository2020.getAllSheets(getFilterList()))
 
         results.foreach(_ => persistFileForQa(fullFilePath, qaTsRepository2020))
-        results.onComplete(reportPublishingResult(_, schedule, fullFilePath))
+        results.onComplete(reportPublishingResult(_, TsScheduler2020, fullFilePath))
       }
-    case schedule @ TsScheduler2021 =>
+    case TsScheduler2021 =>
       publishingGuard.runIfDataIsValid(Period.y2021, Scope.Private) {
         val now           = LocalDateTime.now().minusDays(1)
         val formattedDate = fullDate.format(now)
@@ -211,10 +211,10 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
           uploadFileToS3(s3Sink, tsRepository2021.getAllSheets(getFilterList()))
 
         results.foreach(_ => persistFileForQa(fullFilePath, qaTsRepository2021))
-        results.onComplete(reportPublishingResult(_, schedule, fullFilePath))
+        results.onComplete(reportPublishingResult(_, TsScheduler2021, fullFilePath))
       }
 
-    case schedule @ TsSchedulerQuarterly2020 =>
+    case TsSchedulerQuarterly2020 =>
       val now           = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDateQuarterly.format(now)
       val s3Path        = s"$environmentPrivate/ts/"
@@ -239,7 +239,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
               uploadFileToS3(s3Sink, data)
 
             results.foreach(_ => persistFileForQa(fullFilePath, qaRepository))
-            results.onComplete(reportPublishingResult(_, schedule, fullFilePath))
+            results.onComplete(reportPublishingResult(_, TsSchedulerQuarterly2020, fullFilePath))
 
           }
         }
@@ -248,7 +248,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
       publishQuarter(Period.y2020Q2, tsRepository2020Q2, "quarter_2_2020_ts.txt", qaTsRepository2020Q2)
       publishQuarter(Period.y2020Q3, tsRepository2020Q3, "quarter_3_2020_ts.txt", qaTsRepository2020Q3)
 
-    case schedule @ TsSchedulerQuarterly2021 =>
+    case TsSchedulerQuarterly2021 =>
       val now           = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDateQuarterly.format(now)
       val s3Path        = s"$environmentPrivate/ts/"
@@ -273,7 +273,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
               uploadFileToS3(s3Sink, data)
 
             results.foreach(_ => persistFileForQa(fullFilePath, qaRepository))
-            results.onComplete(reportPublishingResult(_, schedule, fullFilePath))
+            results.onComplete(reportPublishingResult(_, TsSchedulerQuarterly2021, fullFilePath))
 
           }
         }
@@ -281,7 +281,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
       publishQuarter(Period.y2021Q1, tsRepository2021Q1, "quarter_1_2021_ts.txt", qaTsRepository2021Q1)
       publishQuarter(Period.y2021Q2, tsRepository2021Q2, "quarter_2_2021_ts.txt", qaTsRepository2021Q2)
       publishQuarter(Period.y2021Q3, tsRepository2021Q3, "quarter_3_2021_ts.txt", qaTsRepository2021Q3)
-    case schedule @ TsSchedulerQuarterly2022 =>
+    case TsSchedulerQuarterly2022 =>
       val now           = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDateQuarterly.format(now)
       val s3Path        = s"$environmentPrivate/ts/"
@@ -306,7 +306,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
               uploadFileToS3(s3Sink, data)
 
             results.foreach(_ => persistFileForQa(fullFilePath, qaRepository))
-            results.onComplete(reportPublishingResult(_, schedule, fullFilePath))
+            results.onComplete(reportPublishingResult(_, TsSchedulerQuarterly2022, fullFilePath))
 
           }
         }

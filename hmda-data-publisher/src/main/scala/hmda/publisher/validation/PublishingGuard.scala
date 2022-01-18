@@ -76,6 +76,7 @@ class PublishingGuard(
           case Period.y2022Q1 => db2022.validationLarData2022(db2022.Year2022Period.Q1)
           case Period.y2022Q2 => db2022.validationLarData2022(db2022.Year2022Period.Q2)
           case Period.y2022Q3 => db2022.validationLarData2022(db2022.Year2022Period.Q3)
+          case p => throw new IllegalArgumentException("Illegal period used for fetching lar data: " + p.toString)
         }
 
         val tsData = year match {
@@ -92,6 +93,7 @@ class PublishingGuard(
           case Period.y2022Q1 => db2022.validationTSData2022(db2022.Year2022Period.Q1)
           case Period.y2022Q2 => db2022.validationTSData2022(db2022.Year2022Period.Q2)
           case Period.y2022Q3 => db2022.validationTSData2022(db2022.Year2022Period.Q3)
+          case p => throw new IllegalArgumentException("Illegal period used for fetching ts data: " + p.toString)
         }
         List(
           new TSLinesCheck(dbConfig, tsData, larData),
@@ -103,24 +105,14 @@ class PublishingGuard(
           case Period.y2018 => Some(db2018.validationMLarData2018)
           case Period.y2019 => Some(db2019.validationMLarData2019)
           case Period.y2020 => Some(db2020.validationMLarData2020)
-          case Period.y2020Q1 | Period.y2020Q2 | Period.y2020Q3 =>
-            throw new IllegalArgumentException("year 2020 is not supported to public publishers at the moment")
-          case Period.y2021Q1 | Period.y2021Q2 | Period.y2021Q3 =>
-            throw new IllegalArgumentException("year 2021 is not supported to public publishers at the moment")
-          case Period.y2022Q1 | Period.y2022Q2 | Period.y2022Q3 =>
-            throw new IllegalArgumentException("year 2022 is not supported to public publishers at the moment")
+          case p => throw new IllegalArgumentException("Illegal period used for fetching public lar data: " + p.toString)
         }
         val tsData = year match {
           case Period.y2018 => db2018.validationTSData2018
           case Period.y2019 => db2019.validationTSData2019
           case Period.y2020 => db2020.validationTSData2020(db2020.Year2020Period.Whole)
           case Period.y2021 => db2021.validationTSData2021(db2021.Year2021Period.Whole)
-          case Period.y2020Q1 | Period.y2020Q1 | Period.y2020Q3 =>
-            throw new IllegalArgumentException("year 2020 is not supported to public publishers at the moment")
-          case Period.y2021Q1 | Period.y2021Q1 | Period.y2021Q3 =>
-            throw new IllegalArgumentException("year 2021 is not supported to public publishers at the moment")
-          case Period.y2022Q1 | Period.y2022Q2 | Period.y2022Q3 =>
-            throw new IllegalArgumentException("year 2022 is not supported to public publishers at the moment")
+          case p => throw new IllegalArgumentException("Illegal period used for fetching public ts data: " + p.toString)
         }
         larDataOpt
           .map(larData =>

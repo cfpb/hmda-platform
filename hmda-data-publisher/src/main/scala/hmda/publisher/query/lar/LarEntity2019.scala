@@ -5,7 +5,6 @@ import hmda.util.conversion.ColumnDataFormatter
 import io.chrisdavenport.cormorant
 import io.chrisdavenport.cormorant.implicits._
 import cormorant.generic.semiauto._
-import hmda.publisher.query.lar.LarEntityImpl2019WithMsa.{enforcePartialRead, readNext}
 import hmda.util.PsvParsingCompanion
 import io.chrisdavenport.cormorant.CSV
 
@@ -256,7 +255,7 @@ object LarPartSeven2019 extends PsvParsingCompanion[LarPartSeven2019] {
           tractMedianAge = tractMedianAge
         )
       tractMedianAgeOrMore match {
-        case Left((row, tractMedianAge)) => Left(row, create(tractMedianAge))
+        case Left((row, tractMedianAge)) => Left((row, create(tractMedianAge)))
         case Right(tractMedianAge)       => Right(create(tractMedianAge))
       }
     })
@@ -303,7 +302,7 @@ object LarEntityImpl2019 extends PsvParsingCompanion[LarEntityImpl2019] {
       (rest, p5) <- enforcePartialRead(LarPartFive2019.psvReader, rest)
       p6OrMore   <- LarPartSix2019.psvReader.readPartial(rest)
     } yield p6OrMore match {
-      case Left((row, p6)) => Left(row, LarEntityImpl2019(p1, p2, p3, p4, p5, p6))
+      case Left((row, p6)) => Left((row, LarEntityImpl2019(p1, p2, p3, p4, p5, p6)))
       case Right(p6)       => Right(LarEntityImpl2019(p1, p2, p3, p4, p5, p6))
     })
   }

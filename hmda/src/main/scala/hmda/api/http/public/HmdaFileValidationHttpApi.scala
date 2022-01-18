@@ -2,7 +2,6 @@ package hmda.api.http.public
 
 import akka.NotUsed
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
@@ -13,7 +12,6 @@ import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.model.validation.ValidationError
 import hmda.model.validation.LarValidationError
-import hmda.api.http.model.public.LarValidateRequest
 import hmda.api.http.model.filing.submissions.HmdaRowParsedErrorSummary
 import hmda.api.http.model.filing.submissions.{ ValidationErrorSummary, SingleValidationErrorSummary }
 import hmda.api.http.utils.ParserErrorUtils
