@@ -2,17 +2,17 @@ package hmda.publisher.query.component
 
 import java.sql.Timestamp
 import hmda.publisher.helper.PGTableNameLoader
-import hmda.publisher.qa.{ QAEntity, QARepository, QATableBase }
+import hmda.publisher.qa.{QAEntity, QARepository, QATableBase}
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
-import hmda.publisher.query.lar.{ LarEntityImpl2018, _ }
-import hmda.publisher.query.panel.{ InstitutionAltEntity, InstitutionEntity }
-import hmda.publisher.validation.{ LarData, TsData }
-import slick.basic.{ DatabaseConfig, DatabasePublisher }
-import slick.jdbc.{ JdbcProfile, ResultSetConcurrency, ResultSetType }
+import hmda.publisher.query.lar.{LarEntityImpl2018, _}
+import hmda.publisher.query.panel.{InstitutionAltEntity, InstitutionEntity}
+import hmda.publisher.validation.{LarData, PanelData, TsData}
+import slick.basic.{DatabaseConfig, DatabasePublisher}
+import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 trait PublisherComponent2018 extends PGTableNameLoader {
 
@@ -38,6 +38,7 @@ trait PublisherComponent2018 extends PGTableNameLoader {
     def hmdaFiler       = column[Boolean]("hmda_filer")
 
   }
+
   class InstitutionsTable(tag: Tag) extends InstitutionsTableBase[InstitutionEntity](tag, panel2018TableName) {
     override def * =
       (
@@ -872,5 +873,7 @@ trait PublisherComponent2018 extends PGTableNameLoader {
     LarData[ModifiedLarEntityImpl, ModifiedLarTable](mlarTable2018)(_.lei)
   val validationTSData2018: TsData =
     TsData[TransmittalSheetEntity, TransmittalSheetTable](transmittalSheetTable2018)(_.lei, _.totalLines, _.submissionId)
+  val validationPanelData2018: PanelData =
+    PanelData[InstitutionEntity, InstitutionsTable](institutionsTable2018)(_.lei,_.hmdaFiler)
 
 }

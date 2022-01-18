@@ -44,3 +44,24 @@ object LarData {
       override val getLei: Table_ => Rep[String]                    = getLei_
     }
 }
+
+trait PanelData {
+  type Entry
+  type Table <: AbstractTable[Entry]
+  val query: Query[Table, Table#TableElementType, Seq]
+  val getLei: Table => Rep[String]
+  val getHmdaFiler: Table => Rep[Boolean]
+}
+
+object PanelData {
+  def apply[Entry_, Table_ <: AbstractTable[Entry_]](
+                                                      query_ : Query[Table_, Table_ #TableElementType, Seq]
+                                                    )(getLei_ : Table_ => Rep[String],getHmdaFiler_ : Table_ => Rep[Boolean]): PanelData =
+    new PanelData {
+      override type Entry = Entry_
+      override type Table = Table_
+      override val query: Query[Table, Table#TableElementType, Seq] = query_
+      override val getLei: Table_ => Rep[String]                    = getLei_
+      override val getHmdaFiler: Table_ => Rep[Boolean]             = getHmdaFiler_
+    }
+}

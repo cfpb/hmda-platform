@@ -93,9 +93,23 @@ class PublishingGuard(
           case Period.y2022Q2 => db2022.validationTSData2022(db2022.Year2022Period.Q2)
           case Period.y2022Q3 => db2022.validationTSData2022(db2022.Year2022Period.Q3)
         }
+
+        val panelData = year match {
+          case Period.y2018   => db2018.validationPanelData2018
+          case Period.y2019   => db2019.validationPanelData2019
+          case Period.y2020   => db2020.validationPanelData2020(db2020.Year2020Period.Whole)
+          case Period.y2021   => db2021.validationPanelData2021(db2021.Year2021Period.Whole)
+          case Period.y2020Q1 | Period.y2020Q2 | Period.y2020Q3 =>
+            throw new IllegalArgumentException("year 2020 is not supported to public publishers at the moment")
+          case Period.y2021Q1 | Period.y2021Q2 | Period.y2021Q3 =>
+            throw new IllegalArgumentException("year 2021 is not supported to public publishers at the moment")
+          case Period.y2022Q1 | Period.y2022Q2 | Period.y2022Q3 =>
+            throw new IllegalArgumentException("year 2022 is not supported to public publishers at the moment")
+        }
+
         List(
           new TSLinesCheck(dbConfig, tsData, larData),
-          new LeiCountCheck(dbConfig, tsData, larData, leiCheckErrorMargin)
+          new LeiCountCheck(dbConfig, tsData, larData,panelData, leiCheckErrorMargin)
         )
       case Scope.Public =>
         // there is no modified lar table for 2020 and so no chcecks will run for this year and scope
@@ -122,11 +136,24 @@ class PublishingGuard(
           case Period.y2022Q1 | Period.y2022Q2 | Period.y2022Q3 =>
             throw new IllegalArgumentException("year 2022 is not supported to public publishers at the moment")
         }
+
+        val panelData = year match {
+          case Period.y2018 => db2018.validationPanelData2018
+          case Period.y2019 => db2019.validationPanelData2019
+          case Period.y2020 => db2020.validationPanelData2020(db2020.Year2020Period.Whole)
+          case Period.y2021 => db2021.validationPanelData2021(db2021.Year2021Period.Whole)
+          case Period.y2020Q1 | Period.y2020Q1 | Period.y2020Q3 =>
+            throw new IllegalArgumentException("year 2020 is not supported to public publishers at the moment")
+          case Period.y2021Q1 | Period.y2021Q1 | Period.y2021Q3 =>
+            throw new IllegalArgumentException("year 2021 is not supported to public publishers at the moment")
+          case Period.y2022Q1 | Period.y2022Q2 | Period.y2022Q3 =>
+            throw new IllegalArgumentException("year 2022 is not supported to public publishers at the moment")
+        }
         larDataOpt
           .map(larData =>
             List(
               new TSLinesCheck(dbConfig, tsData, larData),
-              new LeiCountCheck(dbConfig, tsData, larData, leiCheckErrorMargin)
+              new LeiCountCheck(dbConfig, tsData, larData,panelData, leiCheckErrorMargin)
             )
           )
           .getOrElse(List())

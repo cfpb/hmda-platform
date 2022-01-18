@@ -7,7 +7,7 @@ import hmda.publisher.helper.PGTableNameLoader
 import hmda.publisher.qa.{QAEntity, QARepository, QATableBase}
 import hmda.publisher.query.lar.{LarEntityImpl2019, _}
 import hmda.publisher.query.panel.{InstitutionAltEntity, InstitutionEntity}
-import hmda.publisher.validation.{LarData, TsData}
+import hmda.publisher.validation.{LarData, PanelData, TsData}
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
@@ -952,6 +952,7 @@ trait PublisherComponent2019 extends PGTableNameLoader {
     LarData[ModifiedLarEntityImpl, ModifiedLarTable](mlarTable2019)(_.lei)
   val validationTSData2019: TsData =
     TsData[TransmittalSheetEntity, TransmittalSheetTable](transmittalSheetTable2019)(_.lei, _.totalLines, _.submissionId)
-
+  val validationPanelData2019: PanelData =
+    PanelData[InstitutionEntity, InstitutionsTable](institutionsTable2019)(_.lei,_.hmdaFiler)
 }
 // $COVERAGE-ON$
