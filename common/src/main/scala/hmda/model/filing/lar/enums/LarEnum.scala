@@ -14,5 +14,6 @@ object LarEnum {
 
 trait LarCodeEnum[+A] {
   val values: List[Int]
+  def blankValue: A = throw new NotImplementedError
   def valueOf(code: Int): A
 }

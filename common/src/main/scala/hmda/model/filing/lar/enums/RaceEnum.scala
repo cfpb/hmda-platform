@@ -4,11 +4,12 @@ sealed trait RaceEnum extends LarEnum
 
 object RaceEnum extends LarCodeEnum[RaceEnum] {
   override val values =
-    List(0, 1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8)
+    List(1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8)
+
+  override def blankValue: RaceEnum = EmptyRaceValue
 
   override def valueOf(code: Int): RaceEnum =
     code match {
-      case 0  => EmptyRaceValue
       case 1  => AmericanIndianOrAlaskaNative
       case 2  => Asian
       case 21 => AsianIndian

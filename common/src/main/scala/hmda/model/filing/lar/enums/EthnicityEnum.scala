@@ -3,11 +3,12 @@ package hmda.model.filing.lar.enums
 sealed trait EthnicityEnum extends LarEnum
 
 object EthnicityEnum extends LarCodeEnum[EthnicityEnum] {
-  override val values = List(0, 1, 11, 12, 13, 14, 2, 3, 4, 5)
+  override val values = List(1, 11, 12, 13, 14, 2, 3, 4, 5)
+
+  override def blankValue: EthnicityEnum = EmptyEthnicityValue
 
   override def valueOf(code: Int): EthnicityEnum =
     code match {
-      case 0  => EmptyEthnicityValue
       case 1  => HispanicOrLatino
       case 11 => Mexican
       case 12 => PuertoRican

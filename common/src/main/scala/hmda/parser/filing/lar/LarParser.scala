@@ -121,8 +121,11 @@ trait LarParser {
   def validateLarCodeOrEmptyField[A](larCodeEnum: LarCodeEnum[A],
                                      value: String,
                                      parserValidationError: ParserValidationError): LarParserValidationResult[A] =
-    if (value == "") {
-      larCodeEnum.valueOf(0).validNel
+    if (value.isBlank) {
+      Try(larCodeEnum.blankValue) match {
+        case Success(enum) => enum.validNel
+        case Failure(_)    => parserValidationError.invalidNel
+      }
     } else {
       validateLarCode(larCodeEnum, value, parserValidationError)
     }
