@@ -100,11 +100,11 @@ class PublishingGuard(
           case Period.y2020   => db2020.validationPanelData2020(db2020.Year2020Period.Whole)
           case Period.y2021   => db2021.validationPanelData2021(db2021.Year2021Period.Whole)
           case Period.y2020Q1 | Period.y2020Q2 | Period.y2020Q3 =>
-            throw new IllegalArgumentException("year 2020 is not supported to public publishers at the moment")
+            throw new IllegalArgumentException("quarterly 2020 is not supported to public publishers at the moment")
           case Period.y2021Q1 | Period.y2021Q2 | Period.y2021Q3 =>
-            throw new IllegalArgumentException("year 2021 is not supported to public publishers at the moment")
+            throw new IllegalArgumentException("quarterly 2021 is not supported to public publishers at the moment")
           case Period.y2022Q1 | Period.y2022Q2 | Period.y2022Q3 =>
-            throw new IllegalArgumentException("year 2022 is not supported to public publishers at the moment")
+            throw new IllegalArgumentException("quarterly 2022 is not supported to public publishers at the moment")
         }
 
         List(
@@ -118,11 +118,11 @@ class PublishingGuard(
           case Period.y2019 => Some(db2019.validationMLarData2019)
           case Period.y2020 => Some(db2020.validationMLarData2020)
           case Period.y2020Q1 | Period.y2020Q2 | Period.y2020Q3 =>
-            throw new IllegalArgumentException("year 2020 is not supported to public publishers at the moment")
+            throw new IllegalArgumentException("quarterly 2020 is not supported to public publishers at the moment")
           case Period.y2021Q1 | Period.y2021Q2 | Period.y2021Q3 =>
-            throw new IllegalArgumentException("year 2021 is not supported to public publishers at the moment")
+            throw new IllegalArgumentException("quarterly 2021 is not supported to public publishers at the moment")
           case Period.y2022Q1 | Period.y2022Q2 | Period.y2022Q3 =>
-            throw new IllegalArgumentException("year 2022 is not supported to public publishers at the moment")
+            throw new IllegalArgumentException("quarterly 2022 is not supported to public publishers at the moment")
         }
         val tsData = year match {
           case Period.y2018 => db2018.validationTSData2018
@@ -130,11 +130,11 @@ class PublishingGuard(
           case Period.y2020 => db2020.validationTSData2020(db2020.Year2020Period.Whole)
           case Period.y2021 => db2021.validationTSData2021(db2021.Year2021Period.Whole)
           case Period.y2020Q1 | Period.y2020Q1 | Period.y2020Q3 =>
-            throw new IllegalArgumentException("year 2020 is not supported to public publishers at the moment")
+            throw new IllegalArgumentException("quarterly 2020 is not supported to public publishers at the moment")
           case Period.y2021Q1 | Period.y2021Q1 | Period.y2021Q3 =>
-            throw new IllegalArgumentException("year 2021 is not supported to public publishers at the moment")
+            throw new IllegalArgumentException("quarterly 2021 is not supported to public publishers at the moment")
           case Period.y2022Q1 | Period.y2022Q2 | Period.y2022Q3 =>
-            throw new IllegalArgumentException("year 2022 is not supported to public publishers at the moment")
+            throw new IllegalArgumentException("quarterly 2022 is not supported to public publishers at the moment")
         }
 
         val panelData = year match {
@@ -143,11 +143,11 @@ class PublishingGuard(
           case Period.y2020 => db2020.validationPanelData2020(db2020.Year2020Period.Whole)
           case Period.y2021 => db2021.validationPanelData2021(db2021.Year2021Period.Whole)
           case Period.y2020Q1 | Period.y2020Q1 | Period.y2020Q3 =>
-            throw new IllegalArgumentException("year 2020 is not supported to public publishers at the moment")
+            throw new IllegalArgumentException("quarterly 2020 is not supported to public publishers at the moment")
           case Period.y2021Q1 | Period.y2021Q1 | Period.y2021Q3 =>
-            throw new IllegalArgumentException("year 2021 is not supported to public publishers at the moment")
+            throw new IllegalArgumentException("quarterly 2021 is not supported to public publishers at the moment")
           case Period.y2022Q1 | Period.y2022Q2 | Period.y2022Q3 =>
-            throw new IllegalArgumentException("year 2022 is not supported to public publishers at the moment")
+            throw new IllegalArgumentException("quarterly 2022 is not supported to public publishers at the moment")
         }
         larDataOpt
           .map(larData =>

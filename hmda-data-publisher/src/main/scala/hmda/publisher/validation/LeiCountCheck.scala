@@ -5,7 +5,7 @@ import slick.jdbc.JdbcProfile
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-class LeiCountCheck(dbConfig: DatabaseConfig[JdbcProfile], tsData: TsData, larData: LarData,panelData: PanelData, allowedErrorMargin: Int)(
+class LeiCountCheck(dbConfig: DatabaseConfig[JdbcProfile], tsData: TsData, larData: LarData, panelData: PanelData, allowedErrorMargin: Int)(
   implicit ec: ExecutionContext
 ) extends ValidationCheck {
 
@@ -26,11 +26,11 @@ class LeiCountCheck(dbConfig: DatabaseConfig[JdbcProfile], tsData: TsData, larDa
     } yield {
       def diffWithinMargin(count1: Int, count2: Int,count3: Int) = (count1 - count2).abs <= allowedErrorMargin &&
         (count1 - count3).abs <= allowedErrorMargin
-      val isOk                                       = diffWithinMargin(tsCount, larCount,panelCount)
+      val isOk                                       = diffWithinMargin(tsCount, larCount, panelCount)
       Either.cond(
         isOk,
         (),
-        s"Number of distinct LEIs in LAR TS, and Panel mismatch by more than allowed error margin ($allowedErrorMargin). " +
+        s"Number of distinct LEIs in LAR, TS, and Panel mismatch by more than allowed error margin ($allowedErrorMargin). " +
           s"LAR: $larCount, TS: $tsCount Panel: $panelCount"
       )
     }
