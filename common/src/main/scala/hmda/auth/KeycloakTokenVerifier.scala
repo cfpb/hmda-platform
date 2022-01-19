@@ -1,7 +1,5 @@
 package hmda.auth
 
-import akka.actor.typed.ActorSystem
-import akka.stream.Materializer
 import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 import io.circe.generic.auto._
@@ -16,19 +14,16 @@ import java.security.spec.RSAPublicKeySpec
 import java.security.KeyFactory
 import java.util.Base64
 import org.keycloak.TokenVerifier
+import scala.util.Try
 
 import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext
 
 // $COVERAGE-OFF$
-class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment)(
-  implicit system: ActorSystem[_],
-  materializer: Materializer,
-  ec: ExecutionContext
-) extends TokenVerifier {
+class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment) extends TokenVerifier {
 
   val config  = ConfigFactory.load()
   val realm   = config.getString("keycloak.realm")
+  val realmUrl = config.getString("keycloak.realmUrl")
   val authUrl = config.getString("keycloak.auth.server.url")
   val timeout = config.getInt("hmda.http.timeout").seconds
   
@@ -38,10 +33,12 @@ class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment)(
   val publicExponent = new BigInteger(1, urlDecoder.decode(config.getString("keycloak.publicKey.exponent")))
   val publicKey = keyFactory.generatePublic(new RSAPublicKeySpec(modulus, publicExponent))
 
-  def verifyToken(token: String): AccessToken = {
-    val tokenVerifier = TokenVerifier.create(token, classOf[AccessToken]).realmUrl(realm)
-      .withDefaultChecks()
-    tokenVerifier.publicKey(publicKey).verify().getToken
+  def verifyToken(token: String): Try[AccessToken] = {
+    val tokenVerifier = TokenVerifier.create(token, classOf[AccessToken])
+    Try {
+      tokenVerifier.withDefaultChecks().realmUrl(realmUrl)
+      tokenVerifier.publicKey(publicKey).verify().getToken
+    }
   }
 
   private def parseAuthKey(line: ByteString): AuthKey = {
