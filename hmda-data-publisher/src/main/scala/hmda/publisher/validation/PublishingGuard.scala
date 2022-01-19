@@ -157,7 +157,7 @@ class PublishingGuard(
           .map(larData =>
             List(
               new TSLinesCheck(dbConfig, tsData, larData),
-              new LeiCountCheck(dbConfig, tsData, larData,panelData, leiCheckErrorMargin)
+              new LeiCountCheck(dbConfig, tsData, larData, panelData, leiCheckErrorMargin)
             )
           )
           .getOrElse(List())
