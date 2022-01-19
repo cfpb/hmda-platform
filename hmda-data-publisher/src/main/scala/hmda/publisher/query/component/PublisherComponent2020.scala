@@ -1,13 +1,12 @@
 package hmda.publisher.query.component
 
 import java.sql.Timestamp
-
 import hmda.model.publication.Msa
 import hmda.publisher.helper.PGTableNameLoader
 import hmda.publisher.qa.{QAEntity, QARepository, QATableBase}
 import hmda.publisher.query.lar.{LarEntityImpl2020, _}
 import hmda.publisher.query.panel.{InstitutionAltEntity, InstitutionEntity}
-import hmda.publisher.validation.{LarData, TsData}
+import hmda.publisher.validation.{LarData, PanelData, TsData}
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
@@ -143,6 +142,9 @@ trait PublisherComponent2020 extends PGTableNameLoader {
       db.run(table.size.result)
   }
 
+  def institutionTableQuery2020(p: Year2020Period) = {
+    TableQuery(tag => new InstitutionsTable(tag))
+  }
   abstract class TransmittalSheetTableBase[T](tag: Tag, tableName: String) extends Table[T](tag, tableName) {
 
     def lei             = column[String]("lei", O.PrimaryKey)
@@ -638,6 +640,9 @@ trait PublisherComponent2020 extends PGTableNameLoader {
 
   def validationTSData2020(p: Year2020Period): TsData =
     TsData[TransmittalSheetEntity, RealTransmittalSheetTable2020](transmittalSheetTableQuery2020(p))(_.lei, _.totalLines, _.submissionId)
+  def validationPanelData2020(p: Year2020Period): PanelData =
+    PanelData[InstitutionEntity, InstitutionsTable](institutionTableQuery2020(p))(_.lei, _.hmdaFiler)
+
   class QALarTableLoanLimit(tag: Tag)
     extends LarTableBase[QAEntity[LarEntityImpl2020WithMsa]](tag, lar2020QALoanLimitTableName)
       with QATableBase[LarEntityImpl2020WithMsa] {
