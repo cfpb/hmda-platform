@@ -1,5 +1,6 @@
 package hmda.api.http.filing.submissions
 
+import akka.actor.typed.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.headers.RawHeader
@@ -20,45 +21,63 @@ import hmda.persistence.submission.SubmissionPersistence.selectSubmissionPersist
 import hmda.util.http.FilingResponseUtils._
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
+import hmda.auth._
 
 import scala.concurrent.Future
 import scala.util.{ Failure, Success }
 
 object SignHttpApi {
-  def create(log: Logger, sharding: ClusterSharding)(implicit t: Timeout): OAuth2Authorization => Route =
-    new SignHttpApi(log, sharding)(t).signRoutes _
+  def create(
+    log: Logger, 
+    sharding: ClusterSharding
+    )(implicit t: Timeout, system: ActorSystem[_]): OAuth2Authorization => Route =
+    new SignHttpApi(log, sharding)(t, system).signRoutes _
 }
 
-private class SignHttpApi(log: Logger, sharding: ClusterSharding)(implicit t: Timeout) {
+private class SignHttpApi(log: Logger, sharding: ClusterSharding)(
+  implicit t: Timeout,
+  system: ActorSystem[_]
+) {
+
+  val config           = system.settings.config
+  val currentNamespace = config.getString("hmda.currentNamespace")
 
   // GET & POST institutions/<lei>/filings/<year>/submissions/<submissionId>/sign
   // GET & POST institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/sign
   def signPath(oAuth2Authorization: OAuth2Authorization): Route =
-    pathPrefix("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
-      pathPrefix("submissions" / IntNumber / "sign") { seqNr =>
+      path("institutions" / Segment / "filings" / IntNumber / "submissions" / IntNumber / "sign") { (lei, year, seqNr) =>
         (extractUri & get) { uri =>
-          oAuth2Authorization.authorizeTokenWithLei(lei)(token => getSubmissionForSigning(lei, year, None, seqNr, token.email, uri))
+          oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { token => 
+            oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+              getSubmissionForSigning(lei, year, None, seqNr, token.email, uri)
+            }
+          }
         } ~ (extractUri & post) { uri =>
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-            oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
-              entity(as[EditsSign])(editsSign => signSubmission(lei, year, None, seqNr, token.email, editsSign.signed, uri, token.username))
+            oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { token =>
+              oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+                entity(as[EditsSign])(editsSign => signSubmission(lei, year, None, seqNr, token.email, editsSign.signed, uri, token.username))
+              }
             }
           }
         }
-      } ~ pathPrefix("quarter" / Segment / "submissions" / IntNumber / "sign") { (quarter, seqNr) =>
+      } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Segment / "submissions" / IntNumber / "sign") { (lei, year, quarter, seqNr) =>
         (extractUri & get) { uri =>
-          oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
-            getSubmissionForSigning(lei, year, Option(quarter), seqNr, token.email, uri)
+          oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { token =>
+            oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+              getSubmissionForSigning(lei, year, Option(quarter), seqNr, token.email, uri)
+            }
           }
         } ~ (extractUri & post) { uri =>
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-            oAuth2Authorization.authorizeTokenWithLei(lei) { token =>
-              entity(as[EditsSign])(editsSign => signSubmission(lei, year, Option(quarter), seqNr, token.email, editsSign.signed, uri, token.username))
+            oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { token =>
+              oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { _ =>
+                entity(as[EditsSign])(editsSign => signSubmission(lei, year, Option(quarter), seqNr, token.email, editsSign.signed, uri, token.username))
+              }
             }
           }
         }
       }
-    }
 
   private def getSubmissionForSigning(lei: String, year: Int, quarter: Option[String], seqNr: Int, email: String, uri: Uri): Route = {
     val submissionId                            = SubmissionId(lei, Period(year, quarter), seqNr)

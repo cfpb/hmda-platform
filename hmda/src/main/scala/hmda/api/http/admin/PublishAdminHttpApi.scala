@@ -14,6 +14,7 @@ import akka.actor.typed.ActorSystem
 import org.apache.kafka.clients.producer.{ Producer => KafkaProducer }
 import hmda.messages.pubsub.HmdaTopics._
 import hmda.util.http.FilingResponseUtils._
+import hmda.auth.AdminOnly
 
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -39,7 +40,7 @@ private class PublishAdminHttpApi(sharding: ClusterSharding, config: Config)(imp
   private def publishTopicPath(oAuth2Authorization: OAuth2Authorization): Route = {
     path("publish" / Segment / "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber) { (topic, lei, period, sequenceNumber) =>
         (extractUri & post)(uri =>
-            oAuth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
+            oAuth2Authorization.authorizeTokenWithRule(AdminOnly) { _ =>
                 val submissionId = s"$lei-$period-$sequenceNumber"
                 if (verifyTopic(topic)) {
                     val publish = publishKafkaEvent(topic, submissionId, lei, stringKafkaProducer)

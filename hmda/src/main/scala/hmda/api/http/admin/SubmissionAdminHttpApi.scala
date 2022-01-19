@@ -36,6 +36,7 @@ import hmda.query.HmdaQuery
 import hmda.utils.YearUtils
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
+import hmda.auth.AdminOnly
 
 import scala.collection.immutable.ListMap
 import scala.concurrent.duration.Duration
@@ -293,9 +294,9 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
     .map(body => body.split(",").map(_.trim).toList)
 
 
-  val routes: OAuth2Authorization => Route = { (oauth2Authorization: OAuth2Authorization) =>
+  val routes: OAuth2Authorization => Route = { (oAuth2Authorization: OAuth2Authorization) =>
     (get & path("institutions" / Segment / "signed" / "oldest" / Segment)) { (lei, period) =>
-      oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
+      oAuth2Authorization.authorizeTokenWithRule(AdminOnly) { _ =>
         val fil = selectFiling(clusterSharding, lei, YearUtils.parsePeriod(period).right.get.year, YearUtils.parsePeriod(period).right.get.quarter)
         val fOldestSigned: Future[Option[Submission]] = fil ? (ref => GetOldestSignedSubmission(ref))
 
@@ -309,8 +310,8 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
             complete(InternalServerError)
         }
       }
-    } ~ (get & path("institutions" / Segment / "signed" / "latest" / Segment)) { (lei, period) =>
-      oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
+    } ~ (get & path("institutions" / Segment / "signed" / "latest"  / Segment)) { (lei, period) =>
+      oAuth2Authorization.authorizeTokenWithRule(AdminOnly) { _ =>
         val fil = selectFiling(clusterSharding, lei, YearUtils.parsePeriod(period).right.get.year, YearUtils.parsePeriod(period).right.get.quarter)
         val fLatestSigned: Future[Option[Submission]] = fil ? (ref => GetLatestSignedSubmission(ref))
 
@@ -325,7 +326,7 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
         }
       }
     } ~ (get & path("institutions" / Segment / "hmdafile" / "latest" / Segment)) { (lei, period) =>
-      oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
+      oAuth2Authorization.authorizeTokenWithRule(AdminOnly) { _ =>
         val fil = selectFiling(clusterSharding, lei, YearUtils.parsePeriod(period).right.get.year, YearUtils.parsePeriod(period).right.get.quarter)
         val fLatest: Future[Option[Submission]] = fil ? (ref => GetLatestSignedSubmission(ref))
 
@@ -344,7 +345,7 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
         }
       }
     } ~ (get & path("receipt" / Segment / "hmdafile")) { rawSubmissionId =>
-      oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
+      oAuth2Authorization.authorizeTokenWithRule(AdminOnly) { _ =>
         validateRawSubmissionId(rawSubmissionId) match {
           case Invalid(reason) =>
             val formattedReasons = reason.mkString_(", ")
@@ -371,7 +372,7 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
         }
       }
     } ~ (get & path("receipt" / Segment / "hmdafile" / "count")) { rawSubmissionId =>
-      oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
+      oAuth2Authorization.authorizeTokenWithRule(AdminOnly) { _ =>
         withRequestTimeout(countTimeout) {
           validateRawSubmissionId(rawSubmissionId) match {
             case Invalid(reason) =>
@@ -423,11 +424,11 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
       }
 
       (get & path("validate" / "all" / "leis" / "submissions" / "count")) {
-        oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
+        oAuth2Authorization.authorizeTokenWithRule(AdminOnly) { _ =>
           validateLeisCount(None)
         }
       } ~ (post & path("validate" / "batch" / "leis" / "all" / "submissions" / "count")) {
-        oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
+        oAuth2Authorization.authorizeTokenWithRule(AdminOnly) { _ =>
 
           entityAsCsv { leis =>
             validateLeisCount(Some(leis))
@@ -435,7 +436,7 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
         }
       }
     } ~ (post & path("validate" / "batch" / "leis" / "latest" / "submissions" / "signed" / "count")) {
-      oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
+      oAuth2Authorization.authorizeTokenWithRule(AdminOnly) { _ =>
 
         entityAsCsv { leis =>
 
@@ -456,7 +457,7 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
         }
       }
     }~ (get & path("validate" / Segment / "submissions" / "count")) { lei =>
-      oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
+      oAuth2Authorization.authorizeTokenWithRule(AdminOnly) { _ =>
         withRequestTimeout(countTimeout) {
           val leiSubmissionSummaries = new LeiSubmissionSummary(log, clusterSharding)
             .leiSubmissionSummaryStreamForLei(lei)

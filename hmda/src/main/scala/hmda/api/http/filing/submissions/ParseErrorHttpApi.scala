@@ -1,5 +1,6 @@
 package hmda.api.http.filing.submissions
 
+import akka.actor.typed.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.http.scaladsl.model.{ StatusCodes, Uri }
 import akka.http.scaladsl.server.Directives._
@@ -20,37 +21,44 @@ import hmda.persistence.submission.{ HmdaParserError, SubmissionPersistence }
 import hmda.util.http.FilingResponseUtils._
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
+import hmda.auth._
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
 object ParseErrorHttpApi {
-  def create(log: Logger, sharding: ClusterSharding)(implicit ec: ExecutionContext, t: Timeout): OAuth2Authorization => Route =
-    new ParseErrorHttpApi(log, sharding)(ec, t).parserErrorRoute _
+  def create(log: Logger, sharding: ClusterSharding)(implicit ec: ExecutionContext, system: ActorSystem[_], t: Timeout): OAuth2Authorization => Route =
+    new ParseErrorHttpApi(log, sharding)(ec, system, t).parserErrorRoute _
 }
 
-private class ParseErrorHttpApi(log: Logger, sharding: ClusterSharding)(implicit ec: ExecutionContext, t: Timeout) {
+private class ParseErrorHttpApi(log: Logger, sharding: ClusterSharding)(implicit ec: ExecutionContext, system: ActorSystem[_], t: Timeout) {
   val quarterlyFiler = quarterlyFilingAllowed(log, sharding) _
+  val config           = system.settings.config
+  val currentNamespace = config.getString("hmda.currentNamespace")
 
   // GET institutions/<lei>/filings/<year>/submissions/<submissionId>/parseErrors
   // GET institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/parseErrors
-  def parseErrorPath(oauth2Authorization: OAuth2Authorization): Route = (extractUri & get) { uri =>
+  def parseErrorPath(oAuth2Authorization: OAuth2Authorization): Route = (extractUri & get) { uri =>
     parameters('page.as[Int] ? 1) { page =>
-      pathPrefix("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
-        oauth2Authorization.authorizeTokenWithLei(lei) { _ =>
-          path("submissions" / IntNumber / "parseErrors") { seqNr =>
+      path("institutions" / Segment / "filings" / IntNumber / "submissions" / IntNumber / "parseErrors") { (lei, year, seqNr) =>
+        oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
+          oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
             checkSubmission(lei, year, None, seqNr, page, uri)
-          } ~ path("quarter" / Quarter / "submissions" / IntNumber / "parseErrors") { (quarter, seqNr) =>
-            pathEndOrSingleSlash {
-              quarterlyFiler(lei, year) {
-                checkSubmission(lei, year, Option(quarter), seqNr, page, uri)
+          }
+        }
+      } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "parseErrors") { (lei, year, quarter, seqNr) =>
+            oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
+              oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { token =>
+                pathEndOrSingleSlash {
+                  quarterlyFiler(lei, year) {
+                    checkSubmission(lei, year, Option(quarter), seqNr, page, uri)
+                  }
+                }
               }
             }
           }
-        }
       }
     }
-  }
 
   private def checkSubmission(lei: String, year: Int, quarter: Option[String], seqNr: Int, page: Int, uri: Uri) = {
     val submissionId                            = SubmissionId(lei, Period(year, quarter), seqNr)

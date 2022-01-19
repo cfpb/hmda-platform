@@ -20,6 +20,7 @@ import hmda.query.HmdaQuery
 import hmda.utils.YearUtils
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
+import hmda.auth.AdminOnly
 
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -41,11 +42,11 @@ private class StatsAdminHttpApi(log: Logger, config: Config, clusterSharding: Cl
 ) {
   private val hmdaAdminRole: String = config.getString("keycloak.hmda.admin.role")
 
-  val routes: OAuth2Authorization => Route = { (oauth2Authorization: OAuth2Authorization) =>
+  val routes: OAuth2Authorization => Route = { (oAuth2Authorization: OAuth2Authorization) =>
     val getLeisCountWithSignedFilling =
       get
         .&(path("admin" / "count" / "lei" / Segment / "filed"))
-        .&(oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole)) { (periodStr, _) =>
+        .&(oAuth2Authorization.authorizeTokenWithRule(AdminOnly)) { (periodStr, _) =>
           val period = YearUtils.parsePeriod(periodStr).toTry.get
           val result = getSignedSubmissionsStream(period)
             .map(_ => 1)
@@ -58,7 +59,7 @@ private class StatsAdminHttpApi(log: Logger, config: Config, clusterSharding: Cl
     val getLeisListWithSignedFilling =
       get
         .&(path("admin" / "list" / "lei" / Segment / "filed"))
-        .&(oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole)) { (periodStr, _) =>
+        .&(oAuth2Authorization.authorizeTokenWithRule(AdminOnly)) { (periodStr, _) =>
           val period = YearUtils.parsePeriod(periodStr).toTry.get
           val result: Future[SignedLeiListResponse] =
             getSignedSubmissionsStream(period)
@@ -71,7 +72,7 @@ private class StatsAdminHttpApi(log: Logger, config: Config, clusterSharding: Cl
     val getTotalLeisCount =
       get
         .&(path("admin" / "count" / Segment / "lei"))
-        .&(oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole)) { (periodStr, _) =>
+        .&(oAuth2Authorization.authorizeTokenWithRule(AdminOnly)) { (periodStr, _) =>
           val period = YearUtils.parsePeriod(periodStr).toTry.get
           val result = getTotalLeiStream(period)
             .map(_ => 1)
@@ -84,7 +85,7 @@ private class StatsAdminHttpApi(log: Logger, config: Config, clusterSharding: Cl
     val getTotalLeisList =
       get
         .&(path("admin" / "list" / Segment / "lei"))
-        .&(oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole)) { (periodStr, _) =>
+        .&(oAuth2Authorization.authorizeTokenWithRule(AdminOnly)) { (periodStr, _) =>
           val period = YearUtils.parsePeriod(periodStr).toTry.get
           val result = getTotalLeiStream(period)
             .map(_.lei)

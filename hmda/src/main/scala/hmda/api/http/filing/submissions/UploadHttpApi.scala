@@ -29,6 +29,7 @@ import hmda.persistence.submission.SubmissionPersistence.selectSubmissionPersist
 import hmda.util.http.FilingResponseUtils._
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
+import hmda.auth._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -49,6 +50,9 @@ private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(
 ) {
   private val quarterlyFiler = quarterlyFilingAllowed(log, sharding) _
 
+  val config           = system.settings.config
+  val currentNamespace = config.getString("hmda.currentNamespace")
+
   def uploadRoutes(oAuth2Authorization: OAuth2Authorization): Route =
     handleRejections(corsRejectionHandler) {
       cors() {
@@ -62,11 +66,13 @@ private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(
 
   // POST <lei>/filings/<year>/submissions/<seqNr>
   // POST <lei>/filings/<year>/quarter/<q>/submissions/<seqNr>
-  private def uploadHmdaFileRoute(oauth2Authorization: OAuth2Authorization): Route =
+  private def uploadHmdaFileRoute(oAuth2Authorization: OAuth2Authorization): Route =
     respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
       pathPrefix(Segment / "filings") { lei =>
         (extractUri & post) { uri =>
-          oauth2Authorization.authorizeTokenWithLei(lei) { _ =>
+          println("upload path")
+          oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { _ =>
+            println("upload path inner")
             path(IntNumber / "submissions" / IntNumber) { (year, seqNr) =>
               checkAndUploadSubmission(lei, year, None, seqNr, uri)
             } ~ path(IntNumber / "quarter" / Quarter / "submissions" / IntNumber) { (year, quarter, seqNr) =>
@@ -79,16 +85,18 @@ private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(
           // WEBSOCKET /institutions/<LEI>/filings/<year>/submissions/<seqNr>/progress
           // WEBSOCKET /institutions/<LEI>/filings/<year>/quarter/<q>/submissions/<seqNr>/progress
           (extractUri & get) { _ =>
-            oauth2Authorization.authorizeTokenWithLei(lei)(_ =>
-              path(IntNumber / "submissions" / IntNumber / "progress")((year, seqNr) =>
-                handleWebSocketMessages(
-                  WebSocketProgressTracker.websocketFlow(system, sharding, SubmissionId(lei, Period(year, None), seqNr))
+            oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei)(_ =>
+              oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { _ =>
+                path(IntNumber / "submissions" / IntNumber / "progress")((year, seqNr) =>
+                  handleWebSocketMessages(
+                    WebSocketProgressTracker.websocketFlow(system, sharding, SubmissionId(lei, Period(year, None), seqNr))
+                  )
+                ) ~ path(IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "progress")((year, quarter, seqNr) =>
+                  handleWebSocketMessages(
+                    WebSocketProgressTracker.websocketFlow(system, sharding, SubmissionId(lei, Period(year, Option(quarter)), seqNr))
+                  )
                 )
-              ) ~ path(IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "progress")((year, quarter, seqNr) =>
-                handleWebSocketMessages(
-                  WebSocketProgressTracker.websocketFlow(system, sharding, SubmissionId(lei, Period(year, Option(quarter)), seqNr))
-                )
-              )
+              }
             )
           }
       }

@@ -17,6 +17,7 @@ import monix.execution.Scheduler.Implicits.global
 import org.slf4j.Logger
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
+import hmda.auth.AdminOnly
 
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
@@ -43,7 +44,7 @@ private class HmdaDashboardHttpApi(log: Logger, config: Config)(implicit val ec:
     new DashboardQueryService(repository)
 
     def hmdaDashboardReadPath(oAuth2Authorization: OAuth2Authorization): Route = 
-      oAuth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
+      oAuth2Authorization.authorizeTokenWithRule(AdminOnly) { _ =>
         withoutRequestTimeout {
         pathPrefix("dashboard") {
           pathPrefix("health") {

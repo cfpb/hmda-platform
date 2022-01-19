@@ -1,5 +1,6 @@
 package hmda.api.http.filing.submissions
 
+import akka.actor.typed.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.headers.RawHeader
@@ -26,17 +27,22 @@ import hmda.persistence.submission.{ HmdaValidationError, SubmissionPersistence 
 import hmda.util.http.FilingResponseUtils._
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
+import hmda.auth._
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.matching.Regex
 import scala.util.{ Failure, Success }
 
 object VerifyHttpApi {
-  def create(log: Logger, sharding: ClusterSharding)(implicit ec: ExecutionContext, t: Timeout): OAuth2Authorization => Route =
-    new VerifyHttpApi(log, sharding)(ec, t).verifyRoutes _
+  def create(log: Logger, sharding: ClusterSharding)(implicit ec: ExecutionContext, t: Timeout, system: ActorSystem[_]): OAuth2Authorization => Route =
+    new VerifyHttpApi(log, sharding)(ec, t, system).verifyRoutes _
 }
 
-private class VerifyHttpApi(log: Logger, sharding: ClusterSharding)(implicit ec: ExecutionContext, t: Timeout) {
+private class VerifyHttpApi(log: Logger, sharding: ClusterSharding)(implicit ec: ExecutionContext, t: Timeout, system: ActorSystem[_]) {
+  
+  val config           = system.settings.config
+  val currentNamespace = config.getString("hmda.currentNamespace")
+
   private val editTypeRegex = new Regex("quality|macro")
 
   private val quarterlyFiler = quarterlyFilingAllowed(log, sharding) _
@@ -44,27 +50,33 @@ private class VerifyHttpApi(log: Logger, sharding: ClusterSharding)(implicit ec:
   // POST institutions/<lei>/filings/<year>/submissions/<submissionId>/edits/<quality|macro>
   // POST institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/edits/<quality|macro>
   def verifyPath(oAuth2Authorization: OAuth2Authorization): Route =
-    (extractUri & post) { uri =>
-      respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
-        pathPrefix("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
-          oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
-            path("submissions" / IntNumber / "edits" / editTypeRegex) { (seqNr, editType) =>
-              entity(as[EditsVerification]) { editsVerification =>
-                verify(lei, year, None, seqNr, editType, editsVerification.verified, uri)
-              }
-            } ~ path("quarter" / Quarter / "submissions" / IntNumber / "edits" / editTypeRegex) { (quarter, seqNr, editType) =>
-              pathEndOrSingleSlash {
-                quarterlyFiler(lei, year) {
+        path("institutions" / Segment / "filings" / IntNumber / "submissions" / IntNumber / "edits" / editTypeRegex) { (lei, year, seqNr, editType) =>
+          (extractUri & post) { uri =>
+            respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+              oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
+                oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { _ =>
                   entity(as[EditsVerification]) { editsVerification =>
-                    verify(lei, year, Option(quarter), seqNr, editType, editsVerification.verified, uri)
+                    verify(lei, year, None, seqNr, editType, editsVerification.verified, uri)
+                  }
+                }
+              }
+            }
+          }
+        } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "edits" / editTypeRegex) { (lei, year, quarter, seqNr, editType) =>
+          (extractUri & post) { uri =>
+            respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+              oAuth2Authorization.authorizeTokenWithRule(LEISpecificOrAdmin, lei) { _ =>
+                oAuth2Authorization.authorizeTokenWithRule(BetaOnlyUser, currentNamespace) { _ =>
+                  quarterlyFiler(lei, year) {
+                    entity(as[EditsVerification]) { editsVerification =>
+                      verify(lei, year, Option(quarter), seqNr, editType, editsVerification.verified, uri)
+                    }
                   }
                 }
               }
             }
           }
         }
-      }
-    }
 
   private def verify(lei: String, year: Int, quarter: Option[String], seqNr: Int, editType: String, verified: Boolean, uri: Uri): Route = {
     val submissionId                            = SubmissionId(lei, Period(year, quarter), seqNr)
