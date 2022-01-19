@@ -1,6 +1,5 @@
 package hmda.api.http.model.filing.submissions
 
-import hmda.model.validation.ValidationError
 import scala.collection.immutable._
 
 case class SingleValidationErrorSummary(

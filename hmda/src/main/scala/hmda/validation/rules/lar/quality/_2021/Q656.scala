@@ -1,7 +1,6 @@
 package hmda.validation.rules.lar.quality._2021
 
 import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.lar.enums._
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax.PredicateOps
 import hmda.validation.dsl.ValidationResult

@@ -8,11 +8,7 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.publisher.scheduler.AllSchedulers
 import hmda.publisher.scheduler.schedules.{Schedule, Schedules}
 
-import scala.concurrent.ExecutionContext
-
-private class DataPublisherHttpApi(
-                                    schedulers: AllSchedulers
-                                  )(implicit ec: ExecutionContext) {
+private class DataPublisherHttpApi(schedulers: AllSchedulers) {
 
   //trigger/<schedulername>
   private val triggerScheduler =

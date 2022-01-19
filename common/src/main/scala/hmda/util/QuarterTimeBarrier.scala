@@ -1,6 +1,6 @@
 package hmda.util
 
-import java.time.{Clock, LocalDate}
+import java.time.LocalDate
 import hmda.util.BankFilterUtils.config
 import hmda.utils.YearUtils.Period
 

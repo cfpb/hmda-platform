@@ -2,7 +2,6 @@ package hmda.persistence.submission
 
 import java.time.Instant
 import akka.actor.typed._
-import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.scaladsl.adapter._
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.cluster.sharding.typed.ShardingEnvelope
@@ -27,8 +26,6 @@ import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents._
 import hmda.messages.submission.ValidationProgressTrackerCommands._
-import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.lar.enums.LoanOriginated
 import hmda.model.filing.submission._
 import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
 import hmda.model.institution.Institution
@@ -51,7 +48,7 @@ import hmda.validation.filing.MacroValidationFlow._
 import hmda.validation.filing.ValidationFlow._
 import hmda.validation.rules.lar.quality._2020.Q600_warning
 import hmda.validation.rules.lar.quality.common.Q600
-import hmda.validation.rules.lar.syntactical.{S304, S305, S306, S307}
+import hmda.validation.rules.lar.syntactical.{S304, S305, S306}
 import net.openhft.hashing.LongHashFunction
 
 import scala.collection.immutable.ListMap
@@ -434,9 +431,6 @@ object HmdaValidationError
                             self: EntityRef[SubmissionProcessingCommand]
                            )(implicit actorSystem: ActorSystem[_], ec: ExecutionContext, t: Timeout): Future[List[ValidationError]] = {
     logger.info(s"Starting validateTsLar for $submissionId")
-
-    def hashString(s: String): Long =
-      LongHashFunction.xx().hashChars(s)
 
     def headerResultTest: Future[TransmittalSheet] =
       uploadConsumerRawStr(submissionId)

@@ -76,6 +76,7 @@ class PublishingGuard(
           case Period.y2022Q1 => db2022.validationLarData2022(db2022.Year2022Period.Q1)
           case Period.y2022Q2 => db2022.validationLarData2022(db2022.Year2022Period.Q2)
           case Period.y2022Q3 => db2022.validationLarData2022(db2022.Year2022Period.Q3)
+          case p => throw new IllegalArgumentException("Illegal period used for fetching lar data: " + p.toString)
         }
 
         val tsData = year match {
@@ -92,6 +93,7 @@ class PublishingGuard(
           case Period.y2022Q1 => db2022.validationTSData2022(db2022.Year2022Period.Q1)
           case Period.y2022Q2 => db2022.validationTSData2022(db2022.Year2022Period.Q2)
           case Period.y2022Q3 => db2022.validationTSData2022(db2022.Year2022Period.Q3)
+          case p => throw new IllegalArgumentException("Illegal period used for fetching ts data: " + p.toString)
         }
 
         val panelData = year match {
@@ -123,6 +125,7 @@ class PublishingGuard(
             throw new IllegalArgumentException("quarterly 2021 is not supported to public publishers at the moment")
           case Period.y2022Q1 | Period.y2022Q2 | Period.y2022Q3 =>
             throw new IllegalArgumentException("quarterly 2022 is not supported to public publishers at the moment")
+          case p => throw new IllegalArgumentException("Illegal period used for fetching public lar data: " + p.toString)
         }
         val tsData = year match {
           case Period.y2018 => db2018.validationTSData2018
@@ -148,6 +151,7 @@ class PublishingGuard(
             throw new IllegalArgumentException("quarterly 2021 is not supported to public publishers at the moment")
           case Period.y2022Q1 | Period.y2022Q2 | Period.y2022Q3 =>
             throw new IllegalArgumentException("quarterly 2022 is not supported to public publishers at the moment")
+          case p => throw new IllegalArgumentException("Illegal period used for fetching public ts data: " + p.toString)
         }
         larDataOpt
           .map(larData =>

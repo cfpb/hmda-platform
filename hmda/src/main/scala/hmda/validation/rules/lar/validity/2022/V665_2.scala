@@ -1,6 +1,5 @@
 package hmda.validation.rules.lar.validity._2022
 
-import com.google.protobuf.any.Any.defaultInstance.is
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
 import hmda.validation.dsl.PredicateCommon._
