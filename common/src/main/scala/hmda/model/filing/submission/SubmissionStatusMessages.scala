@@ -53,4 +53,6 @@ object SubmissionStatusMessages {
   val signedDescription =
     "This completes your HMDA filing process for this year. If you need to upload a new HMDA file, the previously completed filing will not be overridden until all edits have been cleared and verified, and the new file has been submitted."
   val failedDescription = "Please re-upload your file."
+
+  val processingMSg = "Your file is currently being processed."
 }
