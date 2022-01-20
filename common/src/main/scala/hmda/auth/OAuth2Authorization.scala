@@ -1,13 +1,11 @@
 package hmda.auth
 
-import akka.actor.typed.ActorSystem
 import akka.http.scaladsl.model.Uri.Path
 import akka.http.scaladsl.model.headers.{Authorization, OAuth2BearerToken}
 import akka.http.scaladsl.model.{AttributeKey, HttpRequest, StatusCodes, Uri}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 import akka.http.scaladsl.server.directives.LoggingMagnet
-import akka.stream.Materializer
 import com.typesafe.config.{Config, ConfigFactory}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.ErrorResponse
@@ -17,7 +15,7 @@ import org.slf4j.Logger
 
 import java.util.concurrent.atomic.AtomicReference
 import scala.collection.JavaConverters._
-import scala.concurrent.ExecutionContext
+import scala.util.{Failure, Success}
 // $COVERAGE-OFF$
 class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
 
@@ -109,36 +107,42 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
   protected def authorizeToken: Directive1[VerifiedToken] =
     bearerToken.flatMap {
       case Some(token) =>
-        onComplete(tokenVerifier.verifyToken(token)).flatMap {
-          _.map { t =>
-            val lei: String = t.getOtherClaims.asScala
-              .get("lei")
-              .map(_.toString)
-              .getOrElse("")
+        val t = tokenVerifier.verifyToken(token)
+        t match {
+          case Success(vT) => {
+            val lei: String = vT.getOtherClaims.asScala
+            .get("lei")
+            .map(_.toString)
+            .getOrElse("")
             val verifiedToken = VerifiedToken(
               token,
-              t.getId,
-              t.getName,
-              t.getPreferredUsername,
-              t.getEmail,
-              t.getResourceAccess().get(clientId).getRoles.asScala.toSeq,
+              vT.getId,
+              vT.getName,
+              vT.getPreferredUsername,
+              vT.getEmail,
+              vT.getResourceAccess().get(clientId).getRoles.asScala.toSeq,
               lei
             )
             attribute(tokenAttributeRefKey).flatMap(tokenRef => {
               tokenRef.set(verifiedToken)
               provide(verifiedToken)
             })
-          }.recover {
-            case ex: Throwable =>
-              logger.error("Authorization Token could not be verified", ex)
-              reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]]
-          }.get
+          }
+        case Failure(e) =>
+          withLocalModeBypass {
+            val r: Route = (extractRequest { req =>
+              reject(AuthorizationFailedRejection)
+            })
+            logger.error("Token could not be verified: " + e)
+            StandardRoute(r).toDirective[Tuple1[VerifiedToken]]
+          }
         }
+        
       case None =>
         withLocalModeBypass {
           val r: Route = (extractRequest { req =>
             import scala.compat.java8.OptionConverters._
-            logger.error("No bearer token, authz header [{}]" + req.getHeader("authorization").asScala)
+            logger.error("No bearer token, auth header [{}]" + req.getHeader("authorization").asScala)
             reject(AuthorizationFailedRejection)
           })
           StandardRoute(r).toDirective[Tuple1[VerifiedToken]]
@@ -161,7 +165,7 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
 
 object OAuth2Authorization {
 
-  def apply(log: Logger, config: Config)(implicit system: ActorSystem[_], mat: Materializer, ec: ExecutionContext): OAuth2Authorization = {
+  def apply(log: Logger, config: Config): OAuth2Authorization = {
     val authUrl       = config.getString("keycloak.auth.server.url")
     val keycloakRealm = config.getString("keycloak.realm")
     val apiClientId   = config.getString("keycloak.client.id")

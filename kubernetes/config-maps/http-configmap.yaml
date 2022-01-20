@@ -5,6 +5,6 @@ metadata:
   annotations:
     reloader.stakater.com/match: "true"
 data:
+  auth.realmUrl: "https://ffiec.cfpb.gov/auth/realms/hmda2"
   census.host: census-api.default.svc.cluster.local	
   census.port: "9093"
-  auth.url: ""
