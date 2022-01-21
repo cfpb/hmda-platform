@@ -31,7 +31,7 @@ class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment) extends Toke
   val urlDecoder = Base64.getUrlDecoder
   val modulus = new BigInteger(1, urlDecoder.decode(config.getString("keycloak.publicKey.modulus")))
   val publicExponent = new BigInteger(1, urlDecoder.decode(config.getString("keycloak.publicKey.exponent")))
-  val publicKey = keyFactory.generatePublic(new RSAPublicKeySpec(modulus, publicExponent))
+  lazy val publicKey = keyFactory.generatePublic(new RSAPublicKeySpec(modulus, publicExponent))
 
   def verifyToken(token: String): Try[AccessToken] = {
     val tokenVerifier = TokenVerifier.create(token, classOf[AccessToken])
