@@ -109,6 +109,25 @@ trait LarParser {
       str.validNel
     else
       parserValidationError.invalidNel
+  
+  def validateDateField(str: String, parserValidationError: ParserValidationError): LarParserValidationResult[Int] =
+    if(str.length() == 8){
+      Try(str.toInt) match {
+        case Success(i) => i.validNel
+        case Failure(e) =>
+          parserValidationError.invalidNel
+      }
+    }
+    else {
+      parserValidationError.invalidNel
+    }
+
+  def validateDateOrNaField(str: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
+   if (str == "NA") {
+      str.validNel
+    } else {
+      validateDateField(str, parserValidationError).map(x => x.toString)
+    }
 
   def validateLarCode[A](larCodeEnum: LarCodeEnum[A],
                          value: String,
