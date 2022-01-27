@@ -4,6 +4,7 @@ import cats.implicits._
 import hmda.model.filing.lar.enums.LarCodeEnum
 import hmda.parser.LarParserValidationResult
 import hmda.parser.ParserErrorModel.ParserValidationError
+import java.time.format.DateTimeFormatter
 
 import scala.util.{ Failure, Success, Try }
 
@@ -110,17 +111,13 @@ trait LarParser {
     else
       parserValidationError.invalidNel
   
-  def validateDateField(str: String, parserValidationError: ParserValidationError): LarParserValidationResult[Int] =
-    if(str.length() == 8){
-      Try(str.toInt) match {
-        case Success(i) => i.validNel
-        case Failure(e) =>
-          parserValidationError.invalidNel
-      }
+  def validateDateField(str: String, parserValidationError: ParserValidationError): LarParserValidationResult[Int] = {
+    val dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
+    Try(dateFormatter.parse(str))  match {
+      case Success(i) => str.toInt.validNel
+      case Failure(_) => parserValidationError.invalidNel
     }
-    else {
-      parserValidationError.invalidNel
-    }
+  }
 
   def validateDateOrNaField(str: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
    if (str == "NA") {
