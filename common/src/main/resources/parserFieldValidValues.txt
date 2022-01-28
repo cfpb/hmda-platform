@@ -8,7 +8,7 @@ Preapproval|Integer: 1, 2
 Construction Method|Integer: 1, 2
 Occupancy Type|Integer: 1, 2, 3
 Action Taken|Integer: 1, 2, 3, 4, 5, 6, 7, 8
-Action Taken Date|Valid Date in format yyyyMMdd
+Action Taken Date|Valid Date in format YYYYMMDD
 Loan Amount|Double
 Loan Term|Integer, NA, or Exempt
 Ethnicity of Applicant or Borrower: 1|Integer: 1, 11, 12, 13, 14, 2, 3, 4, 5 or Blank
