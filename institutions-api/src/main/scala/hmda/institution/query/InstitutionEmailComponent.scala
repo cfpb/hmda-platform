@@ -10,7 +10,7 @@ import slick.jdbc.JdbcProfile
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait InstitutionEmailComponent extends InstitutionComponent2018 with InstitutionComponent2019 with InstitutionComponent2020 with InstitutionComponent2021 with InstitutionComponent2022 {
+trait InstitutionEmailComponent extends InstitutionComponent {
 
   import dbConfig.profile.api._
 
@@ -76,11 +76,11 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
   def findByYear(year: String)(
     implicit ec: ExecutionContext,
     institutionEmailsRepository: InstitutionEmailsRepository,
-    institutionRepository2018: InstitutionRepository2018,
-    institutionRepository2019: InstitutionRepository2019,
-    institutionRepository2020: InstitutionRepository2020,
-    institutionRepository2021: InstitutionRepository2021,
-    institutionRepository2022: InstitutionRepository2022
+    institutionRepository2018: InstitutionRepository,
+    institutionRepository2019: InstitutionRepository,
+    institutionRepository2020: InstitutionRepository,
+    institutionRepository2021: InstitutionRepository,
+    institutionRepository2022: InstitutionRepository
 
   ):  Future[Seq[Future[String]]]= {
 
@@ -159,14 +159,14 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
 
 
 
-  def findByEmail(email: String, year: String)(
+  def findByEmail(email: String, year: String, 
+    institutionRepository2018: InstitutionRepository,
+    institutionRepository2019: InstitutionRepository,
+    institutionRepository2020: InstitutionRepository,
+    institutionRepository2021: InstitutionRepository,
+    institutionRepository2022: InstitutionRepository)(
     implicit ec: ExecutionContext,
-    institutionEmailsRepository: InstitutionEmailsRepository,
-    institutionRepository2018: InstitutionRepository2018,
-    institutionRepository2019: InstitutionRepository2019,
-    institutionRepository2020: InstitutionRepository2020,
-    institutionRepository2021: InstitutionRepository2021,
-    institutionRepository2022: InstitutionRepository2022
+    institutionEmailsRepository: InstitutionEmailsRepository
   ): Future[Seq[Institution]] = {
 
     val emailDomain = extractDomain(email)
@@ -255,23 +255,22 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
     }
   }
 
-  def findByEmailAnyYear(email: String)(
+  def findByEmailAnyYear(email: String,     
+    institutionRepository2018: InstitutionRepository,
+    institutionRepository2019: InstitutionRepository,
+    institutionRepository2020: InstitutionRepository,
+    institutionRepository2021: InstitutionRepository,
+    institutionRepository2022: InstitutionRepository)(
     implicit ec: ExecutionContext,
-    institutionEmailsRepository: InstitutionEmailsRepository,
-    institutionRepository2018: InstitutionRepository2018,
-    institutionRepository2019: InstitutionRepository2019,
-    institutionRepository2020: InstitutionRepository2020,
-    institutionRepository2021: InstitutionRepository2021,
-    institutionRepository2022: InstitutionRepository2022
-
+    institutionEmailsRepository: InstitutionEmailsRepository
   ): Future[Seq[Institution]] = {
 
       for {
-        institutions2022 <- findByEmail(email, "2022")
-        institutions2021 <- findByEmail(email, "2021")
-        institutions2020 <- findByEmail(email, "2020")
-        institutions2019 <- findByEmail(email, "2019")
-        institutions2018 <- findByEmail(email, "2018")
+        institutions2022 <- findByEmail(email, "2022", institutionRepository2018, institutionRepository2019, institutionRepository2020, institutionRepository2021, institutionRepository2022)
+        institutions2021 <- findByEmail(email, "2021", institutionRepository2018, institutionRepository2019, institutionRepository2020, institutionRepository2021, institutionRepository2022)
+        institutions2020 <- findByEmail(email, "2020", institutionRepository2018, institutionRepository2019, institutionRepository2020, institutionRepository2021, institutionRepository2022)
+        institutions2019 <- findByEmail(email, "2019", institutionRepository2018, institutionRepository2019, institutionRepository2020, institutionRepository2021, institutionRepository2022)
+        institutions2018 <- findByEmail(email, "2018", institutionRepository2018, institutionRepository2019, institutionRepository2020, institutionRepository2021, institutionRepository2022)
         }
       yield (institutions2021, institutions2020, institutions2019, institutions2018, institutions2022) match {
         case _ if (!institutions2021.isEmpty) => institutions2021
@@ -289,17 +288,17 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
     InstitutionConverter.convert(institution, filteredEmails)
   }
 
-  def findByFields(lei: String, name: String, taxId: String, emailDomain: String, year: String)(
+  def findByFields(lei: String, name: String, taxId: String, emailDomain: String, year: String,
+    institutionRepository2018: InstitutionRepository,
+    institutionRepository2019: InstitutionRepository,
+    institutionRepository2020: InstitutionRepository,
+    institutionRepository2021: InstitutionRepository,
+    institutionRepository2022: InstitutionRepository
+    )(
     implicit ec: ExecutionContext,
-    institutionEmailsRepository: InstitutionEmailsRepository,
-    institutionRepository2018: InstitutionRepository2018,
-    institutionRepository2019: InstitutionRepository2019,
-    institutionRepository2020: InstitutionRepository2020,
-    institutionRepository2021: InstitutionRepository2021,
-    institutionRepository2022: InstitutionRepository2022
-
+    institutionEmailsRepository: InstitutionEmailsRepository
   ): Future[Seq[Institution]] = {
-    val emailFiltered = findByEmail(emailDomain, year)
+    val emailFiltered = findByEmail(emailDomain, year, institutionRepository2018, institutionRepository2019, institutionRepository2020, institutionRepository2021, institutionRepository2022)
     for {
       emailEntities <- emailFiltered
       filtered = emailEntities.filter(

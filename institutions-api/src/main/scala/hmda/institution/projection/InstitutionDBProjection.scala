@@ -29,11 +29,11 @@ object InstitutionDBProjection extends InstitutionEmailComponent with Institutio
     * to BETA
     */
 
-  implicit val institutionRepository2018   = new InstitutionRepository2018(dbConfig, "institutions2018")
-  implicit val institutionRepository2019   = new InstitutionRepository2019(dbConfig, "institutions2019")
-  implicit val institutionRepository2020   = new InstitutionRepository2020(dbConfig, "institutions2020")
-  implicit val institutionRepository2021   = new InstitutionRepository2021(dbConfig, "institutions2021")
-  implicit val institutionRepository2022   = new InstitutionRepository2021(dbConfig, "institutions2022")
+  implicit val institutionRepository2018   = new InstitutionRepository(dbConfig, "institutions2018")
+  implicit val institutionRepository2019   = new InstitutionRepository(dbConfig, "institutions2019")
+  implicit val institutionRepository2020   = new InstitutionRepository(dbConfig, "institutions2020")
+  implicit val institutionRepository2021   = new InstitutionRepository(dbConfig, "institutions2021")
+  implicit val institutionRepository2022   = new InstitutionRepository(dbConfig, "institutions2022")
   implicit val institutionEmailsRepository = new InstitutionEmailsRepository(dbConfig)
   implicit val institutionNotesHistoryRepository = new InstitutionNoteHistoryRepository(dbConfig)
 
