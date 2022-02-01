@@ -266,86 +266,21 @@ trait InstitutionEmailComponent extends InstitutionComponent2018 with Institutio
 
   ): Future[Seq[Institution]] = {
 
-    val emailDomain = extractDomain(email)
-    val emailSingleQuery =
-      institutionEmailsRepository.table.filter(_.emailDomain.trim.toLowerCase === emailDomain.trim.toLowerCase())
-
-    def emailTotalQuery(leis: Seq[String]) =
-      institutionEmailsRepository.table.filter(_.lei inSet leis)
-
-    def institutionQuery2022(leis: Seq[String]) =
-      institutionRepository2022.table.filter(_.lei inSet leis)
-
-    def institutionQuery2021(leis: Seq[String]) =
-      institutionRepository2021.table.filter(_.lei inSet leis)
-
-    def institutionQuery2020(leis: Seq[String]) =
-      institutionRepository2020.table.filter(_.lei inSet leis)
-
-    def institutionQuery2019(leis: Seq[String]) =
-      institutionRepository2019.table.filter(_.lei inSet leis)
-
-    def institutionQuery2018(leis: Seq[String]) =
-      institutionRepository2018.table.filter(_.lei inSet leis)
-
-    val db2022 = institutionRepository2022.db
-    val db2021 = institutionRepository2021.db
-    val db2020 = institutionRepository2020.db
-    val db2019 = institutionRepository2019.db
-    val db2018 = institutionRepository2018.db
-
-    for {
-      //There is one email domain table shared across all years, no need to use the other instances
-      emailEntities <- db2019.run(emailSingleQuery.result)
-      leis = emailEntities.map(_.lei) if !emailEntities.isEmpty
-
-      //Current filing season
-      institutions2019 <- if (!leis.isEmpty)
-        db2019.run(institutionQuery2019(leis).result)
-      else Future.successful(Seq.empty)
-
-      institutions2018 <- if (institutions2019.isEmpty)
-        db2019.run(institutionQuery2018(leis).result)
-      else Future.successful(Seq.empty)
-
-      institutions2020 <- if (institutions2018.isEmpty && institutions2019.isEmpty)
-        db2020.run(institutionQuery2020(leis).result)
-      else Future.successful(Seq.empty)
-
-      institutions2021 <- if (institutions2018.isEmpty && institutions2019.isEmpty && institutions2020.isEmpty)
-        db2021.run(institutionQuery2021(leis).result)
-      else Future.successful(Seq.empty)
-
-      institutions2022 <- if (institutions2018.isEmpty && institutions2019.isEmpty && institutions2020.isEmpty && institutions2021.isEmpty)
-        db2022.run(institutionQuery2021(leis).result)
-      else Future.successful(Seq.empty)
-
-      emails <- db2020.run(emailTotalQuery(leis).result)
-    }
-
-      yield (institutions2022,institutions2021, institutions2020, institutions2019, institutions2018) match {
-
-        case _ if (!institutions2019.isEmpty) => institutions2019.map {
-          institution => mergeEmailIntoInstitutions(emails, institution)
+      for {
+        institutions2022 <- findByEmail(email, "2022")
+        institutions2021 <- findByEmail(email, "2021")
+        institutions2020 <- findByEmail(email, "2020")
+        institutions2019 <- findByEmail(email, "2019")
+        institutions2018 <- findByEmail(email, "2018")
         }
-
-        case _ if (!institutions2018.isEmpty) => institutions2018.map {
-          institution => mergeEmailIntoInstitutions(emails, institution)
-        }
-
-        case _ if (!institutions2020.isEmpty) => institutions2020.map {
-          institution => mergeEmailIntoInstitutions(emails, institution)
-        }
-
-        case _ if (!institutions2021.isEmpty) => institutions2021.map {
-          institution => mergeEmailIntoInstitutions(emails, institution)
-        }
-
-        case _ if (!institutions2022.isEmpty) => institutions2022.map {
-          institution => mergeEmailIntoInstitutions(emails, institution)
-        }
-
+      yield (institutions2021, institutions2020, institutions2019, institutions2018, institutions2022) match {
+        case _ if (!institutions2021.isEmpty) => institutions2021
+        case _ if (!institutions2020.isEmpty) => institutions2020
+        case _ if (!institutions2019.isEmpty) => institutions2019
+        case _ if (!institutions2018.isEmpty) => institutions2018
+        case _ if (!institutions2022.isEmpty) => institutions2022
       }
+
   }
 
   private def mergeEmailIntoInstitutions(emails: Seq[InstitutionEmailEntity], institution: InstitutionEntity) = {
