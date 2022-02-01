@@ -1,7 +1,7 @@
 LEI|String with only letters and numbers
 ULI|String with only letters and numbers
 LAR Record Identifier|Integer: 2
-Application Date|Valid Date in format yyyyMMdd or NA
+Application Date|Valid Date in format YYYYMMDD or NA
 Loan Type|Integer: 1, 2, 3, 4
 Loan Purpose|Integer: 1, 2, 31, 32, 4, 5
 Preapproval|Integer: 1, 2
