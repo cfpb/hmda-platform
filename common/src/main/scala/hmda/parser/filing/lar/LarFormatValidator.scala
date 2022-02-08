@@ -486,7 +486,7 @@ sealed trait LarFormatValidator extends LarParser {
                   ): LarParserValidationResult[Loan] =
     (
       validateStrNoSpace(uli, InvalidULI(uli)),
-      validateIntStrOrNAField(applicationDate, InvalidApplicationDate(applicationDate)),
+      validateDateOrNaField(applicationDate, InvalidApplicationDate(applicationDate)),
       validateLarCode(LoanTypeEnum, loanType, InvalidLoanType(loanType)),
       validateLarCode(LoanPurposeEnum, loanPurpose, InvalidLoanPurpose(loanPurpose)),
       validateLarCode(ConstructionMethodEnum, constructionMethod, InvalidConstructionMethod(constructionMethod)),
@@ -505,7 +505,7 @@ sealed trait LarFormatValidator extends LarParser {
     (
       validateLarCode(PreapprovalEnum, preapproval, InvalidPreapproval(preapproval)),
       validateLarCode(ActionTakenTypeEnum, actionTaken, InvalidActionTaken(actionTaken)),
-      validateIntField(actionDate, InvalidActionTakenDate(actionDate))
+      validateDateField(actionDate, InvalidActionTakenDate(actionDate))
       ).mapN(LarAction.apply)
 
   def validateGeography(
