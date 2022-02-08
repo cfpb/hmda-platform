@@ -28,11 +28,11 @@ object InstitutionQueryHttpApi {
 private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionContext) extends InstitutionEmailComponent with InstitutionNoteHistoryComponent{
   val dbConfig = DatabaseConfig.forConfig[JdbcProfile]("institution_db")
 
-  implicit val institutionRepository2018   = new InstitutionRepository2018(dbConfig, "institutions2018")
-  implicit val institutionRepository2019   = new InstitutionRepository2019(dbConfig, "institutions2019")
-  implicit val institutionRepository2020   = new InstitutionRepository2020(dbConfig, "institutions2020")
-  implicit val institutionRepository2021   = new InstitutionRepository2021(dbConfig, "institutions2021")
-  implicit val institutionRepository2022   = new InstitutionRepository2022(dbConfig, "institutions2022")
+  implicit val institutionRepository2018   = new InstitutionRepository(dbConfig, "institutions2018")
+  implicit val institutionRepository2019   = new InstitutionRepository(dbConfig, "institutions2019")
+  implicit val institutionRepository2020   = new InstitutionRepository(dbConfig, "institutions2020")
+  implicit val institutionRepository2021   = new InstitutionRepository(dbConfig, "institutions2021")
+  implicit val institutionRepository2022   = new InstitutionRepository(dbConfig, "institutions2022")
   implicit val institutionEmailsRepository = new InstitutionEmailsRepository(dbConfig)
   implicit val institutionNoteHistoryRepository = new InstitutionNoteHistoryRepository(dbConfig)
 
@@ -93,12 +93,12 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
       (extractUri & get) { uri =>
         isFilingAllowed(year, None) {
           parameter('domain.as[String]) { domain =>
-            val f = findByEmail(domain, year.toString)
+            val f = findByEmail(domain, year.toString, institutionRepository2018, institutionRepository2019, institutionRepository2020, institutionRepository2021, institutionRepository2022)
             completeInstitutionsFuture(f, uri)
           } ~
             parameters('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String])  {
               (domain, lei, respondentName, taxId) =>
-                val f = findByFields(lei, respondentName, taxId, domain, year.toString)
+                val f = findByFields(lei, respondentName, taxId, domain, year.toString, institutionRepository2018, institutionRepository2019, institutionRepository2020, institutionRepository2021, institutionRepository2022)
                 completeInstitutionsFuture(f, uri)
             }
         }
@@ -137,14 +137,14 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
           if (checkIfPublicDomain(domain)) {
             returnNotFoundError(uri)
           } else {
-            val f = findByEmailAnyYear(domain)
+            val f = findByEmailAnyYear(domain, institutionRepository2018, institutionRepository2019, institutionRepository2020, institutionRepository2021, institutionRepository2022)
             completeInstitutionsFuture(f, uri)
           }
         } ~
           parameters('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String]) {
             (domain, lei, respondentName, taxId) =>
               val f =
-                findByFields(lei, respondentName, taxId, domain, currentYear)
+                findByFields(lei, respondentName, taxId, domain, currentYear, institutionRepository2018, institutionRepository2019, institutionRepository2020, institutionRepository2021, institutionRepository2022)
               completeInstitutionsFuture(f, uri)
           }
       }
