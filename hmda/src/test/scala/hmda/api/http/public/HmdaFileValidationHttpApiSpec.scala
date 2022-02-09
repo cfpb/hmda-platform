@@ -54,7 +54,7 @@ class HmdaFileParsingHttpApiSpec extends WordSpec with MustMatchers with Scalate
         status mustBe StatusCodes.OK
         val csv = responseAs[String]
         csv must include("Row Number|Estimated ULI|Field Name|Input Value|Valid Values")
-        csv must include("2|LEI123|Application Date|a|Integer or NA")
+        csv must include("2|LEI123|Application Date|a|Valid Date in format YYYYMMDD or NA")
       }
     }
   }
