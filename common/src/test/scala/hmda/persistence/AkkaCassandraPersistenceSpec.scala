@@ -2,16 +2,15 @@ package hmda.persistence
 
 import java.time.Instant
 import java.util.concurrent.TimeUnit
+
 import akka.actor
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
 import akka.actor.typed.{ ActorRef, ActorSystem, Behavior, TypedActorContext }
-import akka.persistence.testkit.scaladsl.EventSourcedBehaviorTestKit
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
 import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior }
-import com.typesafe.config.ConfigValueFactory
 import hmda.persistence.util.CassandraUtil
 import org.scalacheck.Gen
 import org.scalatest.{ BeforeAndAfterAll, WordSpec }
@@ -95,9 +94,5 @@ abstract class AkkaCassandraPersistenceSpec extends WordSpec with BeforeAndAfter
     val now = Instant.now().toEpochMilli
     Gen.alphaStr.suchThat(s => s != "").sample.getOrElse(s"name-$now")
   }
-
-  protected def akkaCassandraActorSystem: akka.actor.ActorSystem =
-    actor.ActorSystem(actorName,
-      EventSourcedBehaviorTestKit.config.withValue("akka.actor.provider", ConfigValueFactory.fromAnyRef("cluster")))
 
 }
