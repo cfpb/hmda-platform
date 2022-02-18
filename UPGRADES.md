@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS akka.all_persistence_ids(
   persistence_id text PRIMARY KEY);
 ```
 
-new environment variable to put into `cassandra-configmap`: `CASSANDRA_CLUSTER_DC` (e.g.: `dc` / `dc2`)
+new environment variable to put into `cassandra-configmap`: `cassandra-cluster-dc` (e.g.: `dc` / `dc2`)
 
 ### Migration
 newly added table needs to be populated, refer to [Migration Documentation](https://doc.akka.io/docs/akka-persistence-cassandra/current/migrations.html) in [plugin upgrade](#akka-cassandra-persistence-plugin-upgrade) section,
