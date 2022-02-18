@@ -20,7 +20,6 @@ object Dependencies {
   lazy val akkaClusterShardingTyped = "com.typesafe.akka"   %% "akka-cluster-sharding-typed" % Version.akka
   lazy val akkaPersistence          = "com.typesafe.akka"   %% "akka-persistence"            % Version.akka
   lazy val akkaPersistenceTyped     = "com.typesafe.akka"   %% "akka-persistence-typed"      % Version.akka
-  lazy val akkaPersistenceTestKit   = "com.typesafe.akka"   %% "akka-persistence-testkit"    % Version.akka % Test
   lazy val akkaPersistenceQuery     = "com.typesafe.akka"   %% "akka-persistence-query"      % Version.akka
   lazy val akkaTestkitTyped         = "com.typesafe.akka"   %% "akka-actor-testkit-typed"    % Version.akka % Test
   lazy val akkaStream               = "com.typesafe.akka"   %% "akka-stream"                 % Version.akka

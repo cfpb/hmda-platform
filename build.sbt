@@ -41,7 +41,6 @@ lazy val akkaPersistenceDeps =
     akkaPersistence,
     akkaClusterSharding,
     akkaPersistenceTyped,
-    akkaPersistenceTestKit,
     akkaPersistenceQuery,
     akkaClusterShardingTyped,
     akkaPersistenceCassandra,
