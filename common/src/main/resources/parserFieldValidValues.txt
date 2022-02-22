@@ -9,7 +9,7 @@ Construction Method|Integer: 1, 2
 Occupancy Type|Integer: 1, 2, 3
 Action Taken|Integer: 1, 2, 3, 4, 5, 6, 7, 8
 Action Taken Date|Valid Date in format YYYYMMDD
-Loan Amount|Double
+Loan Amount|Numeric (Example: 110500 or 110500.00)
 Loan Term|Integer, NA, or Exempt
 Ethnicity of Applicant or Borrower: 1|Integer: 1, 11, 12, 13, 14, 2, 3, 4, 5 or Blank
 Ethnicity of Applicant or Borrower: 2|Integer: 1, 11, 12, 13, 14, 2, 3, 4, 5 or Blank
@@ -47,28 +47,28 @@ Credit Score of Co-Applicant or Co-Borrower|Integer
 Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model|1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1111
 Income|Integer or NA
 Type of Purchaser|Integer: 1, 2, 3, 4, 5, 6, 71, 72, 8, 9
-Rate Spread|Double, NA, or Exempt
+Rate Spread|Numeric (Example: 110500 or 110500.00), NA, or Exempt
 HOEPA Status|Integer: 1, 2, 3
 Lien Status|Integer: 1, 2
 Reason for Denial: 1|Integer: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1111
 Reason for Denial: 2|Integer: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1111 or Blank
 Reason for Denial: 3|Integer: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1111 or Blank
 Reason for Denial: 4|Integer: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1111 or Blank
-Total Loan Costs|Double, NA, or Exempt
-Total Points and Fees|Double, NA, or Exempt
-Origination Charges|Double, NA, or Exempt
-Discount Points|Double, NA, Exempt, or Blank
-Lender Credits|Double, NA, Exempt, or Blank
-Interest Rate|Double, NA, or Exempt
+Total Loan Costs|Numeric (Example: 110500 or 110500.00), NA, or Exempt
+Total Points and Fees|Numeric (Example: 110500 or 110500.00), NA, or Exempt
+Origination Charges|Numeric (Example: 110500 or 110500.00), NA, or Exempt
+Discount Points|Numeric (Example: 0.2), NA, or Exempt
+Lender Credits|Numeric (Example: 110500 or 110500.00), NA, or Exempt
+Interest Rate|Numeric (Example: 0.0375), NA, or Exempt
 Prepayment Penalty Term|Integer, NA, or Exempt
-Debt-to-Income Ratio|Double, NA, or Exempt
-Combined Loan-to-Value Ratio|Double, NA, or Exempt
+Debt-to-Income Ratio|Numeric (Example: 0.35), NA, or Exempt
+Combined Loan-to-Value Ratio|Numeric (Example: 0.8), NA, or Exempt
 Introductory Rate Period|Integer, NA or Exempt
 Balloon Payments|Integer: 1, 2, 1111
 Interest-Only Payments|Integer: 1, 2, 1111
 Negative Amortization|Integer: 1, 2, 1111
 Other Non-Amortizing Features|Integer: 1, 2, 1111
-Property Value|Double, NA, or Exempt
+Property Value|Numeric (Example: 110500 or 110500.00), NA, or Exempt
 Manufactured Home Secured Property Type|Integer: 1, 2, 3, 1111
 Manufactured Home Land Property Interest|Integer: 1, 2, 3, 4, 5, 1111
 Total Units|Integer
