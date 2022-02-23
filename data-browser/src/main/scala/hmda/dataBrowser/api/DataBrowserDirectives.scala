@@ -164,7 +164,7 @@ trait DataBrowserDirectives extends Settings {
     parameters("years".as(CsvSeq[Int]) ? Nil).flatMap {
       case Nil =>
         import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-        complete((BadRequest, "must provide years parameter"))
+        complete((BadRequest, "must provide years value parameter"))
 
       case xs if xs.exists(year => (year < 2018) || (year > 2020)) => // TODO: Change this to 2017 when 2017 is released
         import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
