@@ -57,8 +57,8 @@ Reason for Denial: 4|Integer: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1111 or Blank
 Total Loan Costs|Numeric (Example: 110500 or 110500.00), NA, or Exempt
 Total Points and Fees|Numeric (Example: 110500 or 110500.00), NA, or Exempt
 Origination Charges|Numeric (Example: 110500 or 110500.00), NA, or Exempt
-Discount Points|Numeric (Example: 0.2), NA, or Exempt
-Lender Credits|Numeric (Example: 110500 or 110500.00), NA, or Exempt
+Discount Points|Numeric (Example: 0.2), NA, Exempt, or Blank
+Lender Credits|Numeric (Example: 110500 or 110500.00), NA, Exempt, or Blank
 Interest Rate|Numeric (Example: 0.0375), NA, or Exempt
 Prepayment Penalty Term|Integer, NA, or Exempt
 Debt-to-Income Ratio|Numeric (Example: 0.35), NA, or Exempt
