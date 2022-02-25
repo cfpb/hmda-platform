@@ -4,5 +4,6 @@ metadata:
   name: cassandra-configmap
 data:
   cassandra-hosts: node-0-server.cassandra.autoip.dcos.thisdcos.directory
+  cassandra-cluster-dc: datacenter1
   cassandra-keyspace: hmda2_journal_beta
   cassandra-keyspace-snapshot: hmda2_snapshot_beta

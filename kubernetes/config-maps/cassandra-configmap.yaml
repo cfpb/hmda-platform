@@ -6,5 +6,6 @@ metadata:
     reloader.stakater.com/match: "true"
 data:
   cassandra-hosts: cluster1-dc1-service.cass-operator
+  cassandra-cluster-dc: dc1
   cassandra-keyspace: hmda2_journal
   cassandra-keyspace-snapshot: hmda2_snapshot
