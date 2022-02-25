@@ -83,7 +83,7 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
     authorizeToken flatMap {
       case t if t.lei.nonEmpty =>
         withLocalModeBypass {
-          val leiList = t.lei.split(',')
+          val leiList = t.lei.split(',').map(_.trim())
           if (leiList.contains(lei.trim())) {
             provide(t)
           } else {
