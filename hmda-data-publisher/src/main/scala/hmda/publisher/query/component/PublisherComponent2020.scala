@@ -3,17 +3,17 @@ package hmda.publisher.query.component
 import java.sql.Timestamp
 import hmda.model.publication.Msa
 import hmda.publisher.helper.PGTableNameLoader
-import hmda.publisher.qa.{QAEntity, QARepository, QATableBase}
-import hmda.publisher.query.lar.{LarEntityImpl2020, _}
-import hmda.publisher.query.panel.{InstitutionAltEntity, InstitutionEntity}
-import hmda.publisher.validation.{LarData, PanelData, TsData}
+import hmda.publisher.qa.{ QAEntity, QARepository, QATableBase }
+import hmda.publisher.query.lar.{ LarEntityImpl2020, _ }
+import hmda.publisher.query.panel.{ InstitutionAltEntity, InstitutionEntity }
+import hmda.publisher.validation.{ LarData, PanelData, TsData }
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
-import slick.basic.{DatabaseConfig, DatabasePublisher}
-import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
+import slick.basic.{ DatabaseConfig, DatabasePublisher }
+import slick.jdbc.{ JdbcProfile, ResultSetConcurrency, ResultSetType }
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 // $COVERAGE-OFF$
 trait PublisherComponent2020 extends PGTableNameLoader {
 
@@ -145,60 +145,9 @@ trait PublisherComponent2020 extends PGTableNameLoader {
   def institutionTableQuery2020(p: Year2020Period) = {
     TableQuery(tag => new InstitutionsTable(tag))
   }
-  abstract class TransmittalSheetTableBase[T](tag: Tag, tableName: String) extends Table[T](tag, tableName) {
 
-    def lei             = column[String]("lei", O.PrimaryKey)
-    def id              = column[Int]("id")
-    def institutionName = column[String]("institution_name")
-    def year            = column[Int]("year")
-    def quarter         = column[Int]("quarter")
-    def name            = column[String]("name")
-    def phone           = column[String]("phone")
-    def email           = column[String]("email")
-    def street          = column[String]("street")
-    def city            = column[String]("city")
-    def state           = column[String]("state")
-    def zipCode         = column[String]("zip_code")
-    def agency          = column[Int]("agency")
-    def totalLines      = column[Int]("total_lines")
-    def taxId           = column[String]("tax_id")
-    def submissionId    = column[Option[String]]("submission_id")
-    def createdAt       = column[Option[Timestamp]]("created_at")
-    def isQuarterly     = column[Option[Boolean]]("is_quarterly")
-    def signDate        = column[Option[Long]]("sign_date")
-
-    def transmittalSheetEntityProjection =
-      (
-        lei,
-        id,
-        institutionName,
-        year,
-        quarter,
-        name,
-        phone,
-        email,
-        street,
-        city,
-        state,
-        zipCode,
-        agency,
-        totalLines,
-        taxId,
-        submissionId,
-        createdAt,
-        isQuarterly,
-        signDate
-      ) <> ((TransmittalSheetEntity.apply _).tupled, TransmittalSheetEntity.unapply)
-  }
-
-  class RealTransmittalSheetTable2020(tag: Tag, tableName: String) extends TransmittalSheetTableBase[TransmittalSheetEntity](tag, tableName) {
+  class RealTransmittalSheetTable2020(tag: Tag, tableName: String) extends AbstractTransmittalSheetTable[TransmittalSheetEntity](tag, tableName) {
     override def * = transmittalSheetEntityProjection
-  }
-
-  class QATransmittalSheetTable(tag: Tag, tableName: String)
-    extends TransmittalSheetTableBase[QAEntity[TransmittalSheetEntity]](tag, tableName)
-      with QATableBase[TransmittalSheetEntity] {
-    def * = (transmittalSheetEntityProjection, fileName,timeStamp) <> ((QAEntity.apply[TransmittalSheetEntity] _).tupled, QAEntity.unapply[TransmittalSheetEntity] _)
   }
 
   def transmittalSheetTableQuery2020(p: Year2020Period): TableQuery[RealTransmittalSheetTable2020] = {
@@ -221,8 +170,10 @@ trait PublisherComponent2020 extends PGTableNameLoader {
     TableQuery(tag => new QATransmittalSheetTable(tag, tableName))
   }
 
-  class TSRepository2020Base[TsTable <: RealTransmittalSheetTable2020](val config: DatabaseConfig[JdbcProfile], val table: TableQuery[TsTable])
-    extends TableRepository[TsTable, String] {
+  class TSRepository2020Base[TsTable <: AbstractTransmittalSheetTable[TransmittalSheetEntity]](
+    val config: DatabaseConfig[JdbcProfile],
+    val table: TableQuery[TsTable]
+  ) extends TsRepository[TsTable] {
 
     override def getId(row: TsTable): config.profile.api.Rep[Id] =
       row.lei
