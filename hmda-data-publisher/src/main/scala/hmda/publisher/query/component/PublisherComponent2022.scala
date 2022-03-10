@@ -143,18 +143,14 @@ trait PublisherComponent2022 extends PGTableNameLoader {
       db.run(table.size.result)
   }
 
-  class RealTransmittalSheetTable2022(tag: Tag, tableName: String) extends AbstractTransmittalSheetTable[TransmittalSheetEntity](tag, tableName) {
-    override def * = transmittalSheetEntityProjection
-  }
-
-  def transmittalSheetTableQuery2022(p: Year2022Period): TableQuery[RealTransmittalSheetTable2022] = {
+  def transmittalSheetTableQuery2022(p: Year2022Period): TableQuery[TransmittalSheetTable] = {
     val tableName = p match {
       case Year2022Period.Whole => ts2022TableName
       case Year2022Period.Q1    => ts2022Q1TableName
       case Year2022Period.Q2    => ts2022Q2TableName
       case Year2022Period.Q3    => ts2022Q3TableName
     }
-    TableQuery(tag => new RealTransmittalSheetTable2022(tag, tableName))
+    TableQuery(tag => new TransmittalSheetTable(tag, tableName))
   }
 
   def qaTransmittalSheetTableQuery2022(p: Year2022Period): TableQuery[QATransmittalSheetTable] = {
@@ -167,7 +163,7 @@ trait PublisherComponent2022 extends PGTableNameLoader {
     TableQuery(tag => new QATransmittalSheetTable(tag, tableName))
   }
 
-  class TSRepository2022Base[TsTable <: RealTransmittalSheetTable2022](val config: DatabaseConfig[JdbcProfile], val table: TableQuery[TsTable])
+  class TSRepository2022Base[TsTable <: TransmittalSheetTable](val config: DatabaseConfig[JdbcProfile], val table: TableQuery[TsTable])
     extends TsRepository[TsTable] {
 
     override def getId(row: TsTable): config.profile.api.Rep[Id] =
@@ -585,7 +581,7 @@ trait PublisherComponent2022 extends PGTableNameLoader {
   def validationLarData2022(p: Year2022Period): LarData = LarData[LarEntityImpl2022, RealLarTable2022](larTableQuery2022(p))(_.lei)
 
   def validationTSData2022(p: Year2022Period): TsData =
-    TsData[TransmittalSheetEntity, RealTransmittalSheetTable2022](transmittalSheetTableQuery2022(p))(_.lei, _.totalLines, _.submissionId)
+    TsData[TransmittalSheetEntity, TransmittalSheetTable](transmittalSheetTableQuery2022(p))(_.lei, _.totalLines, _.submissionId)
   class QALarTableLoanLimit(tag: Tag)
     extends LarTableBase[QAEntity[LarEntityImpl2022WithMsa]](tag, lar2022QALoanLimitTableName)
       with QATableBase[LarEntityImpl2022WithMsa] {

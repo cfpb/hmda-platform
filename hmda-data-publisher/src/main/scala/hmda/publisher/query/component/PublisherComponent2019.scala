@@ -136,10 +136,7 @@ trait PublisherComponent2019 extends PGTableNameLoader {
       db.run(table.size.result)
   }
 
-  class TransmittalSheetTable(tag: Tag) extends AbstractTransmittalSheetTable[TransmittalSheetEntity](tag, ts2019TableName){
-    override def * = transmittalSheetEntityProjection
-  }
-  val transmittalSheetTable2019 = TableQuery[TransmittalSheetTable]
+  val transmittalSheetTable2019 = TableQuery(tag => new TransmittalSheetTable(tag, ts2019TableName))
 
   class TransmittalSheetRepository2019(val config: DatabaseConfig[JdbcProfile]) extends TsRepository[TransmittalSheetTable] {
 

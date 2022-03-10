@@ -52,6 +52,10 @@ abstract class AbstractTransmittalSheetTable[T](tag: Tag, tableName: String) ext
     ) <> ((TransmittalSheetEntity.apply _).tupled, TransmittalSheetEntity.unapply)
 }
 
+class TransmittalSheetTable(tag: Tag, tableName: String) extends AbstractTransmittalSheetTable[TransmittalSheetEntity](tag, tableName) {
+  override def * = transmittalSheetEntityProjection
+}
+
 class QATransmittalSheetTable(tag: Tag, tableName: String)
   extends AbstractTransmittalSheetTable[QAEntity[TransmittalSheetEntity]](tag, tableName)
     with QATableBase[TransmittalSheetEntity] {

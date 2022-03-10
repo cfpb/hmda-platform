@@ -146,18 +146,14 @@ trait PublisherComponent2021 extends PGTableNameLoader {
     TableQuery(tag => new InstitutionsTable(tag))
   }
 
-  class RealTransmittalSheetTable2021(tag: Tag, tableName: String) extends AbstractTransmittalSheetTable[TransmittalSheetEntity](tag, tableName) {
-    override def * = transmittalSheetEntityProjection
-  }
-
-  def transmittalSheetTableQuery2021(p: Year2021Period): TableQuery[RealTransmittalSheetTable2021] = {
+  def transmittalSheetTableQuery2021(p: Year2021Period): TableQuery[TransmittalSheetTable] = {
     val tableName = p match {
       case Year2021Period.Whole => ts2021TableName
       case Year2021Period.Q1    => ts2021Q1TableName
       case Year2021Period.Q2    => ts2021Q2TableName
       case Year2021Period.Q3    => ts2021Q3TableName
     }
-    TableQuery(tag => new RealTransmittalSheetTable2021(tag, tableName))
+    TableQuery(tag => new TransmittalSheetTable(tag, tableName))
   }
 
   def qaTransmittalSheetTableQuery2021(p: Year2021Period): TableQuery[QATransmittalSheetTable] = {
@@ -170,7 +166,7 @@ trait PublisherComponent2021 extends PGTableNameLoader {
     TableQuery(tag => new QATransmittalSheetTable(tag, tableName))
   }
 
-  class TSRepository2021Base[TsTable <: RealTransmittalSheetTable2021](val config: DatabaseConfig[JdbcProfile], val table: TableQuery[TsTable])
+  class TSRepository2021Base[TsTable <: TransmittalSheetTable](val config: DatabaseConfig[JdbcProfile], val table: TableQuery[TsTable])
     extends TsRepository[TsTable] {
 
     override def getId(row: TsTable): config.profile.api.Rep[Id] =
@@ -588,7 +584,7 @@ trait PublisherComponent2021 extends PGTableNameLoader {
   def validationLarData2021(p: Year2021Period): LarData = LarData[LarEntityImpl2021, RealLarTable2021](larTableQuery2021(p))(_.lei)
 
   def validationTSData2021(p: Year2021Period): TsData =
-    TsData[TransmittalSheetEntity, RealTransmittalSheetTable2021](transmittalSheetTableQuery2021(p))(_.lei, _.totalLines, _.submissionId)
+    TsData[TransmittalSheetEntity, TransmittalSheetTable](transmittalSheetTableQuery2021(p))(_.lei, _.totalLines, _.submissionId)
 
   def validationPanelData2021(p: Year2021Period): PanelData =
     PanelData[InstitutionEntity, InstitutionsTable](institutionTableQuery2021(p))(_.lei, _.hmdaFiler)

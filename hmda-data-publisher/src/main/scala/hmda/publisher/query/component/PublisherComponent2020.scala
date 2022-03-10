@@ -146,18 +146,14 @@ trait PublisherComponent2020 extends PGTableNameLoader {
     TableQuery(tag => new InstitutionsTable(tag))
   }
 
-  class RealTransmittalSheetTable2020(tag: Tag, tableName: String) extends AbstractTransmittalSheetTable[TransmittalSheetEntity](tag, tableName) {
-    override def * = transmittalSheetEntityProjection
-  }
-
-  def transmittalSheetTableQuery2020(p: Year2020Period): TableQuery[RealTransmittalSheetTable2020] = {
+  def transmittalSheetTableQuery2020(p: Year2020Period): TableQuery[TransmittalSheetTable] = {
     val tableName = p match {
       case Year2020Period.Whole => ts2020TableName
       case Year2020Period.Q1    => ts2020Q1TableName
       case Year2020Period.Q2    => ts2020Q2TableName
       case Year2020Period.Q3    => ts2020Q3TableName
     }
-    TableQuery(tag => new RealTransmittalSheetTable2020(tag, tableName))
+    TableQuery(tag => new TransmittalSheetTable(tag, tableName))
   }
 
   def qaTransmittalSheetTableQuery2020(p: Year2020Period): TableQuery[QATransmittalSheetTable] = {
@@ -590,7 +586,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
   def validationLarData2020(p: Year2020Period): LarData = LarData[LarEntityImpl2020, RealLarTable2020](larTableQuery2020(p))(_.lei)
 
   def validationTSData2020(p: Year2020Period): TsData =
-    TsData[TransmittalSheetEntity, RealTransmittalSheetTable2020](transmittalSheetTableQuery2020(p))(_.lei, _.totalLines, _.submissionId)
+    TsData[TransmittalSheetEntity, TransmittalSheetTable](transmittalSheetTableQuery2020(p))(_.lei, _.totalLines, _.submissionId)
   def validationPanelData2020(p: Year2020Period): PanelData =
     PanelData[InstitutionEntity, InstitutionsTable](institutionTableQuery2020(p))(_.lei, _.hmdaFiler)
 
