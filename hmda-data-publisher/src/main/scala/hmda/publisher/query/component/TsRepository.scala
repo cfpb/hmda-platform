@@ -10,8 +10,8 @@ trait TsRepository[TsTable <: Table[TransmittalSheetEntity]] extends TableReposi
 
   def count(): Future[Int]
   def getAllSheets(bankIgnoreList: Array[String]): Future[Seq[TransmittalSheetEntity]]
-  def createSchema(): Unit
-  def dropSchema(): Unit
+  def createSchema(): Future[Unit]
+  def dropSchema(): Future[Unit]
 
   def insert(ts: TransmittalSheetEntity): Future[Int]
 
