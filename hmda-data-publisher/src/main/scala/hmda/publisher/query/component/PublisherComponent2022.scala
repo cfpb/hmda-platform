@@ -163,32 +163,6 @@ trait PublisherComponent2022 extends PGTableNameLoader {
     TableQuery(tag => new QATransmittalSheetTable(tag, tableName))
   }
 
-  class TSRepository2022Base[TsTable <: TransmittalSheetTable](val config: DatabaseConfig[JdbcProfile], val table: TableQuery[TsTable])
-    extends TsRepository[TsTable] {
-
-    override def getId(row: TsTable): config.profile.api.Rep[Id] =
-      row.lei
-
-    def createSchema() = db.run(table.schema.create)
-    def dropSchema()   = db.run(table.schema.drop)
-
-    def insert(ts: TransmittalSheetEntity): Future[Int] =
-      db.run(table += ts)
-
-    def findByLei(lei: String): Future[Seq[TransmittalSheetEntity]] =
-      db.run(table.filter(_.lei === lei).result)
-
-    def deleteByLei(lei: String): Future[Int] =
-      db.run(table.filter(_.lei === lei).delete)
-
-    def count(): Future[Int] =
-      db.run(table.size.result)
-
-    def getAllSheets(bankIgnoreList: Array[String]): Future[Seq[TransmittalSheetEntity]] =
-      db.run(table.filterNot(_.lei.toUpperCase inSet bankIgnoreList).result)
-
-  }
-
   abstract class LarTableBase[T](tag: Tag, tableName: String) extends Table[T](tag, tableName) {
 
     def id                         = column[Int]("id")
@@ -496,7 +470,7 @@ trait PublisherComponent2022 extends PGTableNameLoader {
   }
 
   def createTransmittalSheetRepository2022(config: DatabaseConfig[JdbcProfile], p: Year2022Period) =
-    new TSRepository2022Base(config, transmittalSheetTableQuery2022(p))
+    new TsRepository(config, transmittalSheetTableQuery2022(p))
 
   def createQaTransmittalSheetRepository2022(config: DatabaseConfig[JdbcProfile], p: Year2022Period)(implicit ec: ExecutionContext) =
     new QARepository.Default[TransmittalSheetEntity, QATransmittalSheetTable](config, qaTransmittalSheetTableQuery2022(p))(ec)

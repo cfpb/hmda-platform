@@ -53,7 +53,7 @@ abstract class AbstractTransmittalSheetTable[T](tag: Tag, tableName: String) ext
 }
 
 class TransmittalSheetTable(tag: Tag, tableName: String) extends AbstractTransmittalSheetTable[TransmittalSheetEntity](tag, tableName) {
-  override def * = transmittalSheetEntityProjection
+  override def * : ProvenShape[TransmittalSheetEntity] = transmittalSheetEntityProjection
 }
 
 class QATransmittalSheetTable(tag: Tag, tableName: String)

@@ -27,7 +27,7 @@ class PublisherComponent2019Spec
     with PatienceConfiguration {
 
   val institutionRepo = new InstitutionRepository2019(dbConfig)
-  val tsRepo          = new TransmittalSheetRepository2019(dbConfig)
+  val tsRepo          = new TsRepository[TransmittalSheetTable](dbConfig, transmittalSheetTable2019)
   val larRepo         = new LarRepository2019(dbConfig)
 
   override implicit def patienceConfig: PatienceConfig = PatienceConfig(timeout = Span(2, Minutes), interval = Span(100, Millis))

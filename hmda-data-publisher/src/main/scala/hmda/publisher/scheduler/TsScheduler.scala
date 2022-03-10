@@ -14,7 +14,7 @@ import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.publisher.helper.{ PrivateAWSConfigLoader, QuarterTimeBarrier, S3Utils, SnapshotCheck }
 import hmda.publisher.qa.{ QAFilePersistor, QAFileSpec, QARepository }
-import hmda.publisher.query.component.{ PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, TsRepository }
+import hmda.publisher.query.component.{ PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, TransmittalSheetTable, TsRepository }
 import hmda.publisher.scheduler.schedules.Schedule
 import hmda.publisher.scheduler.schedules.Schedules.{ TsScheduler2018, TsScheduler2019, TsScheduler2020, TsScheduler2021, TsSchedulerQuarterly2020, TsSchedulerQuarterly2021, TsSchedulerQuarterly2022 }
 import hmda.publisher.util.PublishingReporter
@@ -44,8 +44,8 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
 
 
   // Regulator File Scheduler Repos Annual
-  def tsRepository2018                 = new TransmittalSheetRepository2018(dbConfig)
-  def tsRepository2019                 = new TransmittalSheetRepository2019(dbConfig)
+  def tsRepository2018                 = new TsRepository[TransmittalSheetTable](dbConfig, transmittalSheetTable2018)
+  def tsRepository2019                 = new TsRepository[TransmittalSheetTable](dbConfig, transmittalSheetTable2019)
   def tsRepository2020                 = createTransmittalSheetRepository2020(dbConfig, Year2020Period.Whole)
   def tsRepository2021                 = createTransmittalSheetRepository2021(dbConfig, Year2021Period.Whole)
 
@@ -169,7 +169,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
     schedule: Schedule,
     period: Period,
     fileName: String,
-    tsRepo: TsRepository[TsTable],
+    tsRepo: TsRepository[TransmittalSheetTable],
     qaTsRepo: QARepository[TransmittalSheetEntity]
   ): Unit = publishTsData(schedule, period, fullDate.format(LocalDateTime.now().minusDays(1)) + fileName, tsRepo, qaTsRepo)
 
@@ -178,7 +178,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
     schedule: Schedule,
     period: Period.Quarter,
     fileName: String,
-    tsRepo: TsRepository[TsTable],
+    tsRepo: TsRepository[TransmittalSheetTable],
     qaTsRepo: QARepository[TransmittalSheetEntity]
   ): Unit =
     timeBarrier.runIfStillRelevant(period) {
@@ -190,7 +190,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
     schedule: Schedule,
     period: Period,
     fullFileName: String,
-    tsRepo: TsRepository[TsTable],
+    tsRepo: TsRepository[TransmittalSheetTable],
     qaTsRepo: QARepository[TransmittalSheetEntity]
   ): Unit =
     publishingGuard.runIfDataIsValid(period, Scope.Private) {

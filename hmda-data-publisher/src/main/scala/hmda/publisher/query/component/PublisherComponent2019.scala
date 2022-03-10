@@ -138,33 +138,6 @@ trait PublisherComponent2019 extends PGTableNameLoader {
 
   val transmittalSheetTable2019 = TableQuery(tag => new TransmittalSheetTable(tag, ts2019TableName))
 
-  class TransmittalSheetRepository2019(val config: DatabaseConfig[JdbcProfile]) extends TsRepository[TransmittalSheetTable] {
-
-    override val table: config.profile.api.TableQuery[TransmittalSheetTable] =
-      transmittalSheetTable2019
-
-    override def getId(row: TransmittalSheetTable): config.profile.api.Rep[Id] =
-      row.lei
-
-    def createSchema() = db.run(table.schema.create)
-    def dropSchema()   = db.run(table.schema.drop)
-
-    def insert(ts: TransmittalSheetEntity): Future[Int] =
-      db.run(table += ts)
-
-    def findByLei(lei: String): Future[Seq[TransmittalSheetEntity]] =
-      db.run(table.filter(_.lei === lei).result)
-
-    def deleteByLei(lei: String): Future[Int] =
-      db.run(table.filter(_.lei === lei).delete)
-
-    def count(): Future[Int] =
-      db.run(table.size.result)
-
-    def getAllSheets(bankIgnoreList: Array[String]): Future[Seq[TransmittalSheetEntity]] =
-      db.run(table.filterNot(_.lei.toUpperCase inSet bankIgnoreList).result)
-  }
-
   def createPublicQaTsRepository2019(config: DatabaseConfig[JdbcProfile])(implicit ec: ExecutionContext) =
     new QARepository.Default[TransmittalSheetEntity, QATransmittalSheetTable](config, TableQuery(tag => new QATransmittalSheetTable(tag, ts2019PublicQATableName)))(ec)
 

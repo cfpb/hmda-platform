@@ -27,7 +27,7 @@ class PublisherComponent2018Spec
     with PatienceConfiguration {
 
   val institutionRepo = new InstitutionRepository2018(dbConfig)
-  val tsRepo          = new TransmittalSheetRepository2018(dbConfig)
+  val tsRepo          = new TsRepository[TransmittalSheetTable](dbConfig, transmittalSheetTable2018)
   val larRepo         = new LarRepository2018(dbConfig)
   val mlarRepo        = new ModifiedLarRepository2018(dbConfig)
 
