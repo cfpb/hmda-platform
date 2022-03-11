@@ -164,35 +164,32 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
   }
 
   import dbConfig.profile.api._
-  private def publishAnnualTsData[TsTable <: Table[TransmittalSheetEntity]]
-  (
+  private def publishAnnualTsData[TsTable <: Table[TransmittalSheetEntity]](
     schedule: Schedule,
     period: Period,
     fileName: String,
     tsRepo: TsRepository[TransmittalSheetTable],
     qaTsRepo: QARepository[TransmittalSheetEntity]
-  ): Unit = publishTsData(schedule, period, fullDate.format(LocalDateTime.now().minusDays(1)) + fileName, tsRepo, qaTsRepo)
+  ): Future[Unit] = publishTsData(schedule, period, fullDate.format(LocalDateTime.now().minusDays(1)) + fileName, tsRepo, qaTsRepo)
 
-  private def publishQuarterTsData[TsTable <: Table[TransmittalSheetEntity]]
-  (
+  private def publishQuarterTsData[TsTable <: Table[TransmittalSheetEntity]](
     schedule: Schedule,
-    period: Period.Quarter,
+    quarter: Period.Quarter,
     fileName: String,
     tsRepo: TsRepository[TransmittalSheetTable],
     qaTsRepo: QARepository[TransmittalSheetEntity]
-  ): Unit =
-    timeBarrier.runIfStillRelevant(period) {
-      publishTsData(schedule, period, fullDateQuarterly.format(LocalDateTime.now().minusDays(1)) + fileName, tsRepo, qaTsRepo)
+  ): Option[Future[Unit]] =
+    timeBarrier.runIfStillRelevant(quarter) {
+      publishTsData(schedule, quarter, fullDateQuarterly.format(LocalDateTime.now().minusDays(1)) + fileName, tsRepo, qaTsRepo)
     }
 
-  private def publishTsData[TsTable <: Table[TransmittalSheetEntity]]
-  (
+  private def publishTsData[TsTable <: Table[TransmittalSheetEntity]](
     schedule: Schedule,
     period: Period,
     fullFileName: String,
     tsRepo: TsRepository[TransmittalSheetTable],
     qaTsRepo: QARepository[TransmittalSheetEntity]
-  ): Unit =
+  ): Future[Unit] =
     publishingGuard.runIfDataIsValid(period, Scope.Private) {
       val s3Path        = s"$environmentPrivate/ts/"
       val fullFilePath  = SnapshotCheck.pathSelector(s3Path, fullFileName)
