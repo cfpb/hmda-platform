@@ -5,11 +5,11 @@ import hmda.query.repository.TableRepository
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
-trait InstitutionComponent2022 {
+trait InstitutionComponent {
 
   import dbConfig.profile.api._
 
-  class InstitutionsTable2022(tag: Tag, tableName: String) extends Table[InstitutionEntity](tag, tableName) {
+  class InstitutionsTable(tag: Tag, tableName: String) extends Table[InstitutionEntity](tag, tableName) {
     def lei             = column[String]("lei", O.PrimaryKey)
     def activityYear    = column[Int]("activity_year")
     def agency          = column[Int]("agency")
@@ -32,6 +32,7 @@ trait InstitutionComponent2022 {
     def quarterlyFilerHasFiledQ2  = column[Boolean]("quarterly_filer_has_filed_q2")
     def quarterlyFilerHasFiledQ3  = column[Boolean]("quarterly_filer_has_filed_q3")
     def notes                     = column[String]("notes")
+
     def * =
       (
         lei,
@@ -59,29 +60,21 @@ trait InstitutionComponent2022 {
       ) <> (InstitutionEntity.tupled, InstitutionEntity.unapply)
   }
 
-  val institutionsTable2022 = TableQuery[InstitutionsTable2022]((tag: Tag) => new InstitutionsTable2022(tag, "institutions2022"))
-
-  class InstitutionRepository2022(val config: DatabaseConfig[JdbcProfile], tableName: String)
-      extends TableRepository[InstitutionsTable2022, String] {
-    val institutionsTable2022               = TableQuery[InstitutionsTable2022]((tag: Tag) => new InstitutionsTable2022(tag, tableName))
-    val table                               = institutionsTable2022
-    def getId(table: InstitutionsTable2022) = table.lei
-    def deleteById(lei: String)             = db.run(filterById(lei).delete)
+  class InstitutionRepository(val config: DatabaseConfig[JdbcProfile], tableName: String)
+      extends TableRepository[InstitutionsTable, String] {
+    val table                           = TableQuery[InstitutionsTable]((tag: Tag) => new InstitutionsTable(tag, tableName))
+    def getId(table: InstitutionsTable) = table.lei
+    def deleteById(lei: String)         = db.run(filterById(lei).delete)
 
     def createSchema() = db.run(table.schema.create)
     def dropSchema()   = db.run(table.schema.drop)
   }
 
-  class InstitutionRepository2022Beta(val config: DatabaseConfig[JdbcProfile], tableName: String)
-      extends TableRepository[InstitutionsTable2022, String] {
-    val institutionsTable2022Beta = TableQuery[InstitutionsTable2022]((tag: Tag) => new InstitutionsTable2022(tag, tableName))
-    val table                     = institutionsTable2022Beta
+    val institutionsTable2018 = TableQuery[InstitutionsTable]((tag: Tag) => new InstitutionsTable(tag, "institutions2018"))
+    val institutionsTable2019 = TableQuery[InstitutionsTable]((tag: Tag) => new InstitutionsTable(tag, "institutions2019"))
+    val institutionsTable2020 = TableQuery[InstitutionsTable]((tag: Tag) => new InstitutionsTable(tag, "institutions2020"))
+    val institutionsTable2021 = TableQuery[InstitutionsTable]((tag: Tag) => new InstitutionsTable(tag, "institutions2021"))
+    val institutionsTable2022 = TableQuery[InstitutionsTable]((tag: Tag) => new InstitutionsTable(tag, "institutions2022"))
 
-    def getId(table: InstitutionsTable2022) = table.lei
-    def deleteById(lei: String)             = db.run(filterById(lei).delete)
-
-    def createSchema() = db.run(table.schema.create)
-    def dropSchema()   = db.run(table.schema.drop)
-  }
 
 }

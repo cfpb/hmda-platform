@@ -63,6 +63,21 @@ spec:
                 configMapKeyRef:
                   name: http-configmap
                   key: auth.url
+            - name: KEYCLOAK_REALM_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: http-configmap
+                  key: auth.realmUrl
+            - name: KEYCLOAK_PUBLIC_MODULUS
+              valueFrom:
+                configMapKeyRef:
+                  name: keycloak-public-key-configmap
+                  key: keycloak.publicKey.modulus
+            - name: KEYCLOAK_PUBLIC_EXPONENT
+              valueFrom:
+                configMapKeyRef:
+                  name: keycloak-public-key-configmap
+                  key: keycloak.publicKey.exponent
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}

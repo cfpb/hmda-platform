@@ -147,15 +147,22 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
         val s3Path        = s"$environmentPrivate/ts/"
         val fullFilePath  = SnapshotCheck.pathSelector(s3Path, fileName)
 
-        val s3Sink =
-          S3.multipartUpload(bucketPrivate, fullFilePath)
+        def countF: Future[Int] = tsRepository2018.count()
+
+        val results = for {
+          count <- countF
+          s3Sink = S3
+            .multipartUpload(bucketPrivate, fullFilePath, metaHeaders = MetaHeaders(Map(LarScheduler.entriesCountMetaName -> count.toString)))
             .withAttributes(S3Attributes.settings(s3Settings))
+          _ <- uploadFileToS3(s3Sink, tsRepository2018.getAllSheets(getFilterList()))
+          _ <- persistFileForQa(fullFilePath, qaTsRepository2018)
+          count <- countF
+        } yield count
 
-        val results: Future[MultipartUploadResult] =
-          uploadFileToS3(s3Sink, tsRepository2018.getAllSheets(getFilterList()))
-
-        results.foreach(_ => persistFileForQa(fullFilePath, qaTsRepository2018))
-        results.onComplete(reportPublishingResult(_, TsScheduler2018, fullFilePath))
+        results onComplete {
+          case Success(count) => reportPublishingResult(TsScheduler2018, fullFilePath,Some(count))
+          case Failure(t) => reportPublishingResultError(TsScheduler2018, fullFilePath,t)
+         }
       }
 
     case TsScheduler2019 =>
@@ -166,15 +173,22 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
         val s3Path        = s"$environmentPrivate/ts/"
         val fullFilePath  = SnapshotCheck.pathSelector(s3Path, fileName)
 
-        val s3Sink =
-          S3.multipartUpload(bucketPrivate, fullFilePath)
+        def countF: Future[Int] = tsRepository2019.count()
+
+        val results = for {
+          count <- countF
+          s3Sink = S3
+            .multipartUpload(bucketPrivate, fullFilePath, metaHeaders = MetaHeaders(Map(LarScheduler.entriesCountMetaName -> count.toString)))
             .withAttributes(S3Attributes.settings(s3Settings))
+          _ <- uploadFileToS3(s3Sink, tsRepository2019.getAllSheets(getFilterList()))
+          _ <- persistFileForQa(fullFilePath, qaTsRepository2019)
+          count <- countF
+        } yield count
 
-        val results: Future[MultipartUploadResult] =
-          uploadFileToS3(s3Sink, tsRepository2019.getAllSheets(getFilterList()))
-
-        results.foreach(_ => persistFileForQa(fullFilePath, qaTsRepository2019))
-        results.onComplete(reportPublishingResult(_, TsScheduler2019, fullFilePath))
+        results onComplete {
+          case Success(count) => reportPublishingResult(TsScheduler2019, fullFilePath,Some(count))
+          case Failure(t) => reportPublishingResultError(TsScheduler2019, fullFilePath,t)
+        }
       }
 
     case TsScheduler2020 =>
@@ -185,15 +199,22 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
         val s3Path        = s"$environmentPrivate/ts/"
         val fullFilePath  = SnapshotCheck.pathSelector(s3Path, fileName)
 
-        val s3Sink =
-          S3.multipartUpload(bucketPrivate, fullFilePath)
+        def countF: Future[Int] = tsRepository2020.count()
+
+        val results = for {
+          count <- countF
+          s3Sink = S3
+            .multipartUpload(bucketPrivate, fullFilePath, metaHeaders = MetaHeaders(Map(LarScheduler.entriesCountMetaName -> count.toString)))
             .withAttributes(S3Attributes.settings(s3Settings))
+          _ <- uploadFileToS3(s3Sink, tsRepository2020.getAllSheets(getFilterList()))
+          _ <- persistFileForQa(fullFilePath, qaTsRepository2020)
+          count <- countF
+        } yield count
 
-        val results: Future[MultipartUploadResult] =
-          uploadFileToS3(s3Sink, tsRepository2020.getAllSheets(getFilterList()))
-
-        results.foreach(_ => persistFileForQa(fullFilePath, qaTsRepository2020))
-        results.onComplete(reportPublishingResult(_, TsScheduler2020, fullFilePath))
+        results onComplete {
+          case Success(count) => reportPublishingResult(TsScheduler2020, fullFilePath,Some(count))
+          case Failure(t) => reportPublishingResultError(TsScheduler2020, fullFilePath,t)
+        }
       }
     case TsScheduler2021 =>
       publishingGuard.runIfDataIsValid(Period.y2021, Scope.Private) {
@@ -203,15 +224,22 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
         val s3Path        = s"$environmentPrivate/ts/"
         val fullFilePath  = SnapshotCheck.pathSelector(s3Path, fileName)
 
-        val s3Sink =
-          S3.multipartUpload(bucketPrivate, fullFilePath)
+        def countF: Future[Int] = tsRepository2021.count()
+
+        val results = for {
+          count <- countF
+          s3Sink = S3
+            .multipartUpload(bucketPrivate, fullFilePath, metaHeaders = MetaHeaders(Map(LarScheduler.entriesCountMetaName -> count.toString)))
             .withAttributes(S3Attributes.settings(s3Settings))
+          _ <- uploadFileToS3(s3Sink, tsRepository2021.getAllSheets(getFilterList()))
+          _ <- persistFileForQa(fullFilePath, qaTsRepository2021)
+          count <- countF
+        } yield count
 
-        val results: Future[MultipartUploadResult] =
-          uploadFileToS3(s3Sink, tsRepository2021.getAllSheets(getFilterList()))
-
-        results.foreach(_ => persistFileForQa(fullFilePath, qaTsRepository2021))
-        results.onComplete(reportPublishingResult(_, TsScheduler2021, fullFilePath))
+        results onComplete {
+          case Success(count) => reportPublishingResult(TsScheduler2021, fullFilePath,Some(count))
+          case Failure(t) => reportPublishingResultError(TsScheduler2021, fullFilePath,t)
+        }
       }
 
     case TsSchedulerQuarterly2020 =>
@@ -228,18 +256,22 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
           publishingGuard.runIfDataIsValid(quarter, Scope.Private) {
             val fileName     = formattedDate + fileNameSuffix
             val fullFilePath = SnapshotCheck.pathSelector(s3Path, fileName)
-            val s3Sink =
-              S3.multipartUpload(bucketPrivate, fullFilePath)
+
+            def countF: Future[Int] = repo.count()
+
+            val results = for {
+              count <- countF
+              s3Sink = S3
+                .multipartUpload(bucketPrivate, fullFilePath, metaHeaders = MetaHeaders(Map(LarScheduler.entriesCountMetaName -> count.toString)))
                 .withAttributes(S3Attributes.settings(s3Settings))
+              _ <- uploadFileToS3(s3Sink, repo.getAllSheets(getFilterList()))
+              count <- countF
+            } yield count
 
-            def data: Future[Seq[TransmittalSheetEntity]] =
-              repo.getAllSheets(getFilterList())
-
-            val results: Future[MultipartUploadResult] =
-              uploadFileToS3(s3Sink, data)
-
-            results.foreach(_ => persistFileForQa(fullFilePath, qaRepository))
-            results.onComplete(reportPublishingResult(_, TsSchedulerQuarterly2020, fullFilePath))
+            results onComplete {
+              case Success(count) => reportPublishingResult(TsSchedulerQuarterly2020, fullFilePath,Some(count))
+              case Failure(t) => reportPublishingResultError(TsSchedulerQuarterly2020, fullFilePath,t)
+            }
 
           }
         }
@@ -262,25 +294,29 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
           publishingGuard.runIfDataIsValid(quarter, Scope.Private) {
             val fileName     = formattedDate + fileNameSuffix
             val fullFilePath = SnapshotCheck.pathSelector(s3Path, fileName)
-            val s3Sink =
-              S3.multipartUpload(bucketPrivate, fullFilePath)
+
+            def countF: Future[Int] = repo.count()
+
+            val results = for {
+              count <- countF
+              s3Sink = S3
+                .multipartUpload(bucketPrivate, fullFilePath, metaHeaders = MetaHeaders(Map(LarScheduler.entriesCountMetaName -> count.toString)))
                 .withAttributes(S3Attributes.settings(s3Settings))
+              _ <- uploadFileToS3(s3Sink, repo.getAllSheets(getFilterList()))
+              count <- countF
+            } yield count
 
-            def data: Future[Seq[TransmittalSheetEntity]] =
-              repo.getAllSheets(getFilterList())
-
-            val results: Future[MultipartUploadResult] =
-              uploadFileToS3(s3Sink, data)
-
-            results.foreach(_ => persistFileForQa(fullFilePath, qaRepository))
-            results.onComplete(reportPublishingResult(_, TsSchedulerQuarterly2021, fullFilePath))
+            results onComplete {
+              case Success(count) => reportPublishingResult(TsSchedulerQuarterly2021, fullFilePath,Some(count))
+              case Failure(t) => reportPublishingResultError(TsSchedulerQuarterly2021, fullFilePath,t)
+            }
 
           }
         }
-
       publishQuarter(Period.y2021Q1, tsRepository2021Q1, "quarter_1_2021_ts.txt", qaTsRepository2021Q1)
       publishQuarter(Period.y2021Q2, tsRepository2021Q2, "quarter_2_2021_ts.txt", qaTsRepository2021Q2)
       publishQuarter(Period.y2021Q3, tsRepository2021Q3, "quarter_3_2021_ts.txt", qaTsRepository2021Q3)
+
     case TsSchedulerQuarterly2022 =>
       val now           = LocalDateTime.now().minusDays(1)
       val formattedDate = fullDateQuarterly.format(now)
@@ -295,22 +331,25 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
           publishingGuard.runIfDataIsValid(quarter, Scope.Private) {
             val fileName     = formattedDate + fileNameSuffix
             val fullFilePath = SnapshotCheck.pathSelector(s3Path, fileName)
-            val s3Sink =
-              S3.multipartUpload(bucketPrivate, fullFilePath)
+
+            def countF: Future[Int] = repo.count()
+
+            val results = for {
+              count <- countF
+              s3Sink = S3
+                .multipartUpload(bucketPrivate, fullFilePath, metaHeaders = MetaHeaders(Map(LarScheduler.entriesCountMetaName -> count.toString)))
                 .withAttributes(S3Attributes.settings(s3Settings))
+              _ <- uploadFileToS3(s3Sink, repo.getAllSheets(getFilterList()))
+              count <- countF
+            } yield count
 
-            def data: Future[Seq[TransmittalSheetEntity]] =
-              repo.getAllSheets(getFilterList())
-
-            val results: Future[MultipartUploadResult] =
-              uploadFileToS3(s3Sink, data)
-
-            results.foreach(_ => persistFileForQa(fullFilePath, qaRepository))
-            results.onComplete(reportPublishingResult(_, TsSchedulerQuarterly2022, fullFilePath))
+            results onComplete {
+              case Success(count) => reportPublishingResult(TsSchedulerQuarterly2022, fullFilePath,Some(count))
+              case Failure(t) => reportPublishingResultError(TsSchedulerQuarterly2022, fullFilePath,t)
+            }
 
           }
         }
-
       publishQuarter(Period.y2022Q1, tsRepository2022Q1, "quarter_1_2022_ts.txt", qaTsRepository2022Q1)
       publishQuarter(Period.y2022Q2, tsRepository2022Q2, "quarter_2_2022_ts.txt", qaTsRepository2022Q2)
       publishQuarter(Period.y2022Q3, tsRepository2022Q3, "quarter_3_2022_ts.txt", qaTsRepository2022Q3)
@@ -328,27 +367,26 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
     qaFilePersistor.fetchAndPersist(spec)
   }
 
-  def reportPublishingResult(result: Try[Any], schedule: Schedule, fullFilePath: String): Unit =
-    result match {
-      case Success(result) =>
-        publishingReporter ! FilePublishingCompleted(
-          schedule,
-          fullFilePath,
-          None,
-          Instant.now,
-          FilePublishingCompleted.Status.Success
-        )
-        log.info(s"Pushed to S3: $bucketPrivate/$fullFilePath.")
-      case Failure(t) =>
-        publishingReporter ! FilePublishingCompleted(
-          schedule,
-          fullFilePath,
-          None,
-          Instant.now,
-          FilePublishingCompleted.Status.Error(t.getMessage)
-        )
-        log.error(s"An error has occurred while publishing $bucketPrivate/$fullFilePath: " + t.getMessage, t)
+  def reportPublishingResult( schedule: Schedule, fullFilePath: String,count: Option[Int]) {
+
+    publishingReporter ! FilePublishingCompleted(
+      schedule,
+      fullFilePath,
+      count,
+      Instant.now,
+      FilePublishingCompleted.Status.Success)
+    log.info(s"Pushed to S3: $bucketPrivate/$fullFilePath.")
     }
+
+  def reportPublishingResultError( schedule: Schedule, fullFilePath: String,message:Throwable) {
+    publishingReporter ! FilePublishingCompleted(
+      schedule,
+      fullFilePath,
+      None,
+      Instant.now,
+      FilePublishingCompleted.Status.Success)
+    log.error(s"An error has occurred while publishing $bucketPrivate/$fullFilePath: " + message.getMessage, message)
+  }
 
 }
 // $COVERAGE-ON$
