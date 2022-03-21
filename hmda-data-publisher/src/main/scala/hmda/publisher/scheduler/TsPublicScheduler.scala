@@ -9,22 +9,22 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.{PrivateAWSConfigLoader, PublicAWSConfigLoader, S3Archiver, S3Utils, SnapshotCheck, TSHeader}
-import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022}
-import hmda.publisher.scheduler.schedules.Schedules.{TsPublicScheduler2018, TsPublicScheduler2019, TsPublicScheduler2020}
+import hmda.publisher.helper.{ PrivateAWSConfigLoader, PublicAWSConfigLoader, S3Archiver, S3Utils, SnapshotCheck, TSHeader }
+import hmda.publisher.query.component.{ PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, TransmittalSheetTable, TsRepository }
+import hmda.publisher.scheduler.schedules.Schedules.{ TsPublicScheduler2018, TsPublicScheduler2019, TsPublicScheduler2020 }
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.ts._
 import hmda.util.BankFilterUtils._
 import akka.stream.alpakka.file.scaladsl.Archive
 import akka.stream.alpakka.file.ArchiveMetadata
-import hmda.publisher.qa.{QAFilePersistor, QAFileSpec, QARepository}
+import hmda.publisher.qa.{ QAFilePersistor, QAFileSpec, QARepository }
 import hmda.publisher.scheduler.schedules.Schedule
 import hmda.publisher.util.PublishingReporter
 import hmda.publisher.validation.PublishingGuard
-import hmda.publisher.validation.PublishingGuard.{Period, Scope}
+import hmda.publisher.validation.PublishingGuard.{ Period, Scope }
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 import java.time.Instant
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 // $COVERAGE-OFF$
@@ -41,8 +41,8 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
 
   implicit val ec                      = context.system.dispatcher
   implicit val materializer            = Materializer(context)
-  def tsRepository2018                 = new TransmittalSheetRepository2018(dbConfig)
-  def tsRepository2019                 = new TransmittalSheetRepository2019(dbConfig)
+  def tsRepository2018                 = new TsRepository[TransmittalSheetTable](dbConfig, transmittalSheetTable2018)
+  def tsRepository2019                 = new TsRepository[TransmittalSheetTable](dbConfig, transmittalSheetTable2019)
   def tsRepository2020                 = createTransmittalSheetRepository2020(dbConfig, Year2020Period.Whole)
 
   val publishingGuard: PublishingGuard = PublishingGuard.create(this)(context.system)
