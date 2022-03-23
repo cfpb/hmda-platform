@@ -40,7 +40,7 @@ object HmdaFilingApi {
     val oAuth2Authorization = OAuth2Authorization(log, config)
     val base                = BaseHttpApi.routes(filingApiName)
     val filingRoutes        = FilingHttpApi.create(log, sharding)
-    val submissionRoutes    = SubmissionHttpApi.create(log, sharding)
+    val submissionRoutes    = SubmissionHttpApi.create(config, log, sharding)
     val uploadRoutes        = UploadHttpApi.create(log, sharding)
     val institutionRoutes   = InstitutionHttpApi.create(log, sharding)
     val parserErrorRoutes   = ParseErrorHttpApi.create(log, sharding)

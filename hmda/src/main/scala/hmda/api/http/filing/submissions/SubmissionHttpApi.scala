@@ -10,6 +10,7 @@ import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
 import akka.util.{ ByteString, Timeout }
+import com.typesafe.config.Config
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.PathMatchers._
@@ -43,15 +44,15 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
 object SubmissionHttpApi {
-  def create(log: Logger, sharding: ClusterSharding)(
+  def create(config: Config, log: Logger, sharding: ClusterSharding)(
     implicit t: Timeout,
     ec: ExecutionContext,
     system: ActorSystem[_],
     mat: Materializer
-  ): OAuth2Authorization => Route = new SubmissionHttpApi(log, sharding)(t, ec, system, mat).submissionRoutes _
+  ): OAuth2Authorization => Route = new SubmissionHttpApi(config, log, sharding)(t, ec, system, mat).submissionRoutes _
 }
 
-private class SubmissionHttpApi(log: Logger, sharding: ClusterSharding)(
+private class SubmissionHttpApi(config: Config, log: Logger, sharding: ClusterSharding)(
   implicit t: Timeout,
   ec: ExecutionContext,
   system: ActorSystem[_],
@@ -59,6 +60,7 @@ private class SubmissionHttpApi(log: Logger, sharding: ClusterSharding)(
 ) {
 
   val quarterlyFiler = quarterlyFilingAllowed(log, sharding) _
+  val hmdaAdminRole   = config.getString("keycloak.hmda.admin.role")
 
   def submissionCreatePath(oauth2Authorization: OAuth2Authorization): Route =
     respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
@@ -141,10 +143,10 @@ private class SubmissionHttpApi(log: Logger, sharding: ClusterSharding)(
     respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
       (extractUri & get) { uri =>
         path("institutions" / Segment / "filings" / IntNumber / "submissions" / IntNumber / "summary") { (lei, year, seqNr) =>
-          oAuth2Authorization.authorizeTokenWithLei(lei)(_ => getSubmissionSummary(lei, year, None, seqNr, uri))
+          oAuth2Authorization.authorizeTokenWithLeiOrRole(lei, hmdaAdminRole)(_ => getSubmissionSummary(lei, year, None, seqNr, uri))
         } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter / "submissions" / IntNumber / "summary") {
           (lei, year, quarter, seqNr) =>
-            oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+            oAuth2Authorization.authorizeTokenWithLeiOrRole(lei, hmdaAdminRole) { _ =>
               pathEndOrSingleSlash {
                 quarterlyFiler(lei, year) {
                   getSubmissionSummary(lei, year, Option(quarter), seqNr, uri)
@@ -199,10 +201,10 @@ private class SubmissionHttpApi(log: Logger, sharding: ClusterSharding)(
     respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
       (extractUri & get) { uri =>
         path("institutions" / Segment / "filings" / IntNumber / "submissions" / "latest") { (lei, year) =>
-          oAuth2Authorization.authorizeTokenWithLei(lei)(_ => getLatestSubmission(lei, year, None, uri))
+          oAuth2Authorization.authorizeTokenWithLeiOrRole(lei, hmdaAdminRole)(_ => getLatestSubmission(lei, year, None, uri))
         } ~ path("institutions" / Segment / "filings" / IntNumber / "quarter" / Quarter / "submissions" / "latest") {
           (lei, year, quarter) =>
-            oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+            oAuth2Authorization.authorizeTokenWithLeiOrRole(lei, hmdaAdminRole) { _ =>
               pathEndOrSingleSlash {
                 quarterlyFiler(lei, year) {
                   getLatestSubmission(lei, year, Option(quarter), uri)

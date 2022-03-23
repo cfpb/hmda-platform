@@ -3,17 +3,17 @@ package hmda.publisher.query.component
 import java.sql.Timestamp
 import hmda.model.publication.Msa
 import hmda.publisher.helper.PGTableNameLoader
-import hmda.publisher.qa.{QAEntity, QARepository, QATableBase}
-import hmda.publisher.query.lar.{LarEntityImpl2020, _}
-import hmda.publisher.query.panel.{InstitutionAltEntity, InstitutionEntity}
-import hmda.publisher.validation.{LarData, PanelData, TsData}
+import hmda.publisher.qa.{ QAEntity, QARepository, QATableBase }
+import hmda.publisher.query.lar.{ LarEntityImpl2020, _ }
+import hmda.publisher.query.panel.{ InstitutionAltEntity, InstitutionEntity }
+import hmda.publisher.validation.{ LarData, PanelData, TsData }
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
-import slick.basic.{DatabaseConfig, DatabasePublisher}
-import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
+import slick.basic.{ DatabaseConfig, DatabasePublisher }
+import slick.jdbc.{ JdbcProfile, ResultSetConcurrency, ResultSetType }
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 // $COVERAGE-OFF$
 trait PublisherComponent2020 extends PGTableNameLoader {
 
@@ -145,70 +145,15 @@ trait PublisherComponent2020 extends PGTableNameLoader {
   def institutionTableQuery2020(p: Year2020Period) = {
     TableQuery(tag => new InstitutionsTable(tag))
   }
-  abstract class TransmittalSheetTableBase[T](tag: Tag, tableName: String) extends Table[T](tag, tableName) {
 
-    def lei             = column[String]("lei", O.PrimaryKey)
-    def id              = column[Int]("id")
-    def institutionName = column[String]("institution_name")
-    def year            = column[Int]("year")
-    def quarter         = column[Int]("quarter")
-    def name            = column[String]("name")
-    def phone           = column[String]("phone")
-    def email           = column[String]("email")
-    def street          = column[String]("street")
-    def city            = column[String]("city")
-    def state           = column[String]("state")
-    def zipCode         = column[String]("zip_code")
-    def agency          = column[Int]("agency")
-    def totalLines      = column[Int]("total_lines")
-    def taxId           = column[String]("tax_id")
-    def submissionId    = column[Option[String]]("submission_id")
-    def createdAt       = column[Option[Timestamp]]("created_at")
-    def isQuarterly     = column[Option[Boolean]]("is_quarterly")
-    def signDate        = column[Option[Long]]("sign_date")
-
-    def transmittalSheetEntityProjection =
-      (
-        lei,
-        id,
-        institutionName,
-        year,
-        quarter,
-        name,
-        phone,
-        email,
-        street,
-        city,
-        state,
-        zipCode,
-        agency,
-        totalLines,
-        taxId,
-        submissionId,
-        createdAt,
-        isQuarterly,
-        signDate
-      ) <> ((TransmittalSheetEntity.apply _).tupled, TransmittalSheetEntity.unapply)
-  }
-
-  class RealTransmittalSheetTable2020(tag: Tag, tableName: String) extends TransmittalSheetTableBase[TransmittalSheetEntity](tag, tableName) {
-    override def * = transmittalSheetEntityProjection
-  }
-
-  class QATransmittalSheetTable(tag: Tag, tableName: String)
-    extends TransmittalSheetTableBase[QAEntity[TransmittalSheetEntity]](tag, tableName)
-      with QATableBase[TransmittalSheetEntity] {
-    def * = (transmittalSheetEntityProjection, fileName,timeStamp) <> ((QAEntity.apply[TransmittalSheetEntity] _).tupled, QAEntity.unapply[TransmittalSheetEntity] _)
-  }
-
-  def transmittalSheetTableQuery2020(p: Year2020Period): TableQuery[RealTransmittalSheetTable2020] = {
+  def transmittalSheetTableQuery2020(p: Year2020Period): TableQuery[TransmittalSheetTable] = {
     val tableName = p match {
       case Year2020Period.Whole => ts2020TableName
       case Year2020Period.Q1    => ts2020Q1TableName
       case Year2020Period.Q2    => ts2020Q2TableName
       case Year2020Period.Q3    => ts2020Q3TableName
     }
-    TableQuery(tag => new RealTransmittalSheetTable2020(tag, tableName))
+    TableQuery(tag => new TransmittalSheetTable(tag, tableName))
   }
 
   def qaTransmittalSheetTableQuery2020(p: Year2020Period): TableQuery[QATransmittalSheetTable] = {
@@ -219,32 +164,6 @@ trait PublisherComponent2020 extends PGTableNameLoader {
       case Year2020Period.Q3    => ts2020Q3QATableName
     }
     TableQuery(tag => new QATransmittalSheetTable(tag, tableName))
-  }
-
-  class TSRepository2020Base[TsTable <: RealTransmittalSheetTable2020](val config: DatabaseConfig[JdbcProfile], val table: TableQuery[TsTable])
-    extends TableRepository[TsTable, String] {
-
-    override def getId(row: TsTable): config.profile.api.Rep[Id] =
-      row.lei
-
-    def createSchema() = db.run(table.schema.create)
-    def dropSchema()   = db.run(table.schema.drop)
-
-    def insert(ts: TransmittalSheetEntity): Future[Int] =
-      db.run(table += ts)
-
-    def findByLei(lei: String): Future[Seq[TransmittalSheetEntity]] =
-      db.run(table.filter(_.lei === lei).result)
-
-    def deleteByLei(lei: String): Future[Int] =
-      db.run(table.filter(_.lei === lei).delete)
-
-    def count(): Future[Int] =
-      db.run(table.size.result)
-
-    def getAllSheets(bankIgnoreList: Array[String]): Future[Seq[TransmittalSheetEntity]] =
-      db.run(table.filterNot(_.lei.toUpperCase inSet bankIgnoreList).result)
-
   }
 
   abstract class LarTableBase[T](tag: Tag, tableName: String) extends Table[T](tag, tableName) {
@@ -554,7 +473,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
   }
 
   def createTransmittalSheetRepository2020(config: DatabaseConfig[JdbcProfile], p: Year2020Period) =
-    new TSRepository2020Base(config, transmittalSheetTableQuery2020(p))
+    new TsRepository[TransmittalSheetTable](config, transmittalSheetTableQuery2020(p))
 
   def createQaTransmittalSheetRepository2020(config: DatabaseConfig[JdbcProfile], p: Year2020Period)(implicit ec: ExecutionContext) =
     new QARepository.Default[TransmittalSheetEntity, QATransmittalSheetTable](config, qaTransmittalSheetTableQuery2020(p))(ec)
@@ -639,7 +558,7 @@ trait PublisherComponent2020 extends PGTableNameLoader {
   def validationLarData2020(p: Year2020Period): LarData = LarData[LarEntityImpl2020, RealLarTable2020](larTableQuery2020(p))(_.lei)
 
   def validationTSData2020(p: Year2020Period): TsData =
-    TsData[TransmittalSheetEntity, RealTransmittalSheetTable2020](transmittalSheetTableQuery2020(p))(_.lei, _.totalLines, _.submissionId)
+    TsData[TransmittalSheetEntity, TransmittalSheetTable](transmittalSheetTableQuery2020(p))(_.lei, _.totalLines, _.submissionId)
   def validationPanelData2020(p: Year2020Period): PanelData =
     PanelData[InstitutionEntity, InstitutionsTable](institutionTableQuery2020(p))(_.lei, _.hmdaFiler)
 

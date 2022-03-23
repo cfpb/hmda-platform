@@ -49,7 +49,6 @@ import hmda.validation.filing.ValidationFlow._
 import hmda.validation.rules.lar.quality._2020.Q600_warning
 import hmda.validation.rules.lar.quality.common.Q600
 import hmda.validation.rules.lar.syntactical.{S304, S305, S306}
-import net.openhft.hashing.LongHashFunction
 
 import scala.collection.immutable.ListMap
 import scala.concurrent.duration._

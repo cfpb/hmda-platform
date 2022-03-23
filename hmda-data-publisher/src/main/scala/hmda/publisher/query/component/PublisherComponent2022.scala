@@ -143,70 +143,14 @@ trait PublisherComponent2022 extends PGTableNameLoader {
       db.run(table.size.result)
   }
 
-  abstract class TransmittalSheetTableBase[T](tag: Tag, tableName: String) extends Table[T](tag, tableName) {
-
-    def lei             = column[String]("lei", O.PrimaryKey)
-    def id              = column[Int]("id")
-    def institutionName = column[String]("institution_name")
-    def year            = column[Int]("year")
-    def quarter         = column[Int]("quarter")
-    def name            = column[String]("name")
-    def phone           = column[String]("phone")
-    def email           = column[String]("email")
-    def street          = column[String]("street")
-    def city            = column[String]("city")
-    def state           = column[String]("state")
-    def zipCode         = column[String]("zip_code")
-    def agency          = column[Int]("agency")
-    def totalLines      = column[Int]("total_lines")
-    def taxId           = column[String]("tax_id")
-    def submissionId    = column[Option[String]]("submission_id")
-    def createdAt       = column[Option[Timestamp]]("created_at")
-    def isQuarterly     = column[Option[Boolean]]("is_quarterly")
-    def signDate        = column[Option[Long]]("sign_date")
-
-    def transmittalSheetEntityProjection =
-      (
-        lei,
-        id,
-        institutionName,
-        year,
-        quarter,
-        name,
-        phone,
-        email,
-        street,
-        city,
-        state,
-        zipCode,
-        agency,
-        totalLines,
-        taxId,
-        submissionId,
-        createdAt,
-        isQuarterly,
-        signDate
-      ) <> ((TransmittalSheetEntity.apply _).tupled, TransmittalSheetEntity.unapply)
-  }
-
-  class RealTransmittalSheetTable2022(tag: Tag, tableName: String) extends TransmittalSheetTableBase[TransmittalSheetEntity](tag, tableName) {
-    override def * = transmittalSheetEntityProjection
-  }
-
-  class QATransmittalSheetTable(tag: Tag, tableName: String)
-    extends TransmittalSheetTableBase[QAEntity[TransmittalSheetEntity]](tag, tableName)
-      with QATableBase[TransmittalSheetEntity] {
-    def * = (transmittalSheetEntityProjection, fileName,timeStamp) <> ((QAEntity.apply[TransmittalSheetEntity] _).tupled, QAEntity.unapply[TransmittalSheetEntity] _)
-  }
-
-  def transmittalSheetTableQuery2022(p: Year2022Period): TableQuery[RealTransmittalSheetTable2022] = {
+  def transmittalSheetTableQuery2022(p: Year2022Period): TableQuery[TransmittalSheetTable] = {
     val tableName = p match {
       case Year2022Period.Whole => ts2022TableName
       case Year2022Period.Q1    => ts2022Q1TableName
       case Year2022Period.Q2    => ts2022Q2TableName
       case Year2022Period.Q3    => ts2022Q3TableName
     }
-    TableQuery(tag => new RealTransmittalSheetTable2022(tag, tableName))
+    TableQuery(tag => new TransmittalSheetTable(tag, tableName))
   }
 
   def qaTransmittalSheetTableQuery2022(p: Year2022Period): TableQuery[QATransmittalSheetTable] = {
@@ -217,32 +161,6 @@ trait PublisherComponent2022 extends PGTableNameLoader {
       case Year2022Period.Q3    => ts2022Q3QATableName
     }
     TableQuery(tag => new QATransmittalSheetTable(tag, tableName))
-  }
-
-  class TSRepository2022Base[TsTable <: RealTransmittalSheetTable2022](val config: DatabaseConfig[JdbcProfile], val table: TableQuery[TsTable])
-    extends TableRepository[TsTable, String] {
-
-    override def getId(row: TsTable): config.profile.api.Rep[Id] =
-      row.lei
-
-    def createSchema() = db.run(table.schema.create)
-    def dropSchema()   = db.run(table.schema.drop)
-
-    def insert(ts: TransmittalSheetEntity): Future[Int] =
-      db.run(table += ts)
-
-    def findByLei(lei: String): Future[Seq[TransmittalSheetEntity]] =
-      db.run(table.filter(_.lei === lei).result)
-
-    def deleteByLei(lei: String): Future[Int] =
-      db.run(table.filter(_.lei === lei).delete)
-
-    def count(): Future[Int] =
-      db.run(table.size.result)
-
-    def getAllSheets(bankIgnoreList: Array[String]): Future[Seq[TransmittalSheetEntity]] =
-      db.run(table.filterNot(_.lei.toUpperCase inSet bankIgnoreList).result)
-
   }
 
   abstract class LarTableBase[T](tag: Tag, tableName: String) extends Table[T](tag, tableName) {
@@ -552,7 +470,7 @@ trait PublisherComponent2022 extends PGTableNameLoader {
   }
 
   def createTransmittalSheetRepository2022(config: DatabaseConfig[JdbcProfile], p: Year2022Period) =
-    new TSRepository2022Base(config, transmittalSheetTableQuery2022(p))
+    new TsRepository(config, transmittalSheetTableQuery2022(p))
 
   def createQaTransmittalSheetRepository2022(config: DatabaseConfig[JdbcProfile], p: Year2022Period)(implicit ec: ExecutionContext) =
     new QARepository.Default[TransmittalSheetEntity, QATransmittalSheetTable](config, qaTransmittalSheetTableQuery2022(p))(ec)
@@ -637,7 +555,7 @@ trait PublisherComponent2022 extends PGTableNameLoader {
   def validationLarData2022(p: Year2022Period): LarData = LarData[LarEntityImpl2022, RealLarTable2022](larTableQuery2022(p))(_.lei)
 
   def validationTSData2022(p: Year2022Period): TsData =
-    TsData[TransmittalSheetEntity, RealTransmittalSheetTable2022](transmittalSheetTableQuery2022(p))(_.lei, _.totalLines, _.submissionId)
+    TsData[TransmittalSheetEntity, TransmittalSheetTable](transmittalSheetTableQuery2022(p))(_.lei, _.totalLines, _.submissionId)
   class QALarTableLoanLimit(tag: Tag)
     extends LarTableBase[QAEntity[LarEntityImpl2022WithMsa]](tag, lar2022QALoanLimitTableName)
       with QATableBase[LarEntityImpl2022WithMsa] {

@@ -2,24 +2,8 @@ package hmda.publisher.validation
 
 import akka.actor.ActorSystem
 import akka.testkit.TestKit
-import hmda.publisher.query.component.PublisherComponent2018
-import hmda.publisher.query.lar.{
-  LarEntityImpl2018,
-  LarPartFive2018,
-  LarPartFour2018,
-  LarPartOne2018,
-  LarPartSix2018,
-  LarPartThree2018,
-  LarPartTwo2018,
-  ModifiedLarEntityImpl,
-  ModifiedLarPartFive,
-  ModifiedLarPartFour,
-  ModifiedLarPartOne,
-  ModifiedLarPartSix,
-  ModifiedLarPartThree,
-  ModifiedLarPartTwo
-}
-import hmda.publisher.query.panel.InstitutionEntity
+import hmda.publisher.query.component.{ PublisherComponent2018, TransmittalSheetTable, TsRepository }
+import hmda.publisher.query.lar.{ LarEntityImpl2018, LarPartFive2018, LarPartFour2018, LarPartOne2018, LarPartSix2018, LarPartThree2018, LarPartTwo2018 }
 import hmda.query.ts.TransmittalSheetEntity
 import hmda.utils.EmbeddedPostgres
 import org.scalatest.concurrent.{ PatienceConfiguration, ScalaFutures }
@@ -44,7 +28,7 @@ class TSLinesCheckTest
 
   override implicit def patienceConfig: PatienceConfig = PatienceConfig(timeout = Span(2, Minutes), interval = Span(100, Millis))
 
-  val tsRepo2018  = new TransmittalSheetRepository2018(dbConfig)
+  val tsRepo2018  = new TsRepository[TransmittalSheetTable](dbConfig, transmittalSheetTable2018)
   val larRepo2018 = new LarRepository2018(dbConfig)
 
   override def beforeAll(): Unit = {
