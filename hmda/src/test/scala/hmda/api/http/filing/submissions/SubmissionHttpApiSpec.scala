@@ -9,6 +9,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
 import akka.testkit._
 import akka.util.Timeout
+import com.typesafe.config.Config
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.ErrorResponse
 import hmda.auth.{ KeycloakTokenVerifier, OAuth2Authorization }
@@ -35,6 +36,7 @@ import scala.concurrent.duration._
 class SubmissionHttpApiSpec extends AkkaCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest {
 
   val duration: FiniteDuration = 30.seconds
+  val config: Config = system.settings.config
 
   implicit val routeTimeout: RouteTestTimeout = RouteTestTimeout(duration.dilated)
 
@@ -42,7 +44,7 @@ class SubmissionHttpApiSpec extends AkkaCassandraPersistenceSpec with MustMatche
   val log: Logger                          = LoggerFactory.getLogger(getClass)
   implicit val timeout: Timeout            = Timeout(duration)
   val sharding: ClusterSharding            = ClusterSharding(typedSystem)
-  val submissionRoutes                     = SubmissionHttpApi.create(log, sharding)
+  val submissionRoutes                     = SubmissionHttpApi.create(config, log, sharding)
 
   val oAuth2Authorization = OAuth2Authorization(
     log,
