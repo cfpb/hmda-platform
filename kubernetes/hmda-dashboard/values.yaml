@@ -21,6 +21,12 @@ dashboard:
 
 hmda:
   runtimeMode: kubernetes
+  tables:
+    ts:
+      yearly: "2018,2019,2020,2021"
+      yearly-format: "transmittalsheet%s"
+      quarterly: "2020-Q1,2020-Q2,2020-Q3,2021-Q1,2021-Q2,2021-Q3"
+      quarterly-format: "ts%s_%s"
 
 ingress:
   enabled: false
