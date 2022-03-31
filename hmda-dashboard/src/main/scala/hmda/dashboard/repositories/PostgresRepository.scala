@@ -197,7 +197,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   def fetchSignsForLastDays(days: Int, period: String): Task[Seq[SignsForLastDays]] = {
     val tsTable = tsTableSelector(period)
     val query = sql"""
-      select to_timestamp(sign_date/1000) as signdate, count(*) as numsign from  #${tsTable} where sign_date is not null and upper(lei) NOT IN (#${filterList}) group by date(to_timestamp(sign_date/1000)) order by signdate desc limit #${days};
+      select date(to_timestamp(sign_date/1000)) as signdate, count(*) as numsign from  #${tsTable} where sign_date is not null and upper(lei) NOT IN (#${filterList}) group by date(to_timestamp(sign_date/1000)) order by signdate desc limit #${days};
       """.as[SignsForLastDays]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
