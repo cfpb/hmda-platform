@@ -63,9 +63,9 @@ spec:
             - name: TS_AVAILABLE_QUARTERLY
               value: {{ .Values.hmda.tables.ts.quarterly }}
             - name: TS_YEARLY_TABLE_FORMAT
-              value: {{ .Values.hmda.tables.ts.yearly-format }}
+              value: {{ .Values.hmda.tables.ts.yearlyFormat }}
             - name: TS_QUARTERLY_TABLE_FORMAT
-              value: {{ .Values.hmda.tables.ts.quarterly-format }}
+              value: {{ .Values.hmda.tables.ts.quarterlyFormat }}
             - name: KEYCLOAK_AUTH_URL
               valueFrom:
                 configMapKeyRef:
