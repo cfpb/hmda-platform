@@ -56,16 +56,18 @@ spec:
                 secretKeyRef:
                   name: dashboard-admin-pass
                   key: password
+            - name: AVAILABLE_YEARLY
+              valueFrom:
+                configMapKeyRef:
+                  name: dashboard-configmap
+                  key: available-yearly
+            - name: AVAILABLE_QUARTERLY
+              valueFrom:
+                configMapKeyRef:
+                  name: dashboard-configmap
+                  key: available-quarterly
             - name: HMDA_RUNTIME_MODE
               value: {{ .Values.hmda.runtimeMode }}
-            - name: TS_AVAILABLE_YEARLY
-              value: {{ .Values.hmda.tables.ts.yearly }}
-            - name: TS_AVAILABLE_QUARTERLY
-              value: {{ .Values.hmda.tables.ts.quarterly }}
-            - name: TS_YEARLY_TABLE_FORMAT
-              value: {{ .Values.hmda.tables.ts.yearlyFormat }}
-            - name: TS_QUARTERLY_TABLE_FORMAT
-              value: {{ .Values.hmda.tables.ts.quarterlyFormat }}
             - name: KEYCLOAK_AUTH_URL
               valueFrom:
                 configMapKeyRef:

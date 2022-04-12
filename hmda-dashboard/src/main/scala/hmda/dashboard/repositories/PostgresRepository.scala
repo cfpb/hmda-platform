@@ -9,19 +9,42 @@ import monix.eval.Task
 import slick.basic.DatabaseConfig
 import slick.jdbc.{ JdbcProfile, PositionedParameters, SQLActionBuilder }
 
+object PostgresRepository {
+  private val MV_EXEMPTIONS = "exemptions"
+  private val MV_OPEN_END_CREDIT = "open_end_credit"
+  private val MV_VOLUNTARY_FILERS = "voluntary_filers"
+  private val MV_LAR_EXEMPTIONS = "lar_exemptions"
+  private val MV_OPEN_END_CREDIT_LAR = "open_end_credit_lar"
+  private val MV_LIST_QUARTERLY_FILERS = "list_quarterly_filers"
+  private val TS_YEARLY = "ts_yearly"
+  private val TS_QUARTERLY = "ts_quarterly"
+  private val LAR_YEARLY = "lar_yearly"
+  private val LAR_QUARTERLY = "lar_quarterly"
+  private val SOURCE_PATTERNS = Map(
+    MV_EXEMPTIONS -> "exemptions_%s",
+    MV_OPEN_END_CREDIT -> "open_end_credit_filers_by_agency_%s",
+    MV_VOLUNTARY_FILERS -> "voluntary_filers%s",
+    MV_LAR_EXEMPTIONS -> "lar_count_using_exemption_by_agency_%s",
+    MV_OPEN_END_CREDIT_LAR -> "open_end_credit_lar_count_by_agency_%s",
+    MV_LIST_QUARTERLY_FILERS -> "list_quarterly_filers_%s",
+    LAR_YEARLY -> "loanapplicationregister%s",
+    LAR_QUARTERLY -> "lar%s_%s",
+    TS_YEARLY -> "transmittalsheet%s",
+    TS_QUARTERLY -> "ts%s_%s"
+  )
+}
 class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Array[String] ) {
 
   import config._
   import config.profile.api._
+  import PostgresRepository._
 
 
   private val filterList = bankFilterList.mkString("'","','","'")
 
-  private val tablesConfig = ConfigFactory.load().getConfig("hmda.tables")
-  private val yearlyAvailable = tablesConfig.getConfig("ts").getString("yearly").split(",").toSeq
-  private val quarterlyAvailable = tablesConfig.getConfig("ts").getString("quarterly").split(",").toSeq
-  private val yearTsTemplate = tablesConfig.getConfig("ts").getString("yearly-format")
-  private val quarterTsTemplate = tablesConfig.getConfig("ts").getString("quarterly-format")
+  private val sourcesConfig = ConfigFactory.load().getConfig("hmda.sources")
+  private val yearlyAvailable = sourcesConfig.getString("yearly").split(",").toSeq
+  private val quarterlyAvailable = sourcesConfig.getString("quarterly").split(",").toSeq
 
   def getDates(y: Int, w: Int, s: Int = 0) : String = {
     val sdf = new SimpleDateFormat("YYYY-MM-dd")
@@ -40,60 +63,41 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
 
   def tsTableSelector(period: String): String = {
     period match {
-      case periodToCheck if periodToCheck.contains('-') => tsQuarterlyTableSelector(periodToCheck)
-      case periodToCheck if yearlyAvailable.contains(periodToCheck) => String.format(yearTsTemplate, periodToCheck)
-      case _ => ""
-    }
-  }
-
-  def tsQuarterlyTableSelector(period: String): String = {
-    if (quarterlyAvailable.contains(period)) {
-      val yrQt = period.split('-').toSeq
-      String.format(quarterTsTemplate, yrQt.head, yrQt.last)
-    } else {
-      ""
+      case periodToCheck if yearlyAvailable.contains(periodToCheck) => getSource(SOURCE_PATTERNS.getOrElse(TS_YEARLY, ""), periodToCheck)
+      case periodToCheck if quarterlyAvailable.contains(periodToCheck) => getSource(SOURCE_PATTERNS.getOrElse(TS_QUARTERLY, ""), periodToCheck)
+      case _ => throw new IllegalArgumentException(f"Data source not configured for period: $period")
     }
   }
 
   def larTableSelector(period: String, mview: String = ""): String = {
-    (period, mview) match {
-      case ("2018","") => "loanapplicationregister2018"
-      case ("2019","") => "loanapplicationregister2019"
-      case ("2020","") => "loanapplicationregister2020"
-      case ("2021","") => "loanapplicationregister2021"
-      case ("2018","exemptions") => "exemptions_2018"
-      case ("2019","exemptions") => "exemptions_2019"
-      case ("2020","exemptions") => "exemptions_2020"
-      case ("2021","exemptions") => "exemptions_2021"
-      case ("2018","open_end_credit") => "open_end_credit_filers_by_agency_2018"
-      case ("2019","open_end_credit") => "open_end_credit_filers_by_agency_2019"
-      case ("2020","open_end_credit") => "open_end_credit_filers_by_agency_2020"
-      case ("2021","open_end_credit") => "open_end_credit_filers_by_agency_2021"
-      case ("2018","voluntary_filers") => "voluntary_filers2018"
-      case ("2019","voluntary_filers") => "voluntary_filers2019"
-      case ("2020","voluntary_filers") => "voluntary_filers2020"
-      case ("2021","voluntary_filers") => "voluntary_filers2021"
-      case ("2018","lar_exemptions") => "lar_count_using_exemption_by_agency_2018"
-      case ("2019","lar_exemptions") => "lar_count_using_exemption_by_agency_2019"
-      case ("2020","lar_exemptions") => "lar_count_using_exemption_by_agency_2020"
-      case ("2021","lar_exemptions") => "lar_count_using_exemption_by_agency_2021"
-      case ("2018","open_end_credit_lar") => "open_end_credit_lar_count_by_agency_2018"
-      case ("2019","open_end_credit_lar") => "open_end_credit_lar_count_by_agency_2019"
-      case ("2020","open_end_credit_lar") => "open_end_credit_lar_count_by_agency_2020"
-      case ("2021","open_end_credit_lar") => "open_end_credit_lar_count_by_agency_2021"
-      case ("2019","list_quarterly_filers") => "list_quarterly_filers_2019"
-      case ("2020","list_quarterly_filers") => "list_quarterly_filers_2020"
-      case ("2021","list_quarterly_filers") => "list_quarterly_filers_2021"
-      case ("2020-Q1","") => "lar2020_q1"
-      case ("2020-Q2","") => "lar2020_q2"
-      case ("2020-Q3","") => "lar2020_q3"
-      case ("2021-Q1","") => "lar2021_q1"
-      case ("2021-Q2","") => "lar2021_q2"
-      case ("2021-Q3","") => "lar2021_q3"
-      case ("2022-Q1","") => "lar2022_q1"
-      case ("2022-Q2","") => "lar2022_q2"
-      case ("2022-Q3","") => "lar2022_q3"
-      case _    => ""
+    val containedInYearly = yearlyAvailable.contains(period)
+    val containedInQuarterly = quarterlyAvailable.contains(period)
+
+    val sourcePattern = mview match {
+      case mv if !mv.isBlank && containedInYearly => SOURCE_PATTERNS.get(mview)
+      case _ if containedInYearly => SOURCE_PATTERNS.get(LAR_YEARLY)
+      case _ if containedInQuarterly => SOURCE_PATTERNS.get(LAR_QUARTERLY)
+      case _ => throw new IllegalArgumentException(f"Data source: $mview, not configured for period: $period")
+    }
+    sourcePattern.map(getSource(_, period)).get
+  }
+
+  def getSource(sourcePattern: String, period: String): String = {
+    getPeriod(period) match {
+      case (yr, qt) if !qt.isBlank => String.format(sourcePattern, yr, qt)
+      case (yr, _) => String.format(sourcePattern, yr)
+      case _ => throw new IllegalArgumentException(f"Data source: $sourcePattern, not configured for period: $period")
+    }
+  }
+
+  def getPeriod(periodToCheck: String): (String, String) = {
+    if (periodToCheck.contains('-')) {
+      periodToCheck.split('-') match {
+        case Array(yr, qt) => (yr, qt)
+        case _ => (periodToCheck, "")
+      }
+    } else {
+      (periodToCheck, "")
     }
   }
 
@@ -255,7 +259,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   }
 
   def fetchFilersUsingExemptionByAgency(period: String): Task[Seq[FilersUsingExemptionByAgency]] = {
-    val materializedView = larTableSelector(period, "exemptions")
+    val materializedView = larTableSelector(period, MV_EXEMPTIONS)
     val query = sql"""
       select agency, count from  #${materializedView} ;
       """.as[FilersUsingExemptionByAgency]
@@ -272,7 +276,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   }
 
   def fetchLarCountUsingExemptionByAgency(period: String): Task[Seq[LarCountUsingExemptionByAgency]] = {
-    val larTable = larTableSelector(period, "lar_exemptions")
+    val larTable = larTableSelector(period, MV_LAR_EXEMPTIONS)
     val query = sql"""
       select agency, count from #${larTable} ;
       """.as[LarCountUsingExemptionByAgency]
@@ -280,7 +284,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   }
 
   def fetchOpenEndCreditFilersByAgency(period: String): Task[Seq[OpenEndCreditByAgency]] = {
-    val larTable = larTableSelector(period, "open_end_credit")
+    val larTable = larTableSelector(period, MV_OPEN_END_CREDIT)
     val query = sql"""
       select agency, count(*) from #${larTable} where upper(lei) NOT IN (#${filterList}) group by agency;
       """.as[OpenEndCreditByAgency]
@@ -288,7 +292,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   }
 
   def fetchOpenEndCreditLarCountByAgency(period: String): Task[Seq[OpenEndCreditLarCountByAgency]] = {
-    val larTable = larTableSelector(period, "open_end_credit_lar")
+    val larTable = larTableSelector(period, MV_OPEN_END_CREDIT_LAR)
     val query = sql"""
       select agency, count(*) from #${larTable} where upper(lei) NOT IN (#${filterList}) group by agency;
       """.as[OpenEndCreditLarCountByAgency]
@@ -341,7 +345,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   }
 
   def fetchListQuarterlyFilers(period: String): Task[Seq[ListQuarterlyFilers]] = {
-    val larTable = larTableSelector((period.toInt-1).toString, "list_quarterly_filers")
+    val larTable = larTableSelector((period.toInt-1).toString, MV_LIST_QUARTERLY_FILERS)
     val query = sql"""
         select *, (select COUNT(*) from ts#${period}_q1 where #${larTable}.lei = ts#${period}_q1.lei) as q1_filed, (select COUNT(*) from ts#${period}_q1 where #${larTable}.lei = ts#${period}_q1.lei) as q2_filed, (select COUNT(*) from ts#${period}_q1 where #${larTable}.lei = ts#${period}_q1.lei) as q3_filed from #${larTable} order by sign_date_east desc;
       """.as[ListQuarterlyFilers]
@@ -478,7 +482,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   }
 
   def fetchVoluntaryFilers(period: String) : Task[Seq[VoluntaryFilers]] = {
-    val materializedView = larTableSelector(period, "voluntary_filers")
+    val materializedView = larTableSelector(period, MV_VOLUNTARY_FILERS)
     val query = sql"""
       select * from  #${materializedView} ;
       """.as[VoluntaryFilers]
