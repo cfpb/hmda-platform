@@ -56,10 +56,10 @@ lazy val slickDeps = Seq(slick, slickHikariCP, postgres, h2)
 
 lazy val dockerSettings = Seq(
   Docker / maintainer := "Hmda-Ops",
-  dockerBaseImage := "openjdk:17-jdk-alpine3.12",
+  dockerBaseImage := "openjdk:19-jdk-alpine3.15",
   dockerRepository := Some("hmda"),
   dockerCommands := dockerCommands.value.flatMap {
-    case cmd@Cmd("FROM",_) => List(cmd, Cmd("RUN", "apk update && apk upgrade "),
+    case cmd@Cmd("FROM",_) => List(cmd, Cmd("RUN", "apk update && apk upgrade"),
       Cmd("RUN", "rm /var/cache/apk/*"))
     case other => List(other)
   }
