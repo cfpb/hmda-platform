@@ -7,6 +7,7 @@ import akka.actor.{ ActorSystem, CoordinatedShutdown }
 import akka.http.scaladsl.server.Directives._
 import hmda.api.http.routes.BaseHttpApi
 import hmda.api.http.directives.HmdaTimeDirectives._
+import hmda.auth.OAuth2Authorization
 
 import scala.concurrent.ExecutionContext
 
@@ -21,7 +22,9 @@ object HmdaProxyApi {
     val shutdown                      = CoordinatedShutdown(system)
     val config                        = ctx.system.settings.config
     val log                           = ctx.log
-    val routes                        = BaseHttpApi.routes(name) ~ ProxyHttpApi.create(log)
+    val oAuth2Authorization           = OAuth2Authorization(log, config)
+    val proxyRoute                    = ProxyHttpApi.create(log)
+    val routes                        = BaseHttpApi.routes(name) ~ proxyRoute(oAuth2Authorization)
     val host: String                  = config.getString("hmda.proxy.http.host")
     val port: Int                     = config.getInt("hmda.proxy.http.port")
 

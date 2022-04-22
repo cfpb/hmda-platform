@@ -88,6 +88,7 @@ lazy val `hmda-root` = (project in file("."))
     common,
     `hmda-platform`,
     `check-digit`,
+    `file-proxy`,
     `institutions-api`,
     `modified-lar`,
     `hmda-analytics`,
@@ -203,6 +204,8 @@ lazy val `check-digit` = (project in file("check-digit"))
     .settings(hmdaBuildSettings: _*)
     .settings(
       Seq(
+        libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
+        enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
         mainClass in Compile := Some("hmda.fileProxy.FileProxy"),
         assemblyJarName in assembly := {
           s"${name.value}.jar"
