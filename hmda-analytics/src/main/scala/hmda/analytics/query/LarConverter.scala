@@ -7,8 +7,9 @@ import hmda.census.records._
 import hmda.census.records.CountyLoanLimitRecords._
 import hmda.model.census.Census
 import com.typesafe.config.ConfigFactory
-import java.security.MessageDigest
+import hmda.census.records.CensusRecords.getCensusOnTractandCounty
 
+import java.security.MessageDigest
 import hmda.util.conversion.LarStringFormatter
 
 object LarConverter {
