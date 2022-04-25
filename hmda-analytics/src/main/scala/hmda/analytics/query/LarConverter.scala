@@ -74,7 +74,7 @@ object LarConverter {
     year: Int,
     isQuarterly: Boolean = false
   ): LarEntity = {
-    val census = CensusRecords.yearTractMap(year).getOrElse(lar.geography.tract, Census())
+    val census = getCensusOnTractandCounty(lar.geography.tract, lar.geography.county, year)
     val overallLoanLimit = getOverallLoanLimit(year)
     val countyLoanLimitsByCounty = getcountyLoanLimitsByCounty(year)
     val countyLoanLimitsByState = getcountyLoanLimitsByState(year)
