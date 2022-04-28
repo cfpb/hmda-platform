@@ -10,16 +10,6 @@ import scala.concurrent.Await
 
 trait InstitutionSetup extends InstitutionEmailComponent {
 
-  implicit val institutionRepository2018 =
-    new InstitutionRepository2018(dbConfig, "institutions2018")
-  implicit val institutionRepository2019 =
-    new InstitutionRepository2019(dbConfig, "institutions2019")
-  implicit val institutionRepository2020 =
-    new InstitutionRepository2020(dbConfig, "institutions2020")
-  implicit val institutionRepository2021 =
-    new InstitutionRepository2021(dbConfig, "institutions2021")
-  implicit val institutionRepository2022 =
-    new InstitutionRepository2022(dbConfig, "institutions2022")
   implicit val emailRepository = new InstitutionEmailsRepository(dbConfig)
   val db                       = emailRepository.db
 
@@ -72,11 +62,9 @@ trait InstitutionSetup extends InstitutionEmailComponent {
 
   def tearDown() = {
     Await.result(emailRepository.dropSchema(), duration)
-    Await.result(institutionRepository2018.dropSchema(), duration)
-    Await.result(institutionRepository2019.dropSchema(), duration)
-    Await.result(institutionRepository2020.dropSchema(), duration)
-    Await.result(institutionRepository2021.dropSchema(), duration)
-    Await.result(institutionRepository2022.dropSchema(), duration)
+    institutionRepositories.values.foreach{ repo =>
+      Await.result(repo.dropSchema(), duration)
+    }
 
   }
 

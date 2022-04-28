@@ -8,7 +8,7 @@ import hmda.query.repository.TableRepository
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 trait InstitutionEmailComponent extends InstitutionComponent {
 
@@ -75,73 +75,18 @@ trait InstitutionEmailComponent extends InstitutionComponent {
 
   def findByYear(year: String)(
     implicit ec: ExecutionContext,
-    institutionEmailsRepository: InstitutionEmailsRepository,
-    institutionRepository2018: InstitutionRepository,
-    institutionRepository2019: InstitutionRepository,
-    institutionRepository2020: InstitutionRepository,
-    institutionRepository2021: InstitutionRepository,
-    institutionRepository2022: InstitutionRepository
-
+    institutionEmailsRepository: InstitutionEmailsRepository
   ):  Future[Seq[Future[String]]]= {
 
-    year match {
-      case "2018" =>
-        def institutionQuery() =
-          institutionRepository2018.table.filterNot(_.lei.toUpperCase inSet bankFilterList)
-        val db = institutionRepository2018.db
+    val repo = institutionRepositories(year)
 
-        for {
-          institutions  <- db.run(institutionQuery().result)
-        } yield {
-          institutions.map { institution => appendLoaderEmailDomains(institution)}
-        }
-      case "2019" =>
-        def institutionQuery() =
-          institutionRepository2019.table.filterNot(_.lei.toUpperCase inSet bankFilterList)
-        val db = institutionRepository2019.db
+    def institutionQuery = repo.table.filterNot(_.lei.toUpperCase inSet bankFilterList)
+    val db = repo.db
 
-        for {
-          institutions  <- db.run(institutionQuery().result)
-        } yield {
-          institutions.map { institution => appendLoaderEmailDomains(institution)}
-        }
-      case "2020" =>
-        def institutionQuery() =
-          institutionRepository2020.table.filterNot(_.lei.toUpperCase inSet bankFilterList)
-        val db = institutionRepository2020.db
-
-        for {
-          institutions  <- db.run(institutionQuery().result)
-        } yield {
-
-          institutions.map(institution => appendLoaderEmailDomains(institution))
-
-        }
-      case "2021" =>
-        def institutionQuery() =
-          institutionRepository2021.table.filterNot(_.lei.toUpperCase inSet bankFilterList)
-        val db = institutionRepository2021.db
-
-        for {
-          institutions  <- db.run(institutionQuery().result)
-        } yield {
-
-          institutions.map(institution => appendLoaderEmailDomains(institution))
-
-        }
-
-      case "2022" =>
-        def institutionQuery() =
-          institutionRepository2022.table.filterNot(_.lei.toUpperCase inSet bankFilterList)
-        val db = institutionRepository2022.db
-
-        for {
-          institutions  <- db.run(institutionQuery().result)
-        } yield {
-
-          institutions.map(institution => appendLoaderEmailDomains(institution))
-
-        }
+    for {
+      institutions <- db.run(institutionQuery.result)
+    } yield {
+      institutions.map { institution => appendLoaderEmailDomains(institution)}
     }
   }
 
@@ -159,127 +104,44 @@ trait InstitutionEmailComponent extends InstitutionComponent {
 
 
 
-  def findByEmail(email: String, year: String, 
-    institutionRepository2018: InstitutionRepository,
-    institutionRepository2019: InstitutionRepository,
-    institutionRepository2020: InstitutionRepository,
-    institutionRepository2021: InstitutionRepository,
-    institutionRepository2022: InstitutionRepository)(
+  def findByEmail(email: String, year: String)(
     implicit ec: ExecutionContext,
     institutionEmailsRepository: InstitutionEmailsRepository
   ): Future[Seq[Institution]] = {
 
+    val repo = institutionRepositories(year)
     val emailDomain = extractDomain(email)
     val emailSingleQuery =
       institutionEmailsRepository.table.filter(_.emailDomain.trim === emailDomain.trim)
 
+    def institutionQuery(leis: Seq[String]) =
+      repo.table.filter(_.lei inSet leis)
+
     def emailTotalQuery(leis: Seq[String]) =
       institutionEmailsRepository.table.filter(_.lei inSet leis)
 
-    year match {
-      case "2018" =>
-        def institutionQuery(leis: Seq[String]) =
-          institutionRepository2018.table.filter(_.lei inSet leis)
-
-        val db = institutionRepository2018.db
-
-        for {
-          emailEntities <- db.run(emailSingleQuery.result)
-          leis          = emailEntities.map(_.lei)
-          institutions  <- db.run(institutionQuery(leis).result)
-          emails        <- db.run(emailTotalQuery(leis).result)
-        } yield {
-          institutions.map { institution => mergeEmailIntoInstitutions(emails, institution)
-          }
-        }
-      case "2019" =>
-        def institutionQuery(leis: Seq[String]) =
-          institutionRepository2019.table.filter(_.lei inSet leis)
-
-        val db = institutionRepository2019.db
-
-        for {
-          emailEntities <- db.run(emailSingleQuery.result)
-          leis          = emailEntities.map(_.lei)
-          institutions  <- db.run(institutionQuery(leis).result)
-          emails        <- db.run(emailTotalQuery(leis).result)
-        } yield {
-          institutions.map { institution => mergeEmailIntoInstitutions(emails, institution)
-          }
-        }
-      case "2020" =>
-        def institutionQuery(leis: Seq[String]) =
-          institutionRepository2020.table.filter(_.lei inSet leis)
-
-        val db = institutionRepository2020.db
-
-        for {
-          emailEntities <- db.run(emailSingleQuery.result)
-          leis          = emailEntities.map(_.lei)
-          institutions  <- db.run(institutionQuery(leis).result)
-          emails        <- db.run(emailTotalQuery(leis).result)
-        } yield {
-          institutions.map { institution => mergeEmailIntoInstitutions(emails, institution)
-          }
-        }
-      case "2021" =>
-        def institutionQuery(leis: Seq[String]) =
-          institutionRepository2021.table.filter(_.lei inSet leis)
-
-        val db = institutionRepository2021.db
-
-        for {
-          emailEntities <- db.run(emailSingleQuery.result)
-          leis          = emailEntities.map(_.lei)
-          institutions  <- db.run(institutionQuery(leis).result)
-          emails        <- db.run(emailTotalQuery(leis).result)
-        } yield {
-          institutions.map { institution => mergeEmailIntoInstitutions(emails, institution)
-          }
-        }
-      case "2022" =>
-        def institutionQuery(leis: Seq[String]) =
-          institutionRepository2022.table.filter(_.lei inSet leis)
-
-        val db = institutionRepository2022.db
-
-        for {
-          emailEntities <- db.run(emailSingleQuery.result)
-          leis          = emailEntities.map(_.lei)
-          institutions  <- db.run(institutionQuery(leis).result)
-          emails        <- db.run(emailTotalQuery(leis).result)
-        } yield {
-          institutions.map { institution => mergeEmailIntoInstitutions(emails, institution)
-          }
-        }
+    for {
+      emailEntities <- repo.db.run(emailSingleQuery.result)
+      leis = emailEntities.map(_.lei)
+      institutions <- repo.db.run(institutionQuery(leis).result)
+      emails <- repo.db.run(emailTotalQuery(leis).result)
+    } yield {
+      institutions.map { institution =>
+        mergeEmailIntoInstitutions(emails, institution)
+      }
     }
   }
 
-  def findByEmailAnyYear(email: String,     
-    institutionRepository2018: InstitutionRepository,
-    institutionRepository2019: InstitutionRepository,
-    institutionRepository2020: InstitutionRepository,
-    institutionRepository2021: InstitutionRepository,
-    institutionRepository2022: InstitutionRepository)(
+  def findByEmailAnyYear(email: String)(
     implicit ec: ExecutionContext,
     institutionEmailsRepository: InstitutionEmailsRepository
   ): Future[Seq[Institution]] = {
+    val sortedYears = yearsAvailable.sortBy(_.toInt).reverse
+    val institutionsByYear = sortedYears.map(findByEmail(email, _))
 
-      for {
-        institutions2022 <- findByEmail(email, "2022", institutionRepository2018, institutionRepository2019, institutionRepository2020, institutionRepository2021, institutionRepository2022)
-        institutions2021 <- findByEmail(email, "2021", institutionRepository2018, institutionRepository2019, institutionRepository2020, institutionRepository2021, institutionRepository2022)
-        institutions2020 <- findByEmail(email, "2020", institutionRepository2018, institutionRepository2019, institutionRepository2020, institutionRepository2021, institutionRepository2022)
-        institutions2019 <- findByEmail(email, "2019", institutionRepository2018, institutionRepository2019, institutionRepository2020, institutionRepository2021, institutionRepository2022)
-        institutions2018 <- findByEmail(email, "2018", institutionRepository2018, institutionRepository2019, institutionRepository2020, institutionRepository2021, institutionRepository2022)
-        }
-      yield (institutions2021, institutions2020, institutions2019, institutions2018, institutions2022) match {
-        case _ if (!institutions2021.isEmpty) => institutions2021
-        case _ if (!institutions2020.isEmpty) => institutions2020
-        case _ if (!institutions2019.isEmpty) => institutions2019
-        case _ if (!institutions2018.isEmpty) => institutions2018
-        case _ if (!institutions2022.isEmpty) => institutions2022
-      }
-
+    Future.sequence(institutionsByYear).map {
+      _.find(_.nonEmpty).getOrElse(Seq())
+    }
   }
 
   private def mergeEmailIntoInstitutions(emails: Seq[InstitutionEmailEntity], institution: InstitutionEntity) = {
@@ -288,17 +150,11 @@ trait InstitutionEmailComponent extends InstitutionComponent {
     InstitutionConverter.convert(institution, filteredEmails)
   }
 
-  def findByFields(lei: String, name: String, taxId: String, emailDomain: String, year: String,
-    institutionRepository2018: InstitutionRepository,
-    institutionRepository2019: InstitutionRepository,
-    institutionRepository2020: InstitutionRepository,
-    institutionRepository2021: InstitutionRepository,
-    institutionRepository2022: InstitutionRepository
-    )(
+  def findByFields(lei: String, name: String, taxId: String, emailDomain: String, year: String)(
     implicit ec: ExecutionContext,
     institutionEmailsRepository: InstitutionEmailsRepository
   ): Future[Seq[Institution]] = {
-    val emailFiltered = findByEmail(emailDomain, year, institutionRepository2018, institutionRepository2019, institutionRepository2020, institutionRepository2021, institutionRepository2022)
+    val emailFiltered = findByEmail(emailDomain, year)
     for {
       emailEntities <- emailFiltered
       filtered = emailEntities.filter(
