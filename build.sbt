@@ -545,3 +545,34 @@ lazy val `email-service` = (project in file("email-service"))
   )
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(`hmda-protocol`)
+
+lazy val `hmda-quarterly-data-service` = (project in file ("hmda-quarterly-data-service"))
+  .enablePlugins(
+    JavaServerAppPackaging,
+    sbtdocker.DockerPlugin,
+    AshScriptPlugin
+  )
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
+        enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
+      assemblyMergeStrategy in assembly := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case PathList(ps @ _*) if ps.last endsWith ".proto" =>
+          MergeStrategy.first
+        case "module-info.class" => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      },
+      assemblyJarName in assembly := {
+        s"${name.value}.jar"
+      }
+    ),
+    dockerSettings,
+    packageSettings
+  )
+  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(`hmda-protocol` % "compile->compile;test->test")
