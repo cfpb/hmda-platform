@@ -79,6 +79,11 @@ spec:
                 configMapKeyRef:
                   name: cassandra-configmap
                   key: cassandra-hosts
+            - name: CASSANDRA_CLUSTER_DC
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-cluster-dc
             - name: CASSANDRA_CLUSTER_USERNAME
               valueFrom:
                 secretKeyRef:
