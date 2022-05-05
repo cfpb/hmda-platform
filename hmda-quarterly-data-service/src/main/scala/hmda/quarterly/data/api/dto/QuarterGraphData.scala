@@ -1,4 +1,4 @@
-package hmda.quarterly.data.model
+package hmda.quarterly.data.api.dto
 
 object QuarterGraphData {
   final case class GraphCoordinate(x: String, y: String)

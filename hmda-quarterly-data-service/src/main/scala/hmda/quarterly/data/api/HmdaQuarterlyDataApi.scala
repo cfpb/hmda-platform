@@ -2,19 +2,16 @@ package hmda.quarterly.data.api
 
 import akka.actor
 import akka.actor.CoordinatedShutdown
-import akka.actor.typed.{ ActorSystem, Behavior }
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import akka.http.scaladsl.model.StatusCodes
+import akka.actor.typed.{ ActorSystem, Behavior }
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
 import hmda.api.http.directives.HmdaTimeDirectives.timed
 import hmda.api.http.routes.BaseHttpApi
-import hmda.auth.OAuth2Authorization
-import spray.json.DefaultJsonProtocol
+import slick.basic.DatabaseConfig
+import slick.jdbc.JdbcProfile
 
 import scala.concurrent.ExecutionContext
 
@@ -27,6 +24,7 @@ object HmdaQuarterlyDataApi {
     implicit val classic: actor.ActorSystem = system.toClassic
     implicit val mat: Materializer = Materializer(ctx)
     implicit val ec: ExecutionContext = ctx.executionContext
+    implicit val dbConfig: DatabaseConfig[JdbcProfile] = DatabaseConfig.forConfig[JdbcProfile]("db")
     val log = ctx.log
     val config = system.settings.config
     val host: String = config.getString("server.bindings.address")
