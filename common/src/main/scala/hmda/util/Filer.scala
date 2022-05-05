@@ -29,6 +29,12 @@ object Filer {
     }
   }
 
+  def checkQuarterlyYear(filingRulesConfig: FilingRulesConfig)(year: Int): Boolean = {
+    import filingRulesConfig._
+    import qf._
+    filingYearsAllowed.contains(year) || quarterlyFilingYearsAllowed.contains(year)
+  }
+
   def parse(hocon: Config): Either[String, FilingRulesConfig] = {
     def parseQuarterConfig(hocon: Config): Either[String, QuarterConfig] = {
       // note that we expect the user to fill in year the month and date, and we fill in the year
