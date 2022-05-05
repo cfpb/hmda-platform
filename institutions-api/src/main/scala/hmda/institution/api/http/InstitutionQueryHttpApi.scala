@@ -28,22 +28,12 @@ object InstitutionQueryHttpApi {
 private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionContext) extends InstitutionEmailComponent with InstitutionNoteHistoryComponent{
   val dbConfig = DatabaseConfig.forConfig[JdbcProfile]("institution_db")
 
-  implicit val institutionRepository2018   = new InstitutionRepository(dbConfig, "institutions2018")
-  implicit val institutionRepository2019   = new InstitutionRepository(dbConfig, "institutions2019")
-  implicit val institutionRepository2020   = new InstitutionRepository(dbConfig, "institutions2020")
-  implicit val institutionRepository2021   = new InstitutionRepository(dbConfig, "institutions2021")
-  implicit val institutionRepository2022   = new InstitutionRepository(dbConfig, "institutions2022")
-  implicit val institutionEmailsRepository = new InstitutionEmailsRepository(dbConfig)
-  implicit val institutionNoteHistoryRepository = new InstitutionNoteHistoryRepository(dbConfig)
+  implicit val institutionEmailsRepository: InstitutionEmailsRepository = new InstitutionEmailsRepository(dbConfig)
+  implicit val institutionNoteHistoryRepository: InstitutionNoteHistoryRepository = new InstitutionNoteHistoryRepository(dbConfig)
 
-
-  val createSchema = config.getString("hmda.institution.createSchema").toBoolean
+  private val createSchema = config.getString("hmda.institution.createSchema").toBoolean
   if (createSchema) {
-    institutionRepository2018.createSchema()
-    institutionRepository2019.createSchema()
-    institutionRepository2020.createSchema()
-    institutionRepository2021.createSchema()
-    institutionRepository2022.createSchema()
+    institutionRepositories.values.foreach(_.createSchema())
     institutionEmailsRepository.createSchema()
   }
 
@@ -53,13 +43,8 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
       (extractUri & get) { uri =>
         isFilingAllowed(year, None) {
 
-          val fInstitution = year match {
-            case 2018 => institutionRepository2018.findById(lei)
-            case 2020 => institutionRepository2020.findById(lei)
-            case 2021 => institutionRepository2021.findById(lei)
-            case 2022 => institutionRepository2022.findById(lei)
-            case _    => institutionRepository2021.findById(lei)
-          }
+          val defaultRepo = institutionRepositories(institutionConfig.getString("defaultYear"))
+          val fInstitution = institutionRepositories.getOrElse(year.toString, defaultRepo).findById(lei)
 
           val fEmails = institutionEmailsRepository.findByLei(lei)
           val f = for {
@@ -93,12 +78,12 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
       (extractUri & get) { uri =>
         isFilingAllowed(year, None) {
           parameter('domain.as[String]) { domain =>
-            val f = findByEmail(domain, year.toString, institutionRepository2018, institutionRepository2019, institutionRepository2020, institutionRepository2021, institutionRepository2022)
+            val f = findByEmail(domain, year.toString)
             completeInstitutionsFuture(f, uri)
           } ~
             parameters('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String])  {
               (domain, lei, respondentName, taxId) =>
-                val f = findByFields(lei, respondentName, taxId, domain, year.toString, institutionRepository2018, institutionRepository2019, institutionRepository2020, institutionRepository2021, institutionRepository2022)
+                val f = findByFields(lei, respondentName, taxId, domain, year.toString)
                 completeInstitutionsFuture(f, uri)
             }
         }
@@ -137,14 +122,14 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
           if (checkIfPublicDomain(domain)) {
             returnNotFoundError(uri)
           } else {
-            val f = findByEmailAnyYear(domain, institutionRepository2018, institutionRepository2019, institutionRepository2020, institutionRepository2021, institutionRepository2022)
+            val f = findByEmailAnyYear(domain)
             completeInstitutionsFuture(f, uri)
           }
         } ~
           parameters('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String]) {
             (domain, lei, respondentName, taxId) =>
               val f =
-                findByFields(lei, respondentName, taxId, domain, currentYear, institutionRepository2018, institutionRepository2019, institutionRepository2020, institutionRepository2021, institutionRepository2022)
+                findByFields(lei, respondentName, taxId, domain, currentYear)
               completeInstitutionsFuture(f, uri)
           }
       }
