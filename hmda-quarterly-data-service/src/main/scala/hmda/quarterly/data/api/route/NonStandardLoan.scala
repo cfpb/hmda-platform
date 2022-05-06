@@ -15,7 +15,7 @@ object NonStandardLoan extends JsonSupport {
       .map(data => {
         val coordinates = data.map(nsl => GraphCoordinate(nsl.quarter, nsl.volume.toString))
         val updated = data.head.lastUpdated
-        GraphSummary(loanType.toString, updated.toString, coordinates)
+        GraphSummary(loanType.description, updated.toString, coordinates)
       })
       .runToFuture
 
