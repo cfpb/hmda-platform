@@ -53,6 +53,11 @@ spec:
                 configMapKeyRef:
                   name: timed-guards
                   key: yearsAllowed
+            - name: RULES_QF_FILING_YEARS_ALLOWED
+              valueFrom:
+                configMapKeyRef:
+                  name: timed-guards
+                  key: quarterlyYearsAllowed
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:
