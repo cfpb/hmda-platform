@@ -82,8 +82,6 @@ class DataBrowserQueryServiceSpec
       inAnyOrder {
         (cache.find _).expects(List(QueryField("one", List("a"))), 2018).returns(Task.now(Some(e1)))
         (cache.find _).expects(List(QueryField("one", List("b"))), 2018).returns(Task.now(Some(e2)))
-        (cache.find _).expects(List(QueryField("one", List("b"))), 2019).returns(Task.now(Some(e2)))
-        (cache.find _).expects(List(QueryField("one", List("b"))), 2020).returns(Task.now(Some(e2)))
         // you might find this surprising that we expect the repository to be called but we are dealing with an effect
         // system and everything is lazy. Notice if we evaluated this effect, this test would fail
         (repo.findAndAggregate _)
