@@ -16,7 +16,12 @@ object LineOfCredit extends JsonSupport {
       .runToFuture
 
   val routes: Route = pathPrefix("line_of_credit") {
-    path("open") {
+    path("") {
+      complete(for {
+        open <- getVolumeByType(OpenEndLineOfCredit)
+        closed <- getVolumeByType(NotOpenEndLineOfCredit)
+      } yield Seq(open, closed))
+    } ~ path("open") {
       complete(getVolumeByType(OpenEndLineOfCredit))
     } ~ path("not_open") {
       complete(getVolumeByType(NotOpenEndLineOfCredit))

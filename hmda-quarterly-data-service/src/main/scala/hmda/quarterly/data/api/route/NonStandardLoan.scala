@@ -20,7 +20,15 @@ object NonStandardLoan extends JsonSupport {
       .runToFuture
 
   val routes: Route = pathPrefix("non_standard_loan") {
-    path("balloon") {
+    path("") {
+      complete(for {
+        balloon <- getVolumeByType(BALLOON_PAYMENT)
+        reverse <- getVolumeByType(REVERSE_MORTGAGE)
+        biz <- getVolumeByType(BUSINESS_OR_COMMERCIAL)
+        interest <- getVolumeByType(INTEREST_ONLY_PAYMENT)
+        amort <- getVolumeByType(AMORTIZATION)
+      } yield Seq(balloon, reverse, biz, interest, amort))
+    } ~ path("balloon") {
       complete(getVolumeByType(BALLOON_PAYMENT))
     } ~ path("reverse") {
       complete(getVolumeByType(REVERSE_MORTGAGE))
