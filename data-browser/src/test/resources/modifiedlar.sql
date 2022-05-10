@@ -1,4 +1,4 @@
-CREATE TABLE institutions2018_snapshot (
+CREATE TABLE modifiedlar2018_three_year_04052022 (
     lei character varying NOT NULL,
     activity_year integer NOT NULL,
     agency integer NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE institutions2018_snapshot (
     quarterly_filer boolean default false NOT NULL
 );
 
-CREATE TABLE modifiedlar2018_snapshot (
+CREATE TABLE modifiedlar2019_one_year_04052022 (
     id integer NOT NULL,
     lei character varying NOT NULL,
     loan_type integer,
