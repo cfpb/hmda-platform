@@ -12,11 +12,7 @@ import monix.execution.Scheduler.Implicits.global
 object NonStandardLoan extends JsonSupport {
   private def getVolumeByType(loanType: NonStandardLoanType): CancelableFuture[GraphSummary] =
     QuarterlyGraphRepo.fetchNonStandardLoanVolumeByType(loanType)
-      .map(data => {
-        val coordinates = data.map(nsl => GraphCoordinate(nsl.quarter, nsl.volume.toString))
-        val updated = data.head.lastUpdated
-        GraphSummary(loanType.description, updated.toString, coordinates)
-      })
+      .map(convertToGraph(loanType.description, _))
       .runToFuture
 
   val routes: Route = pathPrefix("non_standard_loan") {
