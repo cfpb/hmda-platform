@@ -5,5 +5,5 @@ import java.sql.Timestamp
 trait AggregatedVolume {
   val lastUpdated: Timestamp
   val quarter: String
-  val volume: Long
+  val volume: Float
 }

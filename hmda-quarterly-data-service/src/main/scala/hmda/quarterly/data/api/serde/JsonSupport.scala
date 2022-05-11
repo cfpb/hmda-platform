@@ -10,7 +10,7 @@ trait JsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val graphData: RootJsonFormat[GraphSummary] = jsonFormat3(GraphSummary)
 
   protected def convertToGraph(description: String, aggregatedVolume: Seq[AggregatedVolume]): GraphSummary = {
-    val coordinates = aggregatedVolume.map(loc => GraphCoordinate(loc.quarter, loc.volume.toString))
+    val coordinates = aggregatedVolume.map(aggregatedRecord => GraphCoordinate(aggregatedRecord.quarter, aggregatedRecord.volume))
     val updated = aggregatedVolume.head.lastUpdated
     GraphSummary(description, updated.toString, coordinates)
   }

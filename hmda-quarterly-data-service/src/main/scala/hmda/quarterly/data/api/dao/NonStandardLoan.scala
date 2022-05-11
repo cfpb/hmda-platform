@@ -20,12 +20,12 @@ case class NonStandardLoanVolume(
   lastUpdated: Timestamp,
   quarter: String,
   loanType: NonStandardLoanType.Value,
-  volume: Long) extends AggregatedVolume
+  volume: Float) extends AggregatedVolume
 object NonStandardLoanVolume {
   implicit val getResults: GetResult[NonStandardLoanVolume] = GetResult(result => NonStandardLoanVolume(
     result.rs.getTimestamp("last_updated"),
     result.rs.getString("quarter"),
     NonStandardLoanType.withName(result.rs.getString("loan_type")),
-    result.rs.getLong("volume")
+    result.rs.getFloat("volume")
   ))
 }

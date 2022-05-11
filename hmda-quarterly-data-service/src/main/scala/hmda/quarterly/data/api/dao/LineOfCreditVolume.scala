@@ -7,13 +7,13 @@ import java.sql.Timestamp
 case class LineOfCreditVolume(
   lastUpdated: Timestamp,
   quarter: String,
-  volume: Long,
+  volume: Float,
   lineOfCreditCode: LineOfCreditEnum) extends AggregatedVolume
 object LineOfCreditVolume {
   implicit val getResults: GetResult[LineOfCreditVolume] = GetResult(result => LineOfCreditVolume(
       result.rs.getTimestamp("last_updated"),
       result.rs.getString("quarter"),
-      result.rs.getLong("agg"),
+      result.rs.getFloat("agg"),
       LineOfCreditEnum.valueOf(result.rs.getInt("line_of_credits")))
   )
 }
