@@ -105,8 +105,9 @@ class PublishingGuard(
             throw new IllegalArgumentException("quarterly 2020 is not supported to public publishers at the moment")
           case Period.y2021Q1 | Period.y2021Q2 | Period.y2021Q3 =>
             throw new IllegalArgumentException("quarterly 2021 is not supported to public publishers at the moment")
-          case Period.y2022Q1 | Period.y2022Q2 | Period.y2022Q3 =>
-            throw new IllegalArgumentException("quarterly 2022 is not supported to public publishers at the moment")
+          case Period.y2022Q1 => db2022.validationPanelData2022(db2022.Year2022Period.Q1)
+          case Period.y2022Q2 => db2022.validationPanelData2022(db2022.Year2022Period.Q2)
+          case Period.y2022Q3 => db2022.validationPanelData2022(db2022.Year2022Period.Q3)
         }
 
         List(

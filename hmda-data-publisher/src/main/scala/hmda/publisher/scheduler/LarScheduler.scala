@@ -158,7 +158,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
 
         for {
           s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, LarScheduler2018)
-          _ <- persistFileForQa(s3ObjName, LarEntityImpl2018.parseFromPSVUnsafe, qaLarRepository2018)
+         // _ <- persistFileForQa(s3ObjName, LarEntityImpl2018.parseFromPSVUnsafe, qaLarRepository2018)
         } yield ()
       }
 
@@ -176,7 +176,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
 
         for {
           s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, LarScheduler2019)
-          _ <- persistFileForQa(s3ObjName, LarEntityImpl2019.parseFromPSVUnsafe, qaLarRepository2019)
+         // _ <- persistFileForQa(s3ObjName, LarEntityImpl2019.parseFromPSVUnsafe, qaLarRepository2019)
         } yield ()
       }
 
@@ -194,7 +194,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
 
         for {
           s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, LarScheduler2020)
-          _ <- persistFileForQa(s3ObjName, LarEntityImpl2020.parseFromPSVUnsafe, qaLarRepository2020)
+         //// _ <- persistFileForQa(s3ObjName, LarEntityImpl2020.parseFromPSVUnsafe, qaLarRepository2020)
         } yield ()
       }
 
@@ -212,7 +212,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
 
         for {
           s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, LarScheduler2021)
-          _ <- persistFileForQa(s3ObjName, LarEntityImpl2021.parseFromPSVUnsafe, qaLarRepository2021)
+        // // _ <- persistFileForQa(s3ObjName, LarEntityImpl2021.parseFromPSVUnsafe, qaLarRepository2021)
         } yield ()
       }
 
@@ -231,7 +231,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
 
         for {
           s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, LarSchedulerLoanLimit2019)
-          _ <- persistFileForQa(s3ObjName, LarEntityImpl2019WithMsa.parseFromPSVUnsafe, qaLarRepository2019LoanLimit)
+         //// _ <- persistFileForQa(s3ObjName, LarEntityImpl2019WithMsa.parseFromPSVUnsafe, qaLarRepository2019LoanLimit)
         } yield ()
       }
 
@@ -250,7 +250,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
 
         for {
           s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, LarSchedulerLoanLimit2020)
-          _ <- persistFileForQa(s3ObjName, LarEntityImpl2020WithMsa.parseFromPSVUnsafe, qaLarRepository2020LoanLimit)
+          //_ <- persistFileForQa(s3ObjName, LarEntityImpl2020WithMsa.parseFromPSVUnsafe, qaLarRepository2020LoanLimit)
         } yield ()
       }
     case LarSchedulerLoanLimit2021 =>
@@ -268,7 +268,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
 
         for {
           s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, LarSchedulerLoanLimit2021)
-          _ <- persistFileForQa(s3ObjName, LarEntityImpl2021WithMsa.parseFromPSVUnsafe, qaLarRepository2021LoanLimit)
+         //// _ <- persistFileForQa(s3ObjName, LarEntityImpl2021WithMsa.parseFromPSVUnsafe, qaLarRepository2021LoanLimit)
         } yield ()
       }
     case LarSchedulerQuarterly2020 =>
@@ -293,7 +293,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
 
             for {
               s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, LarSchedulerQuarterly2020)
-              _ <- persistFileForQa(s3ObjName, LarEntityImpl2020.parseFromPSVUnsafe, qaRepository)
+            // // _ <- persistFileForQa(s3ObjName, LarEntityImpl2020.parseFromPSVUnsafe, qaRepository)
             } yield ()
           }
         }
@@ -325,7 +325,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
             for {
 
               s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, LarSchedulerQuarterly2021)
-              _         <- persistFileForQa(s3ObjName, LarEntityImpl2021.parseFromPSVUnsafe, qaRepository)
+            //  _         <- persistFileForQa(s3ObjName, LarEntityImpl2021.parseFromPSVUnsafe, qaRepository)
             } yield ()
           }
         }
@@ -357,7 +357,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaF
             for {
 
               s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, LarSchedulerQuarterly2022)
-              _         <- persistFileForQa(s3ObjName, LarEntityImpl2022.parseFromPSVUnsafe, qaRepository)
+           //   _         <- persistFileForQa(s3ObjName, LarEntityImpl2022.parseFromPSVUnsafe, qaRepository)
             } yield ()
           }
         }

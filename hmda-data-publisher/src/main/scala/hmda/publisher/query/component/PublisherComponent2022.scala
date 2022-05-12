@@ -1,20 +1,19 @@
 package hmda.publisher.query.component
 
+import java.sql.Timestamp
 import hmda.model.publication.Msa
 import hmda.publisher.helper.PGTableNameLoader
 import hmda.publisher.qa.{QAEntity, QARepository, QATableBase}
-import hmda.publisher.query.lar._
+import hmda.publisher.query.lar.{LarEntityImpl2022, _}
 import hmda.publisher.query.panel.{InstitutionAltEntity, InstitutionEntity}
-import hmda.publisher.validation.{LarData, TsData}
+import hmda.publisher.validation.{LarData, PanelData, TsData}
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
 import slick.basic.{DatabaseConfig, DatabasePublisher}
 import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
 
-import java.sql.Timestamp
 import scala.concurrent.{ExecutionContext, Future}
-
 // $COVERAGE-OFF$
 trait PublisherComponent2022 extends PGTableNameLoader {
 
@@ -141,6 +140,10 @@ trait PublisherComponent2022 extends PGTableNameLoader {
 
     def count(): Future[Int] =
       db.run(table.size.result)
+  }
+
+  def institutionTableQuery2022(p: Year2022Period) = {
+    TableQuery(tag => new InstitutionsTable(tag))
   }
 
   def transmittalSheetTableQuery2022(p: Year2022Period): TableQuery[TransmittalSheetTable] = {
@@ -556,6 +559,10 @@ trait PublisherComponent2022 extends PGTableNameLoader {
 
   def validationTSData2022(p: Year2022Period): TsData =
     TsData[TransmittalSheetEntity, TransmittalSheetTable](transmittalSheetTableQuery2022(p))(_.lei, _.totalLines, _.submissionId)
+
+  def validationPanelData2022(p: Year2022Period): PanelData =
+    PanelData[InstitutionEntity, InstitutionsTable](institutionTableQuery2022(p))(_.lei, _.hmdaFiler)
+
   class QALarTableLoanLimit(tag: Tag)
     extends LarTableBase[QAEntity[LarEntityImpl2022WithMsa]](tag, lar2022QALoanLimitTableName)
       with QATableBase[LarEntityImpl2022WithMsa] {

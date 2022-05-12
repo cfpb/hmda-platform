@@ -117,7 +117,7 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], q
     val results: Future[MultipartUploadResult] = S3Utils.uploadWithRetry(source, s3Sink)
 
     results.onComplete(reportPublishingComplete(_, PanelScheduler2018, fullFilePath))
-    results.foreach(_ => persistFileForQa(fullFilePath, qaRepository2018))
+    //results.foreach(_ => persistFileForQa(fullFilePath, qaRepository2018))
   }
 
   private def panelSync2019(): Unit = {
@@ -142,7 +142,7 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], q
     val results: Future[MultipartUploadResult] = S3Utils.uploadWithRetry(source, s3Sink)
 
     results.onComplete(reportPublishingComplete(_, PanelScheduler2019, fullFilePath))
-    results.foreach(_ => persistFileForQa(fullFilePath, qaRepository2019))
+    //results.foreach(_ => persistFileForQa(fullFilePath, qaRepository2019))
   }
 
   private def panelSync2020(): Unit = {
@@ -167,7 +167,7 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], q
     val results: Future[MultipartUploadResult] = S3Utils.uploadWithRetry(source, s3Sink)
 
     results.onComplete(reportPublishingComplete(_, PanelScheduler2020, fullFilePath))
-    results.foreach(_ => persistFileForQa(fullFilePath, qaRepository2020))
+    //results.foreach(_ => persistFileForQa(fullFilePath, qaRepository2020))
   }
 
   private def panelSync2021(): Unit = {
@@ -192,7 +192,7 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], q
     val results: Future[MultipartUploadResult] = S3Utils.uploadWithRetry(source, s3Sink)
 
     results.onComplete(reportPublishingComplete(_, PanelScheduler2021, fullFilePath))
-    results.foreach(_ => persistFileForQa(fullFilePath, qaRepository2021))
+    //results.foreach(_ => persistFileForQa(fullFilePath, qaRepository2021))
   }
 
   def appendEmailDomains2018(institution: InstitutionEntity): Future[InstitutionAltEntity] = {
