@@ -34,7 +34,7 @@ object HmdaQuarterlyDataApi {
 //    val oAuth2Authorization = OAuth2Authorization(log, config)
 
     val routes = cors() {
-      BaseHttpApi.routes(name) ~ HmdaQuarterlyDataRequestHandler.routes
+      BaseHttpApi.routes(name) ~ HmdaQuarterlyGraphRequestHandler.routes
     }
     BaseHttpApi.runServer(shutdown, name)(timed(routes), host, port)
     Behaviors.ignore

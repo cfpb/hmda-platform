@@ -10,7 +10,7 @@ import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
 
 object NonStandardLoan extends JsonSupport {
-  private def getVolumeByType(loanType: NonStandardLoanType): CancelableFuture[GraphSummary] =
+  private def getVolumeByType(loanType: NonStandardLoanType): CancelableFuture[GraphSeriesSummary] =
     QuarterlyGraphRepo.fetchNonStandardLoanVolumeByType(loanType)
       .map(convertToGraph(loanType.description, _))
       .runToFuture

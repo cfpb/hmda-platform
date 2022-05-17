@@ -10,7 +10,7 @@ import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
 
 object LineOfCredit extends JsonSupport {
-  private def getVolumeByType(lineOfCreditType: LineOfCreditEnum): CancelableFuture[GraphSummary] =
+  private def getVolumeByType(lineOfCreditType: LineOfCreditEnum): CancelableFuture[GraphSeriesSummary] =
     QuarterlyGraphRepo.fetchLocVolumeByType(lineOfCreditType)
       .map(convertToGraph(lineOfCreditType.description, _))
       .runToFuture
