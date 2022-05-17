@@ -19,7 +19,7 @@ object LoansVolume extends GraphRoute(
     QuarterlyGraphRepo.fetchLoansVolumeByType(loanType, heloc)
       .map(convertToGraph(title, _)).runToFuture
 
-  override val route: Route = pathPrefix(endpoint) {
+  override def route: Route = pathPrefix(endpoint) {
     path("") {
       complete(
         for {

@@ -14,8 +14,6 @@ object ApplicationsVolume extends GraphRoute(
   "quantity",
   "applications"
 ) with JsonSupport {
-
-  val foo = ""
   private def getVolume(loanType: LoanTypeEnum, heloc: Boolean, title: String): CancelableFuture[GraphSeriesSummary] =
     QuarterlyGraphRepo.fetchApplicationsVolumeByType(loanType, heloc)
       .map(convertToGraph(title, _)).runToFuture
