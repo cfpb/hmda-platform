@@ -15,23 +15,24 @@ object LoansVolume extends GraphRoute(
   "loans"
 ) with JsonSupport {
 
-  private def getVolume(loanType: LoanTypeEnum, heloc: Boolean, title: String): CancelableFuture[GraphSeriesSummary] =
-    QuarterlyGraphRepo.fetchLoansVolumeByType(loanType, heloc)
+  private def getVolume(loanType: LoanTypeEnum, title: String, heloc: Boolean = false, conforming: Boolean = false): CancelableFuture[GraphSeriesSummary] =
+    QuarterlyGraphRepo.fetchLoansVolumeByType(loanType, heloc, conforming)
       .map(convertToGraph(title, _)).runToFuture
 
   override def route: Route = pathPrefix(endpoint) {
     path("") {
       complete(
         for {
-          conventional <- getVolume(Conventional, false, "Conventional")
-          fha <- getVolume(FHAInsured, false, "FHA")
-          heloc <- getVolume(Conventional, true, "HELOC")
-          rhsfsa <- getVolume(RHSOrFSAGuaranteed, false, "RHS/FSA")
-          va <- getVolume(VAGuaranteed, false, "VA")
+          conventionalConforming <- getVolume(Conventional, "Conventional Conforming", conforming = true)
+          conventionalNonConforming <- getVolume(Conventional, "Conventional Non-Conforming")
+          fha <- getVolume(FHAInsured, "FHA")
+          heloc <- getVolume(Conventional, "HELOC", heloc = true)
+          rhsfsa <- getVolume(RHSOrFSAGuaranteed, "RHS/FSA")
+          va <- getVolume(VAGuaranteed, "VA")
         } yield GraphSeriesInfo(
           "How has the number of loans changed?",
           "Conventional conforming loans increased starting in 2019 and the increase quickened in 2020. VA loans have also been steadily increasing since 2019.",
-          Seq(conventional, fha, heloc, rhsfsa, va)
+          Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va)
         )
       )
     }

@@ -14,23 +14,24 @@ object ApplicationsVolume extends GraphRoute(
   "quantity",
   "applications"
 ) with JsonSupport {
-  private def getVolume(loanType: LoanTypeEnum, heloc: Boolean, title: String): CancelableFuture[GraphSeriesSummary] =
-    QuarterlyGraphRepo.fetchApplicationsVolumeByType(loanType, heloc)
+  private def getVolume(loanType: LoanTypeEnum, title: String, heloc: Boolean = false, conforming: Boolean = false): CancelableFuture[GraphSeriesSummary] =
+    QuarterlyGraphRepo.fetchApplicationsVolumeByType(loanType, heloc, conforming)
       .map(convertToGraph(title, _)).runToFuture
 
   override def route: Route = pathPrefix(endpoint) {
     path("") {
       complete(
         for {
-          conventional <- getVolume(Conventional, false, "Conventional")
-          fha <- getVolume(FHAInsured, false, "FHA")
-          heloc <- getVolume(Conventional, true, "HELOC")
-          rhsfsa <- getVolume(RHSOrFSAGuaranteed, false, "RHS/FSA")
-          va <- getVolume(VAGuaranteed, false, "VA")
+          conventionalConforming <- getVolume(Conventional, "Conventional Conforming", conforming = true)
+          conventionalNonConforming <- getVolume(Conventional, "Conventional Non-Conforming")
+          fha <- getVolume(FHAInsured, "FHA")
+          heloc <- getVolume(Conventional,"HELOC", heloc = true)
+          rhsfsa <- getVolume(RHSOrFSAGuaranteed, "RHS/FSA")
+          va <- getVolume(VAGuaranteed, "VA")
         } yield GraphSeriesInfo(
           "How has the number of applications changed?",
           "Conventional conforming applications dramatically increased since 2019. FHA loans temporarily moved higher in 2020 Q3.",
-          Seq(conventional, fha, heloc, rhsfsa, va)
+          Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va)
         )
       )
     }
