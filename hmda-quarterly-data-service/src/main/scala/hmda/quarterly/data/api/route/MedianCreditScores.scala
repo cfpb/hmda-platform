@@ -9,7 +9,7 @@ import hmda.quarterly.data.api.serde.JsonSupport
 import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
 
-object MedianCreditScore extends GraphRoute(
+object MedianCreditScores extends GraphRoute(
   "How have median credit scores changed?",
   "rate",
   "credit-scores"

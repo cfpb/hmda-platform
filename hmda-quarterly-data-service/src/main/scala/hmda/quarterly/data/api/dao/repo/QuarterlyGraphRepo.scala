@@ -52,15 +52,26 @@ object QuarterlyGraphRepo {
     runQuery(query)
   }
 
+  def fetchMedianCreditScoreByTypeByRace(loanType: LoanTypeEnum, race: String, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val query =
+      sql"""
+         select last_updated, quarter, median_credit_score as value from median_credit_score_by_loan_by_race
+         where loan_type = #${loanType.code} and race_ethnicity = '#$race'
+            #${getAdditionalParams(loanType, conforming)}
+         order by quarter
+         """.as[DataPoint]
+     runQuery(query)
+  }
+
   private def runQuery[T](query: SqlStreamingAction[Vector[T], T, Effect]) =
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
 
   private def getAdditionalParams(loanType: LoanTypeEnum, conforming: Boolean): String =
     if (loanType == Conventional) {
       if (conforming) {
-        "and conforming_loan_limit = 'C'"
+        "and cll = 'C'"
       } else {
-        "and conforming_loan_limit = 'NC'"
+        "and cll = 'NC'"
       }
     } else {
       ""
