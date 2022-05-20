@@ -52,7 +52,7 @@ object QuarterlyGraphRepo {
     runQuery(query)
   }
 
-  def fetchMedianCreditScoreByTypeByRace(loanType: LoanTypeEnum, race: String, conforming: Boolean): Task[Seq[DataPoint]] = {
+  def fetchMedianCreditScoreByTypeByRace(loanType: LoanTypeEnum, race: String, conforming: Boolean = false): Task[Seq[DataPoint]] = {
     val query =
       sql"""
          select last_updated, quarter, median_credit_score as value from median_credit_score_by_loan_by_race
