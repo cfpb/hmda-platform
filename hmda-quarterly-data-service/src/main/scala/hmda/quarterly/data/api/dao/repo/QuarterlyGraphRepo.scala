@@ -60,7 +60,18 @@ object QuarterlyGraphRepo {
             #${getAdditionalParams(loanType, conforming)}
          order by quarter
          """.as[DataPoint]
-     runQuery(query)
+    runQuery(query)
+  }
+
+  def fetchMedianCLTVByType(loanType: LoanTypeEnum, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    runQuery(
+      sql"""
+        select last_updated, quarter, median_lv as value from median_cltv_by_loan_type
+        where loan_type = #${loanType.code}
+          and loc #${if (heloc) "= 1" else "!= 1"}
+          #${getAdditionalParams(loanType, conforming)}
+        order by quarter
+         """.as[DataPoint])
   }
 
   private def runQuery[T](query: SqlStreamingAction[Vector[T], T, Effect]) =
