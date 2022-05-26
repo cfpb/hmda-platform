@@ -3,8 +3,9 @@ package hmda.proxy.api.http
 import akka.NotUsed
 import akka.http.scaladsl.model.{StatusCodes, HttpEntity}
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.directives.RouteDirectives.complete
+import akka.http.scaladsl.server.{Directive, Directive0}
 import akka.http.scaladsl.server.Route
-import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
@@ -24,10 +25,8 @@ import scala.concurrent._
 import scala.concurrent.Future
 import akka.stream.scaladsl.{Sink, Source}
 import akka.http.scaladsl.model.ContentTypes
-import akka.stream.scaladsl.Source._
 import scala.util.{Failure, Success}
 import akka.http.scaladsl.model.StatusCodes.BadRequest
-import hmda.util.http.FilingResponseUtils.failedResponse
 import hmda.auth.OAuth2Authorization
 
 object ProxyHttpApi {
@@ -35,12 +34,16 @@ object ProxyHttpApi {
 }
 private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: ActorSystem) {
 
-  val config                    = ConfigFactory.load()
-  val accessKeyId               = config.getString("aws.access-key-id")
-  val secretAccess              = config.getString("aws.secret-access-key ")
-  val region                    = config.getString("aws.region")
-  val bucket                    = config.getString("aws.public-bucket")
-  val environment               = config.getString("aws.environment")
+  val config                  = ConfigFactory.load()
+  val accessKeyId             = config.getString("aws.access-key-id")
+  val secretAccess            = config.getString("aws.secret-access-key ")
+  val region                  = config.getString("aws.region")
+  val bucket                  = config.getString("aws.public-bucket")
+  val environment             = config.getString("aws.environment")
+
+  val dynamicYears        = config.getString("hmda.publication.years.dynamic").split(",").toList
+  val irsYears            = config.getString("hmda.publication.years.irs").split(",").toList
+  val snapshotYears       = config.getString("hmda.publication.years.snapshot").split(",").toList
 
   val awsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccess))
   val awsRegionProvider: AwsRegionProvider = new AwsRegionProvider {
@@ -53,12 +56,71 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
     .withS3RegionProvider(awsRegionProvider)
     .withListBucketApiVersion(ListBucketVersion2)
 
-  def retrieveData(path: String): Future[Option[Source[ByteString, NotUsed]]] = {
+  def proxyHttpRoutes(oAuth2Authorization: OAuth2Authorization): Route = {
+    encodeResponse {
+      pathPrefix("file") {
+        //Modified Lar Route
+        path("modifiedLar"/ "year" / Segment / "institution" / Segment) { (year, lei) =>
+          (extractUri & get) { uri =>
+            checkYearAvailable(dynamicYears, year) {
+              val s3Key = "prod/modified-lar/" + year + "/" + lei + ".txt"
+              println("modifiedLar")
+              streamingS3Route(s3Key)
+            }
+          }
+        } ~
+        //Disclosure Report Route
+        path("reports" / "disclosure" / Segment / "msa" / Segment / "report" / Segment) { (year, msa, reportNumber) =>
+          (extractUri & get) { uri =>
+            checkYearAvailable(snapshotYears, year) {
+              val s3Key = "prod/reports/disclosure/" + year + "/" + msa + "/" + reportNumber + ".json"
+              println("disclosure")
+              streamingS3Route(s3Key)
+            }
+          }
+        } ~
+        //Aggregate Report Route
+        path("reports" / "aggregate" / Segment / "msa" / Segment / "report" / Segment) { (year, msa, reportNumber) =>
+          (extractUri & get) { uri =>
+           checkYearAvailable(snapshotYears, year) {
+            val s3Key = "prod/reports/aggregate/" + year + "/" + msa + "/" + reportNumber + ".json"
+            println("aggregate")
+            streamingS3Route(s3Key)
+           }
+          }
+        } ~
+        //Snapshot Route
+        //Documentation Route
+        path("reports" / "aggregate" / Segment / "msa" / Segment / "report" / Segment) { (year, msa, reportNumber) =>
+          (extractUri & get) { uri =>
+            val s3Key = "prod/reports/aggregate/" + year + "/" + msa + "/" + reportNumber + ".json"
+            println("aggregate")
+            streamingS3Route(s3Key)
+          }
+        } ~
+        //IRS Report Route
+        path("reports" / "irs" / "year" / Segment / "institution" / Segment) { (year, lei) =>
+          (extractUri & get) { uri =>
+            oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+              checkYearAvailable(irsYears, year) {
+                val s3Key = "prod/reports/disclosure/" + year + "/" + lei + "/nationwide/IRS.csv"
+                println("irs")
+                println(s3Key)
+                streamingS3Route(s3Key)
+              }
+            }
+          }
+        }
+      }
+    } 
+  }
+
+  private def retrieveData(path: String): Future[Option[Source[ByteString, NotUsed]]] = {
     S3.download("cfpb-hmda-public", path).withAttributes(S3Attributes.settings(s3Settings)).runWith(Sink.head)
       .map(opt => opt.map { case (source, _) => source })
   }
 
-  def streamingS3Route(s3Key: String): Route = {
+  private def streamingS3Route(s3Key: String): Route = {
     val fStream: Future[Source[ByteString, NotUsed]] = retrieveData(s3Key).flatMap {
       case Some(stream) =>
         Future(stream)
@@ -72,43 +134,12 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
     }
   }
 
-  def proxyHttpRoutes(oAuth2Authorization: OAuth2Authorization): Route = {
-    encodeResponse {
-      pathPrefix("file") {
-        //Modified Lar Route
-        path("modifiedLar"/ "year" / Segment / "institution" / Segment) { (year, lei) =>
-          (extractUri & get) { uri =>
-            val s3Key = "prod/modified-lar/" + year + "/" + lei + ".txt"
-            println("modifiedLar")
-            streamingS3Route(s3Key)
-          }
-        } ~
-        path("reports" / "disclosure" / Segment / "msa" / Segment / "report" / Segment) { (year, msa, reportNumber) =>
-          (extractUri & get) { uri =>
-            val s3Key = "prod/reports/disclosure/" + year + "/" + msa + "/" + reportNumber + ".json"
-            println("disclosure")
-            streamingS3Route(s3Key)
-          }
-        } ~
-        path("reports" / "aggregate" / Segment / "msa" / Segment / "report" / Segment) { (year, msa, reportNumber) =>
-          (extractUri & get) { uri =>
-            val s3Key = "prod/reports/aggregate/" + year + "/" + msa + "/" + reportNumber + ".json"
-            println("aggregate")
-            streamingS3Route(s3Key)
-          }
-        } ~
-        path("reports" / "irs" / "year" / Segment / "institution" / Segment) { (year, lei) =>
-          (extractUri & get) { uri =>
-            oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
-              val s3Key = "prod/reports/disclosure/" + year + "/" + lei + "/nationwide/IRS.csv"
-              println("irs")
-              println(s3Key)
-              streamingS3Route(s3Key)
-            }
-          }
-        }
-      }
-    } 
+  private def checkYearAvailable(availableYears: List[String], year: String): Directive0 = {
+    Directive[Unit](route =>
+      if (availableYears.contains(year)) route(())
+      else complete((BadRequest, year + " is not available for dataset"))
+    )
+
   }
 
 }
