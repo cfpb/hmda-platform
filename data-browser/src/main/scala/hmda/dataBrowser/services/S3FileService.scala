@@ -47,7 +47,7 @@ class S3FileService(implicit mat: Materializer) extends FileService with Setting
       dataSource.runWith(sink)
     }.onErrorHandleWith { error =>
       // Note: (this *> that) comes from using cats.implicits and it means execute `this` and discard results then run `that`
-      log.error("S3FileService Something failed", error)
+      log.error("S3FileService failure for key: {}, bucket: {}", key, s3.bucket, error)
       Task.eval(log.error(s"Failed to write data to the S3 bucket (Extended info: ${error.toString})", error)) *> Task
         .raiseError(error)
     }.void
