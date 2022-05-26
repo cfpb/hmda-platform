@@ -41,7 +41,7 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
   private val institutionByIdPath =
     path("institutions" / Segment / "year" / IntNumber) { (lei, year) =>
       (extractUri & get) { uri =>
-        isFilingAllowed(year, None) {
+        isQuarterlyYearAllowed(year) {
 
           val defaultRepo = institutionRepositories(institutionConfig.getString("defaultYear"))
           val fInstitution = institutionRepositories.getOrElse(year.toString, defaultRepo).findById(lei)
