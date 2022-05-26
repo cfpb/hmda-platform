@@ -30,6 +30,7 @@ trait Settings {
   }
 
   object database {
+    val tableName2021: String = config.getString("dbconfig.table.2021")
     val tableName2020: String = config.getString("dbconfig.table.2020")
     val tableName2019: String = config.getString("dbconfig.table.2019")
     val tableName2018: String = config.getString("dbconfig.table.2018")
@@ -41,7 +42,8 @@ trait Settings {
         case 2018 => tableName2018
         case 2019 => tableName2019
         case 2020 => tableName2020
-        case _    => tableName2020
+        case 2021 => tableName2021
+        case _    => tableName2021
       }
       ModifiedLarTable(selected)
     }
@@ -74,7 +76,8 @@ trait Settings {
         case 2018 => config.getString("server.s3.routes.filtered-queries.2018")
         case 2019 => config.getString("server.s3.routes.filtered-queries.2019")
         case 2020 => config.getString("server.s3.routes.filtered-queries.2020")
-        case _ => config.getString("server.s3.routes.filtered-queries.2020")
+        case 2021 => config.getString("server.s3.routes.filtered-queries.2021")
+        case _ => config.getString("server.s3.routes.filtered-queries.2021")
       }
       selected
     }
