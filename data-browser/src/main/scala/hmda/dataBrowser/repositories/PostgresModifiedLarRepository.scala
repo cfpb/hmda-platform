@@ -205,7 +205,7 @@ class PostgresModifiedLarRepository(config: DatabaseConfig[JdbcProfile], tableSe
     val query = sql"""
         SELECT
           COUNT(loan_amount),
-          SUM(loan_amount)
+          SUM(loan_amount::numeric)
         FROM #${tableSelector(year).name}
         #$filterCriteria
         """.as[Statistic].head
