@@ -17,9 +17,8 @@ object QuarterlyGraphRepo {
     val query =
       sql"""
          select last_updated, quarter, sum(agg) as value from applications_volume
-         where loan_type = #${loanType.code}
-            and line_of_credits #${if (heloc) "= 1" else "!= 1"}
-            #${getAdditionalParams(loanType, conforming)}
+         where #${if (heloc) "line_of_credits = 1" else s"loan_type = ${loanType.code} and line_of_credits != 1"}
+            #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
          group by last_updated, quarter
          order by quarter
          """.as[DataPoint]
@@ -30,10 +29,9 @@ object QuarterlyGraphRepo {
     val query =
       sql"""
          select last_updated, quarter, sum(agg) as value from applications_volume
-         where loan_type = #${loanType.code}
+         where #${if (heloc) "line_of_credits = 1" else s"loan_type = ${loanType.code} and line_of_credits != 1"}
             and action_taken_type = 1
-            and line_of_credits #${if (heloc) "= 1" else "!= 1"}
-            #${getAdditionalParams(loanType, conforming)}
+            #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
          group by last_updated, quarter
          order by quarter
          """.as[DataPoint]
