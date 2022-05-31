@@ -17,7 +17,7 @@ create materialized view median_credit_score_by_loan_by_race as
 		and insert_only_payment != 1
 		and amortization != 1
 		and baloon_payment != 1
-		and line_of_credits in (1, 2)
+		and line_of_credits = 2
 		and credit_score_applicant < 1111
 	group by quarter, loan_type, cll, race_ethnicity
 	union
@@ -39,7 +39,7 @@ create materialized view median_credit_score_by_loan_by_race as
 		and insert_only_payment != 1
 		and amortization != 1
 		and baloon_payment != 1
-		and line_of_credits in (1, 2)
+		and line_of_credits = 2
 		and credit_score_applicant < 1111
 	group by quarter, loan_type, cll, race_ethnicity
 	union
@@ -61,7 +61,7 @@ create materialized view median_credit_score_by_loan_by_race as
 		and insert_only_payment != 1
 		and amortization != 1
 		and baloon_payment != 1
-		and line_of_credits in (1, 2)
+		and line_of_credits = 2
 		and credit_score_applicant < 1111
 	group by quarter, loan_type, cll, race_ethnicity
 	union
@@ -83,7 +83,7 @@ create materialized view median_credit_score_by_loan_by_race as
 		and insert_only_payment != 1
 		and amortization != 1
 		and baloon_payment != 1
-		and line_of_credits in (1, 2)
+		and line_of_credits = 2
 		and credit_score_applicant < 1111
 	group by quarter, loan_type, cll, race_ethnicity
 with data;

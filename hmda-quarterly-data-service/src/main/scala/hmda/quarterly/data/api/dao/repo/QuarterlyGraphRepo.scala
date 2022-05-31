@@ -42,7 +42,7 @@ object QuarterlyGraphRepo {
     val query =
       sql"""
          select last_updated, quarter, median_credit_score as value from median_credit_score_by_loan_type
-         where loan_type = #${loanType.code}
+         where lt = #${loanType.code}
             and loc #${if (heloc) "= 1" else "!= 1"}
             #${getAdditionalParams(loanType, conforming)}
          order by quarter
