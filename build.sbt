@@ -95,7 +95,8 @@ lazy val `hmda-root` = (project in file("."))
     `hmda-reporting`,
     `ratespread-calculator`,
     `data-browser`,
-    `submission-errors`
+    `submission-errors`,
+    `hmda-quarterly-data-service`
   )
 
 val latestGitTag = settingKey[String]("The latest git tag.")
