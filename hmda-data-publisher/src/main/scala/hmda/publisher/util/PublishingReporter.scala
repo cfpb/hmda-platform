@@ -126,6 +126,7 @@ object PublishingReporter {
           case Schedules.LarPublicScheduler2018    => 1
           case Schedules.LarPublicScheduler2019    => 1
           case Schedules.LarPublicScheduler2020    => 1
+          case Schedules.LarPublicScheduler2021    => 1
           case Schedules.LarScheduler2019          => 1
           case Schedules.LarScheduler2020          => 1
           case Schedules.LarScheduler2021          => 1
@@ -136,6 +137,7 @@ object PublishingReporter {
           case Schedules.TsPublicScheduler2018     => 1
           case Schedules.TsPublicScheduler2019     => 1
           case Schedules.TsPublicScheduler2020    => 1
+          case Schedules.TsPublicScheduler2021    => 1
           case Schedules.TsScheduler2019           => 1
           case Schedules.TsScheduler2020           => 1
           case Schedules.TsScheduler2021           => 1
@@ -181,6 +183,7 @@ object PublishingReporter {
     case object LarPublicScheduler2018Id      extends ScheduleGroupId
     case object LarPublicScheduler2019Id          extends ScheduleGroupId
     case object LarPublicScheduler2020Id          extends ScheduleGroupId
+    case object LarPublicScheduler2021Id          extends ScheduleGroupId
     case object LarScheduler2019Id          extends ScheduleGroupId
     case object LarScheduler2020Id          extends ScheduleGroupId
     case object LarScheduler2021Id          extends ScheduleGroupId
@@ -193,6 +196,7 @@ object PublishingReporter {
     case object TsPublicScheduler2018Id          extends ScheduleGroupId
     case object TsPublicScheduler2019Id          extends ScheduleGroupId
     case object TsPublicScheduler2020Id          extends ScheduleGroupId
+    case object TsPublicScheduler2021Id          extends ScheduleGroupId
     case object TsScheduler2019Id extends ScheduleGroupId
     case object TsScheduler2020Id extends ScheduleGroupId
     case object TsScheduler2021Id extends ScheduleGroupId
@@ -218,6 +222,7 @@ object PublishingReporter {
 
       case Schedules.LarPublicScheduler2019    => LarPublicScheduler2019Id
       case Schedules.LarPublicScheduler2020   => LarPublicScheduler2020Id
+      case Schedules.LarPublicScheduler2021   => LarPublicScheduler2021Id
       case Schedules.LarScheduler2019          => LarScheduler2019Id
       case Schedules.LarScheduler2020          => LarScheduler2020Id
       case Schedules.LarScheduler2021          => LarScheduler2021Id
@@ -231,6 +236,7 @@ object PublishingReporter {
       case Schedules.TsPublicScheduler2018     => TsPublicScheduler2018Id
       case Schedules.TsPublicScheduler2019     => TsPublicScheduler2019Id
       case Schedules.TsPublicScheduler2020     => TsPublicScheduler2020Id
+      case Schedules.TsPublicScheduler2021     => TsPublicScheduler2021Id
       case Schedules.TsScheduler2019           => TsScheduler2019Id
       case Schedules.TsScheduler2020           => TsScheduler2020Id
       case Schedules.TsScheduler2021           => TsScheduler2021Id
