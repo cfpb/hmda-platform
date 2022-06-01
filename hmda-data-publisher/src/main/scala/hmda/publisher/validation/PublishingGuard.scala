@@ -120,6 +120,7 @@ class PublishingGuard(
           case Period.y2018 => Some(db2018.validationMLarData2018)
           case Period.y2019 => Some(db2019.validationMLarData2019)
           case Period.y2020 => Some(db2020.validationMLarData2020)
+          case Period.y2021 => Some(db2021.validationMLarData2021)
           case Period.y2020Q1 | Period.y2020Q2 | Period.y2020Q3 =>
             throw new IllegalArgumentException("quarterly 2020 is not supported to public publishers at the moment")
           case Period.y2021Q1 | Period.y2021Q2 | Period.y2021Q3 =>

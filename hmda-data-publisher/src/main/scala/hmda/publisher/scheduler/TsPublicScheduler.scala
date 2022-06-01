@@ -9,22 +9,22 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.{ PrivateAWSConfigLoader, PublicAWSConfigLoader, S3Archiver, S3Utils, SnapshotCheck, TSHeader }
-import hmda.publisher.query.component.{ PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, TransmittalSheetTable, TsRepository }
-import hmda.publisher.scheduler.schedules.Schedules.{ TsPublicScheduler2018, TsPublicScheduler2019, TsPublicScheduler2020 }
+import hmda.publisher.helper.{PrivateAWSConfigLoader, PublicAWSConfigLoader, S3Archiver, S3Utils, SnapshotCheck, TSHeader}
+import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, TransmittalSheetTable, TsRepository}
+import hmda.publisher.scheduler.schedules.Schedules.{TsPublicScheduler2018, TsPublicScheduler2019, TsPublicScheduler2020, TsPublicScheduler2021}
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.ts._
 import hmda.util.BankFilterUtils._
 import akka.stream.alpakka.file.scaladsl.Archive
 import akka.stream.alpakka.file.ArchiveMetadata
-import hmda.publisher.qa.{ QAFilePersistor, QAFileSpec, QARepository }
+import hmda.publisher.qa.{QAFilePersistor, QAFileSpec, QARepository}
 import hmda.publisher.scheduler.schedules.Schedule
 import hmda.publisher.util.PublishingReporter
 import hmda.publisher.validation.PublishingGuard
-import hmda.publisher.validation.PublishingGuard.{ Period, Scope }
+import hmda.publisher.validation.PublishingGuard.{Period, Scope}
 
 import scala.concurrent.Future
-import scala.util.{ Failure, Success }
+import scala.util.{Failure, Success}
 import java.time.Instant
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 // $COVERAGE-OFF$
@@ -44,11 +44,14 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
   def tsRepository2018                 = new TsRepository[TransmittalSheetTable](dbConfig, transmittalSheetTable2018)
   def tsRepository2019                 = new TsRepository[TransmittalSheetTable](dbConfig, transmittalSheetTable2019)
   def tsRepository2020                 = createTransmittalSheetRepository2020(dbConfig, Year2020Period.Whole)
+  def tsRepository2021                 = createTransmittalSheetRepository2021(dbConfig, Year2021Period.Whole)
+
 
   val publishingGuard: PublishingGuard = PublishingGuard.create(this)(context.system)
   val qaRepo2018                       = createPublicQaTsRepository2018(dbConfig)
   val qaRepo2019                       = createPublicQaTsRepository2019(dbConfig)
   def qaRepo2020               = createQaTransmittalSheetRepository2020(dbConfig,Year2020Period.Whole)
+  def qaRepo2021               = createQaTransmittalSheetRepository2021(dbConfig,Year2021Period.Whole)
 
   val s3Settings =
     S3Settings(context.system)
@@ -65,13 +68,15 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
       .schedule("TsPublicScheduler2019", self, TsPublicScheduler2019)
     QuartzSchedulerExtension(context.system)
       .schedule("TsPublicScheduler2020", self, TsPublicScheduler2020)
+    QuartzSchedulerExtension(context.system)
+      .schedule("TsPublicScheduler2021", self, TsPublicScheduler2021)
   }
 
   override def postStop(): Unit = {
     QuartzSchedulerExtension(context.system).cancelJob("TsPublicScheduler2018")
     QuartzSchedulerExtension(context.system).cancelJob("TsPublicScheduler2019")
     QuartzSchedulerExtension(context.system).cancelJob("TsPublicScheduler2020")
-
+    QuartzSchedulerExtension(context.system).cancelJob("TsPublicScheduler2021")
   }
   override def receive: Receive = {
 
@@ -110,6 +115,18 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
         val result = tsPublicStream("2020", bucket, fullFilePath, fileName, TsPublicScheduler2020)
         //result.foreach(r => persistFileForQa(r.key, r.bucket, qaRepo2020))
       }
+
+    case TsPublicScheduler2021 =>
+      publishingGuard.runIfDataIsValid(Period.y2021, Scope.Public) {
+        val fileName         = "2021_ts.txt"
+        val zipDirectoryName = "2021_ts.zip"
+        val s3Path           = s"$environmentPublic/dynamic-data/2021/"
+        val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
+        val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
+
+        val result = tsPublicStream("2021", bucket, fullFilePath, fileName, TsPublicScheduler2021)
+        //result.foreach(r => persistFileForQa(r.key, r.bucket, qaRepo2020))
+      }
   }
   private def tsPublicStream(
                               year: String,
@@ -127,6 +144,7 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
         case "2018" => tsRepository2018.getAllSheets(getFilterList())
         case "2019" => tsRepository2019.getAllSheets(getFilterList())
         case "2020" => tsRepository2020.getAllSheets(getFilterList())
+        case "2021" => tsRepository2021.getAllSheets(getFilterList())
         case _      => throw new IllegalArgumentException(s"Unknown year selector value:  [$year]")
 
       }
