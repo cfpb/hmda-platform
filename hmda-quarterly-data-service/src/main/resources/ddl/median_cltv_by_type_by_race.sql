@@ -1,8 +1,13 @@
-create materialized view median_cltv_by_loan_type as
-    select now() last_updated,
+create materialized view median_cltv_by_race as
+    select now() last_updated, percentile_cont(0.5) within group(order by loan_value_ratio::decimal) median_lv,
         case when line_of_credits = 1 then 1 else loan_type end lt, '' cll,
         line_of_credits loc,
-        percentile_cont(0.5) within group(order by loan_value_ratio::decimal) median_lv,
+        derive_race_ethnicity(
+            race_applicant_1, race_applicant_2, race_applicant_3, race_applicant_4, race_applicant_5,
+            race_co_applicant_1, race_co_applicant_2, race_co_applicant_3, race_co_applicant_4, race_co_applicant_5,
+            ethnicity_applicant_1, ethnicity_applicant_2, ethnicity_applicant_3, ethnicity_applicant_4, ethnicity_applicant_5,
+            ethnicity_co_applicant_1, ethnicity_co_applicant_2, ethnicity_co_applicant_3, ethnicity_co_applicant_4, ethnicity_co_applicant_5
+        ) race_ethnicity,
         date_part('year', to_timestamp(action_taken_date::varchar(8), 'yyyymmdd')) || '-Q' || date_part('quarter', to_timestamp(action_taken_date::varchar(8), 'yyyymmdd')) quarter
     from loanapplicationregister2018_three_year_04052022
     where lien_status = 1
@@ -17,13 +22,18 @@ create materialized view median_cltv_by_loan_type as
         and line_of_credits in (1, 2)
         and loan_value_ratio ~ '^[0-9\.]+$'
         and loan_value_ratio::decimal <= 105
-    group by quarter, lt, cll, loc
+    group by quarter, race_ethnicity, lt, loc, cll
     union
-    select now() last_updated,
+    select now() last_updated, percentile_cont(0.5) within group(order by loan_value_ratio::decimal) median_lv,
         case when line_of_credits = 1 then 1 else loan_type end lt,
         case when line_of_credits = 1 or loan_type != 1 then '' else conforming_loan_limit end cll,
         line_of_credits loc,
-        percentile_cont(0.5) within group(order by loan_value_ratio::decimal) median_lv,
+        derive_race_ethnicity(
+            race_applicant_1, race_applicant_2, race_applicant_3, race_applicant_4, race_applicant_5,
+            race_co_applicant_1, race_co_applicant_2, race_co_applicant_3, race_co_applicant_4, race_co_applicant_5,
+            ethnicity_applicant_1, ethnicity_applicant_2, ethnicity_applicant_3, ethnicity_applicant_4, ethnicity_applicant_5,
+            ethnicity_co_applicant_1, ethnicity_co_applicant_2, ethnicity_co_applicant_3, ethnicity_co_applicant_4, ethnicity_co_applicant_5
+        ) race_ethnicity,
         date_part('year', to_timestamp(action_taken_date::varchar(8), 'yyyymmdd')) || '-Q' || date_part('quarter', to_timestamp(action_taken_date::varchar(8), 'yyyymmdd')) quarter
     from loanapplicationregister2019_one_year_04052022
     where lien_status = 1
@@ -38,13 +48,18 @@ create materialized view median_cltv_by_loan_type as
         and line_of_credits in (1, 2)
         and loan_value_ratio ~ '^[0-9\.]+$'
         and loan_value_ratio::decimal <= 105
-    group by quarter, lt, cll, loc
+    group by quarter, race_ethnicity, lt, loc, cll
     union
-    select now() last_updated,
+    select now() last_updated, percentile_cont(0.5) within group(order by loan_value_ratio::decimal) median_lv,
         case when line_of_credits = 1 then 1 else loan_type end lt,
         case when line_of_credits = 1 or loan_type != 1 then '' else conforming_loan_limit end cll,
         line_of_credits loc,
-        percentile_cont(0.5) within group(order by loan_value_ratio::decimal) median_lv,
+        derive_race_ethnicity(
+            race_applicant_1, race_applicant_2, race_applicant_3, race_applicant_4, race_applicant_5,
+            race_co_applicant_1, race_co_applicant_2, race_co_applicant_3, race_co_applicant_4, race_co_applicant_5,
+            ethnicity_applicant_1, ethnicity_applicant_2, ethnicity_applicant_3, ethnicity_applicant_4, ethnicity_applicant_5,
+            ethnicity_co_applicant_1, ethnicity_co_applicant_2, ethnicity_co_applicant_3, ethnicity_co_applicant_4, ethnicity_co_applicant_5
+        ) race_ethnicity,
         date_part('year', to_timestamp(action_taken_date::varchar(8), 'yyyymmdd')) || '-Q' || date_part('quarter', to_timestamp(action_taken_date::varchar(8), 'yyyymmdd')) quarter
     from loanapplicationregister2020_one_year_04302022
     where lien_status = 1
@@ -59,13 +74,18 @@ create materialized view median_cltv_by_loan_type as
         and line_of_credits in (1, 2)
         and loan_value_ratio ~ '^[0-9\.]+$'
         and loan_value_ratio::decimal <= 105
-    group by quarter, lt, cll, loc
+    group by quarter, race_ethnicity, lt, loc, cll
     union
-    select now() last_updated,
+    select now() last_updated, percentile_cont(0.5) within group(order by loan_value_ratio::decimal) median_lv,
         case when line_of_credits = 1 then 1 else loan_type end lt,
         case when line_of_credits = 1 or loan_type != 1 then '' else conforming_loan_limit end cll,
         line_of_credits loc,
-        percentile_cont(0.5) within group(order by loan_value_ratio::decimal) median_lv,
+        derive_race_ethnicity(
+            race_applicant_1, race_applicant_2, race_applicant_3, race_applicant_4, race_applicant_5,
+            race_co_applicant_1, race_co_applicant_2, race_co_applicant_3, race_co_applicant_4, race_co_applicant_5,
+            ethnicity_applicant_1, ethnicity_applicant_2, ethnicity_applicant_3, ethnicity_applicant_4, ethnicity_applicant_5,
+            ethnicity_co_applicant_1, ethnicity_co_applicant_2, ethnicity_co_applicant_3, ethnicity_co_applicant_4, ethnicity_co_applicant_5
+        ) race_ethnicity,
         date_part('year', to_timestamp(action_taken_date::varchar(8), 'yyyymmdd')) || '-Q' || date_part('quarter', to_timestamp(action_taken_date::varchar(8), 'yyyymmdd')) quarter
     from loanapplicationregister2021_snapshot_04302022
     where lien_status = 1
@@ -80,5 +100,5 @@ create materialized view median_cltv_by_loan_type as
         and line_of_credits in (1, 2)
         and loan_value_ratio ~ '^[0-9\.]+$'
         and loan_value_ratio::decimal <= 105
-    group by quarter, lt, cll, loc
+    group by quarter, race_ethnicity, lt, loc, cll
 with data;
