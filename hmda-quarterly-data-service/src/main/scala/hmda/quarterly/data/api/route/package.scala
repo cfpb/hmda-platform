@@ -8,5 +8,5 @@ package object route {
       " reporting HMDA quarterly data throughout 2020 and displays data for each of those institutions" +
       " for 2019 and 2018 as well.",
     Seq(ApplicationsVolume, LoansVolume, MedianCreditScores, MedianCreditScoresCCByRace, MedianCreditScoresFHAByRace,
-      MedianCLTVByType, MedianCLTVCCByRace, MedianCLTVFHAByRace))
+      MedianCLTVByType, MedianCLTVCCByRace, MedianCLTVFHAByRace, MedianDTIByType, MedianDTICCByRace, MedianDTIFHAByRace))
 }

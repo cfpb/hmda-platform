@@ -12,7 +12,7 @@ import monix.execution.Scheduler.Implicits.global
 object MedianCLTVCCByRace extends GraphRoute(
   "For conventional conforming loans, how has median CLTV differed by race/ethnicity?",
   "rate",
-  "ltv-cc-race"
+  "ltv-cc-re"
 ) with JsonSupport {
 
   private def getMedianCLTV(title: String, race: String): CancelableFuture[GraphSeriesSummary] =

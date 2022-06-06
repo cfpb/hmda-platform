@@ -12,7 +12,7 @@ import monix.execution.Scheduler.Implicits.global
 object MedianCreditScoresCCByRace extends GraphRoute(
   "For conventional conforming loans, how have median credit scores differed by race/ethnicity?",
   "rate",
-  "credit-scores-cc-race-ethnicity"
+  "credit-scores-cc-re"
 ) with JsonSupport {
 
   private def getMedianScore(title: String, race: String): CancelableFuture[GraphSeriesSummary] =

@@ -9,18 +9,18 @@ import hmda.quarterly.data.api.serde.JsonSupport
 import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
 
-object MedianCLTVFHAByRace extends GraphRoute(
-  "For FHA loans, how has median CLTV differed by race/ethnicity?",
+object MedianDTICCByRace extends GraphRoute(
+  "For conventional conforming loans, how has median DTI differed by race/ethnicity?",
   "rate",
-  "ltv-fha-re"
+  "dti-cc-re"
 ) with JsonSupport {
 
   private def getMedianCLTV(title: String, race: String): CancelableFuture[GraphSeriesSummary] =
-    QuarterlyGraphRepo.fetchMedianCLTVByTypeByRace(FHAInsured, race, heloc = false, conforming = false)
+    QuarterlyGraphRepo.fetchMedianDTIByTypeByRace(Conventional, race, heloc = false, conforming = true)
       .map(convertToGraph(title, _)).runToFuture
 
   override def route: Route = pathPrefix(endpoint) {
-    path ("") {
+    path("") {
       complete(
         for {
           asian <- getMedianCLTV("Asian", "a")
@@ -28,8 +28,8 @@ object MedianCLTVFHAByRace extends GraphRoute(
           hispanic <- getMedianCLTV("Hispanic", "h")
           white <- getMedianCLTV("White", "w")
         } yield GraphSeriesInfo(
-          "For FHA loans, how has median CLTV differed by race/ethnicity?",
-          "Both Blacks and Hispanics on average had the same median CLTV for FHA loans.",
+          "For conventional conforming loans, how has median DTI differed by race/ethnicity?",
+          "For conventional conforming loans, Hispanics had the highest median DTI while whites had the lowest.",
           Seq(asian, black, hispanic, white)
         )
       )
