@@ -42,9 +42,9 @@ object QuarterlyGraphRepo {
     val query =
       sql"""
          select last_updated, quarter, median_credit_score as value from median_credit_score_by_loan_type
-         where loan_type = #${loanType.code}
+         where lt = #${loanType.code}
             and loc #${if (heloc) "= 1" else "!= 1"}
-            #${getAdditionalParams(loanType, conforming)}
+            #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
          order by quarter
          """.as[DataPoint]
     runQuery(query)
@@ -64,11 +64,66 @@ object QuarterlyGraphRepo {
   def fetchMedianCLTVByType(loanType: LoanTypeEnum, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
     runQuery(
       sql"""
-        select last_updated, quarter, median_lv as value from median_cltv_by_loan_type
-        where loan_type = #${loanType.code}
-          and loc #${if (heloc) "= 1" else "!= 1"}
-          #${getAdditionalParams(loanType, conforming)}
-        order by quarter
+         select last_updated, quarter, median_lv as value from median_cltv_by_loan_type
+         where lt = #${loanType.code}
+           and loc #${if (heloc) "= 1" else "!= 1"}
+           #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         order by quarter
+         """.as[DataPoint])
+  }
+
+  def fetchMedianCLTVByTypeByRace(loanType: LoanTypeEnum, race: String, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    runQuery(
+      sql"""
+         select last_updated, quarter, median_lv as value from median_cltv_by_race
+         where lt = #${loanType.code} and race_ethnicity = '#$race'
+           and loc #${if (heloc) "= 1" else "!= 1"}
+           #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         order by quarter
+         """.as[DataPoint])
+  }
+
+  def fetchMedianDTIByType(loanType: LoanTypeEnum, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    runQuery(
+      sql"""
+         select last_updated, quarter, median_dti as value from median_dti_by_loan_type
+         where lt = #${loanType.code}
+           and loc #${if (heloc) "= 1" else "!= 1"}
+           #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         order by quarter
+         """.as[DataPoint])
+  }
+
+  def fetchMedianDTIByTypeByRace(loanType: LoanTypeEnum, race: String, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    runQuery(
+      sql"""
+         select last_updated, quarter, median_dti as value from median_dti_by_race
+         where lt = #${loanType.code} and race_ethnicity = '#$race'
+           and loc #${if (heloc) "= 1" else "!= 1"}
+           #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         order by quarter
+         """.as[DataPoint])
+  }
+
+  def fetchDenialRates(loanType: LoanTypeEnum, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    runQuery(
+      sql"""
+         select last_updated, quarter, denial_rate as value from denial_rates
+         where lt = #${loanType.code}
+           and loc #${if (heloc) "= 1" else "!= 1"}
+           #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         order by quarter
+         """.as[DataPoint])
+  }
+
+  def fetchDenialRatesByTypeByRace(loanType: LoanTypeEnum, race: String, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    runQuery(
+      sql"""
+         select last_updated, quarter, denial_rate as value from denial_rates_by_race
+         where lt = #${loanType.code} and race_ethnicity = '#$race'
+           and loc #${if (heloc) "= 1" else "!= 1"}
+           #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         order by quarter
          """.as[DataPoint])
   }
 
