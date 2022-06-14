@@ -1,5 +1,5 @@
-create materialized view median_dti_by_race as
-	select now() last_updated, percentile_cont(0.5) within group(order by debt_to_incode::decimal) median_dti,
+create materialized view denial_rates_by_race as
+	select now() last_updated,
 		case when line_of_credits = 1 then 1 else loan_type end lt,
 		case when line_of_credits = 1 or loan_type != 1 then '' else conforming_loan_limit end cll,
 		line_of_credits loc,
@@ -9,6 +9,7 @@ create materialized view median_dti_by_race as
 			ethnicity_applicant_1, ethnicity_applicant_2, ethnicity_applicant_3, ethnicity_applicant_4, ethnicity_applicant_5,
 			ethnicity_co_applicant_1, ethnicity_co_applicant_2, ethnicity_co_applicant_3, ethnicity_co_applicant_4, ethnicity_co_applicant_5
 		) race_ethnicity,
+		count(*) filter (where action_taken_type = 3)::numeric / count(*) filter(where action_taken_type in (1,2,3,4,5,6,7,8)) * 100 denial_rate,
 		date_part('year', to_timestamp(action_taken_date::varchar(8), 'yyyymmdd')) || '-Q' || date_part('quarter', to_timestamp(action_taken_date::varchar(8), 'yyyymmdd')) quarter
 	from loanapplicationregister2018_qpub_06082022
 	where lien_status = 1
@@ -21,11 +22,9 @@ create materialized view median_dti_by_race as
 		and amortization != 1
 		and baloon_payment != 1
 		and line_of_credits in (1, 2)
-		and debt_to_incode ~ '^[0-9\.]+$'
-		and debt_to_incode::decimal <= 144
 	group by quarter, race_ethnicity, lt, loc, cll
 	union
-	select now() last_updated, percentile_cont(0.5) within group(order by debt_to_incode::decimal) median_dti,
+	select now() last_updated,
 		case when line_of_credits = 1 then 1 else loan_type end lt,
 		case when line_of_credits = 1 or loan_type != 1 then '' else conforming_loan_limit end cll,
 		line_of_credits loc,
@@ -35,6 +34,7 @@ create materialized view median_dti_by_race as
 			ethnicity_applicant_1, ethnicity_applicant_2, ethnicity_applicant_3, ethnicity_applicant_4, ethnicity_applicant_5,
 			ethnicity_co_applicant_1, ethnicity_co_applicant_2, ethnicity_co_applicant_3, ethnicity_co_applicant_4, ethnicity_co_applicant_5
 		) race_ethnicity,
+		count(*) filter (where action_taken_type = 3)::numeric / count(*) filter(where action_taken_type in (1,2,3,4,5,6,7,8)) * 100 denial_rate,
 		date_part('year', to_timestamp(action_taken_date::varchar(8), 'yyyymmdd')) || '-Q' || date_part('quarter', to_timestamp(action_taken_date::varchar(8), 'yyyymmdd')) quarter
 	from loanapplicationregister2019_one_year_04052022
 	where lien_status = 1
@@ -47,11 +47,9 @@ create materialized view median_dti_by_race as
 		and amortization != 1
 		and baloon_payment != 1
 		and line_of_credits in (1, 2)
-		and debt_to_incode ~ '^[0-9\.]+$'
-		and debt_to_incode::decimal <= 144
 	group by quarter, race_ethnicity, lt, loc, cll
 	union
-	select now() last_updated, percentile_cont(0.5) within group(order by debt_to_incode::decimal) median_dti,
+	select now() last_updated,
 		case when line_of_credits = 1 then 1 else loan_type end lt,
 		case when line_of_credits = 1 or loan_type != 1 then '' else conforming_loan_limit end cll,
 		line_of_credits loc,
@@ -61,6 +59,7 @@ create materialized view median_dti_by_race as
 			ethnicity_applicant_1, ethnicity_applicant_2, ethnicity_applicant_3, ethnicity_applicant_4, ethnicity_applicant_5,
 			ethnicity_co_applicant_1, ethnicity_co_applicant_2, ethnicity_co_applicant_3, ethnicity_co_applicant_4, ethnicity_co_applicant_5
 		) race_ethnicity,
+		count(*) filter (where action_taken_type = 3)::numeric / count(*) filter(where action_taken_type in (1,2,3,4,5,6,7,8)) * 100 denial_rate,
 		date_part('year', to_timestamp(action_taken_date::varchar(8), 'yyyymmdd')) || '-Q' || date_part('quarter', to_timestamp(action_taken_date::varchar(8), 'yyyymmdd')) quarter
 	from loanapplicationregister2020_one_year_04302022
 	where lien_status = 1
@@ -73,11 +72,9 @@ create materialized view median_dti_by_race as
 		and amortization != 1
 		and baloon_payment != 1
 		and line_of_credits in (1, 2)
-		and debt_to_incode ~ '^[0-9\.]+$'
-		and debt_to_incode::decimal <= 144
 	group by quarter, race_ethnicity, lt, loc, cll
 	union
-	select now() last_updated, percentile_cont(0.5) within group(order by debt_to_incode::decimal) median_dti,
+	select now() last_updated,
 		case when line_of_credits = 1 then 1 else loan_type end lt,
 		case when line_of_credits = 1 or loan_type != 1 then '' else conforming_loan_limit end cll,
 		line_of_credits loc,
@@ -87,6 +84,7 @@ create materialized view median_dti_by_race as
 			ethnicity_applicant_1, ethnicity_applicant_2, ethnicity_applicant_3, ethnicity_applicant_4, ethnicity_applicant_5,
 			ethnicity_co_applicant_1, ethnicity_co_applicant_2, ethnicity_co_applicant_3, ethnicity_co_applicant_4, ethnicity_co_applicant_5
 		) race_ethnicity,
+		count(*) filter (where action_taken_type = 3)::numeric / count(*) filter(where action_taken_type in (1,2,3,4,5,6,7,8)) * 100 denial_rate,
 		date_part('year', to_timestamp(action_taken_date::varchar(8), 'yyyymmdd')) || '-Q' || date_part('quarter', to_timestamp(action_taken_date::varchar(8), 'yyyymmdd')) quarter
 	from loanapplicationregister2021_snapshot_04302022
 	where lien_status = 1
@@ -99,7 +97,5 @@ create materialized view median_dti_by_race as
 		and amortization != 1
 		and baloon_payment != 1
 		and line_of_credits in (1, 2)
-		and debt_to_incode ~ '^[0-9\.]+$'
-		and debt_to_incode::decimal <= 144
 	group by quarter, race_ethnicity, lt, loc, cll
 with data;
