@@ -18,7 +18,7 @@ data:
   publisher.lar.public.2021: 0 15 12 ? * SUN *
   publisher.lar.quarterly.2020: 0 0 0 23 4 ? 2079
   publisher.lar.quarterly.2021: 0 0 0 23 4 ? 2079
-  publisher.lar.quarterly.2022: 0 0 0 23 4 ? 2079
+  publisher.lar.quarterly.2022: 0 30 6 * * ?
   publisher.panel.private.2018: 0 0 0 23 4 ? 2079
   publisher.panel.private.2019: 0 40 5 ? * SUN *
   publisher.panel.private.2020: 0 50 16 ? * SUN *
@@ -33,4 +33,4 @@ data:
   publisher.ts.public.2021: 0 00 12 ? * SUN *
   publisher.ts.quarterly.2020: 0 0 0 23 4 ? 2079
   publisher.ts.quarterly.2021: 0 0 0 23 4 ? 2079
-  publisher.ts.quarterly.2022: 0 0 0 23 4 ? 2079
+  publisher.ts.quarterly.2022:  0 50 6 * * ?
