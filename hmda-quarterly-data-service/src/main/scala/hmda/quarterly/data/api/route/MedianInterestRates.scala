@@ -10,7 +10,7 @@ import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
 
 object MedianInterestRates extends GraphRoute(
-  "How has median DTI changed?",
+  "How have median interest rates changed?",
   "rate",
   "interest-rates"
 ) with JsonSupport {
@@ -30,8 +30,8 @@ object MedianInterestRates extends GraphRoute(
           rhsfsa <- getMedianInterestRates(RHSOrFSAGuaranteed, "RHS/FSA")
           va <- getMedianInterestRates(VAGuaranteed, "VA")
         } yield GraphSeriesInfo(
-          "How has median DTI changed?",
-          "Conventional non-conforming loans on average had the lowest median DTI.",
+          "How have median interest rates changed?",
+          "Median interest rates decreased overall for all loan types.",
           Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va)
         )
       )

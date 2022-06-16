@@ -10,7 +10,7 @@ import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
 
 object MedianInterestRatesCCByRace extends GraphRoute(
-  "For conventional conforming loans, how has median DTI differed by race/ethnicity?",
+  "For conventional conforming loans, how have median interest rates differed by race/ethnicity?",
   "rate",
   "interest-rates-cc-re"
 ) with JsonSupport {
@@ -28,8 +28,8 @@ object MedianInterestRatesCCByRace extends GraphRoute(
           hispanic <- getMedianInterestRates("Hispanic", "h")
           white <- getMedianInterestRates("White", "w")
         } yield GraphSeriesInfo(
-          "For conventional conforming loans, how has median DTI differed by race/ethnicity?",
-          "For conventional conforming loans, Hispanics had the highest median DTI while whites had the lowest.",
+          "For conventional conforming loans, how have median interest rates differed by race/ethnicity?",
+          "Since 2019, all median interest rates have decreased.",
           Seq(asian, black, hispanic, white)
         )
       )
