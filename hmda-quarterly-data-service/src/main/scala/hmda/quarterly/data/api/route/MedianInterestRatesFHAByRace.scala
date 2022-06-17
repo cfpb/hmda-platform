@@ -10,7 +10,7 @@ import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
 
 object MedianInterestRatesFHAByRace extends GraphRoute(
-  "By FHA loans, how have median interest rates differed by race/ethnicity?",
+  "For FHA loans, how have median interest rates differed by race/ethnicity?",
   "rate",
   "interest-rates-fha-re"
 ) with JsonSupport {
