@@ -13,8 +13,12 @@ trait JsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val routeInfoFormat: RootJsonFormat[GraphRouteInfo] = jsonFormat2(GraphRouteInfo)
 
   protected def convertToGraph(description: String, aggregatedVolume: Seq[DataPoint]): GraphSeriesSummary = {
-    val coordinates = aggregatedVolume.map(aggregatedRecord => GraphSeriesCoordinate(aggregatedRecord.quarter, aggregatedRecord.value))
-    val updated = aggregatedVolume.head.lastUpdated
-    GraphSeriesSummary(description, updated.toString, coordinates)
+    if (aggregatedVolume.nonEmpty) {
+      val coordinates = aggregatedVolume.map(aggregatedRecord => GraphSeriesCoordinate(aggregatedRecord.quarter, aggregatedRecord.value))
+      val updated = aggregatedVolume.head.lastUpdated
+      GraphSeriesSummary(description, updated.toString, coordinates)
+    } else {
+      GraphSeriesSummary(description, "", Seq())
+    }
   }
 }

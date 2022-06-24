@@ -9,5 +9,6 @@ package object route {
       " for 2019 and 2018 as well.",
     Seq(ApplicationsVolume, LoansVolume, MedianCreditScores, MedianCreditScoresCCByRace, MedianCreditScoresFHAByRace,
       MedianCLTVByType, MedianCLTVCCByRace, MedianCLTVFHAByRace, MedianDTIByType, MedianDTICCByRace, MedianDTIFHAByRace,
-      DenialRatesByType, DenialRatesCCByRace, DenialRatesFHAByRace))
+      DenialRatesByType, DenialRatesCCByRace, DenialRatesFHAByRace, MedianInterestRates, MedianInterestRatesCCByRace, MedianInterestRatesFHAByRace,
+      MedianTotalLoanCosts, MedianTotalLoanCostsCCByRace, MedianTotalLoanCostsFHAByRace))
 }
