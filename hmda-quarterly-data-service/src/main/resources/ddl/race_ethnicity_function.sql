@@ -1,4 +1,4 @@
-create or replace function race_ethnicity(
+create or replace function derive_race_ethnicity(
 	race_app_1 text, race_app_2 text, race_app_3 text, race_app_4 text, race_app_5 text,
 	race_co_app_1 text, race_co_app_2 text, race_co_app_3 text, race_co_app_4 text, race_co_app_5 text,
 	eth_app_1 text, eth_app_2 text, eth_app_3 text, eth_app_4 text, eth_app_5 text,
