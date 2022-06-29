@@ -11,7 +11,7 @@ import monix.execution.Scheduler.Implicits.global
 
 object DenialRatesCCByRace extends GraphRoute(
   "For conventional conforming loans, how have denial rates differed by race/ethnicity?",
-  "percentage",
+  "Denial Rates",
   "denials-cc-re"
 ) with JsonSupport {
 

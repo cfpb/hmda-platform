@@ -11,7 +11,7 @@ import monix.execution.Scheduler.Implicits.global
 
 object MedianTotalLoanCostsCCByRace extends GraphRoute(
   "For conventional conforming loans, how have median total loan costs differed by race/ethnicity?",
-  "quantity",
+  "Total Loan Costs",
   "tlc-cc-re"
 ) with JsonSupport {
 

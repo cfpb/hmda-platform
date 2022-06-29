@@ -11,7 +11,7 @@ import monix.execution.Scheduler.Implicits.global
 
 object MedianDTIByType extends GraphRoute(
   "How has median DTI changed?",
-  "rate",
+  "Debt-to-Income Ratio",
   "dti"
 ) with JsonSupport {
 

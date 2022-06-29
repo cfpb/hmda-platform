@@ -11,7 +11,7 @@ import monix.execution.Scheduler.Implicits.global
 
 object DenialRatesFHAByRace extends GraphRoute(
   "For FHA loans, how have denial rates differed by race/ethnicity?",
-  "percentage",
+  "Denial Rates",
   "denials-fha-re"
 ) with JsonSupport {
 

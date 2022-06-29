@@ -11,7 +11,7 @@ import monix.execution.Scheduler.Implicits.global
 
 object DenialRatesByType extends GraphRoute(
   "How have denial rates changed?",
-  "percentage",
+  "Denial Rates",
   "denials"
 ) with JsonSupport {
 

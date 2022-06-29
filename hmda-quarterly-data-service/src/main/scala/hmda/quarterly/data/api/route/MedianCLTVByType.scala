@@ -11,7 +11,7 @@ import monix.execution.Scheduler.Implicits.global
 
 object MedianCLTVByType extends GraphRoute(
   "How has median CLTV changed?",
-  "rate",
+  "Combined Loan-to-Value Ratio",
   "ltv"
 ) with JsonSupport {
 

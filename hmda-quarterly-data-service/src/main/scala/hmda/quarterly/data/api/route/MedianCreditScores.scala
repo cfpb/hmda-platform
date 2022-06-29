@@ -11,7 +11,7 @@ import monix.execution.Scheduler.Implicits.global
 
 object MedianCreditScores extends GraphRoute(
   "How have median credit scores changed?",
-  "rate",
+  "Credit Score",
   "credit-scores"
 ) with JsonSupport {
 

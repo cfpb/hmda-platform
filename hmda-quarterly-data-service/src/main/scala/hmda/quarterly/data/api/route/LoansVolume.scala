@@ -11,7 +11,7 @@ import monix.execution.Scheduler.Implicits.global
 
 object LoansVolume extends GraphRoute(
   "How has the number of loans changed?",
-  "quantity",
+  "Loan & Application Counts",
   "loans"
 ) with JsonSupport {
 

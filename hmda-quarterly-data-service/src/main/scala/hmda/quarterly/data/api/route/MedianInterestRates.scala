@@ -11,7 +11,7 @@ import monix.execution.Scheduler.Implicits.global
 
 object MedianInterestRates extends GraphRoute(
   "How have median interest rates changed?",
-  "rate",
+  "Interest Rates",
   "interest-rates"
 ) with JsonSupport {
 

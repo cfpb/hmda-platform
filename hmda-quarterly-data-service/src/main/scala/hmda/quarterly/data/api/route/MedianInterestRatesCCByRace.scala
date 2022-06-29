@@ -11,7 +11,7 @@ import monix.execution.Scheduler.Implicits.global
 
 object MedianInterestRatesCCByRace extends GraphRoute(
   "For conventional conforming loans, how have median interest rates differed by race/ethnicity?",
-  "rate",
+  "Interest Rates",
   "interest-rates-cc-re"
 ) with JsonSupport {
 

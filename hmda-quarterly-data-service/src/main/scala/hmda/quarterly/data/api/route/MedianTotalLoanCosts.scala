@@ -11,7 +11,7 @@ import monix.execution.Scheduler.Implicits.global
 
 object MedianTotalLoanCosts extends GraphRoute(
   "How have median total loan costs changed?",
-  "quantity",
+  "Total Loan Costs",
   "tlc"
 ) with JsonSupport {
 

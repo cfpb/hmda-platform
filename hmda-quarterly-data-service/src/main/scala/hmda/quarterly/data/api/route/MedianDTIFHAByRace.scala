@@ -11,7 +11,7 @@ import monix.execution.Scheduler.Implicits.global
 
 object MedianDTIFHAByRace extends GraphRoute(
   "For FHA loans, how has median DTI differed by race/ethnicity?",
-  "rate",
+  "Debt-to-Income Ratio",
   "dti-fha-re"
 ) with JsonSupport {
 

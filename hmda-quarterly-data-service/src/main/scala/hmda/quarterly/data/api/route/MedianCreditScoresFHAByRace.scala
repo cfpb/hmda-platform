@@ -11,7 +11,7 @@ import monix.execution.Scheduler.Implicits.global
 
 object MedianCreditScoresFHAByRace extends GraphRoute(
   "For FHA loans, how have median credit scores differed by race/ethnicity?",
-  "rate",
+  "Credit Score",
   "credit-scores-fha-re"
 ) with JsonSupport {
 

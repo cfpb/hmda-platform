@@ -11,7 +11,7 @@ import monix.execution.Scheduler.Implicits.global
 
 object ApplicationsVolume extends GraphRoute(
   "How has the number of applications changed?",
-  "quantity",
+  "Loan & Application Counts",
   "applications"
 ) with JsonSupport {
   private def getVolume(loanType: LoanTypeEnum, title: String, heloc: Boolean = false, conforming: Boolean = false): CancelableFuture[GraphSeriesSummary] =

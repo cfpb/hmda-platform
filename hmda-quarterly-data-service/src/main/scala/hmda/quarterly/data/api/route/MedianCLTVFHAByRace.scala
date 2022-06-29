@@ -11,7 +11,7 @@ import monix.execution.Scheduler.Implicits.global
 
 object MedianCLTVFHAByRace extends GraphRoute(
   "For FHA loans, how has median CLTV differed by race/ethnicity?",
-  "rate",
+  "Combined Loan-to-Value Ratio",
   "ltv-fha-re"
 ) with JsonSupport {
 

@@ -11,7 +11,7 @@ import monix.execution.Scheduler.Implicits.global
 
 object MedianTotalLoanCostsFHAByRace extends GraphRoute(
   "For FHA loans, how have median total loan costs differed by race/ethnicity?",
-  "quantity",
+  "Total Loan Costs",
   "tlc-fha-re"
 ) with JsonSupport {
 
