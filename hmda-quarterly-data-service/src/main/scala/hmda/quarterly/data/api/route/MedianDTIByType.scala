@@ -5,6 +5,7 @@ import akka.http.scaladsl.server.Route
 import hmda.model.filing.lar.enums._
 import hmda.quarterly.data.api.dao.repo.QuarterlyGraphRepo
 import hmda.quarterly.data.api.dto.QuarterGraphData._
+import hmda.quarterly.data.api.route.lib.Labels.DTI
 import hmda.quarterly.data.api.serde.JsonSupport
 import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
@@ -33,7 +34,7 @@ object MedianDTIByType extends GraphRoute(
           "How has median DTI changed?",
           "Conventional non-conforming loans on average had the lowest median DTI.",
           Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va),
-          yLabel = "Median DTI"
+          yLabel = DTI
         )
       )
     }

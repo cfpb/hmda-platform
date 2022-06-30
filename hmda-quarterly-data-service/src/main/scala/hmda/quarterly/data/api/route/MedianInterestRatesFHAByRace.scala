@@ -5,6 +5,7 @@ import akka.http.scaladsl.server.Route
 import hmda.model.filing.lar.enums._
 import hmda.quarterly.data.api.dao.repo.QuarterlyGraphRepo
 import hmda.quarterly.data.api.dto.QuarterGraphData._
+import hmda.quarterly.data.api.route.lib.Labels.INTEREST_RATES
 import hmda.quarterly.data.api.serde.JsonSupport
 import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
@@ -31,7 +32,7 @@ object MedianInterestRatesFHAByRace extends GraphRoute(
           "By FHA loans, how have median interest rates differed by race/ethnicity?",
           "Interest rates decreased from 2018 quarter four to 2020.",
           Seq(asian, black, hispanic, white),
-          yLabel = "Median Interest Rates"
+          yLabel = INTEREST_RATES
         )
       )
     }

@@ -5,6 +5,7 @@ import akka.http.scaladsl.server.Route
 import hmda.model.filing.lar.enums._
 import hmda.quarterly.data.api.dao.repo.QuarterlyGraphRepo
 import hmda.quarterly.data.api.dto.QuarterGraphData._
+import hmda.quarterly.data.api.route.lib.Labels.DTI
 import hmda.quarterly.data.api.serde.JsonSupport
 import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
@@ -31,7 +32,7 @@ object MedianDTIFHAByRace extends GraphRoute(
           "For FHA loans, how has median DTI differed by race/ethnicity?",
           "For FHA loans, whites had the lowest median DTI while the position of other racial and ethnic groups changed.",
           Seq(asian, black, hispanic, white),
-          yLabel = "Median DTI"
+          yLabel = DTI
         )
       )
     }

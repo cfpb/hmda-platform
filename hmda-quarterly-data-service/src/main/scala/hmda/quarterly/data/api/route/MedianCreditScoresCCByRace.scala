@@ -5,6 +5,7 @@ import akka.http.scaladsl.server.Route
 import hmda.model.filing.lar.enums._
 import hmda.quarterly.data.api.dao.repo.QuarterlyGraphRepo
 import hmda.quarterly.data.api.dto.QuarterGraphData._
+import hmda.quarterly.data.api.route.lib.Labels.CREDIT_SCORES
 import hmda.quarterly.data.api.serde.JsonSupport
 import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
@@ -31,7 +32,7 @@ object MedianCreditScoresCCByRace extends GraphRoute(
           "For conventional conforming loans, how have median credit scores differed by race/ethnicity?",
           "In 2019, median credit scores increased for all racial and ethnic groups.",
           Seq(asian, black, hispanic, white),
-          yLabel = "Median Credit Score"
+          yLabel = CREDIT_SCORES
         )
       )
     }

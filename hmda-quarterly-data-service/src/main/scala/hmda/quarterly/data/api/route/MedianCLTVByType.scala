@@ -5,6 +5,7 @@ import akka.http.scaladsl.server.Route
 import hmda.model.filing.lar.enums._
 import hmda.quarterly.data.api.dao.repo.QuarterlyGraphRepo
 import hmda.quarterly.data.api.dto.QuarterGraphData._
+import hmda.quarterly.data.api.route.lib.Labels.CLTV
 import hmda.quarterly.data.api.serde.JsonSupport
 import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
@@ -33,7 +34,7 @@ object MedianCLTVByType extends GraphRoute(
           "How has median CLTV changed?",
           "RHS/FSA loans had the highest median CLTV while HELOCs had generally the lowest.",
           Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va),
-          yLabel = "Median CLTV"
+          yLabel = CLTV
         )
       )
     }

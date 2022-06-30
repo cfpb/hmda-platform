@@ -5,6 +5,7 @@ import akka.http.scaladsl.server.Route
 import hmda.model.filing.lar.enums._
 import hmda.quarterly.data.api.dao.repo.QuarterlyGraphRepo
 import hmda.quarterly.data.api.dto.QuarterGraphData._
+import hmda.quarterly.data.api.route.lib.Labels.TLC
 import hmda.quarterly.data.api.serde.JsonSupport
 import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
@@ -33,7 +34,7 @@ object MedianTotalLoanCosts extends GraphRoute(
           "How have median total loan costs changed?",
           "Median total loan costs increased from 2018 to 2020 except for VA loans.",
           Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va),
-          yLabel = "Median Total Loan Costs"
+          yLabel = TLC
         )
       )
     }

@@ -5,6 +5,7 @@ import akka.http.scaladsl.server.Route
 import hmda.model.filing.lar.enums._
 import hmda.quarterly.data.api.dao.repo.QuarterlyGraphRepo
 import hmda.quarterly.data.api.dto.QuarterGraphData._
+import hmda.quarterly.data.api.route.lib.Labels.CREDIT_SCORES
 import hmda.quarterly.data.api.serde.JsonSupport
 import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
@@ -33,7 +34,7 @@ object MedianCreditScores extends GraphRoute(
           "How have median credit scores changed?",
           "HELOC loans had the highest median credit scores while FHA loans had the lowest.",
           Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va),
-          yLabel = "Median Credit Score"
+          yLabel = CREDIT_SCORES
         )
       )
     }

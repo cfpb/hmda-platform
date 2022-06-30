@@ -5,6 +5,7 @@ import akka.http.scaladsl.server.Route
 import hmda.model.filing.lar.enums._
 import hmda.quarterly.data.api.dao.repo.QuarterlyGraphRepo
 import hmda.quarterly.data.api.dto.QuarterGraphData._
+import hmda.quarterly.data.api.route.lib.Labels.DENIALS
 import hmda.quarterly.data.api.serde.JsonSupport
 import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
@@ -33,7 +34,7 @@ object DenialRatesByType extends GraphRoute(
           "How have denial rates changed?",
           "HELOC loans had the highest denial rate.",
           Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va),
-          yLabel = "Denial Rate Percentage"
+          yLabel = DENIALS
         )
       )
     }
