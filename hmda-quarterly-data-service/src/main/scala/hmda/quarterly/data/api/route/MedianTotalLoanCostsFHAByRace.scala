@@ -30,7 +30,8 @@ object MedianTotalLoanCostsFHAByRace extends GraphRoute(
         } yield GraphSeriesInfo(
           "For FHA loans, how have median total loan costs differed by race/ethnicity?",
           "Median total loan costs increased from the start of 2018 to 2020.",
-          Seq(asian, black, hispanic, white)
+          Seq(asian, black, hispanic, white),
+          yLabel = "Median Total Loan Costs"
         )
       )
     }

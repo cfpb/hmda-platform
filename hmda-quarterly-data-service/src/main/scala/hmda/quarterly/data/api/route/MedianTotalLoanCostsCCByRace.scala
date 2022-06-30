@@ -30,7 +30,8 @@ object MedianTotalLoanCostsCCByRace extends GraphRoute(
         } yield GraphSeriesInfo(
           "For conventional conforming loans, how have median total loan costs differed by race/ethnicity?",
           "Since 2019, all median interest rates have decreased.",
-          Seq(asian, black, hispanic, white)
+          Seq(asian, black, hispanic, white),
+          yLabel = "Median Total Loan Costs"
         )
       )
     }

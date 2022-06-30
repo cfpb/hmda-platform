@@ -30,7 +30,8 @@ object DenialRatesFHAByRace extends GraphRoute(
         } yield GraphSeriesInfo(
           "For FHA loans, how have denial rates differed by race/ethnicity?",
           "All racial and ethnic groups experienced an overall decrease in denial rates.",
-          Seq(asian, black, hispanic, white)
+          Seq(asian, black, hispanic, white),
+          yLabel = "Denial Rate Percentage"
         )
       )
     }

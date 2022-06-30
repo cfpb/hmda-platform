@@ -30,7 +30,8 @@ object MedianCLTVCCByRace extends GraphRoute(
         } yield GraphSeriesInfo(
           "For conventional conforming loans, how has median CLTV differed by race/ethnicity?",
           "In 2019, all racial and ethnicity groups experienced a decline in median CLTV.",
-          Seq(asian, black, hispanic, white)
+          Seq(asian, black, hispanic, white),
+          yLabel = "Median CLTV"
         )
       )
     }

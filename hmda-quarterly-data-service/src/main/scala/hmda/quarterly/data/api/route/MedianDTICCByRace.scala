@@ -30,7 +30,8 @@ object MedianDTICCByRace extends GraphRoute(
         } yield GraphSeriesInfo(
           "For conventional conforming loans, how has median DTI differed by race/ethnicity?",
           "For conventional conforming loans, Hispanics had the highest median DTI while whites had the lowest.",
-          Seq(asian, black, hispanic, white)
+          Seq(asian, black, hispanic, white),
+          yLabel = "Median DTI"
         )
       )
     }

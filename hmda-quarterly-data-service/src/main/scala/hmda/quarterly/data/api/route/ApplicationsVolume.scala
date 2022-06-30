@@ -31,7 +31,8 @@ object ApplicationsVolume extends GraphRoute(
         } yield GraphSeriesInfo(
           "How has the number of applications changed?",
           "Conventional conforming applications dramatically increased since 2019. FHA loans temporarily moved higher in 2020 Q3.",
-          Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va)
+          Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va),
+          yLabel = "LAR Count"
         )
       )
     }

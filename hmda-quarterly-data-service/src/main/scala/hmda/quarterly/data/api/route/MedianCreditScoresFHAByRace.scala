@@ -30,7 +30,8 @@ object MedianCreditScoresFHAByRace extends GraphRoute(
         } yield GraphSeriesInfo(
           "For FHA loans, how have median credit scores differed by race/ethnicity?",
           "In 2019, median credit scores increased for all groups and, in 2020, median credit scores declined for all groups.",
-          Seq(asian, black, hispanic, white)
+          Seq(asian, black, hispanic, white),
+          yLabel = "Median Credit Score"
         )
       )
     }

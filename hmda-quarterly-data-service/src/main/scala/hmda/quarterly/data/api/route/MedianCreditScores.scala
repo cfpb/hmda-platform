@@ -32,7 +32,8 @@ object MedianCreditScores extends GraphRoute(
         } yield GraphSeriesInfo(
           "How have median credit scores changed?",
           "HELOC loans had the highest median credit scores while FHA loans had the lowest.",
-          Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va)
+          Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va),
+          yLabel = "Median Credit Score"
         )
       )
     }

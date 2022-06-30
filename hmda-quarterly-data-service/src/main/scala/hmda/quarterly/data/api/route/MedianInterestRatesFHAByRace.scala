@@ -30,7 +30,8 @@ object MedianInterestRatesFHAByRace extends GraphRoute(
         } yield GraphSeriesInfo(
           "By FHA loans, how have median interest rates differed by race/ethnicity?",
           "Interest rates decreased from 2018 quarter four to 2020.",
-          Seq(asian, black, hispanic, white)
+          Seq(asian, black, hispanic, white),
+          yLabel = "Median Interest Rates"
         )
       )
     }

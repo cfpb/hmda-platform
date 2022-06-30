@@ -30,7 +30,8 @@ object MedianCLTVFHAByRace extends GraphRoute(
         } yield GraphSeriesInfo(
           "For FHA loans, how has median CLTV differed by race/ethnicity?",
           "Both Blacks and Hispanics on average had the same median CLTV for FHA loans.",
-          Seq(asian, black, hispanic, white)
+          Seq(asian, black, hispanic, white),
+          yLabel = "Median CLTV"
         )
       )
     }

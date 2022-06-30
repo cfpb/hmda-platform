@@ -32,7 +32,8 @@ object LoansVolume extends GraphRoute(
         } yield GraphSeriesInfo(
           "How has the number of loans changed?",
           "Conventional conforming loans increased starting in 2019 and the increase quickened in 2020. VA loans have also been steadily increasing since 2019.",
-          Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va)
+          Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va),
+          yLabel = "LAR Count"
         )
       )
     }

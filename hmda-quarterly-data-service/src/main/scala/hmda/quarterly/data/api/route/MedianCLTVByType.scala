@@ -32,7 +32,8 @@ object MedianCLTVByType extends GraphRoute(
         } yield GraphSeriesInfo(
           "How has median CLTV changed?",
           "RHS/FSA loans had the highest median CLTV while HELOCs had generally the lowest.",
-          Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va)
+          Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va),
+          yLabel = "Median CLTV"
         )
       )
     }

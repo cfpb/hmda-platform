@@ -32,7 +32,8 @@ object MedianTotalLoanCosts extends GraphRoute(
         } yield GraphSeriesInfo(
           "How have median total loan costs changed?",
           "Median total loan costs increased from 2018 to 2020 except for VA loans.",
-          Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va)
+          Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va),
+          yLabel = "Median Total Loan Costs"
         )
       )
     }

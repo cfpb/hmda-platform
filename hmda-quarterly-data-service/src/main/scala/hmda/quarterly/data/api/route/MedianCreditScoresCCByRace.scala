@@ -30,7 +30,8 @@ object MedianCreditScoresCCByRace extends GraphRoute(
         } yield GraphSeriesInfo(
           "For conventional conforming loans, how have median credit scores differed by race/ethnicity?",
           "In 2019, median credit scores increased for all racial and ethnic groups.",
-          Seq(asian, black, hispanic, white)
+          Seq(asian, black, hispanic, white),
+          yLabel = "Median Credit Score"
         )
       )
     }

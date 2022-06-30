@@ -32,7 +32,8 @@ object DenialRatesByType extends GraphRoute(
         } yield GraphSeriesInfo(
           "How have denial rates changed?",
           "HELOC loans had the highest denial rate.",
-          Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va)
+          Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va),
+          yLabel = "Denial Rate Percentage"
         )
       )
     }

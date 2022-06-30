@@ -32,7 +32,8 @@ object MedianInterestRates extends GraphRoute(
         } yield GraphSeriesInfo(
           "How have median interest rates changed?",
           "Median interest rates decreased overall for all loan types.",
-          Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va)
+          Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va),
+          yLabel = "Median Interest Rates"
         )
       )
     }

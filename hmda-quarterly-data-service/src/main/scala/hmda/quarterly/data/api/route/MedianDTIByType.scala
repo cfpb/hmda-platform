@@ -32,7 +32,8 @@ object MedianDTIByType extends GraphRoute(
         } yield GraphSeriesInfo(
           "How has median DTI changed?",
           "Conventional non-conforming loans on average had the lowest median DTI.",
-          Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va)
+          Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va),
+          yLabel = "Median DTI"
         )
       )
     }
