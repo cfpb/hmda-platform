@@ -11,29 +11,29 @@ object QuarterTimeBarrier {
 
   // Builtin time format of BASIC_ISO_DATE yyyyMMdd i.e. '20111203'.
   private val formatter: DateTimeFormatter =DateTimeFormatter.BASIC_ISO_DATE
-  private val  q12020EndDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q1.endDayOfYear)
-  private val  q22020EndDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q2.endDayOfYear)
-  private val  q32020EndDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q3.endDayOfYear)
+  private val  q12020EndDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q1.actionTakenEnd)
+  private val  q22020EndDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q2.actionTakenEnd)
+  private val  q32020EndDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q3.actionTakenEnd)
 
-  private val  q12021EndDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q1.endDayOfYear)
-  private val  q22021EndDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q2.endDayOfYear)
-  private val  q32021EndDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q3.endDayOfYear)
+  private val  q12021EndDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q1.actionTakenEnd)
+  private val  q22021EndDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q2.actionTakenEnd)
+  private val  q32021EndDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q3.actionTakenEnd)
 
-  private val  q12022EndDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q1.endDayOfYear)
-  private val  q22022EndDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q2.endDayOfYear)
-  private val  q32022EndDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q3.endDayOfYear)
+  private val  q12022EndDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q1.actionTakenEnd)
+  private val  q22022EndDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q2.actionTakenEnd)
+  private val  q32022EndDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q3.actionTakenEnd)
 
-  private val  q12020StartDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q1.startDayOfYear)
-  private val  q22020StartDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q2.startDayOfYear)
-  private val  q32020StartDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q3.startDayOfYear)
+  private val  q12020StartDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q1.actionTakenStart)
+  private val  q22020StartDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q2.actionTakenStart)
+  private val  q32020StartDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q3.actionTakenStart)
 
-  private val  q12021StartDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q1.startDayOfYear)
-  private val  q22021StartDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q2.startDayOfYear)
-  private val  q32021StartDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q3.startDayOfYear)
+  private val  q12021StartDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q1.actionTakenStart)
+  private val  q22021StartDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q2.actionTakenStart)
+  private val  q32021StartDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q3.actionTakenStart)
 
-  private val  q12022StartDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q1.startDayOfYear)
-  private val  q22022StartDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q2.startDayOfYear)
-  private val  q32022StartDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q3.startDayOfYear)
+  private val  q12022StartDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q1.actionTakenStart)
+  private val  q22022StartDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q2.actionTakenStart)
+  private val  q32022StartDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q3.actionTakenStart)
 
   implicit private class ExtendedLocalDate(date: LocalDate) {
     def isOnOrBefore(compareDate: LocalDate): Boolean = date.isBefore(compareDate) || date.isEqual(compareDate)
