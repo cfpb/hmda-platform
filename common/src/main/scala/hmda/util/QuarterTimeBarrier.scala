@@ -11,33 +11,34 @@ object QuarterTimeBarrier {
 
   // Builtin time format of BASIC_ISO_DATE yyyyMMdd i.e. '20111203'.
   private val formatter: DateTimeFormatter =DateTimeFormatter.BASIC_ISO_DATE
-  private val  q12020EndDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q1.endDayOfYear)
-  private val  q22020EndDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q2.endDayOfYear)
-  private val  q32020EndDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q3.endDayOfYear)
+  private val  q12020EndDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q1.actionTakenEnd)
+  private val  q22020EndDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q2.actionTakenEnd)
+  private val  q32020EndDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q3.actionTakenEnd)
 
-  private val  q12021EndDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q1.endDayOfYear)
-  private val  q22021EndDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q2.endDayOfYear)
-  private val  q32021EndDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q3.endDayOfYear)
+  private val  q12021EndDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q1.actionTakenEnd)
+  private val  q22021EndDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q2.actionTakenEnd)
+  private val  q32021EndDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q3.actionTakenEnd)
 
-  private val  q12022EndDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q1.endDayOfYear)
-  private val  q22022EndDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q2.endDayOfYear)
-  private val  q32022EndDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q3.endDayOfYear)
+  private val  q12022EndDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q1.actionTakenEnd)
+  private val  q22022EndDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q2.actionTakenEnd)
+  private val  q32022EndDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q3.actionTakenEnd)
 
-  private val  q12020StartDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q1.startDayOfYear)
-  private val  q22020StartDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q2.startDayOfYear)
-  private val  q32020StartDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q3.startDayOfYear)
+  private val  q12020StartDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q1.actionTakenStart)
+  private val  q22020StartDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q2.actionTakenStart)
+  private val  q32020StartDate = LocalDate.ofYearDay(2020,rulesConfig.qf.q3.actionTakenStart)
 
-  private val  q12021StartDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q1.startDayOfYear)
-  private val  q22021StartDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q2.startDayOfYear)
-  private val  q32021StartDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q3.startDayOfYear)
+  private val  q12021StartDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q1.actionTakenStart)
+  private val  q22021StartDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q2.actionTakenStart)
+  private val  q32021StartDate = LocalDate.ofYearDay(2021,rulesConfig.qf.q3.actionTakenStart)
 
-  private val  q12022StartDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q1.startDayOfYear)
-  private val  q22022StartDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q2.startDayOfYear)
-  private val  q32022StartDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q3.startDayOfYear)
+  private val  q12022StartDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q1.actionTakenStart)
+  private val  q22022StartDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q2.actionTakenStart)
+  private val  q32022StartDate = LocalDate.ofYearDay(2022,rulesConfig.qf.q3.actionTakenStart)
 
   implicit private class ExtendedLocalDate(date: LocalDate) {
     def isOnOrBefore(compareDate: LocalDate): Boolean = date.isBefore(compareDate) || date.isEqual(compareDate)
-    def isBetween(start: LocalDate, end: LocalDate): Boolean = date.isAfter(start) && date.isOnOrBefore(end)
+    def isOnOrAfter(compareDate: LocalDate): Boolean = date.isAfter(compareDate) || date.isEqual(compareDate)
+    def isBetween(start: LocalDate, end: LocalDate): Boolean = date.isOnOrAfter(start) && date.isOnOrBefore(end)
   }
   
   def actionTakenInQuarterRange(actionTakenDate: Int, period: Period):Boolean= {
@@ -49,25 +50,25 @@ object QuarterTimeBarrier {
       //Action Taken Date is on of before the end date of Q1 2020
       case Period(2020, Some("Q1")) => actionTakenDateLocal.isOnOrBefore(q12020EndDate)
       // Action Taken Date is after Q1 2020 Ends and on/before Q2 2020 filing ends
-      case Period(2020, Some("Q2")) => actionTakenDateLocal.isBetween(q12020EndDate, q22020EndDate)
+      case Period(2020, Some("Q2")) => actionTakenDateLocal.isBetween(q22020StartDate, q22020EndDate)
       // Action Taken Date is after Q2 2020 Ends and on/before Q3 2020 filing ends
-      case Period(2020, Some("Q3")) => actionTakenDateLocal.isBetween(q22020EndDate, q32020EndDate)
+      case Period(2020, Some("Q3")) => actionTakenDateLocal.isBetween(q32020StartDate, q32020EndDate)
       case Period(2020, None) => true
 
       //Action Taken Date is on of before the end date of Q1 2021
       case Period(2021, Some("Q1")) => actionTakenDateLocal.isOnOrBefore(q12021EndDate)
       // Action Taken Date is after Q1 2021 Ends and on/before Q2 2021 filing ends
-      case Period(2021, Some("Q2")) => actionTakenDateLocal.isBetween(q12021EndDate, q22021EndDate)
+      case Period(2021, Some("Q2")) => actionTakenDateLocal.isBetween(q22021StartDate, q22021EndDate)
       // Action Taken Date is after Q2 2021 Ends and on/before Q3 2021 filing ends
-      case Period(2021, Some("Q3")) => actionTakenDateLocal.isBetween(q22021EndDate, q32021EndDate)
+      case Period(2021, Some("Q3")) => actionTakenDateLocal.isBetween(q32021StartDate, q32021EndDate)
       case Period(2021, None) => true
 
       //Action Taken Date is on of before the end date of Q1 2022
       case Period(2022, Some("Q1")) => actionTakenDateLocal.isOnOrBefore(q12022EndDate)
       // Action Taken Date is after Q1 2022 Ends and on/before Q2 2022 filing ends
-      case Period(2022, Some("Q2")) => actionTakenDateLocal.isBetween(q12022EndDate, q22022EndDate)
+      case Period(2022, Some("Q2")) => actionTakenDateLocal.isBetween(q22022StartDate, q22022EndDate)
       // Action Taken Date is after Q2 2022 Ends and on/before Q3 2022 filing ends
-      case Period(2022, Some("Q3")) => actionTakenDateLocal.isBetween(q22022EndDate, q32022EndDate)
+      case Period(2022, Some("Q3")) => actionTakenDateLocal.isBetween(q32022StartDate, q32022EndDate)
       case Period(2022, None) => true
 
 
