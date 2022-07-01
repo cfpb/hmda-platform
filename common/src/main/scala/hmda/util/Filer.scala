@@ -45,8 +45,8 @@ object Filer {
         rawEnd   <- Try(hocon.getString("end")).toEither.left.map(_ => "failed to obtain end")
         start    <- Try(formatter.parse(rawStart + year)).toEither.left.map(_ => s"failed to parse $rawStart as a valid start date")
         end      <- Try(formatter.parse(rawEnd + year)).toEither.left.map(_ => s"failed to parse $rawEnd as a valid end date")
-        actionTakenStart <- Try(getDateConfigWithDefault("action_date_start", start)).toEither.left.map(_ => "Invalid action taken start date")
-        actionTakenEnd <- Try(getDateConfigWithDefault("action_date_end", end)).toEither.left.map(_ => "Invalid action taken end date")
+        actionTakenStart <- Try(getDateConfigWithDefault(hocon, "action_date_start", start)).toEither.left.map(_ => "Invalid action taken start date")
+        actionTakenEnd <- Try(getDateConfigWithDefault(hocon , "action_date_end", end)).toEither.left.map(_ => "Invalid action taken end date")
         c <- Try(
           QuarterConfig(
             start.get(ChronoField.DAY_OF_YEAR),
@@ -58,7 +58,7 @@ object Filer {
       } yield c
     }
 
-    def getDateConfigWithDefault(key: String, defaultDate: TemporalAccessor): TemporalAccessor = {
+    def getDateConfigWithDefault(hocon: Config, key: String, defaultDate: TemporalAccessor): TemporalAccessor = {
       val configVal = Try(hocon.getString(key)).getOrElse("")
       if (configVal == "") defaultDate else formatter.parse(configVal + year)
     }
