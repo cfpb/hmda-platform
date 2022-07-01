@@ -68,8 +68,7 @@ object IrsPublisher {
 
       def getCensus(hmdaGeoCounty:String,hmdaGeoTract: String, year: Int): Msa = {
 
-
-        val censusResult = getCensusOnTractandCounty(hmdaGeoCounty,hmdaGeoTract,year)
+        val censusResult = getCensusOnTractandCounty(hmdaGeoTract,hmdaGeoCounty,year)
 
         val censusID =
           if (censusResult.msaMd == 0) "-----" else censusResult.msaMd.toString
