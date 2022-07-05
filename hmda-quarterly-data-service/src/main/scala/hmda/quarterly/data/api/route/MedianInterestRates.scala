@@ -5,13 +5,14 @@ import akka.http.scaladsl.server.Route
 import hmda.model.filing.lar.enums._
 import hmda.quarterly.data.api.dao.repo.QuarterlyGraphRepo
 import hmda.quarterly.data.api.dto.QuarterGraphData._
+import hmda.quarterly.data.api.route.lib.Labels.INTEREST_RATES
 import hmda.quarterly.data.api.serde.JsonSupport
 import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
 
 object MedianInterestRates extends GraphRoute(
   "How have median interest rates changed?",
-  "rate",
+  "Interest Rates",
   "interest-rates"
 ) with JsonSupport {
 
@@ -32,7 +33,8 @@ object MedianInterestRates extends GraphRoute(
         } yield GraphSeriesInfo(
           "How have median interest rates changed?",
           "Median interest rates decreased overall for all loan types.",
-          Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va)
+          Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va),
+          yLabel = INTEREST_RATES
         )
       )
     }

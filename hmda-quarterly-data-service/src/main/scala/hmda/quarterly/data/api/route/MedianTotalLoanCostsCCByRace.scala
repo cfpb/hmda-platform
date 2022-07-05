@@ -5,13 +5,14 @@ import akka.http.scaladsl.server.Route
 import hmda.model.filing.lar.enums._
 import hmda.quarterly.data.api.dao.repo.QuarterlyGraphRepo
 import hmda.quarterly.data.api.dto.QuarterGraphData._
+import hmda.quarterly.data.api.route.lib.Labels.TLC
 import hmda.quarterly.data.api.serde.JsonSupport
 import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
 
 object MedianTotalLoanCostsCCByRace extends GraphRoute(
   "For conventional conforming loans, how have median total loan costs differed by race/ethnicity?",
-  "quantity",
+  "Total Loan Costs",
   "tlc-cc-re"
 ) with JsonSupport {
 
@@ -30,7 +31,8 @@ object MedianTotalLoanCostsCCByRace extends GraphRoute(
         } yield GraphSeriesInfo(
           "For conventional conforming loans, how have median total loan costs differed by race/ethnicity?",
           "Since 2019, all median interest rates have decreased.",
-          Seq(asian, black, hispanic, white)
+          Seq(asian, black, hispanic, white),
+          yLabel = TLC
         )
       )
     }

@@ -5,13 +5,14 @@ import akka.http.scaladsl.server.Route
 import hmda.model.filing.lar.enums._
 import hmda.quarterly.data.api.dao.repo.QuarterlyGraphRepo
 import hmda.quarterly.data.api.dto.QuarterGraphData._
+import hmda.quarterly.data.api.route.lib.Labels.DENIALS
 import hmda.quarterly.data.api.serde.JsonSupport
 import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
 
 object DenialRatesCCByRace extends GraphRoute(
   "For conventional conforming loans, how have denial rates differed by race/ethnicity?",
-  "percentage",
+  "Denial Rates",
   "denials-cc-re"
 ) with JsonSupport {
 
@@ -30,7 +31,8 @@ object DenialRatesCCByRace extends GraphRoute(
         } yield GraphSeriesInfo(
           "For conventional conforming loans, how have denial rates differed by race/ethnicity?",
           "All racial and ethnic groups experienced an overall decrease in denial rates.",
-          Seq(asian, black, hispanic, white)
+          Seq(asian, black, hispanic, white),
+          yLabel = DENIALS
         )
       )
     }

@@ -5,13 +5,14 @@ import akka.http.scaladsl.server.Route
 import hmda.model.filing.lar.enums._
 import hmda.quarterly.data.api.dao.repo.QuarterlyGraphRepo
 import hmda.quarterly.data.api.dto.QuarterGraphData._
+import hmda.quarterly.data.api.route.lib.Labels.CLTV
 import hmda.quarterly.data.api.serde.JsonSupport
 import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
 
 object MedianCLTVCCByRace extends GraphRoute(
   "For conventional conforming loans, how has median CLTV differed by race/ethnicity?",
-  "rate",
+  "Combined Loan-to-Value Ratio",
   "ltv-cc-re"
 ) with JsonSupport {
 
@@ -30,7 +31,8 @@ object MedianCLTVCCByRace extends GraphRoute(
         } yield GraphSeriesInfo(
           "For conventional conforming loans, how has median CLTV differed by race/ethnicity?",
           "In 2019, all racial and ethnicity groups experienced a decline in median CLTV.",
-          Seq(asian, black, hispanic, white)
+          Seq(asian, black, hispanic, white),
+          yLabel = CLTV
         )
       )
     }
