@@ -45,7 +45,7 @@ trait ColumnDataFormatter {
     var j = 0 // the index where the next non-control character should be copied
     while (i < charsCount) {
       if ( (chars(i) != '\"') && (chars(i) >= ' ')) {
-        if (i != j) chars(j) = chars(i) // only copying non-control characters and non-double qoutes
+        if (i != j) chars(j) = chars(i) // only copying non-control characters and non-double quotes
         j += 1
       }
       i += 1
