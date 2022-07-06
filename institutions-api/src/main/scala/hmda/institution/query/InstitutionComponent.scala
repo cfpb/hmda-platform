@@ -3,6 +3,7 @@ package hmda.institution.query
 import com.typesafe.config.{ Config, ConfigFactory }
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
+import hmda.query.ts.TransmittalSheetRepository
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
@@ -84,5 +85,9 @@ trait InstitutionComponent {
   val institutionRepositories: Map[String, InstitutionRepository] = (for {
     year <- yearsAvailable
   } yield year -> new InstitutionRepository(dbConfig, s"institutions$year")).toMap
+
+  val tsRepositories: Map[String, TransmittalSheetRepository] = (for {
+    year <- yearsAvailable
+  } yield year -> new TransmittalSheetRepository(dbConfig, s"transmittalsheet$year")).toMap
 
 }
