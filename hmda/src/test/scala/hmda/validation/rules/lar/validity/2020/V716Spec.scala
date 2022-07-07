@@ -1,4 +1,4 @@
-package hmda.validation.rules.lar.quality._2020
+package hmda.validation.rules.lar.validity._2020
 import hmda.census.records.CensusRecords
 import hmda.model.filing.lar.LarGenerators.larGen
 import hmda.model.filing.lar.LoanApplicationRegister
