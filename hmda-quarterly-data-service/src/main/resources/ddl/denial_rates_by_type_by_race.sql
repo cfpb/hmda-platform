@@ -22,5 +22,6 @@ create materialized view denial_rates_by_race_2018 as
 		and amortization != 1
 		and baloon_payment != 1
 		and line_of_credits in (1, 2)
+		and lei in (select lei from institutions2022 where quarterly_filer = true)
 	group by quarter, race_ethnicity, lt, loc, cll
 with data;

@@ -23,5 +23,6 @@ create materialized view median_dti_by_race_2018 as
 		and line_of_credits in (1, 2)
 		and debt_to_incode ~ '^[0-9\.]+$'
 		and debt_to_incode::decimal <= 144
+		and lei in (select lei from institutions2022 where quarterly_filer = true)
 	group by quarter, race_ethnicity, lt, loc, cll
 with data;

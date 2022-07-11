@@ -18,5 +18,6 @@ create materialized view median_interest_rates_by_loan_type_2018 as
 		and line_of_credits in (1, 2)
 		and interest_rate ~ '^[0-9\.]+$'
 		and interest_rate::numeric <= 8
+		and lei in (select lei from institutions2022 where quarterly_filer = true)
 	group by quarter, lt, cll, loc
 with data;
