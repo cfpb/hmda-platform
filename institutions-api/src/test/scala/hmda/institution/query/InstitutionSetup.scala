@@ -38,23 +38,24 @@ trait InstitutionSetup extends InstitutionEmailComponent {
     import dbConfig.profile.api._
     val setup = db.run(
       DBIOAction.seq(
-        institutionsTable2018.schema.create,
-        institutionsTable2019.schema.create,
-        institutionsTable2020.schema.create,
-        institutionsTable2021.schema.create,
-        institutionsTable2022.schema.create,
-        institutionsTable2018 ++= Seq(
-          instA,
-          instB,
-          instE
-        ),
-        institutionEmailsTable.schema.create,
-        institutionEmailsTable ++= Seq(
-          InstitutionEmailEntity(1, "AAA", "aaa.com"),
-          InstitutionEmailEntity(2, "AAA", "bbb.com"),
-          InstitutionEmailEntity(3, "BBB", "bbb.com"),
-          InstitutionEmailEntity(4, "EEE", "eee.com")
-        )
+        Seq(institutionsTable2018.schema.create,
+          institutionsTable2019.schema.create,
+          institutionsTable2020.schema.create,
+          institutionsTable2021.schema.create,
+          institutionsTable2022.schema.create,
+          institutionsTable2018 ++= Seq(
+            instA,
+            instB,
+            instE
+          ),
+          institutionEmailsTable.schema.create,
+          institutionEmailsTable ++= Seq(
+            InstitutionEmailEntity(1, "AAA", "aaa.com"),
+            InstitutionEmailEntity(2, "AAA", "bbb.com"),
+            InstitutionEmailEntity(3, "BBB", "bbb.com"),
+            InstitutionEmailEntity(4, "EEE", "eee.com")
+          )) ++
+          tsRepositories.values.map(_.table.schema.create).toSeq: _*
       )
     )
     Await.result(setup, duration)
@@ -63,6 +64,10 @@ trait InstitutionSetup extends InstitutionEmailComponent {
   def tearDown() = {
     Await.result(emailRepository.dropSchema(), duration)
     institutionRepositories.values.foreach{ repo =>
+      Await.result(repo.dropSchema(), duration)
+    }
+
+    tsRepositories.values.foreach{ repo =>
       Await.result(repo.dropSchema(), duration)
     }
 

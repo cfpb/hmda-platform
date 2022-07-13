@@ -33,14 +33,18 @@ class InstitutionDBProjectionSpec
   override def beforeAll(): Unit =
     whenReady(
       Future.sequence(
-        institutionRepositories.values.map(_.createSchema()).toSeq :+ emailRepository.createSchema()
+        institutionRepositories.values.map(_.createSchema()).toSeq ++
+          tsRepositories.values.map(_.createSchema()).toSeq :+
+          emailRepository.createSchema()
       )
     )(_ => ())
 
   override def afterAll(): Unit =
     whenReady(
       Future.sequence(
-        institutionRepositories.values.map(_.dropSchema()).toSeq :+ emailRepository.dropSchema()
+        institutionRepositories.values.map(_.dropSchema()).toSeq ++
+          tsRepositories.values.map(_.dropSchema()) :+
+          emailRepository.dropSchema()
       )
     )(_ => ())
 

@@ -17,6 +17,8 @@ import io.circe.generic.auto._
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 import hmda.api.http.EmailUtils._
+import hmda.query.ts.TransmittalSheetEntity
+import org.slf4j.LoggerFactory
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -27,6 +29,8 @@ object InstitutionQueryHttpApi {
 }
 private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionContext) extends InstitutionEmailComponent with InstitutionNoteHistoryComponent{
   val dbConfig = DatabaseConfig.forConfig[JdbcProfile]("institution_db")
+
+  private val log = LoggerFactory.getLogger(getClass)
 
   implicit val institutionEmailsRepository: InstitutionEmailsRepository = new InstitutionEmailsRepository(dbConfig)
   implicit val institutionNoteHistoryRepository: InstitutionNoteHistoryRepository = new InstitutionNoteHistoryRepository(dbConfig)
@@ -52,23 +56,14 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
             emails      <- fEmails
           } yield (institution, emails.map(_.emailDomain))
 
-          onComplete(f) {
-            case Success((institution, emails)) =>
-              if (institution.isEmpty) {
-                returnNotFoundError(uri)
-              } else {
-                complete(
-                  ToResponseMarshallable(
-                    InstitutionConverter
-                      .convert(institution.getOrElse(InstitutionEntity()), emails)
-                  )
-                )
-              }
-            case Failure(error) =>
-              val errorResponse =
-                ErrorResponse(500, error.getLocalizedMessage, uri.path)
-              complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
+          val entityMarshaller: PartialFunction[(Option[InstitutionEntity], Seq[String]), ToResponseMarshallable] = {
+            case res: (Option[InstitutionEntity], Seq[String]) if res._1.nonEmpty =>
+              val (institution, emails) = res
+              ToResponseMarshallable(InstitutionConverter
+                .convert(institution.getOrElse(InstitutionEntity()), emails))
           }
+
+          completeFuture(f, uri, entityMarshaller)
         }
       }
     }
@@ -98,22 +93,13 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
       }
     }
 
-  def completeInstitutionsNoteHistoryFuture(f: Future[Seq[InstitutionNoteHistoryEntity]], uri: Uri): Route =
-    onComplete(f) {
-      case Success(institutionNoteHistory) =>
-        if (institutionNoteHistory.isEmpty) {
-          returnNotFoundError(uri)
-        } else {
-          complete(ToResponseMarshallable(InstitutionNoteHistoryResponse(institutionNoteHistory)))
-        }
-      case Failure(error) =>
-        if (error.getLocalizedMessage.contains("filter predicate is not satisfied")) {
-          returnNotFoundError(uri)
-        } else {
-          val errorResponse = ErrorResponse(500, error.getLocalizedMessage, uri.path)
-          complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
-        }
+  def completeInstitutionsNoteHistoryFuture(f: Future[Seq[InstitutionNoteHistoryEntity]], uri: Uri): Route = {
+    val entityMarshaller: PartialFunction[Seq[InstitutionNoteHistoryEntity], ToResponseMarshallable] = {
+      case institutionNoteHistory: Seq[InstitutionNoteHistoryEntity] if institutionNoteHistory.nonEmpty =>
+        ToResponseMarshallable(InstitutionNoteHistoryResponse(institutionNoteHistory))
     }
+    completeFuture(f, uri, entityMarshaller)
+  }
 
   private val institutionByDomainDefaultPath =
     path("institutions") {
@@ -135,13 +121,42 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
       }
     }
 
-  private def completeInstitutionsFuture(f: Future[Seq[Institution]], uri: Uri): Route =
-    onComplete(f) {
-      case Success(institutions) =>
-        if (institutions.isEmpty) {
-          returnNotFoundError(uri)
+  private val institutionLarCountPath =
+    path("institutions" / Segment / "lars") { lei =>
+      (extractUri & get) { uri =>
+
+        val nonExistingTs: PartialFunction[Throwable, Option[TransmittalSheetEntity]] = {
+          case err: Throwable =>
+            log.debug("ts repo failure, most likely table not yet available for year, skipping...", err)
+            None
+        }
+
+        val requestTransmittals = tsRepositories.values.map(_.findById(lei).recover(nonExistingTs)).toSeq
+        val transmittalFuture = Future.sequence(requestTransmittals)
+
+        val entityMarshaller: PartialFunction[Seq[Option[TransmittalSheetEntity]], ToResponseMarshallable] = {
+          case transmittals: Seq[Option[TransmittalSheetEntity]] if transmittals.flatten.nonEmpty =>
+            ToResponseMarshallable(transmittals.flatten.map(ts => InstitutionLarEntity(ts.year.toString, ts.totalLines)))
+        }
+
+        completeFuture(transmittalFuture, uri, entityMarshaller)
+      }
+    }
+
+  private def completeInstitutionsFuture(f: Future[Seq[Institution]], uri: Uri): Route = {
+    val entityMarshaller: PartialFunction[Seq[Institution], ToResponseMarshallable] = {
+      case institutions: Seq[Institution] if institutions.nonEmpty => ToResponseMarshallable(InstitutionsResponse(institutions))
+    }
+    completeFuture(f, uri, entityMarshaller)
+  }
+
+  private def completeFuture[TYPE](future: Future[TYPE], uri: Uri, entityMarshaller: PartialFunction[TYPE, ToResponseMarshallable]): Route =
+    onComplete(future) {
+      case Success(value) =>
+        if (entityMarshaller.isDefinedAt(value)) {
+          complete(entityMarshaller(value))
         } else {
-          complete(ToResponseMarshallable(InstitutionsResponse(institutions)))
+          returnNotFoundError(uri)
         }
       case Failure(error) =>
         if (error.getLocalizedMessage.contains("filter predicate is not satisfied")) {
@@ -161,7 +176,7 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          institutionByIdPath ~ institutionByDomainPath ~ institutionHistoryPath ~ institutionByDomainDefaultPath
+          institutionByIdPath ~ institutionByDomainPath ~ institutionHistoryPath ~ institutionByDomainDefaultPath ~ institutionLarCountPath
         }
       }
     }
