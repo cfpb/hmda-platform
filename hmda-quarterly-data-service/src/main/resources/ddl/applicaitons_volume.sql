@@ -11,5 +11,6 @@ create materialized view applications_volume_2018 as
 		and amortization != 1
 		and baloon_payment != 1
 		and line_of_credits in (1, 2)
+		and lei in (select lei from institutions2022 where quarterly_filer = true)
 	group by quarter, loan_type, cll, line_of_credits, action_taken_type
 with data;

@@ -15,5 +15,6 @@ create materialized view median_credit_score_by_loan_type_2018 as
 		and baloon_payment != 1
 		and line_of_credits in (1, 2)
 		and credit_score_applicant < 1111
+		and lei in (select lei from institutions2022 where quarterly_filer = true)
 	group by quarter, lt, cll, loc
 with data;
