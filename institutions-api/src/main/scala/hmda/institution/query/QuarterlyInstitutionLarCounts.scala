@@ -12,9 +12,9 @@ object QuarterlyInstitutionLarCounts {
     val colCount = rs.getMetaData.getColumnCount
     val larCountIdxStart = 4
 
-    val larCounts = (for {
-      col <- larCountIdxStart to colCount
-    } yield AnnualLarCount(s"${year + larCountIdxStart - col - 1}", rs.getInt(col))).filter(_.count > 0)
+    val larCounts = (larCountIdxStart to colCount).map(col =>
+      AnnualLarCount(s"${year + larCountIdxStart - col - 1}", rs.getInt(col))
+    ).filter(_.count > 0)
 
     QuarterlyInstitutionLarCounts(
       rs.getString("lei"),
