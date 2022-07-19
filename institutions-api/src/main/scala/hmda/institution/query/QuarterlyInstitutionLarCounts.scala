@@ -2,7 +2,8 @@ package hmda.institution.query
 
 import slick.jdbc.GetResult
 
-case class QuarterlyInstitutionLarCounts(lei: String, name: String, larCounts: Map[String, Int])
+case class AnnualLarCount(year: String, count: Int)
+case class QuarterlyInstitutionLarCounts(lei: String, name: String, larCounts: Seq[AnnualLarCount])
 object QuarterlyInstitutionLarCounts {
   implicit val getResult: GetResult[QuarterlyInstitutionLarCounts] = GetResult(result => {
     val rs = result.rs
@@ -13,7 +14,7 @@ object QuarterlyInstitutionLarCounts {
 
     val larCounts = (for {
       col <- larCountIdxStart to colCount
-    } yield (s"${year + larCountIdxStart - col - 1}", rs.getInt(col))).toMap.filter(_._2 > 0)
+    } yield AnnualLarCount(s"${year + larCountIdxStart - col - 1}", rs.getInt(col))).filter(_.count > 0)
 
     QuarterlyInstitutionLarCounts(
       rs.getString("lei"),
