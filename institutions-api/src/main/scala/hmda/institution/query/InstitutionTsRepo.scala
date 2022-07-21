@@ -10,6 +10,12 @@ object InstitutionTsRepo {
   import dbConfig.profile.api._
 
   def fetchPastLarCountsForQuarterlies(year: Int, pastCount: Int): Future[Vector[QuarterlyInstitutionLarCounts]] = {
+    /**
+     * query generated is dynamic based on how many years back the request wants, first 3 fields don't change,
+     * all subsequent fields are total_lines from prior years' transmittal sheets,
+     * getTsSql generates the x number of lar counts for each prior year.
+     * e.g. parameters (2022, 3) would have the lar counts for 2021, 2020, and 2019
+     */
     val query =
       sql"""
         select lei, respondent_name, activity_year, #${getTsSql(year, pastCount)}

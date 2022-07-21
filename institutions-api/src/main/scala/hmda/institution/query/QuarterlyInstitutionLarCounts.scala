@@ -12,6 +12,10 @@ object QuarterlyInstitutionLarCounts {
     val colCount = rs.getMetaData.getColumnCount
     val larCountIdxStart = 4
 
+    /**
+     * based on the InstitutionTsRepo.fetchPastLarCountsForQuarterlies, the first 3 fields don't change,
+     * fields 4 and onwards contain dynamic number of lar counts based on the request.
+     * */
     val larCounts = (larCountIdxStart to colCount).map(col =>
       AnnualLarCount(s"${year + larCountIdxStart - col - 1}", rs.getInt(col))
     ).filter(_.count > 0)
