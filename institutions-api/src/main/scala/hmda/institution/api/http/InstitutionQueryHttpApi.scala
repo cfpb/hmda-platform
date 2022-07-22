@@ -143,6 +143,19 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
       }
     }
 
+  private val quarterlyFilersLarCountsPath =
+    path("institutions" / "quarterly" / IntNumber / "lars" / "past" / IntNumber) { (year, pastCount) =>
+      (extractUri & get) { uri =>
+        val fetchLarCounts = InstitutionTsRepo.fetchPastLarCountsForQuarterlies(year, pastCount)
+        onComplete(fetchLarCounts) {
+          case Success(data) => complete(ToResponseMarshallable(data))
+          case Failure(error) =>
+            log.debug("most likely tables out of range and doesn't exist.", error)
+            returnNotFoundError(uri)
+        }
+      }
+    }
+
   private def completeInstitutionsFuture(f: Future[Seq[Institution]], uri: Uri): Route = {
     val entityMarshaller: PartialFunction[Seq[Institution], ToResponseMarshallable] = {
       case institutions: Seq[Institution] if institutions.nonEmpty => ToResponseMarshallable(InstitutionsResponse(institutions))
@@ -176,7 +189,8 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          institutionByIdPath ~ institutionByDomainPath ~ institutionHistoryPath ~ institutionByDomainDefaultPath ~ institutionLarCountPath
+          institutionByIdPath ~ institutionByDomainPath ~ institutionHistoryPath ~ institutionByDomainDefaultPath ~
+            institutionLarCountPath ~ quarterlyFilersLarCountsPath
         }
       }
     }
