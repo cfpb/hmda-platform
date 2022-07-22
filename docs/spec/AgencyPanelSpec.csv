@@ -1,0 +1,19 @@
+Column Name, Data Field Name, Data Field Type
+lei, Legal Entity Identifier (LEI), Alphanumeric
+activityYear, Activity Year, Numeric
+agency, Federal Agency, Numeric
+institutionType, Institution Type, Alphanumeric
+id2017, ID 2017, Numeric
+taxId, Tax ID, Alphanumeric
+rssd, RSSD, Numeric
+emailDomains, Associated Email Domains, Alphanumeric
+respondentName, Respondent Name, Alphanumeric
+respondentState, Respondent State, Alphanumeric
+respondentCity, Respondent City, Alphanumeric
+parentIdRssd, Parent RSSD, Numeric
+parentName, Parent Name, Alphanumeric
+assets, Assests, Numeric
+otherLenderCode, Other Lender Code, Numeric
+topHolderIdRssd, Top Holder RSSD, Numeric
+topHolderName, Top Holder Name, Alphanumeric
+hmdaFiler, HMDA Filer, Numeric
