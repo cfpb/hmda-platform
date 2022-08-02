@@ -18,7 +18,7 @@ object InstitutionTsRepo {
      */
     val query =
       sql"""
-        select lei, respondent_name, activity_year, #${getTsSql(year, pastCount)}
+        select lei, respondent_name, agency, activity_year, #${getTsSql(year, pastCount)}
         from #${s"institutions$year"} inst
         where quarterly_filer = true and not lei in ('#${bankFilterList.mkString("','")}')
          """.as[QuarterlyInstitutionLarCounts]

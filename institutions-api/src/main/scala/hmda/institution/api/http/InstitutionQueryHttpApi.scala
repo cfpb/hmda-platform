@@ -146,9 +146,26 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
   private val quarterlyFilersLarCountsPath =
     path("institutions" / "quarterly" / IntNumber / "lars" / "past" / IntNumber) { (year, pastCount) =>
       (extractUri & get) { uri =>
-        val fetchLarCounts = InstitutionTsRepo.fetchPastLarCountsForQuarterlies(year, pastCount)
-        onComplete(fetchLarCounts) {
-          case Success(data) => complete(ToResponseMarshallable(data))
+        val quarterlyLarCounts = InstitutionTsRepo.fetchPastLarCountsForQuarterlies(year, pastCount)
+        val yearlyTotalLarCounts = (1 to pastCount).map(i => {
+          val yr = s"${year - i}"
+          tsRepositories.get(yr)
+            .map(_.sumLars(bankFilterList.toSeq)
+              .recover({
+                case err: Throwable => log.debug("ts repo failure, most likely table not yet available for year, skipping...", err)
+                0
+              })
+              .map(AnnualLarCount(yr, _)))
+            .getOrElse(Future(AnnualLarCount(yr, 0)))
+        })
+
+        val repoRequests = for {
+          yearlyTotal <- Future.sequence(yearlyTotalLarCounts)
+          quarterly <- quarterlyLarCounts
+        } yield (yearlyTotal, quarterly)
+
+        onComplete(repoRequests) {
+          case Success((yearlyTotal, quarterly)) => complete(ToResponseMarshallable(LarCountSummary(yearlyTotal, quarterly)))
           case Failure(error) =>
             log.debug("most likely tables out of range and doesn't exist.", error)
             returnNotFoundError(uri)

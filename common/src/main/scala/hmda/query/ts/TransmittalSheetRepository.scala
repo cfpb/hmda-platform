@@ -12,6 +12,12 @@ class TransmittalSheetRepository(val config: DatabaseConfig[JdbcProfile], val ta
 
   override def getId(row: TransmittalSheetTable): config.profile.api.Rep[Id] = row.lei
 
+  def sumLars(exclusions: Seq[String]): Future[Int] = db.run(sumTotalLines(exclusions).result)
+
+  private def sumTotalLines(exclusions: Seq[String]): Rep[Int] = table.filterNot(s => s.lei inSet exclusions)
+    .map(_.totalLines).sum.getOrElse(0)
+
+
   def createSchema(): Future[Unit] = db.run(table.schema.create)
   def dropSchema(): Future[Unit] = db.run(table.schema.drop)
 }
