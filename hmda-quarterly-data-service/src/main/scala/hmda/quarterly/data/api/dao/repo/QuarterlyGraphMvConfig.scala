@@ -8,6 +8,8 @@ object QuarterlyGraphMvConfig {
   import dbConfig._
   val APP_VOL_MV: String = config.getString("mv.app_vol")
   val APP_VOL_PERIODS: Seq[String] = config.getString("mv.app_vol_periods").split(",").toSeq
+  val ALL_APP_VOL_MV: String = config.getString("mv.all_app_vol")
+  val ALL_APP_VOL_PERIODS: Seq[String] = config.getString("mv.all_app_vol_periods").split(",").toSeq
   val CRED_SCORE_BY_LOAN_MV: String = config.getString("mv.cred_score_by_loan")
   val CRED_SCORE_BY_LOAN_PERIODS: Seq[String] = config.getString("mv.cred_score_by_loan_periods").split(",").toSeq
   val CRED_SCORE_BY_RE_MV: String = config.getString("mv.cred_score_by_re")
