@@ -121,28 +121,6 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
       }
     }
 
-  private val institutionLarCountPath =
-    path("institutions" / Segment / "lars") { lei =>
-      (extractUri & get) { uri =>
-
-        val nonExistingTs: PartialFunction[Throwable, Option[TransmittalSheetEntity]] = {
-          case err: Throwable =>
-            log.debug("ts repo failure, most likely table not yet available for year, skipping...", err)
-            None
-        }
-
-        val requestTransmittals = tsRepositories.values.map(_.findById(lei).recover(nonExistingTs)).toSeq
-        val transmittalFuture = Future.sequence(requestTransmittals)
-
-        val entityMarshaller: PartialFunction[Seq[Option[TransmittalSheetEntity]], ToResponseMarshallable] = {
-          case transmittals: Seq[Option[TransmittalSheetEntity]] if transmittals.flatten.nonEmpty =>
-            ToResponseMarshallable(transmittals.flatten.map(ts => InstitutionLarEntity(ts.year.toString, ts.totalLines)))
-        }
-
-        completeFuture(transmittalFuture, uri, entityMarshaller)
-      }
-    }
-
   private val quarterlyFilersLarCountsPath =
     path("institutions" / "quarterly" / IntNumber / "lars" / "past" / IntNumber) { (year, pastCount) =>
       (extractUri & get) { uri =>
@@ -207,7 +185,7 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
       cors() {
         encodeResponse {
           institutionByIdPath ~ institutionByDomainPath ~ institutionHistoryPath ~ institutionByDomainDefaultPath ~
-            institutionLarCountPath ~ quarterlyFilersLarCountsPath
+            quarterlyFilersLarCountsPath
         }
       }
     }
