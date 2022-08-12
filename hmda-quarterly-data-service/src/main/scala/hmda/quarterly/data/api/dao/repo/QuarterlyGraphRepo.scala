@@ -35,6 +35,19 @@ object QuarterlyGraphRepo {
          """
     })) ++ Seq(ordering)
 
+  def fetchTotalApplicationsVolume(quarterly: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = if (quarterly) getTotalAppVolStmts(APP_VOL_MV, APP_VOL_PERIODS) else getTotalAppVolStmts(ALL_APP_VOL_MV, ALL_APP_VOL_PERIODS)
+    runStatements(stmts)
+  }
+
+  private def getTotalAppVolStmts(mv: String, periods: Seq[String]): Seq[SQLActionBuilder] =
+    unionStatements(periods.map(period => {
+      sql"""
+         select last_updated, quarter, sum(agg) as value from #${s"${mv}_$period"}
+         group by last_updated, quarter
+         """
+    })) ++ Seq(ordering)
+
   def fetchMedianCreditScoreByType(loanType: LoanTypeEnum, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
     val stmts = unionStatements(CRED_SCORE_BY_LOAN_PERIODS.map(period => {
       sql"""
