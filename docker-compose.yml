@@ -99,6 +99,7 @@ services:
       CASSANDRA_CLUSTER_USERNAME:
       CASSANDRA_JOURNAL_KEYSPACE: hmda2_journal
       CASSANDRA_SNAPSHOT_KEYSPACE: hmda2_snapshot
+      CASSANDRA_CLUSTER_DC: 
       KAFKA_CLUSTER_HOSTS: kafka:9092
       KAFKA_INSTITUTIONS_TOPIC: institution
       KAFKA_INSTITUTIONS_GROUP: institutions-group
