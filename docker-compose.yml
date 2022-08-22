@@ -60,8 +60,9 @@ services:
     environment:
       HMDA_RUNTIME_MODE: docker-compose
       CASSANDRA_CLUSTER_HOSTS: cassandra:9042
-      CASSANDRA_CLUSTER_PASSWORD:
-      CASSANDRA_CLUSTER_USERNAME:
+      CASSANDRA_CLUSTER_DC: datacenter1
+      CASSANDRA_CLUSTER_PASSWORD: cassandra
+      CASSANDRA_CLUSTER_USERNAME: cassandra
       CASSANDRA_JOURNAL_KEYSPACE: hmda2_journal
       CASSANDRA_SNAPSHOT_KEYSPACE: hmda2_snapshot
       KAFKA_CLUSTER_HOSTS: kafka:9092
