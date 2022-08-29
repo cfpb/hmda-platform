@@ -36,6 +36,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "hmda-quarterly-data-service.fullname" . }}-mv-configmap
+            - configMapRef:
+                name: {{ include "hmda-quarterly-data-service.fullname" . }}-verbiage-configmap
           env:
             - name: PG_HOST
               valueFrom:
