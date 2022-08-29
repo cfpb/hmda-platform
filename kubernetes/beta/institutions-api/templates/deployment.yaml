@@ -46,6 +46,11 @@ spec:
                 configMapKeyRef:
                   name: timed-guards
                   key: currentYear
+            - name: BANK_FILTER_LIST
+              valueFrom:
+                configMapKeyRef:
+                  key: bank-filter-list
+                  name: bank-filter-configmap
             - name: RULES_YEARLY_FILING_YEARS_ALLOWED
               valueFrom:
                 configMapKeyRef:
