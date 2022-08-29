@@ -482,6 +482,25 @@
                   </li>
               </ul>
           </li>
+          <li>
+            <a href="#quarterly-data-graph-api" class="toc-h1 toc-link" data-title="Quarterly Data Graph API">Quarterly Data Graph API</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#quarterly-data-graph-api-quarterly-data-endpoints" class="toc-h2 toc-link" data-title="Quarterly Data Endpoints">Quarterly Data Endpoints</a>
+                      <ul class="toc-list-h3">
+                          <li>
+                            <a href="#quarterly-data-graph-api-quarterly-data-endpoints-graph-data-summary" class="toc-h3 toc-link" data-title="Graph Data Summary">Graph Data Summary</a>
+                          </li>
+                          <li>
+                            <a href="#quarterly-data-graph-api-quarterly-data-endpoints-specific-graph-data" class="toc-h3 toc-link" data-title="Specific Graph Data">Specific Graph Data</a>
+                          </li>
+                          <li>
+                            <a href="#quarterly-data-graph-api-quarterly-data-endpoints-available-graph-data" class="toc-h3 toc-link" data-title="Available Graph Data">Available Graph Data</a>
+                          </li>
+                      </ul>
+                  </li>
+              </ul>
+          </li>
       </ul>
     </div>
     <div class="page-wrapper">
@@ -3465,6 +3484,232 @@ action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,
 <tr>
 <td>Return</td>
 <td>CSV</td>
+</tr>
+</tbody></table>
+<h1 id='quarterly-data-graph-api'>Quarterly Data Graph API</h1>
+<p>This API is what powers the <a href="https://ffiec.cfpb.gov/data-browser/graphs/quarterly/">Data Browser&#39;s Quarterly Graphs</a></p>
+<h2 id='quarterly-data-graph-api-quarterly-data-endpoints'>Quarterly Data Endpoints</h2><h3 id='quarterly-data-graph-api-quarterly-data-endpoints-graph-data-summary'>Graph Data Summary</h3>
+<blockquote>
+<p><strong>Example</strong></p>
+</blockquote>
+
+<pre><code class="text">
+<b>Request:</b>
+curl "https://ffiec.cfpb.gov/quarterly-data/graphs" -H 'Content-Type: application/json'
+
+<b>JSON Response:</b>
+{
+  "graphs": [
+    {
+      "category": "Loan & Application Counts",
+      "endpoint": "applications",
+      "title": "How has the number of applications changed?"
+    },
+    {
+      "category": "Loan & Application Counts",
+      "endpoint": "loans",
+      "title": "How has the number of loans changed?"
+    },
+    ...
+  ]
+}
+</code></pre>
+
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Method</td>
+<td><code>GET</code></td>
+</tr>
+<tr>
+<td>URL</td>
+<td><code>https://ffiec.cfpb.gov/quarterly-data/graphs/</code></td>
+</tr>
+<tr>
+<td>Return</td>
+<td>JSON</td>
+</tr>
+</tbody></table>
+
+<p>This endpoint lists out all the available graph data accessible through the API. The returned <code>graphs</code> field is a list of metadata consisting of <code>title</code>, <code>category</code>, and <code>endpoint</code>;
+by appending the <code>endpoint</code> field of the desired graph metadata to the API root url of <code>https://ffiec.cfpb.gov/quarterly-data/graphs/</code>, the full graph data is retrieved.</p>
+<h3 id='quarterly-data-graph-api-quarterly-data-endpoints-specific-graph-data'>Specific Graph Data</h3>
+<blockquote>
+<p><strong>Example</strong></p>
+</blockquote>
+
+<pre><code class="text">
+<b>Request:</b>
+curl "https://ffiec.cfpb.gov/quarterly-data/graphs/applications" -H 'Content-Type: application/json'
+
+<b>JSON Response:</b>
+{
+  "series": [
+    {
+      "coordinates": [
+        {
+          "x": "2019-Q3",
+          "y": 1167382.0
+        },
+        {
+          "x": "2019-Q4",
+          "y": 1258227.0
+        },
+        {
+          "x": "2020-Q1",
+          "y": 1301157.0
+        },
+        ...
+      ],
+      "name": "Conventional Conforming",
+    },
+    ...
+  ],
+  "subtitle": "Conventional conforming applications dramatically increased since 2019. FHA loans temporarily moved higher in 2020 Q3.",
+  "title": "How has the number of applications changed?",
+  "xLabel": "Year Quarter",
+  "yLabel": "Application Count"
+}
+</code></pre>
+
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Method</td>
+<td><code>GET</code></td>
+</tr>
+<tr>
+<td>URL</td>
+<td><code>https://ffiec.cfpb.gov/quarterly-data/graphs/{endpoint}</code></td>
+</tr>
+<tr>
+<td>Return</td>
+<td>JSON</td>
+</tr>
+</tbody></table>
+
+<p>To get the specific graph data, append the <code>endpoint</code> value from the above <a href="#quarterly-data-graph-api-quarterly-data-endpoints-graph-data-summary">Graph Data Summary</a> section example response to the base url of <code>https://ffiec.cfpb.gov/quarterly-data/graphs/</code>,
+e.g. <code>https://ffiec.cfpb.gov/quarterly-data/graphs/applications</code>.</p>
+
+<p>The response contains the following sections:</p>
+
+<ul>
+<li><p>title</p></li>
+<li><p>subtitle</p></li>
+<li><p>series</p></li>
+<li><p>xLabel</p></li>
+<li><p>yLabel</p></li>
+</ul>
+
+<p><code>title</code>, <code>subtitle</code>, <code>xLabel</code>, and <code>yLabel</code> are text fields providing some contexts of what the data represents.</p>
+
+<p><code>series</code> section is a list of data representing each line within the graph; each element within <code>series</code> will include xy <code>coordinates</code>, and <code>name</code> of the line.
+In general, the x <code>coordinates</code> represents the time period (e.g. <code>2021-Q3</code>), y <code>coordinates</code> are numeric values.</p>
+<h3 id='quarterly-data-graph-api-quarterly-data-endpoints-available-graph-data'>Available Graph Data</h3>
+<p>At the time of publication, below are the data available with their endpoints.
+To get the most up-to-date list, refer to <a href="#quarterly-data-graph-api-quarterly-data-endpoints-graph-data-summary">Graph Data Summary</a> section.</p>
+
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Endpoint</td>
+<td>Description</td>
+</tr>
+<tr>
+<td><code>applications</code></td>
+<td>How has the number of applications changed?</td>
+</tr>
+<tr>
+<td><code>all-applications</code></td>
+<td>How much of the total loan/application count do quarterly filers account for?</td>
+</tr>
+<tr>
+<td><code>loans</code></td>
+<td>How has the number of loans changed?</td>
+</tr>
+<tr>
+<td><code>credit-scores</code></td>
+<td>How have median credit scores changed?</td>
+</tr>
+<tr>
+<td><code>credit-scores-cc-re</code></td>
+<td>For conventional conforming loans, how have median credit scores differed by race/ethnicity?</td>
+</tr>
+<tr>
+<td><code>credit-scores-fha-re</code></td>
+<td>For FHA loans, how have median credit scores differed by race/ethnicity?</td>
+</tr>
+<tr>
+<td><code>ltv</code></td>
+<td>How has median CLTV changed?</td>
+</tr>
+<tr>
+<td><code>ltv-cc-re</code></td>
+<td>For conventional conforming loans, how has median CLTV differed by race/ethnicity?</td>
+</tr>
+<tr>
+<td><code>ltv-fha-re</code></td>
+<td>For FHA loans, how has median CLTV differed by race/ethnicity?</td>
+</tr>
+<tr>
+<td><code>dti</code></td>
+<td>How has median DTI changed?</td>
+</tr>
+<tr>
+<td><code>dti-cc-re</code></td>
+<td>For conventional conforming loans, how has median DTI differed by race/ethnicity?</td>
+</tr>
+<tr>
+<td><code>dti-fha-re</code></td>
+<td>For FHA loans, how has median DTI differed by race/ethnicity?</td>
+</tr>
+<tr>
+<td><code>denials</code></td>
+<td>How have denial rates changed?</td>
+</tr>
+<tr>
+<td><code>denials-cc-re</code></td>
+<td>For conventional conforming loans, how have denial rates differed by race/ethnicity?</td>
+</tr>
+<tr>
+<td><code>denials-fha-re</code></td>
+<td>For FHA loans, how have denial rates differed by race/ethnicity?</td>
+</tr>
+<tr>
+<td><code>interest-rates</code></td>
+<td>How have median interest rates changed?</td>
+</tr>
+<tr>
+<td><code>interest-rates-cc-re</code></td>
+<td>For conventional conforming loans, how have median interest rates differed by race/ethnicity?</td>
+</tr>
+<tr>
+<td><code>interest-rates-fha-re</code></td>
+<td>For FHA loans, how have median interest rates differed by race/ethnicity?</td>
+</tr>
+<tr>
+<td><code>tlc</code></td>
+<td>How have median total loan costs changed?</td>
+</tr>
+<tr>
+<td><code>tlc-cc-re</code></td>
+<td>For conventional conforming loans, how have median total loan costs differed by race/ethnicity?</td>
+</tr>
+<tr>
+<td><code>tlc-fha-re</code></td>
+<td>For FHA loans, how have median total loan costs differed by race/ethnicity?</td>
 </tr>
 </tbody></table>
 
