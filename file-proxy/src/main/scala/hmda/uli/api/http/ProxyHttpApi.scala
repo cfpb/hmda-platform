@@ -28,6 +28,8 @@ import akka.http.scaladsl.model.ContentTypes
 import scala.util.{Failure, Success}
 import akka.http.scaladsl.model.StatusCodes.BadRequest
 import hmda.auth.OAuth2Authorization
+import akka.util.Timeout
+import scala.concurrent.duration._
 
 object ProxyHttpApi {
   def create(log: Logger)(implicit ec: ExecutionContext, system: ActorSystem): OAuth2Authorization => Route = new ProxyHttpApi(log).proxyHttpRoutes _
@@ -59,43 +61,22 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
   def proxyHttpRoutes(oAuth2Authorization: OAuth2Authorization): Route = {
     encodeResponse {
       pathPrefix("file") {
-        //Modified Lar Route
-        path("modifiedLar"/ "year" / Segment / "institution" / Segment) { (year, lei) =>
+        //Modified Lar Route CSV
+        path("modifiedLar"/ "year" / Segment / "institution" / Segment / "csv") { (year, lei) =>
+          (extractUri & get) { uri =>
+            checkYearAvailable(dynamicYears, year) {
+              val s3Key = "prod/modified-lar/" + year + "/" + lei + ".csv"
+              streamingS3Route(s3Key)
+            }
+          }
+        } ~
+        //Modified Lar Route TXT
+        path("modifiedLar"/ "year" / Segment / "institution" / Segment / "txt") { (year, lei) =>
           (extractUri & get) { uri =>
             checkYearAvailable(dynamicYears, year) {
               val s3Key = "prod/modified-lar/" + year + "/" + lei + ".txt"
-              println("modifiedLar")
               streamingS3Route(s3Key)
             }
-          }
-        } ~
-        //Disclosure Report Route
-        path("reports" / "disclosure" / Segment / "msa" / Segment / "report" / Segment) { (year, msa, reportNumber) =>
-          (extractUri & get) { uri =>
-            checkYearAvailable(snapshotYears, year) {
-              val s3Key = "prod/reports/disclosure/" + year + "/" + msa + "/" + reportNumber + ".json"
-              println("disclosure")
-              streamingS3Route(s3Key)
-            }
-          }
-        } ~
-        //Aggregate Report Route
-        path("reports" / "aggregate" / Segment / "msa" / Segment / "report" / Segment) { (year, msa, reportNumber) =>
-          (extractUri & get) { uri =>
-           checkYearAvailable(snapshotYears, year) {
-            val s3Key = "prod/reports/aggregate/" + year + "/" + msa + "/" + reportNumber + ".json"
-            println("aggregate")
-            streamingS3Route(s3Key)
-           }
-          }
-        } ~
-        //Snapshot Route
-        //Documentation Route
-        path("reports" / "aggregate" / Segment / "msa" / Segment / "report" / Segment) { (year, msa, reportNumber) =>
-          (extractUri & get) { uri =>
-            val s3Key = "prod/reports/aggregate/" + year + "/" + msa + "/" + reportNumber + ".json"
-            println("aggregate")
-            streamingS3Route(s3Key)
           }
         } ~
         //IRS Report Route
@@ -104,8 +85,6 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
             oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
               checkYearAvailable(irsYears, year) {
                 val s3Key = "prod/reports/disclosure/" + year + "/" + lei + "/nationwide/IRS.csv"
-                println("irs")
-                println(s3Key)
                 streamingS3Route(s3Key)
               }
             }
@@ -116,6 +95,7 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
   }
 
   private def retrieveData(path: String): Future[Option[Source[ByteString, NotUsed]]] = {
+    val timeout: Timeout = Timeout(config.getInt("hmda.http.timeout").seconds)
     S3.download("cfpb-hmda-public", path).withAttributes(S3Attributes.settings(s3Settings)).runWith(Sink.head)
       .map(opt => opt.map { case (source, _) => source })
   }
