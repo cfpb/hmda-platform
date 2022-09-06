@@ -8,8 +8,10 @@ import akka.http.scaladsl.server.Directives._
 import hmda.api.http.routes.BaseHttpApi
 import hmda.api.http.directives.HmdaTimeDirectives._
 import hmda.auth.OAuth2Authorization
+import akka.util.Timeout
 
 import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
 
 // This is just a Guardian for starting up the API
 // $COVERAGE-OFF$
@@ -21,6 +23,7 @@ object HmdaProxyApi {
     implicit val ec: ExecutionContext = ctx.executionContext
     val shutdown                      = CoordinatedShutdown(system)
     val config                        = ctx.system.settings.config
+    implicit val timeout: Timeout     = Timeout(config.getInt("hmda.proxy.http.timeout").seconds)
     val log                           = ctx.log
     val oAuth2Authorization           = OAuth2Authorization(log, config)
     val proxyRoute                    = ProxyHttpApi.create(log)
