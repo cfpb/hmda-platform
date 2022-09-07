@@ -8,7 +8,7 @@ import spray.json.{ DefaultJsonProtocol, RootJsonFormat }
 trait JsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val seriesCoordinateFormat: RootJsonFormat[GraphSeriesCoordinate] = jsonFormat2(GraphSeriesCoordinate)
   implicit val seriesSummaryFormat: RootJsonFormat[GraphSeriesSummary] = jsonFormat3(GraphSeriesSummary)
-  implicit val seriesInfo: RootJsonFormat[GraphSeriesInfo] = jsonFormat5(GraphSeriesInfo)
+  implicit val seriesInfo: RootJsonFormat[GraphSeriesInfo] = jsonFormat6(GraphSeriesInfo)
   implicit val routeFormat: RootJsonFormat[GraphRoute] = jsonFormat3(GraphRoute)
   implicit val routeInfoFormat: RootJsonFormat[GraphRouteInfo] = jsonFormat2(GraphRouteInfo)
 
