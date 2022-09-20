@@ -17,24 +17,22 @@ postgresql:
 
 extraEnv: |
   - name: DB_VENDOR
-    value: "postgres"
+    value: postgres
   - name: DB_ADDR
-    value: "postgres-postgresql.postgres"
+    value: postgres-postgresql.postgres.svc.cluster.local
   - name: DB_PORT
     value: "5432"
   - name: DB_DATABASE
-    value: "postgres"
+    value: postgres
   - name: PROXY_ADDRESS_FORWARDING
     value: "true"
+  - name: DB_USER_FILE
+    value: /secrets/postgres-credentials/username
+  - name: DB_PASSWORD_FILE
+    value: /secrets/postgres-credentials/password
 
       #args: 
       #  - "-Dkeycloak.import=/realm/realm.json"
-
-keycloak:
-  persistence:
-    existingSecret: postgres-credentials
-    existingSecretPasswordKey: postgres-password
-    existingSecretUsernameKey: postgres-username
 
 extraInitContainers: |
   - name: theme-provider  
@@ -66,6 +64,9 @@ extraInitContainers: |
         mountPath: /spi
 
 extraVolumes: |
+  - name: postgres-credentials
+    secret:
+      secretName: postgres-credentials
   - name: realm-secret
     secret:
       secretName: realm-secret
@@ -81,3 +82,7 @@ extraVolumeMounts: |
     mountPath: /opt/jboss/keycloak/themes/hmda
   - name: spi
     mountPath: /opt/jboss/keycloak/standalone/deployments
+  - name: postgres-credentials
+    mountPath: /secrets/postgres-credentials
+    readOnly: true
+
