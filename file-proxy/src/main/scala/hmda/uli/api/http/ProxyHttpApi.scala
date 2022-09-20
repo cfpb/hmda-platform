@@ -47,6 +47,8 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
   val irsYears            = config.getString("hmda.publication.years.irs").split(",").toList
   val snapshotYears       = config.getString("hmda.publication.years.snapshot").split(",").toList
 
+  val hmdaAdminRole   = config.getString("keycloak.hmda.admin.role")
+
   val awsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccess))
   val awsRegionProvider: AwsRegionProvider = new AwsRegionProvider {
     override def getRegion: Region = Region.of(region)
@@ -70,6 +72,15 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
             }
           }
         } ~
+        //Modified Lar Header Route CSV
+        path("modifiedLar"/ "year" / Segment / "institution" / Segment / "csv" / "header") { (year, lei) =>
+          (extractUri & get) { uri =>
+            checkYearAvailable(dynamicYears, year) {
+              val s3Key = "prod/modified-lar/" + year + "/" + lei + "_header.csv"
+              streamingS3Route(s3Key)
+            }
+          }
+        } ~
         //Modified Lar Route TXT
         path("modifiedLar"/ "year" / Segment / "institution" / Segment / "txt") { (year, lei) =>
           (extractUri & get) { uri =>
@@ -79,10 +90,19 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
             }
           }
         } ~
+        //Modified Lar Header Route TXT
+        path("modifiedLar"/ "year" / Segment / "institution" / Segment / "txt" / "header") { (year, lei) =>
+          (extractUri & get) { uri =>
+            checkYearAvailable(dynamicYears, year) {
+              val s3Key = "prod/modified-lar/" + year + "/" + lei + "_header.txt"
+              streamingS3Route(s3Key)
+            }
+          }
+        } ~
         //IRS Report Route
         path("reports" / "irs" / "year" / Segment / "institution" / Segment) { (year, lei) =>
           (extractUri & get) { uri =>
-            oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+            oAuth2Authorization.authorizeTokenWithLeiOrRole(lei, hmdaAdminRole) { _ =>
               checkYearAvailable(irsYears, year) {
                 val s3Key = "prod/reports/disclosure/" + year + "/" + lei + "/nationwide/IRS.csv"
                 streamingS3Route(s3Key)
