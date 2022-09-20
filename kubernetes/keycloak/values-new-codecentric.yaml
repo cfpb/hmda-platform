@@ -17,18 +17,18 @@ postgresql:
 
 extraEnv: |
   - name: DB_VENDOR
-    value: "postgres"
+    value: postgres
   - name: DB_ADDR
-    value: "postgres-postgresql.postgres"
+    value: postgres-postgresql.postgres
   - name: DB_PORT
     value: "5432"
   - name: DB_DATABASE
-    value: "postgres"
+    value: postgres
   - name: PROXY_ADDRESS_FORWARDING
     value: "true"
 
-      #args: 
-      #  - "-Dkeycloak.import=/realm/realm.json"
+args: 
+  - "-Dkeycloak.import=/realm/realm.json"
 
 keycloak:
   persistence:
