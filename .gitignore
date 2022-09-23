@@ -73,6 +73,7 @@ dist/
 # Scala
 #########
 ## sbt specific
+.bsp/
 .cache/
 .history/
 .lightbend/
