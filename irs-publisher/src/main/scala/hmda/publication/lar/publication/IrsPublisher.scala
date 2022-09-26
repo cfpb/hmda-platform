@@ -12,6 +12,7 @@ import akka.stream.scaladsl.{Sink, Source}
 import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 import hmda.census.records.CensusRecords
+import hmda.census.records.CensusRecords._
 import hmda.model.census.Census
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.submission.SubmissionId
@@ -65,11 +66,9 @@ object IrsPublisher {
         .withS3RegionProvider(awsRegionProvider)
         .withListBucketApiVersion(ListBucketVersion2)
 
-      def getCensus(hmdaGeoTract: String, year: Int): Msa = {
+      def getCensus(hmdaGeoCounty:String,hmdaGeoTract: String, year: Int): Msa = {
 
-        val indexTractMap = CensusRecords.yearTractMap(year)
-
-        val censusResult = indexTractMap.getOrElse(hmdaGeoTract, Census())
+        val censusResult = getCensusOnTractandCounty(hmdaGeoTract,hmdaGeoCounty,year)
 
         val censusID =
           if (censusResult.msaMd == 0) "-----" else censusResult.msaMd.toString
@@ -104,7 +103,7 @@ object IrsPublisher {
                 .map(_.utf8String)
                 .map(_.trim)
                 .map(s => LarCsvParser(s, true).getOrElse(LoanApplicationRegister()))
-                .map(lar => (lar, getCensus(lar.geography.tract, submissionId.period.year)))
+                .map(lar => (lar, getCensus(lar.geography.county,lar.geography.tract, submissionId.period.year)))
                 .fold(MsaMap()) {
                   case (map, (lar, msa)) => map.addLar(lar, msa)
                 }

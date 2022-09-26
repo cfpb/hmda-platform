@@ -19,6 +19,12 @@ object CreateFilingAuthorization {
     // we use this only for month and day information (not time)
     val now = LocalDate.now()
     if (check(year, now.getDayOfYear, quarter)) successful
+    // The following message is used by the Frontend, please notify devs when modifying this text. 
     else complete((BadRequest, ErrorResponse(BadRequest.intValue, "The provided year or quarter is no longer available for filing", path)))
+  }
+
+  def isQuarterlyYearAllowed(year: Int)(successful: Route): Route = extractMatchedPath { path =>
+    if (Filer.checkQuarterlyYear(rulesConfig)(year)) successful
+    else complete((BadRequest, ErrorResponse(BadRequest.intValue, "The provided year is not available", path)))
   }
 }

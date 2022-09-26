@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hmda-quarterly-data-service.fullname" . }}
+  labels:
+    {{- include "hmda-quarterly-data-service.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "hmda-quarterly-data-service.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "hmda-quarterly-data-service.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "hmda-quarterly-data-service.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "hmda-quarterly-data-service.fullname" . }}-mv-configmap
+            - configMapRef:
+                name: {{ include "hmda-quarterly-data-service.fullname" . }}-verbiage-configmap
+          env:
+            - name: PG_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: host
+            - name: PG_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: postgresql-configmap
+                  key: postgres.database
+            - name: PG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: username
+            - name: PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: password
+            - name: PG_SSL
+              valueFrom:
+                configMapKeyRef:
+                  name: postgresql-configmap
+                  key: postgres.ssl
+            - name: JDBC_URL
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: url
+          ports:
+            - name: http
+              containerPort: 8060
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -167,10 +167,11 @@ class PostgresModifiedLarRepository(config: DatabaseConfig[JdbcProfile], tableSe
 
   override def findFilers(filerFields: List[QueryField], year: Int): Task[Seq[FilerInformationLatest]] = {
     val institutionsTableName = year match { //will be needed when data browser has to support multiple years
-      case 2018 => "institutions2018_snapshot"
-      case 2019 => "institutions2019_snapshot"
-      case 2020 => "institutions2020_snapshot"
-      case _    => "institutions2020_snapshot"
+      case 2018 => "institutions2018_three_year_04052022"
+      case 2019 => "institutions2019_one_year_04052022"
+      case 2020 => "institutions2020_one_year_04302022"
+      case 2021 => "institutions2021_snapshot_04302022"
+      case _    => "institutions2021_snapshot_04302022"
     }
 
     //do not include year in the WHERE clause because all entries in the table (modifiedlar2018_snapshot) have filing_year = 2018
@@ -204,7 +205,7 @@ class PostgresModifiedLarRepository(config: DatabaseConfig[JdbcProfile], tableSe
     val query = sql"""
         SELECT
           COUNT(loan_amount),
-          SUM(loan_amount)
+          SUM(loan_amount::numeric)
         FROM #${tableSelector(year).name}
         #$filterCriteria
         """.as[Statistic].head

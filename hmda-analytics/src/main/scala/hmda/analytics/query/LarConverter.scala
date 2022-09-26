@@ -6,6 +6,7 @@ import hmda.model.census.CountyLoanLimit
 import hmda.census.records._
 import hmda.census.records.CountyLoanLimitRecords._
 import hmda.model.census.Census
+import hmda.census.records.CensusRecords._
 import com.typesafe.config.ConfigFactory
 import java.security.MessageDigest
 
@@ -74,7 +75,7 @@ object LarConverter {
     year: Int,
     isQuarterly: Boolean = false
   ): LarEntity = {
-    val census = CensusRecords.yearTractMap(year).getOrElse(lar.geography.tract, Census())
+    val census = getCensusOnTractandCounty(lar.geography.tract, lar.geography.county, year)
     val overallLoanLimit = getOverallLoanLimit(year)
     val countyLoanLimitsByCounty = getcountyLoanLimitsByCounty(year)
     val countyLoanLimitsByState = getcountyLoanLimitsByState(year)

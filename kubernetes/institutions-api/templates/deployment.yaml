@@ -53,6 +53,16 @@ spec:
                 configMapKeyRef:
                   name: timed-guards
                   key: yearsAllowed
+            - name: BANK_FILTER_LIST
+              valueFrom:
+                configMapKeyRef:
+                  key: bank-filter-list
+                  name: bank-filter-configmap
+            - name: RULES_QF_FILING_YEARS_ALLOWED
+              valueFrom:
+                configMapKeyRef:
+                  name: timed-guards
+                  key: quarterlyYearsAllowed
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:
@@ -100,6 +110,11 @@ spec:
                 configMapKeyRef:
                   name: cassandra-configmap
                   key: cassandra-hosts
+            - name: CASSANDRA_CLUSTER_DC
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-cluster-dc
             - name: CASSANDRA_CLUSTER_USERNAME
               valueFrom:
                 secretKeyRef:

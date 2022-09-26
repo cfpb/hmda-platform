@@ -10,16 +10,6 @@ import scala.concurrent.Await
 
 trait InstitutionSetup extends InstitutionEmailComponent {
 
-  implicit val institutionRepository2018 =
-    new InstitutionRepository2018(dbConfig, "institutions2018")
-  implicit val institutionRepository2019 =
-    new InstitutionRepository2019(dbConfig, "institutions2019")
-  implicit val institutionRepository2020 =
-    new InstitutionRepository2020(dbConfig, "institutions2020")
-  implicit val institutionRepository2021 =
-    new InstitutionRepository2021(dbConfig, "institutions2021")
-  implicit val institutionRepository2022 =
-    new InstitutionRepository2022(dbConfig, "institutions2022")
   implicit val emailRepository = new InstitutionEmailsRepository(dbConfig)
   val db                       = emailRepository.db
 
@@ -48,23 +38,24 @@ trait InstitutionSetup extends InstitutionEmailComponent {
     import dbConfig.profile.api._
     val setup = db.run(
       DBIOAction.seq(
-        institutionsTable2018.schema.create,
-        institutionsTable2019.schema.create,
-        institutionsTable2020.schema.create,
-        institutionsTable2021.schema.create,
-        institutionsTable2022.schema.create,
-        institutionsTable2018 ++= Seq(
-          instA,
-          instB,
-          instE
-        ),
-        institutionEmailsTable.schema.create,
-        institutionEmailsTable ++= Seq(
-          InstitutionEmailEntity(1, "AAA", "aaa.com"),
-          InstitutionEmailEntity(2, "AAA", "bbb.com"),
-          InstitutionEmailEntity(3, "BBB", "bbb.com"),
-          InstitutionEmailEntity(4, "EEE", "eee.com")
-        )
+        Seq(institutionsTable2018.schema.create,
+          institutionsTable2019.schema.create,
+          institutionsTable2020.schema.create,
+          institutionsTable2021.schema.create,
+          institutionsTable2022.schema.create,
+          institutionsTable2018 ++= Seq(
+            instA,
+            instB,
+            instE
+          ),
+          institutionEmailsTable.schema.create,
+          institutionEmailsTable ++= Seq(
+            InstitutionEmailEntity(1, "AAA", "aaa.com"),
+            InstitutionEmailEntity(2, "AAA", "bbb.com"),
+            InstitutionEmailEntity(3, "BBB", "bbb.com"),
+            InstitutionEmailEntity(4, "EEE", "eee.com")
+          )) ++
+          tsRepositories.values.map(_.table.schema.create).toSeq: _*
       )
     )
     Await.result(setup, duration)
@@ -72,11 +63,13 @@ trait InstitutionSetup extends InstitutionEmailComponent {
 
   def tearDown() = {
     Await.result(emailRepository.dropSchema(), duration)
-    Await.result(institutionRepository2018.dropSchema(), duration)
-    Await.result(institutionRepository2019.dropSchema(), duration)
-    Await.result(institutionRepository2020.dropSchema(), duration)
-    Await.result(institutionRepository2021.dropSchema(), duration)
-    Await.result(institutionRepository2022.dropSchema(), duration)
+    institutionRepositories.values.foreach{ repo =>
+      Await.result(repo.dropSchema(), duration)
+    }
+
+    tsRepositories.values.foreach{ repo =>
+      Await.result(repo.dropSchema(), duration)
+    }
 
   }
 

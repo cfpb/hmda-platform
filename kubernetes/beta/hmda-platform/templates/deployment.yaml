@@ -97,6 +97,36 @@ spec:
                 configMapKeyRef:
                   name: timed-guards
                   key: q3End
+            - name: ACTION_DATE_Q1_START
+              valueFrom:
+                configMapKeyRef:
+                  name: timed-guards
+                  key: actionQ1Start
+            - name: ACTION_DATE_Q1_END
+              valueFrom:
+                configMapKeyRef:
+                  name: timed-guards
+                  key: actionQ1End
+            - name: ACTION_DATE_Q2_START
+              valueFrom:
+                configMapKeyRef:
+                  name: timed-guards
+                  key: actionQ2Start
+            - name: ACTION_DATE_Q2_END
+              valueFrom:
+                configMapKeyRef:
+                  name: timed-guards
+                  key: actionQ2End
+            - name: ACTION_DATE_Q3_START
+              valueFrom:
+                configMapKeyRef:
+                  name: timed-guards
+                  key: actionQ3Start
+            - name: ACTION_DATE_Q3_END
+              valueFrom:
+                configMapKeyRef:
+                  name: timed-guards
+                  key: actionQ3End
             - name: KAFKA_EMAIL_TOPIC
               value: {{.Values.kafka.emailTopic}}
             - name: KAFKA_INSTITUTIONS_TOPIC
@@ -127,6 +157,11 @@ spec:
                 configMapKeyRef:
                   name: cassandra-configmap
                   key: cassandra-hosts
+            - name: CASSANDRA_CLUSTER_DC
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-cluster-dc
             - name: CASSANDRA_JOURNAL_KEYSPACE
               valueFrom:
                 configMapKeyRef:

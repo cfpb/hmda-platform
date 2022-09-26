@@ -7,6 +7,12 @@ data:
   q2Start: July 01
   q3End: December 31
   q3Start: October 01
+  actionQ1End: March 31
+  actionQ1Start: January 01
+  actionQ2End: June 30
+  actionQ2Start: April 01
+  actionQ3End: September 30
+  actionQ3Start: July 01
   quarterlyYearsAllowed: 2020,2021
   yearsAllowed: 2019,2020,2021
 kind: ConfigMap

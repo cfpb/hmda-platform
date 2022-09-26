@@ -56,10 +56,10 @@ lazy val slickDeps = Seq(slick, slickHikariCP, postgres, h2)
 
 lazy val dockerSettings = Seq(
   Docker / maintainer := "Hmda-Ops",
-  dockerBaseImage := "openjdk:19-jdk-alpine3.15",
+  dockerBaseImage := "openjdk:19-jdk-alpine3.16",
   dockerRepository := Some("hmda"),
   dockerCommands := dockerCommands.value.flatMap {
-    case cmd@Cmd("FROM",_) => List(cmd, Cmd("RUN", "apk update && apk upgrade"),
+    case cmd@Cmd("FROM",_) => List(cmd, Cmd("RUN", "apk update"),
       Cmd("RUN", "rm /var/cache/apk/*"))
     case other => List(other)
   }
@@ -96,7 +96,8 @@ lazy val `hmda-root` = (project in file("."))
     `hmda-reporting`,
     `ratespread-calculator`,
     `data-browser`,
-    `submission-errors`
+    `submission-errors`,
+    `hmda-quarterly-data-service`
   )
 
 val latestGitTag = settingKey[String]("The latest git tag.")
@@ -578,3 +579,34 @@ lazy val `email-service` = (project in file("email-service"))
   )
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(`hmda-protocol`)
+
+lazy val `hmda-quarterly-data-service` = (project in file ("hmda-quarterly-data-service"))
+  .enablePlugins(
+    JavaServerAppPackaging,
+    sbtdocker.DockerPlugin,
+    AshScriptPlugin
+  )
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
+        enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
+      assemblyMergeStrategy in assembly := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case PathList(ps @ _*) if ps.last endsWith ".proto" =>
+          MergeStrategy.first
+        case "module-info.class" => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      },
+      assemblyJarName in assembly := {
+        s"${name.value}.jar"
+      }
+    ),
+    dockerSettings,
+    packageSettings
+  )
+  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(`hmda-protocol` % "compile->compile;test->test")

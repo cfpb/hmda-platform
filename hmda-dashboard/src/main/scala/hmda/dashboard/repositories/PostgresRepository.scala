@@ -1,20 +1,50 @@
 package hmda.dashboard.repositories
 
+import com.typesafe.config.ConfigFactory
+
 import java.text.SimpleDateFormat
 import java.util.Calendar
-
 import hmda.dashboard.models._
 import monix.eval.Task
 import slick.basic.DatabaseConfig
-import slick.jdbc.JdbcProfile
+import slick.jdbc.{ JdbcProfile, PositionedParameters, SQLActionBuilder }
 
+object PostgresRepository {
+  private val MV_EXEMPTIONS = "exemptions"
+  private val MV_OPEN_END_CREDIT = "open_end_credit"
+  private val MV_VOLUNTARY_FILERS = "voluntary_filers"
+  private val MV_LAR_EXEMPTIONS = "lar_exemptions"
+  private val MV_OPEN_END_CREDIT_LAR = "open_end_credit_lar"
+  private val MV_LIST_QUARTERLY_FILERS = "list_quarterly_filers"
+  private val TS_YEARLY = "ts_yearly"
+  private val TS_QUARTERLY = "ts_quarterly"
+  private val LAR_YEARLY = "lar_yearly"
+  private val LAR_QUARTERLY = "lar_quarterly"
+  private val SOURCE_PATTERNS = Map(
+    MV_EXEMPTIONS -> "exemptions_%s",
+    MV_OPEN_END_CREDIT -> "open_end_credit_filers_by_agency_%s",
+    MV_VOLUNTARY_FILERS -> "voluntary_filers%s",
+    MV_LAR_EXEMPTIONS -> "lar_count_using_exemption_by_agency_%s",
+    MV_OPEN_END_CREDIT_LAR -> "open_end_credit_lar_count_by_agency_%s",
+    MV_LIST_QUARTERLY_FILERS -> "list_quarterly_filers_%s",
+    LAR_YEARLY -> "loanapplicationregister%s",
+    LAR_QUARTERLY -> "lar%s_%s",
+    TS_YEARLY -> "transmittalsheet%s",
+    TS_QUARTERLY -> "ts%s_%s"
+  )
+}
 class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Array[String] ) {
 
   import config._
   import config.profile.api._
+  import PostgresRepository._
 
 
   private val filterList = bankFilterList.mkString("'","','","'")
+
+  private val sourcesConfig = ConfigFactory.load().getConfig("hmda.sources")
+  private val yearlyAvailable = sourcesConfig.getString("yearly").split(",").toSeq
+  private val quarterlyAvailable = sourcesConfig.getString("quarterly").split(",").toSeq
 
   def getDates(y: Int, w: Int, s: Int = 0) : String = {
     val sdf = new SimpleDateFormat("YYYY-MM-dd")
@@ -31,58 +61,43 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
     sdf.format(cal.getTime)
   }
 
-  def tsTableSelector(year: String): String = {
-    year match {
-      case "2018" => "transmittalsheet2018"
-      case "2019" => "transmittalsheet2019"
-      case "2020" => "transmittalsheet2020"
-      case "2021" => "transmittalsheet2021"
-      case "2020-Q1" => "ts2020_q1"
-      case "2020-Q2" => "ts2020_q2"
-      case "2020-Q3" => "ts2020_q3"
-      case "2021-Q1" => "ts2021_q1"
-      case "2021-Q2" => "ts2021_q2"
-      case "2021-Q3" => "ts2021_q3"
-      case _    => ""
+  def tsTableSelector(period: String): String = {
+    period match {
+      case periodToCheck if yearlyAvailable.contains(periodToCheck) => getSource(SOURCE_PATTERNS.getOrElse(TS_YEARLY, ""), periodToCheck)
+      case periodToCheck if quarterlyAvailable.contains(periodToCheck) => getSource(SOURCE_PATTERNS.getOrElse(TS_QUARTERLY, ""), periodToCheck)
+      case _ => throw new IllegalArgumentException(f"Data source not configured for period: $period")
     }
   }
 
   def larTableSelector(period: String, mview: String = ""): String = {
-    (period, mview) match {
-      case ("2018","") => "loanapplicationregister2018"
-      case ("2019","") => "loanapplicationregister2019"
-      case ("2020","") => "loanapplicationregister2020"
-      case ("2021","") => "loanapplicationregister2021"
-      case ("2018","exemptions") => "exemptions_2018"
-      case ("2019","exemptions") => "exemptions_2019"
-      case ("2020","exemptions") => "exemptions_2020"
-      case ("2021","exemptions") => "exemptions_2021"
-      case ("2018","open_end_credit") => "open_end_credit_filers_by_agency_2018"
-      case ("2019","open_end_credit") => "open_end_credit_filers_by_agency_2019"
-      case ("2020","open_end_credit") => "open_end_credit_filers_by_agency_2020"
-      case ("2021","open_end_credit") => "open_end_credit_filers_by_agency_2021"
-      case ("2018","voluntary_filers") => "voluntary_filers2018"
-      case ("2019","voluntary_filers") => "voluntary_filers2019"
-      case ("2020","voluntary_filers") => "voluntary_filers2020"
-      case ("2021","voluntary_filers") => "voluntary_filers2021"
-      case ("2018","lar_exemptions") => "lar_count_using_exemption_by_agency_2018"
-      case ("2019","lar_exemptions") => "lar_count_using_exemption_by_agency_2019"
-      case ("2020","lar_exemptions") => "lar_count_using_exemption_by_agency_2020"
-      case ("2021","lar_exemptions") => "lar_count_using_exemption_by_agency_2021"
-      case ("2018","open_end_credit_lar") => "open_end_credit_lar_count_by_agency_2018"
-      case ("2019","open_end_credit_lar") => "open_end_credit_lar_count_by_agency_2019"
-      case ("2020","open_end_credit_lar") => "open_end_credit_lar_count_by_agency_2020"
-      case ("2021","open_end_credit_lar") => "open_end_credit_lar_count_by_agency_2021"
-      case ("2019","list_quarterly_filers") => "list_quarterly_filers_2019"
-      case ("2020","list_quarterly_filers") => "list_quarterly_filers_2020"
-      case ("2021","list_quarterly_filers") => "list_quarterly_filers_2021"
-      case ("2020-Q1","") => "lar2020_q1"
-      case ("2020-Q2","") => "lar2020_q2"
-      case ("2020-Q3","") => "lar2020_q3"
-      case ("2021-Q1","") => "lar2021_q1"
-      case ("2021-Q2","") => "lar2021_q2"
-      case ("2021-Q3","") => "lar2021_q3"
-      case _    => ""
+    val containedInYearly = yearlyAvailable.contains(period)
+    val containedInQuarterly = quarterlyAvailable.contains(period)
+
+    val sourcePattern = mview match {
+      case mv if !mv.isBlank && containedInYearly => SOURCE_PATTERNS.get(mview)
+      case _ if containedInYearly => SOURCE_PATTERNS.get(LAR_YEARLY)
+      case _ if containedInQuarterly => SOURCE_PATTERNS.get(LAR_QUARTERLY)
+      case _ => throw new IllegalArgumentException(f"Data source: $mview, not configured for period: $period")
+    }
+    sourcePattern.map(getSource(_, period)).get
+  }
+
+  def getSource(sourcePattern: String, period: String): String = {
+    getPeriod(period) match {
+      case (yr, qt) if !qt.isBlank => String.format(sourcePattern, yr, qt)
+      case (yr, _) => String.format(sourcePattern, yr)
+      case _ => throw new IllegalArgumentException(f"Data source: $sourcePattern, not configured for period: $period")
+    }
+  }
+
+  def getPeriod(periodToCheck: String): (String, String) = {
+    if (periodToCheck.contains('-')) {
+      periodToCheck.split('-') match {
+        case Array(yr, qt) => (yr, qt)
+        case _ => (periodToCheck, "")
+      }
+    } else {
+      (periodToCheck, "")
     }
   }
 
@@ -129,31 +144,43 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   }
 
   def fetchFilerAllPeriods(lei: String): Task[Seq[FilerAllPeriods]] = {
-    val tsTable_2018 = tsTableSelector("2018")
-    val tsTable_2019 = tsTableSelector("2019")
-    val tsTable_2020 = tsTableSelector("2020")
-    val tsTable_2021 = tsTableSelector("2021")
-    val tsTable_2020_q1 = tsTableSelector("2020-Q1")
-    val tsTable_2020_q2 = tsTableSelector("2020-Q2")
-    val tsTable_2020_q3 = tsTableSelector("2020-Q3")
-    val tsTable_2021_q1 = tsTableSelector("2021-Q1")
-    val tsTable_2021_q2 = tsTableSelector("2021-Q2")
-    val tsTable_2021_q3 = tsTableSelector("2021-Q3")
+    val union = sql" union all "
+    val yearlyTableNames = yearlyAvailable.map(tsTableSelector)
+    val quarterlyTableNames = quarterlyAvailable.map(tsTableSelector)
 
-    val query = sql"""
-      select cast(year as varchar), institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2018} as ts2018  where upper(ts2018.lei) NOT IN (#${filterList}) and ts2018.lei = '#${lei}' union all
-      select cast(year as varchar), institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2019} as ts2019  where upper(ts2019.lei) NOT IN (#${filterList}) and ts2019.lei = '#${lei}' union all
-      select cast(year as varchar), institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2020} as ts2020  where upper(ts2020.lei) NOT IN (#${filterList}) and ts2020.lei = '#${lei}' union all
-      select cast(year as varchar), institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2021} as ts2021  where upper(ts2021.lei) NOT IN (#${filterList}) and ts2021.lei = '#${lei}' union all
-      select concat(year, '-', quarter) as year, institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2020_q1} as ts2020_q1  where upper(ts2020_q1.lei) NOT IN (#${filterList}) and ts2020_q1.lei = '#${lei}' union all
-      select concat(year, '-', quarter) as year, institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2020_q2} as ts2020_q2  where upper(ts2020_q2.lei) NOT IN (#${filterList}) and ts2020_q2.lei = '#${lei}' union all
-      select concat(year, '-', quarter) as year, institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2020_q3} as ts2020_q3  where upper(ts2020_q3.lei) NOT IN (#${filterList}) and ts2020_q3.lei = '#${lei}' union all
-      select concat(year, '-', quarter) as year, institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2021_q1} as ts2021_q1  where upper(ts2021_q1.lei) NOT IN (#${filterList}) and ts2021_q1.lei = '#${lei}' union all
-      select concat(year, '-', quarter) as year, institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2021_q2} as ts2021_q2  where upper(ts2021_q2.lei) NOT IN (#${filterList}) and ts2021_q2.lei = '#${lei}' union all
-      select concat(year, '-', quarter) as year, institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency from #${tsTable_2021_q3} as ts2021_q3  where upper(ts2021_q3.lei) NOT IN (#${filterList}) and ts2021_q3.lei = '#${lei}';
-      """.as[FilerAllPeriods]
+    val statementBuilder = Seq.newBuilder[SQLActionBuilder]
+
+    yearlyTableNames.foreach(table => statementBuilder += getTsYearlyStatement(lei, table) += union)
+    quarterlyTableNames.foreach(table => statementBuilder += getTsQuarterlyStatement(lei, table) += union)
+
+    val allStatements = statementBuilder.result()
+
+    val statements =
+      if (allStatements.last == union) allStatements.dropRight(1)
+      else allStatements
+
+    val query = combineStatements(statements:_*).as[FilerAllPeriods]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
+
+  private def combineStatements(statements: SQLActionBuilder*): SQLActionBuilder = {
+    SQLActionBuilder(statements.map(_.queryParts).reduce(_ ++ _),
+      (position: Unit, positionedParameters: PositionedParameters) => {
+        statements.foreach(_.unitPConv.apply(position, positionedParameters))
+      })
+  }
+
+  private def getTsYearlyStatement(lei: String, tableName: String): SQLActionBuilder =
+    sql"""
+      select cast(year as varchar), institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency
+      from #$tableName where upper(lei) NOT IN (#$filterList) and lei = '#$lei'
+       """
+
+  private def getTsQuarterlyStatement(lei: String, tableName: String): SQLActionBuilder =
+    sql"""
+      select concat(year, '-', quarter) as year, institution_name, lei, total_lines, city, state, to_timestamp(sign_date/1000) as sign_date, agency
+      from #$tableName where upper(lei) NOT IN (#$filterList) and lei = '#$lei'
+       """
 
   def fetchFilersByLar(period: String, min_lar: Int, max_lar: Int): Task[Seq[FilersByLar]] = {
     val tsTable = tsTableSelector(period)
@@ -174,7 +201,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   def fetchSignsForLastDays(days: Int, period: String): Task[Seq[SignsForLastDays]] = {
     val tsTable = tsTableSelector(period)
     val query = sql"""
-      select to_timestamp(sign_date/1000) as signdate, count(*) as numsign from  #${tsTable} where sign_date is not null and upper(lei) NOT IN (#${filterList}) group by date(to_timestamp(sign_date/1000)) order by signdate desc limit #${days};
+      select date(to_timestamp(sign_date/1000)) as signdate, count(*) as numsign from  #${tsTable} where sign_date is not null and upper(lei) NOT IN (#${filterList}) group by date(to_timestamp(sign_date/1000)) order by signdate desc limit #${days};
       """.as[SignsForLastDays]
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
@@ -232,7 +259,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   }
 
   def fetchFilersUsingExemptionByAgency(period: String): Task[Seq[FilersUsingExemptionByAgency]] = {
-    val materializedView = larTableSelector(period, "exemptions")
+    val materializedView = larTableSelector(period, MV_EXEMPTIONS)
     val query = sql"""
       select agency, count from  #${materializedView} ;
       """.as[FilersUsingExemptionByAgency]
@@ -249,7 +276,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   }
 
   def fetchLarCountUsingExemptionByAgency(period: String): Task[Seq[LarCountUsingExemptionByAgency]] = {
-    val larTable = larTableSelector(period, "lar_exemptions")
+    val larTable = larTableSelector(period, MV_LAR_EXEMPTIONS)
     val query = sql"""
       select agency, count from #${larTable} ;
       """.as[LarCountUsingExemptionByAgency]
@@ -257,7 +284,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   }
 
   def fetchOpenEndCreditFilersByAgency(period: String): Task[Seq[OpenEndCreditByAgency]] = {
-    val larTable = larTableSelector(period, "open_end_credit")
+    val larTable = larTableSelector(period, MV_OPEN_END_CREDIT)
     val query = sql"""
       select agency, count(*) from #${larTable} where upper(lei) NOT IN (#${filterList}) group by agency;
       """.as[OpenEndCreditByAgency]
@@ -265,7 +292,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   }
 
   def fetchOpenEndCreditLarCountByAgency(period: String): Task[Seq[OpenEndCreditLarCountByAgency]] = {
-    val larTable = larTableSelector(period, "open_end_credit_lar")
+    val larTable = larTableSelector(period, MV_OPEN_END_CREDIT_LAR)
     val query = sql"""
       select agency, count(*) from #${larTable} where upper(lei) NOT IN (#${filterList}) group by agency;
       """.as[OpenEndCreditLarCountByAgency]
@@ -318,7 +345,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   }
 
   def fetchListQuarterlyFilers(period: String): Task[Seq[ListQuarterlyFilers]] = {
-    val larTable = larTableSelector((period.toInt-1).toString, "list_quarterly_filers")
+    val larTable = larTableSelector((period.toInt-1).toString, MV_LIST_QUARTERLY_FILERS)
     val query = sql"""
         select *, (select COUNT(*) from ts#${period}_q1 where #${larTable}.lei = ts#${period}_q1.lei) as q1_filed, (select COUNT(*) from ts#${period}_q1 where #${larTable}.lei = ts#${period}_q1.lei) as q2_filed, (select COUNT(*) from ts#${period}_q1 where #${larTable}.lei = ts#${period}_q1.lei) as q3_filed from #${larTable} order by sign_date_east desc;
       """.as[ListQuarterlyFilers]
@@ -455,7 +482,7 @@ class PostgresRepository (config: DatabaseConfig[JdbcProfile],bankFilterList: Ar
   }
 
   def fetchVoluntaryFilers(period: String) : Task[Seq[VoluntaryFilers]] = {
-    val materializedView = larTableSelector(period, "voluntary_filers")
+    val materializedView = larTableSelector(period, MV_VOLUNTARY_FILERS)
     val query = sql"""
       select * from  #${materializedView} ;
       """.as[VoluntaryFilers]

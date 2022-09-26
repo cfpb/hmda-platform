@@ -1,10 +1,9 @@
 package hmda.util
 import java.time.LocalDate
 import java.time.format.DateTimeFormatterBuilder
-
 import cats.implicits._
-import java.time.temporal.ChronoField
 
+import java.time.temporal.{ ChronoField, TemporalAccessor }
 import com.typesafe.config.Config
 
 import scala.util.Try
@@ -29,24 +28,39 @@ object Filer {
     }
   }
 
+  def checkQuarterlyYear(filingRulesConfig: FilingRulesConfig)(year: Int): Boolean = {
+    import filingRulesConfig._
+    import qf._
+    filingYearsAllowed.contains(year) || quarterlyFilingYearsAllowed.contains(year)
+  }
+
   def parse(hocon: Config): Either[String, FilingRulesConfig] = {
+    // note that we expect the user to fill in year the month and date, and we fill in the year
+    val formatter = new DateTimeFormatterBuilder().appendPattern("MMMM dd yyyy").toFormatter
+    // just a random year so we can get DAY_OF_YEAR to resolve to make quarterly range checks easier
+    val year =  " " + LocalDate.now().getYear
     def parseQuarterConfig(hocon: Config): Either[String, QuarterConfig] = {
-      // note that we expect the user to fill in year the month and date, and we fill in the year
-      val formatter = new DateTimeFormatterBuilder().appendPattern("MMMM dd yyyy").toFormatter
-      // just a random year so we can get DAY_OF_YEAR to resolve to make quarterly range checks easier
-      val year =  " " + LocalDate.now().getYear
       for {
         rawStart <- Try(hocon.getString("start")).toEither.left.map(_ => "failed to obtain start")
         rawEnd   <- Try(hocon.getString("end")).toEither.left.map(_ => "failed to obtain end")
         start    <- Try(formatter.parse(rawStart + year)).toEither.left.map(_ => s"failed to parse $rawStart as a valid start date")
         end      <- Try(formatter.parse(rawEnd + year)).toEither.left.map(_ => s"failed to parse $rawEnd as a valid end date")
+        actionTakenStart <- Try(getDateConfigWithDefault(hocon, "action_date_start", start)).toEither.left.map(_ => "Invalid action taken start date")
+        actionTakenEnd <- Try(getDateConfigWithDefault(hocon , "action_date_end", end)).toEither.left.map(_ => "Invalid action taken end date")
         c <- Try(
           QuarterConfig(
             start.get(ChronoField.DAY_OF_YEAR),
-            end.get(ChronoField.DAY_OF_YEAR)
+            end.get(ChronoField.DAY_OF_YEAR),
+            actionTakenStart.get(ChronoField.DAY_OF_YEAR),
+            actionTakenEnd.get(ChronoField.DAY_OF_YEAR)
           )
         ).toEither.left.map(e => s"failed to build config because dates weren't valid ${e.getMessage}")
       } yield c
+    }
+
+    def getDateConfigWithDefault(hocon: Config, key: String, defaultDate: TemporalAccessor): TemporalAccessor = {
+      val configVal = Try(hocon.getString(key)).getOrElse("")
+      if (configVal == "") defaultDate else formatter.parse(configVal + year)
     }
 
     def parseYear(s: String): Either[String, Int] =
@@ -79,7 +93,7 @@ object Filer {
   private def checkQuarter(dayOfYear: Int, quarterConfig: QuarterConfig): Boolean =
     (dayOfYear >= quarterConfig.startDayOfYear) && (dayOfYear <= quarterConfig.endDayOfYear)
 
-  case class QuarterConfig(startDayOfYear: Int, endDayOfYear: Int)
+  case class QuarterConfig(startDayOfYear: Int, endDayOfYear: Int, actionTakenStart: Int, actionTakenEnd: Int)
   case class QuarterlyFilingConfig(quarterlyFilingYearsAllowed: List[Int], q1: QuarterConfig, q2: QuarterConfig, q3: QuarterConfig)
   case class FilingRulesConfig(qf: QuarterlyFilingConfig, filingYearsAllowed: List[Int])
 }

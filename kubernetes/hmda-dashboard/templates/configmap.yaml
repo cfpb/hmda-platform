@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dashboard-configmap
+data:
+  available-yearly: 2018,2019,2020,2021
+  available-quarterly: 2020-Q1,2020-Q2,2020-Q3,2021-Q1,2021-Q2,2021-Q3,2022-Q1,2022-Q2,2022-Q3

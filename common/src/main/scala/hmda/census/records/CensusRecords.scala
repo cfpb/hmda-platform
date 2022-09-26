@@ -98,11 +98,11 @@ object CensusRecords {
       case 2020 =>
         indexedCounty2020
       case 2021 =>
-        indexedTract2021
+        indexedCounty2021
       case 2022 =>
-        indexedTract2022
+        indexedCounty2022
       case _ =>
-        indexedTract2021
+        indexedCounty2021
     }
   }
 

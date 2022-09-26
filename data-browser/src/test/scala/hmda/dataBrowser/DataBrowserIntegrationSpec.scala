@@ -107,14 +107,14 @@ class DataBrowserIntegrationSpec
       }
     }
 
-    "respond to filer requests" in {
-      (cache.findFilers2018 _).expects(*, *).returns(Task.now(None))
-      (cache.updateFilers2018 _).expects(*, *, *).returns(Task.now(FilerInstitutionResponseLatest(Nil)))
-
-      Get("/view/filers?years=2018") ~> routes ~> check {
-        response.status shouldBe StatusCodes.OK
-      }
-    }
+//    "respond to filer requests" in {
+//      (cache.findFilers2018 _).expects(*, *).returns(Task.now(None))
+//      (cache.updateFilers2018 _).expects(*, *, *).returns(Task.now(FilerInstitutionResponseLatest(Nil)))
+//
+//      Get("/view/filers?years=2018") ~> routes ~> check {
+//        response.status shouldBe StatusCodes.OK
+//      }
+//    }
 
     "respond to failed filer requests due to a cache error" in {
       (cache.findFilers2018 _).expects(*, *).returns(Task.raiseError(new RuntimeException("BOOM")))

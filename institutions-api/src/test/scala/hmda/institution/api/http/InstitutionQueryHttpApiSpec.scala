@@ -17,9 +17,6 @@ import scala.concurrent.ExecutionContext
 
 class InstitutionQueryHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll with ScalatestRouteTest with InstitutionSetup {
 
-  override val institutionRepository2018 = new InstitutionRepository2018(dbConfig, "institutions2018")
-  override val institutionRepository2019 = new InstitutionRepository2019(dbConfig, "institutions2019")
-  override val institutionRepository2020 = new InstitutionRepository2020(dbConfig, "institutions2020")
   val ec: ExecutionContext               = system.dispatcher
   val config                             = ConfigFactory.load()
   implicit val timeout                   = Timeout(duration)

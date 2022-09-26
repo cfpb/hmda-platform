@@ -25,21 +25,21 @@ spec:
               -rf /var/cache/apk/ && openssl pkcs12 -export -in certs/redis-cert/redis-crt -inkey certs/redis-key/redis-key
             -out server.p12 -name redis-tls -CAfile certs/ca-cert/ca-crt -caname root
             -passin pass:changeit -passout pass:changeit && keytool -importkeystore
-            -deststorepass changeit -destkeypass changeit -destkeystore /opt/openjdk-16/lib/security/cacerts
+            -deststorepass changeit -destkeypass changeit -destkeystore /etc/ssl/certs/java/cacerts
             -srckeystore server.p12 -srcstoretype PKCS12 -srcstorepass changeit -alias
-            redis-tls
+            redis-tls && cp /etc/ssl/certs/java/cacerts /etc/tls/cacerts
         command:
           - /bin/sh
           - -c
           - --
-        image: openjdk:17-jdk-alpine3.14
+        image: openjdk:19-jdk-alpine3.15
         imagePullPolicy: IfNotPresent
         name: openjdk-init
         resources: {}
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
-          - mountPath: /opt/openjdk-16/lib/security
+          - mountPath: /etc/tls
             name: jks
             subPath: cacerts
           - mountPath: certs/ca-cert
@@ -98,7 +98,7 @@ spec:
           volumeMounts:
             - name: tz-config
               mountPath: /etc/localtime
-            - mountPath: /etc/tls
+            - mountPath: /etc/ssl/certs/java
               name: jks
               readOnly: true
               subPath: cacerts
@@ -112,8 +112,6 @@ spec:
           env:
             - name: _JAVA_OPTIONS
               value: >
-                -Djavax.net.ssl.trustStore=/etc/tls/cacerts
-                -Djavax.net.ssl.trustStorePassword=changeit
                 -Dhttps.protocols=SSLv3,TLSv1,TLSv1.1,TLSv1.2
             - name: PG_HOST
               valueFrom:
@@ -180,11 +178,11 @@ spec:
             - name: DATABROWSER_PG_TABLE_2017
               value: intentionally_left_blank
             - name: DATABROWSER_PG_TABLE_2018
-              value: modifiedlar2018_snapshot
+              value: modifiedlar2018_three_year_04052022
             - name: DATABROWSER_PG_TABLE_2019
-              value: modifiedlar2019_snapshot
+              value: modifiedlar2019_one_year_04052022
             - name: DATABROWSER_PG_TABLE_2020
-              value: modifiedlar2020_snapshot
+              value: modifiedlar2020_one_year_04302022
             - name: REDIS_HOSTNAME
               value: {{.Values.databrowser.redis}}
             - name: REDIS_PROTOCOL

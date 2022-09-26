@@ -150,13 +150,13 @@ class PostgresModifiedLarRepository2017(tableName: String, config: DatabaseConfi
     println(sql"""
         SELECT
           COUNT(loan_amount),
-          SUM(loan_amount)
+          SUM(loan_amount::numeric)
         FROM #${tableName}
         #$filterCriteria""")
     val query = sql"""
         SELECT
           COUNT(loan_amount),
-          SUM(loan_amount)
+          SUM(loan_amount::numeric)
         FROM #${tableName}
         #$filterCriteria
         """.as[Statistic].head

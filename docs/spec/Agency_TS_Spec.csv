@@ -1,0 +1,17 @@
+Column Name, Data Field Name, Data Field Type, Data Field Source
+id, Record Identified - Value is 1, Numeric, HMDA Filing Instructions Guide
+institutionName, Financial Institution Name, Alphanumeric, HMDA Filing Instructions Guide
+year, Calendar Year, Numeric, HMDA Filing Instructions Guide
+quarter, Calendar Quarter, Numeric, HMDA Filing Instructions Guide
+name, Contact Person's Name, Alphanumeric, HMDA Filing Instructions Guide
+phone, Contact Person's Telephone Number, Alphanumeric, HMDA Filing Instructions Guide
+email, Contact Person's E-mail Address, Alphanumeric, HMDA Filing Instructions Guide
+street, Contact Person's Office Street Address, Alphanumeric, HMDA Filing Instructions Guide
+city, Contact Person's Office City, Alphanumeric, HMDA Filing Instructions Guide
+state, Contact Person's Office State, Alphanumeric, HMDA Filing Instructions Guide
+zipCode, Contact Person's Office ZIP Code, Alphanumeric, HMDA Filing Instructions Guide
+agency, Federal Agency, Numeric, HMDA Filing Instructions Guide
+totalLines, Total Number of Entries Contained in Submission, Numeric, HMDA Filing Instructions Guide
+taxId, Federal Taxpayer Identification Number, Alphanumeric, HMDA Filing Instructions Guide
+lei, Legal Entity Identifier (LEI), Alphanumeric, HMDA Filing Instructions Guide
+signDate, HMDA Filing Sign Datetime, Alphanumeric, Collected by the HMDA Platform

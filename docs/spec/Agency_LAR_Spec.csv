@@ -1,0 +1,121 @@
+Column Name, Data Field Name, Data Field Type, Data Field Source
+record_id, Record Identifier, Numeric, HMDA Filing Instructions Guide
+lei, Legal Entity Identifier, Alphanumeric, HMDA Filing Instructions Guide
+uli, Universal Loan Identifier (ULI) or Non-Universal Loan Identifier (NULI), Alphanumeric, HMDA Filing Instructions Guide
+application_date, Application Date, Alphanumeric, HMDA Filing Instructions Guide
+loan_type, Loan Type, Numeric, HMDA Filing Instructions Guide
+loan_purpose, Loan Purpose, Numeric, HMDA Filing Instructions Guide
+preapprovals, Preapproval, Numeric, HMDA Filing Instructions Guide
+construction_method, Construction Method, Numeric, HMDA Filing Instructions Guide
+occupancy, Occupancy Type, Numeric, HMDA Filing Instructions Guide
+loan_amount, Loan Amount, Numeric, HMDA Filing Instructions Guide
+action_type, Action Taken, Numeric, HMDA Filing Instructions Guide
+action_date, Action Taken Date, Numeric, HMDA Filing Instructions Guide
+address, Street Address, Alphanumeric, HMDA Filing Instructions Guide
+city, City, Alphanumeric, HMDA Filing Instructions Guide
+state_code, State, Alphanumeric, HMDA Filing Instructions Guide
+zip, ZIP Code, Alphanumeric, HMDA Filing Instructions Guide
+county_code, County, Alphanumeric, HMDA Filing Instructions Guide
+census_tract_number, Census Tract, Alphanumeric, HMDA Filing Instructions Guide
+applicant_ethnicity_1, Ethnicity of Applicant or Borrower: 1, Numeric, HMDA Filing Instructions Guide
+applicant_ethnicity_2, Ethnicity of Applicant or Borrower: 2, Numeric, HMDA Filing Instructions Guide
+applicant_ethnicity_3, Ethnicity of Applicant or Borrower: 3, Numeric, HMDA Filing Instructions Guide
+applicant_ethnicity_4, Ethnicity of Applicant or Borrower: 4, Numeric, HMDA Filing Instructions Guide
+applicant_ethnicity_5, Ethnicity of Applicant or Borrower: 5, Numeric, HMDA Filing Instructions Guide
+applicant_ethnicity_other, Ethnicity of Applicant or Borrower: Free Form Text Field for Other Hispanic or Latino, Alphanumeric, HMDA Filing Instructions Guide
+coapplicant_ethnicity_1, Ethnicity of Co-Applicant or Co-Borrower: 1, Numeric, HMDA Filing Instructions Guide
+coapplicant_ethnicity_2, Ethnicity of Co-Applicant or Co-Borrower: 2, Numeric, HMDA Filing Instructions Guide
+coapplicant_ethnicity_3, Ethnicity of Co-Applicant or Co-Borrower: 3, Numeric, HMDA Filing Instructions Guide
+coapplicant_ethnicity_4, Ethnicity of Co-Applicant or Co-Borrower: 4, Numeric, HMDA Filing Instructions Guide
+coapplicant_ethnicity_5, Ethnicity of Co-Applicant or Co-Borrower: 5, Numeric, HMDA Filing Instructions Guide
+coapplicant_ethnicity_other, Ethnicity of Co-Applicant or Co-Borrower: Free Form Text Field for Other Hispanic or Latino, Alphanumeric, HMDA Filing Instructions Guide
+applicant_ethnicity_v, Ethnicity of Applicant or Borrower Collected on the Basis of Visual Observation of Surname, Numeric, HMDA Filing Instructions Guide
+coapplicant_ethnicity_v, Ethnicity of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation of Surname, Numeric, HMDA Filing Instructions Guide
+applicant_race1, Race of Applicant or Borrower: 1, Numeric, HMDA Filing Instructions Guide
+applicant_race2, Race of Applicant or Borrower: 2, Numeric, HMDA Filing Instructions Guide
+applicant_race3, Race of Applicant or Borrower: 3, Numeric, HMDA Filing Instructions Guide
+applicant_race4, Race of Applicant or Borrower: 4, Numeric, HMDA Filing Instructions Guide
+applicant_race5, Race of Applicant or Borrower: 5, Numeric, HMDA Filing Instructions Guide
+applicant_race_other1, Race of Applicant or Borrower: Free Form Text Field for American Indian or Alaska Native Enrolled or Principal Tribe, Alphanumeric, HMDA Filing Instructions Guide
+applicant_race_other2, Race of Applicant or Borrower: Free Form Text Field for Other Asian, Alphanumeric, HMDA Filing Instructions Guide
+applicant_race_other3, Race of Applicant or Borrower: Free Form Text Field for Other Pacific Islander, Alphanumeric, HMDA Filing Instructions Guide
+coapplicant_race1, Race of Co-Applicant or Co-Borrower: 1, Numeric, HMDA Filing Instructions Guide
+coapplicant_race2, Race of Co-Applicant or Co-Borrower: 2, Numeric, HMDA Filing Instructions Guide
+coapplicant_race3, Race of Co-Applicant or Co-Borrower: 3, Numeric, HMDA Filing Instructions Guide
+coapplicant_race4, Race of Co-Applicant or Co-Borrower: 4, Numeric, HMDA Filing Instructions Guide
+coapplicant_race5, Race of Co-Applicant or Co-Borrower: 5, Numeric, HMDA Filing Instructions Guide
+coapplicant_race_other1, Race of Co-Applicant or Co-Borrower:  Free Form Text Field for American Indian or Alaska Native Enrolled or Principal Tribe, Alphanumeric, HMDA Filing Instructions Guide
+coapplicant_race_other2, Race of Co-Applicant or Co-Borrower: Free Form Text Field for Other Asian, Alphanumeric, HMDA Filing Instructions Guide
+coapplicant_race_other3, Race of Co-Applicant or Co-Borrower: Free Form Text Field for Other Pacific Islander, Alphanumeric, HMDA Filing Instructions Guide
+applicant_race_v, Race of Applicant or Borrower Collected on the Basis of Visual Observation of Surname, Numeric, HMDA Filing Instructions Guide
+coapplicant_race_v, Race of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation of Surname, Numeric, HMDA Filing Instructions Guide
+applicant_sex, Sex of Applicant or Borrower, Numeric, HMDA Filing Instructions Guide
+coapplicant_sex, Sex of Co-Applicant or Co-Borrower, Numeric, HMDA Filing Instructions Guide
+applicant_sex_v, Sex of Applicant or Borrower Collected on the Basis of Visual Observation of Surname, Numeric, HMDA Filing Instructions Guide
+coapplicant_sex_v, Sex of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation of Surname, Numeric, HMDA Filing Instructions Guide
+applicant_age, Age of Applicant or Borrower, Numeric, HMDA Filing Instructions Guide
+coapplicant_age, Age of Co-Applicant or Co-Borrower, Numeric, HMDA Filing Instructions Guide
+applicant_income, Income, Alphanumeric, HMDA Filing Instructions Guide
+purchaser_type, Type of Purchaser, Numeric, HMDA Filing Instructions Guide
+rate_spread, Rate Spread, Alphanumeric, HMDA Filing Instructions Guide
+hoepa_status, HOEPA Status, Numeric, HMDA Filing Instructions Guide
+lien_status, Lien Status, Numeric, HMDA Filing Instructions Guide
+applicant_creditscore, Credit Score of Applicant or Borrower, Numeric, HMDA Filing Instructions Guide
+coapplicant_creditscore, Credit Score of Co-Applicant or Co-Borrower, Numeric, HMDA Filing Instructions Guide
+applicant_creditscore_model, Applicant or Borrower Name and Version of Credit Scoring Model, Numeric, HMDA Filing Instructions Guide
+applicant_creditscore_model_c, Applicant or Borrower Name and Version of Credit Scoring Model: Conditional Free Form Text Field for Code 8, Numeric, HMDA Filing Instructions Guide
+coapplicant_creditscore_model, Co-Applicant or Co-Borrower Name and Version of Credit Scoring Model, Numeric, HMDA Filing Instructions Guide
+coapplicant_creditscore_model_c, Co-Applicant or Co-Borrower Name and Version of Credit Scoring Model: Conditional Free Form Text Field for Code 8, Numeric, HMDA Filing Instructions Guide
+denial_reason1, Reason for Denial: 1, Numeric, HMDA Filing Instructions Guide
+denial_reason2, Reason for Denial: 2, Numeric, HMDA Filing Instructions Guide
+denial_reason3, Reason for Denial: 3, Numeric, HMDA Filing Instructions Guide
+denial_reason4, Reason for Denial: 4, Numeric, HMDA Filing Instructions Guide
+denial_reason5, Reason for Denial: Conditional Free Form Text Field for Code 9, Numeric, HMDA Filing Instructions Guide
+total_loan_costs, Total Loan Costs, Alphanumeric, HMDA Filing Instructions Guide
+total_points_fees, Total Points and Fees, Alphanumeric, HMDA Filing Instructions Guide
+origination_charges, Origination Charges, Alphanumeric, HMDA Filing Instructions Guide
+discount_points, Discount Points, Alphanumeric, HMDA Filing Instructions Guide
+lender_credits, Lender Credits, Alphanumeric, HMDA Filing Instructions Guide
+interest_rate, Interest Rate, Alphanumeric, HMDA Filing Instructions Guide
+prepayment_penalty_term, Prepayment Penalty Term, Alphanumeric, HMDA Filing Instructions Guide
+debt_to_income_ratio, Debt-to-Income Ration, Alphanumeric, HMDA Filing Instructions Guide
+combinedloan_to_value_ratio, Combined Loan-to-Value Ratio, Alphanumeric, HMDA Filing Instructions Guide
+loan_term, Loan Term, Alphanumeric, HMDA Filing Instructions Guide
+introductory_rate_period, Introductory Rate Period, Alphanumeric, HMDA Filing Instructions Guide
+balloon_payment, Balloon Payment, Numeric, HMDA Filing Instructions Guide
+interest_only_payments, Interest-Only Payments, Numeric, HMDA Filing Instructions Guide
+negative_amortization, Negative Amortization, Numeric, HMDA Filing Instructions Guide
+other_nonamortizing_features, Other Non-Amortizing Features, Numeric, HMDA Filing Instructions Guide
+property_value, Property Value, Alphanumeric, HMDA Filing Instructions Guide
+manufacturedhome_secured_property_type, Manufacture Home Secured Property Type, Numeric, HMDA Filing Instructions Guide
+manufacturedhome_land_property_interest, Manufactured Home Land Property Type, Numeric, HMDA Filing Instructions Guide
+total_units_interest, Total Units, Numeric, HMDA Filing Instructions Guide
+multifamily_affordable_units, Multifamily Affordable Units, Alphanumeric, HMDA Filing Instructions Guide
+submission_of_application, Submission of Application, Numeric, HMDA Filing Instructions Guide
+initially_payable, Initially Payable to Your Institution, Numeric, HMDA Filing Instructions Guide
+nmlsr_identifier, Mortgage Loan Originator NMLSR Identifier, Alphanumeric, HMDA Filing Instructions Guide
+autounderwriting_sys1, Automated Underwriting System: 1, Numeric, HMDA Filing Instructions Guide
+autounderwriting_sys2, Automated Underwriting System: 2, Numeric, HMDA Filing Instructions Guide
+autounderwriting_sys3, Automated Underwriting System: 3, Numeric, HMDA Filing Instructions Guide
+autounderwriting_sys4, Automated Underwriting System: 4, Numeric, HMDA Filing Instructions Guide
+autounderwriting_sys5, Automated Underwriting System: 5, Numeric, HMDA Filing Instructions Guide
+autounderwriting_sys_other, Automated Underwriting System: Conditional Free Form Text Field for Code 5, Alphanumeric, HMDA Filing Instructions Guide
+autounderwriting_sys_result1, Automated Underwriting System Result: 1, Numeric, HMDA Filing Instructions Guide
+autounderwriting_sys_result2, Automated Underwriting System Result: 2, Numeric, HMDA Filing Instructions Guide
+autounderwriting_sys_result3, Automated Underwriting System Result: 3, Numeric, HMDA Filing Instructions Guide
+autounderwriting_sys_result4, Automated Underwriting System Result: 4, Numeric, HMDA Filing Instructions Guide
+autounderwriting_sys_result5, Automated Underwriting System Result: 5, Numeric, HMDA Filing Instructions Guide
+autounderwriting_sys_result_other, Automated Underwriting System Result: Conditional Free Form Text Field for Code 16, Alphanumeric, HMDA Filing Instructions Guide
+reverse_mortgage, Reverse Mortgage, Numeric, HMDA Filing Instructions Guide
+openend_line_of_credit, Open-End Line of Credit, Numeric, HMDA Filing Instructions Guide
+business_commercial_purpose, Business of Commercial Purpose, Numeric, HMDA Filing Instructions Guide
+conforming_loan_limit, Conforming Loan Limit, Numeric, Derived
+population, Tract Population, Numeric, FFIEC Census
+minority_population_percent, Minority Population as Percent of Tract Population, Numeric, FFIEC Census
+median_income_percentage, Tract Median Household Income , Numeric, FFIEC Census
+tract_to_msamd, Tract Median Family Income as a Percentage of the MSA/MD Median Family Income, Numeric, FFIEC Census
+owner_occupied_units, Tract Total Owner Occupied Occupied Housing Units, Numeric, FFIEC Census
+one_to_four_fam_units, Tract One to Four Housing Units in Structure, Numeric, FFIEC Census
+median_age, Tract Persons Median Age, Numeric, FFIEC Census
+msa_md, MSA/MD Code, Numeric, FFIEC Census
+msa_md_name, MSA/MD Name, Alphanumeric, FFIEC Census

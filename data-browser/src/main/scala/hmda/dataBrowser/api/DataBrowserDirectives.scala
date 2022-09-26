@@ -33,10 +33,12 @@ import hmda.dataBrowser.services._
 import monix.eval.Task
 import hmda.dataBrowser.Settings
 import enumeratum._
+import org.slf4j.LoggerFactory
 
 import scala.util.Try
 
 trait DataBrowserDirectives extends Settings {
+  val log = LoggerFactory.getLogger(getClass)
   private implicit val csvStreamingSupport: CsvEntityStreamingSupport =
     EntityStreamingSupport.csv()
 
@@ -77,14 +79,19 @@ trait DataBrowserDirectives extends Settings {
       .retrieveDataUrl(queries.queryFields, delimiter, year)
       .flatMap {
         case Some(url) =>
+          log.info("DataBrowserDirectives redirecting: {}", url)
           Task.now(Right(url))
         case None =>
           // upload the data to S3 in the background and emit the Source immediately
+          log.info("DataBrowserDirectives uploading")
           cache
             .persistData(queries.queryFields, delimiter, year, serializedData)
             .startAndForget *> Task(Left(serializedData))
       }
-      .onErrorFallbackTo(Task.now(Left(serializedData)))
+      .onErrorHandleWith { error =>
+        log.error("DataBrowserDirectives onErrorHandleWith Something failed", error)
+        Task.now(Left(serializedData))
+      }
   }
 
   def csvSource(s: Source[ModifiedLarEntity, NotUsed]): Source[ByteString, NotUsed] = {
@@ -166,7 +173,7 @@ trait DataBrowserDirectives extends Settings {
         import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
         complete((BadRequest, "must provide years value parameter"))
 
-      case xs if xs.exists(year => (year < 2018) || (year > 2020)) => // TODO: Change this to 2017 when 2017 is released
+      case xs if xs.exists(year => (year < 2018) || (year > 2021)) => // TODO: Change this to 2017 when 2017 is released
         import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
         complete((BadRequest, s"must provide years in the range of 2018-2020, you have provided (${xs.mkString(", ")})"))
 

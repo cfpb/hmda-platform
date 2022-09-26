@@ -202,7 +202,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFi
           .multipartUpload(bucketPrivate, fullFilePath, metaHeaders = MetaHeaders(Map(LarScheduler.entriesCountMetaName -> count.toString)))
           .withAttributes(S3Attributes.settings(s3Settings))
         _ <- uploadFileToS3(s3Sink, tsRepo.getAllSheets(getFilterList()))
-        _ <- persistFileForQa(fullFilePath, qaTsRepo)
+       // _ <- persistFileForQa(fullFilePath, qaTsRepo)
         count <- countF
       } yield count
 

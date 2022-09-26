@@ -4,7 +4,7 @@ package hmda.institution.projection
 import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.adapter._
 import akka.testkit.TestKit
-import hmda.institution.query.{ InstitutionComponent2018, InstitutionComponent2019, InstitutionComponent2020, InstitutionEmailComponent }
+import hmda.institution.query.InstitutionEmailComponent
 import hmda.messages.institution.InstitutionEvents.{ InstitutionCreated, InstitutionDeleted, InstitutionModified }
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators._
@@ -23,40 +23,28 @@ class InstitutionDBProjectionSpec
     with MustMatchers
     with ScalaFutures
     with Eventually
-    with InstitutionComponent2018
-    with InstitutionComponent2019
-    with InstitutionComponent2020
     with InstitutionEmailComponent
     with BeforeAndAfterAll {
 
   override implicit def patienceConfig: PatienceConfig = PatienceConfig(timeout = Span(1, Minute), interval = Span(100, Millis))
 
-  val institutionRepository2018 = new InstitutionRepository2018(dbConfig, "institutions2018")
-  val institutionRepository2019 = new InstitutionRepository2019(dbConfig, "institutions2019")
-  val institutionRepository2020 = new InstitutionRepository2020(dbConfig, "institutions2020")
   val emailRepository           = new InstitutionEmailsRepository(dbConfig)
 
   override def beforeAll(): Unit =
     whenReady(
       Future.sequence(
-        List(
-          institutionRepository2018.createSchema(),
-          institutionRepository2019.createSchema(),
-          institutionRepository2020.createSchema(),
+        institutionRepositories.values.map(_.createSchema()).toSeq ++
+          tsRepositories.values.map(_.createSchema()).toSeq :+
           emailRepository.createSchema()
-        )
       )
     )(_ => ())
 
   override def afterAll(): Unit =
     whenReady(
       Future.sequence(
-        List(
-          institutionRepository2018.dropSchema(),
-          institutionRepository2019.dropSchema(),
-          institutionRepository2020.dropSchema(),
+        institutionRepositories.values.map(_.dropSchema()).toSeq ++
+          tsRepositories.values.map(_.dropSchema()) :+
           emailRepository.dropSchema()
-        )
       )
     )(_ => ())
 
