@@ -207,7 +207,7 @@ lazy val `check-digit` = (project in file("check-digit"))
       Seq(
         libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
         enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
-        mainClass in Compile := Some("hmda.fileProxy.FileProxy"),
+        mainClass in Compile := Some("hmda.proxy.FileProxy"),
         assemblyJarName in assembly := {
           s"${name.value}.jar"
         },
