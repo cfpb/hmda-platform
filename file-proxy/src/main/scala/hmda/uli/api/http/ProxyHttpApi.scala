@@ -63,39 +63,42 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
   def proxyHttpRoutes(oAuth2Authorization: OAuth2Authorization): Route = {
     encodeResponse {
       pathPrefix("file") {
-        //Modified Lar Route CSV
-        path("modifiedLar"/ "year" / Segment / "institution" / Segment / "csv") { (year, lei) =>
-          (extractUri & get) { uri =>
-            checkYearAvailable(dynamicYears, year) {
-              val s3Key = "prod/modified-lar/" + year + "/" + lei + ".csv"
-              streamingS3Route(s3Key)
+        //Modified Lar Route
+        pathPrefix ("modifiedLar"/ "year" / Segment / "institution" / Segment) { (year, lei) =>
+          //CSV Without Header
+          path("csv") {
+            (extractUri & get) { uri =>
+              checkYearAvailable(dynamicYears, year) {
+                val s3Key = "prod/modified-lar/" + year + "/" + lei + ".csv"
+                streamingS3Route(s3Key)
+              }
             }
-          }
-        } ~
-        //Modified Lar Header Route CSV
-        path("modifiedLar"/ "year" / Segment / "institution" / Segment / "csv" / "header") { (year, lei) =>
-          (extractUri & get) { uri =>
-            checkYearAvailable(dynamicYears, year) {
-              val s3Key = "prod/modified-lar/" + year + "/header/" + lei + "_header.csv"
-              streamingS3Route(s3Key)
+          } ~
+          //CSV With Header
+          path("csv" / "header") {
+            (extractUri & get) { uri =>
+              checkYearAvailable(dynamicYears, year) {
+                val s3Key = "prod/modified-lar/" + year + "/header/" + lei + "_header.csv"
+                streamingS3Route(s3Key)
+              }
             }
-          }
-        } ~
-        //Modified Lar Route TXT
-        path("modifiedLar"/ "year" / Segment / "institution" / Segment / "txt") { (year, lei) =>
-          (extractUri & get) { uri =>
-            checkYearAvailable(dynamicYears, year) {
-              val s3Key = "prod/modified-lar/" + year + "/" + lei + ".txt"
-              streamingS3Route(s3Key)
+          } ~
+          //TXT Without Header
+          path("txt") {
+            (extractUri & get) { uri =>
+              checkYearAvailable(dynamicYears, year) {
+                val s3Key = "prod/modified-lar/" + year + "/" + lei + ".txt"
+                streamingS3Route(s3Key)
+              }
             }
-          }
-        } ~
-        //Modified Lar Header Route TXT
-        path("modifiedLar"/ "year" / Segment / "institution" / Segment / "txt" / "header") { (year, lei) =>
-          (extractUri & get) { uri =>
-            checkYearAvailable(dynamicYears, year) {
-              val s3Key = "prod/modified-lar/" + year + "/header/" + lei + "_header.txt"
-              streamingS3Route(s3Key)
+          } ~
+          //TXT With Header
+          path("txt" / "header") {
+            (extractUri & get) { uri =>
+              checkYearAvailable(dynamicYears, year) {
+                val s3Key = "prod/modified-lar/" + year + "/header/" + lei + "_header.txt"
+                streamingS3Route(s3Key)
+              }
             }
           }
         } ~
