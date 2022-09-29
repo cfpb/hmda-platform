@@ -13,12 +13,12 @@ object Verbiage {
     final val HISPANIC = config.getString("race.hispanic")
     final val WHITE = config.getString("race.white")
   }
-  final object Loan {
-    final val CONVENTIONAL_CONFORMING = config.getString("loan.conventional_conforming")
-    final val CONVENTIONAL_NON_CONFORMING = config.getString("loan.conventional_non_conforming")
-    final val FHA = config.getString("loan.fha")
-    final val HELOC = config.getString("loan.heloc")
-    final val RHS_FSA = config.getString("loan.rhs_fsa")
-    final val VA = config.getString("loan.va")
+  final object LoanType {
+    final val CONVENTIONAL_CONFORMING = config.getString("loan_type.conventional_conforming")
+    final val CONVENTIONAL_NON_CONFORMING = config.getString("loan_type.conventional_non_conforming")
+    final val FHA = config.getString("loan_type.fha")
+    final val HELOC = config.getString("loan_type.heloc")
+    final val RHS_FSA = config.getString("loan_type.rhs_fsa")
+    final val VA = config.getString("loan_type.va")
   }
 }

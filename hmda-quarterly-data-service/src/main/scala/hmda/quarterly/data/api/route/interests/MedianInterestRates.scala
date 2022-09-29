@@ -6,7 +6,7 @@ import hmda.model.filing.lar.enums._
 import hmda.quarterly.data.api.dao.repo.QuarterlyGraphRepo
 import hmda.quarterly.data.api.dto.QuarterGraphData.{ GraphRoute, GraphSeriesSummary }
 import hmda.quarterly.data.api.route.interests.InterestRates.{ CATEGORY, MEDIAN_SUBTITLE, MEDIAN_TITLE }
-import hmda.quarterly.data.api.route.lib.Verbiage.Loan._
+import hmda.quarterly.data.api.route.lib.Verbiage.LoanType._
 import hmda.quarterly.data.api.serde.JsonSupport
 import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
