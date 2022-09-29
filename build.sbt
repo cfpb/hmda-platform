@@ -88,6 +88,7 @@ lazy val `hmda-root` = (project in file("."))
     common,
     `hmda-platform`,
     `check-digit`,
+    `file-proxy`,
     `institutions-api`,
     `modified-lar`,
     `hmda-analytics`,
@@ -194,6 +195,38 @@ lazy val `check-digit` = (project in file("check-digit"))
   )
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(`hmda-protocol` % "compile->compile;test->test")
+
+  lazy val `file-proxy` = (project in file("file-proxy"))
+    .enablePlugins(
+      JavaServerAppPackaging,
+      sbtdocker.DockerPlugin,
+      AshScriptPlugin
+    )
+    .settings(hmdaBuildSettings: _*)
+    .settings(
+      Seq(
+        libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
+        enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
+        mainClass in Compile := Some("hmda.proxy.FileProxy"),
+        assemblyJarName in assembly := {
+          s"${name.value}.jar"
+        },
+        assemblyMergeStrategy in assembly := {
+          case "application.conf"                      => MergeStrategy.concat
+          case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+          case PathList(ps @ _*) if ps.last endsWith ".proto" =>
+            MergeStrategy.first
+          case "module-info.class" => MergeStrategy.concat
+          case x =>
+            val oldStrategy = (assemblyMergeStrategy in assembly).value
+            oldStrategy(x)
+        }
+      ),
+      dockerSettings,
+      packageSettings
+    )
+    .dependsOn(common % "compile->compile;test->test")
+
 
 lazy val `institutions-api` = (project in file("institutions-api"))
   .enablePlugins(

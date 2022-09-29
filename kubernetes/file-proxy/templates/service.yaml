@@ -1,0 +1,40 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: file-proxy
+  labels:
+    service: file-proxy
+spec:
+  selector:
+    app: file-proxy
+  ports:
+    - port: 9091
+      protocol: TCP
+      targetPort: 9091
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: {{ include "file-proxy.fullname" . }}-ambassador
+  name: {{ include "file-proxy.fullname" . }}-ambassador
+  annotations:
+    getambassador.io/config: |
+      apiVersion: ambassador/v1
+      kind: Mapping
+      name: file_proxy_mapping
+      ambassador_id: ambassador-default-1
+      prefix: /file/
+      rewrite: /file/
+      service: {{ include "file-proxy.fullname" . }}:{{ .Values.service.port }}
+      timeout_ms: 300000
+spec:
+  clusterIP: None
+  ports:
+    - port: {{ .Values.service.port }}
