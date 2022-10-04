@@ -24,5 +24,6 @@ create materialized view median_cltv_by_race_2018 as
         and loan_value_ratio ~ '^[0-9\.]+$'
         and loan_value_ratio::decimal <= 105
 		and lei in (select lei from institutions2022 where quarterly_filer = true)
+--		and action_taken_date >= 20220401 (for quarterly, specify the quarter date range)
     group by quarter, race_ethnicity, lt, loc, cll
 with data;
