@@ -24,5 +24,6 @@ create materialized view median_interest_rates_by_race_2018 as
 		and interest_rate ~ '^[0-9\.]+$'
 		and interest_rate::numeric <= 8
 		and lei in (select lei from institutions2022 where quarterly_filer = true)
+--		and action_taken_date >= 20220401 (for quarterly, specify the quarter date range)
 	group by quarter, race_ethnicity, lt, loc, cll
 with data;

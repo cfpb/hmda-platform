@@ -16,5 +16,6 @@ create materialized view median_credit_score_by_loan_type_2018 as
 		and line_of_credits in (1, 2)
 		and credit_score_applicant < 1111
 		and lei in (select lei from institutions2022 where quarterly_filer = true)
+--		and action_taken_date >= 20220401 (for quarterly, specify the quarter date range)
 	group by quarter, lt, cll, loc
 with data;
