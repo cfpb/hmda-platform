@@ -43,13 +43,13 @@ abstract class RatesGraph(
     override def route: Route = pathPrefix(endpoint) {
       path("") {
         complete(
-          getSummary()
+          getSummary
         )
       }
     }
   }
 
-  private def getSummary(): CancelableFuture[GraphSeriesInfo] = summaryType match {
+  private def getSummary: CancelableFuture[GraphSeriesInfo] = summaryType match {
     case BY_TYPE =>
       for {
         conventionalConforming <- getSummaryByType(Conventional, CONVENTIONAL_CONFORMING, conforming = true)

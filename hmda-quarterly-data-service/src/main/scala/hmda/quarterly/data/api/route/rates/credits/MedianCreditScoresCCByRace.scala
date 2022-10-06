@@ -14,7 +14,7 @@ object MedianCreditScoresCCByRace extends RatesGraph("credit", "credit-scores-cc
   override protected def subtitle: String = CC_BY_RACE_SUBTITLE
   override protected def summaryType: RatesGraph.Value = BY_RACE
 
-  override protected def getSummaryByRace (title: String, race: String): CancelableFuture[GraphSeriesSummary] =
+  override protected def getSummaryByRace(title: String, race: String): CancelableFuture[GraphSeriesSummary] =
     QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRace(Conventional, race, conforming = true)
       .map(convertToGraph(title, _)).runToFuture
 }
