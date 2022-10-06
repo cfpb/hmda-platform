@@ -1,9 +1,9 @@
-package hmda.quarterly.data.api.route.loans
+package hmda.quarterly.data.api.route.counts.loans
 
-import com.typesafe.config.ConfigFactory
+import hmda.quarterly.data.api.route.lib.Verbiage
 
 object Loans {
-  private final val loansVerbiageConfig = ConfigFactory.load().getConfig("graph.verbiage.loan")
+  private final val loansVerbiageConfig = Verbiage.config.getConfig("loan")
   final val CATEGORY = loansVerbiageConfig.getString("category")
   final val APP_VOLUME_TITLE = loansVerbiageConfig.getString("app_volume.title")
   final val APP_VOLUME_SUBTITLE = loansVerbiageConfig.getString("app_volume.subtitle")

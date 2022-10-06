@@ -1,10 +1,10 @@
-package hmda.quarterly.data.api.route.loans
+package hmda.quarterly.data.api.route.counts.loans
 
 import akka.http.scaladsl.server.Directives.{ complete, path, pathPrefix }
 import akka.http.scaladsl.server.Route
 import hmda.quarterly.data.api.dao.repo.QuarterlyGraphRepo
 import hmda.quarterly.data.api.dto.QuarterGraphData.{ GraphRoute, GraphSeriesInfo, GraphSeriesSummary }
-import hmda.quarterly.data.api.route.loans.Loans._
+import Loans._
 import hmda.quarterly.data.api.serde.JsonSupport
 import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global

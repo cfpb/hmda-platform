@@ -3,7 +3,7 @@ package hmda.quarterly.data.api.route.lib
 import com.typesafe.config.ConfigFactory
 
 object Verbiage {
-  private final val config = ConfigFactory.load().getConfig("graph.verbiage")
+  final val config = ConfigFactory.load().getConfig("graph.verbiage")
   final val SUMMARY = config.getString("summary")
   final val DEFAULT_DECIMAL_PRECISION = config.getInt("decimal_precision")
   final val INTEREST_DECIMAL_PRECISION = config.getInt("interest_decimal_precision")
