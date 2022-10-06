@@ -7,39 +7,46 @@ import hmda.quarterly.data.api.dto.QuarterGraphData.{ GraphRoute, GraphSeriesInf
 import hmda.quarterly.data.api.route.lib.Verbiage
 import hmda.quarterly.data.api.route.lib.Verbiage.LoanType._
 import hmda.quarterly.data.api.route.lib.Verbiage.Race._
+import hmda.quarterly.data.api.route.rates.RatesGraph.Category
 import hmda.quarterly.data.api.serde.JsonSupport
 import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
 
-object RatesGraph extends Enumeration {
-  type RatesGraph = Value
-  val BY_TYPE, BY_RACE = Value
+object RatesGraph {
+
+  type Category = Category.Value
+  final object Category extends Enumeration {
+    val BY_TYPE, BY_RACE = Value
+  }
+
+  final val CATEGORY = "category"
+  final val LABEL = "label"
+  final val BY_TYPE_TITLE = "by_type.title"
+  final val BY_TYPE_SUBTITLE = "by_type.subtitle"
+  final val CC_BY_RACE_TITLE = "cc_by_race.title"
+  final val CC_BY_RACE_SUBTITLE = "cc_by_race.subtitle"
+  final val FHA_BY_RACE_TITLE = "fha_by_race.title"
+  final val FHA_BY_RACE_SUBTITLE = "fha_by_race.subtitle"
 }
 abstract class RatesGraph(
-  protected val config: String,
-  protected val endpoint: String,
+  private final val config: String,
+  private final val endpoint: String,
+  private final val titleKey: String,
+  private final val subtitleKey: String,
+  private final val category: Category
 ) extends JsonSupport {
   import RatesGraph._
 
   private final val verbiageConfig = Verbiage.config.getConfig(config)
-
-  protected def title: String
-  protected def subtitle: String
-  protected def summaryType: RatesGraph.Value
+  private final val title: String = verbiageConfig.getString(titleKey)
+  private final val subtitle: String = verbiageConfig.getString(subtitleKey)
+  private final val categoryVerbiage: String = verbiageConfig.getString(CATEGORY)
+  private final val label: String = verbiageConfig.getString(LABEL)
 
   protected def getSummaryByType(loanType: LoanTypeEnum, title: String, heloc: Boolean = false, conforming: Boolean = false): CancelableFuture[GraphSeriesSummary] = ???
   protected def getSummaryByRace(title: String, race: String): CancelableFuture[GraphSeriesSummary] = ???
 
-  protected final val CATEGORY = verbiageConfig.getString("category")
-  protected final val LABEL = verbiageConfig.getString("label")
-  protected final val BY_TYPE_TITLE = verbiageConfig.getString("by_type.title")
-  protected final val BY_TYPE_SUBTITLE = verbiageConfig.getString("by_type.subtitle")
-  protected final val CC_BY_RACE_TITLE = verbiageConfig.getString("cc_by_race.title")
-  protected final val CC_BY_RACE_SUBTITLE = verbiageConfig.getString("cc_by_race.subtitle")
-  protected final val FHA_BY_RACE_TITLE = verbiageConfig.getString("fha_by_race.title")
-  protected final val FHA_BY_RACE_SUBTITLE = verbiageConfig.getString("fha_by_race.subtitle")
-
-  def getRoute: GraphRoute = new GraphRoute(title, CATEGORY, endpoint) {
+  def getRoute: GraphRoute = new GraphRoute(title, categoryVerbiage, endpoint) {
     override def route: Route = pathPrefix(endpoint) {
       path("") {
         complete(
@@ -49,8 +56,8 @@ abstract class RatesGraph(
     }
   }
 
-  private def getSummary: CancelableFuture[GraphSeriesInfo] = summaryType match {
-    case BY_TYPE =>
+  private def getSummary: CancelableFuture[GraphSeriesInfo] = category match {
+    case Category.BY_TYPE =>
       for {
         conventionalConforming <- getSummaryByType(Conventional, CONVENTIONAL_CONFORMING, conforming = true)
         conventionalNonConforming <- getSummaryByType(Conventional, CONVENTIONAL_NON_CONFORMING)
@@ -63,7 +70,7 @@ abstract class RatesGraph(
         subtitle,
         Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va)
       )
-    case BY_RACE =>
+    case Category.BY_RACE =>
       for {
         asian <- getSummaryByRace(ASIAN, "a")
         black <- getSummaryByRace(BLACK, "b")
@@ -78,5 +85,5 @@ abstract class RatesGraph(
   }
 
   private def getGraphSeriesInfo(title: String, subtitle: String, series: Seq[GraphSeriesSummary]): GraphSeriesInfo =
-    GraphSeriesInfo(title, subtitle, series, yLabel = LABEL)
+    GraphSeriesInfo(title, subtitle, series, yLabel = label)
 }
