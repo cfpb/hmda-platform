@@ -1,17 +1,17 @@
-package hmda.quarterly.data.api.route
+package hmda.quarterly.data.api.route.counts.loans
 
-import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Directives.{ complete, path, pathPrefix }
 import akka.http.scaladsl.server.Route
 import hmda.quarterly.data.api.dao.repo.QuarterlyGraphRepo
-import hmda.quarterly.data.api.dto.QuarterGraphData._
-import hmda.quarterly.data.api.route.lib.Labels.APPS
+import hmda.quarterly.data.api.dto.QuarterGraphData.{ GraphRoute, GraphSeriesInfo, GraphSeriesSummary }
+import Loans._
 import hmda.quarterly.data.api.serde.JsonSupport
 import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
 
 object AllApplicationsVolume extends GraphRoute(
-  "How much of the total loan/application count do quarterly filers account for?",
-  "Loan & Application Counts",
+  ALL_APPS_VOLUME_TITLE,
+  CATEGORY,
   "all-applications"
 ) with JsonSupport {
   private def getVolume(title: String, quarterly: Boolean = true): CancelableFuture[GraphSeriesSummary] =
@@ -22,13 +22,13 @@ object AllApplicationsVolume extends GraphRoute(
     path("") {
       complete(
         for {
-          quarterlyFilers <- getVolume("Quarterly Filers")
-          allFilers <- getVolume("All HMDA Filers", quarterly = false)
+          quarterlyFilers <- getVolume(QUARTERLY_FILERS_LABEL)
+          allFilers <- getVolume(ALL_FILERS_LABEL, quarterly = false)
         } yield GraphSeriesInfo(
-          "How much of the total loan/application count do quarterly filers account for?",
-          "How does the number of loans and applications submitted from quarterly filers compare to the total amount?",
+          ALL_APPS_VOLUME_TITLE,
+          ALL_APPS_VOLUME_SUBTITLE,
           Seq(quarterlyFilers, allFilers),
-          yLabel = APPS
+          yLabel = APP_LABEL
         )
       )
     }
