@@ -4,11 +4,23 @@ import java.time.format.DateTimeFormatterBuilder
 import cats.implicits._
 
 import java.time.temporal.{ ChronoField, TemporalAccessor }
-import com.typesafe.config.Config
+import com.typesafe.config.{ Config, ConfigFactory }
+import org.slf4j.LoggerFactory
 
 import scala.util.Try
 
 object Filer {
+  private val log = LoggerFactory.getLogger(getClass)
+
+  private val dateFormatter = new DateTimeFormatterBuilder().appendPattern("MMMM dd yyyy").toFormatter
+
+  private val rtTgConfig = {
+    val tgWatch = ConfigFactory.load().getConfig("hmda.cm_watch.timed_guards")
+    val ns = Try(tgWatch.getString("ns")).getOrElse("default")
+    val cmName = Try(tgWatch.getString("name")).getOrElse("timed-guards")
+    new RealTimeConfig(cmName, ns)
+  }
+
   def check(filingRulesConfig: FilingRulesConfig)(year: Int, dayOfYear: Int, quarter: Option[String]): Boolean = {
     import filingRulesConfig._
     import qf._
@@ -72,22 +84,55 @@ object Filer {
         case _               => Left("Provide a comma separated list of years")
       }
 
-    for {
-      yearlyFilingYearsAllowedC <- Try(hocon.getString("hmda.rules.yearly-filing.years-allowed")).toEither.left.map(_ =>
-        "Failed to get HOCON: hmda.rules.yearly-filing.years-allowed"
-      )
-      quarterlyFilingYearsAllowedC <- Try(hocon.getString("hmda.rules.quarterly-filing.years-allowed")).toEither.left.map(_ =>
-        "Failed to get HOCON: hmda.rules.quarterly-filing.years-allowed"
-      )
-      q1C                         <- Try(hocon.getConfig("hmda.rules.quarterly-filing.q1")).toEither.left.map(_ => "Failed to get HOCON for q1")
-      q2C                         <- Try(hocon.getConfig("hmda.rules.quarterly-filing.q2")).toEither.left.map(_ => "Failed to get HOCON for q2")
-      q3C                         <- Try(hocon.getConfig("hmda.rules.quarterly-filing.q3")).toEither.left.map(_ => "Failed to get HOCON for q3")
-      yearsAllowedForYearlyFiling <- parseYears(yearlyFilingYearsAllowedC)
-      quarterlyFilingYearsAllowed <- parseYears(quarterlyFilingYearsAllowedC)
-      q1                          <- parseQuarterConfig(q1C)
-      q2                          <- parseQuarterConfig(q2C)
-      q3                          <- parseQuarterConfig(q3C)
-    } yield FilingRulesConfig(QuarterlyFilingConfig(quarterlyFilingYearsAllowed, q1, q2, q3), yearsAllowedForYearlyFiling)
+    val rtRules = Try(getRulesFromRtConfig()).toEither.left.map(t => {
+      log.warn(s"Failed to load time guard through real time config: ${t.getMessage}", t)
+      "Failed real time config retrieval"
+    })
+
+    if (rtRules.isRight) {
+      rtRules
+    } else {
+      for {
+        yearlyFilingYearsAllowedC <- Try(hocon.getString("hmda.rules.yearly-filing.years-allowed")).toEither.left.map(_ =>
+          "Failed to get HOCON: hmda.rules.yearly-filing.years-allowed"
+        )
+        quarterlyFilingYearsAllowedC <- Try(hocon.getString("hmda.rules.quarterly-filing.years-allowed")).toEither.left.map(_ =>
+          "Failed to get HOCON: hmda.rules.quarterly-filing.years-allowed"
+        )
+        q1C <- Try(hocon.getConfig("hmda.rules.quarterly-filing.q1")).toEither.left.map(_ => "Failed to get HOCON for q1")
+        q2C <- Try(hocon.getConfig("hmda.rules.quarterly-filing.q2")).toEither.left.map(_ => "Failed to get HOCON for q2")
+        q3C <- Try(hocon.getConfig("hmda.rules.quarterly-filing.q3")).toEither.left.map(_ => "Failed to get HOCON for q3")
+        yearsAllowedForYearlyFiling <- parseYears(yearlyFilingYearsAllowedC)
+        quarterlyFilingYearsAllowed <- parseYears(quarterlyFilingYearsAllowedC)
+        q1 <- parseQuarterConfig(q1C)
+        q2 <- parseQuarterConfig(q2C)
+        q3 <- parseQuarterConfig(q3C)
+      } yield FilingRulesConfig(QuarterlyFilingConfig(quarterlyFilingYearsAllowed, q1, q2, q3), yearsAllowedForYearlyFiling)
+    }
+  }
+
+  private def getRulesFromRtConfig(): FilingRulesConfig = {
+    val quarterlyFilingConfig = QuarterlyFilingConfig(
+      rtTgConfig.getString("quarterlyYearsAllowed").split(",").map(_.toInt).toList,
+      getQuarterConfig(1),
+      getQuarterConfig(2),
+      getQuarterConfig(3)
+    )
+    FilingRulesConfig(quarterlyFilingConfig, rtTgConfig.getString("yearsAllowed").split(",").map(_.toInt).toList)
+  }
+
+  private def getQuarterConfig(quarter: Int): QuarterConfig = {
+    val currentYear = LocalDate.now().getYear
+    val startDate = rtTgConfig.getString(s"q${quarter}Start")
+    val endDate = rtTgConfig.getString(s"q${quarter}End")
+    val actionStartDate = rtTgConfig.getString(s"actionQ${quarter}Start")
+    val actionEndDate = rtTgConfig.getString(s"actionQ${quarter}End")
+    QuarterConfig(
+      dateFormatter.parse(s"$startDate $currentYear").get(ChronoField.DAY_OF_YEAR),
+      dateFormatter.parse(s"$endDate $currentYear").get(ChronoField.DAY_OF_YEAR),
+      dateFormatter.parse(s"$actionStartDate $currentYear").get(ChronoField.DAY_OF_YEAR),
+      dateFormatter.parse(s"$actionEndDate $currentYear").get(ChronoField.DAY_OF_YEAR),
+    )
   }
 
   private def checkQuarter(dayOfYear: Int, quarterConfig: QuarterConfig): Boolean =
