@@ -401,6 +401,37 @@
               </ul>
           </li>
           <li>
+            <a href="#hmda-file-serving" class="toc-h1 toc-link" data-title="HMDA File Serving">HMDA File Serving</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#hmda-file-serving-hmda-file-api" class="toc-h2 toc-link" data-title="HMDA File API">HMDA File API</a>
+                      <ul class="toc-list-h3">
+                          <li>
+                            <a href="#hmda-file-serving-hmda-file-api-get-modified-lar-pipe-delimited-txt-file" class="toc-h3 toc-link" data-title="Get Modified LAR Pipe Delimited .txt File">Get Modified LAR Pipe Delimited .txt File</a>
+                          </li>
+                          <li>
+                            <a href="#hmda-file-serving-hmda-file-api-get-modified-lar-pipe-delimited-txt-file-with-header" class="toc-h3 toc-link" data-title="Get Modified LAR Pipe Delimited .txt File with Header">Get Modified LAR Pipe Delimited .txt File with Header</a>
+                          </li>
+                          <li>
+                            <a href="#hmda-file-serving-hmda-file-api-get-modified-lar-csv-file" class="toc-h3 toc-link" data-title="Get Modified LAR .csv File">Get Modified LAR .csv File</a>
+                          </li>
+                          <li>
+                            <a href="#hmda-file-serving-hmda-file-api-get-modified-lar-csv-file-with-header" class="toc-h3 toc-link" data-title="Get Modified LAR .csv File with Header">Get Modified LAR .csv File with Header</a>
+                          </li>
+                          <li>
+                            <a href="#hmda-file-serving-hmda-file-api-get-institution-register-summary-irs" class="toc-h3 toc-link" data-title="Get Institution Register Summary (IRS)">Get Institution Register Summary (IRS)</a>
+                          </li>
+                      </ul>
+                  </li>
+                  <li>
+                    <a href="#hmda-file-serving-github-file-service" class="toc-h2 toc-link" data-title="Github File Service">Github File Service</a>
+                  </li>
+                  <li>
+                    <a href="#hmda-file-serving-s3-file-service" class="toc-h2 toc-link" data-title="S3 File Service">S3 File Service</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
             <a href="#data-browser-api" class="toc-h1 toc-link" data-title="Data Browser API">Data Browser API</a>
               <ul class="toc-list-h2">
                   <li>
@@ -720,7 +751,7 @@
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X POST \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}&quot; \
   -H &#39;Authorization: Bearer  {{access_token}}&#39; \</p>
 
 <p><b>JSON Response:</b>
@@ -755,7 +786,7 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 <tr>
 <td>Endpoint</td>
-<td><code>https://ffiec.cfpb.gov/v2/filing/{{year}}</code></td>
+<td><code>https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/filings/{{year}}</code></td>
 </tr>
 <tr>
 <td>Headers</td>
@@ -772,7 +803,7 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X GET \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}&quot; \
   -H &#39;Authorization: Bearer  {{access_token}}&#39; \</p>
 
 <p><b>JSON Response:</b>
@@ -804,7 +835,7 @@ curl -X GET \
 </tr>
 <tr>
 <td>Endpoint</td>
-<td><code>https://ffiec.cfpb.gov/v2/filing/{{year}}</code></td>
+<td><code>https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/filings/{{year}}</code></td>
 </tr>
 <tr>
 <td>Headers</td>
@@ -819,7 +850,7 @@ curl -X GET \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X POST \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39; \</p>
 
 <p>A Submission must be created for each file upload. More than one Submission can be created for a filing period. The most recent Submission will be considered the Latest Submission. Each <code>POST</code> on the Submission endpoint will return a new Submission <code>sequenceNumber</code>.</p>
@@ -857,7 +888,7 @@ curl -X POST \
 </tr>
 <tr>
 <td>Endpoint</td>
-<td><code>https://ffiec.cfpb.gov/v2/filing/{{year}}/submissions</code></td>
+<td><code>https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/filings/{{year}}/submissions</code></td>
 </tr>
 <tr>
 <td>Headers</td>
@@ -872,7 +903,7 @@ curl -X POST \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X GET \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/latest&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/latest&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39; \</p>
 
 <p><b>JSON Response:</b>
@@ -912,7 +943,7 @@ curl -X GET \
 </tr>
 <tr>
 <td>Endpoint</td>
-<td><code>https://ffiec.cfpb.gov/v2/filing/{{year}}/submissions/latest</code></td>
+<td><code>https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/filings/{{year}}/submissions/latest</code></td>
 </tr>
 <tr>
 <td>Headers</td>
@@ -927,7 +958,7 @@ curl -X GET \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X POST \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/10&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/10&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39; \
   -H &#39;content-type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW&#39; \
   -F file=<file.csv></p>
@@ -965,7 +996,7 @@ curl -X POST \
 </tr>
 <tr>
 <td>Endpoint</td>
-<td><code>https://ffiec.cfpb.gov/v2/filing/{{year}}/submissions/{{sequenceNumber}}</code></td>
+<td><code>https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/filings/{{year}}/submissions/{{sequenceNumber}}</code></td>
 </tr>
 <tr>
 <td>Headers</td>
@@ -984,7 +1015,7 @@ curl -X POST \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X POST \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/10/parseErrors&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/10/parseErrors&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39;</p>
 
 <p><b>JSON Response</b>
@@ -1023,7 +1054,7 @@ curl -X POST \
 </tr>
 <tr>
 <td>Endpoint</td>
-<td><code>https://ffiec.cfpb.gov/v2/filing/{{year}}/submissions/{{sequenceNumber}}/parseErrors</code></td>
+<td><code>https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/filings/{{year}}/submissions/{{sequenceNumber}}/parseErrors</code></td>
 </tr>
 <tr>
 <td>Headers</td>
@@ -1038,7 +1069,7 @@ curl -X POST \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X GET \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/24/edits&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/24/edits&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39;</p>
 
 <p><b>JSON Response:</b>
@@ -1095,7 +1126,7 @@ curl -X GET \
 </tr>
 <tr>
 <td>Endpoint</td>
-<td><code>https://ffiec.cfpb.gov/v2/filing/{{year}}/submissions/{{sequenceNumber}}/edits</code></td>
+<td><code>https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/filings/{{year}}/submissions/{{sequenceNumber}}/edits</code></td>
 </tr>
 <tr>
 <td>Headers</td>
@@ -1110,7 +1141,7 @@ curl -X GET \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X GET \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/24/edits/Q631&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/24/edits/Q631&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39;</p>
 
 <p><b>JSON Response:</b>
@@ -1158,7 +1189,7 @@ curl -X GET \
 </tr>
 <tr>
 <td>Endpoint</td>
-<td><code>https://ffiec.cfpb.gov/v2/filing/{{year}}/submissions/{{sequenceNumber}}/edits/{{edit_code}}</code></td>
+<td><code>https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/filings/{{year}}/submissions/{{sequenceNumber}}/edits/{{edit_code}}</code></td>
 </tr>
 <tr>
 <td>Headers</td>
@@ -1173,7 +1204,7 @@ curl -X GET \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X POST \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/edits/quality&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/edits/quality&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39; \
   -d &#39;{&quot;verified&quot;: true}&#39;</p>
 
@@ -1202,7 +1233,7 @@ curl -X POST \
 </tr>
 <tr>
 <td>Endpoint</td>
-<td><code>https://ffiec.cfpb.gov/v2/filing/{{year}}/submissions/{{sequenceNumber}}/edits/quality</code></td>
+<td><code>https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/filings/{{year}}/submissions/{{sequenceNumber}}/edits/quality</code></td>
 </tr>
 <tr>
 <td>Headers</td>
@@ -1221,7 +1252,7 @@ curl -X POST \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X POST \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/edits/macro&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/edits/macro&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39; \
   -d &#39;{&quot;verified&quot;: true}&#39;</p>
 
@@ -1250,7 +1281,7 @@ curl -X POST \
 </tr>
 <tr>
 <td>Endpoint</td>
-<td><code>https://ffiec.cfpb.gov/v2/filing/{{year}}/submissions/{{sequenceNumber}}/edits/macro</code></td>
+<td><code>https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/filings/{{year}}/submissions/{{sequenceNumber}}/edits/macro</code></td>
 </tr>
 <tr>
 <td>Headers</td>
@@ -1269,7 +1300,7 @@ curl -X POST \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X POST \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/sign&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/sign&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39; \
   -d &#39;{&quot;verified&quot;: true}&#39;</p>
 
@@ -1300,7 +1331,7 @@ curl -X POST \
 </tr>
 <tr>
 <td>Endpoint</td>
-<td><code>https://ffiec.cfpb.gov/v2/filing/{{year}}/submissions/{{sequenceNumber}}/sign</code></td>
+<td><code>https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/filings/{{year}}/submissions/{{sequenceNumber}}/sign</code></td>
 </tr>
 <tr>
 <td>Headers</td>
@@ -1319,7 +1350,7 @@ curl -X POST \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X GET \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/sign&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/sign&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39;</p>
 
 <p><b>JSON Response:</b>
@@ -1347,7 +1378,7 @@ curl -X GET \
 </tr>
 <tr>
 <td>Endpoint</td>
-<td><code>https://ffiec.cfpb.gov/v2/filing/{{year}}/submissions/{{sequenceNumber}}/sign</code></td>
+<td><code>https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/filings/{{year}}/submissions/{{sequenceNumber}}/sign</code></td>
 </tr>
 <tr>
 <td>Headers</td>
@@ -1362,7 +1393,7 @@ curl -X GET \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X GET \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/summary&#39;&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/summary&#39;&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39;</p>
 
 <p><b>JSON Response:</b>
@@ -1423,7 +1454,7 @@ curl -X GET \
 </tr>
 <tr>
 <td>Endpoint</td>
-<td><code>https://ffiec.cfpb.gov/v2/filing/{{year}}/submissions/{{sequenceNumber}}/sign</code></td>
+<td><code>https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/filings/{{year}}/submissions/{{sequenceNumber}}/sign</code></td>
 </tr>
 <tr>
 <td>Headers</td>
@@ -1438,7 +1469,7 @@ curl -X GET \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X GET \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/quarter/Q1/submissions/latest&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/quarter/Q1/submissions/latest&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39; \</p>
 
 <p><b>JSON Response:</b>
@@ -1646,7 +1677,7 @@ curl -X GET \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X POST \
-  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}&quot; \
+  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}&quot; \
   -H &#39;Authorization: Bearer  {{access_token}}&#39; \</p>
 
 <p><b>JSON Response:</b>
@@ -1681,7 +1712,7 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 </tr>
 <tr>
 <td>Endpoint</td>
-<td><code>https://ffiec.beta.cfpb.gov/v2/filing/{{year}}</code></td>
+<td><code>https://ffiec.beta.cfpb.gov/v2/filing/institutions/{{lei}}/filings/{{year}}</code></td>
 </tr>
 <tr>
 <td>Headers</td>
@@ -1698,7 +1729,7 @@ The <code>POST</code> will result in a <code>200</code> only for the first time 
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X GET \
-  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}&quot; \
+  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}&quot; \
   -H &#39;Authorization: Bearer  {{access_token}}&#39; \</p>
 
 <p><b>JSON Response:</b>
@@ -1730,7 +1761,7 @@ curl -X GET \
 </tr>
 <tr>
 <td>Endpoint</td>
-<td><code>https://ffiec.beta.cfpb.gov/v2/filing/{{year}}</code></td>
+<td><code>https://ffiec.beta.cfpb.gov/v2/filing/institutions/{{lei}}/filings/{{year}}</code></td>
 </tr>
 <tr>
 <td>Headers</td>
@@ -1745,7 +1776,7 @@ curl -X GET \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X POST \
-  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions&quot; \
+  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39; \</p>
 
 <p>A Submission must be created for each file upload. More than one Submission can be created for a filing period. The most recent Submission will be considered the Latest Submission. Each <code>POST</code> on the Submission endpoint will return a new Submission <code>sequenceNumber</code>.</p>
@@ -1783,7 +1814,7 @@ curl -X POST \
 </tr>
 <tr>
 <td>Endpoint</td>
-<td><code>https://ffiec.beta.cfpb.gov/v2/filing/{{year}}/submissions</code></td>
+<td><code>https://ffiec.beta.cfpb.gov/v2/filing/institutions/{{lei}}/filings/{{year}}/submissions</code></td>
 </tr>
 <tr>
 <td>Headers</td>
@@ -1798,7 +1829,7 @@ curl -X POST \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X GET \
-  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/latest&quot; \
+  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/latest&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39; \</p>
 
 <p><b>JSON Response:</b>
@@ -1838,7 +1869,7 @@ curl -X GET \
 </tr>
 <tr>
 <td>Endpoint</td>
-<td><code>https://ffiec.beta.cfpb.gov/v2/filing/{{year}}/submissions/latest</code></td>
+<td><code>https://ffiec.beta.cfpb.gov/v2/filing/institutions/{{lei}}/filings/{{year}}/submissions/latest</code></td>
 </tr>
 <tr>
 <td>Headers</td>
@@ -1853,7 +1884,7 @@ curl -X GET \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X POST \
-  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}&quot; \
+  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39; \
   -H &#39;content-type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW&#39; \
   -F file=<file.csv></p>
@@ -1891,7 +1922,7 @@ curl -X POST \
 </tr>
 <tr>
 <td>Endpoint</td>
-<td><code>https://ffiec.beta.cfpb.gov/v2/filing/{{year}}/submissions/{{sequenceNumber}}</code></td>
+<td><code>https://ffiec.beta.cfpb.gov/v2/filing/institutions/{{lei}}/filings/{{year}}/submissions/{{sequenceNumber}}</code></td>
 </tr>
 <tr>
 <td>Headers</td>
@@ -1910,7 +1941,7 @@ curl -X POST \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X POST \
-  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/parseErrors&quot; \
+  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/parseErrors&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39;</p>
 
 <p><b>JSON Response</b>
@@ -1949,7 +1980,7 @@ curl -X POST \
 </tr>
 <tr>
 <td>Endpoint</td>
-<td><code>https://ffiec.beta.cfpb.gov/v2/filing/{{year}}/submissions/{{sequenceNumber}}/parseErrors</code></td>
+<td><code>https://ffiec.beta.cfpb.gov/v2/filing/institutions/{{lei}}/filings/{{year}}/submissions/{{sequenceNumber}}/parseErrors</code></td>
 </tr>
 <tr>
 <td>Headers</td>
@@ -1964,7 +1995,7 @@ curl -X POST \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X GET \
-  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/edits&quot; \
+  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/edits&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39;</p>
 
 <p><b>JSON Response:</b>
@@ -2021,7 +2052,7 @@ curl -X GET \
 </tr>
 <tr>
 <td>Endpoint</td>
-<td><code>https://ffiec.beta.cfpb.gov/v2/filing/{{year}}/submissions/{{sequenceNumber}}/edits</code></td>
+<td><code>https://ffiec.beta.cfpb.gov/v2/filing/institutions/{{lei}}/filings/{{year}}/submissions/{{sequenceNumber}}/edits</code></td>
 </tr>
 <tr>
 <td>Headers</td>
@@ -2036,7 +2067,7 @@ curl -X GET \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X GET \
-  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/edits/Q631&quot; \
+  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/edits/Q631&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39;</p>
 
 <p><b>JSON Response:</b>
@@ -2084,7 +2115,7 @@ curl -X GET \
 </tr>
 <tr>
 <td>Endpoint</td>
-<td><code>https://ffiec.beta.cfpb.gov/v2/filing/{{year}}/submissions/{{sequenceNumber}}/edits/{{edit_code}}</code></td>
+<td><code>https://ffiec.beta.cfpb.gov/v2/filing/institutions/{{lei}}/filings/{{year}}/submissions/{{sequenceNumber}}/edits/{{edit_code}}</code></td>
 </tr>
 <tr>
 <td>Headers</td>
@@ -2099,7 +2130,7 @@ curl -X GET \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X POST \
-  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/edits/quality&quot; \
+  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/edits/quality&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39; \
   -d &#39;{&quot;verified&quot;: true}&#39;</p>
 
@@ -2128,7 +2159,7 @@ curl -X POST \
 </tr>
 <tr>
 <td>Endpoint</td>
-<td><code>https://ffiec.beta.cfpb.gov/v2/filing/{{year}}/submissions/{{sequenceNumber}}/edits/quality</code></td>
+<td><code>https://ffiec.beta.cfpb.gov/v2/filing/institutions/{{lei}}/filings/{{year}}/submissions/{{sequenceNumber}}/edits/quality</code></td>
 </tr>
 <tr>
 <td>Headers</td>
@@ -2147,7 +2178,7 @@ curl -X POST \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X POST \
-  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/edits/macro&quot; \
+  &quot;https://ffiec.beta.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/submissions/{{sequenceNumber}}/edits/macro&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39; \
   -d &#39;{&quot;verified&quot;: true}&#39;</p>
 
@@ -2176,7 +2207,7 @@ curl -X POST \
 </tr>
 <tr>
 <td>Endpoint</td>
-<td><code>https://ffiec.beta.cfpb.gov/v2/filing/{{year}}/submissions/{{sequenceNumber}}/edits/macro</code></td>
+<td><code>https://ffiec.beta.cfpb.gov/v2/filing/institutions/{{lei}}/filings/{{year}}/submissions/{{sequenceNumber}}/edits/macro</code></td>
 </tr>
 <tr>
 <td>Headers</td>
@@ -2195,7 +2226,7 @@ curl -X POST \
 <p><pre><code class="text">
 <b>Request:</b>
 curl -X GET \
-  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/quarter/Q1/submissions/latest&quot; \
+  &quot;https://ffiec.cfpb.gov/v2/filing/institutions/{{lei}}/institutions/B90YWS6AFX2LGWOXJ1LD/filings/{{year}}/quarter/Q1/submissions/latest&quot; \
   -H &#39;Authorization: Bearer {{access_token}}&#39; \</p>
 
 <p><b>JSON Response:</b>
@@ -2720,6 +2751,135 @@ curl -X GET \
 <td>JSON</td>
 </tr>
 </tbody></table>
+<h1 id='hmda-file-serving'>HMDA File Serving</h1>
+<p>The HMDA Platform serves a number of files including:</p>
+
+<ol>
+<li><a href="https://ffiec.cfpb.gov/documentation">Documentation</a></li>
+<li><a href="https://ffiec.cfpb.gov/data-publication/modified-lar">Modified LAR</a></li>
+<li><a href="https://ffiec.cfpb.gov/filing">Institution Register Summaries</a></li>
+<li><a href="https://ffiec.cfpb.gov/data-publication/dynamic-national-loan-level-dataset">Dynamic National Loan-Level Dataset</a></li>
+<li><a href="https://ffiec.cfpb.gov/data-publication/snapshot-national-loan-level-dataset">Snapshot National Loan-Level Dataset</a></li>
+<li><a href="https://ffiec.cfpb.gov/data-publication/disclosure-reports">Disclosure Reports</a></li>
+<li><a href="https://ffiec.cfpb.gov/data-publication/aggregate-reports">Aggregate Reports</a></li>
+<li><a href="https://ffiec.cfpb.gov/tools/rate-spread">Rate Spread Data</a></li>
+</ol>
+
+<p>The HMDA Platform serves these files in three seperate ways, through the HMDA File api, Githhub, and S3. </p>
+
+<p>The HMDA File api is used to serve the Modfied LAR and Institution Register Summaries. Github is used to serve documentation in the form of markdown files which are formatted by the HMDA-Frontend. S3 is used to serve all other files</p>
+<h2 id='hmda-file-serving-hmda-file-api'>HMDA File API</h2>
+<p>The HMDA File API is used for accessing the Modified LAR and Institution Register Summaries.</p>
+<h3 id='hmda-file-serving-hmda-file-api-get-modified-lar-pipe-delimited-txt-file'>Get Modified LAR Pipe Delimited .txt File</h3>
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Method</td>
+<td><code>GET</code></td>
+</tr>
+<tr>
+<td>Endpoint</td>
+<td><code>https://ffiec.cfpb.gov/file/modifiedLar/year/{{year}}/institution/{{lei}}/txt</code></td>
+</tr>
+</tbody></table>
+<h3 id='hmda-file-serving-hmda-file-api-get-modified-lar-pipe-delimited-txt-file-with-header'>Get Modified LAR Pipe Delimited .txt File with Header</h3>
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Method</td>
+<td><code>GET</code></td>
+</tr>
+<tr>
+<td>Endpoint</td>
+<td><code>https://ffiec.cfpb.gov/file/modifiedLar/year/{{year}}/institution/{{lei}}/txt/header</code></td>
+</tr>
+</tbody></table>
+<h3 id='hmda-file-serving-hmda-file-api-get-modified-lar-csv-file'>Get Modified LAR .csv File</h3>
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Method</td>
+<td><code>GET</code></td>
+</tr>
+<tr>
+<td>Endpoint</td>
+<td><code>https://ffiec.cfpb.gov/file/modifiedLar/year/{{year}}/institution/{{lei}}/csv</code></td>
+</tr>
+</tbody></table>
+<h3 id='hmda-file-serving-hmda-file-api-get-modified-lar-csv-file-with-header'>Get Modified LAR .csv File with Header</h3>
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Method</td>
+<td><code>GET</code></td>
+</tr>
+<tr>
+<td>Endpoint</td>
+<td><code>https://ffiec.cfpb.gov/file/modifiedLar/year/{{year}}/institution/{{lei}}/csv/header</code></td>
+</tr>
+</tbody></table>
+<h3 id='hmda-file-serving-hmda-file-api-get-institution-register-summary-irs'>Get Institution Register Summary (IRS)</h3>
+<blockquote>
+<p><strong>Example Request and Response</strong></p>
+</blockquote>
+
+<pre><code class="text">
+<b>Request:</b>
+
+curl -X POST "https://ffiec.cfpb.gov/public/rateSpread/reports/irs/year/2019/institution/B90YWS6AFX2LGWOXJ1LD" \
+-H 'Authorization: Bearer  {{access_token}}'
+
+<b>CSV Response:</b>
+MSA/MD, MSA/MD Name, Total Lars, Total Amount ($000's), CONV, FHA, VA, FSA, Site Built, Manufactured, 1-4 units, 5+ units, Home Purchase, Home Improvement, Refinancing, Cash-out Refinancing, Other Purpose, Purpose N/A
+16984,"Chicago-Naperville, IL-IN-WI", 1, 135, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0
+27260,"Jacksonville-St. Marys-Palatka, FL-GA", 1, 445, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0
+</code></pre>
+
+<p>The IRS is a summary of a institution&#39;s HMDA submission to be used by the filing institution to confirm that they are submitting the correct data.</p>
+
+<p>As such, access to each IRS is restricted to users associated with the institution. Users must be authenticated using the HMDA authentication system and include a bearer token with their request.</p>
+
+<p>(More information on authentication can be found above in the <a href="https://cfpb.github.io/hmda-platform/#hmda-platform-filing-api-authorization">Authorization section</a> in the HMDA Platform Filing API section of these docs)</p>
+
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Method</td>
+<td><code>GET</code></td>
+</tr>
+<tr>
+<td>Endpoint</td>
+<td><code>https://ffiec.cfpb.gov/file/reports/irs/year/{{year}}/institution/{{lei}}</code></td>
+</tr>
+<tr>
+<td>Headers</td>
+<td><code>Authorization: Bearer {{access_token}}</code></td>
+</tr>
+</tbody></table>
+<h2 id='hmda-file-serving-github-file-service'>Github File Service</h2>
+<p>Documentation served from github can be found on the <a href="https://github.com/cfpb/hmda-frontend/tree/master/src/documentation/markdown">HMDA Frontend github repository</a></p>
+<h2 id='hmda-file-serving-s3-file-service'>S3 File Service</h2>
+<p>All other files are accessed through direct links to the HMDA Platform&#39;s public S3 bucket. These S3 links are all prefixed with: <code>https://s3.amazonaws.com/cfpb-hmda-public/prod</code>.</p>
 <h1 id='data-browser-api'>Data Browser API</h1>
 <p>The data browser api enables developers to interact with HMDA data. The API will return either a JSON report of the data or CSV of the raw data.</p>
 
@@ -3527,7 +3687,7 @@ curl "https://ffiec.cfpb.gov/quarterly-data/graphs" -H 'Content-Type: applicatio
 </tr>
 <tr>
 <td>URL</td>
-<td><code>https://ffiec.cfpb.gov/quarterly-data/graphs/</code></td>
+<td><code>https://ffiec.cfpb.gov/quarterly-data/graphs</code></td>
 </tr>
 <tr>
 <td>Return</td>
