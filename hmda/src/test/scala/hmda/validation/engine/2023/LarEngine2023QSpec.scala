@@ -6,7 +6,7 @@ import hmda.model.filing.lar.{ Ethnicity, LoanApplicationRegister, Race }
 import hmda.model.validation.TsValidationError
 import hmda.utils.YearUtils.Period
 import hmda.validation.context.ValidationContext
-import hmda.validation.engine.LarEngine2023Q._
+import hmda.validation.engine.LarEngine2020Q._
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{ Millis, Minutes, Span }
 import org.scalatest.{ MustMatchers, WordSpec }

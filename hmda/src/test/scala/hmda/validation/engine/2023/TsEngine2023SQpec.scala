@@ -4,7 +4,7 @@ import hmda.model.filing.ts.TsGenerators._
 import hmda.model.validation.{ SyntacticalValidationError, TsValidationError, ValidityValidationError }
 import hmda.utils.YearUtils.Period
 import hmda.validation.context.ValidationContext
-import hmda.validation.engine.TsEngine2023Q._
+import hmda.validation.engine.TsEngine2020Q._
 import org.scalacheck.Gen
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks

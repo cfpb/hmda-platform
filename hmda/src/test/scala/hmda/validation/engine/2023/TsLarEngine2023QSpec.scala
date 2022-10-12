@@ -5,7 +5,7 @@ import hmda.model.filing.ts.{ TransmittalLar, TransmittalSheet }
 import hmda.model.validation.TsValidationError
 import hmda.utils.YearUtils.Period
 import hmda.validation.context.ValidationContext
-import hmda.validation.engine.TsLarEngine2023Q._
+import hmda.validation.engine.TsLarEngine2020Q._
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{ Millis, Minutes, Span }
 import org.scalatest.{ MustMatchers, WordSpec }
