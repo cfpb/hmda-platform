@@ -31,7 +31,7 @@ private class ReportingHttpApi(config: Config)(implicit ec: ExecutionContext) ex
   private val institutionRepository2019 = new InstitutionRepository(databaseConfig, "institutions2019")
   private val institutionRepository2020 = new InstitutionRepository(databaseConfig, "institutions2020")
   private val institutionRepository2021 = new InstitutionRepository(databaseConfig, "institutions2021")
-  private val institutionRepository2021 = new InstitutionRepository(databaseConfig, "institutions2022")
+  private val institutionRepository2022 = new InstitutionRepository(databaseConfig, "institutions2022")
 
 
 
