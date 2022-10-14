@@ -22,7 +22,9 @@ object Filer {
   }
 
   def check(filingRulesConfig: FilingRulesConfig)(year: Int, dayOfYear: Int, quarter: Option[String]): Boolean = {
-    import filingRulesConfig._
+    val rulesConfig = Try(getRulesFromRtConfig()).getOrElse(filingRulesConfig)
+
+    import rulesConfig._
     import qf._
 
     def resolveQuarter(q: String): QuarterConfig = q match {
