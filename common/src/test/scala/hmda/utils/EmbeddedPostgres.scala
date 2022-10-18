@@ -16,7 +16,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
  * after each test and finally deletes all tables before the suite is complete and tears down the database
  */
 trait EmbeddedPostgres extends BeforeAndAfterAll with BeforeAndAfterEach { self: Suite =>
-  private val embeddedPg = new ru.yandex.qatools.embed.postgresql.EmbeddedPostgres(Version.V10_6)
+  private val embeddedPg = new ru.yandex.qatools.embed.postgresql.EmbeddedPostgres(Version.V11_1)
   val dbHoconpath        = "embedded-pg"
   val dbConfig           = DatabaseConfig.forConfig[JdbcProfile](dbHoconpath)
 
