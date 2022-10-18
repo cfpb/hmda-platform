@@ -43,6 +43,7 @@ trait InstitutionSetup extends InstitutionEmailComponent {
           institutionsTable2020.schema.create,
           institutionsTable2021.schema.create,
           institutionsTable2022.schema.create,
+          institutionsTable2023.schema.create,
           institutionsTable2018 ++= Seq(
             instA,
             instB,
