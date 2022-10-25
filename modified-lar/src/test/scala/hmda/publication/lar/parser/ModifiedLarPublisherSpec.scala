@@ -79,6 +79,7 @@ class ModifiedLarPublisherSpec
     val censusTractMap2019: Map[String, Census] = CensusRecords.indexedTract2019
     val censusTractMap2020: Map[String, Census] = CensusRecords.indexedTract2020
     val censusTractMap2021: Map[String, Census] = CensusRecords.indexedTract2021
+    val censusTractMap2022: Map[String, Census] = CensusRecords.indexedTract2022
 
     val customData: TypedSystem[_] => SubmissionId => Source[LineAdded, NotUsed] =
       _ => _ => Source(larData.zipWithIndex.map { case (lar, timestamp) => LineAdded(timestamp, lar.toCSV) })
