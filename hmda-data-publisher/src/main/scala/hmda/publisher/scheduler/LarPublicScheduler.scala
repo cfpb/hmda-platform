@@ -14,7 +14,7 @@ import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.actor.HmdaActor
 import hmda.publisher.helper._
 import hmda.publisher.qa.{QAFilePersistor, QAFileSpec, QARepository}
-import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022}
+import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023}
 import hmda.publisher.query.lar.ModifiedLarEntityImpl
 import hmda.publisher.scheduler.schedules.Schedule
 import hmda.publisher.scheduler.schedules.Schedules.{LarPublicScheduler2018, LarPublicScheduler2019, LarPublicScheduler2020, LarPublicScheduler2021}
@@ -29,13 +29,14 @@ import slick.basic.DatabasePublisher
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 // $COVERAGE-OFF$
-class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFilePersistor: QAFilePersistor)
+class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
   extends HmdaActor
     with PublisherComponent2018
     with PublisherComponent2019
     with PublisherComponent2020
     with PublisherComponent2021
     with PublisherComponent2022
+    with PublisherComponent2023
     with ModifiedLarHeader
     with PGTableNameLoader
     with PublicAWSConfigLoader
@@ -45,13 +46,9 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
   implicit val materializer = Materializer(context)
 
   def mlarRepository2018               = new ModifiedLarRepository2018(dbConfig)
-  def qaMlarRepository2018               = new QAModifiedLarRepository2018(dbConfig)
   def mlarRepository2019               = new ModifiedLarRepository2019(dbConfig)
-  def qaMlarRepository2019              = new QAModifiedLarRepository2019(dbConfig)
   def mlarRepository2020               = new ModifiedLarRepository2020(dbConfig)
-  def qaMlarRepository2020              = new QAModifiedLarRepository2020(dbConfig)
   def mlarRepository2021               = new ModifiedLarRepository2021(dbConfig)
-  def qaMlarRepository2021              = new QAModifiedLarRepository2021(dbConfig)
 
   val publishingGuard: PublishingGuard = PublishingGuard.create(this)(context.system)
 
@@ -186,17 +183,6 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
     resultsPSV
   }
 
-  private def persistFileForQa[T](s3ObjKey: String, bucket: String, parseLine: String => T, repository: QARepository[T]) = {
-    val spec = QAFileSpec(
-      bucket = bucket,
-      key = s3ObjKey,
-      s3Settings = s3Settings,
-      withHeaderLine = true,
-      parseLine = parseLine,
-      repository = repository
-    )
-    qaFilePersistor.fetchAndPersist(spec)
-  }
 
 }
 // $COVERAGE-ON$

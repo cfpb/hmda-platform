@@ -70,41 +70,6 @@ trait PublisherComponent2021 extends PGTableNameLoader {
   }
   val institutionsTable2021 = TableQuery[InstitutionsTable]
 
-  class QAInstitutionsTable(tag: Tag)
-    extends InstitutionsTableBase[QAEntity[InstitutionAltEntity]](tag, panel2021QATableName)
-      with QATableBase[InstitutionAltEntity] {
-    def emailDomains = column[String]("email_domains")
-    def institutionAltEntityProjection =
-      (
-        lei,
-        activityYear,
-        agency,
-        institutionType,
-        id2017,
-        taxId,
-        rssd,
-        respondentName,
-        respondentState,
-        respondentCity,
-        parentIdRssd,
-        parentName,
-        assets,
-        otherLenderCode,
-        topHolderIdRssd,
-        topHolderName,
-        hmdaFiler,
-        emailDomains
-      ) <> ((InstitutionAltEntity.apply _).tupled, InstitutionAltEntity.unapply)
-    def * =
-      (institutionAltEntityProjection, fileName,timeStamp) <> ((QAEntity.apply[InstitutionAltEntity] _).tupled, QAEntity
-        .unapply[InstitutionAltEntity] _)
-  }
-
-  def createQaPanelRepository2021(config: DatabaseConfig[JdbcProfile])(implicit ec: ExecutionContext) =
-    new QARepository.Default[InstitutionAltEntity, QAInstitutionsTable](
-      config,
-      TableQuery(tag => new QAInstitutionsTable(tag))
-    )(ec)
 
   class InstitutionRepository2021(val config: DatabaseConfig[JdbcProfile]) extends TableRepository[InstitutionsTable, String] {
 
@@ -156,15 +121,7 @@ trait PublisherComponent2021 extends PGTableNameLoader {
     TableQuery(tag => new TransmittalSheetTable(tag, tableName))
   }
 
-  def qaTransmittalSheetTableQuery2021(p: Year2021Period): TableQuery[QATransmittalSheetTable] = {
-    val tableName = p match {
-      case Year2021Period.Whole => ts2021QATableName
-      case Year2021Period.Q1    => ts2021Q1QATableName
-      case Year2021Period.Q2    => ts2021Q2QATableName
-      case Year2021Period.Q3    => ts2021Q3QATableName
-    }
-    TableQuery(tag => new QATransmittalSheetTable(tag, tableName))
-  }
+
 
   abstract class LarTableBase[T](tag: Tag, tableName: String) extends Table[T](tag, tableName) {
 
@@ -475,9 +432,6 @@ trait PublisherComponent2021 extends PGTableNameLoader {
   def createTransmittalSheetRepository2021(config: DatabaseConfig[JdbcProfile], p: Year2021Period) =
     new TsRepository[TransmittalSheetTable](config, transmittalSheetTableQuery2021(p))
 
-  def createQaTransmittalSheetRepository2021(config: DatabaseConfig[JdbcProfile], p: Year2021Period)(implicit ec: ExecutionContext) =
-    new QARepository.Default[TransmittalSheetEntity, QATransmittalSheetTable](config, qaTransmittalSheetTableQuery2021(p))(ec)
-
 
   class RealLarTable2021(tag: Tag, tableName: String) extends LarTableBase[LarEntityImpl2021](tag, tableName) {
     def * = larEntityImpl2021Projection
@@ -499,15 +453,7 @@ trait PublisherComponent2021 extends PGTableNameLoader {
     TableQuery(tag => new RealLarTable2021(tag, tableName))
   }
 
-  def qaLarTableQuery2021(p: Year2021Period) = {
-    val tableName = p match {
-      case Year2021Period.Whole => lar2021QATableName
-      case Year2021Period.Q1    => lar2021Q1QATableName
-      case Year2021Period.Q2    => lar2021Q2QATableName
-      case Year2021Period.Q3    => lar2021Q3QATableName
-    }
-    TableQuery(tag => new QALarTableBase2021(tag, tableName))
-  }
+
 
   class LarRepository2021Base[LarTable <: RealLarTable2021](val config: DatabaseConfig[JdbcProfile], val table: TableQuery[LarTable])
     extends TableRepository[LarTable, String] {
@@ -552,9 +498,6 @@ trait PublisherComponent2021 extends PGTableNameLoader {
   def createLarRepository2021(config: DatabaseConfig[JdbcProfile], p: Year2021Period) =
     new LarRepository2021Base(config, larTableQuery2021(p))
 
-  def createQaLarRepository2021(config: DatabaseConfig[JdbcProfile], p: Year2021Period)(implicit ec: ExecutionContext) =
-    new QARepository.Default[LarEntityImpl2021, QALarTableBase2021](config, qaLarTableQuery2021(p))(ec)
-
   def validationLarData2021(p: Year2021Period): LarData = LarData[LarEntityImpl2021, RealLarTable2021](larTableQuery2021(p))(_.lei)
 
   def validationTSData2021(p: Year2021Period): TsData =
@@ -562,57 +505,6 @@ trait PublisherComponent2021 extends PGTableNameLoader {
   def validationPanelData2021(p: Year2021Period): PanelData =
     PanelData[InstitutionEntity, InstitutionsTable](institutionTableQuery2021(p))(_.lei, _.hmdaFiler)
 
-  class QALarTableLoanLimit(tag: Tag)
-    extends LarTableBase[QAEntity[LarEntityImpl2021WithMsa]](tag, lar2021QALoanLimitTableName)
-      with QATableBase[LarEntityImpl2021WithMsa] {
-
-    object MsaColumns {
-      def msaID                   = column[String]("msa_id")
-      def name                 = column[String]("name")
-      def totalLars            = column[Int]("total_lars")
-      def totalAmount          = column[BigDecimal]("total_amount")
-      def conv                 = column[Int]("conv")
-      def FHA                  = column[Int]("fha")
-      def VA                   = column[Int]("va")
-      def FSA                  = column[Int]("fsa")
-      def siteBuilt            = column[Int]("site_built")
-      def manufactured         = column[Int]("manufactured")
-      def oneToFour            = column[Int]("one_to_four")
-      def fivePlus             = column[Int]("five_plus")
-      def homePurchase         = column[Int]("home_purchase")
-      def homeImprovement      = column[Int]("home_improvement")
-      def refinancing          = column[Int]("refinancing")
-      def cashOutRefinancing   = column[Int]("cash_out_refinancing")
-      def otherPurpose         = column[Int]("other_purpose")
-      def notApplicablePurpose = column[Int]("not_applicable_purpose")
-    }
-
-    def msaProjection =
-      (
-        MsaColumns.msaID,
-        MsaColumns.name,
-        MsaColumns.totalLars,
-        MsaColumns.totalAmount,
-        MsaColumns.conv,
-        MsaColumns.FHA,
-        MsaColumns.VA,
-        MsaColumns.FSA,
-        MsaColumns.siteBuilt,
-        MsaColumns.manufactured,
-        MsaColumns.oneToFour,
-        MsaColumns.fivePlus,
-        MsaColumns.homePurchase,
-        MsaColumns.homeImprovement,
-        MsaColumns.refinancing,
-        MsaColumns.cashOutRefinancing,
-        MsaColumns.otherPurpose,
-        MsaColumns.notApplicablePurpose
-      ) <> ((Msa.apply _).tupled, Msa.unapply)
-
-    def larEntityImpl2021WithMsaProjection = (larEntityImpl2021Projection, msaProjection) <> ((LarEntityImpl2021WithMsa.apply _).tupled, LarEntityImpl2021WithMsa.unapply)
-
-    override def * = (larEntityImpl2021WithMsaProjection, fileName,timeStamp) <> ((QAEntity.apply[LarEntityImpl2021WithMsa] _).tupled, QAEntity.unapply[LarEntityImpl2021WithMsa] _)
-  }
 
   abstract class ModifiedLarTableBase[T](tag: Tag, tableName: String) extends Table[T](tag, tableName) {
 
@@ -917,20 +809,11 @@ trait PublisherComponent2021 extends PGTableNameLoader {
       )
   }
 
-  class QAModifiedLarTable(tag: Tag) extends ModifiedLarTableBase[QAEntity[ModifiedLarEntityImpl]](tag, mlar2021QATableName) with QATableBase[ModifiedLarEntityImpl] {
-    override def * = (modifiedLarEntityImplProjection, fileName,timeStamp) <> ((QAEntity.apply[ModifiedLarEntityImpl] _).tupled, QAEntity.unapply[ModifiedLarEntityImpl] _)
-  }
 
-  val qaMlarTable2021 = TableQuery[QAModifiedLarTable]
-  class QAModifiedLarRepository2021(config: DatabaseConfig[JdbcProfile])(implicit ec: ExecutionContext)
-    extends QARepository.Default[ModifiedLarEntityImpl, QAModifiedLarTable](config, qaMlarTable2021)(ec)
+
 
   val validationMLarData2021: LarData =
     LarData[ModifiedLarEntityImpl, ModifiedLarTable](mlarTable2021)(_.lei)
-  val qaLarTable2021LoanLimit = TableQuery[QALarTableLoanLimit]
-
-  class QALarRepository2021LoanLimit(config: DatabaseConfig[JdbcProfile])(implicit ec: ExecutionContext)
-    extends QARepository.Default[LarEntityImpl2021WithMsa, QALarTableLoanLimit](config, qaLarTable2021LoanLimit)(ec)
 
 
 }

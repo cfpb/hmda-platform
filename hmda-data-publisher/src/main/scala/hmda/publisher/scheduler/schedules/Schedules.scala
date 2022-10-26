@@ -11,6 +11,7 @@ object Schedules extends Enum[Schedule] {
   case object PanelScheduler2019        extends Schedule
   case object PanelScheduler2020        extends Schedule
   case object PanelScheduler2021        extends Schedule
+  case object PanelScheduler2022        extends Schedule
   case object LarPublicScheduler2018    extends Schedule
   case object LarPublicScheduler2019    extends Schedule
   case object LarPublicScheduler2020    extends Schedule
@@ -19,22 +20,28 @@ object Schedules extends Enum[Schedule] {
   case object LarScheduler2019          extends Schedule
   case object LarScheduler2020          extends Schedule
   case object LarScheduler2021          extends Schedule
+  case object LarScheduler2022          extends Schedule
   case object LarSchedulerLoanLimit2019 extends Schedule
   case object LarSchedulerLoanLimit2020 extends Schedule
   case object LarSchedulerLoanLimit2021 extends Schedule
+  case object LarSchedulerLoanLimit2022 extends Schedule
   case object TsPublicScheduler2018     extends Schedule
   case object TsPublicScheduler2019     extends Schedule
   case object TsPublicScheduler2020    extends Schedule
   case object TsPublicScheduler2021    extends Schedule
+  case object TsPublicScheduler2022    extends Schedule
   case object TsScheduler2018           extends Schedule
   case object TsScheduler2019           extends Schedule
   case object TsScheduler2020           extends Schedule
   case object TsScheduler2021           extends Schedule
+  case object TsScheduler2022           extends Schedule
   case object LarSchedulerQuarterly2020 extends Schedule
   case object TsSchedulerQuarterly2020  extends Schedule
   case object LarSchedulerQuarterly2021 extends Schedule
   case object TsSchedulerQuarterly2021  extends Schedule
   case object LarSchedulerQuarterly2022 extends Schedule
   case object TsSchedulerQuarterly2022  extends Schedule
+  case object LarSchedulerQuarterly2023 extends Schedule
+  case object TsSchedulerQuarterly2023  extends Schedule
   override def values: immutable.IndexedSeq[Schedule] = findValues
 }

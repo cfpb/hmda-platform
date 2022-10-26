@@ -3,7 +3,7 @@ package hmda.publisher.query.component
 import java.sql.Timestamp
 import hmda.model.publication.Msa
 import hmda.publisher.helper.PGTableNameLoader
-import hmda.publisher.query.lar.{LarEntityImpl2022, _}
+import hmda.publisher.query.lar.{LarEntityImpl2023, _}
 import hmda.publisher.query.panel.{InstitutionAltEntity, InstitutionEntity}
 import hmda.publisher.validation.{LarData, PanelData, TsData}
 import hmda.query.DbConfiguration._
@@ -14,16 +14,16 @@ import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
 
 import scala.concurrent.{ExecutionContext, Future}
 // $COVERAGE-OFF$
-trait PublisherComponent2022 extends PGTableNameLoader {
+trait PublisherComponent2023 extends PGTableNameLoader {
 
   import dbConfig.profile.api._
 
-  sealed trait Year2022Period
-  object Year2022Period {
-    case object Whole extends Year2022Period
-    case object Q1    extends Year2022Period
-    case object Q2    extends Year2022Period
-    case object Q3    extends Year2022Period
+  sealed trait Year2023Period
+  object Year2023Period {
+    case object Whole extends Year2023Period
+    case object Q1    extends Year2023Period
+    case object Q2    extends Year2023Period
+    case object Q3    extends Year2023Period
   }
 
   abstract class InstitutionsTableBase[T](tag: Tag, tableName: String) extends Table[T](tag, tableName) {
@@ -45,7 +45,7 @@ trait PublisherComponent2022 extends PGTableNameLoader {
     def topHolderName   = column[String]("topholder_name")
     def hmdaFiler       = column[Boolean]("hmda_filer")
   }
-  class InstitutionsTable(tag: Tag) extends InstitutionsTableBase[InstitutionEntity](tag, panel2022TableName) {
+  class InstitutionsTable(tag: Tag) extends InstitutionsTableBase[InstitutionEntity](tag, panel2023TableName) {
     override def * =
       (
         lei,
@@ -67,12 +67,12 @@ trait PublisherComponent2022 extends PGTableNameLoader {
         hmdaFiler
       ) <> (InstitutionEntity.tupled, InstitutionEntity.unapply)
   }
-  val institutionsTable2022 = TableQuery[InstitutionsTable]
+  val institutionsTable2023 = TableQuery[InstitutionsTable]
 
-  class InstitutionRepository2022(val config: DatabaseConfig[JdbcProfile]) extends TableRepository[InstitutionsTable, String] {
+  class InstitutionRepository2023(val config: DatabaseConfig[JdbcProfile]) extends TableRepository[InstitutionsTable, String] {
 
     override val table: config.profile.api.TableQuery[InstitutionsTable] =
-      institutionsTable2022
+      institutionsTable2023
 
     override def getId(row: InstitutionsTable): config.profile.api.Rep[Id] =
       row.lei
@@ -105,16 +105,16 @@ trait PublisherComponent2022 extends PGTableNameLoader {
       db.run(table.size.result)
   }
 
-  def institutionTableQuery2022(p: Year2022Period) = {
+  def institutionTableQuery2023(p: Year2023Period) = {
     TableQuery(tag => new InstitutionsTable(tag))
   }
 
-  def transmittalSheetTableQuery2022(p: Year2022Period): TableQuery[TransmittalSheetTable] = {
+  def transmittalSheetTableQuery2023(p: Year2023Period): TableQuery[TransmittalSheetTable] = {
     val tableName = p match {
-      case Year2022Period.Whole => ts2022TableName
-      case Year2022Period.Q1    => ts2022Q1TableName
-      case Year2022Period.Q2    => ts2022Q2TableName
-      case Year2022Period.Q3    => ts2022Q3TableName
+      case Year2023Period.Whole => ts2023TableName
+      case Year2023Period.Q1    => ts2023Q1TableName
+      case Year2023Period.Q2    => ts2023Q2TableName
+      case Year2023Period.Q3    => ts2023Q3TableName
     }
     TableQuery(tag => new TransmittalSheetTable(tag, tableName))
   }
@@ -262,7 +262,7 @@ trait PublisherComponent2022 extends PGTableNameLoader {
     // so don't use create Schema
     def isQuarterly = column[Option[Boolean]]("is_quarterly")
 
-    def larEntityImpl2022Projection =
+    def larEntityImpl2023Projection =
       (
         larPartOneProjection,
         larPartTwoProjection,
@@ -271,7 +271,7 @@ trait PublisherComponent2022 extends PGTableNameLoader {
         larPartFiveProjection,
         larPartSixProjection,
         larPartSevenProjection
-      ) <> ((LarEntityImpl2022.apply _).tupled, LarEntityImpl2022.unapply)
+      ) <> ((LarEntityImpl2023.apply _).tupled, LarEntityImpl2023.unapply)
 
     def larPartOneProjection =
       (
@@ -293,7 +293,7 @@ trait PublisherComponent2022 extends PGTableNameLoader {
         zip,
         county,
         tract
-      ) <> ((LarPartOne2022.apply _).tupled, LarPartOne2022.unapply)
+      ) <> ((LarPartOne2023.apply _).tupled, LarPartOne2023.unapply)
 
     def larPartTwoProjection =
       (
@@ -316,7 +316,7 @@ trait PublisherComponent2022 extends PGTableNameLoader {
         raceApplicant3,
         raceApplicant4,
         raceApplicant5
-      ) <> ((LarPartTwo2022.apply _).tupled, LarPartTwo2022.unapply)
+      ) <> ((LarPartTwo2023.apply _).tupled, LarPartTwo2023.unapply)
 
     def larPartThreeProjection =
       (
@@ -340,7 +340,7 @@ trait PublisherComponent2022 extends PGTableNameLoader {
         ageApplicant,
         ageCoApplicant,
         income
-      ) <> ((LarPartThree2022.apply _).tupled, LarPartThree2022.unapply)
+      ) <> ((LarPartThree2023.apply _).tupled, LarPartThree2023.unapply)
 
     def larPartFourProjection =
       (
@@ -362,7 +362,7 @@ trait PublisherComponent2022 extends PGTableNameLoader {
         totalLoanCosts,
         totalPoints,
         originationCharges
-      ) <> ((LarPartFour2022.apply _).tupled, LarPartFour2022.unapply)
+      ) <> ((LarPartFour2023.apply _).tupled, LarPartFour2023.unapply)
 
     def larPartFiveProjection =
       (
@@ -384,7 +384,7 @@ trait PublisherComponent2022 extends PGTableNameLoader {
         totalUnits,
         mfAffordable,
         applicationSubmission
-      ) <> ((LarPartFive2022.apply _).tupled, LarPartFive2022.unapply)
+      ) <> ((LarPartFive2023.apply _).tupled, LarPartFive2023.unapply)
 
     def larPartSixProjection =
       (
@@ -405,7 +405,7 @@ trait PublisherComponent2022 extends PGTableNameLoader {
         reverseMortgage,
         lineOfCredits,
         businessOrCommercial
-      ) <> ((LarPartSix2022.apply _).tupled, LarPartSix2022.unapply)
+      ) <> ((LarPartSix2023.apply _).tupled, LarPartSix2023.unapply)
 
     def larPartSevenProjection =
       (
@@ -422,32 +422,32 @@ trait PublisherComponent2022 extends PGTableNameLoader {
         tractOneToFourFamilyUnits,
         tractMedianAge,
         tractToMsaIncomePercent
-      ) <> ((LarPartSeven2022.apply _).tupled, LarPartSeven2022.unapply)
+      ) <> ((LarPartSeven2023.apply _).tupled, LarPartSeven2023.unapply)
 
   }
 
-  def createTransmittalSheetRepository2022(config: DatabaseConfig[JdbcProfile], p: Year2022Period) =
-    new TsRepository(config, transmittalSheetTableQuery2022(p))
+  def createTransmittalSheetRepository2023(config: DatabaseConfig[JdbcProfile], p: Year2023Period) =
+    new TsRepository(config, transmittalSheetTableQuery2023(p))
 
 
 
-  class RealLarTable2022(tag: Tag, tableName: String) extends LarTableBase[LarEntityImpl2022](tag, tableName) {
-    def * = larEntityImpl2022Projection
+  class RealLarTable2023(tag: Tag, tableName: String) extends LarTableBase[LarEntityImpl2023](tag, tableName) {
+    def * = larEntityImpl2023Projection
   }
 
 
-  def larTableQuery2022(p: Year2022Period) = {
+  def larTableQuery2023(p: Year2023Period) = {
     val tableName = p match {
-      case Year2022Period.Whole => lar2022TableName
-      case Year2022Period.Q1    => lar2022Q1TableName
-      case Year2022Period.Q2    => lar2022Q2TableName
-      case Year2022Period.Q3    => lar2022Q3TableName
+      case Year2023Period.Whole => lar2023TableName
+      case Year2023Period.Q1    => lar2023Q1TableName
+      case Year2023Period.Q2    => lar2023Q2TableName
+      case Year2023Period.Q3    => lar2023Q3TableName
     }
-    TableQuery(tag => new RealLarTable2022(tag, tableName))
+    TableQuery(tag => new RealLarTable2023(tag, tableName))
   }
 
 
-  class LarRepository2022Base[LarTable <: RealLarTable2022](val config: DatabaseConfig[JdbcProfile], val table: TableQuery[LarTable])
+  class LarRepository2023Base[LarTable <: RealLarTable2023](val config: DatabaseConfig[JdbcProfile], val table: TableQuery[LarTable])
     extends TableRepository[LarTable, String] {
 
     override def getId(row: LarTable): config.profile.api.Rep[Id] =
@@ -459,10 +459,10 @@ trait PublisherComponent2022 extends PGTableNameLoader {
     def dropSchema()   = db.run(table.schema.drop)
     // $COVERAGE-ON$
 
-    def insert(ts: LarEntityImpl2022): Future[Int] =
+    def insert(ts: LarEntityImpl2023): Future[Int] =
       db.run(table += ts)
 
-    def findByLei(lei: String): Future[Seq[LarEntityImpl2022]] =
+    def findByLei(lei: String): Future[Seq[LarEntityImpl2023]] =
       db.run(table.filter(_.lei === lei).result)
 
     def deleteByLei(lei: String): Future[Int] =
@@ -473,7 +473,7 @@ trait PublisherComponent2022 extends PGTableNameLoader {
     def getAllLARsCount(bankIgnoreList: Array[String]): Future[Int] =
       db.run(getAllLARsQuery(bankIgnoreList).size.result)
 
-    def getAllLARs(bankIgnoreList: Array[String]): DatabasePublisher[LarEntityImpl2022] =
+    def getAllLARs(bankIgnoreList: Array[String]): DatabasePublisher[LarEntityImpl2023] =
       db.stream(
         getAllLARsQuery(bankIgnoreList).result
           .withStatementParameters(
@@ -483,21 +483,21 @@ trait PublisherComponent2022 extends PGTableNameLoader {
           )
           .transactionally
       )
-    protected def getAllLARsQuery(bankIgnoreList: Array[String]): Query[LarTable, LarEntityImpl2022, Seq] =
+    protected def getAllLARsQuery(bankIgnoreList: Array[String]): Query[LarTable, LarEntityImpl2023, Seq] =
       table.filterNot(_.lei.toUpperCase inSet bankIgnoreList)
   }
 
-  def createLarRepository2022(config: DatabaseConfig[JdbcProfile], p: Year2022Period) =
-    new LarRepository2022Base(config, larTableQuery2022(p))
+  def createLarRepository2023(config: DatabaseConfig[JdbcProfile], p: Year2023Period) =
+    new LarRepository2023Base(config, larTableQuery2023(p))
 
 
-  def validationLarData2022(p: Year2022Period): LarData = LarData[LarEntityImpl2022, RealLarTable2022](larTableQuery2022(p))(_.lei)
+  def validationLarData2023(p: Year2023Period): LarData = LarData[LarEntityImpl2023, RealLarTable2023](larTableQuery2023(p))(_.lei)
 
-  def validationTSData2022(p: Year2022Period): TsData =
-    TsData[TransmittalSheetEntity, TransmittalSheetTable](transmittalSheetTableQuery2022(p))(_.lei, _.totalLines, _.submissionId)
+  def validationTSData2023(p: Year2023Period): TsData =
+    TsData[TransmittalSheetEntity, TransmittalSheetTable](transmittalSheetTableQuery2023(p))(_.lei, _.totalLines, _.submissionId)
 
-  def validationPanelData2022(p: Year2022Period): PanelData =
-    PanelData[InstitutionEntity, InstitutionsTable](institutionTableQuery2022(p))(_.lei, _.hmdaFiler)
+  def validationPanelData2023(p: Year2023Period): PanelData =
+    PanelData[InstitutionEntity, InstitutionsTable](institutionTableQuery2023(p))(_.lei, _.hmdaFiler)
 
 
 

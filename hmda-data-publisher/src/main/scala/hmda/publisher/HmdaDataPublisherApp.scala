@@ -47,6 +47,8 @@ object HmdaDataPublisherApp extends App with PGTableNameLoader {
   log.info("Using TS 2020 Table: " + ts2020TableName + "\n")
   log.info("Using LAR 2021 Table: " + lar2021TableName + "\n")
   log.info("Using TS 2021 Table: " + ts2021TableName + "\n")
+  log.info("Using LAR 2022 Table: " + lar2022TableName + "\n")
+  log.info("Using TS 2022 Table: " + ts2022TableName + "\n")
   log.info("Using EMAIL Table: " + emailTableName + "\n")
 
   config.getObject("akka.quartz.schedules").forEach((k, v) => log.info(s"$k = ${v.render()}"))
@@ -56,14 +58,13 @@ object HmdaDataPublisherApp extends App with PGTableNameLoader {
     val groupReportingTimeout = 45.minutes // TODO move to config
     actorSystem.spawn(PublishingReporter(mattermostNotifier, groupReportingTimeout), "PublishingReporter")
   }
-  val qaFilePersistor = new QAFilePersistor(mattermostNotifier)
 
   val allSchedulers = AllSchedulers(
-    larPublicScheduler = actorSystem.actorOf(Props(new LarPublicScheduler(publishingReporter, qaFilePersistor)), "LarPublicScheduler"),
-    larScheduler = actorSystem.actorOf(Props(new LarScheduler(publishingReporter, qaFilePersistor)), "LarScheduler"),
-    panelScheduler = actorSystem.actorOf(Props(new PanelScheduler(publishingReporter, qaFilePersistor)), "PanelScheduler"),
-    tsPublicScheduler = actorSystem.actorOf(Props(new TsPublicScheduler(publishingReporter, qaFilePersistor)), "TsPublicScheduler"),
-    tsScheduler = actorSystem.actorOf(Props(new TsScheduler(publishingReporter, qaFilePersistor)), "TsScheduler")
+    larPublicScheduler = actorSystem.actorOf(Props(new LarPublicScheduler(publishingReporter)), "LarPublicScheduler"),
+    larScheduler = actorSystem.actorOf(Props(new LarScheduler(publishingReporter)), "LarScheduler"),
+    panelScheduler = actorSystem.actorOf(Props(new PanelScheduler(publishingReporter)), "PanelScheduler"),
+    tsPublicScheduler = actorSystem.actorOf(Props(new TsPublicScheduler(publishingReporter)), "TsPublicScheduler"),
+    tsScheduler = actorSystem.actorOf(Props(new TsScheduler(publishingReporter)), "TsScheduler")
   )
 
   actorSystem.spawn[Nothing](HmdaDataPublisherApi(allSchedulers), HmdaDataPublisherApi.name)
