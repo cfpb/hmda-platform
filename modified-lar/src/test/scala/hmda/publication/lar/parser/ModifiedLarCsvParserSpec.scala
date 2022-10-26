@@ -9,7 +9,7 @@ class ModifiedLarCsvParserSpec extends WordSpec with ScalaCheckPropertyChecks wi
   "Parses LAR entries" in {
     forAll(larGen) { lar =>
       val mlarFn = ModifiedLarCsvParser(lar.toCSV, _)
-      (2018 to 2021).foreach(year => mlarFn(year).lei shouldBe lar.larIdentifier.LEI)
+      (2018 to 2022).foreach(year => mlarFn(year).lei shouldBe lar.larIdentifier.LEI)
     }
   }
 
