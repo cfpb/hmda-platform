@@ -77,6 +77,8 @@ trait InstitutionComponent {
   val institutionsTable2020 = TableQuery[InstitutionsTable]((tag: Tag) => new InstitutionsTable(tag, "institutions2020"))
   val institutionsTable2021 = TableQuery[InstitutionsTable]((tag: Tag) => new InstitutionsTable(tag, "institutions2021"))
   val institutionsTable2022 = TableQuery[InstitutionsTable]((tag: Tag) => new InstitutionsTable(tag, "institutions2022"))
+  val institutionsTable2023 = TableQuery[InstitutionsTable]((tag: Tag) => new InstitutionsTable(tag, "institutions2023"))
+
 
   val institutionConfig: Config = ConfigFactory.load().getConfig("hmda.institution")
 
