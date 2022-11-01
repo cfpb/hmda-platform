@@ -84,6 +84,8 @@ object CensusRecords {
         indexedTract2021
       case 2022 =>
         indexedTract2022
+      case 2023 =>
+        indexedTract2022
       case _ =>
         indexedTract2021
     }
@@ -100,6 +102,8 @@ object CensusRecords {
       case 2021 =>
         indexedCounty2021
       case 2022 =>
+        indexedCounty2022
+      case 2023 =>
         indexedCounty2022
       case _ =>
         indexedCounty2021

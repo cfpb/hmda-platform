@@ -22,7 +22,8 @@ private[engine] object TsEngine2022 extends ValidationEngine[TransmittalSheet] {
     V606,
     V607,
     V717,
-    V719
+    V719_1,
+    V719_2
   )
 
 }
