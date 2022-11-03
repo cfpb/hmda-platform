@@ -26,9 +26,9 @@ object EditDescriptionLookup {
   val editDescriptionFileName2022 =
     config.getString("hmda.filing.2022.edits.descriptions.filename")
   val editDescriptionFileName2023Quarter =
-    config.getString("hmda.filing.2022Quarter.edits.descriptions.filename")
+    config.getString("hmda.filing.2023Quarter.edits.descriptions.filename")
   val editDescriptionFileName2023 =
-    config.getString("hmda.filing.2022.edits.descriptions.filename")
+    config.getString("hmda.filing.2023.edits.descriptions.filename")
 
   def editDescriptionList(file: Iterable[String]): Iterable[EditDescription] =
     file
