@@ -64,8 +64,8 @@ object EditDescriptionLookup {
   val editDescriptionMap2021 = editDescriptionMap(editDescriptionLines2021)
   val editDescriptionMap2022Quarter = editDescriptionMap(editDescriptionLines2022Quarter)
   val editDescriptionMap2022 = editDescriptionMap(editDescriptionLines2022)
-  val editDescriptionMap2023Quarter = editDescriptionMap(editDescriptionLines2022Quarter)
-  val editDescriptionMap2023 = editDescriptionMap(editDescriptionLines2022)
+  val editDescriptionMap2023Quarter = editDescriptionMap(editDescriptionLines2023Quarter)
+  val editDescriptionMap2023 = editDescriptionMap(editDescriptionLines2023)
 
 
 
