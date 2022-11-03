@@ -25,6 +25,10 @@ object EditDescriptionLookup {
     config.getString("hmda.filing.2022Quarter.edits.descriptions.filename")
   val editDescriptionFileName2022 =
     config.getString("hmda.filing.2022.edits.descriptions.filename")
+  val editDescriptionFileName2023Quarter =
+    config.getString("hmda.filing.2023Quarter.edits.descriptions.filename")
+  val editDescriptionFileName2023 =
+    config.getString("hmda.filing.2023.edits.descriptions.filename")
 
   def editDescriptionList(file: Iterable[String]): Iterable[EditDescription] =
     file
@@ -48,6 +52,8 @@ object EditDescriptionLookup {
   val editDescriptionLines2021 = fileLines(s"/$editDescriptionFileName2021")
   val editDescriptionLines2022Quarter = fileLines(s"/$editDescriptionFileName2022Quarter")
   val editDescriptionLines2022 = fileLines(s"/$editDescriptionFileName2022")
+  val editDescriptionLines2023Quarter = fileLines(s"/$editDescriptionFileName2023Quarter")
+  val editDescriptionLines2023 = fileLines(s"/$editDescriptionFileName2023")
 
 
   val editDescriptionMap2018        = editDescriptionMap(editDescriptionLines2018)
@@ -58,6 +64,8 @@ object EditDescriptionLookup {
   val editDescriptionMap2021 = editDescriptionMap(editDescriptionLines2021)
   val editDescriptionMap2022Quarter = editDescriptionMap(editDescriptionLines2022Quarter)
   val editDescriptionMap2022 = editDescriptionMap(editDescriptionLines2022)
+  val editDescriptionMap2023Quarter = editDescriptionMap(editDescriptionLines2023Quarter)
+  val editDescriptionMap2023 = editDescriptionMap(editDescriptionLines2023)
 
 
 
@@ -71,6 +79,8 @@ object EditDescriptionLookup {
       case Period(2021, None)    => editDescriptionMap2021
       case Period(2022, Some(_)) => editDescriptionMap2022Quarter
       case Period(2022, None) => editDescriptionMap2022
+      case Period(2023, Some(_)) => editDescriptionMap2023Quarter
+      case Period(2023, None) => editDescriptionMap2023
       case _                     => editDescriptionMap2021
     }
 
