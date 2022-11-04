@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.serialization";
+option optimize_for = SPEED;
+
+message ValidationProgressTrackerSubscribeMessage {
+  string reply = 1;
+}
+
+message ValidationProgressTrackerPollMessage {
+  string reply = 1;
+}
+
+message ValidationProgressTrackerStateMessage {
+  ValidationProgressMessage syntacticalValidation = 1;
+  int32 syntacticalValidationProgressPercentage = 2;
+  repeated string syntacticalEdits = 3;
+  ValidationProgressMessage qualityValidation = 4;
+  int32 qualityValidationProgressPercentage = 5;
+  repeated string qualityEdits = 6;
+  ValidationProgressMessage macroValidation = 7;
+  int32 macroValidationProgressPercentage = 8;
+  repeated string macroEdits = 9;
+}
+
+enum ValidationProgressMessage {
+  WAITING = 0;
+  IN_PROGRESS = 1;
+  COMPLETED = 2;
+  COMPLETED_WITH_ERRORS = 3;
+}
+
