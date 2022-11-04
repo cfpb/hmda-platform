@@ -36,7 +36,6 @@ object ValidationProgressTrackerCommandsProtobufConverter {
   private def validationProgressPercentageToProtobuf(p: ValidationProgress): Int = p match {
     case ValidationProgress.InProgress(percentage) => percentage
     case ValidationProgress.Waiting                => 0
-    case ValidationProgress.InProgress(percentage) => percentage
     case ValidationProgress.Completed              => 100
     case ValidationProgress.CompletedWithErrors    => 100
     case _ => 0
