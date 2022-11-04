@@ -2,6 +2,7 @@ package hmda.serialization.validation
 
 import akka.actor.typed.ActorRefResolver
 import hmda.messages.submission.ValidationProgressTrackerCommands
+import hmda.model.processing.state.ValidationProgress.{Completed, CompletedWithErrors, InProgress, Waiting}
 import hmda.model.processing.state.{ValidationProgress, ValidationProgressTrackerState}
 import hmda.persistence.serialization.validationProgressTracker.{ValidationProgressMessage, ValidationProgressTrackerPollMessage, ValidationProgressTrackerStateMessage, ValidationProgressTrackerSubscribeMessage}
 
@@ -34,7 +35,12 @@ object ValidationProgressTrackerCommandsProtobufConverter {
 
   private def validationProgressPercentageToProtobuf(p: ValidationProgress): Int = p match {
     case ValidationProgress.InProgress(percentage) => percentage
+    case ValidationProgress.Waiting                => 0
+    case ValidationProgress.InProgress(percentage) => percentage
+    case ValidationProgress.Completed              => 100
+    case ValidationProgress.CompletedWithErrors    => 100
     case _ => 0
+
   }
 
   //
