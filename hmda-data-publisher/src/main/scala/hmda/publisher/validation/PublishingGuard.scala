@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import cats.data.{Validated, ValidatedNel}
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
-import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022}
+import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023}
 import hmda.publisher.util.MattermostNotifier
 import hmda.publisher.validation.PublishingGuard.{Period, Scope}
 import hmda.query.DbConfiguration
@@ -19,6 +19,7 @@ class PublishingGuard(
                        db2020: PublisherComponent2020,
                        db2021: PublisherComponent2021,
                        db2022: PublisherComponent2022,
+                       db2023: PublisherComponent2023,
                        messageReporter: MattermostNotifier,
                        dbConfig: DatabaseConfig[JdbcProfile]
                      )(
@@ -58,6 +59,9 @@ class PublishingGuard(
       case Period.y2022Q1 => 0
       case Period.y2022Q2 => 0
       case Period.y2022Q3 => 0
+      case Period.y2023Q1 => 0
+      case Period.y2023Q2 => 0
+      case Period.y2023Q3 => 0
     }
 
     scope match {
@@ -67,6 +71,7 @@ class PublishingGuard(
           case Period.y2019   => db2019.validationLarData2019
           case Period.y2020   => db2020.validationLarData2020(db2020.Year2020Period.Whole)
           case Period.y2021   => db2021.validationLarData2021(db2021.Year2021Period.Whole)
+          case Period.y2022   => db2022.validationLarData2022(db2022.Year2022Period.Whole)
           case Period.y2020Q1 => db2020.validationLarData2020(db2020.Year2020Period.Q1)
           case Period.y2020Q2 => db2020.validationLarData2020(db2020.Year2020Period.Q2)
           case Period.y2020Q3 => db2020.validationLarData2020(db2020.Year2020Period.Q3)
@@ -76,6 +81,9 @@ class PublishingGuard(
           case Period.y2022Q1 => db2022.validationLarData2022(db2022.Year2022Period.Q1)
           case Period.y2022Q2 => db2022.validationLarData2022(db2022.Year2022Period.Q2)
           case Period.y2022Q3 => db2022.validationLarData2022(db2022.Year2022Period.Q3)
+          case Period.y2023Q1 => db2023.validationLarData2023(db2023.Year2023Period.Q1)
+          case Period.y2023Q2 => db2023.validationLarData2023(db2023.Year2023Period.Q2)
+          case Period.y2023Q3 => db2023.validationLarData2023(db2023.Year2023Period.Q3)
           case p => throw new IllegalArgumentException("Illegal period used for fetching lar data: " + p.toString)
         }
 
@@ -84,6 +92,7 @@ class PublishingGuard(
           case Period.y2019   => db2019.validationTSData2019
           case Period.y2020   => db2020.validationTSData2020(db2020.Year2020Period.Whole)
           case Period.y2021   => db2021.validationTSData2021(db2021.Year2021Period.Whole)
+          case Period.y2022   => db2022.validationTSData2022(db2022.Year2022Period.Whole)
           case Period.y2020Q1 => db2020.validationTSData2020(db2020.Year2020Period.Q1)
           case Period.y2020Q2 => db2020.validationTSData2020(db2020.Year2020Period.Q2)
           case Period.y2020Q3 => db2020.validationTSData2020(db2020.Year2020Period.Q3)
@@ -93,6 +102,9 @@ class PublishingGuard(
           case Period.y2022Q1 => db2022.validationTSData2022(db2022.Year2022Period.Q1)
           case Period.y2022Q2 => db2022.validationTSData2022(db2022.Year2022Period.Q2)
           case Period.y2022Q3 => db2022.validationTSData2022(db2022.Year2022Period.Q3)
+          case Period.y2023Q1 => db2023.validationTSData2023(db2023.Year2023Period.Q1)
+          case Period.y2023Q2 => db2023.validationTSData2023(db2023.Year2023Period.Q2)
+          case Period.y2023Q3 => db2023.validationTSData2023(db2023.Year2023Period.Q3)
           case p => throw new IllegalArgumentException("Illegal period used for fetching ts data: " + p.toString)
         }
 
@@ -101,13 +113,16 @@ class PublishingGuard(
           case Period.y2019   => db2019.validationPanelData2019
           case Period.y2020   => db2020.validationPanelData2020(db2020.Year2020Period.Whole)
           case Period.y2021   => db2021.validationPanelData2021(db2021.Year2021Period.Whole)
+          case Period.y2022   => db2022.validationPanelData2022(db2022.Year2022Period.Whole)
           case Period.y2020Q1 | Period.y2020Q2 | Period.y2020Q3 =>
             throw new IllegalArgumentException("quarterly 2020 is not supported to public publishers at the moment")
           case Period.y2021Q1 | Period.y2021Q2 | Period.y2021Q3 =>
             throw new IllegalArgumentException("quarterly 2021 is not supported to public publishers at the moment")
-          case Period.y2022Q1 => db2022.validationPanelData2022(db2022.Year2022Period.Q1)
-          case Period.y2022Q2 => db2022.validationPanelData2022(db2022.Year2022Period.Q2)
-          case Period.y2022Q3 => db2022.validationPanelData2022(db2022.Year2022Period.Q3)
+          case Period.y2022Q1 | Period.y2022Q2 | Period.y2022Q3 =>
+            throw new IllegalArgumentException("quarterly 2022 is not supported to public publishers at the moment")
+          case Period.y2023Q1 => db2023.validationPanelData2023(db2023.Year2023Period.Q1)
+          case Period.y2023Q2 => db2023.validationPanelData2023(db2023.Year2023Period.Q2)
+          case Period.y2023Q3 => db2023.validationPanelData2023(db2023.Year2023Period.Q3)
         }
 
         List(
@@ -127,6 +142,8 @@ class PublishingGuard(
             throw new IllegalArgumentException("quarterly 2021 is not supported to public publishers at the moment")
           case Period.y2022Q1 | Period.y2022Q2 | Period.y2022Q3 =>
             throw new IllegalArgumentException("quarterly 2022 is not supported to public publishers at the moment")
+          case Period.y2023Q1 | Period.y2023Q2 | Period.y2023Q3 =>
+            throw new IllegalArgumentException("quarterly 2022 is not supported to public publishers at the moment")
           case p => throw new IllegalArgumentException("Illegal period used for fetching public lar data: " + p.toString)
         }
         val tsData = year match {
@@ -134,11 +151,14 @@ class PublishingGuard(
           case Period.y2019 => db2019.validationTSData2019
           case Period.y2020 => db2020.validationTSData2020(db2020.Year2020Period.Whole)
           case Period.y2021 => db2021.validationTSData2021(db2021.Year2021Period.Whole)
+          case Period.y2022 => db2022.validationTSData2022(db2022.Year2022Period.Whole)
           case Period.y2020Q1 | Period.y2020Q1 | Period.y2020Q3 =>
             throw new IllegalArgumentException("quarterly 2020 is not supported to public publishers at the moment")
           case Period.y2021Q1 | Period.y2021Q1 | Period.y2021Q3 =>
             throw new IllegalArgumentException("quarterly 2021 is not supported to public publishers at the moment")
           case Period.y2022Q1 | Period.y2022Q2 | Period.y2022Q3 =>
+            throw new IllegalArgumentException("quarterly 2022 is not supported to public publishers at the moment")
+          case Period.y2023Q1 | Period.y2023Q2 | Period.y2023Q3 =>
             throw new IllegalArgumentException("quarterly 2022 is not supported to public publishers at the moment")
         }
 
@@ -147,11 +167,14 @@ class PublishingGuard(
           case Period.y2019 => db2019.validationPanelData2019
           case Period.y2020 => db2020.validationPanelData2020(db2020.Year2020Period.Whole)
           case Period.y2021 => db2021.validationPanelData2021(db2021.Year2021Period.Whole)
+          case Period.y2022 => db2022.validationPanelData2022(db2022.Year2022Period.Whole)
           case Period.y2020Q1 | Period.y2020Q1 | Period.y2020Q3 =>
             throw new IllegalArgumentException("quarterly 2020 is not supported to public publishers at the moment")
           case Period.y2021Q1 | Period.y2021Q1 | Period.y2021Q3 =>
             throw new IllegalArgumentException("quarterly 2021 is not supported to public publishers at the moment")
           case Period.y2022Q1 | Period.y2022Q2 | Period.y2022Q3 =>
+            throw new IllegalArgumentException("quarterly 2022 is not supported to public publishers at the moment")
+          case Period.y2023Q1 | Period.y2023Q2 | Period.y2023Q3 =>
             throw new IllegalArgumentException("quarterly 2022 is not supported to public publishers at the moment")
           case p => throw new IllegalArgumentException("Illegal period used for fetching public ts data: " + p.toString)
         }
@@ -186,12 +209,13 @@ object PublishingGuard {
                 with PublisherComponent2020
                 with PublisherComponent2021
                 with PublisherComponent2022
+                with PublisherComponent2023
             )(implicit as: ActorSystem): PublishingGuard = {
     import as.dispatcher
     val config      = ConfigFactory.load("application.conf")
     val msgReporter = new MattermostNotifier(config.getString("hmda.publisher.validation.reportingUrl"))
     val dbConfig    = DbConfiguration.dbConfig
-    new PublishingGuard(dbCompontnents, dbCompontnents, dbCompontnents,dbCompontnents,dbCompontnents, msgReporter, dbConfig)
+    new PublishingGuard(dbCompontnents, dbCompontnents, dbCompontnents,dbCompontnents,dbCompontnents, dbCompontnents,msgReporter, dbConfig)
   }
 
   sealed trait Period
@@ -212,6 +236,9 @@ object PublishingGuard {
     case object y2022Q1 extends Period with Quarter
     case object y2022Q2 extends Period with Quarter
     case object y2022Q3 extends Period with Quarter
+    case object y2023Q1 extends Period with Quarter
+    case object y2023Q2 extends Period with Quarter
+    case object y2023Q3 extends Period with Quarter
   }
 
   sealed trait Scope

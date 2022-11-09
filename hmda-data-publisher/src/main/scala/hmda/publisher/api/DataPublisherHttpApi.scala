@@ -33,6 +33,7 @@ private class DataPublisherHttpApi(schedulers: AllSchedulers) {
       case Schedules.PanelScheduler2019        => panelScheduler
       case Schedules.PanelScheduler2020        => panelScheduler
       case Schedules.PanelScheduler2021        => panelScheduler
+      case Schedules.PanelScheduler2022        => panelScheduler
       case Schedules.LarPublicScheduler2018    => larPublicScheduler
       case Schedules.LarPublicScheduler2019    => larPublicScheduler
       case Schedules.LarPublicScheduler2020    => larPublicScheduler
@@ -41,12 +42,15 @@ private class DataPublisherHttpApi(schedulers: AllSchedulers) {
       case Schedules.LarScheduler2019          => larScheduler
       case Schedules.LarScheduler2020          => larScheduler
       case Schedules.LarScheduler2021          => larScheduler
+      case Schedules.LarScheduler2022          => larScheduler
       case Schedules.LarSchedulerLoanLimit2019 => larScheduler
       case Schedules.LarSchedulerLoanLimit2020 => larScheduler
       case Schedules.LarSchedulerLoanLimit2021 => larScheduler
+      case Schedules.LarSchedulerLoanLimit2022 => larScheduler
       case Schedules.LarSchedulerQuarterly2020 => larScheduler
       case Schedules.LarSchedulerQuarterly2021 => larScheduler
       case Schedules.LarSchedulerQuarterly2022 => larScheduler
+      case Schedules.LarSchedulerQuarterly2023 => larScheduler
       case Schedules.TsPublicScheduler2018     => tsPublicScheduler
       case Schedules.TsPublicScheduler2019     => tsPublicScheduler
       case Schedules.TsPublicScheduler2020     => tsPublicScheduler
@@ -55,9 +59,11 @@ private class DataPublisherHttpApi(schedulers: AllSchedulers) {
       case Schedules.TsScheduler2019           => tsScheduler
       case Schedules.TsScheduler2020           => tsScheduler
       case Schedules.TsScheduler2021           => tsScheduler
+      case Schedules.TsScheduler2022           => tsScheduler
       case Schedules.TsSchedulerQuarterly2020  => tsScheduler
       case Schedules.TsSchedulerQuarterly2021  => tsScheduler
       case Schedules.TsSchedulerQuarterly2022  => tsScheduler
+      case Schedules.TsSchedulerQuarterly2023  => tsScheduler
 
     }
     receiver ! msg

@@ -1,19 +1,21 @@
 package hmda.publisher.query.component
 
+import hmda.model.publication.Msa
+
 import java.sql.Timestamp
 import hmda.publisher.helper.PGTableNameLoader
 import hmda.publisher.qa.{QAEntity, QARepository, QATableBase}
-import hmda.query.DbConfiguration._
-import hmda.query.repository.TableRepository
-import hmda.query.ts.TransmittalSheetEntity
 import hmda.publisher.query.lar.{LarEntityImpl2018, _}
 import hmda.publisher.query.panel.{InstitutionAltEntity, InstitutionEntity}
 import hmda.publisher.validation.{LarData, PanelData, TsData}
+import hmda.query.DbConfiguration._
+import hmda.query.repository.TableRepository
+import hmda.query.ts.TransmittalSheetEntity
 import slick.basic.{DatabaseConfig, DatabasePublisher}
 import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
 
 import scala.concurrent.{ExecutionContext, Future}
-
+// $COVERAGE-OFF$
 trait PublisherComponent2018 extends PGTableNameLoader {
 
   import dbConfig.profile.api._
@@ -36,9 +38,7 @@ trait PublisherComponent2018 extends PGTableNameLoader {
     def topHolderIdRssd = column[Int]("topholder_id_rssd")
     def topHolderName   = column[String]("topholder_name")
     def hmdaFiler       = column[Boolean]("hmda_filer")
-
   }
-
   class InstitutionsTable(tag: Tag) extends InstitutionsTableBase[InstitutionEntity](tag, panel2018TableName) {
     override def * =
       (
@@ -63,41 +63,6 @@ trait PublisherComponent2018 extends PGTableNameLoader {
   }
   val institutionsTable2018 = TableQuery[InstitutionsTable]
 
-  class QAInstitutionsTable(tag: Tag)
-    extends InstitutionsTableBase[QAEntity[InstitutionAltEntity]](tag, panel2018QATableName)
-      with QATableBase[InstitutionAltEntity] {
-    def emailDomains = column[String]("email_domains")
-    def institutionAltEntityProjection =
-      (
-        lei,
-        activityYear,
-        agency,
-        institutionType,
-        id2017,
-        taxId,
-        rssd,
-        respondentName,
-        respondentState,
-        respondentCity,
-        parentIdRssd,
-        parentName,
-        assets,
-        otherLenderCode,
-        topHolderIdRssd,
-        topHolderName,
-        hmdaFiler,
-        emailDomains
-      ) <> ((InstitutionAltEntity.apply _).tupled, InstitutionAltEntity.unapply)
-    def * =
-      (institutionAltEntityProjection, fileName,timeStamp) <> ((QAEntity.apply[InstitutionAltEntity] _).tupled, QAEntity
-        .unapply[InstitutionAltEntity] _)
-  }
-
-  def createQaPanelRepository2018(config: DatabaseConfig[JdbcProfile])(implicit ec: ExecutionContext) =
-    new QARepository.Default[InstitutionAltEntity, QAInstitutionsTable](
-      config,
-      TableQuery(tag => new QAInstitutionsTable(tag))
-    )(ec)
 
 
   class InstitutionRepository2018(val config: DatabaseConfig[JdbcProfile]) extends TableRepository[InstitutionsTable, String] {
@@ -137,18 +102,6 @@ trait PublisherComponent2018 extends PGTableNameLoader {
   }
 
   val transmittalSheetTable2018 = TableQuery(tag => new TransmittalSheetTable(tag, ts2018TableName))
-
-  def createPublicQaTsRepository2018(config: DatabaseConfig[JdbcProfile])(implicit ec: ExecutionContext) =
-    new QARepository.Default[TransmittalSheetEntity, QATransmittalSheetTable](
-      config,
-      TableQuery(tag => new QATransmittalSheetTable(tag, ts2018PublicQATableName))
-    )(ec)
-
-  def createPrivateQaTsRepository2018(config: DatabaseConfig[JdbcProfile])(implicit ec: ExecutionContext) =
-    new QARepository.Default[TransmittalSheetEntity, QATransmittalSheetTable](
-      config,
-      TableQuery(tag => new QATransmittalSheetTable(tag, ts2018PrivateQATableName))
-    )(ec)
 
   abstract class LarTableBase[T](tag: Tag, tableName: String) extends Table[T](tag, tableName) {
 
@@ -227,49 +180,66 @@ trait PublisherComponent2018 extends PGTableNameLoader {
       column[Int]("credit_score_type_co_applicant")
     def creditScoreModelCoApplicant =
       column[String]("credit_score_model_co_applicant")
-    def denialReason1         = column[String]("denial_reason1")
-    def denialReason2         = column[String]("denial_reason2")
-    def denialReason3         = column[String]("denial_reason3")
-    def denialReason4         = column[String]("denial_reason4")
-    def otherDenialReason     = column[String]("other_denial_reason")
-    def totalLoanCosts        = column[String]("total_loan_costs")
-    def totalPoints           = column[String]("total_points")
-    def originationCharges    = column[String]("origination_charges")
-    def discountPoints        = column[String]("discount_points")
-    def lenderCredits         = column[String]("lender_credits")
-    def interestRate          = column[String]("interest_rate")
-    def paymentPenalty        = column[String]("payment_penalty")
-    def debtToIncome          = column[String]("debt_to_incode")
-    def loanValueRatio        = column[String]("loan_value_ratio")
-    def loanTerm              = column[String]("loan_term")
-    def rateSpreadIntro       = column[String]("rate_spread_intro")
-    def baloonPayment         = column[Int]("baloon_payment")
-    def insertOnlyPayment     = column[Int]("insert_only_payment")
-    def amortization          = column[Int]("amortization")
-    def otherAmortization     = column[Int]("other_amortization")
-    def propertyValue         = column[String]("property_value")
-    def homeSecurityPolicy    = column[Int]("home_security_policy")
-    def landPropertyInterest  = column[Int]("lan_property_interest")
-    def totalUnits            = column[Int]("total_uits")
-    def mfAffordable          = column[String]("mf_affordable")
-    def applicationSubmission = column[Int]("application_submission")
-    def payable               = column[Int]("payable")
-    def nmls                  = column[String]("nmls")
-    def aus1                  = column[String]("aus1")
-    def aus2                  = column[String]("aus2")
-    def aus3                  = column[String]("aus3")
-    def aus4                  = column[String]("aus4")
-    def aus5                  = column[String]("aus5")
-    def otheraus              = column[String]("other_aus")
-    def aus1Result            = column[String]("aus1_result")
-    def aus2Result            = column[String]("aus2_result")
-    def aus3Result            = column[String]("aus3_result")
-    def aus4Result            = column[String]("aus4_result")
-    def aus5Result            = column[String]("aus5_result")
-    def otherAusResult        = column[String]("other_aus_result")
-    def reverseMortgage       = column[Int]("reverse_mortgage")
-    def lineOfCredits         = column[Int]("line_of_credits")
-    def businessOrCommercial  = column[Int]("business_or_commercial")
+    def denialReason1           = column[String]("denial_reason1")
+    def denialReason2           = column[String]("denial_reason2")
+    def denialReason3           = column[String]("denial_reason3")
+    def denialReason4           = column[String]("denial_reason4")
+    def otherDenialReason       = column[String]("other_denial_reason")
+    def totalLoanCosts          = column[String]("total_loan_costs")
+    def totalPoints             = column[String]("total_points")
+    def originationCharges      = column[String]("origination_charges")
+    def discountPoints          = column[String]("discount_points")
+    def lenderCredits           = column[String]("lender_credits")
+    def interestRate            = column[String]("interest_rate")
+    def paymentPenalty          = column[String]("payment_penalty")
+    def debtToIncome            = column[String]("debt_to_incode")
+    def loanValueRatio          = column[String]("loan_value_ratio")
+    def loanTerm                = column[String]("loan_term")
+    def rateSpreadIntro         = column[String]("rate_spread_intro")
+    def baloonPayment           = column[Int]("baloon_payment")
+    def insertOnlyPayment       = column[Int]("insert_only_payment")
+    def amortization            = column[Int]("amortization")
+    def otherAmortization       = column[Int]("other_amortization")
+    def propertyValue           = column[String]("property_value")
+    def homeSecurityPolicy      = column[Int]("home_security_policy")
+    def landPropertyInterest    = column[Int]("lan_property_interest")
+    def totalUnits              = column[Int]("total_uits")
+    def mfAffordable            = column[String]("mf_affordable")
+    def applicationSubmission   = column[Int]("application_submission")
+    def payable                 = column[Int]("payable")
+    def nmls                    = column[String]("nmls")
+    def aus1                    = column[String]("aus1")
+    def aus2                    = column[String]("aus2")
+    def aus3                    = column[String]("aus3")
+    def aus4                    = column[String]("aus4")
+    def aus5                    = column[String]("aus5")
+    def otheraus                = column[String]("other_aus")
+    def aus1Result              = column[String]("aus1_result")
+    def aus2Result              = column[String]("aus2_result")
+    def aus3Result              = column[String]("aus3_result")
+    def aus4Result              = column[String]("aus4_result")
+    def aus5Result              = column[String]("aus5_result")
+    def otherAusResult          = column[String]("other_aus_result")
+    def reverseMortgage         = column[Int]("reverse_mortgage")
+    def lineOfCredits           = column[Int]("line_of_credits")
+    def businessOrCommercial    = column[Int]("business_or_commercial")
+    def conformingLoanLimit     = column[String]("conforming_loan_limit")
+    def ethnicityCategorization = column[String]("ethnicity_categorization")
+    def raceCategorization      = column[String]("race_categorization")
+    def sexCategorization       = column[String]("sex_categorization")
+    def dwellingCategorization  = column[String]("dwelling_categorization")
+    def loanProductTypeCategorization =
+      column[String]("loan_product_type_categorization")
+    def tractPopulation = column[Int]("tract_population")
+    def tractMinorityPopulationPercent =
+      column[Double]("tract_minority_population_percent")
+    def tractMedianIncome  = column[Int]("ffiec_msa_md_median_family_income")
+    def tractOccupiedUnits = column[Int]("tract_owner_occupied_units")
+    def tractOneToFourFamilyUnits =
+      column[Int]("tract_one_to_four_family_homes")
+    def tractMedianAge = column[Int]("tract_median_age_of_housing_units")
+    def tractToMsaIncomePercent =
+      column[Double]("tract_to_msa_income_percentage")
 
     def larEntityImpl2018Projection =
       (
@@ -421,13 +391,10 @@ trait PublisherComponent2018 extends PGTableNameLoader {
     def * = larEntityImpl2018Projection
   }
 
-  class QALarTable(tag: Tag)
-    extends LarTableBase[QAEntity[LarEntityImpl2018]](tag, lar2018QATableName)
-      with QATableBase[LarEntityImpl2018] {
-    def * = (larEntityImpl2018Projection, fileName,timeStamp) <> ((QAEntity.apply[LarEntityImpl2018] _).tupled, QAEntity.unapply[LarEntityImpl2018] _)
-  }
-  val larTable2018   = TableQuery[LarTable]
-  val qaLarTable2018 = TableQuery[QALarTable]
+
+
+  val larTable2018 = TableQuery[LarTable]
+
 
   class LarRepository2018(val config: DatabaseConfig[JdbcProfile]) extends TableRepository[LarTable, String] {
 
@@ -450,6 +417,7 @@ trait PublisherComponent2018 extends PGTableNameLoader {
       db.run(table.filter(_.lei === lei).delete)
     def count(): Future[Int] =
       db.run(table.size.result)
+
     def getAllLARsCount(bankIgnoreList: Array[String]): Future[Int] =
       db.run(getAllLARsQuery(bankIgnoreList).size.result)
 
@@ -465,11 +433,8 @@ trait PublisherComponent2018 extends PGTableNameLoader {
       )
     protected def getAllLARsQuery(bankIgnoreList: Array[String]): Query[LarTable, LarEntityImpl2018, Seq] =
       table.filterNot(_.lei.toUpperCase inSet bankIgnoreList)
-
   }
 
-  class QALarRepository2018(config: DatabaseConfig[JdbcProfile])(implicit ec: ExecutionContext)
-    extends QARepository.Default[LarEntityImpl2018, QALarTable](config, qaLarTable2018)(ec)
 
   abstract class ModifiedLarTableBase[T](tag: Tag, tableName: String) extends Table[T](tag, tableName) {
 
@@ -756,8 +721,10 @@ trait PublisherComponent2018 extends PGTableNameLoader {
 
     def deleteByLei(lei: String): Future[Int] =
       db.run(table.filter(_.lei === lei).delete)
+
     def count(): Future[Int] =
       db.run(table.size.result)
+
     def getAllLARs(bankIgnoreList: Array[String]): DatabasePublisher[ModifiedLarEntityImpl] =
       db.stream(
         table
@@ -770,19 +737,8 @@ trait PublisherComponent2018 extends PGTableNameLoader {
           )
           .transactionally
       )
-
   }
 
-  class QAModifiedLarTable(tag: Tag)
-    extends ModifiedLarTableBase[QAEntity[ModifiedLarEntityImpl]](tag, mlar2018QATableName)
-      with QATableBase[ModifiedLarEntityImpl] {
-    override def * =
-      (modifiedLarEntityImplProjection, fileName,timeStamp) <> ((QAEntity.apply[ModifiedLarEntityImpl] _).tupled, QAEntity
-        .unapply[ModifiedLarEntityImpl] _)
-  }
-  val qaMlarTable2018 = TableQuery[QAModifiedLarTable]
-  class QAModifiedLarRepository2018(config: DatabaseConfig[JdbcProfile])(implicit ec: ExecutionContext)
-    extends QARepository.Default[ModifiedLarEntityImpl, QAModifiedLarTable](config, qaMlarTable2018)(ec)
 
   val validationLarData2018: LarData = LarData[LarEntityImpl2018, LarTable](larTable2018)(_.lei)
   val validationMLarData2018: LarData =
@@ -791,5 +747,5 @@ trait PublisherComponent2018 extends PGTableNameLoader {
     TsData[TransmittalSheetEntity, TransmittalSheetTable](transmittalSheetTable2018)(_.lei, _.totalLines, _.submissionId)
   val validationPanelData2018: PanelData =
     PanelData[InstitutionEntity, InstitutionsTable](institutionsTable2018)(_.lei,_.hmdaFiler)
-
 }
+// $COVERAGE-ON$

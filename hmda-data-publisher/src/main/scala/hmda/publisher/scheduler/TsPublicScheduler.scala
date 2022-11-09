@@ -10,7 +10,7 @@ import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.actor.HmdaActor
 import hmda.publisher.helper.{PrivateAWSConfigLoader, PublicAWSConfigLoader, S3Archiver, S3Utils, SnapshotCheck, TSHeader}
-import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, TransmittalSheetTable, TsRepository}
+import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, TransmittalSheetTable, TsRepository}
 import hmda.publisher.scheduler.schedules.Schedules.{TsPublicScheduler2018, TsPublicScheduler2019, TsPublicScheduler2020, TsPublicScheduler2021}
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.ts._
@@ -28,13 +28,14 @@ import scala.util.{Failure, Success}
 import java.time.Instant
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 // $COVERAGE-OFF$
-class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command], qaFilePersistor: QAFilePersistor)
+class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
   extends HmdaActor
     with PublisherComponent2018
     with PublisherComponent2019
     with PublisherComponent2020
     with PublisherComponent2021
     with PublisherComponent2022
+    with PublisherComponent2023
     with TSHeader
     with PublicAWSConfigLoader
     with PrivateAWSConfigLoader {
@@ -48,10 +49,7 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
 
 
   val publishingGuard: PublishingGuard = PublishingGuard.create(this)(context.system)
-  val qaRepo2018                       = createPublicQaTsRepository2018(dbConfig)
-  val qaRepo2019                       = createPublicQaTsRepository2019(dbConfig)
-  def qaRepo2020               = createQaTransmittalSheetRepository2020(dbConfig,Year2020Period.Whole)
-  def qaRepo2021               = createQaTransmittalSheetRepository2021(dbConfig,Year2021Period.Whole)
+
 
   val s3Settings =
     S3Settings(context.system)
@@ -175,18 +173,6 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
         log.info("An error has occurred with: " + key + "; Getting Public TS Data in Future: " + t.getMessage)
     }
     resultsPSV
-  }
-
-  private def persistFileForQa(s3ObjKey: String, bucket: String, repository: QARepository[TransmittalSheetEntity]) = {
-    val spec = QAFileSpec(
-      bucket = bucket,
-      key = s3ObjKey,
-      s3Settings = s3Settings,
-      withHeaderLine = true,
-      parseLine = TransmittalSheetEntity.PublicParser.parseFromPSVUnsafe,
-      repository = repository
-    )
-    qaFilePersistor.fetchAndPersist(spec)
   }
 
 }

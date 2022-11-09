@@ -144,6 +144,11 @@ spec:
               configMapKeyRef:
                 name: schedule-configmap
                 key: publisher.ts.private.2021
+          - name: TS_PRIVATE_SCHEDULE_2022
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.ts.private.2022
           - name: LAR_PRIVATE_SCHEDULE_2019
             valueFrom:
               configMapKeyRef:
@@ -159,6 +164,11 @@ spec:
               configMapKeyRef:
                 name: schedule-configmap
                 key: publisher.lar.private.2021
+          - name: LAR_PRIVATE_SCHEDULE_2022
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.lar.private.2022
           - name: LAR_PRIVATE_SCHEDULE_LOAN_LIMIT_2019
             valueFrom:
               configMapKeyRef:
@@ -174,6 +184,11 @@ spec:
               configMapKeyRef:
                 name: schedule-configmap
                 key: publisher.lar.private.cll.2021
+          - name: LAR_PRIVATE_SCHEDULE_LOAN_LIMIT_2022
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.lar.private.cll.2022
           - name: PANEL_PRIVATE_SCHEDULE_2019
             valueFrom:
               configMapKeyRef:
@@ -189,6 +204,11 @@ spec:
               configMapKeyRef:
                 name: schedule-configmap
                 key: publisher.panel.private.2021
+          - name: PANEL_PRIVATE_SCHEDULE_2022
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.panel.private.2022
           - name: TS_PUBLIC_SCHEDULE_2018
             valueFrom:
               configMapKeyRef:
@@ -264,11 +284,21 @@ spec:
               configMapKeyRef:
                 name: schedule-configmap
                 key: publisher.lar.quarterly.2022
+          - name: LAR_Scheduler_Quarterly_2023
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.lar.quarterly.2023
           - name: TS_Scheduler_Quarterly_2022
             valueFrom:
               configMapKeyRef:
                 name: schedule-configmap
                 key: publisher.ts.quarterly.2022
+          - name: TS_Scheduler_Quarterly_2023
+            valueFrom:
+              configMapKeyRef:
+                name: schedule-configmap
+                key: publisher.ts.quarterly.2023
           - name: LAR_2018_TABLE
             valueFrom:
               configMapKeyRef:
