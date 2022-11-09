@@ -298,7 +298,7 @@ spec:
             valueFrom:
               configMapKeyRef:
                 name: schedule-configmap
-                key: publisher.ts.quarterly.2022
+                key: publisher.ts.quarterly.2023
           - name: LAR_2018_TABLE
             valueFrom:
               configMapKeyRef:
