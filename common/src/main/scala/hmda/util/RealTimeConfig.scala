@@ -22,12 +22,12 @@ class RealTimeConfig(val cmName: String, val ns: String) {
     }, classOf[V1ConfigMap], classOf[V1ConfigMapList])
     informer.addEventHandler(new ResourceEventHandler[V1ConfigMap] {
       override def onAdd(obj: V1ConfigMap): Unit = {
-        log.info("cm added: {}", obj)
+        log.debug("cm added: {}", obj)
         setConfig(obj)
       }
 
       override def onUpdate(oldObj: V1ConfigMap, newObj: V1ConfigMap): Unit = {
-        log.info("cm updated: {}", newObj)
+        log.debug("cm updated: {}", newObj)
         setConfig(newObj)
       }
 
