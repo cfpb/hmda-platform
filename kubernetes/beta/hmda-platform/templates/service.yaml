@@ -71,9 +71,6 @@ metadata:
       service: {{ .Values.service.name }}:{{ .Values.admin.port }}
 spec:
   clusterIP: None  
-  ports:
-    - port: {{ .Values.admin.port }}
-
 ---
 apiVersion: v1
 kind: Service
@@ -83,7 +80,7 @@ metadata:
   name: ambassador-hmda-filing
   annotations:
     getambassador.io/config: |
-      apiVersion: ambassador/v1
+      apiVersion: ambassador/v2
       kind: Mapping
       name: hmda_filing_mapping
       ambassador_id: ambassador-beta-2
@@ -92,9 +89,54 @@ metadata:
       timeout_ms: 60000
 spec:
   clusterIP: None  
-  ports:
-    - port: {{ .Values.filing.port }}
-
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: ambassador-hmda-filing-websocket
+  name: ambassador-hmda-filing-websocket
+  annotations:
+    getambassador.io/config: |
+      apiVersion: ambassador/v2
+      kind: Mapping
+      name: hmda_filing_mapping_websocket
+      ambassador_id: ambassador-beta-2
+      prefix: '/v2/filing/institutions/([a-zA-Z0-9]+)/filings/(\d{4})/submissions/(\d+)/progress'
+      prefix_regex: true
+      regex_rewrite:
+         pattern: '/v2/filing/institutions/([a-zA-Z0-9]+)/filings/(\d{4})/submissions/(\d+)/progress'
+         substitution : '/institutions/\1/filings/\2/submissions/\3/progress'
+      service: {{ .Values.service.name }}:{{ .Values.filing.port }}
+      timeout_ms: 60000
+      allow_upgrade:
+        - websocket      
+spec:
+  clusterIP: None  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: ambassador-hmda-filing-qtr-websocket
+  name: ambassador-hmda-filing-qtr-websocket
+  annotations:
+    getambassador.io/config: |
+      apiVersion: ambassador/v2
+      kind: Mapping
+      name: hmda_filing_mapping__qtr_websocket
+      ambassador_id: ambassador-beta-2
+      prefix: '/v2/filing/institutions/([a-zA-Z0-9]+)/filings/(\d{4})/quarter/Q([1-3])/submissions/(\d+)/progress'
+      prefix_regex: true
+      regex_rewrite:
+         pattern: '/v2/filing/institutions/([a-zA-Z0-9]+)/filings/(\d{4})/quarter/Q([1-3])/submissions/(\d+)/progress'
+         substitution : '/institutions/\1/filings/\2/quarter/Q\3/submissions/\4/progress' 
+      service: {{ .Values.service.name }}:{{ .Values.filing.port }}
+      timeout_ms: 60000
+      allow_upgrade:
+        - websocket
+spec:
+  clusterIP: None  
 ---
 apiVersion: v1
 kind: Service
@@ -104,7 +146,7 @@ metadata:
   name: ambassador-hmda-public
   annotations:
     getambassador.io/config: |
-      apiVersion: ambassador/v1
+      apiVersion: ambassador/v2
       kind: Mapping
       name: hmda_public_mapping
       ambassador_id: ambassador-beta-2
@@ -112,9 +154,6 @@ metadata:
       service: {{ .Values.service.name }}:{{ .Values.public.port }}
 spec:
   clusterIP: None  
-  ports:
-    - port: {{ .Values.public.port }}
-
 ---
 apiVersion: v1
 kind: Service
@@ -124,7 +163,7 @@ metadata:
   name: ambassador-hmda-cluster
   annotations:
     getambassador.io/config: |
-      apiVersion: ambassador/v1
+      apiVersion: ambassador/v2
       kind: Mapping
       name: hmda_cluster_mapping
       ambassador_id: ambassador-beta-2
@@ -132,10 +171,7 @@ metadata:
       rewrite: /cluster/members
       service: {{ .Values.service.name }}:{{ .Values.cluster.port }}
 spec:
-  clusterIP: None  
-  ports:
-    - port: {{ .Values.cluster.port }}
-
+  clusterIP: None
 ---
 apiVersion: v1
 kind: Service
@@ -145,7 +181,7 @@ metadata:
   name: ambassador-hmda-ws
   annotations:
     getambassador.io/config: |
-      apiVersion: ambassador/v1
+      apiVersion: ambassador/v2
       kind: Mapping
       name: hmda_ws_mapping
       ambassador_id: ambassador-beta-2
@@ -153,6 +189,4 @@ metadata:
       service: {{ .Values.service.name }}:{{ .Values.websockets.port }}
       use_websocket: true
 spec:
-  clusterIP: None  
-  ports:
-    - port: {{ .Values.websockets.port }}
+  clusterIP: None
