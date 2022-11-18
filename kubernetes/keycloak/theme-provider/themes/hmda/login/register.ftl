@@ -72,11 +72,11 @@
 
         <#if passwordRequired>
           <label for="password">${msg("password")}</label>
-          <input type="password" id="password" name="password" />
+          <input type="password" id="password" name="password" autocomplete="off"/>
 
           <label for="password-confirm">${msg("passwordConfirm")}</label>
           <span class="usa-input-error-message" id="password-confirm-error-message" role="alert">Passwords do not match</span>
-          <input type="password" id="password-confirm" name="password-confirm" />
+          <input type="password" id="password-confirm" name="password-confirm" autocomplete="off"/>
         </#if>
 
         <#if recaptchaRequired??>
