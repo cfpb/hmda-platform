@@ -78,8 +78,6 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
     QuartzSchedulerExtension(context.system).cancelJob("PanelScheduler2019")
     QuartzSchedulerExtension(context.system).cancelJob("PanelScheduler2021")
     QuartzSchedulerExtension(context.system).cancelJob("PanelScheduler2022")
-
-
   }
 
   override def receive: Receive = {
