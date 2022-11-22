@@ -30,7 +30,7 @@ metadata:
   annotations:
     getambassador.io/config: |
       ---
-      apiVersion: ambassador/v1
+      apiVersion: ambassador/v2
       kind: Mapping
       name: check_digit_mapping
       ambassador_id: ambassador-default-1
@@ -40,10 +40,6 @@ metadata:
       timeout_ms: 60000
 spec:
   clusterIP: None
-  ports:
-    - port: {{ .Values.service.port }}
-
-
 ---
 apiVersion: v1
 kind: Service
