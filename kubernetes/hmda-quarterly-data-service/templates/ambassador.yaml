@@ -4,7 +4,7 @@ metadata:
   annotations:
     getambassador.io/config: |
       ---
-      apiVersion: ambassador/v1
+      apiVersion: ambassador/v2
       kind: Mapping
       name: {{ include "hmda-quarterly-data-service.fullname" . }}_mapping
       ambassador_id: ambassador-default-1
@@ -16,11 +16,3 @@ metadata:
   name: {{ include "hmda-quarterly-data-service.fullname" . }}-ambassador
 spec:
   clusterIP: None
-  clusterIPs:
-    - None
-  ipFamilies:
-    - IPv4
-    - IPv6
-  ipFamilyPolicy: PreferDualStack
-  sessionAffinity: None
-  type: ClusterIP
