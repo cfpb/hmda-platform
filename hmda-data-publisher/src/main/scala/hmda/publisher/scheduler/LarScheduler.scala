@@ -140,7 +140,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
     QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerLoanLimit2019")
     QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerLoanLimit2020")
     QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerLoanLimit2021")
-    QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerLoanLimit2023")
+    QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerLoanLimit2022")
     QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerQuarterly2023")
 
   }

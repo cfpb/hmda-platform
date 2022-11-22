@@ -29,7 +29,6 @@ object Schedules extends Enum[Schedule] {
   case object TsPublicScheduler2019     extends Schedule
   case object TsPublicScheduler2020    extends Schedule
   case object TsPublicScheduler2021    extends Schedule
-  case object TsPublicScheduler2022    extends Schedule
   case object TsScheduler2018           extends Schedule
   case object TsScheduler2019           extends Schedule
   case object TsScheduler2020           extends Schedule
