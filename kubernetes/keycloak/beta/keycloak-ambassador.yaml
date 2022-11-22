@@ -7,7 +7,7 @@ metadata:
   namespace: beta
   annotations:
     getambassador.io/config: |
-      apiVersion: ambassador/v1
+      apiVersion: ambassador/v2
       kind: Mapping
       name: keycloak_https_mapping
       ambassador_id: ambassador-beta-2
