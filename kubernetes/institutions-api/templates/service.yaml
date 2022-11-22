@@ -36,5 +36,3 @@ metadata:
       service: {{ template "institutions-api.fullname" .}}:{{ .Values.service.port }}
 spec:
   clusterIP: None
-  ports:
-    - port: {{ .Values.service.port }}
