@@ -23,8 +23,8 @@ hmda-platform kubernetes/hmda-platform
 
 Delete
 ```
+helm uninstall hmda-platform
 kubectl delete secret cassandra-credentials
 kubectl delete secret generic inst-postgres-credentials
 kubectl delete -f https://github.com/cfpb/hmda-platform/tree/master/kubernetes/config-maps
-helm uninstall hmda-platform
 ```
