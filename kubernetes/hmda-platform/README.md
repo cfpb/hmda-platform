@@ -3,19 +3,19 @@ Pre-requisites
 - [Strimzi](https://strimzi.io/)
 
 Install
-- Secrets
+- Add Secrets
 ```
 kubectl create secret generic cassandra-credentials --from-literal=cassandra.username=  --from-literal=cassandra.password=
 kubectl create secret generic inst-postgres-credentials --from-literal=username= --from-literal=password= --from-literal=host= --from-literal=url="jdbc:postgresql://postgresql:5432/hmda?user= &password= &sslmode=false"
 ```
-- Configmap
+- Add Configmap
 ```
 kubectl apply -f https://github.com/cfpb/hmda-platform/tree/master/kubernetes/config-maps
 ```
 
 Update
 ```
-helm upgrade --install --force --namespace=default --values=kubernetes/hmda-platform/values-dev.yaml \
+helm upgrade --install --namespace=default --values=kubernetes/hmda-platform/values-dev.yaml \
 --set image.tag=latest \
 --set service.name=hmda-platform \
 hmda-platform kubernetes/hmda-platform
