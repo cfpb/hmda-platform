@@ -2,7 +2,7 @@ package hmda.dataBrowser.repositories
 
 import akka.NotUsed
 import akka.stream.scaladsl.Source
-import hmda.dataBrowser.models.{ FilerInformation2017, ModifiedLarEntity2017, QueryField, Statistic }
+import hmda.dataBrowser.models.{ FilerInformation2017, ModifiedLarEntity2017, QueryField, LarQueryField, Statistic }
 import monix.eval.Task
 import slick.basic.DatabaseConfig
 import slick.jdbc.{ JdbcProfile, ResultSetConcurrency, ResultSetType }
@@ -140,12 +140,18 @@ class PostgresModifiedLarRepository2017(tableName: String, config: DatabaseConfi
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
-  override def findAndAggregate(browserFields: List[QueryField], year: Int): Task[Statistic] = {
-    val queries = browserFields.map(field => in(field.dbName, field.values))
+  override def findAndAggregate(instQueryField: QueryField, geoQueryField: QueryField, hmdaQueryFields: List[LarQueryField], year: Int): Task[Statistic] = {
+    val hmdaQueries = hmdaQueryFields.map(field => eq(field.dbName, field.value))
+    val instQuery = in(instQueryField.dbName, instQueryField.values)
+    val geoQuery = in(geoQueryField.dbName, geoQueryField.values)
+
+    val queries = instQuery :: geoQuery :: hmdaQueries
+    
     val filterCriteria = queries match {
       case Nil          => ""
       case head :: tail => whereAndOpt(head, tail: _*)
     }
+
     println("2017 db query")
     println(sql"""
         SELECT

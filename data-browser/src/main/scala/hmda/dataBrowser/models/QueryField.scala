@@ -5,4 +5,9 @@ case class QueryField(name: String = "",
                       dbName: String = "",
                       isAllSelected: Boolean = false)
 
+case class LarQueryField(name: String = "",
+                      value: String = "",
+                      dbName: String = "",
+                      isAllSelected: Boolean = false)
+
 case class QueryFields(year: String = "2018", queryFields: List[QueryField] = List.empty)
