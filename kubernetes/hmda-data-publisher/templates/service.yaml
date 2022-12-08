@@ -26,7 +26,7 @@ metadata:
   name: {{ include "hmda-data-publisher.fullname" . }}-ambassador
   annotations:
     getambassador.io/config: |
-      apiVersion: ambassador/v1
+      apiVersion: ambassador/v2
       kind: Mapping
       name: hmda_data_publisher_mapping
       ambassador_id: ambassador-default-1
@@ -36,5 +36,3 @@ metadata:
       timeout_ms: 300000
 spec:
   clusterIP: None
-  ports:
-    - port: {{ .Values.service.port }}

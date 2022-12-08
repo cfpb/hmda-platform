@@ -21,7 +21,7 @@ metadata:
   name: ambassador-hmda-data-browser-api
   annotations:
     getambassador.io/config: |
-      apiVersion: ambassador/v0
+      apiVersion: ambassador/v1
       kind: Mapping
       name: hmda_databrowser_mapping
       ambassador_id: ambassador-beta-2
@@ -30,5 +30,3 @@ metadata:
       timeout_ms: 3800000
 spec:
   clusterIP: None  
-  ports:
-    - port: {{ .Values.databrowser.port }}

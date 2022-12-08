@@ -27,7 +27,7 @@ metadata:
   name: {{ include "hmda-dashboard.fullname" . }}-ambassador
   annotations:
     getambassador.io/config: |
-      apiVersion: ambassador/v1
+      apiVersion: ambassador/v2
       kind: Mapping
       name: data_browser_mapping
       ambassador_id: ambassador-default-1
@@ -37,5 +37,3 @@ metadata:
       timeout_ms: 300000
 spec:
   clusterIP: None
-  ports:
-    - port: {{ .Values.service.port }}

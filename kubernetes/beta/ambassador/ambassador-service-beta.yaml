@@ -8,7 +8,7 @@ metadata:
   annotations:
     getambassador.io/config: |
       ---
-      apiVersion: ambassador/v1
+      apiVersion: ambassador/v2
       kind:  TLSContext
       name:  tls
       secret: tls-cert
