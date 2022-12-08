@@ -21,7 +21,7 @@ metadata:
   name: ambassador-hmda-data-browser-api
   annotations:
     getambassador.io/config: |
-      apiVersion: ambassador/v1
+      apiVersion: ambassador/v2
       kind: Mapping
       name: hmda_databrowser_mapping
       ambassador_id: ambassador-default-1
@@ -36,6 +36,4 @@ metadata:
          - string_request_label:
            - hmda-reporting
 spec:
-  clusterIP: None  
-  ports:
-    - port: {{ .Values.databrowser.port }}
+  clusterIP: None

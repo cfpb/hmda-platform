@@ -21,13 +21,11 @@ metadata:
   name: ambassador-ratespread-calculator
   annotations:
     getambassador.io/config: |
-      apiVersion: ambassador/v1
+      apiVersion: ambassador/v2
       kind: Mapping
       name: hmda_ratespread_mapping
       ambassador_id: ambassador-default-1
       prefix: /public/
       service: {{ .Values.service.name }}:{{ .Values.ratespread.port }}
 spec:
-  clusterIP: None  
-  ports:
-    - port: {{ .Values.ratespread.port }}
+  clusterIP: None

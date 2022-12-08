@@ -8,7 +8,7 @@ metadata:
     service: ambassador-hmda-reporting
   annotations:
     getambassador.io/config: |
-      apiVersion: ambassador/v1
+      apiVersion: ambassador/v2
       kind: Mapping
       name: hmda_reporting_mapping_beta
       ambassador_id: ambassador-beta-2
