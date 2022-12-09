@@ -72,14 +72,6 @@ trait InstitutionComponent {
     def dropSchema()   = db.run(table.schema.drop)
   }
 
-  val institutionsTable2018 = TableQuery[InstitutionsTable]((tag: Tag) => new InstitutionsTable(tag, "institutions2018"))
-  val institutionsTable2019 = TableQuery[InstitutionsTable]((tag: Tag) => new InstitutionsTable(tag, "institutions2019"))
-  val institutionsTable2020 = TableQuery[InstitutionsTable]((tag: Tag) => new InstitutionsTable(tag, "institutions2020"))
-  val institutionsTable2021 = TableQuery[InstitutionsTable]((tag: Tag) => new InstitutionsTable(tag, "institutions2021"))
-  val institutionsTable2022 = TableQuery[InstitutionsTable]((tag: Tag) => new InstitutionsTable(tag, "institutions2022"))
-  val institutionsTable2023 = TableQuery[InstitutionsTable]((tag: Tag) => new InstitutionsTable(tag, "institutions2023"))
-
-
   val institutionConfig: Config = ConfigFactory.load().getConfig("hmda.institution")
 
   val yearsAvailable: Seq[String] = institutionConfig.getString("yearsAvailable").split(",").toSeq
