@@ -43,6 +43,9 @@ class PublishingGuard(
           messageReporter.report(s"Data validation failed with unexpected exception: $ex")
       }
 
+  def runIfDataIsValid(year: Int, scope: Scope)(thunk: => Unit): Future[Unit] =
+    Future(thunk)
+
   private def getChecks(year: Period, scope: Scope): List[ValidationCheck] = {
     val leiCheckErrorMargin = year match {
       case Period.y2018   => 5

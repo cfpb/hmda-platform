@@ -5,7 +5,7 @@ import akka.actor.typed.ActorRef
 import akka.stream.Materializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{MemoryBufferType, MetaHeaders, S3Attributes, S3Settings}
+import akka.stream.alpakka.s3.{ MemoryBufferType, MetaHeaders, S3Attributes, S3Settings }
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
@@ -14,22 +14,22 @@ import hmda.census.records.CensusRecords
 import hmda.model.census.Census
 import hmda.model.publication.Msa
 import hmda.publisher.helper._
-import hmda.publisher.qa.{QAFilePersistor, QAFileSpec, QARepository}
-import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023}
-import hmda.publisher.query.lar.{LarEntityImpl2018, LarEntityImpl2019, LarEntityImpl2019WithMsa, LarEntityImpl2020, LarEntityImpl2020WithMsa, LarEntityImpl2021, LarEntityImpl2021WithMsa, LarEntityImpl2022}
-import hmda.publisher.scheduler.schedules.Schedule
+import hmda.publisher.qa.{ QAFilePersistor, QAFileSpec, QARepository }
+import hmda.publisher.query.component.{ LarRepository, PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, YearPeriod }
+import hmda.publisher.query.lar.{ LarEntityImpl2018, LarEntityImpl2019, LarEntityImpl2019WithMsa, LarEntityImpl2020, LarEntityImpl2020WithMsa, LarEntityImpl2021, LarEntityImpl2021WithMsa, LarEntityImpl2022 }
+import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear, Schedules }
 import hmda.publisher.scheduler.schedules.Schedules._
 import hmda.publisher.util.PublishingReporter
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 import hmda.publisher.validation.PublishingGuard
-import hmda.publisher.validation.PublishingGuard.{Period, Scope}
+import hmda.publisher.validation.PublishingGuard.{ Period, Scope }
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
 
 import java.time.format.DateTimeFormatter
-import java.time.{Clock, Instant, LocalDateTime}
+import java.time.{ Clock, Instant, LocalDateTime }
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 // $COVERAGE-OFF$
 class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
   extends HmdaActor
@@ -46,6 +46,9 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
   implicit val materializer = Materializer(context)
   private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   private val fullDateQuarterly = DateTimeFormatter.ofPattern("yyyy-MM-dd_")
+  private val larCronExpression = quartzScheduleConfig.getString("LarSchedule.expression")
+  private val larQuarterlyCronExpression = quartzScheduleConfig.getString("LarQuarterlySchedule.expression")
+  private val loanLimitCronExpression = quartzScheduleConfig.getString("LarLoanLimitSchedule.expression")
 
   // Regulator File Scheduler Repos Annual
   def larRepository2018 = new LarRepository2018(dbConfig)
@@ -94,6 +97,21 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
   val indexTractMap2021: Map[String, Census] = CensusRecords.indexedTract2021
   val indexTractMap2022: Map[String, Census] = CensusRecords.indexedTract2022
 
+  val availablePublishers = larAvailableYears.map(yr => yr -> {
+    val component = new PublisherComponent(yr)
+    val repos = if (yr < 2020) {
+      (Some(component.createLarRepository(dbConfig, YearPeriod.Whole)), None, None, None)
+    } else {
+      (
+        Some(component.createLarRepository(dbConfig, YearPeriod.Whole)),
+        Some(component.createLarRepository(dbConfig, YearPeriod.Q1)),
+        Some(component.createLarRepository(dbConfig, YearPeriod.Q2)),
+        Some(component.createLarRepository(dbConfig, YearPeriod.Q3))
+      )
+    }
+    repos
+  })
+
 
   val s3Settings = S3Settings(context.system)
     .withBufferType(MemoryBufferType)
@@ -102,46 +120,33 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
     .withListBucketApiVersion(ListBucketVersion2)
 
   override def preStart() = {
-    QuartzSchedulerExtension(context.system)
-      .schedule("LarScheduler2018", self, LarScheduler2018)
-    QuartzSchedulerExtension(context.system)
-      .schedule("LarScheduler2019", self, LarScheduler2019)
-    QuartzSchedulerExtension(context.system)
-      .schedule("LarScheduler2020", self, LarScheduler2020)
-    QuartzSchedulerExtension(context.system)
-      .schedule("LarScheduler2021", self, LarScheduler2021)
-    QuartzSchedulerExtension(context.system)
-      .schedule("LarScheduler2022", self, LarScheduler2022)
-    QuartzSchedulerExtension(context.system)
-      .schedule("LarSchedulerLoanLimit2019", self, LarSchedulerLoanLimit2019)
-    QuartzSchedulerExtension(context.system)
-      .schedule("LarSchedulerLoanLimit2020", self, LarSchedulerLoanLimit2020)
-    QuartzSchedulerExtension(context.system)
-      .schedule("LarSchedulerLoanLimit2021", self, LarSchedulerLoanLimit2021)
-    QuartzSchedulerExtension(context.system)
-      .schedule("LarSchedulerLoanLimit2022", self, LarSchedulerLoanLimit2022)
-    QuartzSchedulerExtension(context.system)
-      .schedule("LarSchedulerQuarterly2020", self, LarSchedulerQuarterly2020)
-    QuartzSchedulerExtension(context.system)
-      .schedule("LarSchedulerQuarterly2021", self, LarSchedulerQuarterly2021)
-    QuartzSchedulerExtension(context.system)
-      .schedule("LarSchedulerQuarterly2022", self, LarSchedulerQuarterly2022)
-    QuartzSchedulerExtension(context.system)
-      .schedule("LarSchedulerQuarterly2023", self, LarSchedulerQuarterly2023)
+    val scheduler = QuartzSchedulerExtension(context.system)
+    availablePublishers.foreach {
+      case (yr, _) => try {
+        scheduler.createJobSchedule(s"LarSchedule_$yr", self, ScheduleWithYear(LarSchedule, yr), cronExpression = larCronExpression)
+        scheduler.createJobSchedule(s"LoanLimitSchedule_$yr", self, ScheduleWithYear(LarLoanLimitSchedule, yr), cronExpression = loanLimitCronExpression)
+        if (yr >= 2020) {
+          scheduler.createJobSchedule(s"LarQuarterlySchedule_$yr", self, ScheduleWithYear(LarQuarterlySchedule, yr), cronExpression = larQuarterlyCronExpression)
+        }
+      } catch {
+        case e: Throwable => log.error(e, s"failed to schedule for year $yr")
+      }
+    }
   }
 
   override def postStop() = {
-    QuartzSchedulerExtension(context.system).cancelJob("LarScheduler2018")
-    QuartzSchedulerExtension(context.system).cancelJob("LarScheduler2019")
-    QuartzSchedulerExtension(context.system).cancelJob("LarScheduler2020")
-    QuartzSchedulerExtension(context.system).cancelJob("LarScheduler2021")
-    QuartzSchedulerExtension(context.system).cancelJob("LarScheduler2022")
-
-    QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerLoanLimit2019")
-    QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerLoanLimit2020")
-    QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerLoanLimit2021")
-    QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerLoanLimit2022")
-    QuartzSchedulerExtension(context.system).cancelJob("LarSchedulerQuarterly2023")
+    val scheduler = QuartzSchedulerExtension(context.system)
+    availablePublishers.foreach {
+      case (yr, _) => try {
+        scheduler.cancelJob(s"LarSchedule_$yr")
+        scheduler.cancelJob(s"LoanLimitSchedule_$yr")
+        if (yr >= 2020) {
+          scheduler.cancelJob(s"LarQuarterlySchedule_$yr")
+        }
+      } catch {
+        case e: Throwable => log.warning(s"failed to shut down for year $yr")
+      }
+    }
 
   }
 
@@ -422,6 +427,29 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
       publishQuarter2023(Period.y2023Q1, "quarter_1_2023_lar.txt", larRepository2023Q1)
       publishQuarter2023(Period.y2023Q2, "quarter_2_2023_lar.txt", larRepository2023Q2)
       publishQuarter2023(Period.y2023Q3, "quarter_3_2023_lar.txt", larRepository2023Q3)
+
+    case ScheduleWithYear(schedule, yr) =>
+      schedule match {
+        case LarSchedule =>
+          publishingGuard.runIfDataIsValid(yr, Scope.Private) {
+            val now = LocalDateTime.now().minusDays(1)
+            val formattedDate = fullDate.format(now)
+            val fileName = s"$formattedDate${yr}_lar.txt"
+            availablePublishers(yr)._2._1
+            val allResultsSource: Source[String, NotUsed] =
+              Source
+                .fromPublisher(larRepository2020.getAllLARs(getFilterList()))
+                .map(larEntity => larEntity.toRegulatorPSV)
+
+            def countF: Future[Int] = larRepository2020.getAllLARsCount(getFilterList())
+
+            for {
+              _ <- publishPSVtoS3(fileName, allResultsSource, countF, LarScheduler2020)
+            } yield ()
+          }
+        case LarQuarterlySchedule => ""
+        case LarLoanLimitSchedule => ""
+      }
   }
 
 

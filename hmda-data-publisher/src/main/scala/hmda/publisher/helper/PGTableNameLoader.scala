@@ -1,10 +1,11 @@
 package hmda.publisher.helper
 
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{ Config, ConfigFactory }
 
 trait PGTableNameLoader {
 
   val pgTableConfig = ConfigFactory.load("application.conf").getConfig("pg-tables")
+  val quartzScheduleConfig: Config = ConfigFactory.load().getConfig("akka.quartz.schedules")
 
   //2018 table names
   val lar2018TableName: String   = pgTableConfig.getString("lar2018TableName")
@@ -85,5 +86,13 @@ trait PGTableNameLoader {
 
   //common table names
   val emailTableName: String = pgTableConfig.getString("emailTableName")
+  val panelTableBase: String = pgTableConfig.getString("panelTableBase")
+  val tsAnnualTableBase: String = pgTableConfig.getString("tsAnnualTableBase")
+  val tsQuarterTableBase: String = pgTableConfig.getString("tsQuarterTableBase")
+  val larAnnualTableBase: String = pgTableConfig.getString("larAnnualTableBase")
+  val larQuarterTableBase: String = pgTableConfig.getString("larQuarterTableBase")
+  val mLarTableBase: String = pgTableConfig.getString("mlarTableBase")
+  val mLarAvailableYears: Seq[Int] = pgTableConfig.getString("mLarAvailableYears").split(",").map(s => s.toInt)
+  val larAvailableYears: Seq[Int] = pgTableConfig.getString("larAvailableYears").split(",").map(s => s.toInt)
 
 }

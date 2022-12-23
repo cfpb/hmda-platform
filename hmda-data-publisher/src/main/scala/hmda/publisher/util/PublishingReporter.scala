@@ -149,6 +149,7 @@ object PublishingReporter {
           case Schedules.TsSchedulerQuarterly2021  => 1
           case Schedules.LarSchedulerQuarterly2022 => 1
           case Schedules.TsSchedulerQuarterly2022  => 1
+          case _ => 1
         }
         Expectation(s, numOfFiles)
       }
