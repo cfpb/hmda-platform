@@ -21,6 +21,7 @@ spec:
         app: {{ template "institutions-api.name" . }}
         release: {{ .Release.Name }}
     spec:
+      serviceAccountName: {{ .Values.service.account.name }}
       volumes:
         - name: tz-config
           hostPath:

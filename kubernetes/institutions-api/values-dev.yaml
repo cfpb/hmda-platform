@@ -14,6 +14,8 @@ service:
   port: 9092
   targetPort: 9092
   name: http-inst-api
+  account:
+    name: hmda-service-account-default
 
 currentYear: 2019
 
