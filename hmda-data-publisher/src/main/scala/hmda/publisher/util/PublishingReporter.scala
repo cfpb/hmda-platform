@@ -135,6 +135,7 @@ object PublishingReporter {
           case Schedules.LarSchedulerLoanLimit2019 => 1
           case Schedules.LarSchedulerLoanLimit2020 => 1
           case Schedules.LarSchedulerLoanLimit2021 => 1
+          case Schedules.LarSchedulerLoanLimit2022 => 1
           case Schedules.TsScheduler2018           => 1
           case Schedules.TsPublicScheduler2018     => 1
           case Schedules.TsPublicScheduler2019     => 1
