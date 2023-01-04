@@ -1,7 +1,8 @@
 package hmda.publisher.helper
 
-import java.time.{Clock, LocalDate}
+import hmda.publisher.query.component.YearPeriod
 
+import java.time.{ Clock, LocalDate }
 import hmda.publisher.validation.PublishingGuard.Period
 import hmda.util.BankFilterUtils.config
 import hmda.util.Filer
@@ -17,6 +18,10 @@ class QuarterTimeBarrier(clock: Clock) {
     } else {
       None
     }
+  }
+
+  def runIfStillRelevant[T](period: YearPeriod)(thunk: => T): Option[T] = {
+    Some(thunk)
   }
 
 

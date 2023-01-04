@@ -14,10 +14,9 @@ import hmda.census.records.CensusRecords
 import hmda.model.census.Census
 import hmda.model.publication.Msa
 import hmda.publisher.helper._
-import hmda.publisher.qa.{ QAFilePersistor, QAFileSpec, QARepository }
-import hmda.publisher.query.component.{ LarRepository, PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, YearPeriod }
-import hmda.publisher.query.lar.{ LarEntityImpl2018, LarEntityImpl2019, LarEntityImpl2019WithMsa, LarEntityImpl2020, LarEntityImpl2020WithMsa, LarEntityImpl2021, LarEntityImpl2021WithMsa, LarEntityImpl2022 }
-import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear, Schedules }
+import hmda.publisher.query.component.{ PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, YearPeriod }
+import hmda.publisher.query.lar.{ LarEntityImpl, LarEntityImpl2019, LarEntityImpl2020, LarEntityImpl2021, LarEntityImpl2022 }
+import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear }
 import hmda.publisher.scheduler.schedules.Schedules._
 import hmda.publisher.util.PublishingReporter
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
@@ -144,7 +143,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
           scheduler.cancelJob(s"LarQuarterlySchedule_$yr")
         }
       } catch {
-        case e: Throwable => log.warning(s"failed to shut down for year $yr")
+        case _: Throwable => log.warning(s"failed to shut down for year $yr")
       }
     }
 
@@ -428,27 +427,78 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
       publishQuarter2023(Period.y2023Q2, "quarter_2_2023_lar.txt", larRepository2023Q2)
       publishQuarter2023(Period.y2023Q3, "quarter_3_2023_lar.txt", larRepository2023Q3)
 
-    case ScheduleWithYear(schedule, yr) =>
+    case ScheduleWithYear(schedule, year) =>
       schedule match {
         case LarSchedule =>
-          publishingGuard.runIfDataIsValid(yr, Scope.Private) {
+          publishingGuard.runIfDataIsValid(year, Scope.Private) {
             val now = LocalDateTime.now().minusDays(1)
             val formattedDate = fullDate.format(now)
-            val fileName = s"$formattedDate${yr}_lar.txt"
-            availablePublishers(yr)._2._1
-            val allResultsSource: Source[String, NotUsed] =
-              Source
-                .fromPublisher(larRepository2020.getAllLARs(getFilterList()))
-                .map(larEntity => larEntity.toRegulatorPSV)
+            val fileName = s"$formattedDate${year}_lar.txt"
 
-            def countF: Future[Int] = larRepository2020.getAllLARsCount(getFilterList())
+            availablePublishers(year) match {
+              case (_, (Some(repo), _, _, _)) =>
+                val allResultsSource: Source[String, NotUsed] =
+                  Source
+                    .fromPublisher(repo.getAllLARs(getFilterList()))
+                    .map(larEntity => larEntity.toRegulatorPSV)
 
-            for {
-              _ <- publishPSVtoS3(fileName, allResultsSource, countF, LarScheduler2020)
-            } yield ()
+                def countF: Future[Int] = repo.getAllLARsCount(getFilterList())
+
+                for {
+                  _ <- publishPSVtoS3(fileName, allResultsSource, countF, LarSchedule)
+                } yield ()
+              case _ => log.error("No available publisher found for {} in year {}", schedule, year)
+            }
           }
-        case LarQuarterlySchedule => ""
-        case LarLoanLimitSchedule => ""
+
+        case LarQuarterlySchedule =>
+          availablePublishers(year) match {
+            case (_, (_, Some(q1Repo), Some(q2Repo), Some(q3Repo))) =>
+              val now = LocalDateTime.now().minusDays(1)
+              val formattedDate = fullDateQuarterly.format(now)
+              Seq((YearPeriod.Q1, 1, q1Repo), (YearPeriod.Q2, 2, q2Repo), (YearPeriod.Q3, 3, q3Repo)).foreach {
+                case (quarterPeriod, quarterNumber, repo) =>
+                  timeBarrier.runIfStillRelevant(quarterPeriod) {
+                    publishingGuard.runIfDataIsValid(year, Scope.Private) {
+                      val fileName = s"${formattedDate}quarter_${quarterNumber}_${year}_lar.txt"
+
+                      val allResultsSource: Source[String, NotUsed] = Source
+                        .fromPublisher(repo.getAllLARs(getFilterList()))
+                        .map(larEntity => larEntity.toRegulatorPSV)
+
+                      def countF: Future[Int] = repo.getAllLARsCount(getFilterList())
+
+                      for {
+                        _ <- publishPSVtoS3(fileName, allResultsSource, countF, LarQuarterlySchedule)
+                      } yield ()
+                    }
+                  }
+              }
+            case _ => log.error("No available quarterly publisher found for {} in year {}", LarQuarterlySchedule, year)
+          }
+
+        case LarLoanLimitSchedule =>
+          publishingGuard.runIfDataIsValid(year, Scope.Private) {
+            val now = LocalDateTime.now().minusDays(1)
+            val formattedDate = fullDate.format(now)
+            val fileName = s"${year}F_AGY_LAR_withFlag_$formattedDate${year}_lar.txt"
+
+            availablePublishers(year) match {
+              case (_, (Some(repo), _, _, _)) =>
+                val allResultsSource: Source[String, NotUsed] =
+                  Source
+                    .fromPublisher(repo.getAllLARs(getFilterList()))
+                    .map(larEntity => appendCensus(larEntity, year))
+                    .prepend(Source(List(LoanLimitHeader)))
+
+                def countF: Future[Int] = repo.getAllLARsCount(getFilterList())
+
+                for {
+                  _ <- publishPSVtoS3(fileName, allResultsSource, countF, LarLoanLimitSchedule)
+                } yield ()
+              case _ => log.error("No available publisher found for {} in year {}", LarLoanLimitSchedule, year)
+            }
+          }
       }
   }
 
@@ -525,6 +575,11 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
   }
 
   def appendCensus2022(lar: LarEntityImpl2022, year: Int): String = {
+    val msa = getCensus(lar.larPartOne.tract, year)
+    lar.appendMsa(msa).toRegulatorPSV
+  }
+
+  def appendCensus(lar: LarEntityImpl, year: Int): String = {
     val msa = getCensus(lar.larPartOne.tract, year)
     lar.appendMsa(msa).toRegulatorPSV
   }
