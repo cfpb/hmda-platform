@@ -44,9 +44,9 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
   implicit val ec           = context.system.dispatcher
   implicit val materializer = Materializer(context)
 
-  val availablePublishers: Map[Int, (PublisherComponent, ModifiedLarRepository)] = mLarAvailableYears.map(yr => yr -> {
+  val availableRepos: Map[Int, ModifiedLarRepository] = mLarAvailableYears.map(yr => yr -> {
     val component = new PublisherComponent(yr)
-    (component, new ModifiedLarRepository(dbConfig, component.mlarTable))
+    new ModifiedLarRepository(dbConfig, component.mlarTable)
   }).toMap
 
   def mlarRepository2018               = new ModifiedLarRepository2018(dbConfig)
@@ -66,24 +66,24 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
 
   override def preStart(): Unit = {
     val scheduler = QuartzSchedulerExtension(context.system)
-    availablePublishers.foreach {
-      case (yr, _) =>
+    availableRepos.foreach {
+      case (year, _) =>
         try {
           scheduler.createJobSchedule(
-            s"LarPublicScheduler_$yr", self, ScheduleWithYear(LarPublicSchedule, yr), cronExpression = cronExpression)
+            s"LarPublicScheduler_$year", self, ScheduleWithYear(LarPublicSchedule, year), cronExpression = cronExpression)
         } catch {
-          case e: Throwable => log.error(e, s"failed to schedule for $yr")
+          case e: Throwable => log.error(e, s"failed to schedule for $year")
         }
     }
   }
   override def postStop(): Unit = {
     val scheduler = QuartzSchedulerExtension(context.system)
-    availablePublishers.foreach {
-      case (yr, _) =>
+    availableRepos.foreach {
+      case (year, _) =>
         try {
-          scheduler.cancelJob(s"LarPublicScheduler_$yr")
+          scheduler.deleteJobSchedule(s"LarPublicScheduler_$year")
         } catch {
-          case e: Throwable => log.warning(s"failed to shut down for $yr")
+          case e: Throwable => log.warning(s"failed to shut down for $year")
         }
     }
 
@@ -149,18 +149,19 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
         } yield ()
       }
 
-    case ScheduleWithYear(schedule, year) =>
-      if (schedule == LarPublicSchedule) {
-        publishingGuard.runIfDataIsValid(year, Scope.Public) {
-          val fileName = s"${year}_lar.txt"
-          val zipDirectoryName = s"${year}_lar.zip"
-          val s3Path = s"$environmentPublic/dynamic-data/$year/"
-          val fullFilePath = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
-          val bucket = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
+    case ScheduleWithYear(schedule, year) if schedule == LarPublicSchedule =>
+      publishingGuard.runIfDataIsValid(year, Scope.Public) {
+        val fileName = s"${year}_lar.txt"
+        val zipDirectoryName = s"${year}_lar.zip"
+        val s3Path = s"$environmentPublic/dynamic-data/$year/"
+        val fullFilePath = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
+        val bucket = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
 
-          for {
-            _ <- larPublicStream(availablePublishers(year)._2.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, LarPublicSchedule)
-          } yield ()
+        availableRepos(year) match {
+          case repo =>
+            for {
+              _ <- larPublicStream(repo.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, LarPublicSchedule)
+            } yield ()
         }
       }
   }

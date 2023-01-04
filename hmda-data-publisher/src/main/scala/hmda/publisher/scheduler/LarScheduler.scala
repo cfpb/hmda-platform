@@ -96,7 +96,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
   val indexTractMap2021: Map[String, Census] = CensusRecords.indexedTract2021
   val indexTractMap2022: Map[String, Census] = CensusRecords.indexedTract2022
 
-  val availablePublishers = larAvailableYears.map(yr => yr -> {
+  val availableRepos = larAvailableYears.map(yr => yr -> {
     val component = new PublisherComponent(yr)
     val repos = if (yr < 2020) {
       (Some(component.createLarRepository(dbConfig, YearPeriod.Whole)), None, None, None)
@@ -120,30 +120,30 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
 
   override def preStart() = {
     val scheduler = QuartzSchedulerExtension(context.system)
-    availablePublishers.foreach {
-      case (yr, _) => try {
-        scheduler.createJobSchedule(s"LarSchedule_$yr", self, ScheduleWithYear(LarSchedule, yr), cronExpression = larCronExpression)
-        scheduler.createJobSchedule(s"LoanLimitSchedule_$yr", self, ScheduleWithYear(LarLoanLimitSchedule, yr), cronExpression = loanLimitCronExpression)
-        if (yr >= 2020) {
-          scheduler.createJobSchedule(s"LarQuarterlySchedule_$yr", self, ScheduleWithYear(LarQuarterlySchedule, yr), cronExpression = larQuarterlyCronExpression)
+    availableRepos.foreach {
+      case (year, _) => try {
+        scheduler.createJobSchedule(s"LarSchedule_$year", self, ScheduleWithYear(LarSchedule, year), cronExpression = larCronExpression)
+        scheduler.createJobSchedule(s"LoanLimitSchedule_$year", self, ScheduleWithYear(LarLoanLimitSchedule, year), cronExpression = loanLimitCronExpression)
+        if (year >= 2020) {
+          scheduler.createJobSchedule(s"LarQuarterlySchedule_$year", self, ScheduleWithYear(LarQuarterlySchedule, year), cronExpression = larQuarterlyCronExpression)
         }
       } catch {
-        case e: Throwable => log.error(e, s"failed to schedule for year $yr")
+        case e: Throwable => log.error(e, s"failed to schedule for year $year")
       }
     }
   }
 
   override def postStop() = {
     val scheduler = QuartzSchedulerExtension(context.system)
-    availablePublishers.foreach {
-      case (yr, _) => try {
-        scheduler.cancelJob(s"LarSchedule_$yr")
-        scheduler.cancelJob(s"LoanLimitSchedule_$yr")
-        if (yr >= 2020) {
-          scheduler.cancelJob(s"LarQuarterlySchedule_$yr")
+    availableRepos.foreach {
+      case (year, _) => try {
+        scheduler.deleteJobSchedule(s"LarSchedule_$year")
+        scheduler.deleteJobSchedule(s"LoanLimitSchedule_$year")
+        if (year >= 2020) {
+          scheduler.deleteJobSchedule(s"LarQuarterlySchedule_$year")
         }
       } catch {
-        case _: Throwable => log.warning(s"failed to shut down for year $yr")
+        case _: Throwable => log.warning(s"failed to shut down for year $year")
       }
     }
 
@@ -435,7 +435,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
             val formattedDate = fullDate.format(now)
             val fileName = s"$formattedDate${year}_lar.txt"
 
-            availablePublishers(year) match {
+            availableRepos(year) match {
               case (_, (Some(repo), _, _, _)) =>
                 val allResultsSource: Source[String, NotUsed] =
                   Source
@@ -452,7 +452,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
           }
 
         case LarQuarterlySchedule =>
-          availablePublishers(year) match {
+          availableRepos(year) match {
             case (_, (_, Some(q1Repo), Some(q2Repo), Some(q3Repo))) =>
               val now = LocalDateTime.now().minusDays(1)
               val formattedDate = fullDateQuarterly.format(now)
@@ -483,7 +483,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
             val formattedDate = fullDate.format(now)
             val fileName = s"${year}F_AGY_LAR_withFlag_$formattedDate${year}_lar.txt"
 
-            availablePublishers(year) match {
+            availableRepos(year) match {
               case (_, (Some(repo), _, _, _)) =>
                 val allResultsSource: Source[String, NotUsed] =
                   Source

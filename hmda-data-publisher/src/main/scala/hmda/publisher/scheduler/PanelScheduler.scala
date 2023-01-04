@@ -7,25 +7,25 @@ import akka.actor.typed.ActorRef
 import akka.stream.Materializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings}
+import akka.stream.alpakka.s3.{ MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings }
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.{PrivateAWSConfigLoader, S3Utils, SnapshotCheck}
-import hmda.publisher.qa.{QAFilePersistor, QAFileSpec, QARepository}
-import hmda.publisher.query.component.{InstitutionEmailComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023}
-import hmda.publisher.query.panel.{InstitutionAltEntity, InstitutionEmailEntity, InstitutionEntity}
-import hmda.publisher.scheduler.schedules.Schedule
-import hmda.publisher.scheduler.schedules.Schedules.{PanelScheduler2018, PanelScheduler2019, PanelScheduler2020, PanelScheduler2021, PanelScheduler2022}
+import hmda.publisher.helper.{ PrivateAWSConfigLoader, S3Utils, SnapshotCheck }
+import hmda.publisher.qa.{ QAFilePersistor, QAFileSpec, QARepository }
+import hmda.publisher.query.component.{ InstitutionEmailComponent, InstitutionRepository, PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023 }
+import hmda.publisher.query.panel.{ InstitutionAltEntity, InstitutionEmailEntity, InstitutionEntity }
+import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear }
+import hmda.publisher.scheduler.schedules.Schedules.{ PanelSchedule, PanelScheduler2018, PanelScheduler2019, PanelScheduler2020, PanelScheduler2021, PanelScheduler2022 }
 import hmda.publisher.util.PublishingReporter
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.{ Failure, Success, Try }
 // $COVERAGE-OFF$
 class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
   extends HmdaActor
@@ -41,11 +41,17 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
   implicit val ec: ExecutionContext       = context.system.dispatcher
   implicit val materializer: Materializer = Materializer(context)
   private val fullDate                    = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
+  private val panelCronExpression = quartzScheduleConfig.getString("PanelSchedule.expression")
   def institutionRepository2018           = new InstitutionRepository2018(dbConfig)
   def institutionRepository2019           = new InstitutionRepository2019(dbConfig)
   def institutionRepository2020           = new InstitutionRepository2020(dbConfig)
   def institutionRepository2021           = new InstitutionRepository2021(dbConfig)
   def institutionRepository2022           = new InstitutionRepository2022(dbConfig)
+
+  val availableRepos = panelAvailableYears.map(year => year -> {
+    val component = new PublisherComponent(year)
+    new InstitutionRepository(dbConfig, component.institutionsTable)
+  })
 
 
   def emailRepository                     = new InstitutionEmailsRepository2018(dbConfig)
@@ -59,25 +65,28 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
     .withS3RegionProvider(awsRegionProviderPrivate)
     .withListBucketApiVersion(ListBucketVersion2)
 
-  override def preStart(): Unit =
-    try {
-      QuartzSchedulerExtension(context.system)
-        .schedule("PanelScheduler2018", self, PanelScheduler2018)
-      QuartzSchedulerExtension(context.system)
-        .schedule("PanelScheduler2019", self, PanelScheduler2019)
-      QuartzSchedulerExtension(context.system)
-        .schedule("PanelScheduler2020", self, PanelScheduler2020)
-      QuartzSchedulerExtension(context.system)
-        .schedule("PanelScheduler2021", self, PanelScheduler2021)
-      QuartzSchedulerExtension(context.system)
-        .schedule("PanelScheduler2022", self, PanelScheduler2022)
-    } catch { case e: Throwable => println(e) }
+  override def preStart(): Unit = {
+    val scheduler = QuartzSchedulerExtension(context.system)
+    availableRepos.foreach {
+      case (year, _) =>
+        try {
+          scheduler.createJobSchedule(s"PanelSchedule_$year", self, ScheduleWithYear(PanelSchedule, year), cronExpression = panelCronExpression)
+        } catch {
+          case e: Throwable => log.error(e, "failed to schedule for year {}", year)
+        }
+    }
+  }
 
   override def postStop(): Unit = {
-    QuartzSchedulerExtension(context.system).cancelJob("PanelScheduler2018")
-    QuartzSchedulerExtension(context.system).cancelJob("PanelScheduler2019")
-    QuartzSchedulerExtension(context.system).cancelJob("PanelScheduler2021")
-    QuartzSchedulerExtension(context.system).cancelJob("PanelScheduler2022")
+    val scheduler = QuartzSchedulerExtension(context.system)
+    availableRepos.foreach {
+      case (year, _) =>
+        try {
+          scheduler.deleteJobSchedule(s"PanelSchedule_$year")
+        } catch {
+          case e: Throwable => log.warning("failed to schedule for year {}: {}", year, e)
+        }
+    }
   }
 
   override def receive: Receive = {
@@ -95,6 +104,9 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
 
     case PanelScheduler2022 =>
       panelSync2022()
+
+    case ScheduleWithYear(schedule, year) if schedule == PanelSchedule =>
+      panelSync(year)
 
   }
 
@@ -219,6 +231,32 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
 
     results.onComplete(reportPublishingComplete(_, PanelScheduler2022, fullFilePath))
    }
+
+  private def panelSync(year: Int): Unit = {
+    availableRepos(year) match {
+      case (_, repo) =>
+        val allResults = repo.findActiveFilers(getFilterList())
+        val now = LocalDateTime.now().minusDays(1)
+        val formattedDate = fullDate.format(now)
+        val fileName = s"$formattedDate${year}_panel.txt"
+        val s3Path = s"$environmentPrivate/panel/"
+        val fullFilePath = SnapshotCheck.pathSelector(s3Path, fileName)
+
+        val s3Sink =
+          S3.multipartUpload(bucketPrivate, fullFilePath)
+            .withAttributes(S3Attributes.settings(s3Settings))
+        val source = Source
+          .future(allResults)
+          .mapConcat(seek => seek.toList)
+          .mapAsync(1)(institution => appendEmailDomains(institution))
+          .map(institution => institution.toPSV + "\n")
+          .map(s => ByteString(s))
+        val results: Future[MultipartUploadResult] = S3Utils.uploadWithRetry(source, s3Sink)
+
+        results.onComplete(reportPublishingComplete(_, PanelSchedule, fullFilePath))
+      case _ => log.error("No available panel publisher for year {}", year)
+    }
+  }
 
   def appendEmailDomains2018(institution: InstitutionEntity): Future[InstitutionAltEntity] = {
 
