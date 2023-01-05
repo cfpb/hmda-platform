@@ -245,3 +245,4 @@ Related projects
   - https://github.com/cfpb/hmda-test-files - Repo for automatically generating various different test files for HMDA Data
   - https://github.com/cfpb/hmda-census - ETL for geographic and Census data used by the HMDA Platform
   - https://github.com/cfpb/HMDA_Data_Science_Kit - Repo for HMDA Data science work as well as Spark codebase for [Public Facing A&D Reports](https://ffiec.cfpb.gov/data-publication/disclosure-reports/2018)
+  - https://github.com/cfpb/hmda-platform-api-docs - Repo is for the front end [public api](https://cfpb.github.io/hmda-platform/) 
