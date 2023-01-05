@@ -134,6 +134,24 @@ metadata:
       timeout_ms: 60000
       allow_upgrade:
         - websocket      
+      add_response_headers:
+        referrer-policy:
+          value: strict-origin
+          append: False
+        content-security-policy:
+          append: False
+          value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec-api.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
+        permissions-policy:
+          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
+        Strict-Transport-Security: 
+          append: False
+          value: "max-age=31536000; includeSubDomains; preload"
+      remove_response_headers:
+      - x-envoy-upstream-service-time
+      - Access-Control-Allow-Origin
+      - x-forwarded-host
+      - x-host
+      - x-forwarded-server
 spec:
   clusterIP: None  
 ---
@@ -158,6 +176,24 @@ metadata:
       timeout_ms: 60000
       allow_upgrade:
         - websocket
+      add_response_headers:
+        referrer-policy:
+          value: strict-origin
+          append: False
+        content-security-policy:
+          append: False
+          value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec-api.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
+        permissions-policy:
+          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
+        Strict-Transport-Security: 
+          append: False
+          value: "max-age=31536000; includeSubDomains; preload"
+      remove_response_headers:
+      - x-envoy-upstream-service-time
+      - Access-Control-Allow-Origin
+      - x-forwarded-host
+      - x-host
+      - x-forwarded-server
 spec:
   clusterIP: None  
 ---
@@ -175,6 +211,24 @@ metadata:
       ambassador_id: ambassador-default-1
       prefix: /v2/public/
       service: {{ .Values.service.name }}:{{ .Values.public.port }}
+      add_response_headers:
+        referrer-policy:
+          value: strict-origin
+          append: False
+        content-security-policy:
+          append: False
+          value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec-api.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
+        permissions-policy:
+          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
+        Strict-Transport-Security: 
+          append: False
+          value: "max-age=31536000; includeSubDomains; preload"
+      remove_response_headers:
+      - x-envoy-upstream-service-time
+      - Access-Control-Allow-Origin
+      - x-forwarded-host
+      - x-host
+      - x-forwarded-server
 spec:
   clusterIP: None  
 ---
@@ -216,5 +270,23 @@ metadata:
       service: {{ .Values.service.name }}:{{ .Values.websockets.port }}
       allow_upgrade:
        - websocket
+      add_response_headers:
+        referrer-policy:
+          value: strict-origin
+          append: False
+        content-security-policy:
+          append: False
+          value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec-api.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
+        permissions-policy:
+          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
+        Strict-Transport-Security: 
+          append: False
+          value: "max-age=31536000; includeSubDomains; preload"
+      remove_response_headers:
+      - x-envoy-upstream-service-time
+      - Access-Control-Allow-Origin
+      - x-forwarded-host
+      - x-host
+      - x-forwarded-server
 spec:
   clusterIP: None  
