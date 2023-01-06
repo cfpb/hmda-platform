@@ -39,6 +39,9 @@ spec:
               drop:
                 - ALL            
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ template "institutions-api.fullname" . }}-config
           env:
             - name: KAFKA_INSTITUTIONS_TOPIC
               value: {{.Values.kafka.institutionsTopic}}

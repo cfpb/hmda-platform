@@ -38,25 +38,19 @@ trait InstitutionSetup extends InstitutionEmailComponent {
     import dbConfig.profile.api._
     val setup = db.run(
       DBIOAction.seq(
-        Seq(institutionsTable2018.schema.create,
-          institutionsTable2019.schema.create,
-          institutionsTable2020.schema.create,
-          institutionsTable2021.schema.create,
-          institutionsTable2022.schema.create,
-          institutionsTable2023.schema.create,
-          institutionsTable2018 ++= Seq(
-            instA,
-            instB,
-            instE
-          ),
+        Seq(
           institutionEmailsTable.schema.create,
           institutionEmailsTable ++= Seq(
             InstitutionEmailEntity(1, "AAA", "aaa.com"),
             InstitutionEmailEntity(2, "AAA", "bbb.com"),
             InstitutionEmailEntity(3, "BBB", "bbb.com"),
             InstitutionEmailEntity(4, "EEE", "eee.com")
-          )) ++
-          tsRepositories.values.map(_.table.schema.create).toSeq: _*
+        )) ++
+        tsRepositories.values.map(_.table.schema.create).toSeq ++
+        institutionRepositories.values.map(_.table.schema.create).toSeq ++
+        Seq(institutionRepositories
+          .getOrElse("2018", new InstitutionRepository(dbConfig, "institutions2018"))
+          .table ++= Seq(instA, instB, instE)) : _*
       )
     )
     Await.result(setup, duration)
