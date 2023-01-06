@@ -94,6 +94,9 @@ trait PGTableNameLoader {
   val mLarTableBase: String = pgTableConfig.getString("mlarTableBase")
   val mLarAvailableYears: Seq[Int] = pgTableConfig.getString("mLarAvailableYears").split(",").map(s => s.toInt)
   val larAvailableYears: Seq[Int] = pgTableConfig.getString("larAvailableYears").split(",").map(s => s.toInt)
+  val larQuarterAvailableYears: Seq[Int] = pgTableConfig.getString("larQuarterAvailableYears").split(",").map(s => s.toInt)
   val panelAvailableYears: Seq[Int] = pgTableConfig.getString("panelAvailableYears").split(",").map(s => s.toInt)
+  val tsAvailableYears: Seq[Int] = pgTableConfig.getString("tsAvailableYears").split(",").map(s => s.toInt)
+  val tsQuarterAvailableYears: Seq[Int] = pgTableConfig.getString("tsQuarterAvailableYears").split(",").map(s => s.toInt)
 
 }

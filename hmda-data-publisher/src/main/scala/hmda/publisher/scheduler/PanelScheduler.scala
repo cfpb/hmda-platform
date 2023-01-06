@@ -51,7 +51,7 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
   val availableRepos = panelAvailableYears.map(year => year -> {
     val component = new PublisherComponent(year)
     new InstitutionRepository(dbConfig, component.institutionsTable)
-  })
+  }).toMap
 
 
   def emailRepository                     = new InstitutionEmailsRepository2018(dbConfig)
@@ -234,7 +234,7 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
 
   private def panelSync(year: Int): Unit = {
     availableRepos(year) match {
-      case (_, repo) =>
+      case repo =>
         val allResults = repo.findActiveFilers(getFilterList())
         val now = LocalDateTime.now().minusDays(1)
         val formattedDate = fullDate.format(now)

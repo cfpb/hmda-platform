@@ -1,32 +1,32 @@
 package hmda.publisher.scheduler
 
-import java.time.{Clock, Instant, LocalDateTime}
+import java.time.{ Clock, Instant, LocalDateTime }
 import java.time.format.DateTimeFormatter
 import akka.actor.typed.ActorRef
 import akka.stream.Materializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3._
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.scaladsl.{Sink, Source}
+import akka.stream.scaladsl.{ Sink, Source }
 import akka.util.ByteString
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.{PrivateAWSConfigLoader, QuarterTimeBarrier, S3Utils, SnapshotCheck}
-import hmda.publisher.qa.{QAFilePersistor, QAFileSpec, QARepository}
-import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, TransmittalSheetTable, TsRepository}
-import hmda.publisher.scheduler.schedules.Schedule
-import hmda.publisher.scheduler.schedules.Schedules.{TsScheduler2018, TsScheduler2019, TsScheduler2020, TsScheduler2021, TsScheduler2022, TsSchedulerQuarterly2020, TsSchedulerQuarterly2021, TsSchedulerQuarterly2022, TsSchedulerQuarterly2023}
+import hmda.publisher.helper.{ PrivateAWSConfigLoader, QuarterTimeBarrier, S3Utils, SnapshotCheck }
+import hmda.publisher.qa.{ QAFilePersistor, QAFileSpec, QARepository }
+import hmda.publisher.query.component.{ PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, TransmittalSheetTable, TsRepository, YearPeriod }
+import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear }
+import hmda.publisher.scheduler.schedules.Schedules.{ TsQuarterlySchedule, TsSchedule, TsScheduler2018, TsScheduler2019, TsScheduler2020, TsScheduler2021, TsScheduler2022, TsSchedulerQuarterly2020, TsSchedulerQuarterly2021, TsSchedulerQuarterly2022, TsSchedulerQuarterly2023 }
 import hmda.publisher.util.PublishingReporter
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 import hmda.publisher.validation.PublishingGuard
-import hmda.publisher.validation.PublishingGuard.{Period, Scope}
+import hmda.publisher.validation.PublishingGuard.{ Period, Scope }
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.ts._
 import hmda.util.BankFilterUtils._
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 // $COVERAGE-OFF$
 class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
   extends HmdaActor
@@ -42,6 +42,8 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
   implicit val materializer     = Materializer(context)
   private val fullDate          = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   private val fullDateQuarterly = DateTimeFormatter.ofPattern("yyyy-MM-dd_")
+  private val annualTsScheduleCronExpression = ""
+  private val quarterlyTsScheduleCronExpression = ""
 
 
   // Regulator File Scheduler Repos Annual
@@ -69,6 +71,20 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
   def tsRepository2023Q2               = createTransmittalSheetRepository2023(dbConfig, Year2023Period.Q2)
   def tsRepository2023Q3               = createTransmittalSheetRepository2023(dbConfig, Year2023Period.Q3)
 
+  val annualRepos = tsAvailableYears.map(year => year -> {
+    val component = new PublisherComponent(year)
+    new TsRepository[TransmittalSheetTable](dbConfig, component.transmittalSheetTableQuery(YearPeriod.Whole))
+  }).toMap
+
+  val quarterRepos = tsQuarterAvailableYears.map(year => year -> {
+    val component = new PublisherComponent(year)
+    (
+      new TsRepository[TransmittalSheetTable](dbConfig, component.transmittalSheetTableQuery(YearPeriod.Q1)),
+      new TsRepository[TransmittalSheetTable](dbConfig, component.transmittalSheetTableQuery(YearPeriod.Q2)),
+      new TsRepository[TransmittalSheetTable](dbConfig, component.transmittalSheetTableQuery(YearPeriod.Q3))
+    )
+  }).toMap
+
 
   val publishingGuard: PublishingGuard = PublishingGuard.create(this)(context.system)
   val timeBarrier: QuarterTimeBarrier  = new QuarterTimeBarrier(Clock.systemDefaultZone())
@@ -83,41 +99,57 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
     .withListBucketApiVersion(ListBucketVersion2)
 
   override def preStart(): Unit = {
-    QuartzSchedulerExtension(context.system)
-      .schedule("TsScheduler2018", self, TsScheduler2018)
-    QuartzSchedulerExtension(context.system)
-      .schedule("TsScheduler2019", self, TsScheduler2019)
-    QuartzSchedulerExtension(context.system)
-      .schedule("TsScheduler2020", self, TsScheduler2020)
-    QuartzSchedulerExtension(context.system)
-      .schedule("TsScheduler2021", self, TsScheduler2021)
-    QuartzSchedulerExtension(context.system)
-      .schedule("TsScheduler2022", self, TsScheduler2022)
-    QuartzSchedulerExtension(context.system)
-      .schedule("TsSchedulerQuarterly2020", self, TsSchedulerQuarterly2020)
-
-    QuartzSchedulerExtension(context.system)
-      .schedule("TsSchedulerQuarterly2021", self, TsSchedulerQuarterly2021)
-
-    QuartzSchedulerExtension(context.system)
-      .schedule("TsSchedulerQuarterly2022", self, TsSchedulerQuarterly2022)
-
-    QuartzSchedulerExtension(context.system)
-      .schedule("TsSchedulerQuarterly2023", self, TsSchedulerQuarterly2023)
+    val scheduler = QuartzSchedulerExtension(context.system)
+    annualRepos.foreach {
+      case (year, _) => scheduler
+        .createJobSchedule(s"TsSchedule_$year", self, ScheduleWithYear(TsSchedule, year), cronExpression = annualTsScheduleCronExpression)
+    }
+    quarterRepos.foreach {
+      case (year, _) => scheduler
+        .createJobSchedule(s"TsQuarterlySchedule_$year", self, ScheduleWithYear(TsQuarterlySchedule, year), cronExpression = quarterlyTsScheduleCronExpression)
+    }
+//    QuartzSchedulerExtension(context.system)
+//      .schedule("TsScheduler2018", self, TsScheduler2018)
+//    QuartzSchedulerExtension(context.system)
+//      .schedule("TsScheduler2019", self, TsScheduler2019)
+//    QuartzSchedulerExtension(context.system)
+//      .schedule("TsScheduler2020", self, TsScheduler2020)
+//    QuartzSchedulerExtension(context.system)
+//      .schedule("TsScheduler2021", self, TsScheduler2021)
+//    QuartzSchedulerExtension(context.system)
+//      .schedule("TsScheduler2022", self, TsScheduler2022)
+//    QuartzSchedulerExtension(context.system)
+//      .schedule("TsSchedulerQuarterly2020", self, TsSchedulerQuarterly2020)
+//
+//    QuartzSchedulerExtension(context.system)
+//      .schedule("TsSchedulerQuarterly2021", self, TsSchedulerQuarterly2021)
+//
+//    QuartzSchedulerExtension(context.system)
+//      .schedule("TsSchedulerQuarterly2022", self, TsSchedulerQuarterly2022)
+//
+//    QuartzSchedulerExtension(context.system)
+//      .schedule("TsSchedulerQuarterly2023", self, TsSchedulerQuarterly2023)
   }
 
   override def postStop(): Unit = {
-    QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2018")
-    QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2019")
-    QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2020")
-    QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2021")
-    QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2022")
-
-
-    QuartzSchedulerExtension(context.system).cancelJob("TsSchedulerQuarterly2020")
-    QuartzSchedulerExtension(context.system).cancelJob("TsSchedulerQuarterly2021")
-    QuartzSchedulerExtension(context.system).cancelJob("TsSchedulerQuarterly2022")
-    QuartzSchedulerExtension(context.system).cancelJob("TsSchedulerQuarterly2023")
+    val scheduler = QuartzSchedulerExtension(context.system)
+    annualRepos.foreach {
+      case (year, _) => scheduler.deleteJobSchedule(s"TsSchedule_$year")
+    }
+    quarterRepos.foreach {
+      case (year, _) => scheduler.deleteJobSchedule(s"TsQuarterlySchedule_$year")
+    }
+//    QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2018")
+//    QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2019")
+//    QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2020")
+//    QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2021")
+//    QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2022")
+//
+//
+//    QuartzSchedulerExtension(context.system).cancelJob("TsSchedulerQuarterly2020")
+//    QuartzSchedulerExtension(context.system).cancelJob("TsSchedulerQuarterly2021")
+//    QuartzSchedulerExtension(context.system).cancelJob("TsSchedulerQuarterly2022")
+//    QuartzSchedulerExtension(context.system).cancelJob("TsSchedulerQuarterly2023")
 
 
   }
@@ -160,6 +192,21 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
       publishQuarterTsData(TsSchedulerQuarterly2022, Period.y2022Q1, "quarter_1_2022_ts.txt", tsRepository2022Q1)
       publishQuarterTsData(TsSchedulerQuarterly2022, Period.y2022Q2, "quarter_2_2022_ts.txt", tsRepository2022Q2)
       publishQuarterTsData(TsSchedulerQuarterly2022, Period.y2022Q3, "quarter_3_2022_ts.txt", tsRepository2022Q3)
+
+    case ScheduleWithYear(schedule, year) if schedule in (TsSchedule, TsQuarterlySchedule) =>
+      schedule match {
+        case TsSchedule => annualRepos(year) match {
+          case repo => publishAnnualTsData(TsSchedule, year, repo)
+          case _ => log.error("No available ts publisher for {}", year)
+        }
+        case TsQuarterlySchedule => quarterRepos(year) match {
+          case (q1Repo, q2Repo, q3Repo) =>
+            publishQuarterTsData(TsQuarterlySchedule, year, YearPeriod.Q1, s"quarter_1_${year}_ts.txt", q1Repo)
+            publishQuarterTsData(TsQuarterlySchedule, year, YearPeriod.Q2, s"quarter_2_${year}_ts.txt", q2Repo)
+            publishQuarterTsData(TsQuarterlySchedule, year, YearPeriod.Q3, s"quarter_3_${year}_ts.txt", q3Repo)
+          case _ => log.error("No available ts quarterly publisher for {}", year)
+        }
+      }
   }
 
   import dbConfig.profile.api._
@@ -178,6 +225,22 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
       publishTsData(schedule, quarter, fullDateQuarterly.format(LocalDateTime.now().minusDays(1)) + fileName, tsRepo)
     }
 
+  private def publishAnnualTsData[TsTable <: Table[TransmittalSheetEntity]](
+    schedule: Schedule,
+    year: Int,
+    tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] =
+    publishTsData(schedule, year, fullDate.format(LocalDateTime.now().minusDays(1)) + s"${year}_ts.txt", tsRepo)
+
+  private def publishQuarterTsData[TsTable <: Table[TransmittalSheetEntity]](
+    schedule: Schedule,
+    year: Int,
+    quarter: YearPeriod,
+    fileName: String,
+    tsRepo: TsRepository[TransmittalSheetTable]): Option[Future[Unit]] =
+    timeBarrier.runIfStillRelevant(quarter) {
+      publishTsData(schedule, year, fullDateQuarterly.format(LocalDateTime.now().minusDays(1)) + fileName, tsRepo)
+    }
+
   private def publishTsData[TsTable <: Table[TransmittalSheetEntity]](
     schedule: Schedule,
     period: Period,
@@ -186,6 +249,32 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
     publishingGuard.runIfDataIsValid(period, Scope.Private) {
       val s3Path        = s"$environmentPrivate/ts/"
       val fullFilePath  = SnapshotCheck.pathSelector(s3Path, fullFileName)
+
+      def countF: Future[Int] = tsRepo.count()
+
+      val results = for {
+        count <- countF
+        s3Sink = S3
+          .multipartUpload(bucketPrivate, fullFilePath, metaHeaders = MetaHeaders(Map(LarScheduler.entriesCountMetaName -> count.toString)))
+          .withAttributes(S3Attributes.settings(s3Settings))
+        _ <- uploadFileToS3(s3Sink, tsRepo.getAllSheets(getFilterList()))
+        count <- countF
+      } yield count
+
+      results onComplete {
+        case Success(count) => reportPublishingResult(schedule, fullFilePath, Some(count))
+        case Failure(t) => reportPublishingResultError(schedule, fullFilePath, t)
+      }
+    }
+
+  private def publishTsData[TsTable <: Table[TransmittalSheetEntity]](
+    schedule: Schedule,
+    period: Int,
+    fullFileName: String,
+    tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] =
+    publishingGuard.runIfDataIsValid(period, Scope.Private) {
+      val s3Path = s"$environmentPrivate/ts/"
+      val fullFilePath = SnapshotCheck.pathSelector(s3Path, fullFileName)
 
       def countF: Future[Int] = tsRepo.count()
 

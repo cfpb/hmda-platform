@@ -96,20 +96,19 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
   val indexTractMap2021: Map[String, Census] = CensusRecords.indexedTract2021
   val indexTractMap2022: Map[String, Census] = CensusRecords.indexedTract2022
 
-  val availableRepos = larAvailableYears.map(yr => yr -> {
+  val annualRepos = larAvailableYears.map(yr => yr -> {
     val component = new PublisherComponent(yr)
-    val repos = if (yr < 2020) {
-      (Some(component.createLarRepository(dbConfig, YearPeriod.Whole)), None, None, None)
-    } else {
-      (
-        Some(component.createLarRepository(dbConfig, YearPeriod.Whole)),
-        Some(component.createLarRepository(dbConfig, YearPeriod.Q1)),
-        Some(component.createLarRepository(dbConfig, YearPeriod.Q2)),
-        Some(component.createLarRepository(dbConfig, YearPeriod.Q3))
-      )
-    }
-    repos
-  })
+    component.createLarRepository(dbConfig, YearPeriod.Whole)
+  }).toMap
+
+  val quarterRepos = larQuarterAvailableYears.map(yr => yr -> {
+    val component = new PublisherComponent(yr)
+    (
+      component.createLarRepository(dbConfig, YearPeriod.Q1),
+      component.createLarRepository(dbConfig, YearPeriod.Q2),
+      component.createLarRepository(dbConfig, YearPeriod.Q3)
+    )
+  }).toMap
 
 
   val s3Settings = S3Settings(context.system)
@@ -120,30 +119,39 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
 
   override def preStart() = {
     val scheduler = QuartzSchedulerExtension(context.system)
-    availableRepos.foreach {
+    annualRepos.foreach {
       case (year, _) => try {
         scheduler.createJobSchedule(s"LarSchedule_$year", self, ScheduleWithYear(LarSchedule, year), cronExpression = larCronExpression)
         scheduler.createJobSchedule(s"LoanLimitSchedule_$year", self, ScheduleWithYear(LarLoanLimitSchedule, year), cronExpression = loanLimitCronExpression)
-        if (year >= 2020) {
-          scheduler.createJobSchedule(s"LarQuarterlySchedule_$year", self, ScheduleWithYear(LarQuarterlySchedule, year), cronExpression = larQuarterlyCronExpression)
-        }
       } catch {
-        case e: Throwable => log.error(e, s"failed to schedule for year $year")
+        case e: Throwable => log.error(e, s"failed to schedule lar and loan limit for year $year")
+      }
+    }
+
+    quarterRepos.foreach {
+      case (year, (_, _, _)) => try {
+        scheduler.createJobSchedule(s"LarQuarterlySchedule_$year", self, ScheduleWithYear(LarQuarterlySchedule, year), cronExpression = larQuarterlyCronExpression)
+      } catch {
+        case e: Throwable => log.error(e, s"failed to schedule quarterly lar for year $year")
       }
     }
   }
 
   override def postStop() = {
     val scheduler = QuartzSchedulerExtension(context.system)
-    availableRepos.foreach {
+    annualRepos.foreach {
       case (year, _) => try {
         scheduler.deleteJobSchedule(s"LarSchedule_$year")
         scheduler.deleteJobSchedule(s"LoanLimitSchedule_$year")
-        if (year >= 2020) {
-          scheduler.deleteJobSchedule(s"LarQuarterlySchedule_$year")
-        }
       } catch {
-        case _: Throwable => log.warning(s"failed to shut down for year $year")
+        case _: Throwable => log.warning(s"failed to shut down lar and loan limit schedules for year $year")
+      }
+    }
+    quarterRepos.foreach {
+      case (year, (_, _, _)) => try {
+        scheduler.deleteJobSchedule(s"LarQuarterlySchedule_$year")
+      } catch {
+        case _: Throwable => log.warning(s"failed to shut down quarterly lar schedule for year $year")
       }
     }
 
@@ -427,7 +435,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
       publishQuarter2023(Period.y2023Q2, "quarter_2_2023_lar.txt", larRepository2023Q2)
       publishQuarter2023(Period.y2023Q3, "quarter_3_2023_lar.txt", larRepository2023Q3)
 
-    case ScheduleWithYear(schedule, year) =>
+    case ScheduleWithYear(schedule, year) if schedule in (LarSchedule, LarQuarterlySchedule, LarLoanLimitSchedule) =>
       schedule match {
         case LarSchedule =>
           publishingGuard.runIfDataIsValid(year, Scope.Private) {
@@ -435,8 +443,8 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
             val formattedDate = fullDate.format(now)
             val fileName = s"$formattedDate${year}_lar.txt"
 
-            availableRepos(year) match {
-              case (_, (Some(repo), _, _, _)) =>
+            annualRepos(year) match {
+              case repo =>
                 val allResultsSource: Source[String, NotUsed] =
                   Source
                     .fromPublisher(repo.getAllLARs(getFilterList()))
@@ -452,8 +460,8 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
           }
 
         case LarQuarterlySchedule =>
-          availableRepos(year) match {
-            case (_, (_, Some(q1Repo), Some(q2Repo), Some(q3Repo))) =>
+          quarterRepos(year) match {
+            case (q1Repo, q2Repo, q3Repo) =>
               val now = LocalDateTime.now().minusDays(1)
               val formattedDate = fullDateQuarterly.format(now)
               Seq((YearPeriod.Q1, 1, q1Repo), (YearPeriod.Q2, 2, q2Repo), (YearPeriod.Q3, 3, q3Repo)).foreach {
@@ -483,8 +491,8 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
             val formattedDate = fullDate.format(now)
             val fileName = s"${year}F_AGY_LAR_withFlag_$formattedDate${year}_lar.txt"
 
-            availableRepos(year) match {
-              case (_, (Some(repo), _, _, _)) =>
+            annualRepos(year) match {
+              case repo =>
                 val allResultsSource: Source[String, NotUsed] =
                   Source
                     .fromPublisher(repo.getAllLARs(getFilterList()))
