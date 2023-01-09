@@ -87,6 +87,24 @@ metadata:
       prefix: /v2/filing/
       service: {{ .Values.service.name }}:{{ .Values.filing.port }}
       timeout_ms: 60000
+      add_response_headers:
+        referrer-policy:
+          value: strict-origin
+          append: False
+        content-security-policy:
+          append: False
+          value: "default-src 'self'; script-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; object-src 'none'; frame-src 'self'; connect-src 'self'"
+        permissions-policy:
+          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
+        Strict-Transport-Security: 
+          append: False
+          value: "max-age=31536000; includeSubDomains; preload"
+      remove_response_headers:
+      - x-envoy-upstream-service-time
+      - Access-Control-Allow-Origin
+      - x-forwarded-host
+      - x-host
+      - x-forwarded-server
 spec:
   clusterIP: None  
 ---
