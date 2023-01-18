@@ -17,7 +17,7 @@ class V716 private (indexedCounties: Map[String, Census]) extends EditCheck[Loan
     val county = lar.geography.county
     val state  = lar.geography.state
     if (county.toLowerCase != "na" && state.toLowerCase != "na") {
-      if (CensusRecords.indexedCounty2020.contains(county)) { //TODO - this should be changed to 2020 https://github.com/cfpb/hmda-platform/issues/3492
+      if (indexedCounties.contains(county)) { //TODO - this should be changed to 2020 https://github.com/cfpb/hmda-platform/issues/3492
         val countyState = Census.states.getOrElse(state, State("", ""))
         if (county.take(2) == countyState.code) {
           ValidationSuccess
