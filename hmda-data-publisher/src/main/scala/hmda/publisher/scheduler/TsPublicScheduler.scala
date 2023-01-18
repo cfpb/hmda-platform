@@ -7,7 +7,6 @@ import akka.stream.alpakka.s3._
 import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.actor.HmdaActor
 import hmda.publisher.helper.{ PrivateAWSConfigLoader, PublicAWSConfigLoader, S3Archiver, S3Utils, SnapshotCheck, TSHeader }
 import hmda.publisher.query.component.{ PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, TransmittalSheetTable, TsRepository, YearPeriod }
@@ -17,9 +16,8 @@ import hmda.query.ts._
 import hmda.util.BankFilterUtils._
 import akka.stream.alpakka.file.scaladsl.Archive
 import akka.stream.alpakka.file.ArchiveMetadata
-import hmda.publisher.qa.{ QAFilePersistor, QAFileSpec, QARepository }
 import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear }
-import hmda.publisher.util.PublishingReporter
+import hmda.publisher.util.{ PublishingReporter, ScheduleCoordinator }
 import hmda.publisher.validation.PublishingGuard
 import hmda.publisher.validation.PublishingGuard.{ Period, Scope }
 
@@ -27,8 +25,9 @@ import scala.concurrent.Future
 import scala.util.{ Failure, Success }
 import java.time.Instant
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
+import hmda.publisher.util.ScheduleCoordinator.Command._
 // $COVERAGE-OFF$
-class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
+class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command], scheduler: ActorRef[ScheduleCoordinator.Command])
   extends HmdaActor
     with PublisherComponent2018
     with PublisherComponent2019
@@ -42,7 +41,7 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
 
   implicit val ec                      = context.system.dispatcher
   implicit val materializer            = Materializer(context)
-  private val tsPublicCronExpression = quartzScheduleConfig.getString("TsPublicSchedule.expression")
+  private val tsPublicCronExpression = dynamicQuartzScheduleConfig.getString("TsPublicSchedule")
   def tsRepository2018                 = new TsRepository[TransmittalSheetTable](dbConfig, transmittalSheetTable2018)
   def tsRepository2019                 = new TsRepository[TransmittalSheetTable](dbConfig, transmittalSheetTable2019)
   def tsRepository2020                 = createTransmittalSheetRepository2020(dbConfig, Year2020Period.Whole)
@@ -65,30 +64,15 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
       .withListBucketApiVersion(ListBucketVersion2)
 
   override def preStart(): Unit = {
-    val scheduler = QuartzSchedulerExtension(context.system)
     availableRepos.foreach {
-      case (year, _) => scheduler.createJobSchedule(s"TsPublicSchedule_$year", self, ScheduleWithYear(TsPublicSchedule, year), cronExpression = tsPublicCronExpression)
+      case (year, _) => scheduler ! Schedule(s"TsPublicSchedule_$year", self, ScheduleWithYear(TsPublicSchedule, year), tsPublicCronExpression)
     }
-//    QuartzSchedulerExtension(context.system)
-//      .schedule("TsPublicScheduler2018", self, TsPublicScheduler2018)
-//
-//    QuartzSchedulerExtension(context.system)
-//      .schedule("TsPublicScheduler2019", self, TsPublicScheduler2019)
-//    QuartzSchedulerExtension(context.system)
-//      .schedule("TsPublicScheduler2020", self, TsPublicScheduler2020)
-//    QuartzSchedulerExtension(context.system)
-//      .schedule("TsPublicScheduler2021", self, TsPublicScheduler2021)
   }
 
   override def postStop(): Unit = {
-    val scheduler = QuartzSchedulerExtension(context.system)
     availableRepos.foreach {
-      case (year, _) => scheduler.deleteJobSchedule(s"TsPublicSchedule_$year")
+      case (year, _) => scheduler ! Unschedule(s"TsPublicSchedule_$year")
     }
-//    QuartzSchedulerExtension(context.system).cancelJob("TsPublicScheduler2018")
-//    QuartzSchedulerExtension(context.system).cancelJob("TsPublicScheduler2019")
-//    QuartzSchedulerExtension(context.system).cancelJob("TsPublicScheduler2020")
-//    QuartzSchedulerExtension(context.system).cancelJob("TsPublicScheduler2021")
   }
   override def receive: Receive = {
 

@@ -10,15 +10,15 @@ import akka.stream.alpakka.s3._
 import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.actor.HmdaActor
 import hmda.publisher.helper._
 import hmda.publisher.query.component.{ ModifiedLarRepository, PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023 }
 import hmda.publisher.query.lar.ModifiedLarEntityImpl
-import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear, Schedules }
+import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear }
 import hmda.publisher.scheduler.schedules.Schedules.{ LarPublicSchedule, LarPublicScheduler2018, LarPublicScheduler2019, LarPublicScheduler2020, LarPublicScheduler2021 }
-import hmda.publisher.util.PublishingReporter
+import hmda.publisher.util.{ PublishingReporter, ScheduleCoordinator }
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
+import hmda.publisher.util.ScheduleCoordinator.Command._
 import hmda.publisher.validation.PublishingGuard
 import hmda.publisher.validation.PublishingGuard.{ Period, Scope }
 import hmda.query.DbConfiguration.dbConfig
@@ -28,7 +28,7 @@ import slick.basic.DatabasePublisher
 import scala.concurrent.Future
 import scala.util.{ Failure, Success }
 // $COVERAGE-OFF$
-class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
+class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command], scheduler: ActorRef[ScheduleCoordinator.Command])
   extends HmdaActor
     with PublisherComponent2018
     with PublisherComponent2019
@@ -62,29 +62,16 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
     .withS3RegionProvider(awsRegionProviderPublic)
     .withListBucketApiVersion(ListBucketVersion2)
 
-  private val cronExpression = quartzScheduleConfig.getString("LarPublicSchedule.expression")
+  private val cronExpression = dynamicQuartzScheduleConfig.getString("LarPublicSchedule")
 
   override def preStart(): Unit = {
-    val scheduler = QuartzSchedulerExtension(context.system)
     availableRepos.foreach {
-      case (year, _) =>
-        try {
-          scheduler.createJobSchedule(
-            s"LarPublicScheduler_$year", self, ScheduleWithYear(LarPublicSchedule, year), cronExpression = cronExpression)
-        } catch {
-          case e: Throwable => log.error(e, s"failed to schedule for $year")
-        }
+      case (year, _) => scheduler ! Schedule(s"LarPublicSchedule_$year", self, ScheduleWithYear(LarPublicSchedule, year), cronExpression)
     }
   }
   override def postStop(): Unit = {
-    val scheduler = QuartzSchedulerExtension(context.system)
     availableRepos.foreach {
-      case (year, _) =>
-        try {
-          scheduler.deleteJobSchedule(s"LarPublicScheduler_$year")
-        } catch {
-          case e: Throwable => log.warning(s"failed to shut down for $year")
-        }
+      case (year, _) => scheduler ! Unschedule(s"LarPublicSchedule_$year")
     }
 
 
@@ -162,6 +149,7 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
             for {
               _ <- larPublicStream(repo.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, LarPublicSchedule)
             } yield ()
+          case _ => log.error("No available publisher found for {} in year {}", schedule, year)
         }
       }
   }

@@ -9,16 +9,15 @@ import akka.stream.alpakka.s3._
 import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.{ Sink, Source }
 import akka.util.ByteString
-import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.publisher.helper.{ PrivateAWSConfigLoader, QuarterTimeBarrier, S3Utils, SnapshotCheck }
-import hmda.publisher.qa.{ QAFilePersistor, QAFileSpec, QARepository }
 import hmda.publisher.query.component.{ PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, TransmittalSheetTable, TsRepository, YearPeriod }
 import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear }
 import hmda.publisher.scheduler.schedules.Schedules.{ TsQuarterlySchedule, TsSchedule, TsScheduler2018, TsScheduler2019, TsScheduler2020, TsScheduler2021, TsScheduler2022, TsSchedulerQuarterly2020, TsSchedulerQuarterly2021, TsSchedulerQuarterly2022, TsSchedulerQuarterly2023 }
-import hmda.publisher.util.PublishingReporter
+import hmda.publisher.util.{ PublishingReporter, ScheduleCoordinator }
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
+import hmda.publisher.util.ScheduleCoordinator.Command._
 import hmda.publisher.validation.PublishingGuard
 import hmda.publisher.validation.PublishingGuard.{ Period, Scope }
 import hmda.query.DbConfiguration.dbConfig
@@ -28,7 +27,7 @@ import hmda.util.BankFilterUtils._
 import scala.concurrent.Future
 import scala.util.{ Failure, Success }
 // $COVERAGE-OFF$
-class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
+class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], scheduler: ActorRef[ScheduleCoordinator.Command])
   extends HmdaActor
     with PublisherComponent2018
     with PublisherComponent2019
@@ -42,8 +41,8 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
   implicit val materializer     = Materializer(context)
   private val fullDate          = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   private val fullDateQuarterly = DateTimeFormatter.ofPattern("yyyy-MM-dd_")
-  private val annualTsScheduleCronExpression = ""
-  private val quarterlyTsScheduleCronExpression = ""
+  private val annualTsScheduleCronExpression = dynamicQuartzScheduleConfig.getString("TsSchedule")
+  private val quarterlyTsScheduleCronExpression = dynamicQuartzScheduleConfig.getString("TsQuarterlySchedule")
 
 
   // Regulator File Scheduler Repos Annual
@@ -99,59 +98,21 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
     .withListBucketApiVersion(ListBucketVersion2)
 
   override def preStart(): Unit = {
-    val scheduler = QuartzSchedulerExtension(context.system)
     annualRepos.foreach {
-      case (year, _) => scheduler
-        .createJobSchedule(s"TsSchedule_$year", self, ScheduleWithYear(TsSchedule, year), cronExpression = annualTsScheduleCronExpression)
+      case (year, _) => scheduler ! Schedule(s"TsSchedule_$year", self, ScheduleWithYear(TsSchedule, year), annualTsScheduleCronExpression)
     }
     quarterRepos.foreach {
-      case (year, _) => scheduler
-        .createJobSchedule(s"TsQuarterlySchedule_$year", self, ScheduleWithYear(TsQuarterlySchedule, year), cronExpression = quarterlyTsScheduleCronExpression)
+      case (year, _) => scheduler ! Schedule(s"TsQuarterlySchedule_$year", self, ScheduleWithYear(TsQuarterlySchedule, year), quarterlyTsScheduleCronExpression)
     }
-//    QuartzSchedulerExtension(context.system)
-//      .schedule("TsScheduler2018", self, TsScheduler2018)
-//    QuartzSchedulerExtension(context.system)
-//      .schedule("TsScheduler2019", self, TsScheduler2019)
-//    QuartzSchedulerExtension(context.system)
-//      .schedule("TsScheduler2020", self, TsScheduler2020)
-//    QuartzSchedulerExtension(context.system)
-//      .schedule("TsScheduler2021", self, TsScheduler2021)
-//    QuartzSchedulerExtension(context.system)
-//      .schedule("TsScheduler2022", self, TsScheduler2022)
-//    QuartzSchedulerExtension(context.system)
-//      .schedule("TsSchedulerQuarterly2020", self, TsSchedulerQuarterly2020)
-//
-//    QuartzSchedulerExtension(context.system)
-//      .schedule("TsSchedulerQuarterly2021", self, TsSchedulerQuarterly2021)
-//
-//    QuartzSchedulerExtension(context.system)
-//      .schedule("TsSchedulerQuarterly2022", self, TsSchedulerQuarterly2022)
-//
-//    QuartzSchedulerExtension(context.system)
-//      .schedule("TsSchedulerQuarterly2023", self, TsSchedulerQuarterly2023)
   }
 
   override def postStop(): Unit = {
-    val scheduler = QuartzSchedulerExtension(context.system)
     annualRepos.foreach {
-      case (year, _) => scheduler.deleteJobSchedule(s"TsSchedule_$year")
+      case (year, _) => scheduler ! Unschedule(s"TsSchedule_$year")
     }
     quarterRepos.foreach {
-      case (year, _) => scheduler.deleteJobSchedule(s"TsQuarterlySchedule_$year")
+      case (year, _) => scheduler ! Unschedule(s"TsQuarterlySchedule_$year")
     }
-//    QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2018")
-//    QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2019")
-//    QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2020")
-//    QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2021")
-//    QuartzSchedulerExtension(context.system).cancelJob("TsScheduler2022")
-//
-//
-//    QuartzSchedulerExtension(context.system).cancelJob("TsSchedulerQuarterly2020")
-//    QuartzSchedulerExtension(context.system).cancelJob("TsSchedulerQuarterly2021")
-//    QuartzSchedulerExtension(context.system).cancelJob("TsSchedulerQuarterly2022")
-//    QuartzSchedulerExtension(context.system).cancelJob("TsSchedulerQuarterly2023")
-
-
   }
 
   private def uploadFileToS3(

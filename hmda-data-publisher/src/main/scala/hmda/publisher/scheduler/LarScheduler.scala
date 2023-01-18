@@ -8,7 +8,6 @@ import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.alpakka.s3.{ MemoryBufferType, MetaHeaders, S3Attributes, S3Settings }
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.actor.HmdaActor
 import hmda.census.records.CensusRecords
 import hmda.model.census.Census
@@ -18,8 +17,9 @@ import hmda.publisher.query.component.{ PublisherComponent, PublisherComponent20
 import hmda.publisher.query.lar.{ LarEntityImpl, LarEntityImpl2019, LarEntityImpl2020, LarEntityImpl2021, LarEntityImpl2022 }
 import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear }
 import hmda.publisher.scheduler.schedules.Schedules._
-import hmda.publisher.util.PublishingReporter
+import hmda.publisher.util.{ PublishingReporter, ScheduleCoordinator }
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
+import hmda.publisher.util.ScheduleCoordinator.Command._
 import hmda.publisher.validation.PublishingGuard
 import hmda.publisher.validation.PublishingGuard.{ Period, Scope }
 import hmda.query.DbConfiguration.dbConfig
@@ -30,7 +30,7 @@ import java.time.{ Clock, Instant, LocalDateTime }
 import scala.concurrent.Future
 import scala.util.{ Failure, Success }
 // $COVERAGE-OFF$
-class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
+class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], scheduler: ActorRef[ScheduleCoordinator.Command])
   extends HmdaActor
     with PublisherComponent2018
     with PublisherComponent2019
@@ -45,9 +45,9 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
   implicit val materializer = Materializer(context)
   private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   private val fullDateQuarterly = DateTimeFormatter.ofPattern("yyyy-MM-dd_")
-  private val larCronExpression = quartzScheduleConfig.getString("LarSchedule.expression")
-  private val larQuarterlyCronExpression = quartzScheduleConfig.getString("LarQuarterlySchedule.expression")
-  private val loanLimitCronExpression = quartzScheduleConfig.getString("LarLoanLimitSchedule.expression")
+  private val larCronExpression = dynamicQuartzScheduleConfig.getString("LarSchedule")
+  private val larQuarterlyCronExpression = dynamicQuartzScheduleConfig.getString("LarQuarterlySchedule")
+  private val loanLimitCronExpression = dynamicQuartzScheduleConfig.getString("LarLoanLimitSchedule")
 
   // Regulator File Scheduler Repos Annual
   def larRepository2018 = new LarRepository2018(dbConfig)
@@ -118,41 +118,26 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
     .withListBucketApiVersion(ListBucketVersion2)
 
   override def preStart() = {
-    val scheduler = QuartzSchedulerExtension(context.system)
     annualRepos.foreach {
-      case (year, _) => try {
-        scheduler.createJobSchedule(s"LarSchedule_$year", self, ScheduleWithYear(LarSchedule, year), cronExpression = larCronExpression)
-        scheduler.createJobSchedule(s"LoanLimitSchedule_$year", self, ScheduleWithYear(LarLoanLimitSchedule, year), cronExpression = loanLimitCronExpression)
-      } catch {
-        case e: Throwable => log.error(e, s"failed to schedule lar and loan limit for year $year")
-      }
+      case (year, _) =>
+        scheduler ! Schedule(s"LarSchedule_$year", self, ScheduleWithYear(LarSchedule, year), larCronExpression)
+        scheduler ! Schedule(s"LoanLimitSchedule_$year", self, ScheduleWithYear(LarLoanLimitSchedule, year), loanLimitCronExpression)
     }
 
     quarterRepos.foreach {
-      case (year, (_, _, _)) => try {
-        scheduler.createJobSchedule(s"LarQuarterlySchedule_$year", self, ScheduleWithYear(LarQuarterlySchedule, year), cronExpression = larQuarterlyCronExpression)
-      } catch {
-        case e: Throwable => log.error(e, s"failed to schedule quarterly lar for year $year")
-      }
+      case (year, (_, _, _)) =>
+        scheduler ! Schedule(s"LarQuarterlySchedule_$year", self, ScheduleWithYear(LarQuarterlySchedule, year), larQuarterlyCronExpression)
     }
   }
 
   override def postStop() = {
-    val scheduler = QuartzSchedulerExtension(context.system)
     annualRepos.foreach {
-      case (year, _) => try {
-        scheduler.deleteJobSchedule(s"LarSchedule_$year")
-        scheduler.deleteJobSchedule(s"LoanLimitSchedule_$year")
-      } catch {
-        case _: Throwable => log.warning(s"failed to shut down lar and loan limit schedules for year $year")
-      }
+      case (year, _) =>
+        scheduler ! Unschedule(s"LarSchedule_$year")
+        scheduler ! Unschedule(s"LoanLimitSchedule_$year")
     }
     quarterRepos.foreach {
-      case (year, (_, _, _)) => try {
-        scheduler.deleteJobSchedule(s"LarQuarterlySchedule_$year")
-      } catch {
-        case _: Throwable => log.warning(s"failed to shut down quarterly lar schedule for year $year")
-      }
+      case (year, (_, _, _)) => scheduler ! Unschedule(s"LarQuarterlySchedule_$year")
     }
 
   }
