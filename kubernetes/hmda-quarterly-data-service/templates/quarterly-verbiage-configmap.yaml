@@ -4,3 +4,25 @@ metadata:
   name: {{ include "hmda-quarterly-data-service.fullname" . }}-verbiage-configmap
 data:
   GRAPH_SUMMARY: The following graphs represent data for the 55 financial institutions reporting HMDA quarterly data in the current year. The graphs display current quarters and three years of historical data.
+  MEDIAN_INTEREST_RATES_SUBTITLE: After being generally flat in 2021, median interest rates increased for all loan types in 2022.
+  MEDIAN_INTEREST_RATES_CC_RACE_SUBTITLE: After being generally flat in 2021, median interest rates increased for all racial and ethnic groups in 2022.
+  MEDIAN_INTEREST_RATES_FHA_RACE_TITLE: For FHA loans, how have median interest rates differed by race/ethnicity?
+  MEDIAN_INTEREST_RATES_FHA_RACE_SUBTITLE: After being generally flat in 2021, median interest rates increased for all racial and ethnic groups in 2022.
+  APPLICATIONS_VOLUME_SUBTITLE: The volume of conventional conforming applications declined significantly since the start of 2021. All other loan types declined slightly or remained relatively consistent.
+  ALL_APPS_VOLUME_SUBTITLE: Quarterly filers account for over half of the application volume during 2021. Annual data for 2022 has not been collected yet.
+  LOANS_VOLUME_SUBTITLE: Conventional conforming loans experienced a significant decrease since 2021. VA and FHA loans experienced a steadier decline.
+  DENIAL_RATES_SUBTITLE: HELOCs had a significantly higher denial rate percentage compared to the other loan types.
+  DENIAL_RATES_CC_BY_RACE_SUBTITLE: Blacks and Hispanics had higher denial rates for every quarter. In 2022, denial rates for Blacks and Hispanics increased while rates for Whites and Asians fell.
+  DENIAL_RATES_FHA_BY_RACE_SUBTITLE: Blacks had higher denial rates for each quarter. Since 2021, Hispanics showed the lowest denial rates.
+  LTV_CC_BY_RACE_SUBTITLE: In 2022, all racial and ethnic groups experienced an increase in median CLTV after several quarters of mostly declining CLTVs.
+  LTV_FHA_BY_RACE_SUBTITLE: Blacks and Hispanics had similar median CLTVs for FHA loans. Whites experienced a significant decline in median CLTV since Q2 of 2021.
+  MEDIAN_CREDIT_SCORES_SUBTITLE: Conventional Non-Conforming loans had the highest median credit scores while FHA loans had the lowest.
+  MEDIAN_CREDIT_SCORES_CC_RACE_SUBTITLE: After falling each quarter since 2021, median credit scores were unchanged or slightly increasing for all racial and ethnic groups in Q3 of 2022.
+  MEDIAN_CREDIT_SCORES_FHA_RACE_SUBTITLE: After falling during 2021 and Q1 2022, median credit scores were generally unchanged or increasing for all racial and ethnic groups during Q2 and Q3 of 2022.
+  DTI_TITLE: How have median DTIs changed?
+  DTI_SUBTITLE: Median DTIs have generally risen for all loan types since 2021. FHA loans have the highest median DTI.
+  DTI_CC_RACE_SUBTITLE: For conventional conforming loans, Hispanics had the highest median DTI while Whites had the lowest.
+  DTI_FHA_RACE_SUBTITLE: For FHA loans, whites had the lowest median DTI. All racial and ethnic groups experienced an increase in DTI since late 2021.
+  TLC_SUBTITLE: Since Q3 2021, all median total loan costs increased, most notably VA & FHA loans.
+  TLC_CC_RACE_SUBTITLE: Since 2021 Q3, median total loan costs have increased for each racial and ethnic group.
+  TLC_FHA_RACE_SUBTITLE: Median total loan costs for all racial and ethnic groups increased from the start of 2021.
