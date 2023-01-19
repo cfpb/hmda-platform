@@ -306,7 +306,7 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], s
     result match {
       case Success(result) =>
         publishingReporter ! FilePublishingCompleted(
-          PanelScheduler2018,
+          schedule,
           fullFilePath,
           None,
           Instant.now,
@@ -315,7 +315,7 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], s
         log.info("Pushed to S3: " + s"$bucketPrivate/$fullFilePath" + ".")
       case Failure(t) =>
         publishingReporter ! FilePublishingCompleted(
-          PanelScheduler2018,
+          schedule,
           fullFilePath,
           None,
           Instant.now,
