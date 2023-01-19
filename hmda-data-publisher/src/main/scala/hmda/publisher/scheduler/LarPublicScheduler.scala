@@ -144,12 +144,12 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
         val fullFilePath = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
         val bucket = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
 
-        availableRepos(year) match {
-          case repo =>
+        availableRepos.get(year) match {
+          case Some(repo) =>
             for {
               _ <- larPublicStream(repo.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, LarPublicSchedule)
             } yield ()
-          case _ => log.error("No available publisher found for {} in year {}", schedule, year)
+          case None => log.error("No available publisher found for {} in year {}", schedule, year)
         }
       }
   }

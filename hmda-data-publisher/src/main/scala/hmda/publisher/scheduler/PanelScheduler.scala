@@ -220,8 +220,8 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], s
    }
 
   private def panelSync(year: Int): Unit = {
-    availableRepos(year) match {
-      case repo =>
+    availableRepos.get(year) match {
+      case Some(repo) =>
         val allResults = repo.findActiveFilers(getFilterList())
         val now = LocalDateTime.now().minusDays(1)
         val formattedDate = fullDate.format(now)
@@ -241,7 +241,7 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], s
         val results: Future[MultipartUploadResult] = S3Utils.uploadWithRetry(source, s3Sink)
 
         results.onComplete(reportPublishingComplete(_, PanelSchedule, fullFilePath))
-      case _ => log.error("No available panel publisher for year {}", year)
+      case None => log.error("No available panel publisher for year {}", year)
     }
   }
 

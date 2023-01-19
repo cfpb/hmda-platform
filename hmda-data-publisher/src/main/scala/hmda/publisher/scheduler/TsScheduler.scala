@@ -156,16 +156,16 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
 
     case ScheduleWithYear(schedule, year) if schedule in (TsSchedule, TsQuarterlySchedule) =>
       schedule match {
-        case TsSchedule => annualRepos(year) match {
-          case repo => publishAnnualTsData(TsSchedule, year, repo)
-          case _ => log.error("No available ts publisher for {}", year)
+        case TsSchedule => annualRepos.get(year) match {
+          case Some(repo) => publishAnnualTsData(TsSchedule, year, repo)
+          case None => log.error("No available ts publisher for {}", year)
         }
-        case TsQuarterlySchedule => quarterRepos(year) match {
-          case (q1Repo, q2Repo, q3Repo) =>
+        case TsQuarterlySchedule => quarterRepos.get(year) match {
+          case Some((q1Repo, q2Repo, q3Repo)) =>
             publishQuarterTsData(TsQuarterlySchedule, year, YearPeriod.Q1, s"quarter_1_${year}_ts.txt", q1Repo)
             publishQuarterTsData(TsQuarterlySchedule, year, YearPeriod.Q2, s"quarter_2_${year}_ts.txt", q2Repo)
             publishQuarterTsData(TsQuarterlySchedule, year, YearPeriod.Q3, s"quarter_3_${year}_ts.txt", q3Repo)
-          case _ => log.error("No available ts quarterly publisher for {}", year)
+          case None => log.error("No available ts quarterly publisher for {}", year)
         }
       }
   }

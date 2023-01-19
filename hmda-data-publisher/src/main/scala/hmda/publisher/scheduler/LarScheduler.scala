@@ -428,8 +428,8 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
             val formattedDate = fullDate.format(now)
             val fileName = s"$formattedDate${year}_lar.txt"
 
-            annualRepos(year) match {
-              case repo =>
+            annualRepos.get(year) match {
+              case Some(repo) =>
                 val allResultsSource: Source[String, NotUsed] =
                   Source
                     .fromPublisher(repo.getAllLARs(getFilterList()))
@@ -440,13 +440,13 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
                 for {
                   _ <- publishPSVtoS3(fileName, allResultsSource, countF, LarSchedule)
                 } yield ()
-              case _ => log.error("No available publisher found for {} in year {}", schedule, year)
+              case None => log.error("No available publisher found for {} in year {}", LarSchedule, year)
             }
           }
 
         case LarQuarterlySchedule =>
-          quarterRepos(year) match {
-            case (q1Repo, q2Repo, q3Repo) =>
+          quarterRepos.get(year) match {
+            case Some((q1Repo, q2Repo, q3Repo)) =>
               val now = LocalDateTime.now().minusDays(1)
               val formattedDate = fullDateQuarterly.format(now)
               Seq((YearPeriod.Q1, 1, q1Repo), (YearPeriod.Q2, 2, q2Repo), (YearPeriod.Q3, 3, q3Repo)).foreach {
@@ -467,7 +467,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
                     }
                   }
               }
-            case _ => log.error("No available quarterly publisher found for {} in year {}", LarQuarterlySchedule, year)
+            case None => log.error("No available quarterly publisher found for {} in year {}", LarQuarterlySchedule, year)
           }
 
         case LarLoanLimitSchedule =>
@@ -476,8 +476,8 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
             val formattedDate = fullDate.format(now)
             val fileName = s"${year}F_AGY_LAR_withFlag_$formattedDate${year}_lar.txt"
 
-            annualRepos(year) match {
-              case repo =>
+            annualRepos.get(year) match {
+              case Some(repo) =>
                 val allResultsSource: Source[String, NotUsed] =
                   Source
                     .fromPublisher(repo.getAllLARs(getFilterList()))
@@ -489,7 +489,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
                 for {
                   _ <- publishPSVtoS3(fileName, allResultsSource, countF, LarLoanLimitSchedule)
                 } yield ()
-              case _ => log.error("No available publisher found for {} in year {}", LarLoanLimitSchedule, year)
+              case None => log.error("No available publisher found for {} in year {}", LarLoanLimitSchedule, year)
             }
           }
       }

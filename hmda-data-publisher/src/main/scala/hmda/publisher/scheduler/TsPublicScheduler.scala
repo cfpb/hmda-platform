@@ -143,8 +143,8 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
     key: String,
     fileName: String,
     schedule: Schedule
-  ): Future[MultipartUploadResult] = availableRepos(year) match {
-    case repo =>
+  ): Future[MultipartUploadResult] = availableRepos.get(year) match {
+    case Some(repo) =>
       val s3SinkPSV = S3.multipartUpload(bucket, key).withAttributes(S3Attributes.settings(s3Settings))
       val allResults: Future[Seq[TransmittalSheetEntity]] = repo.getAllSheets(getFilterList())
       //SYNC PSV
@@ -174,7 +174,7 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
           log.info("An error has occurred with: " + key + "; Getting Public TS Data in Future: " + t.getMessage)
       }
       resultsPSV
-    case _ => throw new IllegalArgumentException(s"Unknown year selector value:  [$year]")
+    case None => throw new IllegalArgumentException(s"Unknown year selector value:  [$year]")
   }
 
   private def tsPublicStream(
