@@ -12,7 +12,7 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import hmda.actor.HmdaActor
 import hmda.publisher.helper._
-import hmda.publisher.query.component.{ ModifiedLarRepository, PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023 }
+import hmda.publisher.query.component.{ ModifiedLarRepository, PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, YearPeriod }
 import hmda.publisher.query.lar.ModifiedLarEntityImpl
 import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear }
 import hmda.publisher.scheduler.schedules.Schedules.{ LarPublicSchedule, LarPublicScheduler2018, LarPublicScheduler2019, LarPublicScheduler2020, LarPublicScheduler2021 }
@@ -137,7 +137,7 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
       }
 
     case ScheduleWithYear(schedule, year) if schedule == LarPublicSchedule =>
-      publishingGuard.runIfDataIsValid(year, Scope.Public) {
+      publishingGuard.runIfDataIsValid(year, YearPeriod.Whole, Scope.Public) {
         val fileName = s"${year}_lar.txt"
         val zipDirectoryName = s"${year}_lar.zip"
         val s3Path = s"$environmentPublic/dynamic-data/$year/"

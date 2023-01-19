@@ -125,7 +125,7 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
       }
 
     case ScheduleWithYear(schedule, year) if schedule == TsPublicSchedule =>
-      publishingGuard.runIfDataIsValid(year, Scope.Public) {
+      publishingGuard.runIfDataIsValid(year, YearPeriod.Whole, Scope.Public) {
         val fileName = s"${year}_ts.txt"
         val zipDirectoryName = s"${year}_ts.zip"
         val s3Path = s"$environmentPublic/dynamic-data/$year/"

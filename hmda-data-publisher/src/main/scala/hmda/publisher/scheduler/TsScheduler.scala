@@ -190,7 +190,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
     schedule: Schedule,
     year: Int,
     tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] =
-    publishTsData(schedule, year, fullDate.format(LocalDateTime.now().minusDays(1)) + s"${year}_ts.txt", tsRepo)
+    publishTsData(schedule, year, YearPeriod.Whole, fullDate.format(LocalDateTime.now().minusDays(1)) + s"${year}_ts.txt", tsRepo)
 
   private def publishQuarterTsData[TsTable <: Table[TransmittalSheetEntity]](
     schedule: Schedule,
@@ -199,7 +199,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
     fileName: String,
     tsRepo: TsRepository[TransmittalSheetTable]): Option[Future[Unit]] =
     timeBarrier.runIfStillRelevant(quarter) {
-      publishTsData(schedule, year, fullDateQuarterly.format(LocalDateTime.now().minusDays(1)) + fileName, tsRepo)
+      publishTsData(schedule, year, quarter, fullDateQuarterly.format(LocalDateTime.now().minusDays(1)) + fileName, tsRepo)
     }
 
   private def publishTsData[TsTable <: Table[TransmittalSheetEntity]](
@@ -230,10 +230,11 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
 
   private def publishTsData[TsTable <: Table[TransmittalSheetEntity]](
     schedule: Schedule,
-    period: Int,
+    year: Int,
+    period: YearPeriod,
     fullFileName: String,
     tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] =
-    publishingGuard.runIfDataIsValid(period, Scope.Private) {
+    publishingGuard.runIfDataIsValid(year, period, Scope.Private) {
       val s3Path = s"$environmentPrivate/ts/"
       val fullFilePath = SnapshotCheck.pathSelector(s3Path, fullFileName)
 

@@ -423,7 +423,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
     case ScheduleWithYear(schedule, year) if schedule in (LarSchedule, LarQuarterlySchedule, LarLoanLimitSchedule) =>
       schedule match {
         case LarSchedule =>
-          publishingGuard.runIfDataIsValid(year, Scope.Private) {
+          publishingGuard.runIfDataIsValid(year, YearPeriod.Whole, Scope.Private) {
             val now = LocalDateTime.now().minusDays(1)
             val formattedDate = fullDate.format(now)
             val fileName = s"$formattedDate${year}_lar.txt"
@@ -452,7 +452,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
               Seq((YearPeriod.Q1, 1, q1Repo), (YearPeriod.Q2, 2, q2Repo), (YearPeriod.Q3, 3, q3Repo)).foreach {
                 case (quarterPeriod, quarterNumber, repo) =>
                   timeBarrier.runIfStillRelevant(quarterPeriod) {
-                    publishingGuard.runIfDataIsValid(year, Scope.Private) {
+                    publishingGuard.runIfDataIsValid(year, quarterPeriod, Scope.Private) {
                       val fileName = s"${formattedDate}quarter_${quarterNumber}_${year}_lar.txt"
 
                       val allResultsSource: Source[String, NotUsed] = Source
@@ -471,7 +471,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
           }
 
         case LarLoanLimitSchedule =>
-          publishingGuard.runIfDataIsValid(year, Scope.Private) {
+          publishingGuard.runIfDataIsValid(year, YearPeriod.Whole, Scope.Private) {
             val now = LocalDateTime.now().minusDays(1)
             val formattedDate = fullDate.format(now)
             val fileName = s"${year}F_AGY_LAR_withFlag_$formattedDate${year}_lar.txt"
