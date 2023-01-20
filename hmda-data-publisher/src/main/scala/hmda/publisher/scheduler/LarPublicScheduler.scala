@@ -11,6 +11,7 @@ import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import hmda.actor.HmdaActor
+import hmda.publisher.helper.CronConfigLoader.{larPublicCron, larPublicYears }
 import hmda.publisher.helper._
 import hmda.publisher.query.component.{ ModifiedLarRepository, PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, YearPeriod }
 import hmda.publisher.query.lar.ModifiedLarEntityImpl
@@ -62,19 +63,11 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
     .withS3RegionProvider(awsRegionProviderPublic)
     .withListBucketApiVersion(ListBucketVersion2)
 
-  private val cronExpression = dynamicQuartzScheduleConfig.getString("LarPublicSchedule")
-
   override def preStart(): Unit = {
-    availableRepos.foreach {
-      case (year, _) => scheduler ! Schedule(s"LarPublicSchedule_$year", self, ScheduleWithYear(LarPublicSchedule, year), cronExpression)
-    }
+    larPublicYears.foreach(year => scheduler ! Schedule(s"LarPublicSchedule_$year", self, ScheduleWithYear(LarPublicSchedule, year), larPublicCron))
   }
   override def postStop(): Unit = {
-    availableRepos.foreach {
-      case (year, _) => scheduler ! Unschedule(s"LarPublicSchedule_$year")
-    }
-
-
+    larPublicYears.foreach(year => scheduler ! Unschedule(s"LarPublicSchedule_$year"))
   }
   override def receive: Receive = {
     case LarPublicScheduler2018 =>

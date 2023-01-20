@@ -16,6 +16,7 @@ import hmda.query.ts._
 import hmda.util.BankFilterUtils._
 import akka.stream.alpakka.file.scaladsl.Archive
 import akka.stream.alpakka.file.ArchiveMetadata
+import hmda.publisher.helper.CronConfigLoader.{ tsPublicCron, tsPublicYears }
 import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear }
 import hmda.publisher.util.{ PublishingReporter, ScheduleCoordinator }
 import hmda.publisher.validation.PublishingGuard
@@ -41,7 +42,6 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
 
   implicit val ec                      = context.system.dispatcher
   implicit val materializer            = Materializer(context)
-  private val tsPublicCronExpression = dynamicQuartzScheduleConfig.getString("TsPublicSchedule")
   def tsRepository2018                 = new TsRepository[TransmittalSheetTable](dbConfig, transmittalSheetTable2018)
   def tsRepository2019                 = new TsRepository[TransmittalSheetTable](dbConfig, transmittalSheetTable2019)
   def tsRepository2020                 = createTransmittalSheetRepository2020(dbConfig, Year2020Period.Whole)
@@ -64,15 +64,11 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
       .withListBucketApiVersion(ListBucketVersion2)
 
   override def preStart(): Unit = {
-    availableRepos.foreach {
-      case (year, _) => scheduler ! Schedule(s"TsPublicSchedule_$year", self, ScheduleWithYear(TsPublicSchedule, year), tsPublicCronExpression)
-    }
+    tsPublicYears.foreach(year => scheduler ! Schedule(s"TsPublicSchedule_$year", self, ScheduleWithYear(TsPublicSchedule, year), tsPublicCron))
   }
 
   override def postStop(): Unit = {
-    availableRepos.foreach {
-      case (year, _) => scheduler ! Unschedule(s"TsPublicSchedule_$year")
-    }
+    tsPublicYears.foreach(year => scheduler ! Unschedule(s"TsPublicSchedule_$year"))
   }
   override def receive: Receive = {
 

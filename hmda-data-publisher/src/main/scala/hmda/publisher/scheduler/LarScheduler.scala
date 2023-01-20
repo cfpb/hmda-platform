@@ -12,6 +12,7 @@ import hmda.actor.HmdaActor
 import hmda.census.records.CensusRecords
 import hmda.model.census.Census
 import hmda.model.publication.Msa
+import hmda.publisher.helper.CronConfigLoader.{ larCron, larQuarterlyCron, larQuarterlyYears, larYears, loanLimitCron, loanLimitYears }
 import hmda.publisher.helper._
 import hmda.publisher.query.component.{ PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, YearPeriod }
 import hmda.publisher.query.lar.{ LarEntityImpl, LarEntityImpl2019, LarEntityImpl2020, LarEntityImpl2021, LarEntityImpl2022 }
@@ -45,9 +46,6 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
   implicit val materializer = Materializer(context)
   private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   private val fullDateQuarterly = DateTimeFormatter.ofPattern("yyyy-MM-dd_")
-  private val larCronExpression = dynamicQuartzScheduleConfig.getString("LarSchedule")
-  private val larQuarterlyCronExpression = dynamicQuartzScheduleConfig.getString("LarQuarterlySchedule")
-  private val loanLimitCronExpression = dynamicQuartzScheduleConfig.getString("LarLoanLimitSchedule")
 
   // Regulator File Scheduler Repos Annual
   def larRepository2018 = new LarRepository2018(dbConfig)
@@ -118,28 +116,20 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
     .withListBucketApiVersion(ListBucketVersion2)
 
   override def preStart() = {
-    annualRepos.foreach {
-      case (year, _) =>
-        scheduler ! Schedule(s"LarSchedule_$year", self, ScheduleWithYear(LarSchedule, year), larCronExpression)
-        scheduler ! Schedule(s"LoanLimitSchedule_$year", self, ScheduleWithYear(LarLoanLimitSchedule, year), loanLimitCronExpression)
-    }
+    larYears.foreach(year =>
+      scheduler ! Schedule(s"LarSchedule_$year", self, ScheduleWithYear(LarSchedule, year), larCron))
 
-    quarterRepos.foreach {
-      case (year, (_, _, _)) =>
-        scheduler ! Schedule(s"LarQuarterlySchedule_$year", self, ScheduleWithYear(LarQuarterlySchedule, year), larQuarterlyCronExpression)
-    }
+    loanLimitYears.foreach(year =>
+      scheduler ! Schedule(s"LoanLimitSchedule_$year", self, ScheduleWithYear(LarLoanLimitSchedule, year), loanLimitCron))
+
+    larQuarterlyYears.foreach(year =>
+      scheduler ! Schedule(s"LarQuarterlySchedule_$year", self, ScheduleWithYear(LarQuarterlySchedule, year), larQuarterlyCron))
   }
 
   override def postStop() = {
-    annualRepos.foreach {
-      case (year, _) =>
-        scheduler ! Unschedule(s"LarSchedule_$year")
-        scheduler ! Unschedule(s"LoanLimitSchedule_$year")
-    }
-    quarterRepos.foreach {
-      case (year, (_, _, _)) => scheduler ! Unschedule(s"LarQuarterlySchedule_$year")
-    }
-
+    larYears.foreach(year => scheduler ! Unschedule(s"LarSchedule_$year"))
+    loanLimitYears.foreach(year => scheduler ! Unschedule(s"LoanLimitSchedule_$year"))
+    larQuarterlyYears.foreach(year => scheduler ! Unschedule(s"LarQuarterlySchedule_$year"))
   }
 
   override def receive: Receive = {
@@ -451,7 +441,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
               val formattedDate = fullDateQuarterly.format(now)
               Seq((YearPeriod.Q1, 1, q1Repo), (YearPeriod.Q2, 2, q2Repo), (YearPeriod.Q3, 3, q3Repo)).foreach {
                 case (quarterPeriod, quarterNumber, repo) =>
-                  timeBarrier.runIfStillRelevant(quarterPeriod) {
+                  timeBarrier.runIfStillRelevant(year, quarterPeriod) {
                     publishingGuard.runIfDataIsValid(year, quarterPeriod, Scope.Private) {
                       val fileName = s"${formattedDate}quarter_${quarterNumber}_${year}_lar.txt"
 

@@ -20,8 +20,23 @@ class QuarterTimeBarrier(clock: Clock) {
     }
   }
 
-  def runIfStillRelevant[T](period: YearPeriod)(thunk: => T): Option[T] = {
-    Some(thunk)
+  implicit private class ExtendedLocalDate(date: LocalDate) {
+    private def isOnOrBefore(compareDate: LocalDate): Boolean = date.isBefore(compareDate) || date.isEqual(compareDate)
+    private def isOnOrAfter(compareDate: LocalDate): Boolean = date.isAfter(compareDate) || date.isEqual(compareDate)
+    def isBetween(start: LocalDate, end: LocalDate): Boolean = date.isOnOrAfter(start) && date.isOnOrBefore(end)
+    def and(): Boolean = false
+  }
+
+  def runIfStillRelevant[T](year: Int, period: YearPeriod)(thunk: => T): Option[T] = {
+    val now = LocalDate.now(clock)
+    if (now.isBetween(
+      QuarterTimeBarrier.getStartDateForQuarter(year, period),
+      QuarterTimeBarrier.getEndDateForQuarter(year, period).plusDays(8))
+    ) {
+      Some(thunk)
+    } else {
+      None
+    }
   }
 
 
@@ -56,6 +71,26 @@ object QuarterTimeBarrier {
       case Period.y2022Q2 => LocalDate.ofYearDay(2022,rulesConfig.qf.q2.startDayOfYear)
       case Period.y2022Q3 => LocalDate.ofYearDay(2022,rulesConfig.qf.q3.startDayOfYear)
     }
+  }
+
+  def getStartDateForQuarter(year: Int, quarter: YearPeriod): LocalDate = {
+    val dayOfYear = quarter match {
+      case YearPeriod.Q1 => rulesConfig.qf.q1.startDayOfYear
+      case YearPeriod.Q2 => rulesConfig.qf.q2.startDayOfYear
+      case YearPeriod.Q3 => rulesConfig.qf.q3.startDayOfYear
+      case _ => throw new IllegalArgumentException(s"Invalid quarter $quarter")
+    }
+    LocalDate.ofYearDay(year, dayOfYear)
+  }
+
+  def getEndDateForQuarter(year: Int, quarter: YearPeriod): LocalDate = {
+    val dayOfYear = quarter match {
+      case YearPeriod.Q1 => rulesConfig.qf.q1.endDayOfYear
+      case YearPeriod.Q2 => rulesConfig.qf.q2.endDayOfYear
+      case YearPeriod.Q3 => rulesConfig.qf.q3.endDayOfYear
+      case _ => throw new IllegalArgumentException(s"Invalid quarter $quarter")
+    }
+    LocalDate.ofYearDay(year, dayOfYear)
   }
 
 }

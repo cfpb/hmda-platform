@@ -11,6 +11,7 @@ import akka.stream.scaladsl.{ Sink, Source }
 import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
+import hmda.publisher.helper.CronConfigLoader.{ tsCron, tsQuarterlyCron, tsQuarterlyYears, tsYears }
 import hmda.publisher.helper.{ PrivateAWSConfigLoader, QuarterTimeBarrier, S3Utils, SnapshotCheck }
 import hmda.publisher.query.component.{ PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, TransmittalSheetTable, TsRepository, YearPeriod }
 import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear }
@@ -41,8 +42,6 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
   implicit val materializer     = Materializer(context)
   private val fullDate          = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   private val fullDateQuarterly = DateTimeFormatter.ofPattern("yyyy-MM-dd_")
-  private val annualTsScheduleCronExpression = dynamicQuartzScheduleConfig.getString("TsSchedule")
-  private val quarterlyTsScheduleCronExpression = dynamicQuartzScheduleConfig.getString("TsQuarterlySchedule")
 
 
   // Regulator File Scheduler Repos Annual
@@ -98,21 +97,13 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
     .withListBucketApiVersion(ListBucketVersion2)
 
   override def preStart(): Unit = {
-    annualRepos.foreach {
-      case (year, _) => scheduler ! Schedule(s"TsSchedule_$year", self, ScheduleWithYear(TsSchedule, year), annualTsScheduleCronExpression)
-    }
-    quarterRepos.foreach {
-      case (year, _) => scheduler ! Schedule(s"TsQuarterlySchedule_$year", self, ScheduleWithYear(TsQuarterlySchedule, year), quarterlyTsScheduleCronExpression)
-    }
+    tsYears.foreach(year => scheduler ! Schedule(s"TsSchedule_$year", self, ScheduleWithYear(TsSchedule, year), tsCron))
+    tsQuarterlyYears.foreach(year => scheduler ! Schedule(s"TsQuarterlySchedule_$year", self, ScheduleWithYear(TsQuarterlySchedule, year), tsQuarterlyCron))
   }
 
   override def postStop(): Unit = {
-    annualRepos.foreach {
-      case (year, _) => scheduler ! Unschedule(s"TsSchedule_$year")
-    }
-    quarterRepos.foreach {
-      case (year, _) => scheduler ! Unschedule(s"TsQuarterlySchedule_$year")
-    }
+    tsYears.foreach(year => scheduler ! Unschedule(s"TsSchedule_$year"))
+    tsQuarterlyYears.foreach(year => scheduler ! Unschedule(s"TsQuarterlySchedule_$year"))
   }
 
   private def uploadFileToS3(
@@ -198,7 +189,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
     quarter: YearPeriod,
     fileName: String,
     tsRepo: TsRepository[TransmittalSheetTable]): Option[Future[Unit]] =
-    timeBarrier.runIfStillRelevant(quarter) {
+    timeBarrier.runIfStillRelevant(year, quarter) {
       publishTsData(schedule, year, quarter, fullDateQuarterly.format(LocalDateTime.now().minusDays(1)) + fileName, tsRepo)
     }
 

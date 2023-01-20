@@ -1,11 +1,10 @@
 package hmda.publisher.helper
 
-import com.typesafe.config.{ Config, ConfigFactory }
+import com.typesafe.config.ConfigFactory
 
 trait PGTableNameLoader {
 
   val pgTableConfig = ConfigFactory.load("application.conf").getConfig("pg-tables")
-  val dynamicQuartzScheduleConfig: Config = ConfigFactory.load().getConfig("akka.quartz.dynamic")
 
   //2018 table names
   val lar2018TableName: String   = pgTableConfig.getString("lar2018TableName")
