@@ -21,10 +21,9 @@ class QuarterTimeBarrier(clock: Clock) {
   }
 
   implicit private class ExtendedLocalDate(date: LocalDate) {
-    private def isOnOrBefore(compareDate: LocalDate): Boolean = date.isBefore(compareDate) || date.isEqual(compareDate)
-    private def isOnOrAfter(compareDate: LocalDate): Boolean = date.isAfter(compareDate) || date.isEqual(compareDate)
+    def isOnOrBefore(compareDate: LocalDate): Boolean = date.isBefore(compareDate) || date.isEqual(compareDate)
+    def isOnOrAfter(compareDate: LocalDate): Boolean = date.isAfter(compareDate) || date.isEqual(compareDate)
     def isBetween(start: LocalDate, end: LocalDate): Boolean = date.isOnOrAfter(start) && date.isOnOrBefore(end)
-    def and(): Boolean = false
   }
 
   def runIfStillRelevant[T](year: Int, period: YearPeriod)(thunk: => T): Option[T] = {
