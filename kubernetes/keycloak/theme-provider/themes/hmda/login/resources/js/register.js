@@ -103,10 +103,19 @@
 
   }
 
+  // ProdBeta will use Prod data, 
+  // other systems will use data from their host.
+  function deriveInstitutionsApiHost() {
+    if (window.location.host == 'ffiec.beta.cfpb.gov')
+      return 'https://ffiec.cfpb.gov'
+    
+    return ''
+  }
+
   //AJAX call to get data, calls buildList with returned institutions
   function getInstitutions(domain) {
     $.ajax({
-      url: '/v2/public/institutions',
+      url: deriveInstitutionsApiHost() + '/v2/public/institutions',
       statusCode: {
         404: function() {
           $('#institutions')
