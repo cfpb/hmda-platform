@@ -12,7 +12,7 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.CronConfigLoader.{ panelCron, panelYears }
+import hmda.publisher.helper.CronConfigLoader.{ CronString, panelCron, panelYears }
 import hmda.publisher.helper.{ PrivateAWSConfigLoader, S3Utils, SnapshotCheck }
 import hmda.publisher.query.component.{ InstitutionEmailComponent, InstitutionRepository, PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023 }
 import hmda.publisher.query.panel.{ InstitutionAltEntity, InstitutionEmailEntity, InstitutionEntity }
@@ -24,6 +24,7 @@ import hmda.publisher.util.ScheduleCoordinator.Command._
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
 
+import scala.concurrent.duration.HOURS
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success, Try }
 // $COVERAGE-OFF$
@@ -65,7 +66,9 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], s
     .withListBucketApiVersion(ListBucketVersion2)
 
   override def preStart(): Unit = {
-    panelYears.foreach(year => scheduler ! Schedule(s"PanelSchedule_$year", self, ScheduleWithYear(PanelSchedule, year), panelCron))
+    panelYears.zipWithIndex.foreach {
+      case (year, idx) => scheduler ! Schedule(s"PanelSchedule_$year", self, ScheduleWithYear(PanelSchedule, year), panelCron.applyOffset(idx, HOURS))
+    }
   }
 
   override def postStop(): Unit = {

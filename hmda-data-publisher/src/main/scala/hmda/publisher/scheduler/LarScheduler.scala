@@ -12,7 +12,7 @@ import hmda.actor.HmdaActor
 import hmda.census.records.CensusRecords
 import hmda.model.census.Census
 import hmda.model.publication.Msa
-import hmda.publisher.helper.CronConfigLoader.{ larCron, larQuarterlyCron, larQuarterlyYears, larYears, loanLimitCron, loanLimitYears }
+import hmda.publisher.helper.CronConfigLoader.{ CronString, larCron, larQuarterlyCron, larQuarterlyYears, larYears, loanLimitCron, loanLimitYears }
 import hmda.publisher.helper._
 import hmda.publisher.query.component.{ PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, YearPeriod }
 import hmda.publisher.query.lar.{ LarEntityImpl, LarEntityImpl2019, LarEntityImpl2020, LarEntityImpl2021, LarEntityImpl2022 }
@@ -29,6 +29,7 @@ import hmda.util.BankFilterUtils._
 import java.time.format.DateTimeFormatter
 import java.time.{ Clock, Instant, LocalDateTime }
 import scala.concurrent.Future
+import scala.concurrent.duration.HOURS
 import scala.util.{ Failure, Success }
 // $COVERAGE-OFF$
 class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], scheduler: ActorRef[ScheduleCoordinator.Command])
@@ -116,14 +117,20 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
     .withListBucketApiVersion(ListBucketVersion2)
 
   override def preStart() = {
-    larYears.foreach(year =>
-      scheduler ! Schedule(s"LarSchedule_$year", self, ScheduleWithYear(LarSchedule, year), larCron))
+    larYears.zipWithIndex.foreach {
+      case (year, idx) =>
+        scheduler ! Schedule(s"LarSchedule_$year", self, ScheduleWithYear(LarSchedule, year), larCron.applyOffset(idx, HOURS))
+    }
 
-    loanLimitYears.foreach(year =>
-      scheduler ! Schedule(s"LoanLimitSchedule_$year", self, ScheduleWithYear(LarLoanLimitSchedule, year), loanLimitCron))
+    loanLimitYears.zipWithIndex.foreach {
+      case (year, idx) =>
+        scheduler ! Schedule(s"LoanLimitSchedule_$year", self, ScheduleWithYear(LarLoanLimitSchedule, year), loanLimitCron.applyOffset(idx, HOURS))
+    }
 
-    larQuarterlyYears.foreach(year =>
-      scheduler ! Schedule(s"LarQuarterlySchedule_$year", self, ScheduleWithYear(LarQuarterlySchedule, year), larQuarterlyCron))
+    larQuarterlyYears.zipWithIndex.foreach {
+      case (year, idx) =>
+        scheduler ! Schedule(s"LarQuarterlySchedule_$year", self, ScheduleWithYear(LarQuarterlySchedule, year), larQuarterlyCron.applyOffset(idx, HOURS))
+    }
   }
 
   override def postStop() = {

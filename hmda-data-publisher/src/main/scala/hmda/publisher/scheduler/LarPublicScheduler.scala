@@ -11,7 +11,7 @@ import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.CronConfigLoader.{larPublicCron, larPublicYears }
+import hmda.publisher.helper.CronConfigLoader.{ CronString, larPublicCron, larPublicYears }
 import hmda.publisher.helper._
 import hmda.publisher.query.component.{ ModifiedLarRepository, PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, YearPeriod }
 import hmda.publisher.query.lar.ModifiedLarEntityImpl
@@ -27,6 +27,7 @@ import hmda.util.BankFilterUtils._
 import slick.basic.DatabasePublisher
 
 import scala.concurrent.Future
+import scala.concurrent.duration.HOURS
 import scala.util.{ Failure, Success }
 // $COVERAGE-OFF$
 class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command], scheduler: ActorRef[ScheduleCoordinator.Command])
@@ -64,7 +65,9 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
     .withListBucketApiVersion(ListBucketVersion2)
 
   override def preStart(): Unit = {
-    larPublicYears.foreach(year => scheduler ! Schedule(s"LarPublicSchedule_$year", self, ScheduleWithYear(LarPublicSchedule, year), larPublicCron))
+    larPublicYears.zipWithIndex.foreach {
+      case (year, idx) => scheduler ! Schedule(s"LarPublicSchedule_$year", self, ScheduleWithYear(LarPublicSchedule, year), larPublicCron.applyOffset(idx, HOURS))
+    }
   }
   override def postStop(): Unit = {
     larPublicYears.foreach(year => scheduler ! Unschedule(s"LarPublicSchedule_$year"))

@@ -11,7 +11,7 @@ import akka.stream.scaladsl.{ Sink, Source }
 import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.CronConfigLoader.{ tsCron, tsQuarterlyCron, tsQuarterlyYears, tsYears }
+import hmda.publisher.helper.CronConfigLoader.{ CronString, tsCron, tsQuarterlyCron, tsQuarterlyYears, tsYears }
 import hmda.publisher.helper.{ PrivateAWSConfigLoader, QuarterTimeBarrier, S3Utils, SnapshotCheck }
 import hmda.publisher.query.component.{ PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, TransmittalSheetTable, TsRepository, YearPeriod }
 import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear }
@@ -26,6 +26,7 @@ import hmda.query.ts._
 import hmda.util.BankFilterUtils._
 
 import scala.concurrent.Future
+import scala.concurrent.duration.HOURS
 import scala.util.{ Failure, Success }
 // $COVERAGE-OFF$
 class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], scheduler: ActorRef[ScheduleCoordinator.Command])
@@ -97,8 +98,14 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
     .withListBucketApiVersion(ListBucketVersion2)
 
   override def preStart(): Unit = {
-    tsYears.foreach(year => scheduler ! Schedule(s"TsSchedule_$year", self, ScheduleWithYear(TsSchedule, year), tsCron))
-    tsQuarterlyYears.foreach(year => scheduler ! Schedule(s"TsQuarterlySchedule_$year", self, ScheduleWithYear(TsQuarterlySchedule, year), tsQuarterlyCron))
+    tsYears.zipWithIndex.foreach {
+      case (year, idx) =>
+        scheduler ! Schedule(s"TsSchedule_$year", self, ScheduleWithYear(TsSchedule, year), tsCron.applyOffset(idx, HOURS))
+    }
+    tsQuarterlyYears.zipWithIndex.foreach {
+      case (year, idx) =>
+        scheduler ! Schedule(s"TsQuarterlySchedule_$year", self, ScheduleWithYear(TsQuarterlySchedule, year), tsQuarterlyCron.applyOffset(idx, HOURS))
+    }
   }
 
   override def postStop(): Unit = {

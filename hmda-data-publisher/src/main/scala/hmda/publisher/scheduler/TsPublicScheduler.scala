@@ -16,7 +16,7 @@ import hmda.query.ts._
 import hmda.util.BankFilterUtils._
 import akka.stream.alpakka.file.scaladsl.Archive
 import akka.stream.alpakka.file.ArchiveMetadata
-import hmda.publisher.helper.CronConfigLoader.{ tsPublicCron, tsPublicYears }
+import hmda.publisher.helper.CronConfigLoader.{ CronString, tsPublicCron, tsPublicYears }
 import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear }
 import hmda.publisher.util.{ PublishingReporter, ScheduleCoordinator }
 import hmda.publisher.validation.PublishingGuard
@@ -27,6 +27,8 @@ import scala.util.{ Failure, Success }
 import java.time.Instant
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 import hmda.publisher.util.ScheduleCoordinator.Command._
+
+import scala.concurrent.duration.HOURS
 // $COVERAGE-OFF$
 class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command], scheduler: ActorRef[ScheduleCoordinator.Command])
   extends HmdaActor
@@ -64,7 +66,9 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
       .withListBucketApiVersion(ListBucketVersion2)
 
   override def preStart(): Unit = {
-    tsPublicYears.foreach(year => scheduler ! Schedule(s"TsPublicSchedule_$year", self, ScheduleWithYear(TsPublicSchedule, year), tsPublicCron))
+    tsPublicYears.zipWithIndex.foreach {
+      case (year, idx) => scheduler ! Schedule(s"TsPublicSchedule_$year", self, ScheduleWithYear(TsPublicSchedule, year), tsPublicCron.applyOffset(idx, HOURS))
+    }
   }
 
   override def postStop(): Unit = {

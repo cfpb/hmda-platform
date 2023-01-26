@@ -8,6 +8,7 @@ import hmda.util.BankFilterUtils.config
 import hmda.util.Filer
 
 class QuarterTimeBarrier(clock: Clock) {
+  import QuarterTimeBarrier._
 
   def runIfStillRelevant[T](quarter: Period.Quarter)(thunk: => T): Option[T] = {
     val now = LocalDate.now(clock)
@@ -29,8 +30,8 @@ class QuarterTimeBarrier(clock: Clock) {
   def runIfStillRelevant[T](year: Int, period: YearPeriod)(thunk: => T): Option[T] = {
     val now = LocalDate.now(clock)
     if (now.isBetween(
-      QuarterTimeBarrier.getStartDateForQuarter(year, period),
-      QuarterTimeBarrier.getEndDateForQuarter(year, period).plusDays(8))
+      getStartDateForQuarter(year, period),
+      getEndDateForQuarter(year, period).plusDays(8))
     ) {
       Some(thunk)
     } else {
