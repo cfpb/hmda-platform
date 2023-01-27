@@ -42,7 +42,7 @@ object CronConfigLoader {
           parts.updated(cronIdx, newTime).mkString(" ")
         } catch {
           case e: Throwable =>
-            log.warn("Not able to apply offset to cron {}", cron, e)
+            log.warn(s"Not able to apply offset to cron $cron", e)
             cron
         }
       } else {
