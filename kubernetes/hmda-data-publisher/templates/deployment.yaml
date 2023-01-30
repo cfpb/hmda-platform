@@ -38,6 +38,10 @@ spec:
               drop:
                 - ALL
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+          - configMapRef:
+              name: {{ include "hmda-data-publisher.name" . }}-dynamic-schedule-config
+              optional: true
           env:
           - name: CASSANDRA_CLUSTER_HOSTS
             valueFrom:
