@@ -5,6 +5,7 @@ import akka.http.scaladsl.server.Route
 import hmda.model.filing.lar.enums._
 import hmda.quarterly.data.api.dto.QuarterGraphData.{ GraphRoute, GraphSeriesInfo, GraphSeriesSummary }
 import hmda.quarterly.data.api.route.lib.Verbiage
+import hmda.quarterly.data.api.route.lib.Verbiage.DEFAULT_DECIMAL_PRECISION
 import hmda.quarterly.data.api.route.lib.Verbiage.LoanType._
 import hmda.quarterly.data.api.route.lib.Verbiage.Race._
 import hmda.quarterly.data.api.route.rates.RatesGraph.Category
@@ -45,7 +46,7 @@ abstract class RatesGraph(
 
   protected def getSummaryByType(loanType: LoanTypeEnum, title: String, heloc: Boolean = false, conforming: Boolean = false): CancelableFuture[GraphSeriesSummary] = ???
   protected def getSummaryByRace(title: String, race: String): CancelableFuture[GraphSeriesSummary] = ???
-
+  protected def decimalPlaces: Int = DEFAULT_DECIMAL_PRECISION
   def getRoute: GraphRoute = new GraphRoute(title, categoryVerbiage, endpoint) {
     override def route: Route = pathPrefix(endpoint) {
       path("") {
@@ -85,5 +86,5 @@ abstract class RatesGraph(
   }
 
   private def getGraphSeriesInfo(title: String, subtitle: String, series: Seq[GraphSeriesSummary]): GraphSeriesInfo =
-    GraphSeriesInfo(title, subtitle, series, yLabel = label)
+    GraphSeriesInfo(title, subtitle, series, yLabel = label, decimalPrecision = decimalPlaces)
 }

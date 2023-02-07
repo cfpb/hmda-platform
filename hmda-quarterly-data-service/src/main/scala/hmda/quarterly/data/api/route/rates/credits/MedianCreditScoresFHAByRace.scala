@@ -3,12 +3,12 @@ package hmda.quarterly.data.api.route.rates.credits
 import hmda.model.filing.lar.enums.FHAInsured
 import hmda.quarterly.data.api.dao.repo.QuarterlyGraphRepo
 import hmda.quarterly.data.api.dto.QuarterGraphData.GraphSeriesSummary
-import hmda.quarterly.data.api.route.rates.RatesGraph
+import hmda.quarterly.data.api.route.rates.CountRatesGraph
 import hmda.quarterly.data.api.route.rates.RatesGraph._
 import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
 
-object MedianCreditScoresFHAByRace extends RatesGraph(
+object MedianCreditScoresFHAByRace extends CountRatesGraph(
   "credit",
   "credit-scores-fha-re",
   FHA_BY_RACE_TITLE,
