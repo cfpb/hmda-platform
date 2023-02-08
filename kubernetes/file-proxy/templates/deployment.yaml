@@ -86,6 +86,12 @@ spec:
               configMapKeyRef:
                 name: keycloak-public-key-configmap
                 key: keycloak.publicKey.exponent
+          - name: DYNAMIC_YEARS
+            value: {{ .Values.hmda.dynamic_years }}
+          - name: STATIC_YEARS
+            value: {{ .Values.hmda.static_years }}
+          - name: IRS_YEARS
+            value: {{ .Values.hmda.irs_years }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
