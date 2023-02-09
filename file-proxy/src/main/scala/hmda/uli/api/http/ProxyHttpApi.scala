@@ -69,7 +69,7 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
           path("csv") {
             (extractUri & get) { uri =>
               checkYearAvailable(dynamicYears, year) {
-                val s3Key = "prod/modified-lar/" + year + "/" + lei + ".csv"
+                val s3Key = environment + "/modified-lar/" + year + "/" + lei + ".csv"
                 streamingS3Route(s3Key)
               }
             }
@@ -78,7 +78,7 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
           path("csv" / "header") {
             (extractUri & get) { uri =>
               checkYearAvailable(dynamicYears, year) {
-                val s3Key = "prod/modified-lar/" + year + "/header/" + lei + "_header.csv"
+                val s3Key = environment + "/modified-lar/" + year + "/header/" + lei + "_header.csv"
                 streamingS3Route(s3Key)
               }
             }
@@ -87,7 +87,7 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
           path("txt") {
             (extractUri & get) { uri =>
               checkYearAvailable(dynamicYears, year) {
-                val s3Key = "prod/modified-lar/" + year + "/" + lei + ".txt"
+                val s3Key = environment + "/modified-lar/" + year + "/" + lei + ".txt"
                 streamingS3Route(s3Key)
               }
             }
@@ -96,7 +96,7 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
           path("txt" / "header") {
             (extractUri & get) { uri =>
               checkYearAvailable(dynamicYears, year) {
-                val s3Key = "prod/modified-lar/" + year + "/header/" + lei + "_header.txt"
+                val s3Key = environment + "/modified-lar/" + year + "/header/" + lei + "_header.txt"
                 streamingS3Route(s3Key)
               }
             }
@@ -107,7 +107,7 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
           (extractUri & get) { uri =>
             oAuth2Authorization.authorizeTokenWithLeiOrRole(lei, hmdaAdminRole) { _ =>
               checkYearAvailable(irsYears, year) {
-                val s3Key = "prod/reports/disclosure/" + year + "/" + lei + "/nationwide/IRS.csv"
+                val s3Key = environment + "/reports/disclosure/" + year + "/" + lei + "/nationwide/IRS.csv"
                 streamingS3Route(s3Key)
               }
             }
@@ -119,7 +119,7 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
 
   private def retrieveData(path: String): Future[Option[Source[ByteString, NotUsed]]] = {
     val timeout: Timeout = Timeout(config.getInt("hmda.http.timeout").seconds)
-    S3.download("cfpb-hmda-public", path).withAttributes(S3Attributes.settings(s3Settings)).runWith(Sink.head)
+    S3.download(bucket, path).withAttributes(S3Attributes.settings(s3Settings)).runWith(Sink.head)
       .map(opt => opt.map { case (source, _) => source })
   }
 
