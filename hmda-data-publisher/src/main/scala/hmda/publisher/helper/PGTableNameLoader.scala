@@ -98,4 +98,68 @@ trait PGTableNameLoader {
   val tsAvailableYears: Seq[Int] = pgTableConfig.getString("tsAvailableYears").split(",").map(s => s.toInt)
   val tsQuarterAvailableYears: Seq[Int] = pgTableConfig.getString("tsQuarterAvailableYears").split(",").map(s => s.toInt)
 
+  // dynamic suffix parsing ({"ts": {"annual", {yr: "some_suffix"}}})
+  val tableSuffixes: Map[String, Map[String, Map[String, String]]] = parseSuffixes()
+
+  final object suffixKeys {
+    final val TS = "ts"
+    final val LAR = "lar"
+    final val MLAR = "mlar"
+
+    final val ANNUAL = "annual"
+    final val Q1 = "q1"
+    final val Q2 = "q2"
+    final val Q3 = "q3"
+  }
+
+  import suffixKeys._
+
+  def getSuffixes(year: Int, category: String) = {
+    val yr = year.toString
+    tableSuffixes.get(category) match {
+      case Some(byPeriod) => (
+        byPeriod.get(ANNUAL).flatMap(_.get(yr)).getOrElse(""),
+        byPeriod.get(Q1).flatMap(_.get(yr)).getOrElse(""),
+        byPeriod.get(Q2).flatMap(_.get(yr)).getOrElse(""),
+        byPeriod.get(Q3).flatMap(_.get(yr)).getOrElse(""),
+      )
+    }
+  }
+
+  private def parseSuffixes() = {
+    Map(
+      TS -> parseCategory(TS),
+      LAR -> parseCategory(LAR),
+      MLAR -> parseCategory(MLAR)
+    )
+  }
+
+  private def parseCategory(category: String) = {
+    val tableSuffixes = pgTableConfig.getConfig("suffixes")
+    val config = tableSuffixes.getConfig(category)
+    category match {
+      case MLAR => Map(
+        ANNUAL -> parsePairs(config.getString(ANNUAL))
+      )
+      case _ => Map(
+        ANNUAL -> parsePairs(config.getString(ANNUAL)),
+        Q1 -> parsePairs(config.getString(Q1)),
+        Q2 -> parsePairs(config.getString(Q2)),
+        Q3 -> parsePairs(config.getString(Q3)),
+      )
+    }
+  }
+
+  private def parsePairs(str: String, pairSeparator: String = ",", entrySeparator: String = ":"): Map[String, String] = {
+    if (str.trim.nonEmpty) {
+      str.split(pairSeparator).flatMap(pair =>
+        pair.split(entrySeparator, 2).grouped(2).map {
+          case Array(k, v) => k -> v
+          case _ => throw new IllegalArgumentException(s"Invalid suffix configuration found: $str")
+        }).toMap
+    } else {
+      Map.empty
+    }
+  }
+
 }
