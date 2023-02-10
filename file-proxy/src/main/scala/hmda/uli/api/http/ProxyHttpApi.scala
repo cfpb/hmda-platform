@@ -39,9 +39,9 @@ object ProxyHttpApi {
 }
 private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: ActorSystem) {
 
-  private final val DYNAMIC_PUB_KEY = "hmda.publication.years.dynamic"
-  private final val SNAPSHOT_PUB_KEY = "hmda.publication.years.snapshot"
-  private final val IRS_PUB_KEY = "hmda.publication.years.irs"
+  private final val DYNAMIC_PUB_KEY = "DYNAMIC_YEARS"
+  private final val SNAPSHOT_PUB_KEY = "SNAPSHOT_YEARS"
+  private final val IRS_PUB_KEY = "IRS_YEARS"
 
   val config                  = ConfigFactory.load()
   val accessKeyId             = config.getString("aws.access-key-id")
@@ -51,9 +51,9 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
   val environment             = config.getString("aws.environment")
 
   val publicationYears = Map(
-    DYNAMIC_PUB_KEY -> config.getString(DYNAMIC_PUB_KEY).split(",").toSeq,
-    IRS_PUB_KEY -> config.getString(IRS_PUB_KEY).split(",").toSeq,
-    SNAPSHOT_PUB_KEY -> config.getString(SNAPSHOT_PUB_KEY).split(",").toSeq
+    DYNAMIC_PUB_KEY -> config.getString("hmda.publication.years.dynamic").split(",").toSeq,
+    SNAPSHOT_PUB_KEY -> config.getString("hmda.publication.years.snapshot").split(",").toSeq,
+    IRS_PUB_KEY -> config.getString("hmda.publication.years.irs").split(",").toSeq
   )
 
   val runMode = config.getString("hmda.runtime.mode")
