@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "file-proxy.fullname" . }}-publication-config
+data:
+  hmda.publication.years.dynamic: 2017,2018,2019,2020,2021
+  hmda.publication.years.snapshot: 2017,2018,2019,2020,2021
+  hmda.publication.years.irs: 2017,2018,2019,2020,2021,2022
