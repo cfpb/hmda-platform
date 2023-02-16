@@ -1,7 +1,10 @@
 Pre-requisites
 - [k8ssandra](https://k8ssandra.io/)
 - [Strimzi](https://strimzi.io/)
-
+- Create schema for platform
+```
+cqlsh -u 
+```
 Install
 - Add Secrets
 ```
@@ -11,6 +14,10 @@ kubectl create secret generic inst-postgres-credentials --from-literal=username=
 - Add Configmap
 ```
 kubectl apply -f https://github.com/cfpb/hmda-platform/tree/master/kubernetes/config-maps
+```
+- Create schema for platform
+```
+cqlsh -u username -p passsword -f ../hmda-sql-doc/cassandra-scripts.txt
 ```
 
 Update
