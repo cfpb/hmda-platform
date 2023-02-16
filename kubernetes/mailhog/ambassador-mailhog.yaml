@@ -6,7 +6,7 @@ metadata:
   name: mailhog-ambassador
   annotations:
     getambassador.io/config: |
-      apiVersion: ambassador/v1
+      apiVersion: ambassador/v2
       ambassador_id: ambassador-default-1
       kind: Mapping
       name: mailhog_mapping

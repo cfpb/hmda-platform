@@ -55,4 +55,6 @@ class RealTimeConfig(val cmName: String, val ns: String) {
     case Some(config) => config.getString(key)
     case _ => ""
   }
+
+  def getSeq(key: String, delimiter: String = ","): Seq[String] = getString(key).split(delimiter).toSeq
 }

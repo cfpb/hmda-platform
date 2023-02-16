@@ -1,40 +1,47 @@
 package hmda.proxy.api.http
 
 import akka.NotUsed
-import akka.http.scaladsl.model.{StatusCodes, HttpEntity}
+import akka.http.scaladsl.model.{ HttpEntity, StatusCodes }
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.directives.RouteDirectives.complete
-import akka.http.scaladsl.server.{Directive, Directive0}
+import akka.http.scaladsl.server.{ Directive, Directive0 }
 import akka.http.scaladsl.server.Route
 import akka.util.ByteString
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import org.slf4j.Logger
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.scaladsl.{Sink, Source}
+import akka.stream.scaladsl.{ Sink, Source }
+
 import scala.concurrent.Future
 import akka.stream.alpakka.s3._
 import com.typesafe.config.ConfigFactory
-import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
+import software.amazon.awssdk.auth.credentials.{ AwsBasicCredentials, StaticCredentialsProvider }
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.regions.providers.AwsRegionProvider
 import software.amazon.awssdk.regions.providers._
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.actor.ActorSystem
+
 import scala.concurrent._
-import scala.concurrent.Future
-import akka.stream.scaladsl.{Sink, Source}
 import akka.http.scaladsl.model.ContentTypes
-import scala.util.{Failure, Success}
+
+import scala.util.{ Failure, Success, Try }
 import akka.http.scaladsl.model.StatusCodes.BadRequest
 import hmda.auth.OAuth2Authorization
 import akka.util.Timeout
+import hmda.util.RealTimeConfig
+
 import scala.concurrent.duration._
 
 object ProxyHttpApi {
   def create(log: Logger)(implicit ec: ExecutionContext, system: ActorSystem): OAuth2Authorization => Route = new ProxyHttpApi(log).proxyHttpRoutes _
 }
 private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: ActorSystem) {
+
+  private final val DYNAMIC_PUB_KEY = "DYNAMIC_YEARS"
+  private final val SNAPSHOT_PUB_KEY = "SNAPSHOT_YEARS"
+  private final val IRS_PUB_KEY = "IRS_YEARS"
 
   val config                  = ConfigFactory.load()
   val accessKeyId             = config.getString("aws.access-key-id")
@@ -43,9 +50,20 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
   val bucket                  = config.getString("aws.public-bucket")
   val environment             = config.getString("aws.environment")
 
-  val dynamicYears        = config.getString("hmda.publication.years.dynamic").split(",").toList
-  val irsYears            = config.getString("hmda.publication.years.irs").split(",").toList
-  val snapshotYears       = config.getString("hmda.publication.years.snapshot").split(",").toList
+  val publicationYears = Map(
+    DYNAMIC_PUB_KEY -> config.getString("hmda.publication.years.dynamic").split(",").toSeq,
+    SNAPSHOT_PUB_KEY -> config.getString("hmda.publication.years.snapshot").split(",").toSeq,
+    IRS_PUB_KEY -> config.getString("hmda.publication.years.irs").split(",").toSeq
+  )
+
+  val runMode = config.getString("hmda.runtime.mode")
+
+  val rtConfig: Option[RealTimeConfig] = if (runMode == "kubernetes") {
+      val cmToWatch = config.getString("hmda.publication.years.cm")
+      Some(new RealTimeConfig(cmToWatch, "default"))
+    } else {
+      None
+    }
 
   val hmdaAdminRole   = config.getString("keycloak.hmda.admin.role")
 
@@ -68,8 +86,8 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
           //CSV Without Header
           path("csv") {
             (extractUri & get) { uri =>
-              checkYearAvailable(dynamicYears, year) {
-                val s3Key = environment + "/modified-lar/" + year + "/" + lei + ".csv"
+              checkYearAvailable(getAvailableYears(DYNAMIC_PUB_KEY), year) {
+                val s3Key = s"$environment/modified-lar/$year/$lei.csv"
                 streamingS3Route(s3Key)
               }
             }
@@ -77,8 +95,8 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
           //CSV With Header
           path("csv" / "header") {
             (extractUri & get) { uri =>
-              checkYearAvailable(dynamicYears, year) {
-                val s3Key = environment + "/modified-lar/" + year + "/header/" + lei + "_header.csv"
+              checkYearAvailable(getAvailableYears(DYNAMIC_PUB_KEY), year) {
+                val s3Key = s"$environment/modified-lar/$year/header/${lei}_header.csv"
                 streamingS3Route(s3Key)
               }
             }
@@ -86,8 +104,8 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
           //TXT Without Header
           path("txt") {
             (extractUri & get) { uri =>
-              checkYearAvailable(dynamicYears, year) {
-                val s3Key = environment + "/modified-lar/" + year + "/" + lei + ".txt"
+              checkYearAvailable(getAvailableYears(DYNAMIC_PUB_KEY), year) {
+                val s3Key = s"$environment/modified-lar/$year/$lei.txt"
                 streamingS3Route(s3Key)
               }
             }
@@ -95,8 +113,8 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
           //TXT With Header
           path("txt" / "header") {
             (extractUri & get) { uri =>
-              checkYearAvailable(dynamicYears, year) {
-                val s3Key = environment + "/modified-lar/" + year + "/header/" + lei + "_header.txt"
+              checkYearAvailable(getAvailableYears(DYNAMIC_PUB_KEY), year) {
+                val s3Key = s"$environment/modified-lar/$year/header/${lei}_header.txt"
                 streamingS3Route(s3Key)
               }
             }
@@ -106,8 +124,8 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
         path("reports" / "irs" / "year" / Segment / "institution" / Segment) { (year, lei) =>
           (extractUri & get) { uri =>
             oAuth2Authorization.authorizeTokenWithLeiOrRole(lei, hmdaAdminRole) { _ =>
-              checkYearAvailable(irsYears, year) {
-                val s3Key = environment + "/reports/disclosure/" + year + "/" + lei + "/nationwide/IRS.csv"
+              checkYearAvailable(getAvailableYears(IRS_PUB_KEY), year) {
+                val s3Key = s"$environment/reports/disclosure/$year/$lei/nationwide/IRS.csv"
                 streamingS3Route(s3Key)
               }
             }
@@ -115,6 +133,14 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
         }
       }
     } 
+  }
+
+  private def getAvailableYears(pubKey: String): Seq[String] = {
+    val defaultYears = publicationYears(pubKey)
+    rtConfig match {
+      case Some(conf) => Try(conf.getSeq(pubKey)).getOrElse(defaultYears)
+      case None => defaultYears
+    }
   }
 
   private def retrieveData(path: String): Future[Option[Source[ByteString, NotUsed]]] = {
@@ -137,7 +163,7 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
     }
   }
 
-  private def checkYearAvailable(availableYears: List[String], year: String): Directive0 = {
+  private def checkYearAvailable(availableYears: Seq[String], year: String): Directive0 = {
     Directive[Unit](route =>
       if (availableYears.contains(year)) route(())
       else complete((BadRequest, year + " is not available for dataset"))

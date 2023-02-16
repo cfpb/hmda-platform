@@ -84,4 +84,17 @@ object LarValidationUtils {
   def badValue(): String = {
     Gen.alphaStr.suchThat(!_.isEmpty).sample.getOrElse("a")
   }
+
+  def badLeapYearValue(): String = {
+    "20220229"
+  }
+
+  def badDateOptionOneValue(): String = {
+    "20211310"
+  }
+
+  def badDateOptionTwoValue(): String = {
+   "20221232"
+  }
+
 }

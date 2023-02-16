@@ -33,14 +33,33 @@ class LarFormatValidatorSpec extends PropSpec with ScalaCheckPropertyChecks with
     }
   }
 
-  property("Invalid Application Date") {
+  property("Invalid Application Date(Bad Leap Year Test)") {
     forAll(larGen) { lar =>
-      val badAppDate = badValue()
-      validateIntStrOrNAField(badAppDate, InvalidApplicationDate(badAppDate)) mustBe Invalid(
+      val badAppDate = badLeapYearValue()
+      validateDateOrNaField(badAppDate, InvalidApplicationDate(badAppDate)) mustBe Invalid(
         NonEmptyList.of(InvalidApplicationDate(badAppDate))
       )
     }
   }
+
+  property("Invalid Application Date(Bad Year Value Test 1)") {
+    forAll(larGen) { lar =>
+      val badAppDate = badDateOptionOneValue()
+      validateDateOrNaField(badAppDate, InvalidApplicationDate(badAppDate)) mustBe Invalid(
+        NonEmptyList.of(InvalidApplicationDate(badAppDate))
+      )
+    }
+  }
+
+  property("Invalid Application Date(Bad Year Value Test 2)") {
+    forAll(larGen) { lar =>
+      val badAppDate = badDateOptionTwoValue()
+      validateDateOrNaField(badAppDate, InvalidApplicationDate(badAppDate)) mustBe Invalid(
+        NonEmptyList.of(InvalidApplicationDate(badAppDate))
+      )
+    }
+  }
+
 
   property("InvalidLoanType") {
     val loanType = badValue()
@@ -80,12 +99,28 @@ class LarFormatValidatorSpec extends PropSpec with ScalaCheckPropertyChecks with
       NonEmptyList.of(InvalidActionTaken(actionTaken))
     )
   }
-  property("InvalidActionTakenDate") {
-    val actionTakenDate = badValue()
-    validateIntField(actionTakenDate, InvalidActionTakenDate(actionTakenDate)) mustBe Invalid(
+
+  property("InvalidActionTakenDate (Bad Day Test One)") {
+    val actionTakenDate = badLeapYearValue()
+    validateDateOrNaField(actionTakenDate, InvalidActionTakenDate(actionTakenDate)) mustBe Invalid(
       NonEmptyList.of(InvalidActionTakenDate(actionTakenDate))
     )
   }
+
+  property("InvalidActionTakenDate (Bad Year Value Test 1)") {
+    val actionTakenDate = badDateOptionOneValue()
+    validateDateOrNaField(actionTakenDate, InvalidActionTakenDate(actionTakenDate)) mustBe Invalid(
+      NonEmptyList.of(InvalidActionTakenDate(actionTakenDate))
+    )
+  }
+
+  property("InvalidActionTakenDate (Bad Year Value Test 2)") {
+    val actionTakenDate = badDateOptionTwoValue()
+    validateDateOrNaField(actionTakenDate, InvalidActionTakenDate(actionTakenDate)) mustBe Invalid(
+      NonEmptyList.of(InvalidActionTakenDate(actionTakenDate))
+    )
+  }
+
   property("InvalidAmount") {
     val invalidAmount = badValue()
     validateDoubleField(invalidAmount, InvalidAmount(invalidAmount)) mustBe Invalid(

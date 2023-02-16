@@ -219,6 +219,7 @@ lazy val `check-digit` = (project in file("check-digit"))
           case PathList(ps @ _*) if ps.last endsWith ".proto" =>
             MergeStrategy.first
           case "module-info.class" => MergeStrategy.concat
+          case x if x.endsWith("/module-info.class") => MergeStrategy.concat
           case x =>
             val oldStrategy = (assemblyMergeStrategy in assembly).value
             oldStrategy(x)
