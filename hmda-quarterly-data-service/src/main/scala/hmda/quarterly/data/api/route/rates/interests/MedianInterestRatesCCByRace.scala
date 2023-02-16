@@ -3,12 +3,12 @@ package hmda.quarterly.data.api.route.rates.interests
 import hmda.model.filing.lar.enums.Conventional
 import hmda.quarterly.data.api.dao.repo.QuarterlyGraphRepo
 import hmda.quarterly.data.api.dto.QuarterGraphData.GraphSeriesSummary
-import hmda.quarterly.data.api.route.rates.RatesGraph
+import hmda.quarterly.data.api.route.rates.InterestRatesGraph
 import hmda.quarterly.data.api.route.rates.RatesGraph._
 import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
 
-object MedianInterestRatesCCByRace extends RatesGraph(
+object MedianInterestRatesCCByRace extends InterestRatesGraph(
   "interest",
   "interest-rates-cc-re",
   CC_BY_RACE_TITLE,

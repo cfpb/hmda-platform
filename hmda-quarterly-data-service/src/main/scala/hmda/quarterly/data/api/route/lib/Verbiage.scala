@@ -7,6 +7,7 @@ object Verbiage {
   final val SUMMARY = config.getString("summary")
   final val DEFAULT_DECIMAL_PRECISION = config.getInt("decimal_precision")
   final val INTEREST_DECIMAL_PRECISION = config.getInt("interest_decimal_precision")
+  final val COUNT_DECIMAL_PRECISION = config.getInt("count_decimal_precision")
   final object Race {
     final val ASIAN = config.getString("race.asian")
     final val BLACK = config.getString("race.black")
