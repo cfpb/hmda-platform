@@ -25,6 +25,7 @@ spec:
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
+      serviceAccountName: {{ .Values.service.serviceAccount }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -38,6 +39,9 @@ spec:
               drop:
                 - ALL
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+          - configMapRef:
+              name: {{ include "file-proxy.fullname" . }}-publication-config
           env:
           - name: HMDA_RUNTIME_MODE
             value: {{ .Values.hmda.runtimeMode }}
