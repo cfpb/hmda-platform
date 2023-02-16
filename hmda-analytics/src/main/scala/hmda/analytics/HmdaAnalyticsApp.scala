@@ -456,9 +456,8 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
       } yield res
 
     result.recover {
-      case t: Throwable =>
-        log.error("Error happened in inserting: ", t)
-        throw t
+      case t: Throwable => log.error("Error happened in inserting: ", t)
+        akka.Done.done()
     }
 
   }
