@@ -1,17 +1,17 @@
 package hmda.publisher.validation
 
 import akka.actor.ActorSystem
-import cats.data.{Validated, ValidatedNel}
+import cats.data.{ Validated, ValidatedNel }
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
-import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023}
+import hmda.publisher.query.component.{ PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, YearPeriod }
 import hmda.publisher.util.MattermostNotifier
-import hmda.publisher.validation.PublishingGuard.{Period, Scope}
+import hmda.publisher.validation.PublishingGuard.{ Period, Scope }
 import hmda.query.DbConfiguration
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 // $COVERAGE-OFF$
 class PublishingGuard(
                        db2018: PublisherComponent2018,
@@ -42,6 +42,55 @@ class PublishingGuard(
           logger.error(s"Data validation failed with unexpected exception", ex)
           messageReporter.report(s"Data validation failed with unexpected exception: $ex")
       }
+
+  def runIfDataIsValid(year: Int, period: YearPeriod, scope: Scope)(thunk: => Unit): Future[Unit] = {
+    validate(getChecks(year, period, scope))
+      .flatMap({
+        case Validated.Valid(_) =>
+          logger.debug(s"Data validation successful")
+          Future(thunk)
+        case Validated.Invalid(errs) =>
+          val message = errs.toList.mkString("\n")
+          logger.error(s"Data validation failed for year ${year}. Files won't be published. Message:\n${message}")
+          messageReporter.report(message)
+      })
+      .recoverWith {
+        case ex =>
+          logger.error(s"Data validation failed with unexpected exception", ex)
+          messageReporter.report(s"Data validation failed with unexpected exception: $ex")
+      }
+  }
+
+  private def getChecks(year: Int, period: YearPeriod, scope: Scope): List[ValidationCheck] = {
+    val db = new PublisherComponent(year)
+    val leiCheckErrorMargin = year match {
+      case 2018 => 5
+      case 2019 => 1
+      case _ => 0
+    }
+    scope match {
+      case Scope.Private =>
+        val larData = db.validationLarData(period)
+        val tsData = db.validationTSData(period)
+        val panelData = db.validationPanelData(period)
+        List(
+          new TSLinesCheck(dbConfig, tsData, larData),
+          new LeiCountCheck(dbConfig, tsData, larData, panelData, leiCheckErrorMargin)
+        )
+      case Scope.Public =>
+        period match {
+          case YearPeriod.Whole =>
+            val larData = db.validationMLarData
+            val tsData = db.validationTSData(period)
+            val panelData = db.validationPanelData(period)
+            List(
+              new TSLinesCheck(dbConfig, tsData, larData),
+              new LeiCountCheck(dbConfig, tsData, larData, panelData, leiCheckErrorMargin)
+            )
+          case _ => throw new IllegalArgumentException(s"quarterly $year is not supported to public publishers at the moment")
+        }
+    }
+  }
 
   private def getChecks(year: Period, scope: Scope): List[ValidationCheck] = {
     val leiCheckErrorMargin = year match {

@@ -6,8 +6,8 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.testkit.TestProbe
 import akka.util.Timeout
 import hmda.publisher.scheduler.AllSchedulers
-import hmda.publisher.scheduler.schedules.{Schedule, Schedules}
-import org.scalatest.{MustMatchers, WordSpec}
+import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear, Schedules }
+import org.scalatest.{ MustMatchers, WordSpec }
 
 import scala.concurrent.duration.DurationInt
 
@@ -53,6 +53,14 @@ class DataPublisherHttpApiSpec extends WordSpec with MustMatchers with Scalatest
         case x @ Schedules.TsSchedulerQuarterly2022  => testTrigger(x, _.tsScheduler)
         case x @ Schedules.LarSchedulerQuarterly2023 => testTrigger(x, _.larScheduler)
         case x @ Schedules.TsSchedulerQuarterly2023  => testTrigger(x, _.tsScheduler)
+        case x @ Schedules.PanelSchedule             => testTrigger(x, _.panelScheduler)
+        case x @ Schedules.LarPublicSchedule         => testTrigger(x, _.larPublicScheduler)
+        case x @ Schedules.LarSchedule               => testTrigger(x, _.larScheduler)
+        case x @ Schedules.LarLoanLimitSchedule      => testTrigger(x, _.larScheduler)
+        case x @ Schedules.TsPublicSchedule          => testTrigger(x, _.tsPublicScheduler)
+        case x @ Schedules.TsSchedule                => testTrigger(x, _.tsScheduler)
+        case x @ Schedules.LarQuarterlySchedule      => testTrigger(x, _.larScheduler)
+        case x @ Schedules.TsQuarterlySchedule       => testTrigger(x, _.tsScheduler)
       })
     }
   }
@@ -69,10 +77,14 @@ class DataPublisherHttpApiSpec extends WordSpec with MustMatchers with Scalatest
     val routes    = new DataPublisherHttpApi(allSchedulers).routes
     val scheduler = schedulerToBeTriggered(allSchedulers)
     val probe     = probes.find(_.ref == scheduler).get
-    Post(s"/trigger/${msg.entryName}") ~> routes ~> check {
+    val (scheduleWithYear, route) = msg match {
+      case s if s.entryName.matches("\\w+\\d{4}$") => (false, s"/trigger/${s.entryName}")
+      case s => (true, s"/trigger/${s.entryName}/2020")
+    }
+    Post(route) ~> routes ~> check {
       status mustBe StatusCodes.Accepted
     }
-    probe.expectMsg(msg)
+    probe.expectMsg(if (scheduleWithYear) ScheduleWithYear(msg, 2020) else msg)
   }
 
 }
