@@ -14,9 +14,13 @@ service:
   port: 9091
   targetPort: 9091
   name: http-file-proxy
+  serviceAccount: hmda-service-account-default
 
 hmda:
   runtimeMode: kubernetes
+  dynamic_years: "2017,2018,2019,2020,2021"
+  static_years: "2017,2018,2019,2020,2021"
+  irs_years: "2017,2018,2019,2020,2021,2022"
 
 
 #ambassador:

@@ -25,6 +25,7 @@ spec:
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
+      serviceAccountName: {{ .Values.service.serviceAccount }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -38,6 +39,9 @@ spec:
               drop:
                 - ALL
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+          - configMapRef:
+              name: {{ include "file-proxy.fullname" . }}-publication-config
           env:
           - name: HMDA_RUNTIME_MODE
             value: {{ .Values.hmda.runtimeMode }}
@@ -86,6 +90,12 @@ spec:
               configMapKeyRef:
                 name: keycloak-public-key-configmap
                 key: keycloak.publicKey.exponent
+          - name: DYNAMIC_YEARS
+            value: {{ .Values.hmda.dynamic_years }}
+          - name: STATIC_YEARS
+            value: {{ .Values.hmda.static_years }}
+          - name: IRS_YEARS
+            value: {{ .Values.hmda.irs_years }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
