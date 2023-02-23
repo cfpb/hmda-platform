@@ -1,6 +1,6 @@
 package hmda.dataBrowser.repositories
 
-import hmda.dataBrowser.models.{ FilerInstitutionResponse2017, FilerInstitutionResponseLatest, QueryField, Statistic }
+import hmda.dataBrowser.models.{ FilerInstitutionResponse2017, FilerInstitutionResponseLatest, QueryField, LarQueryField, Statistic }
 import io.lettuce.core.api.async.RedisAsyncCommands
 import monix.eval.Task
 
@@ -40,7 +40,23 @@ class RedisModifiedLarAggregateCache(redisClient: Task[RedisAsyncCommands[String
         .map(_ => ())
     }.onErrorFallbackTo(Task.unit)
 
-  private def key(queryFields: List[QueryField], year: Int): String = {
+  private def key(instQueryField: QueryField, geoQueryField: QueryField, hmdaQueries: List[LarQueryField], year: Int): String = {
+    // The year was originally a query field but it was split up later, we do this to preserve backwards compatibility
+    val yearQuery = QueryField(name = "year", year.toString :: Nil, dbName = "filing_year")
+    // ensure we get a stable sorting order so we form keys correctly in Redis
+    val yearQueryField = List(yearQuery, instQueryField, geoQueryField)
+    val hmdaQueryField = hmdaQueries.sortBy(_.name)
+    val yearRedisKey = yearQueryField
+      .map(field => s"${field.name}:${field.values.mkString("|")}")
+      .mkString(":")
+    val hmdaRedisKey = hmdaQueryField
+      .map(field => s"${field.name}:${field.value.mkString("|")}")
+      .mkString(":")
+
+    s"$Prefix:$yearRedisKey:$hmdaRedisKey"
+  }
+
+  private def filerKey(queryFields: List[QueryField], year: Int): String = {
     // The year was originally a query field but it was split up later, we do this to preserve backwards compatibility
     val yearQuery = QueryField(name = "year", year.toString :: Nil, dbName = "filing_year")
     // ensure we get a stable sorting order so we form keys correctly in Redis
@@ -52,26 +68,27 @@ class RedisModifiedLarAggregateCache(redisClient: Task[RedisAsyncCommands[String
     s"$Prefix:$redisKey"
   }
 
-  override def find(queryFields: List[QueryField], year: Int): Task[Option[Statistic]] = {
-    val redisKey = key(queryFields, year)
+  override def find(instQueryField: QueryField, geoQueryField: QueryField, hmdaQueries: List[LarQueryField], year: Int): Task[Option[Statistic]] = {
+    val redisKey = key(instQueryField, geoQueryField, hmdaQueries, year)
     logger.info("Redis Key: " + redisKey)
+    println("CACHE:" +  hmdaQueries)
     findAndParse[Statistic](redisKey)
   }
 
   override def findFilers2017(filerFields: List[QueryField], year: Int): Task[Option[FilerInstitutionResponse2017]] = {
-    val redisKey = key(filerFields, year)
+    val redisKey = filerKey(filerFields, year)
     println(redisKey)
     findAndParse[FilerInstitutionResponse2017](redisKey)
   }
 
   override def findFilers2018(filerFields: List[QueryField], year: Int): Task[Option[FilerInstitutionResponseLatest]] = {
-    val redisKey = key(filerFields, year)
+    val redisKey = filerKey(filerFields, year)
     println(redisKey)
     findAndParse[FilerInstitutionResponseLatest](redisKey)
   }
 
-  override def update(queryFields: List[QueryField], year: Int, statistic: Statistic): Task[Statistic] = {
-    val redisKey = key(queryFields, year)
+  override def update(instQueryField: QueryField, geoQueryField: QueryField, hmdaQueries: List[LarQueryField], year: Int, statistic: Statistic): Task[Statistic] = {
+    val redisKey = key(instQueryField, geoQueryField, hmdaQueries, year)
     updateAndSetTTL(redisKey, statistic)
   }
 
@@ -80,7 +97,7 @@ class RedisModifiedLarAggregateCache(redisClient: Task[RedisAsyncCommands[String
     year: Int,
     filerInstitutionResponse: FilerInstitutionResponse2017
   ): Task[FilerInstitutionResponse2017] = {
-    val redisKey = key(queryFields, year)
+    val redisKey = filerKey(queryFields, year)
     updateAndSetTTL(redisKey, filerInstitutionResponse)
   }
 
@@ -89,12 +106,12 @@ class RedisModifiedLarAggregateCache(redisClient: Task[RedisAsyncCommands[String
     year: Int,
     filerInstitutionResponse: FilerInstitutionResponseLatest
   ): Task[FilerInstitutionResponseLatest] = {
-    val redisKey = key(queryFields, year)
+    val redisKey = filerKey(queryFields, year)
     updateAndSetTTL(redisKey, filerInstitutionResponse)
   }
 
-  override def invalidate(queryFields: List[QueryField], year: Int): Task[Unit] = {
-    val redisKey = key(queryFields, year)
+  override def invalidate(instQueryField: QueryField, geoQueryField: QueryField, hmdaQueries: List[LarQueryField], year: Int): Task[Unit] = {
+    val redisKey = key(instQueryField, geoQueryField, hmdaQueries, year)
     invalidateKey(redisKey)
   }
 

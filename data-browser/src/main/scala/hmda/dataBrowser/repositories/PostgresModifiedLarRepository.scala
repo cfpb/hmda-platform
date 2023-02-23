@@ -2,7 +2,7 @@ package hmda.dataBrowser.repositories
 
 import akka.NotUsed
 import akka.stream.scaladsl.Source
-import hmda.dataBrowser.models.{ FilerInformationLatest, ModifiedLarEntity, ModifiedLarTable, QueryField, Statistic }
+import hmda.dataBrowser.models.{ FilerInformationLatest, ModifiedLarEntity, ModifiedLarTable, QueryField, LarQueryField, Statistic }
 import monix.eval.Task
 import slick.basic.DatabaseConfig
 import slick.jdbc.{ JdbcProfile, ResultSetConcurrency, ResultSetType }
@@ -126,7 +126,10 @@ class PostgresModifiedLarRepository(config: DatabaseConfig[JdbcProfile], tableSe
     s"${escape(fieldName)} = '${escape(value)}'"
 
   def in(fieldName: String, values: Seq[String]): String =
-    s"${escape(fieldName)} IN ${formatSeq(values.map(escape))}"
+    if (!values.isEmpty) {
+      s"${escape(fieldName)} IN ${formatSeq(values.map(escape))}"
+    }
+    else ""
 
   def whereAndOpt(expression: String, remainingExpressions: String*): String = {
     val primary = s"WHERE $expression"
@@ -195,9 +198,15 @@ class PostgresModifiedLarRepository(config: DatabaseConfig[JdbcProfile], tableSe
     Task.deferFuture(db.run(query)).guarantee(Task.shift)
   }
 
-  override def findAndAggregate(browserFields: List[QueryField], year: Int): Task[Statistic] = {
-    val queries = browserFields.map(field => in(field.dbName, field.values))
-    val filterCriteria = queries match {
+  override def findAndAggregate(instQueryField: QueryField, geoQueryField: QueryField, hmdaQueryFields: List[LarQueryField], year: Int): Task[Statistic] = {
+    println("DB:" +  hmdaQueryFields)
+    val hmdaQueries = hmdaQueryFields.map(field => eq(field.dbName, field.value))
+    val instQuery = in(instQueryField.dbName, instQueryField.values)
+    val geoQuery = in(geoQueryField.dbName, geoQueryField.values)
+
+    val queries: List[String] = instQuery :: geoQuery :: hmdaQueries
+
+    val filterCriteria = queries.filter(_ != "") match {
       case Nil          => ""
       case head :: tail => whereAndOpt(head, tail: _*)
     }
