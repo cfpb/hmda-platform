@@ -6,6 +6,7 @@ import hmda.model.filing.lar.enums._
 import hmda.quarterly.data.api.dao.repo.QuarterlyGraphRepo
 import hmda.quarterly.data.api.dto.QuarterGraphData.{ GraphRoute, GraphSeriesInfo, GraphSeriesSummary }
 import Loans._
+import hmda.quarterly.data.api.route.lib.Verbiage.COUNT_DECIMAL_PRECISION
 import hmda.quarterly.data.api.route.lib.Verbiage.LoanType._
 import hmda.quarterly.data.api.serde.JsonSupport
 import monix.execution.CancelableFuture
@@ -34,7 +35,8 @@ object ApplicationsVolume extends GraphRoute(
           APP_VOLUME_TITLE,
           APP_VOLUME_SUBTITLE,
           Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va),
-          yLabel = APP_LABEL
+          yLabel = APP_LABEL,
+          decimalPrecision = COUNT_DECIMAL_PRECISION
         )
       )
     }
