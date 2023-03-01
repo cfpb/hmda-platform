@@ -179,7 +179,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
     Source
       .single(msg)
       .map(msg => SubmissionId(msg))
-      .filter(institution => filterBankWithLogging(institution.lei))
+      .filter(submissionID => filterBankWithLogging(submissionID.lei))
       .mapAsync(1) { id =>
         log.info(s"Adding data for $id")
         addTs(id)
