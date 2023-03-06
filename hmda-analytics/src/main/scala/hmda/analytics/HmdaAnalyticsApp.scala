@@ -179,7 +179,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
     Source
       .single(msg)
       .map(msg => SubmissionId(msg))
-      .filter(submissionID => filterBankWithLogging(submissionID.lei))
+      .filter(institution => filterBankWithLogging(institution.lei))
       .mapAsync(1) { id =>
         log.info(s"Adding data for $id")
         addTs(id)
@@ -223,7 +223,10 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
               case Period(2023, Some("Q1")) => transmittalSheetRepository2023Q1.deleteByLeiAndQuarter(lei = ts.lei)
               case Period(2023, Some("Q2")) => transmittalSheetRepository2023Q2.deleteByLeiAndQuarter(lei = ts.lei)
               case Period(2023, Some("Q3")) => transmittalSheetRepository2023Q3.deleteByLeiAndQuarter(lei = ts.lei)
-              case _ => throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete TS rows.")
+              case _ => {
+                log.error(s"Unable to discern period from $submissionId to delete TS rows.")
+                throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete TS rows.")
+              }
             }
           } yield delete
         }
@@ -280,8 +283,10 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
             case Period(2023, Some("Q1")) => (transmittalSheetRepository2023Q1, true)
             case Period(2023, Some("Q2")) => (transmittalSheetRepository2023Q2, true)
             case Period(2023, Some("Q3")) => (transmittalSheetRepository2023Q3, true)
-            case _ =>
+            case _ =>{
+              log.error(s"Unable to discern period from $submissionId to insert TS rows.")
               throw new IllegalArgumentException(s"Unable to discern period from $submissionId to insert TS rows.")
+            }
           }
 
           for {
@@ -330,7 +335,10 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
               case Period(2023, Some("Q1")) => larRepository2023Q1.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
               case Period(2023, Some("Q2")) => larRepository2023Q2.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
               case Period(2023, Some("Q3")) => larRepository2023Q3.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-              case _ => throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete LAR rows.")
+              case _ => {
+                log.error(s"Unable to discern period from $submissionId to delete LAR rows.")
+                throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete LAR rows.")
+              }
 
             }
           } yield delete
@@ -416,8 +424,10 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
                 larRepository2022Q3.insert(
                   LarConverter(lar = lar, 2023, isQuarterly = true)
                 )
-              case _ =>
+              case _ => {
+                log.error(s"Unable to discern period from $submissionId to insert LAR rows.")
                 throw new IllegalArgumentException(s"Unable to discern period from $submissionId to insert LAR rows.")
+              }
             }
           } yield insertorupdate
         }
@@ -428,35 +438,41 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
         _ <- deleteTsRow
         _ = if(tsDeletion)
-          log.info(s"Data removed from TS for  $submissionId ")
+          log.info(s"Attempt to remove data from TS table for  $submissionId  completed.")
         else
           log.info(s"Skipping Delete TS -- no deletion needed")
 
         _ <- deleteLarRows
         _ = if(larDeletion)
-          log.info(s"Data removed from LAR for  $submissionId")
+          log.info(s"Attempt to remove data from LAR table for  $submissionId  completed.")
         else
           log.info(s"Skipping Delete LAR -- no deletion needed")
 
         _ <- insertTsRow
-        _ = log.info(s"Data added into TS for  $submissionId")
+        _ =  log.info(s"Attempt to add data to TS table for  $submissionId  completed.")
+
 
         _ <- insertLarRows
-        _ = log.info(s"Data added into LAR for  $submissionId")
+        _ = log.info(s"Attempt to add data to LAR table for  $submissionId  completed.")
+
 
         dateSigned   <- signDate
         _ = log.info(s"Date signed $dateSigned")
 
         res <- insertSubmissionHistory
         _ = if(historyInsertion)
-          log.info(s"Inserting into submission history")
+          log.info(s"Attempt to add data too Submission History Table for  $submissionId  completed.")
+
         else
           log.info(s"Skipping Insert Submission History")
 
       } yield res
 
+
+
     result.recover {
-      case t: Throwable => log.error("Error happened in inserting: ", t)
+      case t: Throwable =>
+        log.error("Error happened in inserting: ", t)
         akka.Done.done()
     }
 
