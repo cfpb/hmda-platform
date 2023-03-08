@@ -10,26 +10,27 @@ import akka.stream.alpakka.s3._
 import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.actor.HmdaActor
+import hmda.publisher.helper.CronConfigLoader.{ CronString, larPublicCron, larPublicYears }
 import hmda.publisher.helper._
-import hmda.publisher.qa.{QAFilePersistor, QAFileSpec, QARepository}
-import hmda.publisher.query.component.{PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023}
+import hmda.publisher.query.component.{ ModifiedLarRepository, PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, YearPeriod }
 import hmda.publisher.query.lar.ModifiedLarEntityImpl
-import hmda.publisher.scheduler.schedules.Schedule
-import hmda.publisher.scheduler.schedules.Schedules.{LarPublicScheduler2018, LarPublicScheduler2019, LarPublicScheduler2020, LarPublicScheduler2021}
-import hmda.publisher.util.PublishingReporter
+import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear }
+import hmda.publisher.scheduler.schedules.Schedules.{ LarPublicSchedule, LarPublicScheduler2018, LarPublicScheduler2019, LarPublicScheduler2020, LarPublicScheduler2021 }
+import hmda.publisher.util.{ PublishingReporter, ScheduleCoordinator }
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
+import hmda.publisher.util.ScheduleCoordinator.Command._
 import hmda.publisher.validation.PublishingGuard
-import hmda.publisher.validation.PublishingGuard.{Period, Scope}
+import hmda.publisher.validation.PublishingGuard.{ Period, Scope }
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
 import slick.basic.DatabasePublisher
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
+import scala.concurrent.duration.HOURS
+import scala.util.{ Failure, Success }
 // $COVERAGE-OFF$
-class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command])
+class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command], scheduler: ActorRef[ScheduleCoordinator.Command])
   extends HmdaActor
     with PublisherComponent2018
     with PublisherComponent2019
@@ -45,6 +46,11 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
   implicit val ec           = context.system.dispatcher
   implicit val materializer = Materializer(context)
 
+  val availableRepos: Map[Int, ModifiedLarRepository] = mLarAvailableYears.map(yr => yr -> {
+    val component = new PublisherComponent(yr)
+    new ModifiedLarRepository(dbConfig, component.mlarTable)
+  }).toMap
+
   def mlarRepository2018               = new ModifiedLarRepository2018(dbConfig)
   def mlarRepository2019               = new ModifiedLarRepository2019(dbConfig)
   def mlarRepository2020               = new ModifiedLarRepository2020(dbConfig)
@@ -59,22 +65,12 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
     .withListBucketApiVersion(ListBucketVersion2)
 
   override def preStart(): Unit = {
-    QuartzSchedulerExtension(context.system)
-      .schedule("LarPublicScheduler2018", self, LarPublicScheduler2018)
-    QuartzSchedulerExtension(context.system)
-      .schedule("LarPublicScheduler2019", self, LarPublicScheduler2019)
-    QuartzSchedulerExtension(context.system)
-      .schedule("LarPublicScheduler2020", self, LarPublicScheduler2020)
-    QuartzSchedulerExtension(context.system)
-      .schedule("LarPublicScheduler2021", self, LarPublicScheduler2021)
+    larPublicYears.zipWithIndex.foreach {
+      case (year, idx) => scheduler ! Schedule(s"LarPublicSchedule_$year", self, ScheduleWithYear(LarPublicSchedule, year), larPublicCron.applyOffset(idx, HOURS))
+    }
   }
   override def postStop(): Unit = {
-    QuartzSchedulerExtension(context.system).cancelJob("LarPublicScheduler2018")
-    QuartzSchedulerExtension(context.system).cancelJob("LarPublicScheduler2019")
-    QuartzSchedulerExtension(context.system).cancelJob("LarPublicScheduler2020")
-    QuartzSchedulerExtension(context.system).cancelJob("LarPublicScheduler2021")
-
-
+    larPublicYears.foreach(year => scheduler ! Unschedule(s"LarPublicSchedule_$year"))
   }
   override def receive: Receive = {
     case LarPublicScheduler2018 =>
@@ -134,6 +130,23 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
           result <- larPublicStream(mlarRepository2021.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, LarPublicScheduler2021)
           // _ <- persistFileForQa(result.key, result.bucket, ModifiedLarEntityImpl.parseFromPSVUnsafe, qaMlarRepository2021)
         } yield ()
+      }
+
+    case ScheduleWithYear(schedule, year) if schedule == LarPublicSchedule =>
+      publishingGuard.runIfDataIsValid(year, YearPeriod.Whole, Scope.Public) {
+        val fileName = s"${year}_lar.txt"
+        val zipDirectoryName = s"${year}_lar.zip"
+        val s3Path = s"$environmentPublic/dynamic-data/$year/"
+        val fullFilePath = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
+        val bucket = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
+
+        availableRepos.get(year) match {
+          case Some(repo) =>
+            for {
+              _ <- larPublicStream(repo.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, LarPublicSchedule)
+            } yield ()
+          case None => log.error("No available publisher found for {} in year {}", schedule, year)
+        }
       }
   }
 

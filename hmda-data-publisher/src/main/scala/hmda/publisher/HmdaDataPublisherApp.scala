@@ -1,12 +1,11 @@
 package hmda.publisher
 
 import akka.actor.typed.scaladsl.adapter.ClassicActorSystemOps
-import akka.actor.{ActorSystem, Props}
+import akka.actor.{ ActorSystem, Props }
 import hmda.publisher.api.HmdaDataPublisherApi
 import hmda.publisher.helper.PGTableNameLoader
-import hmda.publisher.qa.QAFilePersistor
 import hmda.publisher.scheduler._
-import hmda.publisher.util.{MattermostNotifier, PublishingReporter}
+import hmda.publisher.util.{ MattermostNotifier, PublishingReporter, ScheduleCoordinator }
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext
@@ -59,12 +58,19 @@ object HmdaDataPublisherApp extends App with PGTableNameLoader {
     actorSystem.spawn(PublishingReporter(mattermostNotifier, groupReportingTimeout), "PublishingReporter")
   }
 
+  /**
+   * Only 1 scheduler should be created
+   * QuartzSchedulerExtension in the current version is not thread safe, look into updating dep
+   * https://github.com/enragedginger/akka-quartz-scheduler/issues/33
+   * */
+  private val scheduleCoordinator = actorSystem.spawn(ScheduleCoordinator.behaviors, "ScheduleCoordinator")
+
   val allSchedulers = AllSchedulers(
-    larPublicScheduler = actorSystem.actorOf(Props(new LarPublicScheduler(publishingReporter)), "LarPublicScheduler"),
-    larScheduler = actorSystem.actorOf(Props(new LarScheduler(publishingReporter)), "LarScheduler"),
-    panelScheduler = actorSystem.actorOf(Props(new PanelScheduler(publishingReporter)), "PanelScheduler"),
-    tsPublicScheduler = actorSystem.actorOf(Props(new TsPublicScheduler(publishingReporter)), "TsPublicScheduler"),
-    tsScheduler = actorSystem.actorOf(Props(new TsScheduler(publishingReporter)), "TsScheduler")
+    larPublicScheduler = actorSystem.actorOf(Props(new LarPublicScheduler(publishingReporter, scheduleCoordinator)), "LarPublicScheduler"),
+    larScheduler = actorSystem.actorOf(Props(new LarScheduler(publishingReporter, scheduleCoordinator)), "LarScheduler"),
+    panelScheduler = actorSystem.actorOf(Props(new PanelScheduler(publishingReporter, scheduleCoordinator)), "PanelScheduler"),
+    tsPublicScheduler = actorSystem.actorOf(Props(new TsPublicScheduler(publishingReporter, scheduleCoordinator)), "TsPublicScheduler"),
+    tsScheduler = actorSystem.actorOf(Props(new TsScheduler(publishingReporter, scheduleCoordinator)), "TsScheduler")
   )
 
   actorSystem.spawn[Nothing](HmdaDataPublisherApi(allSchedulers), HmdaDataPublisherApi.name)

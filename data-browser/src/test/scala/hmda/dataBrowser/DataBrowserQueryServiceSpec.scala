@@ -39,7 +39,7 @@ class DataBrowserQueryServiceSpec
       val futRes = source.runWith(Sink.head)
 
       whenReady(futRes) { res =>
-        (cache.find _).expects(*, *).never()
+        (cache.find _).expects(*, *, *, *).never()
         (cache.findFilers2018 _).expects(*, *).never()
         res shouldBe expected
       }
@@ -51,20 +51,20 @@ class DataBrowserQueryServiceSpec
       val actual = service.permuteQueryFields(q1 :: q2 :: Nil)
       val expected = List(
         List(
-          QueryField("one", List("x")),
-          QueryField("two", List("a"))
+          LarQueryField("one", "x"),
+          LarQueryField("two", "a")
         ),
         List(
-          QueryField("one", List("x")),
-          QueryField("two", List("b"))
+          LarQueryField("one", "x"),
+          LarQueryField("two", "b")
         ),
         List(
-          QueryField("one", List("y")),
-          QueryField("two", List("a"))
+          LarQueryField("one", "y"),
+          LarQueryField("two", "a")
         ),
         List(
-          QueryField("one", List("y")),
-          QueryField("two", List("b"))
+          LarQueryField("one", "y"),
+          LarQueryField("two", "b")
         )
       )
       actual should contain theSameElementsAs expected
@@ -80,12 +80,12 @@ class DataBrowserQueryServiceSpec
 
       // simulate cache hits
       inAnyOrder {
-        (cache.find _).expects(List(QueryField("one", List("a"))), 2018).returns(Task.now(Some(e1)))
-        (cache.find _).expects(List(QueryField("one", List("b"))), 2018).returns(Task.now(Some(e2)))
+        (cache.find _).expects(*, *, List(LarQueryField("one", "a")), 2018).returns(Task.now(Some(e1)))
+        (cache.find _).expects(*, *, List(LarQueryField("one", "b")), 2018).returns(Task.now(Some(e2)))
         // you might find this surprising that we expect the repository to be called but we are dealing with an effect
         // system and everything is lazy. Notice if we evaluated this effect, this test would fail
         (repo.findAndAggregate _)
-          .expects(*, *)
+          .expects(*, *, *, *)
           .returns(Task.raiseError(new Exception("You shouldn't be evaluating me on a cache hit")))
           .twice()
       }

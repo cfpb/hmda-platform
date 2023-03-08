@@ -1,7 +1,6 @@
 package hmda.dataBrowser.services
 import akka.NotUsed
 import akka.stream.scaladsl.Source
-import cats.implicits._
 import hmda.dataBrowser.models._
 import hmda.dataBrowser.repositories._
 import monix.eval.Task
@@ -25,12 +24,12 @@ class DataBrowserQueryService(repoLatest: ModifiedLarRepositoryLatest, repo2017:
       case h :: _ => h.flatMap(i => generateCombinations(x.tail).map(i :: _))
     }
 
-  def permuteQueryFields(input: List[QueryField]): List[List[QueryField]] = {
-    val singleElementBrowserFields: List[List[QueryField]] =
+  def permuteQueryFields(input: List[QueryField]): List[List[LarQueryField]] = {
+    val singleElementBrowserFields: List[List[LarQueryField]] =
       input.map {
         case QueryField(name, values, dbName, isAllSelected) =>
           values
-            .map(value => QueryField(name, value :: Nil, dbName, isAllSelected))
+            .map(value => LarQueryField(name, value, dbName, isAllSelected))
             .toList
       }
     generateCombinations(singleElementBrowserFields)
@@ -59,14 +58,18 @@ class DataBrowserQueryService(repoLatest: ModifiedLarRepositoryLatest, repo2017:
       fields.filter(_.values.nonEmpty).find(_.name == "msamd")
     val optCounty: Option[QueryField] =
       fields.filter(_.values.nonEmpty).find(_.name == "county")
-    val optYear: Option[QueryField] =
-      fields.filter(_.values.nonEmpty).find(_.name == "year")
     val optLEI: Option[QueryField] =
       fields.filter(_.values.nonEmpty).find(_.name == "lei")
     val optARID: Option[QueryField] =
       fields.filter(_.values.nonEmpty).find(_.name == "arid")
 
-    val rest = fields
+    val geoFilter: Option[QueryField] = {
+      if (optState.nonEmpty) optState
+      else if (optMsaMd.nonEmpty) optMsaMd
+      else optCounty
+    }
+
+    val hmdaFilters: List[QueryField] = fields
       .filterNot(_.name == "state")
       .filterNot(_.name == "msamd")
       .filterNot(_.name == "county")
@@ -74,23 +77,21 @@ class DataBrowserQueryService(repoLatest: ModifiedLarRepositoryLatest, repo2017:
       .filterNot(_.name == "lei")
       .filterNot(_.name == "arid")
 
-    val queryFieldCombinations = permuteQueryFields(rest)
-      .map(eachList =>
-        optYear.toList ++ optState.toList ++ optMsaMd.toList ++ optCounty.toList ++ optLEI.toList ++ optARID.toList ++ eachList
-      )
-      .map(eachCombination => eachCombination.sortBy(field => field.name))
+    val queryFieldCombinations = permuteQueryFields(hmdaFilters)
+
+    println("combinations: " + queryFieldCombinations)
 
     Task.parSequenceUnordered {
-      queryFieldCombinations.map { eachCombination =>
-        val fieldInfos = eachCombination.map(field => FieldInfo(field.name, field.values.mkString(",")))
+      queryFieldCombinations.map { combination =>
+        val fieldInfos = combination.map(field => FieldInfo(field.name, field.value))
 
         // the year is a special case as the data selected depends on the year
-        val year = eachCombination.find(_.name == "year").map(_.values.head).getOrElse(queryFields.year).toInt
-
-        cacheResult(
-          cacheLookup = cache.find(eachCombination, year),
-          onMiss = repo.findAndAggregate(eachCombination, year),
-          cacheUpdate = cache.update(eachCombination, year, _: Statistic)
+        val year = queryFields.year.toInt
+        println("about to get result: " + combination)
+        cacheResult (
+          cacheLookup = cache.find(optLEI.getOrElse(QueryField()), geoFilter.getOrElse(QueryField()), combination, year),
+          onMiss = repo.findAndAggregate(optLEI.getOrElse(QueryField()), geoFilter.getOrElse(QueryField()), combination, year),
+          cacheUpdate = cache.update(optLEI.getOrElse(QueryField()), geoFilter.getOrElse(QueryField()), combination, year, _: Statistic)
         ).map { case (from, statistic) => (from, Aggregation(statistic.count, statistic.sum, fieldInfos)) }
       }
     }.map(results =>

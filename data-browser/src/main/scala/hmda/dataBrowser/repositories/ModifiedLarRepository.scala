@@ -7,7 +7,7 @@ import monix.eval.Task
 
 trait ModifiedLarRepository[A, B] {
   def find(browserFields: List[QueryField], year: Int): Source[A, NotUsed]
-  def findAndAggregate(browserFields: List[QueryField], year: Int): Task[Statistic]
+  def findAndAggregate(instQueryField: QueryField, geoQueryField: QueryField, hmdaQueryFields: List[LarQueryField], year: Int): Task[Statistic]
   def findFilers(leiFields: List[QueryField], year: Int): Task[Seq[B]]
 }
 
