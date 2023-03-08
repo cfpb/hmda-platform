@@ -11,24 +11,24 @@ import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.CronConfigLoader.{ CronString, larPublicCron, larPublicYears }
+import hmda.publisher.helper.CronConfigLoader.{CronString, larPublicCron, larPublicYears}
 import hmda.publisher.helper._
-import hmda.publisher.query.component.{ ModifiedLarRepository, PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, YearPeriod }
+import hmda.publisher.query.component.{ModifiedLarRepository, PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, YearPeriod}
 import hmda.publisher.query.lar.ModifiedLarEntityImpl
-import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear }
-import hmda.publisher.scheduler.schedules.Schedules.{ LarPublicSchedule, LarPublicScheduler2018, LarPublicScheduler2019, LarPublicScheduler2020, LarPublicScheduler2021 }
-import hmda.publisher.util.{ PublishingReporter, ScheduleCoordinator }
+import hmda.publisher.scheduler.schedules.{Schedule, ScheduleWithYear}
+import hmda.publisher.scheduler.schedules.Schedules.{CombinedMLarPublicScheduler2018, CombinedMLarPublicScheduler2019, CombinedMLarPublicScheduler2020, CombinedMLarPublicScheduler2021, CombinedMLarPublicScheduler2022, LarPublicSchedule, LarPublicScheduler2018, LarPublicScheduler2019, LarPublicScheduler2020, LarPublicScheduler2021}
+import hmda.publisher.util.{PublishingReporter, ScheduleCoordinator}
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 import hmda.publisher.util.ScheduleCoordinator.Command._
 import hmda.publisher.validation.PublishingGuard
-import hmda.publisher.validation.PublishingGuard.{ Period, Scope }
+import hmda.publisher.validation.PublishingGuard.{Period, Scope}
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
 import slick.basic.DatabasePublisher
 
 import scala.concurrent.Future
 import scala.concurrent.duration.HOURS
-import scala.util.{ Failure, Success }
+import scala.util.{Failure, Success}
 // $COVERAGE-OFF$
 class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command], scheduler: ActorRef[ScheduleCoordinator.Command])
   extends HmdaActor
@@ -55,6 +55,8 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
   def mlarRepository2019               = new ModifiedLarRepository2019(dbConfig)
   def mlarRepository2020               = new ModifiedLarRepository2020(dbConfig)
   def mlarRepository2021               = new ModifiedLarRepository2021(dbConfig)
+  def mlarRepository2022               = new ModifiedLarRepository2022(dbConfig)
+
 
   val publishingGuard: PublishingGuard = PublishingGuard.create(this)(context.system)
 
@@ -82,11 +84,8 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
         val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
 
         for {
-          result <- larPublicStream(mlarRepository2018.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, LarPublicScheduler2018)
-          //_ <- persistFileForQa(result.key, result.bucket, ModifiedLarEntityImpl.parseFromPSVUnsafe, qaMlarRepository2018)
+          _ <- larPublicStream(mlarRepository2018.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, LarPublicScheduler2018,"")
         } yield ()
-
-
       }
 
     case LarPublicScheduler2019 =>
@@ -98,8 +97,7 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
         val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
 
         for {
-          result <- larPublicStream(mlarRepository2019.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, LarPublicScheduler2019)
-         // _ <- persistFileForQa(result.key, result.bucket, ModifiedLarEntityImpl.parseFromPSVUnsafe, qaMlarRepository2019)
+          _ <- larPublicStream(mlarRepository2019.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, LarPublicScheduler2019,"")
         } yield ()
       }
 
@@ -113,8 +111,7 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
         val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
 
         for {
-          result <- larPublicStream(mlarRepository2020.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, LarPublicScheduler2020)
-          // _ <- persistFileForQa(result.key, result.bucket, ModifiedLarEntityImpl.parseFromPSVUnsafe, qaMlarRepository2020)
+          _ <- larPublicStream(mlarRepository2020.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, LarPublicScheduler2020,"")
         } yield ()
       }
 
@@ -127,8 +124,87 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
         val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
 
         for {
-          result <- larPublicStream(mlarRepository2021.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, LarPublicScheduler2021)
+          _ <- larPublicStream(mlarRepository2021.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, LarPublicScheduler2021,"")
           // _ <- persistFileForQa(result.key, result.bucket, ModifiedLarEntityImpl.parseFromPSVUnsafe, qaMlarRepository2021)
+        } yield ()
+      }
+
+    case CombinedMLarPublicScheduler2018 =>
+      publishingGuard.runIfDataIsValid(Period.y2018, Scope.Public) {
+        val fileName         = "2018_combined_mlar.txt"
+        val zipDirectoryName = "2018_combined_mlar.zip"
+        val s3Path           = s"$environmentPublic/dynamic-data/2018/combined-mlar/"
+        val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
+        val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
+
+        for {
+          _ <- larPublicStream(mlarRepository2018.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, CombinedMLarPublicScheduler2018,"combined")
+        } yield ()
+      }
+
+    case CombinedMLarPublicScheduler2018 =>
+      publishingGuard.runIfDataIsValid(Period.y2018, Scope.Public) {
+        val fileName         = "2018_combined_mlar.txt"
+        val zipDirectoryName = "2018_combined_mlar.zip"
+        val s3Path           = s"$environmentPublic/dynamic-data/2018/combined-mlar/"
+        val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
+        val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
+
+        for {
+          _ <- larPublicStream(mlarRepository2018.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, CombinedMLarPublicScheduler2018,"combined")
+        } yield ()
+      }
+
+
+    case CombinedMLarPublicScheduler2019 =>
+      publishingGuard.runIfDataIsValid(Period.y2018, Scope.Public) {
+        val fileName         = "2019_combined_mlar.txt"
+        val zipDirectoryName = "2019_combined_mlar.zip"
+        val s3Path           = s"$environmentPublic/dynamic-data/2019/combined-mlar/"
+        val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
+        val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
+
+        for {
+          _ <- larPublicStream(mlarRepository2019.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, CombinedMLarPublicScheduler2019,"combined")
+        } yield ()
+      }
+
+    case CombinedMLarPublicScheduler2020 =>
+      publishingGuard.runIfDataIsValid(Period.y2020, Scope.Public) {
+        val fileName         = "2020_combined_mlar.txt"
+        val zipDirectoryName = "2020_combined_mlar.zip"
+        val s3Path           = s"$environmentPublic/dynamic-data/2020/combined-mlar/"
+        val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
+        val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
+
+        for {
+          _ <- larPublicStream(mlarRepository2020.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, CombinedMLarPublicScheduler2020,"combined")
+        } yield ()
+      }
+
+    case CombinedMLarPublicScheduler2021 =>
+      publishingGuard.runIfDataIsValid(Period.y2020, Scope.Public) {
+        val fileName         = "2021_combined_mlar.txt"
+        val zipDirectoryName = "2021_combined_mlar.zip"
+        val s3Path           = s"$environmentPublic/dynamic-data/2021/combined-mlar/"
+        val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
+        val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
+
+        for {
+          _ <- larPublicStream(mlarRepository2021.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, CombinedMLarPublicScheduler2021,"combined")
+        } yield ()
+      }
+
+    case CombinedMLarPublicScheduler2022 =>
+      publishingGuard.runIfDataIsValid(Period.y2020, Scope.Public) {
+        val fileName         = "2022_combined_mlar.txt"
+        val zipDirectoryName = "2020_combined_mlar.zip"
+        val s3Path           = s"$environmentPublic/dynamic-data/2022/combined-mlar/"
+        val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
+        val bucket           = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
+
+        for {
+          _ <- larPublicStream(mlarRepository2022.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, CombinedMLarPublicScheduler2022,"combined")
         } yield ()
       }
 
@@ -143,7 +219,7 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
         availableRepos.get(year) match {
           case Some(repo) =>
             for {
-              _ <- larPublicStream(repo.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, LarPublicSchedule)
+              _ <- larPublicStream(repo.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, LarPublicSchedule,"")
             } yield ()
           case None => log.error("No available publisher found for {} in year {}", schedule, year)
         }
@@ -155,7 +231,8 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
                                bucket: String,
                                key: String,
                                fileName: String,
-                               schedule: Schedule
+                               schedule: Schedule,
+                               outputType: String
                              ): Future[MultipartUploadResult] = {
 
     //PSV Sync
@@ -165,8 +242,8 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
 
     val fileStream: Source[ByteString, Any] =
       Source.fromPublisher(data)
-        .map(_.toPublicPSV + "\n")
-        .prepend(Source.single(MLARHeader))
+        .map( if (outputType.equalsIgnoreCase("combined")) _.toCombinedMLAR + "\n" else _.toPublicPSV + "\n")
+        .prepend(if (outputType.equalsIgnoreCase("combined")) Source.single(CombinedMLARHeaderPSV)  else Source.single(MLARHeader))
         .map(s => ByteString(s))
 
     val zipStream = Source(List((ArchiveMetadata(fileName), fileStream)))

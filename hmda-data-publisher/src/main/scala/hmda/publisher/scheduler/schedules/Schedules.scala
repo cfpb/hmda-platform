@@ -16,6 +16,11 @@ object Schedules extends Enum[Schedule] {
   case object LarPublicScheduler2019    extends Schedule
   case object LarPublicScheduler2020    extends Schedule
   case object LarPublicScheduler2021    extends Schedule
+  case object CombinedMLarPublicScheduler2018    extends Schedule
+  case object CombinedMLarPublicScheduler2019    extends Schedule
+  case object CombinedMLarPublicScheduler2020    extends Schedule
+  case object CombinedMLarPublicScheduler2021    extends Schedule
+  case object CombinedMLarPublicScheduler2022    extends Schedule
   case object LarScheduler2018          extends Schedule
   case object LarScheduler2019          extends Schedule
   case object LarScheduler2020          extends Schedule
