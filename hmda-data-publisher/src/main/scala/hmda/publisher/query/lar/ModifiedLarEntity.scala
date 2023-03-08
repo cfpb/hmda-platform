@@ -5,6 +5,8 @@ import io.chrisdavenport.cormorant
 import io.chrisdavenport.cormorant.CSV
 import io.chrisdavenport.cormorant.implicits._
 import cormorant.generic.semiauto._
+import hmda.parser.filing.ts.TsCsvParser.extractOpt
+import hmda.publisher.query.component.YearPeriod
 import hmda.util.PsvParsingCompanion
 
 case class ModifiedLarPartOne(
@@ -137,7 +139,7 @@ object ModifiedLarPartTwo extends PsvParsingCompanion[ModifiedLarPartTwo] {
 }
 
 case class ModifiedLarPartThree(
-                                 baloonPayment: Option[Int] = Some(0),
+                                 balloonPayment: Option[Int] = Some(0),
                                  otherAmortization: Option[Int] = Some(0),
                                  propertyValue: String = "",
                                  constructionMethod: Option[String] = Some(""),
@@ -157,7 +159,7 @@ case class ModifiedLarPartThree(
                                ) extends ColumnDataFormatter {
 
   def toPublicPSV: String =
-    s"${extractOpt(baloonPayment)}|" +
+    s"${extractOpt(balloonPayment)}|" +
       s"${extractOpt(otherAmortization)}|" +
       toBigDecimalString(propertyValue) + "|" +
       s"${extractOpt(constructionMethod)}|${extractOpt(occupancyType)}|" +
@@ -167,7 +169,7 @@ case class ModifiedLarPartThree(
       s"|${extractOpt(ethnicityApplicant3)}|${extractOpt(ethnicityApplicant4)}|"
 
   def toPublicCSV: String =
-    s"${extractOpt(baloonPayment)}," +
+    s"${extractOpt(balloonPayment)}," +
       s"${extractOpt(otherAmortization)}," +
       toBigDecimalString(propertyValue) + "," +
       s"${extractOpt(constructionMethod)},${extractOpt(occupancyType)}," +
@@ -316,7 +318,101 @@ case class ModifiedLarEntityImpl(
       mlarPartFive.toPublicCSV +
       mlarPartSix.toPublicCSV).replaceAll("(\r\n)|\r|\n", "")
 
+
+
+  def toCombinedMLAR(delimiter: String): String = {
+
+   val combinedMlar=  s"${extractOpt(mlarPartOne.filingYear)}${delimiter}" +
+      s"${mlarPartOne.lei}${delimiter}" +
+      s"${extractOpt(mlarPartOne.loanType)}${delimiter}" +
+      s"${extractOpt(mlarPartOne.loanPurpose)}${delimiter}" +
+      s"${extractOpt(mlarPartOne.preapproval)}${delimiter}" +
+      s"${extractOpt(mlarPartThree.constructionMethod)}${delimiter}" +
+      s"${extractOpt(mlarPartThree.occupancyType)}${delimiter}" +
+      s"${extractOpt(mlarPartTwo.loanAmount)}${delimiter}" +
+      s"${extractOpt(mlarPartOne.actionTakenType)}${delimiter}" +
+      s"${extractOpt(mlarPartOne.state)}${delimiter}" +
+      s"${extractOpt(mlarPartOne.county)}${delimiter}" +
+      s"${extractOpt(mlarPartOne.tract)}${delimiter}" +
+      s"${extractOpt(mlarPartThree.ethnicityApplicant1)}${delimiter}" +
+      s"${extractOpt(mlarPartThree.ethnicityApplicant2)}${delimiter}" +
+      s"${extractOpt(mlarPartThree.ethnicityApplicant3)}${delimiter}" +
+      s"${extractOpt(mlarPartThree.ethnicityApplicant4)}${delimiter}" +
+      s"${extractOpt(mlarPartFour.ethnicityApplicant5)}${delimiter}" +
+      s"${extractOpt(mlarPartFour.ethnicityCoApplicant1)}${delimiter}" +
+      s"${extractOpt(mlarPartFour.ethnicityCoApplicant2)}${delimiter}" +
+      s"${extractOpt(mlarPartFour.ethnicityCoApplicant3)}${delimiter}" +
+      s"${extractOpt(mlarPartFour.ethnicityCoApplicant4)}${delimiter}" +
+      s"${extractOpt(mlarPartFour.ethnicityCoApplicant5)}${delimiter}" +
+      s"${extractOpt(mlarPartFour.ethnicityObservedApplicant)}${delimiter}" +
+      s"${extractOpt(mlarPartFour.ethnicityObservedCoApplicant)}${delimiter}" +
+      s"${extractOpt(mlarPartFour.raceApplicant1)}${delimiter}" +
+      s"${extractOpt(mlarPartFour.raceApplicant2)}${delimiter}" +
+      s"${extractOpt(mlarPartFour.raceApplicant3)}${delimiter}" +
+      s"${extractOpt(mlarPartFour.raceApplicant4)}${delimiter}" +
+      s"${extractOpt(mlarPartFour.raceApplicant5)}${delimiter}" +
+      s"${extractOpt(mlarPartFour.raceCoApplicant1)}${delimiter}" +
+      s"${extractOpt(mlarPartFour.raceCoApplicant2)}${delimiter}" +
+      s"${extractOpt(mlarPartFour.raceCoApplicant3)}${delimiter}" +
+      s"${extractOpt(mlarPartFour.raceCoApplicant4)}${delimiter}" +
+      s"${extractOpt(mlarPartFive.raceCoApplicant5)}${delimiter}" +
+      s"${extractOpt(mlarPartFive.raceObservedApplicant)}${delimiter}" +
+      s"${extractOpt(mlarPartFive.raceObservedCoApplicant)}${delimiter}" +
+      s"${extractOpt(mlarPartFive.sexApplicant)}${delimiter}" +
+      s"${extractOpt(mlarPartFive.sexCoApplicant)}${delimiter}" +
+      s"${extractOpt(mlarPartFive.observedSexApplicant)}${delimiter}" +
+      s"${extractOpt(mlarPartFive.observedSexCoApplicant)}${delimiter}" +
+      s"${extractOpt(mlarPartFive.ageApplicant)}${delimiter}" +
+      s"${extractOpt(mlarPartFive.applicantAgeGreaterThan62)}${delimiter}" +
+      s"${extractOpt(mlarPartFive.ageCoApplicant)}${delimiter}" +
+      s"${extractOpt(mlarPartFive.coapplicantAgeGreaterThan62)}${delimiter}" +
+      s"${extractOpt(mlarPartThree.income)}${delimiter}" +
+      s"${extractOpt(mlarPartOne.purchaserType)}${delimiter}" +
+      s"${extractOpt(mlarPartTwo.rateSpread)}${delimiter}" +
+      s"${extractOpt(mlarPartTwo.hoepaStatus)}${delimiter}" +
+      s"${extractOpt(mlarPartOne.lienStatus)}${delimiter}" +
+      s"${extractOpt(mlarPartThree.creditScoreTypeApplicant)}${delimiter}" +
+      s"${extractOpt(mlarPartThree.creditScoreTypeCoApplicant)}${delimiter}" +
+      s"${extractOpt(mlarPartSix.denialReason1)}${delimiter}" +
+      s"${extractOpt(mlarPartSix.denialReason2)}${delimiter}" +
+      s"${extractOpt(mlarPartSix.denialReason3)}${delimiter}" +
+      s"${extractOpt(mlarPartSix.denialReason4)}${delimiter}" +
+      s"${extractOpt(mlarPartTwo.totalLoanCosts)}${delimiter}" +
+      s"${extractOpt(mlarPartTwo.totalPoints)}${delimiter}" +
+      s"${extractOpt(mlarPartTwo.originationCharges)}${delimiter}" +
+      s"${extractOpt(mlarPartTwo.discountPoints)}${delimiter}" +
+      s"${extractOpt(mlarPartTwo.lenderCredits)}${delimiter}" +
+      s"${extractOpt(mlarPartTwo.interestRate)}${delimiter}" +
+      s"${extractOpt(mlarPartTwo.paymentPenalty)}${delimiter}" +
+      s"${extractOpt(mlarPartThree.debtToIncome)}${delimiter}" +
+      s"${extractOpt(mlarPartTwo.loanValueRatio)}${delimiter}" +
+      s"${extractOpt(mlarPartTwo.loanTerm)}${delimiter}" +
+      s"${extractOpt(mlarPartTwo.rateSpreadIntro)}${delimiter}" +
+      s"${extractOpt(mlarPartThree.balloonPayment)}${delimiter}" +
+      s"${extractOpt(mlarPartTwo.insertOnlyPayment)}${delimiter}" +
+      s"${extractOpt(mlarPartTwo.amortization)}${delimiter}" +
+      s"${extractOpt(mlarPartThree.otherAmortization)}${delimiter}" +
+      s"${mlarPartThree.propertyValue}${delimiter}" +
+      s"${extractOpt(mlarPartThree.homeSecurityPolicy)}${delimiter}" +
+      s"${extractOpt(mlarPartThree.landPropertyInterest)}${delimiter}" +
+      s"${extractOpt(mlarPartThree.totalUnits)}${delimiter}" +
+      s"${extractOpt(mlarPartThree.mfAffordable)}${delimiter}" +
+      s"${extractOpt(mlarPartFive.applicationSubmission)}${delimiter}" +
+      s"${extractOpt(mlarPartFive.payable)}${delimiter}" +
+      s"${extractOpt(mlarPartFive.aus1)}${delimiter}" +
+      s"${extractOpt(mlarPartFive.aus2)}${delimiter}" +
+      s"${extractOpt(mlarPartFive.aus3)}${delimiter}" +
+      s"${extractOpt(mlarPartFive.aus4)}${delimiter}" +
+      s"${extractOpt(mlarPartSix.aus5)}${delimiter}" +
+      s"${extractOpt(mlarPartTwo.reverseMortgage)}${delimiter}" +
+      s"${extractOpt(mlarPartTwo.lineOfCredits)}${delimiter}" +
+      s"${extractOpt(mlarPartTwo.businessOrCommercial)}"
+
+    combinedMlar.replaceAll("(\r\n)|\r|\n", "")
+  }
 }
+
+
 
 object ModifiedLarEntityImpl extends PsvParsingCompanion[ModifiedLarEntityImpl] {
   override val psvReader: cormorant.Read[ModifiedLarEntityImpl] = { (a: CSV.Row) =>
