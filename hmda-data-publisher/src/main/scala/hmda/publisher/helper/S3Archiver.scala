@@ -39,7 +39,9 @@ object S3Archiver extends LazyLogging{
         S3.multipartCopy(srcBucket, srcKey, destBucket, destKey)
           .withAttributes(S3Attributes.settings(s3Settings))
           .run()
-      } else Future.unit
+      } else  {
+        logger.info("ERROR ARCHIVING!!!")
+        Future.unit}
 
     } yield ()
 }
