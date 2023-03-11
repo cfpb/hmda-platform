@@ -39,6 +39,9 @@ trait PGTableNameLoader {
 
   //2021 table names
   val mlar2021TableName: String   = pgTableConfig.getString("mlar2021TableName")
+  val mlar2022TableName: String   = pgTableConfig.getString("mlar2022TableName")
+  val mlar2023TableName: String   = pgTableConfig.getString("mlar2023TableName")
+
 
   val panel2021TableName: String   = pgTableConfig.getString("panel2021TableName")
 

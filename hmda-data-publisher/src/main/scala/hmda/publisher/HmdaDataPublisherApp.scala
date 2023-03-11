@@ -66,6 +66,7 @@ object HmdaDataPublisherApp extends App with PGTableNameLoader {
   private val scheduleCoordinator = actorSystem.spawn(ScheduleCoordinator.behaviors, "ScheduleCoordinator")
 
   val allSchedulers = AllSchedulers(
+    combinedMLarPublicScheduler = actorSystem.actorOf(Props(new CombinedMLarPublicScheduler(publishingReporter, scheduleCoordinator)), "CombinedMLarPublicScheduler"),
     larPublicScheduler = actorSystem.actorOf(Props(new LarPublicScheduler(publishingReporter, scheduleCoordinator)), "LarPublicScheduler"),
     larScheduler = actorSystem.actorOf(Props(new LarScheduler(publishingReporter, scheduleCoordinator)), "LarScheduler"),
     panelScheduler = actorSystem.actorOf(Props(new PanelScheduler(publishingReporter, scheduleCoordinator)), "PanelScheduler"),
