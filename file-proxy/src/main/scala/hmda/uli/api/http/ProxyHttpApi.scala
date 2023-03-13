@@ -126,7 +126,7 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
           path("zip") {
             (extractUri & get) { uri =>
               checkYearAvailable(getAvailableYears(DYNAMIC_PUB_KEY), year) {
-                val s3Key = s"$environment/dynamic-data/$year/combined-mlar-header/${year}_combined_mlar_header.zip"
+                val s3Key = s"$environment/dynamic-data/combined-mlar-header/$year/${year}_combined_mlar_header.zip"
                 streamingS3Route(s3Key)
               }
             }
@@ -135,7 +135,7 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
             path("zip" / "header") {
               (extractUri & get) { uri =>
                 checkYearAvailable(getAvailableYears(DYNAMIC_PUB_KEY), year) {
-                  val s3Key = s"$environment/dynamic-data/$year/combined-mlar/${year}_combined_mlar.zip"
+                  val s3Key = s"$environment/dynamic-data/combined-mlar-header/$year/${year}_combined_mlar.zip"
                   streamingS3Route(s3Key)
                 }
               }
