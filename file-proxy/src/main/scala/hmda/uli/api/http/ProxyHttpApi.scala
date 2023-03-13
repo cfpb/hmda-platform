@@ -120,8 +120,7 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
             }
           }
         } ~
-
-        //Modified Lar Route
+        //Combined Modified Lar
         pathPrefix ("combined-modifiedLar"/ "year" / Segment ) { (year) =>
           //PSV Without Header
           path("zip") {
@@ -132,7 +131,7 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
               }
             }
           } ~
-            //PSC With Header
+            //PSV With Header
             path("zip" / "header") {
               (extractUri & get) { uri =>
                 checkYearAvailable(getAvailableYears(DYNAMIC_PUB_KEY), year) {
@@ -141,24 +140,6 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
                 }
               }
             } ~
-            //TXT Without Header
-            path("txt") {
-              (extractUri & get) { uri =>
-                checkYearAvailable(getAvailableYears(DYNAMIC_PUB_KEY), year) {
-                  val s3Key = s"$environment/modified-lar/$year/$lei.txt"
-                  streamingS3Route(s3Key)
-                }
-              }
-            } ~
-            //TXT With Header
-            path("txt" / "header") {
-              (extractUri & get) { uri =>
-                checkYearAvailable(getAvailableYears(DYNAMIC_PUB_KEY), year) {
-                  val s3Key = s"$environment/modified-lar/$year/header/${lei}_header.txt"
-                  streamingS3Route(s3Key)
-                }
-              }
-            }
         } ~
         //IRS Report Route
         path("reports" / "irs" / "year" / Segment / "institution" / Segment) { (year, lei) =>
