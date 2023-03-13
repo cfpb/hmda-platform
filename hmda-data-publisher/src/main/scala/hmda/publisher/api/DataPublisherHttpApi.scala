@@ -50,6 +50,7 @@ private class DataPublisherHttpApi(schedulers: AllSchedulers) {
     val receiver = msg match {
       case PanelSchedule => panelScheduler
       case LarPublicSchedule => larPublicScheduler
+      case CombinedMLarPublicSchedule => combinedMLarPublicScheduler
       case LarSchedule => larScheduler
       case LarLoanLimitSchedule => larScheduler
       case LarQuarterlySchedule => larScheduler

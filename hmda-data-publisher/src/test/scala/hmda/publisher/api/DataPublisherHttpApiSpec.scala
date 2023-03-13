@@ -54,6 +54,7 @@ class DataPublisherHttpApiSpec extends WordSpec with MustMatchers with Scalatest
         case x @ Schedules.LarSchedulerQuarterly2023 => testTrigger(x, _.larScheduler)
         case x @ Schedules.TsSchedulerQuarterly2023  => testTrigger(x, _.tsScheduler)
         case x @ Schedules.PanelSchedule             => testTrigger(x, _.panelScheduler)
+        case x @ Schedules.CombinedMLarPublicSchedule => testTrigger(x, _.combinedMLarPublicScheduler)
         case x @ Schedules.LarPublicSchedule         => testTrigger(x, _.larPublicScheduler)
         case x @ Schedules.LarSchedule               => testTrigger(x, _.larScheduler)
         case x @ Schedules.LarLoanLimitSchedule      => testTrigger(x, _.larScheduler)
@@ -66,13 +67,14 @@ class DataPublisherHttpApiSpec extends WordSpec with MustMatchers with Scalatest
   }
 
   def testTrigger(msg: Schedule, schedulerToBeTriggered: AllSchedulers => ActorRef): Unit = {
-    val probes @ List(p1, p2, p3, p4, p5) = List.fill(5)(TestProbe())
+    val probes @ List(p1, p2, p3, p4, p5,p6) = List.fill(6)(TestProbe())
     val allSchedulers = AllSchedulers(
       p1.ref,
       p2.ref,
       p3.ref,
       p4.ref,
-      p5.ref
+      p5.ref,
+      p6.ref
     )
     val routes    = new DataPublisherHttpApi(allSchedulers).routes
     val scheduler = schedulerToBeTriggered(allSchedulers)

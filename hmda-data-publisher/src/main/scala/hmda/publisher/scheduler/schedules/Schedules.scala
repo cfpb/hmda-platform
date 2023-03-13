@@ -44,6 +44,7 @@ object Schedules extends Enum[Schedule] {
   case object TsSchedulerQuarterly2023  extends Schedule
   case object PanelSchedule extends Schedule
   case object LarPublicSchedule extends Schedule
+  case object CombinedMLarPublicSchedule extends Schedule
   case object LarSchedule extends Schedule
   case object LarLoanLimitSchedule extends Schedule
   case object TsPublicSchedule extends Schedule
