@@ -10,6 +10,7 @@ metadata:
       name: {{ template "rate-limit.name" . }}
       service: "{{ template "rate-limit.name" . }}:{{ .Values.grpc.port }}"
       ambassador_id: ambassador-default-1
+      protocol_version: v3
   labels:
     app: ratelimiter
 spec:
