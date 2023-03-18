@@ -1,33 +1,33 @@
 package hmda.publisher.scheduler
 
-import java.time.{ Clock, Instant, LocalDateTime }
+import java.time.{Clock, Instant, LocalDateTime}
 import java.time.format.DateTimeFormatter
 import akka.actor.typed.ActorRef
 import akka.stream.Materializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3._
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.scaladsl.{ Sink, Source }
+import akka.stream.scaladsl.{Sink, Source}
 import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.CronConfigLoader.{ CronString, tsCron, tsQuarterlyCron, tsQuarterlyYears, tsYears }
-import hmda.publisher.helper.{ PrivateAWSConfigLoader, QuarterTimeBarrier, S3Utils, SnapshotCheck }
-import hmda.publisher.query.component.{ PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, TransmittalSheetTable, TsRepository, YearPeriod }
-import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear }
-import hmda.publisher.scheduler.schedules.Schedules.{ TsQuarterlySchedule, TsSchedule, TsScheduler2018, TsScheduler2019, TsScheduler2020, TsScheduler2021, TsScheduler2022, TsSchedulerQuarterly2020, TsSchedulerQuarterly2021, TsSchedulerQuarterly2022, TsSchedulerQuarterly2023 }
-import hmda.publisher.util.{ PublishingReporter, ScheduleCoordinator }
+import hmda.publisher.helper.CronConfigLoader.{CronString, specificTsCron, specificTsYears, tsCron, tsQuarterlyCron, tsQuarterlyYears, tsYears}
+import hmda.publisher.helper.{PrivateAWSConfigLoader, QuarterTimeBarrier, S3Utils, SnapshotCheck}
+import hmda.publisher.query.component.{PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, TransmittalSheetTable, TsRepository, YearPeriod}
+import hmda.publisher.scheduler.schedules.{Schedule, ScheduleWithYear}
+import hmda.publisher.scheduler.schedules.Schedules.{TsQuarterlySchedule, TsSchedule, TsScheduler2018, TsScheduler2019, TsScheduler2020, TsScheduler2021, TsScheduler2022, TsSchedulerQuarterly2020, TsSchedulerQuarterly2021, TsSchedulerQuarterly2022, TsSchedulerQuarterly2023}
+import hmda.publisher.util.{PublishingReporter, ScheduleCoordinator}
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 import hmda.publisher.util.ScheduleCoordinator.Command._
 import hmda.publisher.validation.PublishingGuard
-import hmda.publisher.validation.PublishingGuard.{ Period, Scope }
+import hmda.publisher.validation.PublishingGuard.{Period, Scope}
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.ts._
 import hmda.util.BankFilterUtils._
 
 import scala.concurrent.Future
 import scala.concurrent.duration.HOURS
-import scala.util.{ Failure, Success }
+import scala.util.{Failure, Success}
 // $COVERAGE-OFF$
 class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], scheduler: ActorRef[ScheduleCoordinator.Command])
   extends HmdaActor
@@ -105,6 +105,10 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
     tsQuarterlyYears.zipWithIndex.foreach {
       case (year, idx) =>
         scheduler ! Schedule(s"TsQuarterlySchedule_$year", self, ScheduleWithYear(TsQuarterlySchedule, year), tsQuarterlyCron.applyOffset(idx, HOURS))
+    }
+    specificTsYears.zipWithIndex.foreach {
+      case (year, idx) =>
+        scheduler ! Schedule(s"TsSchedule_$year", self, ScheduleWithYear(TsSchedule, year), specificTsCron.applyOffset(idx, HOURS))
     }
   }
 

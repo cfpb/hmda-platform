@@ -10,7 +10,7 @@ import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.CronConfigLoader.{CronString, larPublicCron, larPublicYears}
+import hmda.publisher.helper.CronConfigLoader.{CronString, combinedMlarCron, combinedMlarYears, larPublicCron, larPublicYears}
 import hmda.publisher.helper._
 import hmda.publisher.query.component._
 import hmda.publisher.query.lar.ModifiedLarEntityImpl
@@ -61,12 +61,12 @@ class CombinedMLarPublicScheduler(publishingReporter: ActorRef[PublishingReporte
     .withListBucketApiVersion(ListBucketVersion2)
 
   override def preStart(): Unit = {
-    larPublicYears.zipWithIndex.foreach {
-      case (year, idx) => scheduler ! Schedule(s"CombinedMLarPublicSchedule_$year", self, ScheduleWithYear(CombinedMLarPublicSchedule, year), larPublicCron.applyOffset(idx, HOURS))
+    combinedMlarYears.zipWithIndex.foreach {
+      case (year, idx) => scheduler ! Schedule(s"CombinedMLarPublicSchedule_$year", self, ScheduleWithYear(CombinedMLarPublicSchedule, year), combinedMlarCron.applyOffset(idx, HOURS))
     }
   }
   override def postStop(): Unit = {
-    larPublicYears.foreach(year => scheduler ! Unschedule(s"CombinedMLarPublicScheduler_$year"))
+    combinedMlarYears.foreach(year => scheduler ! Unschedule(s"CombinedMLarPublicScheduler_$year"))
   }
   override def receive: Receive = {
 

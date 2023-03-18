@@ -7,26 +7,26 @@ import akka.actor.typed.ActorRef
 import akka.stream.Materializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{ MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings }
+import akka.stream.alpakka.s3.{MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.CronConfigLoader.{ CronString, panelCron, panelYears }
-import hmda.publisher.helper.{ PrivateAWSConfigLoader, S3Utils, SnapshotCheck }
-import hmda.publisher.query.component.{ InstitutionEmailComponent, InstitutionRepository, PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023 }
-import hmda.publisher.query.panel.{ InstitutionAltEntity, InstitutionEmailEntity, InstitutionEntity }
-import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear }
-import hmda.publisher.scheduler.schedules.Schedules.{ PanelSchedule, PanelScheduler2018, PanelScheduler2019, PanelScheduler2020, PanelScheduler2021, PanelScheduler2022 }
-import hmda.publisher.util.{ PublishingReporter, ScheduleCoordinator }
+import hmda.publisher.helper.CronConfigLoader.{CronString, panelCron, panelYears, specificPanelCron, specificPanelYears}
+import hmda.publisher.helper.{PrivateAWSConfigLoader, S3Utils, SnapshotCheck}
+import hmda.publisher.query.component.{InstitutionEmailComponent, InstitutionRepository, PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023}
+import hmda.publisher.query.panel.{InstitutionAltEntity, InstitutionEmailEntity, InstitutionEntity}
+import hmda.publisher.scheduler.schedules.{Schedule, ScheduleWithYear}
+import hmda.publisher.scheduler.schedules.Schedules.{PanelSchedule, PanelScheduler2018, PanelScheduler2019, PanelScheduler2020, PanelScheduler2021, PanelScheduler2022}
+import hmda.publisher.util.{PublishingReporter, ScheduleCoordinator}
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 import hmda.publisher.util.ScheduleCoordinator.Command._
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
 
 import scala.concurrent.duration.HOURS
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.{ Failure, Success, Try }
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 // $COVERAGE-OFF$
 class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], scheduler: ActorRef[ScheduleCoordinator.Command])
   extends HmdaActor
@@ -69,10 +69,15 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], s
     panelYears.zipWithIndex.foreach {
       case (year, idx) => scheduler ! Schedule(s"PanelSchedule_$year", self, ScheduleWithYear(PanelSchedule, year), panelCron.applyOffset(idx, HOURS))
     }
+
+    specificPanelYears.zipWithIndex.foreach {
+      case (year, idx) => scheduler ! Schedule(s"PanelSchedule_$year", self, ScheduleWithYear(PanelSchedule, year), specificPanelCron.applyOffset(idx, HOURS))
+    }
   }
 
   override def postStop(): Unit = {
     panelYears.foreach(year => scheduler ! Unschedule(s"PanelSchedule_$year"))
+    specificPanelYears.foreach(year => scheduler ! Unschedule(s"PanelSchedule_$year"))
   }
 
   override def receive: Receive = {
