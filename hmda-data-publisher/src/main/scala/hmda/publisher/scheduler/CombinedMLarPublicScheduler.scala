@@ -79,7 +79,7 @@ class CombinedMLarPublicScheduler(publishingReporter: ActorRef[PublishingReporte
 
         val fileNameHeader = s"${year}_combined_mlar_header.txt"
         val zipNameHeader = s"${year}_combined_mlar_header.zip"
-        val s3PathHeader = s"$environmentPublic/dynamic-data/combined-mlar/header/$year/"
+        val s3PathHeader = s"$environmentPublic/dynamic-data/combined-mlar/$year/header"
         val fullFilePathHeader     = SnapshotCheck.pathSelector(s3PathHeader, zipNameHeader)
 
         availableRepos.get(year) match {
