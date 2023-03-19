@@ -72,15 +72,17 @@ class CombinedMLarPublicScheduler(publishingReporter: ActorRef[PublishingReporte
 
     case ScheduleWithYear(schedule, year) if schedule == CombinedMLarPublicSchedule =>
       publishingGuard.runIfDataIsValid(year, YearPeriod.Whole, Scope.Public) {
+
+        val fileNameHeader = s"${year}_combined_mlar_header.txt"
+        val zipNameHeader = s"${year}_combined_mlar_header.zip"
+        val s3PathHeader = s"$environmentPublic/dynamic-data/combined-mlar/$year/header/"
+        val fullFilePathHeader     = SnapshotCheck.pathSelector(s3PathHeader, zipNameHeader)
+
         val fileName = s"${year}_combined_mlar.txt"
         val zipFileName = s"${year}_combined_mlar.zip"
         val s3Path = s"$environmentPublic/dynamic-data/combined-mlar/$year/"
         val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipFileName)
 
-        val fileNameHeader = s"${year}_combined_mlar_header.txt"
-        val zipNameHeader = s"${year}_combined_mlar_header.zip"
-        val s3PathHeader = s"$environmentPublic/dynamic-data/combined-mlar/$year/header"
-        val fullFilePathHeader     = SnapshotCheck.pathSelector(s3PathHeader, zipNameHeader)
 
         availableRepos.get(year) match {
           case Some(repo) =>
