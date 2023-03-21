@@ -10,7 +10,7 @@ import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.CronConfigLoader.{CronString, larPublicCron, larPublicYears}
+import hmda.publisher.helper.CronConfigLoader.{CronString, combinedMlarCron, combinedMlarYears, larPublicCron, larPublicYears}
 import hmda.publisher.helper._
 import hmda.publisher.query.component._
 import hmda.publisher.query.lar.ModifiedLarEntityImpl
@@ -61,26 +61,28 @@ class CombinedMLarPublicScheduler(publishingReporter: ActorRef[PublishingReporte
     .withListBucketApiVersion(ListBucketVersion2)
 
   override def preStart(): Unit = {
-    larPublicYears.zipWithIndex.foreach {
-      case (year, idx) => scheduler ! Schedule(s"CombinedMLarPublicSchedule_$year", self, ScheduleWithYear(CombinedMLarPublicSchedule, year), larPublicCron.applyOffset(idx, HOURS))
+    combinedMlarYears.zipWithIndex.foreach {
+      case (year, idx) => scheduler ! Schedule(s"CombinedMLarPublicSchedule_$year", self, ScheduleWithYear(CombinedMLarPublicSchedule, year), combinedMlarCron.applyOffset(idx, HOURS))
     }
   }
   override def postStop(): Unit = {
-    larPublicYears.foreach(year => scheduler ! Unschedule(s"CombinedMLarPublicScheduler_$year"))
+    combinedMlarYears.foreach(year => scheduler ! Unschedule(s"CombinedMLarPublicScheduler_$year"))
   }
   override def receive: Receive = {
 
     case ScheduleWithYear(schedule, year) if schedule == CombinedMLarPublicSchedule =>
       publishingGuard.runIfDataIsValid(year, YearPeriod.Whole, Scope.Public) {
-        val fileName = s"${year}_combined_mlar.txt"
-        val zipFileName = s"${year}_combined_mlar.zip"
-        val s3Path = s"$environmentPublic/dynamic-data/combined-mlar/$year/"
-        val fullFilePath = s3Path+zipFileName
 
         val fileNameHeader = s"${year}_combined_mlar_header.txt"
         val zipNameHeader = s"${year}_combined_mlar_header.zip"
-        val s3PathHeader = s"$environmentPublic/dynamic-data/combined-mlar/header/$year/"
-        val fullFilePathHeader = s3PathHeader+zipNameHeader
+        val s3PathHeader = s"$environmentPublic/dynamic-data/combined-mlar/$year/header/"
+        val fullFilePathHeader     = SnapshotCheck.pathSelector(s3PathHeader, zipNameHeader)
+
+        val fileName = s"${year}_combined_mlar.txt"
+        val zipFileName = s"${year}_combined_mlar.zip"
+        val s3Path = s"$environmentPublic/dynamic-data/combined-mlar/$year/"
+        val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipFileName)
+
 
         availableRepos.get(year) match {
           case Some(repo) =>

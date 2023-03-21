@@ -50,7 +50,6 @@ object HmdaDataPublisherApp extends App with PGTableNameLoader {
   log.info("Using TS 2022 Table: " + ts2022TableName + "\n")
   log.info("Using EMAIL Table: " + emailTableName + "\n")
 
-  config.getObject("akka.quartz.schedules").forEach((k, v) => log.info(s"$k = ${v.render()}"))
 
   val mattermostNotifier = new MattermostNotifier(config.getString("hmda.publisher.validation.reportingUrl"))
   val publishingReporter = {

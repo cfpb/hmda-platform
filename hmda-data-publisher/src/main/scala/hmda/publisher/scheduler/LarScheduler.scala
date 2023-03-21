@@ -5,32 +5,32 @@ import akka.actor.typed.ActorRef
 import akka.stream.Materializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{ MemoryBufferType, MetaHeaders, S3Attributes, S3Settings }
+import akka.stream.alpakka.s3.{MemoryBufferType, MetaHeaders, S3Attributes, S3Settings}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import hmda.actor.HmdaActor
 import hmda.census.records.CensusRecords
 import hmda.model.census.Census
 import hmda.model.publication.Msa
-import hmda.publisher.helper.CronConfigLoader.{ CronString, larCron, larQuarterlyCron, larQuarterlyYears, larYears, loanLimitCron, loanLimitYears }
+import hmda.publisher.helper.CronConfigLoader.{CronString, larCron, larQuarterlyCron, larQuarterlyYears, larYears, loanLimitCron, loanLimitYears, specificLarCron, specificLarYears}
 import hmda.publisher.helper._
-import hmda.publisher.query.component.{ PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, YearPeriod }
-import hmda.publisher.query.lar.{ LarEntityImpl, LarEntityImpl2019, LarEntityImpl2020, LarEntityImpl2021, LarEntityImpl2022 }
-import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear }
+import hmda.publisher.query.component.{PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, YearPeriod}
+import hmda.publisher.query.lar.{LarEntityImpl, LarEntityImpl2019, LarEntityImpl2020, LarEntityImpl2021, LarEntityImpl2022}
+import hmda.publisher.scheduler.schedules.{Schedule, ScheduleWithYear}
 import hmda.publisher.scheduler.schedules.Schedules._
-import hmda.publisher.util.{ PublishingReporter, ScheduleCoordinator }
+import hmda.publisher.util.{PublishingReporter, ScheduleCoordinator}
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 import hmda.publisher.util.ScheduleCoordinator.Command._
 import hmda.publisher.validation.PublishingGuard
-import hmda.publisher.validation.PublishingGuard.{ Period, Scope }
+import hmda.publisher.validation.PublishingGuard.{Period, Scope}
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
 
 import java.time.format.DateTimeFormatter
-import java.time.{ Clock, Instant, LocalDateTime }
+import java.time.{Clock, Instant, LocalDateTime}
 import scala.concurrent.Future
 import scala.concurrent.duration.HOURS
-import scala.util.{ Failure, Success }
+import scala.util.{Failure, Success}
 // $COVERAGE-OFF$
 class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], scheduler: ActorRef[ScheduleCoordinator.Command])
   extends HmdaActor
@@ -131,12 +131,18 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
       case (year, idx) =>
         scheduler ! Schedule(s"LarQuarterlySchedule_$year", self, ScheduleWithYear(LarQuarterlySchedule, year), larQuarterlyCron.applyOffset(idx, HOURS))
     }
+
+    specificLarYears.zipWithIndex.foreach {
+      case (year, idx) =>
+        scheduler ! Schedule(s"LarSchedule_$year", self, ScheduleWithYear(LarSchedule, year), specificLarCron.applyOffset(idx, HOURS))
+    }
   }
 
   override def postStop() = {
     larYears.foreach(year => scheduler ! Unschedule(s"LarSchedule_$year"))
     loanLimitYears.foreach(year => scheduler ! Unschedule(s"LoanLimitSchedule_$year"))
     larQuarterlyYears.foreach(year => scheduler ! Unschedule(s"LarQuarterlySchedule_$year"))
+    specificLarYears.foreach(year => scheduler ! Unschedule(s"LarSchedule_$year"))
   }
 
   override def receive: Receive = {
