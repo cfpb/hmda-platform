@@ -47,6 +47,18 @@ trait Settings {
       }
       ModifiedLarTable(selected)
     }
+
+    def tableNameSelector(year: Int): Seq[String] = {
+      val selected = year match {
+        case 2018 => tableName2018
+        case 2019 => tableName2019
+        case 2020 => tableName2020
+        case 2021 => tableName2021
+        case _    => tableName2021
+      }
+
+      Seq(selected)
+    }
   }
 
   object redis {
