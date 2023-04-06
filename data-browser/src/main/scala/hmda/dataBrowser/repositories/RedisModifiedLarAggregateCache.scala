@@ -42,33 +42,27 @@ class RedisModifiedLarAggregateCache(redisClient: Task[RedisAsyncCommands[String
     }.onErrorFallbackTo(Task.unit)
 
   private def key(instQueryField: QueryField, geoQueryField: QueryField, hmdaQueries: List[LarQueryField], year: Int): String = {
-    // The year was originally a query field but it was split up later, we do this to preserve backwards compatibility
-    val yearQuery = QueryField(name = "year", year.toString :: Nil, dbName = "filing_year")
     // ensure we get a stable sorting order so we form keys correctly in Redis
-    val yearQueryField = List(yearQuery, instQueryField, geoQueryField)
+    val instGeoQueryField = List(instQueryField, geoQueryField)
     val hmdaQueryField = hmdaQueries.sortBy(_.name)
-    val yearRedisKey = yearQueryField
+    val instGeoRedisKey = instGeoQueryField
       .map(field => s"${field.name}:${field.values.mkString("|")}")
       .mkString(":")
     val hmdaRedisKey = hmdaQueryField
       .map(field => s"${field.name}:${field.value.mkString("|")}")
       .mkString(":")
 
-    s"$Prefix:$yearRedisKey:$hmdaRedisKey"
+    s"$Prefix:year:" + year.toString + ":table:" + database.tableNameSelector(year) + s":$instGeoRedisKey:$hmdaRedisKey"
   }
 
   private def filerKey(queryFields: List[QueryField], year: Int): String = {
-    // The year was originally a query field but it was split up later, we do this to preserve backwards compatibility
-    val yearQuery = QueryField(name = "year", year.toString :: Nil, dbName = "filing_year")
-    val tableQuery = QueryField(name = "table", database.tableNameSelector(year), dbName = "filing_table")
-    val sortedQueryFields = queryFields.sortBy(_.name)
     // ensure we get a stable sorting order so we form keys correctly in Redis
-    val finalQueryFields = (yearQuery :: tableQuery :: sortedQueryFields)
-    val redisKey = finalQueryFields
+    val sortedQueryFields = queryFields.sortBy(_.name)
+    val redisKey = sortedQueryFields
       .map(field => s"${field.name}:${field.values.mkString("|")}")
       .mkString(":")
 
-    s"$Prefix:$redisKey"
+    s"$Prefix:year:" + year.toString + ":table:" + database.tableNameSelector(year) + s":$redisKey"
   }
 
   override def find(instQueryField: QueryField, geoQueryField: QueryField, hmdaQueries: List[LarQueryField], year: Int): Task[Option[Statistic]] = {

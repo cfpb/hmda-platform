@@ -48,7 +48,7 @@ trait Settings {
       ModifiedLarTable(selected)
     }
 
-    def tableNameSelector(year: Int): Seq[String] = {
+    def tableNameSelector(year: Int): String = {
       val selected = year match {
         case 2018 => tableName2018
         case 2019 => tableName2019
@@ -57,7 +57,7 @@ trait Settings {
         case _    => tableName2021
       }
 
-      Seq(selected)
+      selected
     }
   }
 
