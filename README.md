@@ -45,8 +45,8 @@ The [Home Mortgage Disclosure Act (HMDA) Platform](http://ffiec.cfpb.gov/) is a 
 ## TS and LAR File Specs
 
 The data is submitted in a flat pipe (`|`) delimited TXT file. The text file is split into two parts: Transmission (TS) File -- first line in the file and Loan Application Register (LAR) -- all remaining lines of the file. Below are the links to the file specifications for data collected in years 2018 - current.
-- [Transmission  File Spec](https://github.com/cfpb/hmda-platform/blob/master/docs/v2/spec/2018_File_Spec_TS.csv)
-- [Loan Application Register File Spec](https://github.com/cfpb/hmda-platform/blob/master/docs/v2/spec/2018_File_Spec_LAR.csv)
+- [Transmission  File Spec](https://github.com/cfpb/hmda-platform/blob/master/docs/spec/Public_File_TS_Spec.csv)
+- [Loan Application Register File Spec](https://github.com/cfpb/hmda-platform/blob/master/docs/spec/Public_File_LAR_Spec.csv)
 
 ## End-to-End filing GIF
 

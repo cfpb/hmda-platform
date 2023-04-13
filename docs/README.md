@@ -61,9 +61,9 @@ This module generates Aggregate and Disclosure reports, as required by HMDA stat
 
 ## Dependencies
 
-### Java 9 SDK
+### Java 19 SDK
 
-The HMDA Platform runs on the Java Virtual Machine (JVM), and requires the Java 9 JDK to build and run the project. This project is currently being built and tested on [Oracle JDK 9](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html). See [Oracle's JDK Install Overview](http://docs.oracle.com/javase/9/docs/technotes/guides/install/install_overview.html) for install instructions.
+The HMDA Platform runs on the Java Virtual Machine (JVM), and requires the Java 19 JDK to build and run the project. This project is currently being built and tested on [Oracle JDK 19](https://www.oracle.com/java/technologies/javase/jdk19-archive-downloads.html). See [Oracle's JDK Install Overview](https://docs.oracle.com/en/java/javase/19/install/index.html) for install instructions.
 
 The HMDA Platform should also run on JDK 8.
 
@@ -164,7 +164,7 @@ For more details, please refer to the [Marathon Documentation](https://mesospher
 
 ### Data Specifications
 
-* [TS File Spec](spec/2018_File_Spec_TS.csv)
-* [LAR File Spec](spec/2018_File_Spec_LAR.csv)
+* [TS File Spec](https://github.com/cfpb/hmda-platform/blob/master/docs/spec/Public_File_TS_Spec.csv)
+* [LAR File Spec](https://github.com/cfpb/hmda-platform/blob/master/docs/spec/Public_File_LAR_Spec.csv)
 * [Institution Data Model Spec](spec/2018_Institution_Data_Model_Spec.csv)
 
