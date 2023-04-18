@@ -80,7 +80,8 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - db-data:/Users/bravoo/postgresql/data
+ #    - db-data:/var/lib/postgresql/data
 
   # ------------- Institutions-API ---------
   institutions-api:
