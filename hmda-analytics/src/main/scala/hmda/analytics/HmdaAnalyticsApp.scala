@@ -405,15 +405,15 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
                   LarConverter(lar = lar, 2022, isQuarterly = true)
                 )
               case Period(2023, Some("Q1")) =>
-                larRepository2022Q1.insert(
+                larRepository2023Q1.insert(
                   LarConverter(lar = lar, 2023, isQuarterly = true)
                 )
               case Period(2023, Some("Q2")) =>
-                larRepository2022Q2.insert(
+                larRepository2023Q2.insert(
                   LarConverter(lar = lar, 2023, isQuarterly = true)
                 )
               case Period(2023, Some("Q3")) =>
-                larRepository2022Q3.insert(
+                larRepository2023Q3.insert(
                   LarConverter(lar = lar, 2023, isQuarterly = true)
                 )
               case _ =>
