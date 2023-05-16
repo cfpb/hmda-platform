@@ -232,6 +232,7 @@ private[engine] object LarEngine2023Q extends ValidationEngine[LoanApplicationRe
     V713,
     V714,
     V715,
+    _2020.V716.withIndexedCounties(CensusRecords.indexedCounty2022),
     _2022.V721_1,
     _2022.V721_2,
     _2022.V720_1,
