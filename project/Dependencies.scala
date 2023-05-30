@@ -49,6 +49,7 @@ object Dependencies {
   lazy val circeParser              = "io.circe"           %% "circe-parser"                        % Version.circe
   lazy val akkaPersistenceCassandra = "com.typesafe.akka"  %% "akka-persistence-cassandra"          % Version.cassandraPluginVersion
   lazy val cassandraLauncher        = "com.typesafe.akka"  %% "akka-persistence-cassandra-launcher" % Version.cassandraPluginVersion
+  lazy val keyspacedriver           = "software.aws.mcs"   % "aws-sigv4-auth-cassandra-java-driver-plugin"  % "4.0.9"
   lazy val slick                    = "com.typesafe.slick" %% "slick"                               % Version.slick
   lazy val slickHikariCP            = "com.typesafe.slick" %% "slick-hikaricp"                      % Version.slick
   lazy val alpakkaSlick             = "com.lightbend.akka" %% "akka-stream-alpakka-slick"           % Version.alpakkaSlick
