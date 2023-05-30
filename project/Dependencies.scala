@@ -88,3 +88,4 @@ object Dependencies {
   // this is needed because of CVE-2021-44228 https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228
   lazy val log4jToSlf4j          = "org.apache.logging.log4j"   % "log4j-to-slf4j"              % Version.log4j % Test
 }
+
