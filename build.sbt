@@ -44,7 +44,8 @@ lazy val akkaPersistenceDeps =
     akkaPersistenceQuery,
     akkaClusterShardingTyped,
     akkaPersistenceCassandra,
-    cassandraLauncher
+    cassandraLauncher,
+    keyspacedriver
   )
 
 lazy val akkaHttpDeps =
