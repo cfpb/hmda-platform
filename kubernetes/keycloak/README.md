@@ -1,9 +1,6 @@
 # Keycloak
 
-# Installation
-
-## Helm 
-
+## Helm Install 
 Add bitnami repo
 ```bash 
 helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -18,7 +15,6 @@ helm upgrade --install keycloak bitnami/keycloak --version 13.1.0 \
 ```
 
 ## Keycloak/Ambassador Service
-
 Ambassador/Emissary use a service to route traffic:
 
 Apply the applicable service(s) for your target env
