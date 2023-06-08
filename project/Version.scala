@@ -36,7 +36,6 @@ object Version {
   val awsSesSdk              = "1.11.635"
   val zeroAllocation         = "0.10.1"
   val cormorant              = "0.3.0"
-  val kantantCsv             = "0.6.1"
   val scalacheckShapeless    = "1.2.5"
   val diffx                  = "0.4.0"
   val log4j                  = "2.15.0"
