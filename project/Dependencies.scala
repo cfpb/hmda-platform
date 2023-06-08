@@ -63,7 +63,7 @@ object Dependencies {
   lazy val keycloak              = "org.keycloak"               % "keycloak-core"               % Version.keycloak
   lazy val jbossLogging          = "org.jboss.logging"          % "jboss-logging"               % Version.jboss
   lazy val httpClient            = "org.apache.httpcomponents"  % "httpclient"                  % Version.httpcomponents
-  lazy val akkaKafkaStreams      = "com.typesafe.akka"          %% "akka-stream-kafka"          % Version.alpakkaKafka
+  lazy val akkaKafkaStreams      = "com.typesafe.akka"          %% "akka-stream-kafka"          % Version.akkaKafka
   lazy val embeddedKafka         = "io.github.embeddedkafka"    %% "embedded-kafka"             % Version.embeddedKafka
   lazy val alpakkaS3             = "com.lightbend.akka"         %% "akka-stream-alpakka-s3"     % Version.alpakkaS3
   lazy val akkaQuartzScheduler   = "com.enragedginger"          %% "akka-quartz-scheduler"      % Version.akkaQuartzScheduler
