@@ -35,6 +35,6 @@ object Version {
   val cormorant              = "0.3.0"
   val scalacheckShapeless    = "1.2.5"
   val diffx                  = "0.4.0"
-  val log4j                  = "2.15.0"
+  val log4j                  = "2.20.0"
   val kubernetesApi          = "15.0.1"
 }
