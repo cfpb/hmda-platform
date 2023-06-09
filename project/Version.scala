@@ -2,7 +2,7 @@ object Version {
 
   val logback                = "1.4.7"
   val scalaTest              = "3.0.8"
-  val scalaCheck             = "1.14.0"
+  val scalaCheck             = "1.17.0"
   val akka                   = "2.8.2"
   val akkaHttp               = "10.5.2"
   val akkaHttpJson           = "1.39.2"
