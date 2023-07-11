@@ -19,7 +19,7 @@ object Version {
   val keycloak               = "4.5.0.Final"
   val jboss                  = "3.5.1.Final"
   val httpcomponents         = "4.5.14"
-  val alpakka                = "6.0.1"
+  val alpakka                = "2.0.2"
   val embeddedKafka          = "2.4.1"
   val akkaQuartzScheduler    = "1.9.3-akka-2.6.x"
   val sprayresolver          = "0.10.0"
