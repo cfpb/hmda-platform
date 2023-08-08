@@ -19,70 +19,74 @@ spec:
         app: {{ include "hmda-data-browser-api.name" . }}
         release: {{ .Release.Name }}
     spec:
+      initContainers:
+      - args:
+        - apk upgrade --update-cache --available && apk add openssl &&
+          openssl pkcs12 -export -in /opt/docker/certs/redis-cert/redis-crt -inkey /opt/docker/certs/redis-key/redis-key
+          -out /opt/docker/server.p12 -name redis-tls -CAfile /opt/docker/certs/ca-cert/ca-crt -caname root
+          -passin pass:changeit -passout pass:changeit &&
+          keytool -importkeystore -deststorepass changeit -destkeypass changeit -destkeystore /opt/java/openjdk/lib/security/cacerts
+          -srckeystore /opt/docker/server.p12 -srcstoretype PKCS12 -srcstorepass changeit -alias redis-tls &&
+          keytool -v -list -storepass changeit -keystore /opt/java/openjdk/lib/security/cacerts 2>/dev/null | grep redis &&
+          cp /opt/java/openjdk/lib/security/* /opt/docker/temporary/ 
+        command:
+          - /bin/sh
+          - -c
+          - --
+        image: eclipse-temurin:19-jdk-alpine
+        name: eclipse-temurin-init
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+          - mountPath: /opt/docker/temporary
+            name: jksfolder
+          - mountPath: /opt/docker/certs/ca-cert
+            name: ca-cert
+            readOnly: true
+          - mountPath: /opt/docker/certs/redis-cert
+            name: redis-cert
+            readOnly: true
+          - mountPath: /opt/docker/certs/redis-key
+            name: redis-key
+            readOnly: true
       restartPolicy: Always
-      schedulerName: default-scheduler
-      securityContext: {}
       terminationGracePeriodSeconds: 30
       volumes:
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
-        - name: jks
-          secret:
-            defaultMode: 420
-            items:
-              - key: cacerts.jks
-                path: cacerts-jks
-            secretName: noinit-redis
+        - emptyDir: {}
+          name: jksfolder
         - name: ca-cert
           secret:
             defaultMode: 420
             items:
               - key: ca.crt
                 path: ca-crt
-            secretName: noinit-redis
+            secretName: redis-tls-secret
         - name: redis-cert
           secret:
             defaultMode: 420
             items:
               - key: redis.crt
                 path: redis-crt
-            secretName: noinit-redis
-        - name: redis-dh
-          secret:
-            defaultMode: 420
-            items:
-              - key: redis.dh
-                path: redis-dh
-            secretName: noinit-redis
+            secretName: redis-tls-secret
         - name: redis-key
           secret:
             defaultMode: 420
             items:
               - key: redis.key
                 path: redis-key
-            secretName: noinit-redis
+            secretName: redis-tls-secret
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           volumeMounts:
-          - mountPath: /etc/localtime
-            name: tz-config
-          - mountPath: /etc/tls
-            name: jks
-            subPath: cacerts
-          - mountPath: certs/ca-cert
-            name: ca-cert
-            readOnly: true
-          - mountPath: certs/redis-cert
-            name: redis-cert
-            readOnly: true
-          - mountPath: certs/redis-dh
-            name: redis-dh
-            readOnly: true
-          - mountPath: certs/redis-key
-            name: redis-key
-            readOnly: true
+            - name: tz-config
+              mountPath: /etc/localtime
+            - mountPath: /opt/java/openjdk/lib/security/
+              name: jksfolder              
           securityContext:
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
@@ -173,8 +177,6 @@ spec:
                 configMapKeyRef:
                   name: s3-configmap
                   key: s3-public-bucket
-            - name: NOINIT_REDIS_FILE
-              value: "/opt/noinit-redis/cacerts.jks"
             - name: REDIS_PASS
               valueFrom:
                 secretKeyRef:
