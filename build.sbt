@@ -11,7 +11,7 @@ lazy val sparkDeps =
     akkaKafkaStreams
   )
 
-lazy val authDeps = Seq(keycloakAdapter, keycloak, keycloakAdmin, jbossLogging, httpClient)
+lazy val authDeps = Seq(keycloakAdapter, keycloak, keycloakAdmin, jbossLogging, httpClient, keycloakCryptoDefault)
 
 lazy val keycloakServerDeps = Seq(resteasyClient, resteasyJackson, resteasyMulti)
 

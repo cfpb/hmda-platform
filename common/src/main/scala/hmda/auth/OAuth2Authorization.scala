@@ -12,12 +12,15 @@ import hmda.api.http.model.ErrorResponse
 import org.keycloak.adapters.KeycloakDeploymentBuilder
 import org.keycloak.representations.adapters.config.AdapterConfig
 import org.slf4j.Logger
+import org.keycloak.common.crypto.CryptoIntegration
 
 import java.util.concurrent.atomic.AtomicReference
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success}
 // $COVERAGE-OFF$
 class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
+
+
 
   private val tokenAttributeRefKey = AttributeKey[AtomicReference[VerifiedToken]]("tokenRef")
 
@@ -179,7 +182,6 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
 }
 
 object OAuth2Authorization {
-
   def apply(log: Logger, config: Config): OAuth2Authorization = {
     val authUrl       = config.getString("keycloak.auth.server.url")
     val keycloakRealm = config.getString("keycloak.realm")

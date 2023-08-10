@@ -62,6 +62,7 @@ object Dependencies {
   lazy val keycloakAdapter       = "org.keycloak"               % "keycloak-adapter-core"       % Version.keycloak
   lazy val keycloak              = "org.keycloak"               % "keycloak-core"               % Version.keycloak
   lazy val keycloakAdmin         = "org.keycloak"               % "keycloak-admin-client"       % Version.keycloak
+  lazy val keycloakCryptoDefault = "org.keycloak"               % "keycloak-crypto-default"     %  Version.keycloak
   lazy val resteasyClient        = "org.jboss.resteasy"         % "resteasy-client"             % Version.resteasy % "provided"
   lazy val resteasyJackson       = "org.jboss.resteasy"         % "resteasy-jackson2-provider"  % Version.resteasy % "provided"
   lazy val resteasyMulti         = "org.jboss.resteasy"         % "resteasy-multipart-provider" % Version.resteasy % "provided"
