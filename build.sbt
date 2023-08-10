@@ -11,7 +11,9 @@ lazy val sparkDeps =
     akkaKafkaStreams
   )
 
-lazy val authDeps = Seq(keycloakAdapter, keycloak, jbossLogging, httpClient)
+lazy val authDeps = Seq(keycloakAdapter, keycloak, keycloakAdmin, jbossLogging, httpClient)
+
+lazy val keycloakServerDeps = Seq(resteasyClient, resteasyJackson, resteasyMulti)
 
 lazy val akkaDeps = Seq(
   akkaSlf4J,
@@ -92,6 +94,7 @@ lazy val `hmda-root` = (project in file("."))
     `institutions-api`,
     `modified-lar`,
     `hmda-analytics`,
+    `hmda-auth`,
     `hmda-data-publisher`,
     `hmda-reporting`,
     `ratespread-calculator`,
@@ -492,6 +495,46 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
     packageSettings
   )
   .dependsOn(common % "compile->compile;test->test")
+
+  lazy val `hmda-auth` = (project in file("hmda-auth"))
+    .enablePlugins(
+      JavaServerAppPackaging,
+      sbtdocker.DockerPlugin,
+      AshScriptPlugin
+    )
+    .settings(hmdaBuildSettings: _*)
+    .settings(
+      Seq(
+        libraryDependencies ++= keycloakServerDeps,
+        mainClass in Compile := Some("hmda.authService.HmdaAuth"),
+        assemblyJarName in assembly := {
+          s"${name.value}.jar"
+        },
+        assemblyMergeStrategy in assembly := {
+          case "application.conf"                      => MergeStrategy.concat
+          case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+          case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+          case "jakarta/ws/rs/core/Configurable" => MergeStrategy.discard
+          case PathList(ps @ _*) if ps.last endsWith ".proto" =>
+            MergeStrategy.first
+          case "module-info.class" => MergeStrategy.concat
+          case PathList("META-INF", _*) => MergeStrategy.concat
+          case PathList("jakarta", _*) => MergeStrategy.concat
+          case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+          case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
+          case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
+          case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
+          case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
+          case x =>
+            val oldStrategy = (assemblyMergeStrategy in assembly).value
+            oldStrategy(x)
+        }
+      ),
+      dockerSettings,
+      packageSettings
+    )
+    .dependsOn(common % "compile->compile;test->test")
+    .dependsOn(`institutions-api` % "compile->compile;test->test")
 
 lazy val `rate-limit` = (project in file("rate-limit"))
   .enablePlugins(

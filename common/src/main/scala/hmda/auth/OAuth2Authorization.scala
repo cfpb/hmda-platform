@@ -40,6 +40,11 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
       .&(handleRejections(authRejectionHandler))
       .&(authorizeTokenWithRoleReject(role))
 
+  def authorizeVerifiedToken(): Directive1[VerifiedToken] =
+    withAccessLog
+      .&(handleRejections(authRejectionHandler))
+      .&(passToken)
+
   def logAccessLog(uri: Uri, token: () => Option[VerifiedToken])(request: HttpRequest)(r: RouteResult): Unit = {
     val result = r match {
       case RouteResult.Complete(response)   => s"completed(${response.status.intValue()})"
@@ -64,6 +69,16 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
         provide(t)
       case _ =>
         withLocalModeBypass {
+          reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]]
+        }
+    }
+
+  protected def passToken(): Directive1[VerifiedToken] = 
+    authorizeToken flatMap {
+      case t =>
+        provide(t)
+      case _ =>
+         withLocalModeBypass {
           reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]]
         }
     }

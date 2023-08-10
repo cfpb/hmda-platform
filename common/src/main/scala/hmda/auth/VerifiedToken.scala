@@ -4,5 +4,5 @@ case class VerifiedToken(token: String, id: String, name: String, username: Stri
 
 object VerifiedToken {
   def apply(): VerifiedToken =
-    VerifiedToken("empty-token", "dev", "token", "dev", "dev@dev.com", Seq.empty, "lei")
+    VerifiedToken("empty-token", "af89acfe-c404-4afb-8c8f-2396a3d06c84", "token", "dev", "dev@dev.com", Seq.empty, "lei")
 }
