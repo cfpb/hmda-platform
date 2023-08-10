@@ -58,7 +58,7 @@ lazy val slickDeps = Seq(slick, slickHikariCP, postgres, h2)
 
 lazy val dockerSettings = Seq(
   Docker / maintainer := "Hmda-Ops",
-  dockerBaseImage := "openjdk:19-jdk-alpine3.16",
+  dockerBaseImage := "eclipse-temurin:19-jdk-alpine",
   dockerRepository := Some("hmda"),
   dockerCommands := dockerCommands.value.flatMap {
     case cmd@Cmd("FROM",_) => List(cmd, Cmd("RUN", "apk update"),
@@ -515,19 +515,18 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
           case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
           case "META-INF/MANIFEST.MF" => MergeStrategy.discard
           case "jakarta/ws/rs/core/Configurable" => MergeStrategy.discard
+          case "reference.conf" => MergeStrategy.concat
           case PathList(ps @ _*) if ps.last endsWith ".proto" =>
             MergeStrategy.first
           case "module-info.class" => MergeStrategy.concat
-          case PathList("META-INF", _*) => MergeStrategy.concat
+          case PathList("META-INF", xs @ _*) => MergeStrategy.discard
           case PathList("jakarta", _*) => MergeStrategy.concat
           case x if x.endsWith("/module-info.class") => MergeStrategy.concat
           case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
           case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
           case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
           case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
-          case x =>
-            val oldStrategy = (assemblyMergeStrategy in assembly).value
-            oldStrategy(x)
+          case x => MergeStrategy.first
         }
       ),
       dockerSettings,
