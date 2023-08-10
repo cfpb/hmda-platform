@@ -190,6 +190,7 @@ object OAuth2Authorization {
     adapterConfig.setRealm(keycloakRealm)
     adapterConfig.setAuthServerUrl(authUrl)
     adapterConfig.setResource(apiClientId)
+    CryptoIntegration.init(this.getClass.getClassLoader)
     val keycloakDeployment = KeycloakDeploymentBuilder.build(adapterConfig)
     OAuth2Authorization(log, new KeycloakTokenVerifier(keycloakDeployment))
   }
