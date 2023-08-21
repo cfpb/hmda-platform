@@ -239,10 +239,8 @@ We use GitHub issues in this repository to track features, bugs, and enhancement
 ## Credits and references
 
 Related projects
-  - https://github.com/cfpb/hmda-frontend - ReactJS Front-end repository powering the [HMDA Platform](http://ffiec.cfpb.gov/)
-  - https://github.com/cfpb/hmda-help - ReactJS Front-end repository powering HMDA Help - used to resolve and troubleshoot issues in filing
+  - https://github.com/cfpb/hmda-combined-documentation - ReactJS Front-end with intergration DocSearch program repository powering the [HMDA Platform](http://ffiec.cfpb.gov/)
   - https://github.com/cfpb/hmda-platform-larft - Repo for the [Public Facing LAR formatting tool](https://ffiec.cfpb.gov/tools/lar-formatting)
   - https://github.com/cfpb/hmda-test-files - Repo for automatically generating various different test files for HMDA Data
   - https://github.com/cfpb/hmda-census - ETL for geographic and Census data used by the HMDA Platform
   - https://github.com/cfpb/HMDA_Data_Science_Kit - Repo for HMDA Data science work as well as Spark codebase for [Public Facing A&D Reports](https://ffiec.cfpb.gov/data-publication/disclosure-reports/2018)
-  - https://github.com/cfpb/hmda-platform-api-docs - Repo is for the front end [public api](https://cfpb.github.io/hmda-platform/) 
