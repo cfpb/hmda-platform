@@ -12,12 +12,15 @@ import hmda.api.http.model.ErrorResponse
 import org.keycloak.adapters.KeycloakDeploymentBuilder
 import org.keycloak.representations.adapters.config.AdapterConfig
 import org.slf4j.Logger
+import org.keycloak.common.crypto.CryptoIntegration
 
 import java.util.concurrent.atomic.AtomicReference
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success}
+import org.keycloak.common.crypto.CryptoIntegration
 // $COVERAGE-OFF$
 class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
+  CryptoIntegration.init(this.getClass.getClassLoader)
 
   private val tokenAttributeRefKey = AttributeKey[AtomicReference[VerifiedToken]]("tokenRef")
 
@@ -39,6 +42,11 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
     withAccessLog
       .&(handleRejections(authRejectionHandler))
       .&(authorizeTokenWithRoleReject(role))
+
+  def authorizeVerifiedToken(): Directive1[VerifiedToken] =
+    withAccessLog
+      .&(handleRejections(authRejectionHandler))
+      .&(passToken)
 
   def logAccessLog(uri: Uri, token: () => Option[VerifiedToken])(request: HttpRequest)(r: RouteResult): Unit = {
     val result = r match {
@@ -64,6 +72,16 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
         provide(t)
       case _ =>
         withLocalModeBypass {
+          reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]]
+        }
+    }
+
+  protected def passToken(): Directive1[VerifiedToken] = 
+    authorizeToken flatMap {
+      case t =>
+        provide(t)
+      case _ =>
+         withLocalModeBypass {
           reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]]
         }
     }
@@ -117,6 +135,7 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
             val verifiedToken = VerifiedToken(
               token,
               vT.getId,
+              vT.getSubject,
               vT.getName,
               vT.getPreferredUsername,
               vT.getEmail,
