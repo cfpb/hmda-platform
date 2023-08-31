@@ -153,10 +153,17 @@ lazy val `hmda-platform` = (project in file("hmda"))
         case "cinnamon-reference.conf"               => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "logback.xml"                           => MergeStrategy.concat
+        case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
+        case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
+        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
+        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
         case x =>
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
@@ -186,10 +193,17 @@ lazy val `check-digit` = (project in file("check-digit"))
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case PathList("META-INF", xs @ _*) => MergeStrategy.concat
+        case PathList("jakarta", xs @ _*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
+        case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
+        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
+        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
         case x =>
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
@@ -219,10 +233,17 @@ lazy val `check-digit` = (project in file("check-digit"))
         assembly/ assemblyMergeStrategy := {
           case "application.conf"                      => MergeStrategy.concat
           case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+          case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+          case PathList("META-INF", xs@_*) => MergeStrategy.concat
+          case PathList("jakarta", xs@_*) => MergeStrategy.last
           case PathList(ps @ _*) if ps.last endsWith ".proto" =>
             MergeStrategy.first
           case "module-info.class" => MergeStrategy.concat
           case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+          case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
+          case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
+          case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
+          case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
           case x =>
             val oldStrategy = (assembly / assemblyMergeStrategy).value
             oldStrategy(x)
@@ -247,10 +268,17 @@ lazy val `institutions-api` = (project in file("institutions-api"))
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
+        case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
+        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
+        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
         case x =>
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
@@ -282,10 +310,17 @@ lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
+        case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
+        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
+        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
         case x =>
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
@@ -312,10 +347,17 @@ lazy val `hmda-dashboard` = (project in file("hmda-dashboard"))
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
+        case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
+        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
+        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
         case x =>
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
@@ -343,10 +385,17 @@ lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
+        case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
+        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
+        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
         case x =>
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
@@ -374,10 +423,17 @@ lazy val `modified-lar` = (project in file("modified-lar"))
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
+        case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
+        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
+        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
         case x =>
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
@@ -406,10 +462,17 @@ lazy val `irs-publisher` = (project in file("irs-publisher"))
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
+        case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
+        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
+        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
         case x =>
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
@@ -438,10 +501,17 @@ lazy val `hmda-reporting` = (project in file("hmda-reporting"))
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
+        case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
+        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
+        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
         case x =>
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
@@ -479,10 +549,17 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
+        case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
+        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
+        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
         case x =>
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
@@ -550,10 +627,17 @@ lazy val `rate-limit` = (project in file("rate-limit"))
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
+        case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
+        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
+        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
         case x =>
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
@@ -582,10 +666,17 @@ lazy val `data-browser` = (project in file("data-browser"))
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
+        case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
+        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
+        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
         case x =>
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
@@ -603,7 +694,27 @@ lazy val `submission-errors` = (project in file("submission-errors"))
   .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin)
   .settings(hmdaBuildSettings)
   .settings(
-    libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps :+ monix :+ slickPostgres,
+    Seq(
+      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps :+ monix :+ slickPostgres,
+      assembly / assemblyMergeStrategy := {
+        case "application.conf" => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("jakarta", xs@_*) => MergeStrategy.last
+        case PathList(ps@_*) if ps.last endsWith ".proto" =>
+          MergeStrategy.first
+        case "module-info.class" => MergeStrategy.concat
+        case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
+        case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
+        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
+        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assembly / assemblyMergeStrategy).value
+          oldStrategy(x)
+      },
+    ),
     dockerSettings,
     packageSettings
   )
@@ -618,10 +729,17 @@ lazy val `email-service` = (project in file("email-service"))
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
+        case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
+        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
+        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
         case x =>
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
@@ -651,10 +769,17 @@ lazy val `hmda-quarterly-data-service` = (project in file ("hmda-quarterly-data-
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
+        case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
+        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
+        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
         case x =>
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
