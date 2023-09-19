@@ -1,9 +1,10 @@
 package hmda.quarterly.data.api.route.rates
 
-import akka.http.scaladsl.server.Directives.{ complete, path, pathPrefix }
+import akka.http.scaladsl.server.Directives.{complete, path, pathPrefix}
 import akka.http.scaladsl.server.Route
 import hmda.model.filing.lar.enums._
-import hmda.quarterly.data.api.dto.QuarterGraphData.{ GraphRoute, GraphSeriesInfo, GraphSeriesSummary }
+import hmda.quarterly.data.api.dto.QuarterGraphData.{GraphRoute, GraphSeriesInfo, GraphSeriesSummary}
+import hmda.quarterly.data.api.route.TitleSuffixAppender.addSuffix
 import hmda.quarterly.data.api.route.lib.Verbiage
 import hmda.quarterly.data.api.route.lib.Verbiage.DEFAULT_DECIMAL_PRECISION
 import hmda.quarterly.data.api.route.lib.Verbiage.LoanType._
@@ -39,7 +40,7 @@ abstract class RatesGraph(
   import RatesGraph._
 
   private final val verbiageConfig = Verbiage.config.getConfig(config)
-  private final val title: String = verbiageConfig.getString(titleKey)
+  private final val title: String = verbiageConfig.getString(titleKey)+addSuffix(endpoint)
   private final val subtitle: String = verbiageConfig.getString(subtitleKey)
   private final val categoryVerbiage: String = verbiageConfig.getString(CATEGORY)
   private final val label: String = verbiageConfig.getString(LABEL)
