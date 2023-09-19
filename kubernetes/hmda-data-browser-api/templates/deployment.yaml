@@ -33,7 +33,7 @@ spec:
           - /bin/sh
           - -c
           - --
-        image: eclipse-temurin:19-jdk-alpine
+        image: eclipse-temurin:20-jdk-alpine
         name: eclipse-temurin-init
         resources: {}
         terminationMessagePath: /dev/termination-log
