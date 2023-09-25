@@ -32,7 +32,7 @@ object ApplicationsVolumeLoanPurposeHome extends GraphRoute(
           rhsfsa <- getVolume(RHSOrFSAGuaranteed, RHS_FSA)
           va <- getVolume(VAGuaranteed, VA)
         } yield GraphSeriesInfo(
-          APP_VOLUME_TITLE,
+          APP_VOLUME_TITLE_HOME,
           APP_VOLUME_SUBTITLE,
           Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va),
           yLabel = APP_LABEL,

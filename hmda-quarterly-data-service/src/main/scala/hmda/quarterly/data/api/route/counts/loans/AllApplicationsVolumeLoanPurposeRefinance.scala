@@ -26,7 +26,7 @@ object AllApplicationsVolumeLoanPurposeRefinance extends GraphRoute(
           quarterlyFilers <- getVolume(QUARTERLY_FILERS_LABEL)
           allFilers <- getVolume(ALL_FILERS_LABEL, quarterly = false)
         } yield GraphSeriesInfo(
-          ALL_APPS_VOLUME_TITLE,
+          ALL_APPS_VOLUME_TITLE_REFINANCE,
           ALL_APPS_VOLUME_SUBTITLE,
           Seq(quarterlyFilers, allFilers),
           yLabel = APP_LABEL,

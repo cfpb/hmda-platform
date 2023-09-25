@@ -5,7 +5,7 @@ import akka.http.scaladsl.server.Route
 import hmda.model.filing.lar.enums._
 import hmda.quarterly.data.api.dao.repo.QuarterlyGraphRepo
 import hmda.quarterly.data.api.dto.QuarterGraphData.{GraphRoute, GraphSeriesInfo, GraphSeriesSummary}
-import hmda.quarterly.data.api.route.counts.loans.Loans.{CATEGORY, LOAN_LABEL, LOAN_VOLUME_SUBTITLE, LOAN_VOLUME_TITLE}
+import hmda.quarterly.data.api.route.counts.loans.Loans.{CATEGORY, LOAN_LABEL, LOAN_VOLUME_SUBTITLE, LOAN_VOLUME_TITLE, LOAN_VOLUME_TITLE_REFINANCE}
 import hmda.quarterly.data.api.route.lib.Verbiage.COUNT_DECIMAL_PRECISION
 import hmda.quarterly.data.api.route.lib.Verbiage.LoanType._
 import hmda.quarterly.data.api.serde.JsonSupport
@@ -33,7 +33,7 @@ object LoansVolumeLoanPurposeRefinance extends GraphRoute(
           rhsfsa <- getVolume(RHSOrFSAGuaranteed, RHS_FSA)
           va <- getVolume(VAGuaranteed, VA)
         } yield GraphSeriesInfo(
-          LOAN_VOLUME_TITLE,
+          LOAN_VOLUME_TITLE_REFINANCE,
           LOAN_VOLUME_SUBTITLE,
           Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va),
           yLabel = LOAN_LABEL,
