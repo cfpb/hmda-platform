@@ -1,14 +1,21 @@
 package hmda.messages
 
-import akka.kafka.ConsumerMessage.{ CommittableMessage, CommittableOffset }
+import akka.kafka.ConsumerMessage.{CommittableMessage, CommittableOffset}
+import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.StrictLogging
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 object HmdaMessageFilter extends StrictLogging {
 
   case class StandardMsg(lei: String, year: Int, quarter: Option[String], sequenceNumber: Option[String])
+
+  val analyticsConfig: Config = ConfigFactory.load().getConfig("hmda.analytics")
+
+  val yearsAvailable : Seq[String] = analyticsConfig.getString("yearsAvailable").split(",").toSeq
+
+
 
   def parse(key: String, value: String): Option[StandardMsg] = {
     Try {
@@ -24,10 +31,12 @@ object HmdaMessageFilter extends StrictLogging {
         year = msgMatch.group("year").toInt
         quarterOpt = Option(msgMatch.group("quarter"))
         seqNum = Option(msgMatch.group("seqNum"))
-        _ <- if (lei1 == lei2) Some(()) else None
+        _ <- if (lei1 == lei2 && validSeason(year)) Some(()) else None
       } yield StandardMsg(lei1, year, quarterOpt, seqNum)
     }.toOption.flatten // regex api is not the safest one and we don't want it to throw accidentally
   }
+
+  def validSeason(year: Int): Boolean = yearsAvailable.contains(year.toString())
 
   type Processor = CommittableMessage[String, String] => Future[CommittableOffset]
 
