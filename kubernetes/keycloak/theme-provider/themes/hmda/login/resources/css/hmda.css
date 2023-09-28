@@ -310,6 +310,10 @@ fieldset fieldset legend {
   animation: loading-spin 1.2s linear infinite;
 }
 
+#kc-register {
+  width: 100%;
+}
+
 #kc-login {
   width: 100%;
 }
@@ -318,31 +322,18 @@ fieldset fieldset legend {
   margin-bottom: 10px;
   margin-top: 20px;
   border: 0;
-  border-top: 1px solid #f1f1f1;
+  border-top: 1px solid #5b616b57;
 }
 
 .identity-provider-header {
   display: flex;
   justify-content: center;
   text-align: center;
-  font-size: 15px;
+  font-size: 16px;
   color: #6A6E72;
   margin-bottom: 10px;
   margin-top: 10px;
   font-weight: normal;
-}
-
-a:visited {
-  color: black;
-}
-
-.login-gov-button {
-  display: flex;
-  justify-content: center;
-  text-align: center;
-  height: 25px;
-  margin-top: 5px;
-  margin-bottom: 15px;
 }
 
 .login-gov-redirect {
@@ -351,22 +342,34 @@ a:visited {
   text-decoration: none;
   justify-content: center;
   text-align: center;
-  padding: .8rem 1.5rem;
-  /* border: 0.1rem solid #5b616b; */
-  border: none;
-  margin-bottom: 10px;
-  transition: background-color 400ms, 
-              color 400ms,
-              border-color 400ms;
+  padding: 1rem 1.5rem;
+  width: 100%;
+  outline: none;
 }
 
 .login-gov-redirect img {
-  height: 23px;
+  height: 25px;
 }
 
 .login-gov-redirect:hover {
   color: #fff;
-  /* background-color: #0271BB;
-  border-color: #0271BB; */
-  border: 0.1rem solid #6A6E72;
+  outline: 0.1rem solid #6A6E72;
+}
+
+/* Social Providers */
+
+#kc-social-providers {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#kc-social-providers ul {
+  width: 100%;
+  padding-left: 0;
+  margin-top: 0.4em;
+}
+
+#linkAccount {
+  width: 100%;
 }
