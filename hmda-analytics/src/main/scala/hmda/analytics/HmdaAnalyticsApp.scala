@@ -461,7 +461,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
         res <- insertSubmissionHistory
         _ = if(historyInsertion)
-          log.info(s"Attempt to add data too Submission History Table for  $submissionId  completed.")
+          log.info(s"Attempt to add data to Submission History Table for  $submissionId  completed.")
 
         else
           log.info(s"Skipping Insert Submission History")
