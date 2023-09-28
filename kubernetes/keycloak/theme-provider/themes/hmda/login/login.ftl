@@ -24,7 +24,10 @@
                     <input tabindex="4" name="login" id="kc-login" type="submit" value="${msg("doLogIn")}"/>
                     <hr class="divider"></hr>
                     <h4 class="identity-provider-header">Or sign in with</h4>
-                    <a tabindex="5" class="login-gov-redirect" href="https://idp.int.identitysandbox.gov/">login.gov</a>
+                    <a tabindex="5" class="login-gov-redirect" href="https://idp.int.identitysandbox.gov/">
+                        <img src="${url.resourcesPath}/img/login-gov-logo.svg">
+                    </a>
+                    <#--  <a tabindex="5" class="login-gov-redirect" href="https://idp.int.identitysandbox.gov/">login.gov</a>  -->
                     <div id="submit-loader" class="LoadingIconWrapper">
                       <div class="LoadingIcon"></div>
                     </div>
