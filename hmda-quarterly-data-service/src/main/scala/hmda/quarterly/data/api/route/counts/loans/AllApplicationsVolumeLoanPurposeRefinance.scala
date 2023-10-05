@@ -11,9 +11,9 @@ import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
 
 object AllApplicationsVolumeLoanPurposeRefinance extends GraphRoute(
-  ALL_APPS_VOLUME_TITLE,
+  ALL_APPS_VOLUME_TITLE_REFINANCE,
   CATEGORY,
-  "all-applications-loan-purpose-home"
+  "all-applications-loan-purpose-refinance"
 ) with JsonSupport {
   private def getVolume(title: String, quarterly: Boolean = true): CancelableFuture[GraphSeriesSummary] =
     QuarterlyGraphRepo.fetchTotalApplicationsVolumeLoanPurposeHome(quarterly)

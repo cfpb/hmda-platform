@@ -13,7 +13,7 @@ import monix.execution.CancelableFuture
 import monix.execution.Scheduler.Implicits.global
 
 object ApplicationsVolumeLoanPurposeHome extends GraphRoute(
-  APP_VOLUME_TITLE,
+  APP_VOLUME_TITLE_HOME,
   CATEGORY,
   "applications-loan-purpose-home"
 ) with JsonSupport {
