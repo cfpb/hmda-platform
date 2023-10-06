@@ -22,4 +22,5 @@ object V720_4 extends EditCheck[LoanApplicationRegister] {
       lar.coApplicant.creditScore is greaterThanOrEqual(300)
     }
   }
+
 }
