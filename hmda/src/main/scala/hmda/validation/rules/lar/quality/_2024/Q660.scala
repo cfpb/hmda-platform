@@ -33,11 +33,10 @@ object Q660 extends EditCheck[LoanApplicationRegister] {
       street.matches(specialRegex) ||
       street.matches(termRegex) ||
       street.matches(numOnlyRegex) ||
-      street.matches(wordOnlyRegex) ||
+      street.matches(wordOnlyRegex)
     ) {
       ValidationFailure
     } else {
-
       ValidationSuccess
     }
   }

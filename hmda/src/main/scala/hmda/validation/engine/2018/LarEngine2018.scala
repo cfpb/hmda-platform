@@ -5,7 +5,7 @@ import hmda.validation.context.ValidationContext
 import hmda.validation.rules.lar.quality._2018._
 import hmda.validation.rules.lar.quality.common._
 import hmda.validation.rules.lar.syntactical.{ S300, S301 }
-import hmda.validation.rules.lar.validity.{ eighteen, _ }
+import hmda.validation.rules.lar.validity.{_2018,_}
 import hmda.census.records.CensusRecords
 
 private[engine] object LarEngine2018 extends ValidationEngine[LoanApplicationRegister] {
@@ -40,7 +40,7 @@ private[engine] object LarEngine2018 extends ValidationEngine[LoanApplicationReg
     V617,
     V618,
     V619_1,
-    eighteen.V619_2,
+    _2018.V619_2,
     V619_3,
     V620,
     V621,
@@ -89,13 +89,13 @@ private[engine] object LarEngine2018 extends ValidationEngine[LoanApplicationReg
     V642_2,
     V643,
     V644_1,
-    eighteen.V644_2,
+    _2018.V644_2,
     V645,
     V646_1,
     V646_2,
     V647,
     V648_1,
-    eighteen.V648_2,
+    _2018.V648_2,
     V649,
     V650,
     V651_1,
@@ -165,7 +165,7 @@ private[engine] object LarEngine2018 extends ValidationEngine[LoanApplicationReg
     V676_3,
     V676_4,
     V676_5,
-    eighteen.V677_1,
+    _2018.V677_1,
     V677_2,
     V678_1,
     V678_2,
@@ -206,9 +206,9 @@ private[engine] object LarEngine2018 extends ValidationEngine[LoanApplicationReg
 //    V694_3,
     V695,
     V696_1,
-    eighteen.V696_2,
+    _2018.V696_2,
     V696_3,
-    eighteen.V699,
+    _2018.V699,
     V700_1,
     V700_2,
     V701,

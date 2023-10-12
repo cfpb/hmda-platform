@@ -1,4 +1,4 @@
-package hmda.validation.rules.lar.validity.2024
+package hmda.validation.rules.lar.validity._2024
 
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
