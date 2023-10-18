@@ -10,7 +10,7 @@ import hmda.validation.rules.lar.syntactical.{S300, S301}
 import hmda.validation.rules.lar.validity.{_2020, _2022, _2023, _2024, _}
 import hmda.census.records.CensusRecords
 import hmda.validation.rules.lar.quality
-import hmda.validation.rules.lar.quality._2024.Q660
+import hmda.validation.rules.lar.quality._2024._
 
 private[engine] object LarEngine2024 extends ValidationEngine[LoanApplicationRegister] {
 
@@ -121,12 +121,12 @@ private[engine] object LarEngine2024 extends ValidationEngine[LoanApplicationReg
     V660_1,
     _2024.V660_2,
     V661,
-    _2022.V662_1,
-    _2022.V662_2,
+    _2024.V662_1,
+    _2024.V662_2,
     V663,
     V664,
     _2022.V665_1,
-    _2022.V665_2,
+    _2024.V665_2,
     V666_1,
     V666_2,
     V667_1,
@@ -238,8 +238,6 @@ private[engine] object LarEngine2024 extends ValidationEngine[LoanApplicationReg
     _2020.V716.withIndexedCounties(CensusRecords.indexedCounty2022),
     _2022.V721_1,
     _2022.V721_2,
-    _2022.V720_1,
-    _2022.V720_2,
     _2024.V720_1,
     _2024.V720_2,
     _2024.V720_3,
@@ -305,7 +303,10 @@ private[engine] object LarEngine2024 extends ValidationEngine[LoanApplicationReg
     quality2022.Q658,
     quality2022.Q659_1,
     quality2022.Q659_2,
-    Q660
+    Q660_1,
+    Q660_2,
+    Q660_3,
+    Q660_4
   )
 }
 // $COVERAGE-ON$
