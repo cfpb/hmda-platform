@@ -43,8 +43,10 @@ Age of Applicant or Borrower|Integer
 Age of Co-Applicant or Co-Borrower|Integer
 Credit Score of Applicant or Borrower|Integer
 Applicant or Borrower, Name and Version of Credit Scoring Model|1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1111
+Applicant or Borrower, Name and Version of Credit Scoring Model(FIG 2024)|Integer: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1111
 Credit Score of Co-Applicant or Co-Borrower|Integer
-Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model|1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1111
+Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model|Integer: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1111
+Co-Applicant or Co-Borrower, Name and Version of Credit Scoring Model(FIG 2024)|Integer: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1111
 Income|Integer or NA
 Type of Purchaser|Integer: 1, 2, 3, 4, 5, 6, 71, 72, 8, 9
 Rate Spread|Numeric (Example: 110500 or 110500.00), NA, or Exempt
