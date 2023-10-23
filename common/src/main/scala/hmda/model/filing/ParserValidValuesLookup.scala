@@ -40,10 +40,7 @@ object ParserValidValuesLookup {
 
   def lookupParserValidValuesByYear(fieldName: String,period: Period): String =
     period match {
-
-      case Period(2024, Some(_)) => parserValidValuesMap2024.getOrElse(fieldName, "")
-      case Period(2024, None)    => parserValidValuesMap2024.getOrElse(fieldName, "")
-      case _                     => parserValidValuesMap.getOrElse(fieldName, "")
+      case Period(yr, _) if yr < 2024 => {parserValidValuesMap.getOrElse(fieldName, "")}
+      case _ => {parserValidValuesMap2024.getOrElse(fieldName, "")}
     }
-
 }
