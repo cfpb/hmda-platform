@@ -283,12 +283,24 @@ fieldset fieldset legend {
   }
 }
 
+.passResetContainer {
+  display: flex;
+  justify-content: space-between;
+  vertical-align: middle;
+  height: 25px;
+}
+
+.passResetContainer #submit-loader {
+  margin: 3px 0 0 0;
+}
+
+.passResetContainer p {
+  margin-top: 5px;
+}
+
 #submit-loader {
   display: none;
-  position: absolute;
-  margin: 0;
-  margin-top: -3.6em;
-  margin-left: 21em;
+  margin: 0 auto 1em auto;
 }
 
 .LoadingIconWrapper {

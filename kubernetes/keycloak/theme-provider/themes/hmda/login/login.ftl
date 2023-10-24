@@ -22,14 +22,16 @@
                     <input tabindex="2" id="password" name="password" type="password" autocomplete="off" />
 
                     <input tabindex="4" name="login" id="kc-login" type="submit" value="${msg("doLogIn")}"/>
-                    <#if realm.resetPasswordAllowed>
-                        <p><a tabindex="6" href="${url.loginResetCredentialsUrl}">${msg("doForgotPassword")}</a></p>
-                    </#if>
+                    <div class="passResetContainer">
+                        <#if realm.resetPasswordAllowed>
+                            <p><a tabindex="6" href="${url.loginResetCredentialsUrl}">${msg("doForgotPassword")}</a></p>
+                        </#if>
+                        <div id="submit-loader" class="LoadingIconWrapper">
+                            <div class="LoadingIcon"></div>
+                        </div>
+                    </div>
                     <hr class="divider"></hr>
                     <h4 class="identity-provider-header">Or sign in with</h4>
-                    <div id="submit-loader" class="LoadingIconWrapper">
-                        <div class="LoadingIcon"></div>
-                    </div>
 
                     <#if realm.password && social.providers??>
                         <div id="kc-social-providers" class="${properties.kcFormSocialAccountSectionClass!}">
