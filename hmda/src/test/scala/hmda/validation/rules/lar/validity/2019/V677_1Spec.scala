@@ -1,9 +1,10 @@
-package hmda.validation.rules.lar.validity.nineteen
+package hmda.validation.rules.lar.validity_2019
 
 import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
+import hmda.validation.rules.lar.validity._2019.V677_1
 
 class V677_1_2019Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = V677_1

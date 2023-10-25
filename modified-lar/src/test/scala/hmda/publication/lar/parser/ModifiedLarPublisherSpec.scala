@@ -80,6 +80,7 @@ class ModifiedLarPublisherSpec
     val censusTractMap2020: Map[String, Census] = CensusRecords.indexedTract2020
     val censusTractMap2021: Map[String, Census] = CensusRecords.indexedTract2021
     val censusTractMap2022: Map[String, Census] = CensusRecords.indexedTract2022
+    val censusTractMap2023: Map[String, Census] = CensusRecords.indexedTract2023
 
     val customData: TypedSystem[_] => SubmissionId => Source[LineAdded, NotUsed] =
       _ => _ => Source(larData.zipWithIndex.map { case (lar, timestamp) => LineAdded(timestamp, lar.toCSV) })
@@ -88,7 +89,7 @@ class ModifiedLarPublisherSpec
     val repo           = new ModifiedLarRepository(databaseConfig)
     val publisher = system.spawnAnonymous(
       Behaviors
-        .supervise(ModifiedLarPublisher.behavior(censusTractMap2018, censusTractMap2019, censusTractMap2020, censusTractMap2021, censusTractMap2022, repo, customData))
+        .supervise(ModifiedLarPublisher.behavior(censusTractMap2018, censusTractMap2019, censusTractMap2020, censusTractMap2021, censusTractMap2022, censusTractMap2023,repo, customData))
         .onFailure(SupervisorStrategy.stop)
     )
     val submissionIdA = SubmissionId("B90YWS6AFX2LGWOXJ1LD", Period(2018, None), sequenceNumber = 1)
