@@ -15,7 +15,7 @@ object Q660_4 extends EditCheck[LoanApplicationRegister] {
     val numOnlyRegex = "^(?=[^A-Za-z]+$).*[0-9].*$".r.regex
     val wordOnlyRegex = "^[^0-9]+$".r.regex
     val street = lar.geography.street.toLowerCase()
-    val exemptPhrases = List("exempt", "na", "n/a")
+    val exemptPhrases = List("exempt", "na")
     if (
         street.matches(numOnlyRegex) ||
         (street.matches(wordOnlyRegex) && !exemptPhrases.contains(street))
