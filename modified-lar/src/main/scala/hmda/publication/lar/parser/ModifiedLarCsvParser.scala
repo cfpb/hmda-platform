@@ -27,6 +27,9 @@ object ModifiedLarCsvParser {
   val countyLoanLimitFileName2022 =
     config.getString("hmda.countyLoanLimit.2022.fields.filename")
 
+  val countyLoanLimitFileName2023 =
+    config.getString("hmda.countyLoanLimit.2023.fields.filename")
+
   val countyLoanLimits2018: Seq[CountyLoanLimit] =
     parseCountyLoanLimitFile(countyLoanLimitFileName2018)
   val countyLoanLimits2019: Seq[CountyLoanLimit] =
@@ -39,12 +42,15 @@ object ModifiedLarCsvParser {
   val countyLoanLimits2022: Seq[CountyLoanLimit] =
     parseCountyLoanLimitFile(countyLoanLimitFileName2022)
 
+  val countyLoanLimits2023: Seq[CountyLoanLimit] =
+    parseCountyLoanLimitFile(countyLoanLimitFileName2023)
 
   val overallLoanLimit2018 = overallLoanLimits(countyLoanLimits2018)
   val overallLoanLimit2019 = overallLoanLimits(countyLoanLimits2019)
   val overallLoanLimit2020 = overallLoanLimits(countyLoanLimits2020)
   val overallLoanLimit2021 = overallLoanLimits(countyLoanLimits2021)
   val overallLoanLimit2022 = overallLoanLimits(countyLoanLimits2022)
+  val overallLoanLimit2023 = overallLoanLimits(countyLoanLimits2023)
 
 
   val countyLoanLimitsByCounty2018 = countyLoansLimitByCounty(countyLoanLimits2018)
@@ -52,6 +58,7 @@ object ModifiedLarCsvParser {
   val countyLoanLimitsByCounty2020 = countyLoansLimitByCounty(countyLoanLimits2020)
   val countyLoanLimitsByCounty2021 = countyLoansLimitByCounty(countyLoanLimits2021)
   val countyLoanLimitsByCounty2022 = countyLoansLimitByCounty(countyLoanLimits2022)
+  val countyLoanLimitsByCounty2023 = countyLoansLimitByCounty(countyLoanLimits2023)
 
 
 
@@ -60,6 +67,7 @@ object ModifiedLarCsvParser {
   val countyLoanLimitsByState2020 = countyLoansLimitByState(countyLoanLimits2020)
   val countyLoanLimitsByState2021 = countyLoansLimitByState(countyLoanLimits2021)
   val countyLoanLimitsByState2022 = countyLoansLimitByState(countyLoanLimits2022)
+  val countyLoanLimitsByState2023 = countyLoansLimitByState(countyLoanLimits2023)
 
 
   def apply(s: String, year: Int): ModifiedLoanApplicationRegister = {
@@ -248,6 +256,8 @@ object ModifiedLarCsvParser {
       case 2020 => countyLoanLimitsByCounty2020
       case 2021 => countyLoanLimitsByCounty2021
       case 2022 => countyLoanLimitsByCounty2022
+      case 2023 => countyLoanLimitsByCounty2023
+
 
 
     }
@@ -260,6 +270,8 @@ object ModifiedLarCsvParser {
       case 2020 => countyLoanLimitsByState2020
       case 2021 => countyLoanLimitsByState2021
       case 2022 => countyLoanLimitsByState2022
+      case 2023 => countyLoanLimitsByState2023
+
 
 
     }
@@ -272,6 +284,8 @@ private def getOverallLoanLimit(year: Int) = {
       case 2020 => overallLoanLimit2020
       case 2021 => overallLoanLimit2021
       case 2022 => overallLoanLimit2022
+      case 2023 => overallLoanLimit2023
+
 
 
     }

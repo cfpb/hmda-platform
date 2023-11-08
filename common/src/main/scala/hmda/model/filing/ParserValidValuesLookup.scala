@@ -2,12 +2,16 @@ package hmda.model.filing
 
 import com.typesafe.config.ConfigFactory
 import hmda.model.ResourceUtils._
+ import hmda.utils.YearUtils.Period
 
 object ParserValidValuesLookup {
 
   val config = ConfigFactory.load()
   val parserValidValuesFile =
     config.getString("hmda.filing.parser.validValues.filename")
+
+  val parserValidValuesFile2024 =
+    config.getString("hmda.filing.parser.validValues.filename2024")
 
   def parserValidValuesMapCreator(
       file: Iterable[String]): Map[String, String] = {
@@ -24,8 +28,19 @@ object ParserValidValuesLookup {
   val parserValidValuesLines = fileLines(s"/$parserValidValuesFile")
   val parserValidValuesMap = parserValidValuesMapCreator(parserValidValuesLines)
 
-  def lookupParserValidValues(fieldName: String): String =
+  val parserValidValuesLines2024 = fileLines(s"/$parserValidValuesFile2024")
+  val parserValidValuesMap2024 = parserValidValuesMapCreator(parserValidValuesLines2024)
+
+  def lookupParserValidValues(fieldName: String): String = {
+
     parserValidValuesMap
       .getOrElse(fieldName, "")
+  }
 
+
+  def lookupParserValidValuesByYear(fieldName: String,period: Period): String =
+    period match {
+      case Period(yr, _) if yr < 2024 => {parserValidValuesMap.getOrElse(fieldName, "")}
+      case _ => {parserValidValuesMap2024.getOrElse(fieldName, "")}
+    }
 }
