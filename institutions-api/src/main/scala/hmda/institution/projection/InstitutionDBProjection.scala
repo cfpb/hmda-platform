@@ -82,6 +82,8 @@ object InstitutionDBProjection extends InstitutionEmailComponent with Institutio
             institutionRepository2023.deleteById(lei)
           case 2024 =>
             institutionRepository2024.deleteById(lei)
+          case _ =>
+            institutionRepository2023.deleteById(lei)
         }
       case other => log.error(s"Unexpected event passed to Institution DB Projector: ${other}")
     }
@@ -108,6 +110,8 @@ object InstitutionDBProjection extends InstitutionEmailComponent with Institutio
           institutionRepository2023.insertOrUpdate(InstitutionConverter.convert(inst))
         case 2024 =>
           institutionRepository2024.insertOrUpdate(InstitutionConverter.convert(inst))
+        case _ =>
+          institutionRepository2023.insertOrUpdate(InstitutionConverter.convert(inst))
       }
     }
 
