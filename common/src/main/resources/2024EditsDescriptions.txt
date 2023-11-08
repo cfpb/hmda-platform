@@ -313,4 +313,4 @@ Q659-2|The values 999 or 99999 were entered in a field that accepts 9999 or NA a
 Q660-1|The Street Address reported is longer than 100 characters, which may indicate that more than one address was reported.|Street Address
 Q660-2|The reported Street Address includes separator values such as: “;”,“&”, or the word “and“, which may indicate that more than one address was reported.|Street Address
 Q660-3|The reported Street Address includes special characters, such as the values: ?, !, *, %, ^, @, [, ], {, } ,<,>,_, +, = or the word “tbd”, which may indicate that an invalid address was reported.|Street Address
-Q660-4|The reported Street Address contains no numbers or only letters, which may indicate that an invalid address was reported. Street Address should be alphanumeric.|Street Address
+Q660-4|The reported Street Address contains either only numbers or only letters, which may indicate that an invalid Street Address was reported. Street Address should generally be alphanumeric, unless the reported value is "Exempt" or "NA".|Street Address
