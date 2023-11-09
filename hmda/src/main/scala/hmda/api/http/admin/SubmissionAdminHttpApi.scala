@@ -32,12 +32,13 @@ import hmda.messages.submission.SubmissionProcessingCommands.GetHmdaValidationEr
 import hmda.model.filing.submission.{Signed, Submission, SubmissionId}
 import hmda.persistence.filing.FilingPersistence.selectFiling
 import hmda.persistence.submission.HmdaValidationError.selectHmdaValidationError
-import hmda.persistence.submission.{HmdaProcessingUtils, HmdaRawData, SubmissionPersistence}
+import hmda.persistence.submission.{EditDetailsPersistence, HmdaProcessingUtils, HmdaRawData, HmdaValidationError, SubmissionPersistence}
 import hmda.query.HmdaQuery
 import hmda.utils.YearUtils
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
 
+import scala.collection.immutable
 import scala.collection.immutable.ListMap
 import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Future}
@@ -141,7 +142,6 @@ private class LeiSubmissionSummary(log: Logger, clusterSharding: ClusterSharding
       .currentPersistenceIds()
       .mapConcat { persistenceId =>
         if (persistenceId.startsWith(submissionPrefix+lei)) {
-          log.info(s"Persistence id = $persistenceId")
           validateRawSubmissionId(persistenceId.stripPrefix(submissionPrefix)) match {
             case Valid(submissionId) => List(submissionId)
             case Invalid(e) =>
@@ -281,20 +281,24 @@ private class LeiSubmissionSummary(log: Logger, clusterSharding: ClusterSharding
   def deleteSubmissionIds(lei: String, period: Period) = {
     val cleanup = new Cleanup(system)
     val persistenceIdParallelism = 10
+
     val submissionPrefix = SubmissionPersistence.name + "-"
     val rawDataPrefix = HmdaRawData.name + "-"
+    val editDetailsPrefix = EditDetailsPersistence.name + "-"
+    val hmdaValidationErrorPrefix = HmdaValidationError.name + "-"
 
     Source.future(submissionsForLei(lei))
       .mapConcat(identity)
       .mapAsync(persistenceIdParallelism) { case (lei, submissionIds) =>
         val fDeleteSubmissions = submissionIds.filter(_.period == period).map { submissionId =>
-            val persistenceId = submissionPrefix + submissionId.toString
-            log.info(s"Deleting submission $submissionId for lei $lei for year ${period.toString} with persistence Id $persistenceId")
-            cleanup.deleteAll(persistenceId, false)
-            val persistenceIdRaw = rawDataPrefix + submissionId.toString
-            log.info(s"Deleting raw submission data with persistence Id $persistenceIdRaw")
-            cleanup.deleteAll(persistenceIdRaw, false)
-          }
+          val submissionPersistenceId = submissionPrefix + submissionId.toString
+          val rawPersistenceId = rawDataPrefix + submissionId.toString
+          val editDetailsPersistenceId = editDetailsPrefix + submissionId.toString
+          val hmdaValidationErrorPersistenceId = hmdaValidationErrorPrefix + submissionId.toString
+          val persistenceIdsToDelete = immutable.Seq(submissionPersistenceId, rawPersistenceId, editDetailsPersistenceId, hmdaValidationErrorPersistenceId)
+          log.info(s"Deleting data for submission id $submissionId with persistence ids $persistenceIdsToDelete")
+          cleanup.deleteAll(persistenceIdsToDelete, false)
+        }
         Future.sequence(fDeleteSubmissions)
       }
     }
