@@ -281,16 +281,19 @@ private class LeiSubmissionSummary(log: Logger, clusterSharding: ClusterSharding
   def deleteSubmissionIds(lei: String, period: Period) = {
     val cleanup = new Cleanup(system)
     val persistenceIdParallelism = 10
-    HmdaQuery
-      .readJournal(system)
-      .currentPersistenceIds()
-      .mapConcat(x => FilingPersistence.parseEntityId(x).toList)
-      .filter(id => (id.period == period && id.lei == lei))
-      .mapAsync(persistenceIdParallelism) { persistenceId =>
-        log.info(s"Deleting all submissions for lei $lei for year ${period.toString} with persistence ID ${persistenceId.mkString}")
-        cleanup.deleteAll(persistenceId.mkString, false)
+
+    Source.future(submissionsForLei(lei))
+      .mapConcat(identity)
+      .mapAsync(persistenceIdParallelism) { case (lei, submissionIds) =>
+        log.info(s"For lei: $lei, found submission count: ${submissionIds.size}")
+
+        val fDeleteSubmissions = submissionIds.filter(_.period == period).map { submissionId =>
+            log.info(s"Deleting submission $submissionId for lei $lei for year ${period.toString}")
+            cleanup.deleteAll(submissionId.toString, false)
+          }
+        Future.sequence(fDeleteSubmissions)
       }
-  }
+    }
 }
 
 private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterSharding: ClusterSharding, countTimeout: Duration)(
