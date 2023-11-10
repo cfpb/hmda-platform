@@ -297,7 +297,7 @@ private class LeiSubmissionSummary(log: Logger, clusterSharding: ClusterSharding
           val hmdaValidationErrorPersistenceId = hmdaValidationErrorPrefix + submissionId.toString
           val persistenceIdsToDelete = immutable.Seq(submissionPersistenceId, rawPersistenceId, editDetailsPersistenceId, hmdaValidationErrorPersistenceId)
           log.info(s"Deleting data for submission id $submissionId with persistence ids $persistenceIdsToDelete")
-          cleanup.deleteAll(persistenceIdsToDelete, false)
+          cleanup.deleteAll(persistenceIdsToDelete, true)
         }
         Future.sequence(fDeleteSubmissions)
       }
