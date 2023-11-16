@@ -11,7 +11,7 @@ object HmdaMessageFilter extends StrictLogging {
 
   case class StandardMsg(lei: String, year: Int, quarter: Option[String], sequenceNumber: Option[String])
 
- 
+
 
 
 
