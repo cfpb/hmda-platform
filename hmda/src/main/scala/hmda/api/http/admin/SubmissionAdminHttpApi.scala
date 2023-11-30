@@ -32,6 +32,7 @@ import hmda.messages.submission.SubmissionProcessingCommands.GetHmdaValidationEr
 import hmda.model.filing.submission.{Signed, Submission, SubmissionId}
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.filing.FilingPersistence.selectFiling
+import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.HmdaValidationError.selectHmdaValidationError
 import hmda.persistence.submission.{EditDetailsPersistence, HmdaParserError, HmdaProcessingUtils, HmdaRawData, HmdaValidationError, SubmissionManager, SubmissionPersistence}
 import hmda.query.HmdaQuery
@@ -283,6 +284,11 @@ private class LeiSubmissionSummary(log: Logger, clusterSharding: ClusterSharding
     val cleanup = new Cleanup(system)
     val persistenceIdParallelism = 10
     val filingPersistenceId = s"${FilingPersistence.name}-$lei-$period"
+    val institutionPersistenceId = s"${InstitutionPersistence.name}-$lei-$period"
+
+    cleanup.deleteAll(filingPersistenceId, true)
+    cleanup.deleteAll(institutionPersistenceId, true)
+
     val submissionPersistenceIdPrefixes = immutable.Seq(
       EditDetailsPersistence.name,
       HmdaValidationError.name,
@@ -296,7 +302,7 @@ private class LeiSubmissionSummary(log: Logger, clusterSharding: ClusterSharding
       .mapConcat(identity)
       .mapAsync(persistenceIdParallelism) { case (lei, submissionIds) =>
         val fDeleteSubmissions = submissionIds.filter(_.period == period).map { submissionId =>
-          val persistenceIdsToDelete = submissionPersistenceIdPrefixes.map(prefix => prefix + "-" + submissionId.toString) :+ filingPersistenceId
+          val persistenceIdsToDelete = submissionPersistenceIdPrefixes.map(prefix => prefix + "-" + submissionId.toString)
           log.info(s"Deleting data with persistence ids $persistenceIdsToDelete")
           cleanup.deleteAll(persistenceIdsToDelete, true)
         }
