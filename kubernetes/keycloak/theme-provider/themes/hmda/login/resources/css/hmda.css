@@ -283,12 +283,24 @@ fieldset fieldset legend {
   }
 }
 
+.passResetContainer {
+  display: flex;
+  justify-content: space-between;
+  vertical-align: middle;
+  height: 25px;
+}
+
+.passResetContainer #submit-loader {
+  margin: 3px 0 0 0;
+}
+
+.passResetContainer p {
+  margin-top: 5px;
+}
+
 #submit-loader {
   display: none;
-  position: absolute;
-  margin: 0;
-  margin-top: -3.6em;
-  margin-left: 21em;
+  margin: 0 auto 1em auto;
 }
 
 .LoadingIconWrapper {
@@ -308,4 +320,68 @@ fieldset fieldset legend {
   width: 30px;
   height: 30px;
   animation: loading-spin 1.2s linear infinite;
+}
+
+#kc-register {
+  width: 100%;
+}
+
+#kc-login {
+  width: 100%;
+}
+
+.divider {
+  margin-bottom: 10px;
+  margin-top: 20px;
+  border: 0;
+  border-top: 1px solid #5b616b57;
+}
+
+.identity-provider-header {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  font-size: 16px;
+  color: #6A6E72;
+  margin-bottom: 10px;
+  margin-top: 10px;
+  font-weight: normal;
+}
+
+.login-gov-redirect {
+  display: flex;
+  font-size: 14px;
+  text-decoration: none;
+  justify-content: center;
+  text-align: center;
+  padding: 1rem 1.5rem;
+  width: 100%;
+  outline: none;
+}
+
+.login-gov-redirect img {
+  height: 25px;
+}
+
+.login-gov-redirect:hover {
+  color: #fff;
+  outline: 0.1rem solid #6A6E72;
+}
+
+/* Social Providers */
+
+#kc-social-providers {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#kc-social-providers ul {
+  width: 100%;
+  padding-left: 0;
+  margin-top: 0.4em;
+}
+
+#linkAccount {
+  width: 100%;
 }
