@@ -286,9 +286,6 @@ private class LeiSubmissionSummary(log: Logger, clusterSharding: ClusterSharding
     val filingPersistenceId = s"${FilingPersistence.name}-$lei-$period"
     val institutionPersistenceId = s"${InstitutionPersistence.name}-$lei-$period"
 
-    cleanup.deleteAll(filingPersistenceId, true)
-    cleanup.deleteAll(institutionPersistenceId, true)
-
     val submissionPersistenceIdPrefixes = immutable.Seq(
       EditDetailsPersistence.name,
       HmdaValidationError.name,
@@ -301,12 +298,20 @@ private class LeiSubmissionSummary(log: Logger, clusterSharding: ClusterSharding
     Source.future(submissionsForLei(lei))
       .mapConcat(identity)
       .mapAsync(persistenceIdParallelism) { case (lei, submissionIds) =>
+        // Delete submissions
         val fDeleteSubmissions = submissionIds.filter(_.period == period).map { submissionId =>
           val persistenceIdsToDelete = submissionPersistenceIdPrefixes.map(prefix => prefix + "-" + submissionId.toString)
           log.info(s"Deleting data with persistence ids $persistenceIdsToDelete")
           cleanup.deleteAll(persistenceIdsToDelete, true)
-        }
-        Future.sequence(fDeleteSubmissions)
+        }.toSeq
+        // Delete filing
+        val fDeleteFiling = cleanup.deleteAll(filingPersistenceId, true)
+        // Delete institution
+        val fDeleteInstitution = cleanup.deleteAll(institutionPersistenceId, true)
+
+        // Combine deletion futures
+        val fDeletions = fDeleteSubmissions :+ fDeleteFiling :+ fDeleteInstitution
+        Future.sequence(fDeletions)
       }
     }
 }
