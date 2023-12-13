@@ -22,7 +22,7 @@ object Version {
   val httpcomponents         = "4.5.14"
   val alpakka                = "2.0.2"
   val alpakkaS3              = "2.0.1"
-  val embeddedKafka          = "2.4.1"
+  val embeddedKafka          = "2.8.1"
   val akkaQuartzScheduler    = "1.9.3-akka-2.6.x"
   val sprayresolver          = "0.10.0"
   val enumeratum             = "1.7.2"
@@ -38,5 +38,5 @@ object Version {
   val scalacheckShapeless    = "1.2.5"
   val diffx                  = "0.4.0"
   val log4j                  = "2.15.0"
-  val kubernetesApi          = "15.0.1"
+  val kubernetesApi          = "16.0.3"
 }
