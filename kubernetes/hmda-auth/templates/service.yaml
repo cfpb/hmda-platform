@@ -32,7 +32,7 @@ metadata:
       prefix: /hmda-auth/
       rewrite: /
       service: {{ include "hmda-auth.fullname" . }}:{{ .Values.service.port }}
-      timeout_ms: 300000
+      timeout_ms: 0
       add_response_headers:
         referrer-policy: 
           value: strict-origin
