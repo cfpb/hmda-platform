@@ -119,7 +119,6 @@ Clone the repo and go into the repo directory:
 git clone https://github.com/cfpb/hmda-platform.git
 cd hmda-platform
 ```
-Note: Make sure 
 
 ## Running with sbt
 
