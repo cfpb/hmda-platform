@@ -101,12 +101,30 @@ The image below shows the cloud vendor agnostic technical architecture for the H
 
 <a href="data-browser/README.md">Please view the README for HMDA Data Browser</a>
 
+## Installations
+Before running the HMDA Platform, make sure to have the following installed:
+1. Homebrew - https://brew.sh/
+2. Docker - ```bash brew install docker ```
+3. Docker Desktop - https://docs.docker.com/desktop/install/mac-install/
+4. Java (version 13.0.2) for MacOS - [https://www.java.com/en/download/](https://www.oracle.com/java/technologies/javase/jdk13-archive-downloads.html)
+5. Scala (version 2.12 for compatibility issues) - ```bash brew install scala@2.12 ```
+6. sdk - https://sdkman.io/install
+Next, use sdk to install sbt instead of brew (it won't work with brew) (Note: before install, check what version is currently being used in project/build.properties and install that version or higher):
+
+```bash
+sdk install sbt
+```
+Clone the repo and go into the repo directory:
+```bash
+git clone https://github.com/cfpb/hmda-platform.git
+cd hmda-platform
+```
+
 ## Running with sbt
 
 The HMDA Platform can run locally using [`sbt`](https://www.scala-sbt.org/) with an [embedded Cassandra](https://doc.akka.io/docs/alpakka-kafka/current/) and [embedded Kafka](https://doc.akka.io/docs/alpakka-kafka/current/). To get started:
 
 ```bash
-git clone https://github.com/cfpb/hmda-platform.git
 cd hmda-platform
 export CASSANDRA_CLUSTER_HOSTS=localhost
 export APP_PORT=2551
