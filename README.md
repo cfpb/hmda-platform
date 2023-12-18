@@ -109,7 +109,7 @@ Before running the HMDA Platform, make sure to have the following installed:
 4. Java (version 13.0.2) for MacOS - [https://www.java.com/en/download/](https://www.oracle.com/java/technologies/javase/jdk13-archive-downloads.html)
 5. Scala (version 2.12 for compatibility issues) - ```bash brew install scala@2.12 ```
 6. sdk - https://sdkman.io/install
-Next, use sdk to install sbt instead of brew (it won't work with brew):
+Next, use sdk to install sbt instead of brew (it won't work with brew) (Note: before install, check what version is currently being used in project/build.properties and install that version or higher):
 
 ```bash
 sdk install sbt
@@ -119,7 +119,7 @@ Clone the repo and go into the repo directory:
 git clone https://github.com/cfpb/hmda-platform.git
 cd hmda-platform
 ```
-Before running with sbt, make sure your sbt version matches with the project version. Exit the project directory and run sbt -version to check the version. Go back to the project directory, go to project directorym then edit the build.properties to match your actual sbt version. NOTE: Please do NOT commit any changes to this file to the remote repo, revert it before pushing
+Note: Make sure 
 
 ## Running with sbt
 
