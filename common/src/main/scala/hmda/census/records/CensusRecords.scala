@@ -114,7 +114,7 @@ object CensusRecords {
       case 2022 =>
         indexedCounty2022
       case 2023 =>
-        indexedCounty2022
+        indexedCounty2023
       case 2024 =>
         indexedCounty2023
       case _ =>
