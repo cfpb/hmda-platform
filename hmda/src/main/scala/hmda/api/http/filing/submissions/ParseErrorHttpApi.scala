@@ -1,7 +1,7 @@
 package hmda.api.http.filing.submissions
 
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.http.scaladsl.model.{ StatusCodes, Uri }
+import akka.http.scaladsl.model.{StatusCodes, Uri}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.util.Timeout
@@ -14,15 +14,16 @@ import hmda.api.http.utils.ParserErrorUtils._
 import hmda.auth.OAuth2Authorization
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.messages.submission.SubmissionProcessingCommands.GetParsingErrors
-import hmda.model.filing.submission.{ Submission, SubmissionId }
+import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowParsedError
+import hmda.model.filing.submission.{Submission, SubmissionId}
 import hmda.model.processing.state.HmdaParserErrorState
-import hmda.persistence.submission.{ HmdaParserError, SubmissionPersistence }
+import hmda.persistence.submission.{HmdaParserError, SubmissionPersistence}
 import hmda.util.http.FilingResponseUtils._
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
 
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.{ Failure, Success }
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 object ParseErrorHttpApi {
   def create(log: Logger, sharding: ClusterSharding)(implicit ec: ExecutionContext, t: Timeout): OAuth2Authorization => Route =
@@ -70,8 +71,8 @@ private class ParseErrorHttpApi(log: Logger, sharding: ClusterSharding)(implicit
             onComplete(fErrors) {
               case Success(state) =>
                 val parsingErrorSummary = ParsingErrorSummary(
-                  state.transmittalSheetErrors.map(parserErrorSummaryConvertor),
-                  state.larErrors.map(parserErrorSummaryConvertor),
+                  state.transmittalSheetErrors.map{hmdaParsedError => parserErrorSummaryConvertor(hmdaParsedError,submissionId.period)},
+                  state.larErrors.map{hmdaParsedError => parserErrorSummaryConvertor(hmdaParsedError,submissionId.period)},
                   uri.path.toString,
                   page,
                   state.totalErrors,

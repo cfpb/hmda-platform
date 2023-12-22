@@ -22,12 +22,27 @@
                     <input tabindex="2" id="password" name="password" type="password" autocomplete="off" />
 
                     <input tabindex="4" name="login" id="kc-login" type="submit" value="${msg("doLogIn")}"/>
-                    <div id="submit-loader" class="LoadingIconWrapper">
-                      <div class="LoadingIcon"></div>
+                    <div class="passResetContainer">
+                        <#if realm.resetPasswordAllowed>
+                            <p><a tabindex="6" href="${url.loginResetCredentialsUrl}">${msg("doForgotPassword")}</a></p>
+                        </#if>
+                        <div id="submit-loader" class="LoadingIconWrapper">
+                            <div class="LoadingIcon"></div>
+                        </div>
                     </div>
+                    <hr class="divider"></hr>
+                    <h4 class="identity-provider-header">Or sign in with</h4>
 
-                    <#if realm.resetPasswordAllowed>
-                        <p><a tabindex="5" href="${url.loginResetCredentialsUrl}">${msg("doForgotPassword")}</a></p>
+                    <#if realm.password && social.providers??>
+                        <div id="kc-social-providers" class="${properties.kcFormSocialAccountSectionClass!}">
+                            <ul class="${properties.kcFormSocialAccountListClass!} <#if social.providers?size gt 3>${properties.kcFormSocialAccountListGridClass!}</#if>">
+                                <#list social.providers as p>
+                                    <a class="login-gov-redirect" href="${p.loginUrl}">
+                                        <img src="${url.resourcesPath}/img/login-gov-logo.svg">
+                                    </a>
+                                </#list>
+                            </ul>
+                        </div>
                     </#if>
                 </fieldset>
                 <p class="usa-text-small">Having trouble? Please contact <a href="mailto:${properties.supportEmailTo!}?subject=${properties.supportEmailSubject!}">${properties.supportEmailTo!}</a></p>

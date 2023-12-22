@@ -1,14 +1,19 @@
 package hmda.messages
 
-import akka.kafka.ConsumerMessage.{ CommittableMessage, CommittableOffset }
+import akka.kafka.ConsumerMessage.{CommittableMessage, CommittableOffset}
+import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.StrictLogging
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 object HmdaMessageFilter extends StrictLogging {
 
   case class StandardMsg(lei: String, year: Int, quarter: Option[String], sequenceNumber: Option[String])
+
+
+
+
 
   def parse(key: String, value: String): Option[StandardMsg] = {
     Try {
@@ -28,6 +33,7 @@ object HmdaMessageFilter extends StrictLogging {
       } yield StandardMsg(lei1, year, quarterOpt, seqNum)
     }.toOption.flatten // regex api is not the safest one and we don't want it to throw accidentally
   }
+
 
   type Processor = CommittableMessage[String, String] => Future[CommittableOffset]
 

@@ -84,11 +84,11 @@
         </#if>
 
         <input disabled name="register" id="kc-register" type="submit" value="${msg("doRegister")}"/>
-
-        <div id="submit-loader" class="LoadingIconWrapper">
-          <div class="LoadingIcon"></div>
-        </div>
       </fieldset>
+
+      <div id="submit-loader" class="LoadingIconWrapper">
+          <div class="LoadingIcon"></div>
+      </div>
 
       <p class="usa-text-small">Having trouble? Please contact <a href="mailto:${properties.supportEmailTo!}?subject=${properties.supportEmailSubject!}">${properties.supportEmailTo!}</a></p>
     </form>

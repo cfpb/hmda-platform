@@ -1,4 +1,4 @@
-package hmda.validation.rules.lar.validity.eighteen
+package hmda.validation.rules.lar.validity._2018
 
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.dsl.PredicateCommon._

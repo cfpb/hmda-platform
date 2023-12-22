@@ -1,9 +1,10 @@
 package hmda.api.http.utils
 
 import hmda.model.filing.ParserValidValuesLookup._
-import hmda.api.http.model.filing.submissions.{ HmdaRowParsedErrorSummary, FieldParserErrorSummary }
+import hmda.api.http.model.filing.submissions.{FieldParserErrorSummary, HmdaRowParsedErrorSummary}
 import hmda.parser.ParserErrorModel.ParserValidationError
 import hmda.messages.submission.SubmissionProcessingEvents._
+import hmda.utils.YearUtils.Period
 
 object ParserErrorUtils {
 
@@ -23,7 +24,7 @@ object ParserErrorUtils {
             ))
     }
   def parserErrorSummaryConvertor(
-      hmdaRowParsedError: HmdaRowParsedError): HmdaRowParsedErrorSummary = {
+      hmdaRowParsedError: HmdaRowParsedError,period: Period): HmdaRowParsedErrorSummary = {
     HmdaRowParsedErrorSummary(
       hmdaRowParsedError.rowNumber,
       hmdaRowParsedError.estimatedULI,
@@ -32,7 +33,7 @@ object ParserErrorUtils {
           FieldParserErrorSummary(
             errorMessage.fieldName,
             errorMessage.inputValue,
-            lookupParserValidValues(errorMessage.fieldName)
+            lookupParserValidValuesByYear(errorMessage.fieldName,period)
         ))
     )
   }

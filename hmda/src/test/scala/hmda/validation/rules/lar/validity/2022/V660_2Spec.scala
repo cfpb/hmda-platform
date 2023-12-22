@@ -11,7 +11,12 @@ class V660_2Spec extends LarEditCheckSpec {
 
   property("Credit score type must be valid") {
     forAll(larGen) { lar =>
-      whenever(lar.applicant.creditScoreType != CreditScoreNoCoApplicant) {
+      whenever(lar.applicant.creditScoreType != CreditScoreNoCoApplicant &&
+        //filtering out the new enums added for 2024 as they are not applicable to past filing seasons
+        lar.applicant.creditScoreType != FICOScore8 &&
+        lar.applicant.creditScoreType != FICOScore10 &&
+        lar.applicant.creditScoreType != FICOScore10T &&
+        lar.applicant.creditScoreType != VantageScore4) {
         lar.mustPass
       }
 
