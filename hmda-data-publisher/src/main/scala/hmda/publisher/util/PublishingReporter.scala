@@ -118,39 +118,6 @@ object PublishingReporter {
     object Expectation {
       def baseForSchedule(s: Schedule): Expectation = {
         val numOfFiles = s match {
-          case Schedules.PanelScheduler2018        => 1
-          case Schedules.PanelScheduler2019        => 1
-          case Schedules.PanelScheduler2020        => 1
-          case Schedules.PanelScheduler2021        => 1
-          case Schedules.PanelScheduler2022        => 1
-          case Schedules.LarScheduler2018          => 1
-          case Schedules.LarPublicScheduler2018    => 1
-          case Schedules.LarPublicScheduler2019    => 1
-          case Schedules.LarPublicScheduler2020    => 1
-          case Schedules.LarPublicScheduler2021    => 1
-          case Schedules.LarScheduler2019          => 1
-          case Schedules.LarScheduler2020          => 1
-          case Schedules.LarScheduler2021          => 1
-          case Schedules.LarScheduler2022          => 1
-          case Schedules.LarSchedulerLoanLimit2019 => 1
-          case Schedules.LarSchedulerLoanLimit2020 => 1
-          case Schedules.LarSchedulerLoanLimit2021 => 1
-          case Schedules.LarSchedulerLoanLimit2022 => 1
-          case Schedules.TsScheduler2018           => 1
-          case Schedules.TsPublicScheduler2018     => 1
-          case Schedules.TsPublicScheduler2019     => 1
-          case Schedules.TsPublicScheduler2020    => 1
-          case Schedules.TsPublicScheduler2021    => 1
-          case Schedules.TsScheduler2019           => 1
-          case Schedules.TsScheduler2020           => 1
-          case Schedules.TsScheduler2021           => 1
-          case Schedules.TsScheduler2022           => 1
-          case Schedules.LarSchedulerQuarterly2020 => 1
-          case Schedules.TsSchedulerQuarterly2020  => 1
-          case Schedules.LarSchedulerQuarterly2021 => 1
-          case Schedules.TsSchedulerQuarterly2021  => 1
-          case Schedules.LarSchedulerQuarterly2022 => 1
-          case Schedules.TsSchedulerQuarterly2022  => 1
           case _ => 1
         }
         Expectation(s, numOfFiles)
@@ -235,53 +202,6 @@ object PublishingReporter {
     case object TsQuarterlyScheduleId extends ScheduleGroupId
 
     def forSchedule(s: Schedule): ScheduleGroupId = s match {
-
-      case Schedules.PanelScheduler2018        => PanelScheduler2018Id
-      case Schedules.PanelScheduler2019        => PanelScheduler2019Id
-      case Schedules.PanelScheduler2020        => PanelScheduler2020Id
-      case Schedules.PanelScheduler2021        => PanelScheduler2021Id
-      case Schedules.PanelScheduler2022        => PanelScheduler2022Id
-
-      case Schedules.LarScheduler2018          => LarScheduler2018Id
-      case Schedules.LarPublicScheduler2018    => LarPublicScheduler2018Id
-
-      case Schedules.LarPublicScheduler2019    => LarPublicScheduler2019Id
-      case Schedules.LarPublicScheduler2020   => LarPublicScheduler2020Id
-      case Schedules.LarPublicScheduler2021   => LarPublicScheduler2021Id
-      case Schedules.LarScheduler2019          => LarScheduler2019Id
-      case Schedules.LarScheduler2020          => LarScheduler2020Id
-      case Schedules.LarScheduler2021          => LarScheduler2021Id
-      case Schedules.LarScheduler2022          => LarScheduler2022Id
-
-      case Schedules.LarSchedulerLoanLimit2019 => LarSchedulerLoanLimit2019Id
-      case Schedules.LarSchedulerLoanLimit2020 => LarSchedulerLoanLimit2020Id
-      case Schedules.LarSchedulerLoanLimit2021 => LarSchedulerLoanLimit2021Id
-      case Schedules.LarSchedulerLoanLimit2022 => LarSchedulerLoanLimit2022Id
-
-
-      case Schedules.TsScheduler2018           => TsScheduler2018Id
-      case Schedules.TsPublicScheduler2018     => TsPublicScheduler2018Id
-      case Schedules.TsPublicScheduler2019     => TsPublicScheduler2019Id
-      case Schedules.TsPublicScheduler2020     => TsPublicScheduler2020Id
-      case Schedules.TsPublicScheduler2021     => TsPublicScheduler2021Id
-      case Schedules.TsScheduler2019           => TsScheduler2019Id
-      case Schedules.TsScheduler2020           => TsScheduler2020Id
-      case Schedules.TsScheduler2021           => TsScheduler2021Id
-      case Schedules.TsScheduler2022           => TsScheduler2022Id
-
-
-      case Schedules.LarSchedulerQuarterly2020 => LarSchedulerQuarterly2020Id
-      case Schedules.TsSchedulerQuarterly2020  => TsSchedulerQuarterly2020Id
-
-      case Schedules.LarSchedulerQuarterly2021 => LarSchedulerQuarterly2021Id
-      case Schedules.TsSchedulerQuarterly2021  => TsSchedulerQuarterly2021Id
-
-      case Schedules.LarSchedulerQuarterly2022 => LarSchedulerQuarterly2022Id
-      case Schedules.TsSchedulerQuarterly2022  => TsSchedulerQuarterly2022Id
-
-      case Schedules.LarSchedulerQuarterly2023 => LarSchedulerQuarterly2023Id
-      case Schedules.TsSchedulerQuarterly2023  => TsSchedulerQuarterly2023Id
-
       case Schedules.PanelSchedule => PanelScheduleId
       case Schedules.LarPublicSchedule => LarPublicScheduleId
       case Schedules.CombinedMLarPublicSchedule => CombinedMLarPublicScheduleId

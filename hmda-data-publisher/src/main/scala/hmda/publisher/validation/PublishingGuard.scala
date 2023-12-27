@@ -99,6 +99,7 @@ class PublishingGuard(
       case Period.y2020   => 0
       case Period.y2021   => 0
       case Period.y2022   => 0
+      case Period.y2023   => 0
       case Period.y2020Q1 => 0
       case Period.y2020Q2 => 0
       case Period.y2020Q3 => 0
@@ -121,6 +122,7 @@ class PublishingGuard(
           case Period.y2020   => db2020.validationLarData2020(db2020.Year2020Period.Whole)
           case Period.y2021   => db2021.validationLarData2021(db2021.Year2021Period.Whole)
           case Period.y2022   => db2022.validationLarData2022(db2022.Year2022Period.Whole)
+          case Period.y2023   => db2023.validationLarData2023(db2023.Year2023Period.Whole)
           case Period.y2020Q1 => db2020.validationLarData2020(db2020.Year2020Period.Q1)
           case Period.y2020Q2 => db2020.validationLarData2020(db2020.Year2020Period.Q2)
           case Period.y2020Q3 => db2020.validationLarData2020(db2020.Year2020Period.Q3)
@@ -142,6 +144,7 @@ class PublishingGuard(
           case Period.y2020   => db2020.validationTSData2020(db2020.Year2020Period.Whole)
           case Period.y2021   => db2021.validationTSData2021(db2021.Year2021Period.Whole)
           case Period.y2022   => db2022.validationTSData2022(db2022.Year2022Period.Whole)
+          case Period.y2023   => db2023.validationTSData2023(db2023.Year2023Period.Whole)
           case Period.y2020Q1 => db2020.validationTSData2020(db2020.Year2020Period.Q1)
           case Period.y2020Q2 => db2020.validationTSData2020(db2020.Year2020Period.Q2)
           case Period.y2020Q3 => db2020.validationTSData2020(db2020.Year2020Period.Q3)
@@ -163,6 +166,7 @@ class PublishingGuard(
           case Period.y2020   => db2020.validationPanelData2020(db2020.Year2020Period.Whole)
           case Period.y2021   => db2021.validationPanelData2021(db2021.Year2021Period.Whole)
           case Period.y2022   => db2022.validationPanelData2022(db2022.Year2022Period.Whole)
+          case Period.y2023   => db2023.validationPanelData2023(db2023.Year2023Period.Whole)
           case Period.y2020Q1 | Period.y2020Q2 | Period.y2020Q3 =>
             throw new IllegalArgumentException("quarterly 2020 is not supported to public publishers at the moment")
           case Period.y2021Q1 | Period.y2021Q2 | Period.y2021Q3 =>
@@ -185,6 +189,8 @@ class PublishingGuard(
           case Period.y2019 => Some(db2019.validationMLarData2019)
           case Period.y2020 => Some(db2020.validationMLarData2020)
           case Period.y2021 => Some(db2021.validationMLarData2021)
+          case Period.y2022 => Some(db2022.validationMLarData2022)
+          case Period.y2023 => Some(db2023.validationMLarData2023)
           case Period.y2020Q1 | Period.y2020Q2 | Period.y2020Q3 =>
             throw new IllegalArgumentException("quarterly 2020 is not supported to public publishers at the moment")
           case Period.y2021Q1 | Period.y2021Q2 | Period.y2021Q3 =>
@@ -201,6 +207,7 @@ class PublishingGuard(
           case Period.y2020 => db2020.validationTSData2020(db2020.Year2020Period.Whole)
           case Period.y2021 => db2021.validationTSData2021(db2021.Year2021Period.Whole)
           case Period.y2022 => db2022.validationTSData2022(db2022.Year2022Period.Whole)
+          case Period.y2023 => db2023.validationTSData2023(db2023.Year2023Period.Whole)
           case Period.y2020Q1 | Period.y2020Q1 | Period.y2020Q3 =>
             throw new IllegalArgumentException("quarterly 2020 is not supported to public publishers at the moment")
           case Period.y2021Q1 | Period.y2021Q1 | Period.y2021Q3 =>
@@ -217,6 +224,7 @@ class PublishingGuard(
           case Period.y2020 => db2020.validationPanelData2020(db2020.Year2020Period.Whole)
           case Period.y2021 => db2021.validationPanelData2021(db2021.Year2021Period.Whole)
           case Period.y2022 => db2022.validationPanelData2022(db2022.Year2022Period.Whole)
+          case Period.y2023 => db2023.validationPanelData2023(db2023.Year2023Period.Whole)
           case Period.y2020Q1 | Period.y2020Q1 | Period.y2020Q3 =>
             throw new IllegalArgumentException("quarterly 2020 is not supported to public publishers at the moment")
           case Period.y2021Q1 | Period.y2021Q1 | Period.y2021Q3 =>
@@ -224,7 +232,7 @@ class PublishingGuard(
           case Period.y2022Q1 | Period.y2022Q2 | Period.y2022Q3 =>
             throw new IllegalArgumentException("quarterly 2022 is not supported to public publishers at the moment")
           case Period.y2023Q1 | Period.y2023Q2 | Period.y2023Q3 =>
-            throw new IllegalArgumentException("quarterly 2022 is not supported to public publishers at the moment")
+            throw new IllegalArgumentException("quarterly 2023 is not supported to public publishers at the moment")
           case p => throw new IllegalArgumentException("Illegal period used for fetching public ts data: " + p.toString)
         }
         larDataOpt
@@ -276,6 +284,7 @@ object PublishingGuard {
     case object y2020   extends Period
     case object y2021   extends Period
     case object y2022   extends Period
+    case object y2023   extends Period
     case object y2020Q1 extends Period with Quarter
     case object y2020Q2 extends Period with Quarter
     case object y2020Q3 extends Period with Quarter

@@ -48,42 +48,6 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
   private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   private val fullDateQuarterly = DateTimeFormatter.ofPattern("yyyy-MM-dd_")
 
-  // Regulator File Scheduler Repos Annual
-  def larRepository2018 = new LarRepository2018(dbConfig)
-
-  def larRepository2019 = new LarRepository2019(dbConfig)
-
-  def larRepository2020 = createLarRepository2020(dbConfig, Year2020Period.Whole)
-
-  def larRepository2021 = createLarRepository2021(dbConfig, Year2021Period.Whole)
-
-  def larRepository2022 = createLarRepository2022(dbConfig, Year2022Period.Whole)
-
-
-  // Regulator File Scheduler Repos Quarterly
-  def larRepository2020Q1 = createLarRepository2020(dbConfig, Year2020Period.Q1)
-
-  def larRepository2020Q2 = createLarRepository2020(dbConfig, Year2020Period.Q2)
-
-  def larRepository2020Q3 = createLarRepository2020(dbConfig, Year2020Period.Q3)
-
-  def larRepository2021Q1 = createLarRepository2021(dbConfig, Year2021Period.Q1)
-
-  def larRepository2021Q2 = createLarRepository2021(dbConfig, Year2021Period.Q2)
-
-  def larRepository2021Q3 = createLarRepository2021(dbConfig, Year2021Period.Q3)
-
-  def larRepository2022Q1 = createLarRepository2022(dbConfig, Year2022Period.Q1)
-
-  def larRepository2022Q2 = createLarRepository2022(dbConfig, Year2022Period.Q2)
-
-  def larRepository2022Q3 = createLarRepository2022(dbConfig, Year2022Period.Q3)
-
-  def larRepository2023Q1 = createLarRepository2023(dbConfig, Year2023Period.Q1)
-
-  def larRepository2023Q2 = createLarRepository2023(dbConfig, Year2023Period.Q2)
-
-  def larRepository2023Q3 = createLarRepository2023(dbConfig, Year2023Period.Q3)
 
 
   val publishingGuard: PublishingGuard = PublishingGuard.create(this)(context.system)
@@ -94,6 +58,8 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
   val indexTractMap2020: Map[String, Census] = CensusRecords.indexedTract2020
   val indexTractMap2021: Map[String, Census] = CensusRecords.indexedTract2021
   val indexTractMap2022: Map[String, Census] = CensusRecords.indexedTract2022
+  val indexTractMap2023: Map[String, Census] = CensusRecords.indexedTract2023
+
 
   val annualRepos = larAvailableYears.map(yr => yr -> {
     val component = new PublisherComponent(yr)
@@ -146,283 +112,6 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
   }
 
   override def receive: Receive = {
-
-    case LarScheduler2018 =>
-      publishingGuard.runIfDataIsValid(Period.y2018, Scope.Private) {
-        val now = LocalDateTime.now().minusDays(1)
-        val formattedDate = fullDate.format(now)
-        val fileName = s"$formattedDate" + "2018_lar.txt"
-
-        val allResultsSource: Source[String, NotUsed] =
-          Source
-            .fromPublisher(larRepository2018.getAllLARs(getFilterList()))
-            .map(larEntity => larEntity.toRegulatorPSV)
-
-        def countF: Future[Int] = larRepository2018.getAllLARsCount(getFilterList())
-
-        for {
-          s3ObjName <- publishPSVtoS3(fileName, allResultsSource, countF, LarScheduler2018)
-          // _ <- persistFileForQa(s3ObjName, LarEntityImpl2018.parseFromPSVUnsafe, qaLarRepository2018)
-        } yield ()
-      }
-
-    case LarScheduler2019 =>
-      publishingGuard.runIfDataIsValid(Period.y2019, Scope.Private) {
-        val now = LocalDateTime.now().minusDays(1)
-        val formattedDate = fullDate.format(now)
-        val fileName = s"$formattedDate" + "2019_lar.txt"
-        val allResultsSource: Source[String, NotUsed] =
-          Source
-            .fromPublisher(larRepository2019.getAllLARs(getFilterList()))
-            .map(larEntity => larEntity.toRegulatorPSV)
-
-        def countF: Future[Int] = larRepository2019.getAllLARsCount(getFilterList())
-
-        for {
-          _ <- publishPSVtoS3(fileName, allResultsSource, countF, LarScheduler2019)
-        } yield ()
-      }
-
-    case LarScheduler2020 =>
-      publishingGuard.runIfDataIsValid(Period.y2020, Scope.Private) {
-        val now = LocalDateTime.now().minusDays(1)
-        val formattedDate = fullDate.format(now)
-        val fileName = s"$formattedDate" + "2020_lar.txt"
-        val allResultsSource: Source[String, NotUsed] =
-          Source
-            .fromPublisher(larRepository2020.getAllLARs(getFilterList()))
-            .map(larEntity => larEntity.toRegulatorPSV)
-
-        def countF: Future[Int] = larRepository2020.getAllLARsCount(getFilterList())
-
-        for {
-          _ <- publishPSVtoS3(fileName, allResultsSource, countF, LarScheduler2020)
-        } yield ()
-      }
-
-    case LarScheduler2021 =>
-      publishingGuard.runIfDataIsValid(Period.y2021, Scope.Private) {
-        val now = LocalDateTime.now().minusDays(1)
-        val formattedDate = fullDate.format(now)
-        val fileName = s"$formattedDate" + "2021_lar.txt"
-        val allResultsSource: Source[String, NotUsed] =
-          Source
-            .fromPublisher(larRepository2021.getAllLARs(getFilterList()))
-            .map(larEntity => larEntity.toRegulatorPSV)
-
-        def countF: Future[Int] = larRepository2021.getAllLARsCount(getFilterList())
-
-        for {
-          _ <- publishPSVtoS3(fileName, allResultsSource, countF, LarScheduler2021)
-        } yield ()
-      }
-
-    case LarScheduler2022 =>
-      publishingGuard.runIfDataIsValid(Period.y2022, Scope.Private) {
-        val now = LocalDateTime.now().minusDays(1)
-        val formattedDate = fullDate.format(now)
-        val fileName = s"$formattedDate" + "2022_lar.txt"
-        val allResultsSource: Source[String, NotUsed] =
-          Source
-            .fromPublisher(larRepository2022.getAllLARs(getFilterList()))
-            .map(larEntity => larEntity.toRegulatorPSV)
-
-        def countF: Future[Int] = larRepository2022.getAllLARsCount(getFilterList())
-
-        for {
-          _ <- publishPSVtoS3(fileName, allResultsSource, countF, LarScheduler2022)
-        } yield ()
-      }
-    case LarSchedulerLoanLimit2019 =>
-      publishingGuard.runIfDataIsValid(Period.y2019, Scope.Private) {
-        val now = LocalDateTime.now().minusDays(1)
-        val formattedDate = fullDate.format(now)
-        val fileName = "2019F_AGY_LAR_withFlag_" + s"$formattedDate" + "2019_lar.txt"
-        val allResultsSource: Source[String, NotUsed] =
-          Source
-            .fromPublisher(larRepository2019.getAllLARs(getFilterList()))
-            .map(larEntity => appendCensus2019(larEntity, 2019))
-            .prepend(Source(List(LoanLimitHeader)))
-
-        def countF: Future[Int] = larRepository2019.getAllLARsCount(getFilterList())
-
-        for {
-          _ <- publishPSVtoS3(fileName, allResultsSource, countF, LarSchedulerLoanLimit2019)
-        } yield ()
-      }
-
-    case LarSchedulerLoanLimit2020 =>
-      publishingGuard.runIfDataIsValid(Period.y2020, Scope.Private) {
-        val now = LocalDateTime.now().minusDays(1)
-        val formattedDate = fullDate.format(now)
-        val fileName = "2020F_AGY_LAR_withFlag_" + s"$formattedDate" + "2020_lar.txt"
-        val allResultsSource: Source[String, NotUsed] =
-          Source
-            .fromPublisher(larRepository2020.getAllLARs(getFilterList()))
-            .map(larEntity => appendCensus2020(larEntity, 2020))
-            .prepend(Source(List(LoanLimitHeader)))
-
-        def countF: Future[Int] = larRepository2020.getAllLARsCount(getFilterList())
-
-        for {
-          _ <- publishPSVtoS3(fileName, allResultsSource, countF, LarSchedulerLoanLimit2020)
-        } yield ()
-      }
-    case LarSchedulerLoanLimit2021 =>
-      publishingGuard.runIfDataIsValid(Period.y2021, Scope.Private) {
-        val now = LocalDateTime.now().minusDays(1)
-        val formattedDate = fullDate.format(now)
-        val fileName = "2021F_AGY_LAR_withFlag_" + s"$formattedDate" + "2021_lar.txt"
-        val allResultsSource: Source[String, NotUsed] =
-          Source
-            .fromPublisher(larRepository2021.getAllLARs(getFilterList()))
-            .map(larEntity => appendCensus2021(larEntity, 2021))
-            .prepend(Source(List(LoanLimitHeader)))
-
-        def countF: Future[Int] = larRepository2021.getAllLARsCount(getFilterList())
-
-        for {
-          _ <- publishPSVtoS3(fileName, allResultsSource, countF, LarSchedulerLoanLimit2021)
-        } yield ()
-      }
-
-    case LarSchedulerLoanLimit2022 =>
-      publishingGuard.runIfDataIsValid(Period.y2022, Scope.Private) {
-        val now = LocalDateTime.now().minusDays(1)
-        val formattedDate = fullDate.format(now)
-        val fileName = "2022F_AGY_LAR_withFlag_" + s"$formattedDate" + "2022_lar.txt"
-        val allResultsSource: Source[String, NotUsed] =
-          Source
-            .fromPublisher(larRepository2022.getAllLARs(getFilterList()))
-            .map(larEntity => appendCensus2022(larEntity, 2022))
-            .prepend(Source(List(LoanLimitHeader)))
-
-        def countF: Future[Int] = larRepository2022.getAllLARsCount(getFilterList())
-
-        for {
-          _ <- publishPSVtoS3(fileName, allResultsSource, countF, LarSchedulerLoanLimit2022)
-        } yield ()
-      }
-    case LarSchedulerQuarterly2020 =>
-      val now = LocalDateTime.now().minusDays(1)
-      val formattedDate = fullDateQuarterly.format(now)
-
-      def publishQuarter2020[Table <: RealLarTable2020](
-                                                         quarter: Period.Quarter,
-                                                         fileNameSuffix: String,
-                                                         repo: LarRepository2020Base[Table]) =
-        timeBarrier.runIfStillRelevant(quarter) {
-          publishingGuard.runIfDataIsValid(quarter, Scope.Private) {
-            val fileName = formattedDate + fileNameSuffix
-
-            val allResultsSource: Source[String, NotUsed] = Source
-              .fromPublisher(repo.getAllLARs(getFilterList()))
-              .map(larEntity => larEntity.toRegulatorPSV)
-
-            def countF: Future[Int] = repo.getAllLARsCount(getFilterList())
-
-            for {
-              _ <- publishPSVtoS3(fileName, allResultsSource, countF, LarSchedulerQuarterly2020)
-            } yield ()
-          }
-        }
-
-      publishQuarter2020(Period.y2020Q1, "quarter_1_2020_lar.txt", larRepository2020Q1)
-      publishQuarter2020(Period.y2020Q2, "quarter_2_2020_lar.txt", larRepository2020Q2)
-      publishQuarter2020(Period.y2020Q3, "quarter_3_2020_lar.txt", larRepository2020Q3)
-
-    case LarSchedulerQuarterly2021 =>
-      val now = LocalDateTime.now().minusDays(1)
-      val formattedDate = fullDateQuarterly.format(now)
-
-      def publishQuarter2021[Table <: RealLarTable2021](
-                                                         quarter: Period.Quarter,
-                                                         fileNameSuffix: String,
-                                                         repo: LarRepository2021Base[Table]) =
-        timeBarrier.runIfStillRelevant(quarter) {
-          publishingGuard.runIfDataIsValid(quarter, Scope.Private) {
-
-            val fileName = formattedDate + fileNameSuffix
-
-            val allResultsSource: Source[String, NotUsed] = Source
-              .fromPublisher(repo.getAllLARs(getFilterList()))
-              .map(larEntity => larEntity.toRegulatorPSV)
-
-            def countF: Future[Int] = repo.getAllLARsCount(getFilterList())
-
-            for {
-
-              _ <- publishPSVtoS3(fileName, allResultsSource, countF, LarSchedulerQuarterly2021)
-            } yield ()
-          }
-        }
-
-      publishQuarter2021(Period.y2021Q1, "quarter_1_2021_lar.txt", larRepository2021Q1)
-      publishQuarter2021(Period.y2021Q2, "quarter_2_2021_lar.txt", larRepository2021Q2)
-      publishQuarter2021(Period.y2021Q3, "quarter_3_2021_lar.txt", larRepository2021Q3)
-
-    case LarSchedulerQuarterly2022 =>
-      val now = LocalDateTime.now().minusDays(1)
-      val formattedDate = fullDateQuarterly.format(now)
-
-      def publishQuarter2022[Table <: RealLarTable2022](
-                                                         quarter: Period.Quarter,
-                                                         fileNameSuffix: String,
-                                                         repo: LarRepository2022Base[Table]
-                                                       ) =
-        timeBarrier.runIfStillRelevant(quarter) {
-          publishingGuard.runIfDataIsValid(quarter, Scope.Private) {
-
-            val fileName = formattedDate + fileNameSuffix
-
-            val allResultsSource: Source[String, NotUsed] = Source
-              .fromPublisher(repo.getAllLARs(getFilterList()))
-              .map(larEntity => larEntity.toRegulatorPSV)
-
-            def countF: Future[Int] = repo.getAllLARsCount(getFilterList())
-
-            for {
-
-              _ <- publishPSVtoS3(fileName, allResultsSource, countF, LarSchedulerQuarterly2022)
-            } yield ()
-          }
-        }
-
-      publishQuarter2022(Period.y2022Q1, "quarter_1_2022_lar.txt", larRepository2022Q1)
-      publishQuarter2022(Period.y2022Q2, "quarter_2_2022_lar.txt", larRepository2022Q2)
-      publishQuarter2022(Period.y2022Q3, "quarter_3_2022_lar.txt", larRepository2022Q3)
-
-    case LarSchedulerQuarterly2023 =>
-      val now = LocalDateTime.now().minusDays(1)
-      val formattedDate = fullDateQuarterly.format(now)
-
-      def publishQuarter2023[Table <: RealLarTable2023](
-                                                         quarter: Period.Quarter,
-                                                         fileNameSuffix: String,
-                                                         repo: LarRepository2023Base[Table]
-                                                       ) =
-        timeBarrier.runIfStillRelevant(quarter) {
-          publishingGuard.runIfDataIsValid(quarter, Scope.Private) {
-
-            val fileName = formattedDate + fileNameSuffix
-
-            val allResultsSource: Source[String, NotUsed] = Source
-              .fromPublisher(repo.getAllLARs(getFilterList()))
-              .map(larEntity => larEntity.toRegulatorPSV)
-
-            def countF: Future[Int] = repo.getAllLARsCount(getFilterList())
-
-            for {
-
-              _ <- publishPSVtoS3(fileName, allResultsSource, countF, LarSchedulerQuarterly2023)
-            } yield ()
-          }
-        }
-
-      publishQuarter2023(Period.y2023Q1, "quarter_1_2023_lar.txt", larRepository2023Q1)
-      publishQuarter2023(Period.y2023Q2, "quarter_2_2023_lar.txt", larRepository2023Q2)
-      publishQuarter2023(Period.y2023Q3, "quarter_3_2023_lar.txt", larRepository2023Q3)
-
     case ScheduleWithYear(schedule, year) if schedule in (LarSchedule, LarQuarterlySchedule, LarLoanLimitSchedule) =>
       schedule match {
         case LarSchedule =>
@@ -545,7 +234,8 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
       case 2020 => indexTractMap2020
       case 2021 => indexTractMap2021
       case 2022 => indexTractMap2022
-      case _ => indexTractMap2021
+      case 2023 => indexTractMap2023
+      case _ => indexTractMap2023
     }
     val censusResult = indexTractMap.getOrElse(hmdaGeoTract, Census())
     val censusID =
@@ -553,26 +243,6 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
     val censusName =
       if (censusResult.name.isEmpty) "MSA/MD NOT AVAILABLE" else censusResult.name
     Msa(censusID, censusName)
-  }
-
-  def appendCensus2019(lar: LarEntityImpl2019, year: Int): String = {
-    val msa = getCensus(lar.larPartOne.tract, year)
-    lar.appendMsa(msa).toRegulatorPSV
-  }
-
-  def appendCensus2020(lar: LarEntityImpl2020, year: Int): String = {
-    val msa = getCensus(lar.larPartOne.tract, year)
-    lar.appendMsa(msa).toRegulatorPSV
-  }
-
-  def appendCensus2021(lar: LarEntityImpl2021, year: Int): String = {
-    val msa = getCensus(lar.larPartOne.tract, year)
-    lar.appendMsa(msa).toRegulatorPSV
-  }
-
-  def appendCensus2022(lar: LarEntityImpl2022, year: Int): String = {
-    val msa = getCensus(lar.larPartOne.tract, year)
-    lar.appendMsa(msa).toRegulatorPSV
   }
 
   def appendCensus(lar: LarEntityImpl, year: Int): String = {
