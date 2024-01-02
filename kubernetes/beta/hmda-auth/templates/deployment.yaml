@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "hmda-auth.fullname" . }}
+  labels:
+  annotations:
+    reloader.stakater.com/search: "true"
+    app: {{ template "hmda-auth.name" . }}
+    chart: {{ template "hmda-auth.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "hmda-auth.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "hmda-auth.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      volumes:
+        - name: tz-config
+          hostPath:
+            path: /usr/share/zoneinfo/America/New_York
+      serviceAccountName: {{ .Values.service.serviceAccount }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          volumeMounts:
+            - name: tz-config
+              mountPath: /etc/localtime
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: HMDA_RUNTIME_MODE
+            value: {{ .Values.hmda.runtimeMode }}
+          - name: BANK_FILTER_LIST
+            valueFrom:
+              configMapKeyRef:
+                name: bank-filter-configmap
+                key: bank-filter-list
+          - name: KEYCLOAK_REALM_URL
+            valueFrom:
+              configMapKeyRef:
+                name: http-configmap
+                key: auth.realmUrl
+          - name: KEYCLOAK_AUTH_URL
+            valueFrom:
+              configMapKeyRef:
+                name: http-configmap
+                key: auth.url
+          - name: KEYCLOAK_PUBLIC_MODULUS
+            valueFrom:
+              configMapKeyRef:
+                name: keycloak-public-key-configmap
+                key: keycloak.publicKey.modulus
+          - name: KEYCLOAK_PUBLIC_EXPONENT
+            valueFrom:
+              configMapKeyRef:
+                name: keycloak-public-key-configmap
+                key: keycloak.publicKey.exponent
+          - name: KEYCLOAK_ADMIN_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: keycloak-credentials
+                key: admin-username
+          - name: KEYCLOAK_ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: keycloak-credentials
+                key: admin-password
+          - name: PG_HOST
+            valueFrom:
+              secretKeyRef:
+                name: inst-postgres-credentials
+                key: host
+          - name: PG_DATABASE
+            valueFrom:
+              configMapKeyRef:
+                name: postgresql-configmap
+                key: postgres.database
+          - name: PG_USER
+            valueFrom:
+              secretKeyRef:
+                name: inst-postgres-credentials
+                key: username
+          - name: PG_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: inst-postgres-credentials
+                key: password
+          - name: PG_SSL
+            valueFrom:
+              configMapKeyRef:
+                name: postgresql-configmap
+                key: postgres.ssl
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}

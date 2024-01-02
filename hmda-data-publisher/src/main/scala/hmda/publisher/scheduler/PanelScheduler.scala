@@ -17,7 +17,7 @@ import hmda.publisher.helper.{PrivateAWSConfigLoader, S3Utils, SnapshotCheck}
 import hmda.publisher.query.component.{InstitutionEmailComponent, InstitutionRepository, PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023}
 import hmda.publisher.query.panel.{InstitutionAltEntity, InstitutionEmailEntity, InstitutionEntity}
 import hmda.publisher.scheduler.schedules.{Schedule, ScheduleWithYear}
-import hmda.publisher.scheduler.schedules.Schedules.{PanelSchedule, PanelScheduler2018, PanelScheduler2019, PanelScheduler2020, PanelScheduler2021, PanelScheduler2022}
+import hmda.publisher.scheduler.schedules.Schedules.{PanelSchedule}
 import hmda.publisher.util.{PublishingReporter, ScheduleCoordinator}
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 import hmda.publisher.util.ScheduleCoordinator.Command._
@@ -81,147 +81,12 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], s
   }
 
   override def receive: Receive = {
-    case PanelScheduler2018 =>
-      panelSync2018()
 
-    case PanelScheduler2019 =>
-      panelSync2019()
-
-    case PanelScheduler2020 =>
-      panelSync2020()
-
-    case PanelScheduler2021 =>
-      panelSync2021()
-
-    case PanelScheduler2022 =>
-      panelSync2022()
 
     case ScheduleWithYear(schedule, year) if schedule == PanelSchedule =>
       panelSync(year)
 
   }
-
-  private def panelSync2018(): Unit = {
-
-    val allResults: Future[Seq[InstitutionEntity]] =
-      institutionRepository2018.findActiveFilers(getFilterList())
-    val now           = LocalDateTime.now().minusDays(1)
-    val formattedDate = fullDate.format(now)
-    val fileName      = s"$formattedDate" + "2018_panel.txt"
-
-    val s3Path       = s"$environmentPrivate/panel/"
-    val fullFilePath = SnapshotCheck.pathSelector(s3Path, fileName)
-
-    val s3Sink =
-      S3.multipartUpload(bucketPrivate, fullFilePath)
-        .withAttributes(S3Attributes.settings(s3Settings))
-    val source = Source
-      .future(allResults)
-      .mapConcat(seek => seek.toList)
-      .mapAsync(1)(institution => appendEmailDomains2018(institution))
-      .map(institution => institution.toPSV + "\n")
-      .map(s => ByteString(s))
-    val results: Future[MultipartUploadResult] = S3Utils.uploadWithRetry(source, s3Sink)
-
-    results.onComplete(reportPublishingComplete(_, PanelScheduler2018, fullFilePath))
-   }
-
-  private def panelSync2019(): Unit = {
-
-    val allResults: Future[Seq[InstitutionEntity]] =
-      institutionRepository2019.findActiveFilers(getFilterList())
-    val now           = LocalDateTime.now().minusDays(1)
-    val formattedDate = fullDate.format(now)
-    val fileName      = s"$formattedDate" + "2019_panel.txt"
-    val s3Path        = s"$environmentPrivate/panel/"
-    val fullFilePath  = SnapshotCheck.pathSelector(s3Path, fileName)
-
-    val s3Sink =
-      S3.multipartUpload(bucketPrivate, fullFilePath)
-        .withAttributes(S3Attributes.settings(s3Settings))
-    val source = Source
-      .future(allResults)
-      .mapConcat(seek => seek.toList)
-      .mapAsync(1)(institution => appendEmailDomains(institution))
-      .map(institution => institution.toPSV + "\n")
-      .map(s => ByteString(s))
-    val results: Future[MultipartUploadResult] = S3Utils.uploadWithRetry(source, s3Sink)
-
-    results.onComplete(reportPublishingComplete(_, PanelScheduler2019, fullFilePath))
-   }
-
-  private def panelSync2020(): Unit = {
-
-    val allResults: Future[Seq[InstitutionEntity]] =
-      institutionRepository2020.findActiveFilers(getFilterList())
-    val now           = LocalDateTime.now().minusDays(1)
-    val formattedDate = fullDate.format(now)
-    val fileName      = s"$formattedDate" + "2020_panel.txt"
-    val s3Path        = s"$environmentPrivate/panel/"
-    val fullFilePath  = SnapshotCheck.pathSelector(s3Path, fileName)
-
-    val s3Sink =
-      S3.multipartUpload(bucketPrivate, fullFilePath)
-        .withAttributes(S3Attributes.settings(s3Settings))
-    val source = Source
-      .future(allResults)
-      .mapConcat(seek => seek.toList)
-      .mapAsync(1)(institution => appendEmailDomains(institution))
-      .map(institution => institution.toPSV + "\n")
-      .map(s => ByteString(s))
-    val results: Future[MultipartUploadResult] = S3Utils.uploadWithRetry(source, s3Sink)
-
-    results.onComplete(reportPublishingComplete(_, PanelScheduler2020, fullFilePath))
-   }
-
-  private def panelSync2021(): Unit = {
-
-    val allResults: Future[Seq[InstitutionEntity]] =
-      institutionRepository2021.findActiveFilers(getFilterList())
-    val now           = LocalDateTime.now().minusDays(1)
-    val formattedDate = fullDate.format(now)
-    val fileName      = s"$formattedDate" + "2021_panel.txt"
-    val s3Path        = s"$environmentPrivate/panel/"
-    val fullFilePath  = SnapshotCheck.pathSelector(s3Path, fileName)
-
-    val s3Sink =
-      S3.multipartUpload(bucketPrivate, fullFilePath)
-        .withAttributes(S3Attributes.settings(s3Settings))
-    val source = Source
-      .future(allResults)
-      .mapConcat(seek => seek.toList)
-      .mapAsync(1)(institution => appendEmailDomains(institution))
-      .map(institution => institution.toPSV + "\n")
-      .map(s => ByteString(s))
-    val results: Future[MultipartUploadResult] = S3Utils.uploadWithRetry(source, s3Sink)
-
-    results.onComplete(reportPublishingComplete(_, PanelScheduler2021, fullFilePath))
-
-  }
-
-  private def panelSync2022(): Unit = {
-
-    val allResults: Future[Seq[InstitutionEntity]] =
-      institutionRepository2022.findActiveFilers(getFilterList())
-    val now           = LocalDateTime.now().minusDays(1)
-    val formattedDate = fullDate.format(now)
-    val fileName      = s"$formattedDate" + "2022_panel.txt"
-    val s3Path        = s"$environmentPrivate/panel/"
-    val fullFilePath  = SnapshotCheck.pathSelector(s3Path, fileName)
-
-    val s3Sink =
-      S3.multipartUpload(bucketPrivate, fullFilePath)
-        .withAttributes(S3Attributes.settings(s3Settings))
-    val source = Source
-      .future(allResults)
-      .mapConcat(seek => seek.toList)
-      .mapAsync(1)(institution => appendEmailDomains(institution))
-      .map(institution => institution.toPSV + "\n")
-      .map(s => ByteString(s))
-    val results: Future[MultipartUploadResult] = S3Utils.uploadWithRetry(source, s3Sink)
-
-    results.onComplete(reportPublishingComplete(_, PanelScheduler2022, fullFilePath))
-   }
 
   private def panelSync(year: Int): Unit = {
     availableRepos.get(year) match {

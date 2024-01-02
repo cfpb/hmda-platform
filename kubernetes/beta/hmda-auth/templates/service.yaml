@@ -1,0 +1,60 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hmda-auth
+  labels:
+    service: hmda-auth
+spec:
+  selector:
+    app: hmda-auth
+  ports:
+    - port: 9095
+      protocol: TCP
+      targetPort: 9095
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: {{ include "hmda-auth.fullname" . }}-ambassador
+  name: {{ include "hmda-auth.fullname" . }}-ambassador
+  annotations:
+    getambassador.io/config: |
+      apiVersion: ambassador/v2
+      kind: Mapping
+      name: hmda_auth_mapping
+      ambassador_id: ambassador-default-1
+      prefix: /hmda-auth/
+      rewrite: /
+      service: {{ include "hmda-auth.fullname" . }}:{{ .Values.service.port }}
+      timeout_ms: 0
+      add_response_headers:
+        referrer-policy: 
+          value: strict-origin
+          append: False
+        content-security-policy: 
+          append: False
+          value: "default-src 'self'; script-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; object-src 'none'; frame-src 'self'; connect-src 'self'"
+        permissions-policy:
+          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
+        x-frame-Options: 
+          value : "SAMEORIGIN"
+        x-content-type-options: 
+          value : nosniff
+        strict-transport-security:
+          value: "max-age=31536000; includeSubDomains; preload"
+        x-xss-protection:
+          value: "1; mode=block"
+      remove_response_headers:
+      - Access-Control-Allow-Origin
+      - x-envoy-upstream-service-time
+      - x-forwarded-host
+      - x-host
+      - x-forwarded-server
+spec:
+  clusterIP: None
