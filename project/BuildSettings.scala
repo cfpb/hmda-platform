@@ -5,7 +5,7 @@ import sbtassembly.AssemblyPlugin.autoImport._
 object BuildSettings {
   val buildOrganization = "cfpb"
   val buildVersion      = "2.0.0"
-  val buildScalaVersion = "2.12.15"
+  val buildScalaVersion = "2.13.12"
 
   lazy val dockerPublishLocalSkipTestsCommand = Command.command("dockerPublishLocalSkipTests") { state =>
     var s = state
@@ -19,7 +19,7 @@ object BuildSettings {
       organization := buildOrganization,
       version := buildVersion,
       scalaVersion := buildScalaVersion,
-      scalacOptions ++= Seq("-Xlint", "-deprecation", "-unchecked", "-feature", "-Ypartial-unification"),
+      scalacOptions ++= Seq("-Xlint", "-deprecation", "-unchecked", "-feature"),
       aggregate in assembly := false,
       parallelExecution in Test := true,
       fork in Test := true,
