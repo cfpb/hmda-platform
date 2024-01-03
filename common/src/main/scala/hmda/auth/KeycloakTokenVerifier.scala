@@ -13,7 +13,6 @@ import java.security.spec.RSAPublicKeySpec
 import java.util.Base64
 import org.keycloak.TokenVerifier
 import scala.util.Try
-
 import scala.concurrent.duration._
 
 // $COVERAGE-OFF$
@@ -37,13 +36,6 @@ class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment) extends Toke
       tokenVerifier.withDefaultChecks().realmUrl(realmUrl)
       tokenVerifier.publicKey(publicKey).verify().getToken
     }
-  }
-
-  private def parseAuthKey(line: ByteString): AuthKey = {
-    val str      = line.utf8String
-    val authKeys = decode[AuthKeys](str).getOrElse(AuthKeys())
-    if (authKeys.keys.nonEmpty) authKeys.keys.head
-    else AuthKey()
   }
 }
 // $COVERAGE-ON$
