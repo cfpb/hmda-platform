@@ -1,9 +1,6 @@
 package hmda.auth
 
-import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
-import io.circe.generic.auto._
-import io.circe.parser.decode
 import org.keycloak.adapters.KeycloakDeployment
 import org.keycloak.representations.AccessToken
 import java.security.KeyFactory
