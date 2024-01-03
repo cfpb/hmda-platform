@@ -20,9 +20,9 @@ object BuildSettings {
       version := buildVersion,
       scalaVersion := buildScalaVersion,
       scalacOptions ++= Seq("-Xlint", "-deprecation", "-unchecked", "-feature"),
-      aggregate in assembly := false,
-      parallelExecution in Test := true,
-      fork in Test := true,
+      assembly / aggregate := false,
+      Test / parallelExecution:= true,
+      Test / fork := true,
       resolvers += Resolver.bintrayRepo("tanukkii007", "maven"),
       commands += dockerPublishLocalSkipTestsCommand
     )

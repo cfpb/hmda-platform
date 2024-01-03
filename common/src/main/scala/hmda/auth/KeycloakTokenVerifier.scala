@@ -8,10 +8,8 @@ import org.keycloak.adapters.KeycloakDeployment
 import org.keycloak.representations.AccessToken
 import java.security.KeyFactory
 import org.keycloak.jose.jws.AlgorithmType
-import org.keycloak.adapters.KeycloakDeployment
 import java.math.BigInteger
 import java.security.spec.RSAPublicKeySpec
-import java.security.KeyFactory
 import java.util.Base64
 import org.keycloak.TokenVerifier
 import scala.util.Try

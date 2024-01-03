@@ -18,7 +18,7 @@ object Version {
   val embeddedPg             = "2.10"
   val keycloak               = "22.0.1"
   val resteasy               = "6.2.4.Final"
-  val jboss                  = "3.5.1.Final"
+  val jbossLogging           = "3.5.1.Final"
   val httpcomponents         = "4.5.14"
   val alpakka                = "2.0.2"
   val alpakkaS3              = "2.0.1"
