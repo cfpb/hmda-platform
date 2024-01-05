@@ -45,7 +45,7 @@ object CountyLoanLimitRecords {
   }
 
   def countyLoansLimitByState(countyLoanLimits: Seq[CountyLoanLimit]): Map[String, StateBoundries] = {
-    countyLoanLimits.groupBy(county => county.stateAbbrv).mapValues { countyList =>
+    countyLoanLimits.groupBy(county => county.stateAbbrv).view.mapValues { countyList =>
       val oneUnit   = countyList.map(county => county.oneUnitLimit)
       val twoUnit   = countyList.map(county => county.twoUnitLimit)
       val threeUnit = countyList.map(county => county.threeUnitLimit)
@@ -60,7 +60,7 @@ object CountyLoanLimitRecords {
         fourUnitMax = fourUnit.max,
         fourUnitMin = fourUnit.min
       )
-    }
+    }.toMap
   }
 
   def overallLoanLimits(countyLoanLimits: Seq[CountyLoanLimit]): OverallLoanLimit = {
