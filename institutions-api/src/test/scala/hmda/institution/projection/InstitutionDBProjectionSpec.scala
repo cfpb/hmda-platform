@@ -30,23 +30,21 @@ class InstitutionDBProjectionSpec
 
   val emailRepository           = new InstitutionEmailsRepository(dbConfig)
 
-  override def beforeAll(): Unit =
-    whenReady(
-      Future.sequence(
-        institutionRepositories.values.map(_.createSchema()).toSeq ++
-          tsRepositories.values.map(_.createSchema()).toSeq :+
-          emailRepository.createSchema()
-      )
-    )(_ => ())
+  override def beforeAll(): Unit = {
+    val futures = Future.sequence(institutionRepositories.values.map(_.createSchema()).toSeq ++
+      tsRepositories.values.map(_.createSchema()).toSeq :+
+      emailRepository.createSchema())
+    whenReady(futures)(_ => ())
+  }
 
-  override def afterAll(): Unit =
-    whenReady(
-      Future.sequence(
-        institutionRepositories.values.map(_.dropSchema()).toSeq ++
-          tsRepositories.values.map(_.dropSchema()) :+
-          emailRepository.dropSchema()
-      )
-    )(_ => ())
+  override def afterAll(): Unit = {
+    val futures = Future.sequence(
+      institutionRepositories.values.map(_.dropSchema()).toSeq ++
+        tsRepositories.values.map(_.dropSchema()) :+
+        emailRepository.dropSchema()
+    )
+    whenReady(futures)(_ => ())
+  }
 
   "InstitutionDBProjection stores, modifies and deletes events" in {
     val actor                               = system.spawn(InstitutionDBProjection.behavior, InstitutionDBProjection.name)
