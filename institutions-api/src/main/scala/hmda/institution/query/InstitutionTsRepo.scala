@@ -13,14 +13,15 @@ object InstitutionTsRepo {
   import dbConfig.profile.api._
 
 
-  val filerCountConfig: Config = ConfigFactory.load().getConfig("hmda.institution.filerCountTables")
+  val filerCountConfig: Config = ConfigFactory.load().getConfig("counts")
 
-  val deafultInstitution = filerCountConfig.getString("institution.filerCountTables.deafultInstitution")
-  val staticTS2022 = filerCountConfig.getString("institution.filerCountTables.transmittalsheet.2022")
-  val staticTS2021 = filerCountConfig.getString("institution.filerCountTables.transmittalsheet.2021")
-  val staticTS2020 = filerCountConfig.getString("institution.filerCountTables.transmittalsheet.2020")
-  val staticTS2019 = filerCountConfig.getString("institution.filerCountTables.transmittalsheet.2019")
-  val staticTS2018 = filerCountConfig.getString("institution.filerCountTables.transmittalsheet.2018")
+  val deafultInstitution = filerCountConfig.getString("deafultInstitution")
+  val staticTS2023 = filerCountConfig.getString("transmittalSheet.2023")
+  val staticTS2022 = filerCountConfig.getString("transmittalSheet.2022")
+  val staticTS2021 = filerCountConfig.getString("transmittalSheet.2021")
+  val staticTS2020 = filerCountConfig.getString("transmittalSheet.2020")
+  val staticTS2019 = filerCountConfig.getString("transmittalSheet.2019")
+  val staticTS2018 = filerCountConfig.getString("transmittalSheet.2018")
 
 
 
@@ -56,7 +57,8 @@ object InstitutionTsRepo {
       case 2020 => staticTS2020
       case 2021 => staticTS2021
       case 2022 => staticTS2022
-      case _ => staticTS2022
+      case 2023 => staticTS2023
+      case _ => staticTS2023
     }
   }
 }
