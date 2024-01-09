@@ -61,4 +61,5 @@ object InstitutionTsRepo {
       case _ => staticTS2023
     }
   }
+
 }
