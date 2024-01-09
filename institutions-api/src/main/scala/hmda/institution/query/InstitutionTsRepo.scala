@@ -51,11 +51,11 @@ object InstitutionTsRepo {
   def selectTransmittalSheet(year: Int): String = {
 
     year match {
-      case 2018 => staticTS2022
-      case 2019 => staticTS2021
+      case 2018 => staticTS2018
+      case 2019 => staticTS2019
       case 2020 => staticTS2020
-      case 2021 => staticTS2019
-      case 2022 => staticTS2018
+      case 2021 => staticTS2021
+      case 2022 => staticTS2022
       case _ => staticTS2022
     }
   }
