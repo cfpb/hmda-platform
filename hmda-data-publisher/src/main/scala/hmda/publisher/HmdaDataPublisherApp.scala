@@ -31,26 +31,6 @@ object HmdaDataPublisherApp extends App with PGTableNameLoader {
   implicit val ec: ExecutionContext = actorSystem.dispatcher
   val config               = actorSystem.settings.config
 
-  log.info("Using LAR 2018 Table: " + lar2018TableName + "\n")
-  log.info("Using MLAR 2018 Table: " + mlar2018TableName + "\n")
-  log.info("Using PANEl 2018 Table: " + panel2018TableName + "\n")
-  log.info("Using TS 2018 Table: " + ts2018TableName + "\n")
-  log.info("Using LAR 2019 Table: " + lar2019TableName + "\n")
-  log.info("Using MLAR 2019 Table: " + mlar2019TableName + "\n")
-  log.info("Using PANEl 2019 Table: " + panel2019TableName + "\n")
-  log.info("Using TS 2019 Table: " + ts2019TableName + "\n")
-  log.info("Using LAR 2020 Table: " + lar2020TableName + "\n")
-  log.info("Using MLAR 2020 Table: " + mlar2020TableName + "\n")
-  log.info("Using PANEl 2020 Table: " + panel2020TableName + "\n")
-  log.info("Using PANEl 2021 Table: " + panel2021TableName + "\n")
-  log.info("Using TS 2020 Table: " + ts2020TableName + "\n")
-  log.info("Using LAR 2021 Table: " + lar2021TableName + "\n")
-  log.info("Using TS 2021 Table: " + ts2021TableName + "\n")
-  log.info("Using LAR 2022 Table: " + lar2022TableName + "\n")
-  log.info("Using TS 2022 Table: " + ts2022TableName + "\n")
-  log.info("Using EMAIL Table: " + emailTableName + "\n")
-
-
   val mattermostNotifier = new MattermostNotifier(config.getString("hmda.publisher.validation.reportingUrl"))
   val publishingReporter = {
     val groupReportingTimeout = 45.minutes // TODO move to config
