@@ -19,7 +19,7 @@ object BuildSettings {
       organization := buildOrganization,
       version := buildVersion,
       scalaVersion := buildScalaVersion,
-      scalacOptions ++= Seq("-Xlint", "-deprecation", "-unchecked", "-feature"),
+      scalacOptions ++= Seq("-Xlint", "-deprecation", "-unchecked", "-feature", "-Ymacro-annotations"),
       assembly / aggregate := false,
       Test / parallelExecution:= true,
       Test / fork := true,
