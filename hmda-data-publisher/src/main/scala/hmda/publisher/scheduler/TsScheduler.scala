@@ -15,7 +15,7 @@ import hmda.publisher.helper.CronConfigLoader.{CronString, specificTsCron, speci
 import hmda.publisher.helper.{PrivateAWSConfigLoader, QuarterTimeBarrier, S3Utils, SnapshotCheck}
 import hmda.publisher.query.component.{PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, TransmittalSheetTable, TsRepository, YearPeriod}
 import hmda.publisher.scheduler.schedules.{Schedule, ScheduleWithYear}
-import hmda.publisher.scheduler.schedules.Schedules.{TsQuarterlySchedule, TsSchedule, TsScheduler2018, TsScheduler2019, TsScheduler2020, TsScheduler2021, TsScheduler2022, TsSchedulerQuarterly2020, TsSchedulerQuarterly2021, TsSchedulerQuarterly2022, TsSchedulerQuarterly2023}
+import hmda.publisher.scheduler.schedules.Schedules.{TsQuarterlySchedule, TsSchedule}
 import hmda.publisher.util.{PublishingReporter, ScheduleCoordinator}
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 import hmda.publisher.util.ScheduleCoordinator.Command._
@@ -43,32 +43,6 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
   implicit val materializer     = Materializer(context)
   private val fullDate          = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   private val fullDateQuarterly = DateTimeFormatter.ofPattern("yyyy-MM-dd_")
-
-
-  // Regulator File Scheduler Repos Annual
-  def tsRepository2018                 = new TsRepository[TransmittalSheetTable](dbConfig, transmittalSheetTable2018)
-  def tsRepository2019                 = new TsRepository[TransmittalSheetTable](dbConfig, transmittalSheetTable2019)
-  def tsRepository2020                 = createTransmittalSheetRepository2020(dbConfig, Year2020Period.Whole)
-  def tsRepository2021                 = createTransmittalSheetRepository2021(dbConfig, Year2021Period.Whole)
-  def tsRepository2022                 = createTransmittalSheetRepository2022(dbConfig, Year2022Period.Whole)
-
-
-  // Regulator File Scheduler Repos Quarterly
-  def tsRepository2020Q1               = createTransmittalSheetRepository2020(dbConfig, Year2020Period.Q1)
-  def tsRepository2020Q2               = createTransmittalSheetRepository2020(dbConfig, Year2020Period.Q2)
-  def tsRepository2020Q3               = createTransmittalSheetRepository2020(dbConfig, Year2020Period.Q3)
-
-  def tsRepository2021Q1               = createTransmittalSheetRepository2021(dbConfig, Year2021Period.Q1)
-  def tsRepository2021Q2               = createTransmittalSheetRepository2021(dbConfig, Year2021Period.Q2)
-  def tsRepository2021Q3               = createTransmittalSheetRepository2021(dbConfig, Year2021Period.Q3)
-
-  def tsRepository2022Q1               = createTransmittalSheetRepository2022(dbConfig, Year2022Period.Q1)
-  def tsRepository2022Q2               = createTransmittalSheetRepository2022(dbConfig, Year2022Period.Q2)
-  def tsRepository2022Q3               = createTransmittalSheetRepository2022(dbConfig, Year2022Period.Q3)
-
-  def tsRepository2023Q1               = createTransmittalSheetRepository2023(dbConfig, Year2023Period.Q1)
-  def tsRepository2023Q2               = createTransmittalSheetRepository2023(dbConfig, Year2023Period.Q2)
-  def tsRepository2023Q3               = createTransmittalSheetRepository2023(dbConfig, Year2023Period.Q3)
 
   val annualRepos = tsAvailableYears.map(year => year -> {
     val component = new PublisherComponent(year)
@@ -130,31 +104,6 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
   }
 
   override def receive: Receive = {
-
-    case TsScheduler2018 => publishAnnualTsData(TsScheduler2018, Period.y2018, "2018_ts.txt", tsRepository2018)
-
-    case TsScheduler2019 => publishAnnualTsData(TsScheduler2019, Period.y2019, "2019_ts.txt", tsRepository2019)
-
-    case TsScheduler2020 => publishAnnualTsData(TsScheduler2020, Period.y2020, "2020_ts.txt", tsRepository2020)
-
-    case TsScheduler2021 => publishAnnualTsData(TsScheduler2021, Period.y2021, "2021_ts.txt", tsRepository2021)
-
-    case TsScheduler2022 => publishAnnualTsData(TsScheduler2022, Period.y2022, "2022_ts.txt", tsRepository2022)
-
-    case TsSchedulerQuarterly2020 =>
-      publishQuarterTsData(TsSchedulerQuarterly2020, Period.y2020Q1, "quarter_1_2020_ts.txt", tsRepository2020Q1)
-      publishQuarterTsData(TsSchedulerQuarterly2020, Period.y2020Q2, "quarter_2_2020_ts.txt", tsRepository2020Q2)
-      publishQuarterTsData(TsSchedulerQuarterly2020, Period.y2020Q3, "quarter_3_2020_ts.txt", tsRepository2020Q3)
-
-    case TsSchedulerQuarterly2021 =>
-      publishQuarterTsData(TsSchedulerQuarterly2021, Period.y2021Q1, "quarter_1_2021_ts.txt", tsRepository2021Q1)
-      publishQuarterTsData(TsSchedulerQuarterly2021, Period.y2021Q2, "quarter_2_2021_ts.txt", tsRepository2021Q2)
-      publishQuarterTsData(TsSchedulerQuarterly2021, Period.y2021Q3, "quarter_3_2021_ts.txt", tsRepository2021Q3)
-
-    case TsSchedulerQuarterly2022 =>
-      publishQuarterTsData(TsSchedulerQuarterly2022, Period.y2022Q1, "quarter_1_2022_ts.txt", tsRepository2022Q1)
-      publishQuarterTsData(TsSchedulerQuarterly2022, Period.y2022Q2, "quarter_2_2022_ts.txt", tsRepository2022Q2)
-      publishQuarterTsData(TsSchedulerQuarterly2022, Period.y2022Q3, "quarter_3_2022_ts.txt", tsRepository2022Q3)
 
     case ScheduleWithYear(schedule, year) if schedule in (TsSchedule, TsQuarterlySchedule) =>
       schedule match {
