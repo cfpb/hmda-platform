@@ -49,6 +49,12 @@ object PredicateCommon {
       throw new NotImplementedError("'numeric' doesn't handle non-number/string values yet")
   }
 
+  def integer[A]: Predicate[A] = (_: A) match {
+    case s: String => Try(s.toInt).isSuccess
+    case _ =>
+      throw new NotImplementedError("'integer' doesn't handle non-number/string values yet")
+  }
+
   def alphaNumeric[A]: Predicate[A] = (_: A) match {
     case s: String => s.matches("^[a-zA-Z0-9]+$")
     case _ =>

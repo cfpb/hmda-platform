@@ -12,7 +12,7 @@ object V695_1 extends EditCheck[LoanApplicationRegister] {
   override def parent: String = "V695"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    (lar.larIdentifier.NMLSRIdentifier is numeric) or 
+    (lar.larIdentifier.NMLSRIdentifier is integer) or 
     (lar.larIdentifier.NMLSRIdentifier is oneOf("Exempt", "NA"))
   }
 
