@@ -1,6 +1,7 @@
 package hmda.institution.query
 
-import com.typesafe.config.{ Config, ConfigFactory }
+import com.typesafe.config.{Config, ConfigFactory}
+import hmda.institution.query.InstitutionTsRepo.selectTransmittalSheet
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetRepository
@@ -82,6 +83,6 @@ trait InstitutionComponent {
 
   val tsRepositories: Map[String, TransmittalSheetRepository] = (for {
     year <- yearsAvailable
-  } yield year -> new TransmittalSheetRepository(dbConfig, s"transmittalsheet$year")).toMap
+  } yield year -> new TransmittalSheetRepository(dbConfig, selectTransmittalSheet(year.toInt))).toMap
 
 }
