@@ -16,6 +16,7 @@ class V695_1Spec extends LarEditCheckSpec {
       lar.copy(larIdentifier = lar.larIdentifier.copy(NMLSRIdentifier = "na")).mustFail
       lar.copy(larIdentifier = lar.larIdentifier.copy(NMLSRIdentifier = "exempt")).mustFail
       lar.copy(larIdentifier = lar.larIdentifier.copy(NMLSRIdentifier = "123myId")).mustFail
+      lar.copy(larIdentifier = lar.larIdentifier.copy(NMLSRIdentifier = "12.3")).mustFail
     }
   }
 }
