@@ -52,10 +52,10 @@ object QuarterTimeBarrier {
       case Period.y2020Q3 => LocalDate.ofYearDay(2020,rulesConfig.qf.q3.endDayOfYear)
       case Period.y2021Q1 => LocalDate.ofYearDay(2021,rulesConfig.qf.q1.endDayOfYear)
       case Period.y2021Q2 => LocalDate.ofYearDay(2021,rulesConfig.qf.q2.endDayOfYear)
-      case Period.y2021Q3 => LocalDate.ofYearDay(2021,rulesConfig.qf.q3.endDayOfYear)
+      case Period.y2021Q3 => LocalDate.ofYearDay(2021,rulesConfig.qf.q3.endDayOfYear - 1)
       case Period.y2022Q1 => LocalDate.ofYearDay(2022,rulesConfig.qf.q1.endDayOfYear)
       case Period.y2022Q2 => LocalDate.ofYearDay(2022,rulesConfig.qf.q2.endDayOfYear)
-      case Period.y2022Q3 => LocalDate.ofYearDay(2022,rulesConfig.qf.q3.endDayOfYear)
+      case Period.y2022Q3 => LocalDate.ofYearDay(2022,rulesConfig.qf.q3.endDayOfYear - 1)
     }
   }
 
