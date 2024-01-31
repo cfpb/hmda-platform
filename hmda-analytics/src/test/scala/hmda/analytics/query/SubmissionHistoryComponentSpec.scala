@@ -6,7 +6,6 @@ import hmda.model.filing.submission.SubmissionId
 import hmda.utils.EmbeddedPostgres
 import hmda.utils.YearUtils.Period
 import org.scalatest.{ AsyncWordSpec, MustMatchers }
-import slick.dbio.DBIO
 
 class SubmissionHistoryComponentSpec extends AsyncWordSpec with SubmissionHistoryComponent with EmbeddedPostgres with MustMatchers {
   "SubmissionHistoryRepository" must {

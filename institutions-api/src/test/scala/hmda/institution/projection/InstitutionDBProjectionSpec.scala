@@ -14,8 +14,7 @@ import org.scalatest.time.{ Millis, Minute, Span }
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpecLike }
 
 import scala.concurrent.ExecutionContext.Implicits._
-import scala.concurrent.{ Await, Future }
-import scala.concurrent.duration._
+import scala.concurrent.{ Future }
 
 class InstitutionDBProjectionSpec
   extends TestKit(ActorSystem("institutiondb-spec"))

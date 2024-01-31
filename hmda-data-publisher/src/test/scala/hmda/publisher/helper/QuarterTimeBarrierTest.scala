@@ -1,6 +1,6 @@
 package hmda.publisher.helper
 
-import java.time.{Clock, Instant, LocalDate, ZoneId, ZoneOffset}
+import java.time.{Clock, Instant, LocalDate, ZoneId}
 
 import hmda.publisher.validation.PublishingGuard.Period
 import org.scalatest.FreeSpec

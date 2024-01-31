@@ -1,10 +1,9 @@
 package hmda.publisher.query.lar
 
 import hmda.model.publication.Msa
-import org.scalatest.{ FreeSpecLike, MustMatchers, PropSpec }
+import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import org.scalacheck.ScalacheckShapeless._
-import org.scalacheck._
 
 class LarEntityImpl2019Test extends PropSpec with ScalaCheckPropertyChecks with MustMatchers {
 

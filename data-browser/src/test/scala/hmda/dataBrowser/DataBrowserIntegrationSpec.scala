@@ -6,7 +6,7 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import hmda.dataBrowser.api.DataBrowserHttpApi
 import hmda.dataBrowser.models.HealthCheckStatus.{ Down, Up }
-import hmda.dataBrowser.models.{ AggregationResponse, FilerInstitutionResponseLatest, HealthCheckResponse, Statistic }
+import hmda.dataBrowser.models.{ AggregationResponse, HealthCheckResponse, Statistic }
 import hmda.dataBrowser.repositories._
 import hmda.dataBrowser.services.{ DataBrowserQueryService, HealthCheckService, S3FileService }
 import hmda.utils.EmbeddedPostgres
