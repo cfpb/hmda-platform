@@ -56,6 +56,9 @@ object QuarterTimeBarrier {
       case Period.y2022Q1 => LocalDate.ofYearDay(2022,rulesConfig.qf.q1.endDayOfYear)
       case Period.y2022Q2 => LocalDate.ofYearDay(2022,rulesConfig.qf.q2.endDayOfYear)
       case Period.y2022Q3 => LocalDate.ofYearDay(2022,rulesConfig.qf.q3.endDayOfYear - 1)
+      case Period.y2023Q1 => LocalDate.ofYearDay(2023, rulesConfig.qf.q1.endDayOfYear)
+      case Period.y2023Q2 => LocalDate.ofYearDay(2023, rulesConfig.qf.q2.endDayOfYear)
+      case Period.y2023Q3 => LocalDate.ofYearDay(2023, rulesConfig.qf.q3.endDayOfYear - 1)
     }
   }
 
@@ -70,6 +73,9 @@ object QuarterTimeBarrier {
       case Period.y2022Q1 => LocalDate.ofYearDay(2022,rulesConfig.qf.q1.startDayOfYear)
       case Period.y2022Q2 => LocalDate.ofYearDay(2022,rulesConfig.qf.q2.startDayOfYear)
       case Period.y2022Q3 => LocalDate.ofYearDay(2022,rulesConfig.qf.q3.startDayOfYear)
+      case Period.y2023Q1 => LocalDate.ofYearDay(2023, rulesConfig.qf.q1.startDayOfYear)
+      case Period.y2023Q2 => LocalDate.ofYearDay(2023, rulesConfig.qf.q2.startDayOfYear)
+      case Period.y2023Q3 => LocalDate.ofYearDay(2023, rulesConfig.qf.q3.startDayOfYear)
     }
   }
 
