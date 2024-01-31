@@ -1,11 +1,10 @@
 package hmda.publisher.query.component
 
 import java.sql.Timestamp
-import hmda.model.publication.Msa
 import hmda.publisher.helper.PGTableNameLoader
-import hmda.publisher.qa.{ QAEntity, QARepository, QATableBase }
+import hmda.publisher.qa.{ QAEntity, QATableBase }
 import hmda.publisher.query.lar.{ LarEntityImpl2020, _ }
-import hmda.publisher.query.panel.{ InstitutionAltEntity, InstitutionEntity }
+import hmda.publisher.query.panel.{ InstitutionEntity }
 import hmda.publisher.validation.{ LarData, PanelData, TsData }
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
@@ -13,7 +12,7 @@ import hmda.query.ts.TransmittalSheetEntity
 import slick.basic.{ DatabaseConfig, DatabasePublisher }
 import slick.jdbc.{ JdbcProfile, ResultSetConcurrency, ResultSetType }
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ Future }
 // $COVERAGE-OFF$
 trait PublisherComponent2020 extends PGTableNameLoader {
 

@@ -21,7 +21,7 @@ import hmda.publisher.util.{ PublishingReporter, ScheduleCoordinator }
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 import hmda.publisher.util.ScheduleCoordinator.Command._
 import hmda.publisher.validation.PublishingGuard
-import hmda.publisher.validation.PublishingGuard.{ Period, Scope }
+import hmda.publisher.validation.PublishingGuard.{ Scope }
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
 import slick.basic.DatabasePublisher

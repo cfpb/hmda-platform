@@ -1,6 +1,5 @@
 package hmda.dataBrowser.services
 
-import cats.implicits._
 import hmda.dataBrowser.models.HealthCheckStatus._
 import hmda.dataBrowser.models.State._
 import hmda.dataBrowser.models.{ Commas, HealthCheckResponse, HealthCheckStatus, QueryField }

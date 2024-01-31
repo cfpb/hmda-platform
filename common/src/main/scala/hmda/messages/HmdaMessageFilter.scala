@@ -1,7 +1,6 @@
 package hmda.messages
 
 import akka.kafka.ConsumerMessage.{CommittableMessage, CommittableOffset}
-import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.StrictLogging
 
 import scala.concurrent.{ExecutionContext, Future}

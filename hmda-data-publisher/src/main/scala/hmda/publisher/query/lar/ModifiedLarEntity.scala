@@ -4,9 +4,7 @@ import hmda.util.conversion.ColumnDataFormatter
 import io.chrisdavenport.cormorant
 import io.chrisdavenport.cormorant.CSV
 import io.chrisdavenport.cormorant.implicits._
-import cormorant.generic.semiauto._
 import hmda.parser.filing.ts.TsCsvParser.extractOpt
-import hmda.publisher.query.component.YearPeriod
 import hmda.util.PsvParsingCompanion
 
 case class ModifiedLarPartOne(

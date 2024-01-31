@@ -15,14 +15,14 @@ import hmda.model.publication.Msa
 import hmda.publisher.helper.CronConfigLoader.{CronString, larCron, larQuarterlyCron, larQuarterlyYears, larYears, loanLimitCron, loanLimitYears, specificLarCron, specificLarYears}
 import hmda.publisher.helper._
 import hmda.publisher.query.component.{PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, YearPeriod}
-import hmda.publisher.query.lar.{LarEntityImpl, LarEntityImpl2019, LarEntityImpl2020, LarEntityImpl2021, LarEntityImpl2022}
+import hmda.publisher.query.lar.{LarEntityImpl}
 import hmda.publisher.scheduler.schedules.{Schedule, ScheduleWithYear}
 import hmda.publisher.scheduler.schedules.Schedules._
 import hmda.publisher.util.{PublishingReporter, ScheduleCoordinator}
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 import hmda.publisher.util.ScheduleCoordinator.Command._
 import hmda.publisher.validation.PublishingGuard
-import hmda.publisher.validation.PublishingGuard.{Period, Scope}
+import hmda.publisher.validation.PublishingGuard.{Scope}
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
 
