@@ -16,7 +16,7 @@ object AllApplicationsVolumeLoanPurposeRefinance extends GraphRoute(
   "all-applications-loan-purpose-refinance"
 ) with JsonSupport {
   private def getVolume(title: String, quarterly: Boolean = true): CancelableFuture[GraphSeriesSummary] =
-    QuarterlyGraphRepo.fetchTotalApplicationsVolumeLoanPurposeHome(quarterly)
+    QuarterlyGraphRepo.fetchTotalApplicationsVolumeLoanPurposeRefinance(quarterly)
       .map(convertToGraph(title, _)).runToFuture
 
   override def route: Route = pathPrefix(endpoint) {
