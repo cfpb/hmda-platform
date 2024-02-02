@@ -28,7 +28,7 @@ object QuarterlyGraphRepo {
     unionStatements(periods.map(period => {
       sql"""
          select last_updated, quarter, sum(agg) as value from #${s"${mv}_$period"}
-         where #${if (heloc) "line_of_credits = 1" else s"loan_type = ${loanType.code} and line_of_credits != 1"}
+         where #${if (heloc) "loc = 1" else s"lt = ${loanType.code} and loc != 1"}
            #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
            #${if (loanOriginated) "and action_taken_type = 1" else ""}
          group by last_updated, quarter
@@ -64,7 +64,7 @@ object QuarterlyGraphRepo {
     val stmts = unionStatements(CRED_SCORE_BY_RE_PERIODS.map(period => {
       sql"""
          select last_updated, quarter, median_credit_score as value from #${s"${CRED_SCORE_BY_RE_MV}_$period"}
-         where loan_type = ${loanType.code} and race_ethnicity = $race
+         where lt = ${loanType.code} and race_ethnicity = $race
            #${getAdditionalParams(loanType, conforming)}
          """
     })) ++ Seq(ordering)
@@ -226,7 +226,7 @@ object QuarterlyGraphRepo {
     val stmts = unionStatements(CRED_SCORE_BY_RE_PERIODS_PURPOSE_PURCHASE.map(period => {
       sql"""
          select last_updated, quarter, median_credit_score as value from #${s"${CRED_SCORE_BY_RE_MV}_$period"}
-         where loan_type = ${loanType.code} and race_ethnicity = $race
+         where lt = ${loanType.code} and race_ethnicity = $race
            #${getAdditionalParams(loanType, conforming)}
          """
     })) ++ Seq(ordering)
@@ -389,7 +389,7 @@ object QuarterlyGraphRepo {
     val stmts = unionStatements(CRED_SCORE_BY_RE_PERIODS_PURPOSE_REFINANCE.map(period => {
       sql"""
          select last_updated, quarter, median_credit_score as value from #${s"${CRED_SCORE_BY_RE_MV}_$period"}
-         where loan_type = ${loanType.code} and race_ethnicity = $race
+         where lt = ${loanType.code} and race_ethnicity = $race
            #${getAdditionalParams(loanType, conforming)}
          """
     })) ++ Seq(ordering)
