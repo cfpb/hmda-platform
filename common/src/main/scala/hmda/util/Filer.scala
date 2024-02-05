@@ -48,11 +48,15 @@ object Filer {
     filingYearsAllowed.contains(year) || quarterlyFilingYearsAllowed.contains(year)
   }
 
-  def parse(hocon: Config): Either[String, FilingRulesConfig] = {
+  def parse(hocon: Config, actualYear: Int = 0): Either[String, FilingRulesConfig] = {
     // note that we expect the user to fill in year the month and date, and we fill in the year
     val formatter = new DateTimeFormatterBuilder().appendPattern("MMMM dd yyyy").toFormatter
-    // just a random year so we can get DAY_OF_YEAR to resolve to make quarterly range checks easier
-    val year =  " " + LocalDate.now().getYear
+    val year: String = if (actualYear != 0) {
+      " " + actualYear
+    } else {
+      " " + LocalDate.now().getYear
+    }
+
     def parseQuarterConfig(hocon: Config): Either[String, QuarterConfig] = {
       for {
         rawStart <- Try(hocon.getString("start")).toEither.left.map(_ => "failed to obtain start")

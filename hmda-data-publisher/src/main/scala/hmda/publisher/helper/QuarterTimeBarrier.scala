@@ -39,11 +39,15 @@ class QuarterTimeBarrier(clock: Clock) {
     }
   }
 
+  def setRulesConfigWithActualYear(actualYear: Int): Unit = {
+    QuarterTimeBarrier.setRulesConfigWithActualYear(actualYear)
+  }
+
 
 }
 
 object QuarterTimeBarrier {
-  private val rulesConfig = Filer.parse(config).fold(error => throw new RuntimeException(s"Failed to parse filing rules in HOCON: $error"), identity)
+  private var rulesConfig = Filer.parse(config).fold(error => throw new RuntimeException(s"Failed to parse filing rules in HOCON: $error"), identity)
 
   def getEndDateForQuarter(quarter: Period.Quarter): LocalDate = {
     quarter match {
@@ -56,6 +60,9 @@ object QuarterTimeBarrier {
       case Period.y2022Q1 => LocalDate.ofYearDay(2022,rulesConfig.qf.q1.endDayOfYear)
       case Period.y2022Q2 => LocalDate.ofYearDay(2022,rulesConfig.qf.q2.endDayOfYear)
       case Period.y2022Q3 => LocalDate.ofYearDay(2022,rulesConfig.qf.q3.endDayOfYear)
+      case Period.y2023Q1 => LocalDate.ofYearDay(2023, rulesConfig.qf.q1.endDayOfYear)
+      case Period.y2023Q2 => LocalDate.ofYearDay(2023, rulesConfig.qf.q2.endDayOfYear)
+      case Period.y2023Q3 => LocalDate.ofYearDay(2023, rulesConfig.qf.q3.endDayOfYear)
     }
   }
 
@@ -70,6 +77,9 @@ object QuarterTimeBarrier {
       case Period.y2022Q1 => LocalDate.ofYearDay(2022,rulesConfig.qf.q1.startDayOfYear)
       case Period.y2022Q2 => LocalDate.ofYearDay(2022,rulesConfig.qf.q2.startDayOfYear)
       case Period.y2022Q3 => LocalDate.ofYearDay(2022,rulesConfig.qf.q3.startDayOfYear)
+      case Period.y2023Q1 => LocalDate.ofYearDay(2023, rulesConfig.qf.q1.startDayOfYear)
+      case Period.y2023Q2 => LocalDate.ofYearDay(2023, rulesConfig.qf.q2.startDayOfYear)
+      case Period.y2023Q3 => LocalDate.ofYearDay(2023, rulesConfig.qf.q3.startDayOfYear)
     }
   }
 
@@ -91,6 +101,10 @@ object QuarterTimeBarrier {
       case _ => throw new IllegalArgumentException(s"Invalid quarter $quarter")
     }
     LocalDate.ofYearDay(year, dayOfYear)
+  }
+
+  def setRulesConfigWithActualYear(actualYear: Int): Unit = {
+    rulesConfig = Filer.parse(config, actualYear).fold(error => throw new RuntimeException(s"Failed to parse filing rules in HOCON: $error"), identity)
   }
 
 }
