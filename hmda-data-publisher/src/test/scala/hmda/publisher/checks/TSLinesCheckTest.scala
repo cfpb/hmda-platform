@@ -8,7 +8,7 @@ import hmda.query.ts.TransmittalSheetEntity
 import hmda.utils.EmbeddedPostgres
 import org.scalatest.concurrent.{ PatienceConfiguration, ScalaFutures }
 import org.scalatest.time.{ Millis, Minutes, Span }
-import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach, FreeSpecLike, FunSuite, Matchers }
+import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach, FreeSpecLike, Matchers }
 
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ Await, Future }

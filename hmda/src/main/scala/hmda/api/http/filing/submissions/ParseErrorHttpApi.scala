@@ -14,7 +14,6 @@ import hmda.api.http.utils.ParserErrorUtils._
 import hmda.auth.OAuth2Authorization
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.messages.submission.SubmissionProcessingCommands.GetParsingErrors
-import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowParsedError
 import hmda.model.filing.submission.{Submission, SubmissionId}
 import hmda.model.processing.state.HmdaParserErrorState
 import hmda.persistence.submission.{HmdaParserError, SubmissionPersistence}

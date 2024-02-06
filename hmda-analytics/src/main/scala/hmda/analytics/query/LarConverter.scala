@@ -3,9 +3,7 @@ package hmda.analytics.query
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.parser.derivedFields._
 import hmda.model.census.CountyLoanLimit
-import hmda.census.records._
 import hmda.census.records.CountyLoanLimitRecords._
-import hmda.model.census.Census
 import hmda.census.records.CensusRecords._
 import com.typesafe.config.ConfigFactory
 import java.security.MessageDigest

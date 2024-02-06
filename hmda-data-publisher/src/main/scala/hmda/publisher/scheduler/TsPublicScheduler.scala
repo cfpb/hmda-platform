@@ -20,7 +20,7 @@ import hmda.publisher.helper.CronConfigLoader.{ CronString, tsPublicCron, tsPubl
 import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear }
 import hmda.publisher.util.{ PublishingReporter, ScheduleCoordinator }
 import hmda.publisher.validation.PublishingGuard
-import hmda.publisher.validation.PublishingGuard.{ Period, Scope }
+import hmda.publisher.validation.PublishingGuard.{ Scope }
 
 import scala.concurrent.Future
 import scala.util.{ Failure, Success }

@@ -2,12 +2,9 @@ package hmda.query.ts
 
 import com.softwaremill.diffx
 import com.softwaremill.diffx.{ Diff, DiffResult, Identical }
-import com.softwaremill.diffx.instances.DiffForString
-import hmda.model.filing.ts.TsGenerators.tsGen
-import hmda.parser.filing.ts.TsCsvParser.{ dateFromString, dateToString }
 import hmda.utils.DiffxMatcher
 import org.scalacheck.{ Arbitrary, Gen }
-import org.scalatest.{ FunSuite, MustMatchers, PropSpec }
+import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import org.scalacheck.ScalacheckShapeless._
 

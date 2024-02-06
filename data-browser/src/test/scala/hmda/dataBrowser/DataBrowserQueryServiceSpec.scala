@@ -7,7 +7,6 @@ import akka.testkit.TestKit
 import hmda.dataBrowser.models._
 import hmda.dataBrowser.repositories._
 import hmda.dataBrowser.services.DataBrowserQueryService
-import hmda.dataBrowser.api.DataBrowserDirectives._
 import monix.eval.Task
 import monix.execution.ExecutionModel
 import monix.execution.schedulers.TestScheduler

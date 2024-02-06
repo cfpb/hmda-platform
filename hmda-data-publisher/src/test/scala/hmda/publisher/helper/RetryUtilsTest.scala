@@ -1,7 +1,7 @@
 package hmda.publisher.helper
 
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
-import org.scalatest.{FreeSpec, FunSuite}
+import org.scalatest.{FreeSpec}
 
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt

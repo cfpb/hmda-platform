@@ -1,5 +1,4 @@
 package hmda.validation.rules.lar.validity._2020
-import hmda.census.records.CensusRecords
 import hmda.model.census.{Census, State}
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.dsl.{ValidationFailure, ValidationResult, ValidationSuccess}

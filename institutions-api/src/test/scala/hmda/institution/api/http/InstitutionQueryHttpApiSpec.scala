@@ -9,7 +9,6 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.institution.api.http.model.InstitutionsResponse
 import hmda.institution.query.InstitutionSetup
 import hmda.model.institution.Institution
-import hmda.query.DbConfiguration._
 import io.circe.generic.auto._
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 

@@ -17,7 +17,6 @@ import io.circe.generic.auto._
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 import hmda.api.http.EmailUtils._
-import hmda.query.ts.TransmittalSheetEntity
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.{ExecutionContext, Future}
