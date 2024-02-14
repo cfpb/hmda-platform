@@ -13,7 +13,7 @@ object DenialRatesByTypeLoanPurposeHome extends RatesGraph(
   "denials-loan-purpose-home",
   BY_TYPE_TITLE,
   BY_TYPE_SUBTITLE,
-  Category.BY_TYPE) {
+  Category.BY_TYPE_NO_HELOC) {
 
   override protected def getSummaryByType(loanType: LoanTypeEnum, title: String, heloc: Boolean = false, conforming: Boolean = false): CancelableFuture[GraphSeriesSummary] =
     QuarterlyGraphRepo.fetchDenialRatesLoanPurposeHome(loanType, heloc, conforming)

@@ -13,7 +13,7 @@ object MedianDTIByTypeLoanPurposeRefinance extends RatesGraph(
   "dti-loan-purpose-refinance",
   BY_TYPE_TITLE,
   BY_TYPE_SUBTITLE,
-  Category.BY_TYPE) {
+  Category.BY_TYPE_NO_HELOC) {
 
   override protected def getSummaryByType(loanType: LoanTypeEnum, title: String, heloc: Boolean, conforming: Boolean): CancelableFuture[GraphSeriesSummary] =
     QuarterlyGraphRepo.fetchMedianDTIByTypeLoanPurposeRefinance(loanType, heloc, conforming)

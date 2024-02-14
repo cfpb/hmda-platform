@@ -18,7 +18,7 @@ object RatesGraph {
 
   type Category = Category.Value
   final object Category extends Enumeration {
-    val BY_TYPE, BY_RACE = Value
+    val BY_TYPE, BY_RACE,BY_TYPE_NO_HELOC = Value
   }
 
   final val CATEGORY = "category"
@@ -59,6 +59,18 @@ abstract class RatesGraph(
   }
 
   private def getSummary: CancelableFuture[GraphSeriesInfo] = category match {
+    case Category.BY_TYPE_NO_HELOC =>
+      for {
+        conventionalConforming <- getSummaryByType(Conventional, CONVENTIONAL_CONFORMING, conforming = true)
+        conventionalNonConforming <- getSummaryByType(Conventional, CONVENTIONAL_NON_CONFORMING)
+        fha <- getSummaryByType(FHAInsured, FHA)
+        rhsfsa <- getSummaryByType(RHSOrFSAGuaranteed, RHS_FSA)
+        va <- getSummaryByType(VAGuaranteed, VA)
+      } yield getGraphSeriesInfo(
+        title,
+        subtitle,
+        Seq(conventionalConforming, conventionalNonConforming, fha, rhsfsa, va)
+      )
     case Category.BY_TYPE =>
       for {
         conventionalConforming <- getSummaryByType(Conventional, CONVENTIONAL_CONFORMING, conforming = true)

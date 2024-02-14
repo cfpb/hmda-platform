@@ -28,13 +28,12 @@ object ApplicationsVolumeLoanPurposeRefinance extends GraphRoute(
           conventionalConforming <- getVolume(Conventional, CONVENTIONAL_CONFORMING, conforming = true)
           conventionalNonConforming <- getVolume(Conventional, CONVENTIONAL_NON_CONFORMING)
           fha <- getVolume(FHAInsured, FHA)
-          heloc <- getVolume(Conventional, HELOC, heloc = true)
           rhsfsa <- getVolume(RHSOrFSAGuaranteed, RHS_FSA)
           va <- getVolume(VAGuaranteed, VA)
         } yield GraphSeriesInfo(
           APP_VOLUME_TITLE_REFINANCE,
           APP_VOLUME_SUBTITLE,
-          Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va),
+          Seq(conventionalConforming, conventionalNonConforming, fha, rhsfsa, va),
           yLabel = APP_LABEL,
           decimalPrecision = COUNT_DECIMAL_PRECISION
         )
