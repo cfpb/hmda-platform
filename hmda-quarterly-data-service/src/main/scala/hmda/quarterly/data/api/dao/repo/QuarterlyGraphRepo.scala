@@ -28,7 +28,7 @@ object QuarterlyGraphRepo {
     unionStatements(periods.map(period => {
       sql"""
          select last_updated, quarter, sum(agg) as value from #${s"${mv}_$period"}
-         where #${if (heloc) "line_of_credits = 1" else s"loan_type = ${loanType.code} and line_of_credits != 1"}
+         where #${if (heloc) "loc = 1" else s"lt = ${loanType.code} and loc != 1"}
            #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
            #${if (loanOriginated) "and action_taken_type = 1" else ""}
          group by last_updated, quarter
@@ -64,7 +64,7 @@ object QuarterlyGraphRepo {
     val stmts = unionStatements(CRED_SCORE_BY_RE_PERIODS.map(period => {
       sql"""
          select last_updated, quarter, median_credit_score as value from #${s"${CRED_SCORE_BY_RE_MV}_$period"}
-         where loan_type = ${loanType.code} and race_ethnicity = $race
+         where lt = ${loanType.code} and race_ethnicity = $race
            #${getAdditionalParams(loanType, conforming)}
          """
     })) ++ Seq(ordering)
@@ -181,6 +181,331 @@ object QuarterlyGraphRepo {
 
   def fetchMedianTotalLoanCostsByTypeByRace(loanType: LoanTypeEnum, race: String, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
     val stmts = unionStatements(TLC_BY_RE_PERIODS.map(period => {
+      sql"""
+         select last_updated, quarter, median_total_loan_costs as value from #${s"${TLC_BY_RE_MV}_$period"}
+         where lt = ${loanType.code} and race_ethnicity = $race
+           and loc #${if (heloc) "= 1" else "!= 1"}
+          #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+  //home
+  def fetchApplicationsVolumeByTypeLoanPurposeHome(loanType: LoanTypeEnum, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = getAppVolStmts(APP_VOL_MV, APP_VOL_PERIODS_PURPOSE_PURCHASE, loanType, heloc, conforming)
+    runStatements(stmts)
+  }
+
+  def fetchLoansVolumeByTypeLoanPurposeHome(loanType: LoanTypeEnum, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = getAppVolStmts(APP_VOL_MV, APP_VOL_PERIODS_PURPOSE_PURCHASE, loanType, heloc, conforming, loanOriginated = true)
+    runStatements(stmts)
+  }
+
+
+
+  def fetchTotalApplicationsVolumeLoanPurposeHome(quarterly: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = if (quarterly) getTotalAppVolStmts(APP_VOL_MV, APP_VOL_PERIODS_PURPOSE_PURCHASE) else getTotalAppVolStmts(ALL_APP_VOL_MV, ALL_APP_VOL_PERIODS_PURPOSE_PURCHASE)
+    runStatements(stmts)
+  }
+
+
+  def fetchMedianCreditScoreByTypeLoanPurposeHome(loanType: LoanTypeEnum, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(CRED_SCORE_BY_LOAN_PERIODS_PURPOSE_PURCHASE.map(period => {
+      sql"""
+         select last_updated, quarter, median_credit_score as value from #${s"${CRED_SCORE_BY_LOAN_MV}_$period"}
+         where lt = ${loanType.code}
+           and loc #${if (heloc) "= 1" else "!= 1"}
+           #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+  def fetchMedianCreditScoreByTypeByRaceLoanPurposeHome(loanType: LoanTypeEnum, race: String, conforming: Boolean = false): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(CRED_SCORE_BY_RE_PERIODS_PURPOSE_PURCHASE.map(period => {
+      sql"""
+         select last_updated, quarter, median_credit_score as value from #${s"${CRED_SCORE_BY_RE_MV}_$period"}
+         where lt = ${loanType.code} and race_ethnicity = $race
+           #${getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+  def fetchMedianCLTVByTypeLoanPurposeHome(loanType: LoanTypeEnum, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(CLTV_BY_LOAN_PERIODS_PURPOSE_PURCHASE.map(period => {
+      sql"""
+         select last_updated, quarter, median_lv as value from #${s"${CLTV_BY_LOAN_MV}_$period"}
+         where lt = ${loanType.code}
+           and loc #${if (heloc) "= 1" else "!= 1"}
+           #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+  def fetchMedianCLTVByTypeByRaceLoanPurposeHome(loanType: LoanTypeEnum, race: String, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(CLTV_BY_RE_PERIODS_PURPOSE_PURCHASE.map(period => {
+      sql"""
+         select last_updated, quarter, median_lv as value from #${s"${CLTV_BY_RE_MV}_$period"}
+         where lt = ${loanType.code} and race_ethnicity = $race
+           and loc #${if (heloc) "= 1" else "!= 1"}
+             #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+  def fetchMedianDTIByTypeLoanPurposeHome(loanType: LoanTypeEnum, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(DTI_BY_LOAN_PERIODS_PURPOSE_PURCHASE.map(period => {
+      sql"""
+         select last_updated, quarter, median_dti as value from #${s"${DTI_BY_LOAN_MV}_$period"}
+         where lt = ${loanType.code}
+           and loc #${if (heloc) "= 1" else "!= 1"}
+           #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+  def fetchMedianDTIByTypeByRaceLoanPurposeHome(loanType: LoanTypeEnum, race: String, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(DTI_BY_RE_PERIODS_PURPOSE_PURCHASE.map(period => {
+      sql"""
+         select last_updated, quarter, median_dti as value from #${s"${DTI_BY_RE_MV}_$period"}
+         where lt = ${loanType.code} and race_ethnicity = $race
+           and loc #${if (heloc) "= 1" else "!= 1"}
+           #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+  def fetchDenialRatesLoanPurposeHome(loanType: LoanTypeEnum, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(DENIAL_RATES_BY_LOAN_PERIODS_PURPOSE_PURCHASE.map(period => {
+      sql"""
+         select last_updated, quarter, denial_rate as value from #${s"${DENIAL_RATES_BY_LOAN_MV}_$period"}
+         where lt = ${loanType.code}
+           and loc #${if (heloc) "= 1" else "!= 1"}
+           #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+  def fetchDenialRatesByTypeByRaceLoanPurposeHome(loanType: LoanTypeEnum, race: String, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(DENIAL_RATES_BY_RE_PERIODS_PURPOSE_PURCHASE.map(period => {
+      sql"""
+         select last_updated, quarter, denial_rate as value from #${s"${DENIAL_RATES_BY_RE_MV}_$period"}
+         where lt = ${loanType.code} and race_ethnicity = $race
+           and loc #${if (heloc) "= 1" else "!= 1"}
+           #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+  def fetchMedianInterestRatesLoanPurposeHome(loanType: LoanTypeEnum, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(INTEREST_RATES_BY_LOAN_PERIODS_PURPOSE_PURCHASE.map(period => {
+      sql"""
+         select last_updated, quarter, median_interest_rate as value from #${s"${INTEREST_RATES_BY_LOAN_MV}_$period"}
+         where lt = ${loanType.code}
+           and loc #${if (heloc) "= 1" else "!= 1"}
+           #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+  def fetchMedianInterestRatesByTypeByRaceLoanPurposeHome(loanType: LoanTypeEnum, race: String, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(INTEREST_RATES_BY_RE_PERIODS_PURPOSE_PURCHASE.map(period => {
+      sql"""
+         select last_updated, quarter, median_interest_rate as value from #${s"${INTEREST_RATES_BY_RE_MV}_$period"}
+         where lt = ${loanType.code} and race_ethnicity = $race
+           and loc #${if (heloc) "= 1" else "!= 1"}
+          #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+  def fetchMedianTotalLoanCostsLoanPurposeHome(loanType: LoanTypeEnum, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(TLC_BY_LOAN_PERIODS_PURPOSE_PURCHASE.map(period => {
+      sql"""
+         select last_updated, quarter, median_total_loan_costs as value from #${s"${TLC_BY_LOAN_MV}_$period"}
+         where lt = ${loanType.code}
+           and loc #${if (heloc) "= 1" else "!= 1"}
+           #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+  def fetchMedianTotalLoanCostsByTypeByRaceLoanPurposeHome(loanType: LoanTypeEnum, race: String, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(TLC_BY_RE_PERIODS_PURPOSE_PURCHASE.map(period => {
+      sql"""
+         select last_updated, quarter, median_total_loan_costs as value from #${s"${TLC_BY_RE_MV}_$period"}
+         where lt = ${loanType.code} and race_ethnicity = $race
+           and loc #${if (heloc) "= 1" else "!= 1"}
+          #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+//refinance
+
+  def fetchApplicationsVolumeByTypeLoanPurposeRefinance(loanType: LoanTypeEnum, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = getAppVolStmts(APP_VOL_MV, APP_VOL_PERIODS_PURPOSE_REFINANCE, loanType, heloc, conforming)
+    runStatements(stmts)
+  }
+
+  def fetchLoansVolumeByTypeLoanPurposeRefinance(loanType: LoanTypeEnum, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = getAppVolStmts(APP_VOL_MV, APP_VOL_PERIODS_PURPOSE_REFINANCE, loanType, heloc, conforming, loanOriginated = true)
+    runStatements(stmts)
+  }
+
+
+
+  def fetchTotalApplicationsVolumeLoanPurposeRefinance(quarterly: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = if (quarterly) getTotalAppVolStmts(APP_VOL_MV, APP_VOL_PERIODS_PURPOSE_REFINANCE) else getTotalAppVolStmts(ALL_APP_VOL_MV, ALL_APP_VOL_PERIODS_PURPOSE_REFINANCE)
+    runStatements(stmts)
+  }
+
+
+  def fetchMedianCreditScoreByTypeLoanPurposeRefinance(loanType: LoanTypeEnum, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(CRED_SCORE_BY_LOAN_PERIODS_PURPOSE_REFINANCE.map(period => {
+      sql"""
+         select last_updated, quarter, median_credit_score as value from #${s"${CRED_SCORE_BY_LOAN_MV}_$period"}
+         where lt = ${loanType.code}
+           and loc #${if (heloc) "= 1" else "!= 1"}
+           #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+  def fetchMedianCreditScoreByTypeByRaceLoanPurposeRefinance(loanType: LoanTypeEnum, race: String, conforming: Boolean = false): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(CRED_SCORE_BY_RE_PERIODS_PURPOSE_REFINANCE.map(period => {
+      sql"""
+         select last_updated, quarter, median_credit_score as value from #${s"${CRED_SCORE_BY_RE_MV}_$period"}
+         where lt = ${loanType.code} and race_ethnicity = $race
+           #${getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+  def fetchMedianCLTVByTypeLoanPurposeRefinance(loanType: LoanTypeEnum, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(CLTV_BY_LOAN_PERIODS_PURPOSE_REFINANCE.map(period => {
+      sql"""
+         select last_updated, quarter, median_lv as value from #${s"${CLTV_BY_LOAN_MV}_$period"}
+         where lt = ${loanType.code}
+           and loc #${if (heloc) "= 1" else "!= 1"}
+           #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+  def fetchMedianCLTVByTypeByRaceLoanPurposeRefinance(loanType: LoanTypeEnum, race: String, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(CLTV_BY_RE_PERIODS_PURPOSE_REFINANCE.map(period => {
+      sql"""
+         select last_updated, quarter, median_lv as value from #${s"${CLTV_BY_RE_MV}_$period"}
+         where lt = ${loanType.code} and race_ethnicity = $race
+           and loc #${if (heloc) "= 1" else "!= 1"}
+             #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+  def fetchMedianDTIByTypeLoanPurposeRefinance(loanType: LoanTypeEnum, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(DTI_BY_LOAN_PERIODS_PURPOSE_REFINANCE.map(period => {
+      sql"""
+         select last_updated, quarter, median_dti as value from #${s"${DTI_BY_LOAN_MV}_$period"}
+         where lt = ${loanType.code}
+           and loc #${if (heloc) "= 1" else "!= 1"}
+           #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+  def fetchMedianDTIByTypeByRaceLoanPurposeRefinance(loanType: LoanTypeEnum, race: String, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(DTI_BY_RE_PERIODS_PURPOSE_REFINANCE.map(period => {
+      sql"""
+         select last_updated, quarter, median_dti as value from #${s"${DTI_BY_RE_MV}_$period"}
+         where lt = ${loanType.code} and race_ethnicity = $race
+           and loc #${if (heloc) "= 1" else "!= 1"}
+           #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+  def fetchDenialRatesLoanPurposeRefinance(loanType: LoanTypeEnum, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(DENIAL_RATES_BY_LOAN_PERIODS_PURPOSE_REFINANCE.map(period => {
+      sql"""
+         select last_updated, quarter, denial_rate as value from #${s"${DENIAL_RATES_BY_LOAN_MV}_$period"}
+         where lt = ${loanType.code}
+           and loc #${if (heloc) "= 1" else "!= 1"}
+           #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+  def fetchDenialRatesByTypeByRaceLoanPurposeRefinance(loanType: LoanTypeEnum, race: String, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(DENIAL_RATES_BY_RE_PERIODS_PURPOSE_REFINANCE.map(period => {
+      sql"""
+         select last_updated, quarter, denial_rate as value from #${s"${DENIAL_RATES_BY_RE_MV}_$period"}
+         where lt = ${loanType.code} and race_ethnicity = $race
+           and loc #${if (heloc) "= 1" else "!= 1"}
+           #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+  def fetchMedianInterestRatesLoanPurposeRefinance(loanType: LoanTypeEnum, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(INTEREST_RATES_BY_LOAN_PERIODS_PURPOSE_REFINANCE.map(period => {
+      sql"""
+         select last_updated, quarter, median_interest_rate as value from #${s"${INTEREST_RATES_BY_LOAN_MV}_$period"}
+         where lt = ${loanType.code}
+           and loc #${if (heloc) "= 1" else "!= 1"}
+           #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+  def fetchMedianInterestRatesByTypeByRaceLoanPurposeRefinance(loanType: LoanTypeEnum, race: String, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(INTEREST_RATES_BY_RE_PERIODS_PURPOSE_REFINANCE.map(period => {
+      sql"""
+         select last_updated, quarter, median_interest_rate as value from #${s"${INTEREST_RATES_BY_RE_MV}_$period"}
+         where lt = ${loanType.code} and race_ethnicity = $race
+           and loc #${if (heloc) "= 1" else "!= 1"}
+          #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+  def fetchMedianTotalLoanCostsLoanPurposeRefinance(loanType: LoanTypeEnum, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(TLC_BY_LOAN_PERIODS_PURPOSE_REFINANCE.map(period => {
+      sql"""
+         select last_updated, quarter, median_total_loan_costs as value from #${s"${TLC_BY_LOAN_MV}_$period"}
+         where lt = ${loanType.code}
+           and loc #${if (heloc) "= 1" else "!= 1"}
+           #${if (heloc) "" else getAdditionalParams(loanType, conforming)}
+         """
+    })) ++ Seq(ordering)
+    runStatements(stmts)
+  }
+
+  def fetchMedianTotalLoanCostsByTypeByRaceLoanPurposeRefinance(loanType: LoanTypeEnum, race: String, heloc: Boolean, conforming: Boolean): Task[Seq[DataPoint]] = {
+    val stmts = unionStatements(TLC_BY_RE_PERIODS_PURPOSE_REFINANCE.map(period => {
       sql"""
          select last_updated, quarter, median_total_loan_costs as value from #${s"${TLC_BY_RE_MV}_$period"}
          where lt = ${loanType.code} and race_ethnicity = $race
