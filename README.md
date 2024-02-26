@@ -106,7 +106,7 @@ Before running the HMDA Platform, make sure to have the following installed:
 1. Homebrew - https://brew.sh/
 2. Docker - ```bash brew install docker ```
 3. Docker Desktop - https://docs.docker.com/desktop/install/mac-install/
-4. Java (version 13.0.2) for MacOS - [https://www.java.com/en/download/](https://www.oracle.com/java/technologies/javase/jdk13-archive-downloads.html)
+4. <a href="./docs/JavaInstall.md">Java (version 13.0.2) for MacOS</a>
 5. Scala (version 2.12 for compatibility issues) - ```bash brew install scala@2.12 ```
 6. sdk - https://sdkman.io/install
 Next, use sdk to install sbt instead of brew (it won't work with brew) (Note: before install, check what version is currently being used in project/build.properties and install that version or higher):
