@@ -6,7 +6,12 @@ import io.chrisdavenport.cormorant.CSV
 import io.chrisdavenport.cormorant.implicits._
 import hmda.parser.filing.ts.TsCsvParser.extractOpt
 import hmda.util.PsvParsingCompanion
-
+import io.chrisdavenport.cormorant._
+import io.chrisdavenport.cormorant.generic.semiauto._
+import io.chrisdavenport.cormorant.parser._
+import cats.implicits._
+import java.util.UUID
+import java.time.Instant
 case class ModifiedLarPartOne(
                                filingYear: Option[Int] = Some(0),
                                lei: String = "",
