@@ -530,9 +530,9 @@ object HmdaValidationError
               larsDistinctCount = rawLineResult.distinctCount,
               uniqueLarsSpecificFields = -1,
               distinctUliCount = -1,
-              duplicateUliToLineNumbers = rawLineResult.uliToDuplicateLineNumbers.mapValues(_.toList),
+              duplicateUliToLineNumbers = rawLineResult.uliToDuplicateLineNumbers.view.mapValues(_.toList).toMap,
               distinctActionTakenUliCount = s306Result.distinctCount,
-              duplicateUliToLineNumbersUliActionType = s306Result.uliToDuplicateLineNumbers.mapValues(_.toList),
+              duplicateUliToLineNumbersUliActionType = s306Result.uliToDuplicateLineNumbers.view.mapValues(_.toList).toMap,
               actionTakenDatesWithinRange = actionTakenWithinRangeResults.totalCount,
               actionTakenDatesGreaterThanRange = actionTakenGreaterThanRangeResults.totalCount
             ),
@@ -554,7 +554,7 @@ object HmdaValidationError
               larsDistinctCount = -1,
               uniqueLarsSpecificFields = uniqueLarResult.distinctCount,
               distinctUliCount = uliResult.distinctCount,
-              duplicateUliToLineNumbers = uliResult.uliToDuplicateLineNumbers.mapValues(_.toList)),
+              duplicateUliToLineNumbers = uliResult.uliToDuplicateLineNumbers.view.mapValues(_.toList).toMap),
             editType,
             validationContext
           )

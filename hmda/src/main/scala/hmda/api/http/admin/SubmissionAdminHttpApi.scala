@@ -168,7 +168,7 @@ private class LeiSubmissionSummary(log: Logger, clusterSharding: ClusterSharding
     leiFilter match {
       case Some(leis) =>
         val leisSet = leis.toSet
-        all.map(_.filterKeys(leisSet.contains))
+        all.map(_.view.filterKeys(leisSet.contains).toMap)
       case None => all
     }
   }

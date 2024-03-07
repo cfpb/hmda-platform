@@ -65,7 +65,7 @@ object Dependencies {
   lazy val resteasyClient        = "org.jboss.resteasy"         % "resteasy-client"             % Version.resteasy % "provided"
   lazy val resteasyJackson       = "org.jboss.resteasy"         % "resteasy-jackson2-provider"  % Version.resteasy % "provided"
   lazy val resteasyMulti         = "org.jboss.resteasy"         % "resteasy-multipart-provider" % Version.resteasy % "provided"
-  lazy val jbossLogging          = "org.jboss.logging"          % "jboss-logging"               % Version.jboss
+  lazy val jbossLogging          = "org.jboss.logging"          % "jboss-logging"               % Version.jbossLogging
   lazy val httpClient            = "org.apache.httpcomponents"  % "httpclient"                  % Version.httpcomponents
   lazy val akkaKafkaStreams      = "com.typesafe.akka"          %% "akka-stream-kafka"          % Version.akkaKafka
   lazy val embeddedKafka         = "io.github.embeddedkafka"    %% "embedded-kafka"             % Version.embeddedKafka

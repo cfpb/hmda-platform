@@ -17,7 +17,7 @@ import org.keycloak.common.crypto.CryptoIntegration
 import java.util.concurrent.atomic.AtomicReference
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success}
-import org.keycloak.common.crypto.CryptoIntegration
+
 // $COVERAGE-OFF$
 class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
   CryptoIntegration.init(this.getClass.getClassLoader)

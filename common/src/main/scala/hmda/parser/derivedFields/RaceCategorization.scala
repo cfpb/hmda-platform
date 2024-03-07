@@ -14,9 +14,9 @@ object RaceCategorization {
       Array(race.race1, race.race2, race.race3, race.race4, race.race5)
     val coRaceFields = Array(coRace.race1, coRace.race2, coRace.race3, coRace.race4, coRace.race5)
 
-    val asianEnums = Array(Asian, AsianIndian, Chinese, Filipino, Japanese, Korean, Vietnamese, OtherAsian)
+    val asianEnums = Seq(Asian, AsianIndian, Chinese, Filipino, Japanese, Korean, Vietnamese, OtherAsian)
     val hawaiianIslanderEnums =
-      Array(NativeHawaiianOrOtherPacificIslander, NativeHawaiian, GuamanianOrChamorro, Samoan, OtherPacificIslander)
+      Seq(NativeHawaiianOrOtherPacificIslander, NativeHawaiian, GuamanianOrChamorro, Samoan, OtherPacificIslander)
 
     if (race.race1 == EmptyRaceValue) {
       "Free Form Text Only"
@@ -115,32 +115,32 @@ object RaceCategorization {
   }
 
   private def AnyApplicantAMinority(raceFields: Array[RaceEnum],
-                                    asianEnums: Array[RaceEnum with Product with Serializable],
-                                    hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable]): Boolean =
+                                    asianEnums: Seq[RaceEnum with Product],
+                                    hawaiianIslanderEnums: Seq[RaceEnum with Product]): Boolean =
     raceFields.exists(asianEnums.contains) ||
       raceFields.exists(hawaiianIslanderEnums.contains) ||
       raceFields.contains(BlackOrAfricanAmerican) |
       raceFields.contains(AmericanIndianOrAlaskaNative)
 
   private def OnlyNativeHawaiianOrOtherPacificIslander(raceFields: Array[RaceEnum],
-                                                       asianEnums: Array[RaceEnum with Product with Serializable],
-                                                       hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable]): Boolean =
+                                                       asianEnums: Seq[RaceEnum with Product],
+                                                       hawaiianIslanderEnums: Seq[RaceEnum with Product]): Boolean =
     !raceFields.exists(asianEnums.contains) &&
       raceFields.exists(hawaiianIslanderEnums.contains) &&
       !raceFields.contains(BlackOrAfricanAmerican) &&
       !raceFields.contains(AmericanIndianOrAlaskaNative)
 
   private def OnlyAsian(raceFields: Array[RaceEnum],
-                        asianEnums: Array[RaceEnum with Product with Serializable],
-                        hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable]): Boolean =
+                        asianEnums: Seq[RaceEnum with Product],
+                        hawaiianIslanderEnums: Seq[RaceEnum with Product]): Boolean =
     raceFields.exists(asianEnums.contains) &&
       !raceFields.exists(hawaiianIslanderEnums.contains) &&
       !raceFields.contains(BlackOrAfricanAmerican) &&
       !raceFields.contains(AmericanIndianOrAlaskaNative)
 
   private def moreThanOneMinority(raceFields: Array[RaceEnum],
-                                  asianEnums: Array[RaceEnum with Product with Serializable],
-                                  hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable]): Boolean = {
+                                  asianEnums: Seq[RaceEnum with Product],
+                                  hawaiianIslanderEnums: Seq[RaceEnum with Product]): Boolean = {
     val numberOfMinorityFields = List(
       raceFields.exists(hawaiianIslanderEnums.contains),
       raceFields.exists(asianEnums.contains),

@@ -115,7 +115,7 @@ class PublisherComponent2019Spec
       result <- count()
       _      = result shouldBe 1
       result <- Source.fromPublisher(getAllLARs(Array.empty)).runWith(Sink.collection)
-      _      = result should have length 1
+      _      = result should have size 1
       _      = result.head shouldBe data
       result <- deleteByLei("EXAMPLE-LEI")
       _      = result shouldBe 1

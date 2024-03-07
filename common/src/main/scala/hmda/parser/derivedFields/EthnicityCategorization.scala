@@ -14,7 +14,7 @@ object EthnicityCategorization {
     val coethnicityFields =
       Array(coEthnicity.ethnicity1, coEthnicity.ethnicity2, coEthnicity.ethnicity3, coEthnicity.ethnicity4, coEthnicity.ethnicity5)
 
-    val hispanicEnums = Array(HispanicOrLatino, Mexican, PuertoRican, Cuban, OtherHispanicOrLatino)
+    val hispanicEnums = Seq(HispanicOrLatino, Mexican, PuertoRican, Cuban, OtherHispanicOrLatino)
 
     def checkEthnicityTwoToFiveEmpty(ethnicity: Ethnicity): Boolean =
       ethnicity.ethnicity2 == EmptyEthnicityValue &&
@@ -30,7 +30,7 @@ object EthnicityCategorization {
         ethnicity.ethnicity5 == EmptyEthnicityValue
 
     def OnlyHispanicFlag(ethnicityFields: Array[EthnicityEnum],
-                         ethnicityEnum: Array[EthnicityEnum with Product with Serializable]): Boolean =
+                         ethnicityEnum: Seq[EthnicityEnum with Product]): Boolean =
       ethnicityFields.exists(ethnicityEnum.contains) &&
         !ethnicityFields.contains(NotHispanicOrLatino)
 

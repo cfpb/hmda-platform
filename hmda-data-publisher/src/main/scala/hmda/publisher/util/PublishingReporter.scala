@@ -136,7 +136,7 @@ object PublishingReporter {
       val expectations: Map[ScheduleGroupId, List[Expectation]] =
         Schedules.values
           .groupBy(forSchedule)
-          .mapValues(_.map(Expectation.baseForSchedule).toList)
+          .view.mapValues(_.map(Expectation.baseForSchedule).toList)
           .toMap
           .withDefault(_ => List())
       def newForId(id: ScheduleGroupId): Group =
