@@ -30,6 +30,9 @@ spec:
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
+        - name: cassandra-truststore
+          secret:
+            secretName: cassandra-truststore            
       serviceAccountName: {{ .Values.service.account.name }}
       containers:
       - name: {{ .Chart.Name }}
@@ -37,6 +40,9 @@ spec:
         volumeMounts:
           - name: tz-config
             mountPath: /etc/localtime
+          - name: cassandra-truststore
+            readOnly: true
+            mountPath: "/opt/cassandra_truststore"            
         resources:
 {{ toYaml .Values.resources | indent 12 }}
         securityContext:
@@ -149,11 +155,13 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: status.podIP
-        - name: CASSANDRA_CLUSTER_HOSTS
+        - name: CASSANDRA_TRUSTSTORE_FILE
+          value: "/opt/cassandra_truststore/cassandra_truststore.jks"              
+        - name: CASSANDRA_CLUSTER_HOSTS_PORT
           valueFrom:
             configMapKeyRef:
+              key: cassandra-hosts-port
               name: cassandra-configmap
-              key: cassandra-hosts
         - name: CASSANDRA_CLUSTER_DC
           valueFrom:
             configMapKeyRef:
@@ -174,11 +182,26 @@ spec:
             secretKeyRef:
               name: cassandra-credentials
               key: cassandra.username
+        - name: CASSANDRA_TRUSTSTORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: cassandra-truststore-password  
         - name: CASSANDRA_CLUSTER_PASSWORD
           valueFrom:
             secretKeyRef:
               name: cassandra-credentials
               key: cassandra.password
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              key: aws-access-key-id
+              name: cassandra-keyspace-credentials
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:        
+            secretKeyRef:
+              key: aws-secret-access-key
+              name: cassandra-keyspace-credentials             
         - name: CASSANDRA_LOG_LEVEL
           value: {{ .Values.logs.cassandra }}
         - name: KEYCLOAK_REALM_URL

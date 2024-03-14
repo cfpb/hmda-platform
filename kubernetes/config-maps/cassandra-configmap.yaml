@@ -2,10 +2,9 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: cassandra-configmap
-  annotations:
-    reloader.stakater.com/match: "true"
+  namespace: default
 data:
-  cassandra-hosts: cluster1-dc1-service.cass-operator
-  cassandra-cluster-dc: dc1
+  cassandra-cluster-dc: us-east-1
+  cassandra-hosts-port: cassandra.us-east-1.amazonaws.com:9142
   cassandra-keyspace: hmda2_journal
   cassandra-keyspace-snapshot: hmda2_snapshot
