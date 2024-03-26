@@ -73,7 +73,7 @@ object Census {
 case class Census(
   id: Int = 0,
   collectionYear: Int = 0,
-  msaMd: Int = 0,
+  msaMd: Int = 99999,
   state: String = "",
   county: String = "",
   tract: String = "",
