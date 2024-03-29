@@ -245,10 +245,6 @@ object LarConverter {
       case 2022 => countyLoanLimitsByCounty2022
       case 2023 => countyLoanLimitsByCounty2023
       case 2024 => countyLoanLimitsByCounty2024
-<<<<<<< HEAD
-
-=======
->>>>>>> master
 
     }
   }
