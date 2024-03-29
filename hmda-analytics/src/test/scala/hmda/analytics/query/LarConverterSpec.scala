@@ -15,6 +15,11 @@ class LarConverterSpec extends PropSpec with ScalaCheckPropertyChecks with MustM
             val finalLar     = unitsLar.copy(loan = unitsLar.loan.copy(amount = 721151.00))
             LarConverter(finalLar, 2018).conformingLoanLimit mustBe "NC"
             LarConverter(finalLar, 2019).conformingLoanLimit mustBe "U"
+            LarConverter(finalLar, 2020).conformingLoanLimit mustBe "U"
+            LarConverter(finalLar, 2021).conformingLoanLimit mustBe "U"
+            LarConverter(finalLar, 2022).conformingLoanLimit mustBe "U"
+            LarConverter(finalLar, 2023).conformingLoanLimit mustBe "C"
+            LarConverter(finalLar, 2024).conformingLoanLimit mustBe "C"
         }
     }
 
@@ -26,6 +31,12 @@ class LarConverterSpec extends PropSpec with ScalaCheckPropertyChecks with MustM
             val finalLar     = unitsLar.copy(loan = unitsLar.loan.copy(amount = 552001.00))
             LarConverter(finalLar, 2019).conformingLoanLimit mustBe "NC"
             LarConverter(finalLar, 2020).conformingLoanLimit mustBe "C"
+            LarConverter(finalLar, 2021).conformingLoanLimit mustBe "C"
+            LarConverter(finalLar, 2022).conformingLoanLimit mustBe "C"
+            LarConverter(finalLar, 2023).conformingLoanLimit mustBe "C"
+            LarConverter(finalLar, 2024).conformingLoanLimit mustBe "C"
+
+
         }
     }
 
@@ -38,6 +49,10 @@ class LarConverterSpec extends PropSpec with ScalaCheckPropertyChecks with MustM
             LarConverter(finalLar, 2019).conformingLoanLimit mustBe "U"
             LarConverter(finalLar, 2019).isEmpty mustBe lar.larIdentifier.LEI.isEmpty
             LarConverter(finalLar, 2020).conformingLoanLimit mustBe "C"
+            LarConverter(finalLar, 2021).conformingLoanLimit mustBe "C"
+            LarConverter(finalLar, 2022).conformingLoanLimit mustBe "C"
+            LarConverter(finalLar, 2023).conformingLoanLimit mustBe "C"
+            LarConverter(finalLar, 2024).conformingLoanLimit mustBe "C"
         }
     }
 

@@ -73,8 +73,6 @@ object LarConverter {
   val overallLoanLimit2024 = overallLoanLimits(countyLoanLimits2024)
 
 
-
-
   val countyLoanLimitsByCounty2018 = countyLoansLimitByCounty(countyLoanLimits2018)
   val countyLoanLimitsByCounty2019 = countyLoansLimitByCounty(countyLoanLimits2019)
   val countyLoanLimitsByCounty2020 = countyLoansLimitByCounty(countyLoanLimits2020)
@@ -83,8 +81,6 @@ object LarConverter {
   val countyLoanLimitsByCounty2023 = countyLoansLimitByCounty(countyLoanLimits2023)
   val countyLoanLimitsByCounty2024 = countyLoansLimitByCounty(countyLoanLimits2024)
 
-
-
   val countyLoanLimitsByState2018 = countyLoansLimitByState(countyLoanLimits2018)
   val countyLoanLimitsByState2019 = countyLoansLimitByState(countyLoanLimits2019)
   val countyLoanLimitsByState2020 = countyLoansLimitByState(countyLoanLimits2020)
@@ -92,8 +88,6 @@ object LarConverter {
   val countyLoanLimitsByState2022 = countyLoansLimitByState(countyLoanLimits2022)
   val countyLoanLimitsByState2023 = countyLoansLimitByState(countyLoanLimits2023)
   val countyLoanLimitsByState2024 = countyLoansLimitByState(countyLoanLimits2024)
-
-
 
   def apply(
     lar: LoanApplicationRegister,
@@ -251,7 +245,10 @@ object LarConverter {
       case 2022 => countyLoanLimitsByCounty2022
       case 2023 => countyLoanLimitsByCounty2023
       case 2024 => countyLoanLimitsByCounty2024
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
 
     }
   }
@@ -266,7 +263,6 @@ object LarConverter {
       case 2023 => countyLoanLimitsByState2023
       case 2024 => countyLoanLimitsByState2024
 
-
     }
   }
 
@@ -279,8 +275,6 @@ object LarConverter {
       case 2022 => overallLoanLimit2022
       case 2023 => overallLoanLimit2023
       case 2024 => overallLoanLimit2024
-
-
     }
   }
 
