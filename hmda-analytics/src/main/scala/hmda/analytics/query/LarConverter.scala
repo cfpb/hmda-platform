@@ -29,6 +29,9 @@ object LarConverter {
   val censusFileName2023 =
     config.getString("hmda.census.fields.2023.filename")
 
+  val censusFileName2024 =
+    config.getString("hmda.census.fields.2024.filename")
+
   val countyLoanLimitFileName2018 =
       config.getString("hmda.countyLoanLimit.2018.fields.filename")
   val countyLoanLimitFileName2019 =
@@ -42,6 +45,9 @@ object LarConverter {
 
   val countyLoanLimitFileName2023 =
     config.getString("hmda.countyLoanLimit.2023.fields.filename")
+
+  val countyLoanLimitFileName2024 =
+    config.getString("hmda.countyLoanLimit.2024.fields.filename")
   
   val countyLoanLimits2018: Seq[CountyLoanLimit] =
     parseCountyLoanLimitFile(countyLoanLimitFileName2018)
@@ -55,6 +61,8 @@ object LarConverter {
     parseCountyLoanLimitFile(countyLoanLimitFileName2022)
   val countyLoanLimits2023: Seq[CountyLoanLimit] =
     parseCountyLoanLimitFile(countyLoanLimitFileName2023)
+  val countyLoanLimits2024: Seq[CountyLoanLimit] =
+    parseCountyLoanLimitFile(countyLoanLimitFileName2024)
 
   val overallLoanLimit2018 = overallLoanLimits(countyLoanLimits2018)
   val overallLoanLimit2019 = overallLoanLimits(countyLoanLimits2019)
@@ -62,6 +70,7 @@ object LarConverter {
   val overallLoanLimit2021 = overallLoanLimits(countyLoanLimits2021)
   val overallLoanLimit2022 = overallLoanLimits(countyLoanLimits2022)
   val overallLoanLimit2023 = overallLoanLimits(countyLoanLimits2023)
+  val overallLoanLimit2024 = overallLoanLimits(countyLoanLimits2024)
 
 
 
@@ -71,6 +80,7 @@ object LarConverter {
   val countyLoanLimitsByCounty2021 = countyLoansLimitByCounty(countyLoanLimits2021)
   val countyLoanLimitsByCounty2022 = countyLoansLimitByCounty(countyLoanLimits2022)
   val countyLoanLimitsByCounty2023 = countyLoansLimitByCounty(countyLoanLimits2023)
+  val countyLoanLimitsByCounty2024 = countyLoansLimitByCounty(countyLoanLimits2024)
 
 
   val countyLoanLimitsByState2018 = countyLoansLimitByState(countyLoanLimits2018)
@@ -79,6 +89,7 @@ object LarConverter {
   val countyLoanLimitsByState2021 = countyLoansLimitByState(countyLoanLimits2021)
   val countyLoanLimitsByState2022 = countyLoansLimitByState(countyLoanLimits2022)
   val countyLoanLimitsByState2023 = countyLoansLimitByState(countyLoanLimits2023)
+  val countyLoanLimitsByState2024 = countyLoansLimitByState(countyLoanLimits2024)
 
 
   def apply(
@@ -236,6 +247,7 @@ object LarConverter {
       case 2021 => countyLoanLimitsByCounty2021
       case 2022 => countyLoanLimitsByCounty2022
       case 2023 => countyLoanLimitsByCounty2023
+      case 2024 => countyLoanLimitsByCounty2024
 
     }
   }
@@ -248,6 +260,7 @@ object LarConverter {
       case 2021 => countyLoanLimitsByState2021
       case 2022 => countyLoanLimitsByState2022
       case 2023 => countyLoanLimitsByState2023
+      case 2024 => countyLoanLimitsByState2024
 
     }
   }
@@ -260,6 +273,7 @@ object LarConverter {
       case 2021 => overallLoanLimit2021
       case 2022 => overallLoanLimit2022
       case 2023 => overallLoanLimit2023
+      case 2024 => overallLoanLimit2024
 
     }
   }
