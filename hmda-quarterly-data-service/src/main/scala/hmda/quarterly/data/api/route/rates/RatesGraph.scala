@@ -98,6 +98,6 @@ abstract class RatesGraph(
     case invalid => throw new IllegalArgumentException(s"Invalid type: $invalid")
   }
 
-  private def getGraphSeriesInfo(title: String, subtitle: String, series: Seq[GraphSeriesSummary]): GraphSeriesInfo =
+  def getGraphSeriesInfo(title: String, subtitle: String, series: Seq[GraphSeriesSummary]): GraphSeriesInfo =
     GraphSeriesInfo(title, subtitle, series, yLabel = label, decimalPrecision = decimalPlaces)
 }

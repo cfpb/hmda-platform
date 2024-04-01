@@ -12,7 +12,7 @@ import hmda.quarterly.data.api.route.rates.tlc._
 
 package object route {
   val graphRoutes: GraphRouteInfo = GraphRouteInfo(SUMMARY,
-    Seq(ApplicationsVolume, AllApplicationsVolume, LoansVolume, MedianCreditScores.getRoute, MedianCreditScoresCCByRace.getRoute, MedianCreditScoresFHAByRace.getRoute,
+    Seq(ApplicationsVolume, AllApplicationsVolume, LoansVolume, CreditScores.getMedianCreditScoresSummaryRoute, MedianCreditScoresCCByRace.getRoute, MedianCreditScoresFHAByRace.getRoute,
       MedianCLTVByType.getRoute, MedianCLTVCCByRace.getRoute, MedianCLTVFHAByRace.getRoute, MedianDTIByType.getRoute, MedianDTICCByRace.getRoute, MedianDTIFHAByRace.getRoute,
       DenialRatesByType.getRoute, DenialRatesCCByRace.getRoute, DenialRatesFHAByRace.getRoute, MedianInterestRates.getRoute, MedianInterestRatesCCByRace.getRoute, MedianInterestRatesFHAByRace.getRoute,
       MedianTotalLoanCosts.getRoute, MedianTotalLoanCostsCCByRace.getRoute, MedianTotalLoanCostsFHAByRace.getRoute,ApplicationsVolumeLoanPurposeHome, AllApplicationsVolumeLoanPurposeHome, LoansVolumeLoanPurposeHome, MedianCreditScoresLoanPurposeHome.getRoute, MedianCreditScoresCCByRaceLoanPurposeHome.getRoute, MedianCreditScoresFHAByRaceLoanPurposeHome.getRoute,
