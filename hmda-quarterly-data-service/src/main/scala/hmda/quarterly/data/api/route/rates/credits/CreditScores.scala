@@ -21,7 +21,7 @@ object CreditScores extends CountRatesGraph(
   BY_TYPE_SUBTITLE,
   Category.BY_TYPE) {
 
-  def getMedianCreditScoresSummaryRoute: GraphRoute = new GraphRoute(MEDIAN_CREDIT_SCORES_TITLE, CREDIT_CATEGORY, MEDIAN_CREDIT_SCORES_ENDPOINT) {
+  def getMedianCreditScoresSummaryRoute: GraphRoute = new GraphRoute(MEDIAN_CREDIT_SCORES_TITLE, Category.BY_TYPE.toString, "credit-scores") {
     override def route: Route = pathPrefix(endpoint) {
       path("") {
         complete(
@@ -48,7 +48,7 @@ object CreditScores extends CountRatesGraph(
     }
   }
 
-  def getMedianCreditScoresCCByRaceLoanPurposeHomeSummaryRoute: GraphRoute = new GraphRoute("ACTUAL_TITLE", "ACTUAL_CATEGORY_VERBIAGE", "ACTUAL_ENDPOINT") {
+  def getMedianCreditScoresCCByRaceSummaryRoute: GraphRoute = new GraphRoute(CC_BY_RACE_TITLE, Category.BY_RACE.toString, "credit-scores-cc-re") {
     override def route: Route = pathPrefix(endpoint) {
       path("") {
         complete(
@@ -62,8 +62,8 @@ object CreditScores extends CountRatesGraph(
             white <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRace(Conventional, "q", conforming = true)
               .map(convertToGraph(WHITE, _)).runToFuture
           } yield getGraphSeriesInfo(
-            BY_TYPE_TITLE,
-            BY_TYPE_SUBTITLE,
+            CC_BY_RACE_TITLE,
+            CC_BY_RACE_SUBTITLE,
             Seq(asian, black, hispanic, white)
           )
         )
@@ -71,22 +71,137 @@ object CreditScores extends CountRatesGraph(
     }
   }
 
-  def getMedianCreditScoresCCByRaceLoanPurposeRefinanceSummaryRoute: GraphRoute = new GraphRoute("ACTUAL_TITLE", "ACTUAL_CATEGORY_VERBIAGE", "ACTUAL_ENDPOINT") {
+  def getMedianCreditScoresCCByRaceLoanPurposeHomeSummaryRoute: GraphRoute = new GraphRoute(CC_BY_RACE_TITLE, Category.BY_RACE.toString, "credit-scores-cc-re-loan-purpose-home") {
     override def route: Route = pathPrefix(endpoint) {
       path("") {
         complete(
           for {
-            conventionalConforming <- QuarterlyGraphRepo.fetchMedianCreditScoreByType(Conventional, false, conforming = true)
+            asian <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRaceLoanPurposeHome(Conventional, "a", conforming = true)
+              .map(convertToGraph(ASIAN, _)).runToFuture
+            black <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRaceLoanPurposeHome(Conventional, "b", conforming = true)
+              .map(convertToGraph(BLACK, _)).runToFuture
+            hispanic <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRaceLoanPurposeHome(Conventional, "h", conforming = true)
+              .map(convertToGraph(HISPANIC, _)).runToFuture
+            white <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRaceLoanPurposeHome(Conventional, "q", conforming = true)
+              .map(convertToGraph(WHITE, _)).runToFuture
+          } yield getGraphSeriesInfo(
+            CC_BY_RACE_TITLE,
+            CC_BY_RACE_SUBTITLE,
+            Seq(asian, black, hispanic, white)
+          )
+        )
+      }
+    }
+  }
+
+  def getMedianCreditScoresCCByRaceLoanPurposeRefinanceSummaryRoute: GraphRoute = new GraphRoute(CC_BY_RACE_TITLE, Category.BY_RACE.toString, "credit-scores-cc-re-loan-purpose-refinance") {
+    override def route: Route = pathPrefix(endpoint) {
+      path("") {
+        complete(
+          for {
+            asian <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRaceLoanPurposeRefinance(Conventional, "a", conforming = true)
+              .map(convertToGraph(ASIAN, _)).runToFuture
+            black <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRaceLoanPurposeRefinance(Conventional, "b", conforming = true)
+              .map(convertToGraph(BLACK, _)).runToFuture
+            hispanic <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRaceLoanPurposeRefinance(Conventional, "h", conforming = true)
+              .map(convertToGraph(HISPANIC, _)).runToFuture
+            white <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRaceLoanPurposeRefinance(Conventional, "q", conforming = true)
+              .map(convertToGraph(WHITE, _)).runToFuture
+          } yield getGraphSeriesInfo(
+            CC_BY_RACE_TITLE,
+            CC_BY_RACE_SUBTITLE,
+            Seq(asian, black, hispanic, white)
+          )
+        )
+      }
+    }
+  }
+
+  def getMedianCreditScoresFHAByRaceSummaryRoute: GraphRoute = new GraphRoute(FHA_BY_RACE_TITLE, Category.BY_RACE.toString, "credit-scores-fha-re") {
+    override def route: Route = pathPrefix(endpoint) {
+      path("") {
+        complete(
+          for {
+            asian <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRace(FHAInsured, "a")
+              .map(convertToGraph(ASIAN, _)).runToFuture
+            black <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRace(FHAInsured, "b")
+              .map(convertToGraph(BLACK, _)).runToFuture
+            hispanic <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRace(FHAInsured, "h")
+              .map(convertToGraph(HISPANIC, _)).runToFuture
+            white <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRace(FHAInsured, "w")
+              .map(convertToGraph(WHITE, _)).runToFuture
+          } yield getGraphSeriesInfo(
+            CC_BY_RACE_TITLE,
+            CC_BY_RACE_SUBTITLE,
+            Seq(asian, black, hispanic, white)
+          )
+        )
+      }
+    }
+  }
+
+  def getMedianCreditScoresFHAByRaceLoanPurposeHomeSummaryRoute: GraphRoute = new GraphRoute(FHA_BY_RACE_TITLE, Category.BY_RACE.toString, "credit-scores-fha-re-loan-purpose-home") {
+    override def route: Route = pathPrefix(endpoint) {
+      path("") {
+        complete(
+          for {
+            asian <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRaceLoanPurposeHome(FHAInsured, "a")
+              .map(convertToGraph(ASIAN, _)).runToFuture
+            black <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRaceLoanPurposeHome(FHAInsured, "b")
+              .map(convertToGraph(BLACK, _)).runToFuture
+            hispanic <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRaceLoanPurposeHome(FHAInsured, "h")
+              .map(convertToGraph(HISPANIC, _)).runToFuture
+            white <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRaceLoanPurposeHome(FHAInsured, "w")
+              .map(convertToGraph(WHITE, _)).runToFuture
+          } yield getGraphSeriesInfo(
+            CC_BY_RACE_TITLE,
+            CC_BY_RACE_SUBTITLE,
+            Seq(asian, black, hispanic, white)
+          )
+        )
+      }
+    }
+  }
+
+  def getMedianCreditScoresFHAByRaceLoanPurposeRefinanceSummaryRoute: GraphRoute = new GraphRoute(FHA_BY_RACE_TITLE, Category.BY_RACE.toString, "credit-scores-fha-re-loan-purpose-refinance") {
+    override def route: Route = pathPrefix(endpoint) {
+      path("") {
+        complete(
+          for {
+            asian <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRaceLoanPurposeRefinance(FHAInsured, "a")
+              .map(convertToGraph(ASIAN, _)).runToFuture
+            black <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRaceLoanPurposeRefinance(FHAInsured, "b")
+              .map(convertToGraph(BLACK, _)).runToFuture
+            hispanic <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRaceLoanPurposeRefinance(FHAInsured, "h")
+              .map(convertToGraph(HISPANIC, _)).runToFuture
+            white <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRaceLoanPurposeRefinance(FHAInsured, "w")
+              .map(convertToGraph(WHITE, _)).runToFuture
+          } yield getGraphSeriesInfo(
+            CC_BY_RACE_TITLE,
+            CC_BY_RACE_SUBTITLE,
+            Seq(asian, black, hispanic, white)
+          )
+        )
+      }
+    }
+  }
+
+  def getMedianCreditScoresLoanPurposeRefinanceSummaryRoute: GraphRoute = new GraphRoute(BY_TYPE_TITLE, Category.BY_TYPE_NO_HELOC.toString, "credit-scores-loan-purpose-refinance") {
+    override def route: Route = pathPrefix(endpoint) {
+      path("") {
+        complete(
+          for {
+            conventionalConforming <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeLoanPurposeRefinance(Conventional, false, conforming = true)
               .map(convertToGraph(CONVENTIONAL_CONFORMING, _)).runToFuture
-            conventionalNonConforming <- QuarterlyGraphRepo.fetchMedianCreditScoreByType(Conventional, heloc = false, conforming = false)
+            conventionalNonConforming <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeLoanPurposeRefinance(Conventional, heloc = false, conforming = false)
               .map(convertToGraph(CONVENTIONAL_NON_CONFORMING, _)).runToFuture
-            fha <- QuarterlyGraphRepo.fetchMedianCreditScoreByType(FHAInsured, heloc = false, conforming = false)
+            fha <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeLoanPurposeRefinance(FHAInsured, heloc = false, conforming = false)
               .map(convertToGraph(FHA, _)).runToFuture
-            heloc <- QuarterlyGraphRepo.fetchMedianCreditScoreByType(Conventional, heloc = true, conforming = false)
+            heloc <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeLoanPurposeRefinance(Conventional, heloc = true, conforming = false)
               .map(convertToGraph(HELOC, _)).runToFuture
-            rhsfsa <- QuarterlyGraphRepo.fetchMedianCreditScoreByType(RHSOrFSAGuaranteed, heloc = false, conforming = false)
+            rhsfsa <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeLoanPurposeRefinance(RHSOrFSAGuaranteed, heloc = false, conforming = false)
               .map(convertToGraph(RHS_FSA, _)).runToFuture
-            va <- QuarterlyGraphRepo.fetchMedianCreditScoreByType(VAGuaranteed, heloc = false, conforming = false)
+            va <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeLoanPurposeRefinance(VAGuaranteed, heloc = false, conforming = false)
               .map(convertToGraph(VA, _)).runToFuture
           } yield getGraphSeriesInfo(
             BY_TYPE_TITLE,
@@ -96,128 +211,8 @@ object CreditScores extends CountRatesGraph(
         )
       }
     }
+
   }
 
-  def getMedianCreditScoresFHAByRaceSummaryRoute: GraphRoute = new GraphRoute("ACTUAL_TITLE", "ACTUAL_CATEGORY_VERBIAGE", "ACTUAL_ENDPOINT") {
-    override def route: Route = pathPrefix(endpoint) {
-      path("") {
-        complete(
-          for {
-            asian <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRace(Conventional, "a", conforming = true)
-              .map(convertToGraph(ASIAN, _)).runToFuture
-            black <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRace(Conventional, "b", conforming = true)
-              .map(convertToGraph(BLACK, _)).runToFuture
-            hispanic <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRace(Conventional, "h", conforming = true)
-              .map(convertToGraph(HISPANIC, _)).runToFuture
-            white <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRace(Conventional, "q", conforming = true)
-              .map(convertToGraph(WHITE, _)).runToFuture
-          } yield getGraphSeriesInfo(
-            BY_TYPE_TITLE,
-            BY_TYPE_SUBTITLE,
-            Seq(asian, black, hispanic, white)
-          )
-        )
-      }
-    }
-  }
 
-  def getMedianCreditScoresFHAByRaceLoanPurposeHomeSummaryRoute: GraphRoute = new GraphRoute("ACTUAL_TITLE", "ACTUAL_CATEGORY_VERBIAGE", "ACTUAL_ENDPOINT") {
-    override def route: Route = pathPrefix(endpoint) {
-      path("") {
-        complete(
-          for {
-            conventionalConforming <- QuarterlyGraphRepo.fetchMedianCreditScoreByType(Conventional, false, conforming = true)
-              .map(convertToGraph(CONVENTIONAL_CONFORMING, _)).runToFuture
-            conventionalNonConforming <- QuarterlyGraphRepo.fetchMedianCreditScoreByType(Conventional, heloc = false, conforming = false)
-              .map(convertToGraph(CONVENTIONAL_NON_CONFORMING, _)).runToFuture
-            fha <- QuarterlyGraphRepo.fetchMedianCreditScoreByType(FHAInsured, heloc = false, conforming = false)
-              .map(convertToGraph(FHA, _)).runToFuture
-            heloc <- QuarterlyGraphRepo.fetchMedianCreditScoreByType(Conventional, heloc = true, conforming = false)
-              .map(convertToGraph(HELOC, _)).runToFuture
-            rhsfsa <- QuarterlyGraphRepo.fetchMedianCreditScoreByType(RHSOrFSAGuaranteed, heloc = false, conforming = false)
-              .map(convertToGraph(RHS_FSA, _)).runToFuture
-            va <- QuarterlyGraphRepo.fetchMedianCreditScoreByType(VAGuaranteed, heloc = false, conforming = false)
-              .map(convertToGraph(VA, _)).runToFuture
-          } yield getGraphSeriesInfo(
-            BY_TYPE_TITLE,
-            BY_TYPE_SUBTITLE,
-            Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va)
-          )
-        )
-      }
-    }
-  }
-
-  def getMedianCreditScoresFHAByRaceLoanPurposeRefinanceSummaryRoute: GraphRoute = new GraphRoute("ACTUAL_TITLE", "ACTUAL_CATEGORY_VERBIAGE", "ACTUAL_ENDPOINT") {
-    override def route: Route = pathPrefix(endpoint) {
-      path("") {
-        complete(
-          for {
-            asian <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRace(Conventional, "a", conforming = true)
-              .map(convertToGraph(ASIAN, _)).runToFuture
-            black <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRace(Conventional, "b", conforming = true)
-              .map(convertToGraph(BLACK, _)).runToFuture
-            hispanic <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRace(Conventional, "h", conforming = true)
-              .map(convertToGraph(HISPANIC, _)).runToFuture
-            white <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRace(Conventional, "q", conforming = true)
-              .map(convertToGraph(WHITE, _)).runToFuture
-          } yield getGraphSeriesInfo(
-            BY_TYPE_TITLE,
-            BY_TYPE_SUBTITLE,
-            Seq(asian, black, hispanic, white)
-          )
-        )
-      }
-    }
-  }
-
-  def getMedianCreditScoresLoanPurposeHomeSummaryRoute: GraphRoute = new GraphRoute("ACTUAL_TITLE", "ACTUAL_CATEGORY_VERBIAGE", "ACTUAL_ENDPOINT") {
-    override def route: Route = pathPrefix(endpoint) {
-      path("") {
-        complete(
-          for {
-            conventionalConforming <- QuarterlyGraphRepo.fetchMedianCreditScoreByType(Conventional, false, conforming = true)
-              .map(convertToGraph(CONVENTIONAL_CONFORMING, _)).runToFuture
-            conventionalNonConforming <- QuarterlyGraphRepo.fetchMedianCreditScoreByType(Conventional, heloc = false, conforming = false)
-              .map(convertToGraph(CONVENTIONAL_NON_CONFORMING, _)).runToFuture
-            fha <- QuarterlyGraphRepo.fetchMedianCreditScoreByType(FHAInsured, heloc = false, conforming = false)
-              .map(convertToGraph(FHA, _)).runToFuture
-            heloc <- QuarterlyGraphRepo.fetchMedianCreditScoreByType(Conventional, heloc = true, conforming = false)
-              .map(convertToGraph(HELOC, _)).runToFuture
-            rhsfsa <- QuarterlyGraphRepo.fetchMedianCreditScoreByType(RHSOrFSAGuaranteed, heloc = false, conforming = false)
-              .map(convertToGraph(RHS_FSA, _)).runToFuture
-            va <- QuarterlyGraphRepo.fetchMedianCreditScoreByType(VAGuaranteed, heloc = false, conforming = false)
-              .map(convertToGraph(VA, _)).runToFuture
-          } yield getGraphSeriesInfo(
-            BY_TYPE_TITLE,
-            BY_TYPE_SUBTITLE,
-            Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va)
-          )
-        )
-      }
-    }
-  }
-
-  def getMedianCreditScoresLoanPurposeRefinanceSummaryRoute: GraphRoute = new GraphRoute("ACTUAL_TITLE", "ACTUAL_CATEGORY_VERBIAGE", "ACTUAL_ENDPOINT") {
-    override def route: Route = pathPrefix(endpoint) {
-      path("") {
-        complete(
-          for {
-            asian <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRace(Conventional, "a", conforming = true)
-              .map(convertToGraph(ASIAN, _)).runToFuture
-            black <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRace(Conventional, "b", conforming = true)
-              .map(convertToGraph(BLACK, _)).runToFuture
-            hispanic <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRace(Conventional, "h", conforming = true)
-              .map(convertToGraph(HISPANIC, _)).runToFuture
-            white <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRace(Conventional, "q", conforming = true)
-              .map(convertToGraph(WHITE, _)).runToFuture
-          } yield getGraphSeriesInfo(
-            BY_TYPE_TITLE,
-            BY_TYPE_SUBTITLE,
-            Seq(asian, black, hispanic, white)
-          )
-        )
-      }
-    }
-  }
 }

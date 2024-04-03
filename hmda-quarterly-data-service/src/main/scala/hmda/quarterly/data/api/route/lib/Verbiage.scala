@@ -23,17 +23,4 @@ object Verbiage {
     final val VA = config.getString("loan_type.va")
   }
 
-  final object Title {
-    final val MEDIAN_CREDIT_SCORES_TITLE = config.getString("credit.by_type.title")
-  }
-
-  final object Category {
-    final val CREDIT_CATEGORY = config.getString("credit.category")
-
-  }
-
-  final object Endpoint {
-    final val MEDIAN_CREDIT_SCORES_ENDPOINT = "credit-scores"
-
-  }
 }
