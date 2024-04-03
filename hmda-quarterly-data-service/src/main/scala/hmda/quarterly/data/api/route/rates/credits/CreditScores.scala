@@ -10,9 +10,7 @@ import hmda.quarterly.data.api.route.lib.Verbiage.Race.{ASIAN, BLACK, HISPANIC, 
 import hmda.quarterly.data.api.route.rates.CountRatesGraph
 import hmda.quarterly.data.api.route.rates.RatesGraph._
 import monix.execution.Scheduler.Implicits.global
-import hmda.quarterly.data.api.route.lib.Verbiage.Title._
-import hmda.quarterly.data.api.route.lib.Verbiage.Category._
-import hmda.quarterly.data.api.route.lib.Verbiage.Endpoint._
+
 
 object CreditScores extends CountRatesGraph(
   "credit",
@@ -21,7 +19,8 @@ object CreditScores extends CountRatesGraph(
   BY_TYPE_SUBTITLE,
   Category.BY_TYPE) {
 
-  def getMedianCreditScoresSummaryRoute: GraphRoute = new GraphRoute(MEDIAN_CREDIT_SCORES_TITLE, Category.BY_TYPE.toString, "credit-scores") {
+  def getMedianCreditScoresSummaryRoute: GraphRoute = new GraphRoute(  BY_TYPE_TITLE,
+    , Category.BY_TYPE.toString, "credit-scores") {
     override def route: Route = pathPrefix(endpoint) {
       path("") {
         complete(
