@@ -37,8 +37,8 @@ object Denials extends RatesGraph(
             va <- QuarterlyGraphRepo.fetchDenialRates(VAGuaranteed, heloc = false, conforming = false)
               .map(convertToGraph(VA, _)).runToFuture
           } yield getGraphSeriesInfo(
-            BY_TYPE_TITLE,
-            BY_TYPE_SUBTITLE,
+            "How have denial rates changed?",
+            "",
             Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va)
           )
         )
@@ -64,8 +64,8 @@ object Denials extends RatesGraph(
             va <- QuarterlyGraphRepo.fetchDenialRatesLoanPurposeHome(VAGuaranteed, heloc = false, conforming = false)
               .map(convertToGraph(VA, _)).runToFuture
           } yield getGraphSeriesInfo(
-            BY_TYPE_TITLE,
-            BY_TYPE_SUBTITLE,
+            "How have denial rates changed? - Home Purchase",
+            "",
             Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va)
           )
         )
@@ -91,8 +91,8 @@ object Denials extends RatesGraph(
             va <- QuarterlyGraphRepo.fetchDenialRatesLoanPurposeRefinance(VAGuaranteed, heloc = false, conforming = false)
               .map(convertToGraph(VA, _)).runToFuture
           } yield getGraphSeriesInfo(
-            BY_TYPE_TITLE,
-            BY_TYPE_SUBTITLE,
+            "How have denial rates changed? - Refinance",
+            "",
             Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va)
           )
         )
@@ -114,8 +114,8 @@ object Denials extends RatesGraph(
             white <- QuarterlyGraphRepo.fetchDenialRatesByTypeByRace(Conventional, "w", heloc = false, conforming = true)
               .map(convertToGraph(WHITE, _)).runToFuture
           } yield getGraphSeriesInfo(
-            CC_BY_RACE_TITLE,
-            CC_BY_RACE_SUBTITLE,
+            "For conventional conforming loans, how have denial rates differed by race/ethnicity?",
+            "",
             Seq(asian, black, hispanic, white)
           )
         )
@@ -137,8 +137,8 @@ object Denials extends RatesGraph(
             white <- QuarterlyGraphRepo.fetchDenialRatesByTypeByRaceLoanPurposeHome(Conventional, "w", heloc = false, conforming = true)
               .map(convertToGraph(WHITE, _)).runToFuture
           } yield getGraphSeriesInfo(
-            CC_BY_RACE_TITLE,
-            CC_BY_RACE_SUBTITLE,
+            "For conventional conforming loans, how have denial rates differed by race/ethnicity? - Home Purchase",
+            "",
             Seq(asian, black, hispanic, white)
           )
         )
@@ -160,8 +160,8 @@ object Denials extends RatesGraph(
             white <- QuarterlyGraphRepo.fetchDenialRatesByTypeByRaceLoanPurposeRefinance(Conventional, "w", heloc = false, conforming = true)
               .map(convertToGraph(WHITE, _)).runToFuture
           } yield getGraphSeriesInfo(
-            CC_BY_RACE_TITLE,
-            CC_BY_RACE_SUBTITLE,
+            "For conventional conforming loans, how have denial rates differed by race/ethnicity? - Refinance",
+            "",
             Seq(asian, black, hispanic, white)
           )
         )
@@ -183,8 +183,8 @@ object Denials extends RatesGraph(
             white <- QuarterlyGraphRepo.fetchDenialRatesByTypeByRace(FHAInsured, "w", heloc = false, conforming = false)
               .map(convertToGraph(WHITE, _)).runToFuture
           } yield getGraphSeriesInfo(
-            FHA_BY_RACE_TITLE,
-            FHA_BY_RACE_SUBTITLE,
+            "For FHA loans, how have denial rates differed by race/ethnicity?",
+            "",
             Seq(asian, black, hispanic, white)
           )
         )
@@ -206,8 +206,8 @@ object Denials extends RatesGraph(
             white <- QuarterlyGraphRepo.fetchDenialRatesByTypeByRaceLoanPurposeHome(FHAInsured, "w", heloc = false, conforming = false)
               .map(convertToGraph(WHITE, _)).runToFuture
           } yield getGraphSeriesInfo(
-            FHA_BY_RACE_TITLE,
-            FHA_BY_RACE_SUBTITLE,
+            "For FHA loans, how have denial rates differed by race/ethnicity? - Home Purchase",
+            "",
             Seq(asian, black, hispanic, white)
           )
         )
@@ -229,8 +229,8 @@ object Denials extends RatesGraph(
             white <- QuarterlyGraphRepo.fetchDenialRatesByTypeByRaceLoanPurposeRefinance(FHAInsured, "w", heloc = false, conforming = false)
               .map(convertToGraph(WHITE, _)).runToFuture
           } yield getGraphSeriesInfo(
-            FHA_BY_RACE_TITLE,
-            FHA_BY_RACE_SUBTITLE,
+            "For FHA loans, how have denial rates differed by race/ethnicity? - Refinance",
+            "",
             Seq(asian, black, hispanic, white)
           )
         )

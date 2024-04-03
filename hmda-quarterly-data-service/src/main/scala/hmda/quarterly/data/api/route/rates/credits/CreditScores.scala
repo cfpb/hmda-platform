@@ -4,12 +4,13 @@ import akka.http.scaladsl.server.Directives.{complete, path, pathPrefix}
 import akka.http.scaladsl.server.Route
 import hmda.model.filing.lar.enums._
 import hmda.quarterly.data.api.dao.repo.QuarterlyGraphRepo
-import hmda.quarterly.data.api.dto.QuarterGraphData.{GraphRoute, GraphSeriesInfo, GraphSeriesSummary}
+import hmda.quarterly.data.api.dto.QuarterGraphData.{GraphRoute}
 import hmda.quarterly.data.api.route.lib.Verbiage.LoanType.{CONVENTIONAL_CONFORMING, CONVENTIONAL_NON_CONFORMING, FHA, HELOC, RHS_FSA, VA}
 import hmda.quarterly.data.api.route.lib.Verbiage.Race.{ASIAN, BLACK, HISPANIC, WHITE}
 import hmda.quarterly.data.api.route.rates.CountRatesGraph
 import hmda.quarterly.data.api.route.rates.RatesGraph._
 import monix.execution.Scheduler.Implicits.global
+
 
 
 object CreditScores extends CountRatesGraph(
@@ -19,8 +20,7 @@ object CreditScores extends CountRatesGraph(
   BY_TYPE_SUBTITLE,
   Category.BY_TYPE) {
 
-  def getMedianCreditScoresSummaryRoute: GraphRoute = new GraphRoute(  BY_TYPE_TITLE,
-    , Category.BY_TYPE.toString, "credit-scores") {
+  def getMedianCreditScoresSummaryRoute: GraphRoute = new GraphRoute(BY_TYPE_TITLE, Category.BY_TYPE.toString, "credit-scores") {
     override def route: Route = pathPrefix(endpoint) {
       path("") {
         complete(
@@ -38,8 +38,8 @@ object CreditScores extends CountRatesGraph(
             va <- QuarterlyGraphRepo.fetchMedianCreditScoreByType(VAGuaranteed, heloc = false, conforming = false)
               .map(convertToGraph(VA, _)).runToFuture
           } yield getGraphSeriesInfo(
-            BY_TYPE_TITLE,
-            BY_TYPE_SUBTITLE,
+            "How have median credit scores changed?",
+            "",
             Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va)
           )
         )
@@ -58,11 +58,11 @@ object CreditScores extends CountRatesGraph(
               .map(convertToGraph(BLACK, _)).runToFuture
             hispanic <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRace(Conventional, "h", conforming = true)
               .map(convertToGraph(HISPANIC, _)).runToFuture
-            white <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRace(Conventional, "q", conforming = true)
+            white <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRace(Conventional, "w", conforming = true)
               .map(convertToGraph(WHITE, _)).runToFuture
           } yield getGraphSeriesInfo(
-            CC_BY_RACE_TITLE,
-            CC_BY_RACE_SUBTITLE,
+            "For conventional conforming loans, how have median credit scores differed by race/ethnicity?",
+            "",
             Seq(asian, black, hispanic, white)
           )
         )
@@ -84,8 +84,8 @@ object CreditScores extends CountRatesGraph(
             white <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRaceLoanPurposeHome(Conventional, "q", conforming = true)
               .map(convertToGraph(WHITE, _)).runToFuture
           } yield getGraphSeriesInfo(
-            CC_BY_RACE_TITLE,
-            CC_BY_RACE_SUBTITLE,
+            "For conventional conforming loans, how have median credit scores differed by race/ethnicity? - Home Purchase",
+            "",
             Seq(asian, black, hispanic, white)
           )
         )
@@ -107,8 +107,8 @@ object CreditScores extends CountRatesGraph(
             white <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRaceLoanPurposeRefinance(Conventional, "q", conforming = true)
               .map(convertToGraph(WHITE, _)).runToFuture
           } yield getGraphSeriesInfo(
-            CC_BY_RACE_TITLE,
-            CC_BY_RACE_SUBTITLE,
+            "For conventional conforming loans, how have median credit scores differed by race/ethnicity? - Refinance",
+            "",
             Seq(asian, black, hispanic, white)
           )
         )
@@ -130,8 +130,8 @@ object CreditScores extends CountRatesGraph(
             white <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRace(FHAInsured, "w")
               .map(convertToGraph(WHITE, _)).runToFuture
           } yield getGraphSeriesInfo(
-            CC_BY_RACE_TITLE,
-            CC_BY_RACE_SUBTITLE,
+            "For FHA loans, how have median credit scores differed by race/ethnicity?",
+            "",
             Seq(asian, black, hispanic, white)
           )
         )
@@ -153,8 +153,8 @@ object CreditScores extends CountRatesGraph(
             white <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRaceLoanPurposeHome(FHAInsured, "w")
               .map(convertToGraph(WHITE, _)).runToFuture
           } yield getGraphSeriesInfo(
-            CC_BY_RACE_TITLE,
-            CC_BY_RACE_SUBTITLE,
+            "For FHA loans, how have median credit scores differed by race/ethnicity? - Home Purchase",
+            "",
             Seq(asian, black, hispanic, white)
           )
         )
@@ -176,8 +176,8 @@ object CreditScores extends CountRatesGraph(
             white <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeByRaceLoanPurposeRefinance(FHAInsured, "w")
               .map(convertToGraph(WHITE, _)).runToFuture
           } yield getGraphSeriesInfo(
-            CC_BY_RACE_TITLE,
-            CC_BY_RACE_SUBTITLE,
+            "For FHA loans, how have median credit scores differed by race/ethnicity? - Refinance",
+            "",
             Seq(asian, black, hispanic, white)
           )
         )
@@ -203,8 +203,8 @@ object CreditScores extends CountRatesGraph(
             va <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeLoanPurposeRefinance(VAGuaranteed, heloc = false, conforming = false)
               .map(convertToGraph(VA, _)).runToFuture
           } yield getGraphSeriesInfo(
-            BY_TYPE_TITLE,
-            BY_TYPE_SUBTITLE,
+            "How have median credit scores changed? - Refinance",
+            "",
             Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va)
           )
         )
