@@ -13,7 +13,7 @@ import monix.execution.Scheduler.Implicits.global
 
 
 
-object CreditScores extends CountRatesGraph(
+object MedianCreditScore extends CountRatesGraph(
   "credit",
   "credit-scores",
   BY_TYPE_TITLE,
@@ -46,7 +46,6 @@ object CreditScores extends CountRatesGraph(
       }
     }
   }
-
   def getMedianCreditScoresCCByRaceSummaryRoute: GraphRoute = new GraphRoute(CC_BY_RACE_TITLE, Category.BY_RACE.toString, "credit-scores-cc-re") {
     override def route: Route = pathPrefix(endpoint) {
       path("") {
@@ -69,7 +68,6 @@ object CreditScores extends CountRatesGraph(
       }
     }
   }
-
   def getMedianCreditScoresCCByRaceLoanPurposeHomeSummaryRoute: GraphRoute = new GraphRoute(CC_BY_RACE_TITLE, Category.BY_RACE.toString, "credit-scores-cc-re-loan-purpose-home") {
     override def route: Route = pathPrefix(endpoint) {
       path("") {
@@ -92,7 +90,6 @@ object CreditScores extends CountRatesGraph(
       }
     }
   }
-
   def getMedianCreditScoresCCByRaceLoanPurposeRefinanceSummaryRoute: GraphRoute = new GraphRoute(CC_BY_RACE_TITLE, Category.BY_RACE.toString, "credit-scores-cc-re-loan-purpose-refinance") {
     override def route: Route = pathPrefix(endpoint) {
       path("") {
@@ -115,7 +112,6 @@ object CreditScores extends CountRatesGraph(
       }
     }
   }
-
   def getMedianCreditScoresFHAByRaceSummaryRoute: GraphRoute = new GraphRoute(FHA_BY_RACE_TITLE, Category.BY_RACE.toString, "credit-scores-fha-re") {
     override def route: Route = pathPrefix(endpoint) {
       path("") {
@@ -138,7 +134,6 @@ object CreditScores extends CountRatesGraph(
       }
     }
   }
-
   def getMedianCreditScoresFHAByRaceLoanPurposeHomeSummaryRoute: GraphRoute = new GraphRoute(FHA_BY_RACE_TITLE, Category.BY_RACE.toString, "credit-scores-fha-re-loan-purpose-home") {
     override def route: Route = pathPrefix(endpoint) {
       path("") {
@@ -161,7 +156,6 @@ object CreditScores extends CountRatesGraph(
       }
     }
   }
-
   def getMedianCreditScoresFHAByRaceLoanPurposeRefinanceSummaryRoute: GraphRoute = new GraphRoute(FHA_BY_RACE_TITLE, Category.BY_RACE.toString, "credit-scores-fha-re-loan-purpose-refinance") {
     override def route: Route = pathPrefix(endpoint) {
       path("") {
@@ -184,7 +178,6 @@ object CreditScores extends CountRatesGraph(
       }
     }
   }
-
   def getMedianCreditScoresLoanPurposeRefinanceSummaryRoute: GraphRoute = new GraphRoute(BY_TYPE_TITLE, Category.BY_TYPE_NO_HELOC.toString, "credit-scores-loan-purpose-refinance") {
     override def route: Route = pathPrefix(endpoint) {
       path("") {
@@ -212,6 +205,31 @@ object CreditScores extends CountRatesGraph(
     }
 
   }
-
+  def getMedianCreditScoresLoanPurposeHomeSummaryRoute: GraphRoute = new GraphRoute(BY_TYPE_TITLE, Category.BY_TYPE_NO_HELOC.toString, "credit-scores-loan-purpose-home") {
+    override def route: Route = pathPrefix(endpoint) {
+      path("") {
+        complete(
+          for {
+            conventionalConforming <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeLoanPurposeHome(Conventional, heloc = false, conforming = true)
+              .map(convertToGraph(CONVENTIONAL_CONFORMING, _)).runToFuture
+            conventionalNonConforming <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeLoanPurposeHome(Conventional, heloc = false, conforming = false)
+              .map(convertToGraph(CONVENTIONAL_NON_CONFORMING, _)).runToFuture
+            fha <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeLoanPurposeHome(FHAInsured, heloc = false, conforming = false)
+              .map(convertToGraph(FHA, _)).runToFuture
+            heloc <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeLoanPurposeHome(Conventional, heloc = true, conforming = false)
+              .map(convertToGraph(HELOC, _)).runToFuture
+            rhsfsa <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeLoanPurposeHome(RHSOrFSAGuaranteed, heloc = false, conforming = false)
+              .map(convertToGraph(RHS_FSA, _)).runToFuture
+            va <- QuarterlyGraphRepo.fetchMedianCreditScoreByTypeLoanPurposeHome(VAGuaranteed, heloc = false, conforming = false)
+              .map(convertToGraph(VA, _)).runToFuture
+          } yield getGraphSeriesInfo(
+            "How have median credit scores changed? - Home Purchase",
+            "",
+            Seq(conventionalConforming, conventionalNonConforming, fha, heloc, rhsfsa, va)
+          )
+        )
+      }
+    }
+  }
 
 }

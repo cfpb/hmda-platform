@@ -12,7 +12,7 @@ import hmda.quarterly.data.api.route.lib.Verbiage.LoanType.{CONVENTIONAL_CONFORM
 import hmda.quarterly.data.api.route.lib.Verbiage.Race.{ASIAN, BLACK, HISPANIC, WHITE}
 
 
-object MedianCLTVByType extends RatesGraph(
+object MedianCLTV extends RatesGraph(
   "ltv",
   "ltv",
   BY_TYPE_TITLE,
