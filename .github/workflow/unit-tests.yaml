@@ -1,0 +1,35 @@
+name: HMDA Unit Tests
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+
+      - name: Run Sbt Tests
+        run: |
+          touch log-file
+          sbt test > log-file
+        continue-on-error: true
+
+      - name: Check Test Results
+        run: |
+          if [ $(cat log-file | grep -E "TEST FAILED|TESTS FAILED|Failed tests" | wc -l) -gt 0 ]; then
+            echo "Unit tests failed."
+            exit 1
+          else
+            echo "Unit tests passed."
+          fi
