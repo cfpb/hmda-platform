@@ -4,30 +4,18 @@ metadata:
   name: {{ include "hmda-quarterly-data-service.fullname" . }}-mv-configmap
 data:
   APP_VOL: applications_volume
-  APP_VOL_PERIODS: 2019,2020,2021,2022_q1,2022_q2_2,2022_q3
   ALL_APP_VOL: all_applications_volume
-  ALL_APP_VOL_PERIODS: 2019,2020,2021
+  PERIODS_ANNUAL: 2018,2019,2020,2021,2022
   CRED_SCORE_BY_LOAN: median_credit_score_by_loan_type
-  CRED_SCORE_BY_LOAN_PERIODS: 2019,2020,2021,2022_q1,2022_q2_2,2022_q3
+  PERIODS_WITH_QUARTER: 2018,2019,2020,2021,2022,2023_q1,2023_q2,2023_q3
   CRED_SCORE_BY_RE: median_credit_score_by_loan_by_race
-  CRED_SCORE_BY_RE_PERIODS: 2019,2020,2021,2022_q1,2022_q2_2,2022_q3
   CLTV_BY_LOAN: median_cltv_by_loan_type
-  CLTV_BY_LOAN_PERIODS: 2019,2020,2021,2022_q1,2022_q2_2,2022_q3
   CLTV_BY_RE: median_cltv_by_race
-  CLTV_BY_RE_PERIODS: 2019,2020,2021,2022_q1,2022_q2_2,2022_q3
   DTI_BY_LOAN: median_dti_by_loan_type
-  DTI_BY_LOAN_PERIODS: 2019,2020,2021,2022_q1,2022_q2_2,2022_q3
   DTI_BY_RE: median_dti_by_race
-  DTI_BY_RE_PERIODS: 2019,2020,2021,2022_q1,2022_q2_2,2022_q3
   DENIAL_RATES_BY_LOAN: denial_rates
-  DENIAL_RATES_BY_LOAN_PERIODS: 2019,2020,2021,2022_q1,2022_q2_2,2022_q3
   DENIAL_RATES_BY_RE: denial_rates_by_race
-  DENIAL_RATES_BY_RE_PERIODS: 2019,2020,2021,2022_q1,2022_q2_2,2022_q3
   INTEREST_RATES_BY_LOAN: median_interest_rates_by_loan_type
-  INTEREST_RATES_BY_LOAN_PERIODS: 2019,2020,2021,2022_q1,2022_q2_2,2022_q3
   INTEREST_RATES_BY_RE: median_interest_rates_by_race
-  INTEREST_RATES_BY_RE_PERIODS: 2019,2020,2021,2022_q1,2022_q2_2,2022_q3
   TLC_BY_LOAN: median_total_loan_costs_by_loan_type
-  TLC_BY_LOAN_PERIODS: 2019,2020,2021,2022_q1,2022_q2_2,2022_q3
   TLC_BY_RE: median_total_loan_costs_by_race
-  TLC_BY_RE_PERIODS: 2019,2020,2021,2022_q1,2022_q2_2,2022_q3
