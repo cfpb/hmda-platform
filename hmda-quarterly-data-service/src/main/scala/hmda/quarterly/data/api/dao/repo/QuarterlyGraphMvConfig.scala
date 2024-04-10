@@ -71,10 +71,8 @@ object QuarterlyGraphMvConfig {
   def periodPrefixer(suffix: String,periods:Seq[String]): Seq[String] = {
     if ( suffix.nonEmpty){
       val periodsAndSuffix: Seq[String] = periods.map(period => period+"_"+suffix)
-      println("List is: " + periodsAndSuffix)
       periodsAndSuffix
     } else {
-      println("Hi")
       periods
     }
   }
