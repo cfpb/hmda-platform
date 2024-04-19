@@ -58,7 +58,7 @@ As such, it needs a mechanism for storing configuration information for addition
 An easy way to satisfy this requirement is to launch a docker container with `ZooKeeper`, as follows:
 
 ```shell
-$ docker run --rm -p 2181:2181 -p 2888:2888 -p 3888:3888 jplock/zookeeper
+$ docker run --rm -p 9092:9092 -p 2888:2888 -p 3888:3888 jplock/zookeeper
 ```
 
 #### PostgreSQL
@@ -75,7 +75,7 @@ docker run -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -e POSTGRES_D
 
 ```shell
 export ZOOKEEPER_HOST=192.168.99.100
-export ZOOKEEPER_PORT=2181
+export ZOOKEEPER_PORT=9092
 ```
 
 * Set the environment variables for the local Cassandra instance. `CASSANDRA_CLUSTER_HOSTS` also uses the Docker Machine IP:
