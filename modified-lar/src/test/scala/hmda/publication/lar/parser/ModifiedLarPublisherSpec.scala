@@ -2,11 +2,11 @@ package hmda.publication.lar.publication
 
 import akka.NotUsed
 import akka.actor.ActorSystem
-import akka.actor.typed.{ ActorSystem => TypedSystem }
+import akka.actor.typed.{ActorSystem => TypedSystem}
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{ ActorRef, SupervisorStrategy }
+import akka.actor.typed.{ActorRef, SupervisorStrategy}
 import akka.stream.scaladsl.Source
 import akka.testkit.TestKit
 import akka.util.Timeout
@@ -14,17 +14,18 @@ import com.adobe.testing.s3mock.S3MockApplication
 import hmda.census.records.CensusRecords
 import hmda.messages.submission.HmdaRawDataEvents.LineAdded
 import hmda.model.census.Census
-import hmda.model.filing.lar.{ LarGenerators, LoanApplicationRegister }
+import hmda.model.filing.lar.{LarGenerators, LoanApplicationRegister}
 import hmda.model.filing.submission.SubmissionId
 import hmda.persistence.util.CassandraUtil
 import hmda.query.repository.ModifiedLarRepository
 import hmda.utils.EmbeddedPostgres
 import hmda.utils.YearUtils.Period
-import net.manub.embeddedkafka.{ EmbeddedK, EmbeddedKafka }
+import io.github.embeddedkafka.EmbeddedKafkaConfig.defaultConfig.{kafkaPort, zooKeeperPort}
+import io.github.embeddedkafka.{EmbeddedK, EmbeddedKafka, EmbeddedKafkaConfig}
 import org.scalacheck.Gen
-import org.scalatest.concurrent.{ PatienceConfiguration, ScalaFutures }
-import org.scalatest.time.{ Millis, Minutes, Span }
-import org.scalatest.{ BeforeAndAfterAll, Matchers, WordSpecLike }
+import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
+import org.scalatest.time.{Millis, Minutes, Span}
+import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
@@ -51,10 +52,17 @@ class ModifiedLarPublisherSpec
   var s3mock: S3MockApplication = _
   var kafka: EmbeddedK          = _
 
+  implicit val embedKafkaConfig = EmbeddedKafkaConfig(kafkaPort = 9092, zooKeeperPort = 9093)
+
+
+
+
   override def beforeAll(): Unit = {
     super.beforeAll()
     s3mock = S3MockApplication.start(properties.asJava)
-    kafka = EmbeddedKafka.start()
+
+    kafka = EmbeddedKafka.start()(embedKafkaConfig)
+
     CassandraUtil.startEmbeddedCassandra()
   }
 
