@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: hmda/email-service
-  tag: master
+  tag: latest
   pullPolicy: IfNotPresent
 
 kafka:
