@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: hmda/file-proxy
-  tag: v2.7.2
+  tag: latest
   pullPolicy: IfNotPresent
 
 service:

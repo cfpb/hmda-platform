@@ -5,10 +5,10 @@
 replicaCount: 1
 
 image:
-  repository: 626560329871.dkr.ecr.us-east-1.amazonaws.com/hmda/hmda-quarterly-data-service
+  repository: hmda/hmda-quarterly-data-service
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: latest
 
 imagePullSecrets: []
 nameOverride: ""

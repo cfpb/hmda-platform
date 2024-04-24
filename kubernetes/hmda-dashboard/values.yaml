@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: hmda/hmda-dashboard
-  tag: v1.0.0
+  tag: latest
   pullPolicy: IfNotPresent
 
 service:

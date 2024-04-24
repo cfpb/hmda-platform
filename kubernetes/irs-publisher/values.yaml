@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: hmda/irs-publisher
-  tag: v2.7.2
+  tag: latest
   pullPolicy: IfNotPresent
 
 nameOverride: ""
