@@ -33,7 +33,7 @@ metadata:
       apiVersion: ambassador/v2
       kind: Mapping
       name: check_digit_mapping
-      ambassador_id: ambassador-default-1
+      ambassador_id: ambassador-hmdaops-3
       prefix: /v2/public/uli/
       rewrite: /uli/
       service: {{ template "check-digit.fullname" .}}:{{ .Values.service.port }}
