@@ -17,9 +17,6 @@ resources:
   limits:
     memory: "2200Mi"
     cpu: "2"
-  requests:
-    memory: "2200Mi"
-    cpu: "1"
 
 ingress:
   enabled: false
