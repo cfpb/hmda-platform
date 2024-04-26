@@ -5,7 +5,6 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: {{.Values.service.account.name}}
-    namespace: default
 roleRef:
   kind: ClusterRole
   name: pod-reader
