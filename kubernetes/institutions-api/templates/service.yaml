@@ -29,7 +29,7 @@ metadata:
       apiVersion: ambassador/v2
       kind: Mapping
       name: institution_api_mapping
-      ambassador_id: ambassador-default-1
+      ambassador_id: ambassador-hmdaops-3
       method: GET
       prefix: /v2/public/institutions
       rewrite: /institutions
