@@ -14,7 +14,6 @@ service:
   port: 9095
   targetPort: 9095
   name: http-hmda-auth
-  serviceAccount: hmda-service-account-default
 
 hmda:
   runtimeMode: kubernetes
@@ -43,9 +42,7 @@ resources:
   limits:
     memory: "6200Mi"
     cpu: "4"
-  requests:
-    memory: "6200Mi"
-    cpu: "2"
+
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
