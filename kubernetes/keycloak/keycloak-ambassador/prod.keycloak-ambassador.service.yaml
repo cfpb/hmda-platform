@@ -6,7 +6,7 @@ metadata:
       apiVersion: ambassador/v2
       kind: Mapping
       name: keycloak_https_mapping
-      ambassador_id: ambassador-default-1
+      ambassador_id: ambassador-hmdaops-3
       prefix: /auth/
       rewrite: /auth/
       service: keycloak.default.svc.cluster.local
