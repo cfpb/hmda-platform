@@ -9,7 +9,7 @@ metadata:
       ambassador_id: ambassador-hmdaops-3
       prefix: /auth/
       rewrite: /auth/
-      service: keycloak.default.svc.cluster.local
+      service: keycloak.hmdaops.svc.cluster.local
       timeout_ms: 20000
       add_response_headers:
         content-security-policy: 
