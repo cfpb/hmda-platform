@@ -22,5 +22,5 @@ WORKDIR /
 
 USER ${SPI_USER}
 
-COPY --from=builder /build/target/keycloak-authenticator-hmda-4.2.1.Final.jar .
+COPY --from=builder /build/target/keycloak-authenticator-hmda-24.0.3.jar .
 
