@@ -2,7 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-namespace: default
+# namespace: default
 
 #keycloak:
 #  auth.url: https://192.168.99.100:8443/auth
@@ -22,9 +22,9 @@ image:
 hmda:
   actorSystemName: hmda2
   runtimeMode: kubernetes
-  podNamespace: default
-  apiNamespace: hmda-api
-  serviceNamespace: default.svc.cluster.local
+#  podNamespace: default
+#  apiNamespace: hmda-api
+#  serviceNamespace: default.svc.cluster.local
 
 kafka:
   institutionsTopic: institution
