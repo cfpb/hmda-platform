@@ -286,4 +286,4 @@ metadata:
       - x-host
       - x-forwarded-server
 spec:
-  clusterIP: None  
+  clusterIP: None
