@@ -26,6 +26,7 @@ Update
 export $PLATNS=default
 
 helm upgrade --install --namespace=$PLATNS --values=kubernetes/hmda-platform/values.yaml \
+--set image.repository=hmda/hmda-platform \
 --set image.tag=latest \
 --set rbac.enabled=true \
 --set grpc.check_digit.host=check-digit-grpc.$PLATNS \
