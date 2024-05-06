@@ -26,7 +26,7 @@ hmda:
 #  apiNamespace: beta
 #  serviceNamespace: beta.svc.cluster.local
 
- kafka:
+kafka:
   institutionsTopic: beta-institution
   modifiedLarTopic: beta-hmda-modified-lar
   irsTopic: beta-hmda-irs
