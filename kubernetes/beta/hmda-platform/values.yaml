@@ -22,9 +22,9 @@ image:
 hmda:
   actorSystemName: hmda2
   runtimeMode: kubernetes
-#  podNamespace: default
-#  apiNamespace: hmda-api
-#  serviceNamespace: default.svc.cluster.local
+#  podNamespace: beta
+#  apiNamespace: beta
+#  serviceNamespace: beta.svc.cluster.local
 
  kafka:
   institutionsTopic: beta-institution
