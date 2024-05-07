@@ -1,7 +1,7 @@
 image:
   registry: docker.io
   repository: bitnami/keycloak
-  tag: 21.1.1-debian-11-r5
+  tag: 23.0.7
 
 auth:
   adminUser: keycloak
@@ -46,7 +46,7 @@ initContainers:
       cp -R /themes/* /theme/hmda
     command:
     - sh
-    image: hmda/keycloak-theme-provider:v1.0.0
+    image: hmda/keycloak-theme-provider:mfaLogoCorrected
     imagePullPolicy: Always
     resources: {}
     terminationMessagePath: /dev/termination-log
@@ -59,10 +59,10 @@ initContainers:
     - -c
     - |
       echo "Copying SPI..."
-      cp -rv keycloak-authenticator-hmda-4.2.1.Final.jar /spi
+      cp -rv keycloak-authenticator-hmda-24.0.3.jar /spi
     command:
     - sh
-    image: hmda/keycloak-spi-provider:v2.7.4
+    image: hmda/keycloak-spi-provider:v2.4.2
     imagePullPolicy: Always
     resources: {}
     terminationMessagePath: /dev/termination-log
