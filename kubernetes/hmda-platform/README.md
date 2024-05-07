@@ -1,10 +1,10 @@
 Pre-requisites
 - [k8ssandra](https://k8ssandra.io/)
 - [Strimzi](https://strimzi.io/)
-- Create schema for platform
-```
-cqlsh -u 
-```
+- [Postresql](https://github.com/bitnami/charts/tree/main/bitnami/postgresql)
+- [Keycloak](https://github.com/bitnami/charts/tree/main/bitnami/keycloak)   
+- S3 Buckets
+
 Install
 - Add Secrets
 ```
@@ -15,6 +15,7 @@ kubectl create secret generic inst-postgres-credentials --from-literal=username=
 ```
 kubectl apply -f https://github.com/cfpb/hmda-platform/tree/master/kubernetes/config-maps
 ```
+- Update configmaps  
 - Create schema for platform
 ```
 cqlsh -u username -p passsword -f ../hmda-sql-doc/cassandra-scripts.txt
@@ -22,9 +23,14 @@ cqlsh -u username -p passsword -f ../hmda-sql-doc/cassandra-scripts.txt
 
 Update
 ```
-helm upgrade --install --namespace=default --values=kubernetes/hmda-platform/values-dev.yaml \
+export $PLATNS=default
+
+helm upgrade --install --namespace=$PLATNS --values=kubernetes/hmda-platform/values.yaml \
+--set image.repository=hmda/hmda-platform \
 --set image.tag=latest \
---set service.name=hmda-platform \
+--set rbac.enabled=true \
+--set grpc.check_digit.host=check-digit-grpc.$PLATNS \
+--set grpc.census.host=census-api-grpc.$PLATNS \
 hmda-platform kubernetes/hmda-platform
 ```
 

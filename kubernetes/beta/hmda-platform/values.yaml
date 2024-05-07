@@ -2,28 +2,29 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-namespace: default
+# namespace: default
 
-keycloak:
-  auth.url: https://192.168.99.100:8443/auth
+#keycloak:
+#  auth.url: https://192.168.99.100:8443/auth
 
 rbac:
-  enabled: false
+  enabled: true
 
 replicaCount: 3
 
 image:
   repository: hmda/hmda-platform
-  tag: v2.7.2
+  tag: latest
   pullPolicy: IfNotPresent
   commitId: 
 
+# note change these for namespace other than default
 hmda:
   actorSystemName: hmda2
   runtimeMode: kubernetes
-  podNamespace: beta
-  apiNamespace: beta
-  serviceNamespace: beta.svc.cluster.local
+#  podNamespace: beta
+#  apiNamespace: beta
+#  serviceNamespace: beta.svc.cluster.local
 
 kafka:
   institutionsTopic: beta-institution
@@ -36,8 +37,8 @@ kafka:
 service:
   type: ClusterIP
   account:
-    name: hmda-service-account-beta
-  name: hmda-platform-beta
+    name: hmda-platform
+  name: hmda-platform
 
 #ambassador:
 #  port: 80
@@ -79,6 +80,7 @@ websockets:
   protocol: TCP
   port: 9080
 
+# note change these for namespace other than default
 grpc:
   check_digit:
     port: 60080
@@ -102,15 +104,13 @@ ingress:
   #      - chart-example.local
 
 resources:
-   limits:
-    cpu: 100m
-    memory: 128Mi
-   requests:
-    cpu: 100m
-    memory: 128Mi
+  requests:
+   cpu: "100m"
+   memory: 128Mi
 
 nodeSelector: {}
 
 tolerations: []
 
-affinity: {}
+logs:
+  cassandra: TRACE

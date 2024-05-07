@@ -1,7 +1,7 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: hmda-bootstrap-beta
+  name: hmda-bootstrap
 spec:
   # by setting the clusterIp to None we are a "headless service"
   # and thus the svc ("service") DNS record for the single IP but the IPs of all nodes that we select
@@ -32,7 +32,8 @@ metadata:
   name: {{ .Values.service.name }}
 spec:
   selector:
-    app: hmda-platform-beta
+    app: hmda-platform
+  type: NodePort
   ports:
   - name: {{ .Values.filing.name }}
     protocol: {{ .Values.filing.protocol }}
@@ -67,11 +68,11 @@ metadata:
       kind: Mapping
       name: hmda_admin_mapping
       ambassador_id: ambassador-beta-2
+      timeout_ms: 0
       prefix: /v2/admin/
       service: {{ .Values.service.name }}:{{ .Values.admin.port }}
-      timeout_ms: 0
 spec:
-  clusterIP: None  
+  clusterIP: None
 ---
 apiVersion: v1
 kind: Service
@@ -94,7 +95,7 @@ metadata:
           append: False
         content-security-policy:
           append: False
-          value: "default-src 'self'; script-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; object-src 'none'; frame-src 'self'; connect-src 'self'"
+          value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec.beta.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
         permissions-policy:
           value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
         Strict-Transport-Security: 
@@ -107,7 +108,7 @@ metadata:
       - x-host
       - x-forwarded-server
 spec:
-  clusterIP: None  
+  clusterIP: None
 ---
 apiVersion: v1
 kind: Service
@@ -136,7 +137,7 @@ metadata:
           append: False
         content-security-policy:
           append: False
-          value: "default-src 'self'; script-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; object-src 'none'; frame-src 'self'; connect-src 'self'"
+          value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec.beta.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
         permissions-policy:
           value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
         Strict-Transport-Security: 
@@ -149,7 +150,7 @@ metadata:
       - x-host
       - x-forwarded-server
 spec:
-  clusterIP: None  
+  clusterIP: None
 ---
 apiVersion: v1
 kind: Service
@@ -178,7 +179,7 @@ metadata:
           append: False
         content-security-policy:
           append: False
-          value: "default-src 'self'; script-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; object-src 'none'; frame-src 'self'; connect-src 'self'"
+          value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec.beta.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
         permissions-policy:
           value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
         Strict-Transport-Security: 
@@ -191,7 +192,7 @@ metadata:
       - x-host
       - x-forwarded-server
 spec:
-  clusterIP: None  
+  clusterIP: None
 ---
 apiVersion: v1
 kind: Service
@@ -213,7 +214,7 @@ metadata:
           append: False
         content-security-policy:
           append: False
-          value: "default-src 'self'; script-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; object-src 'none'; frame-src 'self'; connect-src 'self'"
+          value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec-api.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
         permissions-policy:
           value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
         Strict-Transport-Security: 
@@ -226,7 +227,7 @@ metadata:
       - x-host
       - x-forwarded-server
 spec:
-  clusterIP: None  
+  clusterIP: None
 ---
 apiVersion: v1
 kind: Service
@@ -259,16 +260,20 @@ metadata:
       name: hmda_ws_mapping
       ambassador_id: ambassador-beta-2
       prefix: /v2/ws/status/
+      timeout_ms: 380000
+      retry_policy:
+        num_retries: 10
+        retry_on: 5xx
       service: {{ .Values.service.name }}:{{ .Values.websockets.port }}
       allow_upgrade:
-        - websocket
+       - websocket
       add_response_headers:
         referrer-policy:
           value: strict-origin
           append: False
         content-security-policy:
           append: False
-          value: "default-src 'self'; script-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; object-src 'none'; frame-src 'self'; connect-src 'self'"
+          value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec.beta.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
         permissions-policy:
           value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
         Strict-Transport-Security: 
