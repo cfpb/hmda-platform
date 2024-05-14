@@ -25,7 +25,7 @@ spec:
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
-      serviceAccountName: {{ .Values.service.serviceAccount }}
+      serviceAccountName: {{ .Values.service.account.name }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
