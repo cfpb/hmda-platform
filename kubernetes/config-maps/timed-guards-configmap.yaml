@@ -5,9 +5,9 @@ metadata:
   annotations:
     reloader.stakater.com/match: "true"
 data:
-  yearsAllowed: "2020,2021,2022"
-  currentYear: "2022"
-  quarterlyYearsAllowed: "2023"
+  yearsAllowed: "2021,2022,2023"
+  currentYear: "2024"
+  quarterlyYearsAllowed: "2024"
   q1Start: "April 01"
   q1End: "June 30"
   q2Start: "July 01"
