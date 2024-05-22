@@ -15,6 +15,7 @@ class EditDetailsSummaryCodecSpec
     forAll(editDetailsSummaryGen) { editDetailsSummary =>
       whenever(!editDetailsSummary.isEmpty) {
         val json = editDetailsSummary.asJson
+        val x = 5
         val encoded = json
           .as[EditDetailsSummary]
           .getOrElse(EditDetailsSummary())
@@ -23,5 +24,10 @@ class EditDetailsSummaryCodecSpec
         encoded.total mustBe editDetailsSummary.total
       }
     }
+  }
+
+  property("Empty EditDetailsSummary must correctly return true for is empty"){
+    val editDetailsSummary = EditDetailsSummary()
+     assert(editDetailsSummary.isEmpty)
   }
 }

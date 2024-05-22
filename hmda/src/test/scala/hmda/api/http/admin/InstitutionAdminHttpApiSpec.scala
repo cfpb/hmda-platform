@@ -46,12 +46,36 @@ class InstitutionAdminHttpApiSpec extends AkkaCassandraPersistenceSpec with Must
   override def afterAll(): Unit = super.afterAll()
 
   val lei = Random.alphanumeric.take(20).mkString.toUpperCase
+
   val sampleInstitution =
     institutionGen.sample
       .getOrElse(Institution.empty)
       .copy(LEI = lei)
       .copy(taxId = Option("12-3456789"))
       .copy(activityYear = 2018)
+
+  val sampleWrongLEIInstitution =
+    institutionGen.sample
+      .getOrElse(Institution.empty)
+      .copy(LEI = "Hello, world")
+      .copy(taxId = Option("12-3456789"))
+      .copy(activityYear = 2018)
+
+  val sampleWrongTaxInstitution =
+    institutionGen.sample
+      .getOrElse(Institution.empty)
+      .copy(LEI = lei)
+      .copy(taxId = Option(""))
+      .copy(activityYear = 2018)
+
+  val sampleQuarterlyInstitution =
+    institutionGen.sample
+      .getOrElse(Institution.empty)
+      .copy(LEI = lei)
+      .copy(taxId = Option("12-3456789"))
+      .copy(activityYear = 2018)
+      .copy(quarterlyFiler = true)
+      .copy(quarterlyFilerHasFiledQ1 = true)
 
   val modified =
     sampleInstitution.copy(emailDomains = List("email@bank.com"))
@@ -98,6 +122,18 @@ class InstitutionAdminHttpApiSpec extends AkkaCassandraPersistenceSpec with Must
       }
     }
 
+    "Return a 400 on an incorrect lei" in {
+      Post("/institutions", sampleWrongLEIInstitution) ~> institutionAdminRoutes(oAuth2Authorization) ~> check {
+        status mustBe StatusCodes.BadRequest
+      }
+    }
+
+    "Return Bad Request for the wrong tax id format" in {
+      Post("/institutions", sampleWrongTaxInstitution) ~> institutionAdminRoutes(oAuth2Authorization) ~> check {
+        status mustBe StatusCodes.BadRequest
+      }
+    }
+
     "Get an institution" in {
       Get(s"/institutions/${sampleInstitution.LEI}/year/2018") ~> institutionAdminRoutes(oAuth2Authorization) ~> check {
         status mustBe StatusCodes.OK
@@ -105,9 +141,22 @@ class InstitutionAdminHttpApiSpec extends AkkaCassandraPersistenceSpec with Must
       }
     }
 
-    "Return a 404 on a wrong path to get an institution " in {
+    "Return a 404 on a wrong path to get an institution" in {
       Get(s"/wrongpath/${sampleInstitution.LEI}/year/2018") ~> Route.seal(institutionAdminRoutes(oAuth2Authorization)) ~> check {
         status mustBe StatusCodes.NotFound
+      }
+    }
+
+    "Get an institution by quarter" in {
+      Get(s"/institutions/${modified.LEI}/year/2018/quarter/Q1") ~> institutionAdminRoutes(oAuth2Authorization) ~> check {
+        status mustBe StatusCodes.OK
+        responseAs[Institution] mustBe sampleInstitution
+      }
+    }
+
+    "Get all institutions for lei" in {
+      Get(s"/institutions/${modified.LEI}") ~> institutionAdminRoutes(oAuth2Authorization) ~> check {
+        status mustBe StatusCodes.OK
       }
     }
 
@@ -128,6 +177,25 @@ class InstitutionAdminHttpApiSpec extends AkkaCassandraPersistenceSpec with Must
       Put("/institutions", filerFlagsNegated) ~> institutionAdminRoutes(oAuth2Authorization) ~> check {
         status mustBe StatusCodes.Accepted
         responseAs[Institution] mustBe modified
+      }
+    }
+
+    "Create institution when it doesn't exist for the lei" in {
+      val testSampleInstitution =
+        institutionGen.sample
+          .getOrElse(Institution.empty)
+          .copy(LEI = lei)
+          .copy(taxId = Option("12-3456789"))
+          .copy(activityYear = 2019)
+      Put("/institutions", testSampleInstitution) ~> institutionAdminRoutes(oAuth2Authorization) ~> check {
+        status mustBe StatusCodes.Created
+        responseAs[Institution] mustBe testSampleInstitution
+      }
+    }
+
+    "Return a 400 when we try to modify for the incorrect lei" in {
+      Put("/institutions", sampleWrongLEIInstitution) ~> institutionAdminRoutes(oAuth2Authorization) ~> check {
+        status mustBe StatusCodes.BadRequest
       }
     }
 
