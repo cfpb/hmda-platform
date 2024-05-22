@@ -164,10 +164,10 @@ class InstitutionAdminHttpApiSpec extends AkkaCassandraPersistenceSpec with Must
     }
 
     "Create institution when it doesn't exist for the lei" in {
-      val sampleEmptyInstitution = sampleInstitution.copy(activityYear = 2019)
-      Put("/institutions", sampleEmptyInstitution) ~> institutionAdminRoutes(oAuth2Authorization) ~> check {
+      val sampleNewInstitution = sampleInstitution.copy(activityYear = 2019)
+      Put("/institutions", sampleNewInstitution) ~> institutionAdminRoutes(oAuth2Authorization) ~> check {
         status mustBe StatusCodes.Created
-        responseAs[Institution] mustBe sampleEmptyInstitution
+        responseAs[Institution] mustBe sampleNewInstitution
       }
     }
 
