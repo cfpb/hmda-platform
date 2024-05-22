@@ -24,4 +24,9 @@ class EditDetailsSummaryCodecSpec
       }
     }
   }
+
+  property("Empty EditDetailsSummary must correctly return true for is empty"){
+    val editDetailsSummary = EditDetailsSummary()
+     assert(editDetailsSummary.isEmpty)
+  }
 }
