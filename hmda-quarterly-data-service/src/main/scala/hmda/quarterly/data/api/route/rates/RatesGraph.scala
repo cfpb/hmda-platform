@@ -58,7 +58,7 @@ abstract class RatesGraph(
     }
   }
 
-  private def getSummary: CancelableFuture[GraphSeriesInfo] = category match {
+  def getSummary: CancelableFuture[GraphSeriesInfo] = category match {
     case Category.BY_TYPE_NO_HELOC =>
       for {
         conventionalConforming <- getSummaryByType(Conventional, CONVENTIONAL_CONFORMING, conforming = true)
