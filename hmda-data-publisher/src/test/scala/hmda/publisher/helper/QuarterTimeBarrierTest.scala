@@ -30,13 +30,13 @@ class QuarterTimeBarrierTest extends FreeSpec {
 
   "has correct start date" in {
     testGetStartDateForQuarter(2023, YearPeriod.Q1, LocalDate.ofYearDay(2023, 91))
-    testGetStartDateForQuarter(2023, YearPeriod.Q2, LocalDate.ofYearDay(2023, 92 + 90))
+    testGetStartDateForQuarter(2023, YearPeriod.Q2, LocalDate.ofYearDay(2023, 91 + 91))
     testGetStartDateForQuarter(2023, YearPeriod.Q3, LocalDate.ofYearDay(2023, 92 + 91 + 91))
     testGetStartDateForQuarter(2022, YearPeriod.Q1, LocalDate.ofYearDay(2022, 91))
-    testGetStartDateForQuarter(2022, YearPeriod.Q2, LocalDate.ofYearDay(2022, 92 + 90))
+    testGetStartDateForQuarter(2022, YearPeriod.Q2, LocalDate.ofYearDay(2022, 91 + 91))
     testGetStartDateForQuarter(2022, YearPeriod.Q3, LocalDate.ofYearDay(2022, 92 + 91 + 91))
     testGetStartDateForQuarter(2021, YearPeriod.Q1, LocalDate.ofYearDay(2021, 91))
-    testGetStartDateForQuarter(2021, YearPeriod.Q2, LocalDate.ofYearDay(2021, 92 + 90))
+    testGetStartDateForQuarter(2021, YearPeriod.Q2, LocalDate.ofYearDay(2021, 91 + 91))
     testGetStartDateForQuarter(2021, YearPeriod.Q3, LocalDate.ofYearDay(2021, 92 + 91 + 91))
   }
 
