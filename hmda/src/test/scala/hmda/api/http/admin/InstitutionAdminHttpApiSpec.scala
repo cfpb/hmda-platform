@@ -54,28 +54,11 @@ class InstitutionAdminHttpApiSpec extends AkkaCassandraPersistenceSpec with Must
       .copy(taxId = Option("12-3456789"))
       .copy(activityYear = 2018)
 
-  val sampleWrongLEIInstitution =
-    institutionGen.sample
-      .getOrElse(Institution.empty)
-      .copy(LEI = "Hello, world")
-      .copy(taxId = Option("12-3456789"))
-      .copy(activityYear = 2018)
+  val sampleWrongLEIInstitution = sampleInstitution.copy(LEI = "Hello, world")
 
-  val sampleWrongTaxInstitution =
-    institutionGen.sample
-      .getOrElse(Institution.empty)
-      .copy(LEI = lei)
-      .copy(taxId = Option(""))
-      .copy(activityYear = 2018)
+  val sampleWrongTaxInstitution = sampleInstitution.copy(taxId = Option(""))
 
-  val sampleQuarterlyInstitution =
-    institutionGen.sample
-      .getOrElse(Institution.empty)
-      .copy(LEI = lei)
-      .copy(taxId = Option("12-3456789"))
-      .copy(activityYear = 2018)
-      .copy(quarterlyFiler = true)
-      .copy(quarterlyFilerHasFiledQ1 = true)
+  val sampleQuarterlyInstitution = sampleInstitution.copy(quarterlyFiler = true, quarterlyFilerHasFiledQ1 = true)
 
   val modified =
     sampleInstitution.copy(emailDomains = List("email@bank.com"))
@@ -181,15 +164,10 @@ class InstitutionAdminHttpApiSpec extends AkkaCassandraPersistenceSpec with Must
     }
 
     "Create institution when it doesn't exist for the lei" in {
-      val testSampleInstitution =
-        institutionGen.sample
-          .getOrElse(Institution.empty)
-          .copy(LEI = lei)
-          .copy(taxId = Option("12-3456789"))
-          .copy(activityYear = 2019)
-      Put("/institutions", testSampleInstitution) ~> institutionAdminRoutes(oAuth2Authorization) ~> check {
+      val sampleEmptyInstitution = sampleInstitution.copy(activityYear = 2019)
+      Put("/institutions", sampleEmptyInstitution) ~> institutionAdminRoutes(oAuth2Authorization) ~> check {
         status mustBe StatusCodes.Created
-        responseAs[Institution] mustBe testSampleInstitution
+        responseAs[Institution] mustBe sampleEmptyInstitution
       }
     }
 
