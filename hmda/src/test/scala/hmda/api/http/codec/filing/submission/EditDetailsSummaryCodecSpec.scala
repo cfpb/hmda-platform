@@ -15,7 +15,6 @@ class EditDetailsSummaryCodecSpec
     forAll(editDetailsSummaryGen) { editDetailsSummary =>
       whenever(!editDetailsSummary.isEmpty) {
         val json = editDetailsSummary.asJson
-        val x = 5
         val encoded = json
           .as[EditDetailsSummary]
           .getOrElse(EditDetailsSummary())
