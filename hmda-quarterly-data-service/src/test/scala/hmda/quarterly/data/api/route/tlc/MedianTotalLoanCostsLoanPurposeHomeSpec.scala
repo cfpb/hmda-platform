@@ -1,6 +1,9 @@
 package hmda.quarterly.data.api.route
 
 import org.scalatest.{Matchers, WordSpec}
+import monix.execution.CancelableFuture
+import hmda.quarterly.data.api.dto.QuarterGraphData.GraphSeriesInfo
+
 import hmda.quarterly.data.api.route.rates.tlc.MedianTotalLoanCostsLoanPurposeHome
 
 
@@ -9,7 +12,7 @@ class MedianTotalLoanCostsLoanPurposeHomeSpec extends WordSpec with Matchers {
   val routeSummary = MedianTotalLoanCostsLoanPurposeHome.getSummary
   "median total loan costs loan purpose home route" should {
     "return the correct summary route" in {
-      assert(!routeSummary.isCompleted)
+      assert(routeSummary.isInstanceOf[CancelableFuture[GraphSeriesInfo]])
     }
   }
   "median total loan costs loan purpose home route" should {

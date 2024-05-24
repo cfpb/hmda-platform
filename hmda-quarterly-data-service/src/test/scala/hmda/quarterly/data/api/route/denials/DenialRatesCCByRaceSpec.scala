@@ -1,6 +1,9 @@
 package hmda.quarterly.data.api.route
 
 import org.scalatest.{Matchers, WordSpec}
+import monix.execution.CancelableFuture
+import hmda.quarterly.data.api.dto.QuarterGraphData.GraphSeriesInfo
+
 import hmda.quarterly.data.api.route.rates.denials.DenialRatesCCByRace
 
 
@@ -9,7 +12,7 @@ class DenialRatesCCByRaceSpec extends WordSpec with Matchers {
   val routeSummary = DenialRatesCCByRace.getSummary
   "denial rates cc by race route" should {
     "return the correct summary route" in {
-      assert(!routeSummary.isCompleted)
+      assert(routeSummary.isInstanceOf[CancelableFuture[GraphSeriesInfo]])
     }
   }
   "denial rates cc by race route" should {

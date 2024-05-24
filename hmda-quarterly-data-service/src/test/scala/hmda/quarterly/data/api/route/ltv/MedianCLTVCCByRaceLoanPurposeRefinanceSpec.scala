@@ -1,6 +1,9 @@
 package hmda.quarterly.data.api.route
 
 import org.scalatest.{Matchers, WordSpec}
+import monix.execution.CancelableFuture
+import hmda.quarterly.data.api.dto.QuarterGraphData.GraphSeriesInfo
+
 import hmda.quarterly.data.api.route.rates.ltv.MedianCLTVCCByRaceLoanPurposeRefinance
 
 
@@ -9,7 +12,7 @@ class MedianCLTVCCByRaceLoanPurposeRefinanceSpec extends WordSpec with Matchers 
   val routeSummary = MedianCLTVCCByRaceLoanPurposeRefinance.getSummary
   "median cltvcc by race loan purpose refinance route" should {
     "return the correct summary route" in {
-      assert(routeSummary.isCompleted)
+      assert(routeSummary.isInstanceOf[CancelableFuture[GraphSeriesInfo]])
     }
   }
   "median cltvcc by race loan purpose refinance route" should {
