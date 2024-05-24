@@ -10,12 +10,12 @@ import hmda.quarterly.data.api.route.rates.ltv.MedianCLTVFHAByRaceLoanPurposeRef
 class MedianCLTVFHAByRaceLoanPurposeRefinanceSpec extends WordSpec with Matchers {
   val route = MedianCLTVFHAByRaceLoanPurposeRefinance.getRoute
   val routeSummary = MedianCLTVFHAByRaceLoanPurposeRefinance.getSummary
-  "median cltvfha by race loan purpose refinance route" should {
+  "median cltv fha by race loan purpose refinance route" should {
     "return the correct summary route" in {
       assert(routeSummary.isInstanceOf[CancelableFuture[GraphSeriesInfo]])
     }
   }
-  "median cltvfha by race loan purpose refinance route" should {
+  "median cltv fha by race loan purpose refinance route" should {
     "have a string title" in {
       assert(route.title.isInstanceOf[String])
     }
