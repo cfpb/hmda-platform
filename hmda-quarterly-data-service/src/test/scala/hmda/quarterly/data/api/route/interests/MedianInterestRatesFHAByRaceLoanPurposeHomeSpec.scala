@@ -15,9 +15,7 @@ class MedianInterestRatesFHAByRaceLoanPurposeHomeSpec extends WordSpec with Matc
       assert(routeSummary.isInstanceOf[CancelableFuture[GraphSeriesInfo]])
     }
   }
-  "median interest rates fha by race loan purpose home route" should {
     "have a string title" in {
       assert(route.title.isInstanceOf[String])
     }
-  }
 }

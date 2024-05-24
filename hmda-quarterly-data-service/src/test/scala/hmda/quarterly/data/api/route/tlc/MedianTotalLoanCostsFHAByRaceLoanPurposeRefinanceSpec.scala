@@ -15,9 +15,7 @@ class MedianTotalLoanCostsFHAByRaceLoanPurposeRefinanceSpec extends WordSpec wit
       assert(routeSummary.isInstanceOf[CancelableFuture[GraphSeriesInfo]])
     }
   }
-  "median total loan costs fha by race loan purpose refinance route" should {
     "have a string title" in {
       assert(route.title.isInstanceOf[String])
     }
-  }
 }

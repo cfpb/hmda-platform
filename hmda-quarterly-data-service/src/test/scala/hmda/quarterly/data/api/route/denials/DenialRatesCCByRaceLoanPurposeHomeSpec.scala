@@ -15,9 +15,7 @@ class DenialRatesCCByRaceLoanPurposeHomeSpec extends WordSpec with Matchers {
       assert(routeSummary.isInstanceOf[CancelableFuture[GraphSeriesInfo]])
     }
   }
-  "denial rates cc by race loan purpose home route" should {
     "have a string title" in {
       assert(route.title.isInstanceOf[String])
     }
-  }
 }

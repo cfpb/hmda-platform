@@ -15,9 +15,7 @@ class MedianDTICCByRaceSpec extends WordSpec with Matchers {
       assert(routeSummary.isInstanceOf[CancelableFuture[GraphSeriesInfo]])
     }
   }
-  "median dti cc by race route" should {
     "have a string title" in {
       assert(route.title.isInstanceOf[String])
     }
-  }
 }

@@ -15,9 +15,7 @@ class MedianTotalLoanCostsLoanPurposeRefinanceSpec extends WordSpec with Matcher
       assert(routeSummary.isInstanceOf[CancelableFuture[GraphSeriesInfo]])
     }
   }
-  "median total loan costs loan purpose refinance route" should {
     "have a string title" in {
       assert(route.title.isInstanceOf[String])
     }
-  }
 }

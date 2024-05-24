@@ -15,9 +15,7 @@ class MedianCLTVByTypeLoanPurposeRefinanceSpec extends WordSpec with Matchers {
       assert(routeSummary.isInstanceOf[CancelableFuture[GraphSeriesInfo]])
     }
   }
-  "median cltv by type loan purpose refinance route" should {
     "have a string title" in {
       assert(route.title.isInstanceOf[String])
     }
-  }
 }

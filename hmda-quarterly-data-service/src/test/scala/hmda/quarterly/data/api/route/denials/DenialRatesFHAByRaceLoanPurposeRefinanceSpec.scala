@@ -15,9 +15,7 @@ class DenialRatesFHAByRaceLoanPurposeRefinanceSpec extends WordSpec with Matcher
       assert(routeSummary.isInstanceOf[CancelableFuture[GraphSeriesInfo]])
     }
   }
-  "denial rates fha by race loan purpose refinance route" should {
     "have a string title" in {
       assert(route.title.isInstanceOf[String])
     }
-  }
 }

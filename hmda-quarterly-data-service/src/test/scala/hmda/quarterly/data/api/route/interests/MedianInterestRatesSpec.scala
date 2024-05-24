@@ -15,9 +15,7 @@ class MedianInterestRatesSpec extends WordSpec with Matchers {
       assert(routeSummary.isInstanceOf[CancelableFuture[GraphSeriesInfo]])
     }
   }
-  "median interest rates route" should {
     "have a string title" in {
       assert(route.title.isInstanceOf[String])
     }
-  }
 }
