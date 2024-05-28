@@ -11,11 +11,11 @@ class MedianDTICCByRaceLoanPurposeRefinanceSpec extends WordSpec with Matchers {
   val route = MedianDTICCByRaceLoanPurposeRefinance.getRoute
   val routeSummary = MedianDTICCByRaceLoanPurposeRefinance.getSummary
   "median dti cc by race loan purpose refinance route" should {
-    "return the correct summary route" in {
+    "return an instance of GraphSeriesInfo" in {
       assert(routeSummary.isInstanceOf[CancelableFuture[GraphSeriesInfo]])
     }
-  }
     "have a string title" in {
       assert(route.title.isInstanceOf[String])
     }
+  }
 }

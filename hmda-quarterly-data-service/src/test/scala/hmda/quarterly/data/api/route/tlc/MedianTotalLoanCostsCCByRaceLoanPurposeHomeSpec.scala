@@ -11,11 +11,11 @@ class MedianTotalLoanCostsCCByRaceLoanPurposeHomeSpec extends WordSpec with Matc
   val route = MedianTotalLoanCostsCCByRaceLoanPurposeHome.getRoute
   val routeSummary = MedianTotalLoanCostsCCByRaceLoanPurposeHome.getSummary
   "median total loan costs cc by race loan purpose home route" should {
-    "return the correct summary route" in {
+    "return an instance of GraphSeriesInfo" in {
       assert(routeSummary.isInstanceOf[CancelableFuture[GraphSeriesInfo]])
     }
-  }
     "have a string title" in {
       assert(route.title.isInstanceOf[String])
     }
+  }
 }

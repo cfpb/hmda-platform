@@ -11,11 +11,11 @@ class MedianInterestRatesSpec extends WordSpec with Matchers {
   val route = MedianInterestRates.getRoute
   val routeSummary = MedianInterestRates.getSummary
   "median interest rates route" should {
-    "return the correct summary route" in {
+    "return an instance of GraphSeriesInfo" in {
       assert(routeSummary.isInstanceOf[CancelableFuture[GraphSeriesInfo]])
     }
-  }
     "have a string title" in {
       assert(route.title.isInstanceOf[String])
     }
+  }
 }

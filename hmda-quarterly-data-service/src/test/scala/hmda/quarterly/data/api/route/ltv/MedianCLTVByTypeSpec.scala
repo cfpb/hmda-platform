@@ -11,11 +11,11 @@ class MedianCLTVByTypeSpec extends WordSpec with Matchers {
   val route = MedianCLTVByType.getRoute
   val routeSummary = MedianCLTVByType.getSummary
   "median cltv by type route" should {
-    "return the correct summary route" in {
+    "return an instance of GraphSeriesInfo" in {
       assert(routeSummary.isInstanceOf[CancelableFuture[GraphSeriesInfo]])
     }
-  }
     "have a string title" in {
       assert(route.title.isInstanceOf[String])
     }
+  }
 }

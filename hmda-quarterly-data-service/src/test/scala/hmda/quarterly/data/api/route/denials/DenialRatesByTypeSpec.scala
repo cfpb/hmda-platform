@@ -11,11 +11,11 @@ class DenialRatesByTypeSpec extends WordSpec with Matchers {
   val route = DenialRatesByType.getRoute
   val routeSummary = DenialRatesByType.getSummary
   "denial rates by type route" should {
-    "return the correct summary route" in {
+    "return an instance of GraphSeriesInfo" in {
       assert(routeSummary.isInstanceOf[CancelableFuture[GraphSeriesInfo]])
     }
-  }
     "have a string title" in {
       assert(route.title.isInstanceOf[String])
     }
+  }
 }

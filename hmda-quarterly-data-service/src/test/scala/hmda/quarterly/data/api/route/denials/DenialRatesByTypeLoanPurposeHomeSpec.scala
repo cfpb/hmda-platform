@@ -11,11 +11,11 @@ class DenialRatesByTypeLoanPurposeHomeSpec extends WordSpec with Matchers {
   val route = DenialRatesByTypeLoanPurposeHome.getRoute
   val routeSummary = DenialRatesByTypeLoanPurposeHome.getSummary
   "denial rates by type loan purpose home route" should {
-    "return the correct summary route" in {
+    "return an instance of GraphSeriesInfo" in {
       assert(routeSummary.isInstanceOf[CancelableFuture[GraphSeriesInfo]])
     }
-  }
     "have a string title" in {
       assert(route.title.isInstanceOf[String])
     }
+  }
 }

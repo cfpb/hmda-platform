@@ -11,11 +11,11 @@ class MedianTotalLoanCostsFHAByRaceLoanPurposeRefinanceSpec extends WordSpec wit
   val route = MedianTotalLoanCostsFHAByRaceLoanPurposeRefinance.getRoute
   val routeSummary = MedianTotalLoanCostsFHAByRaceLoanPurposeRefinance.getSummary
   "median total loan costs fha by race loan purpose refinance route" should {
-    "return the correct summary route" in {
+    "return an instance of GraphSeriesInfo" in {
       assert(routeSummary.isInstanceOf[CancelableFuture[GraphSeriesInfo]])
     }
-  }
     "have a string title" in {
       assert(route.title.isInstanceOf[String])
     }
+  }
 }
