@@ -23,7 +23,7 @@ cqlsh -u username -p passsword -f ../hmda-sql-doc/cassandra-scripts.txt
 
 Update
 ```
-export $PLATNS=default
+export PLATNS=default
 
 helm upgrade --install --namespace=$PLATNS --values=kubernetes/hmda-platform/values.yaml \
 --set image.repository=hmda/hmda-platform \
