@@ -29,7 +29,7 @@ metadata:
     getambassador.io/config: |
       apiVersion: ambassador/v2
       kind: Mapping
-      name: data_browser_mapping
+      name: hmda_dashboard_mapping
       ambassador_id: ambassador-default-1
       prefix: /dashboard/
       rewrite: /dashboard/
