@@ -70,12 +70,12 @@ spec:
           - name: KEYCLOAK_ADMIN_USERNAME
             valueFrom:
               secretKeyRef:
-                name: keycloak-credentials
+                name: hmda-auth-credentials
                 key: admin-username
           - name: KEYCLOAK_ADMIN_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: keycloak-credentials
+                name: hmda-auth-credentials
                 key: admin-password
           - name: PG_HOST
             valueFrom:
