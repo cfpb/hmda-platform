@@ -12,9 +12,10 @@ image:
 service:
   type: ClusterIP
   port: 9091
-  targetPort: 9091
-  name: http-file-proxy
-  serviceAccount: hmda-service-account-default
+  targetPort: 9091  
+  name: file-proxy
+  account:
+    name: file-proxy
 
 hmda:
   runtimeMode: kubernetes
