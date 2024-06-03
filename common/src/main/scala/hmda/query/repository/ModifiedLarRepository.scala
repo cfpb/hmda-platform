@@ -290,7 +290,7 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
   private def safeConvertToInt(s: String): Option[Int] =
     Try(s.toInt).toOption
 
-  private def incomeCategorization(larIncome: String, censusMedianIncome: Int): String =
+  def incomeCategorization(larIncome: String, censusMedianIncome: Int): String =
     if (larIncome == "NA" ||larIncome == "")
       "NA"
     else {
@@ -298,23 +298,22 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
       val income    = larIncome.toDouble * 1000
       val fifty     = censusMedianIncome * .5
       val eighty    = censusMedianIncome * .8
-      val ninety    = censusMedianIncome * .9
       val oneTwenty = censusMedianIncome * 1.2
 
       if (income < fifty) {
         "<50%"
-      } else if (income > fifty && income < eighty) {
+      } else if (income >= fifty && income < eighty) {
         "50-79%"
-      } else if (income > eighty && income < ninety) {
+      } else if (income >= eighty && income < censusMedianIncome) {
         "80-99%"
-      } else if (income > ninety && income < oneTwenty) {
+      } else if (income >= censusMedianIncome && income < oneTwenty) {
         "100-119%"
       } else {
         ">120%"
       }
     }
 
-  private def medianAgeCalculated(filingYear: Int, medianAge: Int): String = {
+  def medianAgeCalculated(filingYear: Int, medianAge: Int): String = {
     val medianYear = filingYear - medianAge
     if (medianAge == -1)
       "Age Unknown"
