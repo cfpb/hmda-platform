@@ -86,11 +86,6 @@ class ModifiedLarRepositorySpec extends WordSpec with MustMatchers {
         val result = modifiedLarRepository.medianAgeCalculated(2023, 12)
         assert(result == "2011 - Present")
       }
-
     }
-
-//    "Get the correct year" in {
-//      fetchYearTable()
-//    }
   }
 }
