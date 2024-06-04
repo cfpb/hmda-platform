@@ -114,3 +114,6 @@ tolerations: []
 
 logs:
   cassandra: TRACE
+
+ambassador_id: ambassador-beta-2
+# ambassador_host: hmda-ops.demo.cfpb.gov
