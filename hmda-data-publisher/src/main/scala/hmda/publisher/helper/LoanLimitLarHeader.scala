@@ -28,7 +28,7 @@ trait LoanLimitLarHeader {
     "tract_to_msamd|owner_occupied_units|one_to_four_fam_units|median_age|msa_md|msa_md_name"
 }
 
-object Header extends LoanLimitLarHeader {
+object LoanLimitHeader extends LoanLimitLarHeader {
   def getHeaderString = {
     LoanLimitHeader
   }

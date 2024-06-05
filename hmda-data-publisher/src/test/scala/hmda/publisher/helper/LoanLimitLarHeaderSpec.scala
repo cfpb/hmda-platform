@@ -5,7 +5,7 @@ import org.scalatest.{Matchers, WordSpec}
 
 
 class LoanLimitLarHeaderSpec extends WordSpec with Matchers {
-  val header = Header
+  val header = LoanLimitHeader
   "loan limit lar header" should {
     "have the correct header string" in {
       val headerString = "record_id|lei|uli|application_date|loan_type|loan_purpose|preapprovals|" +
