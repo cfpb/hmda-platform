@@ -75,3 +75,6 @@ databrowser:
   redis: hmda-redis-master
   protocol: TCP
   port: 8070
+
+ambassador_id: ambassador-default-1
+# ambassador_host: hmda-public.example.com
