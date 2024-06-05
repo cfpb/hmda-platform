@@ -27,3 +27,11 @@ trait LoanLimitLarHeader {
     "business_commercial_purpose|conforming_loan_limit|population|minority_population_percent|median_income_percentage|" +
     "tract_to_msamd|owner_occupied_units|one_to_four_fam_units|median_age|msa_md|msa_md_name"
 }
+
+object Header extends LoanLimitLarHeader {
+  def getHeaderString = {
+    LoanLimitHeader
+  }
+
+}
+
