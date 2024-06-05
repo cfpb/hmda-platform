@@ -33,7 +33,12 @@ metadata:
       apiVersion: ambassador/v2
       kind: Mapping
       name: check_digit_mapping
-      ambassador_id: ambassador-default-1
+      {{- if .Values.ambassador_id }}
+      ambassador_id: {{ .Values.ambassador_id }}
+      {{- end}}
+      {{- if .Values.ambassador_host }}
+      host: {{ .Values.ambassador_host }}
+      {{- end}}
       prefix: /v2/public/uli/
       rewrite: /uli/
       service: {{ template "check-digit.fullname" .}}:{{ .Values.service.port }}
