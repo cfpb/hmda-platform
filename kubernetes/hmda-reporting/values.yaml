@@ -80,3 +80,6 @@ reporting:
   name: reporting
   protocol: TCP
   port: 9094
+  
+ambassador_id: ambassador-default-1
+# ambassador_host: hmda-public.example.com
