@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    getambassador.io/config: |
+      apiVersion: ambassador/v2
+      kind: Mapping
+      name: keycloak_beta_https_mapping
+      ambassador_id: ambassador-beta-2
+      prefix: /auth/
+      rewrite: /auth/
+      service: keycloak.default.svc.cluster.local
+      timeout_ms: 20000
+      add_response_headers:
+        content-security-policy: 
+          append: False
+          value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec-api.cfpb.gov https://ffiec.cfpb.gov https://www.google-analytics.com https://s3.amazonaws.com"
+        permissions-policy:
+          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"        
+      remove_response_headers:
+      - referrer-policy
+      - x-envoy-upstream-service-time
+      - Access-Control-Allow-Origin
+      - x-forwarded-host
+      - x-host
+      - x-forwarded-server
+  labels:
+    service: keycloak-beta-ambassador
+  name: keycloak-beta-ambassador
+  namespace: beta
+spec:
+  clusterIP: None
+  clusterIPs:
+  - None
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  sessionAffinity: None
+  type: ClusterIP
