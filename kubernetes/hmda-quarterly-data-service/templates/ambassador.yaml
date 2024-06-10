@@ -7,7 +7,12 @@ metadata:
       apiVersion: ambassador/v2
       kind: Mapping
       name: {{ include "hmda-quarterly-data-service.fullname" . }}_mapping
-      ambassador_id: ambassador-default-1
+      {{- if .Values.ambassador_id }}
+      ambassador_id: {{ .Values.ambassador_id }}
+      {{- end}}
+      {{- if .Values.ambassador_host }}
+      host: {{ .Values.ambassador_host }}
+      {{- end}}
       prefix: /quarterly-data/
       rewrite: /
       service: {{ include "hmda-quarterly-data-service.fullname" . }}:{{ .Values.service.port }}

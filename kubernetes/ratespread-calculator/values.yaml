@@ -87,3 +87,6 @@ apors:
     rate:
       fileName: "YieldTableAdjustable.txt"
   schedule: "\"0/10 * * * * ?\""
+
+ambassador_id: ambassador-default-1
+# ambassador_host: hmda-public.example.com
