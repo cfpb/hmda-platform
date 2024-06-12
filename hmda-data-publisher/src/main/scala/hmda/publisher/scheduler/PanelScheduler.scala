@@ -17,12 +17,13 @@ import hmda.publisher.helper.{PrivateAWSConfigLoader, S3Utils, SnapshotCheck}
 import hmda.publisher.query.component.{InstitutionEmailComponent, InstitutionRepository, PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023}
 import hmda.publisher.query.panel.{InstitutionAltEntity, InstitutionEmailEntity, InstitutionEntity}
 import hmda.publisher.scheduler.schedules.{Schedule, ScheduleWithYear}
-import hmda.publisher.scheduler.schedules.Schedules.{PanelSchedule}
+import hmda.publisher.scheduler.schedules.Schedules.PanelSchedule
 import hmda.publisher.util.{PublishingReporter, ScheduleCoordinator}
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 import hmda.publisher.util.ScheduleCoordinator.Command._
 import hmda.query.DbConfiguration.dbConfig
 import hmda.util.BankFilterUtils._
+import hmda.util.CSVConsolidator.listDeDupeToString
 
 import scala.concurrent.duration.HOURS
 import scala.concurrent.{ExecutionContext, Future}
@@ -118,7 +119,6 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], s
     val emails: Future[Seq[InstitutionEmailEntity]] =
       emailRepository.findByLei(institution.lei)
     var seqTest:Seq[String] = Seq("1","2,3","4","5","6")
-    val dedupe= csvDeDupe(seqTest)
     emails.map(emailList =>
       InstitutionAltEntity(
         lei = institution.lei,
