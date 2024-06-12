@@ -11,6 +11,7 @@ import akka.http.scaladsl.server.directives.RouteDirectives.complete
 import akka.http.scaladsl.unmarshalling.PredefinedFromStringUnmarshallers._
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.dataBrowser.models.ActionTaken._
 import hmda.dataBrowser.models.ConstructionMethod._
 import hmda.dataBrowser.models.DwellingCategory._
@@ -27,6 +28,7 @@ import hmda.dataBrowser.models.State._
 import hmda.dataBrowser.models.County._
 import hmda.dataBrowser.models.TotalUnits._
 import hmda.dataBrowser.models._
+import hmda.util.LEIValidator._
 import Delimiter.fileEnding
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import hmda.dataBrowser.services._
@@ -94,6 +96,8 @@ trait DataBrowserDirectives extends Settings {
       }
   }
 
+
+
   def csvSource(s: Source[ModifiedLarEntity, NotUsed]): Source[ByteString, NotUsed] = {
     val header  = Source.single(ModifiedLarEntity.header)
     val content = s.map(_.toCsv)
@@ -155,6 +159,8 @@ trait DataBrowserDirectives extends Settings {
   private def extractLEIs: Directive1[Option[QueryField]] =
     parameters("leis".as(CsvSeq[String]) ? Nil).flatMap {
       case Nil => provide(None)
+      case xs if xs.exists(lei => isValidLEIFormat(lei)) =>
+        complete((BadRequest, s"A Valid LEI should be 20 characters and Alphanumeric (${xs.mkString(", ")})"))
       case xs =>
         provide(Option(QueryField(name = "lei", xs.map(_.toString), dbName = "lei", isAllSelected = false)))
     }
@@ -170,11 +176,9 @@ trait DataBrowserDirectives extends Settings {
   private def extractYears: Directive1[Option[QueryField]] =
     parameters("years".as(CsvSeq[Int]) ? Nil).flatMap {
       case Nil =>
-        import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
         complete((BadRequest, "must provide years value parameter"))
 
       case xs if xs.exists(year => (year < 2018) || (year > 2023)) => // TODO: Change this to 2017 when 2017 is released
-        import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
         complete((BadRequest, s"must provide years in the range of 2018-2023, you have provided (${xs.mkString(", ")})"))
 
       case xs => provide(Option(QueryField(name = "year", xs.map(_.toString), dbName = "filing_year", isAllSelected = false)))
@@ -193,7 +197,6 @@ trait DataBrowserDirectives extends Settings {
         case _ =>
           validateStates(rawStates) match {
             case Left(invalidStates) =>
-              import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
               complete((BadRequest, InvalidStates(invalidStates)))
 
             case Right(states) if states.nonEmpty =>
@@ -268,7 +271,6 @@ trait DataBrowserDirectives extends Settings {
       val dbName = name
       validateTotalUnits(rawTotalUnits) match {
         case Left(invalidTotalUnits) =>
-          import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
           complete(ToResponseMarshallable((BadRequest, InvalidTotalUnits(invalidTotalUnits))))
 
         case Right(totalUnits) if totalUnits.nonEmpty && totalUnits.size == TotalUnits.values.size =>
@@ -288,7 +290,6 @@ trait DataBrowserDirectives extends Settings {
       val dbName = "race_categorization"
       validateRaces(rawRaces) match {
         case Left(invalidRaces) =>
-          import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
           complete(ToResponseMarshallable((BadRequest, InvalidRaces(invalidRaces))))
 
         case Right(races) if races.nonEmpty && races.size == Race.values.size =>
@@ -307,7 +308,6 @@ trait DataBrowserDirectives extends Settings {
       val dbName = "construction_method"
       validateConstructionMethods(rawConstructionMethods) match {
         case Left(invalidConstructionMethods) =>
-          import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
           complete(ToResponseMarshallable((BadRequest, InvalidConstructionMethods(invalidConstructionMethods))))
 
         case Right(constructionMethods) if constructionMethods.nonEmpty && constructionMethods.size == ConstructionMethod.values.size =>
@@ -326,7 +326,6 @@ trait DataBrowserDirectives extends Settings {
       val dbName = "dwelling_category"
       validateDwellingCategories(rawDwellingCategories) match {
         case Left(invalidDwellingCategories) =>
-          import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
           complete(ToResponseMarshallable((BadRequest, InvalidDwellingCategories(invalidDwellingCategories))))
 
         case Right(dwellingCategories) if dwellingCategories.nonEmpty && dwellingCategories.size == DwellingCategory.values.size =>
@@ -348,7 +347,6 @@ trait DataBrowserDirectives extends Settings {
     parameters("lien_statuses".as(CsvSeq[String]) ? Nil).flatMap { rawLienStatuses =>
       validateLienStatusFunction(rawLienStatuses) match {
         case Left(invalidLienStatuses) =>
-          import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
           complete(ToResponseMarshallable((BadRequest, InvalidLienStatuses(invalidLienStatuses))))
 
         case Right(lienStatuses) if lienStatuses.nonEmpty && lienStatuses.size == LienStatus.values.size =>
@@ -367,7 +365,6 @@ trait DataBrowserDirectives extends Settings {
     parameters("loan_products".as(CsvSeq[String]) ? Nil).flatMap { rawLoanProducts =>
       validateLoanProducts(rawLoanProducts) match {
         case Left(invalidLoanProducts) =>
-          import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
           complete(ToResponseMarshallable((BadRequest, InvalidLoanProducts(invalidLoanProducts))))
 
         case Right(loanProducts) if loanProducts.nonEmpty && loanProducts.size == LoanProduct.values.size =>
@@ -390,7 +387,6 @@ trait DataBrowserDirectives extends Settings {
     parameters("loan_purposes".as(CsvSeq[String]) ? Nil).flatMap { rawLoanPurposes =>
       validateLoanPurposeFunction(rawLoanPurposes) match {
         case Left(invalidLoanPurposes) =>
-          import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
           complete(ToResponseMarshallable((BadRequest, InvalidLoanPurposes(invalidLoanPurposes))))
 
         case Right(loanPurposes) if loanPurposes.nonEmpty && loanPurposes.size == LoanPurpose.values.size =>
@@ -409,7 +405,6 @@ trait DataBrowserDirectives extends Settings {
     parameters("loan_types".as(CsvSeq[String]) ? Nil).flatMap { rawLoanTypes =>
       validateLoanType(rawLoanTypes) match {
         case Left(invalidLoanTypes) =>
-          import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
           complete(ToResponseMarshallable((BadRequest, InvalidLoanTypes(invalidLoanTypes))))
 
         case Right(loanTypes) if loanTypes.nonEmpty && loanTypes.size == LoanType.values.size =>
@@ -427,7 +422,6 @@ trait DataBrowserDirectives extends Settings {
     parameters("sexes".as(CsvSeq[String]) ? Nil).flatMap { rawSexes =>
       validateSexes(rawSexes) match {
         case Left(invalidSexes) =>
-          import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
           complete(ToResponseMarshallable((BadRequest, InvalidSexes(invalidSexes))))
 
         case Right(sexes) if sexes.nonEmpty && sexes.size == Sex.values.size =>
@@ -445,7 +439,6 @@ trait DataBrowserDirectives extends Settings {
     parameters("property_types".as(CsvSeq[String]) ? Nil).flatMap { rawPropertyTypes =>
       validateLoanType(rawPropertyTypes) match {
         case Left(invalidPropertyTypes) =>
-          import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
           complete((BadRequest, InvalidLoanTypes(invalidPropertyTypes)))
 
         case Right(propertyTypes) if propertyTypes.nonEmpty && propertyTypes.size == PropertyType.values.size =>
@@ -465,7 +458,6 @@ trait DataBrowserDirectives extends Settings {
       case "2017"                                                    => extractNonMandatoryQueryFields2017(year)(innerRoute)
       case yearStr if Try(yearStr.toInt).filter(_ >= 2018).isSuccess => extractNonMandatoryQueryFieldsLatest(year)(innerRoute)
       case invalidYear =>
-        import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
         complete((BadRequest, InvalidYear(invalidYear)))
     }
 
@@ -504,7 +496,6 @@ trait DataBrowserDirectives extends Settings {
             ageApplicant
           ).flatten
         if (filteredfields.size > 2) {
-          import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
           complete((BadRequest, TooManyFilterCriterias()))
         } else innerRoute(QueryFields(year, filteredfields))
     }
@@ -528,7 +519,6 @@ trait DataBrowserDirectives extends Settings {
             loanType
           ).flatten
         if (filteredfields.size > 2) {
-          import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
           complete((BadRequest, TooManyFilterCriterias()))
         } else innerRoute(QueryFields(year, filteredfields))
     }
@@ -539,14 +529,12 @@ trait DataBrowserDirectives extends Settings {
         if (years.nonEmpty && (msaMds.nonEmpty || states.nonEmpty)) {
           extractNonMandatoryQueryFields(years.head.values.head) { nonMandatoryFields =>
             if (nonMandatoryFields.queryFields.nonEmpty) {
-              import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
               complete((BadRequest, NoMandatoryFieldsInCount()))
             } else {
               innerRoute((QueryFields(years.head.values.head, List(years, msaMds, states).flatten)))
             }
           }
         } else {
-          import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
           complete((BadRequest, ProvideYearAndStatesOrMsaMds()))
         }
       }
@@ -556,12 +544,10 @@ trait DataBrowserDirectives extends Settings {
     (extractYears) { (years) =>
       (extractMsaMds & extractStates(years.head.values.head) & extractCounties(years.head.values.head)) { (msaMds, states, counties) =>
         if (msaMds.nonEmpty && states.nonEmpty && counties.nonEmpty) {
-          import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
           complete(ToResponseMarshallable((BadRequest, OnlyStatesOrMsaMdsOrCountiesOrLEIs())))
         } else if (years.nonEmpty)
           innerRoute(QueryFields(years.head.values.head, List(years, msaMds, states, counties).flatten))
         else {
-          import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
           complete(ToResponseMarshallable((BadRequest, ProvideYearAndStatesOrMsaMdsOrCounties())))
         }
       }
@@ -579,7 +565,6 @@ trait DataBrowserDirectives extends Settings {
   def extractMsaAndStateAndCountyAndLEIBrowserFields(year: String, innerRoute: QueryFields => Route): Route =
     (extractMsaMds & extractStates(year) & extractCounties(year) & extractLEIs ) { (msaMds, states, counties, leis) =>
       if ((msaMds.nonEmpty && states.nonEmpty && counties.nonEmpty && leis.nonEmpty) || (msaMds.isEmpty && states.isEmpty && counties.isEmpty && leis.isEmpty  )) {
-        import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
         complete((BadRequest, OnlyStatesOrMsaMdsOrCountiesOrLEIs()))
       } else
         innerRoute(QueryFields(year, List(msaMds, states, counties, leis).flatten))
@@ -588,7 +573,6 @@ trait DataBrowserDirectives extends Settings {
   def extractMsaAndStateAndCountyAndARIDBrowserFields(year: String, innerRoute: QueryFields => Route): Route =
     (extractMsaMds & extractStates(year) & extractCounties(year) & extractARIDs) { (msaMds, states, counties, arids) =>
       if ((msaMds.nonEmpty && states.nonEmpty && counties.nonEmpty && arids.nonEmpty) || (msaMds.isEmpty && states.isEmpty && counties.isEmpty && arids.isEmpty)) {
-        import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
         complete((BadRequest, OnlyStatesOrMsaMdsOrCountiesOrLEIs()))
       } else
         innerRoute(QueryFields(year, List(msaMds, states, counties, arids).flatten))
@@ -599,7 +583,6 @@ trait DataBrowserDirectives extends Settings {
       if (years.nonEmpty)
         innerRoute(QueryFields(years.head.values.head, List(years).flatten))
       else {
-        import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
         complete((BadRequest, ProvideYear()))
       }
     }
@@ -608,7 +591,6 @@ trait DataBrowserDirectives extends Settings {
     extractNonMandatoryQueryFields(year) { browserFields =>
       if (browserFields.queryFields.nonEmpty) innerRoute(browserFields)
       else {
-        import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
         complete((BadRequest, NotEnoughFilterCriterias()))
       }
     }
@@ -617,7 +599,6 @@ trait DataBrowserDirectives extends Settings {
     extractNonMandatoryQueryFields(year) { browserFields =>
       if (browserFields.queryFields.nonEmpty) innerRoute(browserFields)
       else {
-        import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
         complete((BadRequest, NotEnoughFilterCriterias()))
       }
     }
