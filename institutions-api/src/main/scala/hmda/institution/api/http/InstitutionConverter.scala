@@ -1,7 +1,8 @@
 package hmda.institution.api.http
 
-import hmda.institution.query.{ InstitutionEmailEntity, InstitutionEntity }
+import hmda.institution.query.{InstitutionEmailEntity, InstitutionEntity}
 import hmda.model.institution._
+import hmda.util.CSVConsolidator.listDeDupeToList
 
 object InstitutionConverter {
 
@@ -66,6 +67,9 @@ object InstitutionConverter {
       notes = institution.notes
     )
 
-  def emailsFromInstitution(institution: Institution): Seq[InstitutionEmailEntity] =
-    institution.emailDomains.map(email => InstitutionEmailEntity(lei = institution.LEI, emailDomain = email.trim.toLowerCase()))
+  def emailsFromInstitution(institution: Institution): Seq[InstitutionEmailEntity] = {
+
+    val uniqueEmailDomainList= listDeDupeToList(institution.emailDomains)
+    uniqueEmailDomainList.map(email => InstitutionEmailEntity(lei = institution.LEI, emailDomain = email))
+  }
 }

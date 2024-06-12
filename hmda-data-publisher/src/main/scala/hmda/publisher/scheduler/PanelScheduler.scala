@@ -114,39 +114,11 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], s
     }
   }
 
-  def appendEmailDomains2018(institution: InstitutionEntity): Future[InstitutionAltEntity] = {
-
-    val emails: Future[Seq[InstitutionEmailEntity]] =
-      emailRepository.findByLei(institution.lei)
-
-    emails.map(emailList =>
-      InstitutionAltEntity(
-        lei = institution.lei,
-        activityYear = institution.activityYear,
-        agency = institution.agency,
-        institutionType = institution.institutionType,
-        id2017 = institution.id2017,
-        taxId = institution.taxId,
-        rssd = institution.rssd,
-        respondentName = institution.respondentName,
-        respondentState = institution.respondentState,
-        respondentCity = institution.respondentCity,
-        parentIdRssd = institution.parentIdRssd,
-        parentName = institution.parentName,
-        assets = institution.assets,
-        otherLenderCode = institution.otherLenderCode,
-        topHolderIdRssd = institution.topHolderIdRssd,
-        topHolderName = institution.topHolderName,
-        hmdaFiler = institution.hmdaFiler,
-        emailDomains = emailList.map(email => email.emailDomain).mkString(",")
-      )
-    )
-  }
-
   def appendEmailDomains(institution: InstitutionEntity): Future[InstitutionAltEntity] = {
     val emails: Future[Seq[InstitutionEmailEntity]] =
       emailRepository.findByLei(institution.lei)
-
+    var seqTest:Seq[String] = Seq("1","2,3","4","5","6")
+    val dedupe= csvDeDupe(seqTest)
     emails.map(emailList =>
       InstitutionAltEntity(
         lei = institution.lei,
@@ -166,10 +138,12 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], s
         topHolderIdRssd = institution.topHolderIdRssd,
         topHolderName = institution.topHolderName,
         hmdaFiler = institution.hmdaFiler,
-        emailDomains = emailList.map(email => email.emailDomain).mkString(",")
+        emailDomains = listDeDupeToString(emailList.map(email => email.emailDomain))
       )
     )
   }
+
+
 
   protected def reportPublishingComplete(result: Try[Any], schedule: Schedule, fullFilePath: String): Unit =
     result match {

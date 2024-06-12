@@ -1,7 +1,8 @@
 package hmda.serialization.institution
 
 import hmda.model.institution._
-import hmda.persistence.serialization.institution.{ InstitutionMessage, ParentMessage, RespondentMessage, TopHolderMessage }
+import hmda.persistence.serialization.institution.{InstitutionMessage, ParentMessage, RespondentMessage, TopHolderMessage}
+import hmda.util.CSVConsolidator.listDeDupeToList
 
 object InstitutionProtobufConverter {
 
@@ -53,7 +54,7 @@ object InstitutionProtobufConverter {
       id2017 = i.institutionId_2017.getOrElse(""),
       taxId = i.taxId.getOrElse(""),
       rssd = i.rssd,
-      emailDomains = i.emailDomains,
+      emailDomains = listDeDupeToList(i.emailDomains),
       respondent = Some(respondentToProtobuf(i.respondent)),
       parent = Some(parentToProtobuf(i.parent)),
       assets = i.assets,
