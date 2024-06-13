@@ -2,8 +2,11 @@ package hmda.util
 
 object LEIValidator { 
 
-    private val alphanumeric = (('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')).toSet
+    val leiRegex = "([A-Z0-9]{20})"
+
+    val leiKeyRegex = "(?<lei>[A-Z0-9]{20})"
 
     def isValidLEIFormat(lei: String): Boolean =
-        lei.length == 20 && lei.forall(alphanumeric.contains(_))
+        lei.matches(leiRegex)
+
 }

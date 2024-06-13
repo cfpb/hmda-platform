@@ -2,6 +2,7 @@ package hmda.messages
 
 import akka.kafka.ConsumerMessage.{CommittableMessage, CommittableOffset}
 import com.typesafe.scalalogging.StrictLogging
+import hmda.util.LEIValidator
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
@@ -16,10 +17,9 @@ object HmdaMessageFilter extends StrictLogging {
 
   def parse(key: String, value: String): Option[StandardMsg] = {
     Try {
-      val leiRegex = "(?<lei>[A-Z0-9]+)"
-      val keyRegex = s"^${leiRegex}$$".r
+      val keyRegex = s"^${LEIValidator.leiKeyRegex}$$".r
       // lei1:lei2-year-q1-seq_num
-      val msgRegex = s"^${leiRegex}-(?<year>[0-9]{4})(-(?<quarter>[qQ][1-3]))?(-(?<seqNum>[0-9]+))?$$".r
+      val msgRegex = s"^${LEIValidator.leiKeyRegex}-(?<year>[0-9]{4})(-(?<quarter>[qQ][1-3]))?(-(?<seqNum>[0-9]+))?$$".r
       for {
         keyMatch <- keyRegex.findFirstMatchIn(key)
         msgMatch <- msgRegex.findFirstMatchIn(value)
