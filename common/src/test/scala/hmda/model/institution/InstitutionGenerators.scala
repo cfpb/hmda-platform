@@ -1,6 +1,7 @@
 package hmda.model.institution
 
-import hmda.generators.CommonGenerators.{ activityYearGen, emailListGen, leiGen, stateGen }
+import hmda.generators.CommonGenerators.{activityYearGen, emailListGen, leiGen, stateGen}
+import hmda.util.CSVConsolidator.listDeDupeToList
 import org.scalacheck.Gen
 
 object InstitutionGenerators {
@@ -36,7 +37,7 @@ object InstitutionGenerators {
         if (id2017 == "") None else Some(id2017),
         if (taxId == "") None else Some(taxId),
         rssd,
-        email,
+        listDeDupeToList(email),
         respondent,
         parent,
         assets,
