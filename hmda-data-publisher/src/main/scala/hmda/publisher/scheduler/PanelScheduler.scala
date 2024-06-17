@@ -118,7 +118,6 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], s
   def appendEmailDomains(institution: InstitutionEntity): Future[InstitutionAltEntity] = {
     val emails: Future[Seq[InstitutionEmailEntity]] =
       emailRepository.findByLei(institution.lei)
-    var seqTest:Seq[String] = Seq("1","2,3","4","5","6")
     emails.map(emailList =>
       InstitutionAltEntity(
         lei = institution.lei,
