@@ -7,11 +7,11 @@ class DateGeneratorSpec extends WordSpec with Matchers {
   "date generator" should {
 
     "return correct current date" in {
-      assert(generator.currentDate == "2024-06-04-")
+      assert(generator.currentDate == "2024-06-19-")
     }
 
     "return correct current quarterly date" in {
-      assert(generator.currentQuarterlyDate == "2024-06-04_")
+      assert(generator.currentQuarterlyDate == "2024-06-19_")
     }
   }
 
