@@ -555,7 +555,7 @@ trait PublisherComponent2018 extends PGTableNameLoader {
     def tractToMsamd           = column[Option[String]]("tract_to_msamd")
     def medianAgeCalculated    = column[Option[String]]("median_age_calculated")
     def percentMedianMsaIncome =
-      column[Option[String]]("percent_median_msa_income")
+      column[Option[Double]]("percent_median_msa_income")
     def msaMDName = column[Option[String]]("msa_md_name")
     def createdAt = column[Timestamp]("created_at")
 
