@@ -13,6 +13,7 @@ import akka.http.scaladsl.model.{HttpEntity, StatusCodes}
 import akka.http.scaladsl.unmarshalling.Unmarshaller
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Directive1, Route}
+import akka.persistence.cassandra.cleanup.Cleanup
 import akka.stream.Materializer
 import akka.stream.scaladsl.{Keep, Sink, Source}
 import akka.util.{ByteString, Timeout}
@@ -29,14 +30,17 @@ import hmda.messages.submission.HmdaRawDataEvents.LineAdded
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.messages.submission.SubmissionProcessingCommands.GetHmdaValidationErrorState
 import hmda.model.filing.submission.{Signed, Submission, SubmissionId}
+import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.filing.FilingPersistence.selectFiling
+import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.HmdaValidationError.selectHmdaValidationError
-import hmda.persistence.submission.{HmdaProcessingUtils, SubmissionPersistence}
+import hmda.persistence.submission.{EditDetailsPersistence, HmdaParserError, HmdaProcessingUtils, HmdaRawData, HmdaValidationError, SubmissionManager, SubmissionPersistence}
 import hmda.query.HmdaQuery
 import hmda.utils.YearUtils
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
 
+import scala.collection.immutable
 import scala.collection.immutable.ListMap
 import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Future}
@@ -275,6 +279,41 @@ private class LeiSubmissionSummary(log: Logger, clusterSharding: ClusterSharding
         LeiLatestSubmissionSummaryResponse(lei, submissionSummary)
       }
   }
+
+  def deleteSubmissionIds(lei: String, period: Period) = {
+    val cleanup = new Cleanup(system)
+    val persistenceIdParallelism = 10
+    val filingPersistenceId = s"${FilingPersistence.name}-$lei-$period"
+    val institutionPersistenceId = s"${InstitutionPersistence.name}-$lei-$period"
+
+    val submissionPersistenceIdPrefixes = immutable.Seq(
+      EditDetailsPersistence.name,
+      HmdaValidationError.name,
+      HmdaParserError.name,
+      HmdaRawData.name,
+      SubmissionPersistence.name,
+      SubmissionManager.name,
+    )
+
+    Source.future(submissionsForLei(lei))
+      .mapConcat(identity)
+      .mapAsync(persistenceIdParallelism) { case (lei, submissionIds) =>
+        // Delete submissions
+        val fDeleteSubmissions = submissionIds.filter(_.period == period).map { submissionId =>
+          val persistenceIdsToDelete = submissionPersistenceIdPrefixes.map(prefix => prefix + "-" + submissionId.toString)
+          log.info(s"Deleting data with persistence ids $persistenceIdsToDelete")
+          cleanup.deleteAll(persistenceIdsToDelete, true)
+        }.toSeq
+        // Delete filing
+        val fDeleteFiling = cleanup.deleteAll(filingPersistenceId, true)
+        // Delete institution
+        val fDeleteInstitution = cleanup.deleteAll(institutionPersistenceId, true)
+
+        // Combine deletion futures
+        val fDeletions = fDeleteSubmissions :+ fDeleteFiling :+ fDeleteInstitution
+        Future.sequence(fDeletions)
+      }
+    }
 }
 
 private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterSharding: ClusterSharding, countTimeout: Duration)(
@@ -466,6 +505,20 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
           onComplete(leiSubmissionSummaries) {
             case Failure(exception) =>
               log.error("Error whilst trying to validate lei submission counts", exception)
+              complete(InternalServerError)
+            case Success(result) =>
+              complete(result)
+          }
+        }
+      }
+    } ~ (delete & path("delete" / Segment / "year" / Segment )) { (lei, periodStr) =>
+      val period = YearUtils.parsePeriod(periodStr).toTry.get
+      oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
+        withRequestTimeout(countTimeout) {
+          val fDeleted = new LeiSubmissionSummary(log, clusterSharding).deleteSubmissionIds(lei, period).run()
+          onComplete(fDeleted) {
+            case Failure(exception) =>
+              log.error("Error whilst trying to delete all submissions for lei " + lei + " for year " + periodStr, exception)
               complete(InternalServerError)
             case Success(result) =>
               complete(result)
