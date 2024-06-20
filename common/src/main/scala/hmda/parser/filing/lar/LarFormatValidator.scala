@@ -36,7 +36,7 @@ sealed trait LarFormatValidator extends LarParser {
       val occupancy                            = values(8)
       val loanAmount                           = values(9)
       val actionTaken                          = values(10)
-      val actionTakenDate                      = values(11)
+      val actionTakenDate                      = values(11).replaceFirst("^0+(?!$)", "")
       val street                               = values(12)
       val city                                 = values(13)
       val state                                = values(14)

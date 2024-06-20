@@ -13,7 +13,7 @@ object SnapshotCheck {
   def pathSelector(s3Path: String,fileName:String): String = {
     if(snapshotActive){
       if (fileName.takeRight(3) == "zip"){
-        val snapshotFile=fileName.replace(".zip","_snapshot.zip")
+        val snapsƒhotFile=fileName.replace(".zip","_snapshot.zip")
         snapshotPath+snapshotFile
       }
       else{

@@ -1,4 +1,4 @@
-CREATE TABLE modifiedlar2019 (
+CREATE TABLE modifiedlar2019_regen_2024 (
                                            id integer NOT NULL,
                                            uli character varying not null,
                                            lei character varying NOT NULL,
@@ -99,7 +99,7 @@ CREATE TABLE modifiedlar2019 (
                                            conforming_loan_limit character varying,
                                            median_age integer,
                                            median_age_calculated character varying,
-                                           median_income_percentage integer,
+                                           median_income_percentage double precision,
                                            race_categorization character varying,
                                            sex_categorization character varying,
                                            ethnicity_categorization character varying,
@@ -110,7 +110,7 @@ CREATE TABLE modifiedlar2019 (
                                            checksum character varying
 );
 
-CREATE TABLE modifiedlar2018 (
+CREATE TABLE modifiedlar2018_regen_2024 (
                                            id integer NOT NULL,
                                            uli character varying not null,
                                            lei character varying NOT NULL,
@@ -211,7 +211,7 @@ CREATE TABLE modifiedlar2018 (
                                            conforming_loan_limit character varying,
                                            median_age integer,
                                            median_age_calculated character varying,
-                                           median_income_percentage integer,
+                                           median_income_percentage double precision,
                                            race_categorization character varying,
                                            sex_categorization character varying,
                                            ethnicity_categorization character varying,
