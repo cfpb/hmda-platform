@@ -33,8 +33,4 @@ object V631_1 extends EditCheck[LoanApplicationRegister] {
         ValidationFailure
       }
     }
-
-  def check(lar: LoanApplicationRegister): Boolean = {
-    validEthnicities.contains(lar.coApplicant.ethnicity.ethnicity1)
-  }
 }
