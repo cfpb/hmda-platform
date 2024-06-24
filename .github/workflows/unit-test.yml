@@ -19,11 +19,6 @@ jobs:
           java-version: '13'
           distribution: 'adopt'
 
-      - name: Setup Scala
-        uses: olafurpg/setup-scala@v11
-        with:
-          scala-version: '2.13.12'
-
       - name: Run Sbt Tests
         run: |
           touch log-file
