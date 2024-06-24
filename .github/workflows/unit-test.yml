@@ -17,6 +17,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '13'
+          scala-version: '2.13.12'
           distribution: 'adopt'
 
       - name: Run Sbt Tests
