@@ -20,7 +20,7 @@ jobs:
           distribution: 'adopt'
 
       - name: Setup Scala
-        uses: coursier/setup-action@v1
+        uses: olafurpg/setup-scala@v11
         with:
           scala-version: '2.13.12'
 
