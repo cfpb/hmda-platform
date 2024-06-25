@@ -18,7 +18,7 @@ class RealTimeConfig(val cmName: String, val ns: String) {
     val factory = new SharedInformerFactory(client)
     val informer = factory.sharedIndexInformerFor((params: CallGeneratorParams) => {
       api.listNamespacedConfigMapCall(
-        ns, null, null, null, s"metadata.name=$cmName", null, null, params.resourceVersion, null, params.timeoutSeconds, params.watch, null)
+        ns, null, null, null, s"metadata.name=$cmName", null, null, params.resourceVersion, null, null, params.timeoutSeconds, params.watch, null)
     }, classOf[V1ConfigMap], classOf[V1ConfigMapList])
     informer.addEventHandler(new ResourceEventHandler[V1ConfigMap] {
       override def onAdd(obj: V1ConfigMap): Unit = {
