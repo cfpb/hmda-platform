@@ -6,15 +6,15 @@ import org.scalatest.FunSuite
 class HmdaMessageFilterTest extends FunSuite {
 
   testParse(
-    "LEI",
-    "LEI-2020",
-    Some(StandardMsg("LEI", 2020, None, None))
+    "B90YWS6AFX2LGWOXJ1LD",
+    "B90YWS6AFX2LGWOXJ1LD-2020",
+    Some(StandardMsg("B90YWS6AFX2LGWOXJ1LD", 2020, None, None))
   )
 
   testParse(
-    "LEI",
-    "LEI-2020-q1",
-    Some(StandardMsg("LEI", 2020, Some("q1"), None))
+    "B90YWS6AFX2LGWOXJ1LD",
+    "B90YWS6AFX2LGWOXJ1LD-2020-q1",
+    Some(StandardMsg("B90YWS6AFX2LGWOXJ1LD", 2020, Some("q1"), None))
   )
 
   testParse(

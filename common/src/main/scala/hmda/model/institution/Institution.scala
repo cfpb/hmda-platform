@@ -2,6 +2,7 @@ package hmda.model.institution
 
 import cats.data.NonEmptyList
 import hmda.model.filing.Institution.InstitutionFieldMapping
+import hmda.util.CSVConsolidator.{listDeDupeToList, listDeDupeToString}
 import io.chrisdavenport.cormorant.CSV
 import io.circe._
 import io.circe.syntax._
@@ -42,7 +43,7 @@ object Institution {
         ("institutionId2017", Json.fromString(i.institutionId_2017.getOrElse(""))),
         ("taxId", Json.fromString(i.taxId.getOrElse(""))),
         ("rssd", Json.fromInt(i.rssd)),
-        ("emailDomains", i.emailDomains.asJson),
+        ("emailDomains", listDeDupeToList(i.emailDomains).asJson),
         ("respondent", i.respondent.asJson),
         ("parent", i.parent.asJson),
         ("assets", Json.fromLong(i.assets)),
@@ -148,7 +149,7 @@ case class Institution(
           institutionId_2017.getOrElse(""),
           taxId.getOrElse(""),
           rssd.toString,
-          emailDomains.mkString(","),
+          listDeDupeToString(emailDomains),
           respondent.name.getOrElse(""),
           respondent.state.getOrElse(""),
           respondent.city.getOrElse(""),

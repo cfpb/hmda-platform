@@ -1,7 +1,8 @@
 package hmda.parser.institution
 
 import hmda.model.institution._
-import io.chrisdavenport.cormorant.parser.{CSVLikeParser}
+import hmda.util.CSVConsolidator.{listDeDupeToList, stringDeDupeToList}
+import io.chrisdavenport.cormorant.parser.CSVLikeParser
 import io.chrisdavenport.cormorant
 
 object InstitutionCsvParser {
@@ -34,7 +35,7 @@ object InstitutionCsvParser {
     val notes                    = values.lift.apply(22).getOrElse("") //TODO consider default value from env
 
     val emails =
-      if (emailDomains.isEmpty) List() else emailDomains.split(',').toList
+      if (emailDomains.isEmpty) List() else stringDeDupeToList(emailDomains)
 
     Institution(
       activityYear,

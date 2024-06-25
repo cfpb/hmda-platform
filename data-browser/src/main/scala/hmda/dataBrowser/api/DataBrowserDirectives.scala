@@ -27,6 +27,7 @@ import hmda.dataBrowser.models.State._
 import hmda.dataBrowser.models.County._
 import hmda.dataBrowser.models.TotalUnits._
 import hmda.dataBrowser.models._
+import hmda.util.LEIValidator._
 import Delimiter.fileEnding
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import hmda.dataBrowser.services._
@@ -155,6 +156,9 @@ trait DataBrowserDirectives extends Settings {
   private def extractLEIs: Directive1[Option[QueryField]] =
     parameters("leis".as(CsvSeq[String]) ? Nil).flatMap {
       case Nil => provide(None)
+      case xs if xs.exists(lei => !isValidLEIFormat(lei)) =>
+        import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+        complete((BadRequest, s"A Valid LEI should be 20 characters and Alphanumeric (${xs.mkString(", ")})"))
       case xs =>
         provide(Option(QueryField(name = "lei", xs.map(_.toString), dbName = "lei", isAllSelected = false)))
     }

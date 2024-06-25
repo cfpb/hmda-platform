@@ -39,4 +39,8 @@ object ScheduleCoordinator {
     }
     Behaviors.same
   }
+
+  def getLogName: String = {
+    log.getName
+  }
 }
