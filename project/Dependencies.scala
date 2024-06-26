@@ -8,7 +8,7 @@ object Dependencies {
     "Sonatype releases" at "https://oss.sonatype.org/content/repositories/releases"
   )
 
-  val scalaTest                     = "org.scalatest"       %% "scalatest"                   % Version.scalaTest % Test exclude ("de.flapdoodle.embed", "de.flapdoodle.embed.process")
+  val scalaTest                     = "org.scalatest"       %% "scalatest"                   % Version.scalaTest % Test
   val scalaCheck                    = "org.scalacheck"      %% "scalacheck"                  % Version.scalaCheck % Test
   val scalaMock                     = "org.scalamock"       %% "scalamock"                   % Version.scalaMock % Test
   val logback                       = "ch.qos.logback"      % "logback-classic"              % Version.logback
