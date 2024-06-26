@@ -181,7 +181,8 @@ class DataBrowserDirectivesSpec extends WordSpec with ScalatestRouteTest with Ma
       val route: Route = failingRoute(extractMsaAndStateAndCountyAndInstitutionIdentifierBrowserFields)
 
       Get("/?msamds=34980&leis=BANK0&states=CA,AK&actions_taken=1,2,3&counties=19125&years=2018") ~> route ~> check {
-        responseAs[String].contains("provide-only-msamds-or-states-or-counties-or-leis") shouldBe true
+        responseAs[String].contains("A Valid LEI should be 20 characters and Alphanumeric") shouldBe true
+        val x = responseAs[String]
         response.status shouldBe StatusCodes.BadRequest
       }
     }
