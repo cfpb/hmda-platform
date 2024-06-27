@@ -1,6 +1,6 @@
 object Version {
 
-  val logback                = "1.2.1"
+  val logback                = "1.5.6"
   val scalaTest              = "3.0.8"
   val scalaCheck             = "1.17.0"
   val akka                   = "2.8.5"
@@ -38,5 +38,5 @@ object Version {
   val scalacheckShapeless    = "1.2.5"
   val diffx                  = "0.4.0"
   val log4j                  = "2.15.0"
-  val kubernetesApi          = "15.0.1"
+  val kubernetesApi          = "21.0.0-legacy"
 }
