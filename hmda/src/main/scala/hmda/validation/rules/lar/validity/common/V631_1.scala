@@ -35,7 +35,5 @@ object V631_1 extends EditCheck[LoanApplicationRegister] {
       lar.coApplicant.ethnicity.ethnicity1 is containedIn(validEthnicities) and (lar.coApplicant.ethnicity.ethnicity1 not empty)
 
   private def checkFreeformNotEmpty(lar: LoanApplicationRegister): ValidationResult =
-    when(lar.coApplicant.ethnicity.otherHispanicOrLatino is empty) {
       lar.coApplicant.ethnicity.ethnicity1 is containedIn(validEthnicities) or (lar.coApplicant.ethnicity.ethnicity1 is empty)
-    }
 }
