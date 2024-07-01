@@ -4,9 +4,8 @@ import java.time.{LocalDateTime, ZoneOffset}
 import hmda.model.filing.submission.SubmissionId
 import hmda.utils.EmbeddedPostgres
 import hmda.utils.YearUtils.Period
-import org.scalatest.{AsyncWordSpec, MustMatchers, Tag}
+import org.scalatest.{AsyncWordSpec, MustMatchers}
 
-object CustomTag extends Tag("actions-ignore")
 
 class SubmissionHistoryComponentSpec extends AsyncWordSpec with SubmissionHistoryComponent with EmbeddedPostgres with MustMatchers {
   "SubmissionHistoryRepository" must {

@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.duration._
 import scala.concurrent.{ Await, Future }
 
-object CustomTag extends Tag("actions-ignore")
+
 class PublisherComponent2018Spec
   extends TestKit(ActorSystem("PublisherComponent2018Spec"))
     with FreeSpecLike
