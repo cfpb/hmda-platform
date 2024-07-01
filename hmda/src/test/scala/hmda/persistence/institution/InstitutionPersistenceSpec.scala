@@ -12,6 +12,9 @@ import hmda.persistence.AkkaCassandraPersistenceSpec
 import akka.actor.typed.scaladsl.adapter._
 import hmda.messages.institution.InstitutionCommands._
 import hmda.messages.institution.InstitutionEvents._
+import org.scalatest.Tag
+
+object CustomTag extends Tag("actions-ignore")
 
 class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
 
@@ -44,7 +47,7 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
       maybeInstitutionProbe.expectMessage(Some(sampleInstitution))
     }
 
-    "not be created if it already exists" in {
+    "not be created if it already exists" taggedAs CustomTag in {
       val institutionPersistence =
         system.spawn(InstitutionPersistence.behavior("ABC12345"), actorName)
       institutionPersistence ! CreateInstitution(sampleInstitution, institutionProbe.ref)

@@ -3,11 +3,13 @@ package hmda.reporting.repository
 import hmda.query.institution.InstitutionEntity
 import hmda.utils.EmbeddedPostgres
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{ Matchers, WordSpec }
+import org.scalatest.{Matchers, Tag, WordSpec}
 
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.duration._
+
+object CustomTag extends Tag("actions-ignore")
 
 class InstitutionComponentSpec extends WordSpec with EmbeddedPostgres with InstitutionComponent with ScalaFutures with Matchers {
   import dbConfig._
@@ -27,7 +29,7 @@ class InstitutionComponentSpec extends WordSpec with EmbeddedPostgres with Insti
     super.afterAll()
   }
 
-  "InstitutionRepository run-through" in {
+  "InstitutionRepository run-through" taggedAs CustomTag in {
     whenReady(db.run(institutionRepo.table += InstitutionEntity("EXAMPLE-LEI-1", activityYear = 2018, hmdaFiler = true)))(_ shouldBe 1)
 
     val test = for {

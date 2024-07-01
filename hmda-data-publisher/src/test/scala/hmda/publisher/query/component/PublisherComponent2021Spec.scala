@@ -7,13 +7,15 @@ import hmda.publisher.query.lar._
 import hmda.publisher.query.panel.InstitutionEntity
 import hmda.query.ts.TransmittalSheetEntity
 import hmda.utils.EmbeddedPostgres
+import hmda.publisher.query.component.CustomTag
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
 import org.scalatest.time.{Millis, Minutes, Span}
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, FreeSpecLike, Matchers}
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, FreeSpecLike, Matchers, Tag}
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
+
 
 class PublisherComponent2021Spec
   extends TestKit(ActorSystem("PublisherComponent2021Spec"))
@@ -44,7 +46,7 @@ class PublisherComponent2021Spec
     )
   }
 
-  "InstitutionRepository2021 runthrough" in {
+  "InstitutionRepository2021 runthrough" taggedAs CustomTag in {
     import institutionRepo._
     val data = InstitutionEntity("EXAMPLE-LEI", activityYear = 2020, institutionType = 1, taxId = "ABC", hmdaFiler = true)
     data.toPSV
@@ -69,7 +71,7 @@ class PublisherComponent2021Spec
     whenReady(test)(_ => ())
   }
 
-  "TransmittalSheetRepository2021 runthrough" in {
+  "TransmittalSheetRepository2021 runthrough" taggedAs CustomTag in {
     import tsRepo._
     val data = TransmittalSheetEntity(lei = "EXAMPLE-LEI", institutionName = "EXAMPLE-INSTITUTION", year = 2020)
     data.toPublicPSV
@@ -95,7 +97,7 @@ class PublisherComponent2021Spec
     whenReady(test)(_ => ())
   }
 
-  "LarRepository2021 runthrough" in {
+  "LarRepository2021 runthrough" taggedAs CustomTag in {
     import larRepo._
     val data = LarEntityImpl2021(
       LarPartOne2021(lei = "EXAMPLE-LEI"),

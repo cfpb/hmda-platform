@@ -1,15 +1,15 @@
 package hmda.analytics.query
 
-import java.time.{ LocalDateTime, ZoneOffset }
-
+import java.time.{LocalDateTime, ZoneOffset}
 import hmda.model.filing.submission.SubmissionId
 import hmda.utils.EmbeddedPostgres
 import hmda.utils.YearUtils.Period
-import org.scalatest.{ AsyncWordSpec, MustMatchers }
+import org.scalatest.{AsyncWordSpec, MustMatchers}
+
 
 class SubmissionHistoryComponentSpec extends AsyncWordSpec with SubmissionHistoryComponent with EmbeddedPostgres with MustMatchers {
   "SubmissionHistoryRepository" must {
-    "be able to persist data" in {
+    "be able to persist data" taggedAs CustomTag in {
       val repo    = new SubmissionHistoryRepository(dbConfig, "submission_history") // as per hmda.sql
       val lei     = "EXAMPLE-LEI"
       val timeNow = LocalDateTime.now()

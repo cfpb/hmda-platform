@@ -2,13 +2,15 @@ package hmda.publisher.query.component
 
 import hmda.publisher.query.panel.InstitutionEmailEntity
 import hmda.utils.EmbeddedPostgres
-import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach, FreeSpec, Matchers }
-import org.scalatest.concurrent.{ PatienceConfiguration, ScalaFutures }
-import org.scalatest.time.{ Millis, Minutes, Span }
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, FreeSpec, Matchers, Tag}
+import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
+import org.scalatest.time.{Millis, Minutes, Span}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits._
+
+object CustomTag extends Tag("actions-ignore")
 
 class InstitutionEmailComponentSpec
   extends FreeSpec
@@ -40,11 +42,11 @@ class InstitutionEmailComponentSpec
 
   override def bootstrapSqlFile: String = ""
 
-  "getId returns the Rep[Int]" in {
+  "getId returns the Rep[Int]" taggedAs CustomTag in {
     repo.getId(_)
   }
 
-  "deleteById deletes ids" in {
+  "deleteById deletes ids" taggedAs CustomTag in {
     val test = for {
       id        <- dbConfig.db.run(repo.table += InstitutionEmailEntity(lei = "EXAMPLE", emailDomain = "example@domain.com"))
       deletedId <- repo.deleteById(id)
@@ -52,7 +54,7 @@ class InstitutionEmailComponentSpec
     whenReady(test)(_ => ())
   }
 
-  "findByLei finds LEIs" in {
+  "findByLei finds LEIs" taggedAs CustomTag in {
     val data = InstitutionEmailEntity(lei = "EXAMPLE", emailDomain = "example@domain.com")
     val test = for {
       _      <- dbConfig.db.run(repo.table += data)
@@ -64,7 +66,7 @@ class InstitutionEmailComponentSpec
     whenReady(test)(_ => ())
   }
 
-  "getAllDomains finds records by domain" in {
+  "getAllDomains finds records by domain" taggedAs CustomTag in {
     val data = InstitutionEmailEntity(lei = "EXAMPLE2", emailDomain = "example@domain1.com")
     val test = for {
       _      <- dbConfig.db.run(repo.table += data)

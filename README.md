@@ -63,7 +63,7 @@ The HMDA Platform follows a loosely coupled [event driven](https://en.wikipedia.
 
 The code base contained in this repository includes the following microservices that work together in support of the HMDA Platform.
 
-- [HMDA Platform](https://github.com/cfpb/hmda-platform/tree/master/hmda): The entire backend API for [public facing filing platform](https://ffiec.cfpb.gov/filing/2019/). Used for processing the uploaded TXT files and validating them in a non-blocking, I/O streaming way. The APIs are built to be able to process various file sizes, from small (few lines) to large (1.5M+ lines), text files simultaneously without impeding the scalability or availability of the platform. The platform contains code for customizable data edits, a [Domain Specific Language (DSL)](https://en.wikipedia.org/wiki/Domain-specific_language) for coding the data edits, and submitting events to Kafka topics.    
+- [HMDA Platform](https://github.com/cfpb/hmda-platform/tree/master/hmda): The entire backend API for [public facing filing platform](https://ffiec.cfpb.gov/filing/2019/). Used for processing the uploaded TXT files and validating them in a non-blocking, I/O streaming way. The APIs are built to be able to process various file sizes, from small (few lines) to large (1.5M+ lines), text files simultaneously without impeding the scalability or availability of the platform. The platform contains code for customizable data edits, a [Domain Specific Language (DSL)](https://en.wikipedia.org/wiki/Domain-specific_language) for coding the data edits, and submitting events to Kafka topics.
 
 - [Check Digit](https://github.com/cfpb/hmda-platform/tree/master/check-digit): The entire backend API for [public facing check digit tool](https://ffiec.cfpb.gov/tools/check-digit). The Check Digit tool is used to (1) Generate a two character check-digit based on an Legal Entity Identifier (LEI) and (2) Validate that a check-digit is calculated correctly for any complete Universal Loan Identifier (ULI). This APIs are built to process multiple row CSV files as well as one time processing.
 
@@ -108,7 +108,7 @@ Before running the HMDA Platform, make sure to have the following installed:
 4. <a href="./docs/JavaInstall.md">Java (version 13.0.2) for MacOS</a>
 5. Scala (version 2.12 for compatibility issues) - ```bash brew install scala@2.12 ```
 6. sdk - https://sdkman.io/install
-Next, use sdk to install sbt instead of brew (it won't work with brew) (Note: before install, check what version is currently being used in project/build.properties and install that version or higher):
+   Next, use sdk to install sbt instead of brew (it won't work with brew) (Note: before install, check what version is currently being used in project/build.properties and install that version or higher):
 
 ```bash
 sdk install sbt
@@ -136,7 +136,7 @@ sbt:hmda-platform> reStart
 ## Access locally build platform
 [hmda-admin-api](http://localhost:8081)   
 [hmda-filing-api](http://localhost:8080)   
-[hmda-public-api](http://localhost:8082)   
+[hmda-public-api](http://localhost:8082)
 ## Build hmda-platform Docker image
 
 Docker Image is build via Docker plugin utilizing [sbt-native-packager](https://sbt-native-packager.readthedocs.io/en/stable/formats/docker.html#docker-plugin)
@@ -179,7 +179,7 @@ The platform and it's dependency services, Kafka, Cassandra and PostgreSQL, can 
 docker-compose up
 ```
 
-The entire filing plaform can be spun up using a one line command. Using this locally running instance of Platform One, no authentication is needed. 
+The entire filing plaform can be spun up using a one line command. Using this locally running instance of Platform One, no authentication is needed.
 
 ```shell
 # Bring up the hmda-platform
@@ -226,7 +226,7 @@ Our team works in two week sprints. The sprints are managed as [Project Boards](
 
 ## Code Formatting
 
-Our team uses [Scalafmt](https://scalameta.org/scalafmt/) to format our codebase. 
+Our team uses [Scalafmt](https://scalameta.org/scalafmt/) to format our codebase.
 
 ## Development Process
 
@@ -256,8 +256,8 @@ We use GitHub issues in this repository to track features, bugs, and enhancement
 ## Credits and references
 
 Related projects
-  - https://github.com/cfpb/hmda-combined-documentation - ReactJS Front-end with intergration DocSearch program repository powering the [HMDA Platform](http://ffiec.cfpb.gov/)
-  - https://github.com/cfpb/hmda-platform-larft - Repo for the [Public Facing LAR formatting tool](https://ffiec.cfpb.gov/tools/lar-formatting)
-  - https://github.com/cfpb/hmda-test-files - Repo for automatically generating various different test files for HMDA Data
-  - https://github.com/cfpb/hmda-census - ETL for geographic and Census data used by the HMDA Platform
-  - https://github.com/cfpb/HMDA_Data_Science_Kit - Repo for HMDA Data science work as well as Spark codebase for [Public Facing A&D Reports](https://ffiec.cfpb.gov/data-publication/disclosure-reports/2018)
+- https://github.com/cfpb/hmda-combined-documentation - ReactJS Front-end with intergration DocSearch program repository powering the [HMDA Platform](http://ffiec.cfpb.gov/)
+- https://github.com/cfpb/hmda-platform-larft - Repo for the [Public Facing LAR formatting tool](https://ffiec.cfpb.gov/tools/lar-formatting)
+- https://github.com/cfpb/hmda-test-files - Repo for automatically generating various different test files for HMDA Data
+- https://github.com/cfpb/hmda-census - ETL for geographic and Census data used by the HMDA Platform
+- https://github.com/cfpb/HMDA_Data_Science_Kit - Repo for HMDA Data science work as well as Spark codebase for [Public Facing A&D Reports](https://ffiec.cfpb.gov/data-publication/disclosure-reports/2018)

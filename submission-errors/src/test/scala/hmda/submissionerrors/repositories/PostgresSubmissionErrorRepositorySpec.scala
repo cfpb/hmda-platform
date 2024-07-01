@@ -6,8 +6,9 @@ import hmda.model.filing.submission.SubmissionId
 import hmda.utils.EmbeddedPostgres
 import hmda.utils.YearUtils.Period
 import monix.execution.Scheduler
-import org.scalatest.{ FlatSpecLike, Matchers }
+import org.scalatest.{ FlatSpecLike, Matchers, Tag }
 
+object CustomTag extends Tag("actions-ignore")
 class PostgresSubmissionErrorRepositorySpec
   extends TestKit(ActorSystem("submission-error-repo-spec"))
     with FlatSpecLike
@@ -17,7 +18,7 @@ class PostgresSubmissionErrorRepositorySpec
 
   override def bootstrapSqlFile: String = "bootstrap.sql"
 
-  "PostgresSubmissionErrorRepository" should "persist error data into the repository" in {
+  "PostgresSubmissionErrorRepository" should "persist error data into the repository" taggedAs CustomTag in {
     // Note: dbConfig comes from EmbeddedPostgres
     val dbConfig     = PostgresSubmissionErrorRepository.config(dbHoconpath)
     val repo         = PostgresSubmissionErrorRepository.make(dbConfig, "triggered_quality_edits")

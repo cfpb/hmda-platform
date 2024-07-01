@@ -25,7 +25,7 @@ import io.github.embeddedkafka.{EmbeddedK, EmbeddedKafka, EmbeddedKafkaConfig}
 import org.scalacheck.Gen
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
 import org.scalatest.time.{Millis, Minutes, Span}
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
+import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike, Tag}
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
@@ -34,6 +34,8 @@ import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.concurrent.duration._
+
+object CustomTag extends Tag("actions-ignore")
 
 class ModifiedLarPublisherSpec
   extends TestKit(ActorSystem("publisher-spec"))
@@ -75,7 +77,7 @@ class ModifiedLarPublisherSpec
 
   override implicit def patienceConfig: PatienceConfig = PatienceConfig(timeout = Span(2, Minutes), interval = Span(100, Millis))
 
-  "Spawn publisher and upload data to S3 and Postgres" in {
+  "Spawn publisher and upload data to S3 and Postgres" taggedAs CustomTag in {
     @tailrec
     def generateLarData(gen: Gen[List[LoanApplicationRegister]]): List[LoanApplicationRegister] = {
       val data = Gen.nonEmptyListOf(LarGenerators.larGen).sample

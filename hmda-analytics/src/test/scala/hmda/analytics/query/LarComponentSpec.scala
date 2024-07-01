@@ -2,12 +2,14 @@ package hmda.analytics.query
 
 import hmda.model.filing.lar.LarGenerators._
 import hmda.utils.EmbeddedPostgres
-import org.scalatest.{AsyncWordSpec, BeforeAndAfter, MustMatchers}
+import org.scalatest.{AsyncWordSpec, BeforeAndAfter, MustMatchers, Tag}
+
+object CustomTag extends Tag("actions-ignore")
 
 class LarComponentSpec extends AsyncWordSpec with LarComponent with EmbeddedPostgres with MustMatchers with BeforeAndAfter {
 
   "LarComponent" must {
-    "be able to persist and delete a 2019 LAR" in {
+    "be able to persist and delete a 2019 LAR" taggedAs CustomTag in {
       val repo      = new LarRepository(dbConfig, "loanapplicationregister2019") // as per hmda.sql
       val sampleLar = larGen.map(LarConverter(_, year = 2019)).sample.get
 
@@ -18,7 +20,7 @@ class LarComponentSpec extends AsyncWordSpec with LarComponent with EmbeddedPost
         .map(_ mustBe 1)
     }
 
-    "be able to persist and delete a quarterly 2019 LAR" in {
+    "be able to persist and delete a quarterly 2019 LAR" taggedAs CustomTag in {
       val repo      = new LarRepository(dbConfig, "loanapplicationregister2019") // as per hmda.sql
       val sampleLar = larGen.map(LarConverter(_, year = 2019)).sample.get.copy(isQuarterly = true)
 

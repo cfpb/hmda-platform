@@ -12,10 +12,12 @@ import hmda.dataBrowser.services.{ DataBrowserQueryService, HealthCheckService, 
 import hmda.utils.EmbeddedPostgres
 import monix.eval.Task
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{ Matchers, WordSpec }
+import org.scalatest.{ Matchers, WordSpec, Tag }
 import org.slf4j.LoggerFactory
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
+
+object CustomTag extends Tag("actions-ignore")
 
 class DataBrowserIntegrationSpec
   extends WordSpec
@@ -48,7 +50,7 @@ class DataBrowserIntegrationSpec
   val routes: Route = DataBrowserHttpApi.create(log, fileStorage, query, healthCheck)
 
   "Data Browser" must {
-    "respond to health checks" in {
+    "respond to health checks" taggedAs CustomTag in {
       (healthCheck.healthCheckStatus _).expects().returns(Task.now(HealthCheckResponse(Up, Up, Up)))
       Get("/health") ~> routes ~> check {
         response.status shouldBe StatusCodes.OK
@@ -56,21 +58,21 @@ class DataBrowserIntegrationSpec
       }
     }
 
-    "respond to health checks when downstream dependencies are failing" in {
+    "respond to health checks when downstream dependencies are failing" taggedAs CustomTag in {
       (healthCheck.healthCheckStatus _).expects().returns(Task.now(HealthCheckResponse(Up, Down, Down)))
       Get("/health") ~> routes ~> check {
         response.status shouldBe StatusCodes.ServiceUnavailable
       }
     }
 
-    "respond to health checks in the scenario of total failure" in {
+    "respond to health checks in the scenario of total failure" taggedAs CustomTag in {
       (healthCheck.healthCheckStatus _).expects().returns(Task.raiseError(new RuntimeException("BOOM!")))
       Get("/health") ~> routes ~> check {
         response.status shouldBe StatusCodes.InternalServerError
       }
     }
 
-    "respond to aggregations" in {
+    "respond to aggregations" taggedAs CustomTag in {
       (cache.find _).expects(*, *, *, *).returns(Task.now(None))
       (cache.update _).expects(*, *, *, *, *).returns(Task(Statistic(1L, 1)))
 
@@ -80,7 +82,7 @@ class DataBrowserIntegrationSpec
       }
     }
 
-    "respond to raw Pipe data requests" in {
+    "respond to raw Pipe data requests" taggedAs CustomTag in {
       (fileStorage.retrieveDataUrl _).expects(*, *, "2018").returns(Task.now(None))
       (fileStorage.persistData _).expects(*, *, "2018", *).returns(Task.unit)
 
@@ -89,7 +91,7 @@ class DataBrowserIntegrationSpec
       }
     }
 
-    "respond to raw CSV data requests" in {
+    "respond to raw CSV data requests" taggedAs CustomTag in {
       (fileStorage.retrieveDataUrl _).expects(*, *, "2018").returns(Task.now(None))
       (fileStorage.persistData _).expects(*, *, "2018", *).returns(Task.unit)
 
@@ -98,7 +100,7 @@ class DataBrowserIntegrationSpec
       }
     }
 
-    "response to count aggregation requests" in {
+    "response to count aggregation requests" taggedAs CustomTag in {
       (cache.find _).expects(*, *, *, *).returns(Task.now(None))
       (cache.update _).expects(*, *, *, *, *).returns(Task(Statistic(1L, 1)))
 
@@ -116,7 +118,7 @@ class DataBrowserIntegrationSpec
 //      }
 //    }
 
-    "respond to failed filer requests due to a cache error" in {
+    "respond to failed filer requests due to a cache error" taggedAs CustomTag in {
       (cache.findFilers2018 _).expects(*, *).returns(Task.raiseError(new RuntimeException("BOOM")))
 
       Get("/view/filers?years=2018") ~> routes ~> check {
@@ -124,7 +126,7 @@ class DataBrowserIntegrationSpec
       }
     }
 
-    "respond to nationwide aggregation queries" in {
+    "respond to nationwide aggregation queries" taggedAs CustomTag in {
       (cache.find _).expects(*, *, *, *).returns(Task.now(None))
       (cache.update _).expects(*, *, *, *, *).returns(Task(Statistic(1L, 1)))
 
@@ -135,7 +137,7 @@ class DataBrowserIntegrationSpec
       }
     }
 
-    "respond to nationwide raw pipe queries" in {
+    "respond to nationwide raw pipe queries" taggedAs CustomTag in {
       (fileStorage.retrieveDataUrl _).expects(*, *, "2018").returns(Task.now(None))
       (fileStorage.persistData _).expects(*, *, "2018", *).returns(Task.unit)
 
@@ -146,7 +148,7 @@ class DataBrowserIntegrationSpec
       }
     }
 
-    "respond to nationwide raw csv queries" in {
+    "respond to nationwide raw csv queries" taggedAs CustomTag in {
       (fileStorage.retrieveDataUrl _).expects(*, *, "2018").returns(Task.now(None))
       (fileStorage.persistData _).expects(*, *, "2018", *).returns(Task.unit)
 

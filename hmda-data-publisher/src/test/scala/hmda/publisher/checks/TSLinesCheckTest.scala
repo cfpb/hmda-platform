@@ -2,16 +2,18 @@ package hmda.publisher.validation
 
 import akka.actor.ActorSystem
 import akka.testkit.TestKit
-import hmda.publisher.query.component.{ PublisherComponent2018, TransmittalSheetTable, TsRepository }
-import hmda.publisher.query.lar.{ LarEntityImpl2018, LarPartFive2018, LarPartFour2018, LarPartOne2018, LarPartSix2018, LarPartThree2018, LarPartTwo2018 }
+import hmda.publisher.query.component.{PublisherComponent2018, TransmittalSheetTable, TsRepository}
+import hmda.publisher.query.lar.{LarEntityImpl2018, LarPartFive2018, LarPartFour2018, LarPartOne2018, LarPartSix2018, LarPartThree2018, LarPartTwo2018}
 import hmda.query.ts.TransmittalSheetEntity
 import hmda.utils.EmbeddedPostgres
-import org.scalatest.concurrent.{ PatienceConfiguration, ScalaFutures }
-import org.scalatest.time.{ Millis, Minutes, Span }
-import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach, FreeSpecLike, Matchers }
+import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
+import org.scalatest.time.{Millis, Minutes, Span}
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, FreeSpecLike, Matchers, Tag}
 
 import scala.concurrent.duration.DurationInt
-import scala.concurrent.{ Await, Future }
+import scala.concurrent.{Await, Future}
+
+object CustomTag extends Tag("actions-ignore")
 
 class TSLinesCheckTest
   extends TestKit(ActorSystem("PublisherComponent2018Spec"))
@@ -44,7 +46,7 @@ class TSLinesCheckTest
     )
   }
 
-  "no data in lar" in {
+  "no data in lar" taggedAs CustomTag in {
 
     val lei1 = "EXAMPLE-LEI"
     val ts1  = TransmittalSheetEntity(lei = lei1, totalLines = 10, submissionId = Some("sub1"))
@@ -66,7 +68,7 @@ class TSLinesCheckTest
 
   }
 
-  "different data in lar" in {
+  "different data in lar" taggedAs CustomTag in {
 
     val lei1  = "EXAMPLE-LEI"
     val ts1   = TransmittalSheetEntity(lei = lei1, totalLines = 10, submissionId = Some("sub1"))
@@ -88,7 +90,7 @@ class TSLinesCheckTest
 
   }
 
-  "matching data in lar - 0" in {
+  "matching data in lar - 0" taggedAs CustomTag in {
 
     val lei1 = "EXAMPLE-LEI"
     val ts1  = TransmittalSheetEntity(lei = lei1, totalLines = 0, submissionId = Some("sub1"))
@@ -107,7 +109,7 @@ class TSLinesCheckTest
 
   }
 
-  "matching data in lar - non 0" in {
+  "matching data in lar - non 0" taggedAs CustomTag in {
 
     val lei1  = "EXAMPLE-LEI"
     val ts1   = TransmittalSheetEntity(lei = lei1, totalLines = 1, submissionId = Some("sub1"))

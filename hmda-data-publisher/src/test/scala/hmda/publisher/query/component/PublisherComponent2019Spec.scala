@@ -1,19 +1,22 @@
 package hmda.publisher.query.component
 
 import akka.actor.ActorSystem
-import akka.stream.scaladsl.{ Sink, Source }
+import akka.stream.scaladsl.{Sink, Source}
 import akka.testkit.TestKit
 import hmda.publisher.query.lar._
 import hmda.publisher.query.panel.InstitutionEntity
 import hmda.query.ts.TransmittalSheetEntity
 import hmda.utils.EmbeddedPostgres
-import org.scalatest.concurrent.{ PatienceConfiguration, ScalaFutures }
-import org.scalatest.time.{ Millis, Minutes, Span }
-import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach, FreeSpecLike, Matchers }
+import hmda.publisher.query.component.CustomTag
+import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
+import org.scalatest.time.{Millis, Minutes, Span}
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, FreeSpecLike, Matchers, Tag}
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.duration._
-import scala.concurrent.{ Await, Future }
+import scala.concurrent.{Await, Future}
+
+
 
 class PublisherComponent2019Spec
   extends TestKit(ActorSystem("PublisherComponent2019Spec"))
@@ -46,7 +49,7 @@ class PublisherComponent2019Spec
     )
   }
 
-  "InstitutionRepository2019 runthrough" in {
+  "InstitutionRepository2019 runthrough" taggedAs CustomTag in {
     import institutionRepo._
     val data = InstitutionEntity("EXAMPLE-LEI", activityYear = 2019, institutionType = 1, taxId = "ABC", hmdaFiler = true)
     data.toPSV
@@ -71,7 +74,7 @@ class PublisherComponent2019Spec
     whenReady(test)(_ => ())
   }
 
-  "TransmittalSheetRepository2019 runthrough" in {
+  "TransmittalSheetRepository2019 runthrough" taggedAs CustomTag in {
     import tsRepo._
     val data = TransmittalSheetEntity(lei = "EXAMPLE-LEI", institutionName = "EXAMPLE-INSTITUTION", year = 2019)
     data.toRegulatorPSV
@@ -94,7 +97,7 @@ class PublisherComponent2019Spec
     whenReady(test)(_ => ())
   }
 
-  "LarRepository2019 runthrough" in {
+  "LarRepository2019 runthrough" taggedAs CustomTag in {
     import larRepo._
     val data = LarEntityImpl2019(
       LarPartOne2019(lei = "EXAMPLE-LEI"),
