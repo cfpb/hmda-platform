@@ -22,7 +22,7 @@ object BuildSettings {
       scalacOptions ++= Seq("-Xlint", "-deprecation", "-unchecked", "-feature", "-Ymacro-annotations"),
       assembly / aggregate := false,
       Test / parallelExecution:= true,
-      Test / fork := false,
+      Test / fork := true,
       resolvers += "Akka library repository".at("https://repo.akka.io/maven"),
       commands += dockerPublishLocalSkipTestsCommand
     )
