@@ -22,7 +22,7 @@ jobs:
       - name: Run Sbt Tests
         run: |
           touch log-file
-          sbt "testOnly * -- -l actions-ignore" > log-file
+          sbt test > log-file
         continue-on-error: true
 
       - name: Check Test Results
