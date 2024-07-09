@@ -66,7 +66,6 @@ object PredicateCommon {
 
   def empty[A]: Predicate[A] = (_: A) match {
     case s: String => s.isEmpty
-    case s: EthnicityEnum => s.code == 0
     case _ =>
       throw new NotImplementedError("'empty doesn't handle non-string values yet'")
   }
