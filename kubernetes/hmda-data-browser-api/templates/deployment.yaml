@@ -163,11 +163,35 @@ spec:
             - name: DATABROWSER_PG_TABLE_2017
               value: intentionally_left_blank
             - name: DATABROWSER_PG_TABLE_2018
-              value: modifiedlar2018_three_year_04052022
+              valueFrom:
+                configMapKeyRef:
+                  name: pgtables-configmap
+                  key: mlartable.2018
             - name: DATABROWSER_PG_TABLE_2019
-              value: modifiedlar2019_one_year_04052022
+              valueFrom:
+              configMapKeyRef:
+                  name: pgtables-configmap
+                  key: mlartable.2019
             - name: DATABROWSER_PG_TABLE_2020
-              value: modifiedlar2020_one_year_04302022
+              valueFrom:
+                configMapKeyRef:
+                  name: pgtables-configmap
+                  key: mlartable.2020
+            - name: DATABROWSER_PG_TABLE_2021
+              valueFrom:
+                configMapKeyRef:
+                  name: pgtables-configmap
+                  key: mlartable.2021
+            - name: DATABROWSER_PG_TABLE_2022
+              valueFrom: 
+                configMapKeyRef:
+                  name: pgtables-configmap
+                  key: mlartable.2022
+            - name: DATABROWSER_PG_TABLE_2023
+              valueFrom:
+                configMapKeyRef:
+                  name: pgtables-configmap
+                  key: mlartable.2023
             - name: REDIS_HOSTNAME
               value: {{.Values.databrowser.redis}}
             - name: REDIS_PROTOCOL
