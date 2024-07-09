@@ -23,7 +23,10 @@ jobs:
         run: |
           touch log-file
           sbt "project hmda-platform" "testOnly -- -l actions-ignore" |& tee -a log-file
-          sbt "project check-digit" testOnly -- -l actions-ignore |& tee -a log-file
+          sbt "project check-digit" "testOnly -- -l actions-ignore" |& tee -a log-file
+          sbt "project common" "testOnly -- -l actions-ignore" |& tee -a log-file
+          sbt "project data-browser" "testOnly -- -l actions-ignore" |& tee -a log-file
+          sbt "project hmda-analytics" "testOnly -- -l actions-ignore" |& tee -a log-file
         continue-on-error: true
 
       - name: Check Test Results
