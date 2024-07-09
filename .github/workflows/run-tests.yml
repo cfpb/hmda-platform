@@ -23,7 +23,7 @@ jobs:
         run: |
           brew install sbt
           touch log-file
-          env JAVA_OPTS="-Xss256m -Xmx4096m" sbt > log-file
+          env JAVA_OPTS="-Xss256m -Xmx4096m" sbt test > log-file
         continue-on-error: true
 
       - name: Check Test Results
