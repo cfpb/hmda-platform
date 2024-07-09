@@ -22,7 +22,7 @@ jobs:
       - name: Run Sbt Tests
         run: |
           touch log-file
-          sbt "project hmda-platform" "testOnly hmda.validation.rules.lar.validity._2024.*" > log-file
+          sbt "project hmda-platform" "testOnly hmda.validation.rules.lar.validity.*" > log-file
         continue-on-error: true
 
       - name: Check Test Results
