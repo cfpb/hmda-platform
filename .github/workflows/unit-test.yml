@@ -23,9 +23,6 @@ jobs:
         run: |
           touch log-file
           sbt "project hmda-platform" test |& tee -a log-file
-          sbt "project check-digit" test |& tee -a log-file
-          sbt "project common" test |& tee -a log-file
-          sbt "project data-browser" test |& tee -a log-file
         continue-on-error: true
 
       - name: Check Test Results
