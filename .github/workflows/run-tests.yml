@@ -17,13 +17,13 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'adopt'
-          java-version: '11'
+          java-version: '13'
 
       - name: Run Sbt Tests
         run: |
           brew install sbt
           touch log-file
-          sbt test > log-file
+          env JAVA_OPTS="-Xss256m -Xmx4096m" sbt > log-file
         continue-on-error: true
 
       - name: Check Test Results
