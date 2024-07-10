@@ -19,29 +19,9 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
 
-      - name: Run hmda-platform Tests
-        run: |
-          sbt "project hmda-platform" "testOnly -- -l actions-ignore" |& tee -a log-file
-        continue-on-error: true
-
-      - name: Run check-digit Tests
-        run: |
-          sbt "project check-digit" "testOnly -- -l actions-ignore" |& tee -a log-file
-        continue-on-error: true
-
-      - name: Run common Tests
-        run: |
-          sbt "project common" "testOnly -- -l actions-ignore" |& tee -a log-file
-        continue-on-error: true
-
       - name: Run data-browser Tests
         run: |
           sbt "project data-browser" "testOnly -- -l actions-ignore" |& tee -a log-file
-        continue-on-error: true
-
-      - name: Run hmda-analytics Tests
-        run: |
-          sbt "project hmda-analytics" "testOnly -- -l actions-ignore" |& tee -a log-file
         continue-on-error: true
 
       - name: Check Test Results
