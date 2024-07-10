@@ -22,9 +22,69 @@ jobs:
       - name: Install sbt
         run: brew install sbt
 
+      - name: Run hmda-platform Tests
+        run: |
+          sbt "project hmda-platform" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
+      - name: Run check-digit Tests
+        run: |
+          sbt "project check-digit" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
+      - name: Run common Tests
+        run: |
+          sbt "project common" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
       - name: Run data-browser Tests
         run: |
           sbt "project data-browser" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
+      - name: Run hmda-analytics Tests
+        run: |
+          sbt "project hmda-analytics" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
+      - name: Run hmda-data-publisher Tests
+        run: |
+          sbt "project hmda-data-publisher" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
+      - name: Run hmda-quarterly-data-service Tests
+        run: |
+          sbt "project hmda-quarterly-data-service" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
+      - name: Run hmda-reporting Tests
+        run: |
+          sbt "project hmda-reporting" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
+      - name: Run institutions-api Tests
+        run: |
+          sbt "project institutions-api" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
+      - name: Run modified-lar Tests
+        run: |
+          sbt "project modified-lar" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
+      - name: Run rate-limit Tests
+        run: |
+          sbt "project rate-limit" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
+      - name: Run ratespread-calculator Tests
+        run: |
+          sbt "project ratespread-calculator" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
+      - name: Run submission-errors Tests
+        run: |
+          sbt "project submission-errors" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
         continue-on-error: true
 
       - name: Check Test Results
