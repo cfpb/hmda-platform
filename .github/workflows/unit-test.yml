@@ -19,6 +19,9 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
 
+      - name: Install sbt
+        run: brew install sbt
+
       - name: Run data-browser Tests
         run: |
           sbt "project data-browser" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
