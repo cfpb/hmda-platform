@@ -21,7 +21,7 @@ jobs:
 
       - name: Run data-browser Tests
         run: |
-          sbt "project data-browser" "testOnly -- -l actions-ignore" |& tee -a log-file
+          sbt "project data-browser" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
         continue-on-error: true
 
       - name: Check Test Results
