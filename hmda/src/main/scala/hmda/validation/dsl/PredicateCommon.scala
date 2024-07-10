@@ -1,7 +1,5 @@
 package hmda.validation.dsl
 
-import hmda.model.filing.lar.enums.EthnicityEnum
-
 import scala.util.Try
 
 object PredicateCommon {
