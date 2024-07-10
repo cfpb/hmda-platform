@@ -26,8 +26,6 @@ object V628_1 extends EditCheck[LoanApplicationRegister] {
       lar.applicant.ethnicity.ethnicity1 is containedIn(validEthnicities) and (lar.applicant.ethnicity.ethnicity1 not equalTo(EmptyEthnicityValue))
     }
     else {
-      val x = lar.applicant.ethnicity.ethnicity1 is containedIn(validEthnicities)
-      val y = lar.applicant.ethnicity.ethnicity1 is equalTo(EmptyEthnicityValue)
       lar.applicant.ethnicity.ethnicity1 is containedIn(validEthnicities) or (lar.applicant.ethnicity.ethnicity1 is equalTo(EmptyEthnicityValue))
     }
 }
