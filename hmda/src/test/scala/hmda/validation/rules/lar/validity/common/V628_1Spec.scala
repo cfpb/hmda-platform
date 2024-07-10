@@ -16,11 +16,11 @@ class V628_1Spec extends LarEditCheckSpec {
 
       val unapplicableLar = lar.copy(
         applicant = lar.applicant.copy(ethnicity =
-          lar.applicant.ethnicity.copy(otherHispanicOrLatino = "test"))) //if free form is not blank and ethnicity is provided correctly
-      unapplicableLar.mustPass
+          lar.applicant.ethnicity.copy(otherHispanicOrLatino = "test")))
 
       val ethnicityValid = applicableLar.applicant.ethnicity
         .copy(ethnicity1 = HispanicOrLatino)
+
       val ethnicityInvalid = applicableLar.applicant.ethnicity
         .copy(ethnicity1 = new InvalidEthnicityCode)
       lar

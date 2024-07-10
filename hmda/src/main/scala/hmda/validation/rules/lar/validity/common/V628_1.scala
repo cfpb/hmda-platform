@@ -19,14 +19,15 @@ object V628_1 extends EditCheck[LoanApplicationRegister] {
                               OtherHispanicOrLatino,
                               NotHispanicOrLatino,
                               InformationNotProvided,
-                              EthnicityNotApplicable,
-                              EthnicityNoCoApplicant)
+                              EthnicityNotApplicable)
 
   override def apply(lar: LoanApplicationRegister): ValidationResult =
     if(lar.applicant.ethnicity.otherHispanicOrLatino.isEmpty) {
-      lar.applicant.ethnicity.ethnicity1 is containedIn(validEthnicities) and (lar.applicant.ethnicity.ethnicity1.code not equalTo(0))
+      lar.applicant.ethnicity.ethnicity1 is containedIn(validEthnicities) and (lar.applicant.ethnicity.ethnicity1 not equalTo(EmptyEthnicityValue))
     }
     else {
-      lar.applicant.ethnicity.ethnicity1 is containedIn(validEthnicities) or (lar.applicant.ethnicity.ethnicity1.code is equalTo(0))
+      val x = lar.applicant.ethnicity.ethnicity1 is containedIn(validEthnicities)
+      val y = lar.applicant.ethnicity.ethnicity1 is equalTo(EmptyEthnicityValue)
+      lar.applicant.ethnicity.ethnicity1 is containedIn(validEthnicities) or (lar.applicant.ethnicity.ethnicity1 is equalTo(EmptyEthnicityValue))
     }
 }
