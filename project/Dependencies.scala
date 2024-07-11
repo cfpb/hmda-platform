@@ -56,9 +56,9 @@ object Dependencies {
   lazy val h2                       = "com.h2database"     % "h2"                                   % Version.h2 % Test
   lazy val embeddedPg =
     "ru.yandex.qatools.embed" % "postgresql-embedded" % Version.embeddedPg % Test exclude ("de.flapdoodle.embed", "de.flapdoodle.embed.process")
-  lazy val embeddedPgSupport     = "de.flapdoodle.embed"        % "de.flapdoodle.embed.process" % "2.1.2" % Test
-  lazy val s3Mock                = "com.adobe.testing"          % "s3mock"                      % "2.1.19" % Test
-  lazy val apacheCommonsIO       = "commons-io"                 % "commons-io"                  % "2.6" % Test
+  lazy val embeddedPgSupport     = "de.flapdoodle.embed"        % "de.flapdoodle.embed.process" % Version.embeddedPgSupport % Test
+  lazy val s3Mock                = "com.adobe.testing"          % "s3mock"                      % Version.s3mock % Test
+  lazy val apacheCommonsIO       = "commons-io"                 % "commons-io"                  % Version.apacheCommons % Test
   lazy val keycloakAdapter       = "org.keycloak"               % "keycloak-adapter-core"       % Version.keycloak
   lazy val keycloak              = "org.keycloak"               % "keycloak-core"               % Version.keycloak
   lazy val keycloakAdmin         = "org.keycloak"               % "keycloak-admin-client"       % Version.keycloak
@@ -90,4 +90,7 @@ object Dependencies {
   // overriding the log4j-slf4j bridge used by spring, transitively brought in by s3mock
   // this is needed because of CVE-2021-44228 https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228
   lazy val log4jToSlf4j          = "org.apache.logging.log4j"   % "log4j-to-slf4j"              % Version.log4j % Test
+
+  // Override slf4j to fix logging because older versions under 1.7.x are not compatible
+  lazy val slf4j                 = "org.slf4j"                  % "slf4j-api"                   % Version.slf4j % Test
 }
