@@ -86,9 +86,10 @@ jobs:
 
       - name: Check Test Results
         run: |
-          if [ $(cat log-file | grep -E "TEST FAILED|TESTS FAILED|Failed tests" | wc -l) -gt 0 ]; then
-            echo "Unit tests failed."
+          if [ $(grep 'All tests passed.' log-file | wc -l) -ne 13 ]; then
+            echo "One or more projects had failures. Please review the logs."
             exit 1
           else
-            echo "Unit tests passed."
+            echo "All tests passed."
+            exit 0
           fi
