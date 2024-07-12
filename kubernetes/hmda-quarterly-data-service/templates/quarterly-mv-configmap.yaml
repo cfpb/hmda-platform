@@ -4,7 +4,7 @@ metadata:
   name: {{ include "hmda-quarterly-data-service.fullname" . }}-mv-configmap
 data:
   APP_VOL: app_vol
-  ALL_APP_VOL: all_applications_volume
+  ALL_APP_VOL: all_app_vol
   PERIODS_ANNUAL: 2018,2019,2020,2021,2022,2023
   CRED_SCORE_BY_LOAN: median_credit_score_by_loan_type
   PERIODS_WITH_QUARTER: 2018,2019,2020,2021,2022,2023,2024_q1
