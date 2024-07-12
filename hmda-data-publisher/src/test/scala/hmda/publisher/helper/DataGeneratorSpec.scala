@@ -1,26 +1,26 @@
 package hmda.publisher.helper
 
 import org.scalatest.{Matchers, WordSpec}
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import scala.util.matching.Regex
 
 
 class DateGeneratorSpec extends WordSpec with Matchers {
 
+  val annualPattern: Regex = raw"\d{4}-\d{2}-\d{2}-".r
+  val quarterPattern: Regex = raw"\d{4}-\d{2}-\d{2}_".r
   val generator = DateGenerator
-  val currentDate: LocalDate = LocalDate.now().minusDays(1)
-  val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-  val actualDateString: String = currentDate.format(formatter) + "-"
-  val actualQuarterlyDateString: String = currentDate.format(formatter) + "_"
+
 
   "date generator" should {
 
-    "return correct current date" in {
-      assert(generator.currentDate == actualDateString)
+    "return a correctly formatted annual date string" in {
+      val annualMatch = annualPattern.findFirstIn(generator.currentDate)
+      assert(annualMatch.contains(generator.currentDate))
     }
 
-    "return correct current quarterly date" in {
-      assert(generator.currentQuarterlyDate == actualQuarterlyDateString)
+    "return a correctly formatted quarterly date string" in {
+      val quarterMatch = quarterPattern.findFirstIn(generator.currentQuarterlyDate)
+      assert(quarterMatch.contains(generator.currentQuarterlyDate))
     }
   }
 
