@@ -16,7 +16,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
  * after each test and finally deletes all tables before the suite is complete and tears down the database
  */
 trait EmbeddedPostgres extends BeforeAndAfterAll with BeforeAndAfterEach { self: Suite =>
-  private val embeddedPg = new FixedHostPortGenericContainer("postgres:12")
+  private val testContainer = new FixedHostPortGenericContainer("postgres:12")
   val dbHoconpath        = "embedded-pg"
   val dbConfig           = DatabaseConfig.forConfig[JdbcProfile](dbHoconpath)
 
@@ -48,11 +48,11 @@ trait EmbeddedPostgres extends BeforeAndAfterAll with BeforeAndAfterEach { self:
   }
 
   override protected def beforeAll(): Unit = {
-    embeddedPg.withEnv("POSTGRES_USER", "postgres")
-    embeddedPg.withEnv("POSTGRES_PASSWORD", "postgres")
-    embeddedPg.withEnv("POSTGRES_DB", "postgres")
-    embeddedPg.withFixedExposedPort(5432, 5432)
-    embeddedPg.start()
+    testContainer.withEnv("POSTGRES_USER", "postgres")
+    testContainer.withEnv("POSTGRES_PASSWORD", "postgres")
+    testContainer.withEnv("POSTGRES_DB", "postgres")
+    testContainer.withFixedExposedPort(5432, 5432)
+    testContainer.start()
     executeSQL(removeAllTables)
     loadSqlFileFromResources(bootstrapSqlFile)
     super.beforeAll()
@@ -60,7 +60,7 @@ trait EmbeddedPostgres extends BeforeAndAfterAll with BeforeAndAfterEach { self:
 
   override protected def afterAll(): Unit = {
     executeSQL(removeAllTables)
-    embeddedPg.stop()
+    testContainer.stop()
     super.afterAll()
   }
 
