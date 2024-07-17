@@ -15,7 +15,6 @@ object Version {
   val slickPostgres          = "0.21.1"
   val postgres               = "42.6.0"
   val h2                     = "2.1.214"
-  val embeddedPg             = "2.10"
   val keycloak               = "22.0.1"
   val resteasy               = "6.2.4.Final"
   val jbossLogging           = "3.5.1.Final"
@@ -39,4 +38,5 @@ object Version {
   val diffx                  = "0.4.0"
   val log4j                  = "2.15.0"
   val kubernetesApi          = "15.0.1"
+  val testContainers         = "1.19.8"
 }

@@ -14,22 +14,82 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '11'
           distribution: 'adopt'
 
-      - name: Run Sbt Tests
+      - name: Run hmda-platform Tests
         run: |
-          touch log-file
-          sbt test > log-file
+          sbt "project hmda-platform" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
+      - name: Run check-digit Tests
+        run: |
+          sbt "project check-digit" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
+      - name: Run common Tests
+        run: |
+          sbt "project common" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
+      - name: Run data-browser Tests
+        run: |
+          sbt "project data-browser" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
+      - name: Run hmda-analytics Tests
+        run: |
+          sbt "project hmda-analytics" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
+      - name: Run hmda-data-publisher Tests
+        run: |
+          sbt "project hmda-data-publisher" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
+      - name: Run hmda-quarterly-data-service Tests
+        run: |
+          sbt "project hmda-quarterly-data-service" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
+      - name: Run hmda-reporting Tests
+        run: |
+          sbt "project hmda-reporting" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
+      - name: Run institutions-api Tests
+        run: |
+          sbt "project institutions-api" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
+      - name: Run modified-lar Tests
+        run: |
+          sbt "project modified-lar" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
+      - name: Run rate-limit Tests
+        run: |
+          sbt "project rate-limit" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
+      - name: Run ratespread-calculator Tests
+        run: |
+          sbt "project ratespread-calculator" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
+
+      - name: Run submission-errors Tests
+        run: |
+          sbt "project submission-errors" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
         continue-on-error: true
 
       - name: Check Test Results
         run: |
-          if [ $(cat log-file | grep -E "TEST FAILED|TESTS FAILED|Failed tests" | wc -l) -gt 0 ]; then
-            echo "Unit tests failed."
+          if [ $(grep 'All tests passed.' log-file | wc -l) -ne 13 ]; then
+            echo "One or more projects had failures. Please review the logs."
             exit 1
           else
-            echo "Unit tests passed."
+            echo "All tests passed."
+            exit 0
           fi
