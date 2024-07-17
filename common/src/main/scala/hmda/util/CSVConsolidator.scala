@@ -10,11 +10,11 @@ object CSVConsolidator {
     seqToDeDupe.mkString(",").toLowerCase().trim.split("\\s*,\\s*").distinct.mkString(",")
   }
   def listDeDupeToList(seqToDeDupe: Seq[String]) = {
-    seqToDeDupe.mkString(",").toLowerCase().trim.split("\\s*,\\s*").distinct.toList
+    seqToDeDupe.mkString(",").toLowerCase().trim.split("\\s*,\\s*").distinct.filter(! _.isEmpty).toList
   }
 
    def stringDeDupeToList(stringToDeDupe: String) = {
-    stringToDeDupe.toLowerCase().trim.split("\\s*,\\s*").distinct.toList
+    stringToDeDupe.toLowerCase().trim.split("\\s*,\\s*").distinct.filter(! _.isEmpty).toList
   }
 
    def stringDeDupeToString(stringToDeDupe: String) = {
