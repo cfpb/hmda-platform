@@ -4,7 +4,7 @@ import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
-import hmda.validation.dsl.ValidationResult
+import hmda.validation.dsl.{ValidationResult, ValidationSuccess, ValidationFailure}
 import hmda.validation.rules.EditCheck
 
 object V631_1 extends EditCheck[LoanApplicationRegister] {
@@ -25,7 +25,10 @@ object V631_1 extends EditCheck[LoanApplicationRegister] {
   )
 
   override def apply(lar: LoanApplicationRegister): ValidationResult =
-    when(lar.coApplicant.ethnicity.otherHispanicOrLatino is empty) {
+    if(lar.coApplicant.ethnicity.otherHispanicOrLatino.isEmpty) {
       lar.coApplicant.ethnicity.ethnicity1 is containedIn(validEthnicities)
+    }
+    else {
+      lar.coApplicant.ethnicity.ethnicity1 is containedIn(validEthnicities) or (lar.coApplicant.ethnicity.ethnicity1 is equalTo(EmptyEthnicityValue))
     }
 }

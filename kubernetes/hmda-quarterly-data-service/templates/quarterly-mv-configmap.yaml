@@ -3,11 +3,11 @@ kind: ConfigMap
 metadata:
   name: {{ include "hmda-quarterly-data-service.fullname" . }}-mv-configmap
 data:
-  APP_VOL: applications_volume
-  ALL_APP_VOL: all_applications_volume
-  PERIODS_ANNUAL: 2018,2019,2020,2021,2022
+  APP_VOL: app_vol
+  ALL_APP_VOL: all_app_vol
+  PERIODS_ANNUAL: 2018,2019,2020,2021,2022,2023
   CRED_SCORE_BY_LOAN: median_credit_score_by_loan_type
-  PERIODS_WITH_QUARTER: 2018,2019,2020,2021,2022,2023_q1,2023_q2,2023_q3
+  PERIODS_WITH_QUARTER: 2018,2019,2020,2021,2022,2023,2024_q1
   CRED_SCORE_BY_RE: median_credit_score_by_loan_by_race
   CLTV_BY_LOAN: median_cltv_by_loan_type
   CLTV_BY_RE: median_cltv_by_race

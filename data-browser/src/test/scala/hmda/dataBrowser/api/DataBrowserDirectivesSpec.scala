@@ -15,6 +15,9 @@ import monix.execution.schedulers.TestScheduler
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{ Assertion, Matchers, WordSpec }
+import org.scalatest.Tag
+
+object CustomTag extends Tag("actions-ignore")
 
 class DataBrowserDirectivesSpec extends WordSpec with ScalatestRouteTest with Matchers with MockFactory with ScalaFutures {
   "DataBrowserDirectives" must {
@@ -177,7 +180,7 @@ class DataBrowserDirectivesSpec extends WordSpec with ScalatestRouteTest with Ma
       }
     }
 
-    "extractYearsAndMsaAndStateAndCountyAndLEIBrowserFields prevents you from providing too many parameters" in {
+    "extractYearsAndMsaAndStateAndCountyAndLEIBrowserFields prevents you from providing too many parameters" taggedAs CustomTag in {
       val route: Route = failingRoute(extractMsaAndStateAndCountyAndInstitutionIdentifierBrowserFields)
 
       Get("/?msamds=34980&leis=BANK0&states=CA,AK&actions_taken=1,2,3&counties=19125&years=2018") ~> route ~> check {

@@ -16,8 +16,6 @@ object Version {
   val slickPostgres          = "0.21.1"
   val postgres               = "42.6.0"
   val h2                     = "2.1.214"
-  val embeddedPg             = "2.10"
-  val embeddedPgSupport      = "2.1.2"
   val s3mock                 = "3.9.1"
   val apacheCommons          = "2.6"
   val keycloak               = "22.0.1"
@@ -42,6 +40,11 @@ object Version {
   val scalacheckShapeless    = "1.2.5"
   val diffx                  = "0.4.0"
   val log4j                  = "2.15.0"
+<<<<<<< HEAD
   val slf4j                  = "2.0.13"
   val kubernetesApi          = "21.0.0-legacy"
+=======
+  val kubernetesApi          = "15.0.1"
+  val testContainers         = "1.19.8"
+>>>>>>> master
 }
