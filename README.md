@@ -5,18 +5,18 @@
 
 The [Home Mortgage Disclosure Act (HMDA) Platform](http://ffiec.cfpb.gov/) is a [Regulatory technology](https://en.wikipedia.org/wiki/Regulatory_technology) application for financial institutions to submit mortgage information as described in the [Filing Instruction Guide (FIG)](https://s3.amazonaws.com/cfpb-hmda-public/prod/help/2020-hmda-fig.pdf). The HMDA-Platform parses data as submitted by mortgage leading institutions and validates the information for edits (Syntactical, Validity, Quality, and Macro as-per the instructions in the FIG) before submitting the data. The HMDA-Platform supports [quarterly](https://ffiec.cfpb.gov/documentation/2020/quarterly-filing-dates/) and [yearly](https://ffiec.cfpb.gov/documentation/2019/annual-filing-dates/) filing periods. For detailed information on Home Mortgage Disclosure Act (HMDA), checkout the [About HMDA page](https://www.consumerfinance.gov/policy-compliance/rulemaking/final-rules/regulation-c-home-mortgage-disclosure-act/) on the CFPB website.
 
-[Please watch this short video](https://youtu.be/C_73Swgyc4g) to view how HMDA Platform transforms the data upload, validation, and submission process.
+[Please watch this short video](https://youtu.be/C_73Swgyc4g) to view h ow HMDA Platform transforms the data upload, validation, and submission process.
 
 ## Linked Projects
 
-|  Project | Repo Link  | Description  | 
-|---|---|---|
-| Frontend  |  https://github.com/cfpb/hmda-frontend | ReactJS Front-end repository powering the [HMDA Platform](http://ffiec.cfpb.gov/)  
-| HMDA-Help  | https://github.com/cfpb/hmda-help  | ReactJS Front-end repository powering HMDA Help - used to resolve and troubleshoot issues in filing  |   
-| LARFT | https://github.com/cfpb/hmda-platform-larft  |  Repo for the [Public Facing LAR formatting tool](https://ffiec.cfpb.gov/tools/lar-formatting) |   
-| HMDA Test Files  | https://github.com/cfpb/hmda-test-files  | Repo for automatically generating various different test files for HMDA Data  |   
-| HMDA Census |  https://github.com/cfpb/hmda-census | ETL for geographic and Census data used by the HMDA Platform
-| HMDA Data Science | https://github.com/cfpb/HMDA_Data_Science_Kit | Repo for HMDA Data science work as well as Spark codebase for [Public Facing A&D Reports](https://ffiec.cfpb.gov/data-publication/disclosure-reports/2018)
+|  Project | Repo Link  | Description                                                                                                                                                | 
+|---|---|------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Frontend  |  https://github.com/cfpb/hmda-frontend | ReactJS Front-end repository powering the [HMDA Platform](http://ffiec.cfpb.gov/)                                                                          
+| HMDA-Help  | https://github.com/cfpb/hmda-help  | ReactJS Front-end repository powering HMDA Help - used to resolve and troubleshoot issues in filing                                                        |   
+| LARFT | https://github.com/cfpb/hmda-platform-larft  | Rep o for the [Public Facing LAR formatting tool](https://ffiec.cfpb.gov/tools/lar-formatting)                                                             |   
+| HMDA Test Files  | https://github.com/cfpb/hmda-test-files  | Repo for automatically generating various different test files for HMDA Data                                                                               |   
+| HMDA Census |  https://github.com/cfpb/hmda-census | ETL for geographic and Census data used by the HMDA Platform                                                                                               
+| HMDA Data Science | https://github.com/cfpb/HMDA_Data_Science_Kit | Repo for HMDA Data science work as well as Spark codebase for [Public Facing A&D Reports](https://ffiec.cfpb.gov/data-publication/disclosure-reports/2018) 
 
 ## Contents
 
