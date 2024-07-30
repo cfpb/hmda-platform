@@ -1,7 +1,7 @@
 package hmda.utils
 
 import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach, Suite }
-import ru.yandex.qatools.embed.postgresql.distribution.Version
+import org.testcontainers.containers.FixedHostPortGenericContainer
 import slick.basic.DatabaseConfig
 import slick.dbio.DBIO
 import slick.jdbc.JdbcProfile
@@ -16,7 +16,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
  * after each test and finally deletes all tables before the suite is complete and tears down the database
  */
 trait EmbeddedPostgres extends BeforeAndAfterAll with BeforeAndAfterEach { self: Suite =>
-  private val embeddedPg = new ru.yandex.qatools.embed.postgresql.EmbeddedPostgres(Version.V11_1)
+  private val testContainer = new FixedHostPortGenericContainer("postgres:12")
   val dbHoconpath        = "embedded-pg"
   val dbConfig           = DatabaseConfig.forConfig[JdbcProfile](dbHoconpath)
 
@@ -48,7 +48,11 @@ trait EmbeddedPostgres extends BeforeAndAfterAll with BeforeAndAfterEach { self:
   }
 
   override protected def beforeAll(): Unit = {
-    embeddedPg.start("localhost", 5432, "postgres", "postgres", "postgres")
+    testContainer.withEnv("POSTGRES_USER", "postgres")
+    testContainer.withEnv("POSTGRES_PASSWORD", "postgres")
+    testContainer.withEnv("POSTGRES_DB", "postgres")
+    testContainer.withFixedExposedPort(5432, 5432)
+    testContainer.start()
     executeSQL(removeAllTables)
     loadSqlFileFromResources(bootstrapSqlFile)
     super.beforeAll()
@@ -56,7 +60,7 @@ trait EmbeddedPostgres extends BeforeAndAfterAll with BeforeAndAfterEach { self:
 
   override protected def afterAll(): Unit = {
     executeSQL(removeAllTables)
-    embeddedPg.close()
+    testContainer.stop()
     super.afterAll()
   }
 

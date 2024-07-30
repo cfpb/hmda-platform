@@ -3,7 +3,7 @@ import BuildSettings._
 import sbtassembly.AssemblyPlugin.autoImport.assemblyMergeStrategy
 import com.typesafe.sbt.packager.docker._
 
-lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson, embeddedPg, embeddedPgSupport, apacheCommonsIO, s3Mock,log4jToSlf4j, kubernetesApi)
+lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson, testContainers, apacheCommonsIO, s3Mock,log4jToSlf4j, kubernetesApi)
 
 lazy val sparkDeps =
   Seq(
@@ -57,6 +57,12 @@ lazy val enumeratumDeps = Seq(enumeratum, enumeratumCirce)
 lazy val slickDeps = Seq(slick, slickHikariCP, postgres, h2)
 
 lazy val dockerSettings = Seq(
+  dockerBuildCommand := {
+    //force amd64 Architecture for k8s docker image compatability
+    if (sys.props("os.arch") != "amd64") {
+      dockerExecCommand.value ++ Seq("buildx", "build", "--platform=linux/amd64", "--load") ++ dockerBuildOptions.value :+ "."
+    } else dockerBuildCommand.value
+  },
   Docker / maintainer := "Hmda-Ops",
   dockerBaseImage := "eclipse-temurin:21.0.2_13-jdk-alpine",
   dockerRepository := Some("hmda"),
@@ -66,6 +72,7 @@ lazy val dockerSettings = Seq(
     case other => List(other)
   }
 )
+
 
 lazy val packageSettings = Seq(
   // removes all jar mappings in universal and appends the fat jar
