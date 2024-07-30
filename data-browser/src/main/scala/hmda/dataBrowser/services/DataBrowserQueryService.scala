@@ -2,6 +2,7 @@ package hmda.dataBrowser.services
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.dataBrowser.models._
+import hmda.dataBrowser.models.Aggregation._
 import hmda.dataBrowser.repositories._
 import monix.eval.Task
 import org.slf4j.Logger
@@ -81,25 +82,41 @@ class DataBrowserQueryService(repoLatest: ModifiedLarRepositoryLatest, repo2017:
 
     println("combinations: " + queryFieldCombinations)
 
-    Task.parSequenceUnordered {
-      queryFieldCombinations.map { combination =>
-        val fieldInfos = combination.map(field => FieldInfo(field.name, field.value))
+    val multiGeoCombinationsSeq: Seq[Task[(ServedFrom, List[Aggregation])]] = queryFieldCombinations.map { combination =>
+      val fieldInfos = combination.map(field => FieldInfo(field.name, field.value))
 
-        // the year is a special case as the data selected depends on the year
-        val year = queryFields.year.toInt
-        println("about to get result: " + combination)
+      // the year is a special case as the data selected depends on the year
+      val year = queryFields.year.toInt
+      println("about to get result: " + combination)
+      val geoListTask: Seq[Task[(ServedFrom, Aggregation)]] = geoFilter.getOrElse(QueryField()).values.map { singleGeoCombination =>
+        val singleGeoFilter = geoFilter.getOrElse(QueryField()).copy(values = Seq(singleGeoCombination))
         cacheResult (
-          cacheLookup = cache.find(optLEI.getOrElse(QueryField()), geoFilter.getOrElse(QueryField()), combination, year),
-          onMiss = repo.findAndAggregate(optLEI.getOrElse(QueryField()), geoFilter.getOrElse(QueryField()), combination, year),
-          cacheUpdate = cache.update(optLEI.getOrElse(QueryField()), geoFilter.getOrElse(QueryField()), combination, year, _: Statistic)
+          cacheLookup = cache.find(optLEI.getOrElse(QueryField()), singleGeoFilter, combination, year),
+          onMiss = repo.findAndAggregate(optLEI.getOrElse(QueryField()), singleGeoFilter, combination, year),
+          cacheUpdate = cache.update(optLEI.getOrElse(QueryField()), singleGeoFilter, combination, year, _: Statistic)
         ).map { case (from, statistic) => (from, Aggregation(statistic.count, statistic.sum, fieldInfos)) }
       }
-    }.map(results =>
+
+      val singleGeoCombinations: Task[(ServedFrom, List[Aggregation])] = {
+          val singleGeoTaskList: Task[Seq[(ServedFrom, Aggregation)]] = Task.sequence(geoListTask)
+          singleGeoTaskList.map { results => results.foldLeft((ServedFrom.Cache: ServedFrom, List.empty[Aggregation])) {
+            case ((servedAcc, aggAcc), (nextServed, nextAgg)) =>
+            (servedAcc.combine(nextServed), nextAgg :: aggAcc)
+          }
+        }
+      }
+
+      singleGeoCombinations
+    }
+
+    val multiGeoCombinationsTask: Task[Seq[(ServedFrom, List[Aggregation])]] = Task.sequence(multiGeoCombinationsSeq)
+
+    multiGeoCombinationsTask.map { results => 
       results.foldLeft((ServedFrom.Cache: ServedFrom, List.empty[Aggregation])) {
         case ((servedAcc, aggAcc), (nextServed, nextAgg)) =>
-          (servedAcc.combine(nextServed), nextAgg :: aggAcc)
+          (servedAcc.combine(nextServed), nextAgg ::: aggAcc)
       }
-    )
+    }
   }
 
   override def fetchFilers(queryFields: QueryFields): Task[(ServedFrom, FilerInstitutionResponseLatest)] = {

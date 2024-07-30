@@ -9,9 +9,14 @@ case class FieldInfo(name: String, value: String)
 case class Aggregation(count: Long, sum: Double, fields: List[FieldInfo])
 
 object Aggregation {
+
   private object constants {
     val Count = "count"
     val Sum = "sum"
+  }
+
+  implicit def sumAggregation(aggregation: Aggregation, secondAggregation: Aggregation): Aggregation = {
+    Aggregation(aggregation.count + secondAggregation.count, aggregation.sum + secondAggregation.sum, aggregation.fields)
   }
 
   // Scala => JSON
