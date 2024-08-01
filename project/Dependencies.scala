@@ -84,7 +84,9 @@ object Dependencies {
   lazy val scalacheckShapeless   = "com.github.alexarchambault" %% "scalacheck-shapeless_1.14"  % Version.scalacheckShapeless % Test
   lazy val diffx                 = "com.softwaremill.diffx"     %% "diffx-core"                 % Version.diffx % Test
   lazy val kubernetesApi         = "io.kubernetes"              % "client-java"                 % Version.kubernetesApi
-
+  // https://mvnrepository.com/artifact/software.amazon.msk/aws-msk-iam-auth
+  lazy val mskdriver             = "software.amazon.msk"        %% "aws-msk-iam-auth"           % "1.1.6"
+  
   // overriding the log4j-slf4j bridge used by spring, transitively brought in by s3mock
   // this is needed because of CVE-2021-44228 https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228
   lazy val log4jToSlf4j          = "org.apache.logging.log4j"   % "log4j-to-slf4j"              % Version.log4j % Test
