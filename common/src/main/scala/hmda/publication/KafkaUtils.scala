@@ -12,7 +12,7 @@ import hmda.messages.institution.InstitutionEvents.InstitutionKafkaEvent
 import hmda.serialization.kafka.InstitutionKafkaEventsSerializer
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.{ProducerRecord, Producer => KafkaProducer}
-import org.apache.kafka.common.config.SslConfigs
+import org.apache.kafka.common.config.{SslConfigs,SaslConfigs}
 import org.apache.kafka.common.security.auth.SecurityProtocol
 import org.apache.kafka.common.serialization.StringSerializer
 
@@ -48,10 +48,13 @@ object KafkaUtils {
   private def getKafkaConfig: Map[String, String] = {
     if (!truststoreLocation.isEmpty && !truststorePassword.isEmpty) {
       Map(
-        CommonClientConfigs.SECURITY_PROTOCOL_CONFIG -> SecurityProtocol.SSL.name,
+        CommonClientConfigs.SECURITY_PROTOCOL_CONFIG -> securityprotocol,
+        CommonClientConfigs.DEFAULT_SECURITY_PROTOCOL -> saslmechanism,
         SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG -> truststoreLocation,
         SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG -> truststorePassword,
-        SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG -> endpointIdAlgo
+        SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG -> endpointIdAlgo,
+        SaslConfigs.SASL_JAAS_CONFIG -> sasljaasconfig,
+        SaslConfigs.SASL_CLIENT_CALLBACK_HANDLER_CLASS -> saslclientcallbackhandler      
       )
     } else {
       Map()
