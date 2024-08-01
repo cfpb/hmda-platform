@@ -31,7 +31,7 @@ lazy val akkaDeps = Seq(
   akkaTestkitTyped,
   akkaStreamsTestKit,
   akkaCors,
-  mskdriver
+  mskdriver,
   akkaKafkaStreams,
   embeddedKafka,
   alpakkaS3,
