@@ -53,8 +53,9 @@ object KafkaUtils {
         SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG -> truststoreLocation,
         SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG -> truststorePassword,
         SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG -> endpointIdAlgo,
+        SaslConfigs.SASL_MECHANISM -> saslmechanism,
         SaslConfigs.SASL_JAAS_CONFIG -> sasljaasconfig,
-        SaslConfigs.SASL_CLIENT_CALLBACK_HANDLER_CLASS -> saslclientcallbackhandler      
+        SaslConfigs.SASL_CLIENT_CALLBACK_HANDLER_CLASS -> saslclientcallbackhandler
       )
     } else {
       Map()
