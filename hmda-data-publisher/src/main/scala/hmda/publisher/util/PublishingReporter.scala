@@ -49,7 +49,12 @@ class PublishingReporter(context: ActorContext[PublishingReporter.Command], repo
     entries
       .map(e =>
         e.status match {
-          case Status.Success => s"Pushed ${e.fileName} to S3 at ${e.time} with ${e.numOfRecords.getOrElse("?")} rows"
+          case Status.Success => e.numOfRecords match {
+            case e.numOfRecords.isEmpty == true =>
+              s"Pushed ${e.fileName} to S3 at ${e.time} with an unknown amount of rows - please check file manually"
+            case _ =>
+              s"Pushed ${e.fileName} to S3 at ${e.time} with ${e.numOfRecords.getOrElse("?")} rows"
+          }
           case Status.Error(message) =>
             s"Pushing ${e.fileName} to S3 at ${e.time} with ${e.numOfRecords.getOrElse("?")} rows failed with message: ${message}"
         }
