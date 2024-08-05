@@ -48,15 +48,15 @@ object Dependencies {
   lazy val circeGeneric             = "io.circe"           %% "circe-generic"                       % Version.circe
   lazy val circeParser              = "io.circe"           %% "circe-parser"                        % Version.circe
   lazy val akkaPersistenceCassandra = "com.typesafe.akka"  %% "akka-persistence-cassandra"          % Version.cassandraPluginVersion
-  lazy val cassandraLauncher        = "com.typesafe.akka"  %% "akka-persistence-cassandra-launcher" % Version.cassandraPluginVersion
+  lazy val cassandraLauncher        = "com.typesafe.akka"  %% "akka-persistence-cassandra-launcher" % Version.cassandraLauncher
   lazy val slick                    = "com.typesafe.slick" %% "slick"                               % Version.slick
   lazy val slickHikariCP            = "com.typesafe.slick" %% "slick-hikaricp"                      % Version.slick
   lazy val alpakkaSlick             = "com.lightbend.akka" %% "akka-stream-alpakka-slick"           % Version.alpakka
   lazy val postgres                 = "org.postgresql"     % "postgresql"                           % Version.postgres
   lazy val h2                       = "com.h2database"     % "h2"                                   % Version.h2 % Test
   lazy val testContainers        = "org.testcontainers"         % "testcontainers"              % Version.testContainers % "test"
-  lazy val s3Mock                = "com.adobe.testing"          % "s3mock"                      % "2.1.19" % Test
-  lazy val apacheCommonsIO       = "commons-io"                 % "commons-io"                  % "2.6" % Test
+  lazy val s3Mock                = "com.adobe.testing"          % "s3mock"                      % Version.s3mock % Test
+  lazy val apacheCommonsIO        = "commons-io"                % "commons-io"                  % Version.apacheCommons % Test
   lazy val keycloakAdapter       = "org.keycloak"               % "keycloak-adapter-core"       % Version.keycloak
   lazy val keycloak              = "org.keycloak"               % "keycloak-core"               % Version.keycloak
   lazy val keycloakAdmin         = "org.keycloak"               % "keycloak-admin-client"       % Version.keycloak
@@ -88,4 +88,7 @@ object Dependencies {
   // overriding the log4j-slf4j bridge used by spring, transitively brought in by s3mock
   // this is needed because of CVE-2021-44228 https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228
   lazy val log4jToSlf4j          = "org.apache.logging.log4j"   % "log4j-to-slf4j"              % Version.log4j % Test
+
+  // Override slf4j to fix logging because older versions under 1.7.x are not compatible
+  lazy val slf4j                 = "org.slf4j"                  % "slf4j-api"                   % Version.slf4j % Test
 }

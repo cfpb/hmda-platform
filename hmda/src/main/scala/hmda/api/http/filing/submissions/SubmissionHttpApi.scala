@@ -11,7 +11,7 @@ import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
 import akka.util.{ ByteString, Timeout }
 import com.typesafe.config.Config
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.PathMatchers._
 import hmda.api.http.directives.CreateFilingAuthorization._

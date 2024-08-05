@@ -1,16 +1,17 @@
 package hmda.api.http
 
-import akka.actor.typed.{ ActorSystem, Behavior }
-import akka.actor.{ CoordinatedShutdown, ActorSystem => ClassicActorSystem }
+import akka.actor.typed.{ActorSystem, Behavior}
+import akka.actor.{CoordinatedShutdown, ActorSystem => ClassicActorSystem}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.stream.Materializer
-import hmda.api.http.public.{ HmdaFileValidationHttpApi, LarValidationHttpApi, TsValidationHttpApi, HmdaFileParsingHttpApi }
+import hmda.api.http.public.{HmdaFileParsingHttpApi, HmdaFileValidationHttpApi, LarValidationHttpApi, TsValidationHttpApi}
 import hmda.api.http.routes.BaseHttpApi
 import hmda.api.http.directives.HmdaTimeDirectives._
+
 import scala.concurrent.ExecutionContext
 import akka.http.scaladsl.server.Directives._
 import akka.actor.typed.scaladsl.adapter._
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
 
 // This is just a Guardian for starting up the API
 // $COVERAGE-OFF$
