@@ -17,7 +17,6 @@ object Version {
   val slickPostgres          = "0.21.1"
   val postgres               = "42.6.0"
   val h2                     = "2.1.214"
-  val s3mock                 = "2.17.0"//"2.1.19" //"3.9.1"
   val apacheCommons          = "2.6"
   val keycloak               = "22.0.1"
   val resteasy               = "6.2.4.Final"
