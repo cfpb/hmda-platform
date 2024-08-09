@@ -20,7 +20,6 @@ object BuildSettings {
       version := buildVersion,
       scalaVersion := buildScalaVersion,
       scalacOptions ++= Seq("-Xlint", "-deprecation", "-unchecked", "-feature", "-Ymacro-annotations"),
-      envVars ++= Map("JDK_JAVA_OPTIONS" -> "--add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.util.concurrent=ALL-UNNAMED --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED"),
       assembly / aggregate := false,
       Test / parallelExecution:= false,
       Test / fork := true,

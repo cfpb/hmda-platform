@@ -1,4 +1,4 @@
-import sbt._
+import sbt.*
 
 object Dependencies {
 
@@ -26,11 +26,11 @@ object Dependencies {
   lazy val akkaStreamTyped          = "com.typesafe.akka"   %% "akka-stream-typed"           % Version.akka
   lazy val akkaStreamsTestKit       = "com.typesafe.akka"   %% "akka-stream-testkit"         % Version.akka % Test
   lazy val akkaHttp                 = "com.typesafe.akka"   %% "akka-http"                   % Version.akkaHttp
-  lazy val akkaHttp2                = "com.typesafe.akka"   %% "akka-http2-support"          % Version.akkaHttp
+  lazy val akkaHttp2                = "com.typesafe.akka"   %% "akka-http2-support"          % Version.akkaHttp2Support
+  lazy val akkaHttpXml              = "com.typesafe.akka"   %% "akka-http-xml"               % Version.akkaHttp
   lazy val akkaHttpTestkit          = "com.typesafe.akka"   %% "akka-http-testkit"           % Version.akkaHttp % Test
   lazy val akkaHttpSprayJson        = "com.typesafe.akka"   %% "akka-http-spray-json"        % Version.akkaHttp
   lazy val slickPostgres            = "com.github.tminglei" %% "slick-pg"                    % Version.slickPostgres
-  lazy val akkaHttpXml              = "com.typesafe.akka"   %% "akka-http-xml"               % Version.akkaHttp
   lazy val akkaHttpCirce            = "de.heikoseeberger"   %% "akka-http-circe"             % Version.akkaHttpJson
   lazy val akkaManagementClusterBootstrap =
     "com.lightbend.akka.management" %% "akka-management-cluster-bootstrap" % Version.akkaClusterManagement exclude ("com.typesafe.akka", "akka-http") exclude ("com.typesafe.akka", "akka-http-xml")
@@ -88,7 +88,4 @@ object Dependencies {
   // overriding the log4j-slf4j bridge used by spring, transitively brought in by s3mock
   // this is needed because of CVE-2021-44228 https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228
   lazy val log4jToSlf4j          = "org.apache.logging.log4j"   % "log4j-to-slf4j"              % Version.log4j % Test
-
-  // Override slf4j to fix logging because older versions under 1.7.x are not compatible
-  lazy val slf4j                 = "org.slf4j"                  % "slf4j-api"                   % Version.slf4j % Test
 }

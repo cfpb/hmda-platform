@@ -3,7 +3,7 @@ import BuildSettings._
 import sbtassembly.AssemblyPlugin.autoImport.assemblyMergeStrategy
 import com.typesafe.sbt.packager.docker._
 
-lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson, testContainers, apacheCommonsIO, s3Mock,log4jToSlf4j, slf4j, kubernetesApi)
+lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson, testContainers, apacheCommonsIO, s3Mock, log4jToSlf4j, kubernetesApi)
 
 lazy val sparkDeps =
   Seq(
@@ -50,7 +50,7 @@ lazy val akkaPersistenceDeps =
   )
 
 lazy val akkaHttpDeps =
-  Seq(akkaHttp, akkaHttp2, akkaHttpTestkit, akkaStreamsTestKit, akkaHttpCirce, akkaHttpXml)
+  Seq(akkaHttp, akkaHttp2, akkaHttpXml, akkaHttpTestkit, akkaStreamsTestKit, akkaHttpCirce)
 lazy val circeDeps      = Seq(circe, circeGeneric, circeParser)
 lazy val enumeratumDeps = Seq(enumeratum, enumeratumCirce)
 
