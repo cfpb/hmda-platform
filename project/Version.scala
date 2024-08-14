@@ -1,6 +1,6 @@
 object Version {
 
-  val logback                = "1.2.1"
+  val logback                = "1.5.6"
   val scalaTest              = "3.0.8"
   val scalaCheck             = "1.17.0"
   val akka                   = "2.8.5"
