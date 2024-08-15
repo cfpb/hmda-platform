@@ -17,7 +17,7 @@ import io.lettuce.core.{ ClientOptions, RedisClient }
 import monix.eval.Task
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
