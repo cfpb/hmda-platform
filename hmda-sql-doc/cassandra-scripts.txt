@@ -403,6 +403,9 @@ CREATE TABLE hmda2_journal_beta.metadata (
     AND min_index_interval = 128
     AND speculative_retry = '99PERCENTILE';
 
+CREATE TABLE hmda2_journal.journal_export (last_export_timebucket text PRIMARY KEY);
+INSERT INTO hmda2_journal.journal_export (last_export_timebucket) VALUES ('0000000000000');
+
 CREATE KEYSPACE hmda2_snapshot_beta WITH replication = {'class': 'NetworkTopologyStrategy', 'dc1': '3'}  AND durable_writes = true;
 CREATE TABLE hmda2_snapshot_beta.snapshot (
     persistence_id text,
