@@ -34,7 +34,7 @@ services:
 
   # ------------- Cassandra -------------
   cassandra:
-    image: "cassandra:3.11.4"
+    image: "cassandra:5"
     ports:
       - "9042:9042"
     logging:
