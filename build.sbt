@@ -817,3 +817,6 @@ lazy val `hmda-quarterly-data-service` = (project in file ("hmda-quarterly-data-
   )
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(`hmda-protocol` % "compile->compile;test->test")
+
+libraryDependencies += "org.apache.zookeeper" % "zookeeper" % "3.8.4"
+dependencyOverrides in ThisBuild += "org.apache.zookeeper" % "zookeeper" % "3.8.4"
