@@ -1,7 +1,7 @@
 name: HMDA Docker Hub Image Push
 
 on:
-  pull_request:
+  push:
     branches:
       - master
 
