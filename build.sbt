@@ -817,3 +817,6 @@ lazy val `hmda-quarterly-data-service` = (project in file ("hmda-quarterly-data-
   )
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(`hmda-protocol` % "compile->compile;test->test")
+
+libraryDependencies += "org.quartz-scheduler" % "quartz" % "2.5.0-rc1"
+dependencyOverrides in ThisBuild += "org.quartz-scheduler" % "quartz" % "2.5.0-rc1"
