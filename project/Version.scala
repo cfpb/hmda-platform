@@ -42,4 +42,5 @@ object Version {
   val log4j                  = "2.15.0"
   val kubernetesApi          = "21.0.0-legacy"
   val testContainers         = "1.19.8"
+  val quartzScheduler        = "2.5.0-rc1"
 }
