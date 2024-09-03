@@ -87,7 +87,7 @@ object ValidationFlow extends ColumnDataFormatter {
       case "syntactical-validity" =>
         validationEngine.checkSyntactical(tsLar, tsLar.uli, validationContext, TsValidationError)
       case "quality" =>
-        validationEngine.checkQuality(tsLar, tsLar.uli)
+        validationEngine.checkQuality(tsLar, tsLar.uli, validationContext)
     }
     errors.leftMap(xs => addTsFieldInformation(tsLar.ts, xs.toList, Option(Institution.empty), period)).toEither
   }
@@ -117,7 +117,7 @@ object ValidationFlow extends ColumnDataFormatter {
               )
 
           case "quality" =>
-            validationEngine.checkQuality(lar, lar.loan.ULI)
+            validationEngine.checkQuality(lar, lar.loan.ULI, ctx)
         }
       (lar, errors)
     }.map(x => x._2.leftMap(xs => addLarFieldInformation(x._1, xs.toList, period)).toEither)

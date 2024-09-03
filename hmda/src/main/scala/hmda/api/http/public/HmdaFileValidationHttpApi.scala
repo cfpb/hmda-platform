@@ -114,12 +114,12 @@ private class HmdaFileValidationHttpApi(implicit mat: Materializer) {
           (index, lar, LarCsvParser(lar))
       }
       .map {
-        case (i, larString, Right(lar)) => Right(validateLar(lar, checkType, year, None))
+        case (i, larString, Right(lar)) => Right(validateLar(lar, checkType, year, None, None))
         case (i, lar, Left(errors)) =>
           Left(ParserErrorUtils.parserValidationErrorSummaryConvertor(i, Some(lar), errors))
       }
 
-  private def validateLar(lar: LoanApplicationRegister, checkType: String, year: Int, quarter: Option[String]): Option[List[ValidationError]] = {
+  private def validateLar(lar: LoanApplicationRegister, checkType: String, year: Int, quarter: Option[String], ts: Option[TransmittalSheet]): Option[List[ValidationError]] = {
     val ctx              = ValidationContext(filingPeriod = Some(Period(year, quarter)))
     val validationEngine = selectLarEngine(year, None)
     import validationEngine._
@@ -128,7 +128,7 @@ private class HmdaFileValidationHttpApi(implicit mat: Materializer) {
       case "syntactical" =>
         checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
       case "validity" => checkValidity(lar, lar.loan.ULI, ctx, LarValidationError)
-      case "quality"  => checkQuality(lar, lar.loan.ULI)
+      case "quality"  => checkQuality(lar, lar.loan.ULI, ctx)
     }
 
     val maybeErrors = validation.leftMap(xs => xs.toList).toEither
