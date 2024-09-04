@@ -41,6 +41,11 @@ parsed_census_df = pd.read_csv(args.censusfile, sep=',', header=None, usecols=cf
                                converters=cfconverters).rename(cfcolnames, axis=1)
 logging.info(f"Parsed {args.censusfile}")
 
+root, ext = os.path.splitext(args.delineationfile)
+prepared_file = f"{root}-prepared{ext}"
+data_pattern = r'\d+,\d*,\d*,"[^"]+",[\w\s]+,("[^"]+")?,("[^"]+")?,[^,]+,[\w\s]+,\d+,\d+,\w+'
+prepare_file(args.delineationfile, prepared_file, data_pattern)
+
 delineation_file_columns = {
     3: ["CBSATitle", conv_str], 5: ["MDTitle", conv_optstr],
     9: ["FIPSStateCode", conv_dgstr], 10: ["FIPSCountyCode", conv_dgstr]
@@ -48,14 +53,10 @@ delineation_file_columns = {
 dfkeys = delineation_file_columns.keys()
 dfcolnames = {k: v[0] for k, v in delineation_file_columns.items()}
 dfconverters = {k: v[1] for k, v in delineation_file_columns.items()}
-
-root, ext = os.path.splitext(args.delineationfile)
-prepared_file = f"{root}-prepared{ext}"
-data_pattern = r'\d+,\d*,\d*,"[^"]+",[\w\s]+,("[^"]+")?,("[^"]+")?,[^,]+,[\w\s]+,\d+,\d+,\w+'
-prepare_file(args.delineationfile, prepared_file, data_pattern)
 parsed_delin_df = pd.read_csv(prepared_file, sep=',', header=None, usecols=dfkeys,
                                converters=dfconverters).rename(dfcolnames, axis=1)
 logging.info(f"Parsed {prepared_file}")
+
 parsed_delin_df["MSAOrMDTitle"] = parsed_delin_df.apply(lambda row:
     row.MDTitle if pd.notna(row.MDTitle) else row.CBSATitle, axis=1)
 parsed_delin_df.drop(columns=["CBSATitle", "MDTitle"], inplace=True)
