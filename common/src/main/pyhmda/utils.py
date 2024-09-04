@@ -54,7 +54,7 @@ def conv_pct(val: str) -> float:
     return float(normalize(val))
 
 
-def conv_optpct(val: Any) -> Any:
+def conv_optpct(val: str) -> Any:
     val = normalize(val)
     return float(val) if val else pd.NA
 
