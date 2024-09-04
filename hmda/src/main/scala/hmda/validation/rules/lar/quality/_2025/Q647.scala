@@ -9,11 +9,19 @@ import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateHmda._
 import hmda.validation.dsl.PredicateSyntax._
 
-object Q647 extends EditCheck[LoanApplicationRegister] {
+object Q647 {
+  def withContext(ctx: ValidationContext): EditCheck[LoanApplicationRegister] = {
+    IfTsPresentIn(ctx) { new Q647(_) }
+  }
+
+}
+
+class Q647 private (ts: TransmittalSheet) extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q647"
 
-  override def parent: String = "Q647"
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    exemptionTaken(lar) is equalTo(false)
+    when (ts.agency.code not equalTo(7)) {
+        exemptionTaken(lar) is equalTo(false)
+    }
   }
 }
