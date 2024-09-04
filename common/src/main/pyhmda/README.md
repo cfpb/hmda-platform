@@ -44,10 +44,11 @@ This utility parses Conforming Loan Limit (CLL) files produced annually by the F
 
 ```
 (.venv) $ parse_census_file.py -h
-usage: parse_census_file [-h] [-v] [-o OUTPUT_FILE] censusfile
+usage: parse_census_file [-h] [-v] [-o OUTPUT_FILE] censusfile delineationfile
 
 positional arguments:
   censusfile
+  delineationfile
 
 options:
   -h, --help            show this help message and exit
