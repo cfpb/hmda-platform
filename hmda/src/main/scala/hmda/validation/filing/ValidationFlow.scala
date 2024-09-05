@@ -178,7 +178,7 @@ object ValidationFlow extends ColumnDataFormatter {
 
   def validateAsyncLarFlow(
                             checkType: String,
-                            period: Period
+                            period: Period, validationContext: ValidationContext
                           )(implicit mat: Materializer, ec: ExecutionContext): Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
     val validationEngine = selectLarEngine(period.year, period.quarter)
     collectLar
@@ -188,7 +188,7 @@ object ValidationFlow extends ColumnDataFormatter {
             case "syntactical-validity" =>
               validationEngine.checkValidityAsync(lar, lar.loan.ULI)
             case "quality" =>
-              validationEngine.checkQualityAsync(lar, lar.loan.ULI)
+              validationEngine.checkQualityAsync(lar, lar.loan.ULI, validationContext)
           }
         futValidation
       }

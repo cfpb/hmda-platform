@@ -23,7 +23,7 @@ private[engine] trait ValidationEngine[A] extends ValidationApi[A] {
 
   def asyncChecks: Vector[AsyncEditCheck[A]] = Vector.empty
 
-  def asyncQualityChecks: Vector[AsyncEditCheck[A]] = Vector.empty
+  def asyncQualityChecks(ctx: ValidationContext): Vector[AsyncEditCheck[A]] = Vector.empty
 
   def checkAll(a: A, id: String, ctx: ValidationContext, validationErrorEntity: ValidationErrorEntity): HmdaValidation[A] = {
     val validations = (
@@ -43,17 +43,21 @@ private[engine] trait ValidationEngine[A] extends ValidationApi[A] {
     if (validityChecks(ctx).isEmpty) Validated.valid(a)
     else runChecks(a, validityChecks(ctx), Validity, validationErrorEntity, id)
 
-  def checkQuality(a: A, id: String, ctx: ValidationContext): HmdaValidation[A] =
+  def checkQuality(a: A, id: String, ctx: ValidationContext): HmdaValidation[A] = {
+    println("check quality")
     if (qualityChecks(ctx).isEmpty) Validated.valid(a)
     else runChecks(a, qualityChecks(ctx), Quality, LarValidationError, id)
+  }
 
   def checkValidityAsync(a: A, id: String)(implicit mat: Materializer, ec: ExecutionContext): Future[HmdaValidation[A]] =
     if (asyncChecks.isEmpty) Future.successful(Validated.valid(a))
     else runAsyncChecks(a, asyncChecks, Validity, LarValidationError, id)
 
-  def checkQualityAsync(a: A, id: String)(implicit mat: Materializer, ec: ExecutionContext): Future[HmdaValidation[A]] =
-    if (asyncQualityChecks.isEmpty) Future.successful(Validated.valid(a))
-    else runAsyncChecks(a, asyncQualityChecks, Quality, LarValidationError, id)
+  def checkQualityAsync(a: A, id: String, ctx: ValidationContext)(implicit mat: Materializer, ec: ExecutionContext): Future[HmdaValidation[A]] = {
+    println("check quality async")
+    if (asyncQualityChecks(ctx).isEmpty) Future.successful(Validated.valid(a))
+    else runAsyncChecks(a, asyncQualityChecks(ctx), Quality, LarValidationError, id)
+  }
 
   private def runChecks(
                          a: A,

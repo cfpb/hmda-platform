@@ -30,6 +30,6 @@ object PredicateHmda {
         lar.denial.denialReason1 == ExemptDenialReason || lar.denial.denialReason2 == ExemptDenialReason || lar.denial.denialReason3 == ExemptDenialReason || lar.denial.denialReason4 == ExemptDenialReason ||
         lar.nonAmortizingFeatures.interestOnlyPayments == InterestOnlyPaymentExempt || lar.lineOfCredit == ExemptLineOfCredit || lar.property.manufacturedHomeLandPropertyInterest == ManufacturedHomeLoanPropertyInterestExempt ||
         lar.property.manufacturedHomeSecuredProperty == ManufacturedHomeSecuredExempt || lar.reverseMortgage == ExemptMortgageType || lar.nonAmortizingFeatures.negativeAmortization == NegativeAmortizationExempt || lar.nonAmortizingFeatures.otherNonAmortizingFeatures == OtherNonAmortizingFeaturesExempt ||
-        lar.payableToInstitution == PayableToInstitutionExempt || lar.loan.interestRate == "Exempt"
+        lar.payableToInstitution == PayableToInstitutionExempt || lar.loan.interestRate == "Exempt" || lar.geography.zipCode=="Exempt" || lar.geography.city=="Exempt" || lar.geography.street=="Exempt" || lar.geography.state=="Exempt"
   }
 }
