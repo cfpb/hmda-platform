@@ -42,18 +42,18 @@ package object engine {
 
   def selectLarEngine(year: Int, quarter: Option[String]): ValidationEngine[LoanApplicationRegister] =
     (year, quarter) match {
-      case (2018, None)    => LarEngine2018
-      case (2019, None)    => LarEngine2019
-      case (2020, None)    => LarEngine2020
-      case (2020, Some(_)) => LarEngine2020Q
-      case (2021, None)    => LarEngine2021
-      case (2021, Some(_)) => LarEngine2021Q
-      case (2022, Some(_)) => LarEngine2022Q
-      case (2022, None)    => LarEngine2022
-      case (2023, Some(_)) => LarEngine2023Q
-      case (2023, None)    => LarEngine2023
-      case (2024, Some(_)) => LarEngine2024Q
-      case (2024, None)    => LarEngine2024
+      case (2018, None)     => LarEngine2018
+      case (2019, None)     => LarEngine2019
+      case (2020, None)     => LarEngine2020
+      case (2020, Some(_))  => LarEngine2020Q
+      case (2021, None)     => LarEngine2021
+      case (2021, Some(_))  => LarEngine2021Q
+      case (2022, Some(_))  => LarEngine2022Q
+      case (2022, None)     => LarEngine2022
+      case (2023, Some(_))  => LarEngine2023Q
+      case (2023, None)     => LarEngine2023
+      case (2024, Some(_))  => LarEngine2024Q
+      case (2024, None) => LarEngine2024
       case _ =>
         LarEngine2022 // TODO: determine what engine to pick if the user enters a year that is not covered
     }

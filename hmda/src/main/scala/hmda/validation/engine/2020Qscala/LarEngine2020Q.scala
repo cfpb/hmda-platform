@@ -236,7 +236,7 @@ private[engine] object LarEngine2020Q extends ValidationEngine[LoanApplicationRe
     V716.withIndexedCounties(CensusRecords.indexedCounty2020)
   )
 
-  override val qualityChecks = Vector(
+  override def qualityChecks(ctx: ValidationContext) = Vector(
     Q601,
     Q602,
     Q603.withIndexedSmallCounties(CensusRecords.indexedSmallCounty2020),

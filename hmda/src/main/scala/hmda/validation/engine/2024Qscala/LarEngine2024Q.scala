@@ -13,7 +13,7 @@ private[engine] object LarEngine2024Q extends ValidationEngine[LoanApplicationRe
 
   override def validityChecks(ctx: ValidationContext) = LarEngine2024.validityChecks(ctx) ++ Vector(V627.withIndexedCounties(CensusRecords.indexedCounty2024))
 
-  override val qualityChecks = LarEngine2024.qualityChecks
+  override def qualityChecks(ctx: ValidationContext) = LarEngine2024.qualityChecks(ctx: ValidationContext)
   
 }
 // $COVERAGE-ON$
