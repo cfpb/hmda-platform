@@ -6,17 +6,17 @@ import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 
 class Q651_2Spec extends LarEditCheckSpec {
-  override def check: EditCheck[LoanApplicationRegister] = Q651-2
+  override def check: EditCheck[LoanApplicationRegister] = Q651_2
 
   property(
-    "CLTV should not be between 0 and 1") {
+    "CLTV should be under 150") {
     
     forAll(larGen) { lar =>
         lar.copy(loan = lar.loan.copy(combinedLoanToValueRatio = "NA")).mustPass
-        lar.copy(loan = lar.loan.copy(combinedLoanToValueRatio = "149.99")).mustPass
+        lar.copy(loan = lar.loan.copy(combinedLoanToValueRatio = "149")).mustPass
         lar.copy(loan = lar.loan.copy(combinedLoanToValueRatio = "0")).mustPass
-        lar.copy(loan = lar.loan.copy(combinedLoanToValueRatio = "1.50")).mustFail
-        lar.copy(loan = lar.loan.copy(combinedLoanToValueRatio = "1.51")).mustFail
+        lar.copy(loan = lar.loan.copy(combinedLoanToValueRatio = "150")).mustFail
+        lar.copy(loan = lar.loan.copy(combinedLoanToValueRatio = "151")).mustFail
 
     }
   }
