@@ -154,6 +154,9 @@ private class HmdaFileValidationHttpApi(implicit mat: Materializer) {
 
       case "validity" =>
         checkValidity(ts, ts.LEI, ctx, TsValidationError)
+      
+      case "quality" =>
+        checkQuality(ts, ts.LEI, ctx)
     }
 
     val maybeErrors = validation.leftMap(xs => xs.toList).toEither
