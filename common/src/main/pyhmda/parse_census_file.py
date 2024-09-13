@@ -39,6 +39,8 @@ cfcolnames = {k: v[0] for k, v in census_file_columns.items()}
 cfconverters = {k: v[1] for k, v in census_file_columns.items()}
 parsed_census_df = pd.read_csv(args.censusfile, sep=',', header=None, usecols=cfkeys,
     converters=cfconverters)[cfkeys].rename(cfcolnames, axis=1)
+parsed_census_df = apply_authorized_modifications(census_file_authorized_modifications,
+                                                  parsed_census_df)
 logging.info(f"Parsed {args.censusfile}")
 
 root, ext = os.path.splitext(args.delineationfile)
@@ -54,7 +56,7 @@ dfkeys = delineation_file_columns.keys()
 dfcolnames = {k: v[0] for k, v in delineation_file_columns.items()}
 dfconverters = {k: v[1] for k, v in delineation_file_columns.items()}
 parsed_delin_df = pd.read_csv(prepared_file, sep=',', header=None, usecols=dfkeys,
-                               converters=dfconverters).rename(dfcolnames, axis=1)
+                              converters=dfconverters).rename(dfcolnames, axis=1)
 logging.info(f"Parsed {prepared_file}")
 
 parsed_delin_df["MSAOrMDTitle"] = parsed_delin_df.apply(lambda row:
@@ -66,6 +68,8 @@ output_file = args.output_file if args.output_file \
     else f"{os.path.splitext(args.censusfile)[0]}-parsed.txt"
 output_df = parsed_census_df.merge(parsed_delin_df,
     how="left", on=["FIPSStateCode", "FIPSCountyCode"])
+output_df["MSAOrMDTitle"] = output_df.apply(lambda row:
+    "" if row.CBSACode == "99999" else row.MSAOrMDTitle, axis=1)
 output_df.to_csv(output_file, sep='|', index=False)
 logging.info(f"Wrote output file {output_file}")
 os.remove(prepared_file)
