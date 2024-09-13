@@ -39,6 +39,8 @@ cfcolnames = {k: v[0] for k, v in census_file_columns.items()}
 cfconverters = {k: v[1] for k, v in census_file_columns.items()}
 parsed_census_df = pd.read_csv(args.censusfile, sep=',', header=None, usecols=cfkeys,
     converters=cfconverters)[cfkeys].rename(cfcolnames, axis=1)
+parsed_census_df = apply_authorized_modifications(census_file_authorized_modifications,
+                                                  parsed_census_df)
 logging.info(f"Parsed {args.censusfile}")
 
 root, ext = os.path.splitext(args.delineationfile)
