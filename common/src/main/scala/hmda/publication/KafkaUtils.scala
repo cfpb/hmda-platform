@@ -13,7 +13,7 @@ import hmda.serialization.kafka.InstitutionKafkaEventsSerializer
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.{ProducerRecord, Producer => KafkaProducer}
 import org.apache.kafka.common.config.{SslConfigs,SaslConfigs}
-import org.apache.kafka.common.security.auth.SecurityProtocol
+//import org.apache.kafka.common.security.auth.SecurityProtocol
 import org.apache.kafka.common.serialization.StringSerializer
 
 import scala.concurrent.Future
@@ -22,9 +22,13 @@ object KafkaUtils {
 
   val config     = ConfigFactory.load()
   val kafkaHosts = config.getString("kafka.hosts")
-  val truststoreLocation = config.getString("kafka.ssl.truststore.location")
-  val truststorePassword = config.getString("kafka.ssl.truststore.password")
-  val endpointIdAlgo = config.getString("kafka.ssl.endpoint")
+  // val truststoreLocation = config.getString("kafka.ssl.truststore.location")
+  // val truststorePassword = config.getString("kafka.ssl.truststore.password")
+  // val endpointIdAlgo = config.getString("kafka.ssl.endpoint")
+  val securityprotocol = config.getString("kafka.security.protocol")
+  val saslmechanism = config.getString("kafka.sasl.mechanism")
+  val sasljaasconfig= config.getString("kafka.sasl.jaas.config")
+  val saslclientcallbackhandler= config.getString("kafka.sasl.client.callback.handler.class")
 
   def getStringKafkaProducer(system: ActorSystem[_]): KafkaProducer[String, String] = {
 
@@ -46,13 +50,18 @@ object KafkaUtils {
   }
 
   private def getKafkaConfig: Map[String, String] = {
-    if (!truststoreLocation.isEmpty && !truststorePassword.isEmpty) {
+
+    if( !securityprotocol.isEmpty) {
+    //if (!truststoreLocation.isEmpty && !truststorePassword.isEmpty) {
       Map(
+        //CommonClientConfigs.SECURITY_PROTOCOL_CONFIG -> SecurityProtocol.SSL.name,
         CommonClientConfigs.SECURITY_PROTOCOL_CONFIG -> securityprotocol,
         CommonClientConfigs.DEFAULT_SECURITY_PROTOCOL -> saslmechanism,
-        SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG -> truststoreLocation,
-        SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG -> truststorePassword,
-        SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG -> endpointIdAlgo,
+
+        //SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG -> truststoreLocation,
+        //SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG -> truststorePassword,
+        //SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG -> endpointIdAlgo,
+
         SaslConfigs.SASL_MECHANISM -> saslmechanism,
         SaslConfigs.SASL_JAAS_CONFIG -> sasljaasconfig,
         SaslConfigs.SASL_CLIENT_CALLBACK_HANDLER_CLASS -> saslclientcallbackhandler
