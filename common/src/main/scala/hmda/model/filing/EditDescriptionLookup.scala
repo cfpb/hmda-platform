@@ -33,6 +33,10 @@ object EditDescriptionLookup {
     config.getString("hmda.filing.2024Quarter.edits.descriptions.filename")
   val editDescriptionFileName2024 =
     config.getString("hmda.filing.2024.edits.descriptions.filename")
+  val editDescriptionFileName2025Quarter =
+    config.getString("hmda.filing.2025Quarter.edits.descriptions.filename")
+  val editDescriptionFileName2025 =
+    config.getString("hmda.filing.2025.edits.descriptions.filename")
   def editDescriptionList(file: Iterable[String]): Iterable[EditDescription] =
     file
       .drop(1)
@@ -59,6 +63,8 @@ object EditDescriptionLookup {
   val editDescriptionLines2023 = fileLines(s"/$editDescriptionFileName2023")
   val editDescriptionLines2024Quarter = fileLines(s"/$editDescriptionFileName2024Quarter")
   val editDescriptionLines2024 = fileLines(s"/$editDescriptionFileName2024")
+  val editDescriptionLines2025Quarter = fileLines(s"/$editDescriptionFileName2025Quarter")
+  val editDescriptionLines2025 = fileLines(s"/$editDescriptionFileName2025")
 
 
   val editDescriptionMap2018        = editDescriptionMap(editDescriptionLines2018)
@@ -73,6 +79,8 @@ object EditDescriptionLookup {
   val editDescriptionMap2023 = editDescriptionMap(editDescriptionLines2023)
   val editDescriptionMap2024Quarter = editDescriptionMap(editDescriptionLines2024Quarter)
   val editDescriptionMap2024 = editDescriptionMap(editDescriptionLines2024)
+  val editDescriptionMap2025Quarter = editDescriptionMap(editDescriptionLines2025Quarter)
+  val editDescriptionMap2025 = editDescriptionMap(editDescriptionLines2025)
 
 
   def mapForPeriod(period: Period): Map[String, EditDescription] =
@@ -89,6 +97,8 @@ object EditDescriptionLookup {
       case Period(2023, None) => editDescriptionMap2023
       case Period(2024, Some(_)) => editDescriptionMap2024Quarter
       case Period(2024, None) => editDescriptionMap2024
+      case Period(2025, Some(_)) => editDescriptionMap2025Quarter
+      case Period(2025, None) => editDescriptionMap2025
       case _                     => editDescriptionMap2021
     }
 
