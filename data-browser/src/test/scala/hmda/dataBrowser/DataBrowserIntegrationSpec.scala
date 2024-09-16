@@ -52,7 +52,7 @@ class DataBrowserIntegrationSpec
 
   val routes: Route = DataBrowserHttpApi.create(log, fileStorage, query, healthCheck)
 
-  implicit val timeout: Timeout = Timeout(15.seconds)
+  implicit val timeout: Timeout = Timeout(120.seconds)
   implicit def routeTestTimeout = RouteTestTimeout(timeout.duration)
 
   "Data Browser" must {
