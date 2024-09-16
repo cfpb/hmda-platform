@@ -16,6 +16,11 @@ import org.scalatest.{ Matchers, WordSpec }
 import org.slf4j.LoggerFactory
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
+import akka.util.Timeout
+import scala.concurrent.duration._
+import akka.http.scaladsl.testkit.RouteTestTimeout
+
+
 
 class DataBrowserIntegrationSpec
   extends WordSpec
@@ -46,6 +51,9 @@ class DataBrowserIntegrationSpec
   val healthCheck: HealthCheckService = mock[HealthCheckService]
 
   val routes: Route = DataBrowserHttpApi.create(log, fileStorage, query, healthCheck)
+
+  implicit val timeout: Timeout = Timeout(15.seconds)
+  implicit def routeTestTimeout = RouteTestTimeout(timeout.duration)
 
   "Data Browser" must {
     "respond to health checks" in {
