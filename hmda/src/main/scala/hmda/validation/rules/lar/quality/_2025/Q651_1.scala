@@ -16,7 +16,8 @@ object Q651_1 extends EditCheck[LoanApplicationRegister] {
 
   override def apply(lar: LoanApplicationRegister): ValidationResult ={
 
-    val cltv= lar.loan.combinedLoanToValueRatio
+
+    val cltv=  Try(lar.loan.combinedLoanToValueRatio.toDouble).getOrElse(0.0)
     when((cltv is numeric) and (cltv is greaterThan(0))) { cltv not lessThan(1.5) }
   }
 }
