@@ -12,15 +12,14 @@ object Q621 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q621"
 
   override def parent: String = "Q621"
-  // valid number between 4 and 12 digits
-  val regex1 = "^\\d{4,12}$"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    if (lar.larIdentifier.NMLSRIdentifier.matches(regex1) ) {
-      ValidationSuccess
-    } else
-    {
-      ValidationFailure
-    }
+
+    val NMLSRLen = lar.larIdentifier.NMLSRIdentifier.length
+    val nmlsRID = lar.larIdentifier.NMLSRIdentifier
+
+      (NMLSRLen is lessThanOrEqual(12)) and
+      (NMLSRLen is greaterThanOrEqual(4)) and
+      ( nmlsRID is numeric)
   }
 }
