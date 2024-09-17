@@ -1,4 +1,5 @@
 
+from datetime import datetime
 import logging
 import pandas as pd
 import re
@@ -60,6 +61,8 @@ def conv_optpct(val: str) -> Any:
 
 
 def prepare_file(read_file: str, write_file: str, pattern: str, expected_match: float=0.95) -> None:
+    """Performs preprocessing on source files to insure clean reads by pandas.
+    """
     lc, mc = 0, 0
     with open(read_file, 'r') as rf:
         with open(write_file, 'w') as wf:
@@ -71,3 +74,25 @@ def prepare_file(read_file: str, write_file: str, pattern: str, expected_match: 
     if mc < expected_match * lc:
         sys.exit(f"{read_file} pattern matched only {mc} of {lc} lines")
     logging.info(f"Prepared file {write_file}")
+
+
+def apply_authorized_modifications(modmap: dict, df: pd.DataFrame) -> pd.DataFrame:
+    """Applies modifications to non-CFPB-owned source data files on directions of outside agencies.
+    """
+    for mod_date in sorted(modmap.keys()):
+        df = modmap[mod_date](df)
+    return df
+
+
+# Census Flat File Modifications
+
+def replace_MedianAge_2002_values(df: pd.DataFrame) -> pd.DataFrame:
+    df.loc[df["MedianAge"] == 2002, "MedianAge"] = 6
+    return df
+
+
+# Modifications to published Census Flat Files directed by the US Census Bureau.
+census_file_authorized_modifications = {
+    datetime(2024, 9, 1) : replace_MedianAge_2002_values
+}
+

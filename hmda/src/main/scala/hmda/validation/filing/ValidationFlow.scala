@@ -66,6 +66,8 @@ object ValidationFlow extends ColumnDataFormatter {
             validationEngine.checkSyntactical(ts, ts.LEI, validationContext, TsValidationError)
           case "validity" =>
             validationEngine.checkValidity(ts, ts.LEI, validationContext, TsValidationError)
+          case "quality" =>
+            validationEngine.checkQuality(ts, ts.LEI, validationContext)
         }
         (ts, errors)
       }
@@ -143,6 +145,17 @@ object ValidationFlow extends ColumnDataFormatter {
       val fieldMap =
         error.editName match {
           case "S303" =>
+            ListMap(
+              affectedFields.map(field =>
+                (
+                  field,
+                  "Provided: " + ts.valueOf(field) + ", Expected: " + institution
+                    .getOrElse(Institution.empty)
+                    .valueOf(field)
+                )
+              ): _*
+            )
+          case "Q303" =>
             ListMap(
               affectedFields.map(field =>
                 (
