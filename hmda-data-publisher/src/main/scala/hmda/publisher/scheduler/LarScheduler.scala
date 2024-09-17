@@ -59,6 +59,8 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
   val indexTractMap2021: Map[String, Census] = CensusRecords.indexedTract2021
   val indexTractMap2022: Map[String, Census] = CensusRecords.indexedTract2022
   val indexTractMap2023: Map[String, Census] = CensusRecords.indexedTract2023
+  val indexTractMap2024: Map[String, Census] = CensusRecords.indexedTract2024
+  val indexTractMap2025: Map[String, Census] = CensusRecords.indexedTract2024
 
 
   val annualRepos = larAvailableYears.map(yr => yr -> {
@@ -235,7 +237,9 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
       case 2021 => indexTractMap2021
       case 2022 => indexTractMap2022
       case 2023 => indexTractMap2023
-      case _ => indexTractMap2023
+      case 2024 => indexTractMap2024
+      case 2025 => indexTractMap2025
+      case _ => indexTractMap2024
     }
     val censusResult = indexTractMap.getOrElse(hmdaGeoTract, Census())
     val censusID =
