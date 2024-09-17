@@ -10,9 +10,9 @@ object V695_3 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V695-3"
 
   override def parent: String = "V695"
-
-  // valid number between 4 and 12 digits
+   // valid number between 4 and 12 digits
   val regex1 = "^\\d{4,12}$"
+
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
     if (lar.larIdentifier.NMLSRIdentifier.matches(regex1) ) {
