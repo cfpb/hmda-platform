@@ -86,12 +86,23 @@ trait ColumnDataFormatter {
       value
     }
 
+
+  def toValidBigInt(value: String): BigInt =
+    if (validBigInt(value)) {
+      BigInt(value).bigInteger
+    } else {
+      0
+    }
   // on conversion of institution names to CSV, we must wrap names that include commas to avoid parsing issues in double quotes
   def escapeCommas(value: String): String = (s""""$value"""")
 
 
   def validNum(str: String): Boolean =
     !throwsNFE(BigDecimal(str).bigDecimal.toPlainString)
+
+  def validBigInt(str: String): Boolean =
+    !throwsNFE(BigInt(str).bigInteger.toString())
+
 
   def throwsNFE(formatAttempt: => Any): Boolean =
     try { formatAttempt; false } catch { case _: NumberFormatException => true }
