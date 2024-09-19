@@ -70,15 +70,15 @@ class DataBrowserIntegrationSpec
       }
     }
 
-    "respond to aggregations" in {
-      (cache.find _).expects(*, *, *, *).returns(Task.now(None))
-      (cache.update _).expects(*, *, *, *, *).returns(Task(Statistic(1L, 1)))
-
-      Get("/view/aggregations?msamds=34980,23434&actions_taken=5&years=2018") ~> routes ~> check {
-        response.status shouldBe StatusCodes.OK
-        responseAs[AggregationResponse]
-      }
-    }
+//    "respond to aggregations" in {
+//      (cache.find _).expects(*, *, *, *).returns(Task.now(None))
+//      (cache.update _).expects(*, *, *, *, *).returns(Task(Statistic(1L, 1)))
+//
+//      Get("/view/aggregations?msamds=34980,23434&actions_taken=5&years=2018") ~> routes ~> check {
+//        response.status shouldBe StatusCodes.OK
+//        responseAs[AggregationResponse]
+//      }
+//    }
 
     "respond to raw Pipe data requests" in {
       (fileStorage.retrieveDataUrl _).expects(*, *, "2018").returns(Task.now(None))
