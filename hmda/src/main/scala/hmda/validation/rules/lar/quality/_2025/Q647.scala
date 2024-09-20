@@ -20,7 +20,7 @@ class Q647 private (ts: TransmittalSheet) extends EditCheck[LoanApplicationRegis
   override def name: String = "Q647"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    when (ts.agency.code not equalTo(7)) {
+    when (ts.agency.code is equalTo(7)) {
         exemptionTaken(lar) is equalTo(false)
     }
   }

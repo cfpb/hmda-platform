@@ -17,7 +17,7 @@ object Q621 extends EditCheck[LoanApplicationRegister] {
 
     val NMLSRLen = lar.larIdentifier.NMLSRIdentifier.length
     val nmlsRID = lar.larIdentifier.NMLSRIdentifier
-    
+
     when (nmlsRID not oneOf("Exempt", "NA")){
       (NMLSRLen is lessThanOrEqual(12)) and
         (NMLSRLen is greaterThanOrEqual(4))
