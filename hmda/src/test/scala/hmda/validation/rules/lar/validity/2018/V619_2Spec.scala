@@ -4,11 +4,10 @@ import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
-import hmda.validation.rules.lar.validity._2018.V619_2
-
+import hmda.validation.rules.lar.validity.common.V619_2
 
 class V619_2Spec extends LarEditCheckSpec {
-  override def check: EditCheck[LoanApplicationRegister] = V619_2
+  override def check: EditCheck[LoanApplicationRegister] = V619_2.withYear("2018")
 
   property("Action taken date must be in the current year") {
     forAll(larGen) { lar =>
