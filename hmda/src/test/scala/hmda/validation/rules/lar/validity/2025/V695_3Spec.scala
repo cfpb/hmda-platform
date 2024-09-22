@@ -32,8 +32,8 @@ class V695_3Spec extends LarEditCheckSpec {
     val larFailAnotherAlt =lar.copy(larIdentifier = lar.larIdentifier.copy(NMLSRIdentifier = "45.56"))
     larFailAnotherAlt.mustFail
 
-//    val larFailFinal =lar.copy(larIdentifier = lar.larIdentifier.copy(NMLSRIdentifier = "Whazam"))
-//    larFailFinal.mustFail
+    val larFailFinal =lar.copy(larIdentifier = lar.larIdentifier.copy(NMLSRIdentifier = "Whazam"))
+    larFailFinal.mustFail
 
 
   }
