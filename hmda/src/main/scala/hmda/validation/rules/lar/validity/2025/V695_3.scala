@@ -1,6 +1,7 @@
 package hmda.validation.rules.lar.validity._2025
 
 import hmda.model.filing.lar.LoanApplicationRegister
+import hmda.parser.filing.ts.TsCsvParser.toValidBigInt
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.dsl.ValidationResult
@@ -15,11 +16,14 @@ object V695_3 extends EditCheck[LoanApplicationRegister] {
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
 
-    val NMLSRLen = lar.larIdentifier.NMLSRIdentifier.length
-    val nmlsRID = lar.larIdentifier.NMLSRIdentifier
-  when (nmlsRID not oneOf("Exempt", "NA")){
-    (NMLSRLen is lessThanOrEqual(12)) and
-      (NMLSRLen is greaterThanOrEqual(4))
+    val nmlsrLen = lar.larIdentifier.NMLSRIdentifier.length
+    val nmlsrID = lar.larIdentifier.NMLSRIdentifier
+  when (nmlsrID not oneOf("Exempt", "NA")  ){
+
+    (nmlsrLen is lessThanOrEqual(12)) and
+      (nmlsrLen is greaterThanOrEqual(4))  and
+      (toValidBigInt(nmlsrID) is greaterThan(0)) and
+      (nmlsrID not double)
   }
   }
 
