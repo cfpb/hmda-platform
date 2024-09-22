@@ -1,6 +1,7 @@
 package hmda.validation.rules.lar.quality._2025
 
 import hmda.model.filing.lar.LoanApplicationRegister
+import hmda.parser.filing.ts.TsCsvParser.toValidBigDecimal
 import hmda.validation.dsl.ValidationResult
 import hmda.validation.rules.EditCheck
 import hmda.validation.dsl.PredicateHmda._
@@ -16,9 +17,14 @@ object Q616_3 extends EditCheck[LoanApplicationRegister] {
   override def parent: String = "Q616"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    val discountPoints = BigDecimal(Try(lar.loanDisclosure.discountPoints.toDouble).getOrElse(0.0))
+
+
+
+    val discountPoints = toValidBigDecimal(lar.loanDisclosure.discountPoints)
     val fifteenPercentLoanAmount = (lar.loan.amount * 0.15).setScale(2, BigDecimal.RoundingMode.HALF_UP)
 
-    discountPoints is lessThan(fifteenPercentLoanAmount)
+    println("discountpoints :"+discountPoints)
+    println("15percenrt: "+fifteenPercentLoanAmount)
+    discountPoints is  lessThanOrEqual(fifteenPercentLoanAmount)
   }
 }

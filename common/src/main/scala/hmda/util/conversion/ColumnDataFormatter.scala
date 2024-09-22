@@ -93,6 +93,13 @@ trait ColumnDataFormatter {
     } else {
       0
     }
+
+  def toValidBigDecimal(value: String): BigDecimal =
+    if (validBigDecimal(value)) {
+      BigDecimal(value).bigDecimal
+    } else {
+      0.0
+    }
   // on conversion of institution names to CSV, we must wrap names that include commas to avoid parsing issues in double quotes
   def escapeCommas(value: String): String = (s""""$value"""")
 
@@ -103,6 +110,8 @@ trait ColumnDataFormatter {
   def validBigInt(str: String): Boolean =
     !throwsNFE(BigInt(str).bigInteger.toString())
 
+  def validBigDecimal(str: String): Boolean =
+    !throwsNFE(BigDecimal(str).bigDecimal.toString())
 
   def throwsNFE(formatAttempt: => Any): Boolean =
     try { formatAttempt; false } catch { case _: NumberFormatException => true }
