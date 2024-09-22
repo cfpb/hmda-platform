@@ -18,13 +18,9 @@ object Q616_3 extends EditCheck[LoanApplicationRegister] {
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
 
-
-
     val discountPoints = toValidBigDecimal(lar.loanDisclosure.discountPoints)
     val fifteenPercentLoanAmount = (lar.loan.amount * 0.15).setScale(2, BigDecimal.RoundingMode.HALF_UP)
 
-    println("discountpoints :"+discountPoints)
-    println("15percenrt: "+fifteenPercentLoanAmount)
     discountPoints is  lessThanOrEqual(fifteenPercentLoanAmount)
   }
 }
