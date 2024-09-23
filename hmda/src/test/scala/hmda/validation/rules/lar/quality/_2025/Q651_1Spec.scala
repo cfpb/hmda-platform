@@ -6,7 +6,7 @@ import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 
 class Q651_1Spec extends LarEditCheckSpec {
-  override def check: EditCheck[LoanApplicationRegister] = Q651_2
+  override def check: EditCheck[LoanApplicationRegister] = Q651_1
 
   property(
     "The CLTV reported is greater than 0 but less than 1.5") {
