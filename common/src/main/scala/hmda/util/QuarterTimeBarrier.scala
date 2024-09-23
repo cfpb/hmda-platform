@@ -103,7 +103,7 @@ object QuarterTimeBarrier {
       case Period(2023, Some("Q3")) => actionTakenDateLocal.isBetween(q32023StartDate, q32023EndDate)
       case Period(2023, None) => true
 
-      //Action Taken Date is on of before the end date of Q1 2024
+      //Action Taken Date is on or before the end date of Q1 2024
       case Period(2024, Some("Q1")) => actionTakenDateLocal.isOnOrBefore(q12024EndDate)
       // Action Taken Date is after Q1 2022 Ends and on/before Q2 2023 filing ends
       case Period(2024, Some("Q2")) => actionTakenDateLocal.isBetween(q22024StartDate, q22024EndDate)
@@ -111,7 +111,7 @@ object QuarterTimeBarrier {
       case Period(2024, Some("Q3")) => actionTakenDateLocal.isBetween(q32024StartDate, q32024EndDate)
       case Period(2024, None) => true
 
-      //Action Taken Date is on of before the end date of Q1 2023
+      //Action Taken Date is on or before the end date of Q1 2023
       case Period(2025, Some("Q1")) => actionTakenDateLocal.isOnOrBefore(q12025EndDate)
       // Action Taken Date is after Q1 2022 Ends and on/before Q2 2023 filing ends
       case Period(2025, Some("Q2")) => actionTakenDateLocal.isBetween(q22025StartDate, q22025EndDate)
