@@ -8,7 +8,7 @@ import hmda.validation.rules.lar.validity.common.V619_2
 import hmda.validation.rules.lar.quality.{_2020 => quality2020, _2021 => quality2021, _2022 => quality2022}
 import hmda.validation.rules.lar.quality.common._
 import hmda.validation.rules.lar.syntactical.{S300, S301}
-import hmda.validation.rules.lar.validity.{_2020, _2022, _2023, _}
+import hmda.validation.rules.lar.validity.{_2020, _2022, _}
 import hmda.census.records.CensusRecords
 
 private[engine] object LarEngine2023 extends ValidationEngine[LoanApplicationRegister] {
