@@ -27,7 +27,7 @@ class Q616_3Spec extends LarEditCheckSpec {
 
       val larPassAlt =lar.copy(loan = lar.loan.copy(amount = 645245.00),
         loanDisclosure = lar.loanDisclosure.copy(discountPoints = "4586.75"))
-      larPass.mustPass
+    larPassAlt.mustPass
 
       val larFailAlt =lar.copy(loan = lar.loan.copy(amount = 645245.00),
         loanDisclosure = lar.loanDisclosure.copy(discountPoints = "444586.75"))
