@@ -96,10 +96,10 @@ class Q646Spec extends LarEditCheckSpec {
     val larPassList   = larNGen(1).suchThat(_.nonEmpty).sample.getOrElse(Nil)
     val larPass = larPassList(0)
 
-    val larApplicationSubmissionExemptPass =larPass.copy(applicationSubmission = SubmittedDirectlyToInstitution,
+    val larAllPass =larPass.copy(applicationSubmission = SubmittedDirectlyToInstitution,
       ausResult = larPass.ausResult.copy(ausResult1 = ApproveEligible,ausResult2 = ApproveEligible,ausResult3 = ApproveEligible,ausResult4 = ApproveEligible,ausResult5 = ApproveEligible),
       AUS = larPass.AUS.copy(aus1 = DesktopUnderwriter,aus2 = DesktopUnderwriter,aus3 = DesktopUnderwriter,aus4 = DesktopUnderwriter,aus5 = DesktopUnderwriter),
-      nonAmortizingFeatures = larPass.nonAmortizingFeatures.copy(balloonPayment = BalloonPayment,negativeAmortization = NegativeAmortization,otherNonAmortizingFeatures = OtherNonFullyAmortizingFeatures),
+      nonAmortizingFeatures = larPass.nonAmortizingFeatures.copy(balloonPayment = BalloonPayment,interestOnlyPayments = InterestOnlyPayment,negativeAmortization = NegativeAmortization,otherNonAmortizingFeatures = OtherNonFullyAmortizingFeatures),
       businessOrCommercialPurpose = PrimarilyBusinessOrCommercialPurpose,
       applicant = larPass.applicant.copy(creditScoreType = EquifaxBeacon5),
       coApplicant = larPass.coApplicant.copy(creditScoreType = EquifaxBeacon5),
@@ -109,11 +109,9 @@ class Q646Spec extends LarEditCheckSpec {
       reverseMortgage = NotReverseMortgage,
       property = larPass.property.copy(manufacturedHomeLandPropertyInterest = DirectOwnership,manufacturedHomeSecuredProperty = ManufacturedHomeAndLand)
       )
+    println(larAllPass.toCSV)
+ 
 
-    larApplicationSubmissionExemptPass.mustPass
-
-
-
-
+    larAllPass.mustPass
   }
 }
