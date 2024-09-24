@@ -93,6 +93,27 @@ class Q646Spec extends LarEditCheckSpec {
     val larSecuredPropertyFail = larAlt.copy( property = larAlt.property.copy(manufacturedHomeSecuredProperty = ManufacturedHomeSecuredExempt))
     larSecuredPropertyFail.mustFail
 
+    val larPassList   = larNGen(1).suchThat(_.nonEmpty).sample.getOrElse(Nil)
+    val larPass = larPassList(0)
+
+    val larApplicationSubmissionExemptPass =larPass.copy(applicationSubmission = SubmittedDirectlyToInstitution,
+      ausResult = larPass.ausResult.copy(ausResult1 = ApproveEligible,ausResult2 = ApproveEligible,ausResult3 = ApproveEligible,ausResult4 = ApproveEligible,ausResult5 = ApproveEligible),
+      AUS = larPass.AUS.copy(aus1 = DesktopUnderwriter,aus2 = DesktopUnderwriter,aus3 = DesktopUnderwriter,aus4 = DesktopUnderwriter,aus5 = DesktopUnderwriter),
+      nonAmortizingFeatures = larPass.nonAmortizingFeatures.copy(balloonPayment = BalloonPayment,negativeAmortization = NegativeAmortization,otherNonAmortizingFeatures = OtherNonFullyAmortizingFeatures),
+      businessOrCommercialPurpose = PrimarilyBusinessOrCommercialPurpose,
+      applicant = larPass.applicant.copy(creditScoreType = EquifaxBeacon5),
+      coApplicant = larPass.coApplicant.copy(creditScoreType = EquifaxBeacon5),
+      denial = larPass.denial.copy(denialReason1 = DebtToIncomeRatio,denialReason2 = DebtToIncomeRatio,denialReason3 = DebtToIncomeRatio,denialReason4 = DebtToIncomeRatio),
+      payableToInstitution = InititallyPayableToInstitution,
+      lineOfCredit = OpenEndLineOfCredit,
+      reverseMortgage = NotReverseMortgage,
+      property = larPass.property.copy(manufacturedHomeLandPropertyInterest = DirectOwnership,manufacturedHomeSecuredProperty = ManufacturedHomeAndLand)
+      )
+
+    larApplicationSubmissionExemptPass.mustPass
+
+
+
 
   }
 }
