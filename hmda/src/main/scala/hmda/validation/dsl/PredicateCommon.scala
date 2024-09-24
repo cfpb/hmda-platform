@@ -62,6 +62,13 @@ object PredicateCommon {
         "'alphanumeric' doesn't handle non-number/string values yet")
   }
 
+  def double[A]: Predicate[A] = (_: A) match {
+    case s: String => s.matches("\\d+\\.\\d+")
+    case _ =>
+      throw new NotImplementedError(
+        "'alphanumeric' doesn't handle non-number/string values yet")
+  }
+
   def empty[A]: Predicate[A] = (_: A) match {
     case s: String => s.isEmpty
     case _ =>
