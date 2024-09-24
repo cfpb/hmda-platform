@@ -1,4 +1,4 @@
-package hmda.validation.rules.ts.quality
+package hmda.validation.rules.ts.quality._2025
 
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.institution.Institution

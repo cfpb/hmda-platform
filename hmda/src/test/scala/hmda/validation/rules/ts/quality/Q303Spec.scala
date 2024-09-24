@@ -6,6 +6,7 @@ import hmda.validation.rules.EditCheck
 import hmda.validation.rules.ts.TsEditCheckSpec
 import hmda.model.filing.ts.TsGenerators._
 import hmda.validation.context.ValidationContext
+import hmda.validation.rules.ts.quality._2025.Q303
 
 class Q303Spec extends TsEditCheckSpec {
 
