@@ -10,6 +10,7 @@ import hmda.validation.rules.lar.validity._
 import hmda.validation.rules.lar.validity._2020
 import hmda.census.records.CensusRecords
 import hmda.validation.rules.lar.validity._2020.V716
+import hmda.validation.rules.lar.validity.common.V619_2
 
 private[engine] object LarEngine2020Q extends ValidationEngine[LoanApplicationRegister] {
 
@@ -43,7 +44,7 @@ private[engine] object LarEngine2020Q extends ValidationEngine[LoanApplicationRe
     V617,
     V618,
     V619_1,
-    _2020.V619_2,
+    V619_2.withYear("2020"),
     V619_3,
     V620,
     V621,
