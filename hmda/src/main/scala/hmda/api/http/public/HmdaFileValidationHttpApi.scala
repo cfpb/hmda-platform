@@ -128,7 +128,7 @@ private class HmdaFileValidationHttpApi(implicit mat: Materializer) {
       case "syntactical" =>
         checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
       case "validity" => checkValidity(lar, lar.loan.ULI, ctx, LarValidationError)
-      case "quality"  => checkQuality(lar, lar.loan.ULI)
+      case "quality"  => checkQuality(lar, lar.loan.ULI, ctx)
     }
 
     val maybeErrors = validation.leftMap(xs => xs.toList).toEither
@@ -154,6 +154,9 @@ private class HmdaFileValidationHttpApi(implicit mat: Materializer) {
 
       case "validity" =>
         checkValidity(ts, ts.LEI, ctx, TsValidationError)
+      
+      case "quality" =>
+        checkQuality(ts, ts.LEI, ctx)
     }
 
     val maybeErrors = validation.leftMap(xs => xs.toList).toEither

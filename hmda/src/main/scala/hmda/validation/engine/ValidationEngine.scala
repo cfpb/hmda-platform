@@ -19,17 +19,17 @@ private[engine] trait ValidationEngine[A] extends ValidationApi[A] {
 
   def validityChecks(ctx: ValidationContext): Vector[EditCheck[A]] = Vector.empty
 
-  def qualityChecks: Vector[EditCheck[A]] = Vector.empty
+  def qualityChecks(ctx: ValidationContext): Vector[EditCheck[A]] = Vector.empty
 
   def asyncChecks: Vector[AsyncEditCheck[A]] = Vector.empty
 
-  def asyncQualityChecks: Vector[AsyncEditCheck[A]] = Vector.empty
+  def asyncQualityChecks(ctx: ValidationContext): Vector[AsyncEditCheck[A]] = Vector.empty
 
   def checkAll(a: A, id: String, ctx: ValidationContext, validationErrorEntity: ValidationErrorEntity): HmdaValidation[A] = {
     val validations = (
       checkSyntactical(a, id, ctx, validationErrorEntity),
       checkValidity(a, id, ctx, validationErrorEntity),
-      checkQuality(a, id)
+      checkQuality(a, id, ctx)
       ).mapN { case (_, _, q) => q }
 
     validations
@@ -43,17 +43,19 @@ private[engine] trait ValidationEngine[A] extends ValidationApi[A] {
     if (validityChecks(ctx).isEmpty) Validated.valid(a)
     else runChecks(a, validityChecks(ctx), Validity, validationErrorEntity, id)
 
-  def checkQuality(a: A, id: String): HmdaValidation[A] =
-    if (qualityChecks.isEmpty) Validated.valid(a)
-    else runChecks(a, qualityChecks, Quality, LarValidationError, id)
+  def checkQuality(a: A, id: String, ctx: ValidationContext): HmdaValidation[A] = {
+    if (qualityChecks(ctx).isEmpty) Validated.valid(a)
+    else runChecks(a, qualityChecks(ctx), Quality, LarValidationError, id)
+  }
 
   def checkValidityAsync(a: A, id: String)(implicit mat: Materializer, ec: ExecutionContext): Future[HmdaValidation[A]] =
     if (asyncChecks.isEmpty) Future.successful(Validated.valid(a))
     else runAsyncChecks(a, asyncChecks, Validity, LarValidationError, id)
 
-  def checkQualityAsync(a: A, id: String)(implicit mat: Materializer, ec: ExecutionContext): Future[HmdaValidation[A]] =
-    if (asyncQualityChecks.isEmpty) Future.successful(Validated.valid(a))
-    else runAsyncChecks(a, asyncQualityChecks, Quality, LarValidationError, id)
+  def checkQualityAsync(a: A, id: String, ctx: ValidationContext)(implicit mat: Materializer, ec: ExecutionContext): Future[HmdaValidation[A]] = {
+    if (asyncQualityChecks(ctx).isEmpty) Future.successful(Validated.valid(a))
+    else runAsyncChecks(a, asyncQualityChecks(ctx), Quality, LarValidationError, id)
+  }
 
   private def runChecks(
                          a: A,
