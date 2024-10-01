@@ -18,7 +18,7 @@ object Version {
   val postgres               = "42.6.0"
   val h2                     = "2.1.214"
   val apacheCommons          = "2.6"
-  val keycloak               = "22.0.1"
+  val keycloak               = "25.0.3"
   val resteasy               = "6.2.4.Final"
   val jbossLogging           = "3.5.1.Final"
   val httpcomponents         = "4.5.14"
