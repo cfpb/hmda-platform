@@ -16,13 +16,15 @@ import hmda.parser.filing.ts.TsCsvParser
 import hmda.util.SourceUtils._
 import hmda.validation.filing.MacroValidationFlow._
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
+import akka.stream.Materializer
+import akka.actor.ActorSystem
 
 import scala.concurrent.Future
 
 class MacroValidationFlowSpec extends AsyncWordSpec with MustMatchers with BeforeAndAfterAll {
 
-  implicit val system       = ActorSystem().toTyped
-  implicit val materializer = Materializer(system)
+  implicit val system:ActorSystem       = ActorSystem().toTyped
+  implicit val materializer:Materializer = Materializer(system)
   implicit val ec           = system.executionContext
 
   override def afterAll(): Unit =

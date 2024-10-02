@@ -6,7 +6,6 @@ import akka.actor.typed.scaladsl.adapter._
 import akka.kafka.scaladsl.Consumer.DrainingControl
 import akka.kafka.scaladsl.{ Committer, Consumer }
 import akka.kafka.{ CommitterSettings, ConsumerSettings, Subscriptions }
-import akka.stream.Materializer
 import akka.stream.scaladsl.{ Keep, Sink, Source }
 import com.typesafe.config.ConfigFactory
 import hmda.institution.api.http.HmdaInstitutionQueryApi
@@ -18,8 +17,10 @@ import hmda.serialization.kafka.InstitutionKafkaEventsDeserializer
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.LoggerFactory
+import scala.concurrent.ExecutionContext
 
 import scala.concurrent.Future
+import akka.stream.Materializer
 
 // $COVERAGE-OFF$
 object HmdaInstitutionApi extends App {
@@ -37,9 +38,9 @@ object HmdaInstitutionApi extends App {
 
   val config = ConfigFactory.load()
 
-  implicit val system       = ActorSystem("hmda-institutions")
-  implicit val materializer = Materializer(system)
-  implicit val ec           = system.dispatcher
+  implicit val system: ActorSystem      = ActorSystem("hmda-institutions")
+  implicit val materializer: Materializer = Materializer(system)
+  implicit val ec: ExecutionContext          = system.dispatcher
 
   val host = config.getString("hmda.institution.http.host")
   val port = config.getString("hmda.institution.http.port")

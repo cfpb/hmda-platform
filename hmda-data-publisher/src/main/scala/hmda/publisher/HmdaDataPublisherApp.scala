@@ -27,7 +27,7 @@ object HmdaDataPublisherApp extends App with PGTableNameLoader {
     """.stripMargin
   )
 
-  implicit val actorSystem = ActorSystem("hmda-data-publisher")
+  implicit val actorSystem: akka.actor.ActorSystem = ActorSystem("hmda-data-publisher")
   implicit val ec: ExecutionContext = actorSystem.dispatcher
   val config               = actorSystem.settings.config
 

@@ -41,7 +41,7 @@ private class HmdaFileValidationHttpApi(implicit mat: Materializer) {
   private val validateYearRoute =
     path("validate" / IntNumber ) { year =>
       post {
-        parameters('check.as[String] ? "all") { checkType =>
+        parameters(Symbol("check").as[String] ? "all") { checkType =>
           fileUpload("file") {
             case (_, byteSource) =>
               val processF =

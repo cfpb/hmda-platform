@@ -69,8 +69,8 @@ object HmdaPlatform extends App {
   implicit val classic: ClassicActorSystem = ClassicActorSystem(clusterConfig.getString("hmda.cluster.name"), clusterConfig)
   implicit val system: ActorSystem[_]      = classic.toTyped
 
-  implicit val mat     = Materializer(system)
-  implicit val cluster = Cluster(system)
+  implicit val mat: akka.stream.Materializer     = Materializer(system)
+  implicit val cluster: akka.cluster.typed.Cluster = Cluster(system)
 
   if (runtimeMode == "dcos" || runtimeMode == "kubernetes" || runtimeMode == "docker-compose" || runtimeMode == "kind") {
     ClusterBootstrap(system).start()

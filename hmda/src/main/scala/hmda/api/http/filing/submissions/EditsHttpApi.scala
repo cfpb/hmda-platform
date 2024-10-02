@@ -156,7 +156,7 @@ private class EditsHttpApi(log: Logger, sharding: ClusterSharding)(
     val editNameRegex: Regex = new Regex("""[SVQ]\d\d\d(?:-\d)?""")
     pathPrefix("institutions" / Segment) { lei =>
       (extractUri & get) { uri =>
-        parameters('page.as[Int] ? 1) { page =>
+        parameters(Symbol("page").as[Int] ? 1) { page =>
           oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
             path("filings" / IntNumber / "submissions" / IntNumber / "edits" / editNameRegex) { (year, seqNr, editName) =>
               getEditDetails(lei, year, None, seqNr, page, editName, uri)

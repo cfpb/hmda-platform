@@ -131,7 +131,7 @@ object APORScheduler {
       .runWith(Sink.ignore)
   }
 
-  private def checkDownload(src: Option[(Source[ByteString, NotUsed], ObjectMetadata)],rateType: RateType){
+  private def checkDownload(src: Option[(Source[ByteString, NotUsed], ObjectMetadata)],rateType: RateType): Unit = {
     if(src ==None){
       logger.error(s"${APORScheduler.name} had an error downloading APOR file for: "+ rateType)
     }

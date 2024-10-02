@@ -25,7 +25,6 @@ object HmdaQuarterlyDataApi {
     implicit val mat: Materializer = Materializer(ctx)
     implicit val ec: ExecutionContext = ctx.executionContext
     implicit val dbConfig: DatabaseConfig[JdbcProfile] = DatabaseConfig.forConfig[JdbcProfile]("db")
-    val log = ctx.log
     val config = system.settings.config
     val host: String = config.getString("server.bindings.address")
     val port: Int = config.getInt("server.bindings.port")

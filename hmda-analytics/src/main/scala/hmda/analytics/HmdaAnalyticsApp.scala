@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext
 
 // $COVERAGE-OFF$
 object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarComponent with SubmissionHistoryComponent {
@@ -48,12 +49,12 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
              |                                                       |___/
     """.stripMargin)
 
-  implicit val system       = ActorSystem()
-  implicit val typedSystem  = system.toTyped
-  implicit val materializer = Materializer(system)
-  implicit val ec           = system.dispatcher
+  implicit val system:ActorSystem       = ActorSystem()
+  implicit val typedSystem: akka.actor.typed.ActorSystem[Nothing]  = system.toTyped
+  implicit val materializer:Materializer = Materializer(system)
+  implicit val ec: ExecutionContext           = system.dispatcher
 
-  implicit val timeout = Timeout(5.seconds)
+  implicit val timeout: akka.util.Timeout = Timeout(5.seconds)
 
   val kafkaConfig = system.settings.config.getConfig("akka.kafka.consumer")
   val config      = ConfigFactory.load()

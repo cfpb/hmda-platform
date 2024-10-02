@@ -13,9 +13,9 @@ import scala.concurrent.duration._
 
 object CheckDigitTest extends App {
 
-  implicit val clientSystem = ActorSystem("CheckDigitClient")
-  implicit val mat          = Materializer(clientSystem)
-  implicit val ec           = clientSystem.dispatcher
+  implicit val clientSystem: akka.actor.ActorSystem = ActorSystem("CheckDigitClient")
+  implicit val mat: akka.stream.Materializer          = Materializer(clientSystem)
+  implicit val ec: scala.concurrent.ExecutionContextExecutor           = clientSystem.dispatcher
 
   val client = CheckDigitServiceClient(GrpcClientSettings.connectToServiceAt("127.0.0.1", 60080).withTls(false))
 

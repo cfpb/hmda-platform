@@ -15,13 +15,15 @@ import hmda.validation.Seq
 import hmda.validation.context.ValidationContext
 import hmda.validation.filing.ValidationFlow._
 import org.scalatest.{ MustMatchers, WordSpec }
+import akka.stream.Materializer
+import akka.actor.ActorSystem
 
 import scala.collection.immutable._
 
 class ValidationFlowSpec extends WordSpec with MustMatchers {
 
-  implicit val system       = ActorSystem()
-  implicit val materializer = Materializer(system)
+  implicit val system:ActorSystem       = ActorSystem()
+  implicit val materializer:Materializer = Materializer(system)
 
   val cleanTsTxt = List(
     "1|Bank0|2018|4|Mr. Smug Pockets|555-555-5555|pockets@ficus.com|1234 Hocus Potato Way|Tatertown|UT|84096|9|2|01-0123456|B90YWS6AFX2LGWOXJ1LD\n"

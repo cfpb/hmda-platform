@@ -24,7 +24,7 @@ class SubmissionEventsSerializer extends SerializerWithStringManifest {
       submissionModifiedToProtobuf(evt).toByteArray
     case evt: SubmissionNotExists =>
       submissionNotExistsToProtobuf(evt).toByteArray
-    case _ ⇒
+    case _ =>
       throw new IllegalArgumentException(s"Cannot serialize object of type [${o.getClass.getName}]")
   }
 

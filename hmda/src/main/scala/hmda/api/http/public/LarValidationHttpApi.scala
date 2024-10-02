@@ -43,7 +43,7 @@ private class LarValidationHttpApi {
   //lar/validate/<year>
   private val validateYearLarRoute =
     path("validate" / IntNumber) { year =>
-      parameters('check.as[String] ? "all") { checkType =>
+      parameters(Symbol("check").as[String] ? "all") { checkType =>
         post {
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             entity(as[LarValidateRequest]) { req =>
@@ -61,7 +61,7 @@ private class LarValidationHttpApi {
   //lar/validate/<year>
   private val validateQuarterLarRoute =
     path("validate" / IntNumber / "quarter" / Quarter) { (year, quarter) =>
-      parameters('check.as[String] ? "all") { checkType =>
+      parameters(Symbol("check").as[String] ? "all") { checkType =>
         post {
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             entity(as[LarValidateRequest]) { req =>

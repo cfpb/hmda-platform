@@ -11,7 +11,7 @@ object AporListEntity {
 
   def variableRateAPORMap: mutable.Map[String, APOR] = _variableRateAPORMap
 
-  def AporOperation(apor: APOR, rateType: RateType) {
+  def AporOperation(apor: APOR, rateType: RateType): Unit= {
     if (rateType == FixedRate) {
       if (!_fixedRateAPORMap.contains(apor.rateDate.toString)) {
         _fixedRateAPORMap.put(apor.rateDate.toString, apor)
