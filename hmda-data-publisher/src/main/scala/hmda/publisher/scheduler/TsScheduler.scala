@@ -39,8 +39,8 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
     with PublisherComponent2023
     with PrivateAWSConfigLoader {
 
-  implicit val ec               = context.system.dispatcher
-  implicit val materializer     = Materializer(context)
+  implicit val ec: scala.concurrent.ExecutionContextExecutor               = context.system.dispatcher
+  implicit val materializer: akka.stream.Materializer     = Materializer(context)
   private val fullDate          = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   private val fullDateQuarterly = DateTimeFormatter.ofPattern("yyyy-MM-dd_")
 
@@ -207,7 +207,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
     }
 
 
-  def reportPublishingResult( schedule: Schedule, fullFilePath: String,count: Option[Int]) {
+  def reportPublishingResult( schedule: Schedule, fullFilePath: String,count: Option[Int]): Unit = {
 
     publishingReporter ! FilePublishingCompleted(
       schedule,
@@ -218,7 +218,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
     log.info(s"Pushed to S3: $bucketPrivate/$fullFilePath.")
     }
 
-  def reportPublishingResultError( schedule: Schedule, fullFilePath: String,message:Throwable) {
+  def reportPublishingResultError( schedule: Schedule, fullFilePath: String,message:Throwable): Unit = {
     publishingReporter ! FilePublishingCompleted(
       schedule,
       fullFilePath,

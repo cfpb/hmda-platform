@@ -43,8 +43,8 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
     with LoanLimitLarHeader
     with PrivateAWSConfigLoader {
 
-  implicit val ec = context.system.dispatcher
-  implicit val materializer = Materializer(context)
+  implicit val ec: scala.concurrent.ExecutionContextExecutor = context.system.dispatcher
+  implicit val materializer: akka.stream.Materializer = Materializer(context)
   private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   private val fullDateQuarterly = DateTimeFormatter.ofPattern("yyyy-MM-dd_")
 

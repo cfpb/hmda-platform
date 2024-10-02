@@ -44,7 +44,7 @@ class InstitutionEventsSerializer extends SerializerWithStringManifest {
       institutionNotExistsToProtobuf(evt).toByteArray
     case evt: FilingAdded =>
       filingAddedToProtobuf(evt).toByteArray
-    case _ ⇒
+    case _ =>
       throw new IllegalArgumentException(s"Cannot serialize object of type [${o.getClass.getName}]")
   }
 

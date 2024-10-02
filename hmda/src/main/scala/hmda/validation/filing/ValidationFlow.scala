@@ -25,7 +25,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 
 object ValidationFlow extends ColumnDataFormatter {
 
-  implicit val larSemigroup = new Semigroup[LoanApplicationRegister] {
+  implicit val larSemigroup: cats.Semigroup[hmda.model.filing.lar.LoanApplicationRegister] = new Semigroup[LoanApplicationRegister] {
     override def combine(x: LoanApplicationRegister, y: LoanApplicationRegister): LoanApplicationRegister =
       x
   }

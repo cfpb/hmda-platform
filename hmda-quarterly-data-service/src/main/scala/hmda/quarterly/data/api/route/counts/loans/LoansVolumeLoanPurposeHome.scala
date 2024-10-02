@@ -5,7 +5,7 @@ import akka.http.scaladsl.server.Route
 import hmda.model.filing.lar.enums._
 import hmda.quarterly.data.api.dao.repo.QuarterlyGraphRepo
 import hmda.quarterly.data.api.dto.QuarterGraphData.{GraphRoute, GraphSeriesInfo, GraphSeriesSummary}
-import hmda.quarterly.data.api.route.counts.loans.Loans.{CATEGORY, LOAN_LABEL, LOAN_VOLUME_SUBTITLE, LOAN_VOLUME_TITLE, LOAN_VOLUME_TITLE_HOME}
+import hmda.quarterly.data.api.route.counts.loans.Loans.{CATEGORY, LOAN_LABEL, LOAN_VOLUME_SUBTITLE, LOAN_VOLUME_TITLE_HOME}
 import hmda.quarterly.data.api.route.lib.Verbiage.COUNT_DECIMAL_PRECISION
 import hmda.quarterly.data.api.route.lib.Verbiage.LoanType._
 import hmda.quarterly.data.api.serde.JsonSupport

@@ -15,11 +15,13 @@ import hmda.parser.filing.ParserFlow._
 import hmda.parser.filing.lar.LarParserErrorModel.IncorrectNumberOfFieldsLar
 import hmda.parser.filing.ts.TsParserErrorModel.IncorrectNumberOfFieldsTs
 import org.scalatest.{ MustMatchers, WordSpec }
+import akka.stream.Materializer
+import akka.actor.ActorSystem
 
 class ParserFlowSpec extends WordSpec with MustMatchers {
 
-  implicit val system       = ActorSystem()
-  implicit val materializer = Materializer(system)
+  implicit val system:ActorSystem      = ActorSystem()
+  implicit val materializer: Materializer = Materializer(system)
 
   val ts       = tsGen.sample.getOrElse(TransmittalSheet())
   val tsCsv    = ts.toCSV + "\n"
