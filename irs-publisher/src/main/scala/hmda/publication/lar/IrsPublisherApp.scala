@@ -60,6 +60,7 @@ object IrsPublisherApp extends App {
       .withBootstrapServers(kafkaHosts)
       .withGroupId(HmdaGroups.irsGroup)
       .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+      .withProperties(getKafkaConfig)
 
   Consumer
     .committableSource(consumerSettings, Subscriptions.topics(HmdaTopics.signTopic, HmdaTopics.irsTopic))
