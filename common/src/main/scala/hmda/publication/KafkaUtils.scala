@@ -49,7 +49,7 @@ object KafkaUtils {
     producerSettings.createKafkaProducer()
   }
 
-  private def getKafkaConfig: Map[String, String] = {
+  def getKafkaConfig: Map[String, String] = {
 
     if( !securityprotocol.isEmpty) {
     //if (!truststoreLocation.isEmpty && !truststorePassword.isEmpty) {
