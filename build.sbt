@@ -137,6 +137,9 @@ lazy val common = (project in file("common"))
       )
     ),
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
+    // addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
+    // unmanagedJars in Compile ++= Seq(new java.io.File("/tmp/aws-msk-iam-auth-2.2.0-all.jar")).classpath,
+    // unmanagedJars in Runtime ++= Seq(new java.io.File("/tmp/aws-msk-iam-auth-2.2.0-all.jar")).classpath   
   )
   .enablePlugins(BuildInfoPlugin)
   .settings(
