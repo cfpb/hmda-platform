@@ -56,7 +56,7 @@ object HmdaInstitutionApi extends App {
       .withBootstrapServers(kafkaHosts)
       .withGroupId(HmdaGroups.institutionsGroup)
       .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
-
+      .withProperties(getKafkaConfig)
   val control: DrainingControl[Done] = Consumer
     .committableSource(consumerSettings, Subscriptions.topics(HmdaTopics.institutionTopic))
     .mapAsync(1)(msg => processData(msg.record.value()).map(_ => msg.committableOffset))
