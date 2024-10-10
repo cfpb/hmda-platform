@@ -51,7 +51,7 @@ object KafkaUtils {
 
   def getKafkaConfig: Map[String, String] = {
 
-    if( !securityprotocol.isEmpty) {
+    if( securityprotocol=="SASL_TLS") {
     //if (!truststoreLocation.isEmpty && !truststorePassword.isEmpty) {
       Map(
         //CommonClientConfigs.SECURITY_PROTOCOL_CONFIG -> SecurityProtocol.SSL.name,
@@ -81,6 +81,7 @@ object KafkaUtils {
     val producerSettings =
       ProducerSettings(system.toClassic, new StringSerializer, new InstitutionKafkaEventsSerializer)
         .withBootstrapServers(kafkaHosts)
+        .withProperties(getKafkaConfig)
         .withProducer(kafkaProducer)
 
     Source
@@ -97,6 +98,7 @@ object KafkaUtils {
     val producerSettings =
       ProducerSettings(system.toClassic, new StringSerializer, new StringSerializer)
         .withBootstrapServers(kafkaHosts)
+        .withProperties(getKafkaConfig)
         .withProducer(producer)
 
     Source
