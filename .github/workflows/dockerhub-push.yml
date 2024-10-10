@@ -22,7 +22,7 @@ jobs:
 
       - name: Build image of HMDA Platform only
         run: |
-            sbt "project hmda-platform" dockerPublishLocalSkipTests
+          sbt -batch clean hmda-platform/docker:publishLocal
         continue-on-error: true
 
       - name: Tag Docker image
