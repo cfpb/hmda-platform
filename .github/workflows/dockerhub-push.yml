@@ -1,0 +1,38 @@
+name: HMDA Docker Hub Image Push
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  push_to_dockerhub:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build image of HMDA Platform only
+        run: |
+          sbt -batch clean hmda-platform/docker:publishLocal
+        continue-on-error: true
+
+      - name: Tag Docker image
+        run: docker tag $(docker images --filter=reference="hmda/hmda-platform:latest" --format "{{.ID}}") ${{ secrets.DOCKERHUB_USERNAME }}/hmda:latest
+
+      - name: Push image to Docker Hub
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/hmda:latest
+
+      - name: Check image for CVEs
+        uses: docker/scout-action@v1
+        with:
+          command: cves
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/hmda:latest
