@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:3.18.3
 
 ENV THEME_PROVIDER_USER="themeprovider" \
     THEME_PROVIDER_USER_ID="1000"
