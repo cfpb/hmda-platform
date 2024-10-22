@@ -95,6 +95,35 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
   }
 
+  case class QuarterlyTransmittalSheetRepositoryWrapper(val year: String, val quarter: String){
+    val transmittalSheet = new TransmittalSheetRepository(dbConfig, getTableNameByYear(year))
+
+    def getTransmittalSheet = transmittalSheet
+
+
+    def getId(row: TransmittalSheetTable): Unit = transmittalSheet.getId(row)
+    def createSchema(): Unit = transmittalSheet.createSchema()
+    def dropSchema(): Unit = transmittalSheet.dropSchema()
+
+    def insert(ts: TransmittalSheetEntity): Future[Int] = transmittalSheet.insert(ts)
+
+    def findByLei(lei: String): Future[Seq[TransmittalSheetEntity]] = transmittalSheet.findByLei(lei)
+
+    def deleteByLei(lei: String): Future[Int] = transmittalSheet.deleteByLei(lei)
+
+    def deleteByLeiAndQuarter(lei: String): Future[Int] = transmittalSheet.deleteByLeiAndQuarter(lei)
+
+    def updateByLei(ts: TransmittalSheetEntity): Future[Int] = transmittalSheet.updateByLei(ts)
+
+    def count(): Future[Int] = transmittalSheet.count()
+
+    private def getTableNameByYear(year: String): String = {
+      val configString = s"hmda.analytics.$year.tsTableName$quarter"
+      config.getString(configString)
+    }
+
+  }
+
   val tsTableName2018  = config.getString("hmda.analytics.2018.tsTableName")
   val larTableName2018 = config.getString("hmda.analytics.2018.larTableName")
   //submission_history table remains same regardless of the year. There is a sign_date column and submission_id column which would show which year the filing was for
