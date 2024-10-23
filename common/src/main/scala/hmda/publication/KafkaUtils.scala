@@ -51,7 +51,7 @@ object KafkaUtils {
 
   def getKafkaConfig: Map[String, String] = {
 
-    if( securityprotocol=="SASL_TLS") {
+    if( securityprotocol=="SASL_SSL") {
     //if (!truststoreLocation.isEmpty && !truststorePassword.isEmpty) {
       Map(
         //CommonClientConfigs.SECURITY_PROTOCOL_CONFIG -> SecurityProtocol.SSL.name,
