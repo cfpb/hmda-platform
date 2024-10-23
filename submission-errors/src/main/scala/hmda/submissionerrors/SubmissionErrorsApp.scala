@@ -14,6 +14,8 @@ import hmda.submissionerrors.streams.SubmissionProcessor.{ handleMessages, proce
 import monix.execution.Scheduler
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
+import hmda.publication.KafkaUtils._
+
 // $COVERAGE-OFF$
 object SubmissionErrorsApp extends App {
   val config         = ConfigFactory.load()
@@ -36,6 +38,7 @@ object SubmissionErrorsApp extends App {
     ).withBootstrapServers(kafkaHosts)
       .withGroupId(HmdaGroups.submissionErrorsGroup)
       .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+      .withProperties(getKafkaConfig)      
 
   val kafkaCommitterSettings: CommitterSettings =
     CommitterSettings(classicSystem)

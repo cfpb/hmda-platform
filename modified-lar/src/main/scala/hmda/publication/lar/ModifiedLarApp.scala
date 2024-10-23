@@ -107,6 +107,7 @@ object ModifiedLarApp extends App {
       .withBootstrapServers(kafkaHosts)
       .withGroupId(HmdaGroups.modifiedLarGroup)
       .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest")
+      .withProperties(getKafkaConfig)
 
   val (control, streamCompleted) =
     Consumer
