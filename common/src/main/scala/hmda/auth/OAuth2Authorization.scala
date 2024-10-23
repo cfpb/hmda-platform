@@ -118,7 +118,7 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
     }
 
   protected def withLocalModeBypass(thunk: => Directive1[VerifiedToken]): Directive1[VerifiedToken] =
-    if (runtimeMode == "dev" || runtimeMode == "docker-compose" || runtimeMode == "kind") {
+    if (runtimeMode == "dev" || runtimeMode == "dev-keyspace" || runtimeMode == "docker-compose" || runtimeMode == "kind") {
       provide(VerifiedToken())
     } else { thunk }
 
