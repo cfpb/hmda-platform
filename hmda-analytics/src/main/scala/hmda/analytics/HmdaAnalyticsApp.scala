@@ -335,7 +335,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
           for {
             delete <- submissionId.period match {
               case Period(2018, None) => YearlyLarRepositoryWrapper("2018").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2019, None) => YearlyLarRepositoryWrapper("2018").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
+              case Period(2019, None) => YearlyLarRepositoryWrapper("2019").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
               case Period(2020, Some("Q1")) =>QuarterlyLarRepositoryWrapper("2020", "Q1").getLarRepository.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
               case Period(2020, Some("Q2")) => QuarterlyLarRepositoryWrapper("2020", "Q2").getLarRepository.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
               case Period(2020, Some("Q3")) => QuarterlyLarRepositoryWrapper("2020", "Q3").getLarRepository.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
