@@ -67,7 +67,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
    * to BETA
    */
 
-  case class YearlyTransmittalSheetRepositoryWrapper(val year: String){
+  case class YearlyTransmittalSheetRepositoryWrapper(year: String){
     val transmittalSheet = new TransmittalSheetRepository(dbConfig, getTableNameByYear(year))
 
     def getTransmittalSheet = transmittalSheet
@@ -95,7 +95,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
   }
 
-  case class QuarterlyTransmittalSheetRepositoryWrapper(val year: String, val quarter: String){
+  case class QuarterlyTransmittalSheetRepositoryWrapper(year: String, quarter: String){
     val transmittalSheet = new TransmittalSheetRepository(dbConfig, getTableNameByYear(year))
 
     def getTransmittalSheet = transmittalSheet
@@ -124,118 +124,47 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
   }
 
-  val tsTableName2018  = config.getString("hmda.analytics.2018.tsTableName")
-  val larTableName2018 = config.getString("hmda.analytics.2018.larTableName")
+  case class YearlyLarRepositoryWrapper(year: String){
+    val larRepo = new LarRepository(dbConfig, getTableNameByYear(year))
+
+    def getLarRepository = larRepo
+
+    def insert(le: LarEntity): Future[Int] = larRepo.insert(le)
+
+    private def getTableNameByYear(year: String): String = {
+      val configString = s"hmda.analytics.$year.larTableName"
+      config.getString(configString)
+    }
+
+  }
+
+  case class QuarterlyLarRepositoryWrapper(year: String, quarter: String){
+    val larRepo = new LarRepository(dbConfig, getTableNameByYear(year))
+
+    def getLarRepository = larRepo
+
+    // for 2019 and beyond
+    def insert(le: LarEntity): Future[Int] = larRepo.insert(le)
+
+    // for 2018
+    def insert(le: LarEntity2018): Future[Int] = larRepo.insert(le)
+    
+    def deletebyLeiAndQuarter(lei: String): Future[Int] = larRepo.deletebyLeiAndQuarter(lei)
+
+    def deleteByLei(lei: String): Future[Int] = larRepo.deleteByLei(lei)
+
+    private def getTableNameByYear(year: String): String = {
+      val configString = s"hmda.analytics.$year.larTableName$quarter"
+      config.getString(configString)
+    }
+
+  }
+
   //submission_history table remains same regardless of the year. There is a sign_date column and submission_id column which would show which year the filing was for
   val histTableName    = config.getString("hmda.analytics.2018.historyTableName")
-  val tsTableName2019  = config.getString("hmda.analytics.2019.tsTableName")
-  val larTableName2019 = config.getString("hmda.analytics.2019.larTableName")
-
-  //2020 TS
-  val tsTableName2020  = config.getString("hmda.analytics.2020.tsTableName")
-  val tsTableName2020Q1  = config.getString("hmda.analytics.2020.tsTableNameQ1")
-  val tsTableName2020Q2  = config.getString("hmda.analytics.2020.tsTableNameQ2")
-  val tsTableName2020Q3  = config.getString("hmda.analytics.2020.tsTableNameQ3")
-
-  //2021 TS
-  val tsTableName2021  = config.getString("hmda.analytics.2021.tsTableName")
-  val tsTableName2021Q1  = config.getString("hmda.analytics.2021.tsTableNameQ1")
-  val tsTableName2021Q2  = config.getString("hmda.analytics.2021.tsTableNameQ2")
-  val tsTableName2021Q3  = config.getString("hmda.analytics.2021.tsTableNameQ3")
-
-  //2020 LAR
-  val larTableName2020 = config.getString("hmda.analytics.2020.larTableName")
-  val larTableName2020Q1 = config.getString("hmda.analytics.2020.larTableNameQ1")
-  val larTableName2020Q2 = config.getString("hmda.analytics.2020.larTableNameQ2")
-  val larTableName2020Q3 = config.getString("hmda.analytics.2020.larTableNameQ3")
-
-  //2021 LAR
-  val larTableName2021 = config.getString("hmda.analytics.2021.larTableName")
-  val larTableName2021Q1 = config.getString("hmda.analytics.2021.larTableNameQ1")
-  val larTableName2021Q2 = config.getString("hmda.analytics.2021.larTableNameQ2")
-  val larTableName2021Q3 = config.getString("hmda.analytics.2021.larTableNameQ3")
-
-
-  //2022 TS
-  val tsTableName2022  = config.getString("hmda.analytics.2022.tsTableName")
-  val tsTableName2022Q1  = config.getString("hmda.analytics.2022.tsTableNameQ1")
-  val tsTableName2022Q2  = config.getString("hmda.analytics.2022.tsTableNameQ2")
-  val tsTableName2022Q3  = config.getString("hmda.analytics.2022.tsTableNameQ3")
-
-  //2022 LAR
-  val larTableName2022 = config.getString("hmda.analytics.2022.larTableName")
-  val larTableName2022Q1 = config.getString("hmda.analytics.2022.larTableNameQ1")
-  val larTableName2022Q2 = config.getString("hmda.analytics.2022.larTableNameQ2")
-  val larTableName2022Q3 = config.getString("hmda.analytics.2022.larTableNameQ3")
-
-
-  //2023 TS
-  val tsTableName2023  = config.getString("hmda.analytics.2023.tsTableName")
-  val tsTableName2023Q1  = config.getString("hmda.analytics.2023.tsTableNameQ1")
-  val tsTableName2023Q2  = config.getString("hmda.analytics.2023.tsTableNameQ2")
-  val tsTableName2023Q3  = config.getString("hmda.analytics.2023.tsTableNameQ3")
-
-  //2023 LAR
-  val larTableName2023 = config.getString("hmda.analytics.2023.larTableName")
-  val larTableName2023Q1 = config.getString("hmda.analytics.2023.larTableNameQ1")
-  val larTableName2023Q2 = config.getString("hmda.analytics.2023.larTableNameQ2")
-  val larTableName2023Q3 = config.getString("hmda.analytics.2023.larTableNameQ3")
-
-  //2024 TS
-  val tsTableName2024Q1  = config.getString("hmda.analytics.2024.tsTableNameQ1")
-  val tsTableName2024Q2  = config.getString("hmda.analytics.2024.tsTableNameQ2")
-  val tsTableName2024Q3  = config.getString("hmda.analytics.2023.tsTableNameQ3")
-
-  //2024 LAR
-  val larTableName2024Q1 = config.getString("hmda.analytics.2024.larTableNameQ1")
-  val larTableName2024Q2 = config.getString("hmda.analytics.2024.larTableNameQ2")
-  val larTableName2024Q3 = config.getString("hmda.analytics.2024.larTableNameQ3")
 
 
 
-  val transmittalSheetRepository2018 = new TransmittalSheetRepository(dbConfig, tsTableName2018)
-  val transmittalSheetRepository2019 = new TransmittalSheetRepository(dbConfig, tsTableName2019)
-  val transmittalSheetRepository2020 = new TransmittalSheetRepository(dbConfig, tsTableName2020)
-  val transmittalSheetRepository2021 = new TransmittalSheetRepository(dbConfig, tsTableName2021)
-  val transmittalSheetRepository2022 = new TransmittalSheetRepository(dbConfig, tsTableName2022)
-  val transmittalSheetRepository2023 = new TransmittalSheetRepository(dbConfig, tsTableName2023)
-  val transmittalSheetRepository2020Q1 = new TransmittalSheetRepository(dbConfig, tsTableName2020Q1)
-  val transmittalSheetRepository2020Q2 = new TransmittalSheetRepository(dbConfig, tsTableName2020Q2)
-  val transmittalSheetRepository2020Q3 = new TransmittalSheetRepository(dbConfig, tsTableName2020Q3)
-  val transmittalSheetRepository2021Q1 = new TransmittalSheetRepository(dbConfig, tsTableName2021Q1)
-  val transmittalSheetRepository2021Q2 = new TransmittalSheetRepository(dbConfig, tsTableName2021Q2)
-  val transmittalSheetRepository2021Q3 = new TransmittalSheetRepository(dbConfig, tsTableName2021Q3)
-  val transmittalSheetRepository2022Q1 = new TransmittalSheetRepository(dbConfig, tsTableName2022Q1)
-  val transmittalSheetRepository2022Q2 = new TransmittalSheetRepository(dbConfig, tsTableName2022Q2)
-  val transmittalSheetRepository2022Q3 = new TransmittalSheetRepository(dbConfig, tsTableName2022Q3)
-  val transmittalSheetRepository2023Q1 = new TransmittalSheetRepository(dbConfig, tsTableName2023Q1)
-  val transmittalSheetRepository2023Q2 = new TransmittalSheetRepository(dbConfig, tsTableName2023Q2)
-  val transmittalSheetRepository2023Q3 = new TransmittalSheetRepository(dbConfig, tsTableName2023Q3)
-  val transmittalSheetRepository2024Q1 = new TransmittalSheetRepository(dbConfig, tsTableName2024Q1)
-  val transmittalSheetRepository2024Q2 = new TransmittalSheetRepository(dbConfig, tsTableName2024Q2)
-  val transmittalSheetRepository2024Q3 = new TransmittalSheetRepository(dbConfig, tsTableName2024Q3)
-  val larRepository2018              = new LarRepository(dbConfig, larTableName2018)
-  val larRepository2019              = new LarRepository(dbConfig, larTableName2019)
-  val larRepository2020              = new LarRepository(dbConfig, larTableName2020)
-  val larRepository2021             = new LarRepository(dbConfig, larTableName2021)
-  val larRepository2022             = new LarRepository(dbConfig, larTableName2022)
-  val larRepository2023             = new LarRepository(dbConfig, larTableName2023)
-
-  val larRepository2020Q1              = new LarRepository(dbConfig, larTableName2020Q1)
-  val larRepository2020Q2              = new LarRepository(dbConfig, larTableName2020Q2)
-  val larRepository2020Q3              = new LarRepository(dbConfig, larTableName2020Q3)
-  val larRepository2021Q1              = new LarRepository(dbConfig, larTableName2021Q1)
-  val larRepository2021Q2              = new LarRepository(dbConfig, larTableName2021Q2)
-  val larRepository2021Q3              = new LarRepository(dbConfig, larTableName2021Q3)
-  val larRepository2022Q1              = new LarRepository(dbConfig, larTableName2022Q1)
-  val larRepository2022Q2              = new LarRepository(dbConfig, larTableName2022Q2)
-  val larRepository2022Q3              = new LarRepository(dbConfig, larTableName2022Q3)
-  val larRepository2023Q1              = new LarRepository(dbConfig, larTableName2023Q1)
-  val larRepository2023Q2              = new LarRepository(dbConfig, larTableName2023Q2)
-  val larRepository2023Q3              = new LarRepository(dbConfig, larTableName2023Q3)
-  val larRepository2024Q1              = new LarRepository(dbConfig, larTableName2024Q1)
-  val larRepository2024Q2              = new LarRepository(dbConfig, larTableName2024Q2)
-  val larRepository2024Q3              = new LarRepository(dbConfig, larTableName2024Q3)
   val submissionHistoryRepository    = new SubmissionHistoryRepository(dbConfig, histTableName)
 
   val consumerSettings: ConsumerSettings[String, String] =
@@ -405,27 +334,27 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .mapAsync(1) { lar =>
           for {
             delete <- submissionId.period match {
-              case Period(2018, None) => larRepository2018.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2019, None) => larRepository2019.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2020, Some("Q1")) => larRepository2020Q1.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-              case Period(2020, Some("Q2")) => larRepository2020Q2.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-              case Period(2020, Some("Q3")) => larRepository2020Q3.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-              case Period(2020, None) => larRepository2020.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2021, None) => larRepository2021.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2022, None) => larRepository2022.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2023, None) => larRepository2023.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2021, Some("Q1")) => larRepository2021Q1.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-              case Period(2021, Some("Q2")) => larRepository2021Q2.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-              case Period(2021, Some("Q3")) => larRepository2021Q3.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-              case Period(2022, Some("Q1")) => larRepository2022Q1.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-              case Period(2022, Some("Q2")) => larRepository2022Q2.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-              case Period(2022, Some("Q3")) => larRepository2022Q3.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-              case Period(2023, Some("Q1")) => larRepository2023Q1.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-              case Period(2023, Some("Q2")) => larRepository2023Q2.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-              case Period(2023, Some("Q3")) => larRepository2023Q3.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-              case Period(2024, Some("Q1")) => larRepository2024Q1.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-              case Period(2024, Some("Q2")) => larRepository2024Q2.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
-              case Period(2024, Some("Q3")) => larRepository2024Q3.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2018, None) => YearlyLarRepositoryWrapper("2018").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
+              case Period(2019, None) => YearlyLarRepositoryWrapper("2018").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
+              case Period(2020, Some("Q1")) =>QuarterlyLarRepositoryWrapper("2020", "Q1").getLarRepository.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2020, Some("Q2")) => QuarterlyLarRepositoryWrapper("2020", "Q2").getLarRepository.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2020, Some("Q3")) => QuarterlyLarRepositoryWrapper("2020", "Q3").getLarRepository.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2020, None) => YearlyLarRepositoryWrapper("2020").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
+              case Period(2021, None) =>YearlyLarRepositoryWrapper("2021").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
+              case Period(2022, None) =>YearlyLarRepositoryWrapper("2022").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
+              case Period(2023, None) =>YearlyLarRepositoryWrapper("2023").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
+              case Period(2021, Some("Q1")) => QuarterlyLarRepositoryWrapper("2021", "Q1").getLarRepository.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2021, Some("Q2")) => QuarterlyLarRepositoryWrapper("2021", "Q2").getLarRepository.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2021, Some("Q3")) => QuarterlyLarRepositoryWrapper("2021", "Q3").getLarRepository.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2022, Some("Q1")) => QuarterlyLarRepositoryWrapper("2022", "Q1").getLarRepository.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2022, Some("Q2")) => QuarterlyLarRepositoryWrapper("2022", "Q2").getLarRepository.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2022, Some("Q3")) => QuarterlyLarRepositoryWrapper("2022", "Q3").getLarRepository.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2023, Some("Q1")) => QuarterlyLarRepositoryWrapper("2023", "Q1").getLarRepository.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2023, Some("Q2")) => QuarterlyLarRepositoryWrapper("2023", "Q2").getLarRepository.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2023, Some("Q3")) => QuarterlyLarRepositoryWrapper("2023", "Q3").getLarRepository.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2024, Some("Q1")) => QuarterlyLarRepositoryWrapper("2024", "Q1").getLarRepository.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2024, Some("Q2")) => QuarterlyLarRepositoryWrapper("2024", "Q2").getLarRepository.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
+              case Period(2024, Some("Q3")) => QuarterlyLarRepositoryWrapper("2024", "Q3").getLarRepository.deletebyLeiAndQuarter(lar.larIdentifier.LEI)
               case _ => {
                 log.error(s"Unable to discern period from $submissionId to delete LAR rows.")
                 throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete LAR rows.")
@@ -450,85 +379,85 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .mapAsync(1) { lar =>
           for {
             insertorupdate <- submissionId.period match {
-              case Period(2018, None) => larRepository2018.insert(LarConverter2018(lar))
+              case Period(2018, None) => YearlyLarRepositoryWrapper("2018").getLarRepository.insert(LarConverter2018(lar))
               case Period(2019, None) =>
-                larRepository2019.insert(
+                YearlyLarRepositoryWrapper("2018").getLarRepository.insert(
                   LarConverter(lar, 2019)
                 )
               case Period(2020, Some("Q1")) =>
-                larRepository2020Q1.insert(
+               QuarterlyLarRepositoryWrapper("2020", "Q1").getLarRepository.insert(
                   LarConverter(lar = lar, 2020, isQuarterly = true)
                 )
               case Period(2020, Some("Q2")) =>
-                larRepository2020Q2.insert(
+                QuarterlyLarRepositoryWrapper("2020", "Q2").getLarRepository.insert(
                   LarConverter(lar = lar, 2020, isQuarterly = true)
                 )
               case Period(2020, Some("Q3")) =>
-                larRepository2020Q3.insert(
+                QuarterlyLarRepositoryWrapper("2020", "Q3").getLarRepository.insert(
                   LarConverter(lar = lar, 2020, isQuarterly = true)
                 )
               case Period(2020, None) =>
-                larRepository2020.insert(
+                YearlyLarRepositoryWrapper("2020").getLarRepository.insert(
                   LarConverter(lar = lar, 2020)
                 )
               case Period(2021, None) =>
-                larRepository2021.insert(
+               YearlyLarRepositoryWrapper("2021").getLarRepository.insert(
                   LarConverter(lar = lar, 2021)
                 )
               case Period(2022, None) =>
-                larRepository2022.insert(
+               YearlyLarRepositoryWrapper("2022").getLarRepository.insert(
                   LarConverter(lar = lar, 2022)
                 )
               case Period(2023, None) =>
-                larRepository2023.insert(
+               YearlyLarRepositoryWrapper("2023").getLarRepository.insert(
                   LarConverter(lar = lar, 2023)
                 )
               case Period(2021, Some("Q1")) =>
-                larRepository2021Q1.insert(
+                QuarterlyLarRepositoryWrapper("2021", "Q1").getLarRepository.insert(
                   LarConverter(lar = lar, 2021, isQuarterly = true)
                 )
               case Period(2021, Some("Q2")) =>
-                larRepository2021Q2.insert(
+                QuarterlyLarRepositoryWrapper("2021", "Q2").getLarRepository.insert(
                   LarConverter(lar = lar, 2021, isQuarterly = true)
                 )
               case Period(2021, Some("Q3")) =>
-                larRepository2021Q3.insert(
+                QuarterlyLarRepositoryWrapper("2021", "Q3").getLarRepository.insert(
                   LarConverter(lar = lar, 2021, isQuarterly = true)
                 )
               case Period(2022, Some("Q1")) =>
-                larRepository2022Q1.insert(
+                QuarterlyLarRepositoryWrapper("2022", "Q1").getLarRepository.insert(
                   LarConverter(lar = lar, 2022, isQuarterly = true)
                 )
               case Period(2022, Some("Q2")) =>
-                larRepository2022Q2.insert(
+                QuarterlyLarRepositoryWrapper("2022", "Q2").getLarRepository.insert(
                   LarConverter(lar = lar, 2022, isQuarterly = true)
                 )
               case Period(2022, Some("Q3")) =>
-                larRepository2022Q3.insert(
+                QuarterlyLarRepositoryWrapper("2022", "Q3").getLarRepository.insert(
                   LarConverter(lar = lar, 2022, isQuarterly = true)
                 )
               case Period(2023, Some("Q1")) =>
-                larRepository2023Q1.insert(
+                QuarterlyLarRepositoryWrapper("2023", "Q1").getLarRepository.insert(
                   LarConverter(lar = lar, 2023, isQuarterly = true)
                 )
               case Period(2023, Some("Q2")) =>
-                larRepository2023Q2.insert(
+                QuarterlyLarRepositoryWrapper("2023", "Q2").getLarRepository.insert(
                   LarConverter(lar = lar, 2023, isQuarterly = true)
                 )
               case Period(2023, Some("Q3")) =>
-                larRepository2023Q3.insert(
+                QuarterlyLarRepositoryWrapper("2023", "Q3").getLarRepository.insert(
                   LarConverter(lar = lar, 2023, isQuarterly = true)
                 )
               case Period(2024, Some("Q1")) =>
-                larRepository2024Q1.insert(
+                QuarterlyLarRepositoryWrapper("2024", "Q1").getLarRepository.insert(
                   LarConverter(lar = lar, 2024, isQuarterly = true)
                 )
               case Period(2024, Some("Q2")) =>
-                larRepository2024Q2.insert(
+                QuarterlyLarRepositoryWrapper("2024", "Q2").getLarRepository.insert(
                   LarConverter(lar = lar, 2024, isQuarterly = true)
                 )
               case Period(2024, Some("Q3")) =>
-                larRepository2024Q3.insert(
+                QuarterlyLarRepositoryWrapper("2024", "Q3").getLarRepository.insert(
                   LarConverter(lar = lar, 2024, isQuarterly = true)
                 )
               case _ => {
