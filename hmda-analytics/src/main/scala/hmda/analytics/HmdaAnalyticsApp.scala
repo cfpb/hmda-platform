@@ -381,7 +381,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
             insertorupdate <- submissionId.period match {
               case Period(2018, None) => YearlyLarRepositoryWrapper("2018").getLarRepository.insert(LarConverter2018(lar))
               case Period(2019, None) =>
-                YearlyLarRepositoryWrapper("2018").getLarRepository.insert(
+                YearlyLarRepositoryWrapper("2019").getLarRepository.insert(
                   LarConverter(lar, 2019)
                 )
               case Period(2020, Some("Q1")) =>
