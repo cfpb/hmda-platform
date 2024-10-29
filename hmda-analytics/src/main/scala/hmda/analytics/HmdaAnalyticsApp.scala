@@ -88,7 +88,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
     def count(): Future[Int] = transmittalSheet.count()
 
-    private def getTableNameByYear(year: String): String = {
+    private def getTableNameByYear: String = {
       val configString = s"hmda.analytics.$year.tsTableName"
       config.getString(configString)
     }
@@ -117,7 +117,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
     def count(): Future[Int] = transmittalSheet.count()
 
-    private def getTableNameByYear(year: String): String = {
+    private def getTableNameByYear: String = {
       val configString = s"hmda.analytics.$year.tsTableName$quarter"
       config.getString(configString)
     }
@@ -131,7 +131,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
     def insert(le: LarEntity): Future[Int] = larRepo.insert(le)
 
-    private def getTableNameByYear(year: String): String = {
+    private def getTableNameByYear: String = {
       val configString = s"hmda.analytics.$year.larTableName"
       config.getString(configString)
     }
@@ -153,7 +153,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
     def deleteByLei(lei: String): Future[Int] = larRepo.deleteByLei(lei)
 
-    private def getTableNameByYear(year: String): String = {
+    private def getTableNameByYear: String = {
       val configString = s"hmda.analytics.$year.larTableName$quarter"
       config.getString(configString)
     }
