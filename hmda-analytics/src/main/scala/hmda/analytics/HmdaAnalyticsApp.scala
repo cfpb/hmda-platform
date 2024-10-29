@@ -68,7 +68,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
    */
 
   case class YearlyTransmittalSheetRepositoryWrapper(year: String){
-    val transmittalSheet = new TransmittalSheetRepository(dbConfig, getTableNameByYear(year))
+    val transmittalSheet = new TransmittalSheetRepository(dbConfig, getTableNameByYear)
 
     def getTransmittalSheet = transmittalSheet
 
@@ -88,7 +88,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
     def count(): Future[Int] = transmittalSheet.count()
 
-    private def getTableNameByYear: String = {
+    private def getTableNameByYear = {
       val configString = s"hmda.analytics.$year.tsTableName"
       config.getString(configString)
     }
@@ -96,7 +96,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
   }
 
   case class QuarterlyTransmittalSheetRepositoryWrapper(year: String, quarter: String){
-    val transmittalSheet = new TransmittalSheetRepository(dbConfig, getTableNameByYear(year))
+    val transmittalSheet = new TransmittalSheetRepository(dbConfig, getTableNameByYear)
 
     def getTransmittalSheet = transmittalSheet
 
@@ -125,7 +125,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
   }
 
   case class YearlyLarRepositoryWrapper(year: String){
-    val larRepo = new LarRepository(dbConfig, getTableNameByYear(year))
+    val larRepo = new LarRepository(dbConfig, getTableNameByYear)
 
     def getLarRepository = larRepo
 
@@ -139,7 +139,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
   }
 
   case class QuarterlyLarRepositoryWrapper(year: String, quarter: String){
-    val larRepo = new LarRepository(dbConfig, getTableNameByYear(year))
+    val larRepo = new LarRepository(dbConfig, getTableNameByYear)
 
     def getLarRepository = larRepo
 
