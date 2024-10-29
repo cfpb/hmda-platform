@@ -1,0 +1,9 @@
+Change job to hmda platform.
+Build docker image.
+Add snyk scan.
+Add trivy scan.
+Upload snyk report.
+Upload trivy report.
+Post snyk report to PR.
+Post trivy report to PR.
+Remove Docker image.
