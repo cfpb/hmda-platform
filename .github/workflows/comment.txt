@@ -1,5 +1,4 @@
-Change job to hmda platform.
-Build docker image.
+Add docker image.
 Add snyk scan.
 Add trivy scan.
 Upload snyk report.
