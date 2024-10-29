@@ -36,5 +36,3 @@ jobs:
         with:
           command: cves
           image: ${{ secrets.DOCKERHUB_USERNAME }}/hmda:latest
-
-
