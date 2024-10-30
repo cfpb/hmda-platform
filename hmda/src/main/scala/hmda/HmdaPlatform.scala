@@ -58,6 +58,9 @@ object HmdaPlatform extends App {
     case "dev-keyspace" =>
       ConfigFactory.parseResources("application-dev-keyspace.conf").resolve()
 
+    case "dev-keyspace-sigv4" =>
+      ConfigFactory.parseResources("application-dev-keyspace.conf").resolve()
+
     case "kubernetes" =>
       log.info(s"HOSTNAME: ${System.getenv("HOSTNAME")}")
       log.info(s"HOSTADDRESS: " + InetAddress.getLocalHost().getHostAddress())
@@ -80,7 +83,7 @@ object HmdaPlatform extends App {
     AkkaManagement(system).start()
   }
 
-  if (runtimeMode == "dev" || runtimeMode == "dev-keyspace") {
+  if (runtimeMode == "dev" || runtimeMode == "dev-keyspace" || runtimeMode == "dev-keyspace-sigv4") {
     CassandraUtil.startEmbeddedCassandra()
     AkkaManagement(system).start()
     implicit val embeddedKafkaConfig: EmbeddedKafkaConfig = EmbeddedKafkaConfig(
