@@ -82,8 +82,6 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
     def deleteByLei(lei: String): Future[Int] = transmittalSheet.deleteByLei(lei)
 
-    def deleteByLeiAndQuarter(lei: String): Future[Int] = transmittalSheet.deleteByLeiAndQuarter(lei)
-
     def updateByLei(ts: TransmittalSheetEntity): Future[Int] = transmittalSheet.updateByLei(ts)
 
     def count(): Future[Int] = transmittalSheet.count()
