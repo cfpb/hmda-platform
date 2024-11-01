@@ -317,85 +317,12 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
           for {
             insertorupdate <- submissionId.period match {
               case Period(2018, None) => YearlyLarRepositoryWrapper("2018").getLarRepository.insert(LarConverter2018(lar))
-              case Period(2019, None) =>
-                YearlyLarRepositoryWrapper("2019").getLarRepository.insert(
-                  LarConverter(lar, 2019)
-                )
-              case Period(2020, Some("Q1")) =>
-               QuarterlyLarRepositoryWrapper("2020", "Q1").getLarRepository.insert(
-                  LarConverter(lar = lar, 2020, isQuarterly = true)
-                )
-              case Period(2020, Some("Q2")) =>
-                QuarterlyLarRepositoryWrapper("2020", "Q2").getLarRepository.insert(
-                  LarConverter(lar = lar, 2020, isQuarterly = true)
-                )
-              case Period(2020, Some("Q3")) =>
-                QuarterlyLarRepositoryWrapper("2020", "Q3").getLarRepository.insert(
-                  LarConverter(lar = lar, 2020, isQuarterly = true)
-                )
-              case Period(2020, None) =>
-                YearlyLarRepositoryWrapper("2020").getLarRepository.insert(
-                  LarConverter(lar = lar, 2020)
-                )
-              case Period(2021, None) =>
-               YearlyLarRepositoryWrapper("2021").getLarRepository.insert(
-                  LarConverter(lar = lar, 2021)
-                )
-              case Period(2022, None) =>
-               YearlyLarRepositoryWrapper("2022").getLarRepository.insert(
-                  LarConverter(lar = lar, 2022)
-                )
-              case Period(2023, None) =>
-               YearlyLarRepositoryWrapper("2023").getLarRepository.insert(
-                  LarConverter(lar = lar, 2023)
-                )
-              case Period(2021, Some("Q1")) =>
-                QuarterlyLarRepositoryWrapper("2021", "Q1").getLarRepository.insert(
-                  LarConverter(lar = lar, 2021, isQuarterly = true)
-                )
-              case Period(2021, Some("Q2")) =>
-                QuarterlyLarRepositoryWrapper("2021", "Q2").getLarRepository.insert(
-                  LarConverter(lar = lar, 2021, isQuarterly = true)
-                )
-              case Period(2021, Some("Q3")) =>
-                QuarterlyLarRepositoryWrapper("2021", "Q3").getLarRepository.insert(
-                  LarConverter(lar = lar, 2021, isQuarterly = true)
-                )
-              case Period(2022, Some("Q1")) =>
-                QuarterlyLarRepositoryWrapper("2022", "Q1").getLarRepository.insert(
-                  LarConverter(lar = lar, 2022, isQuarterly = true)
-                )
-              case Period(2022, Some("Q2")) =>
-                QuarterlyLarRepositoryWrapper("2022", "Q2").getLarRepository.insert(
-                  LarConverter(lar = lar, 2022, isQuarterly = true)
-                )
-              case Period(2022, Some("Q3")) =>
-                QuarterlyLarRepositoryWrapper("2022", "Q3").getLarRepository.insert(
-                  LarConverter(lar = lar, 2022, isQuarterly = true)
-                )
-              case Period(2023, Some("Q1")) =>
-                QuarterlyLarRepositoryWrapper("2023", "Q1").getLarRepository.insert(
-                  LarConverter(lar = lar, 2023, isQuarterly = true)
-                )
-              case Period(2023, Some("Q2")) =>
-                QuarterlyLarRepositoryWrapper("2023", "Q2").getLarRepository.insert(
-                  LarConverter(lar = lar, 2023, isQuarterly = true)
-                )
-              case Period(2023, Some("Q3")) =>
-                QuarterlyLarRepositoryWrapper("2023", "Q3").getLarRepository.insert(
-                  LarConverter(lar = lar, 2023, isQuarterly = true)
-                )
-              case Period(2024, Some("Q1")) =>
-                QuarterlyLarRepositoryWrapper("2024", "Q1").getLarRepository.insert(
-                  LarConverter(lar = lar, 2024, isQuarterly = true)
-                )
-              case Period(2024, Some("Q2")) =>
-                QuarterlyLarRepositoryWrapper("2024", "Q2").getLarRepository.insert(
-                  LarConverter(lar = lar, 2024, isQuarterly = true)
-                )
-              case Period(2024, Some("Q3")) =>
-                QuarterlyLarRepositoryWrapper("2024", "Q3").getLarRepository.insert(
-                  LarConverter(lar = lar, 2024, isQuarterly = true)
+              case Period(submissionId.period.year, None) => YearlyLarRepositoryWrapper(submissionId.period.year.toString).getLarRepository.insert(
+                LarConverter(lar, submissionId.period.year)
+              )
+              case Period(submissionId.period.year, Some(submissionId.period.quarter)) =>
+                QuarterlyLarRepositoryWrapper(submissionId.period.year.toString, submissionId.period.quarter).getLarRepository.insert(
+                  LarConverter(lar = lar, submissionId.period.year, isQuarterly = true)
                 )
               case _ => {
                 log.error(s"Unable to discern period from $submissionId to insert LAR rows.")
