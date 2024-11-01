@@ -93,7 +93,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
   }
 
-  case class QuarterlyTransmittalSheetRepositoryWrapper(year: String, quarter: String){
+  case class QuarterlyTransmittalSheetRepositoryWrapper(year: String, quarter: Option[String]){
     val transmittalSheet = new TransmittalSheetRepository(dbConfig, getTableNameByYear)
 
     def getTransmittalSheet = transmittalSheet
@@ -208,27 +208,8 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .mapAsync(1) { ts =>
           for {
             delete <- submissionId.period match {
-              case Period(2018, None) => YearlyTransmittalSheetRepositoryWrapper("2018").deleteByLei(ts.lei)
-              case Period(2019, None) => YearlyTransmittalSheetRepositoryWrapper("2019").deleteByLei(ts.lei)
-              case Period(2020, Some("Q1")) => QuarterlyTransmittalSheetRepositoryWrapper("2020", "Q1").deleteByLei(ts.lei)
-              case Period(2020, Some("Q2")) => QuarterlyTransmittalSheetRepositoryWrapper("2020", "Q2").deleteByLei(ts.lei)
-              case Period(2020, Some("Q3")) => QuarterlyTransmittalSheetRepositoryWrapper("2020", "Q3").deleteByLei(ts.lei)
-              case Period(2020, None) => YearlyTransmittalSheetRepositoryWrapper("2020").deleteByLei(ts.lei)
-              case Period(2021, None) => YearlyTransmittalSheetRepositoryWrapper("2021").deleteByLei(ts.lei)
-              case Period(2022, None) => YearlyTransmittalSheetRepositoryWrapper("2022").deleteByLei(ts.lei)
-              case Period(2023, None) => YearlyTransmittalSheetRepositoryWrapper("2023").deleteByLei(ts.lei)
-              case Period(2021, Some("Q1")) => QuarterlyTransmittalSheetRepositoryWrapper("2021", "Q1").deleteByLei(ts.lei)
-              case Period(2021, Some("Q2")) => QuarterlyTransmittalSheetRepositoryWrapper("2021", "Q2").deleteByLei(ts.lei)
-              case Period(2021, Some("Q3")) => QuarterlyTransmittalSheetRepositoryWrapper("2021", "Q3").deleteByLei(ts.lei)
-              case Period(2022, Some("Q1")) => QuarterlyTransmittalSheetRepositoryWrapper("2022", "Q1").deleteByLei(ts.lei)
-              case Period(2022, Some("Q2")) => QuarterlyTransmittalSheetRepositoryWrapper("2022", "Q2").deleteByLei(ts.lei)
-              case Period(2022, Some("Q3")) => QuarterlyTransmittalSheetRepositoryWrapper("2022", "Q3").deleteByLei(ts.lei)
-              case Period(2023, Some("Q1")) => QuarterlyTransmittalSheetRepositoryWrapper("2023", "Q1").deleteByLei(ts.lei)
-              case Period(2023, Some("Q2")) => QuarterlyTransmittalSheetRepositoryWrapper("2023", "Q2").deleteByLei(ts.lei)
-              case Period(2023, Some("Q3")) => QuarterlyTransmittalSheetRepositoryWrapper("2023", "Q3").deleteByLei(ts.lei)
-              case Period(2024, Some("Q1")) => QuarterlyTransmittalSheetRepositoryWrapper("2024", "Q1").deleteByLei(ts.lei)
-              case Period(2024, Some("Q2")) => QuarterlyTransmittalSheetRepositoryWrapper("2024", "Q2").deleteByLei(ts.lei)
-              case Period(2024, Some("Q3")) => QuarterlyTransmittalSheetRepositoryWrapper("2024", "Q3").deleteByLei(ts.lei)
+              case Period(submissionId.period.year, None) => YearlyTransmittalSheetRepositoryWrapper(submissionId.period.year.toString).deleteByLei(ts.lei)
+              case Period(submissionId.period.year, Some(submissionId.period.quarter)) => QuarterlyTransmittalSheetRepositoryWrapper(submissionId.period.year.toString, submissionId.period.quarter).deleteByLei(ts.lei)
               case _ => {
                 log.error(s"Unable to discern period from $submissionId to delete TS rows.")
                 throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete TS rows.")
