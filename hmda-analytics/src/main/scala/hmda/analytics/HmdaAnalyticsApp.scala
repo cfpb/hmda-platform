@@ -134,7 +134,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
   }
 
-  case class QuarterlyLarRepositoryWrapper(year: String, quarter: String){
+  case class QuarterlyLarRepositoryWrapper(year: String, quarter: Option[String]){
     val larRepo = new LarRepository(dbConfig, getTableNameByYear)
 
     def getLarRepository = larRepo
@@ -290,27 +290,8 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .mapAsync(1) { lar =>
           for {
             delete <- submissionId.period match {
-              case Period(2018, None) => YearlyLarRepositoryWrapper("2018").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2019, None) => YearlyLarRepositoryWrapper("2019").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2020, Some("Q1")) =>QuarterlyLarRepositoryWrapper("2020", "Q1").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2020, Some("Q2")) => QuarterlyLarRepositoryWrapper("2020", "Q2").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2020, Some("Q3")) => QuarterlyLarRepositoryWrapper("2020", "Q3").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2020, None) => YearlyLarRepositoryWrapper("2020").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2021, None) =>YearlyLarRepositoryWrapper("2021").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2022, None) =>YearlyLarRepositoryWrapper("2022").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2023, None) =>YearlyLarRepositoryWrapper("2023").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2021, Some("Q1")) => QuarterlyLarRepositoryWrapper("2021", "Q1").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2021, Some("Q2")) => QuarterlyLarRepositoryWrapper("2021", "Q2").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2021, Some("Q3")) => QuarterlyLarRepositoryWrapper("2021", "Q3").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2022, Some("Q1")) => QuarterlyLarRepositoryWrapper("2022", "Q1").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2022, Some("Q2")) => QuarterlyLarRepositoryWrapper("2022", "Q2").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2022, Some("Q3")) => QuarterlyLarRepositoryWrapper("2022", "Q3").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2023, Some("Q1")) => QuarterlyLarRepositoryWrapper("2023", "Q1").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2023, Some("Q2")) => QuarterlyLarRepositoryWrapper("2023", "Q2").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2023, Some("Q3")) => QuarterlyLarRepositoryWrapper("2023", "Q3").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2024, Some("Q1")) => QuarterlyLarRepositoryWrapper("2024", "Q1").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2024, Some("Q2")) => QuarterlyLarRepositoryWrapper("2024", "Q2").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
-              case Period(2024, Some("Q3")) => QuarterlyLarRepositoryWrapper("2024", "Q3").getLarRepository.deleteByLei(lar.larIdentifier.LEI)
+              case Period(submissionId.period.year, None) => YearlyLarRepositoryWrapper(submissionId.period.year.toString).getLarRepository.deleteByLei(lar.larIdentifier.LEI)
+              case Period(submissionId.period.year, Some(submissionId.period.quarter)) => QuarterlyLarRepositoryWrapper(submissionId.period.year.toString, submissionId.period.quarter).deleteByLei(lar.larIdentifier.LEI)
               case _ => {
                 log.error(s"Unable to discern period from $submissionId to delete LAR rows.")
                 throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete LAR rows.")
