@@ -209,7 +209,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
           for {
             delete <- submissionId.period match {
               case Period(submissionId.period.year, None) => YearlyTransmittalSheetRepositoryWrapper(submissionId.period.year.toString).deleteByLei(ts.lei)
-              case Period(submissionId.period.year, Some(submissionId.period.quarter)) => QuarterlyTransmittalSheetRepositoryWrapper(submissionId.period.year.toString, submissionId.period.quarter).deleteByLei(ts.lei)
+              case Period(submissionId.period.year, submissionId.period.quarter) => QuarterlyTransmittalSheetRepositoryWrapper(submissionId.period.year.toString, submissionId.period.quarter).deleteByLei(ts.lei)
               case _ => {
                 log.error(s"Unable to discern period from $submissionId to delete TS rows.")
                 throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete TS rows.")
@@ -254,7 +254,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .mapAsync(1) { ts =>
           val (repo, enforceQuarterly) = submissionId.period match {
             case Period(submissionId.period.year, None) => (YearlyTransmittalSheetRepositoryWrapper(submissionId.period.year.toString).getTransmittalSheet, false)
-            case Period(submissionId.period.year, Some(submissionId.period.quarter)) => (QuarterlyTransmittalSheetRepositoryWrapper(submissionId.period.year.toString, submissionId.period.quarter).getTransmittalSheet, true)
+            case Period(submissionId.period.year, submissionId.period.quarter) => (QuarterlyTransmittalSheetRepositoryWrapper(submissionId.period.year.toString, submissionId.period.quarter).getTransmittalSheet, true)
             case _ =>{
               log.error(s"Unable to discern period from $submissionId to insert TS rows.")
               throw new IllegalArgumentException(s"Unable to discern period from $submissionId to insert TS rows.")
@@ -291,7 +291,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
           for {
             delete <- submissionId.period match {
               case Period(submissionId.period.year, None) => YearlyLarRepositoryWrapper(submissionId.period.year.toString).getLarRepository.deleteByLei(lar.larIdentifier.LEI)
-              case Period(submissionId.period.year, Some(submissionId.period.quarter)) => QuarterlyLarRepositoryWrapper(submissionId.period.year.toString, submissionId.period.quarter).deleteByLei(lar.larIdentifier.LEI)
+              case Period(submissionId.period.year, submissionId.period.quarter) => QuarterlyLarRepositoryWrapper(submissionId.period.year.toString, submissionId.period.quarter).deleteByLei(lar.larIdentifier.LEI)
               case _ => {
                 log.error(s"Unable to discern period from $submissionId to delete LAR rows.")
                 throw new IllegalArgumentException(s"Unable to discern period from $submissionId to delete LAR rows.")
@@ -320,7 +320,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
               case Period(submissionId.period.year, None) => YearlyLarRepositoryWrapper(submissionId.period.year.toString).getLarRepository.insert(
                 LarConverter(lar, submissionId.period.year)
               )
-              case Period(submissionId.period.year, Some(submissionId.period.quarter)) =>
+              case Period(submissionId.period.year, submissionId.period.quarter) =>
                 QuarterlyLarRepositoryWrapper(submissionId.period.year.toString, submissionId.period.quarter).getLarRepository.insert(
                   LarConverter(lar = lar, submissionId.period.year, isQuarterly = true)
                 )
