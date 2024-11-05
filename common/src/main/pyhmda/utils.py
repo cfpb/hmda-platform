@@ -87,7 +87,7 @@ def apply_authorized_modifications(modmap: dict, df: pd.DataFrame) -> pd.DataFra
 # Census Flat File Modifications
 
 def replace_MedianAge_2002_values(df: pd.DataFrame) -> pd.DataFrame:
-    df.loc[df["MedianAge"] == 2002, "MedianAge"] = 6
+    df.loc[df["Median Age"] == 2002, "Median Age"] = 6
     return df
 
 
