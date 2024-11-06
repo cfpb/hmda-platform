@@ -26,12 +26,18 @@ spec:
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
+        - name: cassandra-truststore
+          secret:
+            secretName: cassandra-truststore
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           volumeMounts:
             - name: tz-config
               mountPath: /etc/localtime
+            - name: cassandra-truststore
+              readOnly: true
+              mountPath: "/opt/cassandra_truststore"
           securityContext:
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
@@ -104,6 +110,13 @@ spec:
                 secretKeyRef:
                   name: cassandra-credentials
                   key: cassandra.password
+            - name: CASSANDRA_TRUSTSTORE_FILE
+              value: "/opt/cassandra_truststore/cassandra_truststore.jks"
+            - name: CASSANDRA_TRUSTSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cassandra-truststore-password
+                  key: password
             - name: KAFKA_CLUSTER_HOSTS
               valueFrom:
                 configMapKeyRef:
