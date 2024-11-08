@@ -31,9 +31,17 @@ jobs:
       - name: Push image to Docker Hub
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/hmda:latest
 
-      - name: Check image for CVEs
-        id: scout_scan
+      - name: Run Docker Scout CVE scan
+        if: ${{ github.event_name != 'pull_request_target' }}
         uses: docker/scout-action@v1
         with:
           command: cves
           image: ${{ secrets.DOCKERHUB_USERNAME }}/hmda:latest
+          sarif-file: sarif.output.json
+          summary: true
+
+      - name: Upload CVE scan to artifact
+        if: ${{ github.event_name != 'pull_request_target' }}
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: sarif.output.json
