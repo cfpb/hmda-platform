@@ -32,6 +32,7 @@ jobs:
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/hmda:latest
 
       - name: Check image for CVEs
+        id: scout_scan
         uses: docker/scout-action@v1
         with:
           command: cves
