@@ -63,64 +63,64 @@ jobs:
           fi
 
   common_tests:
-      runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
 
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-        - name: Setup JDK
-          uses: actions/setup-java@v4
-          with:
-            java-version: '11'
-            distribution: 'adopt'
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'adopt'
 
-        - name: Run common Tests
-          run: |
-            sbt "project common" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
-          continue-on-error: true
+      - name: Run common Tests
+        run: |
+          sbt "project common" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
 
-        - name: Check Test Results
-          run: |
-            if [ $(grep 'All tests passed.' log-file | wc -l) -ne 1 ]; then
-              echo "One or more projects had failures. Please review the logs."
-              exit 1
-            else
-              echo "All tests passed."
-              exit 0
-            fi
+      - name: Check Test Results
+        run: |
+          if [ $(grep 'All tests passed.' log-file | wc -l) -ne 1 ]; then
+            echo "One or more projects had failures. Please review the logs."
+            exit 1
+          else
+            echo "All tests passed."
+            exit 0
+          fi
 
   data_browser_tests:
-        runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
 
-        steps:
-          - name: Checkout
-            uses: actions/checkout@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-          - name: Setup JDK
-            uses: actions/setup-java@v4
-            with:
-              java-version: '11'
-              distribution: 'adopt'
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'adopt'
 
-          - name: Run data-browser Tests
-            run: |
-              sbt "project data-browser" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
-            continue-on-error: true
+      - name: Run data-browser Tests
+        run: |
+          sbt "project data-browser" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
+        continue-on-error: true
 
-          - name: Check Test Results
-            run: |
-              if [ $(grep 'All tests passed.' log-file | wc -l) -ne 1 ]; then
-                echo "One or more projects had failures. Please review the logs."
-                exit 1
-              else
-                echo "All tests passed."
-                exit 0
-              fi
+      - name: Check Test Results
+        run: |
+          if [ $(grep 'All tests passed.' log-file | wc -l) -ne 1 ]; then
+            echo "One or more projects had failures. Please review the logs."
+            exit 1
+          else
+            echo "All tests passed."
+            exit 0
+          fi
 
   hmda_analytics_tests:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
