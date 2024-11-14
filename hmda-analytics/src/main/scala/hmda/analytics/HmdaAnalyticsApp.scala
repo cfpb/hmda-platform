@@ -126,7 +126,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
   //2024 TS
   val tsTableName2024Q1  = config.getString("hmda.analytics.2024.tsTableNameQ1")
   val tsTableName2024Q2  = config.getString("hmda.analytics.2024.tsTableNameQ2")
-  val tsTableName2024Q3  = config.getString("hmda.analytics.2023.tsTableNameQ3")
+  val tsTableName2024Q3  = config.getString("hmda.analytics.2024.tsTableNameQ3")
 
   //2024 LAR
   val larTableName2024Q1 = config.getString("hmda.analytics.2024.larTableNameQ1")
