@@ -64,8 +64,13 @@ lazy val dockerSettings = Seq(
     } else dockerBuildCommand.value
   },
   Docker / maintainer := "Hmda-Ops",
-  dockerBaseImage := "openjdk:17.0.1-jdk-slim",
-  dockerRepository := Some("hmda")
+  dockerBaseImage := "eclipse-temurin:21.0.2_13-jdk-alpine",
+  dockerRepository := Some("hmda"),
+  dockerCommands := dockerCommands.value.flatMap {
+    case cmd@Cmd("FROM",_) => List(cmd, Cmd("RUN", "apk update"),
+      Cmd("RUN", "rm /var/cache/apk/*"))
+    case other => List(other)
+  }
 )
 
 
