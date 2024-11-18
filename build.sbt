@@ -67,7 +67,9 @@ lazy val dockerSettings = Seq(
   dockerBaseImage := "eclipse-temurin:21.0.2_13-jdk-alpine",
   dockerRepository := Some("hmda"),
   dockerCommands := dockerCommands.value.flatMap {
-    case cmd@Cmd("FROM",_) => List(cmd, Cmd("RUN", "apk update"),
+    case cmd@Cmd("FROM",_) => List(cmd, Cmd("RUN", "apk add --no-cache openssl"),
+      Cmd("RUN", "apk update"),
+      Cmd("RUN", "apk upgrade"),
       Cmd("RUN", "rm /var/cache/apk/*"))
     case other => List(other)
   }
