@@ -820,7 +820,7 @@ lazy val `hmda-quarterly-data-service` = (project in file ("hmda-quarterly-data-
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(`hmda-protocol` % "compile->compile;test->test")
 
-// https://mvnrepository.com/artifact/io.netty/netty-common
 libraryDependencies ++= Seq(
   "io.netty" % "netty-common" % "4.1.115.Final" % Compile
 )
+
