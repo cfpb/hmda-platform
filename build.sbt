@@ -820,3 +820,4 @@ lazy val `hmda-quarterly-data-service` = (project in file ("hmda-quarterly-data-
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(`hmda-protocol` % "compile->compile;test->test")
 
+dependencyOverrides += "com.google.guava" % "guava" % "32.0.1-android"
