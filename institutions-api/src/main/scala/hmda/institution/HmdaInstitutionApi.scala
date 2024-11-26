@@ -13,7 +13,7 @@ import hmda.institution.api.http.HmdaInstitutionQueryApi
 import hmda.institution.projection.{ InstitutionDBProjection, ProjectEvent }
 import hmda.messages.institution.InstitutionEvents.{ InstitutionCreated, InstitutionDeleted, InstitutionKafkaEvent, InstitutionModified }
 import hmda.messages.pubsub.{ HmdaGroups, HmdaTopics }
-import hmda.publication.KafkaUtils.kafkaHosts
+import hmda.publication.KafkaUtils._
 import hmda.serialization.kafka.InstitutionKafkaEventsDeserializer
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
