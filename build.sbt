@@ -226,45 +226,45 @@ lazy val `check-digit` = (project in file("check-digit"))
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(`hmda-protocol` % "compile->compile;test->test")
 
-  lazy val `file-proxy` = (project in file("file-proxy"))
-    .enablePlugins(
-      JavaServerAppPackaging,
-      sbtdocker.DockerPlugin,
-      AshScriptPlugin
-    )
-    .settings(hmdaBuildSettings: _*)
-    .settings(
-      Seq(
-        libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
+lazy val `file-proxy` = (project in file("file-proxy"))
+  .enablePlugins(
+    JavaServerAppPackaging,
+    sbtdocker.DockerPlugin,
+    AshScriptPlugin
+  )
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
         enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
-        Compile / mainClass := Some("hmda.proxy.FileProxy"),
-        assembly / assemblyJarName := {
-          s"${name.value}.jar"
-        },
-        assembly/ assemblyMergeStrategy := {
-          case "application.conf"                      => MergeStrategy.concat
-          case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
-          case "META-INF/MANIFEST.MF" => MergeStrategy.discard
-          case PathList("META-INF", xs@_*) => MergeStrategy.concat
-          case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
-          case PathList("jakarta", xs@_*) => MergeStrategy.last
-          case PathList(ps @ _*) if ps.last endsWith ".proto" =>
-            MergeStrategy.first
-          case "module-info.class" => MergeStrategy.concat
-          case x if x.endsWith("/module-info.class") => MergeStrategy.concat
-          case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
-          case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
-          case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
-          case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
-          case x =>
-            val oldStrategy = (assembly / assemblyMergeStrategy).value
-            oldStrategy(x)
-        }
-      ),
-      dockerSettings,
-      packageSettings
-    )
-    .dependsOn(common % "compile->compile;test->test")
+      Compile / mainClass := Some("hmda.proxy.FileProxy"),
+      assembly / assemblyJarName := {
+        s"${name.value}.jar"
+      },
+      assembly/ assemblyMergeStrategy := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
+        case PathList("jakarta", xs@_*) => MergeStrategy.last
+        case PathList(ps @ _*) if ps.last endsWith ".proto" =>
+          MergeStrategy.first
+        case "module-info.class" => MergeStrategy.concat
+        case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
+        case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
+        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
+        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assembly / assemblyMergeStrategy).value
+          oldStrategy(x)
+      }
+    ),
+    dockerSettings,
+    packageSettings
+  )
+  .dependsOn(common % "compile->compile;test->test")
 
 
 lazy val `institutions-api` = (project in file("institutions-api"))
@@ -593,46 +593,46 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
   )
   .dependsOn(common % "compile->compile;test->test")
 
-  lazy val `hmda-auth` = (project in file("hmda-auth"))
-    .enablePlugins(
-      JavaServerAppPackaging,
-      sbtdocker.DockerPlugin,
-      AshScriptPlugin
-    )
-    .settings(hmdaBuildSettings: _*)
-    .settings(
-      Seq(
-        libraryDependencies ++= keycloakServerDeps,
-        Compile / mainClass := Some("hmda.authService.HmdaAuth"),
-        assembly / assemblyJarName := {
-          s"${name.value}.jar"
-        },
-        assembly / assemblyMergeStrategy := {
-          case "application.conf"                      => MergeStrategy.concat
-          case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
-          case "META-INF/MANIFEST.MF" => MergeStrategy.discard
-          case PathList("META-INF", xs @ _*) => MergeStrategy.concat
-          case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
-          case PathList("jakarta", xs @ _*) => MergeStrategy.last
-          case "reference.conf" => MergeStrategy.concat
-          case PathList(ps @ _*) if ps.last endsWith ".proto" =>
-            MergeStrategy.first
-          case "module-info.class" => MergeStrategy.concat
-          case x if x.endsWith("/module-info.class") => MergeStrategy.concat
-          case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
-          case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
-          case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
-          case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
-          case x =>
+lazy val `hmda-auth` = (project in file("hmda-auth"))
+  .enablePlugins(
+    JavaServerAppPackaging,
+    sbtdocker.DockerPlugin,
+    AshScriptPlugin
+  )
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      libraryDependencies ++= keycloakServerDeps,
+      Compile / mainClass := Some("hmda.authService.HmdaAuth"),
+      assembly / assemblyJarName := {
+        s"${name.value}.jar"
+      },
+      assembly / assemblyMergeStrategy := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case PathList("META-INF", xs @ _*) => MergeStrategy.concat
+        case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
+        case PathList("jakarta", xs @ _*) => MergeStrategy.last
+        case "reference.conf" => MergeStrategy.concat
+        case PathList(ps @ _*) if ps.last endsWith ".proto" =>
+          MergeStrategy.first
+        case "module-info.class" => MergeStrategy.concat
+        case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
+        case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
+        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
+        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
+        case x =>
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
-        }
-      ),
-      dockerSettings,
-      packageSettings
-    )
-    .dependsOn(common % "compile->compile;test->test")
-    .dependsOn(`institutions-api` % "compile->compile;test->test")
+      }
+    ),
+    dockerSettings,
+    packageSettings
+  )
+  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(`institutions-api` % "compile->compile;test->test")
 
 lazy val `rate-limit` = (project in file("rate-limit"))
   .enablePlugins(
@@ -820,4 +820,5 @@ lazy val `hmda-quarterly-data-service` = (project in file ("hmda-quarterly-data-
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(`hmda-protocol` % "compile->compile;test->test")
 
-dependencyOverrides += "com.google.guava" % "guava" % "32.0.1-android"
+// https://mvnrepository.com/artifact/com.google.guava/guava
+libraryDependencies += "com.google.guava" % "guava" % "32.0.0-android"
