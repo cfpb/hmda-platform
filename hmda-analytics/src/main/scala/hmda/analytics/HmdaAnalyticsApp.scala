@@ -156,9 +156,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
   //submission_history table remains same regardless of the year. There is a sign_date column and submission_id column which would show which year the filing was for
   val histTableName    = config.getString("hmda.analytics.2018.historyTableName")
-
-
-
+  
   val submissionHistoryRepository    = new SubmissionHistoryRepository(dbConfig, histTableName)
 
   val consumerSettings: ConsumerSettings[String, String] =
