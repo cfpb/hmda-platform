@@ -821,3 +821,9 @@ lazy val `hmda-quarterly-data-service` = (project in file ("hmda-quarterly-data-
   .dependsOn(`hmda-protocol` % "compile->compile;test->test")
 
 ThisBuild / libraryDependencies += "com.google.guava" % "guava" % "32.0.0-android"
+
+libraryDependencies ++= Seq(
+  "com.datastax.oss" % "java-driver-core" % "4.15.0" exclude ("com.google.guava", "guava"),
+  "com.datastax.oss" % "java-driver-shaded-guava" % "25.1-jre-graal-sub-1" exclude ("com.google.guava", "guava"),
+  "com.google.guava" % "guava" % "32.0.0-android"
+)
