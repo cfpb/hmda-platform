@@ -43,8 +43,8 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
     with PublicAWSConfigLoader
     with PrivateAWSConfigLoader {
 
-  implicit val ec           = context.system.dispatcher
-  implicit val materializer = Materializer(context)
+  implicit val ec: scala.concurrent.ExecutionContextExecutor           = context.system.dispatcher
+  implicit val materializer: akka.stream.Materializer = Materializer(context)
 
   val availableRepos: Map[Int, ModifiedLarRepository] = mLarAvailableYears.map(yr => yr -> {
     val component = new PublisherComponent(yr)

@@ -25,6 +25,9 @@ import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext
+import akka.stream.Materializer
+import akka.actor.ActorSystem
 
 object IrsPublisherApp extends App {
 
@@ -42,9 +45,9 @@ object IrsPublisherApp extends App {
     """.stripMargin
   )
 
-  implicit val system       = ActorSystem()
-  implicit val materializer = Materializer(system)
-  implicit val ec           = system.dispatcher
+  implicit val system:ActorSystem       = ActorSystem()
+  implicit val materializer: Materializer     = Materializer(system)
+  implicit val ec: ExecutionContext           = system.dispatcher
 
   implicit val timeout = Timeout(5.seconds)
 

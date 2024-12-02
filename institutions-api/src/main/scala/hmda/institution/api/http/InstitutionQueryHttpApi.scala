@@ -71,11 +71,11 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
     path("institutions" / "year" / IntNumber) { year =>
       (extractUri & get) { uri =>
         isFilingAllowed(year, None) {
-          parameter('domain.as[String]) { domain =>
+          parameter(Symbol("domain").as[String]) { domain =>
             val f = findByEmail(domain, year.toString)
             completeInstitutionsFuture(f, uri)
           } ~
-            parameters('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String])  {
+            parameters(Symbol("domain").as[String], Symbol("lei").as[String], Symbol("respondentName").as[String], Symbol("taxId").as[String])  {
               (domain, lei, respondentName, taxId) =>
                 val f = findByFields(lei, respondentName, taxId, domain, year.toString)
                 completeInstitutionsFuture(f, uri)
@@ -103,7 +103,7 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
   private val institutionByDomainDefaultPath =
     path("institutions") {
       (extractUri & get) { uri =>
-        parameter('domain.as[String]) { domain =>
+        parameter(Symbol("domain").as[String]) { domain =>
           if (checkIfPublicDomain(domain)) {
             returnNotFoundError(uri)
           } else {
@@ -111,7 +111,7 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
             completeInstitutionsFuture(f, uri)
           }
         } ~
-          parameters('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String]) {
+          parameters(Symbol("domain").as[String], Symbol("lei").as[String], Symbol("respondentName").as[String], Symbol("taxId").as[String]) {
             (domain, lei, respondentName, taxId) =>
               val f =
                 findByFields(lei, respondentName, taxId, domain, currentYear)

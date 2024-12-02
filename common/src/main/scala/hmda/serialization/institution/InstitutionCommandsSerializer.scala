@@ -44,7 +44,7 @@ class InstitutionCommandsSerializer(system: ExtendedActorSystem) extends Seriali
       deleteInstitutionToProtobuf(cmd, resolver).toByteArray
     case cmd: AddFiling =>
       addFilingToProtobuf(cmd, resolver).toByteArray
-    case _ ⇒
+    case _ =>
       throw new IllegalArgumentException(s"Cannot serialize object of type [${o.getClass.getName}]")
   }
 
