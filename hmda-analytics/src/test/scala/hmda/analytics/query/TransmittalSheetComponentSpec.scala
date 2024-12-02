@@ -41,7 +41,7 @@ class TransmittalSheetComponentSpec extends TransmittalSheetAsyncSetup {
         _            = sheets.size mustBe 1
         rowsUpdated  <- transmittalSheetRepository.updateByLei(quarterlyTs.copy(name = quarterlyTs.name + "-updated"))
         _            = rowsUpdated mustBe 1
-        rowsDeleted  <- transmittalSheetRepository.deleteByLeiAndQuarter(quarterlyTs.lei)
+        rowsDeleted  <- transmittalSheetRepository.deleteByLei(quarterlyTs.lei)
       } yield rowsDeleted mustBe 1
     }
   }
