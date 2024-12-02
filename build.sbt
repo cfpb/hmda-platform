@@ -827,3 +827,11 @@ libraryDependencies ++= Seq(
   "com.datastax.oss" % "java-driver-shaded-guava" % "25.1-jre-graal-sub-1" exclude ("com.google.guava", "guava"),
   "com.google.guava" % "guava" % "32.0.0-android"
 )
+
+ThisBuild / libraryDependencies += "io.netty" % "netty-common" % "4.1.115.Final"
+
+libraryDependencies ++= Seq(
+  "io.netty" % "netty-common" % "4.1.94.Final" exclude ("io.netty", "netty-common"),
+  "io.netty" % "netty-transport-native-unix-common" % "4.1.94.Final" exclude ("io.netty", "netty-common"),
+  "io.netty" % "netty-common" % "4.1.115.Final"
+)
