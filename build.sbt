@@ -835,3 +835,13 @@ libraryDependencies ++= Seq(
   "io.netty" % "netty-transport-native-unix-common" % "4.1.94.Final" exclude ("io.netty", "netty-common"),
   "io.netty" % "netty-common" % "4.1.115.Final"
 )
+
+libraryDependencies ++= Seq(
+  "org.keycloak" % "keycloak-crypto-default" % "25.0.3" exclude ("org.keycloak", "keycloak-core"),
+  "org.keycloak" % "keycloak-server-spi" % "25.0.3" exclude ("org.keycloak", "keycloak-core"),
+  "org.keycloak" % "keycloak-server-spi-private" % "25.0.3" exclude ("org.keycloak", "keycloak-core"),
+  "org.keycloak" % "keycloak-adapter-core" % "25.0.3" exclude ("org.keycloak", "keycloak-core"),
+  "org.keycloak" % "keycloak-admin-client" % "25.0.3" exclude ("org.keycloak", "keycloak-core"),
+  "org.keycloak" % "keycloak-common" % "25.0.3" exclude ("org.keycloak", "keycloak-core"),
+  "org.keycloak" % "keycloak-core" % "26.0.6"
+)
