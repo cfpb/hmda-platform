@@ -13,7 +13,7 @@ import hmda.institution.api.http.HmdaInstitutionQueryApi
 import hmda.institution.projection.{ InstitutionDBProjection, ProjectEvent }
 import hmda.messages.institution.InstitutionEvents.{ InstitutionCreated, InstitutionDeleted, InstitutionKafkaEvent, InstitutionModified }
 import hmda.messages.pubsub.{ HmdaGroups, HmdaTopics }
-import hmda.publication.KafkaUtils.kafkaHosts
+import hmda.publication.KafkaUtils._
 import hmda.serialization.kafka.InstitutionKafkaEventsDeserializer
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -56,7 +56,7 @@ object HmdaInstitutionApi extends App {
       .withBootstrapServers(kafkaHosts)
       .withGroupId(HmdaGroups.institutionsGroup)
       .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
-
+      .withProperties(getKafkaConfig)
   val control: DrainingControl[Done] = Consumer
     .committableSource(consumerSettings, Subscriptions.topics(HmdaTopics.institutionTopic))
     .mapAsync(1)(msg => processData(msg.record.value()).map(_ => msg.committableOffset))
