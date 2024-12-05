@@ -33,7 +33,7 @@ object Version {
   val lettuce                = "6.2.4.RELEASE"
   val java8Compat            = "1.0.2"
   val scalaMock              = "4.3.0"
-  val guava                  = "33.0.0-jre"
+  val guava                  = "33.3.1-jre"
   val awsSesSdk              = "1.12.484"
   val zeroAllocation         = "0.16"
   val cormorant              = "0.3.0"
