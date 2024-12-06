@@ -10,7 +10,6 @@ private[engine] object TsEngine2024Q extends ValidationEngine[TransmittalSheet] 
 
   override def syntacticalChecks(ctx: ValidationContext) = TsEngine2024.syntacticalChecks(ctx)
 
-  override def validityChecks(ctx: ValidationContext) = TsEngine2024.validityChecks(ctx).diff((Vector(V718.withContext(ctx)))) //++ Vector(V602)
-
+  override def validityChecks(ctx: ValidationContext) = TsEngine2024.validityChecks(ctx).appendedAll(Vector(V718.withContext(ctx)))filter(_ != V602)
 }
 // $COVERAGE-ON$
