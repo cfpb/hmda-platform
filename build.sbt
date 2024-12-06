@@ -152,7 +152,8 @@ lazy val `hmda-platform` = (project in file("hmda"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      libraryDependencies ++= List(guava, zeroAllocationHashing),      Compile / mainClass := Some("hmda.HmdaPlatform"),
+      libraryDependencies ++= List(guava, zeroAllocationHashing),
+      Compile / mainClass := Some("hmda.HmdaPlatform"),
       assembly / assemblyJarName := "hmda2.jar",
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
