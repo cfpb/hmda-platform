@@ -305,6 +305,7 @@ private def getOverallLoanLimit(year: Int) = {
       case 2020 => overallLoanLimit2020
       case 2021 => overallLoanLimit2021
       case 2022 => overallLoanLimit2022
+      case 2023 => overallLoanLimit2023
       case 2024 => overallLoanLimit2024
       case 2025 => overallLoanLimit2025
 
