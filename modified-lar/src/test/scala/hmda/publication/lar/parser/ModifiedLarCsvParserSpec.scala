@@ -9,7 +9,7 @@ class ModifiedLarCsvParserSpec extends WordSpec with ScalaCheckPropertyChecks wi
   "Parses LAR entries" in {
     forAll(larGen) { lar =>
       val mlarFn = ModifiedLarCsvParser(lar.toCSV, _)
-      (2018 to 2023).foreach(year => mlarFn(year).lei shouldBe lar.larIdentifier.LEI)
+      (2018 to 2025).foreach(year => mlarFn(year).lei shouldBe lar.larIdentifier.LEI)
     }
   }
 
@@ -17,7 +17,7 @@ class ModifiedLarCsvParserSpec extends WordSpec with ScalaCheckPropertyChecks wi
     forAll(larGen) { lar =>
       val larWithChangedAge = lar.copy(applicant = lar.applicant.copy(age = 8888))
       val mlarFn            = ModifiedLarCsvParser(larWithChangedAge.toCSV, _)
-      (2018 to 2023).foreach { year =>
+      (2018 to 2025).foreach { year =>
         mlarFn(year).lei shouldBe lar.larIdentifier.LEI
         mlarFn(year).ageGreaterThanOrEqual62 shouldBe "NA"
       }
@@ -64,7 +64,7 @@ class ModifiedLarCsvParserSpec extends WordSpec with ScalaCheckPropertyChecks wi
     forAll(larGen) { lar =>
       val larWithChangedAge = lar.copy(property = lar.property.copy(totalUnits = 150))
       val mlarFn            = ModifiedLarCsvParser(larWithChangedAge.toCSV, _)
-      (2018 to 2023).foreach { year =>
+      (2018 to 2025).foreach { year =>
         mlarFn(year).lei shouldBe lar.larIdentifier.LEI
         mlarFn(year).totalUnits shouldBe ">149"
       }
