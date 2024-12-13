@@ -1511,6 +1511,6 @@
     "waitIncrementSeconds": "60",
     "offlineSessionMaxLifespanEnabled": "false"
   },
-  "keycloakVersion": "4.2.1.Final",
+  "keycloakVersion": "26.0.5",
   "userManagedAccessAllowed": false
 }

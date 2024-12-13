@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM maven:3.8.3-openjdk-8-slim as builder
+FROM --platform=$BUILDPLATFORM maven:3-eclipse-temurin-23-alpine as builder
 
 WORKDIR build
 COPY src/ ./
@@ -22,5 +22,5 @@ WORKDIR /
 
 USER ${SPI_USER}
 
-COPY --from=builder /build/target/keycloak-authenticator-hmda-24.0.3.jar .
+COPY --from=builder /build/target/keycloak-authenticator-hmda-26.0.5.jar .
 

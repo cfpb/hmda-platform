@@ -8,5 +8,5 @@ allowing users to manage the Institutions they are associated with.
 ## Use the following command to build Keycloak-spi-provider:
 
 ```
-docker buildx build --platform linux/amd64 -t keycloak-spi-provider.v1.0.0 .
+docker buildx build --platform linux/amd64 -t keycloak-spi-provider.v3.0.0 .
 ```

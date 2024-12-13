@@ -1,7 +1,7 @@
 image:
   registry: docker.io
   repository: bitnami/keycloak
-  tag: 23.0.7
+  tag: 26.0.5
 
 auth:
   adminUser: keycloak
@@ -59,10 +59,10 @@ initContainers:
     - -c
     - |
       echo "Copying SPI..."
-      cp -rv keycloak-authenticator-hmda-24.0.3.jar /spi
+      cp -rv keycloak-authenticator-hmda-26.0.5.jar /spi
     command:
     - sh
-    image: hmda/keycloak-spi-provider:v2.4.2
+    image: hmda/keycloak-spi-provider:v3.0.0
     imagePullPolicy: Always
     resources: {}
     terminationMessagePath: /dev/termination-log
