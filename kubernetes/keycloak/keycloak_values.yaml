@@ -1,12 +1,12 @@
 image:
   registry: docker.io
   repository: bitnami/keycloak
-  tag: 23.0.7
+  tag: 26.0.5
 
 auth:
   adminUser: keycloak
   existingSecret: "keycloak-credentials"
-  passwordSecretKey: "password" 
+  passwordSecretKey: "password"
 
 tls:
   enabled: true
@@ -46,7 +46,7 @@ initContainers:
       cp -R /themes/* /theme/hmda
     command:
     - sh
-    image: hmda/keycloak-theme-provider:mfaLogoCorrected
+    image: hmda/keycloak-theme-provider:latest
     imagePullPolicy: Always
     resources: {}
     terminationMessagePath: /dev/termination-log
@@ -59,25 +59,28 @@ initContainers:
     - -c
     - |
       echo "Copying SPI..."
-      cp -rv keycloak-authenticator-hmda-24.0.3.jar /spi
+      cp -rv keycloak-authenticator-hmda-4.2.1.Final.jar /spi
     command:
     - sh
-    image: hmda/keycloak-spi-provider:v2.4.2
-    imagePullPolicy: Always
-    resources: {}
-    terminationMessagePath: /dev/termination-log
-    terminationMessagePolicy: File
+    image: hmda/keycloak-spi-provider:v2.7.4
     volumeMounts:
       - name: spi
         mountPath: /spi
+
+extraEnvVars:
+  - name: KC_PROXY
+    value: reencrypt
+  - name: KC_HOSTNAME_STRICT
+    value: 'true'
 
 postgresql:
   enabled: false
 
 externalDatabase:
-  user: keycloak
-  database: keycloak_v2
   existingSecret: "keycloak-postgresql"
+  existingSecretHostKey: "host"
+  existingSecretDatabaseKey: "database"
+  existingSecretUserKey: "username"
   existingSecretPasswordKey: "postgresql-password"
 
 logging:
