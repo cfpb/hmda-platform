@@ -72,7 +72,12 @@ extraEnvVars:
     value: reencrypt
   - name: KC_HOSTNAME_STRICT
     value: 'true'
-  - name: KC_HOSTNAME_URL
+  - name: KC_HOSTNAME
+    valueFrom:
+      configMapKeyRef:
+        name: http-configmap
+        key: auth.url
+  - name: KC_ADMIN_HOSTNAME
     valueFrom:
       configMapKeyRef:
         name: http-configmap
