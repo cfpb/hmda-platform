@@ -1,7 +1,7 @@
 image:
   registry: docker.io
   repository: bitnami/keycloak
-  tag: 26.0.5
+  tag: 25.0.6
 
 auth:
   adminUser: keycloak
@@ -72,6 +72,16 @@ extraEnvVars:
     value: reencrypt
   - name: KC_HOSTNAME_STRICT
     value: 'true'
+  - name: KC_HOSTNAME
+    valueFrom:
+      configMapKeyRef:
+        name: http-configmap
+        key: auth.url
+  - name: KC_ADMIN_HOSTNAME
+    valueFrom:
+      configMapKeyRef:
+        name: http-configmap
+        key: auth.url
 
 postgresql:
   enabled: false
