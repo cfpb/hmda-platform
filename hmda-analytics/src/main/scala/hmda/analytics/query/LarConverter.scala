@@ -246,8 +246,6 @@ object LarConverter {
       case 2023 => countyLoanLimitsByCounty2023
       case 2024 => countyLoanLimitsByCounty2024
       case 2025 => countyLoanLimitsByCounty2024
-
-
     }
   }
 
@@ -260,9 +258,7 @@ object LarConverter {
       case 2022 => countyLoanLimitsByState2022
       case 2023 => countyLoanLimitsByState2023
       case 2024 => countyLoanLimitsByState2024
-            case 2025 => countyLoanLimitsByCounty2024
-
-
+      case 2025 => countyLoanLimitsByState2024
     }
   }
 
@@ -275,8 +271,7 @@ object LarConverter {
       case 2022 => overallLoanLimit2022
       case 2023 => overallLoanLimit2023
       case 2024 => overallLoanLimit2024
-      case 2025 => countyLoanLimitsByCounty2024
-
+      case 2025 => overallLoanLimit2024
     }
   }
 
