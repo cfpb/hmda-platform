@@ -49,7 +49,7 @@ abstract class RatesGraph(
   protected def getSummaryByRace(title: String, race: String): CancelableFuture[GraphSeriesSummary] = ???
   protected def decimalPlaces: Int = DEFAULT_DECIMAL_PRECISION
   def getRoute: GraphRoute = new GraphRoute(title, categoryVerbiage, endpoint) {
-    override def route: Route = pathPrefix(endpoint) {
+    override def route: Route = pathPrefix(this.endpoint) {
       path("") {
         complete(
           getSummary

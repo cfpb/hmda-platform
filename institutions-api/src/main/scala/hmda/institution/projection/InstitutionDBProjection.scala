@@ -29,19 +29,19 @@ object InstitutionDBProjection extends InstitutionEmailComponent with Institutio
     * to BETA
     */
 
-  implicit val institutionRepository2018   = new InstitutionRepository(dbConfig, "institutions2018")
-  implicit val institutionRepository2019   = new InstitutionRepository(dbConfig, "institutions2019")
-  implicit val institutionRepository2020   = new InstitutionRepository(dbConfig, "institutions2020")
-  implicit val institutionRepository2021   = new InstitutionRepository(dbConfig, "institutions2021")
-  implicit val institutionRepository2022   = new InstitutionRepository(dbConfig, "institutions2022")
-  implicit val institutionRepository2023   = new InstitutionRepository(dbConfig, "institutions2023")
-  implicit val institutionRepository2024   = new InstitutionRepository(dbConfig, "institutions2024")
-  implicit val institutionRepository2025   = new InstitutionRepository(dbConfig, "institutions2025")
+  val institutionRepository2018   = new InstitutionRepository(dbConfig, "institutions2018")
+  val institutionRepository2019   = new InstitutionRepository(dbConfig, "institutions2019")
+  val institutionRepository2020   = new InstitutionRepository(dbConfig, "institutions2020")
+  val institutionRepository2021   = new InstitutionRepository(dbConfig, "institutions2021")
+  val institutionRepository2022   = new InstitutionRepository(dbConfig, "institutions2022")
+  val institutionRepository2023   = new InstitutionRepository(dbConfig, "institutions2023")
+  val institutionRepository2024   = new InstitutionRepository(dbConfig, "institutions2024")
+  val institutionRepository2025   = new InstitutionRepository(dbConfig, "institutions2025")
 
 
 
-  implicit val institutionEmailsRepository = new InstitutionEmailsRepository(dbConfig)
-  implicit val institutionNotesHistoryRepository = new InstitutionNoteHistoryRepository(dbConfig)
+  implicit val institutionEmailsRepository: hmda.institution.projection.InstitutionDBProjection.InstitutionEmailsRepository = new InstitutionEmailsRepository(dbConfig)
+  implicit val institutionNotesHistoryRepository: hmda.institution.projection.InstitutionDBProjection.InstitutionNoteHistoryRepository = new InstitutionNoteHistoryRepository(dbConfig)
 
   implicit val ec: ExecutionContext = ExecutionContext.global
   val log = LoggerFactory.getLogger("hmda")

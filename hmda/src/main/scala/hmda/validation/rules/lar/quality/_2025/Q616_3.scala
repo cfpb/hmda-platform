@@ -4,11 +4,8 @@ import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.parser.filing.ts.TsCsvParser.toValidBigDecimal
 import hmda.validation.dsl.ValidationResult
 import hmda.validation.rules.EditCheck
-import hmda.validation.dsl.PredicateHmda._
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
-
-import scala.util.Try
 
 
 object Q616_3 extends EditCheck[LoanApplicationRegister] {

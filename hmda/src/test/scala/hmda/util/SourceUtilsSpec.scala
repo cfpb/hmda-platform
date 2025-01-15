@@ -5,12 +5,15 @@ import akka.stream.Materializer
 import akka.stream.scaladsl.Source
 import hmda.util.SourceUtils._
 import org.scalatest.{ AsyncWordSpec, MustMatchers }
+import scala.concurrent.ExecutionContext
+import akka.stream.Materializer
+import akka.actor.ActorSystem
 
 class SourceUtilsSpec extends AsyncWordSpec with MustMatchers {
 
-  implicit val system       = ActorSystem()
-  implicit val materializer = Materializer(system)
-  implicit val ec           = system.dispatcher
+  implicit val system:ActorSystem       = ActorSystem()
+  implicit val materializer:Materializer = Materializer(system)
+  implicit val ec: ExecutionContext          = system.dispatcher
 
   val source1 = Source.fromIterator(() => List(1, 2, 3, 4, 5).toIterator)
   val source2 = Source.fromIterator(() => List(1, 2, 3, 4).toIterator)

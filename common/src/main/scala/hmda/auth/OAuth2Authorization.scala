@@ -46,7 +46,7 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
   def authorizeVerifiedToken(): Directive1[VerifiedToken] =
     withAccessLog
       .&(handleRejections(authRejectionHandler))
-      .&(passToken)
+      .&(passToken())
 
   def logAccessLog(uri: Uri, token: () => Option[VerifiedToken])(request: HttpRequest)(r: RouteResult): Unit = {
     val result = r match {

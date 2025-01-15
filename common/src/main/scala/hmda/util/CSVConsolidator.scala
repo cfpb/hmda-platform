@@ -1,8 +1,6 @@
 package hmda.util
 
 import cats.implicits._
-import com.typesafe.config.ConfigFactory
-import hmda.model.filing.submission.SubmissionId
 
 object CSVConsolidator {
 

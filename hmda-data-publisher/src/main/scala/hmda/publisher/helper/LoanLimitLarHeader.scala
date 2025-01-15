@@ -30,7 +30,7 @@ trait LoanLimitLarHeader {
 
 object LoanLimitHeader extends LoanLimitLarHeader {
   def getHeaderString = {
-    LoanLimitHeader
+    this.LoanLimitHeader
   }
 
 }
