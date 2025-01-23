@@ -1,0 +1,57 @@
+name: HMDA Platform CI
+
+env:
+  SCALA_IMAGE: sbtscala/scala-sbt:eclipse-temurin-11.0.16_1.7.3_2.12.17
+  LOCAL_REGISTRY: ghcr.io/${{ github.repository }}
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    container: ${{ env.SCALA_IMAGE }}
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Build Docker image of HMDA platform
+        run: |
+          env JAVA_OPTS="-Xss256m -Xmx4096m" sbt "project hmda-platform" dockerPublishLocalSkipTests
+        continue-on-error: false
+
+      - name: Tag and name Docker image
+        run: docker tag hmda/hmda-platform:latest ${{ env.LOCAL_REGISTRY }}:${{ github.sha }}
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3x
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push image
+        run: |
+          docker push ${{ env.LOCAL_REGISTRY }}:${{ github.sha }}
+        
+
+
+  hmda-platform-cve-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Log in to GHCR
+        uses: docker/login-action@v3x
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v6
+        with:
+          image: ${{ env.LOCAL_REGISTRY }}:${{ github.sha }}
