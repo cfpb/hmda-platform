@@ -1,15 +1,15 @@
 name: HMDA Platform CI
 
-env:
-  SCALA_IMAGE: sbtscala/scala-sbt:eclipse-temurin-11.0.16_1.7.3_2.12.17
-  LOCAL_REGISTRY: ghcr.io/${{ github.repository }}
-
 on:
   pull_request:
     types: [opened, synchronize, reopened]
 
 permissions:
   pull-requests: write
+
+env:
+  SCALA_IMAGE: sbtscala/scala-sbt:eclipse-temurin-11.0.16_1.7.3_2.12.17
+  LOCAL_REGISTRY: ghcr.io/${{ github.repository }}
 
 jobs:
   build-image:
