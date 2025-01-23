@@ -27,7 +27,7 @@ jobs:
         run: docker tag hmda/hmda-platform:latest ${{ env.LOCAL_REGISTRY }}:${{ github.sha }}
 
       - name: Log in to GHCR
-        uses: docker/login-action@v3x
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -44,7 +44,7 @@ jobs:
 
     steps:
       - name: Log in to GHCR
-        uses: docker/login-action@v3x
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
