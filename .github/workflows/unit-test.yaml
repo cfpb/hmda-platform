@@ -7,364 +7,80 @@ on:
 
 jobs:
   hmda_platform_tests:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-
-      - name: Run hmda-platform Tests
-        run: |
-          sbt "project hmda-platform" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
-        continue-on-error: true
-
-      - name: Check Test Results
-        run: |
-          if [ $(grep 'All tests passed.' log-file | wc -l) -ne 1 ]; then
-            echo "One or more projects had failures. Please review the logs."
-            exit 1
-          else
-            echo "All tests passed."
-            exit 0
-          fi
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "hmda-platform"
+      output-file: "output-log"
 
   check_digit_tests:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-
-      - name: Run check-digit Tests
-        run: |
-          sbt "project check-digit" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
-        continue-on-error: true
-
-      - name: Check Test Results
-        run: |
-          if [ $(grep 'All tests passed.' log-file | wc -l) -ne 1 ]; then
-            echo "One or more projects had failures. Please review the logs."
-            exit 1
-          else
-            echo "All tests passed."
-            exit 0
-          fi
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "check-digit"
+      output-file: "output-log"
 
   common_tests:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-
-      - name: Run common Tests
-        run: |
-          sbt "project common" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
-        continue-on-error: true
-
-      - name: Check Test Results
-        run: |
-          if [ $(grep 'All tests passed.' log-file | wc -l) -ne 1 ]; then
-            echo "One or more projects had failures. Please review the logs."
-            exit 1
-          else
-            echo "All tests passed."
-            exit 0
-          fi
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "common"
+      output-file: "output-log"
 
   data_browser_tests:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-
-      - name: Run data-browser Tests
-        run: |
-          sbt "project data-browser" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
-        continue-on-error: true
-
-      - name: Check Test Results
-        run: |
-          if [ $(grep 'All tests passed.' log-file | wc -l) -ne 1 ]; then
-            echo "One or more projects had failures. Please review the logs."
-            exit 1
-          else
-            echo "All tests passed."
-            exit 0
-          fi
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "data-browser"
+      output-file: "output-log"
 
   hmda_analytics_tests:
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "hmda-analytics"
+      output-file: "output-log"
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-
-      - name: Run hmda-analytics Tests
-        run: |
-          sbt "project hmda-analytics" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
-        continue-on-error: true
-
-      - name: Check Test Results
-        run: |
-          if [ $(grep 'All tests passed.' log-file | wc -l) -ne 1 ]; then
-            echo "One or more projects had failures. Please review the logs."
-            exit 1
-          else
-            echo "All tests passed."
-            exit 0
-          fi
 
   hmda_data_publisher_tests:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-
-      - name: Run hmda-data-publisher Tests
-        run: |
-          sbt "project hmda-data-publisher" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
-        continue-on-error: true
-
-      - name: Check Test Results
-        run: |
-          if [ $(grep 'All tests passed.' log-file | wc -l) -ne 1 ]; then
-            echo "One or more projects had failures. Please review the logs."
-            exit 1
-          else
-            echo "All tests passed."
-            exit 0
-          fi
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "hmda-data-publisher"
+      output-file: "output-log"
 
   hmda_quarterly_data_service_tests:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-
-      - name: Run hmda-quarterly-data-service Tests
-        run: |
-          sbt "project hmda-quarterly-data-service" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
-        continue-on-error: true
-
-      - name: Check Test Results
-        run: |
-          if [ $(grep 'All tests passed.' log-file | wc -l) -ne 1 ]; then
-            echo "One or more projects had failures. Please review the logs."
-            exit 1
-          else
-            echo "All tests passed."
-            exit 0
-          fi
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "hmda-quarterly-data-service"
+      output-file: "output-log"
 
   hmda_reporting_tests:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-
-      - name: Run hmda-reporting Tests
-        run: |
-          sbt "project hmda-reporting" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
-        continue-on-error: true
-
-      - name: Check Test Results
-        run: |
-          if [ $(grep 'All tests passed.' log-file | wc -l) -ne 1 ]; then
-            echo "One or more projects had failures. Please review the logs."
-            exit 1
-          else
-            echo "All tests passed."
-            exit 0
-          fi
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "hmda-reporting"
+      output-file: "output-log"
 
   institutions_api_tests:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-
-      - name: Run institutions-api Tests
-        run: |
-          sbt "project institutions-api" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
-        continue-on-error: true
-
-      - name: Check Test Results
-        run: |
-          if [ $(grep 'All tests passed.' log-file | wc -l) -ne 1 ]; then
-            echo "One or more projects had failures. Please review the logs."
-            exit 1
-          else
-            echo "All tests passed."
-            exit 0
-          fi
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "institutions-api"
+      output-file: "output-log"
 
   modified_lar_tests:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-
-      - name: Run modified-lar Tests
-        run: |
-          sbt "project modified-lar" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
-        continue-on-error: true
-
-      - name: Check Test Results
-        run: |
-          if [ $(grep 'All tests passed.' log-file | wc -l) -ne 1 ]; then
-            echo "One or more projects had failures. Please review the logs."
-            exit 1
-          else
-            echo "All tests passed."
-            exit 0
-          fi
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "modified-lar"
+      output-file: "output-log"
 
   rate_limit_tests:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-
-      - name: Run rate-limit Tests
-        run: |
-          sbt "project rate-limit" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
-        continue-on-error: true
-
-      - name: Check Test Results
-        run: |
-          if [ $(grep 'All tests passed.' log-file | wc -l) -ne 1 ]; then
-            echo "One or more projects had failures. Please review the logs."
-            exit 1
-          else
-            echo "All tests passed."
-            exit 0
-          fi
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "rate-limit"
+      output-file: "output-log"
 
   ratespread_calculator_tests:
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "ratespread-calculator"
+      output-file: "output-log"
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-
-      - name: Run ratespread-calculator Tests
-        run: |
-          sbt "project ratespread-calculator" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
-        continue-on-error: true
-
-      - name: Check Test Results
-        run: |
-          if [ $(grep 'All tests passed.' log-file | wc -l) -ne 1 ]; then
-            echo "One or more projects had failures. Please review the logs."
-            exit 1
-          else
-            echo "All tests passed."
-            exit 0
-          fi
   submission_errors_tests:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-
-      - name: Run submission-errors Tests
-        run: |
-          sbt "project submission-errors" "testOnly -- -l actions-ignore" 2>&1 | tee -a log-file
-        continue-on-error: true
-
-      - name: Check Test Results
-        run: |
-          if [ $(grep 'All tests passed.' log-file | wc -l) -ne 1 ]; then
-            echo "One or more projects had failures. Please review the logs."
-            exit 1
-          else
-            echo "All tests passed."
-            exit 0
-          fi
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "submission-errors"
+      output-file: "output-log"
