@@ -8,7 +8,7 @@ import akka.http.scaladsl.model.ws.{ Message, TextMessage }
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.scaladsl.{ Flow, Source }
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
 import hmda.api.ws.model.{ KeepAliveWsResponse, ServerPing, SubmissionStatus, SubmissionStatusWSResponse }
 import hmda.messages.submission.SubmissionEvents.{ SubmissionCreated, SubmissionEvent, SubmissionModified }
 import hmda.model.filing.submission.SubmissionId

@@ -21,8 +21,7 @@ spec:
     spec:
       initContainers:
       - args:
-        - apk upgrade --update-cache --available && apk add openssl &&
-          openssl pkcs12 -export -in /opt/docker/certs/redis-cert/redis-crt -inkey /opt/docker/certs/redis-key/redis-key
+        - openssl pkcs12 -export -in /opt/docker/certs/redis-cert/redis-crt -inkey /opt/docker/certs/redis-key/redis-key
           -out /opt/docker/server.p12 -name redis-tls -CAfile /opt/docker/certs/ca-cert/ca-crt -caname root
           -passin pass:changeit -passout pass:changeit &&
           keytool -importkeystore -deststorepass changeit -destkeypass changeit -destkeystore /opt/java/openjdk/lib/security/cacerts
@@ -33,8 +32,8 @@ spec:
           - /bin/sh
           - -c
           - --
-        image: eclipse-temurin:20-jdk-alpine
-        name: eclipse-temurin-init
+        image: 626560329871.dkr.ecr.us-east-1.amazonaws.com/hmda/hmda-init:v1.0.0
+        name: hmda-init
         resources: {}
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
@@ -160,38 +159,6 @@ spec:
                   key: aws-region
             - name: BROWSER_LOG_LEVEL
               value: {{.Values.databrowser.loglevel}}
-            - name: DATABROWSER_PG_TABLE_2017
-              value: intentionally_left_blank
-            - name: DATABROWSER_PG_TABLE_2018
-              valueFrom:
-                configMapKeyRef:
-                  name: pgtables-configmap
-                  key: mlartable.2018
-            - name: DATABROWSER_PG_TABLE_2019
-              valueFrom:
-              configMapKeyRef:
-                  name: pgtables-configmap
-                  key: mlartable.2019
-            - name: DATABROWSER_PG_TABLE_2020
-              valueFrom:
-                configMapKeyRef:
-                  name: pgtables-configmap
-                  key: mlartable.2020
-            - name: DATABROWSER_PG_TABLE_2021
-              valueFrom:
-                configMapKeyRef:
-                  name: pgtables-configmap
-                  key: mlartable.2021
-            - name: DATABROWSER_PG_TABLE_2022
-              valueFrom: 
-                configMapKeyRef:
-                  name: pgtables-configmap
-                  key: mlartable.2022
-            - name: DATABROWSER_PG_TABLE_2023
-              valueFrom:
-                configMapKeyRef:
-                  name: pgtables-configmap
-                  key: mlartable.2023
             - name: REDIS_HOSTNAME
               value: {{.Values.databrowser.redis}}
             - name: REDIS_PROTOCOL

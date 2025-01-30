@@ -9,6 +9,7 @@ import hmda.validation.rules.lar.quality.common._
 import hmda.validation.rules.lar.syntactical.{S300, S301}
 import hmda.validation.rules.lar.validity.{_2020, _2022, _}
 import hmda.census.records.CensusRecords
+import hmda.validation.rules.lar.validity.common.V619_2
 
 private[engine] object LarEngine2022Q extends ValidationEngine[LoanApplicationRegister] {
 
@@ -42,7 +43,7 @@ private[engine] object LarEngine2022Q extends ValidationEngine[LoanApplicationRe
     V617,
     V618,
     V619_1,
-    _2022.V619_2,
+    V619_2.withYear("2022"),
     V619_3,
     V620,
     V621,
@@ -238,7 +239,7 @@ private[engine] object LarEngine2022Q extends ValidationEngine[LoanApplicationRe
     _2022.V720_2
   )
 
-  override val qualityChecks = Vector(
+  override def qualityChecks(ctx: ValidationContext) = Vector(
     Q601,
     Q602,
     Q603.withIndexedSmallCounties(CensusRecords.indexedSmallCounty2022),

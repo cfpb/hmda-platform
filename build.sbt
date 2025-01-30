@@ -3,7 +3,7 @@ import BuildSettings._
 import sbtassembly.AssemblyPlugin.autoImport.assemblyMergeStrategy
 import com.typesafe.sbt.packager.docker._
 
-lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson, testContainers, apacheCommonsIO, s3Mock,log4jToSlf4j, kubernetesApi)
+lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson, testContainers, apacheCommonsIO, log4jToSlf4j, kubernetesApi)
 
 lazy val sparkDeps =
   Seq(
@@ -51,7 +51,7 @@ lazy val akkaPersistenceDeps =
   )
 
 lazy val akkaHttpDeps =
-  Seq(akkaHttp, akkaHttp2, akkaHttpTestkit, akkaStreamsTestKit, akkaHttpCirce, akkaHttpXml)
+  Seq(akkaHttp, akkaHttp2, akkaHttpXml, akkaHttpTestkit, akkaStreamsTestKit, akkaHttpCirce)
 lazy val circeDeps      = Seq(circe, circeGeneric, circeParser)
 lazy val enumeratumDeps = Seq(enumeratum, enumeratumCirce)
 
@@ -65,7 +65,7 @@ lazy val dockerSettings = Seq(
     } else dockerBuildCommand.value
   },
   Docker / maintainer := "Hmda-Ops",
-  dockerBaseImage := "eclipse-temurin:21.0.2_13-jdk-alpine",
+  dockerBaseImage := "eclipse-temurin:23.0.1_11-jdk-alpine",
   dockerRepository := Some("hmda"),
   dockerCommands := dockerCommands.value.flatMap {
     case cmd@Cmd("FROM",_) => List(cmd, Cmd("RUN", "apk update"),
@@ -156,7 +156,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      libraryDependencies += zeroAllocationHashing,
+      libraryDependencies ++= List(guava, zeroAllocationHashing),
       Compile / mainClass := Some("hmda.HmdaPlatform"),
       assembly / assemblyJarName := "hmda2.jar",
       assembly / assemblyMergeStrategy := {
@@ -166,6 +166,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
         case "logback.xml"                           => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
@@ -201,10 +202,12 @@ lazy val `check-digit` = (project in file("check-digit"))
         s"${name.value}.jar"
       },
       assembly / assemblyMergeStrategy := {
+
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case PathList("META-INF", xs @ _*) => MergeStrategy.concat
+        case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs @ _*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
@@ -245,6 +248,7 @@ lazy val `check-digit` = (project in file("check-digit"))
           case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
           case "META-INF/MANIFEST.MF" => MergeStrategy.discard
           case PathList("META-INF", xs@_*) => MergeStrategy.concat
+          case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
           case PathList("jakarta", xs@_*) => MergeStrategy.last
           case PathList(ps @ _*) if ps.last endsWith ".proto" =>
             MergeStrategy.first
@@ -280,6 +284,7 @@ lazy val `institutions-api` = (project in file("institutions-api"))
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
@@ -322,6 +327,7 @@ lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
@@ -359,6 +365,7 @@ lazy val `hmda-dashboard` = (project in file("hmda-dashboard"))
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
@@ -397,6 +404,7 @@ lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
@@ -435,6 +443,7 @@ lazy val `modified-lar` = (project in file("modified-lar"))
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
@@ -474,6 +483,7 @@ lazy val `irs-publisher` = (project in file("irs-publisher"))
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
@@ -513,6 +523,7 @@ lazy val `hmda-reporting` = (project in file("hmda-reporting"))
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
@@ -561,6 +572,7 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
@@ -602,6 +614,7 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
           case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
           case "META-INF/MANIFEST.MF" => MergeStrategy.discard
           case PathList("META-INF", xs @ _*) => MergeStrategy.concat
+          case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
           case PathList("jakarta", xs @ _*) => MergeStrategy.last
           case "reference.conf" => MergeStrategy.concat
           case PathList(ps @ _*) if ps.last endsWith ".proto" =>
@@ -639,6 +652,7 @@ lazy val `rate-limit` = (project in file("rate-limit"))
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
@@ -678,6 +692,7 @@ lazy val `data-browser` = (project in file("data-browser"))
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
@@ -711,6 +726,7 @@ lazy val `submission-errors` = (project in file("submission-errors"))
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps@_*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
@@ -741,6 +757,7 @@ lazy val `email-service` = (project in file("email-service"))
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
@@ -781,6 +798,7 @@ lazy val `hmda-quarterly-data-service` = (project in file ("hmda-quarterly-data-
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs@_*) => MergeStrategy.last
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first

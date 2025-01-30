@@ -139,7 +139,7 @@ object HmdaValidationError
           )
           _              = tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(95), larSyntacticalValidityErrors.map(_.editName).toSet)
           _              = log.info(s"Starting validateAsycLar - Syntactical for $submissionId")
-          larAsyncErrors <- validateAsyncLar("syntactical-validity", submissionId).mapConcat(_.validationErrors).runWith(Sink.seq)
+          larAsyncErrors <- validateAsyncLar("syntactical-validity", submissionId, validationContext).mapConcat(_.validationErrors).runWith(Sink.seq)
           _              = tracker ! ValidationDelta(ValidationType.Syntactical, InProgress(99), larAsyncErrors.map(_.editName).toSet)
           _              = log.info(s"Finished validateAsycLar - Syntactical for $submissionId")
         } yield (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
@@ -176,9 +176,12 @@ object HmdaValidationError
       case StartQuality(submissionId) =>
         log.info(s"Quality validation started for $submissionId")
         val period = submissionId.period
+        val fValidationContext =
+          validationContext(period, sharding, submissionId)
         tracker ! ValidationDelta(ValidationType.Quality, InProgress(1), Set())
         val fQuality = for {
-          larErrors <- validateLar("quality", ctx, submissionId, ValidationContext(filingPeriod = Some(period)))(
+          validationContext <- fValidationContext
+          larErrors <- validateLar("quality", ctx, submissionId, validationContext)(
             system,
             materializer,
             blockingEc,
@@ -187,7 +190,7 @@ object HmdaValidationError
           _ = tracker ! ValidationDelta(ValidationType.Quality, InProgress(50), larErrors.map(_.editName).toSet)
           _ = log.info(s"Finished ValidateLar Quality for $submissionId")
           _ = log.info(s"Started validateAsyncLar - Quality for $submissionId")
-          larAsyncErrorsQuality <- validateAsyncLar("quality", submissionId)
+          larAsyncErrorsQuality <- validateAsyncLar("quality", submissionId, validationContext)
             .mapConcat(_.validationErrors)
             .runWith(Sink.seq)
           _ = log.info(s"Finished ValidateAsyncLar Quality for $submissionId")
@@ -626,7 +629,8 @@ object HmdaValidationError
 
   private def validateAsyncLar(
                                 editCheck: String,
-                                submissionId: SubmissionId
+                                submissionId: SubmissionId,
+                                validationContext: ValidationContext
                               )(implicit system: ActorSystem[_], mat: Materializer, ec: ExecutionContext, t: Timeout): Source[HmdaRowValidatedError, NotUsed] = {
     val sharding = ClusterSharding(system)
     val self: EntityRef[SubmissionProcessingCommand] = selectHmdaValidationError(sharding, submissionId)
@@ -634,7 +638,7 @@ object HmdaValidationError
     val period = submissionId.period
     uploadConsumerRawStr(submissionId)
       .drop(1)
-      .via(validateAsyncLarFlow(editCheck, period))
+      .via(validateAsyncLarFlow(editCheck, period, validationContext))
       .filter(_.isLeft)
       .map(_.left.get)
       .zip(Source.fromIterator(() => Iterator.from(2)))

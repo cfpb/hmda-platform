@@ -8,14 +8,13 @@ import akka.http.scaladsl.server.Route
 import akka.stream.scaladsl.{ Broadcast, Concat, Flow, GraphDSL, Sink, Source }
 import akka.stream.{ FlowShape, Materializer }
 import akka.util.ByteString
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.model.validation.ValidationError
 import hmda.model.validation.LarValidationError
 import hmda.api.http.model.filing.submissions.HmdaRowParsedErrorSummary
 import hmda.api.http.model.filing.submissions.{ ValidationErrorSummary, SingleValidationErrorSummary }
 import hmda.api.http.utils.ParserErrorUtils
-import hmda.model.validation.LarValidationError
 import hmda.model.validation.TsValidationError
 import hmda.validation.engine._
 import hmda.validation.context.ValidationContext
@@ -129,7 +128,7 @@ private class HmdaFileValidationHttpApi(implicit mat: Materializer) {
       case "syntactical" =>
         checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
       case "validity" => checkValidity(lar, lar.loan.ULI, ctx, LarValidationError)
-      case "quality"  => checkQuality(lar, lar.loan.ULI)
+      case "quality"  => checkQuality(lar, lar.loan.ULI, ctx)
     }
 
     val maybeErrors = validation.leftMap(xs => xs.toList).toEither
@@ -155,6 +154,9 @@ private class HmdaFileValidationHttpApi(implicit mat: Materializer) {
 
       case "validity" =>
         checkValidity(ts, ts.LEI, ctx, TsValidationError)
+      
+      case "quality" =>
+        checkQuality(ts, ts.LEI, ctx)
     }
 
     val maybeErrors = validation.leftMap(xs => xs.toList).toEither

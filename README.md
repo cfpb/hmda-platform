@@ -118,6 +118,18 @@ Clone the repo and go into the repo directory:
 git clone https://github.com/cfpb/hmda-platform.git
 cd hmda-platform
 ```
+### Apple Silicon
+
+The current platform and specifically Cassandra have problems running on "Apple silicon" architecture. If your laptop **About This Mac** information shows an Apple M1 or later chip, this applies to you. This will cause test suites to abort.
+
+The current solution is to install, build and run with an amd64-compatible JDK.
+
+```
+$ brew install asdf
+$ arch -x86_64 asdf plugin-add java https://github.com/halcyon/asdf-java.git
+$ arch -x86_64 asdf install java openjdk-13.0.2
+$ export JAVA_HOME=$HOME/.asdf/installs/java/openjdk-13.0.2
+```
 
 ## Running with sbt
 

@@ -9,8 +9,9 @@ import hmda.validation.dsl.ValidationResult
 import hmda.validation.rules.{ EditCheck, IfTsPresentIn }
 
 object S301 {
-  def withContext(ctx: ValidationContext): EditCheck[LoanApplicationRegister] =
+  def withContext(ctx: ValidationContext): EditCheck[LoanApplicationRegister] = {
     IfTsPresentIn(ctx) { new S301(_) }
+  }
 
 }
 

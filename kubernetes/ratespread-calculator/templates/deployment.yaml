@@ -50,16 +50,6 @@ spec:
                 secretKeyRef:
                   name: aws-credentials
                   key: aws-secret-access-key
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                 secretKeyRef:
-                   name: aws-credentials
-                   key: aws-access-key-id
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                 secretKeyRef:
-                   name: aws-credentials
-                   key: aws-secret-access-key
             - name: APOR_SCHEDULE
               valueFrom:
                  configMapKeyRef:

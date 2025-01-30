@@ -13,7 +13,7 @@ private[engine] object TsLarEngine2024 extends ValidationEngine[TransmittalLar] 
     S306
   )
 
-  override val qualityChecks = Vector(
+  override def qualityChecks(ctx: ValidationContext) = Vector(
     Q600
   )
 

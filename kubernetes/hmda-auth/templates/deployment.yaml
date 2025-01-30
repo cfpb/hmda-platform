@@ -21,10 +21,59 @@ spec:
         app: {{ template "hmda-auth.name" . }}
         release: {{ .Release.Name }}
     spec:
+      initContainers:
+        - args:
+            - cp /opt/java/openjdk/lib/security/* /opt/docker/temporary/
+          command:
+            - /bin/sh
+            - -c
+            - --
+          image: 626560329871.dkr.ecr.us-east-1.amazonaws.com/hmda/hmda-init:v1.0.0
+          name: hmda-init
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /opt/docker/temporary
+              name: jksfolder
+            - mountPath: /opt/docker/certs/ca-cert
+              name: ca-cert
+              readOnly: false
+            - mountPath: /opt/docker/certs/keycloak-cert
+              name: keycloak-cert
+              readOnly: false
+            - mountPath: /opt/docker/certs/keycloak-key
+              name: keycloak-key
+              readOnly: false
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
       volumes:
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
+        - emptyDir: {}
+          name: jksfolder
+        - name: ca-cert
+          secret:
+            defaultMode: 420
+            items:
+              - key: ca.crt
+                path: ca-crt
+            secretName:  keycloak-tls-secrets
+        - name: keycloak-cert
+          secret:
+            defaultMode: 420
+            items:
+              - key: tls.crt
+                path: keycloak-crt
+            secretName:  keycloak-tls-secrets
+        - name: keycloak-key
+          secret:
+            defaultMode: 420
+            items:
+              - key: tls.key
+                path: keycloak-key
+            secretName:  keycloak-tls-secrets
       # serviceAccountName: {{ .Values.service.serviceAccount }}
       containers:
         - name: {{ .Chart.Name }}
@@ -32,6 +81,8 @@ spec:
           volumeMounts:
             - name: tz-config
               mountPath: /etc/localtime
+            - mountPath: /opt/java/openjdk/lib/security/
+              name: jksfolder
           securityContext:
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
@@ -40,79 +91,69 @@ spec:
                 - ALL
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-          - name: HMDA_RUNTIME_MODE
-            value: {{ .Values.hmda.runtimeMode }}
-          - name: BANK_FILTER_LIST
-            valueFrom:
-              configMapKeyRef:
-                name: bank-filter-configmap
-                key: bank-filter-list
-          - name: KEYCLOAK_REALM_URL
-            valueFrom:
-              configMapKeyRef:
-                name: http-configmap
-                key: auth.realmUrl
-          - name: KEYCLOAK_AUTH_URL
-            valueFrom:
-              configMapKeyRef:
-                name: http-configmap
-                key: auth.url
-          - name: KEYCLOAK_PUBLIC_MODULUS
-            valueFrom:
-              configMapKeyRef:
-                name: keycloak-public-key-configmap
-                key: keycloak.publicKey.modulus
-          - name: KEYCLOAK_PUBLIC_EXPONENT
-            valueFrom:
-              configMapKeyRef:
-                name: keycloak-public-key-configmap
-                key: keycloak.publicKey.exponent
-          - name: KEYCLOAK_ADMIN_USERNAME
-            valueFrom:
-              secretKeyRef:
-                name: hmda-auth-credentials
-                key: admin-username
-          - name: KEYCLOAK_ADMIN_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: hmda-auth-credentials
-                key: admin-password
-          - name: PG_HOST
-            valueFrom:
-              secretKeyRef:
-                name: inst-postgres-credentials
-                key: host
-          - name: PG_DATABASE
-            valueFrom:
-              configMapKeyRef:
-                name: postgresql-configmap
-                key: postgres.database
-          - name: PG_USER
-            valueFrom:
-              secretKeyRef:
-                name: inst-postgres-credentials
-                key: username
-          - name: PG_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: inst-postgres-credentials
-                key: password
-          - name: PG_SSL
-            valueFrom:
-              configMapKeyRef:
-                name: postgresql-configmap
-                key: postgres.ssl
-          resources:
-{{ toYaml .Values.resources | indent 12 }}
-    {{- with .Values.nodeSelector }}
-      nodeSelector:
-{{ toYaml . | indent 8 }}
-    {{- end }}
-    {{- with .Values.affinity }}
-      affinity:
-{{ toYaml . | indent 8 }}
-    {{- end }}
-    {{- with .Values.tolerations }}
-      tolerations:
-{{ toYaml . | indent 8 }}
-    {{- end }}
+            - name: _JAVA_OPTIONS
+              value: >
+                -Dhttps.protocols=SSLv3,TLSv1,TLSv1.1,TLSv1.2
+                -Dcom.sun.security.enableAIAcaIssuers=true
+            - name: HMDA_RUNTIME_MODE
+              value: {{ .Values.hmda.runtimeMode }}
+            - name: BANK_FILTER_LIST
+              valueFrom:
+                configMapKeyRef:
+                  name: bank-filter-configmap
+                  key: bank-filter-list
+            - name: KEYCLOAK_REALM_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: http-configmap
+                  key: auth.realmUrl
+            - name: KEYCLOAK_AUTH_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: http-configmap
+                  key: auth.url
+            - name: KEYCLOAK_PUBLIC_MODULUS
+              valueFrom:
+                configMapKeyRef:
+                  name: keycloak-public-key-configmap
+                  key: keycloak.publicKey.modulus
+            - name: KEYCLOAK_PUBLIC_EXPONENT
+              valueFrom:
+                configMapKeyRef:
+                  name: keycloak-public-key-configmap
+                  key: keycloak.publicKey.exponent
+            - name: KEYCLOAK_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: hmda-auth-credentials
+                  key: admin-username
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hmda-auth-credentials
+                  key: admin-password
+            - name: PG_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: host
+            - name: PG_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: postgresql-configmap
+                  key: postgres.database
+            - name: PG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: username
+            - name: PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: password
+            - name: PG_SSL
+              valueFrom:
+                configMapKeyRef:
+                  name: postgresql-configmap
+                  key: postgres.ssl

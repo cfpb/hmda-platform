@@ -1,4 +1,4 @@
-import sbt._
+import sbt.*
 
 object Dependencies {
 
@@ -26,11 +26,11 @@ object Dependencies {
   lazy val akkaStreamTyped          = "com.typesafe.akka"   %% "akka-stream-typed"           % Version.akka
   lazy val akkaStreamsTestKit       = "com.typesafe.akka"   %% "akka-stream-testkit"         % Version.akka % Test
   lazy val akkaHttp                 = "com.typesafe.akka"   %% "akka-http"                   % Version.akkaHttp
-  lazy val akkaHttp2                = "com.typesafe.akka"   %% "akka-http2-support"          % Version.akkaHttp
+  lazy val akkaHttp2                = "com.typesafe.akka"   %% "akka-http2-support"          % Version.akkaHttp2Support
+  lazy val akkaHttpXml              = "com.typesafe.akka"   %% "akka-http-xml"               % Version.akkaHttp
   lazy val akkaHttpTestkit          = "com.typesafe.akka"   %% "akka-http-testkit"           % Version.akkaHttp % Test
   lazy val akkaHttpSprayJson        = "com.typesafe.akka"   %% "akka-http-spray-json"        % Version.akkaHttp
   lazy val slickPostgres            = "com.github.tminglei" %% "slick-pg"                    % Version.slickPostgres
-  lazy val akkaHttpXml              = "com.typesafe.akka"   %% "akka-http-xml"               % Version.akkaHttp
   lazy val akkaHttpCirce            = "de.heikoseeberger"   %% "akka-http-circe"             % Version.akkaHttpJson
   lazy val akkaManagementClusterBootstrap =
     "com.lightbend.akka.management" %% "akka-management-cluster-bootstrap" % Version.akkaClusterManagement exclude ("com.typesafe.akka", "akka-http") exclude ("com.typesafe.akka", "akka-http-xml")
@@ -48,15 +48,14 @@ object Dependencies {
   lazy val circeGeneric             = "io.circe"           %% "circe-generic"                       % Version.circe
   lazy val circeParser              = "io.circe"           %% "circe-parser"                        % Version.circe
   lazy val akkaPersistenceCassandra = "com.typesafe.akka"  %% "akka-persistence-cassandra"          % Version.cassandraPluginVersion
-  lazy val cassandraLauncher        = "com.typesafe.akka"  %% "akka-persistence-cassandra-launcher" % Version.cassandraPluginVersion
+  lazy val cassandraLauncher        = "com.typesafe.akka"  %% "akka-persistence-cassandra-launcher" % Version.cassandraLauncher
   lazy val slick                    = "com.typesafe.slick" %% "slick"                               % Version.slick
   lazy val slickHikariCP            = "com.typesafe.slick" %% "slick-hikaricp"                      % Version.slick
   lazy val alpakkaSlick             = "com.lightbend.akka" %% "akka-stream-alpakka-slick"           % Version.alpakka
   lazy val postgres                 = "org.postgresql"     % "postgresql"                           % Version.postgres
   lazy val h2                       = "com.h2database"     % "h2"                                   % Version.h2 % Test
   lazy val testContainers        = "org.testcontainers"         % "testcontainers"              % Version.testContainers % "test"
-  lazy val s3Mock                = "com.adobe.testing"          % "s3mock"                      % "2.1.19" % Test
-  lazy val apacheCommonsIO       = "commons-io"                 % "commons-io"                  % "2.6" % Test
+  lazy val apacheCommonsIO        = "commons-io"                % "commons-io"                  % Version.apacheCommons % Test
   lazy val keycloakAdapter       = "org.keycloak"               % "keycloak-adapter-core"       % Version.keycloak
   lazy val keycloak              = "org.keycloak"               % "keycloak-core"               % Version.keycloak
   lazy val keycloakAdmin         = "org.keycloak"               % "keycloak-admin-client"       % Version.keycloak

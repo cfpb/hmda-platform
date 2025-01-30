@@ -9,7 +9,7 @@ import akka.http.scaladsl.server.Route
 import akka.stream.scaladsl.{ Broadcast, Concat, Flow, GraphDSL, Sink, Source }
 import akka.stream.{ FlowShape, Materializer }
 import akka.util.ByteString
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.filing.submissions.HmdaRowParsedErrorSummary
 import hmda.api.http.utils.ParserErrorUtils

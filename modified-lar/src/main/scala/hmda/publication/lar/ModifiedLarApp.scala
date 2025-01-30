@@ -94,11 +94,17 @@ object ModifiedLarApp extends App {
   val censusTractMap2023: Map[String, Census] =
     CensusRecords.indexedTract2023
 
+  val censusTractMap2024: Map[String, Census] =
+    CensusRecords.indexedTract2024
+
+  val censusTractMap2025: Map[String, Census] =
+    CensusRecords.indexedTract2025
+
   // database configuration is located in `common` project
   val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
   val repo           = new ModifiedLarRepository(databaseConfig)
   val modifiedLarPublisher =
-    classicSystem.spawn(ModifiedLarPublisher.behavior(censusTractMap2018, censusTractMap2019, censusTractMap2020,censusTractMap2021,censusTractMap2022,censusTractMap2023, repo), ModifiedLarPublisher.name)
+    classicSystem.spawn(ModifiedLarPublisher.behavior(censusTractMap2018, censusTractMap2019, censusTractMap2020,censusTractMap2021,censusTractMap2022,censusTractMap2023,censusTractMap2024,censusTractMap2025, repo), ModifiedLarPublisher.name)
   val processKafkaRecord: String => Future[Done] =
     submitForPersistence(modifiedLarPublisher)
 

@@ -3,6 +3,7 @@ package hmda.validation.engine
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.lar.quality._2018._
+import hmda.validation.rules.lar.validity.common.V619_2
 import hmda.validation.rules.lar.quality.common._
 import hmda.validation.rules.lar.syntactical.{ S300, S301 }
 import hmda.validation.rules.lar.validity.{_2018,_}
@@ -40,7 +41,7 @@ private[engine] object LarEngine2018 extends ValidationEngine[LoanApplicationReg
     V617,
     V618,
     V619_1,
-    _2018.V619_2,
+    V619_2.withYear("2018"),
     V619_3,
     V620,
     V621,
@@ -232,7 +233,7 @@ private[engine] object LarEngine2018 extends ValidationEngine[LoanApplicationReg
     V715
   )
 
-  override val qualityChecks = Vector(
+  override def qualityChecks(ctx: ValidationContext) = Vector(
     Q601,
     Q602,
     Q603.withIndexedSmallCounties(CensusRecords.indexedSmallCounty2018),
