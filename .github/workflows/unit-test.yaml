@@ -1,0 +1,86 @@
+name: HMDA Unit Tests
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  hmda_platform_tests:
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "hmda-platform"
+      output-file: "output-log"
+
+  check_digit_tests:
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "check-digit"
+      output-file: "output-log"
+
+  common_tests:
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "common"
+      output-file: "output-log"
+
+  data_browser_tests:
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "data-browser"
+      output-file: "output-log"
+
+  hmda_analytics_tests:
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "hmda-analytics"
+      output-file: "output-log"
+
+
+  hmda_data_publisher_tests:
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "hmda-data-publisher"
+      output-file: "output-log"
+
+  hmda_quarterly_data_service_tests:
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "hmda-quarterly-data-service"
+      output-file: "output-log"
+
+  hmda_reporting_tests:
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "hmda-reporting"
+      output-file: "output-log"
+
+  institutions_api_tests:
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "institutions-api"
+      output-file: "output-log"
+
+  modified_lar_tests:
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "modified-lar"
+      output-file: "output-log"
+
+  rate_limit_tests:
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "rate-limit"
+      output-file: "output-log"
+
+  ratespread_calculator_tests:
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "ratespread-calculator"
+      output-file: "output-log"
+
+  submission_errors_tests:
+    uses: ./.github/workflows/helper-functions.yaml
+    with:
+      service: "submission-errors"
+      output-file: "output-log"

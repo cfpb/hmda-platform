@@ -1,0 +1,42 @@
+name: "Helper Functions"
+on:
+  workflow_call:
+    inputs:
+      service:
+        required: true
+        type: string
+      output-file:
+        required: true
+        type: string
+jobs:
+  test-service:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup sbt launcher
+        uses: sbt/setup-sbt@v1
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Run hmda-platform Tests
+        run: |
+          sbt "project ${{ inputs.service }}" "testOnly -- -l actions-ignore" 2>&1 | tee -a ${{ inputs.output-file }}
+        continue-on-error: true
+
+      - name: Check Test Results
+        run: |
+          if [ $(grep 'All tests passed.' ${{ inputs.output-file }} | wc -l) -ne 1 ]; then
+            echo "One or more projects had failures. Please review the logs."
+            cat ${{ inputs.output-file }}
+            exit 1
+          else
+            echo "All tests passed."
+            exit 0
+          fi

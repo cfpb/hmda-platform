@@ -3,15 +3,16 @@ package hmda.publication.lar
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl._
 import akka.actor.typed.scaladsl.adapter._
-import akka.actor.{ ActorSystem => UntypedActorSystem }
+import akka.actor.{ActorSystem => UntypedActorSystem}
 import akka.kafka.CommitterSettings
-import akka.stream.{ ActorMaterializer, Materializer }
+import akka.stream.{ActorMaterializer, Materializer}
 import akka.stream.scaladsl.Keep
+import com.amazonaws.regions.Regions
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder
 import hmda.publication.lar.config.Settings
-import hmda.publication.lar.database.{ EmailSubmissionStatusRepository, PGSlickEmailSubmissionStatusRepository }
+import hmda.publication.lar.database.{EmailSubmissionStatusRepository, PGSlickEmailSubmissionStatusRepository}
 import hmda.publication.lar.email.SESEmailService
-import hmda.publication.lar.streams.Stream.{ commitMessages, pullEmails, sendEmailsIfNecessary }
+import hmda.publication.lar.streams.Stream.{commitMessages, pullEmails, sendEmailsIfNecessary}
 import monix.execution.Scheduler
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
@@ -29,7 +30,7 @@ object EmailGuardian {
 
       val databaseConfig                                   = DatabaseConfig.forConfig[JdbcProfile]("db")
       val config                                           = Settings(system)
-      val serviceClient                                    = AmazonSimpleEmailServiceClientBuilder.defaultClient()
+      val serviceClient                                    = AmazonSimpleEmailServiceClientBuilder.standard().withRegion(Regions.US_EAST_1).build()
       val emailService                                     = new SESEmailService(serviceClient, config.email.fromAddress)
       val emailStatusRepo: EmailSubmissionStatusRepository = new PGSlickEmailSubmissionStatusRepository(databaseConfig)
       val commitSettings                                   = CommitterSettings(config.kafka.commitSettings)

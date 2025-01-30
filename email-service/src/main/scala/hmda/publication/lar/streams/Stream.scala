@@ -23,6 +23,7 @@ import java.util.TimeZone
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import org.slf4j.LoggerFactory
+import hmda.publication.KafkaUtils._
 
 object Stream {
   val log = LoggerFactory.getLogger("hmda")
@@ -36,7 +37,8 @@ object Stream {
         .withBootstrapServers(bootstrapServers)
         .withGroupId(HmdaGroups.emailGroup)
         .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
-
+        .withProperties(getKafkaConfig)
+    
     Consumer
       .committableSource(settings, Subscriptions.topics(HmdaTopics.emailTopic))
       .asSourceWithContext(_.committableOffset) // hide context

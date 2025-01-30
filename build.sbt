@@ -31,6 +31,7 @@ lazy val akkaDeps = Seq(
   akkaTestkitTyped,
   akkaStreamsTestKit,
   akkaCors,
+  mskdriver,
   akkaKafkaStreams,
   embeddedKafka,
   alpakkaS3,
@@ -65,7 +66,7 @@ lazy val dockerSettings = Seq(
     } else dockerBuildCommand.value
   },
   Docker / maintainer := "Hmda-Ops",
-  dockerBaseImage := "eclipse-temurin:21.0.2_13-jdk-alpine",
+  dockerBaseImage := "eclipse-temurin:23.0.1_11-jdk-alpine",
   dockerRepository := Some("hmda"),
   dockerCommands := dockerCommands.value.flatMap {
     case cmd@Cmd("FROM",_) => List(cmd, Cmd("RUN", "apk update"),
@@ -137,6 +138,9 @@ lazy val common = (project in file("common"))
       )
     ),
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
+    // addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
+    // unmanagedJars in Compile ++= Seq(new java.io.File("/tmp/aws-msk-iam-auth-2.2.0-all.jar")).classpath,
+    // unmanagedJars in Runtime ++= Seq(new java.io.File("/tmp/aws-msk-iam-auth-2.2.0-all.jar")).classpath   
   )
   .enablePlugins(BuildInfoPlugin)
   .settings(
@@ -153,7 +157,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      libraryDependencies += zeroAllocationHashing,
+      libraryDependencies ++= List(guava, zeroAllocationHashing),
       Compile / mainClass := Some("hmda.HmdaPlatform"),
       assembly / assemblyJarName := "hmda2.jar",
       assembly / assemblyMergeStrategy := {
