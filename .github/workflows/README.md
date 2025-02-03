@@ -1,5 +1,8 @@
 ## Releasing Image to ECR
 
+> **_NOTE:_**  This document contains info on how to publish the `hmda-platform` image to ECR.
+> This job, located in `ecr-push.yaml`, can **only** be run locally on your machine.
+
 ### Prerequisites 
 
 - `act` - version >=0.2.71
