@@ -118,7 +118,7 @@ Before running the HMDA Platform, make sure to have the following installed:
     * [Colima](https://github.com/abiosoft/colima/)
     * [Rancher Desktop](https://rancherdesktop.io/)
 4. Go to the following link for instructions to install OpenJDK:
-    * <a href="./docs/JavaInstall.md">Java (version 13.0.2) for MacOS</a>
+    * [Java (version 13.0.2) for MacOS](/docs/JavaInstall.md)
 5. Install Scala (version 2.12 for compatibility issues):
     ```bash 
     brew install scala@2.12
