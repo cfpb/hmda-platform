@@ -138,18 +138,6 @@ INSTITUTION_LOG_LEVEL (Defaulted to INFO)
 CHECKDIGIT_LOG_LEVEL (Defaulted to DEBUG)
 ```
 
-### Running the application in clustered mode (mesos)
-
-* The script in the [mesos](../../mesos) folder describes the deployment through [Marathon](https://mesosphere.github.io/marathon/) on a DCOS / Mesos cluster.
-
-For a 3 node cluster deployed through the [DC/OS CLI](https://docs.mesosphere.com/1.10/cli/), the following command can be used:
-
-```shell
-dcos marathon app add mesos/hmda-platform-host-mode.json
-```
-
-For more details, please refer to the [Marathon Documentation](https://mesosphere.github.io/marathon/)
-
 ## Resources
 
 ### API Documentation
