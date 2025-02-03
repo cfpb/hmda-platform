@@ -126,6 +126,7 @@ curl --location --request POST 'http://localhost:8080/institutions/B90YWS6AFX2LG
 --data ''
 ```
 - Create a submission
+Note: Sequence number is unique, it cannot be reused
 ```
 curl --location --request POST 'http://localhost:8080/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2022/submissions' \
 --data ''
