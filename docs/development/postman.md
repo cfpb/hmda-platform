@@ -37,7 +37,3 @@ If you have [Newman](https://github.com/postmanlabs/newman) installed, you can e
 ```shell
 newman run HMDA_API_Filing.postman_collection.json -e HMDA_ENV.postman_environment.json --delay-request 5000
 ```
-
-## HMDA API Documenation 
-
-More information about HMDA's API can be found in the [HMDA API Docs](https://cfpb.github.io/hmda-platform/#hmda-api-documentation)
