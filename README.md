@@ -102,53 +102,116 @@ The image below shows the cloud vendor agnostic technical architecture for the H
 
 ## Installations
 Before running the HMDA Platform, make sure to have the following installed:
-1. Homebrew - https://brew.sh/
-2. Docker - ```bash brew install docker ```
-3. Docker Desktop - https://docs.docker.com/desktop/install/mac-install/
-4. <a href="./docs/JavaInstall.md">Java (version 13.0.2) for MacOS</a>
-5. Scala (version 2.12 for compatibility issues) - ```bash brew install scala@2.12 ```
-6. sdk - https://sdkman.io/install
-Next, use sdk to install sbt instead of brew (it won't work with brew) (Note: before install, check what version is currently being used in project/build.properties and install that version or higher):
 
-```bash
-sdk install sbt
-```
-Clone the repo and go into the repo directory:
-```bash
-git clone https://github.com/cfpb/hmda-platform.git
-cd hmda-platform
-```
+### MacOS
+1. Install [Homebrew](https://brew.sh/):
+    ```bash
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    ```
+2. Install [Docker](https://www.docker.com/):
+    ```bash
+    brew install docker
+    ```
+3. Install one of following docker engine implementations:
+    * [Docker Desktop](https://docs.docker.com/desktop/install/mac-install/)
+    * [Podman](https://podman.io/)
+    * [Colima](https://github.com/abiosoft/colima/)
+    * [Rancher Desktop](https://rancherdesktop.io/)
+4. Go to the following link for instructions to install OpenJDK:
+    * [Java (version 13.0.2) for MacOS](/docs/JavaInstall.md)
+5. Install Scala (version 2.12 for compatibility issues):
+    ```bash 
+    brew install scala@2.12
+    ```
+6. Install [sdkman](https://sdkman.io/install):
+    ```bash
+    curl -s "https://get.sdkman.io" | bash
+    ```
+7. Install [sbt](https://www.scala-sbt.org/) using `sdkman` (not `brew`):
+    ```bash
+    sdk install sbt <VERSION>
+    ```
+    * Replace `<VERSION>` with the version used in `project/build.properties` or higher
+
+8. Clone the repo and go into the repo directory:
+    ```bash
+    git clone https://github.com/cfpb/hmda-platform.git
+    cd hmda-platform
+    ```
+
 ### Apple Silicon
 
 The current platform and specifically Cassandra have problems running on "Apple silicon" architecture. If your laptop **About This Mac** information shows an Apple M1 or later chip, this applies to you. This will cause test suites to abort.
 
 The current solution is to install, build and run with an amd64-compatible JDK.
 
-```
-$ brew install asdf
-$ arch -x86_64 asdf plugin-add java https://github.com/halcyon/asdf-java.git
-$ arch -x86_64 asdf install java openjdk-13.0.2
-$ export JAVA_HOME=$HOME/.asdf/installs/java/openjdk-13.0.2
+```bash
+brew install asdf
+arch -x86_64 asdf plugin-add java https://github.com/halcyon/asdf-java.git
+arch -x86_64 asdf install java openjdk-13.0.2
+export JAVA_HOME=$HOME/.asdf/installs/java/openjdk-13.0.2
 ```
 
-## Running with sbt
+## Running Locally
+
+### Running with sbt
 
 The HMDA Platform can run locally using [`sbt`](https://www.scala-sbt.org/) with an [embedded Cassandra](https://doc.akka.io/docs/alpakka-kafka/current/) and [embedded Kafka](https://doc.akka.io/docs/alpakka-kafka/current/). To get started:
 
-```bash
-cd hmda-platform
-export CASSANDRA_CLUSTER_HOSTS=localhost
-export APP_PORT=2551
-sbt
-[...]
-sbt:hmda-root> project hmda-platform
-sbt:hmda-platform> reStart
+1. Export the following environment variables:
+    ```bash
+    export CASSANDRA_CLUSTER_HOSTS=localhost
+    export APP_PORT=2551
+    ```
+2. Open terminal with `hmda-platform` root as the  working directory
+3. Start sbt and run the platform with the following commands:
+    ```bash
+    sbt
+    [...]
+    sbt:hmda-root> project hmda-platform
+    sbt:hmda-platform> reStart
+    ```
 
+### Running with docker compose
+
+The platform and it's dependency services, Kafka, Cassandra and PostgreSQL, can run locally using [Docker Compose](https://docs.docker.com/compose/).
+The entire filing plaform can be spun up using a one line command. Using this locally running instance of Platform One, no authentication is needed. 
+
+```bash
+# Bring up every service (e.g., "hmda-platform", "hmda-analytics", "institutions-api")
+docker compose up
+
+# Bring up a single service (e.g., "hmda-platform")
+docker compose up hmda-platform
 ```
-## Access locally build platform
-[hmda-admin-api](http://localhost:8081)   
-[hmda-filing-api](http://localhost:8080)   
-[hmda-public-api](http://localhost:8082)   
+
+Additionally, there are several environment varialbes that can be configured/changed. The platform uses sensible defaults for each one. However, if required they can be overridden:
+
+```bash
+CASSANDRA_CLUSTER_HOSTS
+CASSANDRA_CLUSTER_DC
+CASSANDRA_CLUSTER_USERNAME
+CASSANDRA_CLUSTER_PASSWORD
+CASSANDRA_JOURNAL_KEYSPACE
+CASSANDRA_SNAPSHOT_KEYSPACE
+KAFKA_CLUSTER_HOSTS
+APP_PORT
+HMDA_HTTP_PORT
+HMDA_HTTP_ADMIN_PORT
+HMDA_HTTP_PUBLIC_PORT
+MANAGEMENT_PORT
+HMDA_CASSANDRA_LOCAL_PORT
+HMDA_LOCAL_KAFKA_PORT
+HMDA_LOCAL_ZK_PORT
+WS_PORT
+```
+
+### Access locally built platform APIs
+The following API endpoints are accessible when running the platform locally using either [Running with sbt](#running-with-sbt) or [Running with docker compose](#running-with-docker-compose).
+* [hmda-admin-api](http://localhost:8081)   
+* [hmda-filing-api](http://localhost:8080)   
+* [hmda-public-api](http://localhost:8082)   
+
 ## Build hmda-platform Docker image
 
 Docker Image is build via Docker plugin utilizing [sbt-native-packager](https://sbt-native-packager.readthedocs.io/en/stable/formats/docker.html#docker-plugin)
@@ -181,43 +244,6 @@ kubernetes/hmda-platform
 ## Docker Hub
 
 All of the containers built by the HMDA Platform are released publicly via Docker Hub: https://hub.docker.com/u/hmda
-
-## One-line Local Development Environment (No Auth)
-
-The platform and it's dependency services, Kafka, Cassandra and PostgreSQL, can run locally using [Docker Compose](https://docs.docker.com/compose/).
-
-```shell
-# Bring up hmda-platform, hmda-analytics, institutions-api
-docker-compose up
-```
-
-The entire filing plaform can be spun up using a one line command. Using this locally running instance of Platform One, no authentication is needed. 
-
-```shell
-# Bring up the hmda-platform
-docker-compose up hmda-platform
-```
-
-Additionally, there are several environment varialbes that can be configured/changed. The platform uses sensible defaults for each one. However, if required they can be overridden:
-
-```
-CASSANDRA_CLUSTER_HOSTS
-CASSANDRA_CLUSTER_DC
-CASSANDRA_CLUSTER_USERNAME
-CASSANDRA_CLUSTER_PASSWORD
-CASSANDRA_JOURNAL_KEYSPACE
-CASSANDRA_SNAPSHOT_KEYSPACE
-KAFKA_CLUSTER_HOSTS
-APP_PORT
-HMDA_HTTP_PORT
-HMDA_HTTP_ADMIN_PORT
-HMDA_HTTP_PUBLIC_PORT
-MANAGEMENT_PORT
-HMDA_CASSANDRA_LOCAL_PORT
-HMDA_LOCAL_KAFKA_PORT
-HMDA_LOCAL_ZK_PORT
-WS_PORT
-```
 
 ## Automated Testing
 
