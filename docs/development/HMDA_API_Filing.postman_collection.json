@@ -1,0 +1,557 @@
+{
+	"info": {
+		"_postman_id": "26cf9a83-2331-496b-be7b-48c993e43575",
+		"name": "HMDA API Filing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Filing API Health Check",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{URL_FILING}}/",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Token (not needed for local development)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7f40fc9c-a127-45d6-bc7b-989668657423",
+						"exec": [
+							"var data = pm.response.json();",
+							"pm.environment.set(\"TOKEN\", data.access_token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "client_id",
+							"value": "hmda2-api",
+							"type": "text"
+						},
+						{
+							"key": "grant_type",
+							"value": "password",
+							"type": "text"
+						},
+						{
+							"key": "username",
+							"value": "{{USERNAME}}",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "{{PASSWORD}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{URL_TOKEN}}",
+					"host": [
+						"{{URL_TOKEN}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create an Institution",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "bd3d0ed9-2dcc-4433-b2da-64e214184535",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"activityYear\": 2019,\n    \"lei\": \"B90YWS6AFX2LGWOXJ1LD\",\n    \"agency\": 9,\n    \"institutionType\": -1,\n    \"institutionId2017\": \"\",\n    \"taxId\": \"01-0123456\",\n    \"rssd\": -1,\n    \"emailDomains\": [\n        \"bank1.com\"\n    ],\n    \"respondent\": {\n        \"name\": \"Bank 0\",\n        \"state\": \"\",\n        \"city\": \"\"\n    },\n    \"parent\": {\n        \"idRssd\": -1,\n        \"name\": \"\"\n    },\n    \"assets\": -1,\n    \"otherLenderCode\": -1,\n    \"topHolder\": {\n        \"idRssd\": -1,\n        \"name\": \"\"\n    },\n    \"hmdaFiler\": false,\n    \"quarterlyFiler\": true,\n    \"quarterlyFilerHasFiledQ1\": false,\n    \"quarterlyFilerHasFiledQ2\": false,\n    \"quarterlyFilerHasFiledQ3\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL_ADMIN}}/institutions",
+					"host": [
+						"{{URL_ADMIN}}"
+					],
+					"path": [
+						"institutions"
+					]
+				},
+				"description": "Create institution on admin API"
+			},
+			"response": []
+		},
+		{
+			"name": "Start filing for a year",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{LEI}}",
+						"filings",
+						"{{YEAR}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a submission",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7ccc3d22-c10f-4fae-b0f1-66f2b2b9e7a9",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"SEQUENCE_NUMBER\", jsonData.id.sequenceNumber);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}/submissions",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{LEI}}",
+						"filings",
+						"{{YEAR}}",
+						"submissions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Show latest submission",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}/submissions/latest",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{LEI}}",
+						"filings",
+						"{{YEAR}}",
+						"submissions",
+						"latest"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload file for submission",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": []
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}/submissions/{{SEQUENCE_NUMBER}}",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{LEI}}",
+						"filings",
+						"{{YEAR}}",
+						"submissions",
+						"{{SEQUENCE_NUMBER}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Edits Summary",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}/submissions/{{SEQUENCE_NUMBER}}/edits",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{LEI}}",
+						"filings",
+						"{{YEAR}}",
+						"submissions",
+						"{{SEQUENCE_NUMBER}}",
+						"edits"
+					]
+				},
+				"description": "Edits Summary for a submission"
+			},
+			"response": []
+		},
+		{
+			"name": "Edits Detail",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}/submissions/{{SEQUENCE_NUMBER}}/edits/Q614",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{LEI}}",
+						"filings",
+						"{{YEAR}}",
+						"submissions",
+						"{{SEQUENCE_NUMBER}}",
+						"edits",
+						"Q614"
+					]
+				},
+				"description": "Edits Summary for a submission"
+			},
+			"response": []
+		},
+		{
+			"name": "Edits Detail CSV",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}/submissions/{{SEQUENCE_NUMBER}}/edits/csv?format=csv",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{LEI}}",
+						"filings",
+						"{{YEAR}}",
+						"submissions",
+						"{{SEQUENCE_NUMBER}}",
+						"edits",
+						"csv"
+					],
+					"query": [
+						{
+							"key": "format",
+							"value": "csv"
+						}
+					]
+				},
+				"description": "Edits Summary for a submission"
+			},
+			"response": []
+		},
+		{
+			"name": "Verify Quality Edits",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"verified\": true}"
+				},
+				"url": {
+					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}/submissions/{{SEQUENCE_NUMBER}}/edits/quality",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{LEI}}",
+						"filings",
+						"{{YEAR}}",
+						"submissions",
+						"{{SEQUENCE_NUMBER}}",
+						"edits",
+						"quality"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Verify Macro Edits",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"verified\": true}"
+				},
+				"url": {
+					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}/submissions/{{SEQUENCE_NUMBER}}/edits/macro",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{LEI}}",
+						"filings",
+						"{{YEAR}}",
+						"submissions",
+						"{{SEQUENCE_NUMBER}}",
+						"edits",
+						"macro"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Sign ",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"signed\": true}"
+				},
+				"url": {
+					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}/submissions/{{SEQUENCE_NUMBER}}/sign",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{LEI}}",
+						"filings",
+						"{{YEAR}}",
+						"submissions",
+						"{{SEQUENCE_NUMBER}}",
+						"sign"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Sign",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"signed\": true}"
+				},
+				"url": {
+					"raw": "{{URL_FILING}}/institutions/{{LEI}}/filings/{{YEAR}}/submissions/{{SEQUENCE_NUMBER}}/sign",
+					"host": [
+						"{{URL_FILING}}"
+					],
+					"path": [
+						"institutions",
+						"{{LEI}}",
+						"filings",
+						"{{YEAR}}",
+						"submissions",
+						"{{SEQUENCE_NUMBER}}",
+						"sign"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
