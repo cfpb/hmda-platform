@@ -59,7 +59,7 @@ services:
       - "--services cassandra:9042"
     environment:
       HMDA_RUNTIME_MODE: docker-compose
-      CASSANDRA_CLUSTER_HOSTS: cassandra:9042
+      CASSANDRA_CLUSTER_HOSTS: cassandra
       CASSANDRA_CLUSTER_DC: datacenter1
       CASSANDRA_CLUSTER_PASSWORD: cassandra
       CASSANDRA_CLUSTER_USERNAME: cassandra
