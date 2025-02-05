@@ -1,0 +1,30 @@
+name: HMDA ECR Image Push
+
+on: workflow_dispatch
+
+jobs:
+  release_to_ecr:
+      name: Copy Docker image from Dockerhub to ECR
+      runs-on: ubuntu-latest
+      steps:
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+            aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+            aws-region: us-east-1
+
+        - name: Login to Amazon ECR
+          id: login-ecr
+          uses: aws-actions/amazon-ecr-login@v2
+
+        - name: Copy Image to ECR
+          run: |
+            docker pull hmda/hmda-platform:${{ env.IMAGE_TAG }}
+            docker tag hmda/hmda-platform:${{ env.IMAGE_TAG }} ${{ env.AWS_URL }}/hmda/hmda-platform:${{ env.IMAGE_TAG }}
+            docker push ${{ env.AWS_URL }}/hmda/hmda-platform:${{ env.IMAGE_TAG }}
+
+        - name: Cleanup images
+          run: |
+            docker rmi hmda/hmda-platform:${{ env.IMAGE_TAG }}
+            docker rmi ${{ env.AWS_URL }}/hmda/hmda-platform:${{ env.IMAGE_TAG }}
