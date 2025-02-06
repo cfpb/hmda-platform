@@ -1,4 +1,4 @@
-version: "3.7"
+#version: "3.7"
 
 services:
 
@@ -43,6 +43,20 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - db-data:/var/lib/cassandra/data
 
+  # ------------- Cassandra CQLSH -------------
+  cassandra-cqlsh:
+    image: "cassandra:3.11.4"
+    depends_on:
+      - cassandra
+    entrypoint: /bin/bash 
+    command:
+     - "cqlsh-docker-run.sh"
+    logging:
+      driver: none
+    volumes:
+      - ./cqlsh-docker-run.sh:/usr/bin/cqlsh-docker-run.sh
+      - ./hmda-sql-doc/dev-cassandra.cql:/tmp/dev-cassandra.cql
+
   # ------------- HMDA Platform ---------
   hmda-platform:
     image: hmda/hmda-platform
@@ -53,6 +67,7 @@ services:
     depends_on:
       - kafka
       - cassandra
+      - cassandra-cqlsh
     command:
       - "wait-for-it.sh"
       - "--service kafka:9092"
