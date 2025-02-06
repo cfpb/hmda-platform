@@ -171,7 +171,15 @@ The HMDA Platform can run locally using [`sbt`](https://www.scala-sbt.org/) with
     sbt:hmda-root> project hmda-platform
     sbt:hmda-platform> reStart
     ```
-
+### Building and running the .jar       
+To build JVM artifacts, from the sbt prompt first choose the project you want to build and use the assembly command:   
+   ```bash
+    sbt
+    sbt:root> project check-digit
+    sbt:check-digit>assembly
+   ```
+This task will create a fat jar, which can be executed on any JDK9 compliant JVM:   
+`java -jar target/scala-2.12/check-digit.jar`
 ### Running with docker compose
 
 The platform and it's dependency services, Kafka, Cassandra and PostgreSQL, can run locally using [Docker Compose](https://docs.docker.com/compose/).
