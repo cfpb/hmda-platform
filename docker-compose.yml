@@ -1,4 +1,4 @@
-version: "3.7"
+#version: "3.7"
 
 services:
 
@@ -6,13 +6,13 @@ services:
   zookeeper:
     image: wurstmeister/zookeeper
     ports:
-      - "9092:9092"
+      - "2181:2181"
     logging:
       driver: none
 
   kafka:
     image: wurstmeister/kafka
-    command: ["wait-for-it.sh", "zookeeper:9092", "--","start-kafka.sh"]
+    command: ["wait-for-it.sh", "zookeeper:2181", "--","start-kafka.sh"]
     ports:
       - "9092:9092"
     logging:
@@ -24,7 +24,7 @@ services:
       KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       # KAFKA_CREATE_TOPICS: institution
       KAFKA_CREATE_GROUP: institutions-group
       KAFKA_BROKER_ID: 2
@@ -43,6 +43,20 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - db-data:/var/lib/cassandra/data
 
+  # ------------- Cassandra CQLSH -------------
+  cassandra-cqlsh:
+    image: "cassandra:3.11.4"
+    depends_on:
+      - cassandra
+    entrypoint: /bin/bash 
+    command:
+     - "cqlsh-docker-run.sh"
+    logging:
+      driver: none
+    volumes:
+      - ./cqlsh-docker-run.sh:/usr/bin/cqlsh-docker-run.sh
+      - ./hmda-sql-doc/dev-cassandra.cql:/tmp/dev-cassandra.cql
+
   # ------------- HMDA Platform ---------
   hmda-platform:
     image: hmda/hmda-platform
@@ -53,13 +67,14 @@ services:
     depends_on:
       - kafka
       - cassandra
+      - cassandra-cqlsh
     command:
       - "wait-for-it.sh"
       - "--service kafka:9092"
       - "--services cassandra:9042"
     environment:
       HMDA_RUNTIME_MODE: docker-compose
-      CASSANDRA_CLUSTER_HOSTS: cassandra:9042
+      CASSANDRA_CLUSTER_HOSTS: cassandra
       CASSANDRA_CLUSTER_DC: datacenter1
       CASSANDRA_CLUSTER_PASSWORD: cassandra
       CASSANDRA_CLUSTER_USERNAME: cassandra

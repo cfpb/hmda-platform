@@ -85,6 +85,18 @@ src_managed/
 project/boot/
 project/plugins/project/
 
+## sbt project specifics
+check-digit/project/
+data-browser/project/
+email-service/project/
+file-proxy/project/
+hmda-reporting/project/
+institutions-api/project/
+irs-publisher/project/
+modified-lar/project/
+rate-limit/project/
+ratespread-calculator/project/
+
 ## Lightbend
 .lightbend/
 

@@ -18,7 +18,7 @@ import hmda.model.filing.submission.SubmissionId
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
-import hmda.publication.KafkaUtils.kafkaHosts
+import hmda.publication.KafkaUtils._
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.HmdaQuery.{readRawData, readSubmission}
 import hmda.query.ts.{TransmittalSheetConverter, TransmittalSheetEntity}
@@ -105,6 +105,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
       .withBootstrapServers(kafkaHosts)
       .withGroupId(HmdaGroups.analyticsGroup)
       .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+      .withProperties(getKafkaConfig)
 
   Consumer
     .committableSource(consumerSettings, Subscriptions.topics(HmdaTopics.signTopic, HmdaTopics.analyticsTopic))
