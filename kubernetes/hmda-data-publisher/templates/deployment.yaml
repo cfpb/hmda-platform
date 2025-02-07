@@ -44,6 +44,8 @@ spec:
               name: {{ include "hmda-data-publisher.name" . }}-dynamic-schedule-config
               optional: true
           env:
+          - name: HMDA_RUNTIME_MODE
+            value: { { .Values.hmda.runtimeMode } }
           - name: CASSANDRA_CLUSTER_HOSTS
             valueFrom:
               configMapKeyRef:

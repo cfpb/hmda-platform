@@ -23,6 +23,8 @@ grpc:
   targetPort: 60082
   name: http2-publisher
 
+hmda:
+  runtimeMode: kubernetes
 #ambassador:
 #  name: ambassador-publisher
 #  port: 80

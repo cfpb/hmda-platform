@@ -23,6 +23,9 @@ kafka:
   institutionsGroup: institutions-group
   institutionsTopic: institution
 
+hmda:
+  runtimeMode: kubernetes
+
 #ambassador:
 #  name: institutions-api-ambassador
 #  service:

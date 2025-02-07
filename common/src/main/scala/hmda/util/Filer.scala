@@ -7,6 +7,7 @@ import java.time.temporal.{ ChronoField, TemporalAccessor }
 import com.typesafe.config.{ Config, ConfigFactory }
 import org.slf4j.LoggerFactory
 
+import scala.util.matching.Regex
 import scala.util.Try
 
 object Filer {
@@ -14,11 +15,51 @@ object Filer {
 
   private val dateFormatter = new DateTimeFormatterBuilder().appendPattern("MMMM dd yyyy").toFormatter
 
-  private val rtTgConfig = {
-    val tgWatch = ConfigFactory.load().getConfig("hmda.cm_watch.timed_guards")
-    val ns = Try(tgWatch.getString("ns")).getOrElse("default")
-    val cmName = Try(tgWatch.getString("name")).getOrElse("timed-guards")
-    new RealTimeConfig(cmName, ns)
+  private val config = ConfigFactory.load()
+
+  private val runMode = config.getString("hmda.runtime.mode")
+
+  private val rtTgConfigOpt: Option[RealTimeConfig]  = {
+    if (runMode == "kubernetes") {
+      val tgWatch = config.getConfig("hmda.cm_watch.timed_guards")
+      val ns = Try(tgWatch.getString("ns")).getOrElse("default")
+      val cmName = Try(tgWatch.getString("name")).getOrElse("timed-guards")
+      log.info("Using real time configmap for timed guard.")
+      Some(new RealTimeConfig(cmName, ns))
+    } else {
+      log.warn("Failed to load time guard through real time config.")
+      log.info("Using default for timed guard values.")
+      None
+    }
+  }
+
+  /*
+  get default (stored in conf file) value from config key
+   */
+  def getString(key: String): String = {
+    val QuarterReg: Regex = "q([1-3])(Start|End)".r
+    val ActionQuarterReg: Regex = "actionQ([1-3])(Start|End)".r
+    val quarterlyFiling: String = "hmda.rules.quarterly-filing"
+    val localKey: String = key match {
+      case "currentYear" => "hmda.filing.current"
+      case "yearsAllowed" => "hmda.rules.yearly-filing.years-allowed"
+      case "quarterlyYearsAllowed" => s"$quarterlyFiling.years-allowed"
+      case QuarterReg(q,t) => s"$quarterlyFiling.q$q.${t.toLowerCase()}"
+      case ActionQuarterReg(q,t) => s"$quarterlyFiling.q$q.action_date_${t.toLowerCase()}"
+      case _ => key
+    }
+    Try(config.getString(localKey)).getOrElse(localKey)
+  }
+
+  /*
+  get configuration value from a key.  if running in prod/dev, it should be using k8
+  configmap.  Else (for local/test), it should be using default config file ((stored in conf file)
+   */
+  def getConfig(key: String): String = {
+    rtTgConfigOpt match {
+      case Some(rtTgConfig) => rtTgConfig.getString(key)
+      case _ => getString(key)
+    }
   }
 
   def check(filingRulesConfig: FilingRulesConfig)(year: Int, dayOfYear: Int, quarter: Option[String]): Boolean = {
@@ -119,20 +160,20 @@ object Filer {
 
   private def getRulesFromRtConfig(): FilingRulesConfig = {
     val quarterlyFilingConfig = QuarterlyFilingConfig(
-      rtTgConfig.getString("quarterlyYearsAllowed").split(",").map(_.toInt).toList,
+      getConfig("quarterlyYearsAllowed").split(",").map(_.toInt).toList,
       getQuarterConfig(1),
       getQuarterConfig(2),
       getQuarterConfig(3)
     )
-    FilingRulesConfig(quarterlyFilingConfig, rtTgConfig.getString("yearsAllowed").split(",").map(_.toInt).toList)
+    FilingRulesConfig(quarterlyFilingConfig, getConfig("yearsAllowed").split(",").map(_.toInt).toList)
   }
 
   private def getQuarterConfig(quarter: Int): QuarterConfig = {
     val currentYear = LocalDate.now().getYear
-    val startDate = rtTgConfig.getString(s"q${quarter}Start")
-    val endDate = rtTgConfig.getString(s"q${quarter}End")
-    val actionStartDate = rtTgConfig.getString(s"actionQ${quarter}Start")
-    val actionEndDate = rtTgConfig.getString(s"actionQ${quarter}End")
+    val startDate = getConfig(s"q${quarter}Start")
+    val endDate = getConfig(s"q${quarter}End")
+    val actionStartDate = getConfig(s"actionQ${quarter}Start")
+    val actionEndDate = getConfig(s"actionQ${quarter}End")
     QuarterConfig(
       dateFormatter.parse(s"$startDate $currentYear").get(ChronoField.DAY_OF_YEAR),
       dateFormatter.parse(s"$endDate $currentYear").get(ChronoField.DAY_OF_YEAR),
