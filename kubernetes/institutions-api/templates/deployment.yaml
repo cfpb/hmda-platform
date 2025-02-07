@@ -43,6 +43,8 @@ spec:
             - configMapRef:
                 name: {{ template "institutions-api.fullname" . }}-config
           env:
+            - name: HMDA_RUNTIME_MODE
+              value: {{ .Values.hmda.runtimeMode }}
             - name: KAFKA_INSTITUTIONS_TOPIC
               value: {{.Values.kafka.institutionsTopic}}
             - name: KAFKA_INSTITUTIONS_GROUP
