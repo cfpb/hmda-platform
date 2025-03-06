@@ -94,6 +94,10 @@ spec:
                   key: postgres.ssl
             - name: INSTITUTION_PG_CREATE_SCHEMA
               value: "{{ .Values.postgresql.createSchema }}"
+            {{- if .Values.kafka.security }}
+            - name: KAFKA_SECURITY
+            value: {{.Values.kafka.security}}
+            {{- end }}
             - name: KAFKA_CLUSTER_HOSTS
               valueFrom:
                 configMapKeyRef:
