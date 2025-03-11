@@ -22,7 +22,8 @@ currentYear: 2018
 kafka:
   institutionsGroup: institutions-group
   institutionsTopic: institution
-
+  security: ""
+  
 #ambassador:
 #  name: institutions-api-ambassador
 #  service:

@@ -185,6 +185,10 @@ spec:
               value: {{.Values.kafka.signTopic}}
             - name: KAFKA_MODIFIED_LAR_GROUP
               value: {{.Values.kafka.modifiedLarGroup}}
+            {{- if .Values.kafka.security }}
+            - name: KAFKA_SECURITY
+              value: {{.Values.kafka.security}}
+            {{- end }}              
             - name: IS_GENERATE_MLAR_S3_FIES
               valueFrom:
                 configMapKeyRef:

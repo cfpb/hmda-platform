@@ -52,12 +52,12 @@ spec:
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: aws-email-credentials
+                  name: aws-credentials
                   key: aws-access-key-id
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: aws-email-credentials
+                  name: aws-credentials
                   key: aws-secret-access-key
             - name: AWS_ENVIRONMENT
               valueFrom:
@@ -75,6 +75,10 @@ spec:
               value: {{.Values.kafka.emailTopic}}
             - name: KAFKA_EMAIL_CONSUMER_GROUP_ID
               value: {{.Values.kafka.emailGroup}}
+            {{- if .Values.kafka.security }}
+            - name: KAFKA_SECURITY
+              value: {{.Values.kafka.security}}
+            {{- end }}              
             - name: EMAIL_SUBJECT
               valueFrom:
                 configMapKeyRef:

@@ -49,6 +49,10 @@ spec:
               value: {{.Values.kafka.signTopic}}
             - name: KAFKA_ANALYTICS_GROUP
               value: {{.Values.kafka.analyticsGroup}}
+            {{- if .Values.kafka.security }}
+            - name: KAFKA_SECURITY
+              value: {{.Values.kafka.security}}
+            {{- end }}              
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:

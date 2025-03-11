@@ -12,7 +12,8 @@ image:
 kafka:
   emailTopic: hmda-email
   emailGroup: email-consumer 
-
+  security: ""
+  
 resources:
   limits:
     memory: "2200Mi"

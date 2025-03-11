@@ -132,6 +132,10 @@ spec:
             configMapKeyRef:
               name: timed-guards
               key: actionQ3End
+        {{- if .Values.kafka.security }}
+        - name: KAFKA_SECURITY
+          value: {{.Values.kafka.security}}
+        {{- end }}
         - name: KAFKA_INSTITUTIONS_TOPIC
           value: {{.Values.kafka.institutionsTopic}}
         - name: KAFKA_SIGN_TOPIC

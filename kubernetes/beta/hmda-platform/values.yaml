@@ -33,6 +33,7 @@ kafka:
   analyticsTopic: beta-hmda-analytics
   signTopic: beta-hmda-sign
   emailTopic: beta-hmda-email
+  security: ""
 
 service:
   type: ClusterIP

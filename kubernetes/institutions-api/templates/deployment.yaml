@@ -94,11 +94,25 @@ spec:
                   key: postgres.ssl
             - name: INSTITUTION_PG_CREATE_SCHEMA
               value: "{{ .Values.postgresql.createSchema }}"
+            {{- if .Values.kafka.security }}
+            - name: KAFKA_SECURITY
+              value: {{.Values.kafka.security}}
+            {{- end }}
             - name: KAFKA_CLUSTER_HOSTS
               valueFrom:
                 configMapKeyRef:
                   name: kafka-configmap
                   key: kafka.hosts
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: aws-access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: aws-secret-access-key
             - name: JDBC_URL
               valueFrom:
                 secretKeyRef:
