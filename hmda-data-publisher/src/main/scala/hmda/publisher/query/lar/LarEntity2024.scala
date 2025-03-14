@@ -4,6 +4,7 @@ import hmda.model.publication.Msa
 import hmda.util.PsvParsingCompanion
 import hmda.util.conversion.ColumnDataFormatter
 import io.chrisdavenport.cormorant
+import cormorant.generic.semiauto._
 import io.chrisdavenport.cormorant.CSV
 import io.chrisdavenport.cormorant.implicits._
 

@@ -1,19 +1,18 @@
 package hmda.publisher.query.component
 
+import java.sql.Timestamp
 import hmda.publisher.helper.PGTableNameLoader
-import hmda.publisher.qa.{QAEntity, QATableBase}
-import hmda.publisher.query.lar._
-import hmda.publisher.query.panel.InstitutionEntity
-import hmda.publisher.validation.{LarData, PanelData, TsData}
+import hmda.publisher.qa.{ QAEntity, QATableBase }
+import hmda.publisher.query.lar.{ LarEntityImpl2024, _ }
+import hmda.publisher.query.panel.{ InstitutionEntity }
+import hmda.publisher.validation.{ LarData, PanelData, TsData }
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.query.ts.TransmittalSheetEntity
-import slick.basic.{DatabaseConfig, DatabasePublisher}
-import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
+import slick.basic.{ DatabaseConfig, DatabasePublisher }
+import slick.jdbc.{ JdbcProfile, ResultSetConcurrency, ResultSetType }
 
-import java.sql.Timestamp
-import scala.concurrent.Future
-
+import scala.concurrent.{ Future }
 // $COVERAGE-OFF$
 trait PublisherComponent2024 extends PGTableNameLoader {
 
