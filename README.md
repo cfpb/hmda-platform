@@ -152,6 +152,24 @@ arch -x86_64 asdf install java openjdk-13.0.2
 export JAVA_HOME=$HOME/.asdf/installs/java/openjdk-13.0.2
 ```
 
+---
+If `arch -x86_64` command shows error, e.g. `arch: posix_spawnp: asdf: Bad CPU type in executable`,
+you may need to launch a shell in the `x86_64` architecture, then run the asdf commands:
+```zsh
+env arch -x86_64 zsh --login
+```
+We can run `arch` command in terminal, and verify we're now in `i386` instead of `arm64`.
+
+We can now do the installations in the x86 arch shell:
+```zsh
+asdf plugin-add java https://github.com/halcyon/asdf-java.git
+asdf install java openjdk-13.0.2
+```
+After installation finishes, we can `exit` the x86 shell, and set the `JAVA_HOME` environment variable
+```zsh
+export JAVA_HOME=$HOME/.asdf/installs/java/openjdk-13.0.2
+```
+
 ## Running Locally
 
 ### Running with sbt
