@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: hmda/institutions-api
-  tag: v2.7.2
+  tag: latest
   pullPolicy: IfNotPresent
 
 service:
@@ -20,6 +20,7 @@ currentYear: 2018
 kafka:
   institutionsGroup: beta-institution-group
   institutionsTopic: beta-institution
+  security: ""
 
 #ambassador:
 #  name: institutions-api-ambassador
@@ -68,3 +69,6 @@ affinity: {}
 postgresql:
   enabled: false
   createSchema: false
+
+ambassador_id: ambassador-beta-2
+# ambassador_host: hmda-public.cfpb.gov
