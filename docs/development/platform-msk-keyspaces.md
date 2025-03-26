@@ -19,7 +19,7 @@ This includes the Keyspaces configuration for hmda-platform, modified-lar, irs-p
 - Changes in application files, required to connect to keyspaces
 ```
 hmda/src/main/resources/application.conf (for local platform to connect to keyspaces)
-hmda/src/main/resources/application-kubernetes.conf (for platform on run on kubernetes cluster)
+hmda/src/main/resources/application-kubernetes.conf (for platform run on kubernetes cluster)
 hmda-analytics/src/main/resources/application.conf
 modified-lar/src/main/resources/application.conf
 irs-publisher/src/main/resources/application.conf
