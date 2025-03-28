@@ -4,7 +4,7 @@ import sbtassembly.AssemblyPlugin.autoImport._
 
 object BuildSettings {
   val buildOrganization = "cfpb"
-  val buildVersion      = "2.0.0"
+  val buildVersion      = "latest"
   val buildScalaVersion = "2.13.12"
 
   lazy val dockerPublishLocalSkipTestsCommand = Command.command("dockerPublishLocalSkipTests") { state =>
