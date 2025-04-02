@@ -11,12 +11,13 @@ import org.slf4j.LoggerFactory
 class RealTimeConfig(val cmName: String, val ns: String) {
   private val log = LoggerFactory.getLogger(getClass)
   private var currentConfig: Option[Config] = None
+  private var factory: Option[SharedInformerFactory] = None
 
   try {
     val client = io.kubernetes.client.util.Config.defaultClient()
     val api = new CoreV1Api(client)
-    val factory = new SharedInformerFactory(client)
-    val informer = factory.sharedIndexInformerFor((params: CallGeneratorParams) => {
+    factory = Option(new SharedInformerFactory(client))
+    val informer = factory.get.sharedIndexInformerFor((params: CallGeneratorParams) => {
       api.listNamespacedConfigMapCall(
         ns, null, null, null, s"metadata.name=$cmName", null, null, params.resourceVersion, null, null, params.timeoutSeconds, params.watch, null)
     }, classOf[V1ConfigMap], classOf[V1ConfigMapList])
@@ -34,13 +35,15 @@ class RealTimeConfig(val cmName: String, val ns: String) {
       override def onDelete(obj: V1ConfigMap, deletedFinalStateUnknown: Boolean): Unit = log.warn("cm deleted: {}, deleteStateUnknown: {}", obj, deletedFinalStateUnknown)
     })
 
-    factory.startAllRegisteredInformers()
+    factory.get.startAllRegisteredInformers()
     setConfig(api.readNamespacedConfigMap(cmName, ns, null))
   } catch {
     case e: ApiException =>
       log.error(s"Failed to setup informer, most likely role permission issues. ${e.getResponseBody}", e)
+      factory.get.stopAllRegisteredInformers()
     case e: Throwable =>
       log.error(s"Failed to setup informer", e)
+      factory.get.stopAllRegisteredInformers()
   }
 
   private def setConfig(cm: V1ConfigMap): Unit = {

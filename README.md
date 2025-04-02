@@ -152,6 +152,24 @@ arch -x86_64 asdf install java openjdk-13.0.2
 export JAVA_HOME=$HOME/.asdf/installs/java/openjdk-13.0.2
 ```
 
+---
+If `arch -x86_64` command shows error, e.g. `arch: posix_spawnp: asdf: Bad CPU type in executable`,
+you may need to launch a shell in the `x86_64` architecture, then run the asdf commands:
+```zsh
+env arch -x86_64 zsh --login
+```
+We can run `arch` command in terminal, and verify we're now in `i386` instead of `arm64`.
+
+We can now do the installations in the x86 arch shell:
+```zsh
+asdf plugin-add java https://github.com/halcyon/asdf-java.git
+asdf install java openjdk-13.0.2
+```
+After installation finishes, we can `exit` the x86 shell, and set the `JAVA_HOME` environment variable
+```zsh
+export JAVA_HOME=$HOME/.asdf/installs/java/openjdk-13.0.2
+```
+
 ## Running Locally
 
 ### Running with sbt
@@ -171,7 +189,15 @@ The HMDA Platform can run locally using [`sbt`](https://www.scala-sbt.org/) with
     sbt:hmda-root> project hmda-platform
     sbt:hmda-platform> reStart
     ```
-
+### Building and running the .jar       
+To build JVM artifacts, from the sbt prompt first choose the project you want to build and use the assembly command:   
+   ```bash
+    sbt
+    sbt:root> project check-digit
+    sbt:check-digit>assembly
+   ```
+This task will create a fat jar, which can be executed on any JDK9 compliant JVM:   
+`java -jar target/scala-2.12/check-digit.jar`
 ### Running with docker compose
 
 The platform and it's dependency services, Kafka, Cassandra and PostgreSQL, can run locally using [Docker Compose](https://docs.docker.com/compose/).
