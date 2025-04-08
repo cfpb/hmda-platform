@@ -169,7 +169,7 @@ private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(
 
   private def uploadFile(submissionId: SubmissionId, hmdaRaw: EntityRef[HmdaRawDataCommand]): Flow[String, LinesAdded, NotUsed] =
     Flow[String]
-      .grouped(20)
+      .grouped(30)
       .mapAsync(1)(lines => persistLines(hmdaRaw, submissionId, lines))
 
   private def persistLines(entityRef: EntityRef[HmdaRawDataCommand], submissionId: SubmissionId, data: Seq[String]): Future[LinesAdded] = {

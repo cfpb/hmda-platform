@@ -84,6 +84,9 @@ object Dependencies {
   lazy val diffx                 = "com.softwaremill.diffx"     %% "diffx-core"                 % Version.diffx % Test
   lazy val kubernetesApi         = "io.kubernetes"              % "client-java"                 % Version.kubernetesApi
   lazy val keyspacedriver        = "software.aws.mcs"           % "aws-sigv4-auth-cassandra-java-driver-plugin"  % "4.0.9"
+  // https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-keyspaces
+  // lazy val keyspacedriversdk     = "com.amazonaws"              % "aws-java-sdk-keyspaces"      % "1.12.782"
+  // lazy val keyspacehelper        = "com.aws.ssa.keyspaces"      %  "amazon-keyspaces-helpers"   % "1.0-SNAPSHOT"
   // https://mvnrepository.com/artifact/software.amazon.msk/aws-msk-iam-auth
   lazy val mskdriver             = "software.amazon.msk"        % "aws-msk-iam-auth"           % "2.2.0"
   // overriding the log4j-slf4j bridge used by spring, transitively brought in by s3mock
