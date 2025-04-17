@@ -56,9 +56,8 @@ object Dependencies {
   lazy val h2                       = "com.h2database"     % "h2"                                   % Version.h2 % Test
   lazy val testContainers        = "org.testcontainers"         % "testcontainers"              % Version.testContainers % "test"
   lazy val apacheCommonsIO        = "commons-io"                % "commons-io"                  % Version.apacheCommons % Test
-  lazy val keycloakAdapter       = "org.keycloak"               % "keycloak-adapter-core"       % Version.keycloakAdapter
-  lazy val keycloak              = "org.keycloak"               % "keycloak-core"               % Version.keycloakCore
   lazy val keycloakAdmin         = "org.keycloak"               % "keycloak-admin-client"       % Version.keycloakAdmin exclude("org.jboss.logging", "commons-logging-jboss-logging")
+  lazy val keycloakCommons       = "org.keycloak"               % "keycloak-client-common-synced" % Version.keycloakCommons
   lazy val resteasyClient        = "org.jboss.resteasy"         % "resteasy-client"             % Version.resteasy % "provided"
   lazy val resteasyJackson       = "org.jboss.resteasy"         % "resteasy-jackson2-provider"  % Version.resteasy % "provided"
   lazy val resteasyMulti         = "org.jboss.resteasy"         % "resteasy-multipart-provider" % Version.resteasy % "provided"
