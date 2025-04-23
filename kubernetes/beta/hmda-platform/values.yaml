@@ -24,8 +24,8 @@ hmda:
   runtimeMode: kubernetes
   upload:
     lines:
-      batch: "30"
-      parallelism: "1"
+      batch: 30
+      parallelism: 1
 #  podNamespace: beta
 #  apiNamespace: beta
 #  serviceNamespace: beta.svc.cluster.local
