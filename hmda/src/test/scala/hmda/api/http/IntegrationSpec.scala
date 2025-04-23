@@ -29,7 +29,6 @@ import hmda.persistence.submission._
 import hmda.utils.YearUtils.Period
 import io.circe.Encoder
 import io.circe.generic.semiauto._
-import org.keycloak.adapters.KeycloakDeploymentBuilder
 import org.scalatest.MustMatchers
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.time.{Millis, Minutes, Span}
@@ -69,11 +68,7 @@ class IntegrationSpec   extends AkkaCassandraPersistenceSpec
 
   val oAuth2Authorization = OAuth2Authorization(
     log,
-    new KeycloakTokenVerifier(
-      KeycloakDeploymentBuilder.build(
-        getClass.getResourceAsStream("/keycloak.json")
-      )
-    )
+    new KeycloakTokenVerifier
   )
 
   val period = Period(2019, None)
