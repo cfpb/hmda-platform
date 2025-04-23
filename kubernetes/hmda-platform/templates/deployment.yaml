@@ -250,7 +250,7 @@ spec:
               key: census.port
         - name: UPLOAD_LINES_BATCH
           value: {{ .Values.hmda.upload.lines.batch }}
-        - name: UPLOAD_LINES_PARALLEL
+        - name: UPLOAD_LINES_PARALLELISM
           value: {{ .Values.hmda.upload.lines.parallelism }}
 #        livenessProbe:
 #          tcpSocket:
