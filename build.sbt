@@ -11,7 +11,7 @@ lazy val sparkDeps =
     akkaKafkaStreams
   )
 
-lazy val authDeps = Seq(keycloakAdapter, keycloak, keycloakAdmin, jbossLogging, httpClient)
+lazy val authDeps = Seq(keycloakAdmin, jbossLogging, httpClient)
 
 lazy val keycloakServerDeps = Seq(resteasyClient, resteasyJackson, resteasyMulti)
 
@@ -67,7 +67,7 @@ lazy val dockerSettings = Seq(
     } else dockerBuildCommand.value
   },
   Docker / maintainer := "Hmda-Ops",
-  dockerBaseImage := "eclipse-temurin:23.0.1_11-jdk-alpine",
+  dockerBaseImage := "eclipse-temurin:24_36-jdk-alpine-3.21",
   dockerRepository := Some("hmda"),
   dockerCommands := dockerCommands.value.flatMap {
     case cmd@Cmd("FROM",_) => List(cmd, Cmd("RUN", "apk update"),

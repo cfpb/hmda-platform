@@ -23,7 +23,6 @@ import hmda.persistence.AkkaCassandraPersistenceSpec
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import io.circe.generic.auto._
-import org.keycloak.adapters.KeycloakDeploymentBuilder
 import org.scalatest.MustMatchers
 import org.slf4j.{ Logger, LoggerFactory }
 
@@ -45,11 +44,7 @@ class InstitutionHttpApiSpec extends AkkaCassandraPersistenceSpec with MustMatch
 
   val oAuth2Authorization = OAuth2Authorization(
     log,
-    new KeycloakTokenVerifier(
-      KeycloakDeploymentBuilder.build(
-        getClass.getResourceAsStream("/keycloak.json")
-      )
-    )
+    new KeycloakTokenVerifier
   )
 
   val sampleInstitution = institutionGen

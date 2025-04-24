@@ -1,7 +1,6 @@
 package hmda.auth
 
 import com.typesafe.config.ConfigFactory
-import org.keycloak.adapters.KeycloakDeployment
 import org.keycloak.representations.AccessToken
 import java.security.KeyFactory
 import org.keycloak.jose.jws.AlgorithmType
@@ -13,7 +12,7 @@ import scala.util.Try
 import scala.concurrent.duration._
 
 // $COVERAGE-OFF$
-class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment) extends TokenVerifier {
+class KeycloakTokenVerifier extends TokenVerifier {
 
   val config  = ConfigFactory.load()
   val realm   = config.getString("keycloak.realm")

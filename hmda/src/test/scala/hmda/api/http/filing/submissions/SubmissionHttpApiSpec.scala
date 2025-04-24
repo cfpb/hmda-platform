@@ -27,7 +27,6 @@ import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.{ HmdaValidationError, SubmissionPersistence }
 import hmda.utils.YearUtils.Period
-import org.keycloak.adapters.KeycloakDeploymentBuilder
 import org.scalatest.MustMatchers
 import org.slf4j.{ Logger, LoggerFactory }
 
@@ -48,11 +47,7 @@ class SubmissionHttpApiSpec extends AkkaCassandraPersistenceSpec with MustMatche
 
   val oAuth2Authorization = OAuth2Authorization(
     log,
-    new KeycloakTokenVerifier(
-      KeycloakDeploymentBuilder.build(
-        getClass.getResourceAsStream("/keycloak.json")
-      )
-    )
+    new KeycloakTokenVerifier
   )
 
   val period = Period(2018, None)

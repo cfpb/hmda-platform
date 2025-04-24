@@ -41,6 +41,9 @@ trait PGTableNameLoader {
   val mlar2021TableName: String   = pgTableConfig.getString("mlar2021TableName")
   val mlar2022TableName: String   = pgTableConfig.getString("mlar2022TableName")
   val mlar2023TableName: String   = pgTableConfig.getString("mlar2023TableName")
+  val mlar2024TableName: String   = pgTableConfig.getString("mlar2024TableName")
+  val mlar2025TableName: String   = pgTableConfig.getString("mlar2025TableName")
+
 
 
   val panel2021TableName: String   = pgTableConfig.getString("panel2021TableName")
@@ -84,6 +87,32 @@ trait PGTableNameLoader {
   val ts2023Q1TableName: String = pgTableConfig.getString("ts2023Q1TableName")
   val ts2023Q2TableName: String = pgTableConfig.getString("ts2023Q2TableName")
   val ts2023Q3TableName: String = pgTableConfig.getString("ts2023Q3TableName")
+
+
+  val lar2024TableName: String   = pgTableConfig.getString("lar2024TableName")
+  val lar2024Q1TableName: String = pgTableConfig.getString("lar2024Q1TableName")
+  val lar2024Q2TableName: String = pgTableConfig.getString("lar2024Q2TableName")
+  val lar2024Q3TableName: String = pgTableConfig.getString("lar2024Q3TableName")
+
+  val panel2024TableName: String   = pgTableConfig.getString("panel2024TableName")
+
+  val ts2024TableName: String   = pgTableConfig.getString("ts2024TableName")
+  val ts2024Q1TableName: String = pgTableConfig.getString("ts2024Q1TableName")
+  val ts2024Q2TableName: String = pgTableConfig.getString("ts2024Q2TableName")
+  val ts2024Q3TableName: String = pgTableConfig.getString("ts2024Q3TableName")
+
+
+  val lar2025TableName: String   = pgTableConfig.getString("lar2025TableName")
+  val lar2025Q1TableName: String = pgTableConfig.getString("lar2025Q1TableName")
+  val lar2025Q2TableName: String = pgTableConfig.getString("lar2025Q2TableName")
+  val lar2025Q3TableName: String = pgTableConfig.getString("lar2025Q3TableName")
+
+  val panel2025TableName: String   = pgTableConfig.getString("panel2025TableName")
+
+  val ts2025TableName: String   = pgTableConfig.getString("ts2025TableName")
+  val ts2025Q1TableName: String = pgTableConfig.getString("ts2025Q1TableName")
+  val ts2025Q2TableName: String = pgTableConfig.getString("ts2025Q2TableName")
+  val ts2025Q3TableName: String = pgTableConfig.getString("ts2025Q3TableName")
 
 
   //common table names
