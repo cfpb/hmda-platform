@@ -15,7 +15,7 @@ import hmda.persistence.HmdaPersistence
 import hmda.persistence.util.CassandraUtil
 import hmda.publication.{HmdaPublication, KafkaUtils}
 import hmda.validation.HmdaValidation
-import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
+import io.github.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
 import org.slf4j.LoggerFactory
 
 // $COVERAGE-OFF$
