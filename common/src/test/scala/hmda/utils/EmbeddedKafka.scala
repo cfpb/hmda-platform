@@ -2,7 +2,7 @@ package hmda.utils
 
 import java.util.concurrent.atomic.AtomicReference
 
-import net.manub.embeddedkafka.{ EmbeddedK, EmbeddedKafka }
+import io.github.embeddedkafka.{ EmbeddedK, EmbeddedKafka }
 import org.scalatest.{ BeforeAndAfterAll, Suite }
 
 trait EmbeddedKafka extends BeforeAndAfterAll {
