@@ -28,13 +28,13 @@ abstract class AkkaCassandraPersistenceSpec extends WordSpec with BeforeAndAfter
   implicit val typedSystem: ActorSystem[_]
 
   override def beforeAll(): Unit = {
-    CassandraUtil.startEmbeddedCassandra()
+//    CassandraUtil.startEmbeddedCassandra()
     awaitPersistenceInit()
     super.beforeAll()
   }
 
   override def afterAll(): Unit = {
-    CassandraUtil.shutdown()
+//    CassandraUtil.shutdown()
     system.terminate()
     super.afterAll()
   }
