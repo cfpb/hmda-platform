@@ -7,13 +7,6 @@ on:
 
 jobs:
   hmda_platform_tests:
-    services:
-      cassandra:
-        image: "cassandra:3.11.4"
-        ports:
-          - "9042:9042"
-    env:
-      HMDA_RUNTIME_MODE: "docker-compose"
     uses: ./.github/workflows/helper-functions.yaml
     with:
       service: "hmda-platform"

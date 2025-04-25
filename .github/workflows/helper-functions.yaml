@@ -8,6 +8,13 @@ on:
 jobs:
   test-service:
     runs-on: ubuntu-latest
+    services:
+      cassandra:
+        image: "cassandra:3.11.4"
+        ports:
+          - "9042:9042"
+    env:
+      HMDA_RUNTIME_MODE: "docker-compose"
 
     steps:
       - name: Checkout
