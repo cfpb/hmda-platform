@@ -12,6 +12,7 @@ import akka.stream.Materializer
 import akka.stream.scaladsl.{Flow, Framing, Sink}
 import akka.util.{ByteString, Timeout}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
+import com.typesafe.config.ConfigFactory
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.PathMatchers._
 import hmda.api.http.directives.QuarterlyFilingAuthorization._
@@ -48,6 +49,8 @@ private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(
   mat: Materializer
 ) {
   private val quarterlyFiler = quarterlyFilingAllowed(log, sharding) _
+
+  private val config = ConfigFactory.load().getConfig("hmda.upload.lines")
 
   def uploadRoutes(oAuth2Authorization: OAuth2Authorization): Route =
     handleRejections(corsRejectionHandler) {
@@ -169,8 +172,8 @@ private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(
 
   private def uploadFile(submissionId: SubmissionId, hmdaRaw: EntityRef[HmdaRawDataCommand]): Flow[String, LinesAdded, NotUsed] =
     Flow[String]
-      .grouped(30)
-      .mapAsync(1)(lines => persistLines(hmdaRaw, submissionId, lines))
+      .grouped(config.getInt("batch"))
+      .mapAsync(config.getInt("parallelism"))(lines => persistLines(hmdaRaw, submissionId, lines))
 
   private def persistLines(entityRef: EntityRef[HmdaRawDataCommand], submissionId: SubmissionId, data: Seq[String]): Future[LinesAdded] = {
     val response: Future[LinesAdded] = entityRef ? (ref => AddLines(submissionId, Instant.now.toEpochMilli, data, Some(ref)))
