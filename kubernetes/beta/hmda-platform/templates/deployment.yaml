@@ -184,6 +184,11 @@ spec:
             configMapKeyRef:
               name: cassandra-configmap
               key: cassandra-keyspace-snapshot
+        - name: CASSANDRA_TARGET_PARTITION_SIZE
+          valueFrom:
+            configMapKeyRef:
+              name: cassandra-configmap
+              key: cassandra-target-partition-size
         - name: CASSANDRA_CLUSTER_USERNAME
           valueFrom:
             secretKeyRef:
@@ -243,6 +248,10 @@ spec:
             configMapKeyRef:
               name: http-configmap
               key: census.port
+        - name: UPLOAD_LINES_BATCH
+          value: {{ .Values.hmda.upload.lines.batch | quote }}
+        - name: UPLOAD_LINES_PARALLELISM
+          value: {{ .Values.hmda.upload.lines.parallelism | quote }}
 #        livenessProbe:
 #          tcpSocket:
 #            port: {{ .Values.bootstrap.port }}

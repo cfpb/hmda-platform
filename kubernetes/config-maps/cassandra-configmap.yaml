@@ -9,3 +9,4 @@ data:
   cassandra-cluster-dc: dc1
   cassandra-keyspace: hmda2_journal
   cassandra-keyspace-snapshot: hmda2_snapshot
+  cassandra-target-partition-size: "500000"
