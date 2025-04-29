@@ -226,21 +226,24 @@ trait DataBrowserDirectives extends Settings {
       }
 
   private def extractActions: Directive1[Option[QueryField]] = {
-    val name   = "actions_taken"
-    val dbName = "action_taken_type"
-    parameters("actions_taken".as(CsvSeq[String]) ? Nil)
-      .map(_.toList)
-      .map(validateActionsTaken)
-      .collect {
+    parameters("actions_taken".as(CsvSeq[String]) ? Nil).flatMap { rawAction =>
+      val name   = "actions_taken"
+      val dbName = "action_taken_type"
+      validateActionsTaken(rawAction) match {
+        case Left(invalidActionsTaken) =>
+          import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+          complete(ToResponseMarshallable((BadRequest, InvalidActions(invalidActionsTaken))))
+
         case Right(actionsTaken) if actionsTaken.nonEmpty && actionsTaken.size == ActionTaken.values.size =>
-          Option(QueryField(name, actionsTaken.map(_.entryName), dbName, isAllSelected = true))
+          provide(Option(QueryField(name, actionsTaken.map(_.entryName), dbName, isAllSelected = true)))
 
         case Right(actionsTaken) if (actionsTaken.nonEmpty && actionsTaken.size != ActionTaken.values.size) =>
-          Option(QueryField(name, actionsTaken.map(_.entryName), dbName, isAllSelected = false))
+          provide(Option(QueryField(name, actionsTaken.map(_.entryName), dbName, isAllSelected = false)))
 
         case Right(_) =>
-          None
+          provide(None)
       }
+    }
   }
 
   private def extractAgeApplicant: Directive1[Option[QueryField]] = {
