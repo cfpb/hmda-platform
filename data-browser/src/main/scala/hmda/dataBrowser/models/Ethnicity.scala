@@ -15,7 +15,7 @@ object Ethnicity extends Enum[Ethnicity] {
   case object NotHispanicOrLatino extends Ethnicity("Not Hispanic or Latino")
   case object Joint extends Ethnicity("Joint")
 
-  def validEthnicities(
+  def validateEthnicities(
       rawEthnicities: Seq[String]): Either[Seq[String], Seq[Ethnicity]] = {
     val potentialEthnicities =
       rawEthnicities.map(ethnicity =>
