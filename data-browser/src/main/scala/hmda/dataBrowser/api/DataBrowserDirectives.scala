@@ -249,7 +249,7 @@ trait DataBrowserDirectives extends Settings {
   private def extractAgeApplicant: Directive1[Option[QueryField]] = {
     parameters("ageapplicant".as(CsvSeq[String]) ? Nil).flatMap { rawAgeApplicant =>
       val name   = "ageapplicant"
-      val dbName = name
+      val dbName = "age_applicant"
       validateAgeApplicant(rawAgeApplicant) match {
         case Left(invalidAgeApplicant) =>
           import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
