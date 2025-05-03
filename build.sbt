@@ -48,6 +48,7 @@ lazy val akkaPersistenceDeps =
     akkaClusterShardingTyped,
     akkaPersistenceCassandra,
     keyspacedriver,
+//    keyspacehelper,
     cassandraLauncher
   )
 
@@ -137,10 +138,10 @@ lazy val common = (project in file("common"))
         cormorant, cormorantGeneric, scalaMock, scalacheckShapeless, diffx
       )
     ),
-    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
-    // addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
-    // unmanagedJars in Compile ++= Seq(new java.io.File("/tmp/aws-msk-iam-auth-2.2.0-all.jar")).classpath,
-    // unmanagedJars in Runtime ++= Seq(new java.io.File("/tmp/aws-msk-iam-auth-2.2.0-all.jar")).classpath   
+    // addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
+    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
+    unmanagedJars in Compile ++= Seq(new java.io.File("/tmp/amazon-keyspaces-helpers-1.0-SNAPSHOT-jar-with-dependencies.jar")).classpath,
+    unmanagedJars in Runtime ++= Seq(new java.io.File("/tmp/amazon-keyspaces-helpers-1.0-SNAPSHOT-jar-with-dependencies.jar")).classpath
   )
   .enablePlugins(BuildInfoPlugin)
   .settings(
@@ -181,7 +182,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
       },
-     reStart / envVars ++= Map("CASSANDRA_CLUSTER_HOSTS" -> "localhost", "APP_PORT" -> "2551"),
+//     reStart / envVars ++= Map("CASSANDRA_CLUSTER_HOSTS" -> "localhost", "APP_PORT" -> "2551"),
     ),
     dockerSettings,
     packageSettings
