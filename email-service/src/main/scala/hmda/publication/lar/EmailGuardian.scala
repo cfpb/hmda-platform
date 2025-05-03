@@ -12,7 +12,8 @@ import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder
 import hmda.publication.lar.config.Settings
 import hmda.publication.lar.database.{EmailSubmissionStatusRepository, PGSlickEmailSubmissionStatusRepository}
 import hmda.publication.lar.email.SESEmailService
-import hmda.publication.lar.streams.Stream.{commitMessages, pullEmails, sendEmailsIfNecessary}
+import hmda.publication.lar.streams.SubmissionStream
+import hmda.publication.lar.streams.AdminStream
 import monix.execution.Scheduler
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
@@ -35,10 +36,10 @@ object EmailGuardian {
       val emailStatusRepo: EmailSubmissionStatusRepository = new PGSlickEmailSubmissionStatusRepository(databaseConfig)
       val commitSettings                                   = CommitterSettings(config.kafka.commitSettings)
 
-      val (control, streamCompletion) =
-        pullEmails(system, config.kafka.bootstrapServers)
+      val (submissionControl, streamSubmissionCompletion) =
+        SubmissionStream.pullEmails(system, config.kafka.bootstrapServers)
           .via(
-            sendEmailsIfNecessary(
+            SubmissionStream.sendEmailsIfNecessary(
               emailService,
               emailStatusRepo,
               config.email.content,
@@ -50,18 +51,42 @@ object EmailGuardian {
           )
           .asSource
           .map { case (_, offset) => offset }
-          .toMat(commitMessages(commitSettings))(Keep.both)
+          .toMat(SubmissionStream.commitMessages(commitSettings))(Keep.both)
           .run()
 
-      streamCompletion.onComplete { t =>
+      val (adminControl, streamAdminCompletion) =
+        AdminStream.pullEmails(system, config.kafka.bootstrapServers)
+          .via(
+            AdminStream.sendEmailsIfNecessary(
+              emailService,
+              config.email.parallelism,
+              config.email.timeToRetry
+            )
+          )
+          .asSource
+          .map { case (_, offset) => offset }
+          .toMat(AdminStream.commitMessages(commitSettings))(Keep.both)
+          .run()
+
+      streamSubmissionCompletion.onComplete { t =>
         val errorMessage = t.fold(e => e.getMessage, _ => "infinite stream completed")
         ctx.self ! Error(errorMessage)
       }
 
+      streamAdminCompletion.onComplete { t =>
+        val errorMessage = t.fold(e => e.getMessage, _ => "infinite stream completed")
+        ctx.self ! Error(errorMessage)
+      }
+
+
       Behaviors.receiveMessage {
         case Error(errorMessage) =>
           ctx.log.error(s"Infinite consumer stream has terminated, Error: $errorMessage")
-          control.drainAndShutdown(streamCompletion).onComplete { _ =>
+          submissionControl.drainAndShutdown(streamSubmissionCompletion).onComplete { _ =>
+            serviceClient.shutdown()
+            databaseConfig.db.shutdown
+          }
+          adminControl.drainAndShutdown(streamAdminCompletion).onComplete { _ =>
             serviceClient.shutdown()
             databaseConfig.db.shutdown
           }
