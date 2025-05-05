@@ -42,7 +42,8 @@ object Version {
   val diffx                  = "0.4.0"
   val log4j                  = "2.15.0"
   val kubernetesApi          = "21.0.0-legacy"
-  val testContainers         = "1.19.8"
+  val testContainers         = "1.21.0"
   val keyspaceDriver         = "4.0.9"
   val mskAuth                = "2.3.2"
+  val scalaLogging           = "3.9.5"
 }

@@ -30,6 +30,7 @@ object Dependencies {
   lazy val akkaHttpXml              = "com.typesafe.akka"   %% "akka-http-xml"               % Version.akkaHttp
   lazy val akkaHttpTestkit          = "com.typesafe.akka"   %% "akka-http-testkit"           % Version.akkaHttp % Test
   lazy val akkaHttpSprayJson        = "com.typesafe.akka"   %% "akka-http-spray-json"        % Version.akkaHttp
+  lazy val scalaLogging             = "com.typesafe.scala-logging"   %% "scala-logging"               % Version.scalaLogging
   lazy val slickPostgres            = "com.github.tminglei" %% "slick-pg"                    % Version.slickPostgres
   lazy val akkaHttpCirce            = "de.heikoseeberger"   %% "akka-http-circe"             % Version.akkaHttpJson
   lazy val akkaManagementClusterBootstrap =
@@ -48,13 +49,12 @@ object Dependencies {
   lazy val circeGeneric             = "io.circe"           %% "circe-generic"                       % Version.circe
   lazy val circeParser              = "io.circe"           %% "circe-parser"                        % Version.circe
   lazy val akkaPersistenceCassandra = "com.typesafe.akka"  %% "akka-persistence-cassandra"          % Version.cassandraPluginVersion
-  lazy val cassandraLauncher        = "com.typesafe.akka"  %% "akka-persistence-cassandra-launcher" % Version.cassandraLauncher
   lazy val slick                    = "com.typesafe.slick" %% "slick"                               % Version.slick
   lazy val slickHikariCP            = "com.typesafe.slick" %% "slick-hikaricp"                      % Version.slick
   lazy val alpakkaSlick             = "com.lightbend.akka" %% "akka-stream-alpakka-slick"           % Version.alpakka
   lazy val postgres                 = "org.postgresql"     % "postgresql"                           % Version.postgres
   lazy val h2                       = "com.h2database"     % "h2"                                   % Version.h2 % Test
-  lazy val testContainers        = "org.testcontainers"         % "testcontainers"              % Version.testContainers % "test"
+  lazy val testContainers        = "org.testcontainers"         % "testcontainers"              % Version.testContainers % Test
   lazy val apacheCommonsIO        = "commons-io"                % "commons-io"                  % Version.apacheCommons % Test
   lazy val keycloakAdmin         = "org.keycloak"               % "keycloak-admin-client"       % Version.keycloakAdmin exclude("org.jboss.logging", "commons-logging-jboss-logging")
   lazy val keycloakCommons       = "org.keycloak"               % "keycloak-client-common-synced" % Version.keycloakCommons
@@ -64,7 +64,6 @@ object Dependencies {
   lazy val jbossLogging          = "org.jboss.logging"          % "jboss-logging"               % Version.jbossLogging
   lazy val httpClient            = "org.apache.httpcomponents"  % "httpclient"                  % Version.httpcomponents
   lazy val akkaKafkaStreams      = "com.typesafe.akka"          %% "akka-stream-kafka"          % Version.akkaKafka
-  lazy val embeddedKafka         = "io.github.embeddedkafka"    %% "embedded-kafka"             % Version.embeddedKafka
   lazy val alpakkaS3             = "com.lightbend.akka"         %% "akka-stream-alpakka-s3"     % Version.alpakkaS3
   lazy val akkaQuartzScheduler   = "com.enragedginger"          %% "akka-quartz-scheduler"      % Version.akkaQuartzScheduler
   lazy val sbtResolver           = "io.spray"                   %% "sbt-revolver"               % Version.sprayresolver
