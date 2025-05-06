@@ -174,15 +174,26 @@ export JAVA_HOME=$HOME/.asdf/installs/java/openjdk-13.0.2
 
 ### Running with sbt
 
-The HMDA Platform can run locally using [`sbt`](https://www.scala-sbt.org/) with an [embedded Cassandra](https://doc.akka.io/docs/alpakka-kafka/current/) and [embedded Kafka](https://doc.akka.io/docs/alpakka-kafka/current/). To get started:
+~~The HMDA Platform can run locally using [`sbt`](https://www.scala-sbt.org/) with an [embedded Cassandra](https://doc.akka.io/docs/alpakka-kafka/current/) and [embedded Kafka](https://doc.akka.io/docs/alpakka-kafka/current/). To get started:~~  
+_removing embedded cassandra allows us to use more up-to-date java versions_
 
+For local development, supporting services need to be started first in docker:
+
+1. Open terminal with `hmda-platform` root as the  working directory
+2. Start the supporting services of Kafka, Cassandra, and PostgreSQL:
+   ```bash
+   docker compose up -d kafka cassandra pg
+   ```
+   * the `-d` option runs the services in detached mode, so we can use the same terminal to the run remaining commands, to stop the services run:
+     ```bash
+     docker compose stop
+     ```
 1. Export the following environment variables:
     ```bash
     export CASSANDRA_CLUSTER_HOSTS=localhost
     export APP_PORT=2551
     ```
-2. Open terminal with `hmda-platform` root as the  working directory
-3. Start sbt and run the platform with the following commands:
+1. Start sbt and run the platform with the following commands:
     ```bash
     sbt
     [...]

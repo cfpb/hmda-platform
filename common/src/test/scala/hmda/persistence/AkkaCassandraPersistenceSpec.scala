@@ -2,18 +2,16 @@ package hmda.persistence
 
 import java.time.Instant
 import java.util.concurrent.TimeUnit
-
 import akka.actor
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{ ActorRef, ActorSystem, Behavior, TypedActorContext }
+import akka.actor.typed.{ActorRef, ActorSystem, Behavior, TypedActorContext}
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
-import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior }
-import hmda.persistence.util.CassandraUtil
+import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 import org.scalacheck.Gen
-import org.scalatest.{ BeforeAndAfterAll, WordSpec }
+import org.scalatest.{BeforeAndAfterAll, WordSpec}
 
 import scala.concurrent.duration._
 
@@ -28,13 +26,11 @@ abstract class AkkaCassandraPersistenceSpec extends WordSpec with BeforeAndAfter
   implicit val typedSystem: ActorSystem[_]
 
   override def beforeAll(): Unit = {
-    CassandraUtil.startEmbeddedCassandra()
     awaitPersistenceInit()
     super.beforeAll()
   }
 
   override def afterAll(): Unit = {
-    CassandraUtil.shutdown()
     system.terminate()
     super.afterAll()
   }
