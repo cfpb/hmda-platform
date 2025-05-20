@@ -22,7 +22,7 @@ object ErrorLines {
   type RawLine = String
 
   final case class RowLoanData(uli: String, actionTaken: Int, actionTakenDate: Int, applicationDate: String) {
-    override def toString: String = s"$uli:$actionTaken:$actionTakenDate``"
+    override def toString: String = s"$uli:$actionTaken:$actionTakenDate:$applicationDate"
   }
 
   final case class ErrorResult(editName: EditName, loanDataRows: Vector[RowLoanData])
