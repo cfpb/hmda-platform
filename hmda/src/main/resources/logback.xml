@@ -22,5 +22,8 @@
     <logger name="com.datastax.driver.core.QueryLogger.ERROR" level="${CASSANDRA_LOG_LEVEL:-INFO}"/>
     <logger name="com.datastax.driver.core.Connection" level="${CASSANDRA_LOG_LEVEL:-INFO}"/>
     <logger name="com.datastax.driver.core.Cluster" level="${CASSANDRA_LOG_LEVEL:-INFO}"/>    
-    <logger name="akka.persistence.cassandra.query" level="ERROR"/>
+    <logger name="com.datastax.driver.core.RequestHandler" level="${CASSANDRA_LOG_LEVEL:-INFO}"/>  
+    <logger name="com.datastax.driver.core.Session" level="${CASSANDRA_LOG_LEVEL:-INFO}"/>   
+<!--   <logger name="com.datastax.oss.driver" level="${CASSANDRA_LOG_LEVEL:-INFO}"/>  -->
+    <logger name="akka.persistence.cassandra.query" level="DEBUG"/>
 </configuration>
