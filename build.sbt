@@ -63,7 +63,7 @@ lazy val dockerSettings = Seq(
   dockerBuildCommand := {
     //force amd64 Architecture for k8s docker image compatability
     if (sys.props("os.arch") != "amd64") {
-      dockerExecCommand.value ++ Seq("buildx", "build", "--platform=linux/amd64", "--load") ++ dockerBuildOptions.value :+ "."
+      dockerExecCommand.value ++ Seq("buildx", "build", "--platform=linux/amd64","--provenance=false", "--load") ++ dockerBuildOptions.value :+ "."
     } else dockerBuildCommand.value
   },
   Docker / maintainer := "Hmda-Ops",
