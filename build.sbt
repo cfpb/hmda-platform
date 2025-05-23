@@ -721,7 +721,7 @@ lazy val `submission-errors` = (project in file("submission-errors"))
   .settings(hmdaBuildSettings)
   .settings(
     Seq(
-      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps :+ monix :+ slickPostgres,
+      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps :+ monix :+ slickPostgres :+ slickPostgresJson,
       assembly / assemblyMergeStrategy := {
         case "application.conf" => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat

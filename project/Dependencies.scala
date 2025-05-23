@@ -31,6 +31,7 @@ object Dependencies {
   lazy val akkaHttpTestkit          = "com.typesafe.akka"   %% "akka-http-testkit"           % Version.akkaHttp % Test
   lazy val akkaHttpSprayJson        = "com.typesafe.akka"   %% "akka-http-spray-json"        % Version.akkaHttp
   lazy val slickPostgres            = "com.github.tminglei" %% "slick-pg"                    % Version.slickPostgres
+  lazy val slickPostgresJson        = "com.github.tminglei" %% "slick-pg_spray-json"         % Version.slickPostgres
   lazy val akkaHttpCirce            = "de.heikoseeberger"   %% "akka-http-circe"             % Version.akkaHttpJson
   lazy val akkaManagementClusterBootstrap =
     "com.lightbend.akka.management" %% "akka-management-cluster-bootstrap" % Version.akkaClusterManagement exclude ("com.typesafe.akka", "akka-http") exclude ("com.typesafe.akka", "akka-http-xml")

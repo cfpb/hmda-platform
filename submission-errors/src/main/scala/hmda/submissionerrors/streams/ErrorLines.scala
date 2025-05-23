@@ -3,8 +3,9 @@ package hmda.submissionerrors.streams
 import akka.NotUsed
 import akka.actor.typed.ActorSystem
 import akka.persistence.query.EventEnvelope
-import akka.stream.scaladsl.{ Sink, Source }
+import akka.stream.scaladsl.{Sink, Source}
 import hmda.messages.submission.HmdaRawDataEvents.LineAdded
+import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowValidatedError
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.submission.SubmissionId
 import hmda.parser.filing.lar.LarCsvParser
@@ -20,12 +21,15 @@ import scala.concurrent.Future
  */
 object ErrorLines {
   type RawLine = String
+  type Fields = Map[String, Map[String, String]]
 
   final case class RowLoanData(uli: String, actionTaken: Int, actionTakenDate: Int, applicationDate: String) {
     override def toString: String = s"$uli:$actionTaken:$actionTakenDate:$applicationDate"
   }
 
   final case class ErrorResult(editName: EditName, loanDataRows: Vector[RowLoanData])
+
+  final case class ErrorResult2(editName: EditName, loanDataRows: Vector[RowLoanData], fields: Fields)
 
   /**
    * Depends on the results of Step 2 (ErrorInformation.obtainSubmissionErrors)
@@ -43,6 +47,13 @@ object ErrorLines {
     Task
       .fromFuture(submissionRawData(submissionId).runWith(collectAndParseErrorLines(errorMap)))
       .map(enrichedMap => enrichedMap.toList.map { case (editNameKey, loanDatasValue) => ErrorResult(editNameKey, loanDatasValue) })
+
+  def obtainLoanData2(
+                      submissionId: SubmissionId
+                    )(validatedErrors: Set[HmdaRowValidatedError])(implicit system: ActorSystem[_]): Task[List[ErrorResult2]] =
+    Task
+      .fromFuture(submissionRawData(submissionId).runWith(collectAndParseErrorLines2(validatedErrors)))
+      .map(enrichedMap => enrichedMap.toList.map { case (editNameKey, loanDatasValue) => ErrorResult2(editNameKey, loanDatasValue._1, loanDatasValue._2) })
 
   private[streams] def submissionRawData(
                                           submissionId: SubmissionId
@@ -72,6 +83,24 @@ object ErrorLines {
             }
           case None =>
             acc
+        }
+    }
+
+  private[streams] def collectAndParseErrorLines2(
+                                                  validatedErrors: Set[HmdaRowValidatedError]
+                                                ): Sink[(RawLine, LineNumber), Future[Map[EditName, (Vector[RowLoanData], Fields)]]] =
+    Sink.fold[Map[EditName, (Vector[RowLoanData], Fields)], (RawLine, LineNumber)](Map.empty[EditName, (Vector[RowLoanData], Fields)]) {
+      case (acc, (rawData, lineNumber)) =>
+        val lar = LarCsvParser(rawData).getOrElse(LoanApplicationRegister())
+        val loanData = RowLoanData(lar.loan.ULI, lar.action.actionTakenType.code, lar.action.actionTakenDate, lar.loan.applicationDate)
+        val foo = validatedErrors.filter(_.rowNumber == lineNumber)
+        foo.foldLeft(acc) { (acc, nextError) =>
+          nextError.validationErrors.foldLeft(acc) { (acc, nve) =>
+            val baz = acc.getOrElse(nve.editName, (Vector.empty[RowLoanData], Map.empty[String, Map[String, String]]))
+            val asdf = baz._1 :+ loanData
+            val lkj = baz._2 + (nve.uli -> nve.fields)
+            acc + (nve.editName -> (asdf, lkj))
+          }
         }
     }
 }

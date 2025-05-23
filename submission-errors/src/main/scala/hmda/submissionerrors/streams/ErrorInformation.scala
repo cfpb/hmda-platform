@@ -33,6 +33,9 @@ object ErrorInformation {
   def obtainSubmissionErrors(submissionId: SubmissionId)(implicit system: ActorSystem[_]): Task[Map[LineNumber, Set[EditName]]] =
     Task.fromFuture(submissionRowError(submissionId).runWith(collectErrors))
 
+  def obtainSubmissionErrors2(submissionId: SubmissionId)(implicit system: ActorSystem[_]): Task[Set[HmdaRowValidatedError]] =
+    Task.fromFuture(submissionRowError(submissionId).runWith(collectErrors2))
+
   private[streams] def submissionRowError(
                                            submissionId: SubmissionId
                                          )(implicit system: ActorSystem[_]): Source[HmdaRowValidatedError, NotUsed] = {
@@ -65,9 +68,22 @@ object ErrorInformation {
     Sink.fold[Map[LineNumber, Set[EditName]], HmdaRowValidatedError](Map.empty[LineNumber, Set[EditName]]) { (acc, next) =>
       val lineNumber = next.rowNumber.toLong
       val editNames  = next.validationErrors.map(_.editName)
+//      val fields = next.validationErrors.map(_.fields)
       val existing   = acc.getOrElse(lineNumber, Set.empty[EditName])
       val updated    = existing ++ editNames
       acc + (lineNumber -> updated)
     }
+
+  private[streams] val collectErrors2: Sink[HmdaRowValidatedError, Future[Set[HmdaRowValidatedError]]] = {
+    Sink.fold[Set[HmdaRowValidatedError], HmdaRowValidatedError](Set.empty[HmdaRowValidatedError])((acc, ele) => acc + ele)
+//    Sink.fold[Map[LineNumber, Set[Fields]], HmdaRowValidatedError](Map.empty[LineNumber, Set[Fields]]) { (acc, next) =>
+//      val lineNumber = next.rowNumber.toLong
+////      val editNames  = next.validationErrors.map(_.editName)
+//      val fields = next.validationErrors.map(_.fields)
+//      val existing   = acc.getOrElse(lineNumber, Set.empty[Fields])
+//      val updated    = existing ++ fields
+//      acc + (lineNumber -> updated)
+//    }
+  }
 }
 // $COVERAGE-ON$
