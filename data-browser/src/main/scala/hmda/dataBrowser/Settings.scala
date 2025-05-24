@@ -30,6 +30,7 @@ trait Settings {
   }
 
   object database {
+    val tableName2024: String = config.getString("dbconfig.table.2024")
     val tableName2023: String = config.getString("dbconfig.table.2023")
     val tableName2022: String = config.getString("dbconfig.table.2022")
     val tableName2021: String = config.getString("dbconfig.table.2021")
@@ -47,7 +48,8 @@ trait Settings {
         case 2021 => tableName2021
         case 2022 => tableName2022
         case 2023 => tableName2023
-        case _    => tableName2023
+        case 2024 => tableName2024
+        case _    => tableName2024
       }
       ModifiedLarTable(selected)
     }
@@ -60,7 +62,8 @@ trait Settings {
         case 2021 => tableName2021
         case 2022 => tableName2022
         case 2023 => tableName2023
-        case _    => tableName2023
+        case 2024 => tableName2024
+        case _    => tableName2024
       }
 
       selected
@@ -97,7 +100,8 @@ trait Settings {
         case 2021 => config.getString("server.s3.routes.filtered-queries.2021")
         case 2022 => config.getString("server.s3.routes.filtered-queries.2022")
         case 2023 => config.getString("server.s3.routes.filtered-queries.2023")
-        case _ => config.getString("server.s3.routes.filtered-queries.2023")
+        case 2024 => config.getString("server.s3.routes.filtered-queries.2024")
+        case _ => config.getString("server.s3.routes.filtered-queries.2024")
       }
       selected
     }
