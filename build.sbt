@@ -3,7 +3,7 @@ import BuildSettings._
 import sbtassembly.AssemblyPlugin.autoImport.assemblyMergeStrategy
 import com.typesafe.sbt.packager.docker._
 
-lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson, testContainers, apacheCommonsIO, log4jToSlf4j, kubernetesApi)
+lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson, testContainers, apacheCommonsIO, log4jToSlf4j, kubernetesApi, scalaLogging)
 
 lazy val sparkDeps =
   Seq(
@@ -33,7 +33,6 @@ lazy val akkaDeps = Seq(
   akkaCors,
   mskdriver,
   akkaKafkaStreams,
-  embeddedKafka,
   alpakkaS3,
   akkaQuartzScheduler,
   alpakkaFile
@@ -47,8 +46,7 @@ lazy val akkaPersistenceDeps =
     akkaPersistenceQuery,
     akkaClusterShardingTyped,
     akkaPersistenceCassandra,
-    keyspacedriver,
-    cassandraLauncher
+    keyspacedriver
   )
 
 lazy val akkaHttpDeps =
