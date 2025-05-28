@@ -1,15 +1,14 @@
 package hmda.submissionerrors.repositories
 
-import com.github.tminglei.slickpg._
-
-import java.sql.{Date, Timestamp}
-import java.time.{Instant, ZoneOffset, ZonedDateTime}
-import hmda.model.filing.submission.{Submission, SubmissionId}
+import hmda.model.filing.submission.{ Submission, SubmissionId }
 import hmda.submissionerrors.streams.ErrorLines.Fields
 import monix.eval.Task
 import slick.basic.DatabaseConfig
-import spray.json._
 import spray.json.DefaultJsonProtocol._
+import spray.json._
+
+import java.sql.Timestamp
+import java.time.{ ZoneOffset, ZonedDateTime }
 // $COVERAGE-OFF$
 final case class SubmissionErrorRecord(
                                         lei: String,
@@ -22,15 +21,10 @@ final case class SubmissionErrorRecord(
                                         loanData: Vector[String],
                                         submissionStartDate: Timestamp,
                                         submissionEndDate: Option[Timestamp],
-                                        fields: Fields
+                                        fields: JsValue
                                       )
 
 final case class AddSubmissionError(
-                                     editName: String,
-                                     loanData: Vector[String]
-                                   )
-
-final case class AddSubmissionError2(
                                      editName: String,
                                      loanData: Vector[String],
                                      fields: Fields
@@ -91,35 +85,7 @@ private[repositories] class PostgresSubmissionErrorRepository(config: DatabaseCo
   // Task.deferFuture in order to delay immediate execution
     Task.deferFuture(db.run(submissionPresentDBIO(submissionId)))
 
-//  def add(submissionId: SubmissionId, submissionStatus: Int, info: List[AddSubmissionError]): Task[Unit] = {
-//    import submissionId._
-//    val now = {
-//      val zdt    = ZonedDateTime.now()
-//      val utcZdt = zdt.withZoneSameInstant(ZoneOffset.UTC)
-//      Timestamp.valueOf(utcZdt.toLocalDateTime)
-//    }
-//    val records = info.map(a =>
-//      SubmissionErrorRecord(
-//        lei = lei,
-//        period = period.toString,
-//        sequenceNumber = sequenceNumber,
-//        submissionStatus = submissionStatus,
-//        createdDate = now,
-//        updatedDate = now,
-//        a.editName,
-//        a.loanData
-//      )
-//    )
-//
-//    Task
-//      .deferFuture(db.run(submissionPresentDBIO(submissionId).flatMap {
-//        case true  => tableQuery ++= Nil
-//        case false => tableQuery ++= records
-//      }(db.ioExecutionContext)))
-//      .void
-//  }
-
-  override def add(submission: Submission, info: List[AddSubmissionError]): Task[Unit] = {
+  override def add(submission: Submission, info: Set[AddSubmissionError]): Task[Unit] = {
     import submission.id._
     val now = {
       val zdt    = ZonedDateTime.now()
@@ -139,41 +105,7 @@ private[repositories] class PostgresSubmissionErrorRepository(config: DatabaseCo
         a.loanData,
         new Timestamp(submission.start),
         if (submission.end > 0) Option.apply(new Timestamp(submission.end)) else Option.empty,
-//        Option.empty,
-//        "{\"baz\":\"qux\"}"
-      )
-    )
-
-    Task
-      .deferFuture(db.run(submissionPresentDBIO(submission.id).flatMap {
-        case true  => tableQuery ++= Nil
-        case false => tableQuery ++= records
-      }(db.ioExecutionContext)))
-      .void
-  }
-
-  override def add2(submission: Submission, info: List[AddSubmissionError2]): Task[Unit] = {
-    import submission.id._
-    val now = {
-      val zdt    = ZonedDateTime.now()
-      val utcZdt = zdt.withZoneSameInstant(ZoneOffset.UTC)
-      Timestamp.valueOf(utcZdt.toLocalDateTime)
-    }
-
-    val records = info.map(a =>
-      SubmissionErrorRecord(
-        lei = lei,
-        period = period.toString,
-        sequenceNumber = sequenceNumber,
-        submissionStatus = submission.status.code,
-        createdDate = now,
-        updatedDate = now,
-        a.editName,
-        a.loanData,
-        new Timestamp(submission.start),
-        if (submission.end > 0) Option.apply(new Timestamp(submission.end)) else Option.empty,
-        a.fields
-//        Option.empty
+        a.fields.toJson
       )
     )
 

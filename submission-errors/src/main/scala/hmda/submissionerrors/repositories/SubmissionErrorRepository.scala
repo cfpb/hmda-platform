@@ -21,8 +21,6 @@ trait SubmissionErrorRepository {
    * @param info is a list of error information to be added for a given Submission ID
    * @return
    */
-//  def add(submissionId: SubmissionId, submissionStatus: Int, info: List[AddSubmissionError]): Task[Unit]
-  def add(submission: Submission, info: List[AddSubmissionError]): Task[Unit]
-  def add2(submission: Submission, info: List[AddSubmissionError2]): Task[Unit]
+  def add(submission: Submission, info: Set[AddSubmissionError]): Task[Unit]
 }
 // $COVERAGE-ON$

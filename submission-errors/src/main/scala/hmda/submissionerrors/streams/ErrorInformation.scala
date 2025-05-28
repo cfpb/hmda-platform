@@ -19,22 +19,15 @@ object ErrorInformation {
   type LineNumber = Long
 
   /**
-   * This is responsible for fetching the line numbers that have failed validation for a given submission
+   * This is responsible for fetching set of `HmdaRowValidatedError` for a given submission
    * For example:
-   * Map(
-   *   line number 2  -> Set(Q614, Q617),
-   *   line number 16 -> Set(Q609)
-   * )
    *
    * @param submissionId is the submission ID
    * @param system is the actor system needed to run the Akka Stream
    * @return
    */
-  def obtainSubmissionErrors(submissionId: SubmissionId)(implicit system: ActorSystem[_]): Task[Map[LineNumber, Set[EditName]]] =
+  def obtainSubmissionErrors(submissionId: SubmissionId)(implicit system: ActorSystem[_]): Task[Set[HmdaRowValidatedError]] =
     Task.fromFuture(submissionRowError(submissionId).runWith(collectErrors))
-
-  def obtainSubmissionErrors2(submissionId: SubmissionId)(implicit system: ActorSystem[_]): Task[Set[HmdaRowValidatedError]] =
-    Task.fromFuture(submissionRowError(submissionId).runWith(collectErrors2))
 
   private[streams] def submissionRowError(
                                            submissionId: SubmissionId
@@ -58,32 +51,14 @@ object ErrorInformation {
    *
    * We would expect the result of running the stream to be a
    * Future(
-   *   Map(
-   *      line number 1 -> Set(EditName1, EditName2),
-   *      line number 4 -> Set(EditName1, EditName3)
+   *    Set(
+   *      HmdaRowValidatedError(line number = 1, edit names = Set(EditName1, EditName2),
+   *      HmdaRowValidatedError(line number = 4, edit names = Set(EditName1, EditName3)
    *    )
    * )
    */
-  private[streams] val collectErrors: Sink[HmdaRowValidatedError, Future[Map[LineNumber, Set[EditName]]]] =
-    Sink.fold[Map[LineNumber, Set[EditName]], HmdaRowValidatedError](Map.empty[LineNumber, Set[EditName]]) { (acc, next) =>
-      val lineNumber = next.rowNumber.toLong
-      val editNames  = next.validationErrors.map(_.editName)
-//      val fields = next.validationErrors.map(_.fields)
-      val existing   = acc.getOrElse(lineNumber, Set.empty[EditName])
-      val updated    = existing ++ editNames
-      acc + (lineNumber -> updated)
-    }
-
-  private[streams] val collectErrors2: Sink[HmdaRowValidatedError, Future[Set[HmdaRowValidatedError]]] = {
+  private[streams] val collectErrors: Sink[HmdaRowValidatedError, Future[Set[HmdaRowValidatedError]]] = {
     Sink.fold[Set[HmdaRowValidatedError], HmdaRowValidatedError](Set.empty[HmdaRowValidatedError])((acc, ele) => acc + ele)
-//    Sink.fold[Map[LineNumber, Set[Fields]], HmdaRowValidatedError](Map.empty[LineNumber, Set[Fields]]) { (acc, next) =>
-//      val lineNumber = next.rowNumber.toLong
-////      val editNames  = next.validationErrors.map(_.editName)
-//      val fields = next.validationErrors.map(_.fields)
-//      val existing   = acc.getOrElse(lineNumber, Set.empty[Fields])
-//      val updated    = existing ++ fields
-//      acc + (lineNumber -> updated)
-//    }
   }
 }
 // $COVERAGE-ON$

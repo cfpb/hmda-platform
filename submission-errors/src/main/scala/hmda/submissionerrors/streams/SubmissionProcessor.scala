@@ -1,15 +1,14 @@
 package hmda.submissionerrors.streams
 
-import akka.{Done, NotUsed}
 import akka.actor.typed.ActorSystem
 import akka.kafka.CommitterSettings
-import akka.kafka.ConsumerMessage.{CommittableMessage, CommittableOffset}
+import akka.kafka.ConsumerMessage.{ CommittableMessage, CommittableOffset }
 import akka.kafka.scaladsl.Committer
-import akka.stream.scaladsl.{Flow, Keep, Sink}
-import cats.implicits._
-import hmda.model.filing.submission.{Submission, SubmissionId}
-import hmda.submissionerrors.repositories.{AddSubmissionError, AddSubmissionError2, SubmissionErrorRepository}
-import hmda.submissionerrors.streams.ErrorLines.{ErrorResult, ErrorResult2}
+import akka.stream.scaladsl.{ Flow, Keep, Sink }
+import akka.{ Done, NotUsed }
+import hmda.model.filing.submission.Submission
+import hmda.submissionerrors.repositories.{ AddSubmissionError, SubmissionErrorRepository }
+import hmda.submissionerrors.streams.ErrorLines.ErrorResult
 import hmda.utils.YearUtils
 import hmda.utils.YearUtils.Period
 import monix.eval.Task
@@ -119,21 +118,13 @@ object SubmissionProcessor {
     repo.submissionPresent(submission.id).flatMap {
       case false =>
         for {
-//          errorMap           <- ErrorInformation.obtainSubmissionErrors(submission.id)
-          foo <- ErrorInformation.obtainSubmissionErrors2(submission.id)
-//          enrichedErrorLines <- ErrorLines.obtainLoanData(submission.id)(errorMap)
-          bar <- ErrorLines.obtainLoanData2(submission.id)(foo)
-//          dataToAdd = enrichedErrorLines.map {
-//            case ErrorResult(editName, rowsLoanData) =>
-//              AddSubmissionError(editName, rowsLoanData.map(_.toString))
-//          }
-          dataToAdd2 = bar.map {
-            case ErrorResult2(editName, loanDataRows, fields) =>
-              AddSubmissionError2(editName, loanDataRows.map(_.toString), "{\"foo\": \"bar\"}")
+          errors <- ErrorInformation.obtainSubmissionErrors(submission.id)
+          loanDataWithErrors <- ErrorLines.obtainLoanData(submission.id)(errors)
+          dataToAdd = loanDataWithErrors.map {
+            case ErrorResult(editName, loanDataRows, fields) =>
+              AddSubmissionError(editName, loanDataRows.map(_.toString), fields)
           }
-//          _ <- repo.add(submission, dataToAdd)
-          _ <- repo.add2(submission, dataToAdd2)
-//          _ <- repo.add(submission.id, submission.status.code, dataToAdd)
+          _ <- repo.add(submission, dataToAdd)
         } yield ()
 
       case true =>
