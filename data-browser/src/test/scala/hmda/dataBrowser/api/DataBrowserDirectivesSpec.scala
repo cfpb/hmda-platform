@@ -83,11 +83,15 @@ class DataBrowserDirectivesSpec extends WordSpec with ScalatestRouteTest with Ma
       }
 
       Get("/?ethnicities=offworld") ~> Route.seal(failingRoute(extractNonMandatoryQueryFields("2018"))) ~> check {
-        response.status shouldBe StatusCodes.NotFound
+        response.status shouldBe StatusCodes.BadRequest
       }
 
       Get("/?actions_taken=99999") ~> Route.seal(failingRoute(extractNonMandatoryQueryFields("2018"))) ~> check {
-        response.status shouldBe StatusCodes.NotFound
+        response.status shouldBe StatusCodes.BadRequest
+      }
+
+      Get("/?ageapplicant=62") ~> Route.seal(failingRoute(extractNonMandatoryQueryFields("2018"))) ~> check {
+        response.status shouldBe StatusCodes.BadRequest
       }
     }
 
