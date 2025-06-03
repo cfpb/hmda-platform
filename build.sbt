@@ -237,7 +237,7 @@ lazy val `check-digit` = (project in file("check-digit"))
     .settings(
       Seq(
         libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
-        enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
+        enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
         Compile / mainClass := Some("hmda.proxy.FileProxy"),
         assembly / assemblyJarName := {
           s"${name.value}.jar"
@@ -358,7 +358,7 @@ lazy val `hmda-dashboard` = (project in file("hmda-dashboard"))
   .settings(
     Seq(
       libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
-        enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
+        enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
@@ -685,7 +685,7 @@ lazy val `data-browser` = (project in file("data-browser"))
   .settings(
     Seq(
       libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
-        enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
+        enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
@@ -791,7 +791,7 @@ lazy val `hmda-quarterly-data-service` = (project in file ("hmda-quarterly-data-
   .settings(
     Seq(
       libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
-        enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
+        enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat

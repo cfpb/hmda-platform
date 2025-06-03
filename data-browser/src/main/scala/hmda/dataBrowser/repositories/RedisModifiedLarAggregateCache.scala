@@ -5,7 +5,6 @@ import hmda.dataBrowser.Settings
 import io.lettuce.core.api.async.RedisAsyncCommands
 import monix.eval.Task
 
-import scala.compat.java8.FutureConverters._
 import io.circe.parser._
 import io.circe.syntax._
 import cats.implicits._
@@ -13,6 +12,7 @@ import io.circe.{ Decoder, Encoder }
 import org.slf4j.Logger
 
 import scala.concurrent.duration.FiniteDuration
+import scala.jdk.FutureConverters._
 
 // $COVERAGE-OFF$
 // Talks to Redis via Redis4Cats
@@ -22,7 +22,7 @@ class RedisModifiedLarAggregateCache(redisClient: Task[RedisAsyncCommands[String
   private def findAndParse[A: Decoder](key: String): Task[Option[A]] =
     redisClient.flatMap { redisClient =>
       Task
-        .deferFuture(redisClient.get(key).toScala)
+        .deferFuture(redisClient.get(key).asScala)
         .map(Option(_))
         .map(optResponse => optResponse.flatMap(stringResponse => decode[A](stringResponse).toOption))
     }.onErrorFallbackTo(Task.now(None))
@@ -30,14 +30,14 @@ class RedisModifiedLarAggregateCache(redisClient: Task[RedisAsyncCommands[String
   private def updateAndSetTTL[A: Encoder](key: String, value: A): Task[A] =
     (for {
       redisClient <- redisClient
-      _           <- Task.deferFuture(redisClient.set(key, value.asJson.noSpaces).toScala)
-      _           <- Task.deferFuture(redisClient.pexpire(key, timeToLive.toMillis).toScala)
+      _           <- Task.deferFuture(redisClient.set(key, value.asJson.noSpaces).asScala)
+      _           <- Task.deferFuture(redisClient.pexpire(key, timeToLive.toMillis).asScala)
     } yield value).onErrorFallbackTo(Task.now(value))
 
   private def invalidateKey(key: String): Task[Unit] =
     redisClient.flatMap { redisClient =>
       Task
-        .deferFuture(redisClient.pexpire(key, timeToLive.toMillis).toScala)
+        .deferFuture(redisClient.pexpire(key, timeToLive.toMillis).asScala)
         .map(_ => ())
     }.onErrorFallbackTo(Task.unit)
 
@@ -114,7 +114,7 @@ class RedisModifiedLarAggregateCache(redisClient: Task[RedisAsyncCommands[String
 
   def healthCheck: Task[Unit] =
     redisClient
-      .flatMap(client => Task.deferFuture(client.ping().toScala))
+      .flatMap(client => Task.deferFuture(client.ping().asScala))
       .void
 }
 // $COVERAGE-ON$
