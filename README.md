@@ -83,11 +83,15 @@ The code base contained in this repository includes the following microservices 
 
 - [HMDA Dashboard](https://github.com/cfpb/hmda-platform/tree/master/hmda-dashboard): Authenticated APIs to view realtime analytics for the filings happening on the platform. The dashboard includes summarized statistics, data trends, and supports data visualizations via frontend.
 
-- [Rate imit](https://github.com/cfpb/hmda-platform/tree/master/rate-limit): Rate limiter service working in-sync with [ambassador](https://www.getambassador.io/docs/latest/topics/running/services/rate-limit-service/) to limit the number of times in a given time period that the API can be called. If the rate limit is reached, a 503 error code is sent.
-
 - [HMDA Data Browser](https://github.com/cfpb/hmda-platform/tree/master/data-browser): Public facing API for [HMDA Data Browser](https://ffiec.cfpb.gov/data-browser/). This API makes the entire dataset available for summarized statistics, deep analysis, as well as geographic map layout.
 
 - [Email Service](https://github.com/cfpb/hmda-platform/tree/master/email-service): Event driven service to send an automated email to the filer on each successful submission.
+
+- [HMDA Quarterly Data Service](https://github.com/cfpb/hmda-platform/tree/master/hmda-quarterly-data-service): Public facing API for  [HMDA Quarterlty Graphs](https://ffiec.cfpb.gov/data-browser/graphs/quarterly/). This API serves the categorical trends of the HMDA data through the filing periods aggregated by quarters.
+
+- [File Proxy](https://github.com/cfpb/hmda-platform/tree/master/file-proxy): Reverse proxy to serve the publication data stored in S3. Allowing for easier, more configurable access control by delegating S3 permissions to app level.
+
+- [HMDA Auth](https://github.com/cfpb/hmda-platform/tree/master/hmda-auth): Support user information updates through the API interfacing with Auth framework.
 
 
 ## HMDA Platform Technical Architecture
