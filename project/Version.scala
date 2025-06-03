@@ -40,7 +40,7 @@ object Version {
   val scalacheckShapeless    = "1.2.5"
   val diffx                  = "0.4.0"
   val log4j                  = "2.15.0"
-  val kubernetesApi          = "21.0.0-legacy"
+  val kubernetesApi          = "24.0.0"
   val testContainers         = "1.21.0"
   val keyspaceDriver         = "4.0.9"
   val mskAuth                = "2.3.2"
