@@ -31,7 +31,6 @@ object Version {
   val enumeratumCirce        = "1.7.2"
   val monix                  = "3.4.1"
   val lettuce                = "6.2.4.RELEASE"
-  val java8Compat            = "1.0.2"
   val scalaMock              = "4.3.0"
   val guava                  = "33.4.8-jre"
   val awsSesSdk              = "1.12.782"
