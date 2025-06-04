@@ -10,6 +10,7 @@ object Version {
   val akkaClusterManagement  = "1.5.2"
   val akkaCors               = "1.2.0"
   val akkaKafka              = "2.0.2"
+  val kafkaClients           = "3.9.1"
   val circe                  = "0.14.5"
   val cassandraPluginVersion = "1.2.1"
   val cassandraLauncher      = "1.1.1"

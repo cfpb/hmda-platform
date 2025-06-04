@@ -63,7 +63,8 @@ object Dependencies {
   lazy val resteasyMulti         = "org.jboss.resteasy"         % "resteasy-multipart-provider" % Version.resteasy % "provided"
   lazy val jbossLogging          = "org.jboss.logging"          % "jboss-logging"               % Version.jbossLogging
   lazy val httpClient            = "org.apache.httpcomponents"  % "httpclient"                  % Version.httpcomponents
-  lazy val akkaKafkaStreams      = "com.typesafe.akka"          %% "akka-stream-kafka"          % Version.akkaKafka
+  lazy val akkaKafkaStreams      = "com.typesafe.akka"          %% "akka-stream-kafka"          % Version.akkaKafka exclude("org.apache.kafka", "kafka-clients")
+  lazy val kafkaClients          = "org.apache.kafka"           % "kafka-clients"               % Version.kafkaClients
   lazy val alpakkaS3             = "com.lightbend.akka"         %% "akka-stream-alpakka-s3"     % Version.alpakkaS3
   lazy val akkaQuartzScheduler   = "com.enragedginger"          %% "akka-quartz-scheduler"      % Version.akkaQuartzScheduler
   lazy val sbtResolver           = "io.spray"                   %% "sbt-revolver"               % Version.sprayresolver

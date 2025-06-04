@@ -8,7 +8,8 @@ lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson, tes
 lazy val sparkDeps =
   Seq(
     postgres,
-    akkaKafkaStreams
+    akkaKafkaStreams,
+    kafkaClients
   )
 
 lazy val authDeps = Seq(keycloakAdmin, jbossLogging, httpClient)
@@ -33,6 +34,7 @@ lazy val akkaDeps = Seq(
   akkaCors,
   mskdriver,
   akkaKafkaStreams,
+  kafkaClients,
   alpakkaS3,
   akkaQuartzScheduler,
   alpakkaFile
@@ -773,7 +775,7 @@ lazy val `email-service` = (project in file("email-service"))
       assembly / assemblyJarName := {
         s"${name.value}.jar"
       },
-      libraryDependencies ++= monix :: akkaKafkaStreams :: awsSesSdk :: logback :: Nil
+      libraryDependencies ++= monix :: akkaKafkaStreams :: kafkaClients :: awsSesSdk :: logback :: Nil
     ),
     dockerSettings,
     packageSettings
