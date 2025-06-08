@@ -56,8 +56,8 @@ sealed trait ApplicantFormatValidator extends LarParser {
       ),
       validateRace(race1, race2, race3, race4, race5, otherNative, otherAsian, otherPacific, raceObserved, coApp = coApp),
       validateSex(sex, sexObserved, coApp = coApp),
-      validateIntField(age, ageEnum),
-      validateIntField(creditScore, credEnum),
+      validateIntFieldReturnInt(age, ageEnum),
+      validateIntFieldReturnInt(creditScore, credEnum),
       validateLarCode(CreditScoreEnum, creditScoreModel, credModelEnum),
       validateStr(otherCreditScore)
     ).mapN(Applicant.apply)

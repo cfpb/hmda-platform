@@ -10,7 +10,7 @@ import scala.util.{Failure, Success, Try}
 
 trait LarParser {
 
-  def validateIntField(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
+  def validateIntFieldReturnString(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
     Try(value.toInt) match {
       case Success(i) => value.validNel
       case Failure(e) => parserValidationError.invalidNel
@@ -22,7 +22,7 @@ trait LarParser {
       case Failure(e) => parserValidationError.invalidNel
     }
 
-  def validateDoubleField(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
+  def validateDoubleFieldReturnString(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
     Try(value.toDouble) match {
       case Success(i) => value.validNel
       case Failure(_) => parserValidationError.invalidNel
@@ -61,7 +61,7 @@ trait LarParser {
     } else if (value == "NA") {
       value.validNel
     } else {
-      validateIntField(value, parserValidationError)
+      validateIntFieldReturnString(value, parserValidationError)
     }
 
   def validateIntStrOrNAOrExemptField(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
@@ -70,7 +70,7 @@ trait LarParser {
     } else if (value == "NA" || value == "Exempt") {
       value.validNel
     } else {
-      validateIntField(value, parserValidationError)
+      validateIntFieldReturnString(value, parserValidationError)
     }
 
   def validateDoubleStrOrNAField(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
@@ -79,7 +79,7 @@ trait LarParser {
     } else if (value == "NA") {
       value.validNel
     } else {
-      validateDoubleField(value, parserValidationError)
+      validateDoubleFieldReturnString(value, parserValidationError)
     }
 
   def validateDoubleStrOrNAOrExemptField(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
@@ -88,7 +88,7 @@ trait LarParser {
     } else if (value == "NA" || value == "Exempt") {
       value.validNel
     } else {
-      validateDoubleField(value, parserValidationError)
+      validateDoubleFieldReturnString(value, parserValidationError)
     }
 
   def validateDoubleStrOrNAOrExemptOrEmptyField(value: String,
@@ -96,14 +96,14 @@ trait LarParser {
     if (value == "NA" || value == "Exempt" || value == "") {
       value.validNel
     } else {
-      validateDoubleField(value, parserValidationError)
+      validateDoubleFieldReturnString(value, parserValidationError)
     }
 
   def validateDoubleStrOrEmptyOrNaField(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
     if (value == "" || value == "NA") {
       value.validNel
     } else {
-      validateDoubleField(value, parserValidationError)
+      validateDoubleFieldReturnString(value, parserValidationError)
     }
 
 
