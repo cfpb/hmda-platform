@@ -14,7 +14,7 @@ import hmda.api.http.routes.BaseHttpApi
 import hmda.auth.OAuth2Authorization
 import org.slf4j.Logger
 
-import scala.compat.java8.DurationConverters.DurationOps
+import scala.jdk.DurationConverters._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
