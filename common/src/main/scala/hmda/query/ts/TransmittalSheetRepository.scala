@@ -14,6 +14,11 @@ class TransmittalSheetRepository(val config: DatabaseConfig[JdbcProfile], val ta
 
   def sumLars(exclusions: Seq[String]): Future[Int] = db.run(sumTotalLines(exclusions).result)
 
+  def getAnnualLarCountByLei(leis: Seq[String]): Future[Seq[(String, Int, Int)]] = db.run(
+    table.filter(_.lei inSet leis)
+      .map(inst => (inst.lei, inst.year, inst.totalLines)).result
+  )
+
   private def sumTotalLines(exclusions: Seq[String]): Rep[Int] = table.filterNot(s => s.lei inSet exclusions)
     .map(_.totalLines).sum.getOrElse(0)
 
