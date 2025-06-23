@@ -34,6 +34,8 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
   implicit val institutionEmailsRepository: InstitutionEmailsRepository = new InstitutionEmailsRepository(dbConfig)
   implicit val institutionNoteHistoryRepository: InstitutionNoteHistoryRepository = new InstitutionNoteHistoryRepository(dbConfig)
 
+  private val institutionTsRepo = new InstitutionTsRepo(dbConfig)
+
   private val createSchema = config.getString("hmda.institution.createSchema").toBoolean
   if (createSchema) {
     institutionRepositories.values.foreach(_.createSchema())
@@ -123,7 +125,7 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
   private val quarterlyFilersLarCountsPath =
     path("institutions" / "quarterly" / IntNumber / "lars" / "past" / IntNumber) { (year, pastCount) =>
       (extractUri & get) { uri =>
-        val quarterlyLarCounts = InstitutionTsRepo.fetchPastLarCountsForQuarterlies(year, pastCount)
+        val quarterlyLarCounts = institutionTsRepo.fetchPastLarCountsForQuarterlies(year, pastCount)
         val yearlyTotalLarCounts = (1 to pastCount).map(i => {
           val yr = s"${year - i}"
           tsRepositories.get(yr)
