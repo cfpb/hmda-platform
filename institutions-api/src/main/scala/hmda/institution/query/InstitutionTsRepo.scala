@@ -43,8 +43,7 @@ class InstitutionTsRepo(val config: DatabaseConfig[JdbcProfile])(implicit ec: Ex
       annualLarCountByLei <- getAnnualLarCountByLei(quarterlyFilers.map {
         case (lei, _, _) => lei
       }, year, pastCount)
-      annualLarCountByLeiFlattened <- Future(annualLarCountByLei.flatten)
-      totalLinesPerYear <- Future(annualLarCountByLeiFlattened.map {
+      totalLinesPerYear <- Future(annualLarCountByLei.map {
         case (lei, year, totalLines) => lei -> AnnualLarCount(year.toString, totalLines)
       })
       linesPerYearByLei <- Future(
@@ -63,14 +62,14 @@ class InstitutionTsRepo(val config: DatabaseConfig[JdbcProfile])(implicit ec: Ex
     }
   }
 
-  private def getAnnualLarCountByLei(leis: Seq[String], year: Int, pastCount: Int) = {
-    val bar = (1 to pastCount).map(i => {
+  private def getAnnualLarCountByLei(leis: Seq[String], year: Int, pastCount: Int): Future[Seq[(String, Int, Int)]] = {
+    val leiYearTotal = (1 to pastCount).map(i => {
       val yr = s"${year - i}"
       val tr = tsRepositories(yr)
       tr.getAnnualLarCountByLei(leis)
     })
 
-    Future.sequence(bar)
+    Future.sequence(leiYearTotal).map(_.flatten)
   }
 
 }
