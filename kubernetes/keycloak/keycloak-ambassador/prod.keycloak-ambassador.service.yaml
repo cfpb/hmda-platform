@@ -12,11 +12,11 @@ metadata:
       service: keycloak.default.svc.cluster.local
       timeout_ms: 20000
       add_response_headers:
-        content-security-policy: 
+        content-security-policy:
           append: False
-          value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec-api.cfpb.gov https://ffiec.cfpb.gov https://www.google-analytics.com https://s3.amazonaws.com"
+          value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob:data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec.cfpb.gov https://www.google-analytics.com https://s3.amazonaws.com"
         permissions-policy:
-          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"        
+          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
       remove_response_headers:
       - referrer-policy
       - x-envoy-upstream-service-time
@@ -24,17 +24,12 @@ metadata:
       - x-forwarded-host
       - x-host
       - x-forwarded-server
+      cors:
+        origins: https://ffiec.beta.cfpb.gov
+        credentials: true
   labels:
     service: keycloak-ambassador
   name: keycloak-ambassador
   namespace: default
 spec:
   clusterIP: None
-  clusterIPs:
-  - None
-  internalTrafficPolicy: Cluster
-  ipFamilies:
-  - IPv4
-  ipFamilyPolicy: SingleStack
-  sessionAffinity: None
-  type: ClusterIP

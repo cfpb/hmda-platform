@@ -3,7 +3,7 @@ import BuildSettings._
 import sbtassembly.AssemblyPlugin.autoImport.assemblyMergeStrategy
 import com.typesafe.sbt.packager.docker._
 
-lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson, testContainers, apacheCommonsIO, log4jToSlf4j, kubernetesApi)
+lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson, testContainers, apacheCommonsIO, log4jToSlf4j, kubernetesApi, scalaLogging)
 
 lazy val sparkDeps =
   Seq(
@@ -33,7 +33,6 @@ lazy val akkaDeps = Seq(
   akkaCors,
   mskdriver,
   akkaKafkaStreams,
-  embeddedKafka,
   alpakkaS3,
   akkaQuartzScheduler,
   alpakkaFile
@@ -47,9 +46,7 @@ lazy val akkaPersistenceDeps =
     akkaPersistenceQuery,
     akkaClusterShardingTyped,
     akkaPersistenceCassandra,
-    keyspacedriver,
-//    keyspacehelper,
-    cassandraLauncher
+    keyspacedriver
   )
 
 lazy val akkaHttpDeps =
@@ -140,8 +137,8 @@ lazy val common = (project in file("common"))
     ),
     // addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
-    unmanagedJars in Compile ++= Seq(new java.io.File("/tmp/amazon-keyspaces-helpers-1.0-SNAPSHOT-jar-with-dependencies.jar")).classpath,
-    unmanagedJars in Runtime ++= Seq(new java.io.File("/tmp/amazon-keyspaces-helpers-1.0-SNAPSHOT-jar-with-dependencies.jar")).classpath
+    // 
+    Runtime / unmanagedBase := baseDirectory.value / "lib"
   )
   .enablePlugins(BuildInfoPlugin)
   .settings(

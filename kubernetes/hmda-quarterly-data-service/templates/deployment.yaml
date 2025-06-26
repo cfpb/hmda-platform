@@ -69,6 +69,16 @@ spec:
                 secretKeyRef:
                   name: inst-postgres-credentials
                   key: url
+            - name: PERIODS_QUARTER
+              valueFrom:
+                  configMapKeyRef:
+                    name: hmda-quarterly-data-service-mv-configmap
+                    key: PERIODS_WITH_QUARTER
+            - name: PERIODS_ANNUAL
+              valueFrom:
+                    configMapKeyRef:
+                      name: hmda-quarterly-data-service-mv-configmap
+                      key: PERIODS_ANNUAL
           ports:
             - name: http
               containerPort: 8060
