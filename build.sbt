@@ -179,7 +179,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
       },
-//     reStart / envVars ++= Map("CASSANDRA_CLUSTER_HOSTS" -> "localhost", "APP_PORT" -> "2551"),
+    reStart / envVars ++= Map("CASSANDRA_CLUSTER_HOSTS" -> "localhost", "APP_PORT" -> "2551"),
     ),
     dockerSettings,
     packageSettings
