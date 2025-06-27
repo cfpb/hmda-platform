@@ -173,9 +173,10 @@ class PostgresModifiedLarRepository(config: DatabaseConfig[JdbcProfile], tableSe
       case 2018 => "institutions2018_three_year_04052022"
       case 2019 => "institutions2019_three_year_04122023"
       case 2020 => "institutions2020_three_year_05012024"
-      case 2021 => "institutions2021_one_year_05012023"
+      case 2021 => "institutions2021_three_year_05192025_v2"
       case 2022 => "institutions2022_one_year_05012024"
-      case 2023 => "institutions2023_snapshot_05012024 "
+      case 2023 => "institutions2023_one_year_05192025_v2"
+      case 2024 => "institutions2024_snapshot_05192025_v2"
       case _    => "institutions2022_snapshot_05012023"
     }
 
