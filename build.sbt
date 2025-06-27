@@ -60,7 +60,7 @@ lazy val dockerSettings = Seq(
   dockerBuildCommand := {
     //force amd64 Architecture for k8s docker image compatability
     if (sys.props("os.arch") != "amd64") {
-      dockerExecCommand.value ++ Seq("buildx", "build", "--platform=linux/amd64", "--load") ++ dockerBuildOptions.value :+ "."
+      dockerExecCommand.value ++ Seq("buildx", "build", "--platform=linux/amd64","--provenance=false", "--load") ++ dockerBuildOptions.value :+ "."
     } else dockerBuildCommand.value
   },
   Docker / maintainer := "Hmda-Ops",
@@ -135,10 +135,10 @@ lazy val common = (project in file("common"))
         cormorant, cormorantGeneric, scalaMock, scalacheckShapeless, diffx
       )
     ),
-    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
-    // addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
-    // unmanagedJars in Compile ++= Seq(new java.io.File("/tmp/aws-msk-iam-auth-2.2.0-all.jar")).classpath,
-    // unmanagedJars in Runtime ++= Seq(new java.io.File("/tmp/aws-msk-iam-auth-2.2.0-all.jar")).classpath   
+    // addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
+    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
+    // https://github.com/aws-samples/amazon-keyspaces-java-driver-helpers
+    Runtime / unmanagedBase := baseDirectory.value / "lib"
   )
   .enablePlugins(BuildInfoPlugin)
   .settings(
@@ -179,7 +179,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
       },
-     reStart / envVars ++= Map("CASSANDRA_CLUSTER_HOSTS" -> "localhost", "APP_PORT" -> "2551"),
+    reStart / envVars ++= Map("CASSANDRA_CLUSTER_HOSTS" -> "localhost", "APP_PORT" -> "2551"),
     ),
     dockerSettings,
     packageSettings
