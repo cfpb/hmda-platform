@@ -12,6 +12,7 @@ import akka.http.scaladsl.unmarshalling.PredefinedFromStringUnmarshallers._
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import hmda.dataBrowser.models.ActionTaken._
+import hmda.dataBrowser.models.AgeApplicant._
 import hmda.dataBrowser.models.ConstructionMethod._
 import hmda.dataBrowser.models.DwellingCategory._
 import hmda.dataBrowser.models.Ethnicity._
@@ -177,7 +178,7 @@ trait DataBrowserDirectives extends Settings {
         import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
         complete((BadRequest, "must provide years value parameter"))
 
-      case xs if xs.exists(year => (year < 2018) || (year > 2023)) => // TODO: Change this to 2017 when 2017 is released
+      case xs if xs.exists(year => (year < 2018) || (year > 2024)) => // TODO: Change this to 2017 when 2017 is released
         import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
         complete((BadRequest, s"must provide years in the range of 2018-2023, you have provided (${xs.mkString(", ")})"))
 
@@ -225,45 +226,64 @@ trait DataBrowserDirectives extends Settings {
       }
 
   private def extractActions: Directive1[Option[QueryField]] = {
-    val name   = "actions_taken"
-    val dbName = "action_taken_type"
-    parameters("actions_taken".as(CsvSeq[String]) ? Nil)
-      .map(_.toList)
-      .map(validateActionsTaken)
-      .collect {
+    parameters("actions_taken".as(CsvSeq[String]) ? Nil).flatMap { rawAction =>
+      val name   = "actions_taken"
+      val dbName = "action_taken_type"
+      validateActionsTaken(rawAction) match {
+        case Left(invalidActionsTaken) =>
+          import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+          complete(ToResponseMarshallable((BadRequest, InvalidActions(invalidActionsTaken))))
+
         case Right(actionsTaken) if actionsTaken.nonEmpty && actionsTaken.size == ActionTaken.values.size =>
-          Option(QueryField(name, actionsTaken.map(_.entryName), dbName, isAllSelected = true))
+          provide(Option(QueryField(name, actionsTaken.map(_.entryName), dbName, isAllSelected = true)))
 
         case Right(actionsTaken) if (actionsTaken.nonEmpty && actionsTaken.size != ActionTaken.values.size) =>
-          Option(QueryField(name, actionsTaken.map(_.entryName), dbName, isAllSelected = false))
+          provide(Option(QueryField(name, actionsTaken.map(_.entryName), dbName, isAllSelected = false)))
 
         case Right(_) =>
-          None
+          provide(None)
       }
+    }
   }
 
   private def extractAgeApplicant: Directive1[Option[QueryField]] = {
-    parameters("ageapplicant".as(CsvSeq[String]) ? Nil).flatMap {
-      case Nil => provide(None)
-      case xs =>
-        provide(Option(QueryField(name = "ageapplicant", xs.map(_.toString), dbName = "age_applicant", isAllSelected = false)))
+    parameters("ageapplicant".as(CsvSeq[String]) ? Nil).flatMap { rawAgeApplicant =>
+      val name   = "ageapplicant"
+      val dbName = "age_applicant"
+      validateAgeApplicant(rawAgeApplicant) match {
+        case Left(invalidAgeApplicant) =>
+          import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+          complete(ToResponseMarshallable((BadRequest, InvalidAgeApplicant(invalidAgeApplicant))))
+
+        case Right(ageApplicant) if ageApplicant.nonEmpty && ageApplicant.size == AgeApplicant.values.size =>
+          provide(Option(QueryField(name, ageApplicant.map(_.entryName), dbName, isAllSelected = true)))
+
+        case Right(ageApplicant) if ageApplicant.nonEmpty && ageApplicant.size != AgeApplicant.values.size =>
+          provide(Option(QueryField(name, ageApplicant.map(_.entryName), dbName, isAllSelected = false)))
+
+        case Right(_) =>
+          provide(None)
+      }
     }
   }
 
   private def extractEthnicities: Directive1[Option[QueryField]] = {
-    val name   = "ethnicities"
-    val dbName = "ethnicity_categorization"
-    parameters("ethnicities".as(CsvSeq[String]) ? Nil)
-      .map(validEthnicities)
-      .collect {
+    parameters("ethnicities".as(CsvSeq[String]) ? Nil).flatMap { rawEthnicities =>
+      val name   = "ethnicities"
+      val dbName = "ethnicity_categorization"
+      validateEthnicities(rawEthnicities) match {
+        case Left(invalidAgeApplicant) =>
+          import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+          complete(ToResponseMarshallable((BadRequest, InvalidAgeApplicant(invalidAgeApplicant))))
         case Right(ethnicities) if ethnicities.nonEmpty && ethnicities.size == Ethnicity.values.size =>
-          Option(QueryField(name, ethnicities.map(_.entryName), dbName, isAllSelected = true))
+          provide(Option(QueryField(name, ethnicities.map(_.entryName), dbName, isAllSelected = true)))
 
         case Right(ethnicities) if ethnicities.nonEmpty && ethnicities.size != Ethnicity.values.size =>
-          Option(QueryField(name, ethnicities.map(_.entryName), dbName, isAllSelected = false))
+          provide(Option(QueryField(name, ethnicities.map(_.entryName), dbName, isAllSelected = false)))
 
-        case Right(_) => None
+        case Right(_) => provide(None)
       }
+    }
   }
 
   private def extractTotalUnits: Directive1[Option[QueryField]] =

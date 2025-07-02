@@ -77,7 +77,7 @@ class LarFormatValidatorSpec extends PropSpec with ScalaCheckPropertyChecks with
 
   property("InvalidPreapproval") {
     val preapproval = badValue()
-    validateIntField(preapproval, InvalidPreapproval(preapproval)) mustBe Invalid(
+    validateIntFieldReturnString(preapproval, InvalidPreapproval(preapproval)) mustBe Invalid(
       NonEmptyList.of(InvalidPreapproval(preapproval))
     )
   }
@@ -123,7 +123,7 @@ class LarFormatValidatorSpec extends PropSpec with ScalaCheckPropertyChecks with
 
   property("InvalidAmount") {
     val invalidAmount = badValue()
-    validateDoubleField(invalidAmount, InvalidAmount(invalidAmount)) mustBe Invalid(
+    validateDoubleFieldReturnString(invalidAmount, InvalidAmount(invalidAmount)) mustBe Invalid(
       NonEmptyList.of(InvalidAmount(invalidAmount))
     )
   }
@@ -336,7 +336,7 @@ class LarFormatValidatorSpec extends PropSpec with ScalaCheckPropertyChecks with
   }
   property("InvalidTotalUnits") {
     val invalidTotalUnits = badValue()
-    validateIntField(invalidTotalUnits, InvalidTotalUnits(invalidTotalUnits)) mustBe Invalid(
+    validateIntFieldReturnString(invalidTotalUnits, InvalidTotalUnits(invalidTotalUnits)) mustBe Invalid(
       NonEmptyList.of(InvalidTotalUnits(invalidTotalUnits))
     )
   }

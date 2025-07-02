@@ -1,8 +1,8 @@
 package hmda.dataBrowser.services
 
 import akka.NotUsed
+import akka.actor.typed.ActorSystem
 import akka.http.scaladsl.model.ContentTypes
-import akka.stream.Materializer
 import akka.stream.alpakka.s3.S3Headers
 import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.{ Sink, Source }
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory
 
 // $COVERAGE-OFF$
 // All this does is use the Alpakka S3 APIs
-class S3FileService(implicit mat: Materializer) extends FileService with Settings {
+class S3FileService(implicit system: ActorSystem[Nothing]) extends FileService with Settings {
 
   private final val log = LoggerFactory.getLogger(getClass)
 

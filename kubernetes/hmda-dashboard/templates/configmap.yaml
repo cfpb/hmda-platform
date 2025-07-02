@@ -3,5 +3,6 @@ kind: ConfigMap
 metadata:
   name: dashboard-configmap
 data:
-  available-yearly: 2018,2019,2020,2021
-  available-quarterly: 2020-Q1,2020-Q2,2020-Q3,2021-Q1,2021-Q2,2021-Q3,2022-Q1,2022-Q2,2022-Q3
+  available-quarterly: 2020-Q1,2020-Q2,2020-Q3,2021-Q1,2021-Q2,2021-Q3,2022-Q1,2022-Q2,2022-Q3,2023-Q1,2023-Q2,2023-Q3,2024-Q1,2024-Q2,2024-Q3,2022-Q1,2025-Q1
+  available-yearly: 2018,2019,2020,2021,2022,2023,2024
+
