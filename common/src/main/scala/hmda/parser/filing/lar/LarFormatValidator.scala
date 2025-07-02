@@ -463,7 +463,7 @@ sealed trait LarFormatValidator extends LarParser {
                              NMLSRIdentifier: String
                            ): LarParserValidationResult[LarIdentifier] =
     (
-      validateIntField(id, InvalidLarId(id)),
+      validateIntFieldReturnInt(id, InvalidLarId(id)),
       validateStrNoSpace(LEI, InvalidLei(LEI)),
       validateStr(NMLSRIdentifier)
       ).mapN(LarIdentifier.apply)
@@ -591,7 +591,7 @@ sealed trait LarFormatValidator extends LarParser {
         manufacturedHomeLandPropertyInterest,
         InvalidManufacturedHomeLandPropertyInterest(manufacturedHomeLandPropertyInterest)
       ),
-      validateIntField(totalUnits, InvalidTotalUnits(totalUnits)),
+      validateIntFieldReturnInt(totalUnits, InvalidTotalUnits(totalUnits)),
       validateIntStrOrNAOrExemptField(multifamilyUnits, InvalidMultifamilyUnits(multifamilyUnits))
       ).mapN(Property.apply)
 
