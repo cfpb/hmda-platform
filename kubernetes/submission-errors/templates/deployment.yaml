@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "submission-errors.fullname" . }}
@@ -26,12 +26,18 @@ spec:
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
+        - name: cassandra-truststore
+          secret:
+            secretName: cassandra-truststore
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           volumeMounts:
             - name: tz-config
               mountPath: /etc/localtime
+            - name: cassandra-truststore
+              readOnly: true
+              mountPath: "/opt/cassandra_truststore"
           securityContext:
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
@@ -39,10 +45,6 @@ spec:
               drop:
                 - ALL             
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          resources:
-            limits:
-              cpu: "4"
-              memory: "2200Mi"
           env:
             - name: PG_HOST
               valueFrom:
@@ -79,11 +81,11 @@ spec:
                 configMapKeyRef:
                   name: cassandra-configmap
                   key: cassandra-hosts
-            - name: CASSANDRA_CLUSTER_USERNAME
+            - name: CASSANDRA_CLUSTER_DC
               valueFrom:
-                secretKeyRef:
-                  name: cassandra-credentials
-                  key: cassandra.username
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-cluster-dc
             - name: CASSANDRA_JOURNAL_KEYSPACE
               valueFrom:
                 configMapKeyRef:
@@ -94,11 +96,30 @@ spec:
                 configMapKeyRef:
                   name: cassandra-configmap
                   key: cassandra-keyspace-snapshot
+            - name: CASSANDRA_TARGET_PARTITION_SIZE
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-target-partition-size
+            - name: CASSANDRA_CLUSTER_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: cassandra-credentials
+                  key: cassandra.username
             - name: CASSANDRA_CLUSTER_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: cassandra-credentials
                   key: cassandra.password
+            - name: CASSANDRA_LOG_LEVEL
+              value: {{ .Values.logs.cassandra }}
+            - name: CASSANDRA_TRUSTSTORE_FILE
+              value: "/opt/cassandra_truststore/cassandra_truststore.jks"
+            - name: CASSANDRA_TRUSTSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cassandra-truststore-password
+                  key: password
             - name: KAFKA_CLUSTER_HOSTS
               valueFrom:
                 configMapKeyRef:
@@ -152,6 +173,12 @@ spec:
                 configMapKeyRef:
                   name: mlar-options-configmap
                   key: createDispositionKafkaRecord
+            - name: KAFKA_TOPIC
+              value: submission-errors
+            {{- if .Values.kafka.security }}
+            - name: KAFKA_SECURITY
+              value: {{.Values.kafka.security}}
+            {{- end }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}

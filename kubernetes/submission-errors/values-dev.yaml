@@ -16,6 +16,10 @@ kafka:
   modifiedLarGroup: submission-errors-group
   modifiedLarTopic: hmda-submission-errors
   signTopic: hmda-sign
+  security: ""
+
+logs:
+  cassandra: TRACE
 
 ingress:
   enabled: false
