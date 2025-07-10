@@ -24,7 +24,7 @@ trait LarParser {
 
   def validateDoubleFieldReturnString(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
     Try(value.toDouble) match {
-      case Success(_) => if ("[\\d.]".r.matches(value)) value.validNel else parserValidationError.invalidNel
+      case Success(_) => if ("[\\d.]+".r.matches(value)) value.validNel else parserValidationError.invalidNel
       case Failure(_) => parserValidationError.invalidNel
     }
 
