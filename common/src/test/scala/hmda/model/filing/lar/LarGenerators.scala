@@ -1,8 +1,8 @@
 package hmda.model.filing.lar
 
 import java.text.SimpleDateFormat
+import java.math.BigDecimal
 import java.util.Date
-
 import hmda.generators.CommonGenerators._
 import hmda.model.census.Census
 import hmda.model.filing.lar.enums.LarEnumGenerators._
@@ -326,7 +326,10 @@ object LarGenerators {
     valueOrDefault(g, "NA")
 
   private def valueOrDefault[A](g: Gen[A], value: String) = {
-    Gen.oneOf(g.map(_.toString), Gen.const(value))
+    Gen.oneOf(g.map {
+      case d: Double => BigDecimal.valueOf(d).toPlainString
+      case v => v.toString
+    }, Gen.const(value))
   }
 
 }
