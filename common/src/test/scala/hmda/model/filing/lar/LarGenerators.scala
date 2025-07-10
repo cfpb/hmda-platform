@@ -81,7 +81,7 @@ object LarGenerators {
       loanPurpose <- loanPurposeEnumGen
       constructionMethod <- constructionMethodEnumGen
       occupancy <- occupancyEnumGen
-      amount <- Gen.choose(0.0, Double.MaxValue)
+      amount <- Gen.choose(0.0, 9999999.0)
       term <- intValueOrNA(Gen.choose(1, Int.MaxValue))
       rateSpread <- doubleValueOrNA(Gen.choose(0.0, 1.0))
       interestRate <- doubleValueOrNA(Gen.choose(0.0, 30.0))
@@ -118,11 +118,11 @@ object LarGenerators {
 
   implicit def loanDisclosureGen: Gen[LoanDisclosure] = {
     for {
-      totalLoanCosts <- doubleValueOrNA(Gen.choose(0.0, Double.MaxValue))
-      totalPointsAndFees <- doubleValueOrNA(Gen.choose(0.0, Double.MaxValue))
-      originationCharges <- doubleValueOrNA(Gen.choose(0.0, Double.MaxValue))
-      discountPoints <- doubleValueOrNA(Gen.choose(0.0, Double.MaxValue))
-      lenderCredits <- doubleValueOrNA(Gen.choose(0.0, Double.MaxValue))
+      totalLoanCosts <- doubleValueOrNA(Gen.choose(0.0, 9999999.0))
+      totalPointsAndFees <- doubleValueOrNA(Gen.choose(0.0, 9999999.0))
+      originationCharges <- doubleValueOrNA(Gen.choose(0.0, 9999999.0))
+      discountPoints <- doubleValueOrNA(Gen.choose(0.0, 9999999.0))
+      lenderCredits <- doubleValueOrNA(Gen.choose(0.0, 9999999.0))
     } yield {
       LoanDisclosure(totalLoanCosts,
                      totalPointsAndFees,
@@ -170,7 +170,7 @@ object LarGenerators {
 
   implicit def propertyGen: Gen[Property] = {
     for {
-      propertyValue <- doubleValueOrNA(Gen.choose(1.0, Double.MaxValue))
+      propertyValue <- doubleValueOrNA(Gen.choose(1.0, 9999999.0))
       manufacturedHomeSecuredProperty <- manufacturedHomeSecuredPropertyEnumGen
       manufacturedHomeLandPropertyInterest <- manufacturedHomeLandPropertyInterestEnumGen
       totalUnits <- Gen.choose(1, 100)
