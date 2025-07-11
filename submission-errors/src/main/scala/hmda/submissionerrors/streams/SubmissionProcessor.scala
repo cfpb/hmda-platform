@@ -6,6 +6,7 @@ import akka.kafka.ConsumerMessage.{ CommittableMessage, CommittableOffset }
 import akka.kafka.scaladsl.Committer
 import akka.stream.scaladsl.{ Flow, Keep, Sink }
 import akka.{ Done, NotUsed }
+import com.typesafe.scalalogging.LazyLogging
 import hmda.model.filing.submission.Submission
 import hmda.submissionerrors.repositories.{ AddSubmissionError, SubmissionErrorRepository }
 import hmda.submissionerrors.streams.ErrorLines.ErrorResult
@@ -16,7 +17,7 @@ import monix.execution.Scheduler
 
 import scala.concurrent.Future
 // $COVERAGE-OFF$
-object SubmissionProcessor {
+object SubmissionProcessor extends LazyLogging {
   sealed trait IncomingData
   object IncomingData {
     final case class Parsed(lei: String, period: Period) extends IncomingData
@@ -117,6 +118,7 @@ object SubmissionProcessor {
   ): Task[Unit] =
     repo.submissionPresent(submission.id).flatMap {
       case false =>
+        logger.info("Start processing: {}", submission.id)
         for {
           errors <- ErrorInformation.obtainSubmissionErrors(submission.id)
           loanDataWithErrors <- ErrorLines.obtainLoanData(submission.id)(errors)
@@ -125,9 +127,11 @@ object SubmissionProcessor {
               AddSubmissionError(editName, loanDataRows.map(_.toString), fields)
           }
           _ <- repo.add(submission, dataToAdd)
+          _ = logger.info("Finished processing: {}", submission.id)
         } yield ()
 
       case true =>
+        logger.info("Data already exists for: {}", submission.id)
         Task.unit
     }
 }
