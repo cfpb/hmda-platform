@@ -23,6 +23,8 @@ jobs:
       - name: Build image of HMDA Platform only
         run: |
           sbt "project hmda-platform" dockerPublishLocalSkipTests
+        env:
+          AKKA_RESOLVER: ${{ secrets.AKKA_RESOLVER }}
 
       - name: Tag Docker image
         run: docker tag $(docker images --filter=reference="hmda/hmda-platform:latest" --format "{{.ID}}") ${{ env.REGISTRY }}:${{ github.ref_name }}
