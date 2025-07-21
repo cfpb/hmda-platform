@@ -5,6 +5,7 @@ on:
       service:
         required: true
         type: string
+    secrets: inherit
 jobs:
   test-service:
     runs-on: ubuntu-latest
