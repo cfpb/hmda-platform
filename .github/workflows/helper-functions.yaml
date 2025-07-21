@@ -15,7 +15,6 @@ jobs:
           - "9042:9042"
     env:
       HMDA_RUNTIME_MODE: "docker-compose"
-      AKKA_RESOLVER: ${{ secrets.AKKA_RESOLVER }}
 
     steps:
       - name: Checkout
@@ -39,6 +38,8 @@ jobs:
             fi
           done
         continue-on-error: true
+        env:
+          AKKA_RESOLVER: ${{ secrets.AKKA_RESOLVER }}
 
       - name: Check Test Results
         run: |
