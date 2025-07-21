@@ -197,6 +197,11 @@ For local development, supporting services need to be started first in docker:
     export CASSANDRA_CLUSTER_HOSTS=localhost
     export APP_PORT=2551
     ```
+1. With the new Akka dependencies no longer available from the public resolver, we need to use the authenticated URL retrievable from https://account.akka.io/token.
+   Once we get the url from that page, export it as an environment variable (or set it as a env var shell profile):
+   ```bash
+   export AKKA_RESOLVER={url from the akka token web page}
+   ```
 1. Start sbt and run the platform with the following commands:
     ```bash
     sbt
