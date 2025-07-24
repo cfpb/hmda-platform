@@ -12,19 +12,19 @@ trait LarParser {
 
   def validateIntFieldReturnString(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
     Try(value.toInt) match {
-      case Success(i) => value.validNel
-      case Failure(e) => parserValidationError.invalidNel
+      case Success(_) => value.validNel
+      case Failure(_) => parserValidationError.invalidNel
     }
 
   def validateIntFieldReturnInt(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[Int] =
     Try(value.toInt) match {
       case Success(i) => i.validNel
-      case Failure(e) => parserValidationError.invalidNel
+      case Failure(_) => parserValidationError.invalidNel
     }
 
   def validateDoubleFieldReturnString(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
     Try(value.toDouble) match {
-      case Success(i) => value.validNel
+      case Success(_) => if ("[\\d.]+".r.matches(value)) value.validNel else parserValidationError.invalidNel
       case Failure(_) => parserValidationError.invalidNel
     }
 
