@@ -38,6 +38,8 @@ jobs:
             fi
           done
         continue-on-error: true
+        env:
+          AKKA_RESOLVER: ${{ secrets.AKKA_RESOLVER }}
 
       - name: Check Test Results
         run: |
