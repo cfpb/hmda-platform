@@ -298,7 +298,8 @@ Q648|If Action Taken equals 1, 2, 3, 4, 5, 7, or 8, the first 20 characters of t
 Q649-1|If Credit Score of Applicant or Borrower does not equal 7777, 8888, or 1111, Credit Score should generally be between 300 and 900.|Credit Score of Applicant or Borrower;
 Q649-2|If Credit Score of Co-Applicant or Co-Borrower does not equal 7777, 8888, 9999, or 1111, Credit Score should generally be between 300 and 900.|Credit Score of Co-Applicant or Co-Borrower;
 Q650-1|The Interest Rate reported is greater than 0 but less than 0.5, which may indicate a misplaced decimal point.|Interest Rate
-Q650-2|The Interest Rate reported is greater than 20, which may indicate a misplaced decimal point.|Interest RateQ651|The CLTV reported is greater than 0 but less than 1, which may indicate a misplaced decimal point.|Combined Loan-to-Value Ratio
+Q650-2|The Interest Rate reported is greater than 20, which may indicate a misplaced decimal point.|Interest Rate
+Q651|The CLTV reported is greater than 0 but less than 1, which may indicate a misplaced decimal point.|Combined Loan-to-Value Ratio
 Q652|The DTI reported is greater than 0 but less than 1, which may indicate a misplaced decimal point.|Debt-to-Income Ratio
 Q653-1|If Action Taken equals 1, 2, or 8, the CLTV should generally be between 0 and 250.|Action Taken; Combined Loan-to-Value Ratio
 Q653-2|If Action Taken equals 3, 4, 5, 6, or 7, the CLTV should generally be between 0 and 1,000.|Action Taken; Combined Loan-to-Value Ratio
