@@ -24,8 +24,7 @@ trait LarParser {
 
   def validateDoubleFieldReturnString(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
     Try(BigDecimal(value)) match {
-      // added logic to reject scientific notation
-      case Success(i) => if ("[-\\d.]+".r.matches(value))  i.bigDecimal.toPlainString.validNel else parserValidationError.invalidNel
+      case Success(i) => i.bigDecimal.toPlainString.validNel
       case Failure(_) => parserValidationError.invalidNel
     }
   def validateNAOrExemptOrStringValue(str: String): Boolean = {
