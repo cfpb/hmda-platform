@@ -11,8 +11,8 @@ import scala.util.{Failure, Success, Try}
 trait LarParser {
 
   def validateIntFieldReturnString(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
-    Try(value.toInt) match {
-      case Success(_) => value.validNel
+    Try(BigInt(value)) match {
+      case Success(i) => i.toString.validNel
       case Failure(_) => parserValidationError.invalidNel
     }
 
@@ -23,11 +23,10 @@ trait LarParser {
     }
 
   def validateDoubleFieldReturnString(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
-    Try(value.toDouble) match {
-      case Success(_) => if ("[-\\d.]+".r.matches(value)) value.validNel else parserValidationError.invalidNel
+    Try(BigDecimal(value)) match {
+      case Success(i) => i.bigDecimal.toPlainString.validNel
       case Failure(_) => parserValidationError.invalidNel
     }
-
   def validateNAOrExemptOrStringValue(str: String): Boolean = {
     val naCode: String = "NA"
     val exemptCode: String = "Exempt"
@@ -115,7 +114,7 @@ trait LarParser {
       str.validNel
     else
       parserValidationError.invalidNel
-  
+
   def validateDateField(str: String, parserValidationError: ParserValidationError): LarParserValidationResult[Int] = {
     val dateFormatter = DateTimeFormatter.ofPattern("uuuuMMdd").withResolverStyle(ResolverStyle.STRICT)
     Try(dateFormatter.parse(str))  match {
