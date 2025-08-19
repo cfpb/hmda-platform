@@ -41,7 +41,7 @@ class InstitutionTsRepo(val config: DatabaseConfig[JdbcProfile])(implicit ec: Ex
 
   def fetchPastLarCountsForQuarterlies(year: Int, pastCount: Int): Future[Seq[QuarterlyInstitutionLarCounts]] = {
     for {
-      quarterlyFilers <- instRepo.getQuarterlyFilers(bankFilterList)
+      quarterlyFil ers <- instRepo.getQuarterlyFilers(bankFilterList)
       annualLarCountByLei <- getAnnualLarCountByLei(quarterlyFilers.map {
         case (lei, _, _) => lei
       }, year, pastCount)
