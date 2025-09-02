@@ -1,6 +1,3 @@
---
--- PostgreSQL database dump
---
 
 -- Dumped from database version 10.6
 -- Dumped by pg_dump version 10.5
