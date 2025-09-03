@@ -75,8 +75,8 @@ trait InstitutionComponent {
         .result
     )
 
-    def createSchema() = db.run(table.schema.create)
-    def dropSchema()   = db.run(table.schema.drop)
+    def createSchema() = db.run(table.schema.createIfNotExists)
+    def dropSchema()   = db.run(table.schema.dropIfExists)
   }
 
   val institutionConfig: Config = ConfigFactory.load().getConfig("hmda.institution")
