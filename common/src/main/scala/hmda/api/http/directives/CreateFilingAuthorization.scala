@@ -30,7 +30,7 @@ object CreateFilingAuthorization {
 
   def isInstitutionsYearAllowed(allowed: Boolean)(successful: Route): Route = extractMatchedPath { path =>
     if (allowed) successful
-    else complete((BadRequest, ErrorResponse(BadRequest.intValue, "The provided year is not available", path)))
+    else complete((BadRequest, ErrorResponse(BadRequest.intValue, "The provided year is not allowed via the institutions api service.", path)))
   }
 
 
