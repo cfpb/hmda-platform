@@ -27,4 +27,11 @@ object CreateFilingAuthorization {
     if (Filer.checkQuarterlyYear(rulesConfig)(year)) successful
     else complete((BadRequest, ErrorResponse(BadRequest.intValue, "The provided year is not available", path)))
   }
+
+  def isInstitutionsYearAllowed(allowed: Boolean)(successful: Route): Route = extractMatchedPath { path =>
+    if (allowed) successful
+    else complete((BadRequest, ErrorResponse(BadRequest.intValue, "The provided year is not available", path)))
+  }
+
+
 }
