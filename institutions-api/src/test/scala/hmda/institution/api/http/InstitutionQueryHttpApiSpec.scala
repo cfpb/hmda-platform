@@ -34,15 +34,15 @@ class InstitutionQueryHttpApiSpec extends WordSpec with MustMatchers with Before
   "Institution Query HTTP API" must {
     "search by LEI" in {
       Get("/institutions/XXX/year/2018") ~> institutionPublicRoutes ~> check {
-        status mustBe StatusCodes.BadRequest
+        status mustBe StatusCodes.NotFound
       }
 
       Get("/institutions/XXX/year/2019") ~> institutionPublicRoutes ~> check {
-        status mustBe StatusCodes.BadRequest
+        status mustBe StatusCodes.NotFound
       }
 
       Get("/institutions/XXX/year/2020") ~> institutionPublicRoutes ~> check {
-        status mustBe StatusCodes.BadRequest
+        status mustBe StatusCodes.NotFound
       }
 
       Get(s"/institutions/AAA/year/2018") ~> institutionPublicRoutes ~> check {
