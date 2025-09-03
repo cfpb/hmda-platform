@@ -46,9 +46,7 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
   private val institutionByIdPath =
     path("institutions" / Segment / "year" / IntNumber) { (lei, year) =>
       (extractUri & get) { uri =>
-
-
-        isInstitutionsYearAllowed(yearsAvailable.contains(year)) {
+        isQuarterlyYearAllowed(year) {
 
           val defaultRepo = institutionRepositories(institutionConfig.getString("defaultYear"))
           val fInstitution = institutionRepositories.getOrElse(year.toString, defaultRepo).findById(lei)
@@ -74,7 +72,7 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
   private val institutionByDomainPath =
     path("institutions" / "year" / IntNumber) { year =>
       (extractUri & get) { uri =>
-        isInstitutionsYearAllowed(yearsAvailable.contains(year)) {
+        isFilingAllowed(year, None) {
           parameter('domain.as[String]) { domain =>
             val f = findByEmail(domain, year.toString)
             completeInstitutionsFuture(f, uri)
