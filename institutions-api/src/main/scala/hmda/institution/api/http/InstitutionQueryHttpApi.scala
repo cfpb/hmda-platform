@@ -74,7 +74,7 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
   private val institutionByDomainPath =
     path("institutions" / "year" / IntNumber) { year =>
       (extractUri & get) { uri =>
-        isFilingAllowed(year, None) {
+        isInstitutionsYearAllowed(yearsAvailable.contains(year)) {
           parameter('domain.as[String]) { domain =>
             val f = findByEmail(domain, year.toString)
             completeInstitutionsFuture(f, uri)
