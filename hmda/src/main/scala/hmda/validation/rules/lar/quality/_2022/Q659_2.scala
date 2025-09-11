@@ -10,7 +10,7 @@ object Q659_2 extends EditCheck[LoanApplicationRegister] {
   override def parent: String = "Q659"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    val invalidExemptionRegex = "^9{3}(9{2})?(\\.0)?$"
+    val invalidExemptionRegex = "^9{3}(9{2})?(\\.0)?(\\.00)?$"
     val fieldsToCheck = List(
       lar.applicant.age.toString,
       lar.coApplicant.age.toString,
