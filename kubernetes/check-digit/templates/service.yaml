@@ -18,55 +18,90 @@ spec:
   selector:
     app: {{ template "check-digit.name" . }}
     release: {{ .Release.Name }}
-
-
 ---
-apiVersion: v1
-kind: Service
+apiVersion: getambassador.io/v2
+kind: Mapping
 metadata:
   labels:
-    service: {{ include "check-digit.fullname" . }}-ambassador
-  name: {{ include "check-digit.fullname" . }}-ambassador
-  annotations:
-    getambassador.io/config: |
-      ---
-      apiVersion: ambassador/v2
-      kind: Mapping
-      name: check_digit_mapping
-      {{- if .Values.ambassador_id }}
-      ambassador_id: {{ .Values.ambassador_id }}
-      {{- end}}
-      {{- if .Values.ambassador_host }}
-      host: {{ .Values.ambassador_host }}
-      {{- end}}
-      prefix: /v2/public/uli/
-      rewrite: /uli/
-      service: {{ template "check-digit.fullname" .}}:{{ .Values.service.port }}
-      timeout_ms: 60000
-      add_response_headers:
-        referrer-policy: 
-          value: strict-origin
-          append: False
-        content-security-policy: 
-          append: False
-          value: "default-src 'self'; script-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; object-src 'none'; frame-src 'self'; connect-src 'self'"
-        permissions-policy:
-          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
-        x-frame-Options: 
-          value : "SAMEORIGIN"
-        x-content-type-options: 
-          value : nosniff
-        strict-transport-security:
-          value: "max-age=31536000; includeSubDomains; preload"
-        x-xss-protection:
-          value: "1; mode=block"
-      remove_response_headers:
-      - x-envoy-upstream-service-time
-      - x-forwarded-host
-      - x-host
-      - x-forwarded-server       
+    service: {{ include "check-digit.fullname" . }}-mapping
+  name: {{ include "check-digit.fullname" . }}-mapping
 spec:
-  clusterIP: None
+  {{- if .Values.ambassador_id }}
+  ambassador_id: {{ .Values.ambassador_id }}
+  {{- end}}
+  prefix: /v2/public/uli/
+  rewrite: /uli/
+  service: {{ template "check-digit.fullname" .}}:{{ .Values.service.port }}
+  timeout_ms: 60000
+  add_response_headers:
+    referrer-policy:
+      value: strict-origin
+      append: False
+    content-security-policy:
+      append: False
+      value: "default-src 'self'; script-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; object-src 'none'; frame-src 'self'; connect-src 'self'"
+    permissions-policy:
+      value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
+    x-frame-Options:
+      value : "SAMEORIGIN"
+    x-content-type-options:
+      value : nosniff
+    strict-transport-security:
+      value: "max-age=31536000; includeSubDomains; preload"
+    x-xss-protection:
+      value: "1; mode=block"
+  remove_response_headers:
+    - x-envoy-upstream-service-time
+    - x-forwarded-host
+    - x-host
+    - x-forwarded-server
+#---
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  labels:
+#    service: {{ include "check-digit.fullname" . }}-ambassador
+#  name: {{ include "check-digit.fullname" . }}-ambassador
+#  annotations:
+#    getambassador.io/config: |
+#      ---
+#      apiVersion: ambassador/v2
+#      kind: Mapping
+#      name: check_digit_mapping
+#      {{- if .Values.ambassador_id }}
+#      ambassador_id: {{ .Values.ambassador_id }}
+#      {{- end}}
+#      {{- if .Values.ambassador_host }}
+#      host: {{ .Values.ambassador_host }}
+#      {{- end}}
+#      prefix: /v2/public/uli/
+#      rewrite: /uli/
+#      service: {{ template "check-digit.fullname" .}}:{{ .Values.service.port }}
+#      timeout_ms: 60000
+#      add_response_headers:
+#        referrer-policy:
+#          value: strict-origin
+#          append: False
+#        content-security-policy:
+#          append: False
+#          value: "default-src 'self'; script-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; object-src 'none'; frame-src 'self'; connect-src 'self'"
+#        permissions-policy:
+#          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
+#        x-frame-Options:
+#          value : "SAMEORIGIN"
+#        x-content-type-options:
+#          value : nosniff
+#        strict-transport-security:
+#          value: "max-age=31536000; includeSubDomains; preload"
+#        x-xss-protection:
+#          value: "1; mode=block"
+#      remove_response_headers:
+#      - x-envoy-upstream-service-time
+#      - x-forwarded-host
+#      - x-host
+#      - x-forwarded-server
+#spec:
+#  clusterIP: None
 ---
 apiVersion: v1
 kind: Service
