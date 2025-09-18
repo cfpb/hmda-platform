@@ -56,269 +56,460 @@ spec:
     port: {{ .Values.websockets.port }}
 
 ---
-apiVersion: v1
-kind: Service
+apiVersion: getambassador.io/v2
+kind: Mapping
 metadata:
-  labels:
-    service: ambassador-hmda-admin
-  name: ambassador-hmda-admin
-  annotations:
-    getambassador.io/config: |
-      apiVersion: ambassador/v2
-      kind: Mapping
-      name: hmda_admin_mapping
-      {{- if .Values.ambassador_id }}
-      ambassador_id: {{ .Values.ambassador_id }}
-      {{- end}}
-      {{- if .Values.ambassador_host }}
-      host: {{ .Values.ambassador_host }}
-      {{- end}}
-      timeout_ms: 0
-      prefix: /v2/admin/
-      service: {{ .Values.service.name }}:{{ .Values.admin.port }}
+  name: hmda-admin-mapping
 spec:
-  clusterIP: None  
+  ambassador_id: ambassador-default-1
+  timeout_ms: 0
+  prefix: /v2/admin/
+#  rewrite: /v2/admin/
+  service: {{ .Values.service.name }}:{{ .Values.admin.port }}
+
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  labels:
+#    service: ambassador-hmda-admin
+#  name: ambassador-hmda-admin
+#  annotations:
+#    getambassador.io/config: |
+#      apiVersion: ambassador/v2
+#      kind: Mapping
+#      name: hmda_admin_mapping
+#      {{- if .Values.ambassador_id }}
+#      ambassador_id: {{ .Values.ambassador_id }}
+#      {{- end}}
+#      {{- if .Values.ambassador_host }}
+#      host: {{ .Values.ambassador_host }}
+#      {{- end}}
+#      timeout_ms: 0
+#      prefix: /v2/admin/
+#      service: {{ .Values.service.name }}:{{ .Values.admin.port }}
+#spec:
+#  clusterIP: None
 ---
-apiVersion: v1
-kind: Service
+apiVersion: getambassador.io/v2
+kind: Mapping
 metadata:
-  labels:
-    service: ambassador-hmda-filing
-  name: ambassador-hmda-filing
-  annotations:
-    getambassador.io/config: |
-      apiVersion: ambassador/v2
-      kind: Mapping
-      name: hmda_filing_mapping
-      {{- if .Values.ambassador_id }}
-      ambassador_id: {{ .Values.ambassador_id }}
-      {{- end}}
-      {{- if .Values.ambassador_host }}
-      host: {{ .Values.ambassador_host }}
-      {{- end}}
-      prefix: /v2/filing/
-      service: {{ .Values.service.name }}:{{ .Values.filing.port }}
-      timeout_ms: 0
-      add_response_headers:
-        referrer-policy:
-          value: strict-origin
-          append: False
-        content-security-policy:
-          append: False
-          value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec-api.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
-        permissions-policy:
-          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
-        Strict-Transport-Security: 
-          append: False
-          value: "max-age=31536000; includeSubDomains; preload"
-      remove_response_headers:
-      - x-envoy-upstream-service-time
-      - Access-Control-Allow-Origin
-      - x-forwarded-host
-      - x-host
-      - x-forwarded-server
+  name: hmda-filing-mapping
 spec:
-  clusterIP: None
+  ambassador_id: ambassador-default-1
+  timeout_ms: 0
+  prefix: /v2/filing/
+#  rewrite: /v2/filing/
+  service: {{ .Values.service.name }}:{{ .Values.filing.port }}
+  add_response_headers:
+    referrer-policy:
+      value: strict-origin
+      append: False
+    content-security-policy:
+      append: False
+      value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec-api.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
+    permissions-policy:
+      value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
+    Strict-Transport-Security:
+      append: False
+      value: "max-age=31536000; includeSubDomains; preload"
+  remove_response_headers:
+  - x-envoy-upstream-service-time
+  - Access-Control-Allow-Origin
+  - x-forwarded-host
+  - x-host
+  - x-forwarded-server
+
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  labels:
+#    service: ambassador-hmda-filing
+#  name: ambassador-hmda-filing
+#  annotations:
+#    getambassador.io/config: |
+#      apiVersion: ambassador/v2
+#      kind: Mapping
+#      name: hmda_filing_mapping
+#      {{- if .Values.ambassador_id }}
+#      ambassador_id: {{ .Values.ambassador_id }}
+#      {{- end}}
+#      {{- if .Values.ambassador_host }}
+#      host: {{ .Values.ambassador_host }}
+#      {{- end}}
+#      prefix: /v2/filing/
+#      service: {{ .Values.service.name }}:{{ .Values.filing.port }}
+#      timeout_ms: 0
+#      add_response_headers:
+#        referrer-policy:
+#          value: strict-origin
+#          append: False
+#        content-security-policy:
+#          append: False
+#          value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec-api.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
+#        permissions-policy:
+#          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
+#        Strict-Transport-Security:
+#          append: False
+#          value: "max-age=31536000; includeSubDomains; preload"
+#      remove_response_headers:
+#      - x-envoy-upstream-service-time
+#      - Access-Control-Allow-Origin
+#      - x-forwarded-host
+#      - x-host
+#      - x-forwarded-server
+#spec:
+#  clusterIP: None
 ---
-apiVersion: v1
-kind: Service
+apiVersion: getambassador.io/v2
+kind: Mapping
 metadata:
-  labels:
-    service: ambassador-hmda-filing-websocket
-  name: ambassador-hmda-filing-websocket
-  annotations:
-    getambassador.io/config: |
-      apiVersion: ambassador/v2
-      kind: Mapping
-      name: hmda_filing_mapping_websocket
-      {{- if .Values.ambassador_id }}
-      ambassador_id: {{ .Values.ambassador_id }}
-      {{- end}}
-      {{- if .Values.ambassador_host }}
-      host: {{ .Values.ambassador_host }}
-      {{- end}}
-      prefix: '/v2/filing/institutions/([a-zA-Z0-9]+)/filings/(\d{4})/submissions/(\d+)/progress'
-      prefix_regex: true
-      regex_rewrite:
-         pattern: '/v2/filing/institutions/([a-zA-Z0-9]+)/filings/(\d{4})/submissions/(\d+)/progress'
-         substitution : '/institutions/\1/filings/\2/submissions/\3/progress'
-      service: {{ .Values.service.name }}:{{ .Values.filing.port }}
-      timeout_ms: 0
-      allow_upgrade:
-        - websocket      
-      add_response_headers:
-        referrer-policy:
-          value: strict-origin
-          append: False
-        content-security-policy:
-          append: False
-          value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec-api.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
-        permissions-policy:
-          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
-        Strict-Transport-Security: 
-          append: False
-          value: "max-age=31536000; includeSubDomains; preload"
-      remove_response_headers:
-      - x-envoy-upstream-service-time
-      - Access-Control-Allow-Origin
-      - x-forwarded-host
-      - x-host
-      - x-forwarded-server
+  name: hmda-filing-mapping-websocket
 spec:
-  clusterIP: None  
+  ambassador_id: ambassador-default-1
+  timeout_ms: 0
+  prefix: '/v2/filing/institutions/([a-zA-Z0-9]+)/filings/(\d{4})/submissions/(\d+)/progress'
+  prefix_regex: true
+  regex_rewrite:
+     pattern: '/v2/filing/institutions/([a-zA-Z0-9]+)/filings/(\d{4})/submissions/(\d+)/progress'
+     substitution : '/institutions/\1/filings/\2/submissions/\3/progress'
+  service: {{ .Values.service.name }}:{{ .Values.filing.port }}
+  allow_upgrade:
+    - websocket
+  add_response_headers:
+    referrer-policy:
+      value: strict-origin
+      append: False
+    content-security-policy:
+      append: False
+      value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec-api.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
+    permissions-policy:
+      value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
+    Strict-Transport-Security:
+      append: False
+      value: "max-age=31536000; includeSubDomains; preload"
+  remove_response_headers:
+  - x-envoy-upstream-service-time
+  - Access-Control-Allow-Origin
+  - x-forwarded-host
+  - x-host
+  - x-forwarded-server
+
+
+
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  labels:
+#    service: ambassador-hmda-filing-websocket
+#  name: ambassador-hmda-filing-websocket
+#  annotations:
+#    getambassador.io/config: |
+#      apiVersion: ambassador/v2
+#      kind: Mapping
+#      name: hmda_filing_mapping_websocket
+#      {{- if .Values.ambassador_id }}
+#      ambassador_id: {{ .Values.ambassador_id }}
+#      {{- end}}
+#      {{- if .Values.ambassador_host }}
+#      host: {{ .Values.ambassador_host }}
+#      {{- end}}
+#      prefix: '/v2/filing/institutions/([a-zA-Z0-9]+)/filings/(\d{4})/submissions/(\d+)/progress'
+#      prefix_regex: true
+#      regex_rewrite:
+#         pattern: '/v2/filing/institutions/([a-zA-Z0-9]+)/filings/(\d{4})/submissions/(\d+)/progress'
+#         substitution : '/institutions/\1/filings/\2/submissions/\3/progress'
+#      service: {{ .Values.service.name }}:{{ .Values.filing.port }}
+#      timeout_ms: 0
+#      allow_upgrade:
+#        - websocket
+#      add_response_headers:
+#        referrer-policy:
+#          value: strict-origin
+#          append: False
+#        content-security-policy:
+#          append: False
+#          value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec-api.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
+#        permissions-policy:
+#          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
+#        Strict-Transport-Security:
+#          append: False
+#          value: "max-age=31536000; includeSubDomains; preload"
+#      remove_response_headers:
+#      - x-envoy-upstream-service-time
+#      - Access-Control-Allow-Origin
+#      - x-forwarded-host
+#      - x-host
+#      - x-forwarded-server
+#spec:
+#  clusterIP: None
 ---
-apiVersion: v1
-kind: Service
+apiVersion: getambassador.io/v2
+kind: Mapping
 metadata:
-  labels:
-    service: ambassador-hmda-filing-qtr-websocket
-  name: ambassador-hmda-filing-qtr-websocket
-  annotations:
-    getambassador.io/config: |
-      apiVersion: ambassador/v2
-      kind: Mapping
-      name: hmda_filing_mapping__qtr_websocket
-      {{- if .Values.ambassador_id }}
-      ambassador_id: {{ .Values.ambassador_id }}
-      {{- end}}
-      {{- if .Values.ambassador_host }}
-      host: {{ .Values.ambassador_host }}
-      {{- end}}
-      prefix: '/v2/filing/institutions/([a-zA-Z0-9]+)/filings/(\d{4})/quarter/Q([1-3])/submissions/(\d+)/progress'
-      prefix_regex: true
-      regex_rewrite:
-         pattern: '/v2/filing/institutions/([a-zA-Z0-9]+)/filings/(\d{4})/quarter/Q([1-3])/submissions/(\d+)/progress'
-         substitution : '/institutions/\1/filings/\2/quarter/Q\3/submissions/\4/progress' 
-      service: {{ .Values.service.name }}:{{ .Values.filing.port }}
-      timeout_ms: 0
-      allow_upgrade:
-        - websocket
-      add_response_headers:
-        referrer-policy:
-          value: strict-origin
-          append: False
-        content-security-policy:
-          append: False
-          value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec-api.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
-        permissions-policy:
-          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
-        Strict-Transport-Security: 
-          append: False
-          value: "max-age=31536000; includeSubDomains; preload"
-      remove_response_headers:
-      - x-envoy-upstream-service-time
-      - Access-Control-Allow-Origin
-      - x-forwarded-host
-      - x-host
-      - x-forwarded-server
+  name: hmda-filing-mapping-qtr-websocket
 spec:
-  clusterIP: None  
+  ambassador_id: ambassador-default-1
+  timeout_ms: 0
+  prefix: '/v2/filing/institutions/([a-zA-Z0-9]+)/filings/(\d{4})/quarter/Q([1-3])/submissions/(\d+)/progress'
+  prefix_regex: true
+  regex_rewrite:
+     pattern: '/v2/filing/institutions/([a-zA-Z0-9]+)/filings/(\d{4})/quarter/Q([1-3])/submissions/(\d+)/progress'
+     substitution : '/institutions/\1/filings/\2/quarter/Q\3/submissions/\4/progress'
+  service: {{ .Values.service.name }}:{{ .Values.filing.port }}
+  allow_upgrade:
+    - websocket
+  add_response_headers:
+    referrer-policy:
+      value: strict-origin
+      append: False
+    content-security-policy:
+      append: False
+      value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec-api.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
+    permissions-policy:
+      value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
+    Strict-Transport-Security:
+      append: False
+      value: "max-age=31536000; includeSubDomains; preload"
+  remove_response_headers:
+  - x-envoy-upstream-service-time
+  - Access-Control-Allow-Origin
+  - x-forwarded-host
+  - x-host
+  - x-forwarded-server
+
+
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  labels:
+#    service: ambassador-hmda-filing-qtr-websocket
+#  name: ambassador-hmda-filing-qtr-websocket
+#  annotations:
+#    getambassador.io/config: |
+#      apiVersion: ambassador/v2
+#      kind: Mapping
+#      name: hmda_filing_mapping__qtr_websocket
+#      {{- if .Values.ambassador_id }}
+#      ambassador_id: {{ .Values.ambassador_id }}
+#      {{- end}}
+#      {{- if .Values.ambassador_host }}
+#      host: {{ .Values.ambassador_host }}
+#      {{- end}}
+#      prefix: '/v2/filing/institutions/([a-zA-Z0-9]+)/filings/(\d{4})/quarter/Q([1-3])/submissions/(\d+)/progress'
+#      prefix_regex: true
+#      regex_rewrite:
+#         pattern: '/v2/filing/institutions/([a-zA-Z0-9]+)/filings/(\d{4})/quarter/Q([1-3])/submissions/(\d+)/progress'
+#         substitution : '/institutions/\1/filings/\2/quarter/Q\3/submissions/\4/progress'
+#      service: {{ .Values.service.name }}:{{ .Values.filing.port }}
+#      timeout_ms: 0
+#      allow_upgrade:
+#        - websocket
+#      add_response_headers:
+#        referrer-policy:
+#          value: strict-origin
+#          append: False
+#        content-security-policy:
+#          append: False
+#          value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec-api.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
+#        permissions-policy:
+#          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
+#        Strict-Transport-Security:
+#          append: False
+#          value: "max-age=31536000; includeSubDomains; preload"
+#      remove_response_headers:
+#      - x-envoy-upstream-service-time
+#      - Access-Control-Allow-Origin
+#      - x-forwarded-host
+#      - x-host
+#      - x-forwarded-server
+#spec:
+#  clusterIP: None
 ---
-apiVersion: v1
-kind: Service
+apiVersion: getambassador.io/v2
+kind: Mapping
 metadata:
-  labels:
-    service: ambassador-hmda-public
-  name: ambassador-hmda-public
-  annotations:
-    getambassador.io/config: |
-      apiVersion: ambassador/v2
-      kind: Mapping
-      name: hmda_public_mapping
-      {{- if .Values.ambassador_id }}
-      ambassador_id: {{ .Values.ambassador_id }}
-      {{- end}}
-      {{- if .Values.ambassador_host }}
-      host: {{ .Values.ambassador_host }}
-      {{- end}}    
-      prefix: /v2/public/
-      service: {{ .Values.service.name }}:{{ .Values.public.port }}
-      add_response_headers:
-        referrer-policy:
-          value: strict-origin
-          append: False
-        content-security-policy:
-          append: False
-          value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec-api.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
-        permissions-policy:
-          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
-        Strict-Transport-Security: 
-          append: False
-          value: "max-age=31536000; includeSubDomains; preload"
-      remove_response_headers:
-      - x-envoy-upstream-service-time
-      - Access-Control-Allow-Origin
-      - x-forwarded-host
-      - x-host
-      - x-forwarded-server
+  name: hmda-public-mapping
 spec:
-  clusterIP: None  
+  ambassador_id: ambassador-default-1
+  timeout_ms: 0
+  prefix: /v2/public/
+#  rewrite: /v2/public/
+  service: {{ .Values.service.name }}:{{ .Values.public.port }}
+  add_response_headers:
+    referrer-policy:
+      value: strict-origin
+      append: False
+    content-security-policy:
+      append: False
+      value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec-api.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
+    permissions-policy:
+      value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
+    Strict-Transport-Security:
+      append: False
+      value: "max-age=31536000; includeSubDomains; preload"
+  remove_response_headers:
+  - x-envoy-upstream-service-time
+  - Access-Control-Allow-Origin
+  - x-forwarded-host
+  - x-host
+  - x-forwarded-server
+
+
+
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  labels:
+#    service: ambassador-hmda-public
+#  name: ambassador-hmda-public
+#  annotations:
+#    getambassador.io/config: |
+#      apiVersion: ambassador/v2
+#      kind: Mapping
+#      name: hmda_public_mapping
+#      {{- if .Values.ambassador_id }}
+#      ambassador_id: {{ .Values.ambassador_id }}
+#      {{- end}}
+#      {{- if .Values.ambassador_host }}
+#      host: {{ .Values.ambassador_host }}
+#      {{- end}}
+#      prefix: /v2/public/
+#      service: {{ .Values.service.name }}:{{ .Values.public.port }}
+#      add_response_headers:
+#        referrer-policy:
+#          value: strict-origin
+#          append: False
+#        content-security-policy:
+#          append: False
+#          value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec-api.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
+#        permissions-policy:
+#          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
+#        Strict-Transport-Security:
+#          append: False
+#          value: "max-age=31536000; includeSubDomains; preload"
+#      remove_response_headers:
+#      - x-envoy-upstream-service-time
+#      - Access-Control-Allow-Origin
+#      - x-forwarded-host
+#      - x-host
+#      - x-forwarded-server
+#spec:
+#  clusterIP: None
 ---
-apiVersion: v1
-kind: Service
+apiVersion: getambassador.io/v2
+kind: Mapping
 metadata:
-  labels:
-    service: ambassador-hmda-cluster
-  name: ambassador-hmda-cluster
-  annotations:
-    getambassador.io/config: |
-      apiVersion: ambassador/v2
-      kind: Mapping
-      name: hmda_cluster_mapping
-      {{- if .Values.ambassador_id }}
-      ambassador_id: {{ .Values.ambassador_id }}
-      {{- end}}
-      {{- if .Values.ambassador_host }}
-      host: {{ .Values.ambassador_host }}
-      {{- end}}
-      prefix: /v2/cluster/
-      rewrite: /cluster/members
-      service: {{ .Values.service.name }}:{{ .Values.cluster.port }}
+  name: hmda-cluster-mapping
 spec:
-  clusterIP: None  
+  ambassador_id: ambassador-default-1
+  timeout_ms: 0
+  prefix: /v2/cluster/
+  rewrite: /cluster/members
+  service: {{ .Values.service.name }}:{{ .Values.cluster.port }}
+
+
+
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  labels:
+#    service: ambassador-hmda-cluster
+#  name: ambassador-hmda-cluster
+#  annotations:
+#    getambassador.io/config: |
+#      apiVersion: ambassador/v2
+#      kind: Mapping
+#      name: hmda_cluster_mapping
+#      {{- if .Values.ambassador_id }}
+#      ambassador_id: {{ .Values.ambassador_id }}
+#      {{- end}}
+#      {{- if .Values.ambassador_host }}
+#      host: {{ .Values.ambassador_host }}
+#      {{- end}}
+#      prefix: /v2/cluster/
+#      rewrite: /cluster/members
+#      service: {{ .Values.service.name }}:{{ .Values.cluster.port }}
+#spec:
+#  clusterIP: None
 ---
-apiVersion: v1
-kind: Service
+apiVersion: getambassador.io/v2
+kind: Mapping
 metadata:
-  labels:
-    service: ambassador-hmda-ws
-  name: ambassador-hmda-ws
-  annotations:
-    getambassador.io/config: |
-      apiVersion: ambassador/v2
-      kind: Mapping
-      name: hmda_ws_mapping
-      {{- if .Values.ambassador_id }}
-      ambassador_id: {{ .Values.ambassador_id }}
-      {{- end}}
-      {{- if .Values.ambassador_host }}
-      host:  {{ .Values.ambassador_host }}
-      {{- end}}
-      prefix: /v2/ws/status/
-      timeout_ms: 380000
-      retry_policy:
-        num_retries: 10
-        retry_on: 5xx
-      service: {{ .Values.service.name }}:{{ .Values.websockets.port }}
-      allow_upgrade:
-       - websocket
-      add_response_headers:
-        referrer-policy:
-          value: strict-origin
-          append: False
-        content-security-policy:
-          append: False
-          value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec-api.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
-        permissions-policy:
-          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
-        Strict-Transport-Security: 
-          append: False
-          value: "max-age=31536000; includeSubDomains; preload"
-      remove_response_headers:
-      - x-envoy-upstream-service-time
-      - Access-Control-Allow-Origin
-      - x-forwarded-host
-      - x-host
-      - x-forwarded-server
+  name: hmda-ws-mapping
 spec:
-  clusterIP: None
+  ambassador_id: ambassador-default-1
+  prefix: /v2/ws/status/
+#  rewrite: /v2/ws/status/
+  timeout_ms: 380000
+  retry_policy:
+    num_retries: 10
+    retry_on: 5xx
+  service: {{ .Values.service.name }}:{{ .Values.websockets.port }}
+  allow_upgrade:
+   - websocket
+  add_response_headers:
+    referrer-policy:
+      value: strict-origin
+      append: False
+    content-security-policy:
+      append: False
+      value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec-api.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
+    permissions-policy:
+      value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
+    Strict-Transport-Security:
+      append: False
+      value: "max-age=31536000; includeSubDomains; preload"
+  remove_response_headers:
+  - x-envoy-upstream-service-time
+  - Access-Control-Allow-Origin
+  - x-forwarded-host
+  - x-host
+  - x-forwarded-server
+
+
+
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  labels:
+#    service: ambassador-hmda-ws
+#  name: ambassador-hmda-ws
+#  annotations:
+#    getambassador.io/config: |
+#      apiVersion: ambassador/v2
+#      kind: Mapping
+#      name: hmda_ws_mapping
+#      {{- if .Values.ambassador_id }}
+#      ambassador_id: {{ .Values.ambassador_id }}
+#      {{- end}}
+#      {{- if .Values.ambassador_host }}
+#      host:  {{ .Values.ambassador_host }}
+#      {{- end}}
+#      prefix: /v2/ws/status/
+#      timeout_ms: 380000
+#      retry_policy:
+#        num_retries: 10
+#        retry_on: 5xx
+#      service: {{ .Values.service.name }}:{{ .Values.websockets.port }}
+#      allow_upgrade:
+#       - websocket
+#      add_response_headers:
+#        referrer-policy:
+#          value: strict-origin
+#          append: False
+#        content-security-policy:
+#          append: False
+#          value: "default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob: data: https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://*.cfpb.gov https://www.consumerfinance.gov; img-src 'self' blob: data: https://www.google-analytics.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; frame-src 'self' https://www.youtube.com/ https://ffiec.cfpb.gov/; connect-src 'self' https://*.cfpb.gov https://www.consumerfinance.gov https://raw.githubusercontent.com https://ffiec-api.cfpb.gov https://ffiec.cfpb.gov https://*.mapbox.com https://www.google-analytics.com https://s3.amazonaws.com"
+#        permissions-policy:
+#          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
+#        Strict-Transport-Security:
+#          append: False
+#          value: "max-age=31536000; includeSubDomains; preload"
+#      remove_response_headers:
+#      - x-envoy-upstream-service-time
+#      - Access-Control-Allow-Origin
+#      - x-forwarded-host
+#      - x-host
+#      - x-forwarded-server
+#spec:
+#  clusterIP: None

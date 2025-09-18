@@ -18,49 +18,36 @@ spec:
     release: {{ .Release.Name }}
 
 ---
-apiVersion: v1
-kind: Service
+apiVersion: getambassador.io/v2
+kind: Mapping
 metadata:
-  labels:
-    service: institutions-api-ambassador
-  name: institutions-api-ambassador
-  annotations:
-    getambassador.io/config: |
-      apiVersion: ambassador/v2
-      kind: Mapping
-      name: institution_api_mapping
-      {{- if .Values.ambassador_id }}
-      ambassador_id: {{ .Values.ambassador_id }}
-      {{- end}}
-      {{- if .Values.ambassador_host }}
-      host: {{ .Values.ambassador_host }}
-      {{- end}}
-      method: GET
-      prefix: /v2/public/institutions
-      rewrite: /institutions
-      service: {{ template "institutions-api.fullname" .}}:{{ .Values.service.port }}
-      add_response_headers:
-        referrer-policy: 
-          value: strict-origin
-          append: False
-        content-security-policy: 
-          append: False
-          value: "default-src 'self'; script-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; object-src 'none'; frame-src 'self'; connect-src 'self'"
-        permissions-policy:
-          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
-        x-frame-Options: 
-          value : "SAMEORIGIN"
-        x-content-type-options: 
-          value : nosniff
-        strict-transport-security:
-          value: "max-age=31536000; includeSubDomains; preload"
-        x-xss-protection:
-          value: "1; mode=block"
-      remove_response_headers:
-      - Access-Control-Allow-Origin
-      - x-envoy-upstream-service-time
-      - x-forwarded-host
-      - x-host
-      - x-forwarded-server      
+  name: institution-api-mapping
 spec:
-  clusterIP: None
+  ambassador_id: ambassador-default-1
+  timeout_ms: 0
+  prefix: /v2/public/institutions
+  rewrite: /institutions
+  service: {{ template "institutions-api.fullname" .}}:{{ .Values.service.port }}
+  add_response_headers:
+    referrer-policy:
+      value: strict-origin
+      append: False
+    content-security-policy:
+      append: False
+      value: "default-src 'self'; script-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; object-src 'none'; frame-src 'self'; connect-src 'self'"
+    permissions-policy:
+      value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
+    x-frame-Options:
+      value: "SAMEORIGIN"
+    x-content-type-options:
+      value: nosniff
+    strict-transport-security:
+      value: "max-age=31536000; includeSubDomains; preload"
+    x-xss-protection:
+      value: "1; mode=block"
+  remove_response_headers:
+    - Access-Control-Allow-Origin
+    - x-envoy-upstream-service-time
+    - x-forwarded-host
+    - x-host
+    - x-forwarded-server
