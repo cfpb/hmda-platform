@@ -10,12 +10,12 @@ object Q659_2 extends EditCheck[LoanApplicationRegister] {
   override def parent: String = "Q659"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    val invalidExemptionRegex = "^9{3}(9{2})?(\\.0)?$"
+
     val fieldsToCheck = List(
-      lar.applicant.age.toString,
-      lar.coApplicant.age.toString,
-      lar.applicant.creditScore.toString,
-      lar.coApplicant.creditScore.toString,
+      lar.applicant.age,
+      lar.coApplicant.age,
+      lar.applicant.creditScore,
+      lar.coApplicant.creditScore,
       lar.geography.street.trim,
       lar.geography.city.trim,
       lar.geography.state.trim,
@@ -38,7 +38,13 @@ object Q659_2 extends EditCheck[LoanApplicationRegister] {
       lar.larIdentifier.NMLSRIdentifier.trim
     )
 
-    if (fieldsToCheck.exists(field => field.matches(invalidExemptionRegex))) {
+    if (fieldsToCheck.exists{field => 
+      if (Try(field.toDouble).isSuccess) {
+        val doubled = field.toDouble
+        if (doubled == 999 or doubled === 99999) true
+        else false
+      } else false
+    }) {
       ValidationFailure
     } else {
       ValidationSuccess
