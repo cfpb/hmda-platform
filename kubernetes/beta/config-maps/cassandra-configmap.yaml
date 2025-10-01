@@ -7,3 +7,4 @@ data:
   cassandra-cluster-dc: datacenter1
   cassandra-keyspace: hmda2_journal_beta
   cassandra-keyspace-snapshot: hmda2_snapshot_beta
+  cassandra-target-partition-size: "500000"

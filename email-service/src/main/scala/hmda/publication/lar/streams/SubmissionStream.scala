@@ -25,8 +25,9 @@ import scala.concurrent.duration._
 import org.slf4j.LoggerFactory
 import hmda.publication.KafkaUtils._
 
-object Stream {
-  val log = LoggerFactory.getLogger("hmda")
+object SubmissionStream {
+  val log =          LoggerFactory.getLogger("hmda")
+
   def pullEmails(system: ActorSystem, bootstrapServers: String): SourceWithContext[
     CommittableMessage[String, String],
     CommittableOffset,

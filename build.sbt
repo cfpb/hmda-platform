@@ -3,12 +3,13 @@ import BuildSettings._
 import sbtassembly.AssemblyPlugin.autoImport.assemblyMergeStrategy
 import com.typesafe.sbt.packager.docker._
 
-lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson, testContainers, apacheCommonsIO, log4jToSlf4j, kubernetesApi)
+lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson, testContainers, apacheCommonsIO, log4jToSlf4j, kubernetesApi, scalaLogging)
 
 lazy val sparkDeps =
   Seq(
     postgres,
-    akkaKafkaStreams
+    akkaKafkaStreams,
+    kafkaClients
   )
 
 lazy val authDeps = Seq(keycloakAdmin, jbossLogging, httpClient)
@@ -33,7 +34,7 @@ lazy val akkaDeps = Seq(
   akkaCors,
   mskdriver,
   akkaKafkaStreams,
-  embeddedKafka,
+  kafkaClients,
   alpakkaS3,
   akkaQuartzScheduler,
   alpakkaFile
@@ -47,8 +48,7 @@ lazy val akkaPersistenceDeps =
     akkaPersistenceQuery,
     akkaClusterShardingTyped,
     akkaPersistenceCassandra,
-    keyspacedriver,
-    cassandraLauncher
+    keyspacedriver
   )
 
 lazy val akkaHttpDeps =
@@ -62,11 +62,11 @@ lazy val dockerSettings = Seq(
   dockerBuildCommand := {
     //force amd64 Architecture for k8s docker image compatability
     if (sys.props("os.arch") != "amd64") {
-      dockerExecCommand.value ++ Seq("buildx", "build", "--platform=linux/amd64", "--load") ++ dockerBuildOptions.value :+ "."
+      dockerExecCommand.value ++ Seq("buildx", "build", "--platform=linux/amd64","--provenance=false", "--load") ++ dockerBuildOptions.value :+ "."
     } else dockerBuildCommand.value
   },
   Docker / maintainer := "Hmda-Ops",
-  dockerBaseImage := "eclipse-temurin:24_36-jdk-alpine-3.21",
+  dockerBaseImage := "eclipse-temurin:24.0.2_12-jdk-alpine-3.22",
   dockerRepository := Some("hmda"),
   dockerCommands := dockerCommands.value.flatMap {
     case cmd@Cmd("FROM",_) => List(cmd, Cmd("RUN", "apk update"),
@@ -137,10 +137,10 @@ lazy val common = (project in file("common"))
         cormorant, cormorantGeneric, scalaMock, scalacheckShapeless, diffx
       )
     ),
-    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
-    // addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
-    // unmanagedJars in Compile ++= Seq(new java.io.File("/tmp/aws-msk-iam-auth-2.2.0-all.jar")).classpath,
-    // unmanagedJars in Runtime ++= Seq(new java.io.File("/tmp/aws-msk-iam-auth-2.2.0-all.jar")).classpath   
+    // addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
+    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
+    // https://github.com/aws-samples/amazon-keyspaces-java-driver-helpers
+    Runtime / unmanagedBase := baseDirectory.value / "lib"
   )
   .enablePlugins(BuildInfoPlugin)
   .settings(
@@ -181,7 +181,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
       },
-     reStart / envVars ++= Map("CASSANDRA_CLUSTER_HOSTS" -> "localhost", "APP_PORT" -> "2551"),
+    reStart / envVars ++= Map("CASSANDRA_CLUSTER_HOSTS" -> "localhost", "APP_PORT" -> "2551"),
     ),
     dockerSettings,
     packageSettings
@@ -239,7 +239,7 @@ lazy val `check-digit` = (project in file("check-digit"))
     .settings(
       Seq(
         libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
-        enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
+        enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
         Compile / mainClass := Some("hmda.proxy.FileProxy"),
         assembly / assemblyJarName := {
           s"${name.value}.jar"
@@ -360,7 +360,7 @@ lazy val `hmda-dashboard` = (project in file("hmda-dashboard"))
   .settings(
     Seq(
       libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
-        enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
+        enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
@@ -687,7 +687,7 @@ lazy val `data-browser` = (project in file("data-browser"))
   .settings(
     Seq(
       libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
-        enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
+        enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
@@ -775,7 +775,7 @@ lazy val `email-service` = (project in file("email-service"))
       assembly / assemblyJarName := {
         s"${name.value}.jar"
       },
-      libraryDependencies ++= monix :: akkaKafkaStreams :: awsSesSdk :: logback :: Nil
+      libraryDependencies ++= monix :: akkaKafkaStreams :: kafkaClients :: awsSesSdk :: logback :: Nil
     ),
     dockerSettings,
     packageSettings
@@ -793,7 +793,7 @@ lazy val `hmda-quarterly-data-service` = (project in file ("hmda-quarterly-data-
   .settings(
     Seq(
       libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
-        enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
+        enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat

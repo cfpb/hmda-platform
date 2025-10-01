@@ -17,28 +17,19 @@ spec:
   selector:
     app: {{ include "hmda-dashboard.name" . }}
     release: {{ .Release.Name }}
-
 ---
-apiVersion: v1
-kind: Service
+apiVersion: getambassador.io/v2
+kind: Mapping
 metadata:
-  labels:
-    service: {{ include "hmda-dashboard.fullname" . }}-ambassador
-  name: {{ include "hmda-dashboard.fullname" . }}-ambassador
-  annotations:
-    getambassador.io/config: |
-      apiVersion: ambassador/v2
-      kind: Mapping
-      name: hmda_dashboard_mapping
-      {{- if .Values.ambassador_id }}
-      ambassador_id: {{ .Values.ambassador_id }}
-      {{- end}}
-      {{- if .Values.ambassador_host }}
-      host: {{ .Values.ambassador_host }}
-      {{- end}}
-      prefix: /dashboard/
-      rewrite: /dashboard/
-      service: {{ include "hmda-dashboard.fullname" . }}:{{ .Values.service.port }}
-      timeout_ms: 300000
+  name: {{ include "hmda-dashboard.fullname" . }}-mapping
 spec:
-  clusterIP: None
+  {{- if .Values.ambassador_id }}
+  ambassador_id: {{ .Values.ambassador_id }}
+  {{- end}}
+  {{- if .Values.ambassador_host }}
+  host: {{ .Values.ambassador_host }}
+  {{- end}}
+  prefix: /dashboard/
+  rewrite: /dashboard/
+  service: {{ include "hmda-dashboard.fullname" . }}:{{ .Values.service.port }}
+  timeout_ms: 300000

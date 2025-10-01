@@ -13,37 +13,47 @@ class RealTimeConfig(val cmName: String, val ns: String) {
   private var currentConfig: Option[Config] = None
   private var factory: Option[SharedInformerFactory] = None
 
-  try {
-    val client = io.kubernetes.client.util.Config.defaultClient()
-    val api = new CoreV1Api(client)
-    factory = Option(new SharedInformerFactory(client))
-    val informer = factory.get.sharedIndexInformerFor((params: CallGeneratorParams) => {
-      api.listNamespacedConfigMapCall(
-        ns, null, null, null, s"metadata.name=$cmName", null, null, params.resourceVersion, null, null, params.timeoutSeconds, params.watch, null)
-    }, classOf[V1ConfigMap], classOf[V1ConfigMapList])
-    informer.addEventHandler(new ResourceEventHandler[V1ConfigMap] {
-      override def onAdd(obj: V1ConfigMap): Unit = {
-        log.debug("cm added: {}", obj)
-        setConfig(obj)
-      }
+  private val config = ConfigFactory.load()
 
-      override def onUpdate(oldObj: V1ConfigMap, newObj: V1ConfigMap): Unit = {
-        log.debug("cm updated: {}", newObj)
-        setConfig(newObj)
-      }
+  private val runMode = if (config.hasPath("hmda.runtime.mode")) config.getString("hmda.runtime.mode") else "dev"
 
-      override def onDelete(obj: V1ConfigMap, deletedFinalStateUnknown: Boolean): Unit = log.warn("cm deleted: {}, deleteStateUnknown: {}", obj, deletedFinalStateUnknown)
-    })
+  if (runMode == "kubernetes") {
+    try {
+      val client = io.kubernetes.client.util.Config.defaultClient()
+      val api = new CoreV1Api(client)
+      factory = Option(new SharedInformerFactory(client))
+      val informer = factory.get.sharedIndexInformerFor((params: CallGeneratorParams) => {
+        api.listNamespacedConfigMap(ns)
+          .fieldSelector(s"metadata.name=$cmName")
+          .resourceVersion(params.resourceVersion)
+          .timeoutSeconds(params.timeoutSeconds)
+          .watch(params.watch)
+          .buildCall(null)
+      }, classOf[V1ConfigMap], classOf[V1ConfigMapList])
+      informer.addEventHandler(new ResourceEventHandler[V1ConfigMap] {
+        override def onAdd(obj: V1ConfigMap): Unit = {
+          log.debug("cm added: {}", obj)
+          setConfig(obj)
+        }
 
-    factory.get.startAllRegisteredInformers()
-    setConfig(api.readNamespacedConfigMap(cmName, ns, null))
-  } catch {
-    case e: ApiException =>
-      log.error(s"Failed to setup informer, most likely role permission issues. ${e.getResponseBody}", e)
-      factory.get.stopAllRegisteredInformers()
-    case e: Throwable =>
-      log.error(s"Failed to setup informer", e)
-      factory.get.stopAllRegisteredInformers()
+        override def onUpdate(oldObj: V1ConfigMap, newObj: V1ConfigMap): Unit = {
+          log.debug("cm updated: {}", newObj)
+          setConfig(newObj)
+        }
+
+        override def onDelete(obj: V1ConfigMap, deletedFinalStateUnknown: Boolean): Unit = log.warn("cm deleted: {}, deleteStateUnknown: {}", obj, deletedFinalStateUnknown)
+      })
+
+      factory.get.startAllRegisteredInformers()
+      setConfig(api.readNamespacedConfigMap(cmName, ns).execute())
+    } catch {
+      case e: ApiException =>
+        log.error(s"Failed to setup informer, most likely role permission issues. ${e.getResponseBody}", e)
+        factory.get.stopAllRegisteredInformers()
+      case e: Throwable =>
+        log.error(s"Failed to setup informer", e)
+        factory.get.stopAllRegisteredInformers()
+    }
   }
 
   private def setConfig(cm: V1ConfigMap): Unit = {

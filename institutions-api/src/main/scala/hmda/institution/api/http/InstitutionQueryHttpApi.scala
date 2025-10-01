@@ -34,6 +34,8 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
   implicit val institutionEmailsRepository: InstitutionEmailsRepository = new InstitutionEmailsRepository(dbConfig)
   implicit val institutionNoteHistoryRepository: InstitutionNoteHistoryRepository = new InstitutionNoteHistoryRepository(dbConfig)
 
+  private val institutionTsRepo = new InstitutionTsRepo(dbConfig)
+
   private val createSchema = config.getString("hmda.institution.createSchema").toBoolean
   if (createSchema) {
     institutionRepositories.values.foreach(_.createSchema())
@@ -44,7 +46,7 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
   private val institutionByIdPath =
     path("institutions" / Segment / "year" / IntNumber) { (lei, year) =>
       (extractUri & get) { uri =>
-        isQuarterlyYearAllowed(year) {
+        isInstitutionsYearAllowed(yearsAvailable.contains(year.toString)){
 
           val defaultRepo = institutionRepositories(institutionConfig.getString("defaultYear"))
           val fInstitution = institutionRepositories.getOrElse(year.toString, defaultRepo).findById(lei)
@@ -70,7 +72,7 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
   private val institutionByDomainPath =
     path("institutions" / "year" / IntNumber) { year =>
       (extractUri & get) { uri =>
-        isFilingAllowed(year, None) {
+        isInstitutionsYearAllowed(yearsAvailable.contains(year.toString)){
           parameter('domain.as[String]) { domain =>
             val f = findByEmail(domain, year.toString)
             completeInstitutionsFuture(f, uri)
@@ -123,7 +125,7 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
   private val quarterlyFilersLarCountsPath =
     path("institutions" / "quarterly" / IntNumber / "lars" / "past" / IntNumber) { (year, pastCount) =>
       (extractUri & get) { uri =>
-        val quarterlyLarCounts = InstitutionTsRepo.fetchPastLarCountsForQuarterlies(year, pastCount)
+        val quarterlyLarCounts = institutionTsRepo.fetchPastLarCountsForQuarterlies(year, pastCount)
         val yearlyTotalLarCounts = (1 to pastCount).map(i => {
           val yr = s"${year - i}"
           tsRepositories.get(yr)

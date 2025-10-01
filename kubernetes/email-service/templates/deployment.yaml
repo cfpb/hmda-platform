@@ -94,6 +94,11 @@ spec:
                 configMapKeyRef:
                   name: email-configmap
                   key: emailSender
+            - name: HMDA_ADMIN_EMIAL
+              valueFrom:
+                configMapKeyRef:
+                  name: email-configmap
+                  key: adminEmailAddress
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}

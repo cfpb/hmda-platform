@@ -12,10 +12,8 @@ import akka.stream.Materializer
 import com.typesafe.config.ConfigFactory
 import hmda.api.HmdaApi
 import hmda.persistence.HmdaPersistence
-import hmda.persistence.util.CassandraUtil
 import hmda.publication.{HmdaPublication, KafkaUtils}
 import hmda.validation.HmdaValidation
-import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
 import org.slf4j.LoggerFactory
 
 // $COVERAGE-OFF$
@@ -72,21 +70,8 @@ object HmdaPlatform extends App {
   implicit val mat     = Materializer(system)
   implicit val cluster = Cluster(system)
 
-  if (runtimeMode == "dcos" || runtimeMode == "kubernetes" || runtimeMode == "docker-compose" || runtimeMode == "kind") {
-    ClusterBootstrap(system).start()
-    AkkaManagement(system).start()
-  }
-
-  if (runtimeMode == "dev") {
-    CassandraUtil.startEmbeddedCassandra()
-    AkkaManagement(system).start()
-    implicit val embeddedKafkaConfig: EmbeddedKafkaConfig = EmbeddedKafkaConfig(
-      sys.env.getOrElse("HMDA_LOCAL_KAFKA_PORT", "9092").toInt,
-      sys.env.getOrElse("HMDA_LOCAL_ZK_PORT", "2182").toInt,
-      Map("offsets.topic.replication.factor" -> "1", "zookeeper.connection.timeout.ms" -> "20000")
-    )
-    EmbeddedKafka.start()
-  }
+  ClusterBootstrap(system).start()
+  AkkaManagement(system).start()
 
   // TODO: Fix this as initializing it here is not a good idea, this should be initialized in HmdaPersistence and passed into HmdaValidationError
   val stringKafkaProducer      = KafkaUtils.getStringKafkaProducer(system)

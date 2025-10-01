@@ -13,55 +13,93 @@ spec:
     port: {{ .Values.reporting.port }}
     targetPort: {{ .Values.reporting.port }}
 ---
-apiVersion: v1
-kind: Service
+apiVersion: getambassador.io/v2
+kind: Mapping
 metadata:
   labels:
-    service: ambassador-hmda-reporting
-  name: ambassador-hmda-reporting
-  annotations:
-    getambassador.io/config: |
-      apiVersion: ambassador/v2
-      kind: Mapping
-      name: hmda_reporting_mapping
-      {{- if .Values.ambassador_id }}
-      ambassador_id: {{ .Values.ambassador_id }}
-      {{- end}}
-      {{- if .Values.ambassador_host }}
-      host: {{ .Values.ambassador_host }}
-      {{- end}}
-      prefix: /v2/reporting/
-      service: {{ .Values.service.name }}:{{ .Values.reporting.port }}
-      timeout_ms: 180000
-      retry_policy:
-        num_retries: 10
-        retry_on: 5xx
-      labels:
-        ambassador:
-         - string_request_label:
-           - hmda-reporting
-      add_response_headers:
-        referrer-policy: 
-          value: strict-origin
-          append: False
-        content-security-policy: 
-          append: False
-          value: "default-src 'self'; script-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; object-src 'none'; frame-src 'self'; connect-src 'self'"
-        permissions-policy:
-          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
-        x-frame-Options: 
-          value : "SAMEORIGIN"
-        x-content-type-options: 
-          value : nosniff
-        strict-transport-security:
-          value: "max-age=31536000; includeSubDomains; preload"
-        x-xss-protection:
-          value: "1; mode=block"
-      remove_response_headers:
-      - Access-Control-Allow-Origin
-      - x-envoy-upstream-service-time
-      - x-forwarded-host
-      - x-host
-      - x-forwarded-server
+    service: {{ include "hmda-reporting.fullname" . }}-mapping
+  name: {{ include "hmda-reporting.fullname" . }}-mapping
 spec:
-  clusterIP: None
+  ambassador_id: ambassador-default-1
+  prefix: /v2/reporting/
+  service: {{ .Values.service.name }}:{{ .Values.reporting.port }}
+  timeout_ms: 180000
+  retry_policy:
+    num_retries: 10
+    retry_on: 5xx
+  add_response_headers:
+    referrer-policy:
+      value: strict-origin
+      append: False
+    content-security-policy:
+      append: False
+      value: "default-src 'self'; script-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; object-src 'none'; frame-src 'self'; connect-src 'self'"
+    permissions-policy:
+      value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
+    x-frame-Options:
+      value : "SAMEORIGIN"
+    x-content-type-options:
+      value : nosniff
+    strict-transport-security:
+      value: "max-age=31536000; includeSubDomains; preload"
+    x-xss-protection:
+      value: "1; mode=block"
+  remove_response_headers:
+    - Access-Control-Allow-Origin
+    - x-envoy-upstream-service-time
+    - x-forwarded-host
+    - x-host
+    - x-forwarded-server
+#---
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  labels:
+#    service: ambassador-hmda-reporting
+#  name: ambassador-hmda-reporting
+#  annotations:
+#    getambassador.io/config: |
+#      apiVersion: ambassador/v2
+#      kind: Mapping
+#      name: hmda_reporting_mapping
+#      {{- if .Values.ambassador_id }}
+#      ambassador_id: {{ .Values.ambassador_id }}
+#      {{- end}}
+#      {{- if .Values.ambassador_host }}
+#      host: {{ .Values.ambassador_host }}
+#      {{- end}}
+#      prefix: /v2/reporting/
+#      service: {{ .Values.service.name }}:{{ .Values.reporting.port }}
+#      timeout_ms: 180000
+#      retry_policy:
+#        num_retries: 10
+#        retry_on: 5xx
+#      labels:
+#        ambassador:
+#         - string_request_label:
+#           - hmda-reporting
+#      add_response_headers:
+#        referrer-policy:
+#          value: strict-origin
+#          append: False
+#        content-security-policy:
+#          append: False
+#          value: "default-src 'self'; script-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; object-src 'none'; frame-src 'self'; connect-src 'self'"
+#        permissions-policy:
+#          value: "autoplay=(), encrypted-media=(), fullscreen=(), geolocation=(), microphone=(), midi=()"
+#        x-frame-Options:
+#          value : "SAMEORIGIN"
+#        x-content-type-options:
+#          value : nosniff
+#        strict-transport-security:
+#          value: "max-age=31536000; includeSubDomains; preload"
+#        x-xss-protection:
+#          value: "1; mode=block"
+#      remove_response_headers:
+#      - Access-Control-Allow-Origin
+#      - x-envoy-upstream-service-time
+#      - x-forwarded-host
+#      - x-host
+#      - x-forwarded-server
+#spec:
+#  clusterIP: None

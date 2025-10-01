@@ -117,6 +117,15 @@ final case class NotEnoughFilterCriterias(
                                            message: String = "Provide at least 1 filter criteria to perform aggregations (eg. actions_taken, races, genders, etc.)"
                                          ) extends ErrorResponse
 
+object InvalidAgeApplicant {
+  implicit val encoder: Encoder[InvalidAgeApplicant] = deriveEncoder[InvalidAgeApplicant]
+}
+final case class InvalidAgeApplicant(
+                                   invalidAgeApplicant: Seq[String],
+                                   errorType: String = "invalid-age-of-applicant",
+                                   message: String = s"valid age groups are ${AgeApplicant.values.map(_.entryName).mkString(", ")}"
+                                 ) extends ErrorResponse
+
 object InvalidLoanTypes {
   implicit val encoder: Encoder[InvalidLoanTypes] = deriveEncoder[InvalidLoanTypes]
 }
