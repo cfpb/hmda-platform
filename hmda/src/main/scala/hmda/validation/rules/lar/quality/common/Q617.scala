@@ -36,7 +36,7 @@ object Q617 extends EditCheck[LoanApplicationRegister] {
         calculatedRatio.setScale(precision, RoundingMode.HALF_UP).underlying()
 
 
-      for( a <- 1 to 10000) {
+      for( a <- 1 to 10) {
       println("Original CLTV: " + combinedLoanValueRatio)
         println("Stripped CLTV: " + combinedLoanValueRatioStripped)
         println("Calculated Precision: " + precision)
