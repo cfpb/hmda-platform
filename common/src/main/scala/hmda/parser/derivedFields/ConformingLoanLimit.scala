@@ -5,6 +5,7 @@ import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
 import hmda.model.census.CountyLoanLimit
 import hmda.census.records.OverallLoanLimit
+import hmda.model.filing.EditDescriptionLookup.config
 // $COVERAGE-OFF$
 case class LoanLimitInfo(
   totalUnits: Int,
@@ -28,9 +29,9 @@ case class StateBoundries(
 object ConformingLoanLimit {
 
   val config = ConfigFactory.load()
-  val configFactory = ConfigFactory.load("reference.conf").getConfig("filter")
 
-  val fairfieldCountyTractList: List[String] = configFactory.getString("hmda.census.fairfield").split(",").toList
+
+  val fairfieldCountyTractList =config.getString("hmda.census.fairfield").split(",").toList
 
   val fairfieldCountyId: String = "001"
 
