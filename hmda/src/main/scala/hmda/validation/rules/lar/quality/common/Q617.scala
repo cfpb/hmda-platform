@@ -5,12 +5,14 @@ import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.dsl.ValidationResult
 import hmda.validation.rules.EditCheck
+import org.slf4j.LoggerFactory
 
 import scala.math.BigDecimal.RoundingMode
 import scala.util.Try
 
 object Q617 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q617"
+  val log = LoggerFactory.getLogger("q617-logger")
 
   override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(
@@ -24,14 +26,25 @@ object Q617 extends EditCheck[LoanApplicationRegister] {
         Try(BigDecimal(lar.loan.combinedLoanToValueRatio))
           .getOrElse(BigDecimal(0))
 
-      val combinedLoanValueRatioStripped =   combinedLoanValueRatio.underlying().stripTrailingZeros()
+      val combinedLoanValueRatioStripped = combinedLoanValueRatio.underlying().stripTrailingZeros()
 
       val precision = getPrecision(combinedLoanValueRatioStripped)
 
       val calculatedRatio = (lar.loan.amount / propValue) * 100
 
       val ratioToPrecision =
-        calculatedRatio.setScale(precision, RoundingMode.HALF_UP)
+        calculatedRatio.setScale(precision, RoundingMode.HALF_UP).underlying()
+
+
+      for( a <- 1 to 10000) {
+      println("Original CLTV: " + combinedLoanValueRatio)
+        println("Stripped CLTV: " + combinedLoanValueRatioStripped)
+        println("Calculated Precision: " + precision)
+        println("Calculated LTV: " + calculatedRatio)
+        println("LTV to Precision :" + ratioToPrecision)
+        val x = combinedLoanValueRatioStripped is greaterThanOrEqual(ratioToPrecision)
+        println("Test if CLTV is GTEQ to LTV: " + x.toString)
+      }
 
       combinedLoanValueRatioStripped is greaterThanOrEqual(ratioToPrecision)
     }
