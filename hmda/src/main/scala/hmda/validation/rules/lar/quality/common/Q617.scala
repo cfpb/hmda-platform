@@ -36,7 +36,6 @@ object Q617 extends EditCheck[LoanApplicationRegister] {
         calculatedRatio.setScale(precision, RoundingMode.HALF_UP).underlying()
 
 
-      for( a <- 1 to 10) {
       println("Original CLTV: " + combinedLoanValueRatio)
         println("Stripped CLTV: " + combinedLoanValueRatioStripped)
         println("Calculated Precision: " + precision)
@@ -44,7 +43,7 @@ object Q617 extends EditCheck[LoanApplicationRegister] {
         println("LTV to Precision :" + ratioToPrecision)
         val x = combinedLoanValueRatioStripped is greaterThanOrEqual(ratioToPrecision)
         println("Test if CLTV is GTEQ to LTV: " + x.toString)
-      }
+
 
       combinedLoanValueRatioStripped is greaterThanOrEqual(ratioToPrecision)
     }
