@@ -30,9 +30,18 @@ spec:
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
-        - name: cassandra-truststore
-          secret:
-            secretName: cassandra-truststore
+#        - name: cassandra-truststore
+#          csi:
+#            driver: secrets-store.csi.k8s.io
+#            readOnly: true
+#            volumeAttributes:
+#              secretProviderClass: cassandra-truststore-provider
+        - name: cassandra-credentials
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: k8ssandra-credentials-provider
       serviceAccountName: {{ .Values.service.account.name }} 
       containers:
       - name: {{ .Chart.Name }}
@@ -40,9 +49,12 @@ spec:
         volumeMounts:
           - name: tz-config
             mountPath: /etc/localtime
-          - name: cassandra-truststore
+#          - name: cassandra-truststore
+#            readOnly: true
+#            mountPath: "/opt/cassandra_truststore"
+          - name: cassandra-credentials
             readOnly: true
-            mountPath: "/opt/cassandra_truststore"
+            mountPath: "/mnt/secret-store"
         resources:
 {{ toYaml .Values.resources | indent 12 }}
         securityContext:
@@ -147,7 +159,7 @@ spec:
         - name: KUBERNETES_HMDA_POD_NAMESPACE
           valueFrom:
             fieldRef:
-              fieldPath: metadata.namespace        
+              fieldPath: metadata.namespace
           #value: {{.Values.hmda.podNamespace}}
         - name: KUBERNETES_HMDA_SERVICE_NAME
           valueFrom:
@@ -201,13 +213,14 @@ spec:
               key: cassandra.password
         - name: CASSANDRA_LOG_LEVEL
           value: {{ .Values.logs.cassandra }}
-        - name: CASSANDRA_TRUSTSTORE_FILE
-          value: "/opt/cassandra_truststore/cassandra_truststore.jks"
-        - name: CASSANDRA_TRUSTSTORE_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: cassandra-truststore-password            
-              key: password
+#        - name: CASSANDRA_TRUSTSTORE_FILE
+#          value: "/opt/cassandra_truststore/cassandra_truststore.jks"
+#        - name: CASSANDRA_TRUSTSTORE_PASSWORD
+#          value: test123
+#          valueFrom:
+#            secretKeyRef:
+#              name: cassandra-truststore-password
+#              key: password
         - name: KEYCLOAK_REALM_URL
           valueFrom:
             configMapKeyRef:
@@ -228,26 +241,26 @@ spec:
             configMapKeyRef:
               name: kafka-configmap
               key: kafka.hosts
-        - name: AWS_ACCESS_KEY_ID
-          valueFrom:
-            secretKeyRef:
-              name: aws-credentials
-              key: aws-access-key-id
-        - name: AWS_SECRET_ACCESS_KEY
-          valueFrom:
-            secretKeyRef:
-              name: aws-credentials
-              key: aws-secret-access-key
-        - name: HTTP_CENSUS_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: http-configmap
-              key: census.host
-        - name: HTTP_CENSUS_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: http-configmap
-              key: census.port
+#        - name: AWS_ACCESS_KEY_ID
+#          valueFrom:
+#            secretKeyRef:
+#              name: aws-credentials
+#              key: aws-access-key-id
+#        - name: AWS_SECRET_ACCESS_KEY
+#          valueFrom:
+#            secretKeyRef:
+#              name: aws-credentials
+#              key: aws-secret-access-key
+#        - name: HTTP_CENSUS_HOST
+#          valueFrom:
+#            configMapKeyRef:
+#              name: http-configmap
+#              key: census.host
+#        - name: HTTP_CENSUS_PORT
+#          valueFrom:
+#            configMapKeyRef:
+#              name: http-configmap
+#              key: census.port
         - name: UPLOAD_LINES_BATCH
           value: {{ .Values.hmda.upload.lines.batch | quote }}
         - name: UPLOAD_LINES_PARALLELISM

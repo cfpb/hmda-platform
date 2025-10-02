@@ -53,8 +53,8 @@ object APORScheduler {
             val variableRateFileName          = aporConfig.getString("variable.rate.fileName ")
 
             val awsConfig         = ConfigFactory.load("application.conf").getConfig("aws")
-            val accessKeyId       = awsConfig.getString("access-key-id")
-            val secretAccess      = awsConfig.getString("secret-access-key")
+//            val accessKeyId       = awsConfig.getString("access-key-id")
+//            val secretAccess      = awsConfig.getString("secret-access-key")
             val region            = awsConfig.getString("region")
             val bucket            = awsConfig.getString("public-bucket")
             val environment       = awsConfig.getString("environment")
@@ -62,14 +62,14 @@ object APORScheduler {
             val variableBucketKey = s"$environment/apor/$variableRateFileName"
             val quartz            = QuartzSchedulerExtension(ctx.system)
 
-            val awsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccess))
+//            val awsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccess))
             val awsRegionProvider: AwsRegionProvider = new AwsRegionProvider {
               override def getRegion: Region = Region.of(region)
             }
 
             val s3Settings = S3Settings(ctx.system.toClassic)
               .withBufferType(MemoryBufferType)
-              .withCredentialsProvider(awsCredentialsProvider)
+//              .withCredentialsProvider(awsCredentialsProvider)
               .withS3RegionProvider(awsRegionProvider)
               .withListBucketApiVersion(ListBucketVersion2)
 

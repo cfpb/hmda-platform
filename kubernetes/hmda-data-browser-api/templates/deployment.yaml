@@ -19,73 +19,92 @@ spec:
         app: {{ include "hmda-data-browser-api.name" . }}
         release: {{ .Release.Name }}
     spec:
-      initContainers:
-      - args:
-        - openssl pkcs12 -export -in /opt/docker/certs/redis-cert/redis-crt -inkey /opt/docker/certs/redis-key/redis-key
-          -out /opt/docker/server.p12 -name redis-tls -CAfile /opt/docker/certs/ca-cert/ca-crt -caname root
-          -passin pass:changeit -passout pass:changeit &&
-          keytool -importkeystore -deststorepass changeit -destkeypass changeit -destkeystore /opt/java/openjdk/lib/security/cacerts
-          -srckeystore /opt/docker/server.p12 -srcstoretype PKCS12 -srcstorepass changeit -alias redis-tls &&
-          keytool -v -list -storepass changeit -keystore /opt/java/openjdk/lib/security/cacerts 2>/dev/null | grep redis &&
-          cp /opt/java/openjdk/lib/security/* /opt/docker/temporary/ 
-        command:
-          - /bin/sh
-          - -c
-          - --
-        image: 626560329871.dkr.ecr.us-east-1.amazonaws.com/hmda/hmda-init:v1.0.0
-        name: hmda-init
-        resources: {}
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
-        volumeMounts:
-          - mountPath: /opt/docker/temporary
-            name: jksfolder
-          - mountPath: /opt/docker/certs/ca-cert
-            name: ca-cert
-            readOnly: true
-          - mountPath: /opt/docker/certs/redis-cert
-            name: redis-cert
-            readOnly: true
-          - mountPath: /opt/docker/certs/redis-key
-            name: redis-key
-            readOnly: true
+#      initContainers:
+#      - args:
+#        - openssl pkcs12 -export -in /opt/docker/certs/redis-cert/redis-crt -inkey /opt/docker/certs/redis-key/redis-key
+#          -out /opt/docker/server.p12 -name redis-tls -CAfile /opt/docker/certs/ca-cert/ca-crt -caname root
+#          -passin pass:changeit -passout pass:changeit &&
+#          keytool -importkeystore -deststorepass changeit -destkeypass changeit -destkeystore /opt/java/openjdk/lib/security/cacerts
+#          -srckeystore /opt/docker/server.p12 -srcstoretype PKCS12 -srcstorepass changeit -alias redis-tls &&
+#          keytool -v -list -storepass changeit -keystore /opt/java/openjdk/lib/security/cacerts 2>/dev/null | grep redis &&
+#          cp /opt/java/openjdk/lib/security/* /opt/docker/temporary/
+#        command:
+#          - /bin/sh
+#          - -c
+#          - --
+#        image: 626560329871.dkr.ecr.us-east-1.amazonaws.com/hmda/hmda-init:v1.0.0
+#        name: hmda-init
+#        resources: {}
+#        terminationMessagePath: /dev/termination-log
+#        terminationMessagePolicy: File
+#        volumeMounts:
+#          - mountPath: /opt/docker/temporary
+#            name: jksfolder
+#          - mountPath: /opt/docker/certs/ca-cert
+#            name: ca-cert
+#            readOnly: true
+#          - mountPath: /opt/docker/certs/redis-cert
+#            name: redis-cert
+#            readOnly: true
+#          - mountPath: /opt/docker/certs/redis-key
+#            name: redis-key
+#            readOnly: true
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
+      serviceAccountName: hmda-platform
       volumes:
-        - name: tz-config
-          hostPath:
-            path: /usr/share/zoneinfo/America/New_York
-        - emptyDir: {}
-          name: jksfolder
-        - name: ca-cert
-          secret:
-            defaultMode: 420
-            items:
-              - key: ca.crt
-                path: ca-crt
-            secretName: redis-tls-secret
-        - name: redis-cert
-          secret:
-            defaultMode: 420
-            items:
-              - key: redis.crt
-                path: redis-crt
-            secretName: redis-tls-secret
-        - name: redis-key
-          secret:
-            defaultMode: 420
-            items:
-              - key: redis.key
-                path: redis-key
-            secretName: redis-tls-secret
+      - name: redis-secrets-vol
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: redis-secrets-provider
+      - name: rds-secrets-vol
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: hmda-rds-secrets-provider
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/America/New_York
+#        - emptyDir: {}
+#          name: jksfolder
+#        - name: ca-cert
+#          secret:
+#            defaultMode: 420
+#            items:
+#              - key: ca.crt
+#                path: ca-crt
+#            secretName: redis-tls-secret
+#        - name: redis-cert
+#          secret:
+#            defaultMode: 420
+#            items:
+#              - key: redis.crt
+#                path: redis-crt
+#            secretName: redis-tls-secret
+#        - name: redis-key
+#          secret:
+#            defaultMode: 420
+#            items:
+#              - key: redis.key
+#                path: redis-key
+#            secretName: redis-tls-secret
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           volumeMounts:
             - name: tz-config
               mountPath: /etc/localtime
-            - mountPath: /opt/java/openjdk/lib/security/
-              name: jksfolder              
+#            - mountPath: /opt/java/openjdk/lib/security/
+#              name: jksfolder
+            - name: redis-secrets-vol
+              readOnly: true
+              mountPath: /mnt/redis-secrets-store
+            - name: rds-secrets-vol
+              readOnly: true
+              mountPath: /mnt/rds-secrets-store
           securityContext:
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
@@ -94,39 +113,40 @@ spec:
                 - ALL     
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            - name: _JAVA_OPTIONS
-              value: >
-                -Dhttps.protocols=SSLv3,TLSv1,TLSv1.1,TLSv1.2
+#            - name: _JAVA_OPTIONS
+#              value: >
+#                -Dhttps.protocols=SSLv3,TLSv1,TLSv1.1,TLSv1.2
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:
-                  name: inst-postgres-credentials
+                  name: platform-rds-secrets
                   key: host
             - name: PG_DATABASE
               valueFrom:
-                configMapKeyRef:
-                  name: postgresql-configmap
-                  key: postgres.database
+                secretKeyRef:
+                  name: platform-rds-secrets
+                  key: database
             - name: PG_USER
               valueFrom:
                 secretKeyRef:
-                  name: inst-postgres-credentials
+                  name: platform-rds-secrets
                   key: username
             - name: PG_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: inst-postgres-credentials
+                  name: platform-rds-secrets
                   key: password
             - name: PG_SSL
-              valueFrom:
-                configMapKeyRef:
-                  name: postgresql-configmap
-                  key: postgres.ssl
-            - name: JDBC_URL
-              valueFrom:
-                secretKeyRef:
-                  name: inst-postgres-credentials
-                  key: url
+              value: require
+#              valueFrom:
+#                configMapKeyRef:
+#                  name: postgresql-configmap
+#                  key: postgres.ssl
+#            - name: JDBC_URL
+#              valueFrom:
+#                secretKeyRef:
+#                  name: inst-postgres-credentials
+#                  key: url
             - name: BANK_FILTER_LIST
               valueFrom:
                 configMapKeyRef:
@@ -137,16 +157,16 @@ spec:
                 configMapKeyRef:
                   name: kafka-configmap
                   key: kafka.hosts
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: aws-credentials
-                  key: aws-access-key-id
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: aws-credentials
-                  key: aws-secret-access-key
+#            - name: AWS_ACCESS_KEY_ID
+#              valueFrom:
+#                secretKeyRef:
+#                  name: aws-credentials
+#                  key: aws-access-key-id
+#            - name: AWS_SECRET_ACCESS_KEY
+#              valueFrom:
+#                secretKeyRef:
+#                  name: aws-credentials
+#                  key: aws-secret-access-key
             - name: AWS_ENVIRONMENT
               valueFrom:
                 configMapKeyRef:
@@ -157,12 +177,17 @@ spec:
                 configMapKeyRef:
                   name: s3-configmap
                   key: aws-region
+            - name: S3_PUBLIC_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: s3-configmap
+                  key: s3-public-bucket
             - name: BROWSER_LOG_LEVEL
               value: {{.Values.databrowser.loglevel}}
             - name: REDIS_HOSTNAME
               value: {{.Values.databrowser.redis}}
             - name: REDIS_PROTOCOL
-              value: "rediss"
+              value: "redis"
             - name: S3_PUBLIC_BUCKET
               valueFrom:
                 configMapKeyRef:

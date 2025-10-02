@@ -37,7 +37,7 @@ kafka:
   analyticsTopic: hmda-analytics
   signTopic: hmda-sign
   disclosureTopic: hmda-spark-disclosure
-  security: ""
+  security: "SASL_SSL"
 
 service:
   type: ClusterIP
@@ -110,7 +110,7 @@ ingress:
 
 resources:
   requests:
-   cpu: "2"
+   cpu: "500m"
    memory: 6200Mi
 
 nodeSelector: {}

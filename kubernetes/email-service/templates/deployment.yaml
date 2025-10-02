@@ -21,16 +21,25 @@ spec:
         app: {{ template "email-service.name" . }}
         release: {{ .Release.Name }}
     spec:
+      serviceAccountName: {{ .Values.service.account.name }}
       volumes:
+        - name: secret-provider-vol
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: hmda-rds-secrets-provider
         - name: tz-config
           hostPath:
-            path: /usr/share/zoneinfo/America/New_York    
+            path: /usr/share/zoneinfo/America/New_York
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           volumeMounts:
+            - name: secret-provider-vol
+              mountPath: /mnt/secrets-store
             - name: tz-config
-              mountPath: /etc/localtime          
+              mountPath: /etc/localtime
           securityContext:
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
@@ -39,26 +48,46 @@ spec:
                 - ALL            
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            - name: JDBC_URL
+#            - name: JDBC_URL
+#              valueFrom:
+#                secretKeyRef:
+#                  name: inst-postgres-credentials
+#                  key: url
+            - name: PG_HOST
               valueFrom:
                 secretKeyRef:
-                  name: inst-postgres-credentials
-                  key: url
+                  name: platform-rds-secrets
+                  key: host
+            - name: PG_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: platform-rds-secrets
+                  key: database
+            - name: PG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: platform-rds-secrets
+                  key: username
+            - name: PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: platform-rds-secrets
+                  key: password
             - name: KAFKA_CLUSTER_HOSTS
               valueFrom:
                 configMapKeyRef:
                   name: kafka-configmap
                   key: kafka.hosts
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: aws-credentials
-                  key: aws-access-key-id
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: aws-credentials
-                  key: aws-secret-access-key
+#            - name: AWS_ACCESS_KEY_ID
+#              valueFrom:
+#                secretKeyRef:
+#                  name: aws-credentials
+#                  key: aws-access-key-id
+#            - name: AWS_SECRET_ACCESS_KEY
+#              valueFrom:
+#                secretKeyRef:
+#                  name: aws-credentials
+#                  key: aws-secret-access-key
             - name: AWS_ENVIRONMENT
               valueFrom:
                 configMapKeyRef:
@@ -90,10 +119,11 @@ spec:
                   name: email-configmap
                   key: emailContent
             - name: SENDER_EMAIL_ADDRESS
-              valueFrom:
-                configMapKeyRef:
-                  name: email-configmap
-                  key: emailSender
+              value: le.chen@cfpb.gov
+#              valueFrom:
+#                configMapKeyRef:
+#                  name: email-configmap
+#                  key: emailSender
             - name: HMDA_ADMIN_EMIAL
               valueFrom:
                 configMapKeyRef:

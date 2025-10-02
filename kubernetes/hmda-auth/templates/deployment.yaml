@@ -21,68 +21,84 @@ spec:
         app: {{ template "hmda-auth.name" . }}
         release: {{ .Release.Name }}
     spec:
-      initContainers:
-        - args:
-            - cp /opt/java/openjdk/lib/security/* /opt/docker/temporary/
-          command:
-            - /bin/sh
-            - -c
-            - --
-          image: 626560329871.dkr.ecr.us-east-1.amazonaws.com/hmda/hmda-init:v1.0.0
-          name: hmda-init
-          resources: {}
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-          volumeMounts:
-            - mountPath: /opt/docker/temporary
-              name: jksfolder
-            - mountPath: /opt/docker/certs/ca-cert
-              name: ca-cert
-              readOnly: false
-            - mountPath: /opt/docker/certs/keycloak-cert
-              name: keycloak-cert
-              readOnly: false
-            - mountPath: /opt/docker/certs/keycloak-key
-              name: keycloak-key
-              readOnly: false
+#      initContainers:
+#        - args:
+#            - cp /opt/java/openjdk/lib/security/* /opt/docker/temporary/
+#          command:
+#            - /bin/sh
+#            - -c
+#            - --
+#          image: 626560329871.dkr.ecr.us-east-1.amazonaws.com/hmda/hmda-init:v1.0.0
+#          name: hmda-init
+#          resources: {}
+#          terminationMessagePath: /dev/termination-log
+#          terminationMessagePolicy: File
+#          volumeMounts:
+#            - mountPath: /opt/docker/temporary
+#              name: jksfolder
+#            - mountPath: /opt/docker/certs/ca-cert
+#              name: ca-cert
+#              readOnly: false
+#            - mountPath: /opt/docker/certs/keycloak-cert
+#              name: keycloak-cert
+#              readOnly: false
+#            - mountPath: /opt/docker/certs/keycloak-key
+#              name: keycloak-key
+#              readOnly: false
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
+        - name: rds-provider-vol
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: hmda-rds-secrets-provider
+        - name: kc-provider-vol
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: keycloak-secrets-provider
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
-        - emptyDir: {}
-          name: jksfolder
-        - name: ca-cert
-          secret:
-            defaultMode: 420
-            items:
-              - key: ca.crt
-                path: ca-crt
-            secretName:  keycloak-tls-secrets
-        - name: keycloak-cert
-          secret:
-            defaultMode: 420
-            items:
-              - key: tls.crt
-                path: keycloak-crt
-            secretName:  keycloak-tls-secrets
-        - name: keycloak-key
-          secret:
-            defaultMode: 420
-            items:
-              - key: tls.key
-                path: keycloak-key
-            secretName:  keycloak-tls-secrets
-      # serviceAccountName: {{ .Values.service.serviceAccount }}
+#        - emptyDir: {}
+#          name: jksfolder
+#        - name: ca-cert
+#          secret:
+#            defaultMode: 420
+#            items:
+#              - key: ca.crt
+#                path: ca-crt
+#            secretName:  keycloak-tls-secrets
+#        - name: keycloak-cert
+#          secret:
+#            defaultMode: 420
+#            items:
+#              - key: tls.crt
+#                path: keycloak-crt
+#            secretName:  keycloak-tls-secrets
+#        - name: keycloak-key
+#          secret:
+#            defaultMode: 420
+#            items:
+#              - key: tls.key
+#                path: keycloak-key
+#            secretName:  keycloak-tls-secrets
+      serviceAccountName: {{ .Values.service.serviceAccount }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           volumeMounts:
+            - name: rds-provider-vol
+              mountPath: /mnt/rds-secrets-store
+            - name: kc-provider-vol
+              mountPath: /mnt/kc-secrets-store
             - name: tz-config
               mountPath: /etc/localtime
-            - mountPath: /opt/java/openjdk/lib/security/
-              name: jksfolder
+#            - mountPath: /opt/java/openjdk/lib/security/
+#              name: jksfolder
           securityContext:
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
@@ -91,10 +107,10 @@ spec:
                 - ALL
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            - name: _JAVA_OPTIONS
-              value: >
-                -Dhttps.protocols=SSLv3,TLSv1,TLSv1.1,TLSv1.2
-                -Dcom.sun.security.enableAIAcaIssuers=true
+#            - name: _JAVA_OPTIONS
+#              value: >
+#                -Dhttps.protocols=SSLv3,TLSv1,TLSv1.1,TLSv1.2
+#                -Dcom.sun.security.enableAIAcaIssuers=true
             - name: HMDA_RUNTIME_MODE
               value: {{ .Values.hmda.runtimeMode }}
             - name: BANK_FILTER_LIST
@@ -125,35 +141,35 @@ spec:
             - name: KEYCLOAK_ADMIN_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: hmda-auth-credentials
+                  name: keycloak-credentials
                   key: admin-username
             - name: KEYCLOAK_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: hmda-auth-credentials
+                  name: keycloak-credentials
                   key: admin-password
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:
-                  name: inst-postgres-credentials
+                  name: platform-rds-secrets
                   key: host
             - name: PG_DATABASE
               valueFrom:
-                configMapKeyRef:
-                  name: postgresql-configmap
-                  key: postgres.database
+                secretKeyRef:
+                  name: platform-rds-secrets
+                  key: database
             - name: PG_USER
               valueFrom:
                 secretKeyRef:
-                  name: inst-postgres-credentials
+                  name: platform-rds-secrets
                   key: username
             - name: PG_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: inst-postgres-credentials
+                  name: platform-rds-secrets
                   key: password
-            - name: PG_SSL
-              valueFrom:
-                configMapKeyRef:
-                  name: postgresql-configmap
-                  key: postgres.ssl
+#            - name: PG_SSL
+#              valueFrom:
+#                configMapKeyRef:
+#                  name: postgresql-configmap
+#                  key: postgres.ssl

@@ -19,7 +19,20 @@ spec:
         app: {{ include "hmda-dashboard.name" . }}
         release: {{ .Release.Name }}
     spec:
+      serviceAccountName: hmda-platform
       volumes:
+        - name: rds-provider-vol
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: hmda-rds-secrets-provider
+        - name: dashboard-provider-vol
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: dashboard-secrets-provider
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
@@ -27,6 +40,12 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           volumeMounts:
+            - name: rds-provider-vol
+              readOnly: true
+              mountPath: /mnt/rds-secrets-store
+            - name: dashboard-provider-vol
+              readOnly: true
+              mountPath: /mnt/dashboard-secrets-store
             - name: tz-config
               mountPath: /etc/localtime
           securityContext:
@@ -41,11 +60,31 @@ spec:
               containerPort: 9999
               protocol: TCP
           env:
-            - name: JDBC_URL
+            - name: PG_HOST
               valueFrom:
                 secretKeyRef:
-                  name: inst-postgres-credentials
-                  key: url
+                  name: platform-rds-secrets
+                  key: host
+            - name: PG_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: platform-rds-secrets
+                  key: database
+            - name: PG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: platform-rds-secrets
+                  key: username
+            - name: PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: platform-rds-secrets
+                  key: password
+#            - name: JDBC_URL
+#              valueFrom:
+#                secretKeyRef:
+#                  name: inst-postgres-credentials
+#                  key: url
             - name: BANK_FILTER_LIST
               valueFrom:
                 configMapKeyRef:
