@@ -63,7 +63,7 @@ class Q617Spec extends LarEditCheckSpec {
   }
 
   property(
-    "Calculation should not differentiate between a whole numer and a whole number with .0") {
+    "Calculation should not differentiate between a whole number and a whole number with .0") {
     forAll(larGen) { lar =>
       val failLar =
         lar.copy(
