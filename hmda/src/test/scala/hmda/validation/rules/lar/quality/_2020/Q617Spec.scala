@@ -19,15 +19,15 @@ class Q617Spec extends LarEditCheckSpec {
 
       val appLar =
         lar.copy(loan =
-          lar.loan.copy(loanType = Conventional, amount = 150000, combinedLoanToValueRatio = "25.860"))
+          lar.loan.copy(loanType = Conventional, amount = 10.0, combinedLoanToValueRatio = "50.0"))
       appLar
-        .copy(property = appLar.property.copy(propertyValue = "500000.00"))
+        .copy(property = appLar.property.copy(propertyValue = "19.0"))
         .mustFail
       appLar
-        .copy(property = appLar.property.copy(propertyValue = "570000.00"))
-        .mustFail
+        .copy(property = appLar.property.copy(propertyValue = "20.0"))
+        .mustPass
       appLar
-        .copy(property = appLar.property.copy(propertyValue = "580000.00"))
+        .copy(property = appLar.property.copy(propertyValue = "21.0"))
         .mustPass
     }
   }
