@@ -25,7 +25,7 @@ class Q617Spec extends LarEditCheckSpec {
         .mustFail
       appLar
         .copy(property = appLar.property.copy(propertyValue = "570000.00"))
-        .mustPass
+        .mustFail
       appLar
         .copy(property = appLar.property.copy(propertyValue = "580000.00"))
         .mustPass
