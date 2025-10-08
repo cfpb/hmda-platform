@@ -30,9 +30,15 @@ spec:
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
-        - name: cassandra-truststore
-          secret:
-            secretName: cassandra-truststore
+#        - name: cassandra-truststore
+#          secret:
+#            secretName: cassandra-truststore
+        - name: cassandra-credentials
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: k8ssandra-credentials-provider
       serviceAccountName: {{ .Values.service.account.name }} 
       containers:
       - name: {{ .Chart.Name }}
@@ -40,9 +46,12 @@ spec:
         volumeMounts:
           - name: tz-config
             mountPath: /etc/localtime
-          - name: cassandra-truststore
+#          - name: cassandra-truststore
+#            readOnly: true
+#            mountPath: "/opt/cassandra_truststore"
+          - name: cassandra-credentials
             readOnly: true
-            mountPath: "/opt/cassandra_truststore"
+            mountPath: "/mnt/secret-store"
         resources:
 {{ toYaml .Values.resources | indent 12 }}
         securityContext:
@@ -201,13 +210,13 @@ spec:
               key: cassandra.password
         - name: CASSANDRA_LOG_LEVEL
           value: {{ .Values.logs.cassandra }}
-        - name: CASSANDRA_TRUSTSTORE_FILE
-          value: "/opt/cassandra_truststore/cassandra_truststore.jks"
-        - name: CASSANDRA_TRUSTSTORE_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              key: password
-              name: cassandra-truststore-password
+#        - name: CASSANDRA_TRUSTSTORE_FILE
+#          value: "/opt/cassandra_truststore/cassandra_truststore.jks"
+#        - name: CASSANDRA_TRUSTSTORE_PASSWORD
+#          valueFrom:
+#            secretKeyRef:
+#              key: password
+#              name: cassandra-truststore-password
         - name: KEYCLOAK_REALM_URL
           valueFrom:
             configMapKeyRef:
@@ -228,16 +237,16 @@ spec:
             configMapKeyRef:
               name: kafka-configmap
               key: kafka.hosts
-        - name: AWS_ACCESS_KEY_ID
-          valueFrom:
-            secretKeyRef:
-              name: aws-credentials
-              key: aws-access-key-id
-        - name: AWS_SECRET_ACCESS_KEY
-          valueFrom:
-            secretKeyRef:
-              name: aws-credentials
-              key: aws-secret-access-key
+#        - name: AWS_ACCESS_KEY_ID
+#          valueFrom:
+#            secretKeyRef:
+#              name: aws-credentials
+#              key: aws-access-key-id
+#        - name: AWS_SECRET_ACCESS_KEY
+#          valueFrom:
+#            secretKeyRef:
+#              name: aws-credentials
+#              key: aws-secret-access-key
         - name: HTTP_CENSUS_HOST
           valueFrom:
             configMapKeyRef:

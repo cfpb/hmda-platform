@@ -37,7 +37,7 @@ kafka:
   analyticsTopic: beta-hmda-analytics
   signTopic: beta-hmda-sign
   emailTopic: beta-hmda-email
-  security: ""
+  security: "SASL_SSL"
 
 service:
   type: ClusterIP
@@ -120,5 +120,5 @@ tolerations: []
 logs:
   cassandra: TRACE
 
-ambassador_id: ambassador-beta-2
+#ambassador_id: ambassador-beta-2
 # ambassador_host: hmda-public.cfpb.gov
