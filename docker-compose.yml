@@ -32,7 +32,6 @@ services:
       - ./wait-for-it.sh:/usr/bin/wait-for-it.sh
       - db-data:/var/lib/kafka/data
 
-
   # ------------- Cassandra -------------
   cassandra:
     image: "cassandra:3.11.4"
