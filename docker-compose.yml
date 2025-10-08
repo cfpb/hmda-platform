@@ -32,20 +32,6 @@ services:
       - ./wait-for-it.sh:/usr/bin/wait-for-it.sh
       - db-data:/var/lib/kafka/data
 
-  akhq:
-    image: tchiotludo/akhq
-    environment:
-      AKHQ_CONFIGURATION: |
-        akhq:
-          connections:
-            local-kafka:
-              properties:
-                bootstrap.servers: "kafka:9092"
-
-    ports:
-      - 8090:8080
-    links:
-      - kafka
 
   # ------------- Cassandra -------------
   cassandra:
@@ -54,8 +40,6 @@ services:
       - "9042:9042"
     logging:
       driver: none
-    environment:
-      CASSANDRA_ENABLE_USER_DEFINED_FUNCTIONS: "true"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - db-data:/var/lib/cassandra/data
