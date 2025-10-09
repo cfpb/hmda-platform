@@ -1,9 +1,11 @@
 package hmda.parser.derivedFields
 
+import com.typesafe.config.ConfigFactory
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
 import hmda.model.census.CountyLoanLimit
 import hmda.census.records.OverallLoanLimit
+import hmda.model.filing.EditDescriptionLookup.config
 // $COVERAGE-OFF$
 case class LoanLimitInfo(
   totalUnits: Int,
@@ -26,15 +28,31 @@ case class StateBoundries(
 
 object ConformingLoanLimit {
 
+  val config = ConfigFactory.load()
+
+
+  val fairfieldCountyTractList =config.getString("hmda.census.fairfield").split(",").toList
+
+  val fairfieldCountyId: String = "001"
+
   def assignLoanLimit(lar: LoanApplicationRegister,
+                      year: Int,
                       overallLoanLimit: OverallLoanLimit,
                       countyLoanLimitsByCounty: Map[String, CountyLoanLimit],
                       countyLoanLimitsByState: Map[String, StateBoundries]): String = {
+    
+    val county = {
+      if (year == 2025) {
+        if (fairfieldCountyTractList.contains(lar.geography.tract)) fairfieldCountyId
+        else lar.geography.county
+      } else lar.geography.county
+    }
+
     val loan = LoanLimitInfo(
       lar.property.totalUnits,
       lar.loan.amount,
       lar.lienStatus,
-      lar.geography.county,
+      county,
       lar.geography.state
     )
 
