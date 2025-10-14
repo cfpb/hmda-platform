@@ -25,14 +25,16 @@ object Q617 extends EditCheck[LoanApplicationRegister] {
         Try(BigDecimal(lar.loan.combinedLoanToValueRatio))
           .getOrElse(BigDecimal(0))
 
-      val precision = getPrecision(combinedLoanValueRatio)
+      val combinedLoanValueRatioStripped = combinedLoanValueRatio.underlying().stripTrailingZeros()
+
+      val precision = getPrecision(combinedLoanValueRatioStripped)
 
       val calculatedRatio = (lar.loan.amount / propValue) * 100
 
       val ratioToPrecision =
-        calculatedRatio.setScale(precision, RoundingMode.HALF_UP)
+        calculatedRatio.setScale(precision, RoundingMode.HALF_UP).underlying()
 
-      combinedLoanValueRatio is greaterThanOrEqual(ratioToPrecision)
+      combinedLoanValueRatioStripped is greaterThanOrEqual(ratioToPrecision)
     }
 
   private def getPrecision(number: BigDecimal): Int =
