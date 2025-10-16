@@ -25,7 +25,7 @@ spec:
             driver: secrets-store.csi.k8s.io
             readOnly: true
             volumeAttributes:
-              secretProviderClass: hmda-rds-secrets-provider
+              secretProviderClass: irsa-hmda-rds-secrets-provider
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
@@ -68,22 +68,22 @@ spec:
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:
-                  name: platform-rds-secrets
+                  name: irsa-platform-rds-secrets
                   key: host
             - name: PG_DATABASE
               valueFrom:
                 secretKeyRef:
-                  name: platform-rds-secrets
+                  name: irsa-platform-rds-secrets
                   key: database
             - name: PG_USER
               valueFrom:
                 secretKeyRef:
-                  name: platform-rds-secrets
+                  name: irsa-platform-rds-secrets
                   key: username
             - name: PG_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: platform-rds-secrets
+                  name: irsa-platform-rds-secrets
                   key: password
             - name: PG_ADDCONFIG
               value: "ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory&currentSchema=hmda_beta_user"

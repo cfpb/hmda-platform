@@ -38,7 +38,7 @@ spec:
             driver: secrets-store.csi.k8s.io
             readOnly: true
             volumeAttributes:
-              secretProviderClass: k8ssandra-credentials-provider
+              secretProviderClass: irsa-k8ssandra-credentials-provider
       serviceAccountName: {{ .Values.service.account.name }} 
       containers:
       - name: {{ .Chart.Name }}
@@ -201,12 +201,12 @@ spec:
         - name: CASSANDRA_CLUSTER_USERNAME
           valueFrom:
             secretKeyRef:
-              name: cassandra-credentials
+              name: irsa-cassandra-credentials
               key: cassandra.username
         - name: CASSANDRA_CLUSTER_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: cassandra-credentials
+              name: irsa-cassandra-credentials
               key: cassandra.password
         - name: CASSANDRA_LOG_LEVEL
           value: {{ .Values.logs.cassandra }}

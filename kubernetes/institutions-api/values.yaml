@@ -15,7 +15,7 @@ service:
   targetPort: 9092
   name: http-inst-api
   account:
-    name: hmda-platform
+    name: hmda-platform-irsa
 
 #currentYear: 2018
 
@@ -72,5 +72,5 @@ postgresql:
   enabled: false
   createSchema: true
 
-ambassador_id: ambassador-default-1
+# ambassador_id: ambassador-default-1
 # ambassador_host: hmda-public.example.com

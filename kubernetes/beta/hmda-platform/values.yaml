@@ -42,7 +42,7 @@ kafka:
 service:
   type: ClusterIP
   account:
-    name: hmda-platform
+    name: hmda-platform-irsa
   name: hmda-platform
 
 #ambassador:

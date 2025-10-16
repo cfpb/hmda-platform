@@ -42,7 +42,7 @@ kafka:
 service:
   type: ClusterIP
   account:
-    name: hmda-platform
+    name: hmda-platform-irsa
   name: hmda-platform
 
 #ambassador:
@@ -132,5 +132,5 @@ affinity:
 logs:
   cassandra: TRACE
 
-ambassador_id: ambassador-default-1
+# ambassador_id: ambassador-default-1
 # ambassador_host: hmda-public.example.com
