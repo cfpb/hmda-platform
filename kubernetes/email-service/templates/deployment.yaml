@@ -119,11 +119,10 @@ spec:
                   name: email-configmap
                   key: emailContent
             - name: SENDER_EMAIL_ADDRESS
-              value: le.chen@cfpb.gov
-#              valueFrom:
-#                configMapKeyRef:
-#                  name: email-configmap
-#                  key: emailSender
+              valueFrom:
+                configMapKeyRef:
+                  name: email-configmap
+                  key: emailSender
             - name: HMDA_ADMIN_EMIAL
               valueFrom:
                 configMapKeyRef:
