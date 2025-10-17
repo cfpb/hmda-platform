@@ -67,14 +67,14 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
 
   val hmdaAdminRole   = config.getString("keycloak.hmda.admin.role")
 
-  val awsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccess))
+//  val awsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccess))
   val awsRegionProvider: AwsRegionProvider = new AwsRegionProvider {
     override def getRegion: Region = Region.of(region)
   }
 
   val s3Settings = S3Settings(system)
     .withBufferType(MemoryBufferType)
-    .withCredentialsProvider(awsCredentialsProvider)
+//    .withCredentialsProvider(awsCredentialsProvider)
     .withS3RegionProvider(awsRegionProvider)
     .withListBucketApiVersion(ListBucketVersion2)
 
@@ -145,6 +145,7 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
 
   private def retrieveData(path: String): Future[Option[Source[ByteString, NotUsed]]] = {
     val timeout: Timeout = Timeout(config.getInt("hmda.http.timeout").seconds)
+    log.info("retrieving bucket: {}, path: {}", bucket, path)
     S3.download(bucket, path).withAttributes(S3Attributes.settings(s3Settings)).runWith(Sink.head)
       .map(opt => opt.map { case (source, _) => source })
   }
@@ -152,8 +153,10 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
   private def streamingS3Route(s3Key: String): Route = {
     val fStream: Future[Source[ByteString, NotUsed]] = retrieveData(s3Key).flatMap {
       case Some(stream) =>
+        log.info("got data!")
         Future(stream)
       case None =>
+        log.info("no data...")
         Future(Source.empty)
     }
 

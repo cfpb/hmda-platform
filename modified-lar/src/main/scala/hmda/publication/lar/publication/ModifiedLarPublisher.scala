@@ -52,7 +52,7 @@ object ModifiedLarPublisher {
   val isJustGenerateS3File = config.getBoolean("hmda.lar.modified.justGenerateS3File")
   val isJustGenerateS3FileHeader = config.getBoolean("hmda.lar.modified.justGenerateS3FileHeader")
 
-  val awsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccess))
+//  val awsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccess))
   val awsRegionProvider: AwsRegionProvider = new AwsRegionProvider {
     override def getRegion: Region = Region.of(region)
   }
@@ -79,7 +79,7 @@ object ModifiedLarPublisher {
 
       val s3Settings = S3Settings(ctx.system.toClassic)
         .withBufferType(MemoryBufferType)
-        .withCredentialsProvider(awsCredentialsProvider)
+//        .withCredentialsProvider(awsCredentialsProvider)
         .withS3RegionProvider(awsRegionProvider)
         .withListBucketApiVersion(ListBucketVersion2)
 

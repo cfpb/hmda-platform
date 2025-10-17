@@ -24,7 +24,12 @@ metadata:
     service: {{ include "hmda-auth.fullname" . }}-mapping
   name: {{ include "hmda-auth.fullname" . }}-mapping
 spec:
-  ambassador_id: ambassador-default-1
+  {{- if .Values.ambassador_id }}
+  ambassador_id: {{ .Values.ambassador_id }}
+  {{- end}}
+  {{- if .Values.ambassador_host }}
+  host: {{ .Values.ambassador_host }}
+  {{- end}}
   timeout_ms: 0
   prefix: /hmda-auth/
   rewrite: /

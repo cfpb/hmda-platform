@@ -15,13 +15,14 @@ service:
   targetPort: 9091  
   name: file-proxy
   account:
-    name: file-proxy
+    create: false
+    name: hmda-platform
 
 hmda:
   runtimeMode: kubernetes
-  dynamic_years: "2017,2018,2019,2020,2021,2022,2023,2024"
-  static_years: "2017,2018,2019,2020,2021,2022,2023,2024"
-  irs_years: "2017,2018,2019,2020,2021,2022,2023,2024"
+  dynamic_years: "2024"
+  static_years: "2024"
+  irs_years: "2024"
 
 
 #ambassador:

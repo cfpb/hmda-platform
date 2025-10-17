@@ -14,7 +14,7 @@ service:
   port: 9095
   targetPort: 9095
   name: http-hmda-auth
-  serviceAccount: hmda-service-account-default
+  serviceAccount: hmda-platform
 
 hmda:
   runtimeMode: kubernetes

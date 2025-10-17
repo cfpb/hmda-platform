@@ -12,7 +12,7 @@ image:
 kafka:
   emailTopic: hmda-email
   emailGroup: email-consumer 
-  security: ""
+  security: "SASL_SSL"
   
 resources:
   limits:
@@ -32,6 +32,9 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
+service:
+  account:
+    name: hmda-platform
 
 nodeSelector: {}
 

@@ -80,7 +80,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
 
   val s3Settings = S3Settings(context.system)
     .withBufferType(MemoryBufferType)
-    .withCredentialsProvider(awsCredentialsProviderPrivate)
+//    .withCredentialsProvider(awsCredentialsProviderPrivate)
     .withS3RegionProvider(awsRegionProviderPrivate)
     .withListBucketApiVersion(ListBucketVersion2)
 
