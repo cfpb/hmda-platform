@@ -2,14 +2,14 @@ package hmda.validation.engine
 
 import hmda.model.filing.ts.TransmittalLar
 import hmda.validation.context.ValidationContext
-import hmda.validation.rules.lar.syntactical.{S307}
-import hmda.validation.engine.TsLarEngine2025
+import hmda.validation.rules.lar.syntactical.S307
+import hmda.validation.engine.TsLarEngine2026
 // $COVERAGE-OFF$
 private[engine] object TsLarEngine2025Q extends ValidationEngine[TransmittalLar] {
 
-  override def syntacticalChecks(ctx: ValidationContext) = TsLarEngine2024.syntacticalChecks(ctx) ++ Vector(S307)
+  override def syntacticalChecks(ctx: ValidationContext) = TsLarEngine2025.syntacticalChecks(ctx) ++ Vector(S307)
 
-  override def qualityChecks(ctx: ValidationContext) = TsLarEngine2024.qualityChecks(ctx: ValidationContext)
+  override def qualityChecks(ctx: ValidationContext) = TsLarEngine2025.qualityChecks(ctx: ValidationContext)
 
 }
 
