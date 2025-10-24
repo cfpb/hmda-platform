@@ -66,6 +66,7 @@ object ModifiedLarPublisher {
                 indexTractMap2023: Map[String, Census],
                 indexTractMap2024: Map[String, Census],
                 indexTractMap2025: Map[String, Census],
+                indexTractMap2026: Map[String, Census],
                 modifiedLarRepo: ModifiedLarRepository,
                 readRawData: ActorSystem[_] => SubmissionId => Source[LineAdded, NotUsed] = as => id => HmdaQuery.readRawData(id)(as)
               ): Behavior[ModifiedLarCommand] =

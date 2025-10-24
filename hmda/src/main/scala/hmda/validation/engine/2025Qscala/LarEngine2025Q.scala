@@ -11,7 +11,7 @@ private[engine] object LarEngine2025Q extends ValidationEngine[LoanApplicationRe
 
   override def syntacticalChecks(ctx: ValidationContext) = LarEngine2025.syntacticalChecks(ctx)
 
-  override def validityChecks(ctx: ValidationContext) = LarEngine2025.validityChecks(ctx) ++ Vector(V627.withIndexedCounties(CensusRecords.indexedCounty2024))
+  override def validityChecks(ctx: ValidationContext) = LarEngine2025.validityChecks(ctx) ++ Vector(V627.withIndexedCounties(CensusRecords.indexedCounty2025))
 
   override def qualityChecks(ctx: ValidationContext) = LarEngine2025.qualityChecks(ctx: ValidationContext)
 
