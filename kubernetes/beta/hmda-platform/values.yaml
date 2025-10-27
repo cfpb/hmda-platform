@@ -121,4 +121,4 @@ logs:
   cassandra: TRACE
 
 #ambassador_id: ambassador-beta-2
-# ambassador_host: hmda-public.cfpb.gov
+ambassador_host: ffiec.beta.cfpb.gov
