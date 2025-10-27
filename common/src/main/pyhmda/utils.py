@@ -21,7 +21,7 @@ def normalize(val: str) -> str:
 def conv_str(val: str) -> str:
     val = normalize(val)
     if not val: raise ValueError(f"invalid str: \"{val}\"")
-    return val    
+    return val
 
 
 def conv_optstr(val: str) -> Any:
@@ -58,6 +58,12 @@ def conv_pct(val: str) -> float:
 def conv_optpct(val: str) -> Any:
     val = normalize(val)
     return float(val) if val else pd.NA
+
+
+def conv_scf(val: str) -> str:
+    val = val.strip()
+    if val not in ["T", "S", "I"]: raise ValueError(f"invalid scf: \"{val}\"")
+    return val
 
 
 def prepare_file(read_file: str, write_file: str, pattern: str, expected_match: float=0.95) -> None:
