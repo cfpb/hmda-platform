@@ -7,9 +7,9 @@ import hmda.validation.engine.TsLarEngine2025
 // $COVERAGE-OFF$
 private[engine] object TsLarEngine2025Q extends ValidationEngine[TransmittalLar] {
 
-  override def syntacticalChecks(ctx: ValidationContext) = TsLarEngine2024.syntacticalChecks(ctx) ++ Vector(S307)
+  override def syntacticalChecks(ctx: ValidationContext) = TsLarEngine2025.syntacticalChecks(ctx) ++ Vector(S307)
 
-  override def qualityChecks(ctx: ValidationContext) = TsLarEngine2024.qualityChecks(ctx: ValidationContext)
+  override def qualityChecks(ctx: ValidationContext) = TsLarEngine2025.qualityChecks(ctx: ValidationContext)
 
 }
 
