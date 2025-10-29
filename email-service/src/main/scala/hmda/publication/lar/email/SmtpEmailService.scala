@@ -28,9 +28,9 @@ class SmtpEmailService(config: Settings) extends EmailService {
       val session = Session.getInstance(props, passwordAuthenticator)
       val msg = new MimeMessage(session)
       msg.setRecipients(Message.RecipientType.TO, recipientAddress)
-      msg.setFrom("no-reply@cfpb.gov")
+      msg.setFrom(config.email.fromAddress)
       msg.setSubject(subject)
-      msg.setText(plainTextContent)
+      msg.setText(plainTextContent, "utf-8", "html")
 
       Transport.send(msg)
 
