@@ -23,12 +23,18 @@ spec:
     spec:
       serviceAccountName: {{ .Values.service.account.name }}
       volumes:
-        - name: secret-provider-vol
+        - name: rds-secrets-vol
           csi:
             driver: secrets-store.csi.k8s.io
             readOnly: true
             volumeAttributes:
-              secretProviderClass: hmda-rds-secrets-provider
+              secretProviderClass: irsa-hmda-rds-secrets-provider
+        - name: smtp-secrets-vol
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: smtp-provider
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
@@ -36,8 +42,10 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           volumeMounts:
-            - name: secret-provider-vol
-              mountPath: /mnt/secrets-store
+            - name: rds-secrets-vol
+              mountPath: /mnt/rds-secrets
+            - name: smtp-secrets-vol
+              mountPath: /mnt/smtp-secrets
             - name: tz-config
               mountPath: /etc/localtime
           securityContext:
@@ -56,22 +64,22 @@ spec:
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:
-                  name: platform-rds-secrets
+                  name: irsa-platform-rds-secrets
                   key: host
             - name: PG_DATABASE
               valueFrom:
                 secretKeyRef:
-                  name: platform-rds-secrets
+                  name: irsa-platform-rds-secrets
                   key: database
             - name: PG_USER
               valueFrom:
                 secretKeyRef:
-                  name: platform-rds-secrets
+                  name: irsa-platform-rds-secrets
                   key: username
             - name: PG_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: platform-rds-secrets
+                  name: irsa-platform-rds-secrets
                   key: password
             - name: KAFKA_CLUSTER_HOSTS
               valueFrom:
@@ -128,6 +136,28 @@ spec:
                 configMapKeyRef:
                   name: email-configmap
                   key: adminEmailAddress
+            - name: EMAIL_PROTOCOL
+              value: smtp
+            - name: SMTP_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: smtp-secrets
+                  key: host
+            - name: SMTP_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: smtp-secrets
+                  key: port
+            - name: SMTP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: smtp-secrets
+                  key: username
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: smtp-secrets
+                  key: password
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
