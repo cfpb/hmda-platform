@@ -34,7 +34,7 @@ ingress:
 
 service:
   account:
-    name: hmda-platform
+    name: hmda-platform-irsa
 
 nodeSelector: {}
 
