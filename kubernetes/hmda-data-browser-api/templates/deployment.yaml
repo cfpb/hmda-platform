@@ -51,7 +51,7 @@ spec:
 #            readOnly: true
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
-      serviceAccountName: hmda-platform
+      serviceAccountName: {{ .Values.service.account.name }}
       volumes:
       - name: redis-secrets-vol
         csi:
