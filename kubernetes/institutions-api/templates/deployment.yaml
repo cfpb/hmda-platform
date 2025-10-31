@@ -21,8 +21,14 @@ spec:
         app: {{ template "institutions-api.name" . }}
         release: {{ .Release.Name }}
     spec:
-      # serviceAccountName: {{ .Values.service.account.name }}
+      serviceAccountName: {{ .Values.service.account.name }}
       volumes:
+        - name: secret-provider-vol
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: irsa-hmda-rds-secrets-provider
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
@@ -30,6 +36,8 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           volumeMounts:
+            - name: secret-provider-vol
+              mountPath: /mnt/secrets-store
             - name: tz-config
               mountPath: /etc/localtime
           securityContext:
@@ -57,11 +65,11 @@ spec:
                 configMapKeyRef:
                   name: timed-guards
                   key: yearsAllowed
-            - name: BANK_FILTER_LIST
-              valueFrom:
-                configMapKeyRef:
-                  key: bank-filter-list
-                  name: bank-filter-configmap
+#            - name: BANK_FILTER_LIST
+#              valueFrom:
+#                configMapKeyRef:
+#                  key: bank-filter-list
+#                  name: bank-filter-configmap
             - name: RULES_QF_FILING_YEARS_ALLOWED
               valueFrom:
                 configMapKeyRef:
@@ -70,28 +78,28 @@ spec:
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:
-                  name: inst-postgres-credentials
+                  name: irsa-platform-rds-secrets
                   key: host
             - name: PG_DATABASE
               valueFrom:
-                configMapKeyRef:
-                  name: postgresql-configmap
-                  key: postgres.database
+                secretKeyRef:
+                  name: irsa-platform-rds-secrets
+                  key: database
             - name: PG_USER
               valueFrom:
                 secretKeyRef:
-                  name: inst-postgres-credentials
+                  name: irsa-platform-rds-secrets
                   key: username
             - name: PG_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: inst-postgres-credentials
+                  name: irsa-platform-rds-secrets
                   key: password
-            - name: PG_SSL
-              valueFrom:
-                configMapKeyRef:
-                  name: postgresql-configmap
-                  key: postgres.ssl
+#            - name: PG_SSL
+#              valueFrom:
+#                configMapKeyRef:
+#                  name: postgresql-configmap
+#                  key: postgres.ssl
             - name: INSTITUTION_PG_CREATE_SCHEMA
               value: "{{ .Values.postgresql.createSchema }}"
             {{- if .Values.kafka.security }}
@@ -103,21 +111,21 @@ spec:
                 configMapKeyRef:
                   name: kafka-configmap
                   key: kafka.hosts
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: aws-credentials
-                  key: aws-access-key-id
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: aws-credentials
-                  key: aws-secret-access-key
-            - name: JDBC_URL
-              valueFrom:
-                secretKeyRef:
-                  name: inst-postgres-credentials
-                  key: url
+#            - name: AWS_ACCESS_KEY_ID
+#              valueFrom:
+#                secretKeyRef:
+#                  name: aws-credentials
+#                  key: aws-access-key-id
+#            - name: AWS_SECRET_ACCESS_KEY
+#              valueFrom:
+#                secretKeyRef:
+#                  name: aws-credentials
+#                  key: aws-secret-access-key
+#            - name: JDBC_URL
+#              valueFrom:
+#                secretKeyRef:
+#                  name: inst-postgres-credentials
+#                  key: url
           ports:
             - name: {{ .Values.service.name }}
               containerPort: 9092

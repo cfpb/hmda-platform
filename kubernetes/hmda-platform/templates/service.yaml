@@ -61,7 +61,12 @@ kind: Mapping
 metadata:
   name: hmda-admin-mapping
 spec:
-  ambassador_id: ambassador-default-1
+  {{- if .Values.ambassador_id }}
+  ambassador_id: {{ .Values.ambassador_id }}
+  {{- end}}
+  {{- if .Values.ambassador_host }}
+  host: {{ .Values.ambassador_host }}
+  {{- end}}
   timeout_ms: 0
   prefix: /v2/admin/
 #  rewrite: /v2/admin/
@@ -95,7 +100,12 @@ kind: Mapping
 metadata:
   name: hmda-filing-mapping
 spec:
-  ambassador_id: ambassador-default-1
+  {{- if .Values.ambassador_id }}
+  ambassador_id: {{ .Values.ambassador_id }}
+  {{- end}}
+  {{- if .Values.ambassador_host }}
+  host: {{ .Values.ambassador_host }}
+  {{- end}}
   timeout_ms: 0
   prefix: /v2/filing/
 #  rewrite: /v2/filing/
@@ -165,7 +175,12 @@ kind: Mapping
 metadata:
   name: hmda-filing-mapping-websocket
 spec:
-  ambassador_id: ambassador-default-1
+  {{- if .Values.ambassador_id }}
+  ambassador_id: {{ .Values.ambassador_id }}
+  {{- end}}
+  {{- if .Values.ambassador_host }}
+  host: {{ .Values.ambassador_host }}
+  {{- end}}
   timeout_ms: 0
   prefix: '/v2/filing/institutions/([a-zA-Z0-9]+)/filings/(\d{4})/submissions/(\d+)/progress'
   prefix_regex: true
@@ -248,7 +263,12 @@ kind: Mapping
 metadata:
   name: hmda-filing-mapping-qtr-websocket
 spec:
-  ambassador_id: ambassador-default-1
+  {{- if .Values.ambassador_id }}
+  ambassador_id: {{ .Values.ambassador_id }}
+  {{- end}}
+  {{- if .Values.ambassador_host }}
+  host: {{ .Values.ambassador_host }}
+  {{- end}}
   timeout_ms: 0
   prefix: '/v2/filing/institutions/([a-zA-Z0-9]+)/filings/(\d{4})/quarter/Q([1-3])/submissions/(\d+)/progress'
   prefix_regex: true
@@ -330,7 +350,12 @@ kind: Mapping
 metadata:
   name: hmda-public-mapping
 spec:
-  ambassador_id: ambassador-default-1
+  {{- if .Values.ambassador_id }}
+  ambassador_id: {{ .Values.ambassador_id }}
+  {{- end}}
+  {{- if .Values.ambassador_host }}
+  host: {{ .Values.ambassador_host }}
+  {{- end}}
   timeout_ms: 0
   prefix: /v2/public/
 #  rewrite: /v2/public/
@@ -401,7 +426,12 @@ kind: Mapping
 metadata:
   name: hmda-cluster-mapping
 spec:
-  ambassador_id: ambassador-default-1
+  {{- if .Values.ambassador_id }}
+  ambassador_id: {{ .Values.ambassador_id }}
+  {{- end}}
+  {{- if .Values.ambassador_host }}
+  host: {{ .Values.ambassador_host }}
+  {{- end}}
   timeout_ms: 0
   prefix: /v2/cluster/
   rewrite: /cluster/members
@@ -437,7 +467,12 @@ kind: Mapping
 metadata:
   name: hmda-ws-mapping
 spec:
-  ambassador_id: ambassador-default-1
+  {{- if .Values.ambassador_id }}
+  ambassador_id: {{ .Values.ambassador_id }}
+  {{- end}}
+  {{- if .Values.ambassador_host }}
+  host: {{ .Values.ambassador_host }}
+  {{- end}}
   prefix: /v2/ws/status/
 #  rewrite: /v2/ws/status/
   timeout_ms: 380000

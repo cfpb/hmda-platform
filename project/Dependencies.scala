@@ -74,6 +74,7 @@ object Dependencies {
   lazy val lettuce               = "io.lettuce"                 % "lettuce-core"                % Version.lettuce
   lazy val guava                 = "com.google.guava"           % "guava"                       % Version.guava
   lazy val awsSesSdk             = "com.amazonaws"              % "aws-java-sdk-ses"            % Version.awsSesSdk exclude ("commons-logging", "commons-logging")
+  lazy val jakartaMail           = "jakarta.mail"               % "jakarta.mail-api"            % Version.jakartaMail
   lazy val zeroAllocationHashing = "net.openhft"                % "zero-allocation-hashing"     % Version.zeroAllocation
   lazy val cormorant             = "io.chrisdavenport"          %% "cormorant-parser"           % Version.cormorant
   lazy val cormorantGeneric      = "io.chrisdavenport"          %% "cormorant-generic"          % Version.cormorant

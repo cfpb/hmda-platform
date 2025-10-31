@@ -23,7 +23,12 @@ kind: Mapping
 metadata:
   name: institution-api-mapping
 spec:
-  ambassador_id: ambassador-default-1
+  {{- if .Values.ambassador_id }}
+  ambassador_id: {{ .Values.ambassador_id }}
+  {{- end}}
+  {{- if .Values.ambassador_host }}
+  host: {{ .Values.ambassador_host }}
+  {{- end}}
   timeout_ms: 0
   prefix: /v2/public/institutions
   rewrite: /institutions

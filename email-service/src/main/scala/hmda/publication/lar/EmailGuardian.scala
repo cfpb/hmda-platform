@@ -3,15 +3,15 @@ package hmda.publication.lar
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl._
 import akka.actor.typed.scaladsl.adapter._
-import akka.actor.{ActorSystem => UntypedActorSystem}
+import akka.actor.{ ActorSystem => UntypedActorSystem }
 import akka.kafka.CommitterSettings
-import akka.stream.{ActorMaterializer, Materializer}
+import akka.stream.{ ActorMaterializer, Materializer }
 import akka.stream.scaladsl.Keep
 import com.amazonaws.regions.Regions
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder
+import com.amazonaws.services.simpleemail.{ AmazonSimpleEmailService, AmazonSimpleEmailServiceClientBuilder }
 import hmda.publication.lar.config.Settings
-import hmda.publication.lar.database.{EmailSubmissionStatusRepository, PGSlickEmailSubmissionStatusRepository}
-import hmda.publication.lar.email.SESEmailService
+import hmda.publication.lar.database.{ EmailSubmissionStatusRepository, PGSlickEmailSubmissionStatusRepository }
+import hmda.publication.lar.email.{ SESEmailService, SmtpEmailService }
 import hmda.publication.lar.streams.SubmissionStream
 import hmda.publication.lar.streams.AdminStream
 import monix.execution.Scheduler
@@ -31,8 +31,16 @@ object EmailGuardian {
 
       val databaseConfig                                   = DatabaseConfig.forConfig[JdbcProfile]("db")
       val config                                           = Settings(system)
-      val serviceClient                                    = AmazonSimpleEmailServiceClientBuilder.standard().withRegion(Regions.US_EAST_1).build()
-      val emailService                                     = new SESEmailService(serviceClient, config.email.fromAddress)
+      val serviceClient: Option[AmazonSimpleEmailService] = None
+      val emailService = {
+        config.client.protocol match {
+          case "ses" =>
+            val serviceClient = Some(AmazonSimpleEmailServiceClientBuilder.standard().withRegion(Regions.US_EAST_1).build())
+            new SESEmailService(serviceClient.get, config.email.fromAddress)
+          case "smtp" => new SmtpEmailService(config)
+          case proto => throw new IllegalStateException(s"Invalid email client protocol: $proto")
+        }
+      }
       val emailStatusRepo: EmailSubmissionStatusRepository = new PGSlickEmailSubmissionStatusRepository(databaseConfig)
       val commitSettings                                   = CommitterSettings(config.kafka.commitSettings)
 
@@ -83,11 +91,15 @@ object EmailGuardian {
         case Error(errorMessage) =>
           ctx.log.error(s"Infinite consumer stream has terminated, Error: $errorMessage")
           submissionControl.drainAndShutdown(streamSubmissionCompletion).onComplete { _ =>
-            serviceClient.shutdown()
+            serviceClient match {
+              case Some(client) => client.shutdown()
+            }
             databaseConfig.db.shutdown
           }
           adminControl.drainAndShutdown(streamAdminCompletion).onComplete { _ =>
-            serviceClient.shutdown()
+            serviceClient match {
+              case Some(client) => client.shutdown()
+            }
             databaseConfig.db.shutdown
           }
           Behaviors.stopped
