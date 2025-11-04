@@ -133,4 +133,4 @@ logs:
   cassandra: TRACE
 
 # ambassador_id: ambassador-default-1
-# ambassador_host: hmda-public.example.com
+ambassador_host: ffiec-test.cfpb.gov
