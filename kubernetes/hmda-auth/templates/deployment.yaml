@@ -59,7 +59,7 @@ spec:
             driver: secrets-store.csi.k8s.io
             readOnly: true
             volumeAttributes:
-              secretProviderClass: keycloak-secrets-provider
+              secretProviderClass: kc-admin-secrets-provider
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
@@ -141,13 +141,13 @@ spec:
             - name: KEYCLOAK_ADMIN_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: keycloak-credentials
-                  key: admin-username
+                  name: keycloak-admin-secrets
+                  key: username
             - name: KEYCLOAK_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: keycloak-credentials
-                  key: admin-password
+                  name: keycloak-admin-secrets
+                  key: password
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:

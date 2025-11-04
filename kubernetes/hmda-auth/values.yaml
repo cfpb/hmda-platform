@@ -62,5 +62,5 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
-ambassador_id: ambassador-default-1
-# ambassador_host: hmda-publicl.example.com
+#ambassador_id: ambassador-default-1
+ambassador_host: ffiec-test.cfpb.gov
