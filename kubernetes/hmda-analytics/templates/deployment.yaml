@@ -21,12 +21,18 @@ spec:
     spec:
       serviceAccountName: {{ .Values.service.account.name }}
       volumes:
-        - name: secret-provider-vol
+        - name: rds-provider-vol
           csi:
             driver: secrets-store.csi.k8s.io
             readOnly: true
             volumeAttributes:
-              secretProviderClass: hmda-rds-secrets-provider
+              secretProviderClass: irsa-hmda-rds-secrets-provider
+        - name: sandra-provider-vol
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: irsa-k8ssandra-credentials-provider
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
@@ -37,8 +43,10 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           volumeMounts:
-            - name: secret-provider-vol
-              mountPath: /mnt/secrets-store
+            - name: rds-provider-vol
+              mountPath: /mnt/rds-secrets-store
+            - name: sandra-provider-vol
+              mountPath: /mnt/sandra-secrets-store
             - name: tz-config
               mountPath: /etc/localtime
 #            - name: cassandra-truststore
@@ -65,22 +73,22 @@ spec:
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:
-                  name: platform-rds-secrets
+                  name: irsa-platform-rds-secrets
                   key: host
             - name: PG_DATABASE
               valueFrom:
                 secretKeyRef:
-                  name: platform-rds-secrets
+                  name: irsa-platform-rds-secrets
                   key: database
             - name: PG_USER
               valueFrom:
                 secretKeyRef:
-                  name: platform-rds-secrets
+                  name: irsa-platform-rds-secrets
                   key: username
             - name: PG_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: platform-rds-secrets
+                  name: irsa-platform-rds-secrets
                   key: password
 #            - name: PG_SSL
 #              valueFrom:
@@ -120,12 +128,12 @@ spec:
             - name: CASSANDRA_CLUSTER_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: cassandra-credentials
+                  name: irsa-cassandra-credentials
                   key: cassandra.username
             - name: CASSANDRA_CLUSTER_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: cassandra-credentials
+                  name: irsa-cassandra-credentials
                   key: cassandra.password
 #            - name: CASSANDRA_TRUSTSTORE_FILE
 #              value: "/opt/cassandra_truststore/cassandra_truststore.jks"
