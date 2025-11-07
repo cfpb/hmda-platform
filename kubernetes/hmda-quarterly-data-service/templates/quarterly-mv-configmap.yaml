@@ -12,11 +12,10 @@ data:
   DTI_BY_RE: median_dti_by_race
   INTEREST_RATES_BY_LOAN: median_interest_rates_by_loan_type
   INTEREST_RATES_BY_RE: median_interest_rates_by_race
-  PERIODS_ANNUAL: 2018,2019,2020,2021,2022,2023
-  PERIODS_WITH_QUARTER: 2018,2019,2020,2021,2022,2023,2024_q1,2024_q2,2024_q3
+  PERIODS_ANNUAL: 2018,2019,2020,2021,2022,2023,2024
+  PERIODS_WITH_QUARTER: 2018,2019,2020,2021,2022,2023,2024
   TLC_BY_LOAN: median_total_loan_costs_by_loan_type
   TLC_BY_RE: median_total_loan_costs_by_race
 kind: ConfigMap
 metadata:
   name: hmda-quarterly-data-service-mv-configmap
-  namespace: default
