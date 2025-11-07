@@ -15,7 +15,8 @@ service:
   targetPort: 9091  
   name: file-proxy
   account:
-    name: file-proxy
+    create: false
+    name: hmda-platform
 
 hmda:
   runtimeMode: kubernetes
@@ -66,3 +67,5 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+ambassador_host: ffiec-test.cfpb.gov

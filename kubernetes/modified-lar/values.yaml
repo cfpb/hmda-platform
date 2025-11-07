@@ -16,7 +16,7 @@ kafka:
   modifiedLarGroup: modified-lar-group
   modifiedLarTopic: hmda-modified-lar
   signTopic: hmda-sign
-  security: ""  
+  security: "SASL_SSL"
 
 ingress:
   enabled: false

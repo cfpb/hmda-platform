@@ -15,7 +15,7 @@ service:
   targetPort: 9190
   name: http-publisher
   account:
-    name: hmda-service-account-default
+    name: hmda-platform
 
 grpc:
   type: ClusterIP

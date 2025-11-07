@@ -23,6 +23,9 @@ spec:
   {{- if .Values.ambassador_id }}
   ambassador_id: {{ .Values.ambassador_id }}
   {{- end}}
+  {{- if .Values.ambassador_host }}
+  host: {{ .Values.ambassador_host }}
+  {{- end}}
   prefix: /public/
   service: {{ .Values.service.name }}:{{ .Values.ratespread.port }}
   add_response_headers:

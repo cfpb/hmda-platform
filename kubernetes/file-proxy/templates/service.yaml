@@ -24,7 +24,12 @@ metadata:
     service: {{ include "file-proxy.fullname" . }}-mapping
   name: {{ include "file-proxy.fullname" . }}-mapping
 spec:
-  ambassador_id: ambassador-default-1
+  {{- if .Values.ambassador_id }}
+  ambassador_id: {{ .Values.ambassador_id }}
+  {{- end}}
+  {{- if .Values.ambassador_host }}
+  host: {{ .Values.ambassador_host }}
+  {{- end}}
   prefix: /file/
   rewrite: /file/
   service: {{ include "file-proxy.fullname" . }}:{{ .Values.service.port }}
