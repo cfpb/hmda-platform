@@ -13,7 +13,7 @@ data:
   INTEREST_RATES_BY_LOAN: median_interest_rates_by_loan_type
   INTEREST_RATES_BY_RE: median_interest_rates_by_race
   PERIODS_ANNUAL: 2018,2019,2020,2021,2022,2023,2024
-  PERIODS_WITH_QUARTER: 2018,2019,2020,2021,2022,2023,2024
+  PERIODS_WITH_QUARTER: 2018,2019,2020,2021,2022,2023,2024,2025_q1,2025_q2
   TLC_BY_LOAN: median_total_loan_costs_by_loan_type
   TLC_BY_RE: median_total_loan_costs_by_race
 kind: ConfigMap
