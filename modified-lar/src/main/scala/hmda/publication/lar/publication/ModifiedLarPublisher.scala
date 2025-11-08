@@ -45,7 +45,6 @@ object ModifiedLarPublisher {
   val secretAccess              = config.getString("aws.secret-access-key ")
   val region                    = config.getString("aws.region")
   val bucket                    = config.getString("aws.public-bucket")
-  val environment               = config.getString("aws.environment")
   val isGenerateBothS3Files          = config.getBoolean("hmda.lar.modified.generateS3Files")
   val regenerateMlar = config.getBoolean("hmda.lar.modified.regenerateMlar")
   val isCreateDispositionRecord = config.getBoolean("hmda.lar.modified.creteDispositionRecord")
@@ -104,13 +103,13 @@ object ModifiedLarPublisher {
                 Map("Content-Disposition" -> "attachment", "filename" -> fileName)
 
               val s3Sink = S3
-                .multipartUpload(bucket, s"$environment/modified-lar/$filingPeriod/$fileName", metaHeaders = MetaHeaders(metaHeaders))
+                .multipartUpload(bucket, s"modified-lar/$filingPeriod/$fileName", metaHeaders = MetaHeaders(metaHeaders))
                 .withAttributes(S3Attributes.settings(s3Settings))
 
               val s3SinkWithHeader = S3
                 .multipartUpload(
                   bucket,
-                  s"$environment/modified-lar/$filingPeriod/header/$fileNameHeader",
+                  s"modified-lar/$filingPeriod/$fileNameHeader",
                   metaHeaders = MetaHeaders(metaHeaders)
                 )
                 .withAttributes(S3Attributes.settings(s3Settings))

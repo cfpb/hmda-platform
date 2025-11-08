@@ -12,7 +12,6 @@ trait PrivateAWSConfigLoader {
   val secretAccessPrivate = awsConfigPrivate.getString("private-secret-access-key ")
   val regionPrivate       = awsConfigPrivate.getString("private-region")
   val bucketPrivate       = awsConfigPrivate.getString("private-s3-bucket")
-  val environmentPrivate  = awsConfigPrivate.getString("private-environment")
 
 //  val awsCredentialsProviderPrivate = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyIdPrivate, secretAccessPrivate))
 
