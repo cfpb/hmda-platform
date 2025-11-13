@@ -80,7 +80,7 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
         availableRepos.get(year) match {
           case Some(repo) =>
             for {
-              _ <- larPublicStream(repo.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, LarPublicSchedule)
+              _ <- larPublicStream(repo.getAllLARs(getFilterList()), bucket, fullFilePath, fileName, LarPublicSchedule,year)
             } yield ()
           case None => log.error("No available publisher found for {} in year {}", schedule, year)
         }
@@ -92,7 +92,8 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
                                bucket: String,
                                key: String,
                                fileName: String,
-                               schedule: Schedule
+                               schedule: Schedule,
+                               year: Int
                              ): Future[MultipartUploadResult] = {
 
     //PSV Sync
@@ -109,7 +110,7 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
     val zipStream = Source(List((ArchiveMetadata(fileName), fileStream)))
 
     val resultsPSV = for {
-      _            <- S3Archiver.archiveFileIfExists(bucket, key, bucketPrivate, s3Settings)
+      _            <- S3Archiver.archiveFileIfExists(bucket, key, bucketPrivate, s3Settings,year)
       source       = zipStream.via(Archive.zip())
       uploadResult <- S3Utils.uploadWithRetry(source, s3SinkPSV)
     } yield uploadResult
@@ -119,7 +120,7 @@ class LarPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command
         case Some(value) => FilePublishingCompleted.Status.Error(value)
         case None        => FilePublishingCompleted.Status.Success
       }
-      publishingReporter ! FilePublishingCompleted(schedule, key, None, Instant.now(), status)
+      publishingReporter ! FilePublishingCompleted(schedule, bucket+"/"+key, None, Instant.now(), status)
     }
 
     resultsPSV onComplete {

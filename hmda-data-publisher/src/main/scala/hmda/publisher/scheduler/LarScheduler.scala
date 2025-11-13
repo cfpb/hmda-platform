@@ -213,7 +213,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
         case Some(value) => FilePublishingCompleted.Status.Error(value)
         case None => FilePublishingCompleted.Status.Success
       }
-      publishingReporter ! FilePublishingCompleted(schedule, fullFilePath, count, Instant.now(), status)
+      publishingReporter ! FilePublishingCompleted(schedule, bucketPrivate+"/"+fullFilePath, count, Instant.now(), status)
     }
 
     results onComplete {

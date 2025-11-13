@@ -201,8 +201,8 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
       } yield count
 
       results onComplete {
-        case Success(count) => reportPublishingResult(schedule, fullFilePath, Some(count))
-        case Failure(t) => reportPublishingResultError(schedule, fullFilePath, t)
+        case Success(count) => reportPublishingResult(schedule, bucketPrivate+"/"+fullFilePath, Some(count))
+        case Failure(t) => reportPublishingResultError(schedule, bucketPrivate+"/"+fullFilePath, t)
       }
     }
 

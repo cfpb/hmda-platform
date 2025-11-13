@@ -88,8 +88,8 @@ class CombinedMLarPublicScheduler(publishingReporter: ActorRef[PublishingReporte
         availableRepos.get(year) match {
           case Some(repo) =>
             for {
-              _ <- larPublicStream(repo.getAllLARs(getFilterList()), bucketPublic, fullFilePathHeader, fileNameHeader, CombinedMLarPublicSchedule,"header")
-              _ <- larPublicStream(repo.getAllLARs(getFilterList()), bucketPublic, fullFilePath, fileName, CombinedMLarPublicSchedule,"")
+              _ <- larPublicStream(repo.getAllLARs(getFilterList()), bucketPublic, fullFilePathHeader, fileNameHeader, CombinedMLarPublicSchedule,"header",year)
+              _ <- larPublicStream(repo.getAllLARs(getFilterList()), bucketPublic, fullFilePath, fileName, CombinedMLarPublicSchedule,"",year)
             } yield ()
           case None => log.error("No available publisher found for {} in year {}", schedule, year)
         }
@@ -102,7 +102,8 @@ class CombinedMLarPublicScheduler(publishingReporter: ActorRef[PublishingReporte
                                key: String,
                                fileName: String,
                                schedule: Schedule,
-                               fileType: String
+                               fileType: String,
+                               year: Int
                              ): Future[MultipartUploadResult] = {
 
     //PSV Sync
@@ -119,7 +120,7 @@ class CombinedMLarPublicScheduler(publishingReporter: ActorRef[PublishingReporte
     val zipStream = Source(List((ArchiveMetadata(fileName), fileStream)))
 
     val resultsPSV = for {
-      _            <- S3Archiver.archiveFileIfExists(bucket, key, bucketPrivate, s3Settings)
+      _            <- S3Archiver.archiveFileIfExists(bucket, key, bucketPrivate, s3Settings,year)
       source       = zipStream.via(Archive.zip())
       uploadResult <- S3Utils.uploadWithRetry(source, s3SinkPSV)
     } yield uploadResult

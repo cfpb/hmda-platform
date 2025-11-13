@@ -12,7 +12,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 
 object S3Archiver extends LazyLogging{
 
-  def archiveFileIfExists(srcBucket: String, srcKey: String, destBucket: String, s3Settings: S3Settings)(
+  def archiveFileIfExists(srcBucket: String, srcKey: String, destBucket: String, s3Settings: S3Settings,year: Int)(
     implicit ec: ExecutionContext,
     mat: Materializer
   ): Future[Unit] = {
@@ -21,10 +21,10 @@ object S3Archiver extends LazyLogging{
       if (dotIdx == -1) "" else srcKey.substring(dotIdx)
     }
     val destKey = srcKey.stripSuffix(extension) + s"_${Instant.now()}${extension}"
-    copyIfExists(srcBucket, srcKey, destBucket, destKey, s3Settings)
+    copyIfExists(srcBucket, srcKey, destBucket, destKey, s3Settings,year)
   }
 
-  private def copyIfExists(srcBucket: String, srcKey: String, destBucket: String, destKey: String, s3Settings: S3Settings)(
+  private def copyIfExists(srcBucket: String, srcKey: String, destBucket: String, destKey: String, s3Settings: S3Settings,year: Int)(
     implicit ec: ExecutionContext,
     mat: Materializer
   ): Future[Unit] =

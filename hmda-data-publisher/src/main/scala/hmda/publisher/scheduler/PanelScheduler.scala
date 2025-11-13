@@ -158,7 +158,7 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], s
       case Failure(t) =>
         publishingReporter ! FilePublishingCompleted(
           schedule,
-          fullFilePath,
+          bucketPrivate+"/"+fullFilePath,
           None,
           Instant.now,
           FilePublishingCompleted.Status.Error(t.getMessage)

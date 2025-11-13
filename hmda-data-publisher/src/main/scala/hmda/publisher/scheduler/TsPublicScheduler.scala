@@ -108,17 +108,17 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
       )
 
       val resultsPSV = for {
-        _ <- S3Archiver.archiveFileIfExists(bucket, key, bucketPrivate, s3Settings)
+        _ <- S3Archiver.archiveFileIfExists(bucket, key, bucketPrivate, s3Settings,year)
         bytesStream = zipStream.via(Archive.zip())
         uploadResult <- S3Utils.uploadWithRetry(bytesStream, s3SinkPSV)
       } yield uploadResult
 
       resultsPSV onComplete {
         case Success(result) =>
-          publishingReporter ! FilePublishingCompleted(schedule, key, None, Instant.now, FilePublishingCompleted.Status.Success)
+          publishingReporter ! FilePublishingCompleted(schedule, bucket+"/"+key, None, Instant.now, FilePublishingCompleted.Status.Success)
           log.info("Pushed to S3: " + s"$bucket/$key" + ".")
         case Failure(t) =>
-          publishingReporter ! FilePublishingCompleted(schedule, key, None, Instant.now, FilePublishingCompleted.Status.Error(t.getMessage))
+          publishingReporter ! FilePublishingCompleted(schedule, bucket+"/"+key, None, Instant.now, FilePublishingCompleted.Status.Error(t.getMessage))
           log.info("An error has occurred with: " + key + "; Getting Public TS Data in Future: " + t.getMessage)
       }
       resultsPSV
