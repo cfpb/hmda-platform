@@ -88,8 +88,8 @@ class CombinedMLarPublicScheduler(publishingReporter: ActorRef[PublishingReporte
         availableRepos.get(year) match {
           case Some(repo) =>
             for {
-              _ <- larPublicStream(repo.getAllLARs(getFilterList()), bucketPublic, fullFilePathHeader, fileNameHeader, CombinedMLarPublicSchedule,"header",year)
-              _ <- larPublicStream(repo.getAllLARs(getFilterList()), bucketPublic, fullFilePath, fileName, CombinedMLarPublicSchedule,"",year)
+              _ <- larPublicStream(repo.getAllLARs(getFilterList()), bucketPublic, fullFilePathHeader, fileNameHeader, CombinedMLarPublicSchedule,"header")
+              _ <- larPublicStream(repo.getAllLARs(getFilterList()), bucketPublic, fullFilePath, fileName, CombinedMLarPublicSchedule,"")
             } yield ()
           case None => log.error("No available publisher found for {} in year {}", schedule, year)
         }
@@ -102,8 +102,7 @@ class CombinedMLarPublicScheduler(publishingReporter: ActorRef[PublishingReporte
                                key: String,
                                fileName: String,
                                schedule: Schedule,
-                               fileType: String,
-                               year: Int
+                               fileType: String
                              ): Future[MultipartUploadResult] = {
 
     //PSV Sync

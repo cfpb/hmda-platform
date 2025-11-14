@@ -57,7 +57,6 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
   val s3Settings =
     S3Settings(context.system)
       .withBufferType(MemoryBufferType)
-//      .withCredentialsProvider(awsCredentialsProviderPublic)
       .withS3RegionProvider(awsRegionProviderPublic)
       .withListBucketApiVersion(ListBucketVersion2)
 
