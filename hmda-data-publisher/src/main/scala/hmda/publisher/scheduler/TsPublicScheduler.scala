@@ -107,7 +107,7 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
       )
 
       val resultsPSV = for {
-        _ <- S3Archiver.archiveFileIfExists(bucket, key, bucketPrivate, s3Settings,year)
+        _ <- S3Archiver.archiveFileIfExists(bucket, key, bucketPrivate, s3Settings)
         bytesStream = zipStream.via(Archive.zip())
         uploadResult <- S3Utils.uploadWithRetry(bytesStream, s3SinkPSV)
       } yield uploadResult

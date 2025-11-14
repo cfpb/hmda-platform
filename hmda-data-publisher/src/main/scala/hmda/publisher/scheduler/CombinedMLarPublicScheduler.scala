@@ -120,7 +120,7 @@ class CombinedMLarPublicScheduler(publishingReporter: ActorRef[PublishingReporte
     val zipStream = Source(List((ArchiveMetadata(fileName), fileStream)))
 
     val resultsPSV = for {
-      _            <- S3Archiver.archiveFileIfExists(bucket, key, bucketPrivate, s3Settings,year)
+      _            <- S3Archiver.archiveFileIfExists(bucket, key, bucketPrivate, s3Settings)
       source       = zipStream.via(Archive.zip())
       uploadResult <- S3Utils.uploadWithRetry(source, s3SinkPSV)
     } yield uploadResult
