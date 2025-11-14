@@ -80,8 +80,7 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
         val fullFilePath = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
         val bucket = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
 
-        val result = tsPublicStream(year, bucket, fullFilePath, fileName, TsPublicSchedule)
-        //result.foreach(r => persistFileForQa(r.key, r.bucket, qaRepo2020))
+        tsPublicStream(year, bucket, fullFilePath, fileName, TsPublicSchedule)
       }
   }
 

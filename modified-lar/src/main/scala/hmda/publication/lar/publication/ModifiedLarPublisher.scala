@@ -41,13 +41,10 @@ object ModifiedLarPublisher {
   final val name: String = "ModifiedLarPublisher"
 
   val config                    = ConfigFactory.load()
-  val accessKeyId               = config.getString("aws.access-key-id")
-  val secretAccess              = config.getString("aws.secret-access-key ")
   val region                    = config.getString("aws.region")
   val bucket                    = config.getString("aws.public-bucket")
   val isGenerateBothS3Files          = config.getBoolean("hmda.lar.modified.generateS3Files")
   val regenerateMlar = config.getBoolean("hmda.lar.modified.regenerateMlar")
-  val isCreateDispositionRecord = config.getBoolean("hmda.lar.modified.creteDispositionRecord")
   val isJustGenerateS3File = config.getBoolean("hmda.lar.modified.justGenerateS3File")
   val isJustGenerateS3FileHeader = config.getBoolean("hmda.lar.modified.justGenerateS3FileHeader")
 
@@ -79,7 +76,6 @@ object ModifiedLarPublisher {
 
       val s3Settings = S3Settings(ctx.system.toClassic)
         .withBufferType(MemoryBufferType)
-//        .withCredentialsProvider(awsCredentialsProvider)
         .withS3RegionProvider(awsRegionProvider)
         .withListBucketApiVersion(ListBucketVersion2)
 
@@ -191,7 +187,6 @@ object ModifiedLarPublisher {
                   removeLei
                   Future.sequence(List(graphWithJustS3NoHeader.run(), graphWithJustS3WithHeader.run(), graphWithJustPG.run()))
                 }
-                _ <- produceRecord(disclosureTopic, submissionId.lei, submissionId.toString, kafkaProducer)
               } yield ()
 
               finalResult.onComplete {
