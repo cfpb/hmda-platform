@@ -27,10 +27,20 @@ spec:
       serviceAccountName: {{ include "hmda-quarterly-data-service.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+        - name: rds-secret-provider-vol
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: hmda-rds-secrets-provider
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
+          volumeMounts:
+            - name: rds-secret-provider-vol
+              mountPath: /mnt/rds-secrets-store
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
@@ -42,43 +52,43 @@ spec:
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:
-                  name: inst-postgres-credentials
+                  name: platform-rds-secrets
                   key: host
             - name: PG_DATABASE
               valueFrom:
-                configMapKeyRef:
-                  name: postgresql-configmap
-                  key: postgres.database
+                secretKeyRef:
+                  name: platform-rds-secrets
+                  key: database
             - name: PG_USER
               valueFrom:
                 secretKeyRef:
-                  name: inst-postgres-credentials
+                  name: platform-rds-secrets
                   key: username
             - name: PG_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: inst-postgres-credentials
+                  name: platform-rds-secrets
                   key: password
-            - name: PG_SSL
-              valueFrom:
-                configMapKeyRef:
-                  name: postgresql-configmap
-                  key: postgres.ssl
-            - name: JDBC_URL
-              valueFrom:
-                secretKeyRef:
-                  name: inst-postgres-credentials
-                  key: url
-            - name: PERIODS_QUARTER
-              valueFrom:
-                  configMapKeyRef:
-                    name: hmda-quarterly-data-service-mv-configmap
-                    key: PERIODS_WITH_QUARTER
-            - name: PERIODS_ANNUAL
-              valueFrom:
-                    configMapKeyRef:
-                      name: hmda-quarterly-data-service-mv-configmap
-                      key: PERIODS_ANNUAL
+#            - name: PG_SSL
+#              valueFrom:
+#                configMapKeyRef:
+#                  name: postgresql-configmap
+#                  key: postgres.ssl
+#            - name: JDBC_URL
+#              valueFrom:
+#                secretKeyRef:
+#                  name: inst-postgres-credentials
+#                  key: url
+#            - name: PERIODS_QUARTER
+#              valueFrom:
+#                  configMapKeyRef:
+#                    name: hmda-quarterly-data-service-mv-configmap
+#                    key: PERIODS_WITH_QUARTER
+#            - name: PERIODS_ANNUAL
+#              valueFrom:
+#                    configMapKeyRef:
+#                      name: hmda-quarterly-data-service-mv-configmap
+#                      key: PERIODS_ANNUAL
           ports:
             - name: http
               containerPort: 8060

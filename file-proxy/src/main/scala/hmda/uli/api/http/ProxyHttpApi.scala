@@ -44,11 +44,8 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
   private final val IRS_PUB_KEY = "IRS_YEARS"
 
   val config                  = ConfigFactory.load()
-  val accessKeyId             = config.getString("aws.access-key-id")
-  val secretAccess            = config.getString("aws.secret-access-key ")
   val region                  = config.getString("aws.region")
   val bucket                  = config.getString("aws.public-bucket")
-  val environment             = config.getString("aws.environment")
 
   val publicationYears = Map(
     DYNAMIC_PUB_KEY -> config.getString("hmda.publication.years.dynamic").split(",").toSeq,
@@ -56,25 +53,14 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
     IRS_PUB_KEY -> config.getString("hmda.publication.years.irs").split(",").toSeq
   )
 
-  val runMode = config.getString("hmda.runtime.mode")
-
-  val rtConfig: Option[RealTimeConfig] = if (runMode == "kubernetes") {
-      val cmToWatch = config.getString("hmda.publication.years.cm")
-      Some(new RealTimeConfig(cmToWatch, "default"))
-    } else {
-      None
-    }
-
   val hmdaAdminRole   = config.getString("keycloak.hmda.admin.role")
 
-  val awsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccess))
   val awsRegionProvider: AwsRegionProvider = new AwsRegionProvider {
     override def getRegion: Region = Region.of(region)
   }
 
   val s3Settings = S3Settings(system)
     .withBufferType(MemoryBufferType)
-    .withCredentialsProvider(awsCredentialsProvider)
     .withS3RegionProvider(awsRegionProvider)
     .withListBucketApiVersion(ListBucketVersion2)
 
@@ -86,8 +72,8 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
           //CSV Without Header
           path("csv") {
             (extractUri & get) { uri =>
-              checkYearAvailable(getAvailableYears(DYNAMIC_PUB_KEY), year) {
-                val s3Key = s"$environment/modified-lar/$year/$lei.csv"
+              checkYearAvailable(publicationYears(DYNAMIC_PUB_KEY), year) {
+                val s3Key = s"modified-lar/$year/$lei.csv"
                 streamingS3Route(s3Key)
               }
             }
@@ -95,8 +81,8 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
           //CSV With Header
           path("csv" / "header") {
             (extractUri & get) { uri =>
-              checkYearAvailable(getAvailableYears(DYNAMIC_PUB_KEY), year) {
-                val s3Key = s"$environment/modified-lar/$year/header/${lei}_header.csv"
+              checkYearAvailable(publicationYears(DYNAMIC_PUB_KEY), year) {
+                val s3Key = s"modified-lar/$year/header/${lei}_header.csv"
                 streamingS3Route(s3Key)
               }
             }
@@ -104,8 +90,8 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
           //TXT Without Header
           path("txt") {
             (extractUri & get) { uri =>
-              checkYearAvailable(getAvailableYears(DYNAMIC_PUB_KEY), year) {
-                val s3Key = s"$environment/modified-lar/$year/$lei.txt"
+              checkYearAvailable(publicationYears(DYNAMIC_PUB_KEY), year) {
+                val s3Key = s"modified-lar/$year/$lei.txt"
                 streamingS3Route(s3Key)
               }
             }
@@ -113,8 +99,8 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
           //TXT With Header
           path("txt" / "header") {
             (extractUri & get) { uri =>
-              checkYearAvailable(getAvailableYears(DYNAMIC_PUB_KEY), year) {
-                val s3Key = s"$environment/modified-lar/$year/header/${lei}_header.txt"
+              checkYearAvailable(publicationYears(DYNAMIC_PUB_KEY), year) {
+                val s3Key = s"modified-lar/$year/header/${lei}_header.txt"
                 streamingS3Route(s3Key)
               }
             }
@@ -124,8 +110,8 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
         path("reports" / "irs" / "year" / Segment / "institution" / Segment) { (year, lei) =>
           (extractUri & get) { uri =>
             oAuth2Authorization.authorizeTokenWithLeiOrRole(lei, hmdaAdminRole) { _ =>
-              checkYearAvailable(getAvailableYears(IRS_PUB_KEY), year) {
-                val s3Key = s"$environment/reports/disclosure/$year/$lei/nationwide/IRS.csv"
+              checkYearAvailable(publicationYears(IRS_PUB_KEY), year) {
+                val s3Key = s"reports/disclosure/$year/$lei/nationwide/IRS.csv"
                 streamingS3Route(s3Key)
               }
             }
@@ -135,16 +121,9 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
     } 
   }
 
-  private def getAvailableYears(pubKey: String): Seq[String] = {
-    val defaultYears = publicationYears(pubKey)
-    rtConfig match {
-      case Some(conf) => Try(conf.getSeq(pubKey)).getOrElse(defaultYears)
-      case None => defaultYears
-    }
-  }
-
   private def retrieveData(path: String): Future[Option[Source[ByteString, NotUsed]]] = {
     val timeout: Timeout = Timeout(config.getInt("hmda.http.timeout").seconds)
+    log.info("retrieving bucket: {}, path: {}", bucket, path)
     S3.download(bucket, path).withAttributes(S3Attributes.settings(s3Settings)).runWith(Sink.head)
       .map(opt => opt.map { case (source, _) => source })
   }
@@ -152,8 +131,10 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
   private def streamingS3Route(s3Key: String): Route = {
     val fStream: Future[Source[ByteString, NotUsed]] = retrieveData(s3Key).flatMap {
       case Some(stream) =>
+        log.info("got data!")
         Future(stream)
       case None =>
+        log.info("no data...")
         Future(Source.empty)
     }
 

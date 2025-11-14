@@ -57,7 +57,7 @@ class CombinedMLarPublicScheduler(publishingReporter: ActorRef[PublishingReporte
 
   val s3Settings = S3Settings(context.system)
     .withBufferType(MemoryBufferType)
-    .withCredentialsProvider(awsCredentialsProviderPublic)
+//    .withCredentialsProvider(awsCredentialsProviderPublic)
     .withS3RegionProvider(awsRegionProviderPublic)
     .withListBucketApiVersion(ListBucketVersion2)
 

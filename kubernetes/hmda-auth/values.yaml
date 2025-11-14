@@ -14,7 +14,7 @@ service:
   port: 9095
   targetPort: 9095
   name: http-hmda-auth
-  serviceAccount: hmda-service-account-default
+  serviceAccount: hmda-platform
 
 hmda:
   runtimeMode: kubernetes
@@ -62,5 +62,5 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
-ambassador_id: ambassador-default-1
-# ambassador_host: hmda-publicl.example.com
+#ambassador_id: ambassador-default-1
+ambassador_host: ffiec-test.cfpb.gov

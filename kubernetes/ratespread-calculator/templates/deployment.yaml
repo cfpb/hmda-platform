@@ -21,16 +21,17 @@ spec:
         app: {{ include "ratespread-calculator.name" . }}
         release: {{ .Release.Name }}
     spec:
+      serviceAccountName: hmda-platform
       volumes:
         - name: tz-config
           hostPath:
-            path: /usr/share/zoneinfo/America/New_York    
+            path: /usr/share/zoneinfo/America/New_York
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           volumeMounts:
             - name: tz-config
-              mountPath: /etc/localtime          
+              mountPath: /etc/localtime
           securityContext:
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
@@ -39,17 +40,31 @@ spec:
                 - ALL              
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-
-            - name: AWS_ACCESS_KEY_ID
+#            - name: AWS_ACCESS_KEY_ID
+#              valueFrom:
+#                secretKeyRef:
+#                  name: aws-credentials
+#                  key: aws-access-key-id
+#            - name: AWS_SECRET_ACCESS_KEY
+#              valueFrom:
+#                secretKeyRef:
+#                  name: aws-credentials
+#                  key: aws-secret-access-key
+            - name: AWS_ENVIRONMENT
               valueFrom:
-                secretKeyRef:
-                  name: aws-credentials
-                  key: aws-access-key-id
-            - name: AWS_SECRET_ACCESS_KEY
+                configMapKeyRef:
+                  name: s3-configmap
+                  key: aws-environment
+            - name: S3_PUBLIC_BUCKET
               valueFrom:
-                secretKeyRef:
-                  name: aws-credentials
-                  key: aws-secret-access-key
+                configMapKeyRef:
+                  name: s3-configmap
+                  key: s3-public-bucket
+            - name: S3_PRIVATE_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: s3-configmap
+                  key: s3-private-bucket
             - name: APOR_SCHEDULE
               valueFrom:
                  configMapKeyRef:

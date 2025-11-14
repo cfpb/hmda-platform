@@ -66,7 +66,7 @@ lazy val dockerSettings = Seq(
     } else dockerBuildCommand.value
   },
   Docker / maintainer := "Hmda-Ops",
-  dockerBaseImage := "eclipse-temurin:24.0.2_12-jdk-alpine-3.22",
+  dockerBaseImage := "eclipse-temurin:25_36-jdk-alpine-3.22",
   dockerRepository := Some("hmda"),
   dockerCommands := dockerCommands.value.flatMap {
     case cmd@Cmd("FROM",_) => List(cmd, Cmd("RUN", "apk update"),
@@ -763,11 +763,11 @@ lazy val `email-service` = (project in file("email-service"))
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
-        case x if x.endsWith("/module-info.class") => MergeStrategy.concat
-        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
-        case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
-        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
-        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
+        case x if x.endsWith("/module-info.class") => MergeStrategy.last
+        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.last
+        case x if x.endsWith("/LogSupport.class") => MergeStrategy.last
+        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.last
+        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.last
         case x =>
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
@@ -775,7 +775,7 @@ lazy val `email-service` = (project in file("email-service"))
       assembly / assemblyJarName := {
         s"${name.value}.jar"
       },
-      libraryDependencies ++= monix :: akkaKafkaStreams :: kafkaClients :: awsSesSdk :: logback :: Nil
+      libraryDependencies ++= monix :: akkaKafkaStreams :: kafkaClients :: awsSesSdk :: jakartaMail :: logback :: Nil
     ),
     dockerSettings,
     packageSettings

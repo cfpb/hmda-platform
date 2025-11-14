@@ -13,7 +13,7 @@ trait PublicAWSConfigLoader {
   val regionPublic                 = awsConfigPublic.getString("public-region")
   val bucketPublic                 = awsConfigPublic.getString("public-s3-bucket")
   val environmentPublic            = awsConfigPublic.getString("public-environment")
-  val awsCredentialsProviderPublic = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyIdPublic, secretAccessPublic))
+//  val awsCredentialsProviderPublic = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyIdPublic, secretAccessPublic))
   val awsRegionProviderPublic: AwsRegionProvider = () => Region.of(regionPublic)
 
 }

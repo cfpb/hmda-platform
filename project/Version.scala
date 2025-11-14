@@ -35,6 +35,7 @@ object Version {
   val scalaMock              = "4.3.0"
   val guava                  = "33.4.8-jre"
   val awsSesSdk              = "1.12.782"
+  val jakartaMail            = "2.1.5"
   val zeroAllocation         = "0.16"
   val cormorant              = "0.3.0"
   val scalacheckShapeless    = "1.2.5"

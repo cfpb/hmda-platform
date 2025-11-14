@@ -5,6 +5,7 @@ services:
   # ------------- Kafka -----------------
   zookeeper:
     image: wurstmeister/zookeeper
+    platform: linux/amd64
     ports:
       - "2181:2181"
     logging:
