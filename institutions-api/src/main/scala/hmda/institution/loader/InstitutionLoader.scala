@@ -36,6 +36,7 @@ object InstitutionLoader extends App {
   val url         = config.getString("hmda.loader.institution.url")
 
   val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
+  val token = ""
   val bankFilterList =
     bankFilter.getString("bank-filter-list").toUpperCase.split(",")
 
@@ -67,6 +68,18 @@ object InstitutionLoader extends App {
         HttpRequest(uri = s"$url", method = HttpMethods.POST)
           .withEntity(ContentTypes.`application/json`, ByteString(json))
     }
+
+  //- REQUEST WITH BEARER TOKEN
+  //  def request(json: String) =
+  //    postOrPut match {
+  //      case "put" =>
+  //        HttpRequest(uri = s"$url", method = HttpMethods.PUT)
+  //          .withEntity(ContentTypes.`application/json`, ByteString(json)).addHeader((Authorization(OAuth2BearerToken(token))) )
+  //      case _ =>
+  //        HttpRequest(uri = s"$url", method = HttpMethods.POST)
+  //          .withEntity(ContentTypes.`application/json`, ByteString(json)).addHeader((Authorization(OAuth2BearerToken(token))) )
+  //    }
+
 
   source
     .via(FlowUtils.framing)
