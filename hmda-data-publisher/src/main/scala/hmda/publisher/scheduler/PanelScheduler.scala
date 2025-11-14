@@ -96,7 +96,7 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], s
         val now = LocalDateTime.now().minusDays(1)
         val formattedDate = fullDate.format(now)
         val fileName = s"$formattedDate${year}_panel.txt"
-        val s3Path = s"$environmentPrivate/panel/"
+        val s3Path = "dynamic/panel/"
         val fullFilePath = SnapshotCheck.pathSelector(s3Path, fileName)
 
         val s3Sink =
@@ -158,7 +158,7 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], s
       case Failure(t) =>
         publishingReporter ! FilePublishingCompleted(
           schedule,
-          fullFilePath,
+          bucketPrivate+"/"+fullFilePath,
           None,
           Instant.now,
           FilePublishingCompleted.Status.Error(t.getMessage)

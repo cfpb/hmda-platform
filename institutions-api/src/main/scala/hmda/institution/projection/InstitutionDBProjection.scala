@@ -39,6 +39,7 @@ object InstitutionDBProjection extends InstitutionEmailComponent with Institutio
   implicit val institutionRepository2025   = new InstitutionRepository(dbConfig, "institutions2025")
   implicit val institutionRepository2026   = new InstitutionRepository(dbConfig, "institutions2026")
 
+
   implicit val institutionEmailsRepository = new InstitutionEmailsRepository(dbConfig)
   implicit val institutionNotesHistoryRepository = new InstitutionNoteHistoryRepository(dbConfig)
 
