@@ -192,7 +192,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
 
   // returns effective file name/s3 object key
   def publishPSVtoS3(fileName: String, rows: Source[String, NotUsed], countF: => Future[Int], schedule: Schedule): Future[String] = {
-    val s3Path = "dynamic-data//lar/"
+    val s3Path = "dynamic-data/lar/"
     val fullFilePath = SnapshotCheck.pathSelector(s3Path, fileName)
 
     val bytesStream: Source[ByteString, NotUsed] =
