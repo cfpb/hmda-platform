@@ -96,7 +96,7 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], s
         val now = LocalDateTime.now().minusDays(1)
         val formattedDate = fullDate.format(now)
         val fileName = s"$formattedDate${year}_panel.txt"
-        val s3Path = "dynamic-data//panel/"
+        val s3Path = "dynamic-data/panel/"
         val fullFilePath = SnapshotCheck.pathSelector(s3Path, fileName)
 
         val s3Sink =
