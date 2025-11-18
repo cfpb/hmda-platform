@@ -21,13 +21,13 @@ spec:
     spec:
       serviceAccountName: {{ .Values.service.account.name }}
       volumes:
-        - name: rds-provider-vol
+        - name: rds-secret-provider-vol
           csi:
             driver: secrets-store.csi.k8s.io
             readOnly: true
             volumeAttributes:
               secretProviderClass: irsa-hmda-rds-secrets-provider
-        - name: sandra-provider-vol
+        - name: k8ssandra-secret-provider-vol
           csi:
             driver: secrets-store.csi.k8s.io
             readOnly: true
@@ -43,9 +43,9 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           volumeMounts:
-            - name: rds-provider-vol
+            - name: rds-secret-provider-vol
               mountPath: /mnt/rds-secrets-store
-            - name: sandra-provider-vol
+            - name: k8ssandra-secret-provider-vol
               mountPath: /mnt/sandra-secrets-store
             - name: tz-config
               mountPath: /etc/localtime
