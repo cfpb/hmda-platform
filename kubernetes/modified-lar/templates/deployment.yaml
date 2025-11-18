@@ -22,7 +22,7 @@ spec:
         app: {{ include "modified-lar.name" . }}
         release: {{ .Release.Name }}
     spec:
-      serviceAccountName: hmda-platform
+      serviceAccountName: hmda-platform-irsa
 #      initContainers:
 #        - args:
 #            - cp /opt/java/openjdk/lib/security/* /opt/docker/temporary/
@@ -46,13 +46,13 @@ spec:
             driver: secrets-store.csi.k8s.io
             readOnly: true
             volumeAttributes:
-              secretProviderClass: hmda-rds-secrets-provider
+              secretProviderClass: irsa-hmda-rds-secrets-provider
         - name: k8ssandra-secret-provider-vol
           csi:
             driver: secrets-store.csi.k8s.io
             readOnly: true
             volumeAttributes:
-              secretProviderClass: hmda-rds-secrets-provider
+              secretProviderClass: irsa-k8ssandra-credentials-provider
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
@@ -97,22 +97,22 @@ spec:
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:
-                  name: platform-rds-secrets
+                  name: irsa-platform-rds-secrets
                   key: host
             - name: PG_DATABASE
               valueFrom:
                 secretKeyRef:
-                  name: platform-rds-secrets
+                  name: irsa-platform-rds-secrets
                   key: database
             - name: PG_USER
               valueFrom:
                 secretKeyRef:
-                  name: platform-rds-secrets
+                  name: irsa-platform-rds-secrets
                   key: username
             - name: PG_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: platform-rds-secrets
+                  name: irsa-platform-rds-secrets
                   key: password
 #            - name: PG_SSL
 #              valueFrom:
@@ -137,7 +137,7 @@ spec:
             - name: CASSANDRA_CLUSTER_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: cassandra-credentials
+                  name: irsa-cassandra-credentials
                   key: cassandra.username
             - name: CASSANDRA_JOURNAL_KEYSPACE
               valueFrom:
@@ -152,7 +152,7 @@ spec:
             - name: CASSANDRA_CLUSTER_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: cassandra-credentials
+                  name: irsa-cassandra-credentials
                   key: cassandra.password
 #            - name: CASSANDRA_TRUSTSTORE_FILE
 #              value: "/opt/cassandra_truststore/cassandra_truststore.jks"

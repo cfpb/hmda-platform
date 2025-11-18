@@ -33,7 +33,7 @@ spec:
 #        - name: cassandra-truststore
 #          secret:
 #            secretName: cassandra-truststore
-        - name: cassandra-credentials
+        - name: k8ssandra-secret-provider-vol
           csi:
             driver: secrets-store.csi.k8s.io
             readOnly: true
@@ -49,7 +49,7 @@ spec:
 #          - name: cassandra-truststore
 #            readOnly: true
 #            mountPath: "/opt/cassandra_truststore"
-          - name: cassandra-credentials
+          - name: k8ssandra-secret-provider-vol
             readOnly: true
             mountPath: "/mnt/secret-store"
         resources:

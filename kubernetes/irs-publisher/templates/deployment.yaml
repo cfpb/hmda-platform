@@ -22,14 +22,14 @@ spec:
         app: {{ include "irs-publisher.name" . }}
         release: {{ .Release.Name }}
     spec:
-      serviceAccountName: hmda-platform
+      serviceAccountName: hmda-platform-irsa
       volumes:
-        - name: cass-provider-vol
+        - name: k8ssandra-secret-provider-vol
           csi:
             driver: secrets-store.csi.k8s.io
             readOnly: true
             volumeAttributes:
-              secretProviderClass: k8ssandra-credentials-provider
+              secretProviderClass: irsa-k8ssandra-credentials-provider
 #        - name: cassandra-truststore
 #          secret:
 #            secretName: cassandra-truststore
@@ -37,9 +37,9 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           volumeMounts:
-            - name: cass-provider-vol
+            - name: k8ssandra-secret-provider-vol
               readOnly: true
-              mountPath: /mnt/cass-secrets-store
+              mountPath: /mnt/k8ssandra-secrets-store
 #            - name: cassandra-truststore
 #              readOnly: true
 #              mountPath: "/opt/cassandra_truststore"
@@ -88,12 +88,12 @@ spec:
             - name: CASSANDRA_CLUSTER_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: cassandra-credentials
+                  name: irsa-cassandra-credentials
                   key: cassandra.username
             - name: CASSANDRA_CLUSTER_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: cassandra-credentials
+                  name: irsa-cassandra-credentials
                   key: cassandra.password
 #            - name: CASSANDRA_TRUSTSTORE_FILE
 #              value: "/opt/cassandra_truststore/cassandra_truststore.jks"
