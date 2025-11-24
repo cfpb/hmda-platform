@@ -81,7 +81,7 @@ class CombinedMLarPublicScheduler(publishingReporter: ActorRef[PublishingReporte
 
         val fileName = s"${year}_combined_mlar.txt"
         val zipFileName = s"${year}_combined_mlar.zip"
-        val s3Path = s"modified-lar/$year/"
+        val s3Path = s"modified-lar/combined-mlar/$year/"
         val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipFileName)
 
 
