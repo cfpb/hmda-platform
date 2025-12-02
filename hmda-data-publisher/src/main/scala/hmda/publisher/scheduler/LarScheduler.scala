@@ -219,10 +219,10 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
     results onComplete {
       case Success(count) =>
         sendPublishingNotif(None, Some(count))
-        log.info(s"Pushed to S3: $bucketPrivate/$fullFilePath.")
+        log.info(s"Pushed to S3: $fullFilePath.")
       case Failure(t) =>
         sendPublishingNotif(Some(t.getMessage), None)
-        log.info(s"An error has occurred pushing LAR Data to $bucketPrivate/$fullFilePath: ${t.getMessage}")
+        log.info(s"An error has occurred pushing LAR Data to $fullFilePath: ${t.getMessage}")
     }
 
     results.map(_ => fullFilePath)
