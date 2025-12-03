@@ -65,11 +65,11 @@ spec:
                 configMapKeyRef:
                   name: timed-guards
                   key: yearsAllowed
-#            - name: BANK_FILTER_LIST
-#              valueFrom:
-#                configMapKeyRef:
-#                  key: bank-filter-list
-#                  name: bank-filter-configmap
+            - name: BANK_FILTER_LIST
+              valueFrom:
+                configMapKeyRef:
+                  key: bank-filter-list
+                  name: bank-filter-configmap
             - name: RULES_QF_FILING_YEARS_ALLOWED
               valueFrom:
                 configMapKeyRef:
