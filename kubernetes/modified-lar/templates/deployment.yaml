@@ -22,43 +22,60 @@ spec:
         app: {{ include "modified-lar.name" . }}
         release: {{ .Release.Name }}
     spec:
-      initContainers:
-        - args:
-            - cp /opt/java/openjdk/lib/security/* /opt/docker/temporary/
-          command:
-            - /bin/sh
-            - -c
-            - --
-          image: 626560329871.dkr.ecr.us-east-1.amazonaws.com/hmda/hmda-auth:init-universal-12092025
-          name: hmda-init-universal
-          resources: {}
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-          volumeMounts:
-            - mountPath: /opt/docker/temporary
-              name: jksfolder
+      serviceAccountName: hmda-platform-irsa
+#      initContainers:
+#        - args:
+#            - cp /opt/java/openjdk/lib/security/* /opt/docker/temporary/
+#          command:
+#            - /bin/sh
+#            - -c
+#            - --
+#          image: 626560329871.dkr.ecr.us-east-1.amazonaws.com/hmda/hmda-auth:init-universal-12092025
+#          name: hmda-init-universal
+#          resources: {}
+#          terminationMessagePath: /dev/termination-log
+#          terminationMessagePolicy: File
+#          volumeMounts:
+#            - mountPath: /opt/docker/temporary
+#              name: jksfolder
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
+        - name: rds-secret-provider-vol
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: irsa-hmda-rds-secrets-provider
+        - name: k8ssandra-secret-provider-vol
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: irsa-k8ssandra-credentials-provider
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
-        - name: cassandra-truststore
-          secret:
-            secretName: cassandra-truststore
-        - emptyDir: {}
-          name: jksfolder
+#        - name: cassandra-truststore
+#          secret:
+#            secretName: cassandra-truststore
+#        - emptyDir: {}
+#          name: jksfolder
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           volumeMounts:
+            - name: rds-secret-provider-vol
+              mountPath: /mnt/rds-secrets-store
+            - name: k8ssandra-secret-provider-vol
+              mountPath: /mnt/k8ssandra-secrets-store
             - name: tz-config
               mountPath: /etc/localtime
-            - name: cassandra-truststore
-              readOnly: true
-              mountPath: "/opt/cassandra_truststore"
-            - mountPath: /opt/java/openjdk/lib/security/
-              name: jksfolder
+#            - name: cassandra-truststore
+#              readOnly: true
+#              mountPath: "/opt/cassandra_truststore"
+#            - mountPath: /opt/java/openjdk/lib/security/
+#              name: jksfolder
           securityContext:
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
@@ -67,9 +84,11 @@ spec:
                 - ALL             
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           resources:
-            limits:
-              cpu: "4"
-              memory: "2200Mi"
+{{ toYaml .Values.resources | indent 12 }}
+#          resources:
+#            limits:
+#              cpu: "4"
+#              memory: "2200Mi"
           env:
             - name: _JAVA_OPTIONS
               value: >
@@ -78,33 +97,33 @@ spec:
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:
-                  name: inst-postgres-credentials
+                  name: irsa-platform-rds-secrets
                   key: host
             - name: PG_DATABASE
               valueFrom:
-                configMapKeyRef:
-                  name: postgresql-configmap
-                  key: postgres.database
+                secretKeyRef:
+                  name: irsa-platform-rds-secrets
+                  key: database
             - name: PG_USER
               valueFrom:
                 secretKeyRef:
-                  name: inst-postgres-credentials
+                  name: irsa-platform-rds-secrets
                   key: username
             - name: PG_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: inst-postgres-credentials
+                  name: irsa-platform-rds-secrets
                   key: password
-            - name: PG_SSL
-              valueFrom:
-                configMapKeyRef:
-                  name: postgresql-configmap
-                  key: postgres.ssl
-            - name: JDBC_URL
-              valueFrom:
-                secretKeyRef:
-                  name: inst-postgres-credentials
-                  key: url
+#            - name: PG_SSL
+#              valueFrom:
+#                configMapKeyRef:
+#                  name: postgresql-configmap
+#                  key: postgres.ssl
+#            - name: JDBC_URL
+#              valueFrom:
+#                secretKeyRef:
+#                  name: inst-postgres-credentials
+#                  key: url
             - name: CASSANDRA_CLUSTER_HOSTS
               valueFrom:
                 configMapKeyRef:
@@ -118,7 +137,7 @@ spec:
             - name: CASSANDRA_CLUSTER_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: cassandra-credentials
+                  name: irsa-cassandra-credentials
                   key: cassandra.username
             - name: CASSANDRA_JOURNAL_KEYSPACE
               valueFrom:
@@ -133,35 +152,40 @@ spec:
             - name: CASSANDRA_CLUSTER_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: cassandra-credentials
+                  name: irsa-cassandra-credentials
                   key: cassandra.password
-            - name: CASSANDRA_TRUSTSTORE_FILE
-              value: "/opt/cassandra_truststore/cassandra_truststore.jks"
-            - name: CASSANDRA_TRUSTSTORE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: cassandra-truststore-password
-                  key: password
+#            - name: CASSANDRA_TRUSTSTORE_FILE
+#              value: "/opt/cassandra_truststore/cassandra_truststore.jks"
+#            - name: CASSANDRA_TRUSTSTORE_PASSWORD
+#              valueFrom:
+#                secretKeyRef:
+#                  name: cassandra-truststore-password
+#                  key: password
             - name: KAFKA_CLUSTER_HOSTS
               valueFrom:
                 configMapKeyRef:
                   name: kafka-configmap
                   key: kafka.hosts
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: aws-credentials
-                  key: aws-access-key-id
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: aws-credentials
-                  key: aws-secret-access-key
+#            - name: AWS_ACCESS_KEY_ID
+#              valueFrom:
+#                secretKeyRef:
+#                  name: aws-credentials
+#                  key: aws-access-key-id
+#            - name: AWS_SECRET_ACCESS_KEY
+#              valueFrom:
+#                secretKeyRef:
+#                  name: aws-credentials
+#                  key: aws-secret-access-key
             - name: AWS_ENVIRONMENT
               valueFrom:
                 configMapKeyRef:
                   name: s3-configmap
                   key: aws-environment
+            - name: S3_PUBLIC_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: s3-configmap
+                  key: s3-public-bucket
             - name: BANK_FILTER_LIST
               valueFrom:
                 configMapKeyRef:

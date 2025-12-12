@@ -60,7 +60,7 @@ postgresql:
 service:
   type: ClusterIP
   account:
-    name: hmda-data-browser-api
+    name: hmda-platform
   name: hmda-data-browser-api
 
 #ambassador:
@@ -71,10 +71,10 @@ service:
 databrowser:
   name: databrowser
   loglevel: INFO
-  s3Url: https://cfpb-hmda-public.s3.amazonaws.com
-  redis: hmda-redis-master
+  s3Url: https://files.ffiec.cfpb.gov
+  redis: hmda-redis
   protocol: TCP
   port: 8070
 
-ambassador_id: ambassador-default-1
-# ambassador_host: hmda-public.example.com
+#ambassador_id: ambassador-default-1
+ambassador_host: ffiec-test.cfpb.gov

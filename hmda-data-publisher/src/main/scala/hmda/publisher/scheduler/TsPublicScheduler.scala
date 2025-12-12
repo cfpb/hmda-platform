@@ -57,7 +57,6 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
   val s3Settings =
     S3Settings(context.system)
       .withBufferType(MemoryBufferType)
-      .withCredentialsProvider(awsCredentialsProviderPublic)
       .withS3RegionProvider(awsRegionProviderPublic)
       .withListBucketApiVersion(ListBucketVersion2)
 
@@ -76,12 +75,11 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
       publishingGuard.runIfDataIsValid(year, YearPeriod.Whole, Scope.Public) {
         val fileName = s"${year}_ts.txt"
         val zipDirectoryName = s"${year}_ts.zip"
-        val s3Path = s"$environmentPublic/dynamic-data/$year/"
+        val s3Path = s"dynamic-data/$year/"
         val fullFilePath = SnapshotCheck.pathSelector(s3Path, zipDirectoryName)
         val bucket = if (SnapshotCheck.snapshotActive) SnapshotCheck.snapshotBucket else bucketPublic
 
-        val result = tsPublicStream(year, bucket, fullFilePath, fileName, TsPublicSchedule)
-        //result.foreach(r => persistFileForQa(r.key, r.bucket, qaRepo2020))
+        tsPublicStream(year, bucket, fullFilePath, fileName, TsPublicSchedule)
       }
   }
 
@@ -115,10 +113,10 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
 
       resultsPSV onComplete {
         case Success(result) =>
-          publishingReporter ! FilePublishingCompleted(schedule, key, None, Instant.now, FilePublishingCompleted.Status.Success)
+          publishingReporter ! FilePublishingCompleted(schedule, bucket+"/"+key, None, Instant.now, FilePublishingCompleted.Status.Success)
           log.info("Pushed to S3: " + s"$bucket/$key" + ".")
         case Failure(t) =>
-          publishingReporter ! FilePublishingCompleted(schedule, key, None, Instant.now, FilePublishingCompleted.Status.Error(t.getMessage))
+          publishingReporter ! FilePublishingCompleted(schedule, bucket+"/"+key, None, Instant.now, FilePublishingCompleted.Status.Error(t.getMessage))
           log.info("An error has occurred with: " + key + "; Getting Public TS Data in Future: " + t.getMessage)
       }
       resultsPSV

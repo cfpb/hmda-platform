@@ -80,7 +80,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
 
   val s3Settings = S3Settings(context.system)
     .withBufferType(MemoryBufferType)
-    .withCredentialsProvider(awsCredentialsProviderPrivate)
+//    .withCredentialsProvider(awsCredentialsProviderPrivate)
     .withS3RegionProvider(awsRegionProviderPrivate)
     .withListBucketApiVersion(ListBucketVersion2)
 
@@ -192,7 +192,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
 
   // returns effective file name/s3 object key
   def publishPSVtoS3(fileName: String, rows: Source[String, NotUsed], countF: => Future[Int], schedule: Schedule): Future[String] = {
-    val s3Path = s"$environmentPrivate/lar/"
+    val s3Path = "dynamic-data/lar/"
     val fullFilePath = SnapshotCheck.pathSelector(s3Path, fileName)
 
     val bytesStream: Source[ByteString, NotUsed] =
@@ -213,16 +213,16 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
         case Some(value) => FilePublishingCompleted.Status.Error(value)
         case None => FilePublishingCompleted.Status.Success
       }
-      publishingReporter ! FilePublishingCompleted(schedule, fullFilePath, count, Instant.now(), status)
+      publishingReporter ! FilePublishingCompleted(schedule, bucketPrivate+"/"+fullFilePath, count, Instant.now(), status)
     }
 
     results onComplete {
       case Success(count) =>
         sendPublishingNotif(None, Some(count))
-        log.info(s"Pushed to S3: $bucketPrivate/$fullFilePath.")
+        log.info(s"Pushed to S3: $fullFilePath.")
       case Failure(t) =>
         sendPublishingNotif(Some(t.getMessage), None)
-        log.info(s"An error has occurred pushing LAR Data to $bucketPrivate/$fullFilePath: ${t.getMessage}")
+        log.info(s"An error has occurred pushing LAR Data to $fullFilePath: ${t.getMessage}")
     }
 
     results.map(_ => fullFilePath)

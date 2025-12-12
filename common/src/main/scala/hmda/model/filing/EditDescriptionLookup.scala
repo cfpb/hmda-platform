@@ -37,6 +37,10 @@ object EditDescriptionLookup {
     config.getString("hmda.filing.2025Quarter.edits.descriptions.filename")
   val editDescriptionFileName2025 =
     config.getString("hmda.filing.2025.edits.descriptions.filename")
+  val editDescriptionFileName2026Quarter =
+    config.getString("hmda.filing.2026Quarter.edits.descriptions.filename")
+  val editDescriptionFileName2026 =
+    config.getString("hmda.filing.2026.edits.descriptions.filename")
   def editDescriptionList(file: Iterable[String]): Iterable[EditDescription] =
     file
       .drop(1)
@@ -65,6 +69,8 @@ object EditDescriptionLookup {
   val editDescriptionLines2024 = fileLines(s"/$editDescriptionFileName2024")
   val editDescriptionLines2025Quarter = fileLines(s"/$editDescriptionFileName2025Quarter")
   val editDescriptionLines2025 = fileLines(s"/$editDescriptionFileName2025")
+  val editDescriptionLines2026Quarter = fileLines(s"/$editDescriptionFileName2026Quarter")
+  val editDescriptionLines2026 = fileLines(s"/$editDescriptionFileName2026")
 
 
   val editDescriptionMap2018        = editDescriptionMap(editDescriptionLines2018)
@@ -81,7 +87,8 @@ object EditDescriptionLookup {
   val editDescriptionMap2024 = editDescriptionMap(editDescriptionLines2024)
   val editDescriptionMap2025Quarter = editDescriptionMap(editDescriptionLines2025Quarter)
   val editDescriptionMap2025 = editDescriptionMap(editDescriptionLines2025)
-
+  val editDescriptionMap2026Quarter = editDescriptionMap(editDescriptionLines2026Quarter)
+  val editDescriptionMap2026 = editDescriptionMap(editDescriptionLines2026)
 
   def mapForPeriod(period: Period): Map[String, EditDescription] =
     period match {
@@ -99,7 +106,9 @@ object EditDescriptionLookup {
       case Period(2024, None) => editDescriptionMap2024
       case Period(2025, Some(_)) => editDescriptionMap2025Quarter
       case Period(2025, None) => editDescriptionMap2025
-      case _                     => editDescriptionMap2021
+      case Period(2026, Some(_)) => editDescriptionMap2026Quarter
+      case Period(2026, None) => editDescriptionMap2026
+      case _                     => editDescriptionMap2024
     }
 
   def lookupDescription(editName: String, period: Period = Period(2018, None)): String =

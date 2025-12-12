@@ -57,7 +57,7 @@ class CombinedMLarPublicScheduler(publishingReporter: ActorRef[PublishingReporte
 
   val s3Settings = S3Settings(context.system)
     .withBufferType(MemoryBufferType)
-    .withCredentialsProvider(awsCredentialsProviderPublic)
+//    .withCredentialsProvider(awsCredentialsProviderPublic)
     .withS3RegionProvider(awsRegionProviderPublic)
     .withListBucketApiVersion(ListBucketVersion2)
 
@@ -76,12 +76,12 @@ class CombinedMLarPublicScheduler(publishingReporter: ActorRef[PublishingReporte
 
         val fileNameHeader = s"${year}_combined_mlar_header.txt"
         val zipNameHeader = s"${year}_combined_mlar_header.zip"
-        val s3PathHeader = s"$environmentPublic/dynamic-data/combined-mlar/$year/header/"
+        val s3PathHeader = s"modified-lar/combined-mlar/$year/"
         val fullFilePathHeader     = SnapshotCheck.pathSelector(s3PathHeader, zipNameHeader)
 
         val fileName = s"${year}_combined_mlar.txt"
         val zipFileName = s"${year}_combined_mlar.zip"
-        val s3Path = s"$environmentPublic/dynamic-data/combined-mlar/$year/"
+        val s3Path = s"modified-lar/combined-mlar/$year/"
         val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipFileName)
 
 

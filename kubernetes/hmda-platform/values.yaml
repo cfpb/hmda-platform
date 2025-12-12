@@ -37,12 +37,12 @@ kafka:
   analyticsTopic: hmda-analytics
   signTopic: hmda-sign
   disclosureTopic: hmda-spark-disclosure
-  security: ""
+  security: "SASL_SSL"
 
 service:
   type: ClusterIP
   account:
-    name: hmda-platform
+    name: hmda-platform-irsa
   name: hmda-platform
 
 #ambassador:
@@ -110,7 +110,7 @@ ingress:
 
 resources:
   requests:
-   cpu: "2"
+   cpu: "500m"
    memory: 6200Mi
 
 nodeSelector: {}
@@ -132,5 +132,5 @@ affinity:
 logs:
   cassandra: TRACE
 
-ambassador_id: ambassador-default-1
-# ambassador_host: hmda-public.example.com
+# ambassador_id: ambassador-default-1
+ambassador_host: ffiec-test.cfpb.gov
