@@ -40,7 +40,7 @@ object CountyLoanLimitRecords {
 
   def countyLoansLimitByCounty(countyLoanLimits: Seq[CountyLoanLimit]): Map[String, CountyLoanLimit] = {
     countyLoanLimits
-      .map(county => county.stateCode + county.countyCode -> county)
+      .map(county => county.stateAbbrv + county.countyCode -> county)
       .toMap
   }
 
