@@ -33,7 +33,7 @@ object ConformingLoanLimit {
 
   val fairfieldCountyTractList =config.getString("hmda.census.fairfield").split(",").toList
 
-  val fairfieldCountyId: String = "001"
+  val fairfieldCountyId: String = "09001"
 
   def assignLoanLimit(lar: LoanApplicationRegister,
                       year: Int,
