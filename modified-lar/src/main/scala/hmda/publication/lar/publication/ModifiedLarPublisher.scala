@@ -47,6 +47,7 @@ object ModifiedLarPublisher {
   val regenerateMlar = config.getBoolean("hmda.lar.modified.regenerateMlar")
   val isJustGenerateS3File = config.getBoolean("hmda.lar.modified.justGenerateS3File")
   val isJustGenerateS3FileHeader = config.getBoolean("hmda.lar.modified.justGenerateS3FileHeader")
+  private val onlyPersistDb = config.getBoolean("hmda.lar.modified.onlyPersistDb")
 
 //  val awsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccess))
   val awsRegionProvider: AwsRegionProvider = new AwsRegionProvider {
@@ -179,6 +180,8 @@ object ModifiedLarPublisher {
                 else if (isGenerateBothS3Files) {
                   removeLei
                   graphWithS3AndPG.run()
+                } else if (onlyPersistDb) {
+                  graphWithJustPG.run()
                 } else if (isJustGenerateS3File)
                   graphWithJustS3NoHeader.run()
                 else if (isJustGenerateS3FileHeader)
