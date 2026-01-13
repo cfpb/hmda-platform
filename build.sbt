@@ -67,14 +67,13 @@ lazy val dockerSettings = Seq(
   },
   Docker / maintainer := "Hmda-Ops",
   dockerBaseImage := "eclipse-temurin:25_36-jdk-alpine-3.22",
-  
   dockerRepository := Some("hmda"),
 
   dockerCommands := {
     val zscalerStage = Seq(
       Cmd("FROM", s"${dockerBaseImage.value} AS zscaler"),
-      Cmd("RUN", "apk add openssh-client ca-certificates curl --no-cache --no-check-certificate"),
-      Cmd("COPY", "opt/docker/zscaler-root-public.cert", "/usr/local/share/ca-certificates/zscaler-root-public.cert"),
+      Cmd("RUN", "apk add ca-certificates --no-cache --no-check-certificate"),
+      Cmd("ADD", "https://raw.githubusercontent.com/cfpb/zscaler-cert/refs/heads/main/zscaler_root_ca.pem", "/usr/local/share/ca-certificates/zscaler_root_ca.pem"),
       Cmd("RUN", "update-ca-certificates"),
       Cmd("WORKDIR", "/app"),
       Cmd("RUN", "cp /etc/ssl/certs/ca-certificates.crt /app/ca-certificates.crt")
@@ -103,14 +102,12 @@ lazy val packageSettings = Seq(
     // universalMappings: Seq[(File,String)]
     val universalMappings = (Universal / mappings).value
     val fatJar            = (Compile / assembly).value
-    val certFile = baseDirectory.value / "zscaler-root-public.cert"
     // removing means filtering
     val filtered = universalMappings filter {
       case (_, fileName) => !fileName.endsWith(".jar") || fileName.contains("cinnamon-agent")
     }
     // add the fat jar
-    filtered :+ (fatJar -> ("lib/" + fatJar.getName)):+ 
-      (certFile -> "zscaler-root-public.cert")
+    filtered :+ (fatJar -> ("lib/" + fatJar.getName))
   },
   // the bash scripts classpath only needs the fat jar
   scriptClasspath := Seq((assembly / assemblyJarName).value)
