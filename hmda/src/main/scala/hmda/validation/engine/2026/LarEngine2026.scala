@@ -236,7 +236,7 @@ private[engine] object LarEngine2026 extends ValidationEngine[LoanApplicationReg
     V713,
     V714,
     V715,
-    _2020.V716.withIndexedCounties(CensusRecords.indexedCounty2024),
+    _2020.V716.withIndexedCounties(CensusRecords.indexedCounty2025),
     _2022.V721_1,
     _2022.V721_2,
     _2024.V720_1,
@@ -248,7 +248,7 @@ private[engine] object LarEngine2026 extends ValidationEngine[LoanApplicationReg
   override def qualityChecks(ctx: ValidationContext) = Vector(
     Q601,
     Q602,
-    Q603.withIndexedSmallCounties(CensusRecords.indexedSmallCounty2024),
+    Q603.withIndexedSmallCounties(CensusRecords.indexedSmallCounty2025),
     Q605_1,
     Q605_2,
     quality2020.Q606,

@@ -109,9 +109,11 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
         //IRS Report Route
         path("reports" / "irs" / "year" / Segment / "institution" / Segment) { (year, lei) =>
           (extractUri & get) { uri =>
-            oAuth2Authorization.authorizeTokenWithLeiOrRole(lei, hmdaAdminRole) { _ =>
-              checkYearAvailable(publicationYears(IRS_PUB_KEY), year) {
-                val s3Key = s"reports/disclosure/$year/$lei/nationwide/IRS.csv"
+            val s3Key = s"reports/disclosure/$year/$lei/nationwide/IRS.csv"
+            if (publicationYears(IRS_PUB_KEY).contains(year)) {
+              streamingS3Route(s3Key)
+            } else {
+              oAuth2Authorization.authorizeTokenWithLeiOrRole(lei, hmdaAdminRole) { _ =>
                 streamingS3Route(s3Key)
               }
             }
@@ -131,10 +133,8 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
   private def streamingS3Route(s3Key: String): Route = {
     val fStream: Future[Source[ByteString, NotUsed]] = retrieveData(s3Key).flatMap {
       case Some(stream) =>
-        log.info("got data!")
         Future(stream)
       case None =>
-        log.info("no data...")
         Future(Source.empty)
     }
 
