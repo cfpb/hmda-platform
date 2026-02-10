@@ -1,5 +1,6 @@
 # HMDA Platform
 ![Static Badge](https://img.shields.io/badge/coverage-91%25-green)
+[![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/cfpb/hmda-platform)
 
 ## Introduction
 
