@@ -28,7 +28,12 @@ podAnnotations: {}
 podSecurityContext: {}
   # fsGroup: 2000
 
-securityContext: {}
+securityContext: { 
+  seccompProfile: { 
+    type: RuntimeDefault 
+    } 
+    }
+
   # capabilities:
   #   drop:
   #   - ALL
