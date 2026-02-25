@@ -66,7 +66,7 @@ lazy val dockerSettings = Seq(
     } else dockerBuildCommand.value
   },
   Docker / maintainer := "Hmda-Ops",
-  dockerBaseImage := "eclipse-temurin:25_36-jdk-alpine-3.22",
+  dockerBaseImage := "eclipse-temurin:25.0.2_10-jdk-alpine",
   dockerRepository := Some("hmda"),
 
   dockerCommands := {
