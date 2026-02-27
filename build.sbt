@@ -47,7 +47,8 @@ lazy val akkaPersistenceDeps =
     akkaPersistenceTyped,
     akkaPersistenceQuery,
     akkaClusterShardingTyped,
-    akkaPersistenceCassandra,
+    akkaPersistenceR2DBC,
+//    akkaPersistenceCassandra,
     keyspacedriver
   )
 

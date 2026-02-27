@@ -48,7 +48,8 @@ object Dependencies {
   lazy val circe                    = "io.circe"           %% "circe-core"                          % Version.circe
   lazy val circeGeneric             = "io.circe"           %% "circe-generic"                       % Version.circe
   lazy val circeParser              = "io.circe"           %% "circe-parser"                        % Version.circe
-  lazy val akkaPersistenceCassandra = "com.typesafe.akka"  %% "akka-persistence-cassandra"          % Version.cassandraPluginVersion
+//  lazy val akkaPersistenceCassandra = "com.typesafe.akka"  %% "akka-persistence-cassandra"          % Version.cassandraPluginVersion
+  lazy val akkaPersistenceR2DBC     = "com.lightbend.akka" %% "akka-persistence-r2dbc"              % Version.r2dbcPluginVersion
   lazy val slick                    = "com.typesafe.slick" %% "slick"                               % Version.slick
   lazy val slickHikariCP            = "com.typesafe.slick" %% "slick-hikaricp"                      % Version.slick
   lazy val alpakkaSlick             = "com.lightbend.akka" %% "akka-stream-alpakka-slick"           % Version.alpakka
