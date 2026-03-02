@@ -114,7 +114,9 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
       processData(msg.record.value()).map(_ => msg.committableOffset)
     })
     .toMat(Committer.sink(CommitterSettings(system).withParallelism(2)))(Keep.both)
-    .mapMaterializedValue(DrainingControl.apply)
+    .mapMaterializedValue {
+      case (ctrl, future) => DrainingControl.apply(ctrl, future)
+    }
     .run()
 
   def processData(msg: String): Future[Done] =
