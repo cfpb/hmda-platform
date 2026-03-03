@@ -190,6 +190,8 @@ spec:
               value: {{.Values.databrowser.redis}}
             - name: REDIS_PROTOCOL
               value: "redis"
+            - name: REDIS_PORT
+              value: "6379"
             - name: S3_PUBLIC_BUCKET
               valueFrom:
                 configMapKeyRef:
