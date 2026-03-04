@@ -15,7 +15,7 @@ object Version {
   val akkaKafka              = "7.0.4"
   val kafkaClients           = "4.0.0"
   val circe                  = "0.14.5"
-  val cassandraPluginVersion = "1.2.1"
+  val cassandraPluginVersion = "1.3.4"
   val r2dbcPluginVersion     = "1.3.12"
   val cassandraLauncher      = "1.1.1"
   val slick                  = "3.4.1"
