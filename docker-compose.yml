@@ -1,5 +1,3 @@
-#version: "3.7"
-
 services:
 
   # ------------- Kafka -----------------
@@ -31,7 +29,7 @@ services:
       KAFKA_BROKER_ID: 2
     volumes:
       - ./wait-for-it.sh:/usr/bin/wait-for-it.sh
-      - db-data:/var/lib/kafka/data
+      - kafka-data:/var/lib/kafka/data
 
   # ------------- Cassandra -------------
   cassandra:
@@ -96,7 +94,7 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql
 
   # ------------- Institutions-API ---------
   institutions-api:
@@ -157,4 +155,6 @@ services:
 
 volumes:
   db-data:
+    driver: local
+  kafka-data:
     driver: local
