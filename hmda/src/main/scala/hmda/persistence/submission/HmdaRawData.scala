@@ -25,7 +25,7 @@ object HmdaRawData extends HmdaTypedPersistentActor[HmdaRawDataCommand, HmdaRawD
         emptyState = HmdaRawDataState(),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
-      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000, keepNSnapshots = 10))
+      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000))
     }
 
   override def commandHandler(

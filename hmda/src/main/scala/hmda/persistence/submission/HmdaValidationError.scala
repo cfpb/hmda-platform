@@ -74,7 +74,7 @@ object HmdaValidationError
         emptyState = HmdaValidationErrorState(),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
-      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000, keepNSnapshots = 10)).receiveSignal {
+      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000)).receiveSignal {
         case (state, RecoveryCompleted) =>
           // send a snapshot of the internal state to the tracker once the actor has completely hydrated from the journal
           tracker ! StateSnapshot(state)

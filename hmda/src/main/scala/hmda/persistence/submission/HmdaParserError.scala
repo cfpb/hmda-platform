@@ -42,7 +42,7 @@ object HmdaParserError extends HmdaTypedPersistentActor[SubmissionProcessingComm
         emptyState = HmdaParserErrorState(),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
-      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000, keepNSnapshots = 10))
+      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000))
     }
 
   override def commandHandler(
