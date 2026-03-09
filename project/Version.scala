@@ -47,7 +47,6 @@ object Version {
   val log4j                  = "2.15.0"
   val kubernetesApi          = "24.0.0"
   val testContainers         = "1.21.0"
-  val keyspaceDriver         = "4.0.9"
   val mskAuth                = "2.3.2"
   val scalaLogging           = "3.9.5"
 }

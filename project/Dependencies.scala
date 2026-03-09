@@ -83,7 +83,6 @@ object Dependencies {
   lazy val scalacheckShapeless   = "com.github.alexarchambault" %% "scalacheck-shapeless_1.14"  % Version.scalacheckShapeless % Test
   lazy val diffx                 = "com.softwaremill.diffx"     %% "diffx-core"                 % Version.diffx % Test
   lazy val kubernetesApi         = "io.kubernetes"              % "client-java"                 % Version.kubernetesApi
-  lazy val keyspacedriver        = "software.aws.mcs"           % "aws-sigv4-auth-cassandra-java-driver-plugin"  % Version.keyspaceDriver
   // https://mvnrepository.com/artifact/software.amazon.msk/aws-msk-iam-auth
   lazy val mskdriver             = "software.amazon.msk"        % "aws-msk-iam-auth"            % Version.mskAuth
   // overriding the log4j-slf4j bridge used by spring, transitively brought in by s3mock

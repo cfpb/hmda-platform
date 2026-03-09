@@ -48,8 +48,7 @@ lazy val akkaPersistenceDeps =
     akkaPersistenceQuery,
     akkaClusterShardingTyped,
     akkaPersistenceR2DBC,
-    akkaPersistenceCassandra,
-    keyspacedriver
+    akkaPersistenceCassandra
   )
 
 lazy val akkaHttpDeps =
@@ -856,25 +855,26 @@ lazy val `hmda-persistence-migrator` = (project in file ("hmda-persistence-migra
       libraryDependencies += "com.lightbend.akka" %% "akka-persistence-r2dbc-migration" % "1.3.12",
 //      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
 //        enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
-//      assembly / assemblyMergeStrategy := {
-//        case "application.conf"                      => MergeStrategy.concat
-//        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
-//        case "META-INF/MANIFEST.MF" => MergeStrategy.discard
-//        case PathList("META-INF", xs@_*) => MergeStrategy.concat
-//        case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
-//        case PathList("jakarta", xs@_*) => MergeStrategy.last
-//        case PathList(ps @ _*) if ps.last endsWith ".proto" =>
-//          MergeStrategy.first
-//        case "module-info.class" => MergeStrategy.concat
-//        case x if x.endsWith("/module-info.class") => MergeStrategy.concat
-//        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
-//        case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
-//        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
-//        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
-//        case x =>
-//          val oldStrategy = (assembly / assemblyMergeStrategy).value
-//          oldStrategy(x)
-//      },
+      assembly / assemblyMergeStrategy := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case "version.conf" => MergeStrategy.concat
+        case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
+        case PathList("jakarta", xs@_*) => MergeStrategy.last
+        case PathList(ps @ _*) if ps.last endsWith ".proto" =>
+          MergeStrategy.first
+        case "module-info.class" => MergeStrategy.concat
+        case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
+        case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
+        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
+        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assembly / assemblyMergeStrategy).value
+          oldStrategy(x)
+      },
       assembly / assemblyJarName := {
         s"${name.value}.jar"
       }
