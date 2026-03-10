@@ -185,6 +185,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
         case "cinnamon-reference.conf"               => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "logback.xml"                           => MergeStrategy.concat
+        case "version.conf"                          => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
         case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
