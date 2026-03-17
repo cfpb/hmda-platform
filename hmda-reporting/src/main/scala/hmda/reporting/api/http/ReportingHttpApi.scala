@@ -34,6 +34,7 @@ private class ReportingHttpApi(config: Config)(implicit ec: ExecutionContext) ex
   private val institutionRepository2022 = new InstitutionRepository(databaseConfig, "institutions2022")
   private val institutionRepository2023 = new InstitutionRepository(databaseConfig, "institutions2023")
   private val institutionRepository2024 = new InstitutionRepository(databaseConfig, "institutions2024")
+  private val institutionRepository2025 = new InstitutionRepository(databaseConfig, "institutions2025")
 
 
   private val filerListRoute: Route = {
@@ -141,6 +142,20 @@ private class ReportingHttpApi(config: Config)(implicit ec: ExecutionContext) ex
                   )
                   .toSet
               )
+          case 2025 =>
+            institutionRepository2025
+              .getFilteredFilers(bankFilterList)
+              .map(sheets =>
+                sheets
+                  .map(instituionEntity =>
+                    HmdaFiler(
+                      instituionEntity.lei.toUpperCase,
+                      instituionEntity.respondentName,
+                      instituionEntity.activityYear.toString
+                    )
+                  )
+                  .toSet
+              )
           case _ => Future(Set(HmdaFiler("", "", "")))
         }
 
@@ -163,9 +178,7 @@ private class ReportingHttpApi(config: Config)(implicit ec: ExecutionContext) ex
             case 2022 => institutionRepository2022
             case 2023 => institutionRepository2023
             case 2024 => institutionRepository2024
-
-
-
+            case 2025 => institutionRepository2025
           }
         val resultset = for {
           msaMdsResult      <- repo.msaMds(lei, year)
