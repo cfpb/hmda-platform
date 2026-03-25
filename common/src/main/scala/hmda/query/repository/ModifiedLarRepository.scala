@@ -58,10 +58,14 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
     * @param submissionId
     * @return the number of rows removed
     */
-  def deleteBySubmissionID(submissionId: SubmissionId): Future[Int] =
+  def deleteBySubmissionID(submissionId: SubmissionId): Future[Int] = {
+    println(submissionId.lei)
+    println(submissionId.period.year)
+    println(s"DELETE FROM ${fetchYearTable(submissionId.period.year.toInt)} WHERE submission_id LIKE '${submissionId.lei}-${submissionId.period.year}-%'")
     db.run(
       sqlu"DELETE FROM #${fetchYearTable(submissionId.period.year.toInt)} WHERE submission_id LIKE '${submissionId.lei}-${submissionId.period.year}-%'"
     )
+  }
 
   /**
     * Inserts Modified Loan Application Register data that has been enhanced with Census information via the tract map
