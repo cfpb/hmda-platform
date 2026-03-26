@@ -241,7 +241,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
       case 2023 => indexTractMap2023
       case 2024 => indexTractMap2024
       case 2025 => indexTractMap2025
-      case 2026 => indexTractMap2025
+      case 2026 => indexTractMap2026
       case _ => indexTractMap2025
     }
     val censusResult = indexTractMap.getOrElse(hmdaGeoTract, Census())
