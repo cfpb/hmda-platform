@@ -51,7 +51,8 @@ object HmdaParserError extends HmdaTypedPersistentActor[SubmissionProcessingComm
     val log                                   = ctx.log
     implicit val system: ActorSystem[_]       = ctx.system
     implicit val materializer: Materializer   = Materializer(ctx)
-    implicit val blockingEc: ExecutionContext = system.dispatchers.lookup(DispatcherSelector.fromConfig("akka.blocking-parser-dispatcher"))
+//    implicit val blockingEc: ExecutionContext = system.dispatchers.lookup(DispatcherSelector.fromConfig("akka.blocking-parser-dispatcher"))
+    implicit val blockingEc: ExecutionContext = system.dispatchers.lookup(DispatcherSelector.default())
     val sharding                              = ClusterSharding(system)
 
     cmd match {

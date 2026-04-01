@@ -1,0 +1,72 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: akka-persistence-migrator-260331-4
+spec:
+  template:
+    spec:
+      containers:
+        - name: akka-persistence-migrator
+          image: 564992080820.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:persistence_migrator_test.260330.3
+          env:
+            - name: AKKA_LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: akka-lc-key
+                  key: key
+            - name: AKKA_PERSISTENCE_MIGRATE_BATCH
+              value: "500"
+            - name: AKKA_PERSISTENCE_MIGRATE_PARALLELISM
+              value: "10"
+            - name: AKKA_PERSISTENCE_PG_JOURNAL_TABLE
+              value: event_journal2
+            - name: AKKA_PERSISTENCE_PG_SNAP_TABLE
+              value: snapshot2
+            - name: AKKA_PERSISTENCE_PG_DURABLE_STATE_TABLE
+              value: durable_state2
+            - name: AKKA_PERSISTENCE_PG_SSL_ENABLED
+              value: "on"
+            - name: AKKA_PERSISTENCE_PG_SSL_MODE
+              value: allow
+            - name: AKKA_PERSISTENCE_PG_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: akka-persistence-db
+                  key: host
+            - name: AKKA_PERSISTENCE_PG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: akka-persistence-db
+                  key: username
+            - name: AKKA_PERSISTENCE_PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: akka-persistence-db
+                  key: password
+            - name: AKKA_PERSISTENCE_PG_DB
+              valueFrom:
+                secretKeyRef:
+                  name: akka-persistence-db
+                  key: db
+            - name: AKKA_PERSISTENCE_PG_SCHEMA
+              valueFrom:
+                secretKeyRef:
+                  name: akka-persistence-db
+                  key: schema
+            - name: CASSANDRA_CLUSTER_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: cass-creds
+                  key: username
+            - name: CASSANDRA_CLUSTER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cass-creds
+                  key: password
+            - name: CASSANDRA_CLUSTER_HOSTS
+              value: cluster1-main-service.k8ssandra-operator:9042
+            - name: CASSANDRA_CLUSTER_DC
+              value: main
+#          command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+      restartPolicy: Never
+  backoffLimit: 4

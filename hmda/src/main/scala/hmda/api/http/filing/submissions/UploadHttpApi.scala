@@ -2,16 +2,16 @@ package hmda.api.http.filing.submissions
 
 import java.time.Instant
 import akka.NotUsed
-import akka.actor.typed.ActorSystem
-import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
+import akka.actor.typed.{ ActorSystem, DispatcherSelector }
+import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import akka.http.scaladsl.model.headers.RawHeader
-import akka.http.scaladsl.model.{StatusCodes, Uri}
+import akka.http.scaladsl.model.{ StatusCodes, Uri }
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
-import akka.stream.scaladsl.{Flow, Framing, Sink}
-import akka.util.{ByteString, Timeout}
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
+import akka.stream.scaladsl.{ Flow, Framing, Sink }
+import akka.util.{ ByteString, Timeout }
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{ cors, corsRejectionHandler }
 import com.typesafe.config.ConfigFactory
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.PathMatchers._
@@ -19,10 +19,10 @@ import hmda.api.http.directives.QuarterlyFilingAuthorization._
 import hmda.api.http.model.ErrorResponse
 import hmda.api.ws.WebSocketProgressTracker
 import hmda.auth.OAuth2Authorization
-import hmda.messages.submission.HmdaRawDataCommands.{AddLines, HmdaRawDataCommand}
+import hmda.messages.submission.HmdaRawDataCommands.{ AddLines, HmdaRawDataCommand }
 import hmda.messages.submission.HmdaRawDataReplies.LinesAdded
 import hmda.messages.submission.SubmissionCommands.GetSubmission
-import hmda.messages.submission.SubmissionManagerCommands.{SubmissionManagerCommand, UpdateSubmissionStatus}
+import hmda.messages.submission.SubmissionManagerCommands.{ SubmissionManagerCommand, UpdateSubmissionStatus }
 import hmda.model.filing.submission._
 import hmda.persistence.submission.HmdaRawData.selectHmdaRawData
 import hmda.persistence.submission.SubmissionManager.selectSubmissionManager
@@ -31,8 +31,8 @@ import hmda.util.http.FilingResponseUtils._
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.{ Failure, Success }
 
 object UploadHttpApi {
   def create(
@@ -129,6 +129,7 @@ private class UploadHttpApi(log: Logger, sharding: ClusterSharding)(
                           submission: Submission,
                           uri: Uri
                         ): Route = {
+//    implicit val blockingEc: ExecutionContext = system.dispatchers.lookup(DispatcherSelector.fromConfig("akka.blocking-upload-dispatcher"))
     val splitLines =
       Framing.delimiter(ByteString("\n"), 2048, allowTruncation = true)
 

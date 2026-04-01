@@ -157,7 +157,6 @@ lazy val common = (project in file("common"))
         cormorant, cormorantGeneric, scalaMock, scalacheckShapeless, diffx
       )
     ),
-    // addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
     // https://github.com/aws-samples/amazon-keyspaces-java-driver-helpers
     Runtime / unmanagedBase := baseDirectory.value / "lib"

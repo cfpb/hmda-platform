@@ -36,12 +36,12 @@ spec:
 #            readOnly: true
 #            volumeAttributes:
 #              secretProviderClass: cassandra-truststore-provider
-        - name: cassandra-credentials
-          csi:
-            driver: secrets-store.csi.k8s.io
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: irsa-k8ssandra-credentials-provider
+#        - name: cassandra-credentials
+#          csi:
+#            driver: secrets-store.csi.k8s.io
+#            readOnly: true
+#            volumeAttributes:
+#              secretProviderClass: irsa-k8ssandra-credentials-provider
       serviceAccountName: {{ .Values.service.account.name }} 
       containers:
       - name: {{ .Chart.Name }}
@@ -52,9 +52,9 @@ spec:
 #          - name: cassandra-truststore
 #            readOnly: true
 #            mountPath: "/opt/cassandra_truststore"
-          - name: cassandra-credentials
-            readOnly: true
-            mountPath: "/mnt/secret-store"
+#          - name: cassandra-credentials
+#            readOnly: true
+#            mountPath: "/mnt/secret-store"
         resources:
 {{ toYaml .Values.resources | indent 12 }}
         securityContext:
@@ -71,81 +71,121 @@ spec:
           valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-        - name: CURRENT_YEAR
+        - name: AKKA_LICENSE_KEY
           valueFrom:
-            configMapKeyRef:
-              name: timed-guards
-              key: currentYear
-        - name: RULES_YEARLY_FILING_YEARS_ALLOWED
+            secretKeyRef:
+              name: akka-lc-key
+              key: key
+        - name: AKKA_PERSISTENCE_PG_HOST
           valueFrom:
-            configMapKeyRef:
-              name: timed-guards
-              key: yearsAllowed
-        - name: RULES_QF_FILING_YEARS_ALLOWED
+            secretKeyRef:
+              name: akka-persistence-db
+              key: host
+        - name: AKKA_PERSISTENCE_PG_SCHEMA
           valueFrom:
-            configMapKeyRef:
-              name: timed-guards
-              key: quarterlyYearsAllowed
-        - name: RULES_QF_Q1_START
+            secretKeyRef:
+              name: akka-persistence-db
+              key: schema
+        - name: AKKA_PERSISTENCE_PG_DB
           valueFrom:
-            configMapKeyRef:
-              name: timed-guards
-              key: q1Start
-        - name: RULES_QF_Q1_END
+            secretKeyRef:
+              name: akka-persistence-db
+              key: db
+        - name: AKKA_PERSISTENCE_PG_USER
           valueFrom:
-            configMapKeyRef:
-              name: timed-guards
-              key: q1End
-        - name: RULES_QF_Q2_START
+            secretKeyRef:
+              name: akka-persistence-db
+              key: username
+        - name: AKKA_PERSISTENCE_PG_PASSWORD
           valueFrom:
-            configMapKeyRef:
-              name: timed-guards
-              key: q2Start
-        - name: RULES_QF_Q2_END
-          valueFrom:
-            configMapKeyRef:
-              name: timed-guards
-              key: q2End
-        - name: RULES_QF_Q3_START
-          valueFrom:
-            configMapKeyRef:
-              name: timed-guards
-              key: q3Start
-        - name: RULES_QF_Q3_END
-          valueFrom:
-            configMapKeyRef:
-              name: timed-guards
-              key: q3End
-        - name: ACTION_DATE_Q1_START
-          valueFrom:
-            configMapKeyRef:
-              name: timed-guards
-              key: actionQ1Start
-        - name: ACTION_DATE_Q1_END
-          valueFrom:
-            configMapKeyRef:
-              name: timed-guards
-              key: actionQ1End
-        - name: ACTION_DATE_Q2_START
-          valueFrom:
-            configMapKeyRef:
-              name: timed-guards
-              key: actionQ2Start
-        - name: ACTION_DATE_Q2_END
-          valueFrom:
-            configMapKeyRef:
-              name: timed-guards
-              key: actionQ2End
-        - name: ACTION_DATE_Q3_START
-          valueFrom:
-            configMapKeyRef:
-              name: timed-guards
-              key: actionQ3Start
-        - name: ACTION_DATE_Q3_END
-          valueFrom:
-            configMapKeyRef:
-              name: timed-guards
-              key: actionQ3End
+            secretKeyRef:
+              name: akka-persistence-db
+              key: password
+        - name: AKKA_PERSISTENCE_PG_SSL_ENABLED
+          value: "on"
+        - name: AKKA_PERSISTENCE_PG_SSL_MODE
+          value: allow
+        - name: AKKA_PERSISTENCE_PG_BUFFER_SIZE
+          value: "2000"
+        - name: AKKA_PERSISTENCE_PG_REFRESH_INTERVAL
+          value: "1s"
+        - name: HMDA_ERROR_PERSIST_PARALLELISM
+          value: "1"
+#        - name: CURRENT_YEAR
+#          valueFrom:
+#            configMapKeyRef:
+#              name: timed-guards
+#              key: currentYear
+#        - name: RULES_YEARLY_FILING_YEARS_ALLOWED
+#          valueFrom:
+#            configMapKeyRef:
+#              name: timed-guards
+#              key: yearsAllowed
+#        - name: RULES_QF_FILING_YEARS_ALLOWED
+#          valueFrom:
+#            configMapKeyRef:
+#              name: timed-guards
+#              key: quarterlyYearsAllowed
+#        - name: RULES_QF_Q1_START
+#          valueFrom:
+#            configMapKeyRef:
+#              name: timed-guards
+#              key: q1Start
+#        - name: RULES_QF_Q1_END
+#          valueFrom:
+#            configMapKeyRef:
+#              name: timed-guards
+#              key: q1End
+#        - name: RULES_QF_Q2_START
+#          valueFrom:
+#            configMapKeyRef:
+#              name: timed-guards
+#              key: q2Start
+#        - name: RULES_QF_Q2_END
+#          valueFrom:
+#            configMapKeyRef:
+#              name: timed-guards
+#              key: q2End
+#        - name: RULES_QF_Q3_START
+#          valueFrom:
+#            configMapKeyRef:
+#              name: timed-guards
+#              key: q3Start
+#        - name: RULES_QF_Q3_END
+#          valueFrom:
+#            configMapKeyRef:
+#              name: timed-guards
+#              key: q3End
+#        - name: ACTION_DATE_Q1_START
+#          valueFrom:
+#            configMapKeyRef:
+#              name: timed-guards
+#              key: actionQ1Start
+#        - name: ACTION_DATE_Q1_END
+#          valueFrom:
+#            configMapKeyRef:
+#              name: timed-guards
+#              key: actionQ1End
+#        - name: ACTION_DATE_Q2_START
+#          valueFrom:
+#            configMapKeyRef:
+#              name: timed-guards
+#              key: actionQ2Start
+#        - name: ACTION_DATE_Q2_END
+#          valueFrom:
+#            configMapKeyRef:
+#              name: timed-guards
+#              key: actionQ2End
+#        - name: ACTION_DATE_Q3_START
+#          valueFrom:
+#            configMapKeyRef:
+#              name: timed-guards
+#              key: actionQ3Start
+#        - name: ACTION_DATE_Q3_END
+#          valueFrom:
+#            configMapKeyRef:
+#              name: timed-guards
+#              key: actionQ3End
         {{- if .Values.kafka.security }}
         - name: KAFKA_SECURITY
           value: {{.Values.kafka.security}}
@@ -178,43 +218,43 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: status.podIP
-        - name: CASSANDRA_CLUSTER_HOSTS
-          valueFrom:
-            configMapKeyRef:
-              name: cassandra-configmap
-              key: cassandra-hosts
-        - name: CASSANDRA_CLUSTER_DC
-          valueFrom:
-            configMapKeyRef:
-              name: cassandra-configmap
-              key: cassandra-cluster-dc
-        - name: CASSANDRA_JOURNAL_KEYSPACE
-          valueFrom:
-            configMapKeyRef:
-              name: cassandra-configmap
-              key: cassandra-keyspace
-        - name: CASSANDRA_SNAPSHOT_KEYSPACE
-          valueFrom:
-            configMapKeyRef:
-              name: cassandra-configmap
-              key: cassandra-keyspace-snapshot
-        - name: CASSANDRA_TARGET_PARTITION_SIZE
-          valueFrom:
-            configMapKeyRef:
-              name: cassandra-configmap
-              key: cassandra-target-partition-size
-        - name: CASSANDRA_CLUSTER_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: irsa-cassandra-credentials
-              key: cassandra.username
-        - name: CASSANDRA_CLUSTER_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: irsa-cassandra-credentials
-              key: cassandra.password
-        - name: CASSANDRA_LOG_LEVEL
-          value: {{ .Values.logs.cassandra }}
+#        - name: CASSANDRA_CLUSTER_HOSTS
+#          valueFrom:
+#            configMapKeyRef:
+#              name: cassandra-configmap
+#              key: cassandra-hosts
+#        - name: CASSANDRA_CLUSTER_DC
+#          valueFrom:
+#            configMapKeyRef:
+#              name: cassandra-configmap
+#              key: cassandra-cluster-dc
+#        - name: CASSANDRA_JOURNAL_KEYSPACE
+#          valueFrom:
+#            configMapKeyRef:
+#              name: cassandra-configmap
+#              key: cassandra-keyspace
+#        - name: CASSANDRA_SNAPSHOT_KEYSPACE
+#          valueFrom:
+#            configMapKeyRef:
+#              name: cassandra-configmap
+#              key: cassandra-keyspace-snapshot
+#        - name: CASSANDRA_TARGET_PARTITION_SIZE
+#          valueFrom:
+#            configMapKeyRef:
+#              name: cassandra-configmap
+#              key: cassandra-target-partition-size
+#        - name: CASSANDRA_CLUSTER_USERNAME
+#          valueFrom:
+#            secretKeyRef:
+#              name: irsa-cassandra-credentials
+#              key: cassandra.username
+#        - name: CASSANDRA_CLUSTER_PASSWORD
+#          valueFrom:
+#            secretKeyRef:
+#              name: irsa-cassandra-credentials
+#              key: cassandra.password
+#        - name: CASSANDRA_LOG_LEVEL
+#          value: {{ .Values.logs.cassandra }}
 #        - name: CASSANDRA_TRUSTSTORE_FILE
 #          value: "/opt/cassandra_truststore/cassandra_truststore.jks"
 #        - name: CASSANDRA_TRUSTSTORE_PASSWORD
@@ -253,16 +293,16 @@ spec:
 #            secretKeyRef:
 #              name: aws-credentials
 #              key: aws-secret-access-key
-#        - name: HTTP_CENSUS_HOST
-#          valueFrom:
-#            configMapKeyRef:
-#              name: http-configmap
-#              key: census.host
-#        - name: HTTP_CENSUS_PORT
-#          valueFrom:
-#            configMapKeyRef:
-#              name: http-configmap
-#              key: census.port
+        - name: HTTP_CENSUS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: http-configmap
+              key: census.host
+        - name: HTTP_CENSUS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: http-configmap
+              key: census.port
         - name: UPLOAD_LINES_BATCH
           value: {{ .Values.hmda.upload.lines.batch | quote }}
         - name: UPLOAD_LINES_PARALLELISM

@@ -90,7 +90,8 @@ object HmdaValidationError
                              ): CommandHandler[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaValidationErrorState] = { (state, cmd) =>
     val log                                   = ctx.log
     implicit val system: ActorSystem[_]       = ctx.system
-    implicit val blockingEc: ExecutionContext = system.dispatchers.lookup(DispatcherSelector.fromConfig("akka.blocking-quality-dispatcher"))
+//    implicit val blockingEc: ExecutionContext = system.dispatchers.lookup(DispatcherSelector.fromConfig("akka.blocking-quality-dispatcher"))
+    implicit val blockingEc: ExecutionContext = system.dispatchers.lookup(DispatcherSelector.default())
     val materializer = implicitly[Materializer]
 
     val config                    = system.settings.config
@@ -574,6 +575,7 @@ object HmdaValidationError
 
     val sharding = ClusterSharding(system)
     val self: EntityRef[SubmissionProcessingCommand] = selectHmdaValidationError(sharding, submissionId)
+    val errorPersistParallel = ctx.system.settings.config.getInt("hmda.error.persist.parallelism")
 
     def qualityChecks: Future[List[ValidationError]] =
       if (editCheck == "quality") validateTsLar(submissionId, "quality", validationContext, self)
@@ -588,7 +590,7 @@ object HmdaValidationError
           case (Left(errors), rowNumber) =>
             PersistHmdaRowValidatedError(submissionId, rowNumber, errors, None)
         }
-        .mapAsync(1)(el =>
+        .mapAsync(errorPersistParallel)(el =>
           self ? ((replyTo: ActorRef[HmdaRowValidatedError]) => el.copy(replyTo = Some(replyTo)))
         )
         .named("errorPersisting" + submissionId)
@@ -634,6 +636,7 @@ object HmdaValidationError
                               )(implicit system: ActorSystem[_], mat: Materializer, ec: ExecutionContext, t: Timeout): Source[HmdaRowValidatedError, NotUsed] = {
     val sharding = ClusterSharding(system)
     val self: EntityRef[SubmissionProcessingCommand] = selectHmdaValidationError(sharding, submissionId)
+    val errorPersistParallel = system.settings.config.getInt("hmda.error.persist.parallelism")
 
     val period = submissionId.period
     uploadConsumerRawStr(submissionId)
@@ -642,7 +645,7 @@ object HmdaValidationError
       .filter(_.isLeft)
       .map(_.left.get)
       .zip(Source.fromIterator(() => Iterator.from(2)))
-      .mapAsync(1)(el =>
+      .mapAsync(errorPersistParallel)(el =>
         self ? ((replyTo: ActorRef[HmdaRowValidatedError]) => PersistHmdaRowValidatedError(submissionId, el._2, el._1, Some(replyTo))
           ))
   }
