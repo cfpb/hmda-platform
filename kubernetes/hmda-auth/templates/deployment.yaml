@@ -99,6 +99,7 @@ spec:
               mountPath: /etc/localtime
 #            - mountPath: /opt/java/openjdk/lib/security/
 #              name: jksfolder
+          resources: {{- toYaml .Values.resources | nindent 12 }}
           securityContext:
             seccompProfile:
               type: RuntimeDefault
@@ -145,11 +146,11 @@ spec:
                 secretKeyRef:
                   name: keycloak-admin-secrets
                   key: username
-            - name: KEYCLOAK_ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: keycloak-admin-secrets
-                  key: password
+            # - name: KEYCLOAK_ADMIN_PASSWORD
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: keycloak-admin-secrets
+            #       key: password
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:
@@ -165,11 +166,11 @@ spec:
                 secretKeyRef:
                   name: platform-rds-secrets
                   key: username
-            - name: PG_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: platform-rds-secrets
-                  key: password
+            # - name: PG_PASSWORD
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: platform-rds-secrets
+            #       key: password
 #            - name: PG_SSL
 #              valueFrom:
 #                configMapKeyRef:

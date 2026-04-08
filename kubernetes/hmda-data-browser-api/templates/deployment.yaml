@@ -133,11 +133,11 @@ spec:
                 secretKeyRef:
                   name: platform-rds-secrets
                   key: username
-            - name: PG_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: platform-rds-secrets
-                  key: password
+            # - name: PG_PASSWORD
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: platform-rds-secrets
+            #       key: password
             - name: PG_SSL
               value: require
 #              valueFrom:
@@ -197,11 +197,11 @@ spec:
                 configMapKeyRef:
                   name: s3-configmap
                   key: s3-public-bucket
-            - name: REDIS_PASS
-              valueFrom:
-                secretKeyRef:
-                  key: redis-password
-                  name: redis-password
+            # - name: REDIS_PASS
+            #   valueFrom:
+            #     secretKeyRef:
+            #       key: redis-password
+            #       name: redis-password
             - name: S3_URL
               value: {{.Values.databrowser.s3Url}}
             - name: COMMIT_ID

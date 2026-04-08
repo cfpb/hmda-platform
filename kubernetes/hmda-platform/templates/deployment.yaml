@@ -208,11 +208,11 @@ spec:
             secretKeyRef:
               name: irsa-cassandra-credentials
               key: cassandra.username
-        - name: CASSANDRA_CLUSTER_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: irsa-cassandra-credentials
-              key: cassandra.password
+        # - name: CASSANDRA_CLUSTER_PASSWORD
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: irsa-cassandra-credentials
+        #       key: cassandra.password
         - name: CASSANDRA_LOG_LEVEL
           value: {{ .Values.logs.cassandra }}
 #        - name: CASSANDRA_TRUSTSTORE_FILE

@@ -78,11 +78,11 @@ spec:
                 secretKeyRef:
                   name: irsa-platform-rds-secrets
                   key: username
-            - name: PG_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: irsa-platform-rds-secrets
-                  key: password
+            # - name: PG_PASSWORD
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: irsa-platform-rds-secrets
+            #       key: password
             - name: KAFKA_CLUSTER_HOSTS
               valueFrom:
                 configMapKeyRef:
@@ -155,11 +155,11 @@ spec:
                 secretKeyRef:
                   name: smtp-secrets
                   key: username
-            - name: SMTP_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: smtp-secrets
-                  key: password
+            # - name: SMTP_PASSWORD
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: smtp-secrets
+            #       key: password
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}

@@ -77,11 +77,11 @@ spec:
                 secretKeyRef:
                   name: platform-rds-secrets
                   key: username
-            - name: PG_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: platform-rds-secrets
-                  key: password
+            # - name: PG_PASSWORD
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: platform-rds-secrets
+            #       key: password
 #            - name: JDBC_URL
 #              valueFrom:
 #                secretKeyRef:
@@ -92,11 +92,11 @@ spec:
                 configMapKeyRef:
                   name: bank-filter-configmap
                   key: bank-filter-list
-            - name: DASHBOARD_ADMIN_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: dashboard-admin-pass
-                  key: password
+            # - name: DASHBOARD_ADMIN_PASS
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: dashboard-admin-pass
+            #       key: password
             - name: AVAILABLE_YEARLY
               valueFrom:
                 configMapKeyRef:

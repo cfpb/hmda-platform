@@ -28,18 +28,28 @@ podAnnotations: {}
 podSecurityContext: {}
   # fsGroup: 2000
 
-securityContext: { 
-  seccompProfile: { 
-    type: RuntimeDefault 
-    } 
-    }
+# securityContext: { 
+#   seccompProfile: { 
+#     type: RuntimeDefault 
+#     } 
+#     }
 
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+securityContext:
+  seccompProfile:
+    type: RuntimeDefault
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+
+# securityContext:
+#   seccompProfile:
+#     type: RuntimeDefault
+#   allowPrivilegeEscalation: false
+#   readOnlyRootFilesystem: true
+#   runAsNonRoot: true
+#   runAsUser: 1000
+#   capabilities:
+#     drop:
+#       - ALL
 
 service:
   type: ClusterIP

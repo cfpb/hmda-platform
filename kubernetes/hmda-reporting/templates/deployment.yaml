@@ -66,11 +66,11 @@ spec:
                 secretKeyRef:
                   name: platform-rds-secrets
                   key: username
-            - name: PG_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: platform-rds-secrets
-                  key: password
+            # - name: PG_PASSWORD
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: platform-rds-secrets
+            #       key: password
 #            - name: PG_SSL
 #              valueFrom:
 #                configMapKeyRef:
