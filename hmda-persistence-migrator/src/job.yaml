@@ -1,33 +1,39 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: akka-persistence-migrator-260331-4
+  name: akka-persistence-migrator-260410-7
 spec:
   template:
     spec:
       containers:
         - name: akka-persistence-migrator
-          image: 564992080820.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:persistence_migrator_test.260330.3
+          image: 760711518487.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:persistence_migrator_test.260410.2
           env:
             - name: AKKA_LICENSE_KEY
               valueFrom:
                 secretKeyRef:
                   name: akka-lc-key
                   key: key
-            - name: AKKA_PERSISTENCE_MIGRATE_BATCH
-              value: "500"
+#            - name: AKKA_PERSISTENCE_MIGRATE_BATCH
+#              value: "500"
+            - name: HMDA_MIGRATOR_LOG
+              value: DEBUG
             - name: AKKA_PERSISTENCE_MIGRATE_PARALLELISM
-              value: "10"
+              value: "1"
+            - name: PERSISTENCE_ID
+              value: "DEBUG"
             - name: AKKA_PERSISTENCE_PG_JOURNAL_TABLE
-              value: event_journal2
+              value: event_journal
             - name: AKKA_PERSISTENCE_PG_SNAP_TABLE
-              value: snapshot2
+              value: snapshot
             - name: AKKA_PERSISTENCE_PG_DURABLE_STATE_TABLE
-              value: durable_state2
+              value: durable_state
             - name: AKKA_PERSISTENCE_PG_SSL_ENABLED
               value: "on"
             - name: AKKA_PERSISTENCE_PG_SSL_MODE
               value: allow
+#            - name: MIGRATION_TOOL_LOG
+#              value: DEBUG
             - name: AKKA_PERSISTENCE_PG_HOST
               valueFrom:
                 secretKeyRef:
@@ -64,9 +70,8 @@ spec:
                   name: cass-creds
                   key: password
             - name: CASSANDRA_CLUSTER_HOSTS
-              value: cluster1-main-service.k8ssandra-operator:9042
+              value: cluster2-main-service.k8ssandra-failover:9042
             - name: CASSANDRA_CLUSTER_DC
               value: main
-#          command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
       restartPolicy: Never
   backoffLimit: 4
