@@ -9,11 +9,17 @@ import akka.persistence.r2dbc.migration.MigrationTool.Result
 import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
 import org.slf4j.LoggerFactory
+import slick.basic.DatabaseConfig
+import slick.jdbc.JdbcProfile
 
+import scala.concurrent.Future
 import scala.util.{ Failure, Success, Try }
 
 object HmdaPersistenceMigrator extends App {
   private val log = LoggerFactory.getLogger(getClass)
+  val dbConfig: DatabaseConfig[JdbcProfile] = DatabaseConfig.forConfig[JdbcProfile]("slickdb")
+  import dbConfig._
+  import dbConfig.profile.api._
 
   private val main: Behavior[Try[Result]] = Behaviors.setup { context =>
     val migration = new MigrationTool(context.system)
@@ -27,57 +33,87 @@ object HmdaPersistenceMigrator extends App {
     implicit val ec = context.executionContext
     implicit val mat = Materializer(context.system)
 
-    sys.env.get("PERSISTENCE_ID") match {
-      case Some("DEBUG") =>
-        val result = sourcePersistenceIdsQuery
-          .currentPersistenceIds()
-          .mapAsyncUnordered(parallelism) { persistenceId =>
-            log.debug("Migrating {}", persistenceId)
-            for {
-              x <- migration.migrateEvents(persistenceId)
-            } yield persistenceId -> Result(1, x, 0)
-          }.map { case (pid, result @ Result(_, events, snapshots)) =>
-              log.debug(
-                "Migrated persistenceId [{}] with [{}] events{}.",
-                pid,
-                events,
-                if (snapshots == 0) "" else " and snapshot")
-              result
-          }
-          .runWith(Sink.fold(Result.empty) { case (acc, Result(_, events, snapshots)) =>
-            val result = Result(acc.persistenceIds + 1, acc.events + events, acc.snapshots + snapshots)
-            if (result.persistenceIds % 100 == 0)
-              log.info(
-                "Migrated [{}] persistenceIds with [{}] events and [{}] snapshots.",
-                result.persistenceIds,
-                result.events,
-                result.snapshots)
-            result
-          })
+    val skipPersistence = sourcePersistenceIdsQuery
+      .currentPersistenceIds()
+      .mapAsyncUnordered(parallelism) { persistenceId =>
+        if (persistenceId.matches("HmdaParserError-([A-Z0-9]{20})-2018-\\d+")) {
+          log.info("Adding persistence id for skipping: {}", persistenceId)
+          val skipAdded = db.run(
+            sqlu"""
+                 INSERT INTO migration_progress(persistence_id, event_seq_nr)
+                 VALUES($persistenceId, 0)
+                 ON CONFLICT (persistence_id)
+                 DO UPDATE SET
+                 event_seq_nr = excluded.event_seq_nr
+               """
+          )
+          skipAdded
+        } else {
+          Future.successful(0)
+        }
+      }.runWith(Sink.fold(0) { case (acc, updated) =>
+        acc + updated
+      })
 
-        result.transform {
-          case s @ Success(Result(persistenceIds, events, snapshots)) =>
-            log.info(
-              "Migration successful. Migrated [{}] persistenceIds with [{}] events and [{}] snapshots.",
-              persistenceIds,
-              events,
-              snapshots)
-            s
-          case f @ Failure(exc) =>
-            log.error("Migration failed.", exc)
-            f
+    skipPersistence.onComplete {
+      case Success(n) =>
+        log.info("Added {} to be skipped, resuming migration,", n)
+        sys.env.get("PERSISTENCE_ID") match {
+          case Some("DEBUG") =>
+            val result = sourcePersistenceIdsQuery
+              .currentPersistenceIds()
+              .mapAsyncUnordered(parallelism) { persistenceId =>
+                log.debug("Migrating {}", persistenceId)
+                for {
+                  x <- migration.migrateEvents(persistenceId)
+                } yield persistenceId -> Result(1, x, 0)
+              }.map { case (pid, result @ Result(_, events, snapshots)) =>
+                log.debug(
+                  "Migrated persistenceId [{}] with [{}] events{}.",
+                  pid,
+                  events,
+                  if (snapshots == 0) "" else " and snapshot")
+                result
+              }
+              .runWith(Sink.fold(Result.empty) { case (acc, Result(_, events, snapshots)) =>
+                val result = Result(acc.persistenceIds + 1, acc.events + events, acc.snapshots + snapshots)
+                if (result.persistenceIds % 100 == 0)
+                  log.info(
+                    "Migrated [{}] persistenceIds with [{}] events and [{}] snapshots.",
+                    result.persistenceIds,
+                    result.events,
+                    result.snapshots)
+                result
+              })
+
+            result.transform {
+              case s @ Success(Result(persistenceIds, events, snapshots)) =>
+                log.info(
+                  "Migration successful. Migrated [{}] persistenceIds with [{}] events and [{}] snapshots.",
+                  persistenceIds,
+                  events,
+                  snapshots)
+                s
+              case f @ Failure(exc) =>
+                log.error("Migration failed.", exc)
+                f
+            }
+            context.pipeToSelf(result) { result =>
+              result
+            }
+          case Some(pid) =>
+            context.pipeToSelf(migration.migrateEvents(pid)) { result =>
+              result.map(r => Result(1, r, 0))
+            }
+          case None =>
+            context.pipeToSelf(migration.migrateAll()) { result =>
+              result
+            }
         }
-        context.pipeToSelf(result) { result =>
-          result
-        }
-      case Some(pid) =>
-        context.pipeToSelf(migration.migrateEvents(pid)) { result =>
-          result.map(r => Result(1, r, 0))
-        }
-      case None =>
-        context.pipeToSelf(migration.migrateAll()) { result =>
-          result
-        }
+
+      case Failure(ex) =>
+        log.error("failed", ex)
+        context.pipeToSelf(Future.failed(ex)) { res: Try[Result] => res }
     }
 
     Behaviors.receiveMessage {
