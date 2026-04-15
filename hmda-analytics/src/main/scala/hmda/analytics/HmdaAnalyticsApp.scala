@@ -144,22 +144,6 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
       submissionHistoryRepository.firstSignDate(submissionId)
     }
 
-
-/*     def firstSignDate: Future[Seq[Option[Long]]] = {
-      val tsRepo = getTsRepo(
-        s"Unable to discern period from $submissionId to delete TS rows",
-        submissionId.period.year.toString,
-       submissionId.period.quarter.getOrElse("")
-      )
-      if (submissionId.period.quarter.isDefined) {
-        tsRepo.findByLeiAndQuarter(lei = submissionId.lei).map(_.map(_.firstSignDate))
-      } else {
-        println("find by the following submission id")
-        println(submissionId.lei)
-        tsRepo.findByLei(lei = submissionId.lei).map(_.map(_.firstSignDate))
-      }
-    } */
-
     def deleteTsRow: Future[Done] =
       rawData.take(1)
         .map(s => TsCsvParser(s, fromCassandra = true))
