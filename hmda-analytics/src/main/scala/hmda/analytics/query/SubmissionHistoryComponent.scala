@@ -28,6 +28,18 @@ trait SubmissionHistoryComponent {
            sign_date = ${signDate}
           """
       }
+    
+    def firstSignDate(submissionId: SubmissionId): Future[Seq[Long]] = {
+      val period = submissionId.period.year
+      val lei = submissionId.lei
+      val submissionIdLikeStatment = s"${lei}-${period}-%"
+      config.db.run {
+        sql"""
+        SELECT MIN(sign_date) from #${tableName}
+        WHERE submission_id LIKE $submissionIdLikeStatment
+        """.as[Long]
+      }
+    }
   }
 
 }
