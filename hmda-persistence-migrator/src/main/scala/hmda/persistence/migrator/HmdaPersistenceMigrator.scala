@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.Future
 import scala.util.{ Failure, Success, Try }
 
 object HmdaPersistenceMigrator extends App {
@@ -26,6 +25,8 @@ object HmdaPersistenceMigrator extends App {
 
     val migrationConfig = context.system.settings.config.getConfig("akka.persistence.r2dbc.migration")
 
+    val skipLeis = migrationConfig.getStringList("hmda.lei.skip")
+
     val sourceQueryPluginId = migrationConfig.getString("source.query-plugin-id")
     val sourceReadJournal = PersistenceQuery(context.system).readJournalFor[ReadJournal](sourceQueryPluginId)
     val sourcePersistenceIdsQuery = sourceReadJournal.asInstanceOf[CurrentPersistenceIdsQuery]
@@ -33,87 +34,97 @@ object HmdaPersistenceMigrator extends App {
     implicit val ec = context.executionContext
     implicit val mat = Materializer(context.system)
 
-    val skipPersistence = sourcePersistenceIdsQuery
-      .currentPersistenceIds()
-      .mapAsyncUnordered(parallelism) { persistenceId =>
-        if (persistenceId.matches("HmdaParserError-([A-Z0-9]{20})-2018-\\d+")) {
-          log.info("Adding persistence id for skipping: {}", persistenceId)
-          val skipAdded = db.run(
-            sqlu"""
-                 INSERT INTO migration_progress(persistence_id, event_seq_nr)
-                 VALUES($persistenceId, 0)
-                 ON CONFLICT (persistence_id)
-                 DO UPDATE SET
-                 event_seq_nr = excluded.event_seq_nr
-               """
-          )
-          skipAdded
-        } else {
-          Future.successful(0)
-        }
-      }.runWith(Sink.fold(0) { case (acc, updated) =>
-        acc + updated
-      })
-
-    skipPersistence.onComplete {
-      case Success(n) =>
-        log.info("Added {} to be skipped, resuming migration,", n)
-        sys.env.get("PERSISTENCE_ID") match {
-          case Some("DEBUG") =>
-            val result = sourcePersistenceIdsQuery
-              .currentPersistenceIds()
-              .mapAsyncUnordered(parallelism) { persistenceId =>
-                log.debug("Migrating {}", persistenceId)
-                for {
-                  x <- migration.migrateEvents(persistenceId)
-                } yield persistenceId -> Result(1, x, 0)
-              }.map { case (pid, result @ Result(_, events, snapshots)) =>
-                log.debug(
-                  "Migrated persistenceId [{}] with [{}] events{}.",
-                  pid,
-                  events,
-                  if (snapshots == 0) "" else " and snapshot")
-                result
+    sys.env.get("PERSISTENCE_ID") match {
+      case Some("DEBUG") =>
+        val result = sourcePersistenceIdsQuery
+          .currentPersistenceIds()
+          .filterNot(pid => {
+            !pid.startsWith("Institution") && ("([A-Z0-9]{20})".r.findFirstIn(pid) match {
+              case Some(lei) =>
+                log.info("Skipping LEI: {}, PID: {}", lei, pid)
+                skipLeis.contains(lei)
+              case _ => false
+            })
+          })
+          .mapAsyncUnordered(parallelism) { persistenceId =>
+            for {
+              events <- {
+                migration.migrateEvents(persistenceId).transform {
+                  case Success(n) => Success(n)
+                  case f @ Failure(exception) =>
+                    log.error("Failed to migrate event {}", persistenceId)
+                    db.run(
+                      sqlu"""
+                            insert into migration_failure(persistence_id, failure_type)
+                            values ($persistenceId, 'event')
+                            ON CONFLICT (persistence_id)
+                            DO UPDATE SET
+                            persistence_id = excluded.persistence_id
+                          """
+                    )
+                    Success(0L)
+                }
               }
-              .runWith(Sink.fold(Result.empty) { case (acc, Result(_, events, snapshots)) =>
-                val result = Result(acc.persistenceIds + 1, acc.events + events, acc.snapshots + snapshots)
-                if (result.persistenceIds % 100 == 0)
-                  log.info(
-                    "Migrated [{}] persistenceIds with [{}] events and [{}] snapshots.",
-                    result.persistenceIds,
-                    result.events,
-                    result.snapshots)
-                result
-              })
+              snapshots <- {
+                migration.migrateSnapshot(persistenceId).transform {
+                  case Success(n) => Success(n)
+                  case f @ Failure(exception) =>
+                    log.error("Failed to migrate snapshot {}", persistenceId)
+                    db.run(
+                      sqlu"""
+                            insert into migration_failure(persistence_id, failure_type)
+                            values ($persistenceId, 'snapshot')
+                            ON CONFLICT (persistence_id)
+                            DO UPDATE SET
+                            persistence_id = excluded.persistence_id
+                          """
+                    )
+                    Success(0)
+                }
+              }
+            } yield persistenceId -> Result(1, events, snapshots)
+          }.map { case (pid, result @ Result(_, events, snapshots)) =>
+            log.debug(
+              "Migrated persistenceId [{}] with [{}] events{}.",
+              pid,
+              events,
+              if (snapshots == 0) "" else " and snapshot")
+            result
+          }
+          .runWith(Sink.fold(Result.empty) { case (acc, Result(_, events, snapshots)) =>
+            val result = Result(acc.persistenceIds + 1, acc.events + events, acc.snapshots + snapshots)
+            if (result.persistenceIds % 100 == 0)
+              log.info(
+                "Migrated [{}] persistenceIds with [{}] events and [{}] snapshots.",
+                result.persistenceIds,
+                result.events,
+                result.snapshots)
+            result
+          })
 
-            result.transform {
-              case s @ Success(Result(persistenceIds, events, snapshots)) =>
-                log.info(
-                  "Migration successful. Migrated [{}] persistenceIds with [{}] events and [{}] snapshots.",
-                  persistenceIds,
-                  events,
-                  snapshots)
-                s
-              case f @ Failure(exc) =>
-                log.error("Migration failed.", exc)
-                f
-            }
-            context.pipeToSelf(result) { result =>
-              result
-            }
-          case Some(pid) =>
-            context.pipeToSelf(migration.migrateEvents(pid)) { result =>
-              result.map(r => Result(1, r, 0))
-            }
-          case None =>
-            context.pipeToSelf(migration.migrateAll()) { result =>
-              result
-            }
+        result.transform {
+          case s @ Success(Result(persistenceIds, events, snapshots)) =>
+            log.info(
+              "Migration successful. Migrated [{}] persistenceIds with [{}] events and [{}] snapshots.",
+              persistenceIds,
+              events,
+              snapshots)
+            s
+          case f @ Failure(exc) =>
+            log.error("Migration failed.", exc)
+            f
         }
-
-      case Failure(ex) =>
-        log.error("failed", ex)
-        context.pipeToSelf(Future.failed(ex)) { res: Try[Result] => res }
+        context.pipeToSelf(result) { result =>
+          result
+        }
+      case Some(pid) =>
+        context.pipeToSelf(migration.migrateEvents(pid)) { result =>
+          result.map(r => Result(1, r, 0))
+        }
+      case None =>
+        context.pipeToSelf(migration.migrateAll()) { result =>
+          result
+        }
     }
 
     Behaviors.receiveMessage {
