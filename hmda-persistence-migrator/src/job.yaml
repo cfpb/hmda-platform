@@ -1,0 +1,81 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: akka-persistence-beta-migrator-260422-2
+spec:
+  template:
+    spec:
+      containers:
+        - name: akka-persistence-migrator
+          image: 760711518487.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:persistence_migrator_test.260420.1
+          env:
+            - name: CASSANDRA_JOURNAL_KEYSPACE
+              value: hmda2_journal_beta
+            - name: CASSANDRA_SNAPSHOT_KEYSPACE
+              value: hmda2_snap_beta
+            - name: AKKA_LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: akka-lc-key
+                  key: key
+#            - name: AKKA_PERSISTENCE_MIGRATE_BATCH
+#              value: "500"
+#            - name: HMDA_MIGRATOR_LOG
+#              value: DEBUG
+#            - name: AKKA_PERSISTENCE_MIGRATE_PARALLELISM
+#              value: "1"
+            - name: PERSISTENCE_ID
+              value: "DEBUG"
+            - name: AKKA_PERSISTENCE_PG_JOURNAL_TABLE
+              value: event_journal2
+            - name: AKKA_PERSISTENCE_PG_SNAP_TABLE
+              value: snapshot2
+            - name: AKKA_PERSISTENCE_PG_DURABLE_STATE_TABLE
+              value: durable_state2
+            - name: AKKA_PERSISTENCE_PG_SSL_ENABLED
+              value: "on"
+            - name: AKKA_PERSISTENCE_PG_SSL_MODE
+              value: allow
+#            - name: MIGRATION_TOOL_LOG
+#              value: DEBUG
+            - name: AKKA_PERSISTENCE_PG_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: akka-persistence-db
+                  key: host
+            - name: AKKA_PERSISTENCE_PG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: akka-persistence-db
+                  key: username
+            - name: AKKA_PERSISTENCE_PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: akka-persistence-db
+                  key: password
+            - name: AKKA_PERSISTENCE_PG_DB
+              valueFrom:
+                secretKeyRef:
+                  name: akka-persistence-db
+                  key: db
+            - name: AKKA_PERSISTENCE_PG_SCHEMA
+              valueFrom:
+                secretKeyRef:
+                  name: akka-persistence-db
+                  key: schema
+            - name: CASSANDRA_CLUSTER_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: cass-creds
+                  key: username
+            - name: CASSANDRA_CLUSTER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cass-creds
+                  key: password
+            - name: CASSANDRA_CLUSTER_HOSTS
+              value: cluster2-main-service.k8ssandra-failover:9042
+            - name: CASSANDRA_CLUSTER_DC
+              value: main
+      restartPolicy: Never
+  backoffLimit: 4

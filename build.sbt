@@ -47,8 +47,8 @@ lazy val akkaPersistenceDeps =
     akkaPersistenceTyped,
     akkaPersistenceQuery,
     akkaClusterShardingTyped,
-    akkaPersistenceCassandra,
-    keyspacedriver
+    akkaPersistenceR2DBC,
+    akkaPersistenceCassandra
   )
 
 lazy val akkaHttpDeps =
@@ -157,7 +157,6 @@ lazy val common = (project in file("common"))
         cormorant, cormorantGeneric, scalaMock, scalacheckShapeless, diffx
       )
     ),
-    // addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
     // https://github.com/aws-samples/amazon-keyspaces-java-driver-helpers
     Runtime / unmanagedBase := baseDirectory.value / "lib"
@@ -185,6 +184,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
         case "cinnamon-reference.conf"               => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "logback.xml"                           => MergeStrategy.concat
+        case "version.conf"                          => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
         case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
@@ -818,6 +818,49 @@ lazy val `hmda-quarterly-data-service` = (project in file ("hmda-quarterly-data-
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
+        case PathList("jakarta", xs@_*) => MergeStrategy.last
+        case PathList(ps @ _*) if ps.last endsWith ".proto" =>
+          MergeStrategy.first
+        case "module-info.class" => MergeStrategy.concat
+        case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
+        case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
+        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
+        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assembly / assemblyMergeStrategy).value
+          oldStrategy(x)
+      },
+      assembly / assemblyJarName := {
+        s"${name.value}.jar"
+      }
+    ),
+    dockerSettings,
+    packageSettings
+  )
+  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(`hmda-protocol` % "compile->compile;test->test")
+
+lazy val `hmda-persistence-migrator` = (project in file ("hmda-persistence-migrator"))
+  .enablePlugins(
+    JavaServerAppPackaging,
+    sbtdocker.DockerPlugin,
+    AshScriptPlugin
+  )
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      libraryDependencies += "com.lightbend.akka" %% "akka-persistence-r2dbc-migration" % "1.3.12",
+      libraryDependencies ++= slickDeps,
+//      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
+//        enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
+      assembly / assemblyMergeStrategy := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case "version.conf" => MergeStrategy.concat
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
         case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs@_*) => MergeStrategy.last

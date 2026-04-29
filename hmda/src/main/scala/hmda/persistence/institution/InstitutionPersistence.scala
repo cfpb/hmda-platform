@@ -32,7 +32,7 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
         emptyState = InstitutionState(None),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
-      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000, keepNSnapshots = 10))
+      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000))
         .withTagger(_ => Set(name.toLowerCase()))
     }
 
