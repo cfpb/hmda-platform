@@ -1,9 +1,9 @@
 package hmda.submissionerrors.repositories
 
-import com.github.tminglei.slickpg.{ ExPostgresProfile, PgArraySupport, PgSprayJsonSupport }
+import com.github.tminglei.slickpg.{ ExPostgresProfile, PgArraySupport, PgJsonSupport }
 import slick.basic.Capability
 // $COVERAGE-OFF$
-trait PostgresEnhancedProfile extends ExPostgresProfile with PgArraySupport with PgSprayJsonSupport {
+trait PostgresEnhancedProfile extends ExPostgresProfile with PgArraySupport with PgJsonSupport {
   override protected def computeCapabilities: Set[Capability] =
     super.computeCapabilities + slick.jdbc.JdbcCapabilities.insertOrUpdate
 
