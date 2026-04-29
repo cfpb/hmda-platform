@@ -110,7 +110,7 @@ spec:
         - name: AKKA_PERSISTENCE_PG_REFRESH_INTERVAL
           value: "1s"
         - name: HMDA_ERROR_PERSIST_PARALLELISM
-          value: "1"
+          value: "2"
 #        - name: CURRENT_YEAR
 #          valueFrom:
 #            configMapKeyRef:

@@ -1,14 +1,18 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: akka-persistence-migrator-260410-7
+  name: akka-persistence-beta-migrator-260422-2
 spec:
   template:
     spec:
       containers:
         - name: akka-persistence-migrator
-          image: 760711518487.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:persistence_migrator_test.260410.2
+          image: 760711518487.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:persistence_migrator_test.260420.1
           env:
+            - name: CASSANDRA_JOURNAL_KEYSPACE
+              value: hmda2_journal_beta
+            - name: CASSANDRA_SNAPSHOT_KEYSPACE
+              value: hmda2_snap_beta
             - name: AKKA_LICENSE_KEY
               valueFrom:
                 secretKeyRef:
@@ -16,18 +20,18 @@ spec:
                   key: key
 #            - name: AKKA_PERSISTENCE_MIGRATE_BATCH
 #              value: "500"
-            - name: HMDA_MIGRATOR_LOG
-              value: DEBUG
-            - name: AKKA_PERSISTENCE_MIGRATE_PARALLELISM
-              value: "1"
+#            - name: HMDA_MIGRATOR_LOG
+#              value: DEBUG
+#            - name: AKKA_PERSISTENCE_MIGRATE_PARALLELISM
+#              value: "1"
             - name: PERSISTENCE_ID
               value: "DEBUG"
             - name: AKKA_PERSISTENCE_PG_JOURNAL_TABLE
-              value: event_journal
+              value: event_journal2
             - name: AKKA_PERSISTENCE_PG_SNAP_TABLE
-              value: snapshot
+              value: snapshot2
             - name: AKKA_PERSISTENCE_PG_DURABLE_STATE_TABLE
-              value: durable_state
+              value: durable_state2
             - name: AKKA_PERSISTENCE_PG_SSL_ENABLED
               value: "on"
             - name: AKKA_PERSISTENCE_PG_SSL_MODE
