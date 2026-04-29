@@ -57,11 +57,15 @@ options:
 (.venv) $
 ```
 
-This utility parses Census Flat Files produced annually by the Federal Financial Institutions Examination Council (FFIEC) and Delineation Files produced by the US Census Bureau on a less frequent and irregular basis. Small subsets of data from both files are captured and joined. The tool should be run with the output file option to generate ffiec_census_{YYYY}.txt files suitable for HMDA ingest. The whole annual process can be performed with these steps.
+This utility parses Census Flat Files produced annually by the Federal Financial Institutions Examination Council (FFIEC) and CBSA Tract to MSA Crosswalk Delineation Files (Delineation File) produced by the US Census Bureau on a less frequent and irregular basis. Small subsets of data from both files are captured and joined. The tool should be run with the output file option to generate ffiec_census_{YYYY}.txt files suitable for HMDA ingest. The whole annual process can be performed with these steps.
 
-1. Download the zip archive for the current year Census Flat File from [here](https://www.ffiec.gov/censusapp.htm). Extract the CSV format file from the archive.
-1. Download the most recent Delineation File in Excel format from either [here](https://www.census.gov/geographies/reference-files/time-series/demo/metro-micro/delineation-files.html) or [here](https://www2.census.gov/programs-surveys/metro-micro/geographies/reference-files/). For a given year, multiple Delineation File variants are made available. The tool requires the variant for CBSAs and CSAs. This information will be noted on the download page or the file header.
-1. Open the Delineation File in Excel and save it in CSV file format.
-1. Run parse_census_file.py on the CSV files.
-1. Commit the output file to the hmda-platform repo and process as normal.
+1. Download the zip archive for the current year Census Flat File from [here](https://www.ffiec.gov/data/census/flat-files). Extract the CSV format file from the archive. 
+ - Check the Documentation to ensure there are no schema changes. If there are, make sure the code accounts for them. 
+2. Download the most recent Delineation File in Excel format from either [here](https://www.census.gov/geographies/reference-files/time-series/demo/metro-micro/delineation-files.html) or [here](https://www2.census.gov/programs-surveys/metro-micro/geographies/reference-files/). For a given year, multiple Delineation File variants are made available. The tool requires the variant for CBSAs and CSAs. This information will be noted on the download page or the file header.
+3. Open the Delineation File in Excel and save it in CSV file format.
+4. Run parse_census_file.py on the CSV files. Example: `python parse_census_file.py data/CensusFlatFile2025.csv data/list1_2023.csv -o output/ffiec_census_2025.txt`
+5. Commit the output file to the [resources](https://github.com/cfpb/hmda-platform/tree/master/common/src/main/resources) folder of the `hmda-platform` repo and process as normal.
 
+Future note: per the 2025 FFIEC Census File documentation, "Indices 86, 87, 874, and 875 were expected to be available in the DHC but are no longer available in any file. They have been marked "NA" to preserve index compatibility and will be removed at a future date if they are still unavailable." In years after 2025, we may need to adjust the code to account for the index removal. 
+
+For 2025 it was necessary to include the `skipfooter = 5` argument in the `parse_census_file.py` file because of an upstream issue with the `CensusFlatFile2025.csv` provided by the FFIEC that inadvertently included metadata. 

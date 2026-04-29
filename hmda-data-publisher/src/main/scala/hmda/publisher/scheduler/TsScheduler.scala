@@ -67,7 +67,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
 
   val s3Settings = S3Settings(context.system)
     .withBufferType(MemoryBufferType)
-    .withCredentialsProvider(awsCredentialsProviderPrivate)
+//    .withCredentialsProvider(awsCredentialsProviderPrivate)
     .withS3RegionProvider(awsRegionProviderPrivate)
     .withListBucketApiVersion(ListBucketVersion2)
 
@@ -159,7 +159,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
     fullFileName: String,
     tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] =
     publishingGuard.runIfDataIsValid(period, Scope.Private) {
-      val s3Path        = s"$environmentPrivate/ts/"
+      val s3Path        = "dynamic-data/ts/"
       val fullFilePath  = SnapshotCheck.pathSelector(s3Path, fullFileName)
 
       def countF: Future[Int] = tsRepo.count()
@@ -186,7 +186,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
     fullFileName: String,
     tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] =
     publishingGuard.runIfDataIsValid(year, period, Scope.Private) {
-      val s3Path = s"$environmentPrivate/ts/"
+      val s3Path = "dynamic-data/ts/"
       val fullFilePath = SnapshotCheck.pathSelector(s3Path, fullFileName)
 
       def countF: Future[Int] = tsRepo.count()
@@ -201,8 +201,8 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
       } yield count
 
       results onComplete {
-        case Success(count) => reportPublishingResult(schedule, fullFilePath, Some(count))
-        case Failure(t) => reportPublishingResultError(schedule, fullFilePath, t)
+        case Success(count) => reportPublishingResult(schedule, bucketPrivate+"/"+fullFilePath, Some(count))
+        case Failure(t) => reportPublishingResultError(schedule, bucketPrivate+"/"+fullFilePath, t)
       }
     }
 

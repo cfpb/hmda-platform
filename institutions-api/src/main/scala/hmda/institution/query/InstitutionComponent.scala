@@ -68,9 +68,15 @@ trait InstitutionComponent {
     val table                           = TableQuery[InstitutionsTable]((tag: Tag) => new InstitutionsTable(tag, tableName))
     def getId(table: InstitutionsTable) = table.lei
     def deleteById(lei: String)         = db.run(filterById(lei).delete)
+    def getQuarterlyFilers(exclusions: Seq[String]) = db.run(
+      table.filter(_.quarterlyFiler === true)
+        .filterNot(_.lei inSet exclusions)
+        .map(i => (i.lei, i.respondentName, i.agency))
+        .result
+    )
 
-    def createSchema() = db.run(table.schema.create)
-    def dropSchema()   = db.run(table.schema.drop)
+    def createSchema() = db.run(table.schema.createIfNotExists)
+    def dropSchema()   = db.run(table.schema.dropIfExists)
   }
 
   val institutionConfig: Config = ConfigFactory.load().getConfig("hmda.institution")

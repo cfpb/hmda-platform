@@ -41,18 +41,14 @@ object ModifiedLarPublisher {
   final val name: String = "ModifiedLarPublisher"
 
   val config                    = ConfigFactory.load()
-  val accessKeyId               = config.getString("aws.access-key-id")
-  val secretAccess              = config.getString("aws.secret-access-key ")
   val region                    = config.getString("aws.region")
   val bucket                    = config.getString("aws.public-bucket")
-  val environment               = config.getString("aws.environment")
   val isGenerateBothS3Files          = config.getBoolean("hmda.lar.modified.generateS3Files")
   val regenerateMlar = config.getBoolean("hmda.lar.modified.regenerateMlar")
-  val isCreateDispositionRecord = config.getBoolean("hmda.lar.modified.creteDispositionRecord")
   val isJustGenerateS3File = config.getBoolean("hmda.lar.modified.justGenerateS3File")
   val isJustGenerateS3FileHeader = config.getBoolean("hmda.lar.modified.justGenerateS3FileHeader")
 
-  val awsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccess))
+//  val awsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccess))
   val awsRegionProvider: AwsRegionProvider = new AwsRegionProvider {
     override def getRegion: Region = Region.of(region)
   }
@@ -66,6 +62,7 @@ object ModifiedLarPublisher {
                 indexTractMap2023: Map[String, Census],
                 indexTractMap2024: Map[String, Census],
                 indexTractMap2025: Map[String, Census],
+                indexTractMap2026: Map[String, Census],
                 modifiedLarRepo: ModifiedLarRepository,
                 readRawData: ActorSystem[_] => SubmissionId => Source[LineAdded, NotUsed] = as => id => HmdaQuery.readRawData(id)(as)
               ): Behavior[ModifiedLarCommand] =
@@ -79,7 +76,6 @@ object ModifiedLarPublisher {
 
       val s3Settings = S3Settings(ctx.system.toClassic)
         .withBufferType(MemoryBufferType)
-        .withCredentialsProvider(awsCredentialsProvider)
         .withS3RegionProvider(awsRegionProvider)
         .withListBucketApiVersion(ListBucketVersion2)
 
@@ -103,13 +99,13 @@ object ModifiedLarPublisher {
                 Map("Content-Disposition" -> "attachment", "filename" -> fileName)
 
               val s3Sink = S3
-                .multipartUpload(bucket, s"$environment/modified-lar/$filingPeriod/$fileName", metaHeaders = MetaHeaders(metaHeaders))
+                .multipartUpload(bucket, s"modified-lar/$filingPeriod/$fileName", metaHeaders = MetaHeaders(metaHeaders))
                 .withAttributes(S3Attributes.settings(s3Settings))
 
               val s3SinkWithHeader = S3
                 .multipartUpload(
                   bucket,
-                  s"$environment/modified-lar/$filingPeriod/header/$fileNameHeader",
+                  s"modified-lar/$filingPeriod/$fileNameHeader",
                   metaHeaders = MetaHeaders(metaHeaders)
                 )
                 .withAttributes(S3Attributes.settings(s3Settings))
@@ -191,7 +187,6 @@ object ModifiedLarPublisher {
                   removeLei
                   Future.sequence(List(graphWithJustS3NoHeader.run(), graphWithJustS3WithHeader.run(), graphWithJustPG.run()))
                 }
-                _ <- produceRecord(disclosureTopic, submissionId.lei, submissionId.toString, kafkaProducer)
               } yield ()
 
               finalResult.onComplete {

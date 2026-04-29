@@ -15,14 +15,14 @@ service:
   targetPort: 9092
   name: http-inst-api
   account:
-    name: hmda-service-account-default
+    name: hmda-platform-irsa
 
-currentYear: 2018
+#currentYear: 2018
 
 kafka:
   institutionsGroup: institutions-group
   institutionsTopic: institution
-  security: ""
+  security: "SASL_SSL"
   
 #ambassador:
 #  name: institutions-api-ambassador
@@ -70,7 +70,7 @@ affinity: {}
 
 postgresql:
   enabled: false
-  createSchema: false
+  createSchema: true
 
-ambassador_id: ambassador-default-1
-# ambassador_host: hmda-public.example.com
+# ambassador_id: ambassador-default-1
+ambassador_host: ffiec-test.cfpb.gov

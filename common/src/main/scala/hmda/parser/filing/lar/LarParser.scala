@@ -11,23 +11,22 @@ import scala.util.{Failure, Success, Try}
 trait LarParser {
 
   def validateIntFieldReturnString(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
-    Try(value.toInt) match {
-      case Success(i) => value.validNel
-      case Failure(e) => parserValidationError.invalidNel
+    Try(BigInt(value)) match {
+      case Success(i) => i.toString.validNel
+      case Failure(_) => parserValidationError.invalidNel
     }
 
   def validateIntFieldReturnInt(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[Int] =
     Try(value.toInt) match {
       case Success(i) => i.validNel
-      case Failure(e) => parserValidationError.invalidNel
-    }
-
-  def validateDoubleFieldReturnString(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
-    Try(value.toDouble) match {
-      case Success(i) => value.validNel
       case Failure(_) => parserValidationError.invalidNel
     }
 
+  def validateDoubleFieldReturnString(value: String, parserValidationError: ParserValidationError): LarParserValidationResult[String] =
+    Try(BigDecimal(value)) match {
+      case Success(i) => i.bigDecimal.toPlainString.validNel
+      case Failure(_) => parserValidationError.invalidNel
+    }
   def validateNAOrExemptOrStringValue(str: String): Boolean = {
     val naCode: String = "NA"
     val exemptCode: String = "Exempt"
@@ -115,7 +114,7 @@ trait LarParser {
       str.validNel
     else
       parserValidationError.invalidNel
-  
+
   def validateDateField(str: String, parserValidationError: ParserValidationError): LarParserValidationResult[Int] = {
     val dateFormatter = DateTimeFormatter.ofPattern("uuuuMMdd").withResolverStyle(ResolverStyle.STRICT)
     Try(dateFormatter.parse(str))  match {

@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: {{ include "hmda-quarterly-data-service.fullname" . }}-verbiage-configmap
 data:
-  GRAPH_SUMMARY: 31 financial institutions were required to report HMDA quarterly data in 2024. The following graphs show current and historic quarterly HMDA data for these institutions.
+  GRAPH_SUMMARY: 35 financial institutions were required to report HMDA quarterly data in 2025. The following graphs show current and historic quarterly HMDA data for these institutions.
   MEDIAN_INTEREST_RATES_SUBTITLE: ""
   MEDIAN_INTEREST_RATES_CC_RACE_SUBTITLE: ""
   MEDIAN_INTEREST_RATES_FHA_RACE_TITLE: For FHA loans, how have median interest rates differed by race/ethnicity?

@@ -37,15 +37,15 @@ object IrsPublisher {
   val config = ConfigFactory.load()
   val bankFilter =
     ConfigFactory.load("application.conf").getConfig("filter")
-  val accessKeyId  = config.getString("aws.access-key-id")
-  val secretAccess = config.getString("aws.secret-access-key ")
+//  val accessKeyId  = config.getString("aws.access-key-id")
+//  val secretAccess = config.getString("aws.secret-access-key")
   val region       = config.getString("aws.region")
   val bucket       = config.getString("aws.public-bucket")
   val environment  = config.getString("aws.environment")
   val censusHost   = config.getString("hmda.census.http.host")
   val censusPort   = config.getInt("hmda.census.http.port")
 
-  val awsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccess))
+//  val awsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccess))
 
   val awsRegionProvider: AwsRegionProvider = () => Region.of(region)
 
@@ -62,7 +62,7 @@ object IrsPublisher {
 
       val s3Settings = S3Settings(ctx.system.toClassic)
         .withBufferType(MemoryBufferType)
-        .withCredentialsProvider(awsCredentialsProvider)
+//        .withCredentialsProvider(awsCredentialsProvider)
         .withS3RegionProvider(awsRegionProvider)
         .withListBucketApiVersion(ListBucketVersion2)
 
@@ -84,7 +84,7 @@ object IrsPublisher {
           log.info(s"Publishing IRS for $submissionId for filing period $filingPeriod")
 
           val s3Sink: Sink[ByteString, Future[MultipartUploadResult]] =
-            S3.multipartUpload(bucket, s"$environment/reports/disclosure/$filingPeriod/${submissionId.lei}/nationwide/IRS.csv")
+            S3.multipartUpload(bucket, s"reports/disclosure/$filingPeriod/${submissionId.lei}/nationwide/IRS.csv")
               .withAttributes(S3Attributes.settings(s3Settings))
 
           val msaSummarySource: Source[ByteString, NotUsed] = {

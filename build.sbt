@@ -8,7 +8,8 @@ lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson, tes
 lazy val sparkDeps =
   Seq(
     postgres,
-    akkaKafkaStreams
+    akkaKafkaStreams,
+    kafkaClients
   )
 
 lazy val authDeps = Seq(keycloakAdmin, jbossLogging, httpClient)
@@ -33,6 +34,7 @@ lazy val akkaDeps = Seq(
   akkaCors,
   mskdriver,
   akkaKafkaStreams,
+  kafkaClients,
   alpakkaS3,
   akkaQuartzScheduler,
   alpakkaFile
@@ -60,17 +62,37 @@ lazy val dockerSettings = Seq(
   dockerBuildCommand := {
     //force amd64 Architecture for k8s docker image compatability
     if (sys.props("os.arch") != "amd64") {
-      dockerExecCommand.value ++ Seq("buildx", "build", "--platform=linux/amd64", "--load") ++ dockerBuildOptions.value :+ "."
+      dockerExecCommand.value ++ Seq("buildx", "build", "--platform=linux/amd64","--provenance=false", "--load") ++ dockerBuildOptions.value :+ "."
     } else dockerBuildCommand.value
   },
   Docker / maintainer := "Hmda-Ops",
-  dockerBaseImage := "eclipse-temurin:24_36-jdk-alpine-3.21",
+  dockerBaseImage := "eclipse-temurin:25.0.2_10-jdk-alpine",
   dockerRepository := Some("hmda"),
-  dockerCommands := dockerCommands.value.flatMap {
-    case cmd@Cmd("FROM",_) => List(cmd, Cmd("RUN", "apk update"),
-      Cmd("RUN", "rm /var/cache/apk/*"))
-    case other => List(other)
-  }
+
+  dockerCommands := {
+    val zscalerStage = Seq(
+      Cmd("FROM", s"${dockerBaseImage.value} AS zscaler"),
+      Cmd("RUN", "apk add ca-certificates --no-cache --no-check-certificate"),
+      Cmd("ADD", "https://raw.githubusercontent.com/cfpb/zscaler-cert/refs/heads/main/zscaler_root_ca.pem", "/usr/local/share/ca-certificates/zscaler_root_ca.pem"),
+      Cmd("RUN", "update-ca-certificates"),
+      Cmd("WORKDIR", "/app"),
+      Cmd("RUN", "cp /etc/ssl/certs/ca-certificates.crt /app/ca-certificates.crt")
+    )
+
+    val finalStage = dockerCommands.value.flatMap {
+      // Re-initialize the final stage with the desired base image
+      case cmd@Cmd("FROM", _) =>
+        List(
+          Cmd("FROM", dockerBaseImage.value),
+          Cmd("COPY", "--from=zscaler", "/app/ca-certificates.crt", "/etc/ssl/certs/ca-certificates.crt"),
+          Cmd("RUN", "apk update"),
+          Cmd("RUN", "rm /var/cache/apk/*")
+        )
+      case other => List(other)
+    }
+
+    zscalerStage ++ finalStage
+  },
 )
 
 
@@ -135,10 +157,10 @@ lazy val common = (project in file("common"))
         cormorant, cormorantGeneric, scalaMock, scalacheckShapeless, diffx
       )
     ),
-    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
-    // addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
-    // unmanagedJars in Compile ++= Seq(new java.io.File("/tmp/aws-msk-iam-auth-2.2.0-all.jar")).classpath,
-    // unmanagedJars in Runtime ++= Seq(new java.io.File("/tmp/aws-msk-iam-auth-2.2.0-all.jar")).classpath   
+    // addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
+    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
+    // https://github.com/aws-samples/amazon-keyspaces-java-driver-helpers
+    Runtime / unmanagedBase := baseDirectory.value / "lib"
   )
   .enablePlugins(BuildInfoPlugin)
   .settings(
@@ -179,7 +201,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
       },
-     reStart / envVars ++= Map("CASSANDRA_CLUSTER_HOSTS" -> "localhost", "APP_PORT" -> "2551"),
+    reStart / envVars ++= Map("CASSANDRA_CLUSTER_HOSTS" -> "localhost", "APP_PORT" -> "2551"),
     ),
     dockerSettings,
     packageSettings
@@ -237,7 +259,7 @@ lazy val `check-digit` = (project in file("check-digit"))
     .settings(
       Seq(
         libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
-        enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
+        enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
         Compile / mainClass := Some("hmda.proxy.FileProxy"),
         assembly / assemblyJarName := {
           s"${name.value}.jar"
@@ -358,7 +380,7 @@ lazy val `hmda-dashboard` = (project in file("hmda-dashboard"))
   .settings(
     Seq(
       libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
-        enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
+        enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
@@ -685,7 +707,7 @@ lazy val `data-browser` = (project in file("data-browser"))
   .settings(
     Seq(
       libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
-        enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
+        enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
@@ -761,11 +783,11 @@ lazy val `email-service` = (project in file("email-service"))
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
-        case x if x.endsWith("/module-info.class") => MergeStrategy.concat
-        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
-        case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
-        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
-        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
+        case x if x.endsWith("/module-info.class") => MergeStrategy.last
+        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.last
+        case x if x.endsWith("/LogSupport.class") => MergeStrategy.last
+        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.last
+        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.last
         case x =>
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
@@ -773,7 +795,7 @@ lazy val `email-service` = (project in file("email-service"))
       assembly / assemblyJarName := {
         s"${name.value}.jar"
       },
-      libraryDependencies ++= monix :: akkaKafkaStreams :: awsSesSdk :: logback :: Nil
+      libraryDependencies ++= monix :: akkaKafkaStreams :: kafkaClients :: awsSesSdk :: jakartaMail :: logback :: Nil
     ),
     dockerSettings,
     packageSettings
@@ -791,7 +813,7 @@ lazy val `hmda-quarterly-data-service` = (project in file ("hmda-quarterly-data-
   .settings(
     Seq(
       libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
-        enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
+        enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat

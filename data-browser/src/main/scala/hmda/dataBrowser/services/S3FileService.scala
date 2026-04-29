@@ -82,7 +82,7 @@ class S3FileService(implicit system: ActorSystem[Nothing]) extends FileService w
   private def s3Key(queries: List[QueryField], delimiter: Delimiter, year: String): String = {
     val input = md5HashString(formName(queries))
     println ("This is the input: " + input)
-    val key = s"${s3.environment}/${s3.tableSelector(year.toInt)}/$input"
+    val key = s"${s3.tableSelector(year.toInt)}/$input"
     s"$key${fileEnding(delimiter)}"
   }
 

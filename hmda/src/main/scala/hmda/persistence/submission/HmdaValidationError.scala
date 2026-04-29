@@ -336,7 +336,7 @@ object HmdaValidationError
           val timestamp = Instant.now().toEpochMilli
           val signed    = SubmissionSigned(submissionId, timestamp, Signed)
           val currentNamespace = config.getString("hmda.currentNamespace")
-          if (currentNamespace != "default") { //signing the submission is not allowed on Beta namespace
+          if (currentNamespace == "beta") { //signing the submission is not allowed on Beta namespace
             Effect.reply(replyTo)(SubmissionNotReadyToBeSigned(submissionId))
           }
           else if ((state.qualityVerified && state.macroVerified) || state

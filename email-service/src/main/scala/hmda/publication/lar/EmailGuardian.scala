@@ -3,16 +3,17 @@ package hmda.publication.lar
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl._
 import akka.actor.typed.scaladsl.adapter._
-import akka.actor.{ActorSystem => UntypedActorSystem}
+import akka.actor.{ ActorSystem => UntypedActorSystem }
 import akka.kafka.CommitterSettings
-import akka.stream.{ActorMaterializer, Materializer}
+import akka.stream.{ ActorMaterializer, Materializer }
 import akka.stream.scaladsl.Keep
 import com.amazonaws.regions.Regions
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder
+import com.amazonaws.services.simpleemail.{ AmazonSimpleEmailService, AmazonSimpleEmailServiceClientBuilder }
 import hmda.publication.lar.config.Settings
-import hmda.publication.lar.database.{EmailSubmissionStatusRepository, PGSlickEmailSubmissionStatusRepository}
-import hmda.publication.lar.email.SESEmailService
-import hmda.publication.lar.streams.Stream.{commitMessages, pullEmails, sendEmailsIfNecessary}
+import hmda.publication.lar.database.{ EmailSubmissionStatusRepository, PGSlickEmailSubmissionStatusRepository }
+import hmda.publication.lar.email.{ SESEmailService, SmtpEmailService }
+import hmda.publication.lar.streams.SubmissionStream
+import hmda.publication.lar.streams.AdminStream
 import monix.execution.Scheduler
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
@@ -30,15 +31,23 @@ object EmailGuardian {
 
       val databaseConfig                                   = DatabaseConfig.forConfig[JdbcProfile]("db")
       val config                                           = Settings(system)
-      val serviceClient                                    = AmazonSimpleEmailServiceClientBuilder.standard().withRegion(Regions.US_EAST_1).build()
-      val emailService                                     = new SESEmailService(serviceClient, config.email.fromAddress)
+      val serviceClient: Option[AmazonSimpleEmailService] = None
+      val emailService = {
+        config.client.protocol match {
+          case "ses" =>
+            val serviceClient = Some(AmazonSimpleEmailServiceClientBuilder.standard().withRegion(Regions.US_EAST_1).build())
+            new SESEmailService(serviceClient.get, config.email.fromAddress)
+          case "smtp" => new SmtpEmailService(config)
+          case proto => throw new IllegalStateException(s"Invalid email client protocol: $proto")
+        }
+      }
       val emailStatusRepo: EmailSubmissionStatusRepository = new PGSlickEmailSubmissionStatusRepository(databaseConfig)
       val commitSettings                                   = CommitterSettings(config.kafka.commitSettings)
 
-      val (control, streamCompletion) =
-        pullEmails(system, config.kafka.bootstrapServers)
+      val (submissionControl, streamSubmissionCompletion) =
+        SubmissionStream.pullEmails(system, config.kafka.bootstrapServers)
           .via(
-            sendEmailsIfNecessary(
+            SubmissionStream.sendEmailsIfNecessary(
               emailService,
               emailStatusRepo,
               config.email.content,
@@ -50,19 +59,47 @@ object EmailGuardian {
           )
           .asSource
           .map { case (_, offset) => offset }
-          .toMat(commitMessages(commitSettings))(Keep.both)
+          .toMat(SubmissionStream.commitMessages(commitSettings))(Keep.both)
           .run()
 
-      streamCompletion.onComplete { t =>
+      val (adminControl, streamAdminCompletion) =
+        AdminStream.pullEmails(system, config.kafka.bootstrapServers)
+          .via(
+            AdminStream.sendEmailsIfNecessary(
+              emailService,
+              config.email.parallelism,
+              config.email.timeToRetry
+            )
+          )
+          .asSource
+          .map { case (_, offset) => offset }
+          .toMat(AdminStream.commitMessages(commitSettings))(Keep.both)
+          .run()
+
+      streamSubmissionCompletion.onComplete { t =>
         val errorMessage = t.fold(e => e.getMessage, _ => "infinite stream completed")
         ctx.self ! Error(errorMessage)
       }
 
+      streamAdminCompletion.onComplete { t =>
+        val errorMessage = t.fold(e => e.getMessage, _ => "infinite stream completed")
+        ctx.self ! Error(errorMessage)
+      }
+
+
       Behaviors.receiveMessage {
         case Error(errorMessage) =>
           ctx.log.error(s"Infinite consumer stream has terminated, Error: $errorMessage")
-          control.drainAndShutdown(streamCompletion).onComplete { _ =>
-            serviceClient.shutdown()
+          submissionControl.drainAndShutdown(streamSubmissionCompletion).onComplete { _ =>
+            serviceClient match {
+              case Some(client) => client.shutdown()
+            }
+            databaseConfig.db.shutdown
+          }
+          adminControl.drainAndShutdown(streamAdminCompletion).onComplete { _ =>
+            serviceClient match {
+              case Some(client) => client.shutdown()
+            }
             databaseConfig.db.shutdown
           }
           Behaviors.stopped

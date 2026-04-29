@@ -25,6 +25,15 @@ class Settings(config: Config) {
     val bootstrapServers: String = config.getString("kafka.hosts")
     val commitSettings: Config   = config.getConfig("kafka.commit")
   }
+
+  object client {
+    private val clientPath = config.getConfig("hmda.client")
+    val protocol: String = clientPath.getString("protocol")
+    val smtpHost: String = clientPath.getString("host")
+    val smtpPort: Int = clientPath.getInt("port")
+    val smtpUsername: String = clientPath.getString("username")
+    val smtpPassword: String = clientPath.getString("password")
+  }
 }
 
 object Settings {

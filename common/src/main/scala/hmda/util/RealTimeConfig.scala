@@ -23,8 +23,12 @@ class RealTimeConfig(val cmName: String, val ns: String) {
       val api = new CoreV1Api(client)
       factory = Option(new SharedInformerFactory(client))
       val informer = factory.get.sharedIndexInformerFor((params: CallGeneratorParams) => {
-        api.listNamespacedConfigMapCall(
-          ns, null, null, null, s"metadata.name=$cmName", null, null, params.resourceVersion, null, null, params.timeoutSeconds, params.watch, null)
+        api.listNamespacedConfigMap(ns)
+          .fieldSelector(s"metadata.name=$cmName")
+          .resourceVersion(params.resourceVersion)
+          .timeoutSeconds(params.timeoutSeconds)
+          .watch(params.watch)
+          .buildCall(null)
       }, classOf[V1ConfigMap], classOf[V1ConfigMapList])
       informer.addEventHandler(new ResourceEventHandler[V1ConfigMap] {
         override def onAdd(obj: V1ConfigMap): Unit = {
@@ -41,7 +45,7 @@ class RealTimeConfig(val cmName: String, val ns: String) {
       })
 
       factory.get.startAllRegisteredInformers()
-      setConfig(api.readNamespacedConfigMap(cmName, ns, null))
+      setConfig(api.readNamespacedConfigMap(cmName, ns).execute())
     } catch {
       case e: ApiException =>
         log.error(s"Failed to setup informer, most likely role permission issues. ${e.getResponseBody}", e)

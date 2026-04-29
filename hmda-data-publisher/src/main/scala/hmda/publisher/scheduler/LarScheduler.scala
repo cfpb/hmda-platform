@@ -60,7 +60,9 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
   val indexTractMap2022: Map[String, Census] = CensusRecords.indexedTract2022
   val indexTractMap2023: Map[String, Census] = CensusRecords.indexedTract2023
   val indexTractMap2024: Map[String, Census] = CensusRecords.indexedTract2024
-  val indexTractMap2025: Map[String, Census] = CensusRecords.indexedTract2024
+  val indexTractMap2025: Map[String, Census] = CensusRecords.indexedTract2025
+  val indexTractMap2026: Map[String, Census] = CensusRecords.indexedTract2026
+
 
 
   val annualRepos = larAvailableYears.map(yr => yr -> {
@@ -80,7 +82,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
 
   val s3Settings = S3Settings(context.system)
     .withBufferType(MemoryBufferType)
-    .withCredentialsProvider(awsCredentialsProviderPrivate)
+//    .withCredentialsProvider(awsCredentialsProviderPrivate)
     .withS3RegionProvider(awsRegionProviderPrivate)
     .withListBucketApiVersion(ListBucketVersion2)
 
@@ -192,7 +194,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
 
   // returns effective file name/s3 object key
   def publishPSVtoS3(fileName: String, rows: Source[String, NotUsed], countF: => Future[Int], schedule: Schedule): Future[String] = {
-    val s3Path = s"$environmentPrivate/lar/"
+    val s3Path = "dynamic-data/lar/"
     val fullFilePath = SnapshotCheck.pathSelector(s3Path, fileName)
 
     val bytesStream: Source[ByteString, NotUsed] =
@@ -213,16 +215,16 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
         case Some(value) => FilePublishingCompleted.Status.Error(value)
         case None => FilePublishingCompleted.Status.Success
       }
-      publishingReporter ! FilePublishingCompleted(schedule, fullFilePath, count, Instant.now(), status)
+      publishingReporter ! FilePublishingCompleted(schedule, bucketPrivate+"/"+fullFilePath, count, Instant.now(), status)
     }
 
     results onComplete {
       case Success(count) =>
         sendPublishingNotif(None, Some(count))
-        log.info(s"Pushed to S3: $bucketPrivate/$fullFilePath.")
+        log.info(s"Pushed to S3: $fullFilePath.")
       case Failure(t) =>
         sendPublishingNotif(Some(t.getMessage), None)
-        log.info(s"An error has occurred pushing LAR Data to $bucketPrivate/$fullFilePath: ${t.getMessage}")
+        log.info(s"An error has occurred pushing LAR Data to $fullFilePath: ${t.getMessage}")
     }
 
     results.map(_ => fullFilePath)
@@ -239,7 +241,8 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
       case 2023 => indexTractMap2023
       case 2024 => indexTractMap2024
       case 2025 => indexTractMap2025
-      case _ => indexTractMap2024
+      case 2026 => indexTractMap2026
+      case _ => indexTractMap2025
     }
     val censusResult = indexTractMap.getOrElse(hmdaGeoTract, Census())
     val censusID =

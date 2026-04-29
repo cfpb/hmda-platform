@@ -12,7 +12,8 @@ import hmda.api.http.model.ErrorResponse
 import org.slf4j.Logger
 
 import java.util.concurrent.atomic.AtomicReference
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
+import scala.jdk.OptionConverters._
 import scala.util.{Failure, Success}
 
 // $COVERAGE-OFF$
@@ -156,8 +157,7 @@ class OAuth2Authorization(logger: Logger, tokenVerifier: TokenVerifier) {
       case None =>
         withLocalModeBypass {
           val r: Route = (extractRequest { req =>
-            import scala.compat.java8.OptionConverters._
-            logger.error("No bearer token, auth header [{}]" + req.getHeader("authorization").asScala)
+            logger.error("No bearer token, auth header [{}]" + req.getHeader("authorization").toScala)
             reject(AuthorizationFailedRejection)
           })
           StandardRoute(r).toDirective[Tuple1[VerifiedToken]]

@@ -22,9 +22,11 @@ class Q659_1Spec extends LarEditCheckSpec {
         lar.copy(income = s"$$$invalidExemptCode").mustPass
         lar.copy(loan = lar.loan.copy(rateSpread = invalidExemptCode)).mustFail
         lar.copy(loan = lar.loan.copy(rateSpread = s"$invalidExemptCode.0")).mustFail
+        lar.copy(loan = lar.loan.copy(rateSpread = s"$invalidExemptCode.00")).mustFail
         lar.copy(loan = lar.loan.copy(rateSpread = s"123$invalidExemptCode.0")).mustPass
         lar.copy(loanDisclosure = lar.loanDisclosure.copy(totalLoanCosts = invalidExemptCode)).mustFail
         lar.copy(loanDisclosure = lar.loanDisclosure.copy(totalLoanCosts = s"$invalidExemptCode.0")).mustFail
+        lar.copy(loanDisclosure = lar.loanDisclosure.copy(totalLoanCosts = s"$invalidExemptCode.00")).mustFail
         lar.copy(loanDisclosure = lar.loanDisclosure.copy(totalLoanCosts = s"123$invalidExemptCode.0")).mustPass
         lar.copy(property = lar.property.copy(multiFamilyAffordableUnits = invalidExemptCode)).mustFail
         lar.copy(larIdentifier = lar.larIdentifier.copy(NMLSRIdentifier = invalidExemptCode)).mustFail

@@ -186,7 +186,7 @@ object ModifiedLarCsvParser {
       lar.reverseMortgage.code,
       lar.lineOfCredit.code,
       lar.businessOrCommercialPurpose.code,
-      ConformingLoanLimit.assignLoanLimit(lar,
+      ConformingLoanLimit.assignLoanLimit(lar, year,
                                           overallLoanLimit,
                                           countyLoanLimitsByCounty,
                                           countyLoanLimitsByState),

@@ -8,65 +8,78 @@ on:
 jobs:
   hmda_platform_tests:
     uses: ./.github/workflows/helper-functions.yaml
+    secrets: inherit
     with:
       service: "hmda-platform"
 
   check_digit_tests:
     uses: ./.github/workflows/helper-functions.yaml
+    secrets: inherit
     with:
       service: "check-digit"
 
   common_tests:
     uses: ./.github/workflows/helper-functions.yaml
+    secrets: inherit
     with:
       service: "common"
 
   data_browser_tests:
     uses: ./.github/workflows/helper-functions.yaml
+    secrets: inherit
     with:
       service: "data-browser"
 
   hmda_analytics_tests:
     uses: ./.github/workflows/helper-functions.yaml
+    secrets: inherit
     with:
       service: "hmda-analytics"
 
   hmda_data_publisher_tests:
     uses: ./.github/workflows/helper-functions.yaml
+    secrets: inherit
     with:
       service: "hmda-data-publisher"
 
   hmda_quarterly_data_service_tests:
     uses: ./.github/workflows/helper-functions.yaml
+    secrets: inherit
     with:
       service: "hmda-quarterly-data-service"
 
   hmda_reporting_tests:
     uses: ./.github/workflows/helper-functions.yaml
+    secrets: inherit
     with:
       service: "hmda-reporting"
 
   institutions_api_tests:
     uses: ./.github/workflows/helper-functions.yaml
+    secrets: inherit
     with:
       service: "institutions-api"
 
   modified_lar_tests:
     uses: ./.github/workflows/helper-functions.yaml
+    secrets: inherit
     with:
       service: "modified-lar"
 
   rate_limit_tests:
     uses: ./.github/workflows/helper-functions.yaml
+    secrets: inherit
     with:
       service: "rate-limit"
 
   ratespread_calculator_tests:
     uses: ./.github/workflows/helper-functions.yaml
+    secrets: inherit
     with:
       service: "ratespread-calculator"
 
   submission_errors_tests:
     uses: ./.github/workflows/helper-functions.yaml
+    secrets: inherit
     with:
       service: "submission-errors"
