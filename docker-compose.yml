@@ -153,6 +153,30 @@ services:
     volumes:
       - ./wait-for-it.sh:/usr/bin/wait-for-it.sh
 
+  akhq:
+    # build:
+    #   context: .
+    image: tchiotludo/akhq
+#    restart: unless-stopped
+    environment:
+      AKHQ_CONFIGURATION: |
+        akhq:
+          connections:
+            docker-kafka-server:
+              properties:
+                bootstrap.servers: "kafka:9092"
+#              schema-registry:
+#                url: "http://schema-registry:8085"
+#              connect:
+#                - name: "connect"
+#                  url: "http://connect:8083"
+
+    ports:
+      - 8880:8080
+#    links:
+#      - kafka
+#      - schema-registry
+
 volumes:
   db-data:
     driver: local
