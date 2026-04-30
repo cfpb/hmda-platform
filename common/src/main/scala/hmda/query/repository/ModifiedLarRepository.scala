@@ -51,6 +51,19 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
     db.run(
       sqlu"DELETE FROM #${fetchYearTable(submissionId.period.year.toInt)} WHERE UPPER(lei) = ${submissionId.lei.toUpperCase} and filing_year = ${submissionId.period.year.toInt}"
     )
+  
+    /**
+    * Deletes entries in the Modified LAR table by their Submission ID 
+    * This is to account for the change from S303 to Q303
+    * @param submissionId
+    * @return the number of rows removed
+    */
+  def deleteBySubmissionID(submissionId: SubmissionId): Future[Int] = {
+    val likeStatement = s"${submissionId.lei}-%"
+    db.run(
+      sqlu"""DELETE FROM #${fetchYearTable(period.toInt)} WHERE submission_id LIKE $likeStatement"""
+    )
+  }
 
   /**
     * Inserts Modified Loan Application Register data that has been enhanced with Census information via the tract map

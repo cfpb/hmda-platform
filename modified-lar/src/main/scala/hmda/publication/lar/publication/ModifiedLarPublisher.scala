@@ -111,7 +111,7 @@ object ModifiedLarPublisher {
                 .withAttributes(S3Attributes.settings(s3Settings))
 
               def removeLei: Future[Int] =
-                modifiedLarRepo.deleteByLei(submissionId)
+                modifiedLarRepo.deleteBySubmissionID(submissionId)
 
               val mlarSource: Source[ModifiedLoanApplicationRegister, NotUsed] =
                 readRawData(system)(submissionId)
@@ -175,6 +175,7 @@ object ModifiedLarPublisher {
 
               val finalResult: Future[Unit] = for {
                 _ <- if (regenerateMlar)
+                  removeLei
                   graphWithS3AndPG.run()
                 else if (isGenerateBothS3Files) {
                   removeLei
