@@ -63,7 +63,7 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
     val lei = submissionId.lei
     val likeStatement = s"${lei}-%"
     db.run(
-      sqlu"""DELETE FROM #${fetchYearTable(period.toInt)} WHERE submission_id LIKE $likeStatement"""
+      sqlu"""DELETE FROM #${fetchYearTable(submissionId.period.year.toInt)} WHERE submission_id LIKE $likeStatement"""
     )
   }
 

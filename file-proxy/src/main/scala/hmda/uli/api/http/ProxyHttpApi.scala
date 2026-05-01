@@ -82,7 +82,7 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
           path("csv" / "header") {
             (extractUri & get) { uri =>
               checkYearAvailable(publicationYears(DYNAMIC_PUB_KEY), year) {
-                val s3Key = s"modified-lar/$year/header/${lei}_header.csv"
+                val s3Key = s"modified-lar/$year/${lei}_header.csv"
                 streamingS3Route(s3Key)
               }
             }
@@ -100,7 +100,7 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
           path("txt" / "header") {
             (extractUri & get) { uri =>
               checkYearAvailable(publicationYears(DYNAMIC_PUB_KEY), year) {
-                val s3Key = s"modified-lar/$year/header/${lei}_header.txt"
+                val s3Key = s"modified-lar/$year/${lei}_header.txt"
                 streamingS3Route(s3Key)
               }
             }
