@@ -59,7 +59,9 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
     * @return the number of rows removed
     */
   def deleteBySubmissionID(submissionId: SubmissionId): Future[Int] = {
-    val likeStatement = s"${submissionId.lei}-%"
+    val period = submissionId.period.year
+    val lei = submissionId.lei
+    val likeStatement = s"${lei}-%"
     db.run(
       sqlu"""DELETE FROM #${fetchYearTable(period.toInt)} WHERE submission_id LIKE $likeStatement"""
     )
