@@ -85,5 +85,38 @@ hmda:
   ssm:
     name: submission-errors-secrets-provider
     usePodIdentity: "false"
-    objects: []
-    secretObjects: []
+    objects:
+      - objectName: ""
+        objectType: "secretsmanager"
+        jmesPath:
+          - path: ""
+            objectAlias: "hmda-rds-username"
+          - path: ""
+            objectAlias: "hmda-rds-password"
+          - path: ""
+            objectAlias: "hmda-rds-host"
+          - path: ""
+            objectAlias: "hmda-rds-db"
+      - objectName: ""
+        objectType: "secretsmanager"
+        jmesPath:
+          - path: ""
+            objectAlias: "cassandra.username"
+          - path: ""
+            objectAlias: "cassandra.password"
+    secretObjects:
+      - data:
+          - key: hmda-rds-username
+            objectName: hmda-rds-username
+          - key: hmda-rds-password
+            objectName: hmda-rds-password
+          - key: hmda-rds-host
+            objectName: hmda-rds-host
+          - key: hmda-rds-db
+            objectName: hmda-rds-db
+          - key: cassandra.username
+            objectName: cassandra.username
+          - key: cassandra.password
+            objectName: cassandra.password
+        secretName: submission-errors-secrets
+        type: Opaque
