@@ -34,6 +34,10 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
+service:
+  account:
+    name: hmda-platform
+
 resources:
   limits:
     memory: "6200Mi"
@@ -57,3 +61,29 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+hmda:
+  platform:
+    rds:
+      secret:
+        name: submission-errors-secrets
+        keys:
+          host: hmda-rds-host
+          database: hmda-rds-db
+          username: hmda-rds-username
+          password: hmda-rds-password
+    cassandra:
+      host: localhost:9042
+      dc: main
+      journal: hmda2_journal
+      snapshot: hmda2_snapshot
+      secret:
+        name: submission-errors-secrets
+        keys:
+          username: cassandra.username
+          password: cassandra.password
+  ssm:
+    name: submission-errors-secrets-provider
+    usePodIdentity: "false"
+    objects: []
+    secretObjects: []

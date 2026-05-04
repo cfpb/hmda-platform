@@ -2,14 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "submission-errors.fullname" . }}
-  annotations:
-    downscaler/uptime: Mon-Fri 10:00-23:00 UTC
-    reloader.stakater.com/search: "true"
   labels:
     app: {{ include "submission-errors.name" . }}
     chart: {{ include "submission-errors.chart" . }}
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -22,22 +18,32 @@ spec:
         app: {{ include "submission-errors.name" . }}
         release: {{ .Release.Name }}
     spec:
+      serviceAccountName: {{ .Values.service.account.name }}
       volumes:
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
-        - name: cassandra-truststore
-          secret:
-            secretName: cassandra-truststore
+        - name: submission-errors-credentials
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: {{ .Values.hmda.ssm.name }}
+#        - name: cassandra-truststore
+#          secret:
+#            secretName: cassandra-truststore
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           volumeMounts:
             - name: tz-config
               mountPath: /etc/localtime
-            - name: cassandra-truststore
+            - name: submission-errors-credentials
               readOnly: true
-              mountPath: "/opt/cassandra_truststore"
+              mountPath: "/mnt/secret-store"
+#            - name: cassandra-truststore
+#              readOnly: true
+#              mountPath: "/opt/cassandra_truststore"
           securityContext:
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
@@ -49,130 +55,117 @@ spec:
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:
-                  name: inst-postgres-credentials
-                  key: host
+                  name: {{ .Values.hmda.platform.rds.secret.name }}
+                  key: {{ .Values.hmda.platform.rds.secret.keys.host }}
             - name: PG_DATABASE
               valueFrom:
-                configMapKeyRef:
-                  name: postgresql-configmap
-                  key: postgres.database
+                secretKeyRef:
+                  name: {{ .Values.hmda.platform.rds.secret.name }}
+                  key: {{ .Values.hmda.platform.rds.secret.keys.database }}
             - name: PG_USER
               valueFrom:
                 secretKeyRef:
-                  name: inst-postgres-credentials
-                  key: username
+                  name: {{ .Values.hmda.platform.rds.secret.name }}
+                  key: {{ .Values.hmda.platform.rds.secret.keys.username }}
             - name: PG_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: inst-postgres-credentials
-                  key: password
+                  name: {{ .Values.hmda.platform.rds.secret.name }}
+                  key: {{ .Values.hmda.platform.rds.secret.keys.password }}
             - name: PG_SSL
-              valueFrom:
-                configMapKeyRef:
-                  name: postgresql-configmap
-                  key: postgres.ssl
-            - name: JDBC_URL
-              valueFrom:
-                secretKeyRef:
-                  name: inst-postgres-credentials
-                  key: url
+              value: require
+#            - name: JDBC_URL
+#              valueFrom:
+#                secretKeyRef:
+#                  name: inst-postgres-credentials
+#                  key: url
             - name: CASSANDRA_CLUSTER_HOSTS
-              valueFrom:
-                configMapKeyRef:
-                  name: cassandra-configmap
-                  key: cassandra-hosts
+              value: {{ .Values.hmda.platform.cassandra.host }}
             - name: CASSANDRA_CLUSTER_DC
-              valueFrom:
-                configMapKeyRef:
-                  name: cassandra-configmap
-                  key: cassandra-cluster-dc
+              value: {{ .Values.hmda.platform.cassandra.dc }}
             - name: CASSANDRA_JOURNAL_KEYSPACE
-              valueFrom:
-                configMapKeyRef:
-                  name: cassandra-configmap
-                  key: cassandra-keyspace
+              value: {{ .Values.hmda.platform.cassandra.journal }}
             - name: CASSANDRA_SNAPSHOT_KEYSPACE
-              valueFrom:
-                configMapKeyRef:
-                  name: cassandra-configmap
-                  key: cassandra-keyspace-snapshot
+              value: {{ .Values.hmda.platform.cassandra.snapshot }}
             - name: CASSANDRA_TARGET_PARTITION_SIZE
-              valueFrom:
-                configMapKeyRef:
-                  name: cassandra-configmap
-                  key: cassandra-target-partition-size
+              value: "500000"
             - name: CASSANDRA_CLUSTER_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: cassandra-credentials
-                  key: cassandra.username
+                  name: {{ .Values.hmda.platform.cassandra.secret.name }}
+                  key: {{ .Values.hmda.platform.cassandra.secret.keys.username }}
             - name: CASSANDRA_CLUSTER_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: cassandra-credentials
-                  key: cassandra.password
+                  name: {{ .Values.hmda.platform.cassandra.secret.name }}
+                  key: {{ .Values.hmda.platform.cassandra.secret.keys.password }}
             - name: CASSANDRA_LOG_LEVEL
               value: {{ .Values.logs.cassandra }}
-            - name: CASSANDRA_TRUSTSTORE_FILE
-              value: "/opt/cassandra_truststore/cassandra_truststore.jks"
-            - name: CASSANDRA_TRUSTSTORE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: cassandra-truststore-password
-                  key: password
+#            - name: CASSANDRA_TRUSTSTORE_FILE
+#              value: "/opt/cassandra_truststore/cassandra_truststore.jks"
+#            - name: CASSANDRA_TRUSTSTORE_PASSWORD
+#              valueFrom:
+#                secretKeyRef:
+#                  name: cassandra-truststore-password
+#                  key: password
+#            - name: KAFKA_CLUSTER_HOSTS
+#              valueFrom:
+#                configMapKeyRef:
+#                  name: kafka-configmap
+#                  key: kafka.hosts
+#            - name: AWS_ACCESS_KEY_ID
+#              valueFrom:
+#                secretKeyRef:
+#                  name: aws-credentials
+#                  key: aws-access-key-id
+#            - name: AWS_SECRET_ACCESS_KEY
+#              valueFrom:
+#                secretKeyRef:
+#                  name: aws-credentials
+#                  key: aws-secret-access-key
+#            - name: AWS_ENVIRONMENT
+#              valueFrom:
+#                configMapKeyRef:
+#                  name: s3-configmap
+#                  key: aws-environment
+#            - name: BANK_FILTER_LIST
+#              valueFrom:
+#                configMapKeyRef:
+#                  name: bank-filter-configmap
+#                  key: bank-filter-list
+#            - name: HTTP_CENSUS_HOST
+#              valueFrom:
+#                configMapKeyRef:
+#                  name: http-configmap
+#                  key: census.host
+#            - name: HTTP_CENSUS_PORT
+#              valueFrom:
+#                configMapKeyRef:
+#                  name: http-configmap
+#                  key: census.port
+#            - name: KAFKA_LOG_LEVEL
+#              value: INFO
+#            - name: KAFKA_MODIFIED_LAR_TOPIC
+#              value: {{.Values.kafka.modifiedLarTopic}}
+#            - name: KAFKA_SIGN_TOPIC
+#              value: {{.Values.kafka.signTopic}}
+#            - name: KAFKA_MODIFIED_LAR_GROUP
+#              value: {{.Values.kafka.modifiedLarGroup}}
+#            - name: IS_GENERATE_MLAR_S3_FIES
+#              valueFrom:
+#                configMapKeyRef:
+#                  name: mlar-options-configmap
+#                  key: generateMlarS3File
+#            - name: IS_CREATE_DISPOSITION_KAFKA_RECORD
+#              valueFrom:
+#                configMapKeyRef:
+#                  name: mlar-options-configmap
+#                  key: createDispositionKafkaRecord
             - name: KAFKA_CLUSTER_HOSTS
               valueFrom:
                 configMapKeyRef:
                   name: kafka-configmap
                   key: kafka.hosts
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: aws-credentials
-                  key: aws-access-key-id
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: aws-credentials
-                  key: aws-secret-access-key
-            - name: AWS_ENVIRONMENT
-              valueFrom:
-                configMapKeyRef:
-                  name: s3-configmap
-                  key: aws-environment
-            - name: BANK_FILTER_LIST
-              valueFrom:
-                configMapKeyRef:
-                  name: bank-filter-configmap
-                  key: bank-filter-list
-            - name: HTTP_CENSUS_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: http-configmap
-                  key: census.host
-            - name: HTTP_CENSUS_PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: http-configmap
-                  key: census.port
-            - name: KAFKA_LOG_LEVEL
-              value: INFO
-            - name: KAFKA_MODIFIED_LAR_TOPIC
-              value: {{.Values.kafka.modifiedLarTopic}}
-            - name: KAFKA_SIGN_TOPIC
-              value: {{.Values.kafka.signTopic}}
-            - name: KAFKA_MODIFIED_LAR_GROUP
-              value: {{.Values.kafka.modifiedLarGroup}}
-            - name: IS_GENERATE_MLAR_S3_FIES
-              valueFrom:
-                configMapKeyRef:
-                  name: mlar-options-configmap
-                  key: generateMlarS3File
-            - name: IS_CREATE_DISPOSITION_KAFKA_RECORD
-              valueFrom:
-                configMapKeyRef:
-                  name: mlar-options-configmap
-                  key: createDispositionKafkaRecord
             - name: KAFKA_TOPIC
               value: submission-errors
             {{- if .Values.kafka.security }}
