@@ -35,6 +35,7 @@ trait TransmittalSheetComponent {
     def createdAt       = column[Option[Timestamp]]("created_at")
     def isQuarterly     = column[Option[Boolean]]("is_quarterly")
     def signDate     = column[Option[Long]]("sign_date")
+    def firstSignDate   = column[Option[Long]]("first_sign_data")
 
     override def * =
       (
@@ -56,7 +57,8 @@ trait TransmittalSheetComponent {
         submissionId,
         createdAt,
         isQuarterly,
-        signDate
+        signDate,
+        firstSignDate
       ) <> ((TransmittalSheetEntity.apply _).tupled, TransmittalSheetEntity.unapply)
   }
 
@@ -83,6 +85,9 @@ trait TransmittalSheetComponent {
 
     def findByLei(lei: String): Future[Seq[TransmittalSheetEntity]] =
       db.run(table.filter(_.lei.toUpperCase === lei.toUpperCase).result)
+
+    def findByLeiAndQuarter(lei: String): Future[Seq[TransmittalSheetEntity]] =
+      db.run(table.filter(x => x.lei.toUpperCase === lei.toUpperCase && x.isQuarterly === true).result)
 
     def deleteByLei(lei: String): Future[Int] =
       db.run(table.filter(_.lei.toUpperCase === lei.toUpperCase).delete)

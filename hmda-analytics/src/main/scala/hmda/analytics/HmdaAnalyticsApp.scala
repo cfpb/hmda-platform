@@ -140,6 +140,10 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .map(l => l.submission.end)
         .runWith(Sink.lastOption)
 
+    def firstSignDateSubmissionHistory: Future[Seq[Long]] = {
+      submissionHistoryRepository.firstSignDate(submissionId)
+    }
+
     def deleteTsRow: Future[Done] =
       rawData.take(1)
         .map(s => TsCsvParser(s, fromCassandra = true))
@@ -189,16 +193,29 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
           val enforceQuarterly = submissionId.period.quarter.isDefined
           for {
             signdate <- signDate
-            insertorupdate <- repo.insert(copyTs(ts, Some(signdate.getOrElse(0L)), enforceQuarterly))
+            firstsigndate <- firstSignDateSubmissionHistory
+            insertorupdate <- {
+              println("first sign date")
+              println(firstsigndate)
+              val resolvedSignDate = Some(signdate.getOrElse(0L))
+              val resolvedFirstSignDate = {
+                if (firstsigndate.isEmpty) resolvedSignDate
+                else Some(firstsigndate.head)
+              }
+              repo.insert(copyTs(ts, resolvedSignDate, resolvedFirstSignDate, enforceQuarterly))
+            }
           } yield insertorupdate
         }
         .runWith(Sink.ignore)
 
-    def copyTs(ts: TransmittalSheetEntity, signdate: Option[Long], enforceQuarterly: Boolean): TransmittalSheetEntity =
+    def copyTs(ts: TransmittalSheetEntity, signdate: Option[Long], firstsigndate: Option[Long], enforceQuarterly: Boolean): TransmittalSheetEntity =
       if (enforceQuarterly) {
-        ts.copy(lei = ts.lei.toUpperCase, signDate = signdate, isQuarterly = Some(true))
+        ts.copy(lei = ts.lei.toUpperCase, signDate = signdate, firstSignDate = firstsigndate, isQuarterly = Some(true))
       } else {
-        ts.copy(lei = ts.lei.toUpperCase, signDate = signdate)
+        val newts = ts.copy(lei = ts.lei.toUpperCase, firstSignDate = firstsigndate, signDate = signdate)
+        println("new ts")
+        println(newts)
+        newts
       }
 
     def deleteLarRows: Future[Done] =
@@ -248,6 +265,9 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
     def result =
       for {
 
+        firstSignDate <- firstSignDateSubmissionHistory
+        _ = log.info(s"First date signed $firstSignDate")
+
         _ <- deleteTsRow
         _ = if(tsDeletion)
           log.info(s"Attempt to remove data from TS table for  $submissionId  completed.")
@@ -268,7 +288,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         _ = log.info(s"Attempt to add data to LAR table for  $submissionId  completed.")
 
 
-        dateSigned   <- signDate
+        dateSigned <- signDate
         _ = log.info(s"Date signed $dateSigned")
 
         res <- insertSubmissionHistory
