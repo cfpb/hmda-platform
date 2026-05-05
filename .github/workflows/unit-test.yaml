@@ -28,7 +28,7 @@ jobs:
     uses: ./.github/workflows/helper-functions.yaml
     secrets: inherit
     with:
-      service: "data-browser"
+      service: "hmda-data-browser-api"
 
   hmda_analytics_tests:
     uses: ./.github/workflows/helper-functions.yaml
