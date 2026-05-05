@@ -81,7 +81,7 @@ Automated Underwriting System: 2|Integer: 1, 2, 3, 4, 5, 6, 7, 1111 or Blank
 Automated Underwriting System: 3|Integer: 1, 2, 3, 4, 5, 6, 7, 1111 or Blank
 Automated Underwriting System: 4|Integer: 1, 2, 3, 4, 5, 6, 7, 1111 or Blank
 Automated Underwriting System: 5|Integer: 1, 2, 3, 4, 5, 6, 7, 1111 or Blank
-Automated Underwriting System Result: 1|Integer: 1-24 or 1111 or Blank
+Automated Underwriting System Result: 1|Integer: 1-24 or 1111
 Automated Underwriting System Result: 2|Integer: 1-24 or 1111 or Blank
 Automated Underwriting System Result: 3|Integer: 1-24 or 1111 or Blank
 Automated Underwriting System Result: 4|Integer: 1-24 or 1111 or Blank
