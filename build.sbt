@@ -127,7 +127,7 @@ lazy val `hmda-root` = (project in file("."))
     `hmda-data-publisher`,
     `hmda-reporting`,
     `ratespread-calculator`,
-    `data-browser`,
+    `hmda-data-browser-api`,
     `submission-errors`,
     `hmda-quarterly-data-service`
   )
@@ -697,7 +697,7 @@ lazy val `rate-limit` = (project in file("rate-limit"))
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(`hmda-protocol`)
 
-lazy val `data-browser` = (project in file("data-browser"))
+lazy val `hmda-data-browser-api` = (project in file("hmda-data-browser-api"))
   .enablePlugins(
     JavaServerAppPackaging,
     sbtdocker.DockerPlugin,
