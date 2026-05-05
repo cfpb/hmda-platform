@@ -31,7 +31,7 @@ jobs:
 
       - name: Run hmda-platform Tests
         run: |
-          hmdaServices=("hmda-platform" "check-digit" "common" "data-browser" "hmda-analytics" "hmda-data-publisher" "hmda-quarterly-data-service" "hmda-reporting" "institutions-api" "modified-lar" "rate-limit" "ratespread-calculator" "submission-errors")
+          hmdaServices=("hmda-platform" "check-digit" "common" "hmda-data-browser-api" "hmda-analytics" "hmda-data-publisher" "hmda-quarterly-data-service" "hmda-reporting" "institutions-api" "modified-lar" "rate-limit" "ratespread-calculator" "submission-errors")
           for service in "${hmdaServices[@]}"; do
             if [ "$service" == ${{ inputs.service }} ]; then
               sbt "project ${{ inputs.service }}" "testOnly -- -l actions-ignore" 2>&1 | tee -a output-log.txt
