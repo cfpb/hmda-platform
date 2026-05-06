@@ -1,3 +1,3 @@
-packageName in Docker := "hmda-data-browser-api"
+packageName in Docker := "data-browser"
 
 version in Docker := "latest"
