@@ -17,12 +17,16 @@ import hmda.api.http.routes.BaseHttpApi
 import hmda.messages.pubsub.HmdaGroups
 import hmda.publication.KafkaUtils
 import hmda.publication.KafkaUtils._
+import hmda.query.DbConfiguration.dbConfig
 import hmda.submissionerrors.repositories.PostgresSubmissionErrorRepository
 import hmda.submissionerrors.streams.SubmissionProcessor.{ handleMessages, processRawKafkaSubmission }
 import monix.execution.Scheduler
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import spray.json.DefaultJsonProtocol._
 
+import scala.concurrent.Future
 import scala.util.{ Failure, Success }
 
 // $COVERAGE-OFF$
@@ -43,6 +47,7 @@ object SubmissionErrorsApp extends App {
     val kafkaTopic     = config.getString("kafka.topic")
     val databaseTable  = config.getString("dbconfig.table")
     val databaseConfig = PostgresSubmissionErrorRepository.config("submission-errors-db")
+    val tsTablePrefix = config.getString("dbconfig.tsTablePrefix")
 
     implicit val monixScheduler: Scheduler   = Scheduler(system.executionContext)
 
@@ -77,15 +82,35 @@ object SubmissionErrorsApp extends App {
     val killSwitch = graph.run()
 
     val appRoutes: Route = {
-      pathPrefix("key") {
-        path( Segment ) { key => {
-          onComplete(KafkaUtils.produceRecord(kafkaTopic, "", key, stringKafkaProducer)) {
-            case Success(_) => complete(f"sent $key")
-            case Failure(exception) =>
-              log.error("failed to send {}", key, exception)
-              complete("failed")
+      path("run") {
+        post {
+          entity(as[Map[String, Int]]) { payload =>
+            val yearParam = payload.get("year")
+
+            yearParam.map(year => {
+              import dbConfig._
+              import dbConfig.profile.api._
+
+              val tsName = f"$tsTablePrefix$year"
+
+              onComplete(db.run(sql"SELECT DISTINCT lei FROM #$tsName".as[String])) {
+                case Success(value) =>
+                  onComplete(Future.sequence(value.map(lei => KafkaUtils.produceRecord(kafkaTopic, "", f"$lei:$year", stringKafkaProducer)))) {
+                    case Success(_) =>
+                      complete(f"All leis for year $year sent")
+                    case Failure(e) =>
+                      log.error("Failed!", e)
+                      complete("Failed to send to kafka, check server logs")
+                  }
+                case Failure(exception) =>
+                  log.error("failed", exception)
+                  complete(f"Failed to get LEIs from $year, check server logs")
+              }
+            }).getOrElse(
+              complete("Need to provide \"year\" parameter")
+            )
           }
-        }}
+        }
       }
     }
 
