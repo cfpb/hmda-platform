@@ -74,6 +74,8 @@ spec:
                   key: {{ .Values.hmda.platform.rds.secret.keys.password }}
             - name: PG_SSL
               value: require
+            - name: TS_TABLE_PREFIX
+              value: {{ .Values.hmda.platform.db.ts.prefix }}
 #            - name: JDBC_URL
 #              valueFrom:
 #                secretKeyRef:
