@@ -69,7 +69,7 @@ object Submissions {
    */
   val collectSubmissions: Sink[Submission, Future[SortedSet[Submission]]] =
     Sink.fold[SortedSet[Submission], Submission](SortedSet.empty[Submission](setOrdering)) { (acc, next) =>
-      if (next.status.code >= 10) acc + next
+      if (next.status.code >= 10) SortedSet(next) ++ acc
       else acc
     }
 }
