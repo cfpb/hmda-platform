@@ -13,7 +13,8 @@ import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.publisher.helper.CronConfigLoader.{CronString, specificTsCron, specificTsYears, tsCron, tsQuarterlyCron, tsQuarterlyYears, tsYears}
 import hmda.publisher.helper.{PrivateAWSConfigLoader, QuarterTimeBarrier, S3Utils, SnapshotCheck}
-import hmda.publisher.query.component.{PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, TransmittalSheetTable, TsRepository, YearPeriod}
+import hmda.publisher.query.component.{PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, SubmissionHistoryComponent, TransmittalSheetTable, TsRepository, YearPeriod}
+import hmda.publisher.query.submissionhistory.SubmissionHistoryEntity
 import hmda.publisher.scheduler.schedules.{Schedule, ScheduleWithYear}
 import hmda.publisher.scheduler.schedules.Schedules.{TsQuarterlySchedule, TsSchedule}
 import hmda.publisher.util.{PublishingReporter, ScheduleCoordinator}
@@ -37,7 +38,9 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
     with PublisherComponent2021
     with PublisherComponent2022
     with PublisherComponent2023
-    with PrivateAWSConfigLoader {
+    with PrivateAWSConfigLoader
+    with SubmissionHistoryComponent
+     {
 
   implicit val ec               = context.system.dispatcher
   implicit val materializer     = Materializer(context)
@@ -58,6 +61,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
     )
   }).toMap
 
+  def submissionHistoryRepository                     = new SubmissionHistoryRepository(dbConfig)
 
   val publishingGuard: PublishingGuard = PublishingGuard.create(this)(context.system)
   val timeBarrier: QuarterTimeBarrier  = new QuarterTimeBarrier(Clock.systemDefaultZone())
@@ -98,6 +102,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
     val source = Source
       .future(transmittalSheets)
       .mapConcat(_.toList)
+      .mapAsync(1)(transmittalsheet => appendMinSignDate(transmittalsheet))
       .map(transmittalSheet => transmittalSheet.toRegulatorPSV + "\n")
       .map(ByteString(_))
     S3Utils.uploadWithRetry(source, s3Sink)
@@ -227,6 +232,34 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
       FilePublishingCompleted.Status.Success)
     log.error(s"An error has occurred while publishing $bucketPrivate/$fullFilePath: " + message.getMessage, message)
   }
+
+  def appendMinSignDate(transmittalsheet: TransmittalSheetEntity): Future[TransmittalSheetAltEntity] = {
+         val firstSignDates: Future[Seq[Long]] =
+           submissionHistoryRepository.findFirstSignDate(transmittalsheet.lei,transmittalsheet.year)
+    firstSignDates.map( signDateList =>
+      TransmittalSheetAltEntity(
+        lei = transmittalsheet.lei, 
+        institutionName= transmittalsheet.institutionName,
+      year= transmittalsheet.year,
+    quarter= transmittalsheet.quarter,
+    name= transmittalsheet.name,
+    phone= transmittalsheet.phone,
+    email= transmittalsheet.email,
+    street= transmittalsheet.street,
+    city= transmittalsheet.city,
+    state= transmittalsheet.state,
+    zipCode= transmittalsheet.zipCode,
+    agency= transmittalsheet.agency,
+    totalLines= transmittalsheet.totalLines,
+    taxId= transmittalsheet.taxId,
+    submissionId=transmittalsheet.submissionId,
+    createdAt= transmittalsheet.createdAt,
+    isQuarterly= transmittalsheet.isQuarterly,
+    signDate= transmittalsheet.signDate,
+    firstSignDate = Option(signDateList.toList.last)
+           )
+         )
+       }
 
 }
 // $COVERAGE-ON$

@@ -117,6 +117,7 @@ trait PGTableNameLoader {
 
   //common table names
   val emailTableName: String = pgTableConfig.getString("emailTableName")
+  val submissionHistoryTableName: String = pgTableConfig.getString("submissionHistoryTableName")
   val panelTableBase: String = pgTableConfig.getString("panelTableBase")
   val tsAnnualTableBase: String = pgTableConfig.getString("tsAnnualTableBase")
   val tsQuarterTableBase: String = pgTableConfig.getString("tsQuarterTableBase")

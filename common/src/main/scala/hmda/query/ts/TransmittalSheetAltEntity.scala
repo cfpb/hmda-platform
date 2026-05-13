@@ -3,11 +3,11 @@ package hmda.query.ts
 import hmda.parser.filing.ts.TsCsvParser.dateFromString
 import hmda.util.PsvParsingCompanion
 import hmda.util.conversion.ColumnDataFormatter
-import io.chrisdavenport.cormorant.CSV
 import io.chrisdavenport.cormorant
+import io.chrisdavenport.cormorant.CSV
 import io.chrisdavenport.cormorant.implicits._
 
-case class TransmittalSheetEntity(
+case class TransmittalSheetAltEntity(
                                    lei: String = "",
                                    id: Int = 0,
                                    institutionName: String = "",
@@ -26,7 +26,8 @@ case class TransmittalSheetEntity(
                                    submissionId: Option[String] = Some(""),
                                    createdAt: Option[java.sql.Timestamp] = Some(new java.sql.Timestamp(System.currentTimeMillis())),
                                    isQuarterly: Option[Boolean] = Some(false),
-                                   signDate: Option[Long] = Some(0L)
+                                   signDate: Option[Long] = Some(0L),
+                                   firstSignDate: Option[Long] = Some(0L)
                                  ) extends ColumnDataFormatter {
   def isEmpty: Boolean = lei == ""
 
@@ -35,7 +36,7 @@ case class TransmittalSheetEntity(
       s"$quarter|$name|$phone|" +
       s"$email|$street|$city|" +
       s"$state|$zipCode|$agency|" +
-      s"$totalLines|$taxId|$lei|${dateToString(signDate)}}"
+      s"$totalLines|$taxId|$lei|${dateToString(signDate)}|${dateToString(firstSignDate)}"
 
   def toPublicPSV: String =
     s"$year|$quarter|$lei|$taxId|$agency|" +
@@ -47,10 +48,10 @@ case class TransmittalSheetEntity(
 
 }
 
-object TransmittalSheetEntity {
+object TransmittalSheetAltEntity {
 
-  object PublicParser extends PsvParsingCompanion[TransmittalSheetEntity] {
-    override val psvReader: cormorant.Read[TransmittalSheetEntity] = { (a: CSV.Row) =>
+  object PublicParser extends PsvParsingCompanion[TransmittalSheetAltEntity] {
+    override val psvReader: cormorant.Read[TransmittalSheetAltEntity] = { (a: CSV.Row) =>
       for {
         (rest, year)            <- enforcePartialRead(readNext[Int], a)
         (rest, quarter)         <- enforcePartialRead(readNext[Int], rest)
@@ -63,7 +64,7 @@ object TransmittalSheetEntity {
         (rest, zipCode)         <- enforcePartialRead(readNext[String], rest)
         totalLinesOrMore        <- readNext[Int].readPartial(rest)
       } yield {
-        def create(totalLines: Int) = TransmittalSheetEntity(
+        def create(totalLines: Int) = TransmittalSheetAltEntity(
           lei = lei,
           institutionName = institutionName,
           year = year,
@@ -90,8 +91,8 @@ object TransmittalSheetEntity {
       s"$state|$zipCode|$agency|" +
       s"$totalLines|$taxId|$lei|${dateToString(signDate)}|${dateToString(firstSignDate)}"
    */
-  object RegulatorParser extends PsvParsingCompanion[TransmittalSheetEntity] {
-    override val psvReader: cormorant.Read[TransmittalSheetEntity] = { (a: CSV.Row) =>
+  object RegulatorParser extends PsvParsingCompanion[TransmittalSheetAltEntity] {
+    override val psvReader: cormorant.Read[TransmittalSheetAltEntity] = { (a: CSV.Row) =>
       for {
         (rest, id)              <- enforcePartialRead(readNext[Int], a)
         (rest, institutionName) <- enforcePartialRead(readNext[String], rest)
@@ -111,7 +112,7 @@ object TransmittalSheetEntity {
         (rest, signDate)        <- enforcePartialRead(readNext[String], rest)
         firstSignDateOrMore     <- readNext[String].readPartial(rest)
       } yield {
-        def create(firstSignDate: String) = TransmittalSheetEntity(
+        def create(firstSignDate: String) = TransmittalSheetAltEntity(
           lei = lei,
           id = id,
           institutionName = institutionName,
@@ -127,7 +128,9 @@ object TransmittalSheetEntity {
           agency = agency,
           totalLines = totalLines,
           taxId = taxId,
-          signDate = dateFromString(signDate))
+          signDate = dateFromString(signDate),
+          firstSignDate = dateFromString(firstSignDate)
+        )
 
         
         firstSignDateOrMore match {

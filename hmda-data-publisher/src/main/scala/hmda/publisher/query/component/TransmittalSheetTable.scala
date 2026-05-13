@@ -27,7 +27,6 @@ abstract class AbstractTransmittalSheetTable[T](tag: Tag, tableName: String) ext
   def createdAt       = column[Option[Timestamp]]("created_at")
   def isQuarterly     = column[Option[Boolean]]("is_quarterly")
   def signDate        = column[Option[Long]]("sign_date")
-  def firstSignDate   = column[Option[Long]]("first_sign_date")
 
   def transmittalSheetEntityProjection =
     (
@@ -49,8 +48,7 @@ abstract class AbstractTransmittalSheetTable[T](tag: Tag, tableName: String) ext
       submissionId,
       createdAt,
       isQuarterly,
-      signDate,
-      firstSignDate
+      signDate
     ) <> ((TransmittalSheetEntity.apply _).tupled, TransmittalSheetEntity.unapply)
 }
 
