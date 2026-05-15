@@ -35,7 +35,7 @@ trait TransmittalSheetComponent {
     def createdAt       = column[Option[Timestamp]]("created_at")
     def isQuarterly     = column[Option[Boolean]]("is_quarterly")
     def signDate     = column[Option[Long]]("sign_date")
-    def firstSignDate   = column[Option[Long]]("first_sign_data")
+    def firstSignDate   = column[Option[Long]]("first_sign_date")
 
     override def * =
       (
