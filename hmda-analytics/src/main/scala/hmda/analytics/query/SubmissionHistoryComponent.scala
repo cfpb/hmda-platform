@@ -30,14 +30,25 @@ trait SubmissionHistoryComponent {
       }
     
     def firstSignDate(submissionId: SubmissionId): Future[Seq[Long]] = {
-      val period = submissionId.period.year
+      val period = submissionId.period
       val lei = submissionId.lei
       val submissionIdLikeStatment = s"${lei}-${period}-%"
-      config.db.run {
-        sql"""
-        SELECT MIN(sign_date) from #${tableName}
-        WHERE submission_id LIKE $submissionIdLikeStatment
-        """.as[Long]
+      if (period.quarter.isDefined) {
+        config.db.run {
+          sql"""
+          SELECT MIN(sign_date) from #${tableName}
+          WHERE submission_id LIKE $submissionIdLikeStatment
+          AND submission_id NOT LIKE '%-Q_-%'
+          """.as[Long]
+        }
+      }
+      else {
+        config.db.run {
+          sql"""
+          SELECT MIN(sign_date) from #${tableName}
+          WHERE submission_id LIKE $submissionIdLikeStatment
+          """.as[Long]
+        }
       }
     }
   }
