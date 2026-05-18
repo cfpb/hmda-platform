@@ -38,7 +38,6 @@ trait SubmissionHistoryComponent {
           sql"""
           SELECT MIN(sign_date) from #${tableName}
           WHERE submission_id LIKE $submissionIdLikeStatment
-          AND submission_id NOT LIKE '%-Q_-%'
           """.as[Long]
         }
       }
@@ -47,6 +46,7 @@ trait SubmissionHistoryComponent {
           sql"""
           SELECT MIN(sign_date) from #${tableName}
           WHERE submission_id LIKE $submissionIdLikeStatment
+          AND submission_id NOT LIKE '%-Q_-%'
           """.as[Long]
         }
       }
