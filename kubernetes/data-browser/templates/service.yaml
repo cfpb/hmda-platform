@@ -5,7 +5,7 @@ metadata:
   name: {{ .Values.service.name }}
 spec:
   selector:
-    app: hmda-data-browser-api
+    app: data-browser
   type: ClusterIP
   ports:
   - name: {{ .Values.databrowser.name }}
