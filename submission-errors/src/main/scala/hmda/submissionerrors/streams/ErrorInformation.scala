@@ -4,7 +4,7 @@ import akka.NotUsed
 import akka.actor.typed.ActorSystem
 import akka.persistence.query.EventEnvelope
 import akka.stream.scaladsl.{ Sink, Source }
-import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowValidatedError
+import hmda.messages.submission.SubmissionProcessingEvents.{ HmdaMacroValidatedError, HmdaRowValidatedError }
 import hmda.model.filing.submission.SubmissionId
 import hmda.query.HmdaQuery
 import monix.eval.Task
@@ -17,6 +17,7 @@ import scala.concurrent.Future
 object ErrorInformation {
   type EditName   = String
   type LineNumber = Long
+  type Error = Either[HmdaRowValidatedError, HmdaMacroValidatedError]
 
   /**
    * This is responsible for fetching set of `HmdaRowValidatedError` for a given submission
@@ -26,17 +27,16 @@ object ErrorInformation {
    * @param system is the actor system needed to run the Akka Stream
    * @return
    */
-  def obtainSubmissionErrors(submissionId: SubmissionId)(implicit system: ActorSystem[_]): Task[Set[HmdaRowValidatedError]] =
-    Task.fromFuture(submissionRowError(submissionId).runWith(collectErrors))
+  def obtainSubmissionErrors(submissionId: SubmissionId)(implicit system: ActorSystem[_]): Task[Set[Error]] =
+    Task.fromFuture(submissionErrors(submissionId).runWith(collectErrors))
 
-  private[streams] def submissionRowError(
-                                           submissionId: SubmissionId
-                                         )(implicit system: ActorSystem[_]): Source[HmdaRowValidatedError, NotUsed] = {
+  private[streams] def submissionErrors(submissionId: SubmissionId)(implicit system: ActorSystem[_]): Source[Error, NotUsed] = {
     val persistenceId = s"HmdaValidationError-$submissionId"
     HmdaQuery
       .currentEventEnvelopeByPersistenceId(persistenceId)
       .collect {
-        case EventEnvelope(_, _, _, event: HmdaRowValidatedError) => event
+        case EventEnvelope(_, _, _, event: HmdaRowValidatedError) => Left(event)
+        case EventEnvelope(_, _, _, event: HmdaMacroValidatedError) => Right(event)
       }
   }
 
@@ -57,8 +57,8 @@ object ErrorInformation {
    *    )
    * )
    */
-  private[streams] val collectErrors: Sink[HmdaRowValidatedError, Future[Set[HmdaRowValidatedError]]] = {
-    Sink.fold[Set[HmdaRowValidatedError], HmdaRowValidatedError](Set.empty[HmdaRowValidatedError])((acc, ele) => acc + ele)
+  private[streams] val collectErrors: Sink[Error, Future[Set[Error]]] = {
+    Sink.fold[Set[Error], Error](Set.empty[Error])((acc, ele) => acc + ele)
   }
 }
 // $COVERAGE-ON$

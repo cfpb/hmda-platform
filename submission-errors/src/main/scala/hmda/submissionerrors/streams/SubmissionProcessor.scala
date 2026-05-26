@@ -120,13 +120,20 @@ object SubmissionProcessor extends LazyLogging {
       case false =>
         logger.info("Start processing: {}", submission.id)
         for {
-          errors <- ErrorInformation.obtainSubmissionErrors(submission.id)
-          loanDataWithErrors <- ErrorLines.obtainLoanData(submission.id)(errors)
-          dataToAdd = loanDataWithErrors.map {
+          allErrors <- ErrorInformation.obtainSubmissionErrors(submission.id)
+          rowValidatedErrors = allErrors.filter(_.isLeft).map {
+            case Left(qualityEdit) => qualityEdit
+          }
+          loanDataWithErrors <- ErrorLines.obtainLoanData(submission.id)(rowValidatedErrors)
+          qualityEditsDataToAdd = loanDataWithErrors.map {
             case ErrorResult(editName, loanDataRows, fields) =>
               AddSubmissionError(editName, loanDataRows.map(_.toString), fields)
           }
-          _ <- repo.add(submission, dataToAdd)
+          macrosToAdd = allErrors.filter(_.isRight).map {
+            case Right(macroEdit) =>
+              AddSubmissionError(macroEdit.error.editName, Vector(macroEdit.error.uli), Map(macroEdit.error.uli -> macroEdit.error.fields))
+          }
+          _ <- repo.add(submission, qualityEditsDataToAdd ++ macrosToAdd)
           _ = logger.info("Finished processing: {}", submission.id)
         } yield ()
 
