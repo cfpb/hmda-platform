@@ -24,8 +24,8 @@ object ErrorLines {
   type ErrorKey = String
   type Fields = Map[String, Map[String, String]]
 
-  final case class RowLoanData(uli: String, actionTaken: Int, actionTakenDate: Int, applicationDate: String) {
-    override def toString: String = s"$uli:$actionTaken:$actionTakenDate:$applicationDate"
+  final case class RowLoanData(lei: String, uli: String, actionTaken: Int, actionTakenDate: Int, applicationDate: String) {
+    override def toString: String = s"$lei:$uli:$actionTaken:$actionTakenDate:$applicationDate"
   }
 
   final case class ErrorResult(editName: EditName, loanDataRows: Vector[RowLoanData], fields: Fields)
@@ -64,7 +64,7 @@ object ErrorLines {
     Sink.fold[Map[ErrorKey, ErrorResult], (RawLine, LineNumber)](Map.empty) {
       case (acc, (rawData, lineNumber)) =>
         val lar = LarCsvParser(rawData).getOrElse(LoanApplicationRegister())
-        val loanData = RowLoanData(lar.loan.ULI, lar.action.actionTakenType.code, lar.action.actionTakenDate, lar.loan.applicationDate)
+        val loanData = RowLoanData(lar.larIdentifier.LEI, lar.loan.ULI, lar.action.actionTakenType.code, lar.action.actionTakenDate, lar.loan.applicationDate)
         validatedErrors.find(_.rowNumber == lineNumber).map(_.validationErrors) match {
           case Some(validationErrors) =>
             validationErrors.foldLeft(acc) { (agg, nextError) =>
