@@ -199,7 +199,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
               println(firstsigndate)
               val resolvedSignDate = Some(signdate.getOrElse(0L))
               val resolvedFirstSignDate = {
-                if (firstsigndate.isEmpty) resolvedSignDate
+                if (firstsigndate.head == 0) resolvedSignDate
                 else Some(firstsigndate.head)
               }
               repo.insert(copyTs(ts, resolvedSignDate, resolvedFirstSignDate, enforceQuarterly))
