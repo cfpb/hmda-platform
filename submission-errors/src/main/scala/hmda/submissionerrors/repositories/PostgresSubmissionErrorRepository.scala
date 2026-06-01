@@ -80,7 +80,7 @@ private[repositories] class PostgresSubmissionErrorRepository(config: DatabaseCo
   // Note: We use Task to delay execution to get more control on how the Slick database queries are executed
   // Note: Task is just a description of the program we would like to run, nothing is run yet until we call one
   // of the unsafeRun* methods
-  def submissionPresent(submissionId: SubmissionId): Task[Boolean] =
+  override def submissionPresent(submissionId: SubmissionId): Task[Boolean] =
   // It is very important to ensure that whenever a Future is about to be created, we immediately wrap it in
   // Task.deferFuture in order to delay immediate execution
     Task.deferFuture(db.run(submissionPresentDBIO(submissionId)))

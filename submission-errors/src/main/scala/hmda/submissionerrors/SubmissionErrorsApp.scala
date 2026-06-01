@@ -18,7 +18,7 @@ import hmda.messages.pubsub.HmdaGroups
 import hmda.publication.KafkaUtils
 import hmda.publication.KafkaUtils._
 import hmda.query.DbConfiguration.dbConfig
-import hmda.submissionerrors.repositories.PostgresSubmissionErrorRepository
+import hmda.submissionerrors.repositories.{ PostgresSubmissionErrorRepository, PostgresSubmissionSummaryRepository }
 import hmda.submissionerrors.streams.SubmissionProcessor.{ handleMessages, processRawKafkaSubmission }
 import monix.execution.Scheduler
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -46,12 +46,14 @@ object SubmissionErrorsApp extends App {
     val kafkaHosts     = config.getString("kafka.hosts")
     val kafkaTopic     = config.getString("kafka.topic")
     val databaseTable  = config.getString("dbconfig.table")
+    val summaryTable = config.getString("dbconfig.summaryTable")
     val databaseConfig = PostgresSubmissionErrorRepository.config("submission-errors-db")
     val tsTablePrefix = config.getString("dbconfig.tsTablePrefix")
 
     implicit val monixScheduler: Scheduler   = Scheduler(system.executionContext)
 
     val repo = PostgresSubmissionErrorRepository.make(databaseConfig, databaseTable)
+    val summaryRepo = PostgresSubmissionSummaryRepository.make(databaseConfig, summaryTable)
 
     val kafkaConsumerSettings: ConsumerSettings[String, String] =
       ConsumerSettings(
@@ -76,7 +78,7 @@ object SubmissionErrorsApp extends App {
     val graph: RunnableGraph[Consumer.Control] =
       kafkaConsumerSource
         .via(processRawKafkaSubmission)
-        .to(handleMessages(repo, kafkaCommitterSettings))
+        .to(handleMessages(repo, summaryRepo, kafkaCommitterSettings))
         .withAttributes(ActorAttributes.supervisionStrategy(decider))
 
     val killSwitch = graph.run()

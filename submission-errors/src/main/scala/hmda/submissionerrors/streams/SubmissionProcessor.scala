@@ -4,11 +4,14 @@ import akka.actor.typed.ActorSystem
 import akka.kafka.CommitterSettings
 import akka.kafka.ConsumerMessage.{ CommittableMessage, CommittableOffset }
 import akka.kafka.scaladsl.Committer
+import akka.persistence.query.EventEnvelope
 import akka.stream.scaladsl.{ Flow, Keep, Sink }
 import akka.{ Done, NotUsed }
 import com.typesafe.scalalogging.LazyLogging
+import hmda.messages.submission.HmdaRawDataEvents.LineAdded
 import hmda.model.filing.submission.Submission
-import hmda.submissionerrors.repositories.{ AddSubmissionError, SubmissionErrorRepository }
+import hmda.query.HmdaQuery
+import hmda.submissionerrors.repositories.{ AddSubmissionError, SubmissionAnalysisRepository, SubmissionErrorRepository, SubmissionSummaryRecord }
 import hmda.submissionerrors.streams.ErrorLines.ErrorResult
 import hmda.utils.YearUtils
 import hmda.utils.YearUtils.Period
@@ -43,11 +46,12 @@ object SubmissionProcessor extends LazyLogging {
 
   def handleMessages(
                       repository: SubmissionErrorRepository,
+                      summaryRepo: SubmissionAnalysisRepository[SubmissionSummaryRecord],
                       kafkaCommitterSettings: CommitterSettings
                     )(implicit system: ActorSystem[_], scheduler: Scheduler): Sink[(IncomingData, CommittableOffset), Future[Done]] =
     Flow[(IncomingData, CommittableOffset)]
       .alsoToMat(handleInvalidMessages(kafkaCommitterSettings))(Keep.right)
-      .toMat(handleValidMessages(repository, kafkaCommitterSettings))(Keep.both)
+      .toMat(handleValidMessages(repository, summaryRepo, kafkaCommitterSettings))(Keep.both)
       .mapMaterializedValue {
         case (errorSinkCompletion, normalSinkCompletion) =>
           for {
@@ -67,13 +71,14 @@ object SubmissionProcessor extends LazyLogging {
 
   def handleValidMessages(
                            repo: SubmissionErrorRepository,
+                           summaryRepo: SubmissionAnalysisRepository[SubmissionSummaryRecord],
                            kafkaCommitterSettings: CommitterSettings
                          )(implicit system: ActorSystem[_], monixScheduler: Scheduler): Sink[(IncomingData, CommittableOffset), Future[Done]] =
     Flow[(IncomingData, CommittableOffset)].collect { case (v: IncomingData.Parsed, o) => (v, o) }
       .log("valid-messages", { case (p, _) => s"processing submissions for ${p.lei}:${p.period}" })
       .mapAsync(1) { // process one LEI + Period at a time
         case (IncomingData.Parsed(lei, period), offset) =>
-          handleSubmissions(repo, lei, period).as(offset).runToFuture
+          handleSubmissions(repo, summaryRepo, lei, period).as(offset).runToFuture
       }
       .toMat(Committer.sink(kafkaCommitterSettings))(Keep.right)
 
@@ -93,15 +98,48 @@ object SubmissionProcessor extends LazyLogging {
    * @param system is the actor system
    * @return
    */
-  def handleSubmissions(repo: SubmissionErrorRepository, lei: String, period: Period, submissionParallelism: Int = 2)(
+  def handleSubmissions(repo: SubmissionErrorRepository, summaryRepo: SubmissionAnalysisRepository[SubmissionSummaryRecord], lei: String, period: Period, submissionParallelism: Int = 2)(
     implicit system: ActorSystem[_]
   ): Task[Unit] =
     for {
       submissions <- Submissions.obtainSubmissions(lei, period)
       _ <- Task.parTraverseN(submissionParallelism)(submissions)(submission =>
-        handleSubmission(repo, submission)
+        handleSubmission(repo, summaryRepo, submission)
       )
     } yield ()
+
+  def handleSubmission(repo: SubmissionErrorRepository, summaryRepo: SubmissionAnalysisRepository[SubmissionSummaryRecord], submission: Submission)(
+    implicit system: ActorSystem[_]
+  ): Task[Unit] =
+    for {
+      _ <- handSubmissionSummary(summaryRepo, submission)
+      _ <- handleSubmissionErrors(repo, submission)
+    } yield ()
+
+  def handSubmissionSummary(summaryRepo: SubmissionAnalysisRepository[SubmissionSummaryRecord], submission: Submission)(
+    implicit system: ActorSystem[_]
+  ): Task[Unit] =
+    summaryRepo.submissionPresent(submission.id).flatMap {
+      case false =>
+        logger.info("Start summary processing: {}", submission.id)
+        for {
+          larCount <- Task.deferFuture(
+            HmdaQuery
+              .currentEventEnvelopeByPersistenceId(f"HmdaRawData-${submission.id}")
+              .collect {
+                case EventEnvelope(_, _, _, event: LineAdded) => event
+              }
+              .drop(1)
+              .runFold(0)((acc, _) => acc + 1))
+          _ <- summaryRepo.add(submission, Seq(
+            SubmissionSummaryRecord(submission.id.lei, submission.id.period.toString, submission.id.sequenceNumber, larCount)
+          ))
+          _ = logger.info("Finished summary processing: {}", submission.id)
+        } yield ()
+      case true =>
+        logger.info("Summary data already exists for: {}", submission.id)
+        Task.unit
+    }
 
   /**
    * Process a single submission
@@ -113,12 +151,12 @@ object SubmissionProcessor extends LazyLogging {
    * @param system is the actor system
    * @return
    */
-  def handleSubmission(repo: SubmissionErrorRepository, submission: Submission)(
+  def handleSubmissionErrors(repo: SubmissionErrorRepository, submission: Submission)(
     implicit system: ActorSystem[_]
   ): Task[Unit] =
     repo.submissionPresent(submission.id).flatMap {
       case false =>
-        logger.info("Start processing: {}", submission.id)
+        logger.info("Start errors processing: {}", submission.id)
         for {
           allErrors <- ErrorInformation.obtainSubmissionErrors(submission.id)
           rowValidatedErrors = allErrors.filter(_.isLeft).map {
@@ -134,11 +172,11 @@ object SubmissionProcessor extends LazyLogging {
               AddSubmissionError(macroEdit.error.editName, Vector(macroEdit.error.uli), Map(macroEdit.error.uli -> macroEdit.error.fields))
           }
           _ <- repo.add(submission, qualityEditsDataToAdd ++ macrosToAdd)
-          _ = logger.info("Finished processing: {}", submission.id)
+          _ = logger.info("Finished errors processing: {}", submission.id)
         } yield ()
 
       case true =>
-        logger.info("Data already exists for: {}", submission.id)
+        logger.info("Errors data already exists for: {}", submission.id)
         Task.unit
     }
 }
