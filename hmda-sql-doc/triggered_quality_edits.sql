@@ -17,6 +17,7 @@ CREATE TABLE triggered_submission_summary (
     lei VARCHAR,
     period VARCHAR,
     sequence_number INT,
+    submission_status INT,
     lar_count INT,
     CONSTRAINT triggered_submission_summary_pk PRIMARY KEY (lei, period, sequence_number)
 );

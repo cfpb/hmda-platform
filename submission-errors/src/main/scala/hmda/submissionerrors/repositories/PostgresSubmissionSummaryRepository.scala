@@ -8,6 +8,7 @@ final case class SubmissionSummaryRecord(
                                         lei: String,
                                         period: String,
                                         sequenceNumber: Int,
+                                        submissionStatus: Int,
                                         larCount: Int,
                                       )
 
@@ -32,11 +33,12 @@ private[repositories] class PostgresSubmissionSummaryRepository(config: Database
     def lei              = column[String]("lei")
     def period           = column[String]("period")
     def sequenceNumber   = column[Int]("sequence_number")
+    def submissionStatus = column[Int]("submission_status")
     def larCount = column[Int]("lar_count")
     def pk               = primaryKey("submission_summary_pk", (lei, period, sequenceNumber))
 
     override def * =
-      (lei, period, sequenceNumber, larCount) <> (SubmissionSummaryRecord.tupled, SubmissionSummaryRecord.unapply)
+      (lei, period, sequenceNumber, submissionStatus, larCount) <> (SubmissionSummaryRecord.tupled, SubmissionSummaryRecord.unapply)
   }
 
   private val tableQuery = TableQuery[SubmissionSummaryTable](tag => SubmissionSummaryTable(tableName)(tag))

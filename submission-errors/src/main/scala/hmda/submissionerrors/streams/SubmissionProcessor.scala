@@ -132,7 +132,7 @@ object SubmissionProcessor extends LazyLogging {
               .drop(1)
               .runFold(0)((acc, _) => acc + 1))
           _ <- summaryRepo.add(submission, Seq(
-            SubmissionSummaryRecord(submission.id.lei, submission.id.period.toString, submission.id.sequenceNumber, larCount)
+            SubmissionSummaryRecord(submission.id.lei, submission.id.period.toString, submission.id.sequenceNumber, submission.status.code, larCount)
           ))
           _ = logger.info("Finished summary processing: {}", submission.id)
         } yield ()
