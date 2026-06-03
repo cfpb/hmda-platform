@@ -15,3 +15,4 @@ totalLines, Total Number of Entries Contained in Submission, Numeric, HMDA Filin
 taxId, Federal Taxpayer Identification Number, Alphanumeric, HMDA Filing Instructions Guide
 lei, Legal Entity Identifier (LEI), Alphanumeric, HMDA Filing Instructions Guide
 signDate, HMDA Filing Sign Datetime, Alphanumeric, Collected by the HMDA Platform
+firstSignDate, HMDA Filing First Sign Datetime, Alphanumeric, Collected by the HMDA Platform

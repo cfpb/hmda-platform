@@ -25,6 +25,7 @@ class TransmittalSheetTable(tag: Tag, tableName: String) extends Table[Transmitt
   def createdAt = column[Option[Timestamp]]("created_at")
   def isQuarterly = column[Option[Boolean]]("is_quarterly")
   def signDate = column[Option[Long]]("sign_date")
+  def firstSignDate = column[Option[Long]]("sign_date")
 
   override def * =
     (
@@ -46,6 +47,7 @@ class TransmittalSheetTable(tag: Tag, tableName: String) extends Table[Transmitt
       submissionId,
       createdAt,
       isQuarterly,
-      signDate
+      signDate,
+      firstSignDate
     ) <> ((TransmittalSheetEntity.apply _).tupled, TransmittalSheetEntity.unapply)
 }
