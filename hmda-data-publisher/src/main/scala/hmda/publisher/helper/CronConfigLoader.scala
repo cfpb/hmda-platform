@@ -28,7 +28,12 @@ object CronConfigLoader {
   val tsPublicCron: String = dynamicQuartzScheduleConfig.getString("TsPublicSchedule.expression")
   val tsPublicYears: Seq[Int] = dynamicQuartzScheduleConfig.getString("TsPublicSchedule.years").split(",").map(s => s.toInt)
   val tsCron: String = dynamicQuartzScheduleConfig.getString("TsSchedule.expression")
+  val tsAltCron: String = dynamicQuartzScheduleConfig.getString("TsAltSchedule.expression")
+
+
   val tsYears: Seq[Int] = dynamicQuartzScheduleConfig.getString("TsSchedule.years").split(",").map(s => s.toInt)
+  val tsAltYears: Seq[Int] = dynamicQuartzScheduleConfig.getString("TsAltSchedule.years").split(",").map(s => s.toInt)
+
   val tsQuarterlyCron: String = dynamicQuartzScheduleConfig.getString("TsQuarterlySchedule.expression")
   val tsQuarterlyYears: Seq[Int] = dynamicQuartzScheduleConfig.getString("TsQuarterlySchedule.years").split(",").map(s => s.toInt)
 

@@ -11,11 +11,11 @@ import akka.stream.scaladsl.{Sink, Source}
 import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.CronConfigLoader.{CronString, specificTsCron, specificTsYears, tsCron, tsQuarterlyCron, tsQuarterlyYears, tsYears}
+import hmda.publisher.helper.CronConfigLoader.{CronString, specificTsCron, specificTsYears, tsAltCron, tsAltYears, tsCron, tsQuarterlyCron, tsQuarterlyYears, tsYears}
 import hmda.publisher.helper.{PrivateAWSConfigLoader, QuarterTimeBarrier, S3Utils, SnapshotCheck}
 import hmda.publisher.query.component.{PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, TransmittalSheetTable, TsRepository, YearPeriod}
 import hmda.publisher.scheduler.schedules.{Schedule, ScheduleWithYear}
-import hmda.publisher.scheduler.schedules.Schedules.{TsQuarterlySchedule, TsSchedule}
+import hmda.publisher.scheduler.schedules.Schedules.{TsAltSchedule, TsQuarterlySchedule, TsSchedule}
 import hmda.publisher.util.{PublishingReporter, ScheduleCoordinator}
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 import hmda.publisher.util.ScheduleCoordinator.Command._
@@ -67,7 +67,6 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
 
   val s3Settings = S3Settings(context.system)
     .withBufferType(MemoryBufferType)
-//    .withCredentialsProvider(awsCredentialsProviderPrivate)
     .withS3RegionProvider(awsRegionProviderPrivate)
     .withListBucketApiVersion(ListBucketVersion2)
 
@@ -83,6 +82,10 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
     specificTsYears.zipWithIndex.foreach {
       case (year, idx) =>
         scheduler ! Schedule(s"TsSchedule_$year", self, ScheduleWithYear(TsSchedule, year), specificTsCron.applyOffset(idx, HOURS))
+    }
+    tsAltYears.zipWithIndex.foreach {
+      case (year, idx) =>
+        scheduler ! Schedule(s"TsAltSchedule_$year", self, ScheduleWithYear(TsAltSchedule, year), tsAltCron.applyOffset(idx, HOURS))
     }
   }
 
@@ -103,13 +106,29 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
     S3Utils.uploadWithRetry(source, s3Sink)
   }
 
+  private def uploadAltFileToS3(
+                              s3Sink: Sink[ByteString, Future[MultipartUploadResult]],
+                              transmittalSheets: => Future[Seq[TransmittalSheetEntity]]
+                            ): Future[MultipartUploadResult] = {
+    val source = Source
+      .future(transmittalSheets)
+      .mapConcat(_.toList)
+      .map(transmittalSheet => transmittalSheet.toRegulatorAltPSV + "\n")
+      .map(ByteString(_))
+    S3Utils.uploadWithRetry(source, s3Sink)
+  }
+
   override def receive: Receive = {
 
-    case ScheduleWithYear(schedule, year) if schedule in (TsSchedule, TsQuarterlySchedule) =>
+    case ScheduleWithYear(schedule, year) if schedule in (TsSchedule, TsQuarterlySchedule,TsAltSchedule) =>
       schedule match {
         case TsSchedule => annualRepos.get(year) match {
           case Some(repo) => publishAnnualTsData(TsSchedule, year, repo)
           case None => log.error("No available ts publisher for {}", year)
+        }
+        case TsAltSchedule => annualRepos.get(year) match {
+          case Some(repo) => publishAnnualAltTsData(TsSchedule, year, repo)
+          case None => log.error("No available ts alt publisher for {}", year)
         }
         case TsQuarterlySchedule => quarterRepos.get(year) match {
           case Some((q1Repo, q2Repo, q3Repo)) =>
@@ -124,24 +143,15 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
   import dbConfig.profile.api._
   private def publishAnnualTsData[TsTable <: Table[TransmittalSheetEntity]](
     schedule: Schedule,
-    period: Period,
-    fileName: String,
-    tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] = publishTsData(schedule, period, fullDate.format(LocalDateTime.now().minusDays(1)) + fileName, tsRepo)
-
-  private def publishQuarterTsData[TsTable <: Table[TransmittalSheetEntity]](
-    schedule: Schedule,
-    quarter: Period.Quarter,
-    fileName: String,
-    tsRepo: TsRepository[TransmittalSheetTable]): Option[Future[Unit]] =
-    timeBarrier.runIfStillRelevant(quarter) {
-      publishTsData(schedule, quarter, fullDateQuarterly.format(LocalDateTime.now().minusDays(1)) + fileName, tsRepo)
-    }
-
-  private def publishAnnualTsData[TsTable <: Table[TransmittalSheetEntity]](
-    schedule: Schedule,
     year: Int,
     tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] =
     publishTsData(schedule, year, YearPeriod.Whole, fullDate.format(LocalDateTime.now().minusDays(1)) + s"${year}_ts.txt", tsRepo)
+
+  private def publishAnnualAltTsData[TsTable <: Table[TransmittalSheetEntity]](
+                                                                             schedule: Schedule,
+                                                                             year: Int,
+                                                                             tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] =
+    publishAltTsData(schedule, year, YearPeriod.Whole, fullDate.format(LocalDateTime.now().minusDays(1)) + s"${year}_ts.txt", tsRepo)
 
   private def publishQuarterTsData[TsTable <: Table[TransmittalSheetEntity]](
     schedule: Schedule,
@@ -151,32 +161,6 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
     tsRepo: TsRepository[TransmittalSheetTable]): Option[Future[Unit]] =
     timeBarrier.runIfStillRelevant(year, quarter) {
       publishTsData(schedule, year, quarter, fullDateQuarterly.format(LocalDateTime.now().minusDays(1)) + fileName, tsRepo)
-    }
-
-  private def publishTsData[TsTable <: Table[TransmittalSheetEntity]](
-    schedule: Schedule,
-    period: Period,
-    fullFileName: String,
-    tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] =
-    publishingGuard.runIfDataIsValid(period, Scope.Private) {
-      val s3Path        = "dynamic-data/ts/"
-      val fullFilePath  = SnapshotCheck.pathSelector(s3Path, fullFileName)
-
-      def countF: Future[Int] = tsRepo.count()
-
-      val results = for {
-        count <- countF
-        s3Sink = S3
-          .multipartUpload(bucketPrivate, fullFilePath, metaHeaders = MetaHeaders(Map(LarScheduler.entriesCountMetaName -> count.toString)))
-          .withAttributes(S3Attributes.settings(s3Settings))
-        _ <- uploadFileToS3(s3Sink, tsRepo.getAllSheets(getFilterList()))
-        count <- countF
-      } yield count
-
-      results onComplete {
-        case Success(count) => reportPublishingResult(schedule, fullFilePath, Some(count))
-        case Failure(t) => reportPublishingResultError(schedule, fullFilePath, t)
-      }
     }
 
   private def publishTsData[TsTable <: Table[TransmittalSheetEntity]](
@@ -206,7 +190,32 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
       }
     }
 
+  private def publishAltTsData[TsTable <: Table[TransmittalSheetEntity]](
+                                                                       schedule: Schedule,
+                                                                       year: Int,
+                                                                       period: YearPeriod,
+                                                                       fullFileName: String,
+                                                                       tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] =
+    publishingGuard.runIfDataIsValid(year, period, Scope.Private) {
+      val s3Path = "dynamic-data/ts/"
+      val fullFilePath = SnapshotCheck.pathSelector(s3Path, fullFileName)
 
+      def countF: Future[Int] = tsRepo.count()
+
+      val results = for {
+        count <- countF
+        s3Sink = S3
+          .multipartUpload(bucketPrivate, fullFilePath, metaHeaders = MetaHeaders(Map(LarScheduler.entriesCountMetaName -> count.toString)))
+          .withAttributes(S3Attributes.settings(s3Settings))
+        _ <- uploadAltFileToS3(s3Sink, tsRepo.getAllSheets(getFilterList()))
+        count <- countF
+      } yield count
+
+      results onComplete {
+        case Success(count) => reportPublishingResult(schedule, bucketPrivate+"/"+fullFilePath, Some(count))
+        case Failure(t) => reportPublishingResultError(schedule, bucketPrivate+"/"+fullFilePath, t)
+      }
+    }
   def reportPublishingResult( schedule: Schedule, fullFilePath: String,count: Option[Int]) {
 
     publishingReporter ! FilePublishingCompleted(
