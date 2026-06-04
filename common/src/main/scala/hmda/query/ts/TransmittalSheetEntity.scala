@@ -36,7 +36,7 @@ case class TransmittalSheetEntity(
       s"$quarter|$name|$phone|" +
       s"$email|$street|$city|" +
       s"$state|$zipCode|$agency|" +
-      s"$totalLines|$taxId|$lei|${dateToString(signDate)}, ${dateToString(firstSignDate)}"
+      s"$totalLines|$taxId|$lei|${dateToString(signDate)}|${dateToString(firstSignDate)}"
 
   def toPublicPSV: String =
     s"$year|$quarter|$lei|$taxId|$agency|" +
