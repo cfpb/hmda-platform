@@ -45,6 +45,8 @@ object CronConfigLoader {
 
   val specificTsCron: String = dynamicQuartzScheduleConfig.getString("SpecificTsSchedule.expression")
   val specificTsYears: Seq[Int] = dynamicQuartzScheduleConfig.getString("SpecificTsSchedule.years").split(",").map(s => s.toInt)
+  val specificTsAltCron: String = dynamicQuartzScheduleConfig.getString("SpecificTsAltSchedule.expression")
+  val specificTsAltYears: Seq[Int] = dynamicQuartzScheduleConfig.getString("SpecificTsAltSchedule.years").split(",").map(s => s.toInt)
 
 
 

@@ -11,7 +11,7 @@ import akka.stream.scaladsl.{Sink, Source}
 import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
-import hmda.publisher.helper.CronConfigLoader.{CronString, specificTsCron, specificTsYears, tsAltCron, tsAltYears, tsCron, tsQuarterlyCron, tsQuarterlyYears, tsYears}
+import hmda.publisher.helper.CronConfigLoader.{CronString, specificTsAltCron, specificTsAltYears, specificTsCron, specificTsYears, tsAltCron, tsAltYears, tsCron, tsQuarterlyCron, tsQuarterlyYears, tsYears}
 import hmda.publisher.helper.{PrivateAWSConfigLoader, QuarterTimeBarrier, S3Utils, SnapshotCheck}
 import hmda.publisher.query.component.{PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, TransmittalSheetTable, TsRepository, YearPeriod}
 import hmda.publisher.scheduler.schedules.{Schedule, ScheduleWithYear}
@@ -83,6 +83,10 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
       case (year, idx) =>
         scheduler ! Schedule(s"TsSchedule_$year", self, ScheduleWithYear(TsSchedule, year), specificTsCron.applyOffset(idx, HOURS))
     }
+    specificTsAltYears.zipWithIndex.foreach {
+      case (year, idx) =>
+        scheduler ! Schedule(s"TsAltSchedule_$year", self, ScheduleWithYear(TsAltSchedule, year), specificTsAltCron.applyOffset(idx, HOURS))
+    }
     tsAltYears.zipWithIndex.foreach {
       case (year, idx) =>
         scheduler ! Schedule(s"TsAltSchedule_$year", self, ScheduleWithYear(TsAltSchedule, year), tsAltCron.applyOffset(idx, HOURS))
@@ -150,8 +154,10 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
   private def publishAnnualAltTsData[TsTable <: Table[TransmittalSheetEntity]](
                                                                              schedule: Schedule,
                                                                              year: Int,
-                                                                             tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] =
-    publishAltTsData(schedule, year, YearPeriod.Whole, fullDate.format(LocalDateTime.now().minusDays(1)) + s"${year}_ts.txt", tsRepo)
+                                                                             tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] = {
+    publishAltTsData(schedule, year, YearPeriod.Whole, fullDate.format(LocalDateTime.now().minusDays(1)) + s"${year}_ts_plusFirstSignDate.txt", tsRepo)
+    //new-ts-file
+  }
 
   private def publishQuarterTsData[TsTable <: Table[TransmittalSheetEntity]](
     schedule: Schedule,
