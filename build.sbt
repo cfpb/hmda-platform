@@ -58,6 +58,8 @@ lazy val enumeratumDeps = Seq(enumeratum, enumeratumCirce)
 
 lazy val slickDeps = Seq(slick, slickHikariCP, postgres, h2)
 
+lazy val metaInfMatcher = """META-INF/.+\.(SF|DSA|RSA)""".r
+
 lazy val dockerSettings = Seq(
   dockerBuildCommand := {
     //force amd64 Architecture for k8s docker image compatability
@@ -186,6 +188,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
         case "logback.xml"                           => MergeStrategy.concat
         case "version.conf"                          => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case metaInfMatcher(_) => MergeStrategy.discard
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
         case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs@_*) => MergeStrategy.last
@@ -860,6 +863,7 @@ lazy val `hmda-persistence-migrator` = (project in file ("hmda-persistence-migra
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case metaInfMatcher(_) => MergeStrategy.discard
         case "version.conf" => MergeStrategy.concat
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
         case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first

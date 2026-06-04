@@ -76,38 +76,38 @@ spec:
             secretKeyRef:
               name: akka-lc-key
               key: key
-        - name: AKKA_PERSISTENCE_PG_HOST
+        - name: ACTOR_PERSISTENCE_PG_HOST
           valueFrom:
             secretKeyRef:
-              name: akka-persistence-db
+              name: actor-persistence-db
               key: host
-        - name: AKKA_PERSISTENCE_PG_SCHEMA
+        - name: ACTOR_PERSISTENCE_PG_SCHEMA
           valueFrom:
             secretKeyRef:
-              name: akka-persistence-db
+              name: actor-persistence-db
               key: schema
-        - name: AKKA_PERSISTENCE_PG_DB
+        - name: ACTOR_PERSISTENCE_PG_DB
           valueFrom:
             secretKeyRef:
-              name: akka-persistence-db
+              name: actor-persistence-db
               key: db
-        - name: AKKA_PERSISTENCE_PG_USER
+        - name: ACTOR_PERSISTENCE_PG_USER
           valueFrom:
             secretKeyRef:
-              name: akka-persistence-db
+              name: actor-persistence-db
               key: username
-        - name: AKKA_PERSISTENCE_PG_PASSWORD
+        - name: ACTOR_PERSISTENCE_PG_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: akka-persistence-db
+              name: actor-persistence-db
               key: password
-        - name: AKKA_PERSISTENCE_PG_SSL_ENABLED
+        - name: ACTOR_PERSISTENCE_PG_SSL_ENABLED
           value: "on"
-        - name: AKKA_PERSISTENCE_PG_SSL_MODE
+        - name: ACTOR_PERSISTENCE_PG_SSL_MODE
           value: allow
-        - name: AKKA_PERSISTENCE_PG_BUFFER_SIZE
+        - name: ACTOR_PERSISTENCE_PG_BUFFER_SIZE
           value: "2000"
-        - name: AKKA_PERSISTENCE_PG_REFRESH_INTERVAL
+        - name: ACTOR_PERSISTENCE_PG_REFRESH_INTERVAL
           value: "1s"
         - name: HMDA_ERROR_PERSIST_PARALLELISM
           value: "2"
