@@ -55,7 +55,7 @@ object PredicateHmda {
  lar.property.manufacturedHomeLandPropertyInterest == ManufacturedHomeLoanPropertyInterestExempt || 
  lar.property.manufacturedHomeSecuredProperty == ManufacturedHomeSecuredExempt ||
  lar.reverseMortgage == ExemptMortgageType || 
- lar.nonAmortizingFeatures.negativeAmortization == NegativeAmortizatioznExempt ||
+ lar.nonAmortizingFeatures.negativeAmortization == NegativeAmortizationExempt ||
  lar.nonAmortizingFeatures.otherNonAmortizingFeatures == OtherNonAmortizingFeaturesExempt || 
  lar.payableToInstitution == PayableToInstitutionExempt||
  checkExemption( lar.geography.street) ||
