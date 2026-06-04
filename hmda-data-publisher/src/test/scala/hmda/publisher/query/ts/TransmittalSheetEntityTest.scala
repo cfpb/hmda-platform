@@ -61,9 +61,9 @@ class TransmittalSheetEntityTest extends PropSpec with ScalaCheckPropertyChecks 
     // I couldnt find exact issue but this filed should never occur with such small value
     // investigate further if ever becomes an issue
     val tsGen = implicitly[Arbitrary[TransmittalSheetEntity]].arbitrary
-      .suchThat(x => x.signDate.isEmpty || x.signDate.exists(_ >= 0))
+      .suchThat(x => x.signDate.isEmpty || x.signDate.exists(_ >= 0) )
     forAll(tsGen) { (ts: TransmittalSheetEntity) =>
-      val psv     = ts.toRegulatorPSV
+      val psv     = ts.toRegulatorAltPSV
       val fromPsv = TransmittalSheetEntity.RegulatorParser.parseFromPSVUnsafe(psv)
       fromPsv must matchTo(ts)
     }
