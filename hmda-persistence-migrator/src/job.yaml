@@ -1,22 +1,39 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: akka-persistence-beta-migrator-260422-2
+  name: akka-persistence-beta-migrator-260612-1
 spec:
   template:
     spec:
+      serviceAccountName: hmda-platform-irsa
       containers:
         - name: akka-persistence-migrator
-          image: 760711518487.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:persistence_migrator_test.260420.1
+          image: 039774476268.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:persistence_migrator.260612.6
           env:
             - name: CASSANDRA_JOURNAL_KEYSPACE
-              value: hmda2_journal_beta
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-keyspace
             - name: CASSANDRA_SNAPSHOT_KEYSPACE
-              value: hmda2_snap_beta
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-keyspace-snapshot
+            - name: CASSANDRA_CLUSTER_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-hosts
+            - name: CASSANDRA_CLUSTER_DC
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-cluster-dc
             - name: AKKA_LICENSE_KEY
               valueFrom:
                 secretKeyRef:
-                  name: akka-lc-key
+                  name: irsa-akka-license-key
                   key: key
 #            - name: AKKA_PERSISTENCE_MIGRATE_BATCH
 #              value: "500"
@@ -24,14 +41,14 @@ spec:
 #              value: DEBUG
 #            - name: AKKA_PERSISTENCE_MIGRATE_PARALLELISM
 #              value: "1"
-            - name: PERSISTENCE_ID
-              value: "DEBUG"
+#            - name: PERSISTENCE_ID
+#              value: "DEBUG"
             - name: AKKA_PERSISTENCE_PG_JOURNAL_TABLE
-              value: event_journal2
+              value: event_journal
             - name: AKKA_PERSISTENCE_PG_SNAP_TABLE
-              value: snapshot2
+              value: snapshot
             - name: AKKA_PERSISTENCE_PG_DURABLE_STATE_TABLE
-              value: durable_state2
+              value: durable_state
             - name: AKKA_PERSISTENCE_PG_SSL_ENABLED
               value: "on"
             - name: AKKA_PERSISTENCE_PG_SSL_MODE
@@ -41,41 +58,63 @@ spec:
             - name: AKKA_PERSISTENCE_PG_HOST
               valueFrom:
                 secretKeyRef:
-                  name: akka-persistence-db
+                  name: irsa-actor-persistence-secrets
                   key: host
             - name: AKKA_PERSISTENCE_PG_USER
               valueFrom:
                 secretKeyRef:
-                  name: akka-persistence-db
+                  name: irsa-actor-persistence-secrets
                   key: username
             - name: AKKA_PERSISTENCE_PG_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: akka-persistence-db
+                  name: irsa-actor-persistence-secrets
                   key: password
             - name: AKKA_PERSISTENCE_PG_DB
               valueFrom:
                 secretKeyRef:
-                  name: akka-persistence-db
-                  key: db
+                  name: irsa-actor-persistence-secrets
+                  key: database
             - name: AKKA_PERSISTENCE_PG_SCHEMA
-              valueFrom:
-                secretKeyRef:
-                  name: akka-persistence-db
-                  key: schema
+              value: actor_persistence_beta
             - name: CASSANDRA_CLUSTER_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: cass-creds
-                  key: username
+                  name: irsa-cassandra-credentials
+                  key: cassandra.username
             - name: CASSANDRA_CLUSTER_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: cass-creds
-                  key: password
-            - name: CASSANDRA_CLUSTER_HOSTS
-              value: cluster2-main-service.k8ssandra-failover:9042
-            - name: CASSANDRA_CLUSTER_DC
-              value: main
+                  name: irsa-cassandra-credentials
+                  key: cassandra.password
+          volumeMounts:
+            - name: actor-persistence-secrets
+              mountPath: /mnt/actor-persistence-secrets
+              readOnly: true
+            - name: akka-license
+              mountPath: /mnt/akka-license
+              readOnly: true
+            - name: cassandra-secrets
+              mountPath: /mnt/cass-secrets
+              readOnly: true
+      volumes:
+       - name: actor-persistence-secrets
+         csi:
+           driver: secrets-store.csi.k8s.io
+           readOnly: true
+           volumeAttributes:
+             secretProviderClass: irsa-actor-persistence-secrets-provider
+       - name: akka-license
+         csi:
+           driver: secrets-store.csi.k8s.io
+           readOnly: true
+           volumeAttributes:
+             secretProviderClass: irsa-akka-license-provider
+       - name: cassandra-secrets
+         csi:
+           driver: secrets-store.csi.k8s.io
+           readOnly: true
+           volumeAttributes:
+             secretProviderClass: irsa-k8ssandra-credentials-provider
       restartPolicy: Never
   backoffLimit: 4
