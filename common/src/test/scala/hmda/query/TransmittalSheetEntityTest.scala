@@ -26,6 +26,7 @@ class TransmittalSheetEntityTest extends PropSpec with ScalaCheckPropertyChecks 
       .ignore[TransmittalSheetEntity, Option[java.sql.Timestamp]](_.createdAt)
       .ignore[TransmittalSheetEntity, Option[Boolean]](_.isQuarterly)
       .ignore[TransmittalSheetEntity, Option[Long]](_.signDate)
+      .ignore[TransmittalSheetEntity, Option[Long]](_.firstSignDate)
       .ignore[TransmittalSheetEntity, Int](_.id)
       .ignore[TransmittalSheetEntity, String](_.street)
       .ignore[TransmittalSheetEntity, String](_.phone)

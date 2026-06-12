@@ -26,7 +26,8 @@ case class TransmittalSheetEntity(
                                    submissionId: Option[String] = Some(""),
                                    createdAt: Option[java.sql.Timestamp] = Some(new java.sql.Timestamp(System.currentTimeMillis())),
                                    isQuarterly: Option[Boolean] = Some(false),
-                                   signDate: Option[Long] = Some(0L)
+                                   signDate: Option[Long] = Some(0L),
+                                   firstSignDate: Option[Long] = Some(0L)
                                  ) extends ColumnDataFormatter {
   def isEmpty: Boolean = lei == ""
 
@@ -36,6 +37,14 @@ case class TransmittalSheetEntity(
       s"$email|$street|$city|" +
       s"$state|$zipCode|$agency|" +
       s"$totalLines|$taxId|$lei|${dateToString(signDate)}"
+
+
+  def toRegulatorAltPSV: String =
+    s"$id|$institutionName|$year|" +
+      s"$quarter|$name|$phone|" +
+      s"$email|$street|$city|" +
+      s"$state|$zipCode|$agency|" +
+      s"$totalLines|$taxId|$lei|${dateToString(signDate)}|${dateToString(firstSignDate)}"
 
   def toPublicPSV: String =
     s"$year|$quarter|$lei|$taxId|$agency|" +
@@ -83,13 +92,6 @@ object TransmittalSheetEntity {
     }
   }
 
-  /**
-   *     s"$id|$institutionName|$year|" +
-      s"$quarter|$name|$phone|" +
-      s"$email|$street|$city|" +
-      s"$state|$zipCode|$agency|" +
-      s"$totalLines|$taxId|$lei|${dateToString(signDate)}"
-   */
   object RegulatorParser extends PsvParsingCompanion[TransmittalSheetEntity] {
     override val psvReader: cormorant.Read[TransmittalSheetEntity] = { (a: CSV.Row) =>
       for {
@@ -108,9 +110,10 @@ object TransmittalSheetEntity {
         (rest, totalLines)      <- enforcePartialRead(readNext[Int], rest)
         (rest, taxId)           <- enforcePartialRead(readNext[String], rest)
         (rest, lei)             <- enforcePartialRead(readNext[String], rest)
-        signDateOrMore          <- readNext[String].readPartial(rest)
+        (rest, signDate)        <- enforcePartialRead(readNext[String], rest)
+        firstSignDateOrMore     <- readNext[String].readPartial(rest)
       } yield {
-        def create(signDate: String) = TransmittalSheetEntity(
+        def create(firstSignDate: String) = TransmittalSheetEntity(
           lei = lei,
           id = id,
           institutionName = institutionName,
@@ -126,12 +129,14 @@ object TransmittalSheetEntity {
           agency = agency,
           totalLines = totalLines,
           taxId = taxId,
-          signDate = dateFromString(signDate)
+          signDate = dateFromString(signDate),
+          firstSignDate = dateFromString(firstSignDate)
         )
 
-        signDateOrMore match {
-          case Left((more, signDate)) => Left(more -> create(signDate))
-          case Right(signDate)        => Right(create(signDate))
+        
+        firstSignDateOrMore match {
+          case Left((more, firstSignDate)) => Left(more -> create(firstSignDate))
+          case Right(firstSignDate)        => Right(create(firstSignDate))
         }
       }
     }
