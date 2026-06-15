@@ -30,6 +30,18 @@ spec:
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
+        - name: actor-persistence-secrets
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: irsa-actor-persistence-secrets-provider
+        - name: akka-license
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: irsa-akka-license-provider
 #        - name: cassandra-truststore
 #          csi:
 #            driver: secrets-store.csi.k8s.io
@@ -49,6 +61,12 @@ spec:
         volumeMounts:
           - name: tz-config
             mountPath: /etc/localtime
+          - name: actor-persistence-secrets
+            mountPath: /mnt/actor-persistence-secrets
+            readOnly: true
+          - name: akka-license
+            mountPath: /mnt/akka-license
+            readOnly: true
 #          - name: cassandra-truststore
 #            readOnly: true
 #            mountPath: "/opt/cassandra_truststore"
@@ -74,32 +92,29 @@ spec:
         - name: AKKA_LICENSE_KEY
           valueFrom:
             secretKeyRef:
-              name: akka-lc-key
+              name: irsa-akka-license-key
               key: key
         - name: ACTOR_PERSISTENCE_PG_HOST
           valueFrom:
             secretKeyRef:
-              name: actor-persistence-db
+              name: irsa-actor-persistence-secrets
               key: host
         - name: ACTOR_PERSISTENCE_PG_SCHEMA
-          valueFrom:
-            secretKeyRef:
-              name: actor-persistence-db
-              key: schema
+          value: actor_persistence_beta
         - name: ACTOR_PERSISTENCE_PG_DB
           valueFrom:
             secretKeyRef:
-              name: actor-persistence-db
-              key: db
+              name: irsa-actor-persistence-secrets
+              key: database
         - name: ACTOR_PERSISTENCE_PG_USER
           valueFrom:
             secretKeyRef:
-              name: actor-persistence-db
+              name: irsa-actor-persistence-secrets
               key: username
         - name: ACTOR_PERSISTENCE_PG_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: actor-persistence-db
+              name: irsa-actor-persistence-secrets
               key: password
         - name: ACTOR_PERSISTENCE_PG_SSL_ENABLED
           value: "on"
@@ -111,81 +126,81 @@ spec:
           value: "1s"
         - name: HMDA_ERROR_PERSIST_PARALLELISM
           value: "2"
-#        - name: CURRENT_YEAR
-#          valueFrom:
-#            configMapKeyRef:
-#              name: timed-guards
-#              key: currentYear
-#        - name: RULES_YEARLY_FILING_YEARS_ALLOWED
-#          valueFrom:
-#            configMapKeyRef:
-#              name: timed-guards
-#              key: yearsAllowed
-#        - name: RULES_QF_FILING_YEARS_ALLOWED
-#          valueFrom:
-#            configMapKeyRef:
-#              name: timed-guards
-#              key: quarterlyYearsAllowed
-#        - name: RULES_QF_Q1_START
-#          valueFrom:
-#            configMapKeyRef:
-#              name: timed-guards
-#              key: q1Start
-#        - name: RULES_QF_Q1_END
-#          valueFrom:
-#            configMapKeyRef:
-#              name: timed-guards
-#              key: q1End
-#        - name: RULES_QF_Q2_START
-#          valueFrom:
-#            configMapKeyRef:
-#              name: timed-guards
-#              key: q2Start
-#        - name: RULES_QF_Q2_END
-#          valueFrom:
-#            configMapKeyRef:
-#              name: timed-guards
-#              key: q2End
-#        - name: RULES_QF_Q3_START
-#          valueFrom:
-#            configMapKeyRef:
-#              name: timed-guards
-#              key: q3Start
-#        - name: RULES_QF_Q3_END
-#          valueFrom:
-#            configMapKeyRef:
-#              name: timed-guards
-#              key: q3End
-#        - name: ACTION_DATE_Q1_START
-#          valueFrom:
-#            configMapKeyRef:
-#              name: timed-guards
-#              key: actionQ1Start
-#        - name: ACTION_DATE_Q1_END
-#          valueFrom:
-#            configMapKeyRef:
-#              name: timed-guards
-#              key: actionQ1End
-#        - name: ACTION_DATE_Q2_START
-#          valueFrom:
-#            configMapKeyRef:
-#              name: timed-guards
-#              key: actionQ2Start
-#        - name: ACTION_DATE_Q2_END
-#          valueFrom:
-#            configMapKeyRef:
-#              name: timed-guards
-#              key: actionQ2End
-#        - name: ACTION_DATE_Q3_START
-#          valueFrom:
-#            configMapKeyRef:
-#              name: timed-guards
-#              key: actionQ3Start
-#        - name: ACTION_DATE_Q3_END
-#          valueFrom:
-#            configMapKeyRef:
-#              name: timed-guards
-#              key: actionQ3End
+        - name: CURRENT_YEAR
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: currentYear
+        - name: RULES_YEARLY_FILING_YEARS_ALLOWED
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: yearsAllowed
+        - name: RULES_QF_FILING_YEARS_ALLOWED
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: quarterlyYearsAllowed
+        - name: RULES_QF_Q1_START
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: q1Start
+        - name: RULES_QF_Q1_END
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: q1End
+        - name: RULES_QF_Q2_START
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: q2Start
+        - name: RULES_QF_Q2_END
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: q2End
+        - name: RULES_QF_Q3_START
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: q3Start
+        - name: RULES_QF_Q3_END
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: q3End
+        - name: ACTION_DATE_Q1_START
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: actionQ1Start
+        - name: ACTION_DATE_Q1_END
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: actionQ1End
+        - name: ACTION_DATE_Q2_START
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: actionQ2Start
+        - name: ACTION_DATE_Q2_END
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: actionQ2End
+        - name: ACTION_DATE_Q3_START
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: actionQ3Start
+        - name: ACTION_DATE_Q3_END
+          valueFrom:
+            configMapKeyRef:
+              name: timed-guards
+              key: actionQ3End
         {{- if .Values.kafka.security }}
         - name: KAFKA_SECURITY
           value: {{.Values.kafka.security}}
