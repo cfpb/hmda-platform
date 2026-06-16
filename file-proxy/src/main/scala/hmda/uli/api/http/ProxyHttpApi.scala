@@ -119,6 +119,26 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
             }
           }
         }
+        pathPrefix("passthrough" / "data-browser" / "maps" / Remaining) { (mapsUrl) =>
+          (extractUri & get) { uri =>
+            //println(uri)
+            val s3Key  = s"data-browser/maps/$mapsUrl"
+            jsonStreamingS3Route(s3Key)
+          }
+        }
+        pathPrefix("passthrough" / "reports" / Remaining) { (reportsUrl) =>
+          (extractUri & get) { uri =>
+            //println(uri)
+            val s3Key  = s"reports/$reportsUrl"
+            jsonStreamingS3Route(s3Key)
+          }
+        }
+        pathPrefix("passthrough" / Remaining) { (s3Url) =>
+          (extractUri & get) { uri =>
+            //println(uri)
+            streamingS3Route(s3Url)
+          }
+        }
       }
     } 
   }
@@ -140,6 +160,20 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
 
     onComplete(fStream){
       case Success(stream) => complete(HttpEntity(ContentTypes.`text/csv(UTF-8)`, stream))
+      case Failure(error) => complete(StatusCodes.BadRequest)
+    }
+  }
+
+  private def jsonStreamingS3Route(s3Key: String): Route = {
+    val fStream: Future[Source[ByteString, NotUsed]] = retrieveData(s3Key).flatMap {
+      case Some(stream) =>
+        Future(stream)
+      case None =>
+        Future(Source.empty)
+    }
+
+    onComplete(fStream){
+      case Success(stream) => complete(HttpEntity(ContentTypes.`application/json`, stream))
       case Failure(error) => complete(StatusCodes.BadRequest)
     }
   }
