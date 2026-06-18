@@ -58,6 +58,9 @@ spec:
               drop:
                 - ALL
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ template "institutions-api.fullname" . }}-config
           env:
             - name: AKKA_LICENSE_KEY
               valueFrom:
