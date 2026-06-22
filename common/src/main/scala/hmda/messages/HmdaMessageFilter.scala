@@ -28,7 +28,6 @@ object HmdaMessageFilter extends StrictLogging {
         year = msgMatch.group("year").toInt
         quarterOpt = Option(msgMatch.group("quarter"))
         seqNum = Option(msgMatch.group("seqNum"))
-        _ <- if (lei1 == lei2) Some(()) else None
       } yield StandardMsg(lei1, year, quarterOpt, seqNum)
     }.toOption.flatten // regex api is not the safest one and we don't want it to throw accidentally
   }
