@@ -40,6 +40,7 @@ class CombinedMLarPublicScheduler(publishingReporter: ActorRef[PublishingReporte
     with PublisherComponent2022
     with PublisherComponent2023
     with PublisherComponent2024
+    with PublisherComponent2025
     with ModifiedLarHeader
     with PGTableNameLoader
     with PublicAWSConfigLoader

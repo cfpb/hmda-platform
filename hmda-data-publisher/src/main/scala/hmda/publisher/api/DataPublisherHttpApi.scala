@@ -44,6 +44,7 @@ private class DataPublisherHttpApi(schedulers: AllSchedulers) {
       case TsPublicSchedule => tsPublicScheduler
       case TsSchedule => tsScheduler
       case TsQuarterlySchedule => tsScheduler
+      case TsAltSchedule => tsScheduler
     }
     receiver ! ScheduleWithYear(msg, year)
   }

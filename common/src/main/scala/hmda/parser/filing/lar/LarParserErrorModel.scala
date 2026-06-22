@@ -103,7 +103,7 @@ object LarParserErrorModel {
   case class InvalidCoApplicantEthnicityObserved(value: String)
       extends ParserValidationError {
     override def fieldName: String =
-      "Ethnicity of Co-Applicant or CoBorrower Collected on the Basis of Visual Observation or Surname"
+      "Ethnicity of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname"
     override def inputValue: String = value
   }
 
@@ -380,7 +380,7 @@ object LarParserErrorModel {
   }
 
   case class InvalidMortgageType(value: String) extends ParserValidationError {
-    override def fieldName: String = "Reverse Mortage"
+    override def fieldName: String = "Reverse Mortgage"
     override def inputValue: String = value
   }
 

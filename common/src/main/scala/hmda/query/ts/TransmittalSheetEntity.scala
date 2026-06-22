@@ -36,6 +36,14 @@ case class TransmittalSheetEntity(
       s"$quarter|$name|$phone|" +
       s"$email|$street|$city|" +
       s"$state|$zipCode|$agency|" +
+      s"$totalLines|$taxId|$lei|${dateToString(signDate)}"
+
+
+  def toRegulatorAltPSV: String =
+    s"$id|$institutionName|$year|" +
+      s"$quarter|$name|$phone|" +
+      s"$email|$street|$city|" +
+      s"$state|$zipCode|$agency|" +
       s"$totalLines|$taxId|$lei|${dateToString(signDate)}|${dateToString(firstSignDate)}"
 
   def toPublicPSV: String =
@@ -84,13 +92,6 @@ object TransmittalSheetEntity {
     }
   }
 
-  /**
-   *     s"$id|$institutionName|$year|" +
-      s"$quarter|$name|$phone|" +
-      s"$email|$street|$city|" +
-      s"$state|$zipCode|$agency|" +
-      s"$totalLines|$taxId|$lei|${dateToString(signDate)}|${dateToString(firstSignDate)}"
-   */
   object RegulatorParser extends PsvParsingCompanion[TransmittalSheetEntity] {
     override val psvReader: cormorant.Read[TransmittalSheetEntity] = { (a: CSV.Row) =>
       for {

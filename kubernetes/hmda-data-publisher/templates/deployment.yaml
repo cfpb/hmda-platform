@@ -55,31 +55,6 @@ spec:
               name: {{ include "hmda-data-publisher.name" . }}-dynamic-schedule-config
               optional: true
           env:
-          - name: CASSANDRA_CLUSTER_HOSTS
-            valueFrom:
-              configMapKeyRef:
-                name: cassandra-configmap
-                key: cassandra-hosts
-          - name: CASSANDRA_CLUSTER_USERNAME
-            valueFrom:
-              secretKeyRef:
-                name: cassandra-credentials
-                key: cassandra.username
-          - name: CASSANDRA_CLUSTER_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: cassandra-credentials
-                key: cassandra.password
-#          - name: AWS_ACCESS_KEY_ID
-#            valueFrom:
-#              secretKeyRef:
-#                name: aws-credentials
-#                key: aws-access-key-id
-#          - name: AWS_SECRET_ACCESS_KEY
-#            valueFrom:
-#              secretKeyRef:
-#                name: aws-credentials
-#                key: aws-secret-access-key
           - name: AWS_ENVIRONMENT
             valueFrom:
               configMapKeyRef:

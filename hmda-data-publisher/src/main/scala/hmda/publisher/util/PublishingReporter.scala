@@ -198,6 +198,7 @@ object PublishingReporter {
     case object LarLoanLimitScheduleId extends ScheduleGroupId
     case object TsPublicScheduleId extends ScheduleGroupId
     case object TsScheduleId extends ScheduleGroupId
+    case object TsAltScheduleId extends ScheduleGroupId
     case object LarQuarterlyScheduleId extends ScheduleGroupId
     case object TsQuarterlyScheduleId extends ScheduleGroupId
 
@@ -209,6 +210,7 @@ object PublishingReporter {
       case Schedules.LarLoanLimitSchedule => LarLoanLimitScheduleId
       case Schedules.TsPublicSchedule => TsPublicScheduleId
       case Schedules.TsSchedule => TsScheduleId
+      case Schedules.TsAltSchedule => TsAltScheduleId
       case Schedules.LarQuarterlySchedule => LarQuarterlyScheduleId
       case Schedules.TsQuarterlySchedule => TsQuarterlyScheduleId
     }

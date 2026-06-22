@@ -111,7 +111,7 @@ object ModifiedLarPublisher {
                 .withAttributes(S3Attributes.settings(s3Settings))
 
               def removeLei: Future[Int] =
-                modifiedLarRepo.deleteByLei(submissionId)
+                modifiedLarRepo.deleteBySubmissionID(submissionId)
 
               val mlarSource: Source[ModifiedLoanApplicationRegister, NotUsed] =
                 readRawData(system)(submissionId)
@@ -174,19 +174,22 @@ object ModifiedLarPublisher {
               val graphWithJustS3WithHeader = mlarSource.via(serializeMlar).prepend(mlarHeader).toMat(s3SinkWithHeader)(Keep.right)
 
               val finalResult: Future[Unit] = for {
-                _ <- if (regenerateMlar)
-                  graphWithS3AndPG.run()
-                else if (isGenerateBothS3Files) {
-                  removeLei
-                  graphWithS3AndPG.run()
-                } else if (isJustGenerateS3File)
-                  graphWithJustS3NoHeader.run()
-                else if (isJustGenerateS3FileHeader)
-                  graphWithJustS3WithHeader.run()
-                else { //everything
-                  removeLei
-                  Future.sequence(List(graphWithJustS3NoHeader.run(), graphWithJustS3WithHeader.run(), graphWithJustPG.run()))
-                }
+                  _ <- { if (regenerateMlar) {
+                      removeLei
+                      graphWithS3AndPG.run()
+                    }
+                    else if (isGenerateBothS3Files) {
+                      removeLei
+                      graphWithS3AndPG.run()
+                    } else if (isJustGenerateS3File)
+                      graphWithJustS3NoHeader.run()
+                    else if (isJustGenerateS3FileHeader)
+                      graphWithJustS3WithHeader.run()
+                    else { //everything
+                      removeLei
+                      Future.sequence(List(graphWithJustS3NoHeader.run(), graphWithJustS3WithHeader.run(), graphWithJustPG.run()))
+                    }
+                  }
               } yield ()
 
               finalResult.onComplete {

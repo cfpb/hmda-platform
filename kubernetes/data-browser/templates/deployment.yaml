@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "hmda-data-browser-api.fullname" . }}
+  name: {{ include "data-browser.fullname" . }}
   labels:
-    app: {{ include "hmda-data-browser-api.name" . }}
-    chart: {{ include "hmda-data-browser-api.chart" . }}
+    app: {{ include "data-browser.name" . }}
+    chart: {{ include "data-browser.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ include "hmda-data-browser-api.name" . }}
+      app: {{ include "data-browser.name" . }}
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ include "hmda-data-browser-api.name" . }}
+        app: {{ include "data-browser.name" . }}
         release: {{ .Release.Name }}
     spec:
 #      initContainers:
@@ -112,7 +112,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop:
-                - ALL     
+                - ALL
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
 #            - name: _JAVA_OPTIONS
@@ -192,11 +192,6 @@ spec:
               value: "redis"
             - name: REDIS_PORT
               value: "6379"
-            - name: S3_PUBLIC_BUCKET
-              valueFrom:
-                configMapKeyRef:
-                  name: s3-configmap
-                  key: s3-public-bucket
             - name: REDIS_PASS
               valueFrom:
                 secretKeyRef:

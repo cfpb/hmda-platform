@@ -5,26 +5,13 @@
 replicaCount: 1
 
 image:
-  repository: hmda/hmda-data-browser-api
-  tag: v2.7.2
+  repository: hmda/data-browser
+  tag: latest
   pullPolicy: IfNotPresent
   commitId:
 
 nameOverride: ""
 fullnameOverride: ""
-
-ingress:
-  enabled: false
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  path: /
-  hosts:
-    - chart-example.local
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
 
 resources:
   limits:
@@ -60,8 +47,8 @@ postgresql:
 service:
   type: ClusterIP
   account:
-    name: hmda-data-browser-api
-  name: hmda-data-browser-api
+    name: hmda-platform
+  name: data-browser
 
 #ambassador:
 #  port: 80
@@ -71,10 +58,10 @@ service:
 databrowser:
   name: databrowser
   loglevel: INFO
-  s3Url: https://cfpb-hmda-public.s3.amazonaws.com
-  nationwideRouteCSV: data-browser/nationwide_all.csv
-  nationwideRoutePipe: data-browser/nationwide_all.txt
-  table: modifiedlar2018_snapshot
-  redis: hmda-redis-master
+  s3Url: https://files.ffiec.cfpb.gov
+  redis: hmda-redis
   protocol: TCP
   port: 8070
+
+#ambassador_id: ambassador-default-1
+ambassador_host: ffiec-test.cfpb.gov
