@@ -13,6 +13,7 @@ object InstitutionTsRepo {
   private val filerCountConfig: Config = ConfigFactory.load().getConfig("counts")
 
   private val defaultInstitution = filerCountConfig.getString("defaultInstitution")
+  private val staticTS2025 = filerCountConfig.getString("transmittalSheet.2025")
   private val staticTS2024 = filerCountConfig.getString("transmittalSheet.2024")
   private val staticTS2023 = filerCountConfig.getString("transmittalSheet.2023")
   private val staticTS2022 = filerCountConfig.getString("transmittalSheet.2022")
@@ -30,7 +31,8 @@ object InstitutionTsRepo {
       case 2022 => staticTS2022
       case 2023 => staticTS2023
       case 2024 => staticTS2024
-      case _ => staticTS2024
+      case 2025 => staticTS2025
+      case _ => staticTS2025
     }
   }
 }
