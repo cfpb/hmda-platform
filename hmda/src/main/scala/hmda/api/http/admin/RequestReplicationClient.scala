@@ -1,11 +1,11 @@
 package hmda.api.http.admin
 // $COVERAGE-OFF$
-import akka.actor.ActorSystem
-import akka.http.scaladsl.model.headers.{Authorization, RawHeader}
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{HttpRequest, Uri}
-import akka.http.scaladsl.server.{Directive, Directive0, Directives, RouteResult}
-import akka.http.scaladsl.server.Directives._
+import org.apache.pekko.actor.ActorSystem
+import pekko.http.scaladsl.model.headers.{Authorization, RawHeader}
+import pekko.http.scaladsl.Http
+import pekko.http.scaladsl.model.{HttpRequest, Uri}
+import pekko.http.scaladsl.server.{Directive, Directive0, Directives, RouteResult}
+import pekko.http.scaladsl.server.Directives._
 import hmda.api.http.admin.RequestReplicationClient.{InternalReplicationErrorResultCode, ResultCodeHeaderName}
 import org.slf4j.LoggerFactory
 import cats.syntax.all._

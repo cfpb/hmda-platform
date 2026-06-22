@@ -1,8 +1,8 @@
 package hmda.persistence
 
-import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ Behavior, PostStop, PreRestart }
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
+import org.apache.pekko.actor.typed.scaladsl.Behaviors
+import org.apache.pekko.actor.typed.{ Behavior, PostStop, PreRestart }
+import pekko.cluster.sharding.typed.scaladsl.ClusterSharding
 import com.typesafe.config.ConfigFactory
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence

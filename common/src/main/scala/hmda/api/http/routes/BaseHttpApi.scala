@@ -3,12 +3,12 @@ package hmda.api.http.routes
 import java.net.InetAddress
 import java.time.Instant
 
-import akka.Done
-import akka.actor.{ ActorSystem, CoordinatedShutdown }
-import akka.http.scaladsl.Http
+import pekko.Done
+import org.apache.pekko.actor.{ ActorSystem, CoordinatedShutdown }
+import pekko.http.scaladsl.Http
 import hmda.api.http.directives.HmdaTimeDirectives._
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
+import pekko.http.scaladsl.server.Directives._
+import pekko.http.scaladsl.server.Route
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.HmdaServiceStatus
 import io.circe.generic.auto._

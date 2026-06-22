@@ -1,8 +1,8 @@
 package hmda.reporting.api.http
 
-import akka.http.scaladsl.model.StatusCodes.OK
-import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.testkit.ScalatestRouteTest
+import pekko.http.scaladsl.model.StatusCodes.OK
+import pekko.http.scaladsl.server.Route
+import pekko.http.scaladsl.testkit.ScalatestRouteTest
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import hmda.model.institution.{ HmdaFiler, HmdaFilerResponse, MsaMd, MsaMdResponse }
 import hmda.query.institution.InstitutionEntity

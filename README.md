@@ -178,7 +178,7 @@ export JAVA_HOME=$HOME/.asdf/installs/java/openjdk-13.0.2
 
 ### Running with sbt
 
-~~The HMDA Platform can run locally using [`sbt`](https://www.scala-sbt.org/) with an [embedded Cassandra](https://doc.akka.io/docs/alpakka-kafka/current/) and [embedded Kafka](https://doc.akka.io/docs/alpakka-kafka/current/). To get started:~~  
+~~The HMDA Platform can run locally using [`sbt`](https://www.scala-sbt.org/) with an [embedded Cassandra](https://doc.pekko.io/docs/alpakka-kafka/current/) and [embedded Kafka](https://doc.pekko.io/docs/alpakka-kafka/current/). To get started:~~  
 _removing embedded cassandra allows us to use more up-to-date java versions_
 
 For local development, supporting services need to be started first in docker:
@@ -197,7 +197,7 @@ For local development, supporting services need to be started first in docker:
     export CASSANDRA_CLUSTER_HOSTS=localhost
     export APP_PORT=2551
     ```
-1. With the new Akka dependencies no longer available from the public resolver, we need to use the authenticated URL retrievable from https://account.akka.io/token.
+1. With the new Akka dependencies no longer available from the public resolver, we need to use the authenticated URL retrievable from https://account.pekko.io/token.
    Once we get the url from that page, export it as an environment variable (or set it as a env var shell profile):
    ```bash
    export AKKA_RESOLVER={url from the akka token web page}

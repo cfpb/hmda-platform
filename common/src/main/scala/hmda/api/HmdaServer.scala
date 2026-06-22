@@ -2,10 +2,10 @@ package hmda.api
 
 import java.net.InetSocketAddress
 
-import akka.actor.{ Actor, ActorSystem, Status }
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.Http.ServerBinding
-import akka.stream.Materializer
+import org.apache.pekko.actor.{ Actor, ActorSystem, Status }
+import pekko.http.scaladsl.Http
+import pekko.http.scaladsl.Http.ServerBinding
+import pekko.stream.Materializer
 import hmda.actor.HmdaActor
 
 import scala.concurrent.{ ExecutionContext, Future }

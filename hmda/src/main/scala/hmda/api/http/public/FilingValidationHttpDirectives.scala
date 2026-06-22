@@ -1,8 +1,8 @@
 package hmda.api.http.public
 
-import akka.http.scaladsl.model.StatusCodes.BadRequest
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
+import pekko.http.scaladsl.model.StatusCodes.BadRequest
+import pekko.http.scaladsl.server.Directives._
+import pekko.http.scaladsl.server.Route
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.public.{ SingleValidationErrorResult, ValidationErrorSummary, ValidationSingleErrorSummary }
 import hmda.api.http.utils.ParserErrorUtils._

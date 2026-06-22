@@ -1,12 +1,12 @@
 package hmda.dataBrowser.services
 
-import akka.NotUsed
-import akka.actor.typed.ActorSystem
-import akka.http.scaladsl.model.ContentTypes
-import akka.stream.alpakka.s3.S3Headers
-import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.scaladsl.{ Sink, Source }
-import akka.util.ByteString
+import pekko.NotUsed
+import org.apache.pekko.actor.typed.ActorSystem
+import pekko.http.scaladsl.model.ContentTypes
+import pekko.stream.alppekko.s3.S3Headers
+import pekko.stream.alppekko.s3.scaladsl.S3
+import pekko.stream.scaladsl.{ Sink, Source }
+import pekko.util.ByteString
 import cats.implicits._
 import hmda.dataBrowser.Settings
 import hmda.dataBrowser.models.Delimiter.fileEnding

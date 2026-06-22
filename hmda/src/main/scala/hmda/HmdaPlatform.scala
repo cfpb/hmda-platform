@@ -2,13 +2,13 @@ package hmda
 
 import java.net.InetAddress
 
-import akka.actor.typed.ActorSystem
-import akka.actor.typed.scaladsl.adapter._
-import akka.actor.{ActorSystem => ClassicActorSystem}
-import akka.cluster.typed.Cluster
-import akka.management.cluster.bootstrap.ClusterBootstrap
-import akka.management.scaladsl.AkkaManagement
-import akka.stream.Materializer
+import org.apache.pekko.actor.typed.ActorSystem
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.actor.{ActorSystem => ClassicActorSystem}
+import pekko.cluster.typed.Cluster
+import pekko.management.cluster.bootstrap.ClusterBootstrap
+import pekko.management.scaladsl.AkkaManagement
+import pekko.stream.Materializer
 import com.typesafe.config.ConfigFactory
 import hmda.api.HmdaApi
 import hmda.persistence.HmdaPersistence

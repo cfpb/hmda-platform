@@ -1,9 +1,9 @@
 
 package hmda.institution.projection
 
-import akka.actor.ActorSystem
-import akka.actor.typed.scaladsl.adapter._
-import akka.testkit.TestKit
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import pekko.testkit.TestKit
 import hmda.institution.query.InstitutionEmailComponent
 import hmda.messages.institution.InstitutionEvents.{ InstitutionCreated, InstitutionDeleted, InstitutionModified }
 import hmda.model.institution.Institution

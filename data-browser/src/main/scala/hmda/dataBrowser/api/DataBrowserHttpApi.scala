@@ -1,10 +1,10 @@
 package hmda.dataBrowser.api
 
-import akka.http.scaladsl.model.ContentTypes._
-import akka.http.scaladsl.model.{HttpEntity, StatusCodes, Uri}
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.server.directives.RouteDirectives.complete
+import pekko.http.scaladsl.model.ContentTypes._
+import pekko.http.scaladsl.model.{HttpEntity, StatusCodes, Uri}
+import pekko.http.scaladsl.server.Directives._
+import pekko.http.scaladsl.server.Route
+import pekko.http.scaladsl.server.directives.RouteDirectives.complete
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.dataBrowser.api.DataBrowserDirectives._
 import hmda.dataBrowser.models.HealthCheckStatus.Up

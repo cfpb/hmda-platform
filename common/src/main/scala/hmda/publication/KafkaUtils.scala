@@ -1,12 +1,12 @@
 package hmda.publication
 
-import akka.Done
-import akka.actor.typed.ActorSystem
-import akka.actor.typed.scaladsl.adapter._
-import akka.kafka.ProducerSettings
-import akka.kafka.scaladsl.Producer
-import akka.stream.Materializer
-import akka.stream.scaladsl.{Keep, Source}
+import pekko.Done
+import org.apache.pekko.actor.typed.ActorSystem
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import pekko.kafka.ProducerSettings
+import pekko.kafka.scaladsl.Producer
+import pekko.stream.Materializer
+import pekko.stream.scaladsl.{Keep, Source}
 import com.typesafe.config.ConfigFactory
 import hmda.messages.institution.InstitutionEvents.InstitutionKafkaEvent
 import hmda.serialization.kafka.InstitutionKafkaEventsSerializer
@@ -32,7 +32,7 @@ object KafkaUtils {
 
   def getStringKafkaProducer(system: ActorSystem[_]): KafkaProducer[String, String] = {
 
-    val kafkaConfig = system.settings.config.getConfig("akka.kafka.producer")
+    val kafkaConfig = system.settings.config.getConfig("pekko.kafka.producer")
     val producerSettings =
       ProducerSettings(kafkaConfig, new StringSerializer, new StringSerializer)
         .withBootstrapServers(kafkaHosts)

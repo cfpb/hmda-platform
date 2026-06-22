@@ -1,15 +1,15 @@
 package hmda.publication.lar.publication
 
-import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{ActorRef, ActorSystem, Behavior, SupervisorStrategy}
-import akka.stream._
-import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
-import akka.stream.alpakka.s3._
-import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.scaladsl._
-import akka.util.ByteString
-import akka.{Done, NotUsed}
+import org.apache.pekko.actor.typed.scaladsl.Behaviors
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.actor.typed.{ActorRef, ActorSystem, Behavior, SupervisorStrategy}
+import pekko.stream._
+import pekko.stream.alppekko.s3.ApiVersion.ListBucketVersion2
+import pekko.stream.alppekko.s3._
+import pekko.stream.alppekko.s3.scaladsl.S3
+import pekko.stream.scaladsl._
+import pekko.util.ByteString
+import pekko.{Done, NotUsed}
 import com.typesafe.config.ConfigFactory
 import hmda.messages.pubsub.HmdaTopics._
 import hmda.messages.submission.HmdaRawDataEvents.LineAdded
@@ -144,7 +144,7 @@ object ModifiedLarPublisher {
                       _ <- s3HeaderMat
                       _ <- s3NoHeaderMat
                       _ <- pgMat
-                    } yield akka.Done.done()
+                    } yield pekko.Done.done()
                   ) { implicit builder => (source, headerSink, noHeaderSink, pgSink) =>
                     import GraphDSL.Implicits._
 

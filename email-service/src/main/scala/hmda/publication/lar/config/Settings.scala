@@ -1,6 +1,6 @@
 package hmda.publication.lar.config
 
-import akka.actor.{ActorSystem => UntypedActorSystem}
+import org.apache.pekko.actor.{ActorSystem => UntypedActorSystem}
 import com.typesafe.config.Config
 import hmda.util.BankFilterUtils._
 

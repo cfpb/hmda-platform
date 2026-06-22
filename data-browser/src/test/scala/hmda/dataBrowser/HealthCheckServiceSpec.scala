@@ -1,8 +1,8 @@
 package hmda.dataBrowser
 
-import akka.actor.ActorSystem
-import akka.stream.Materializer
-import akka.testkit.TestKit
+import org.apache.pekko.actor.ActorSystem
+import pekko.stream.Materializer
+import pekko.testkit.TestKit
 import hmda.dataBrowser.models.HealthCheckStatus.Up
 import hmda.dataBrowser.models.{ Commas, HealthCheckResponse, QueryField }
 import hmda.dataBrowser.models.State.AK

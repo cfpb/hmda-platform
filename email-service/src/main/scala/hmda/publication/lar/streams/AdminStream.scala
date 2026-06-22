@@ -1,11 +1,11 @@
 package hmda.publication.lar.streams
 
-import akka.actor.ActorSystem
-import akka.kafka.ConsumerMessage.{CommittableMessage, CommittableOffset}
-import akka.kafka.scaladsl._
-import akka.kafka.{CommitterSettings, ConsumerSettings, Subscriptions}
-import akka.stream.scaladsl._
-import akka.{Done, NotUsed}
+import org.apache.pekko.actor.ActorSystem
+import pekko.kafka.ConsumerMessage.{CommittableMessage, CommittableOffset}
+import pekko.kafka.scaladsl._
+import pekko.kafka.{CommitterSettings, ConsumerSettings, Subscriptions}
+import pekko.stream.scaladsl._
+import pekko.{Done, NotUsed}
 import cats.implicits._
 import hmda.messages.pubsub.{HmdaGroups, HmdaTopics}
 import hmda.publication.lar.email.{Email, EmailService}

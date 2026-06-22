@@ -1,15 +1,15 @@
 package hmda.persistence.institution
 
-import akka.actor
-import akka.actor.typed.ActorSystem
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.cluster.typed.Cluster
-import akka.cluster.typed.Join
-import akka.actor.testkit.typed.scaladsl.TestProbe
+import org.apache.pekko.actor
+import org.apache.pekko.actor.typed.ActorSystem
+import pekko.cluster.sharding.typed.scaladsl.ClusterSharding
+import pekko.cluster.typed.Cluster
+import pekko.cluster.typed.Join
+import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators._
 import hmda.persistence.AkkaCassandraPersistenceSpec
-import akka.actor.typed.scaladsl.adapter._
+import org.apache.pekko.actor.typed.scaladsl.adapter._
 import hmda.messages.institution.InstitutionCommands._
 import hmda.messages.institution.InstitutionEvents._
 import org.scalatest.Tag

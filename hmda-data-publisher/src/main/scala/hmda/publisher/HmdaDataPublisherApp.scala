@@ -1,7 +1,7 @@
 package hmda.publisher
 
-import akka.actor.typed.scaladsl.adapter.ClassicActorSystemOps
-import akka.actor.{ ActorSystem, Props }
+import org.apache.pekko.actor.typed.scaladsl.adapter.ClassicActorSystemOps
+import org.apache.pekko.actor.{ ActorSystem, Props }
 import hmda.publisher.api.HmdaDataPublisherApi
 import hmda.publisher.helper.PGTableNameLoader
 import hmda.publisher.scheduler._

@@ -1,11 +1,11 @@
 package hmda.auth
 
-import akka.http.scaladsl.model.Uri.Path
-import akka.http.scaladsl.model.headers.{Authorization, OAuth2BearerToken}
-import akka.http.scaladsl.model.{AttributeKey, HttpRequest, StatusCodes, Uri}
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server._
-import akka.http.scaladsl.server.directives.LoggingMagnet
+import pekko.http.scaladsl.model.Uri.Path
+import pekko.http.scaladsl.model.headers.{Authorization, OAuth2BearerToken}
+import pekko.http.scaladsl.model.{AttributeKey, HttpRequest, StatusCodes, Uri}
+import pekko.http.scaladsl.server.Directives._
+import pekko.http.scaladsl.server._
+import pekko.http.scaladsl.server.directives.LoggingMagnet
 import com.typesafe.config.{Config, ConfigFactory}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.ErrorResponse

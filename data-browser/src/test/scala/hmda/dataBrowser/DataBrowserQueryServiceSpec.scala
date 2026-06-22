@@ -1,9 +1,9 @@
 package hmda.dataBrowser
 
-import akka.actor.ActorSystem
-import akka.stream.Materializer
-import akka.stream.scaladsl._
-import akka.testkit.TestKit
+import org.apache.pekko.actor.ActorSystem
+import pekko.stream.Materializer
+import pekko.stream.scaladsl._
+import pekko.testkit.TestKit
 import hmda.dataBrowser.models._
 import hmda.dataBrowser.repositories._
 import hmda.dataBrowser.services.DataBrowserQueryService

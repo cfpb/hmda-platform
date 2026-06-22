@@ -1,10 +1,10 @@
 package hmda.proxy
 
-import akka.actor.typed.ActorSystem
-import akka.actor.typed.scaladsl.adapter._
-import akka.actor.{ActorSystem => ClassicActorSystem}
-import akka.stream.Materializer
-import akka.util.Timeout
+import org.apache.pekko.actor.typed.ActorSystem
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.actor.{ActorSystem => ClassicActorSystem}
+import pekko.stream.Materializer
+import pekko.util.Timeout
 import scala.concurrent.ExecutionContext
 import hmda.proxy.api.http.HmdaProxyApi
 import org.slf4j.LoggerFactory

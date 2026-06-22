@@ -1,15 +1,15 @@
 package hmda.publication.lar
 
-import akka.Done
-import akka.actor.typed.scaladsl.AskPattern._
-import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{ActorRef, ActorSystem}
-import akka.actor.{ActorSystem => ClassicActorSystem}
-import akka.kafka.scaladsl.{Committer, Consumer}
-import akka.kafka.{CommitterSettings, ConsumerMessage, ConsumerSettings, Subscriptions}
-import akka.stream.Materializer
-import akka.stream.scaladsl._
-import akka.util.Timeout
+import pekko.Done
+import org.apache.pekko.actor.typed.scaladsl.AskPattern._
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.actor.typed.{ActorRef, ActorSystem}
+import org.apache.pekko.actor.{ActorSystem => ClassicActorSystem}
+import pekko.kafka.scaladsl.{Committer, Consumer}
+import pekko.kafka.{CommitterSettings, ConsumerMessage, ConsumerSettings, Subscriptions}
+import pekko.stream.Materializer
+import pekko.stream.scaladsl._
+import pekko.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.census.records._
 import hmda.messages.HmdaMessageFilter
@@ -73,7 +73,7 @@ object ModifiedLarApp extends App {
   implicit val timeout: Timeout                  = Timeout(1.hour)
 
   val config      = ConfigFactory.load()
-  val kafkaConfig = config.getConfig("akka.kafka.consumer")
+  val kafkaConfig = config.getConfig("pekko.kafka.consumer")
   val parallelism = config.getInt("hmda.lar.modified.parallelism")
 
   val censusTractMap2018: Map[String, Census] =
@@ -127,7 +127,7 @@ object ModifiedLarApp extends App {
             log.info(s"Received a message - key: ${msg.record.key().toUpperCase()}, value: ${msg.record.value().toUpperCase()}")
             processKafkaRecord(msg.record.value().toUpperCase().trim).map(_ => msg.committableOffset)
           }
-          akka.pattern.retry(
+          pekko.pattern.retry(
             attempt = () => processMsg(),
             attempts = 2,
             delay = 90.seconds

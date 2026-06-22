@@ -23,7 +23,7 @@ object BuildSettings {
       assembly / aggregate := false,
       Test / parallelExecution:= false,
       Test / fork := true,
-      resolvers += "Akka library repository".at("https://repo.akka.io/maven"),
+      resolvers += "Akka library repository".at("https://repo.pekko.io/maven"),
       commands += dockerPublishLocalSkipTestsCommand
     )
 }

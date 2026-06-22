@@ -1,11 +1,11 @@
 package hmda.uli.api.http
 
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.testkit.ScalatestRouteTest
-import akka.util.Timeout
+import pekko.http.scaladsl.model.StatusCodes
+import pekko.http.scaladsl.testkit.ScalatestRouteTest
+import pekko.util.Timeout
 import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
-import akka.http.scaladsl.model.Uri.Path
-import akka.http.scaladsl.model.headers.{HttpOrigin, Origin}
+import pekko.http.scaladsl.model.Uri.Path
+import pekko.http.scaladsl.model.headers.{HttpOrigin, Origin}
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.model.ErrorResponse
 import hmda.uli.api.model.ULIModel.{ULIBatchValidated, _}
@@ -13,7 +13,7 @@ import hmda.util.http.FileUploadUtils
 import hmda.uli.api.model.ULIValidationErrorMessages._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
-import akka.http.scaladsl.unmarshalling.Unmarshaller._
+import pekko.http.scaladsl.unmarshalling.Unmarshaller._
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.duration._

@@ -1,8 +1,8 @@
 package hmda.util.streams
 
-import akka.NotUsed
-import akka.stream.scaladsl.{ Flow, Framing }
-import akka.util.ByteString
+import pekko.NotUsed
+import pekko.stream.scaladsl.{ Flow, Framing }
+import pekko.util.ByteString
 
 object FlowUtils {
 

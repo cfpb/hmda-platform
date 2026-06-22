@@ -2,7 +2,7 @@ package hmda.serialization.submission
 
 import java.io.NotSerializableException
 
-import akka.serialization.SerializerWithStringManifest
+import pekko.serialization.SerializerWithStringManifest
 import hmda.messages.submission.SubmissionProcessingEvents._
 import hmda.model.filing.submission.VerificationStatus
 import hmda.model.processing.state.{ HmdaParserErrorState, HmdaValidationErrorState }

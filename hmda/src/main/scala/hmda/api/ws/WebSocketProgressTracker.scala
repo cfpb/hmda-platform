@@ -1,14 +1,14 @@
 package hmda.api.ws
 // $COVERAGE-OFF$
-import akka.Done
-import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{ ActorRef, ActorSystem, Behavior }
-import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
-import akka.http.scaladsl.model.ws.{ BinaryMessage, Message, TextMessage }
-import akka.stream.scaladsl.{ Flow, Sink, Source, SourceQueueWithComplete }
-import akka.stream.{ Materializer, OverflowStrategy }
-import akka.util.Timeout
+import pekko.Done
+import org.apache.pekko.actor.typed.scaladsl.Behaviors
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.actor.typed.{ ActorRef, ActorSystem, Behavior }
+import pekko.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
+import pekko.http.scaladsl.model.ws.{ BinaryMessage, Message, TextMessage }
+import pekko.stream.scaladsl.{ Flow, Sink, Source, SourceQueueWithComplete }
+import pekko.stream.{ Materializer, OverflowStrategy }
+import pekko.util.Timeout
 import hmda.api.ws.WebSocketProgressTracker.Protocol._
 import hmda.api.ws.model.TrackerResponse
 import hmda.messages.submission.SubmissionProcessingCommands

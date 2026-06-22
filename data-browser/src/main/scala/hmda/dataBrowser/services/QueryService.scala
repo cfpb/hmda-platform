@@ -1,7 +1,7 @@
 package hmda.dataBrowser.services
 
-import akka.NotUsed
-import akka.stream.scaladsl.Source
+import pekko.NotUsed
+import pekko.stream.scaladsl.Source
 import hmda.dataBrowser.models._
 
 import monix.eval.Task

@@ -75,7 +75,7 @@ This will connect to the running cluster and send the contents of each file in t
 ## Troubleshooting
 
 * In cases where there is no connection, make sure that the `HmdaSupervisor` and `HmdaQuerySupervisor` are receiving messages from the cluster client. Both of these actors
-need to have the Cluster Receptionist enabled. For more information please consult the current Akka documentation on [Cluster Client](https://doc.akka.io/docs/akka/current/scala/cluster-client.html)
+need to have the Cluster Receptionist enabled. For more information please consult the current Akka documentation on [Cluster Client](https://doc.pekko.io/docs/akka/current/scala/cluster-client.html)
 
 * When loading large number of files, it might be necessary to increase the `hmda.persistent-actor-timeout` in the `Persistence-model` project's configuration file (or by passing the relevant
 runtime flag in a deployed application).

@@ -1,11 +1,11 @@
 package hmda.api.http.directives
 
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.model.StatusCodes.{ BadRequest, Forbidden }
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server._
-import akka.util.Timeout
+import pekko.cluster.sharding.typed.scaladsl.ClusterSharding
+import pekko.http.scaladsl.model.StatusCodes
+import pekko.http.scaladsl.model.StatusCodes.{ BadRequest, Forbidden }
+import pekko.http.scaladsl.server.Directives._
+import pekko.http.scaladsl.server._
+import pekko.util.Timeout
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.ErrorResponse
 import hmda.messages.institution.InstitutionCommands.GetInstitution

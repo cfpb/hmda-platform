@@ -1,6 +1,6 @@
 package hmda.actor
 
-import akka.actor._
+import org.apache.pekko.actor._
 import hmda.messages.CommonMessages.StopActor
 
 abstract class HmdaActor extends Actor with ActorLogging {

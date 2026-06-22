@@ -1,10 +1,10 @@
 package hmda.dataBrowser.api
 
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.testkit.ScalatestRouteTest
-import akka.stream.scaladsl.Source
+import pekko.http.scaladsl.model.StatusCodes
+import pekko.http.scaladsl.server.Directives._
+import pekko.http.scaladsl.server.Route
+import pekko.http.scaladsl.testkit.ScalatestRouteTest
+import pekko.stream.scaladsl.Source
 import cats.implicits._
 import hmda.dataBrowser.api.DataBrowserDirectives._
 import hmda.dataBrowser.models._

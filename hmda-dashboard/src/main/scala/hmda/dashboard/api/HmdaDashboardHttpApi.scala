@@ -1,10 +1,10 @@
 package hmda.dashboard.api
 
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.server.directives.RouteDirectives.complete
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
+import pekko.http.scaladsl.model.StatusCodes
+import pekko.http.scaladsl.server.Directives._
+import pekko.http.scaladsl.server.Route
+import pekko.http.scaladsl.server.directives.RouteDirectives.complete
+import ch.megard.pekko.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
 import com.typesafe.config.{Config, ConfigFactory}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.auth.OAuth2Authorization

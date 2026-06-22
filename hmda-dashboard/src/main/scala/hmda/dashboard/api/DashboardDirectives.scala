@@ -1,9 +1,9 @@
 package hmda.dashboard.api
 
-import akka.http.scaladsl.model.StatusCodes.BadRequest
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server._
-import akka.http.scaladsl.server.directives.RouteDirectives.complete
+import pekko.http.scaladsl.model.StatusCodes.BadRequest
+import pekko.http.scaladsl.server.Directives._
+import pekko.http.scaladsl.server._
+import pekko.http.scaladsl.server.directives.RouteDirectives.complete
 import hmda.dashboard.Settings
 import hmda.dashboard.models._
 

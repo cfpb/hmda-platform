@@ -1,13 +1,13 @@
 package hmda.api.http.admin
 
-import akka.NotUsed
-import akka.actor.typed.ActorSystem
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import akka.stream.Materializer
-import akka.stream.scaladsl.{ Sink, Source }
-import akka.util.Timeout
+import pekko.NotUsed
+import org.apache.pekko.actor.typed.ActorSystem
+import pekko.cluster.sharding.typed.scaladsl.ClusterSharding
+import pekko.http.scaladsl.server.Directives._
+import pekko.http.scaladsl.server.Route
+import pekko.stream.Materializer
+import pekko.stream.scaladsl.{ Sink, Source }
+import pekko.util.Timeout
 import com.typesafe.config.Config
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.{ SignedLeiCountResponse, SignedLeiListResponse, TotalLeiCountResponse, TotalLeiListResponse }

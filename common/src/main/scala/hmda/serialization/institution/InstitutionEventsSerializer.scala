@@ -2,7 +2,7 @@ package hmda.serialization.institution
 
 import java.io.NotSerializableException
 
-import akka.serialization.SerializerWithStringManifest
+import pekko.serialization.SerializerWithStringManifest
 import hmda.messages.institution.InstitutionEvents._
 import hmda.persistence.serialization.institution.events._
 import hmda.serialization.institution.InstitutionEventsProtobufConverter._

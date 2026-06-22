@@ -1,14 +1,14 @@
 package hmda.analytics
 
-import akka.Done
-import akka.actor.{ActorSystem, typed}
-import akka.actor.typed.scaladsl.adapter._
-import akka.kafka.scaladsl.Consumer.DrainingControl
-import akka.kafka.scaladsl.{Committer, Consumer}
-import akka.kafka.{CommitterSettings, ConsumerSettings, Subscriptions}
-import akka.stream.Materializer
-import akka.stream.scaladsl.{Keep, Sink, Source}
-import akka.util.{ByteString, Timeout}
+import pekko.Done
+import org.apache.pekko.actor.{ActorSystem, typed}
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import pekko.kafka.scaladsl.Consumer.DrainingControl
+import pekko.kafka.scaladsl.{Committer, Consumer}
+import pekko.kafka.{CommitterSettings, ConsumerSettings, Subscriptions}
+import pekko.stream.Materializer
+import pekko.stream.scaladsl.{Keep, Sink, Source}
+import pekko.util.{ByteString, Timeout}
 import com.typesafe.config.ConfigFactory
 import hmda.analytics.query._
 import hmda.messages.HmdaMessageFilter
@@ -54,7 +54,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
   implicit val timeout: Timeout = Timeout(5.seconds)
 
-  val kafkaConfig = system.settings.config.getConfig("akka.kafka.consumer")
+  val kafkaConfig = system.settings.config.getConfig("pekko.kafka.consumer")
   val config      = ConfigFactory.load()
   val parallelism = config.getInt("hmda.analytics.parallelism")
   val larDeletion = config.getBoolean("hmda.analytics.larDeletion")
@@ -305,7 +305,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
     result.recover {
       case t: Throwable =>
         log.error("Error happened in inserting: ", t)
-        akka.Done.done()
+        pekko.Done.done()
     }
 
   }

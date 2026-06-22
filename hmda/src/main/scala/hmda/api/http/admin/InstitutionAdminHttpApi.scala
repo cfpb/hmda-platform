@@ -1,12 +1,12 @@
 package hmda.api.http.admin
 
-import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
-import akka.http.scaladsl.model.headers.RawHeader
-import akka.http.scaladsl.model.{ StatusCodes, Uri }
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import akka.util.Timeout
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
+import pekko.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
+import pekko.http.scaladsl.model.headers.RawHeader
+import pekko.http.scaladsl.model.{ StatusCodes, Uri }
+import pekko.http.scaladsl.server.Directives._
+import pekko.http.scaladsl.server.Route
+import pekko.util.Timeout
+import ch.megard.pekko.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
 import com.typesafe.config.Config
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.PathMatchers._

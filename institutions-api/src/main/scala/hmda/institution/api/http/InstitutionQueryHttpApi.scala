@@ -1,10 +1,10 @@
 package hmda.institution.api.http
 
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.{StatusCodes, Uri}
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
+import pekko.http.scaladsl.marshalling.ToResponseMarshallable
+import pekko.http.scaladsl.model.{StatusCodes, Uri}
+import pekko.http.scaladsl.server.Directives._
+import pekko.http.scaladsl.server.Route
+import ch.megard.pekko.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
 import com.typesafe.config.Config
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.directives.CreateFilingAuthorization._

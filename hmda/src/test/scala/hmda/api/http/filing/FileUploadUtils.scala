@@ -1,6 +1,6 @@
 package hmda.api.http.filing
 
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, Multipart}
+import pekko.http.scaladsl.model.{ContentTypes, HttpEntity, Multipart}
 
 trait FileUploadUtils {
   def multiPartFile(contents: String, fileName: String) =

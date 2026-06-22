@@ -2,7 +2,7 @@ package hmda.serialization.submission
 
 import java.io.NotSerializableException
 
-import akka.serialization.SerializerWithStringManifest
+import pekko.serialization.SerializerWithStringManifest
 import hmda.messages.submission.EditDetailsEvents.{ EditDetailsAdded, EditDetailsRowCounted }
 import hmda.persistence.serialization.edit.details.events.{ EditDetailsAddedMessage, EditDetailsRowCountedMessage }
 import hmda.serialization.submission.EditDetailsEventsProtobufConverter._

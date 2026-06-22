@@ -1,10 +1,10 @@
 package hmda.publisher.api
 
-import akka.actor.ActorRef
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.testkit.ScalatestRouteTest
-import akka.testkit.TestProbe
-import akka.util.Timeout
+import org.apache.pekko.actor.ActorRef
+import pekko.http.scaladsl.model.StatusCodes
+import pekko.http.scaladsl.testkit.ScalatestRouteTest
+import pekko.testkit.TestProbe
+import pekko.util.Timeout
 import hmda.publisher.scheduler.AllSchedulers
 import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear, Schedules }
 import org.scalatest.{ MustMatchers, WordSpec }

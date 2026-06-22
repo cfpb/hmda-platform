@@ -1,8 +1,8 @@
 package hmda.api.http.public
 
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.testkit.ScalatestRouteTest
+import pekko.http.scaladsl.model.StatusCodes
+import pekko.http.scaladsl.server.Route
+import pekko.http.scaladsl.testkit.ScalatestRouteTest
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.filing.submissions.HmdaRowParsedErrorSummary
 import hmda.api.http.model.public.{ LarValidateRequest, SingleValidationErrorResult, ValidationErrorSummary, ValidationSingleErrorSummary }

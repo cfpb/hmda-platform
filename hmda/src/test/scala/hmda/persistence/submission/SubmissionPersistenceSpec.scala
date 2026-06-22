@@ -1,11 +1,11 @@
 package hmda.persistence.submission
 
-import akka.actor
-import akka.actor.testkit.typed.scaladsl.TestProbe
+import org.apache.pekko.actor
+import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
 import hmda.persistence.AkkaCassandraPersistenceSpec
-import akka.actor.typed.scaladsl.adapter._
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.cluster.typed.{ Cluster, Join }
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import pekko.cluster.sharding.typed.scaladsl.ClusterSharding
+import pekko.cluster.typed.{ Cluster, Join }
 import hmda.messages.submission.SubmissionCommands.{ CreateSubmission, GetSubmission, ModifySubmission }
 import hmda.messages.submission.SubmissionEvents.{ SubmissionCreated, SubmissionEvent, SubmissionModified, SubmissionNotExists }
 import hmda.model.filing.submission.{ Created, Submission, SubmissionId, Uploaded }

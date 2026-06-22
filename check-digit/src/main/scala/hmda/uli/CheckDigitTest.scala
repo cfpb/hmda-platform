@@ -1,8 +1,8 @@
 package hmda.uli
 
-import akka.actor.ActorSystem
-import akka.grpc.GrpcClientSettings
-import akka.stream.Materializer
+import org.apache.pekko.actor.ActorSystem
+import pekko.grpc.GrpcClientSettings
+import pekko.stream.Materializer
 import hmda.grpc.services.{ CheckDigitServiceClient, ValidUliRequest }
 
 import scala.concurrent.Await

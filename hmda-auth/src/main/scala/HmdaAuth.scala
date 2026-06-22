@@ -1,9 +1,9 @@
 package hmda.authService
 
-import akka.actor.typed.ActorSystem
-import akka.actor.typed.scaladsl.adapter._
-import akka.actor.{ActorSystem => ClassicActorSystem}
-import akka.stream.Materializer
+import org.apache.pekko.actor.typed.ActorSystem
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.actor.{ActorSystem => ClassicActorSystem}
+import pekko.stream.Materializer
 import scala.concurrent.ExecutionContext
 import hmda.authService.api.HmdaAuthApi
 import org.slf4j.LoggerFactory

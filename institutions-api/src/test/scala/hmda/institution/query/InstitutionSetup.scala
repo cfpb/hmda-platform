@@ -1,6 +1,6 @@
 package hmda.institution.query
 
-import akka.http.scaladsl.testkit.RouteTestTimeout
+import pekko.http.scaladsl.testkit.RouteTestTimeout
 import hmda.institution.query.InstitutionEntityGenerators.institutionEntityGen
 import hmda.query.DbConfiguration.dbConfig
 import slick.dbio.DBIOAction

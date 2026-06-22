@@ -1,9 +1,9 @@
 package hmda.validation.filing
 
-import akka.NotUsed
-import akka.actor.typed.ActorSystem
-import akka.stream.Materializer
-import akka.stream.scaladsl.Source
+import pekko.NotUsed
+import org.apache.pekko.actor.typed.ActorSystem
+import pekko.stream.Materializer
+import pekko.stream.scaladsl.Source
 import com.typesafe.config.ConfigFactory
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums._

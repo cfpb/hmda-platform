@@ -1,20 +1,20 @@
 package hmda.persistence.submission
 
 import java.time.Instant
-import akka.actor.typed._
-import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
-import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
-import akka.pattern.ask
-import akka.persistence.typed.scaladsl.EventSourcedBehavior.{CommandHandler, EventHandler}
-import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
-import akka.persistence.typed.{PersistenceId, RecoveryCompleted}
-import akka.stream.Materializer
-import akka.stream.scaladsl.{Sink, Source, _}
-import akka.stream.typed.scaladsl.ActorFlow
-import akka.util.{ByteString, Timeout}
-import akka.{Done, NotUsed}
+import org.apache.pekko.actor.typed._
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.actor.typed.scaladsl.{ActorContext, Behaviors}
+import pekko.cluster.sharding.typed.ShardingEnvelope
+import pekko.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
+import pekko.pattern.ask
+import pekko.persistence.typed.scaladsl.EventSourcedBehavior.{CommandHandler, EventHandler}
+import pekko.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
+import pekko.persistence.typed.{PersistenceId, RecoveryCompleted}
+import pekko.stream.Materializer
+import pekko.stream.scaladsl.{Sink, Source, _}
+import pekko.stream.typed.scaladsl.ActorFlow
+import pekko.util.{ByteString, Timeout}
+import pekko.{Done, NotUsed}
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.StrictLogging
 import hmda.HmdaPlatform.stringKafkaProducer
@@ -90,7 +90,7 @@ object HmdaValidationError
                              ): CommandHandler[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaValidationErrorState] = { (state, cmd) =>
     val log                                   = ctx.log
     implicit val system: ActorSystem[_]       = ctx.system
-    implicit val blockingEc: ExecutionContext = system.dispatchers.lookup(DispatcherSelector.fromConfig("akka.blocking-quality-dispatcher"))
+    implicit val blockingEc: ExecutionContext = system.dispatchers.lookup(DispatcherSelector.fromConfig("pekko.blocking-quality-dispatcher"))
     val materializer = implicitly[Materializer]
 
     val config                    = system.settings.config

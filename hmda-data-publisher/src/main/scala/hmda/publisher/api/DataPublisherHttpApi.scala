@@ -1,9 +1,9 @@
 package hmda.publisher.api
 
-import akka.http.scaladsl.model.headers.RawHeader
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
+import pekko.http.scaladsl.model.headers.RawHeader
+import pekko.http.scaladsl.server.Directives._
+import pekko.http.scaladsl.server.Route
+import ch.megard.pekko.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.publisher.scheduler.AllSchedulers
 import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear, Schedules }

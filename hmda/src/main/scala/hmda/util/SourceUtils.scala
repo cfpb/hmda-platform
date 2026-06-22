@@ -1,8 +1,8 @@
 package hmda.util
 
-import akka.NotUsed
-import akka.stream.Materializer
-import akka.stream.scaladsl.{ Sink, Source }
+import pekko.NotUsed
+import pekko.stream.Materializer
+import pekko.stream.scaladsl.{ Sink, Source }
 
 import scala.collection.immutable
 import scala.concurrent.Future

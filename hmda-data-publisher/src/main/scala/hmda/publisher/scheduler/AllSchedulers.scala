@@ -1,6 +1,6 @@
 package hmda.publisher.scheduler
 
-import akka.actor.ActorRef
+import org.apache.pekko.actor.ActorRef
 // $COVERAGE-OFF$
 case class AllSchedulers(
                           combinedMLarPublicScheduler: ActorRef,

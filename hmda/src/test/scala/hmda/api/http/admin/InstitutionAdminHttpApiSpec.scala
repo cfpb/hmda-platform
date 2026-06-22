@@ -1,14 +1,14 @@
 package hmda.api.http.admin
 
-import akka.actor.typed.ActorSystem
-import akka.actor.typed.scaladsl.adapter._
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.cluster.typed.{ Cluster, Join }
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
-import akka.testkit._
-import akka.util.Timeout
+import org.apache.pekko.actor.typed.ActorSystem
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import pekko.cluster.sharding.typed.scaladsl.ClusterSharding
+import pekko.cluster.typed.{ Cluster, Join }
+import pekko.http.scaladsl.model.StatusCodes
+import pekko.http.scaladsl.server.Route
+import pekko.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
+import pekko.testkit._
+import pekko.util.Timeout
 import com.typesafe.config.Config
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.admin.InstitutionDeletedResponse

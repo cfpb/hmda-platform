@@ -1,15 +1,15 @@
 package hmda.api.http.directives
 
-import akka.actor.testkit.typed.scaladsl.TestProbe
-import akka.actor.typed.ActorSystem
-import akka.actor.typed.scaladsl.adapter._
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.cluster.typed.{ Cluster, Join }
-import akka.http.scaladsl.model.StatusCodes._
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.testkit.ScalatestRouteTest
-import akka.util.Timeout
+import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
+import org.apache.pekko.actor.typed.ActorSystem
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import pekko.cluster.sharding.typed.scaladsl.ClusterSharding
+import pekko.cluster.typed.{ Cluster, Join }
+import pekko.http.scaladsl.model.StatusCodes._
+import pekko.http.scaladsl.server.Directives._
+import pekko.http.scaladsl.server.Route
+import pekko.http.scaladsl.testkit.ScalatestRouteTest
+import pekko.util.Timeout
 import hmda.messages.institution.InstitutionCommands.CreateInstitution
 import hmda.messages.institution.InstitutionEvents.{ InstitutionCreated, InstitutionEvent }
 import hmda.model.institution.Institution

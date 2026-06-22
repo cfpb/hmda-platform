@@ -1,8 +1,8 @@
 package hmda.validation
 
-import akka.actor.typed.scaladsl.adapter._
-import akka.actor.ActorSystem
-import akka.testkit.{ ImplicitSender, TestKit }
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.actor.ActorSystem
+import pekko.testkit.{ ImplicitSender, TestKit }
 import org.scalatest.{ MustMatchers, WordSpecLike }
 
 class HmdaValidationSpec extends TestKit(ActorSystem("hmda-validation-spec")) with WordSpecLike with MustMatchers with ImplicitSender {
