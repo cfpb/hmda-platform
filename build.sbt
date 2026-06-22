@@ -228,8 +228,10 @@ lazy val `check-digit` = (project in file("check-digit"))
       assembly / assemblyMergeStrategy := {
 
         case "application.conf"                      => MergeStrategy.concat
+        case "version.conf" => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case metaInfMatcher(_) => MergeStrategy.discard
         case PathList("META-INF", xs @ _*) => MergeStrategy.concat
         case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs @ _*) => MergeStrategy.last
