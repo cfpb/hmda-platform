@@ -34,15 +34,15 @@ object Dependencies {
   lazy val slickPostgres            = "com.github.tminglei" %% "slick-pg"                    % Version.slickPostgres
   lazy val pekkoHttpCirce            = "de.heikoseeberger"   %% "pekko-http-circe"             % Version.pekkoHttpJson
   lazy val pekkoManagementClusterBootstrap =
-    "com.lightbend.pekko.management" %% "pekko-management-cluster-bootstrap" % Version.pekkoClusterManagement exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
+    "org.apache.pekko" %% "pekko-management-cluster-bootstrap" % Version.pekkoClusterManagement exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
   lazy val pekkoServiceDiscoveryDNS =
     "org.apache.pekko" %% "pekko-discovery" % Version.pekko exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
   lazy val pekkoServiceDiscoveryKubernetes =
-    "com.lightbend.pekko.discovery" %% "pekko-discovery-kubernetes-api" % Version.pekkoClusterManagement exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
+    "org.apache.pekko" %% "pekko-discovery-kubernetes-api" % Version.pekkoClusterManagement exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
   lazy val pekkoManagement =
-    "com.lightbend.pekko.management" %% "pekko-management" % Version.pekkoClusterManagement exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
+    "org.apache.pekko" %% "pekko-management" % Version.pekkoClusterManagement exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
   lazy val pekkoClusterHttpManagement =
-    "com.lightbend.pekko.management" %% "pekko-management-cluster-http" % Version.pekkoClusterManagement exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
+    "org.apache.pekko.management" %% "pekko-management-cluster-http" % Version.pekkoClusterManagement exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
   lazy val pekkoCors =
     "ch.megard" %% "pekko-http-cors" % Version.pekkoCors exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
   lazy val circe                    = "io.circe"           %% "circe-core"                          % Version.circe
