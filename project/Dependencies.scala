@@ -12,46 +12,46 @@ object Dependencies {
   val scalaCheck                    = "org.scalacheck"      %% "scalacheck"                  % Version.scalaCheck % Test
   val scalaMock                     = "org.scalamock"       %% "scalamock"                   % Version.scalaMock % Test
   val logback                       = "ch.qos.logback"      % "logback-classic"              % Version.logback
-  lazy val akkaSlf4J                = "org.apache.pekko"   %% "akka-slf4j"                  % Version.akka
-  lazy val akkaTyped                = "org.apache.pekko"   %% "akka-actor-typed"            % Version.akka
-  lazy val akkaCluster              = "org.apache.pekko"   %% "akka-cluster"                % Version.akka
-  lazy val akkaClusterTyped         = "org.apache.pekko"   %% "akka-cluster-typed"          % Version.akka
-  lazy val akkaClusterSharding      = "org.apache.pekko"   %% "akka-cluster-sharding"       % Version.akka
-  lazy val akkaClusterShardingTyped = "org.apache.pekko"   %% "akka-cluster-sharding-typed" % Version.akka
-  lazy val akkaPersistence          = "org.apache.pekko"   %% "pekko-persistence"            % Version.akka
-  lazy val akkaPersistenceTyped     = "org.apache.pekko"   %% "pekko-persistence-typed"      % Version.akka
-  lazy val akkaPersistenceQuery     = "org.apache.pekko"   %% "pekko-persistence-query"      % Version.akka
-  lazy val akkaTestkitTyped         = "org.apache.pekko"   %% "akka-actor-testkit-typed"    % Version.akka % Test
-  lazy val akkaStream               = "org.apache.pekko"   %% "akka-stream"                 % Version.akka
-  lazy val akkaStreamTyped          = "org.apache.pekko"   %% "akka-stream-typed"           % Version.akka
-  lazy val akkaStreamsTestKit       = "org.apache.pekko"   %% "akka-stream-testkit"         % Version.akka % Test
-  lazy val akkaHttp                 = "org.apache.pekko"   %% "akka-http"                   % Version.akkaHttp
-  lazy val akkaHttp2                = "org.apache.pekko"   %% "akka-http2-support"          % Version.akkaHttp2Support
-  lazy val akkaHttpXml              = "org.apache.pekko"   %% "akka-http-xml"               % Version.akkaHttp
-  lazy val akkaHttpTestkit          = "org.apache.pekko"   %% "akka-http-testkit"           % Version.akkaHttp % Test
-  lazy val akkaHttpSprayJson        = "org.apache.pekko"   %% "akka-http-spray-json"        % Version.akkaHttp
+  lazy val pekkoSlf4J                = "org.apache.pekko"   %% "pekko-slf4j"                  % Version.pekko
+  lazy val pekkoTyped                = "org.apache.pekko"   %% "pekko-actor-typed"            % Version.pekko
+  lazy val pekkoCluster              = "org.apache.pekko"   %% "pekko-cluster"                % Version.pekko
+  lazy val pekkoClusterTyped         = "org.apache.pekko"   %% "pekko-cluster-typed"          % Version.pekko
+  lazy val pekkoClusterSharding      = "org.apache.pekko"   %% "pekko-cluster-sharding"       % Version.pekko
+  lazy val pekkoClusterShardingTyped = "org.apache.pekko"   %% "pekko-cluster-sharding-typed" % Version.pekko
+  lazy val pekkoPersistence          = "org.apache.pekko"   %% "pekko-persistence"            % Version.pekko
+  lazy val pekkoPersistenceTyped     = "org.apache.pekko"   %% "pekko-persistence-typed"      % Version.pekko
+  lazy val pekkoPersistenceQuery     = "org.apache.pekko"   %% "pekko-persistence-query"      % Version.pekko
+  lazy val pekkoTestkitTyped         = "org.apache.pekko"   %% "pekko-actor-testkit-typed"    % Version.pekko % Test
+  lazy val pekkoStream               = "org.apache.pekko"   %% "pekko-stream"                 % Version.pekko
+  lazy val pekkoStreamTyped          = "org.apache.pekko"   %% "pekko-stream-typed"           % Version.pekko
+  lazy val pekkoStreamsTestKit       = "org.apache.pekko"   %% "pekko-stream-testkit"         % Version.pekko % Test
+  lazy val pekkoHttp                 = "org.apache.pekko"   %% "pekko-http"                   % Version.pekkoHttp
+  lazy val pekkoHttp2                = "org.apache.pekko"   %% "pekko-http2-support"          % Version.pekkoHttp2Support
+  lazy val pekkoHttpXml              = "org.apache.pekko"   %% "pekko-http-xml"               % Version.pekkoHttp
+  lazy val pekkoHttpTestkit          = "org.apache.pekko"   %% "pekko-http-testkit"           % Version.pekkoHttp % Test
+  lazy val pekkoHttpSprayJson        = "org.apache.pekko"   %% "pekko-http-spray-json"        % Version.pekkoHttp
   lazy val scalaLogging             = "com.typesafe.scala-logging"   %% "scala-logging"               % Version.scalaLogging
   lazy val slickPostgres            = "com.github.tminglei" %% "slick-pg"                    % Version.slickPostgres
-  lazy val akkaHttpCirce            = "de.heikoseeberger"   %% "akka-http-circe"             % Version.akkaHttpJson
-  lazy val akkaManagementClusterBootstrap =
-    "com.lightbend.pekko.management" %% "akka-management-cluster-bootstrap" % Version.akkaClusterManagement exclude ("org.apache.pekko", "akka-http") exclude ("org.apache.pekko", "akka-http-xml")
-  lazy val akkaServiceDiscoveryDNS =
-    "org.apache.pekko" %% "akka-discovery" % Version.akka exclude ("org.apache.pekko", "akka-http") exclude ("org.apache.pekko", "akka-http-xml")
-  lazy val akkaServiceDiscoveryKubernetes =
-    "com.lightbend.pekko.discovery" %% "akka-discovery-kubernetes-api" % Version.akkaClusterManagement exclude ("org.apache.pekko", "akka-http") exclude ("org.apache.pekko", "akka-http-xml")
-  lazy val akkaManagement =
-    "com.lightbend.pekko.management" %% "akka-management" % Version.akkaClusterManagement exclude ("org.apache.pekko", "akka-http") exclude ("org.apache.pekko", "akka-http-xml")
-  lazy val akkaClusterHttpManagement =
-    "com.lightbend.pekko.management" %% "akka-management-cluster-http" % Version.akkaClusterManagement exclude ("org.apache.pekko", "akka-http") exclude ("org.apache.pekko", "akka-http-xml")
-  lazy val akkaCors =
-    "ch.megard" %% "akka-http-cors" % Version.akkaCors exclude ("org.apache.pekko", "akka-http") exclude ("org.apache.pekko", "akka-http-xml")
+  lazy val pekkoHttpCirce            = "de.heikoseeberger"   %% "pekko-http-circe"             % Version.pekkoHttpJson
+  lazy val pekkoManagementClusterBootstrap =
+    "com.lightbend.pekko.management" %% "pekko-management-cluster-bootstrap" % Version.pekkoClusterManagement exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
+  lazy val pekkoServiceDiscoveryDNS =
+    "org.apache.pekko" %% "pekko-discovery" % Version.pekko exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
+  lazy val pekkoServiceDiscoveryKubernetes =
+    "com.lightbend.pekko.discovery" %% "pekko-discovery-kubernetes-api" % Version.pekkoClusterManagement exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
+  lazy val pekkoManagement =
+    "com.lightbend.pekko.management" %% "pekko-management" % Version.pekkoClusterManagement exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
+  lazy val pekkoClusterHttpManagement =
+    "com.lightbend.pekko.management" %% "pekko-management-cluster-http" % Version.pekkoClusterManagement exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
+  lazy val pekkoCors =
+    "ch.megard" %% "pekko-http-cors" % Version.pekkoCors exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
   lazy val circe                    = "io.circe"           %% "circe-core"                          % Version.circe
   lazy val circeGeneric             = "io.circe"           %% "circe-generic"                       % Version.circe
   lazy val circeParser              = "io.circe"           %% "circe-parser"                        % Version.circe
-  lazy val akkaPersistenceCassandra = "org.apache.pekko"  %% "pekko-persistence-cassandra"          % Version.cassandraPluginVersion
+  lazy val pekkoPersistenceCassandra = "org.apache.pekko"  %% "pekko-persistence-cassandra"          % Version.cassandraPluginVersion
   lazy val slick                    = "com.typesafe.slick" %% "slick"                               % Version.slick
   lazy val slickHikariCP            = "com.typesafe.slick" %% "slick-hikaricp"                      % Version.slick
-  lazy val alpakkaSlick             = "com.lightbend.akka" %% "akka-stream-alpakka-slick"           % Version.alpakka
+  lazy val pekkoSlick             = "org.apache.pekko" %% "pekko-connectors-slick"           % Version.pekkoSlick
   lazy val postgres                 = "org.postgresql"     % "postgresql"                           % Version.postgres
   lazy val h2                       = "com.h2database"     % "h2"                                   % Version.h2 % Test
   lazy val testContainers        = "org.testcontainers"         % "testcontainers"              % Version.testContainers % Test
@@ -63,10 +63,10 @@ object Dependencies {
   lazy val resteasyMulti         = "org.jboss.resteasy"         % "resteasy-multipart-provider" % Version.resteasy % "provided"
   lazy val jbossLogging          = "org.jboss.logging"          % "jboss-logging"               % Version.jbossLogging
   lazy val httpClient            = "org.apache.httpcomponents"  % "httpclient"                  % Version.httpcomponents
-  lazy val akkaKafkaStreams      = "org.apache.pekko"          %% "akka-stream-kafka"          % Version.akkaKafka exclude("org.apache.kafka", "kafka-clients")
+  lazy val pekkoKafkaStreams      = "org.apache.pekko"          %% "pekko-connectors-kafka"          % Version.pekkoKafkaStreams exclude("org.apache.kafka", "kafka-clients")
   lazy val kafkaClients          = "org.apache.kafka"           % "kafka-clients"               % Version.kafkaClients
-  lazy val alpakkaS3             = "com.lightbend.akka"         %% "akka-stream-alpakka-s3"     % Version.alpakkaS3
-  lazy val pekkoQuartzScheduler   = "org.apache"          %% "pekko.extension.quartz"      % Version.pekkoQuartzScheduler
+  lazy val pekkoS3             = "org.apache.pekko"         %% "pekko-connectors-s3"     % Version.pekkoS3
+  lazy val pekkoQuartzScheduler   = "org.apache.pekko"          %% "extension.quartz"      % Version.pekkoQuartzScheduler
   lazy val sbtResolver           = "io.spray"                   %% "sbt-revolver"               % Version.sprayresolver
   lazy val enumeratum            = "com.beachape"               %% "enumeratum"                 % Version.enumeratum
   lazy val enumeratumCirce       = "com.beachape"               %% "enumeratum-circe"           % Version.enumeratumCirce
@@ -78,7 +78,7 @@ object Dependencies {
   lazy val zeroAllocationHashing = "net.openhft"                % "zero-allocation-hashing"     % Version.zeroAllocation
   lazy val cormorant             = "io.chrisdavenport"          %% "cormorant-parser"           % Version.cormorant
   lazy val cormorantGeneric      = "io.chrisdavenport"          %% "cormorant-generic"          % Version.cormorant
-  lazy val alpakkaFile           = "com.lightbend.akka"         %% "akka-stream-alpakka-file"   % Version.alpakka
+  lazy val pekkoFile             = "org.apache.pekko"           %% "pekko-connectors-file"      % Version.pekkoFile
   lazy val scalacheckShapeless   = "com.github.alexarchambault" %% "scalacheck-shapeless_1.14"  % Version.scalacheckShapeless % Test
   lazy val diffx                 = "com.softwaremill.diffx"     %% "diffx-core"                 % Version.diffx % Test
   lazy val kubernetesApi         = "io.kubernetes"              % "client-java"                 % Version.kubernetesApi
