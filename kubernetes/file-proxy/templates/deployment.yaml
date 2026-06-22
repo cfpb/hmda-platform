@@ -27,7 +27,7 @@ spec:
             driver: secrets-store.csi.k8s.io
             readOnly: true
             volumeAttributes:
-              secretProviderClass: irsa-akka-license-provider
+              secretProviderClass: akka-license-provider
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
@@ -56,7 +56,7 @@ spec:
           - name: AKKA_LICENSE_KEY
             valueFrom:
               secretKeyRef:
-                name: irsa-akka-license-key
+                name: akka-license-key
                 key: key
           - name: HMDA_RUNTIME_MODE
             value: {{ .Values.hmda.runtimeMode }}
