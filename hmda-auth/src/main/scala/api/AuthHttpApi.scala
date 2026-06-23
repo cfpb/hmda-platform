@@ -1,12 +1,12 @@
 package hmda.authService.api
 
-import pekko.http.scaladsl.marshalling.ToResponseMarshallable
-import pekko.http.scaladsl.model.StatusCodes
-import pekko.http.scaladsl.model.StatusCodes.BadRequest
-import pekko.http.scaladsl.server.Directives._
-import pekko.http.scaladsl.server.directives.RouteDirectives.complete
-import pekko.http.scaladsl.server.Route
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import org.apache.pekko.http.scaladsl.marshalling.ToResponseMarshallable
+import org.apache.pekko.http.scaladsl.model.StatusCodes
+import org.apache.pekko.http.scaladsl.model.StatusCodes.BadRequest
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.directives.RouteDirectives.complete
+import org.apache.pekko.http.scaladsl.server.Route
+import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import org.slf4j.Logger
 

@@ -3,7 +3,7 @@ package hmda.authService
 import org.apache.pekko.actor.typed.ActorSystem
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.actor.{ActorSystem => ClassicActorSystem}
-import pekko.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import scala.concurrent.ExecutionContext
 import hmda.authService.api.HmdaAuthApi
 import org.slf4j.LoggerFactory

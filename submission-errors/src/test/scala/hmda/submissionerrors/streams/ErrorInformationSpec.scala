@@ -1,9 +1,9 @@
 package hmda.submissionerrors.streams
 
-import pekko.NotUsed
+import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.ActorSystem
-import pekko.stream.scaladsl.Source
-import pekko.testkit.TestKit
+import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.testkit.TestKit
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowValidatedError
 import hmda.model.validation.{ LarValidationError, MacroValidationError, SyntacticalValidationError }
 import hmda.submissionerrors.streams.ErrorInformation._

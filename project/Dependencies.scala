@@ -26,13 +26,13 @@ object Dependencies {
   lazy val pekkoStreamTyped          = "org.apache.pekko"   %% "pekko-stream-typed"           % Version.pekko
   lazy val pekkoStreamsTestKit       = "org.apache.pekko"   %% "pekko-stream-testkit"         % Version.pekko % Test
   lazy val pekkoHttp                 = "org.apache.pekko"   %% "pekko-http"                   % Version.pekkoHttp
-  lazy val pekkoHttp2                = "org.apache.pekko"   %% "pekko-http2-support"          % Version.pekkoHttp2Support
+  lazy val pekkoHttp2                = "org.playframework"   %% "play-pekko-http2-support"          % Version.pekkoHttp2Support
   lazy val pekkoHttpXml              = "org.apache.pekko"   %% "pekko-http-xml"               % Version.pekkoHttp
   lazy val pekkoHttpTestkit          = "org.apache.pekko"   %% "pekko-http-testkit"           % Version.pekkoHttp % Test
   lazy val pekkoHttpSprayJson        = "org.apache.pekko"   %% "pekko-http-spray-json"        % Version.pekkoHttp
   lazy val scalaLogging             = "com.typesafe.scala-logging"   %% "scala-logging"               % Version.scalaLogging
   lazy val slickPostgres            = "com.github.tminglei" %% "slick-pg"                    % Version.slickPostgres
-  lazy val pekkoHttpCirce            = "de.heikoseeberger"   %% "pekko-http-circe"             % Version.pekkoHttpJson
+  lazy val pekkoHttpCirce            = "org.mdedetrich"   %% "pekko-http-circe"             % Version.pekkoHttpCirce
   lazy val pekkoManagementClusterBootstrap =
     "org.apache.pekko" %% "pekko-management-cluster-bootstrap" % Version.pekkoClusterManagement exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
   lazy val pekkoServiceDiscoveryDNS =
@@ -42,9 +42,9 @@ object Dependencies {
   lazy val pekkoManagement =
     "org.apache.pekko" %% "pekko-management" % Version.pekkoClusterManagement exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
   lazy val pekkoClusterHttpManagement =
-    "org.apache.pekko.management" %% "pekko-management-cluster-http" % Version.pekkoClusterManagement exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
+    "org.apache.pekko" %% "pekko-management-cluster-http" % Version.pekkoClusterManagement exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
   lazy val pekkoCors =
-    "ch.megard" %% "pekko-http-cors" % Version.pekkoCors exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
+    "org.apache.pekko" %% "pekko-http-cors" % Version.pekkoCors exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
   lazy val circe                    = "io.circe"           %% "circe-core"                          % Version.circe
   lazy val circeGeneric             = "io.circe"           %% "circe-generic"                       % Version.circe
   lazy val circeParser              = "io.circe"           %% "circe-parser"                        % Version.circe
@@ -65,8 +65,8 @@ object Dependencies {
   lazy val httpClient            = "org.apache.httpcomponents"  % "httpclient"                  % Version.httpcomponents
   lazy val pekkoKafkaStreams      = "org.apache.pekko"          %% "pekko-connectors-kafka"          % Version.pekkoKafkaStreams exclude("org.apache.kafka", "kafka-clients")
   lazy val kafkaClients          = "org.apache.kafka"           % "kafka-clients"               % Version.kafkaClients
-  lazy val pekkoS3             = "org.apache.pekko"         %% "pekko-connectors-s3"     % Version.pekkoS3
-  lazy val pekkoQuartzScheduler   = "org.apache.pekko"          %% "extension.quartz"      % Version.pekkoQuartzScheduler
+  lazy val pekkoS3             = "org.apache.pekko"             %% "pekko-connectors-s3"     % Version.pekkoS3
+  lazy val pekkoQuartzScheduler   = "io.github.samueleresca"    %% "pekko-quartz-scheduler"      % Version.pekkoQuartzScheduler
   lazy val sbtResolver           = "io.spray"                   %% "sbt-revolver"               % Version.sprayresolver
   lazy val enumeratum            = "com.beachape"               %% "enumeratum"                 % Version.enumeratum
   lazy val enumeratumCirce       = "com.beachape"               %% "enumeratum-circe"           % Version.enumeratumCirce

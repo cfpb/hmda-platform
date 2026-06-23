@@ -1,7 +1,7 @@
 package hmda.uli.api.grpc
 
 import org.apache.pekko.actor.ActorSystem
-import pekko.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import hmda.grpc.services.{ ValidUliRequest, ValidUliResponse }
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.Span

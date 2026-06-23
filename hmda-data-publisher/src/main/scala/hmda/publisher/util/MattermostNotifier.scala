@@ -1,8 +1,8 @@
 package hmda.publisher.util
 
 import org.apache.pekko.actor.ActorSystem
-import pekko.http.scaladsl.Http
-import pekko.http.scaladsl.model.{HttpEntity, HttpMethods, HttpRequest}
+import org.apache.pekko.http.scaladsl.Http
+import org.apache.pekko.http.scaladsl.model.{HttpEntity, HttpMethods, HttpRequest}
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.Json
 import io.circe.syntax._

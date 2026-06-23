@@ -1,11 +1,11 @@
 package hmda.submissionerrors.streams
 
-import pekko.{ Done, NotUsed }
+import org.apache.pekko.{ Done, NotUsed }
 import org.apache.pekko.actor.typed.ActorSystem
-import pekko.kafka.CommitterSettings
-import pekko.kafka.ConsumerMessage.{ CommittableMessage, CommittableOffset }
-import pekko.kafka.scaladsl.Committer
-import pekko.stream.scaladsl.{ Flow, Keep, Sink }
+import org.apache.pekko.kafka.CommitterSettings
+import org.apache.pekko.kafka.ConsumerMessage.{ CommittableMessage, CommittableOffset }
+import org.apache.pekko.kafka.scaladsl.Committer
+import org.apache.pekko.stream.scaladsl.{ Flow, Keep, Sink }
 import cats.implicits._
 import hmda.model.filing.submission.SubmissionId
 import hmda.submissionerrors.repositories.{ AddSubmissionError, SubmissionErrorRepository }

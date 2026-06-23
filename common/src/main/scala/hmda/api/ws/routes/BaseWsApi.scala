@@ -3,11 +3,11 @@ package hmda.api.ws.routes
 import java.net.InetAddress
 import java.time.Instant
 
-import pekko.NotUsed
-import pekko.http.scaladsl.model.ws.{ Message, TextMessage }
-import pekko.http.scaladsl.server.Directives.{ get, handleWebSocketMessages, pathSingleSlash }
-import pekko.http.scaladsl.server.Route
-import pekko.stream.scaladsl.Flow
+import org.apache.pekko.NotUsed
+import org.apache.pekko.http.scaladsl.model.ws.{ Message, TextMessage }
+import org.apache.pekko.http.scaladsl.server.Directives.{ get, handleWebSocketMessages, pathSingleSlash }
+import org.apache.pekko.http.scaladsl.server.Route
+import org.apache.pekko.stream.scaladsl.Flow
 import ch.megard.pekko.http.cors.scaladsl.CorsDirectives.cors
 import hmda.api.http.model.HmdaServiceStatus
 import io.circe.generic.auto._

@@ -1,12 +1,12 @@
 package hmda.api.http
 
-import pekko.NotUsed
+import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.ActorSystem
-import pekko.http.scaladsl.Http
-import pekko.http.scaladsl.model.{ HttpMethods, HttpRequest, HttpResponse, Uri }
-import pekko.http.scaladsl.unmarshalling.Unmarshal
-import pekko.stream.scaladsl.{ Flow, Framing }
-import pekko.util.ByteString
+import org.apache.pekko.http.scaladsl.Http
+import org.apache.pekko.http.scaladsl.model.{ HttpMethods, HttpRequest, HttpResponse, Uri }
+import org.apache.pekko.http.scaladsl.unmarshalling.Unmarshal
+import org.apache.pekko.stream.scaladsl.{ Flow, Framing }
+import org.apache.pekko.util.ByteString
 
 import scala.concurrent.{ ExecutionContext, Future }
 // $COVERAGE-OFF$

@@ -2,9 +2,9 @@ package hmda.persistence.institution
 
 import org.apache.pekko.actor
 import org.apache.pekko.actor.typed.ActorSystem
-import pekko.cluster.sharding.typed.scaladsl.ClusterSharding
-import pekko.cluster.typed.Cluster
-import pekko.cluster.typed.Join
+import org.apache.pekko.cluster.sharding.typed.scaladsl.ClusterSharding
+import org.apache.pekko.cluster.typed.Cluster
+import org.apache.pekko.cluster.typed.Join
 import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators._

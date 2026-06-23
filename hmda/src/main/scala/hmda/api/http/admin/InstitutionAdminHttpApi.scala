@@ -1,14 +1,14 @@
 package hmda.api.http.admin
 
-import pekko.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
-import pekko.http.scaladsl.model.headers.RawHeader
-import pekko.http.scaladsl.model.{ StatusCodes, Uri }
-import pekko.http.scaladsl.server.Directives._
-import pekko.http.scaladsl.server.Route
-import pekko.util.Timeout
+import org.apache.pekko.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
+import org.apache.pekko.http.scaladsl.model.headers.RawHeader
+import org.apache.pekko.http.scaladsl.model.{ StatusCodes, Uri }
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.Route
+import org.apache.pekko.util.Timeout
 import ch.megard.pekko.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
 import com.typesafe.config.Config
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.PathMatchers._
 import hmda.api.http.model.ErrorResponse
 import hmda.api.http.model.admin.InstitutionDeletedResponse

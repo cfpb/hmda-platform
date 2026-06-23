@@ -4,7 +4,7 @@ import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
 import org.apache.pekko.actor.typed.ActorRefResolver
 import org.apache.pekko.actor.typed.scaladsl.adapter._
-import pekko.persistence.query.TimeBasedUUID
+import org.apache.pekko.persistence.query.TimeBasedUUID
 import com.datastax.oss.driver.api.core.uuid.Uuids
 import hmda.messages.projection.CommonProjectionMessages.{ GetOffset, OffsetSaved, SaveOffset }
 import hmda.serialization.projection.ProjectionProtobufConverter._

@@ -1,12 +1,12 @@
 package hmda.publication
 
-import pekko.Done
-import org.apache.pekko.actor.typed.ActorSystem
+import org.apache.pekko.Done
+import `org.apache.pekko.actor.typed.ActorSystem`
 import org.apache.pekko.actor.typed.scaladsl.adapter._
-import pekko.kafka.ProducerSettings
-import pekko.kafka.scaladsl.Producer
-import pekko.stream.Materializer
-import pekko.stream.scaladsl.{Keep, Source}
+import org.apache.pekko.kafka.ProducerSettings
+import org.apache.pekko.kafka.scaladsl.Producer
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl.{Keep, Source}
 import com.typesafe.config.ConfigFactory
 import hmda.messages.institution.InstitutionEvents.InstitutionKafkaEvent
 import hmda.serialization.kafka.InstitutionKafkaEventsSerializer

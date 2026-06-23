@@ -3,7 +3,7 @@ package hmda.institution.projection
 
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.actor.typed.scaladsl.adapter._
-import pekko.testkit.TestKit
+import org.apache.pekko.testkit.TestKit
 import hmda.institution.query.InstitutionEmailComponent
 import hmda.messages.institution.InstitutionEvents.{ InstitutionCreated, InstitutionDeleted, InstitutionModified }
 import hmda.model.institution.Institution

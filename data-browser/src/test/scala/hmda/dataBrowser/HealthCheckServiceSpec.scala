@@ -1,8 +1,8 @@
 package hmda.dataBrowser
 
 import org.apache.pekko.actor.ActorSystem
-import pekko.stream.Materializer
-import pekko.testkit.TestKit
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.testkit.TestKit
 import hmda.dataBrowser.models.HealthCheckStatus.Up
 import hmda.dataBrowser.models.{ Commas, HealthCheckResponse, QueryField }
 import hmda.dataBrowser.models.State.AK

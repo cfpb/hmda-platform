@@ -5,10 +5,10 @@ import java.net.InetAddress
 import org.apache.pekko.actor.typed.ActorSystem
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.actor.{ActorSystem => ClassicActorSystem}
-import pekko.cluster.typed.Cluster
-import pekko.management.cluster.bootstrap.ClusterBootstrap
-import pekko.management.scaladsl.AkkaManagement
-import pekko.stream.Materializer
+import org.apache.pekko.cluster.typed.Cluster
+import org.apache.pekko.management.cluster.bootstrap.ClusterBootstrap
+import org.apache.pekko.management.scaladsl.AkkaManagement
+import org.apache.pekko.stream.Materializer
 import com.typesafe.config.ConfigFactory
 import hmda.api.HmdaApi
 import hmda.persistence.HmdaPersistence

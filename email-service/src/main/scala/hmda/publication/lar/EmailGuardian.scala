@@ -4,9 +4,9 @@ import org.apache.pekko.actor.typed.Behavior
 import org.apache.pekko.actor.typed.scaladsl._
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.actor.{ ActorSystem => UntypedActorSystem }
-import pekko.kafka.CommitterSettings
-import pekko.stream.{ ActorMaterializer, Materializer }
-import pekko.stream.scaladsl.Keep
+import org.apache.pekko.kafka.CommitterSettings
+import org.apache.pekko.stream.{ ActorMaterializer, Materializer }
+import org.apache.pekko.stream.scaladsl.Keep
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.simpleemail.{ AmazonSimpleEmailService, AmazonSimpleEmailServiceClientBuilder }
 import hmda.publication.lar.config.Settings

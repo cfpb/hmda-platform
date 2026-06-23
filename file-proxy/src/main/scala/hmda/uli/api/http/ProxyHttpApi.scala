@@ -1,35 +1,35 @@
 package hmda.proxy.api.http
 
-import pekko.NotUsed
-import pekko.http.scaladsl.model.{ HttpEntity, StatusCodes }
-import pekko.http.scaladsl.server.Directives._
-import pekko.http.scaladsl.server.directives.RouteDirectives.complete
-import pekko.http.scaladsl.server.{ Directive, Directive0 }
-import pekko.http.scaladsl.server.Route
-import pekko.util.ByteString
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import org.apache.pekko.NotUsed
+import org.apache.pekko.http.scaladsl.model.{ HttpEntity, StatusCodes }
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.directives.RouteDirectives.complete
+import org.apache.pekko.http.scaladsl.server.{ Directive, Directive0 }
+import org.apache.pekko.http.scaladsl.server.Route
+import org.apache.pekko.util.ByteString
+import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import org.slf4j.Logger
-import pekko.stream.alppekko.s3.scaladsl.S3
-import pekko.stream.scaladsl.{ Sink, Source }
+import org.apache.pekko.stream.alppekko.s3.scaladsl.S3
+import org.apache.pekko.stream.scaladsl.{ Sink, Source }
 
 import scala.concurrent.Future
-import pekko.stream.alppekko.s3._
+import org.apache.pekko.stream.alppekko.s3._
 import com.typesafe.config.ConfigFactory
 import software.amazon.awssdk.auth.credentials.{ AwsBasicCredentials, StaticCredentialsProvider }
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.regions.providers.AwsRegionProvider
 import software.amazon.awssdk.regions.providers._
-import pekko.stream.alppekko.s3.ApiVersion.ListBucketVersion2
+import org.apache.pekko.stream.alppekko.s3.ApiVersion.ListBucketVersion2
 import org.apache.pekko.actor.ActorSystem
 
 import scala.concurrent._
-import pekko.http.scaladsl.model.ContentTypes
+import org.apache.pekko.http.scaladsl.model.ContentTypes
 
 import scala.util.{ Failure, Success, Try }
-import pekko.http.scaladsl.model.StatusCodes.BadRequest
+import org.apache.pekko.http.scaladsl.model.StatusCodes.BadRequest
 import hmda.auth.OAuth2Authorization
-import pekko.util.Timeout
+import org.apache.pekko.util.Timeout
 import hmda.util.RealTimeConfig
 
 import scala.concurrent.duration._

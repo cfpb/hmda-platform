@@ -25,5 +25,5 @@
     <logger name="com.datastax.driver.core.RequestHandler" level="${CASSANDRA_LOG_LEVEL:-INFO}"/>  
     <logger name="com.datastax.driver.core.Session" level="${CASSANDRA_LOG_LEVEL:-INFO}"/>   
 <!--   <logger name="com.datastax.oss.driver" level="${CASSANDRA_LOG_LEVEL:-INFO}"/>  -->
-    <logger name="pekko.persistence.cassandra.query" level="DEBUG"/>
+    <logger name="org.apache.pekko.persistence.cassandra.query" level="DEBUG"/>
 </configuration>

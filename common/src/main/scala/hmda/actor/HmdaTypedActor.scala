@@ -2,8 +2,8 @@ package hmda.actor
 
 import org.apache.pekko.actor.typed.scaladsl.Behaviors
 import org.apache.pekko.actor.typed.{ActorRef, Behavior, SupervisorStrategy}
-import pekko.cluster.sharding.typed.ShardingEnvelope
-import pekko.cluster.sharding.typed.scaladsl.{ClusterSharding, Entity, EntityTypeKey}
+import org.apache.pekko.cluster.sharding.typed.ShardingEnvelope
+import org.apache.pekko.cluster.sharding.typed.scaladsl.{ClusterSharding, Entity, EntityTypeKey}
 import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.duration._

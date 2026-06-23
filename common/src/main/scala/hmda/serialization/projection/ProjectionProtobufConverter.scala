@@ -3,7 +3,7 @@ package hmda.serialization.projection
 import java.util.UUID
 
 import org.apache.pekko.actor.typed.ActorRefResolver
-import pekko.persistence.query.TimeBasedUUID
+import org.apache.pekko.persistence.query.TimeBasedUUID
 import hmda.messages.projection.CommonProjectionMessages.{ GetOffset, OffsetSaved, SaveOffset }
 import hmda.messages.projection.projection.{ GetOffsetMessage, OffsetSavedMessage, SaveOffsetMessage }
 

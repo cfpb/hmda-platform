@@ -1,8 +1,8 @@
 package hmda.util
 
 import org.apache.pekko.actor.ActorSystem
-import pekko.stream.Materializer
-import pekko.stream.scaladsl.Source
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl.Source
 import hmda.util.SourceUtils._
 import org.scalatest.{ AsyncWordSpec, MustMatchers }
 

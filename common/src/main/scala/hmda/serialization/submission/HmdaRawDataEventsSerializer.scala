@@ -2,7 +2,7 @@ package hmda.serialization.submission
 
 import java.io.NotSerializableException
 
-import pekko.serialization.SerializerWithStringManifest
+import org.apache.pekko.serialization.SerializerWithStringManifest
 import hmda.messages.submission.HmdaRawDataEvents.LineAdded
 import hmda.model.processing.state.HmdaRawDataState
 import hmda.persistence.serialization.raw.data.events.{ HmdaRawDataStateMessage, LineAddedMessage }

@@ -3,9 +3,9 @@ package hmda.api
 import java.net.InetSocketAddress
 
 import org.apache.pekko.actor.{ Actor, ActorSystem, Status }
-import pekko.http.scaladsl.Http
-import pekko.http.scaladsl.Http.ServerBinding
-import pekko.stream.Materializer
+import org.apache.pekko.http.scaladsl.Http
+import org.apache.pekko.http.scaladsl.Http.ServerBinding
+import org.apache.pekko.stream.Materializer
 import hmda.actor.HmdaActor
 
 import scala.concurrent.{ ExecutionContext, Future }

@@ -3,8 +3,8 @@ package hmda.proxy
 import org.apache.pekko.actor.typed.ActorSystem
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.actor.{ActorSystem => ClassicActorSystem}
-import pekko.stream.Materializer
-import pekko.util.Timeout
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.util.Timeout
 import scala.concurrent.ExecutionContext
 import hmda.proxy.api.http.HmdaProxyApi
 import org.slf4j.LoggerFactory

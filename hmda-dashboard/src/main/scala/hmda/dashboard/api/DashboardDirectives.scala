@@ -1,9 +1,9 @@
 package hmda.dashboard.api
 
-import pekko.http.scaladsl.model.StatusCodes.BadRequest
-import pekko.http.scaladsl.server.Directives._
-import pekko.http.scaladsl.server._
-import pekko.http.scaladsl.server.directives.RouteDirectives.complete
+import org.apache.pekko.http.scaladsl.model.StatusCodes.BadRequest
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server._
+import org.apache.pekko.http.scaladsl.server.directives.RouteDirectives.complete
 import hmda.dashboard.Settings
 import hmda.dashboard.models._
 
@@ -13,7 +13,7 @@ trait DashboardDirectives extends Settings {
   private def extractDatetime: Directive1[String] =
     parameters("late_date" ).flatMap {
       case "" =>
-        import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+        import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
         complete((BadRequest, "must provide late_date"))
 
       case x => provide(x)
@@ -24,7 +24,7 @@ trait DashboardDirectives extends Settings {
       if (datetime.nonEmpty)
         innerRoute(datetime)
       else {
-        import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+        import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
         complete((BadRequest, ProvideDatetime()))
       }
     }

@@ -2,10 +2,10 @@ package hmda.publisher.helper
 // $COVERAGE-OFF$
 import java.time.Instant
 
-import pekko.stream.Materializer
-import pekko.stream.alppekko.s3.{ S3Attributes, S3Settings }
-import pekko.stream.alppekko.s3.scaladsl.S3
-import pekko.stream.scaladsl.Sink
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.alppekko.s3.{ S3Attributes, S3Settings }
+import org.apache.pekko.stream.alppekko.s3.scaladsl.S3
+import org.apache.pekko.stream.scaladsl.Sink
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.concurrent.{ ExecutionContext, Future }

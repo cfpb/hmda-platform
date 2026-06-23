@@ -3,9 +3,9 @@ package hmda.persistence.submission
 import org.apache.pekko.actor
 import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
 import org.apache.pekko.actor.typed.scaladsl.adapter._
-import pekko.cluster.sharding.typed.scaladsl.ClusterSharding
-import pekko.cluster.typed.{ Cluster, Join }
-import pekko.http.scaladsl.testkit.RouteTestTimeout
+import org.apache.pekko.cluster.sharding.typed.scaladsl.ClusterSharding
+import org.apache.pekko.cluster.typed.{ Cluster, Join }
+import org.apache.pekko.http.scaladsl.testkit.RouteTestTimeout
 import hmda.messages.filing.FilingCommands.GetLatestSubmission
 import hmda.messages.submission.SubmissionCommands.{ CreateSubmission, GetSubmission }
 import hmda.messages.submission.SubmissionEvents.{ SubmissionCreated, SubmissionEvent }
@@ -18,7 +18,7 @@ import hmda.persistence.AkkaCassandraPersistenceSpec
 import hmda.persistence.filing.FilingPersistence
 import hmda.utils.YearUtils.Period
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers }
-import pekko.testkit._
+import org.apache.pekko.testkit._
 
 import scala.concurrent.duration._
 

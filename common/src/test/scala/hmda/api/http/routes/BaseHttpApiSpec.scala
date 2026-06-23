@@ -1,10 +1,10 @@
 package hmda.api.http.routes
 
-import pekko.http.scaladsl.model.StatusCodes
-import pekko.http.scaladsl.model.headers.HttpEncodings._
-import pekko.http.scaladsl.model.headers._
-import pekko.http.scaladsl.testkit.ScalatestRouteTest
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import org.apache.pekko.http.scaladsl.model.StatusCodes
+import org.apache.pekko.http.scaladsl.model.headers.HttpEncodings._
+import org.apache.pekko.http.scaladsl.model.headers._
+import org.apache.pekko.http.scaladsl.testkit.ScalatestRouteTest
+import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.HmdaServiceStatus
 import hmda.api.http.routes.BaseHttpApi._
 import io.circe.generic.auto._

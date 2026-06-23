@@ -1,10 +1,10 @@
 package hmda.publisher.helper
 
-import pekko.NotUsed
-import pekko.stream.Materializer
-import pekko.stream.alppekko.s3.MultipartUploadResult
-import pekko.stream.scaladsl.{ Sink, Source }
-import pekko.util.ByteString
+import org.apache.pekko.NotUsed
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.alppekko.s3.MultipartUploadResult
+import org.apache.pekko.stream.scaladsl.{ Sink, Source }
+import org.apache.pekko.util.ByteString
 
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ ExecutionContext, Future }

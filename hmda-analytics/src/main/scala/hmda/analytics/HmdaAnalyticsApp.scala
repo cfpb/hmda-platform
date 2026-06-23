@@ -1,14 +1,14 @@
 package hmda.analytics
 
-import pekko.Done
+import org.apache.pekko.Done
 import org.apache.pekko.actor.{ActorSystem, typed}
 import org.apache.pekko.actor.typed.scaladsl.adapter._
-import pekko.kafka.scaladsl.Consumer.DrainingControl
-import pekko.kafka.scaladsl.{Committer, Consumer}
-import pekko.kafka.{CommitterSettings, ConsumerSettings, Subscriptions}
-import pekko.stream.Materializer
-import pekko.stream.scaladsl.{Keep, Sink, Source}
-import pekko.util.{ByteString, Timeout}
+import org.apache.pekko.kafka.scaladsl.Consumer.DrainingControl
+import org.apache.pekko.kafka.scaladsl.{Committer, Consumer}
+import org.apache.pekko.kafka.{CommitterSettings, ConsumerSettings, Subscriptions}
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl.{Keep, Sink, Source}
+import org.apache.pekko.util.{ByteString, Timeout}
 import com.typesafe.config.ConfigFactory
 import hmda.analytics.query._
 import hmda.messages.HmdaMessageFilter

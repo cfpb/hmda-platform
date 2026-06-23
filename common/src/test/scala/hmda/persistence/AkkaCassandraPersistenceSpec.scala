@@ -7,9 +7,9 @@ import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
 import org.apache.pekko.actor.typed.scaladsl.Behaviors
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.actor.typed.{ActorRef, ActorSystem, Behavior, TypedActorContext}
-import pekko.persistence.typed.PersistenceId
-import pekko.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
-import pekko.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
+import org.apache.pekko.persistence.typed.PersistenceId
+import org.apache.pekko.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
+import org.apache.pekko.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 import org.scalacheck.Gen
 import org.scalatest.{BeforeAndAfterAll, WordSpec}
 

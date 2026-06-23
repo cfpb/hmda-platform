@@ -1,6 +1,6 @@
 package hmda.messages
 
-import pekko.kafka.ConsumerMessage.{CommittableMessage, CommittableOffset}
+import org.apache.pekko.kafka.ConsumerMessage.{CommittableMessage, CommittableOffset}
 import com.typesafe.scalalogging.StrictLogging
 import hmda.util.LEIValidator
 

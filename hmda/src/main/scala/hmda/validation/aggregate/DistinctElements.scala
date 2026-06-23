@@ -1,9 +1,9 @@
 package hmda.validation.aggregate
 
-import pekko.NotUsed
-import pekko.stream.Materializer
-import pekko.stream.scaladsl.{ Keep, Sink, Source }
-import pekko.util.ByteString
+import org.apache.pekko.NotUsed
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl.{ Keep, Sink, Source }
+import org.apache.pekko.util.ByteString
 import com.typesafe.scalalogging.StrictLogging
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums.LoanOriginated

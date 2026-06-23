@@ -2,8 +2,8 @@ package hmda.persistence.submission
 
 import org.apache.pekko.actor.typed.scaladsl.Behaviors
 import org.apache.pekko.actor.typed.{ActorRef, Behavior}
-import pekko.cluster.sharding.typed.ShardingEnvelope
-import pekko.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
+import org.apache.pekko.cluster.sharding.typed.ShardingEnvelope
+import org.apache.pekko.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import hmda.actor.HmdaTypedActor
 import hmda.messages.submission.SubmissionCommands.ModifySubmission
 import hmda.messages.submission.SubmissionEvents.{SubmissionEvent, SubmissionModified}

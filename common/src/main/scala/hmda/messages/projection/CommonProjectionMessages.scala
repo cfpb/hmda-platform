@@ -1,7 +1,7 @@
 package hmda.messages.projection
 
 import org.apache.pekko.actor.typed.ActorRef
-import pekko.persistence.query.Offset
+import org.apache.pekko.persistence.query.Offset
 
 object CommonProjectionMessages {
   sealed trait ProjectionCommand

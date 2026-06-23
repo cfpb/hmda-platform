@@ -1,15 +1,15 @@
 package hmda.publication.lar
 
-import pekko.Done
+import org.apache.pekko.Done
 import org.apache.pekko.actor.typed.scaladsl.AskPattern._
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.actor.typed.{ActorRef, ActorSystem}
 import org.apache.pekko.actor.{ActorSystem => ClassicActorSystem}
-import pekko.kafka.scaladsl.{Committer, Consumer}
-import pekko.kafka.{CommitterSettings, ConsumerMessage, ConsumerSettings, Subscriptions}
-import pekko.stream.Materializer
-import pekko.stream.scaladsl._
-import pekko.util.Timeout
+import org.apache.pekko.kafka.scaladsl.{Committer, Consumer}
+import org.apache.pekko.kafka.{CommitterSettings, ConsumerMessage, ConsumerSettings, Subscriptions}
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl._
+import org.apache.pekko.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.census.records._
 import hmda.messages.HmdaMessageFilter

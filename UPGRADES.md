@@ -19,7 +19,7 @@ import scala.util.Failure
 import scala.util.Success
 
 import org.apache.pekko.actor.ActorSystem
-import pekko.persistence.cassandra.reconciler.Reconciliation
+import org.apache.pekko.persistence.cassandra.reconciler.Reconciliation
 
 // System should have the same Cassandra plugin configuration as your application
 // but be careful to remove seed nodes so this doesn't join the cluster

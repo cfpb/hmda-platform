@@ -1,9 +1,9 @@
 package hmda.validation.filing
 
-import pekko.NotUsed
-import pekko.stream.{ FlowShape, Materializer }
-import pekko.stream.scaladsl.{ Broadcast, Concat, Flow, GraphDSL }
-import pekko.util.ByteString
+import org.apache.pekko.NotUsed
+import org.apache.pekko.stream.{ FlowShape, Materializer }
+import org.apache.pekko.stream.scaladsl.{ Broadcast, Concat, Flow, GraphDSL }
+import org.apache.pekko.util.ByteString
 import cats.Semigroup
 import hmda.model.filing.EditDescriptionLookup.config
 import hmda.model.filing.{ EditDescriptionLookup, PipeDelimited }

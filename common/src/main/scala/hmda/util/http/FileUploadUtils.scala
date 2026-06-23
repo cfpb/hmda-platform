@@ -1,7 +1,7 @@
 package hmda.util.http
 
-import pekko.http.scaladsl.model.Multipart.FormData
-import pekko.http.scaladsl.model.{ ContentTypes, HttpEntity, Multipart }
+import org.apache.pekko.http.scaladsl.model.Multipart.FormData
+import org.apache.pekko.http.scaladsl.model.{ ContentTypes, HttpEntity, Multipart }
 
 trait FileUploadUtils {
 

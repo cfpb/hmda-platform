@@ -1,9 +1,9 @@
 package hmda.dataBrowser
 
-import pekko.http.scaladsl.model.StatusCodes
-import pekko.http.scaladsl.server.Route
-import pekko.http.scaladsl.testkit.ScalatestRouteTest
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
+import org.apache.pekko.http.scaladsl.model.StatusCodes
+import org.apache.pekko.http.scaladsl.server.Route
+import org.apache.pekko.http.scaladsl.testkit.ScalatestRouteTest
+import org.mdedetrich.akkahttpcirce.FailFastCirceSupport
 import hmda.dataBrowser.api.DataBrowserHttpApi
 import hmda.dataBrowser.models.HealthCheckStatus.{ Down, Up }
 import hmda.dataBrowser.models.{ AggregationResponse, HealthCheckResponse, Statistic }

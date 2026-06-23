@@ -5,8 +5,8 @@ import org.apache.pekko.actor.CoordinatedShutdown
 import org.apache.pekko.actor.typed.scaladsl.Behaviors
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.actor.typed.{ ActorSystem, Behavior }
-import pekko.http.scaladsl.server.Directives._
-import pekko.stream.Materializer
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.stream.Materializer
 import ch.megard.pekko.http.cors.scaladsl.CorsDirectives.cors
 import hmda.api.http.directives.HmdaTimeDirectives.timed
 import hmda.api.http.routes.BaseHttpApi

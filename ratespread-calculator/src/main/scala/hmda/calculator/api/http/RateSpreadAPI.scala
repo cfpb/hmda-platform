@@ -4,7 +4,7 @@ import org.apache.pekko.actor.typed.Behavior
 import org.apache.pekko.actor.typed.scaladsl.Behaviors
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.actor.{ ActorSystem, CoordinatedShutdown }
-import pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.Directives._
 import hmda.api.http.directives.HmdaTimeDirectives._
 import hmda.api.http.routes.BaseHttpApi
 

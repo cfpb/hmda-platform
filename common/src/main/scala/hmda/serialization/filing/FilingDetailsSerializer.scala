@@ -2,7 +2,7 @@ package hmda.serialization.filing
 
 import java.io.NotSerializableException
 
-import pekko.serialization.SerializerWithStringManifest
+import org.apache.pekko.serialization.SerializerWithStringManifest
 import hmda.model.filing.FilingDetails
 import hmda.persistence.filing.FilingState
 import hmda.persistence.serialization.filing.filingdetails.FilingDetailsMessage

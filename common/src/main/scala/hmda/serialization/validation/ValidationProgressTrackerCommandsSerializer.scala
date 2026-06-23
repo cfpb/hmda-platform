@@ -3,7 +3,7 @@ package hmda.serialization.validation
 import org.apache.pekko.actor.ExtendedActorSystem
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.actor.typed.ActorRefResolver
-import pekko.serialization.SerializerWithStringManifest
+import org.apache.pekko.serialization.SerializerWithStringManifest
 import hmda.messages.submission.ValidationProgressTrackerCommands
 import hmda.model.processing.state.ValidationProgressTrackerState
 import hmda.persistence.serialization.validationProgressTracker.{ValidationProgressTrackerPollMessage, ValidationProgressTrackerStateMessage, ValidationProgressTrackerSubscribeMessage}

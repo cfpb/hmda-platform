@@ -1,15 +1,15 @@
 package hmda.api.http.admin
 // $COVERAGE-OFF$
-import pekko.cluster.sharding.typed.scaladsl.ClusterSharding
-import pekko.http.scaladsl.model.StatusCodes
-import pekko.http.scaladsl.server.Directives._
-import pekko.http.scaladsl.server.Route
+import org.apache.pekko.cluster.sharding.typed.scaladsl.ClusterSharding
+import org.apache.pekko.http.scaladsl.model.StatusCodes
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.Route
 import ch.megard.pekko.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
 import com.typesafe.config.Config
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
 import hmda.auth.OAuth2Authorization
 import hmda.publication.KafkaUtils._
-import pekko.Done
+import org.apache.pekko.Done
 import org.apache.pekko.actor.typed.ActorSystem
 import org.apache.kafka.clients.producer.{ Producer => KafkaProducer }
 import hmda.messages.pubsub.HmdaTopics._

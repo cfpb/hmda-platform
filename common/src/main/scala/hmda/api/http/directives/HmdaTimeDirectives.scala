@@ -1,11 +1,11 @@
 package hmda.api.http.directives
 
-import pekko.http.scaladsl.model.{ HttpRequest, HttpResponse, StatusCodes }
-import pekko.http.scaladsl.server.{ Directive0, Route, RouteResult }
-import pekko.http.scaladsl.server.Directives._
-import pekko.http.scaladsl.server.RouteResult.{ Complete, Rejected }
-import pekko.stream.scaladsl.Flow
-import pekko.util.ByteString
+import org.apache.pekko.http.scaladsl.model.{ HttpRequest, HttpResponse, StatusCodes }
+import org.apache.pekko.http.scaladsl.server.{ Directive0, Route, RouteResult }
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.RouteResult.{ Complete, Rejected }
+import org.apache.pekko.stream.scaladsl.Flow
+import org.apache.pekko.util.ByteString
 import org.slf4j.{ Logger, LoggerFactory }
 
 import scala.concurrent.ExecutionContext
@@ -72,7 +72,7 @@ object HmdaTimeDirectives {
               case other =>
                 onDone(Success(other))
                 other
-            }.andThen { // skip this if you use pekko.http.scaladsl.server.handleExceptions, put onDone there
+            }.andThen { // skip this if you useorg.apache.pekko.http.scaladsl.server.handleExceptions, put onDone there
               case Failure(ex) =>
                 onDone(Failure(ex))
             }

@@ -1,8 +1,8 @@
 package hmda.util.streams
 
-import pekko.NotUsed
-import pekko.stream.scaladsl.{ Flow, Framing }
-import pekko.util.ByteString
+import org.apache.pekko.NotUsed
+import org.apache.pekko.stream.scaladsl.{ Flow, Framing }
+import org.apache.pekko.util.ByteString
 
 object FlowUtils {
 

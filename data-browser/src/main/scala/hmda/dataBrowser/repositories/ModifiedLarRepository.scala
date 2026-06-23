@@ -1,7 +1,7 @@
 package hmda.dataBrowser.repositories
 
-import pekko.NotUsed
-import pekko.stream.scaladsl.Source
+import org.apache.pekko.NotUsed
+import org.apache.pekko.stream.scaladsl.Source
 import hmda.dataBrowser.models._
 import monix.eval.Task
 

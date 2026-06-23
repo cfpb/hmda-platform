@@ -3,13 +3,13 @@ package hmda.api.http
 import org.apache.pekko.actor.typed.{ActorSystem, Behavior}
 import org.apache.pekko.actor.{CoordinatedShutdown, ActorSystem => ClassicActorSystem}
 import org.apache.pekko.actor.typed.scaladsl.Behaviors
-import pekko.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import hmda.api.http.public.{HmdaFileParsingHttpApi, HmdaFileValidationHttpApi, LarValidationHttpApi, TsValidationHttpApi}
 import hmda.api.http.routes.BaseHttpApi
 import hmda.api.http.directives.HmdaTimeDirectives._
 
 import scala.concurrent.ExecutionContext
-import pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.Directives._
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import ch.megard.pekko.http.cors.scaladsl.CorsDirectives.cors
 

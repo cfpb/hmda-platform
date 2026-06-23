@@ -2,13 +2,13 @@ package hmda.api.http
 
 import org.apache.pekko.actor.typed.ActorSystem
 import org.apache.pekko.actor.typed.scaladsl.adapter._
-import pekko.cluster.sharding.typed.scaladsl.ClusterSharding
-import pekko.cluster.typed.{Cluster, Join}
-import pekko.http.scaladsl.model.StatusCodes
-import pekko.http.scaladsl.model.StatusCodes.Created
-import pekko.http.scaladsl.testkit.ScalatestRouteTest
-import pekko.stream.scaladsl.Sink
-import pekko.util.Timeout
+import org.apache.pekko.cluster.sharding.typed.scaladsl.ClusterSharding
+import org.apache.pekko.cluster.typed.{Cluster, Join}
+import org.apache.pekko.http.scaladsl.model.StatusCodes
+import org.apache.pekko.http.scaladsl.model.StatusCodes.Created
+import org.apache.pekko.http.scaladsl.testkit.ScalatestRouteTest
+import org.apache.pekko.stream.scaladsl.Sink
+import org.apache.pekko.util.Timeout
 import com.typesafe.config.Config
 import hmda.api.http.admin.{ InstitutionAdminHttpApi, SubmissionAdminHttpApi }
 import hmda.api.http.filing.submissions._
@@ -111,7 +111,7 @@ class IntegrationQuarterlySpec
 
   "IntegrationQuarterlySpec" must {
     "run through for a quarterly submission" in {
-      import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+      import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
       val institution = Post("/institutions", sampleInstitutionQuarterly) ~> institutionAdminRoute(oAuth2Authorization) ~> check {
         response.status mustBe Created
         responseAs[Institution]

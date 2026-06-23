@@ -3,10 +3,10 @@ package hmda.submissionerrors
 import org.apache.pekko.actor.typed.ActorSystem
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.actor.{ CoordinatedShutdown, ActorSystem => ClassicActorSystem }
-import pekko.kafka.scaladsl.Consumer
-import pekko.kafka.{ CommitterSettings, ConsumerMessage, ConsumerSettings, Subscriptions }
-import pekko.stream.scaladsl.{ RunnableGraph, Source }
-import pekko.stream.{ ActorAttributes, Supervision }
+import org.apache.pekko.kafka.scaladsl.Consumer
+import org.apache.pekko.kafka.{ CommitterSettings, ConsumerMessage, ConsumerSettings, Subscriptions }
+import org.apache.pekko.stream.scaladsl.{ RunnableGraph, Source }
+import org.apache.pekko.stream.{ ActorAttributes, Supervision }
 import com.typesafe.config.ConfigFactory
 import hmda.messages.pubsub.HmdaGroups
 import hmda.submissionerrors.repositories.PostgresSubmissionErrorRepository

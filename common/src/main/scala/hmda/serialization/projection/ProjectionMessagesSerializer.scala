@@ -3,7 +3,7 @@ package hmda.serialization.projection
 import org.apache.pekko.actor.ExtendedActorSystem
 import org.apache.pekko.actor.typed.ActorRefResolver
 import org.apache.pekko.actor.typed.scaladsl.adapter._
-import pekko.serialization.SerializerWithStringManifest
+import org.apache.pekko.serialization.SerializerWithStringManifest
 import hmda.messages.projection.CommonProjectionMessages.{ GetOffset, OffsetSaved, SaveOffset }
 import hmda.messages.projection.projection.OffsetSavedMessage
 import hmda.serialization.projection.ProjectionProtobufConverter._

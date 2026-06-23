@@ -1,6 +1,6 @@
 package hmda.publisher.util
 
-import pekko.http.scaladsl.testkit.ScalatestRouteTest
+import org.apache.pekko.http.scaladsl.testkit.ScalatestRouteTest
 import org.scalatest.{MustMatchers, WordSpec}
 
 import scala.concurrent.ExecutionContext

@@ -1,7 +1,7 @@
 package hmda.quarterly.data.api.route.counts.loans
 
-import pekko.http.scaladsl.server.Directives.{ complete, path, pathPrefix }
-import pekko.http.scaladsl.server.Route
+import org.apache.pekko.http.scaladsl.server.Directives.{ complete, path, pathPrefix }
+import org.apache.pekko.http.scaladsl.server.Route
 import hmda.quarterly.data.api.dao.repo.QuarterlyGraphRepo
 import hmda.quarterly.data.api.dto.QuarterGraphData.{ GraphRoute, GraphSeriesInfo, GraphSeriesSummary }
 import Loans._

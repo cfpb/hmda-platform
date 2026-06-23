@@ -1,8 +1,8 @@
 package hmda.publisher.query.component
 
 import org.apache.pekko.actor.ActorSystem
-import pekko.stream.scaladsl.{Sink, Source}
-import pekko.testkit.TestKit
+import org.apache.pekko.stream.scaladsl.{Sink, Source}
+import org.apache.pekko.testkit.TestKit
 import hmda.publisher.query.lar._
 import hmda.publisher.query.panel.InstitutionEntity
 import hmda.query.ts.TransmittalSheetEntity

@@ -1,6 +1,6 @@
 package hmda.serialization.submission
 
-import pekko.serialization.SerializerWithStringManifest
+import org.apache.pekko.serialization.SerializerWithStringManifest
 import hmda.messages.submission.HmdaRawDataReplies.LinesAdded
 import hmda.persistence.serialization.raw.data.replies.LinesAddedMessage
 import hmda.serialization.submission.HmdaRawDataRepliesProtobufConverter._

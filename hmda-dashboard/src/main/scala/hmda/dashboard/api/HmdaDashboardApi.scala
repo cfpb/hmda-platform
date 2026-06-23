@@ -5,7 +5,7 @@ import org.apache.pekko.actor.typed.scaladsl.Behaviors
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.actor.typed.{ActorSystem, Behavior}
 import org.apache.pekko.actor.{CoordinatedShutdown, ActorSystem => ClassicActorSystem}
-import pekko.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import hmda.api.http.directives.HmdaTimeDirectives._
 import hmda.api.http.routes.BaseHttpApi
 import hmda.auth.OAuth2Authorization

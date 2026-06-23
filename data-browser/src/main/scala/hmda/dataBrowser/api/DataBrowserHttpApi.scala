@@ -1,11 +1,11 @@
 package hmda.dataBrowser.api
 
-import pekko.http.scaladsl.model.ContentTypes._
-import pekko.http.scaladsl.model.{HttpEntity, StatusCodes, Uri}
-import pekko.http.scaladsl.server.Directives._
-import pekko.http.scaladsl.server.Route
-import pekko.http.scaladsl.server.directives.RouteDirectives.complete
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import org.apache.pekko.http.scaladsl.model.ContentTypes._
+import org.apache.pekko.http.scaladsl.model.{HttpEntity, StatusCodes, Uri}
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.Route
+import org.apache.pekko.http.scaladsl.server.directives.RouteDirectives.complete
+import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
 import hmda.dataBrowser.api.DataBrowserDirectives._
 import hmda.dataBrowser.models.HealthCheckStatus.Up
 import hmda.dataBrowser.models._

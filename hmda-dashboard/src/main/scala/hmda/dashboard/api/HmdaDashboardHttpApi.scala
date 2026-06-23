@@ -1,12 +1,12 @@
 package hmda.dashboard.api
 
-import pekko.http.scaladsl.model.StatusCodes
-import pekko.http.scaladsl.server.Directives._
-import pekko.http.scaladsl.server.Route
-import pekko.http.scaladsl.server.directives.RouteDirectives.complete
+import org.apache.pekko.http.scaladsl.model.StatusCodes
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.Route
+import org.apache.pekko.http.scaladsl.server.directives.RouteDirectives.complete
 import ch.megard.pekko.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
 import com.typesafe.config.{Config, ConfigFactory}
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
 import hmda.auth.OAuth2Authorization
 import hmda.dashboard.api.DashboardDirectives._
 import hmda.dashboard.models.HealthCheckStatus.Up

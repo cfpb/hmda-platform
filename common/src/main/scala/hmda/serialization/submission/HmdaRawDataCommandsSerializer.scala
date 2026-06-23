@@ -4,7 +4,7 @@ import java.io.NotSerializableException
 import org.apache.pekko.actor.ExtendedActorSystem
 import org.apache.pekko.actor.typed.ActorRefResolver
 import org.apache.pekko.actor.typed.scaladsl.adapter._
-import pekko.serialization.SerializerWithStringManifest
+import org.apache.pekko.serialization.SerializerWithStringManifest
 import hmda.messages.submission.HmdaRawDataCommands.AddLines
 import hmda.persistence.serialization.raw.data.commands.{AddLineMessage, AddLinesMessage}
 import hmda.serialization.submission.HmdaRawDataCommandsProtobufConverter._

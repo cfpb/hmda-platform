@@ -5,7 +5,7 @@ import java.io.NotSerializableException
 import org.apache.pekko.actor.ExtendedActorSystem
 import org.apache.pekko.actor.typed.ActorRefResolver
 import org.apache.pekko.actor.typed.scaladsl.adapter._
-import pekko.serialization.SerializerWithStringManifest
+import org.apache.pekko.serialization.SerializerWithStringManifest
 import hmda.messages.submission.SubmissionProcessingCommands.{ CompleteSyntacticalValidity, GetHmdaValidationErrorState, _ }
 import hmda.persistence.serialization.submission.processing.commands._
 import hmda.serialization.submission.SubmissionProcessingCommandsProtobufConverter._

@@ -1,9 +1,9 @@
 package hmda.submissionerrors.streams
 
-import pekko.NotUsed
+import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.typed.ActorSystem
-import pekko.persistence.query.EventEnvelope
-import pekko.stream.scaladsl.{ Sink, Source }
+import org.apache.pekko.persistence.query.EventEnvelope
+import org.apache.pekko.stream.scaladsl.{ Sink, Source }
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowValidatedError
 import hmda.model.filing.submission.SubmissionId
 import hmda.query.HmdaQuery

@@ -5,10 +5,10 @@ import org.apache.pekko.actor.CoordinatedShutdown
 import org.apache.pekko.actor.typed.scaladsl.Behaviors
 import org.apache.pekko.actor.typed.{ ActorSystem, Behavior, SupervisorStrategy }
 import org.apache.pekko.actor.typed.scaladsl.adapter._
-import pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.Directives._
 import hmda.api.http.directives.HmdaTimeDirectives._
 import hmda.api.http.routes.BaseHttpApi
-import pekko.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import hmda.dataBrowser.Settings
 import hmda.dataBrowser.repositories.{ PostgresModifiedLarRepository, PostgresModifiedLarRepository2017, RedisModifiedLarAggregateCache }
 import hmda.dataBrowser.services.{ DataBrowserQueryService, HealthCheckService, QueryService, S3FileService }
