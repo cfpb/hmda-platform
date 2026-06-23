@@ -66,7 +66,7 @@ lazy val dockerSettings = Seq(
     } else dockerBuildCommand.value
   },
   Docker / maintainer := "Hmda-Ops",
-  dockerBaseImage := "eclipse-temurin:25.0.2_10-jdk-pine-3.23",
+  dockerBaseImage := "eclipse-temurin:25.0.2_10-jdk-alpine-3.23",
   dockerRepository := Some("hmda"),
 
   dockerCommands := {
@@ -424,18 +424,36 @@ lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case "reference.conf" => MergeStrategy.concat
+        case PathList("META-INF", "services", xs @ _*) => MergeStrategy.concat
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("net", "jpountz", xs @ _*) => MergeStrategy.last
+        case PathList("org", "lz4", xs @ _*) => MergeStrategy.last
         case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs@_*) => MergeStrategy.last
-        case PathList(ps @ _*) if ps.last endsWith ".proto" =>
-          MergeStrategy.first
-        case "module-info.class" => MergeStrategy.concat
-        case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+        case PathList(ps @ _*) if ps.last endsWith ".proto" => MergeStrategy.first
+        case PathList("com", "datastax", xs@_*) => MergeStrategy.first
+        case PathList("org", "apache", xs@_*) => MergeStrategy.first
+        case PathList("org", "glassfish", xs@_*) => MergeStrategy.first
+        case PathList("com", "sun", xs@_*) => MergeStrategy.first
+        case x if x.endsWith("reference-overrides.conf") => MergeStrategy.concat
+        case x if x.endsWith("reference.conf") => MergeStrategy.concat
+        case x if x.endsWith("version.conf") => MergeStrategy.concat
+        case x if x.endsWith("module-info.class") => MergeStrategy.concat
         case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
         case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
         case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
         case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
-        case x =>
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
+        case x if x.endsWith("/liblz4-java.so") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4ByteBufferUtils$Match.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+
+
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat case x =>
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
       },
