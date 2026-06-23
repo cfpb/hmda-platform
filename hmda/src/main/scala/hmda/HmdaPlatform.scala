@@ -7,7 +7,7 @@ import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.actor.{ActorSystem => ClassicActorSystem}
 import org.apache.pekko.cluster.typed.Cluster
 import org.apache.pekko.management.cluster.bootstrap.ClusterBootstrap
-import org.apache.pekko.management.scaladsl.AkkaManagement
+import org.apache.pekko.management.scaladsl.PekkoManagement
 import org.apache.pekko.stream.Materializer
 import com.typesafe.config.ConfigFactory
 import hmda.api.HmdaApi
@@ -71,7 +71,7 @@ object HmdaPlatform extends App {
   implicit val cluster = Cluster(system)
 
   ClusterBootstrap(system).start()
-  AkkaManagement(system).start()
+  PekkoManagement(system).start()
 
   // TODO: Fix this as initializing it here is not a good idea, this should be initialized in HmdaPersistence and passed into HmdaValidationError
   val stringKafkaProducer      = KafkaUtils.getStringKafkaProducer(system)
