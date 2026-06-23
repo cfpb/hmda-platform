@@ -451,11 +451,8 @@ lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
         case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
         case x if x.endsWith("/LZ4ByteBufferUtils$Match.class") => MergeStrategy.concat
         case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
-        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
-        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
-
-
-        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat case x =>
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
+        case x =>
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
       },
