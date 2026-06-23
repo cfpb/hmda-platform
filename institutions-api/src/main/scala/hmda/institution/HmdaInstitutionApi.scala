@@ -61,7 +61,9 @@ object HmdaInstitutionApi extends App {
     .committableSource(consumerSettings, Subscriptions.topics(HmdaTopics.institutionTopic))
     .mapAsync(1)(msg => processData(msg.record.value()).map(_ => msg.committableOffset))
     .toMat(Committer.sink(CommitterSettings(system).withParallelism(1)))(Keep.both)
-    .mapMaterializedValue(DrainingControl.apply)
+    .mapMaterializedValue {
+      case (control, future) => DrainingControl.apply(control, future)
+    }
     .run()
 
   val institutionDBProjector =
