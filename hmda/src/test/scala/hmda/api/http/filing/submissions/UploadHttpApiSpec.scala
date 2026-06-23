@@ -31,7 +31,7 @@ import hmda.model.filing.ts.TsGenerators._
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators.institutionGen
 import hmda.model.submission.SubmissionGenerator.submissionGen
-import hmda.persistence.AkkaCassandraPersistenceSpec
+import hmda.persistence.pekkoCassandraPersistenceSpec
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission._
@@ -41,7 +41,7 @@ import org.slf4j.{ Logger, LoggerFactory }
 
 import scala.concurrent.duration._
 
-class UploadHttpApiSpec extends AkkaCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest with FileUploadUtils {
+class UploadHttpApiSpec extends pekkoCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest with FileUploadUtils {
 
   implicit val typedSystem                       = system.toTyped
   val log: Logger                                = LoggerFactory.getLogger(getClass)

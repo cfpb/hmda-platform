@@ -9,12 +9,12 @@ import hmda.messages.submission.HmdaRawDataCommands.AddLines
 import hmda.messages.submission.HmdaRawDataEvents.LineAdded
 import hmda.messages.submission.HmdaRawDataReplies.LinesAdded
 import hmda.model.filing.submission.SubmissionId
-import hmda.persistence.AkkaCassandraPersistenceSpec
+import hmda.persistence.pekkoCassandraPersistenceSpec
 import hmda.utils.YearUtils.Period
 
 import java.time.Instant
 
-class HmdaRawDataSpec extends AkkaCassandraPersistenceSpec {
+class HmdaRawDataSpec extends pekkoCassandraPersistenceSpec {
   override implicit val system      = actor.ActorSystem()
   override implicit val typedSystem = system.toTyped
 

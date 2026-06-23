@@ -2,7 +2,7 @@ package hmda.persistence.submission
 
 import org.apache.pekko.actor
 import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
-import hmda.persistence.AkkaCassandraPersistenceSpec
+import hmda.persistence.pekkoCassandraPersistenceSpec
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.cluster.sharding.typed.scaladsl.ClusterSharding
 import org.apache.pekko.cluster.typed.{ Cluster, Join }
@@ -14,7 +14,7 @@ import hmda.utils.YearUtils.Period
 
 import scala.util.Random
 
-class EditDetailsPersistenceSpec extends AkkaCassandraPersistenceSpec {
+class EditDetailsPersistenceSpec extends pekkoCassandraPersistenceSpec {
   override implicit val system      = actor.ActorSystem()
   override implicit val typedSystem = system.toTyped
 

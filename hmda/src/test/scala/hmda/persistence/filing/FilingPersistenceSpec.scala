@@ -8,14 +8,14 @@ import org.apache.pekko.cluster.typed.{ Cluster, Join }
 import hmda.messages.filing.FilingCommands._
 import hmda.messages.filing.FilingEvents.FilingCreated
 import hmda.model.filing.{ Filing, FilingDetails, FilingId }
-import hmda.persistence.AkkaCassandraPersistenceSpec
+import hmda.persistence.pekkoCassandraPersistenceSpec
 import hmda.model.filing.FilingGenerator._
 import hmda.model.filing.submission._
 import hmda.model.submission.SubmissionGenerator._
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.utils.YearUtils.Period
 
-class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
+class FilingPersistenceSpec extends pekkoCassandraPersistenceSpec {
   override implicit val system      = actor.ActorSystem()
   override implicit val typedSystem = system.toTyped
 

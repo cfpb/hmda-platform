@@ -60,7 +60,7 @@ and Loan Application Register data, as per the [2017 Filing Instruction Guide](h
 
 By default, the loader will use `localhost` as the host where the HMDA Platform cluster is running. For remote systems, use the `HMDA_CLUSTER_HOST` environment variable.
 
-When starting the cluster, take note of the port that Akka uses to communicate (i.e. 2551). This value needs to be set in an environment variable.
+When starting the cluster, take note of the port that pekko uses to communicate (i.e. 2551). This value needs to be set in an environment variable.
 The persistence cluster role needs to be active, and its dependencies (`Zookeeper`, `Cassandra`) running and properly configured.
 
 ```shell
@@ -75,7 +75,7 @@ This will connect to the running cluster and send the contents of each file in t
 ## Troubleshooting
 
 * In cases where there is no connection, make sure that the `HmdaSupervisor` and `HmdaQuerySupervisor` are receiving messages from the cluster client. Both of these actors
-need to have the Cluster Receptionist enabled. For more information please consult the current Akka documentation on [Cluster Client](https://doc.pekko.io/docs/akka/current/scala/cluster-client.html)
+need to have the Cluster Receptionist enabled. For more information please consult the current pekko documentation on [Cluster Client](https://doc.pekko.io/docs/pekko/current/scala/cluster-client.html)
 
 * When loading large number of files, it might be necessary to increase the `hmda.persistent-actor-timeout` in the `Persistence-model` project's configuration file (or by passing the relevant
 runtime flag in a deployed application).

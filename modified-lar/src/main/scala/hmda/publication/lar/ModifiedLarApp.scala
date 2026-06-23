@@ -44,7 +44,7 @@ object ModifiedLarApp extends App {
       val futRes: Future[PersistModifiedLarResult] =
         modifiedLarPublisher ? ((ref: ActorRef[PersistModifiedLarResult]) => PersistToS3AndPostgres(submissionId, ref))
       // bubble up failure if there is any (this is done to prevent a commit to Kafka from happening
-      // when used in Kafka consumer Akka Stream
+      // when used in Kafka consumer pekko Stream
       futRes.map(result => result.status).flatMap {
         case UploadSucceeded         => Future.successful(Done.done())
         case UploadFailed(exception) => Future.failed(exception)

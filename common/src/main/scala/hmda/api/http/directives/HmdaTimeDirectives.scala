@@ -19,7 +19,7 @@ object HmdaTimeDirectives {
 
   private val timeoutResponse = HttpResponse(StatusCodes.NetworkReadTimeout, entity = "Unable to serve response within time limit.")
 
-  // Reference: https://blog.softwaremill.com/measuring-response-time-in-akka-http-7b6312ec70cf
+  // Reference: https://blog.softwaremill.com/measuring-response-time-in-pekko-http-7b6312ec70cf
   private def timeRequest(request: HttpRequest): Try[RouteResult] => Unit = {
     val start = System.currentTimeMillis()
 
@@ -37,7 +37,7 @@ object HmdaTimeDirectives {
     }
   }
 
-  // Reference: https://blog.softwaremill.com/measuring-response-time-in-akka-http-7b6312ec70cf
+  // Reference: https://blog.softwaremill.com/measuring-response-time-in-pekko-http-7b6312ec70cf
   private def aroundRequest(onRequest: HttpRequest => Try[RouteResult] => Unit)(implicit ec: ExecutionContext): Directive0 =
     extractRequestContext.flatMap { ctx =>
       val onDone = onRequest(ctx.request)

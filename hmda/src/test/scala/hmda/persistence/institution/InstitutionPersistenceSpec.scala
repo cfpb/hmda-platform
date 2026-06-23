@@ -8,7 +8,7 @@ import org.apache.pekko.cluster.typed.Join
 import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators._
-import hmda.persistence.AkkaCassandraPersistenceSpec
+import hmda.persistence.pekkoCassandraPersistenceSpec
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import hmda.messages.institution.InstitutionCommands._
 import hmda.messages.institution.InstitutionEvents._
@@ -16,7 +16,7 @@ import org.scalatest.Tag
 
 object CustomTag extends Tag("actions-ignore")
 
-class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
+class InstitutionPersistenceSpec extends pekkoCassandraPersistenceSpec {
 
   override val system                               = actor.ActorSystem()
   override implicit val typedSystem: ActorSystem[_] = system.toTyped

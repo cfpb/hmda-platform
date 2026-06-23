@@ -15,7 +15,7 @@ import monix.eval.Task
 import org.slf4j.LoggerFactory
 
 // $COVERAGE-OFF$
-// All this does is use the Alpakka S3 APIs
+// All this does is use the Alppekko S3 APIs
 class S3FileService(implicit system: ActorSystem[Nothing]) extends FileService with Settings {
 
   private final val log = LoggerFactory.getLogger(getClass)

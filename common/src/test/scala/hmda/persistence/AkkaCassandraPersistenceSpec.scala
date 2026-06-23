@@ -15,7 +15,7 @@ import org.scalatest.{BeforeAndAfterAll, WordSpec}
 
 import scala.concurrent.duration._
 
-abstract class AkkaCassandraPersistenceSpec extends WordSpec with BeforeAndAfterAll {
+abstract class pekkoCassandraPersistenceSpec extends WordSpec with BeforeAndAfterAll {
 
   sealed trait Command
   sealed trait Event

@@ -40,7 +40,7 @@ object HmdaDataPublisherApp extends App with PGTableNameLoader {
   /**
    * Only 1 scheduler should be created
    * QuartzSchedulerExtension in the current version is not thread safe, look into updating dep
-   * https://github.com/enragedginger/akka-quartz-scheduler/issues/33
+   * https://github.com/enragedginger/pekko-quartz-scheduler/issues/33
    * */
   private val scheduleCoordinator = actorSystem.spawn(ScheduleCoordinator.behaviors, "ScheduleCoordinator")
 

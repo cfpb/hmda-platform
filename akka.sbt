@@ -1,2 +1,2 @@
-ThisBuild / resolvers += "akka-secure-mvn" at sys.env("AKKA_RESOLVER")
-ThisBuild / resolvers += Resolver.url("akka-secure-ivy", url(sys.env("AKKA_RESOLVER")))(Resolver.ivyStylePatterns)
+ThisBuild / resolvers += "pekko-secure-mvn" at sys.env("pekko_RESOLVER")
+ThisBuild / resolvers += Resolver.url("pekko-secure-ivy", url(sys.env("pekko_RESOLVER")))(Resolver.ivyStylePatterns)

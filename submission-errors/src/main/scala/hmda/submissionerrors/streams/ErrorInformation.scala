@@ -27,7 +27,7 @@ object ErrorInformation {
    * )
    *
    * @param submissionId is the submission ID
-   * @param system is the actor system needed to run the Akka Stream
+   * @param system is the actor system needed to run the pekko Stream
    * @return
    */
   def obtainSubmissionErrors(submissionId: SubmissionId)(implicit system: ActorSystem[_]): Task[Map[LineNumber, Set[EditName]]] =

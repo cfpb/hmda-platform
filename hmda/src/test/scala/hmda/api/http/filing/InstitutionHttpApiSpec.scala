@@ -19,7 +19,7 @@ import hmda.model.filing.Filing
 import hmda.model.filing.FilingGenerator._
 import hmda.model.institution.InstitutionGenerators._
 import hmda.model.institution.{ Institution, InstitutionDetail }
-import hmda.persistence.AkkaCassandraPersistenceSpec
+import hmda.persistence.pekkoCassandraPersistenceSpec
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import io.circe.generic.auto._
@@ -29,7 +29,7 @@ import org.slf4j.{ Logger, LoggerFactory }
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-class InstitutionHttpApiSpec extends AkkaCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest {
+class InstitutionHttpApiSpec extends pekkoCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest {
 
   val duration = 30.seconds
 
