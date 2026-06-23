@@ -8,7 +8,7 @@ import org.apache.pekko.http.scaladsl.model.ws.{ Message, TextMessage }
 import org.apache.pekko.http.scaladsl.server.Directives._
 import org.apache.pekko.http.scaladsl.server.Route
 import org.apache.pekko.stream.scaladsl.{ Flow, Source }
-import ch.megard.pekko.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
+import org.apache.pekko.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
 import hmda.api.ws.model.{ KeepAliveWsResponse, ServerPing, SubmissionStatus, SubmissionStatusWSResponse }
 import hmda.messages.submission.SubmissionEvents.{ SubmissionCreated, SubmissionEvent, SubmissionModified }
 import hmda.model.filing.submission.SubmissionId

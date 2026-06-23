@@ -7,7 +7,7 @@ import org.apache.pekko.http.scaladsl.model.{ StatusCodes, Uri }
 import org.apache.pekko.http.scaladsl.server.Directives.{ encodeResponse, handleRejections, _ }
 import org.apache.pekko.http.scaladsl.server.Route
 import org.apache.pekko.util.Timeout
-import ch.megard.pekko.http.cors.scaladsl.CorsDirectives.{ cors, corsRejectionHandler }
+import org.apache.pekko.http.cors.scaladsl.CorsDirectives.{ cors, corsRejectionHandler }
 import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.filing.submissions.{ EditsSign, SignedResponse }
 import hmda.auth.OAuth2Authorization

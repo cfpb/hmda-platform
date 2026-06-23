@@ -11,7 +11,7 @@ import hmda.api.http.directives.HmdaTimeDirectives._
 import scala.concurrent.ExecutionContext
 import org.apache.pekko.http.scaladsl.server.Directives._
 import org.apache.pekko.actor.typed.scaladsl.adapter._
-import ch.megard.pekko.http.cors.scaladsl.CorsDirectives.cors
+import org.apache.pekko.http.cors.scaladsl.CorsDirectives.cors
 
 // This is just a Guardian for starting up the API
 // $COVERAGE-OFF$

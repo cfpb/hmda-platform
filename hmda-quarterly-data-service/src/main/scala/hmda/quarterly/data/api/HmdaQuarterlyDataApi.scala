@@ -7,7 +7,7 @@ import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.actor.typed.{ ActorSystem, Behavior }
 import org.apache.pekko.http.scaladsl.server.Directives._
 import org.apache.pekko.stream.Materializer
-import ch.megard.pekko.http.cors.scaladsl.CorsDirectives.cors
+import org.apache.pekko.http.cors.scaladsl.CorsDirectives.cors
 import hmda.api.http.directives.HmdaTimeDirectives.timed
 import hmda.api.http.routes.BaseHttpApi
 import slick.basic.DatabaseConfig

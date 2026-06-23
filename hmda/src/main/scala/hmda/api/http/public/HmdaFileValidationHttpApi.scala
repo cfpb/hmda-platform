@@ -8,7 +8,7 @@ import org.apache.pekko.http.scaladsl.server.Route
 import org.apache.pekko.stream.scaladsl.{ Broadcast, Concat, Flow, GraphDSL, Sink, Source }
 import org.apache.pekko.stream.{ FlowShape, Materializer }
 import org.apache.pekko.util.ByteString
-import ch.megard.pekko.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
+import org.apache.pekko.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
 import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.model.validation.ValidationError
 import hmda.model.validation.LarValidationError
