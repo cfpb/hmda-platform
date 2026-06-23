@@ -39,7 +39,7 @@ spec:
             driver: secrets-store.csi.k8s.io
             readOnly: true
             volumeAttributes:
-              secretProviderClass: irsa-akka-license-provider
+              secretProviderClass: akka-license-provider
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -60,7 +60,7 @@ spec:
             - name: AKKA_LICENSE_KEY
               valueFrom:
                 secretKeyRef:
-                  name: irsa-akka-license-key
+                  name: akka-license-key
                   key: key
             - name: PG_HOST
               valueFrom:
