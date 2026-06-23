@@ -55,9 +55,8 @@ lazy val pekkoHttpDeps =
   Seq(pekkoHttp, pekkoHttp2, pekkoHttpXml, pekkoHttpTestkit, pekkoStreamsTestKit, pekkoHttpCirce)
 lazy val circeDeps      = Seq(circe, circeGeneric, circeParser)
 lazy val enumeratumDeps = Seq(enumeratum, enumeratumCirce)
-
 lazy val slickDeps = Seq(slick, slickHikariCP, postgres, h2)
-
+lazy val metaInfMatcher = """META-INF/.+\.(SF|DSA|RSA)""".r
 lazy val dockerSettings = Seq(
   dockerBuildCommand := {
     //force amd64 Architecture for k8s docker image compatability
@@ -156,6 +155,8 @@ lazy val common = (project in file("common"))
       libraryDependencies ++= commonDeps ++ authDeps ++ pekkoDeps ++ pekkoPersistenceDeps ++ pekkoHttpDeps ++ circeDeps ++ slickDeps ++ List(
         cormorant, cormorantGeneric, scalaMock, scalacheckShapeless, diffx
       )
+    ),Seq(dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.2"
+
     ),
     // addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
@@ -425,6 +426,7 @@ lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case "reference.conf" => MergeStrategy.concat
+        case metaInfMatcher(_) => MergeStrategy.discard
         case PathList("META-INF", "services", xs @ _*) => MergeStrategy.concat
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
         case PathList("net", "jpountz", xs @ _*) => MergeStrategy.last
