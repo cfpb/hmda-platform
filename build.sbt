@@ -155,9 +155,9 @@ lazy val common = (project in file("common"))
       libraryDependencies ++= commonDeps ++ authDeps ++ pekkoDeps ++ pekkoPersistenceDeps ++ pekkoHttpDeps ++ circeDeps ++ slickDeps ++ List(
         cormorant, cormorantGeneric, scalaMock, scalacheckShapeless, diffx
       )
-    ),Seq(dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.2"
-
     ),
+    Seq(dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.2")
+    ,
     // addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
     // https://github.com/aws-samples/amazon-keyspaces-java-driver-helpers
@@ -419,8 +419,8 @@ lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
   )
   .settings(hmdaBuildSettings: _*)
   .settings(
-    Seq(
-      Compile / mainClass := Some("hmda.calculator.HmdaRateSpread"),
+    Seq(       dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.2",
+        Compile / mainClass := Some("hmda.calculator.HmdaRateSpread"),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
