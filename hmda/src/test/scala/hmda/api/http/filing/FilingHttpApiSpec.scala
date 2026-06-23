@@ -9,7 +9,7 @@ import org.apache.pekko.http.scaladsl.model.StatusCodes
 import org.apache.pekko.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
 import org.apache.pekko.testkit._
 import org.apache.pekko.util.Timeout
-import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.auth.{ KeycloakTokenVerifier, OAuth2Authorization }
 import hmda.messages.institution.InstitutionCommands.CreateInstitution
 import hmda.messages.institution.InstitutionEvents._

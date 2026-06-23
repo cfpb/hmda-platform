@@ -11,7 +11,7 @@ import org.apache.pekko.http.scaladsl.server.Directives._
 import org.apache.pekko.http.scaladsl.server.Route
 import org.apache.pekko.stream.scaladsl.{Flow, Source}
 import org.apache.pekko.util.ByteString
-import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.uli.api.model.ULIModel._
 import hmda.uli.api.model.ULIValidationErrorMessages.{invalidLoanIdLengthMessage, nonAlpanumericLoanIdMessage}
 import hmda.uli.validation.ULI._

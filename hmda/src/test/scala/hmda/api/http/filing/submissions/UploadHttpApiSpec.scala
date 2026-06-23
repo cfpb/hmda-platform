@@ -12,7 +12,7 @@ import org.apache.pekko.stream.scaladsl.Source
 import org.apache.pekko.testkit._
 import org.apache.pekko.util.Timeout
 import com.typesafe.config.Config
-import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.api.http.filing.FileUploadUtils
 import hmda.api.http.model.ErrorResponse
 import hmda.auth.{ KeycloakTokenVerifier, OAuth2Authorization }

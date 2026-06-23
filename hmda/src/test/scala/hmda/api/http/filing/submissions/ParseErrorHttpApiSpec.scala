@@ -9,7 +9,7 @@ import org.apache.pekko.http.scaladsl.model.StatusCodes
 import org.apache.pekko.http.scaladsl.server.Route
 import org.apache.pekko.http.scaladsl.testkit.ScalatestRouteTest
 import org.apache.pekko.util.Timeout
-import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.filing.submissions.ParsingErrorSummary
 import hmda.auth.{ KeycloakTokenVerifier, OAuth2Authorization }
 import hmda.messages.filing.FilingCommands.CreateFiling

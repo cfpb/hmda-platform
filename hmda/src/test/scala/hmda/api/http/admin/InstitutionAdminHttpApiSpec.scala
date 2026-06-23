@@ -10,7 +10,7 @@ import org.apache.pekko.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRoute
 import org.apache.pekko.testkit._
 import org.apache.pekko.util.Timeout
 import com.typesafe.config.Config
-import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.admin.InstitutionDeletedResponse
 import hmda.auth.{ KeycloakTokenVerifier, OAuth2Authorization }
 import hmda.model.institution.Institution

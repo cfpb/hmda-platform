@@ -6,7 +6,7 @@ import org.apache.pekko.http.scaladsl.server.Route
 import org.apache.pekko.http.scaladsl.server.directives.RouteDirectives.complete
 import ch.megard.pekko.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
 import com.typesafe.config.{Config, ConfigFactory}
-import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.auth.OAuth2Authorization
 import hmda.dashboard.api.DashboardDirectives._
 import hmda.dashboard.models.HealthCheckStatus.Up

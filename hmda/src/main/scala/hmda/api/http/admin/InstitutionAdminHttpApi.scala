@@ -8,7 +8,7 @@ import org.apache.pekko.http.scaladsl.server.Route
 import org.apache.pekko.util.Timeout
 import ch.megard.pekko.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
 import com.typesafe.config.Config
-import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.api.http.PathMatchers._
 import hmda.api.http.model.ErrorResponse
 import hmda.api.http.model.admin.InstitutionDeletedResponse

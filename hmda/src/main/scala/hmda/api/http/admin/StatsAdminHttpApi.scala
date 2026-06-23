@@ -9,7 +9,7 @@ import org.apache.pekko.stream.Materializer
 import org.apache.pekko.stream.scaladsl.{ Sink, Source }
 import org.apache.pekko.util.Timeout
 import com.typesafe.config.Config
-import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.{ SignedLeiCountResponse, SignedLeiListResponse, TotalLeiCountResponse, TotalLeiListResponse }
 import hmda.auth.OAuth2Authorization
 import hmda.messages.filing.FilingCommands.GetLatestSignedSubmission

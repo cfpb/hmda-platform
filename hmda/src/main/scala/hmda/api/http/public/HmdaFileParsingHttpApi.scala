@@ -10,7 +10,7 @@ import org.apache.pekko.stream.scaladsl.{ Broadcast, Concat, Flow, GraphDSL, Sin
 import org.apache.pekko.stream.{ FlowShape, Materializer }
 import org.apache.pekko.util.ByteString
 import ch.megard.pekko.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
-import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.filing.submissions.HmdaRowParsedErrorSummary
 import hmda.api.http.utils.ParserErrorUtils
 import hmda.parser.filing.lar.LarCsvParser

@@ -3,7 +3,7 @@ package hmda.api.http.public
 import org.apache.pekko.http.scaladsl.model.StatusCodes
 import org.apache.pekko.http.scaladsl.server.Route
 import org.apache.pekko.http.scaladsl.testkit.ScalatestRouteTest
-import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.filing.submissions.HmdaRowParsedErrorSummary
 import hmda.api.http.model.public.{ LarValidateRequest, SingleValidationErrorResult, ValidationErrorSummary, ValidationSingleErrorSummary }
 import hmda.model.filing.lar.LarGenerators._

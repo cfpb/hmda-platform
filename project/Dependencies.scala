@@ -32,7 +32,7 @@ object Dependencies {
   lazy val pekkoHttpSprayJson        = "org.apache.pekko"   %% "pekko-http-spray-json"        % Version.pekkoHttp
   lazy val scalaLogging             = "com.typesafe.scala-logging"   %% "scala-logging"               % Version.scalaLogging
   lazy val slickPostgres            = "com.github.tminglei" %% "slick-pg"                    % Version.slickPostgres
-  lazy val pekkoHttpCirce            = "org.mdedetrich"   %% "pekko-http-circe"             % Version.pekkoHttpCirce
+  lazy val pekkoHttpCirce            = "com.github.pjfanning"   %% "pekko-http-circe"             % Version.pekkoHttpCirce
   lazy val pekkoManagementClusterBootstrap =
     "org.apache.pekko" %% "pekko-management-cluster-bootstrap" % Version.pekkoClusterManagement exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
   lazy val pekkoServiceDiscoveryDNS =

@@ -12,7 +12,7 @@ object Version {
   val pekkoKafkaStreams              = "1.1.0"
   val kafkaClients           = "4.0.0"
   val circe                  = "0.14.5"
-  val pekkoHttpCirce         = "1.1.0"
+  val pekkoHttpCirce         = "3.9.2"
   val cassandraPluginVersion = "1.1.0"
   val cassandraLauncher      = "1.1.1"
   val slick                  = "3.4.1"

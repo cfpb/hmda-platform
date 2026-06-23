@@ -13,7 +13,7 @@ trait DashboardDirectives extends Settings {
   private def extractDatetime: Directive1[String] =
     parameters("late_date" ).flatMap {
       case "" =>
-        import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+        import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
         complete((BadRequest, "must provide late_date"))
 
       case x => provide(x)
@@ -24,7 +24,7 @@ trait DashboardDirectives extends Settings {
       if (datetime.nonEmpty)
         innerRoute(datetime)
       else {
-        import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+        import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
         complete((BadRequest, ProvideDatetime()))
       }
     }

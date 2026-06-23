@@ -7,7 +7,7 @@ import org.apache.pekko.http.scaladsl.server.directives.RouteDirectives.complete
 import org.apache.pekko.http.scaladsl.server.{ Directive, Directive0 }
 import org.apache.pekko.http.scaladsl.server.Route
 import org.apache.pekko.util.ByteString
-import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import org.slf4j.Logger
 import org.apache.pekko.stream.alppekko.s3.scaladsl.S3

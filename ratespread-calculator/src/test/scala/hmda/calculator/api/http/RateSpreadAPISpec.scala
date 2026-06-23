@@ -7,7 +7,7 @@ import org.apache.pekko.http.scaladsl.testkit.ScalatestRouteTest
 import org.apache.pekko.http.scaladsl.unmarshalling.Unmarshaller._
 import org.apache.pekko.util.Timeout
 import com.typesafe.config.ConfigFactory
-import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.calculator.api.RateSpreadResponse
 import hmda.calculator.api.http.RateSpreadAPIRoutes
 import hmda.calculator.api.model.RateSpreadRequest

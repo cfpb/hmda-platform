@@ -7,7 +7,7 @@ import org.apache.pekko.http.scaladsl.server.Directives._
 import org.apache.pekko.http.scaladsl.server.Route
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.model.ErrorResponse
-import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 
 object CreateFilingAuthorization {
   private val config = ConfigFactory.load()

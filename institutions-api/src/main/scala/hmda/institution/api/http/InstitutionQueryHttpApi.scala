@@ -6,7 +6,7 @@ import org.apache.pekko.http.scaladsl.server.Directives._
 import org.apache.pekko.http.scaladsl.server.Route
 import ch.megard.pekko.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
 import com.typesafe.config.Config
-import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.api.http.directives.CreateFilingAuthorization._
 import hmda.api.http.model.ErrorResponse
 import hmda.institution.api.http.model.{InstitutionNoteHistoryResponse, InstitutionsResponse}

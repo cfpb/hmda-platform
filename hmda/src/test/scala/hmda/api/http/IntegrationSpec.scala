@@ -113,7 +113,7 @@ class IntegrationSpec   extends AkkaCassandraPersistenceSpec
 
   "IntegrationSpec" must {
     "run through the process for a yearly submission" in {
-      import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+      import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
       val institution = Post("/institutions", sampleInstitution) ~> institutionAdminRoute(oAuth2Authorization) ~> check {
         response.status mustBe Created
         responseAs[Institution]

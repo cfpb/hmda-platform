@@ -20,7 +20,7 @@ import cats.data.Validated.{Invalid, Valid}
 import cats.data.ValidatedNec
 import cats.implicits._
 import com.typesafe.config.Config
-import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.api.http.admin.SubmissionAdminHttpApi.{lineCount, pipeDelimitedFileStream, validateRawSubmissionId}
 import hmda.api.http.model.admin.{LeiLatestSubmissionSummaryResponse, LeiSubmissionSummaryResponse, SubmissionSummaryResponse, YearlySubmissionSummaryResponse}
 import hmda.auth.OAuth2Authorization

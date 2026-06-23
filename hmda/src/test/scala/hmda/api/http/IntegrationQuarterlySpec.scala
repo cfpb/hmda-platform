@@ -111,7 +111,7 @@ class IntegrationQuarterlySpec
 
   "IntegrationQuarterlySpec" must {
     "run through for a quarterly submission" in {
-      import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+      import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
       val institution = Post("/institutions", sampleInstitutionQuarterly) ~> institutionAdminRoute(oAuth2Authorization) ~> check {
         response.status mustBe Created
         responseAs[Institution]

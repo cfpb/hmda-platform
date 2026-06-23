@@ -4,7 +4,7 @@ import org.apache.pekko.http.scaladsl.model.StatusCodes
 import org.apache.pekko.http.scaladsl.model.headers.HttpEncodings._
 import org.apache.pekko.http.scaladsl.model.headers._
 import org.apache.pekko.http.scaladsl.testkit.ScalatestRouteTest
-import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.HmdaServiceStatus
 import hmda.api.http.routes.BaseHttpApi._
 import io.circe.generic.auto._

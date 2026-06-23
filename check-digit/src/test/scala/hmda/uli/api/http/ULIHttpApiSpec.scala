@@ -11,7 +11,7 @@ import hmda.api.http.model.ErrorResponse
 import hmda.uli.api.model.ULIModel.{ULIBatchValidated, _}
 import hmda.util.http.FileUploadUtils
 import hmda.uli.api.model.ULIValidationErrorMessages._
-import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import org.apache.pekko.http.scaladsl.unmarshalling.Unmarshaller._
 import org.slf4j.{Logger, LoggerFactory}

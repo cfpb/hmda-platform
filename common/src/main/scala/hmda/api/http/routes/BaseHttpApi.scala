@@ -9,7 +9,7 @@ import org.apache.pekko.http.scaladsl.Http
 import hmda.api.http.directives.HmdaTimeDirectives._
 import org.apache.pekko.http.scaladsl.server.Directives._
 import org.apache.pekko.http.scaladsl.server.Route
-import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.HmdaServiceStatus
 import io.circe.generic.auto._
 import org.slf4j.{ Logger, LoggerFactory }

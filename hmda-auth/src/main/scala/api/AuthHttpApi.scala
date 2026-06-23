@@ -6,7 +6,7 @@ import org.apache.pekko.http.scaladsl.model.StatusCodes.BadRequest
 import org.apache.pekko.http.scaladsl.server.Directives._
 import org.apache.pekko.http.scaladsl.server.directives.RouteDirectives.complete
 import org.apache.pekko.http.scaladsl.server.Route
-import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import org.slf4j.Logger
 

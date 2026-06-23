@@ -6,7 +6,7 @@ import org.apache.pekko.http.scaladsl.model.StatusCodes.{ BadRequest, Forbidden 
 import org.apache.pekko.http.scaladsl.server.Directives._
 import org.apache.pekko.http.scaladsl.server._
 import org.apache.pekko.util.Timeout
-import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.ErrorResponse
 import hmda.messages.institution.InstitutionCommands.GetInstitution
 import hmda.model.institution.Institution

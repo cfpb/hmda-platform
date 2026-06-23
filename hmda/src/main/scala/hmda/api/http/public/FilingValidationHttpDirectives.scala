@@ -3,7 +3,7 @@ package hmda.api.http.public
 import org.apache.pekko.http.scaladsl.model.StatusCodes.BadRequest
 import org.apache.pekko.http.scaladsl.server.Directives._
 import org.apache.pekko.http.scaladsl.server.Route
-import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.public.{ SingleValidationErrorResult, ValidationErrorSummary, ValidationSingleErrorSummary }
 import hmda.api.http.utils.ParserErrorUtils._
 import hmda.model.filing.EditDescriptionLookup

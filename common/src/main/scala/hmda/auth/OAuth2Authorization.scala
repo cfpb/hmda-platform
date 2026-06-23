@@ -7,7 +7,7 @@ import org.apache.pekko.http.scaladsl.server.Directives._
 import org.apache.pekko.http.scaladsl.server._
 import org.apache.pekko.http.scaladsl.server.directives.LoggingMagnet
 import com.typesafe.config.{Config, ConfigFactory}
-import org.mdedetrich.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.ErrorResponse
 import org.slf4j.Logger
 
