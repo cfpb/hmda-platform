@@ -354,8 +354,10 @@ lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
       },
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
+        case "version.conf" => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case metaInfMatcher(_) => MergeStrategy.discard
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
         case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs@_*) => MergeStrategy.last
@@ -392,8 +394,10 @@ lazy val `hmda-dashboard` = (project in file("hmda-dashboard"))
         enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
+        case "version.conf" => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case metaInfMatcher(_) => MergeStrategy.discard
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
         case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs@_*) => MergeStrategy.last
