@@ -1,7 +1,7 @@
 package hmda.publication
 
 import org.apache.pekko.Done
-import `org.apache.pekko.actor.typed.ActorSystem`
+import org.apache.pekko.actor.typed.ActorSystem
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.kafka.ProducerSettings
 import org.apache.pekko.kafka.scaladsl.Producer

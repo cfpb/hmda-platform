@@ -8,7 +8,7 @@ import org.apache.pekko.http.scaladsl.model.ws.{ Message, TextMessage }
 import org.apache.pekko.http.scaladsl.server.Directives.{ get, handleWebSocketMessages, pathSingleSlash }
 import org.apache.pekko.http.scaladsl.server.Route
 import org.apache.pekko.stream.scaladsl.Flow
-import ch.megard.pekko.http.cors.scaladsl.CorsDirectives.cors
+import org.apache.pekko.http.cors.scaladsl.CorsDirectives.cors
 import hmda.api.http.model.HmdaServiceStatus
 import io.circe.generic.auto._
 import io.circe.syntax._
