@@ -1,13 +1,12 @@
 package hmda.api.http.filing.submissions
 
-import org.apache.pekko.actor.testkit.typed.scaladsl._
+import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
 import org.apache.pekko.actor.typed.ActorSystem
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.cluster.sharding.typed.scaladsl.ClusterSharding
 import org.apache.pekko.cluster.typed.{ Cluster, Join }
 import org.apache.pekko.http.scaladsl.model.StatusCodes
 import org.apache.pekko.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
-import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
 import org.apache.pekko.testkit._
 import org.apache.pekko.util.Timeout
 import com.typesafe.config.Config

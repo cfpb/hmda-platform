@@ -3,7 +3,7 @@ package hmda.persistence
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 import org.apache.pekko.actor
-import org.apache.pekko.actor.testkit.typed.scaladsl._
+import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
 import org.apache.pekko.actor.typed.scaladsl.Behaviors
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.actor.typed.{ActorRef, ActorSystem, Behavior, TypedActorContext}

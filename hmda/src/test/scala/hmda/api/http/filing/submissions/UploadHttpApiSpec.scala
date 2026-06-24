@@ -1,6 +1,6 @@
 package hmda.api.http.filing.submissions
 
-import org.apache.pekko.actor.testkit.typed.scaladsl._
+import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.cluster.sharding.typed.scaladsl.ClusterSharding
 import org.apache.pekko.cluster.typed.{ Cluster, Join }
