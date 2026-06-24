@@ -1,7 +1,7 @@
 package hmda.serialization.projection
 
 import org.apache.pekko.actor.ActorSystem
-import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
+import org.apache.pekko.actor.testkit.typed.scaladsl._
 import org.apache.pekko.actor.typed.ActorRefResolver
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.persistence.query.TimeBasedUUID

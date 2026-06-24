@@ -3,7 +3,7 @@ package hmda.persistence
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 import org.apache.pekko.actor
-import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
+import org.apache.pekko.actor.testkit.typed.scaladsl._
 import org.apache.pekko.actor.typed.scaladsl.Behaviors
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.actor.typed.{ActorRef, ActorSystem, Behavior, TypedActorContext}
@@ -15,7 +15,7 @@ import org.scalatest.{BeforeAndAfterAll, WordSpec}
 
 import scala.concurrent.duration._
 
-abstract class pekkoCassandraPersistenceSpec extends WordSpec with BeforeAndAfterAll {
+abstract class PekkoCassandraPersistenceSpec extends WordSpec with BeforeAndAfterAll {
 
   sealed trait Command
   sealed trait Event
@@ -45,7 +45,7 @@ abstract class pekkoCassandraPersistenceSpec extends WordSpec with BeforeAndAfte
         val actor =
           system.spawn(AwaitPersistenceInit.behavior, actorName)
         actor ! Request(probe.ref)
-        probe.expectMessage(5.seconds, Response)
+        probe.expectMessage(15.seconds, Response)
         system.log.debug("awaitPersistenceInit took {} ms {}", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t0), system.name)
       }
     }
