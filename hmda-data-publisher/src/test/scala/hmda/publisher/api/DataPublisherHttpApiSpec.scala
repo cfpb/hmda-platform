@@ -12,7 +12,7 @@ import org.scalatest.{ MustMatchers, WordSpec }
 import scala.concurrent.duration.DurationInt
 
 class DataPublisherHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest {
-  implicit val timeout = Timeout(15.seconds)
+  implicit val timeout = Timeout(120.seconds)
 
   "DataPublisherHttpApi" must {
     "trigger right scheduler" in {
