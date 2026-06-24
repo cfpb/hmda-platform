@@ -22,7 +22,7 @@ import hmda.model.filing.FilingGenerator._
 import hmda.model.filing.submission.{ Submission, SubmissionId, VerificationStatus }
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators.institutionGen
-import hmda.persistence.pekkoCassandraPersistenceSpec
+import hmda.persistence.PekkoCassandraPersistenceSpec
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.{ HmdaValidationError, SubmissionPersistence }
@@ -32,7 +32,7 @@ import org.slf4j.{ Logger, LoggerFactory }
 
 import scala.concurrent.duration._
 
-class SubmissionHttpApiSpec extends pekkoCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest {
+class SubmissionHttpApiSpec extends PekkoCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest {
 
   val duration: FiniteDuration = 30.seconds
   val config: Config = system.settings.config

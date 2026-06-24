@@ -14,7 +14,7 @@ import hmda.model.filing.FilingGenerator.filingGen
 import hmda.model.filing.{ Filing, FilingId }
 import hmda.model.filing.submission._
 import hmda.model.submission.SubmissionGenerator.submissionGen
-import hmda.persistence.pekkoCassandraPersistenceSpec
+import hmda.persistence.PekkoCassandraPersistenceSpec
 import hmda.persistence.filing.FilingPersistence
 import hmda.utils.YearUtils.Period
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers }
@@ -22,7 +22,7 @@ import org.apache.pekko.testkit._
 
 import scala.concurrent.duration._
 
-class SubmissionManagerSpec extends pekkoCassandraPersistenceSpec with MustMatchers with BeforeAndAfterAll {
+class SubmissionManagerSpec extends PekkoCassandraPersistenceSpec with MustMatchers with BeforeAndAfterAll {
   implicit val system      = actor.ActorSystem()
   implicit val typedSystem = system.toTyped
 

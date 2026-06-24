@@ -15,7 +15,7 @@ import hmda.api.http.model.admin.InstitutionDeletedResponse
 import hmda.auth.{ KeycloakTokenVerifier, OAuth2Authorization }
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators._
-import hmda.persistence.pekkoCassandraPersistenceSpec
+import hmda.persistence.PekkoCassandraPersistenceSpec
 import hmda.persistence.institution.InstitutionPersistence
 import org.scalatest.MustMatchers
 import org.slf4j.{ Logger, LoggerFactory }
@@ -23,7 +23,7 @@ import org.slf4j.{ Logger, LoggerFactory }
 import scala.concurrent.duration._
 import scala.util.Random
 
-class InstitutionAdminHttpApiSpec extends pekkoCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest {
+class InstitutionAdminHttpApiSpec extends PekkoCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest {
 
   val duration = 10.seconds
 

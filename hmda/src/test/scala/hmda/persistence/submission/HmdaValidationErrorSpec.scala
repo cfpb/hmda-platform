@@ -18,7 +18,7 @@ import hmda.messages.submission.ValidationProgressTrackerCommands.ValidationProg
 import hmda.model.filing.submission.{MacroErrors, SubmissionId, Verified}
 import hmda.model.processing.state.{EditSummary, HmdaValidationErrorState, ValidationProgress, ValidationProgressTrackerState}
 import hmda.model.validation._
-import hmda.persistence.pekkoCassandraPersistenceSpec
+import hmda.persistence.PekkoCassandraPersistenceSpec
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.util.streams.FlowUtils.framing
 import hmda.utils.YearUtils.Period
@@ -28,7 +28,7 @@ import org.scalatest.concurrent.ScalaFutures
 import java.time.Instant
 import scala.concurrent.duration._
 
-class HmdaValidationErrorSpec extends pekkoCassandraPersistenceSpec with ScalaFutures {
+class HmdaValidationErrorSpec extends PekkoCassandraPersistenceSpec with ScalaFutures {
   override implicit val system      = actor.ActorSystem()
   override implicit val typedSystem = system.toTyped
 

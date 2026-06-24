@@ -20,7 +20,7 @@ import hmda.model.filing.FilingDetails
 import hmda.model.filing.submission.{Submission, SubmissionId}
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators.institutionGen
-import hmda.persistence.pekkoCassandraPersistenceSpec
+import hmda.persistence.PekkoCassandraPersistenceSpec
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission._
@@ -37,7 +37,7 @@ import scala.concurrent.{Await, ExecutionContext}
 import scala.util.Random
 
 class IntegrationQuarterlySpec
-  extends pekkoCassandraPersistenceSpec
+  extends PekkoCassandraPersistenceSpec
     with MustMatchers
     with ScalatestRouteTest
     with FileUploadUtils

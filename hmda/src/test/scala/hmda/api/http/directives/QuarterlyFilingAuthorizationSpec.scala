@@ -13,14 +13,14 @@ import org.apache.pekko.util.Timeout
 import hmda.messages.institution.InstitutionCommands.CreateInstitution
 import hmda.messages.institution.InstitutionEvents.{ InstitutionCreated, InstitutionEvent }
 import hmda.model.institution.Institution
-import hmda.persistence.pekkoCassandraPersistenceSpec
+import hmda.persistence.PekkoCassandraPersistenceSpec
 import hmda.persistence.institution.InstitutionPersistence
 import org.scalatest.{ Assertion, MustMatchers }
 import org.slf4j.{ Logger, LoggerFactory }
 
 import scala.concurrent.duration._
 
-class QuarterlyFilingAuthorizationSpec extends pekkoCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest {
+class QuarterlyFilingAuthorizationSpec extends PekkoCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest {
 
   override implicit val typedSystem: ActorSystem[_] = system.toTyped
   val sharding                                      = ClusterSharding(typedSystem)

@@ -27,7 +27,7 @@ import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators.institutionGen
 import hmda.model.submission.SubmissionGenerator.submissionGen
 import hmda.parser.filing.lar.LarParserErrorModel.InvalidLarId
-import hmda.persistence.pekkoCassandraPersistenceSpec
+import hmda.persistence.PekkoCassandraPersistenceSpec
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.{ HmdaParserError, SubmissionPersistence }
@@ -39,7 +39,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.util.Random
 
-class ParseErrorHttpApiSpec extends pekkoCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest {
+class ParseErrorHttpApiSpec extends PekkoCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest {
 
   val duration = 10.seconds
 
