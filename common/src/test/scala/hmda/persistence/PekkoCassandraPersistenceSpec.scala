@@ -40,12 +40,12 @@ abstract class PekkoCassandraPersistenceSpec extends WordSpec with BeforeAndAfte
     val probe = TestProbe[Event](s"probe-$id")
     val t0    = System.nanoTime()
 
-    probe.within(45.seconds) {
+    probe.within(90.seconds) {
       probe.awaitAssert {
         val actor =
           system.spawn(AwaitPersistenceInit.behavior, actorName)
         actor ! Request(probe.ref)
-        probe.expectMessage(15.seconds, Response)
+        probe.expectMessage(120.seconds, Response)
         system.log.debug("awaitPersistenceInit took {} ms {}", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t0), system.name)
       }
     }

@@ -52,7 +52,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
   implicit val materializer: Materializer = Materializer(system)
   implicit val ec: ExecutionContextExecutor = system.dispatcher
 
-  implicit val timeout: Timeout = Timeout(5.seconds)
+  implicit val timeout: Timeout = Timeout(10.seconds)
 
   val kafkaConfig = system.settings.config.getConfig("pekko.kafka.consumer")
   val config      = ConfigFactory.load()

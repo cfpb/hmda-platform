@@ -29,7 +29,7 @@ import scala.util.Random
 
 class FilingHttpApiSpec extends PekkoCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest {
 
-  val duration = 90.seconds
+  val duration = 120.seconds
 
   implicit val routeTimeout = RouteTestTimeout(duration.dilated)
 

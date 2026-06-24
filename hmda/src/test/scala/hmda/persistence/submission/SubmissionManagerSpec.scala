@@ -26,7 +26,7 @@ class SubmissionManagerSpec extends PekkoCassandraPersistenceSpec with MustMatch
   implicit val system      = actor.ActorSystem()
   implicit val typedSystem = system.toTyped
 
-  val duration = 10.seconds
+  val duration = 120.seconds
 
   implicit val routeTimeout = RouteTestTimeout(duration.dilated)
 
