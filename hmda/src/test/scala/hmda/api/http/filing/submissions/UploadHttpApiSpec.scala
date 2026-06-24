@@ -9,6 +9,7 @@ import org.apache.pekko.http.scaladsl.model.Uri.Path
 import org.apache.pekko.http.scaladsl.server.Route
 import org.apache.pekko.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
 import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
 import org.apache.pekko.testkit._
 import org.apache.pekko.util.Timeout
 import com.typesafe.config.Config
