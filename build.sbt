@@ -156,7 +156,7 @@ lazy val common = (project in file("common"))
         cormorant, cormorantGeneric, scalaMock, scalacheckShapeless, diffx
       )
     ),
-    Seq(dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.2")
+    Seq(dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ))
     ,
     // addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
@@ -179,7 +179,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
   .settings(
     Seq(
       libraryDependencies ++= List(guava, zeroAllocationHashing),
-      dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.2",
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       Compile / mainClass := Some("hmda.HmdaPlatform"),
       assembly / assemblyJarName := "hmda2.jar",
       assembly / assemblyMergeStrategy := {
@@ -240,7 +240,7 @@ lazy val `check-digit` = (project in file("check-digit"))
   .settings(
     Seq(
       Compile / mainClass := Some("hmda.uli.HmdaUli"),
-      dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.2",
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyJarName := {
         s"${name.value}.jar"
       },
@@ -301,7 +301,7 @@ lazy val `check-digit` = (project in file("check-digit"))
       Seq(
         libraryDependencies ++= commonDeps ++ pekkoDeps ++ pekkoHttpDeps ++ circeDeps ++ slickDeps ++
         enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
-        dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.2",
+        dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
         Compile / mainClass := Some("hmda.proxy.FileProxy"),
         assembly / assemblyJarName := {
           s"${name.value}.jar"
@@ -363,7 +363,7 @@ lazy val `institutions-api` = (project in file("institutions-api"))
   .settings(
     Seq(
       Compile / mainClass := Some("hmda.institution.HmdaInstitutionApi"),
-      dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.2",
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
@@ -422,7 +422,7 @@ lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
     Seq(
       libraryDependencies ++= commonDeps ++ pekkoDeps ++ pekkoHttpDeps ++ circeDeps ++ slickDeps ++ enumeratumDeps :+
         scalaMock :+ cormorantGeneric :+ scalacheckShapeless :+ diffx,
-      dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.2",
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       Compile / mainClass := Some("hmda.publisher.HmdaDataPublisherApp"),
       assembly / assemblyJarName := {
         s"${name.value}.jar"
@@ -484,7 +484,7 @@ lazy val `hmda-dashboard` = (project in file("hmda-dashboard"))
     Seq(
       libraryDependencies ++= commonDeps ++ pekkoDeps ++ pekkoHttpDeps ++ circeDeps ++ slickDeps ++
         enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
-      dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.2",
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
@@ -543,7 +543,7 @@ lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
   )
   .settings(hmdaBuildSettings: _*)
   .settings(
-    Seq(       dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.2",
+    Seq(       dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
         Compile / mainClass := Some("hmda.calculator.HmdaRateSpread"),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
@@ -600,7 +600,7 @@ lazy val `modified-lar` = (project in file("modified-lar"))
   .settings(
     Seq(
       Compile / mainClass := Some("hmda.publication.lar.ModifiedLarApp"),
-      dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.2",
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
@@ -660,7 +660,7 @@ lazy val `irs-publisher` = (project in file("irs-publisher"))
   .settings(
     Seq(
       Compile / mainClass := Some("hmda.publication.lar.IrsPublisherApp"),
-      dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.2",
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
@@ -720,7 +720,7 @@ lazy val `hmda-reporting` = (project in file("hmda-reporting"))
   .settings(
     Seq(
       Compile / mainClass := Some("hmda.reporting.HmdaReporting"),
-      dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.2",
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
@@ -789,7 +789,7 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
   .settings(
     Seq(
       Compile / mainClass := Some("hmda.analytics.HmdaAnalyticsApp"),
-      dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.2",
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
@@ -848,7 +848,7 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
       Seq(
         libraryDependencies ++= keycloakServerDeps,
         Compile / mainClass := Some("hmda.authService.HmdaAuth"),
-        dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.2",
+        dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
         assembly / assemblyJarName := {
           s"${name.value}.jar"
         },
@@ -910,7 +910,7 @@ lazy val `rate-limit` = (project in file("rate-limit"))
   .settings(
     Seq(
       libraryDependencies ++= commonDeps ++ pekkoDeps ++ pekkoHttpDeps :+ guava,
-      dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.2",
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       Compile / mainClass := Some("hmda.rateLimit.RateLimitApp"),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
@@ -971,7 +971,7 @@ lazy val `data-browser` = (project in file("data-browser"))
     Seq(
       libraryDependencies ++= commonDeps ++ pekkoDeps ++ pekkoHttpDeps ++ circeDeps ++ slickDeps ++
         enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
-      dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.2",
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
@@ -1025,7 +1025,7 @@ lazy val `submission-errors` = (project in file("submission-errors"))
   .settings(
     Seq(
       libraryDependencies ++= commonDeps ++ pekkoDeps ++ pekkoHttpDeps ++ circeDeps ++ slickDeps :+ monix :+ slickPostgres,
-      dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.2",
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf" => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
@@ -1076,7 +1076,7 @@ lazy val `email-service` = (project in file("email-service"))
   .settings(
     Seq(
       Compile / mainClass := Some("hmda.publication.lar.EmailReceiptApp"),
-      dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.2",
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
@@ -1137,7 +1137,7 @@ lazy val `hmda-quarterly-data-service` = (project in file ("hmda-quarterly-data-
     Seq(
       libraryDependencies ++= commonDeps ++ pekkoDeps ++ pekkoHttpDeps ++ circeDeps ++ slickDeps ++
         enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
-      dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.2",
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat

@@ -71,6 +71,8 @@ object Dependencies {
   lazy val enumeratum            = "com.beachape"               %% "enumeratum"                 % Version.enumeratum
   lazy val enumeratumCirce       = "com.beachape"               %% "enumeratum-circe"           % Version.enumeratumCirce
   lazy val monix                 = "io.monix"                   %% "monix"                      % Version.monix
+  lazy val jacksonDatabind       = "com.fasterxml.jackson.core" %% "jackson-databind"           % Version.jacksonDatabind
+  lazy val pekkoSerialization    = "org.apache.pekko"           %% "pekko-serialization-jackson" % Version.pekkoVersion
   lazy val lettuce               = "io.lettuce"                 % "lettuce-core"                % Version.lettuce
   lazy val guava                 = "com.google.guava"           % "guava"                       % Version.guava
   lazy val awsSesSdk             = "com.amazonaws"              % "aws-java-sdk-ses"            % Version.awsSesSdk exclude ("commons-logging", "commons-logging")
