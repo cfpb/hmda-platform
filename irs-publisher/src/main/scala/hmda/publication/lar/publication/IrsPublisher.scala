@@ -5,9 +5,9 @@ import org.apache.pekko.actor.typed.Behavior
 import org.apache.pekko.actor.typed.scaladsl.Behaviors
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.stream.Materializer
-import org.apache.pekko.stream.pekko.s3.ApiVersion.ListBucketVersion2
-import org.apache.pekko.stream.pekko.s3.scaladsl.S3
-import org.apache.pekko.stream.pekko.s3.{MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings}
+import org.apache.pekko.stream.connectors.s3.ApiVersion.ListBucketVersion2
+import org.apache.pekko.stream.connectors.s3.scaladsl.S3
+import org.apache.pekko.stream.connectors.s3.{MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings}
 import org.apache.pekko.stream.scaladsl.{Sink, Source}
 import org.apache.pekko.util.ByteString
 import com.typesafe.config.ConfigFactory

@@ -3,8 +3,8 @@ package hmda.publisher.helper
 import java.time.Instant
 
 import org.apache.pekko.stream.Materializer
-import org.apache.pekko.stream.pekko.s3.{ S3Attributes, S3Settings }
-import org.apache.pekko.stream.pekko.s3.scaladsl.S3
+import org.apache.pekko.stream.connectors.s3.{ S3Attributes, S3Settings }
+import org.apache.pekko.stream.connectors.s3.scaladsl.S3
 import org.apache.pekko.stream.scaladsl.Sink
 import com.typesafe.scalalogging.LazyLogging
 

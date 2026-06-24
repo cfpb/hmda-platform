@@ -3,9 +3,9 @@ package hmda.publisher.scheduler
 import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.typed.ActorRef
 import org.apache.pekko.stream.Materializer
-import org.apache.pekko.stream.pekko.s3.ApiVersion.ListBucketVersion2
-import org.apache.pekko.stream.pekko.s3.scaladsl.S3
-import org.apache.pekko.stream.pekko.s3.{MemoryBufferType, MetaHeaders, S3Attributes, S3Settings}
+import org.apache.pekko.stream.connectors.s3.ApiVersion.ListBucketVersion2
+import org.apache.pekko.stream.connectors.s3.scaladsl.S3
+import org.apache.pekko.stream.connectors.s3.{MemoryBufferType, MetaHeaders, S3Attributes, S3Settings}
 import org.apache.pekko.stream.scaladsl.Source
 import org.apache.pekko.util.ByteString
 import hmda.actor.HmdaActor

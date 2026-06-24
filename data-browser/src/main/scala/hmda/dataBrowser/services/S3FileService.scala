@@ -3,8 +3,8 @@ package hmda.dataBrowser.services
 import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.typed.ActorSystem
 import org.apache.pekko.http.scaladsl.model.ContentTypes
-import org.apache.pekko.stream.pekko.s3.S3Headers
-import org.apache.pekko.stream.pekko.s3.scaladsl.S3
+import org.apache.pekko.stream.connectors.s3.S3Headers
+import org.apache.pekko.stream.connectors.s3.scaladsl.S3
 import org.apache.pekko.stream.scaladsl.{ Sink, Source }
 import org.apache.pekko.util.ByteString
 import cats.implicits._

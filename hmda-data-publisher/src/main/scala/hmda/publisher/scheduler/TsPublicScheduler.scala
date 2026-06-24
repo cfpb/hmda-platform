@@ -2,9 +2,9 @@ package hmda.publisher.scheduler
 
 import org.apache.pekko.actor.typed.ActorRef
 import org.apache.pekko.stream.Materializer
-import org.apache.pekko.stream.pekko.s3.ApiVersion.ListBucketVersion2
-import org.apache.pekko.stream.pekko.s3._
-import org.apache.pekko.stream.pekko.s3.scaladsl.S3
+import org.apache.pekko.stream.connectors.s3.ApiVersion.ListBucketVersion2
+import org.apache.pekko.stream.connectors.s3._
+import org.apache.pekko.stream.connectors.s3.scaladsl.S3
 import org.apache.pekko.stream.scaladsl.Source
 import org.apache.pekko.util.ByteString
 import hmda.actor.HmdaActor
@@ -14,8 +14,8 @@ import hmda.publisher.scheduler.schedules.Schedules.{ TsPublicSchedule }
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.ts._
 import hmda.util.BankFilterUtils._
-import org.apache.pekko.stream.pekko.file.scaladsl.Archive
-import org.apache.pekko.stream.pekko.file.ArchiveMetadata
+import org.apache.pekko.stream.connectors.file.scaladsl.Archive
+import org.apache.pekko.stream.connectors.file.ArchiveMetadata
 import hmda.publisher.helper.CronConfigLoader.{ CronString, tsPublicCron, tsPublicYears }
 import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear }
 import hmda.publisher.util.{ PublishingReporter, ScheduleCoordinator }

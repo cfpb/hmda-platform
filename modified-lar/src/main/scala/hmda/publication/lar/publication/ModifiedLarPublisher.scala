@@ -4,9 +4,9 @@ import org.apache.pekko.actor.typed.scaladsl.Behaviors
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.actor.typed.{ActorRef, ActorSystem, Behavior, SupervisorStrategy}
 import org.apache.pekko.stream._
-import org.apache.pekko.stream.pekko.s3.ApiVersion.ListBucketVersion2
-import org.apache.pekko.stream.pekko.s3._
-import org.apache.pekko.stream.pekko.s3.scaladsl.S3
+import org.apache.pekko.stream.connectors.s3.ApiVersion.ListBucketVersion2
+import org.apache.pekko.stream.connectors.s3._
+import org.apache.pekko.stream.connectors.s3.scaladsl.S3
 import org.apache.pekko.stream.scaladsl._
 import org.apache.pekko.util.ByteString
 import org.apache.pekko.{Done, NotUsed}
