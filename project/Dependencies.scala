@@ -36,7 +36,7 @@ object Dependencies {
   lazy val pekkoManagementClusterBootstrap =
     "org.apache.pekko" %% "pekko-management-cluster-bootstrap" % Version.pekkoClusterManagement exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
   lazy val pekkoServiceDiscoveryDNS =
-    "org.apache.pekko" %% "pekko-discovery" % Version.pekkoClusterManagement exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
+    "org.apache.pekko" %% "pekko-discovery" % Version.pekkoVersion exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
   lazy val pekkoServiceDiscoveryKubernetes =
     "org.apache.pekko" %% "pekko-discovery-kubernetes-api" % Version.pekkoClusterManagement exclude ("org.apache.pekko", "pekko-http") exclude ("org.apache.pekko", "pekko-http-xml")
   lazy val pekkoManagement =
