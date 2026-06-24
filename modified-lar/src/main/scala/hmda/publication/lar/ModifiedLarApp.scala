@@ -1,6 +1,6 @@
 package hmda.publication.lar
 
-import org.apache.pekko.Done
+import org.apache.pekko.{Done, pattern}
 import org.apache.pekko.actor.typed.scaladsl.AskPattern._
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.actor.typed.{ActorRef, ActorSystem}
@@ -127,7 +127,7 @@ object ModifiedLarApp extends App {
             log.info(s"Received a message - key: ${msg.record.key().toUpperCase()}, value: ${msg.record.value().toUpperCase()}")
             processKafkaRecord(msg.record.value().toUpperCase().trim).map(_ => msg.committableOffset)
           }
-          pekko.pattern.retry(
+          pattern.retry(
             attempt = () => processMsg(),
             attempts = 2,
             delay = 90.seconds

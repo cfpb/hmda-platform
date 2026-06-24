@@ -3,7 +3,7 @@ package hmda.publisher.util
 import org.apache.pekko.actor.ActorRef
 import org.apache.pekko.actor.typed.Behavior
 import org.apache.pekko.actor.typed.scaladsl.{ ActorContext, Behaviors }
-import com.typesafe.pekko.extension.quartz.QuartzSchedulerExtension
+import org.apache.pekko.extension.quartz.QuartzSchedulerExtension
 import hmda.publisher.scheduler.schedules.ScheduleWithYear
 import org.slf4j.LoggerFactory
 
