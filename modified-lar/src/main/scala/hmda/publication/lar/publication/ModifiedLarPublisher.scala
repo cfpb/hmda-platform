@@ -144,7 +144,7 @@ object ModifiedLarPublisher {
                       _ <- s3HeaderMat
                       _ <- s3NoHeaderMat
                       _ <- pgMat
-                    } yield pekko.Done.done()
+                    } yield Done.done()
                   ) { implicit builder => (source, headerSink, noHeaderSink, pgSink) =>
                     import GraphDSL.Implicits._
 

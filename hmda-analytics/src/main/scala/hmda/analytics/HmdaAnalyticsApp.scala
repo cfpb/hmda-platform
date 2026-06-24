@@ -114,7 +114,9 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
       processData(msg.record.value()).map(_ => msg.committableOffset)
     })
     .toMat(Committer.sink(CommitterSettings(system).withParallelism(2)))(Keep.both)
-    .mapMaterializedValue(DrainingControl.apply)
+    .mapMaterializedValue {
+      case (control, future) => DrainingControl.apply(control, future)
+    }
     .run()
 
   def processData(msg: String): Future[Done] =
@@ -305,7 +307,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
     result.recover {
       case t: Throwable =>
         log.error("Error happened in inserting: ", t)
-        pekko.Done.done()
+        Done.done()
     }
 
   }
