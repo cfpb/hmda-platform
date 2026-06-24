@@ -3,7 +3,7 @@ object Version {
   val logback                = "1.5.18"
   val scalaTest              = "3.0.8"
   val scalaCheck             = "1.17.0"
-  val pekko                   = "1.3.0"
+  val pekkoVersion                   = "1.3.0"
   val pekkoHttp               = "1.3.0"
   val pekkoHttp2Support       = "3.0.11"
   val pekkoHttpJson           = "1.3.0"
