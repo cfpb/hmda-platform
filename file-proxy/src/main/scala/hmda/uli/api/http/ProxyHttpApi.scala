@@ -10,17 +10,17 @@ import org.apache.pekko.util.ByteString
 import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import org.slf4j.Logger
-import org.apache.pekko.stream.alppekko.s3.scaladsl.S3
+import org.apache.pekko.stream.pekko.s3.scaladsl.S3
 import org.apache.pekko.stream.scaladsl.{ Sink, Source }
 
 import scala.concurrent.Future
-import org.apache.pekko.stream.alppekko.s3._
+import org.apache.pekko.stream.pekko.s3._
 import com.typesafe.config.ConfigFactory
 import software.amazon.awssdk.auth.credentials.{ AwsBasicCredentials, StaticCredentialsProvider }
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.regions.providers.AwsRegionProvider
 import software.amazon.awssdk.regions.providers._
-import org.apache.pekko.stream.alppekko.s3.ApiVersion.ListBucketVersion2
+import org.apache.pekko.stream.pekko.s3.ApiVersion.ListBucketVersion2
 import org.apache.pekko.actor.ActorSystem
 
 import scala.concurrent._

@@ -34,7 +34,7 @@ lazy val pekkoDeps = Seq(
   pekkoCors,
   pekkoKafkaStreams,
   embeddedKafka,
-  alppekkoS3,
+  pekkoS3,
   pekkoQuartzScheduler,
   phantomDSL,
   phantomJDK8

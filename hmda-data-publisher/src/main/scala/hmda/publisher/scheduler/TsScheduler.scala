@@ -4,9 +4,9 @@ import java.time.{Clock, Instant, LocalDateTime}
 import java.time.format.DateTimeFormatter
 import org.apache.pekko.actor.typed.ActorRef
 import org.apache.pekko.stream.Materializer
-import org.apache.pekko.stream.alppekko.s3.ApiVersion.ListBucketVersion2
-import org.apache.pekko.stream.alppekko.s3._
-import org.apache.pekko.stream.alppekko.s3.scaladsl.S3
+import org.apache.pekko.stream.pekko.s3.ApiVersion.ListBucketVersion2
+import org.apache.pekko.stream.pekko.s3._
+import org.apache.pekko.stream.pekko.s3.scaladsl.S3
 import org.apache.pekko.stream.scaladsl.{Sink, Source}
 import org.apache.pekko.util.ByteString
 import com.typesafe.config.ConfigFactory

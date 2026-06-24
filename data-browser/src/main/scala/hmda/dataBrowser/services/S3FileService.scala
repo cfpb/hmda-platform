@@ -3,8 +3,8 @@ package hmda.dataBrowser.services
 import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.typed.ActorSystem
 import org.apache.pekko.http.scaladsl.model.ContentTypes
-import org.apache.pekko.stream.alppekko.s3.S3Headers
-import org.apache.pekko.stream.alppekko.s3.scaladsl.S3
+import org.apache.pekko.stream.pekko.s3.S3Headers
+import org.apache.pekko.stream.pekko.s3.scaladsl.S3
 import org.apache.pekko.stream.scaladsl.{ Sink, Source }
 import org.apache.pekko.util.ByteString
 import cats.implicits._
@@ -15,7 +15,7 @@ import monix.eval.Task
 import org.slf4j.LoggerFactory
 
 // $COVERAGE-OFF$
-// All this does is use the Alppekko S3 APIs
+// All this does is use the pekko S3 APIs
 class S3FileService(implicit system: ActorSystem[Nothing]) extends FileService with Settings {
 
   private final val log = LoggerFactory.getLogger(getClass)

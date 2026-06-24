@@ -2,8 +2,8 @@ package hmda.publisher.qa
 
 import org.apache.pekko.NotUsed
 import org.apache.pekko.stream.Materializer
-import org.apache.pekko.stream.alppekko.s3.S3Attributes
-import org.apache.pekko.stream.alppekko.s3.scaladsl.S3
+import org.apache.pekko.stream.pekko.s3.S3Attributes
+import org.apache.pekko.stream.pekko.s3.scaladsl.S3
 import org.apache.pekko.stream.scaladsl.{ Framing, Source }
 import org.apache.pekko.util.ByteString
 import cats.instances.future._

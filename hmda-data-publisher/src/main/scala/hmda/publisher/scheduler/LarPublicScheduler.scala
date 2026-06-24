@@ -3,11 +3,11 @@ package hmda.publisher.scheduler
 import java.time.Instant
 import org.apache.pekko.actor.typed.ActorRef
 import org.apache.pekko.stream.Materializer
-import org.apache.pekko.stream.alppekko.file.ArchiveMetadata
-import org.apache.pekko.stream.alppekko.file.scaladsl.Archive
-import org.apache.pekko.stream.alppekko.s3.ApiVersion.ListBucketVersion2
-import org.apache.pekko.stream.alppekko.s3._
-import org.apache.pekko.stream.alppekko.s3.scaladsl.S3
+import org.apache.pekko.stream.pekko.file.ArchiveMetadata
+import org.apache.pekko.stream.pekko.file.scaladsl.Archive
+import org.apache.pekko.stream.pekko.s3.ApiVersion.ListBucketVersion2
+import org.apache.pekko.stream.pekko.s3._
+import org.apache.pekko.stream.pekko.s3.scaladsl.S3
 import org.apache.pekko.stream.scaladsl.Source
 import org.apache.pekko.util.ByteString
 import hmda.actor.HmdaActor

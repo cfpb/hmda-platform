@@ -178,7 +178,7 @@ export JAVA_HOME=$HOME/.asdf/installs/java/openjdk-13.0.2
 
 ### Running with sbt
 
-~~The HMDA Platform can run locally using [`sbt`](https://www.scala-sbt.org/) with an [embedded Cassandra](https://doc.pekko.io/docs/alppekko-kafka/current/) and [embedded Kafka](https://doc.pekko.io/docs/alppekko-kafka/current/). To get started:~~  
+~~The HMDA Platform can run locally using [`sbt`](https://www.scala-sbt.org/) with an [embedded Cassandra](https://doc.pekko.io/docs/pekko-kafka/current/) and [embedded Kafka](https://doc.pekko.io/docs/pekko-kafka/current/). To get started:~~  
 _removing embedded cassandra allows us to use more up-to-date java versions_
 
 For local development, supporting services need to be started first in docker:
