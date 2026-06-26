@@ -186,3 +186,27 @@ case class Institution(
       .mapping(this)
       .getOrElse(field, s"error: field name mismatch for $field")
 }
+
+def nullifyFields: Institution = {
+  Institution(
+    activityYear,
+    lei,
+    Agency.valueOf(agency),
+    InstitutionType.valueOf(institutionType),
+    institutionId2017,
+    taxId,
+    rssdId,
+    emailDomains,
+    respondent,
+    parent,
+    assets,
+    otherLenderCode,
+    topHolder,
+    hmdaFiler,
+    quarterlyFiler,
+    quarterlyFilerHasFiledQ1,
+    quarterlyFilerHasFiledQ2,
+    quarterlyFilerHasFiledQ3,
+    notes.getOrElse("")
+  )
+}

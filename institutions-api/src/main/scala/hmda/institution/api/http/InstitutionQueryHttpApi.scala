@@ -61,7 +61,7 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
             case res: (Option[InstitutionEntity], Seq[String]) if res._1.nonEmpty =>
               val (institution, emails) = res
               ToResponseMarshallable(InstitutionConverter
-                .convert(institution.getOrElse(InstitutionEntity()), emails))
+                .convert(institution.getOrElse(InstitutionEntity()), emails).toCSV)
           }
 
           completeFuture(f, uri, entityMarshaller)
