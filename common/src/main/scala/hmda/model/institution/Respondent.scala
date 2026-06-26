@@ -14,8 +14,8 @@ object Respondent {
     new Encoder[Respondent] {
       override def apply(r: Respondent): Json = Json.obj(
         ("name", Json.fromString(r.name.getOrElse(""))),
-        ("state", Json.fromString(r.state.getOrElse(""))),
-        ("city", Json.fromString(r.city.getOrElse("")))
+        ("state", Json.fromString("")),
+        ("city", Json.fromString(""))
       )
     }
 

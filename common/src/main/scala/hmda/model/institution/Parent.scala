@@ -4,13 +4,13 @@ import io.circe.Decoder.Result
 import io.circe.{Decoder, Encoder, HCursor, Json}
 
 object Parent {
-  def empty: Parent = Parent(-1, None)
+  def empty: Parent = Parent("", "")
 
   implicit val parentEncoder: Encoder[Parent] =
     new Encoder[Parent] {
       override def apply(r: Parent): Json = Json.obj(
-        ("idRssd", Json.fromInt(r.idRssd)),
-        ("name", Json.fromString(r.name.getOrElse("")))
+        ("idRssd", Json.fromString("")),
+        ("name", Json.fromString(""))
       )
     }
 
@@ -18,22 +18,22 @@ object Parent {
     new Decoder[Parent] {
       override def apply(c: HCursor): Result[Parent] =
         for {
-          idRssd <- c.downField("idRssd").as[Int]
+          idRssd <- c.downField("idRssd").as[String]
           maybeName <- c.downField("name").as[String]
         } yield {
           val name = if (maybeName == "") None else Some(maybeName)
-          Parent(idRssd, name)
+          Parent("", "")
         }
     }
 }
 
 case class Parent(
-  idRssd: Int,
-  name: Option[String]
+  idRssd: String,
+  name: String
 ) {
   def isEmpty: Boolean =
     this match {
-      case Parent(-1, None) => true
+      case Parent("", "") => true
       case _                => false
     }
 }

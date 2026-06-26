@@ -4,13 +4,13 @@ import io.circe.Decoder.Result
 import io.circe.{Decoder, Encoder, HCursor, Json}
 
 object TopHolder {
-  def empty: TopHolder = TopHolder(-1, None)
+  def empty: TopHolder = TopHolder("", "")
 
   implicit val topHolderEncoder: Encoder[TopHolder] =
     new Encoder[TopHolder] {
       override def apply(r: TopHolder): Json = Json.obj(
-        ("idRssd", Json.fromInt(r.idRssd)),
-        ("name", Json.fromString(r.name.getOrElse("")))
+        ("idRssd", Json.fromString("")),
+        ("name", Json.fromString(""))
       )
     }
 
@@ -22,19 +22,19 @@ object TopHolder {
           maybeName <- c.downField("name").as[String]
         } yield {
           val name = if (maybeName == "") None else Some(maybeName)
-          TopHolder(idRssd, name)
+          TopHolder(String, String)
         }
     }
 
 }
 
 case class TopHolder(
-  idRssd: Int,
-  name: Option[String]
+  idRssd: String,
+  name: String
 ) {
   def isEmpty: Boolean =
     this match {
-      case TopHolder(-1, None) => true
+      case TopHolder(String, String) => true
       case _                   => false
     }
 }
