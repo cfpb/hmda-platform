@@ -200,7 +200,7 @@ For local development, supporting services need to be started first in docker:
 1. With the new pekko dependencies no longer available from the public resolver, we need to use the authenticated URL retrievable from https://account.pekko.io/token.
    Once we get the url from that page, export it as an environment variable (or set it as a env var shell profile):
    ```bash
-   export pekko_RESOLVER={url from the pekko token web page}
+   export PEKKO_RESOLVER={url from the pekko token web page}
    ```
 1. Start sbt and run the platform with the following commands:
     ```bash

@@ -39,7 +39,7 @@ jobs:
           done
         continue-on-error: true
         env:
-          pekko_RESOLVER: ${{ secrets.pekko_RESOLVER }}
+          PEKKO_RESOLVER: ${{ secrets.PEKKO_RESOLVER }}
 
       - name: Check Test Results
         run: |
