@@ -24,7 +24,7 @@ object HmdaQuery {
 
   val configuration = ConfigFactory.load()
 
-  val journalId = configuration.getString("pekko.persistence.cassandra.query")
+  val journalId = configuration.getString("pekko.persistence.cassandra.query.journal.id")
 
   def readJournal(system: ActorSystem[_]): RJ =
     PersistenceQuery(system).readJournalFor[RJ](journalId)
