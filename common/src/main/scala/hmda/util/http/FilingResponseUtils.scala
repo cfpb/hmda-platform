@@ -1,10 +1,10 @@
 package hmda.util.http
 
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.{ StatusCode, StatusCodes, Uri }
-import akka.http.scaladsl.server.Directives.complete
-import akka.http.scaladsl.server.Route
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import org.apache.pekko.http.scaladsl.marshalling.ToResponseMarshallable
+import org.apache.pekko.http.scaladsl.model.{ StatusCode, StatusCodes, Uri }
+import org.apache.pekko.http.scaladsl.server.Directives.complete
+import org.apache.pekko.http.scaladsl.server.Route
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.ErrorResponse
 import hmda.model.filing.submission.SubmissionId
 

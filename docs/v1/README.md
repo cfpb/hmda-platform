@@ -8,8 +8,8 @@ For more information on HMDA, checkout the [About HMDA page](http://www.consumer
 
 This repository contains the code for the entirety of the HMDA platform backend. This platform has been designed to accommodate the needs of the HMDA filing process by financial institutions, as well as the data management and publication needs of the HMDA data asset.
 
-The HMDA Platform uses sbt's multi-project builds, each project representing a specific task. The platform is an Akka Cluster
-application that can be deployed on a single node or as a distributed application. For more information on how Akka Cluster
+The HMDA Platform uses sbt's multi-project builds, each project representing a specific task. The platform is an pekko Cluster
+application that can be deployed on a single node or as a distributed application. For more information on how pekko Cluster
 is used, see the documentation [here](Documents/cluster.md)
 
 The HMDA Platform is composed of the following modules:
@@ -217,7 +217,7 @@ The Filing API will run on `$(docker-machine ip):8080`
 The Public API will run on `$(docker-machine ip):8082`
 
 By default, the `HDMA Platform` runs with a log level of `INFO`. This can be changed by establishing a different log level in the `HMDA_LOGLEVEL` environment variable.
-For the different logging options, see the [reference.conf](https://github.com/akka/akka/blob/master/akka-actor/src/main/resources/reference.conf#L38) default configuration file for `Akka`.
+For the different logging options, see the [reference.conf](https://github.com/pekko/pekko/blob/master/pekko-actor/src/main/resources/reference.conf#L38) default configuration file for `pekko`.
 
 #### API Load Testing
 

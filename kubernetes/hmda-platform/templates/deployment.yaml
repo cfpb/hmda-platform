@@ -275,11 +275,11 @@ spec:
 #            path: /ready
 #            port: {{ .Values.bootstrap.name }}
         ports:
-        # akka remoting
+        # pekko remoting
         - name: {{ .Values.remoting.name }}
           containerPort: {{ .Values.remoting.port }}
           protocol: {{ .Values.remoting.protocol }}
-        # akka-management bootstrap
+        # pekko-management bootstrap
         - name: {{ .Values.bootstrap.name }}
           containerPort: {{ .Values.bootstrap.port }}
           protocol: {{ .Values.bootstrap.protocol }}

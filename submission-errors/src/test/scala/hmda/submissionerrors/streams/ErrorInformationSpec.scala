@@ -1,9 +1,9 @@
 package hmda.submissionerrors.streams
 
-import akka.NotUsed
-import akka.actor.ActorSystem
-import akka.stream.scaladsl.Source
-import akka.testkit.TestKit
+import org.apache.pekko.NotUsed
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.testkit.TestKit
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowValidatedError
 import hmda.model.validation.{ LarValidationError, MacroValidationError, SyntacticalValidationError }
 import hmda.submissionerrors.streams.ErrorInformation._

@@ -1,6 +1,6 @@
 package hmda.calculator
 
-import akka.actor.typed.ActorSystem
+import org.apache.pekko.actor.typed.ActorSystem
 import org.slf4j.LoggerFactory
 // $COVERAGE-OFF$
 object HmdaRateSpread extends App {

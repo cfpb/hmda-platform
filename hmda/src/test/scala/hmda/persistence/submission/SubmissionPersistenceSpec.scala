@@ -1,11 +1,11 @@
 package hmda.persistence.submission
 
-import akka.actor
-import akka.actor.testkit.typed.scaladsl.TestProbe
-import hmda.persistence.AkkaCassandraPersistenceSpec
-import akka.actor.typed.scaladsl.adapter._
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.cluster.typed.{ Cluster, Join }
+import org.apache.pekko.actor
+import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
+import hmda.persistence.PekkoCassandraPersistenceSpec
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.cluster.sharding.typed.scaladsl.ClusterSharding
+import org.apache.pekko.cluster.typed.{ Cluster, Join }
 import hmda.messages.submission.SubmissionCommands.{ CreateSubmission, GetSubmission, ModifySubmission }
 import hmda.messages.submission.SubmissionEvents.{ SubmissionCreated, SubmissionEvent, SubmissionModified, SubmissionNotExists }
 import hmda.model.filing.submission.{ Created, Submission, SubmissionId, Uploaded }
@@ -15,7 +15,7 @@ import hmda.utils.YearUtils.Period
 
 import scala.concurrent.duration._
 
-class SubmissionPersistenceSpec extends AkkaCassandraPersistenceSpec {
+class SubmissionPersistenceSpec extends PekkoCassandraPersistenceSpec {
   override implicit val system      = actor.ActorSystem()
   override implicit val typedSystem = system.toTyped
 

@@ -1,11 +1,11 @@
 package hmda.api.http.directives
 
-import akka.http.scaladsl.model.{ HttpRequest, HttpResponse, StatusCodes }
-import akka.http.scaladsl.server.{ Directive0, Route, RouteResult }
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.RouteResult.{ Complete, Rejected }
-import akka.stream.scaladsl.Flow
-import akka.util.ByteString
+import org.apache.pekko.http.scaladsl.model.{ HttpRequest, HttpResponse, StatusCodes }
+import org.apache.pekko.http.scaladsl.server.{ Directive0, Route, RouteResult }
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.RouteResult.{ Complete, Rejected }
+import org.apache.pekko.stream.scaladsl.Flow
+import org.apache.pekko.util.ByteString
 import org.slf4j.{ Logger, LoggerFactory }
 
 import scala.concurrent.ExecutionContext
@@ -19,7 +19,7 @@ object HmdaTimeDirectives {
 
   private val timeoutResponse = HttpResponse(StatusCodes.NetworkReadTimeout, entity = "Unable to serve response within time limit.")
 
-  // Reference: https://blog.softwaremill.com/measuring-response-time-in-akka-http-7b6312ec70cf
+  // Reference: https://blog.softwaremill.com/measuring-response-time-in-pekko-http-7b6312ec70cf
   private def timeRequest(request: HttpRequest): Try[RouteResult] => Unit = {
     val start = System.currentTimeMillis()
 
@@ -37,7 +37,7 @@ object HmdaTimeDirectives {
     }
   }
 
-  // Reference: https://blog.softwaremill.com/measuring-response-time-in-akka-http-7b6312ec70cf
+  // Reference: https://blog.softwaremill.com/measuring-response-time-in-pekko-http-7b6312ec70cf
   private def aroundRequest(onRequest: HttpRequest => Try[RouteResult] => Unit)(implicit ec: ExecutionContext): Directive0 =
     extractRequestContext.flatMap { ctx =>
       val onDone = onRequest(ctx.request)
@@ -72,7 +72,7 @@ object HmdaTimeDirectives {
               case other =>
                 onDone(Success(other))
                 other
-            }.andThen { // skip this if you use akka.http.scaladsl.server.handleExceptions, put onDone there
+            }.andThen { // skip this if you useorg.apache.pekko.http.scaladsl.server.handleExceptions, put onDone there
               case Failure(ex) =>
                 onDone(Failure(ex))
             }

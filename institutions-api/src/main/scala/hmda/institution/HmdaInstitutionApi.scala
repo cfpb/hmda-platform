@@ -1,13 +1,13 @@
 package hmda.institution
 
-import akka.Done
-import akka.actor.ActorSystem
-import akka.actor.typed.scaladsl.adapter._
-import akka.kafka.scaladsl.Consumer.DrainingControl
-import akka.kafka.scaladsl.{ Committer, Consumer }
-import akka.kafka.{ CommitterSettings, ConsumerSettings, Subscriptions }
-import akka.stream.Materializer
-import akka.stream.scaladsl.{ Keep, Sink, Source }
+import org.apache.pekko.Done
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.kafka.scaladsl.Consumer.DrainingControl
+import org.apache.pekko.kafka.scaladsl.{ Committer, Consumer }
+import org.apache.pekko.kafka.{ CommitterSettings, ConsumerSettings, Subscriptions }
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl.{ Keep, Sink, Source }
 import com.typesafe.config.ConfigFactory
 import hmda.institution.api.http.HmdaInstitutionQueryApi
 import hmda.institution.projection.{ InstitutionDBProjection, ProjectEvent }
@@ -44,7 +44,7 @@ object HmdaInstitutionApi extends App {
   val host = config.getString("hmda.institution.http.host")
   val port = config.getString("hmda.institution.http.port")
 
-  val kafkaConfig = system.settings.config.getConfig("akka.kafka.consumer")
+  val kafkaConfig = system.settings.config.getConfig("pekko.kafka.consumer")
 
   val jdbcUrl = config.getString("db.db.url")
   log.info(s"Connection URL is \n\n$jdbcUrl\n")
@@ -61,7 +61,9 @@ object HmdaInstitutionApi extends App {
     .committableSource(consumerSettings, Subscriptions.topics(HmdaTopics.institutionTopic))
     .mapAsync(1)(msg => processData(msg.record.value()).map(_ => msg.committableOffset))
     .toMat(Committer.sink(CommitterSettings(system).withParallelism(1)))(Keep.both)
-    .mapMaterializedValue(DrainingControl.apply)
+    .mapMaterializedValue {
+      case (control, future) => DrainingControl.apply(control, future)
+    }
     .run()
 
   val institutionDBProjector =

@@ -1,6 +1,6 @@
 package hmda.quarterly.data.api.serde
 
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+import org.apache.pekko.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import hmda.quarterly.data.api.dao.DataPoint
 import hmda.quarterly.data.api.dto.QuarterGraphData._
 import spray.json.{ DefaultJsonProtocol, RootJsonFormat }

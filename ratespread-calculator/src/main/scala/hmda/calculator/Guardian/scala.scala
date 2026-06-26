@@ -1,7 +1,7 @@
 package hmda.calculator
 
-import akka.actor.typed.Behavior
-import akka.actor.typed.scaladsl.Behaviors
+import org.apache.pekko.actor.typed.Behavior
+import org.apache.pekko.actor.typed.scaladsl.Behaviors
 import hmda.calculator.api.http.RateSpreadAPI
 import hmda.calculator.scheduler.APORScheduler
 import hmda.calculator.scheduler.APORScheduler.Command

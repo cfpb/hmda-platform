@@ -1,6 +1,6 @@
 package hmda.publisher.validation
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import cats.data.{ Validated, ValidatedNel }
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
