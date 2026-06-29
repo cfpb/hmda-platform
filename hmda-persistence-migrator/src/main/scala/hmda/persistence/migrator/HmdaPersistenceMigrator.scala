@@ -41,8 +41,10 @@ object HmdaPersistenceMigrator extends App {
           .filterNot(pid => {
             !pid.startsWith("Institution") && ("([A-Z0-9]{20})".r.findFirstIn(pid) match {
               case Some(lei) =>
-                log.info("Skipping LEI: {}, PID: {}", lei, pid)
-                skipLeis.contains(lei)
+                val skippingLei = skipLeis.contains(lei)
+                if (skippingLei)
+                  log.info("Skipping LEI: {}, PID: {}", lei, pid)
+                skippingLei
               case _ => false
             })
           })
