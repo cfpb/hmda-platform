@@ -26,6 +26,12 @@ spec:
             readOnly: true
             volumeAttributes:
               secretProviderClass: irsa-hmda-rds-secrets-provider
+        - name: akka-license
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: irsa-akka-license-provider
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
@@ -36,6 +42,9 @@ spec:
           volumeMounts:
             - name: secret-provider-vol
               mountPath: /mnt/secrets-store
+            - name: akka-license
+              mountPath: /mnt/akka-license
+              readOnly: true
             - name: tz-config
               mountPath: /etc/localtime
           securityContext:
@@ -48,6 +57,11 @@ spec:
                 - ALL        
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+            - name: AKKA_LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: irsa-akka-license-key
+                  key: key
             - name: KAFKA_INSTITUTIONS_TOPIC
               value: {{.Values.kafka.institutionsTopic}}
             - name: KAFKA_INSTITUTIONS_GROUP

@@ -27,7 +27,7 @@ object SubmissionPersistence extends HmdaTypedPersistentActor[SubmissionCommand,
         emptyState = SubmissionState(None),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
-      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000, keepNSnapshots = 10))
+      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000))
     }
 
   override def commandHandler(

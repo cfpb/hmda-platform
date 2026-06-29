@@ -67,7 +67,9 @@ object IrsPublisherApp extends App {
     .mapAsync(parallelism)(HmdaMessageFilter.processOnlyValidKeys(msg => processData(msg.record.value().stripLineEnd.trim()).map(_ => msg.committableOffset)))
     .mapAsync(parallelism * 2)(offset => offset.commitScaladsl())
     .toMat(Sink.seq)(Keep.both)
-    .mapMaterializedValue(DrainingControl.apply)
+    .mapMaterializedValue {
+      case (ctrl, future) => DrainingControl.apply(ctrl, future)
+    }
     .run()
 
   def processData(msg: String): Future[Done] =

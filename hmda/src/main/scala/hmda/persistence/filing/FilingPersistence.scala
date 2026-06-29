@@ -32,7 +32,7 @@ object FilingPersistence extends HmdaTypedPersistentActor[FilingCommand, FilingE
         emptyState = FilingState(),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
-      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000, keepNSnapshots = 10))
+      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000))
     }
 
   override def commandHandler(ctx: ActorContext[FilingCommand]): CommandHandler[FilingCommand, FilingEvent, FilingState] = { (state, cmd) =>
