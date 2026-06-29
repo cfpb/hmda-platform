@@ -1,7 +1,7 @@
 package hmda.institution.api.http
 
 import hmda.institution.query.{InstitutionEmailEntity, InstitutionEntity}
-import hmda.institution.util.HelperUtility.{nullifyFields, nullifyInstitutionEntityFields, nullifyInstitutionFields}
+import hmda.institution.util.HelperUtility.{nullifyInstitutionEntityFields, nullifyInstitutionFields}
 import hmda.model.institution.{Institution, _}
 import hmda.util.CSVConsolidator.listDeDupeToList
 
