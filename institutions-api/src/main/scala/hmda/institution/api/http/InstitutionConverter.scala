@@ -1,9 +1,9 @@
 package hmda.institution.api.http
 
 import hmda.institution.query.{InstitutionEmailEntity, InstitutionEntity}
-import hmda.institution.util.HelperUtility.{nullifyInstitutionEntityFields, nullifyInstitutionFields}
-import hmda.model.institution.{Institution, _}
+import hmda.model.institution._
 import hmda.util.CSVConsolidator.listDeDupeToList
+import hmda.util.FieldNullifyUtility.nullifyInstitutionFields
 
 object InstitutionConverter {
 
@@ -41,15 +41,11 @@ object InstitutionConverter {
       entity.quarterlyFilerHasFiledQ3,
       entity.notes
     )
-
-    if (institution.activityYear>=2024){
       nullifyInstitutionFields(institution)
-    }else
-      institution
   }
 
-  def convert(institution: Institution): InstitutionEntity = {
-    val instituionInstitutionEntity = InstitutionEntity(
+  def convert(institution: Institution): InstitutionEntity =
+  InstitutionEntity(
       institution.LEI,
       institution.activityYear,
       institution.agency.code,
@@ -73,13 +69,6 @@ object InstitutionConverter {
       institution.quarterlyFilerHasFiledQ3,
       notes = institution.notes
     )
-
-
-    if (instituionInstitutionEntity.activityYear>=2024){
-      nullifyInstitutionEntityFields(instituionInstitutionEntity)
-    }else
-      instituionInstitutionEntity
-  }
 
   def emailsFromInstitution(institution: Institution): Seq[InstitutionEmailEntity] = {
 
