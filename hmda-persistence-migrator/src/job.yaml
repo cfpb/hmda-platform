@@ -1,14 +1,14 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: akka-persistence-beta-migrator-260612-1
+  name: akka-persistence-failover-migrator-260629-3
 spec:
   template:
     spec:
-      serviceAccountName: hmda-platform-irsa
+      serviceAccountName: hmda-platform
       containers:
         - name: akka-persistence-migrator
-          image: 039774476268.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:persistence_migrator.260612.6
+          image: 039774476268.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:persistence_migrator.260629.1
           env:
             - name: CASSANDRA_JOURNAL_KEYSPACE
               valueFrom:
@@ -33,7 +33,7 @@ spec:
             - name: AKKA_LICENSE_KEY
               valueFrom:
                 secretKeyRef:
-                  name: irsa-akka-license-key
+                  name: akka-license-key
                   key: key
 #            - name: AKKA_PERSISTENCE_MIGRATE_BATCH
 #              value: "500"
@@ -41,8 +41,8 @@ spec:
 #              value: DEBUG
 #            - name: AKKA_PERSISTENCE_MIGRATE_PARALLELISM
 #              value: "1"
-#            - name: PERSISTENCE_ID
-#              value: "DEBUG"
+            - name: PERSISTENCE_ID
+              value: "DEBUG"
             - name: AKKA_PERSISTENCE_PG_JOURNAL_TABLE
               value: event_journal
             - name: AKKA_PERSISTENCE_PG_SNAP_TABLE
@@ -58,35 +58,35 @@ spec:
             - name: AKKA_PERSISTENCE_PG_HOST
               valueFrom:
                 secretKeyRef:
-                  name: irsa-actor-persistence-secrets
+                  name: actor-persistence-secrets
                   key: host
             - name: AKKA_PERSISTENCE_PG_USER
               valueFrom:
                 secretKeyRef:
-                  name: irsa-actor-persistence-secrets
+                  name: actor-persistence-secrets
                   key: username
             - name: AKKA_PERSISTENCE_PG_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: irsa-actor-persistence-secrets
+                  name: actor-persistence-secrets
                   key: password
             - name: AKKA_PERSISTENCE_PG_DB
               valueFrom:
                 secretKeyRef:
-                  name: irsa-actor-persistence-secrets
+                  name: actor-persistence-secrets
                   key: database
             - name: AKKA_PERSISTENCE_PG_SCHEMA
-              value: actor_persistence_beta
+              value: actor_persistence_failover
             - name: CASSANDRA_CLUSTER_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: irsa-cassandra-credentials
-                  key: cassandra.username
+                  name: cluster1-user
+                  key: username
             - name: CASSANDRA_CLUSTER_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: irsa-cassandra-credentials
-                  key: cassandra.password
+                  name: cluster1-user
+                  key: password
           volumeMounts:
             - name: actor-persistence-secrets
               mountPath: /mnt/actor-persistence-secrets
@@ -94,27 +94,27 @@ spec:
             - name: akka-license
               mountPath: /mnt/akka-license
               readOnly: true
-            - name: cassandra-secrets
-              mountPath: /mnt/cass-secrets
-              readOnly: true
+#            - name: cassandra-secrets
+#              mountPath: /mnt/cass-secrets
+#              readOnly: true
       volumes:
        - name: actor-persistence-secrets
          csi:
            driver: secrets-store.csi.k8s.io
            readOnly: true
            volumeAttributes:
-             secretProviderClass: irsa-actor-persistence-secrets-provider
+             secretProviderClass: actor-persistence-secrets-provider
        - name: akka-license
          csi:
            driver: secrets-store.csi.k8s.io
            readOnly: true
            volumeAttributes:
-             secretProviderClass: irsa-akka-license-provider
-       - name: cassandra-secrets
-         csi:
-           driver: secrets-store.csi.k8s.io
-           readOnly: true
-           volumeAttributes:
-             secretProviderClass: irsa-k8ssandra-credentials-provider
+             secretProviderClass: akka-license-provider
+#       - name: cassandra-secrets
+#         csi:
+#           driver: secrets-store.csi.k8s.io
+#           readOnly: true
+#           volumeAttributes:
+#             secretProviderClass: k8ssandra-credentials-provider
       restartPolicy: Never
   backoffLimit: 4
