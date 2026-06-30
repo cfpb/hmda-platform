@@ -18,6 +18,7 @@ import hmda.model.institution.{Institution, InstitutionDetail}
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.publication.KafkaUtils._
 import com.typesafe.config.ConfigFactory
+import hmda.util.FieldNullifyUtility.nullifyInstitutionFields
 
 import scala.concurrent.Future
 
@@ -152,7 +153,7 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
       state
     } else {
       if (institution.LEI == state.institution.get.LEI) {
-        state.copy(Some(institution))
+        state.copy(Some(nullifyInstitutionFields(institution)))
       } else {
         state
       }
