@@ -61,7 +61,7 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
             case res: (Option[InstitutionEntity], Seq[String]) if res._1.nonEmpty =>
               val (institution, emails) = res
               ToResponseMarshallable(InstitutionConverter
-                .convert(institution.getOrElse(InstitutionEntity()), emails).toCSV)
+                .convert(institution.getOrElse(InstitutionEntity()), emails))
           }
 
           completeFuture(f, uri, entityMarshaller)
@@ -132,7 +132,7 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
             .map(_.sumLars(bankFilterList.toSeq)
               .recover({
                 case err: Throwable => log.debug("ts repo failure, most likely table not yet available for year, skipping...", err)
-                0
+                  0
               })
               .map(AnnualLarCount(yr, _)))
             .getOrElse(Future(AnnualLarCount(yr, 0)))
