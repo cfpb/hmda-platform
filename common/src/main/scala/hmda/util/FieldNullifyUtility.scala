@@ -5,6 +5,8 @@ import hmda.model.institution.{Institution, InstitutionType, Parent, Respondent,
 
 object FieldNullifyUtility {
   def nullifyInstitutionFields(institution: Institution): Institution = {
+      //HMDA Ops will no longer provide updates to institution fields if they are not shared
+      //with the transmittal sheet model
       if( institution.activityYear>=2024)
 {
       Institution(
