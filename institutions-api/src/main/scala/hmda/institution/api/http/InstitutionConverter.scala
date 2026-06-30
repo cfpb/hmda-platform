@@ -9,7 +9,7 @@ object InstitutionConverter {
 
   def convert(entity: InstitutionEntity, emails: Seq[String]): Institution = {
 
-   val institution= Institution(
+    nullifyInstitutionFields(Institution(
       entity.activityYear,
       entity.lei,
       Agency.valueOf(entity.agency),
@@ -40,8 +40,7 @@ object InstitutionConverter {
       entity.quarterlyFilerHasFiledQ2,
       entity.quarterlyFilerHasFiledQ3,
       entity.notes
-    )
-      nullifyInstitutionFields(institution)
+    ))
   }
 
   def convert(institution: Institution): InstitutionEntity =
