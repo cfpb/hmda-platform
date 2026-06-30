@@ -132,7 +132,7 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
             .map(_.sumLars(bankFilterList.toSeq)
               .recover({
                 case err: Throwable => log.debug("ts repo failure, most likely table not yet available for year, skipping...", err)
-                0
+                  0
               })
               .map(AnnualLarCount(yr, _)))
             .getOrElse(Future(AnnualLarCount(yr, 0)))

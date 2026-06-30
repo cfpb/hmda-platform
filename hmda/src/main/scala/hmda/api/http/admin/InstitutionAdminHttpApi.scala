@@ -1,8 +1,8 @@
 package hmda.api.http.admin
 
-import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import akka.http.scaladsl.model.headers.RawHeader
-import akka.http.scaladsl.model.{ StatusCodes, Uri }
+import akka.http.scaladsl.model.{StatusCodes, Uri}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.util.Timeout
@@ -15,14 +15,15 @@ import hmda.api.http.model.admin.InstitutionDeletedResponse
 import hmda.auth.OAuth2Authorization
 import hmda.messages.institution.InstitutionCommands._
 import hmda.messages.institution.InstitutionEvents._
-import hmda.model.institution.{ Agency, Institution }
+import hmda.model.institution.{Agency, Institution}
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.institution.InstitutionPersistence.selectInstitution
 import hmda.util.http.FilingResponseUtils._
 import hmda.api.http.EmailUtils._
+import hmda.util.FieldNullifyUtility.nullifyInstitutionFields
 
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.{ Failure, Success }
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 object InstitutionAdminHttpApi {
   def create(config: Config, sharding: ClusterSharding)(implicit ec: ExecutionContext, t: Timeout): OAuth2Authorization => Route =
@@ -180,7 +181,7 @@ private class InstitutionAdminHttpApi(config: Config, sharding: ClusterSharding)
         complete((StatusCodes.InternalServerError, errorResponse))
 
       case Success(Some(i)) =>
-        complete(i)
+        complete(nullifyInstitutionFields(i))
 
       case Success(None) =>
         complete(StatusCodes.NotFound)
