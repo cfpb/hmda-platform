@@ -186,4 +186,3 @@ case class Institution(
       .mapping(this)
       .getOrElse(field, s"error: field name mismatch for $field")
 }
-
