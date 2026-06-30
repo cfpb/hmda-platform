@@ -32,7 +32,7 @@ import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.concurrent.duration._
 
 // $COVERAGE-OFF$
-object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarComponent with SubmissionHistoryComponent {
+object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarComponent with SubmissionHistoryComponent with InstitutionTSComponent{
 
   val log = LoggerFactory.getLogger("hmda")
 
@@ -76,6 +76,18 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
       val tsTable =  getTableName("hmda.analytics.%s.larTableName%s", year, quarter)
       new LarRepository(dbConfig, tsTable)
     } catch {
+      case e: Exception =>
+        val errMsg = s"$msg: ${e.getMessage}"
+        log.error(errMsg)
+        throw new IllegalArgumentException(errMsg)
+    }
+  }
+
+  private def getInstitutionRepo(msg: String, year: String, quarter: String): InstitutionRepository = {
+    try {
+      val institutionTable =  getTableName("hmda.analytics.%s.institutionTableName%s", year, quarter)
+      new InstitutionRepository(dbConfig, institutionTable)
+    }  catch {
       case e: Exception =>
         val errMsg = s"$msg: ${e.getMessage}"
         log.error(errMsg)
@@ -185,8 +197,13 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
         .filter(t => t.LEI != "" && t.institutionName != "")
         .map(ts => TransmittalSheetConverter(ts, submissionIdOption))
         .mapAsync(1) { ts =>
-          val repo = getTsRepo(
+          val tsRepo = getTsRepo(
             s"Unable to discern period from $submissionId to insert TS rows",
+            submissionId.period.year.toString,
+            submissionId.period.quarter.getOrElse("")
+          )
+          val institutionRepo = getInstitutionRepo(
+            s"Unable to discern period from $submissionId to update panel rows",
             submissionId.period.year.toString,
             submissionId.period.quarter.getOrElse("")
           )
@@ -195,14 +212,13 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
             signdate <- signDate
             firstsigndate <- firstSignDateSubmissionHistory
             insertorupdate <- {
-              println("first sign date")
-              println(firstsigndate)
               val resolvedSignDate = Some(signdate.getOrElse(0L))
               val resolvedFirstSignDate = {
                 if (firstsigndate.head == 0) resolvedSignDate
                 else Some(firstsigndate.head)
               }
-              repo.insert(copyTs(ts, resolvedSignDate, resolvedFirstSignDate, enforceQuarterly))
+              tsRepo.insert(copyTs(ts, resolvedSignDate, resolvedFirstSignDate, enforceQuarterly))
+              institutionRepo.updateByLei(generateInstituionEntity(ts))
             }
           } yield insertorupdate
         }
@@ -310,5 +326,17 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
   }
 
+  private def generateInstituionEntity(ts: TransmittalSheetEntity) = {
+
+      InstitutionTSEntity(
+        lei = ts.lei,
+        activityYear = ts.year,
+        agency = ts.agency,
+        taxId = ts.taxId,
+        respondentName = ts.institutionName,
+        respondentState = ts.state,
+        respondentCity = ts.city,
+    )
+  }
 }
 // $COVERAGE-ON$

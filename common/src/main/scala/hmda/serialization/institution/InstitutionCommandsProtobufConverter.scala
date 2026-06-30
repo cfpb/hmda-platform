@@ -9,6 +9,7 @@ import hmda.persistence.serialization.institution.InstitutionMessage
 import hmda.persistence.serialization.institution.commands._
 import hmda.serialization.filing.FilingProtobufConverter._
 import hmda.serialization.institution.InstitutionProtobufConverter._
+import hmda.util.FieldNullifyUtility.nullifyInstitutionFields
 // $COVERAGE-OFF$
 object InstitutionCommandsProtobufConverter {
 
@@ -22,7 +23,7 @@ object InstitutionCommandsProtobufConverter {
     val msg         = CreateInstitutionMessage.parseFrom(bytes)
     val institution = institutionFromProtobuf(msg.institution.getOrElse(InstitutionMessage()))
     val actorRef    = resolver.resolveActorRef(msg.replyTo)
-    CreateInstitution(institution, actorRef)
+    CreateInstitution(nullifyInstitutionFields(institution), actorRef)
   }
 
   def modifyInstitutionToProtobuf(
@@ -41,7 +42,7 @@ object InstitutionCommandsProtobufConverter {
     val msg         = ModifyInstitutionMessage.parseFrom(bytes)
     val institution = institutionFromProtobuf(msg.institution.getOrElse(InstitutionMessage()))
     val actorRef    = resolver.resolveActorRef[InstitutionEvent](msg.replyTo)
-    ModifyInstitution(institution, actorRef)
+    ModifyInstitution(nullifyInstitutionFields(institution), actorRef)
   }
 
   def getInstitutionToProtobuf(

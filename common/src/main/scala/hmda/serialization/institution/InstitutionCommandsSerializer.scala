@@ -1,16 +1,16 @@
 package hmda.serialization.institution
 
 import java.io.NotSerializableException
-
 import akka.actor.ExtendedActorSystem
 import akka.actor.typed.ActorRefResolver
 import akka.actor.typed.scaladsl.adapter._
 import akka.serialization.SerializerWithStringManifest
-import hmda.messages.institution.InstitutionCommands.{ GetInstitutionDetails, _ }
+import hmda.messages.institution.InstitutionCommands.{GetInstitutionDetails, _}
 import hmda.model.institution.Institution
 import hmda.persistence.serialization.institution.InstitutionMessage
 import hmda.serialization.institution.InstitutionCommandsProtobufConverter._
 import hmda.serialization.institution.InstitutionProtobufConverter._
+import hmda.util.FieldNullifyUtility.nullifyInstitutionFields
 // $COVERAGE-OFF$
 class InstitutionCommandsSerializer(system: ExtendedActorSystem) extends SerializerWithStringManifest {
 
@@ -31,7 +31,7 @@ class InstitutionCommandsSerializer(system: ExtendedActorSystem) extends Seriali
 
   override def toBinary(o: AnyRef): Array[Byte] = o match {
     case i: Institution =>
-      institutionToProtobuf(i).toByteArray
+      institutionToProtobuf(nullifyInstitutionFields(i)).toByteArray
     case cmd: CreateInstitution =>
       createInstitutionToProtobuf(cmd, resolver).toByteArray
     case cmd: ModifyInstitution =>
