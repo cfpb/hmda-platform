@@ -26,6 +26,8 @@ hmda:
     lines:
       batch: 100
       parallelism: 2
+  actorSystemPersistence:
+    schema: actor_persistence
 #  podNamespace: default
 #  apiNamespace: hmda-api
 #  serviceNamespace: default.svc.cluster.local

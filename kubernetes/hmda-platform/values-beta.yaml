@@ -26,6 +26,8 @@ hmda:
     lines:
       batch: 30
       parallelism: 1
+  actorSystemPersistence:
+    schema: actor_persistence_beta
 #  podNamespace: beta
 #  apiNamespace: beta
 #  serviceNamespace: beta.svc.cluster.local

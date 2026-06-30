@@ -100,7 +100,7 @@ spec:
               name: irsa-actor-persistence-secrets
               key: host
         - name: ACTOR_PERSISTENCE_PG_SCHEMA
-          value: actor_persistence_beta
+          value: {{ .Values.hmda.actorSystemPersistence.schema }}
         - name: ACTOR_PERSISTENCE_PG_DB
           valueFrom:
             secretKeyRef:
