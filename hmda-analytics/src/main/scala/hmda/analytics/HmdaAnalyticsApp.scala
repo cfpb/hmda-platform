@@ -208,6 +208,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
             submissionId.period.quarter.getOrElse("")
           )
           val enforceQuarterly = submissionId.period.quarter.isDefined
+          if (ts.year>2023) {institutionRepo.updateByLei(generateInstituionEntity(ts))}
           for {
             signdate <- signDate
             firstsigndate <- firstSignDateSubmissionHistory
@@ -218,7 +219,6 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
                 else Some(firstsigndate.head)
               }
               tsRepo.insert(copyTs(ts, resolvedSignDate, resolvedFirstSignDate, enforceQuarterly))
-              institutionRepo.updateByLei(generateInstituionEntity(ts))
             }
           } yield insertorupdate
         }
