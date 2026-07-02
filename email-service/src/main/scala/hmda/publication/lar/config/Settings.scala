@@ -23,7 +23,7 @@ class Settings(config: Config) {
 
   object kafka {
     val bootstrapServers: String = config.getString("kafka.hosts")
-    val commitSettings: Config   = config.getConfig("kafka.commit")
+    val commitSettings: Config   = config.getConfig("kafka.committer")
   }
 
   object client {
