@@ -100,7 +100,7 @@ object QuarterTimeBarrier {
 
       case Period.y2026Q1 => LocalDate.ofYearDay(2026, rulesConfig.qf.q1.startDayOfYear)
       case Period.y2026Q2 => LocalDate.ofYearDay(2026, rulesConfig.qf.q2.startDayOfYear)
-      case Period.y2026Q3 => LocalDate.ofYearDay(2026z, rulesConfig.qf.q3.startDayOfYear)
+      case Period.y2026Q3 => LocalDate.ofYearDay(2026, rulesConfig.qf.q3.startDayOfYear)
     }
   }
 
