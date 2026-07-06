@@ -63,6 +63,15 @@ object QuarterTimeBarrier {
       case Period.y2023Q1 => LocalDate.ofYearDay(2023, rulesConfig.qf.q1.endDayOfYear)
       case Period.y2023Q2 => LocalDate.ofYearDay(2023, rulesConfig.qf.q2.endDayOfYear)
       case Period.y2023Q3 => LocalDate.ofYearDay(2023, rulesConfig.qf.q3.endDayOfYear)
+      case Period.y2024Q1 => LocalDate.ofYearDay(2024, rulesConfig.qf.q1.endDayOfYear)
+      case Period.y2024Q2 => LocalDate.ofYearDay(2024, rulesConfig.qf.q2.endDayOfYear)
+      case Period.y2024Q3 => LocalDate.ofYearDay(2024, rulesConfig.qf.q3.endDayOfYear)
+      case Period.y2025Q1 => LocalDate.ofYearDay(2025, rulesConfig.qf.q1.endDayOfYear)
+      case Period.y2025Q2 => LocalDate.ofYearDay(2025, rulesConfig.qf.q2.endDayOfYear)
+      case Period.y2025Q3 => LocalDate.ofYearDay(2025, rulesConfig.qf.q3.endDayOfYear)
+      case Period.y2026Q1 => LocalDate.ofYearDay(2026, rulesConfig.qf.q1.endDayOfYear)
+      case Period.y2026Q2 => LocalDate.ofYearDay(2026, rulesConfig.qf.q2.endDayOfYear)
+      case Period.y2026Q3 => LocalDate.ofYearDay(2026, rulesConfig.qf.q3.endDayOfYear)
     }
   }
 
@@ -80,6 +89,18 @@ object QuarterTimeBarrier {
       case Period.y2023Q1 => LocalDate.ofYearDay(2023, rulesConfig.qf.q1.startDayOfYear)
       case Period.y2023Q2 => LocalDate.ofYearDay(2023, rulesConfig.qf.q2.startDayOfYear)
       case Period.y2023Q3 => LocalDate.ofYearDay(2023, rulesConfig.qf.q3.startDayOfYear)
+
+      case Period.y2024Q1 => LocalDate.ofYearDay(2024, rulesConfig.qf.q1.startDayOfYear)
+      case Period.y2024Q2 => LocalDate.ofYearDay(2024, rulesConfig.qf.q2.startDayOfYear)
+      case Period.y2024Q3 => LocalDate.ofYearDay(2024, rulesConfig.qf.q3.startDayOfYear)
+
+      case Period.y2025Q1 => LocalDate.ofYearDay(2025, rulesConfig.qf.q1.startDayOfYear)
+      case Period.y2025Q2 => LocalDate.ofYearDay(2025, rulesConfig.qf.q2.startDayOfYear)
+      case Period.y2026Q3 => LocalDate.ofYearDay(2025, rulesConfig.qf.q3.startDayOfYear)
+
+      case Period.y2026Q1 => LocalDate.ofYearDay(2026, rulesConfig.qf.q1.startDayOfYear)
+      case Period.y2026Q2 => LocalDate.ofYearDay(2026, rulesConfig.qf.q2.startDayOfYear)
+      case Period.y2026Q3 => LocalDate.ofYearDay(2026z, rulesConfig.qf.q3.startDayOfYear)
     }
   }
 
