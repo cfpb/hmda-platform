@@ -83,7 +83,7 @@ trait InstitutionTSComponent {
     def dropSchema()   = db.run(table.schema.dropIfExists)
   }
 
-  val institutionConfig: Config = ConfigFactory.load().getConfig("hmda.institution")
+  val institutionConfig: Config = ConfigFactory.load().getConfig("hmda.analytics")
 
   val yearsAvailable: Seq[String] = institutionConfig.getString("yearsAvailable").split(",").toSeq
 
