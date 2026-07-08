@@ -11,7 +11,6 @@ import akka.stream.Materializer
 import akka.stream.scaladsl.{Keep, Sink, Source}
 import akka.util.{ByteString, Timeout}
 import com.typesafe.config.ConfigFactory
-import hmda.analytics.HmdaAnalyticsApp.generateInstitutionEntity
 import hmda.analytics.query._
 import hmda.messages.HmdaMessageFilter
 import hmda.messages.institution.InstitutionCommands.{GetInstitution, InstitutionCommand, ModifyInstitution}
@@ -54,7 +53,8 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
              |                                                       |___/
     """.stripMargin)
 
-  implicit val system: ActorSystem = ActorSystem()
+  val config = ConfigFactory.load()
+  implicit val system: ActorSystem = ActorSystem(config.getString("hmda.cluster.name"))
   implicit val typedSystem: typed.ActorSystem[Nothing] = system.toTyped
   implicit val materializer: Materializer = Materializer(system)
   implicit val ec: ExecutionContextExecutor = system.dispatcher
@@ -62,7 +62,6 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
   implicit val timeout: Timeout = Timeout(5.seconds)
 
   val kafkaConfig = system.settings.config.getConfig("akka.kafka.consumer")
-  val config      = ConfigFactory.load()
   val parallelism = config.getInt("hmda.analytics.parallelism")
   val larDeletion = config.getBoolean("hmda.analytics.larDeletion")
   val historyInsertion = config.getBoolean("hmda.analytics.historyInsertion")
