@@ -75,8 +75,7 @@ object HmdaPlatform extends App {
 
   // TODO: Fix this as initializing it here is not a good idea, this should be initialized in HmdaPersistence and passed into HmdaValidationError
   val stringKafkaProducer      = KafkaUtils.getStringKafkaProducer(system)
-  val institutionKafkaProducer = KafkaUtils.getInstitutionKafkaProducer(system)
-
+ 
   //Start Persistence
   classic.spawn(HmdaPersistence(), HmdaPersistence.name)
 

@@ -87,8 +87,7 @@ private class SignHttpApi(log: Logger, sharding: ClusterSharding)(implicit t: Ti
                               uri: Uri,
                               username: String
                             ): Route = {
-    log.info(s"inside signSubmission ${lei} and ${seqNr}")
-    val submissionId = SubmissionId(lei, Period(year, quarter), seqNr)
+     val submissionId = SubmissionId(lei, Period(year, quarter), seqNr)
     if (!signed) badRequest(submissionId, uri, "Illegal argument: signed = false")
     else {
       val hmdaValidationError                    = selectHmdaValidationError(sharding, submissionId)

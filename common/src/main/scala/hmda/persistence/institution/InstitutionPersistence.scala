@@ -8,21 +8,33 @@ import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
+import akka.actor.typed.ActorSystem
+import akka.actor.typed.scaladsl.adapter._
+import akka.actor.{ActorSystem => ClassicActorSystem}
+import akka.management.cluster.bootstrap.ClusterBootstrap
+import akka.management.scaladsl.AkkaManagement
 import akka.stream.Materializer
-import com.typesafe.config.Config
-import hmda.HmdaPlatform.{institutionKafkaProducer, log}
+import akka.util.Timeout
+
+import scala.concurrent.ExecutionContext
+import org.slf4j.LoggerFactory
+
+import scala.concurrent.duration._
+import akka.util.Timeout
+import com.typesafe.config.{Config, ConfigFactory}
 import hmda.messages.institution.InstitutionCommands._
 import hmda.messages.institution.InstitutionEvents._
 import hmda.messages.pubsub.HmdaTopics._
 import hmda.model.institution.{Institution, InstitutionDetail}
 import hmda.persistence.HmdaTypedPersistentActor
+import hmda.publication.KafkaUtils
 import hmda.publication.KafkaUtils._
-import com.typesafe.config.ConfigFactory
 import hmda.util.FieldNullifyUtility.nullifyInstitutionFields
+import org.apache.kafka.clients.producer.{KafkaProducer, Producer}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionCommand, InstitutionEvent, InstitutionState] {
+object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionCommand, InstitutionEvent, InstitutionState] with App {
   override final val name = "Institution"
 
   override def behavior(entityId: String): Behavior[InstitutionCommand] =
@@ -47,6 +59,7 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
     val louConfig = ConfigFactory.load("application.conf").getConfig("filter")
     val louList =
       louConfig.getString("lou-filter-list").toUpperCase.split(",")
+    val institutionKafkaProducer = KafkaUtils.getInstitutionKafkaProducer(system)
 
     (state, cmd) =>
       cmd match {
@@ -61,7 +74,7 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
             Effect.persist(InstitutionCreated(i)).thenRun { _ =>
               log.debug(s"Institution Created: ${i.toString}")
               val event = InstitutionCreated(i)
-              publishInstitutionEvent(i.LEI, InstitutionKafkaEvent("InstitutionCreated", event), config)
+              publishInstitutionEvent(i.LEI, InstitutionKafkaEvent("InstitutionCreated", event), config,institutionKafkaProducer)
               replyTo ! event
             }
           } else {
@@ -78,7 +91,7 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
             Effect.persist(InstitutionModified(i)).thenRun { _ =>
               log.debug(s"Institution Modified: ${i.toString}")
               val event = InstitutionModified(i)
-              publishInstitutionEvent(i.LEI, InstitutionKafkaEvent("InstitutionModified", event), config)
+              publishInstitutionEvent(i.LEI, InstitutionKafkaEvent("InstitutionModified", event), config,institutionKafkaProducer)
               replyTo ! event
             }
           } else {
@@ -94,7 +107,7 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
             Effect.persist(InstitutionDeleted(lei, activityYear)).thenRun { _ =>
               log.debug(s"Institution Deleted: $lei")
               val event = InstitutionDeleted(lei, activityYear)
-              publishInstitutionEvent(lei, InstitutionKafkaEvent("InstitutionDeleted", event), config)
+              publishInstitutionEvent(lei, InstitutionKafkaEvent("InstitutionDeleted", event), config,institutionKafkaProducer)
               replyTo ! event
             }
           } else {
@@ -144,7 +157,8 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
   private def publishInstitutionEvent(
                                        institutionID: String,
                                        event: InstitutionKafkaEvent,
-                                       config: Config
+                                       config: Config,
+                                       institutionKafkaProducer: Producer[String,InstitutionKafkaEvent]
                                      )(implicit system: ActorSystem[_], materializer: Materializer): Future[Done] =
     produceInstitutionRecord(institutionTopic, institutionID, event, institutionKafkaProducer)
 
@@ -170,7 +184,7 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
       if(parts.size == 1) Some(EntityId(parts.head, 2018))
       else if(parts.size == 2) Some(EntityId(parts(0), parts(1).toInt))
       else {
-        log.error(s"Cant parse institution entity id: ${entityIdStr}")
+      //  log.error(s"Cant parse institution entity id: ${entityIdStr}")
         None
       }
     } else {
