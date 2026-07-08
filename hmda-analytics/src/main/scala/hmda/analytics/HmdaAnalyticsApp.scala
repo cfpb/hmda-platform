@@ -353,7 +353,13 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
     val originalHasFiledQ1Flag = originalInstOpt.getOrElse(Institution.empty).quarterlyFilerHasFiledQ1
     val originalHasFiledQ2Flag = originalInstOpt.getOrElse(Institution.empty).quarterlyFilerHasFiledQ2
     val originalHasFiledQ3Flag = originalInstOpt.getOrElse(Institution.empty).quarterlyFilerHasFiledQ3
-    val institutionId_2017 =originalInstOpt.getOrElse(Institution.empty).institutionId_2017
+    val institutionId_2017Flag =originalInstOpt.getOrElse(Institution.empty).institutionId_2017
+    val emailDomainsFlag = originalInstOpt.getOrElse(Institution.empty).emailDomains
+
+
+     log.info(s"Institution Name:" +transmittalSheetEntity.institutionName)
+    log.info(s"City Name:" +transmittalSheetEntity.city)
+    log.info(s"State Name:" +transmittalSheetEntity.state)
 
     val iFilerFlagsSet = incomingInstitution.copy(
       LEI = transmittalSheetEntity.lei,
@@ -361,12 +367,16 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
       agency =Agency.valueOf( transmittalSheetEntity.agency),
       taxId = Some(transmittalSheetEntity.taxId),
       respondent = Respondent(Some(transmittalSheetEntity.institutionName),Some(transmittalSheetEntity.state),Some(transmittalSheetEntity.city)),
-      institutionId_2017=institutionId_2017,
+      institutionId_2017=institutionId_2017Flag,
+      emailDomains=emailDomainsFlag,
       hmdaFiler = originalFilerFlag,
       quarterlyFilerHasFiledQ1 = originalHasFiledQ1Flag,
       quarterlyFilerHasFiledQ2 = originalHasFiledQ2Flag,
       quarterlyFilerHasFiledQ3 = originalHasFiledQ3Flag
     )
+    log.info(s"Flag Institution Name:" +iFilerFlagsSet.respondent.name)
+    log.info(s"Flag City Name:" +iFilerFlagsSet.respondent.city)
+    log.info(s"Flag State Name:" +iFilerFlagsSet.respondent.state)
     institutionPersistence ? (ref => ModifyInstitution(iFilerFlagsSet, ref))
   }
 
