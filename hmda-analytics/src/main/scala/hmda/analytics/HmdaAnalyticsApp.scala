@@ -3,6 +3,7 @@ package hmda.analytics
 import akka.Done
 import akka.actor.{ActorSystem, typed}
 import akka.actor.typed.scaladsl.adapter._
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import akka.kafka.scaladsl.Consumer.DrainingControl
 import akka.kafka.scaladsl.{Committer, Consumer}
 import akka.kafka.{CommitterSettings, ConsumerSettings, Subscriptions}
@@ -10,14 +11,20 @@ import akka.stream.Materializer
 import akka.stream.scaladsl.{Keep, Sink, Source}
 import akka.util.{ByteString, Timeout}
 import com.typesafe.config.ConfigFactory
+import hmda.analytics.HmdaAnalyticsApp.generateInstitutionEntity
 import hmda.analytics.query._
 import hmda.messages.HmdaMessageFilter
+import hmda.messages.institution.InstitutionCommands.{GetInstitution, InstitutionCommand, ModifyInstitution}
+import hmda.messages.institution.InstitutionEvents.InstitutionEvent
 import hmda.messages.pubsub.{HmdaGroups, HmdaTopics}
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.submission.SubmissionId
 import hmda.model.filing.ts.TransmittalSheet
+import hmda.model.institution.{Agency, Institution, Respondent}
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
+import hmda.persistence.institution.InstitutionPersistence
+import hmda.persistence.institution.InstitutionPersistence.startShardRegion
 import hmda.publication.KafkaUtils._
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.HmdaQuery.{readRawData, readSubmission}
@@ -60,6 +67,11 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
   val larDeletion = config.getBoolean("hmda.analytics.larDeletion")
   val historyInsertion = config.getBoolean("hmda.analytics.historyInsertion")
   val tsDeletion = config.getBoolean("hmda.analytics.tsDeletion")
+  val sharding = ClusterSharding(typedSystem)
+
+  startShardRegion(sharding)
+
+
   /**
    * Note: hmda-analytics microservice reads the JDBC_URL env var from inst-postgres-credentials secret.
    * In beta namespace this environment variable has currentSchema=hmda_beta_user appended to it to change the schema
@@ -207,9 +219,15 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
             submissionId.period.year.toString,
             submissionId.period.quarter.getOrElse("")
           )
+          val institutionEntity=generateInstitutionEntity(ts)
+          val institution= Institution.empty
+          val institutionPersistence = InstitutionPersistence.selectInstitution(sharding, institutionEntity.lei, institutionEntity.activityYear)
+
           val enforceQuarterly = submissionId.period.quarter.isDefined
-          if (ts.year>2023) {institutionRepo.updateByLei(generateInstituionEntity(ts))}
+          if (ts.year>2023) {institutionRepo.updateByLei(generateInstitutionEntity(ts))}
           for {
+             originalInstituion <- institutionPersistence ? GetInstitution
+            _ <- modifyInstitutionViaCassandra(institution, originalInstituion,ts,institutionPersistence)
             signdate <- signDate
             firstsigndate <- firstSignDateSubmissionHistory
             insertorupdate <- {
@@ -326,7 +344,34 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
   }
 
-  private def generateInstituionEntity(ts: TransmittalSheetEntity) = {
+  private def modifyInstitutionViaCassandra(
+                          incomingInstitution: Institution,
+                          originalInstOpt: Option[Institution],
+                          transmittalSheetEntity: TransmittalSheetEntity,
+                          institutionPersistence: EntityRef[InstitutionCommand]
+                        ): Future[InstitutionEvent] = {
+    val originalFilerFlag      = originalInstOpt.getOrElse(Institution.empty).hmdaFiler
+    val originalHasFiledQ1Flag = originalInstOpt.getOrElse(Institution.empty).quarterlyFilerHasFiledQ1
+    val originalHasFiledQ2Flag = originalInstOpt.getOrElse(Institution.empty).quarterlyFilerHasFiledQ2
+    val originalHasFiledQ3Flag = originalInstOpt.getOrElse(Institution.empty).quarterlyFilerHasFiledQ3
+    val institutionId_2017 =originalInstOpt.getOrElse(Institution.empty).institutionId_2017
+
+    val iFilerFlagsSet = incomingInstitution.copy(
+      LEI = transmittalSheetEntity.lei,
+      activityYear = transmittalSheetEntity.year,
+      agency =Agency.valueOf( transmittalSheetEntity.agency),
+      taxId = Some(transmittalSheetEntity.taxId),
+      respondent = Respondent(Some(transmittalSheetEntity.institutionName),Some(transmittalSheetEntity.state),Some(transmittalSheetEntity.city)),
+      institutionId_2017=institutionId_2017,
+      hmdaFiler = originalFilerFlag,
+      quarterlyFilerHasFiledQ1 = originalHasFiledQ1Flag,
+      quarterlyFilerHasFiledQ2 = originalHasFiledQ2Flag,
+      quarterlyFilerHasFiledQ3 = originalHasFiledQ3Flag
+    )
+    institutionPersistence ? (ref => ModifyInstitution(iFilerFlagsSet, ref))
+  }
+
+  private def generateInstitutionEntity(ts: TransmittalSheetEntity) = {
 
       InstitutionTSEntity(
         lei = ts.lei,

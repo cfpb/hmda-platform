@@ -40,6 +40,7 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
   override def behavior(entityId: String): Behavior[InstitutionCommand] =
     Behaviors.setup { ctx =>
       ctx.log.info(s"Started Institution: $entityId")
+      val sharding                             = ClusterSharding(ctx.system)
       EventSourcedBehavior[InstitutionCommand, InstitutionEvent, InstitutionState](
         persistenceId = PersistenceId.ofUniqueId(entityId),
         emptyState = InstitutionState(None),
@@ -198,4 +199,5 @@ object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionComman
 
   def selectInstitution(sharding: ClusterSharding, lei: String, year: Int): EntityRef[InstitutionCommand] =
     sharding.entityRefFor(InstitutionPersistence.typeKey, makeEntityId(lei, year))
+
 }
