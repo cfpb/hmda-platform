@@ -225,8 +225,8 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
           val enforceQuarterly = submissionId.period.quarter.isDefined
           if (ts.year>2023) {institutionRepo.updateByLei(generateInstitutionEntity(ts))}
           for {
-             originalInstituion <- institutionPersistence ? GetInstitution
-            _ <- modifyInstitutionViaCassandra(institution, originalInstituion,ts,institutionPersistence)
+            originalInstituion <- institutionPersistence ? GetInstitution
+            _ <- modifyActorPersistenceInstitution(institution, originalInstituion,ts,institutionPersistence)
             signdate <- signDate
             firstsigndate <- firstSignDateSubmissionHistory
             insertorupdate <- {
@@ -343,7 +343,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
 
   }
 
-  private def modifyInstitutionViaCassandra(
+  private def modifyActorPersistenceInstitution(
                           incomingInstitution: Institution,
                           originalInstOpt: Option[Institution],
                           transmittalSheetEntity: TransmittalSheetEntity,
