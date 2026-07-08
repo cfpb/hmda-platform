@@ -34,7 +34,7 @@ import org.apache.kafka.clients.producer.{KafkaProducer, Producer}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionCommand, InstitutionEvent, InstitutionState] with App {
+object InstitutionPersistence extends HmdaTypedPersistentActor[InstitutionCommand, InstitutionEvent, InstitutionState] {
   override final val name = "Institution"
 
   override def behavior(entityId: String): Behavior[InstitutionCommand] =
