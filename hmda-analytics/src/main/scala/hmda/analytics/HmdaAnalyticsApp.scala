@@ -13,7 +13,7 @@ import akka.util.{ByteString, Timeout}
 import com.typesafe.config.ConfigFactory
 import hmda.analytics.query._
 import hmda.messages.HmdaMessageFilter
-import hmda.messages.institution.InstitutionCommands.{GetInstitution, InstitutionCommand, ModifyInstitution}
+import hmda.messages.institution.InstitutionCommands.{GetInstitution, InstitutionCommand, InstitutionStop, ModifyInstitution}
 import hmda.messages.institution.InstitutionEvents.InstitutionEvent
 import hmda.messages.pubsub.{HmdaGroups, HmdaTopics}
 import hmda.model.filing.lar.LoanApplicationRegister
@@ -235,7 +235,10 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
                 if (firstsigndate.head == 0) resolvedSignDate
                 else Some(firstsigndate.head)
               }
-              tsRepo.insert(copyTs(ts, resolvedSignDate, resolvedFirstSignDate, enforceQuarterly))
+             val tsRepoResult = tsRepo.insert(copyTs(ts, resolvedSignDate, resolvedFirstSignDate, enforceQuarterly))
+              institutionPersistence ! InstitutionStop
+              tsRepoResult
+
             }
           } yield insertorupdate
         }
@@ -356,11 +359,6 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
     val institutionId_2017Flag =originalInstOpt.getOrElse(Institution.empty).institutionId_2017
     val emailDomainsFlag = originalInstOpt.getOrElse(Institution.empty).emailDomains
 
-
-     log.info(s"Institution Name:" +transmittalSheetEntity.institutionName)
-    log.info(s"City Name:" +transmittalSheetEntity.city)
-    log.info(s"State Name:" +transmittalSheetEntity.state)
-
     val iFilerFlagsSet = incomingInstitution.copy(
       LEI = transmittalSheetEntity.lei,
       activityYear = transmittalSheetEntity.year,
@@ -374,10 +372,10 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
       quarterlyFilerHasFiledQ2 = originalHasFiledQ2Flag,
       quarterlyFilerHasFiledQ3 = originalHasFiledQ3Flag
     )
-    log.info(s"Flag Institution Name:" +iFilerFlagsSet.respondent.name)
-    log.info(s"Flag City Name:" +iFilerFlagsSet.respondent.city)
-    log.info(s"Flag State Name:" +iFilerFlagsSet.respondent.state)
+
     institutionPersistence ? (ref => ModifyInstitution(iFilerFlagsSet, ref))
+
+
   }
 
   private def generateInstitutionEntity(ts: TransmittalSheetEntity) = {
