@@ -297,6 +297,18 @@ object PublishingGuard {
     case object y2023Q1 extends Period with Quarter
     case object y2023Q2 extends Period with Quarter
     case object y2023Q3 extends Period with Quarter
+
+    case object y2024Q1 extends Period with Quarter
+    case object y2024Q2 extends Period with Quarter
+    case object y2024Q3 extends Period with Quarter
+
+    case object y2025Q1 extends Period with Quarter
+    case object y2025Q2 extends Period with Quarter
+    case object y2025Q3 extends Period with Quarter
+
+    case object y2026Q1 extends Period with Quarter
+    case object y2026Q2 extends Period with Quarter
+    case object y2026Q3 extends Period with Quarter
   }
 
   sealed trait Scope

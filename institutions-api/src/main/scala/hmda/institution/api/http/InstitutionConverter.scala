@@ -3,11 +3,13 @@ package hmda.institution.api.http
 import hmda.institution.query.{InstitutionEmailEntity, InstitutionEntity}
 import hmda.model.institution._
 import hmda.util.CSVConsolidator.listDeDupeToList
+import hmda.util.FieldNullifyUtility.nullifyInstitutionFields
 
 object InstitutionConverter {
 
   def convert(entity: InstitutionEntity, emails: Seq[String]): Institution = {
-    Institution(
+
+    nullifyInstitutionFields(Institution(
       entity.activityYear,
       entity.lei,
       Agency.valueOf(entity.agency),
@@ -38,11 +40,11 @@ object InstitutionConverter {
       entity.quarterlyFilerHasFiledQ2,
       entity.quarterlyFilerHasFiledQ3,
       entity.notes
-    )
+    ))
   }
 
   def convert(institution: Institution): InstitutionEntity =
-    InstitutionEntity(
+  InstitutionEntity(
       institution.LEI,
       institution.activityYear,
       institution.agency.code,

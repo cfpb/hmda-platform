@@ -552,6 +552,7 @@ lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
         case "reference.conf" => MergeStrategy.concat
         case metaInfMatcher(_) => MergeStrategy.discard
         case PathList("META-INF", "services", xs @ _*) => MergeStrategy.concat
+
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
         case PathList("net", "jpountz", xs @ _*) => MergeStrategy.last
         case PathList("org", "lz4", xs @ _*) => MergeStrategy.last
