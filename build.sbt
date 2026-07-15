@@ -66,35 +66,12 @@ lazy val dockerSettings = Seq(
     } else dockerBuildCommand.value
   },
   Docker / maintainer := "Hmda-Ops",
-  dockerBaseImage := "eclipse-temurin:25.0.2_10-jdk-alpine-3.23",
+  dockerBaseImage := "dhi.io/eclipse-temurin:26.0.1.8-alpine3.24-dev",
+
   dockerRepository := Some("hmda"),
+  Docker / daemonUser := "nonroot",
 
-  dockerCommands := {
-    val zscalerStage = Seq(
-      Cmd("FROM", s"${dockerBaseImage.value} AS zscaler"),
-      Cmd("RUN", "apk add ca-certificates --no-cache --no-check-certificate"),
-      Cmd("ADD", "https://raw.githubusercontent.com/cfpb/zscaler-cert/refs/heads/main/zscaler_root_ca.pem", "/usr/local/share/ca-certificates/zscaler_root_ca.pem"),
-      Cmd("RUN", "update-ca-certificates"),
-      Cmd("WORKDIR", "/app"),
-      Cmd("RUN", "cp /etc/ssl/certs/ca-certificates.crt /app/ca-certificates.crt")
-    )
-
-    val finalStage = dockerCommands.value.flatMap {
-      // Re-initialize the final stage with the desired base image
-      case cmd@Cmd("FROM", _) =>
-        List(
-          Cmd("FROM", dockerBaseImage.value),
-          Cmd("COPY", "--from=zscaler", "/app/ca-certificates.crt", "/etc/ssl/certs/ca-certificates.crt"),
-          Cmd("RUN", "apk update"),
-          Cmd("RUN", "rm /var/cache/apk/*")
-        )
-      case other => List(other)
-    }
-
-    zscalerStage ++ finalStage
-  },
 )
-
 
 lazy val packageSettings = Seq(
   // removes all jar mappings in universal and appends the fat jar
