@@ -66,8 +66,11 @@ lazy val dockerSettings = Seq(
     } else dockerBuildCommand.value
   },
   Docker / maintainer := "Hmda-Ops",
-  dockerBaseImage := "eclipse-temurin:25.0.2_10-jdk-alpine-3.23",
+  // dockerBaseImage := "eclipse-temurin:26.0.1_8-jre-alpine-3.23",
+  dockerBaseImage := "dhi.io/eclipse-temurin:26.0.1.8-alpine3.24-dev",
+
   dockerRepository := Some("hmda"),
+  Docker / daemonUser := "nonroot",
 
   dockerCommands := {
     val zscalerStage = Seq(
@@ -84,9 +87,10 @@ lazy val dockerSettings = Seq(
       case cmd@Cmd("FROM", _) =>
         List(
           Cmd("FROM", dockerBaseImage.value),
-          Cmd("COPY", "--from=zscaler", "/app/ca-certificates.crt", "/etc/ssl/certs/ca-certificates.crt"),
-          Cmd("RUN", "apk update"),
-          Cmd("RUN", "rm /var/cache/apk/*")
+//        Cmd("COPY", "--from=zscaler", "/app/ca-certificates.crt", "/etc/ssl/certs/ca-certificates.crt"),
+//        Cmd("RUN", "apk update"),
+//        Cmd("RUN", "apk add --no-cache openssl>=3.5.7-r0 libssl3>=3.5.7-r0 libcrypto3>=3.5.7-r0"),
+//        Cmd("RUN", "rm -rf /var/cache/apk/*")
         )
       case other => List(other)
     }
