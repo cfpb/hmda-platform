@@ -1,35 +1,44 @@
 package hmda.api.http.filing.submissions
 
+import akka.actor.typed.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{ StatusCodes, Uri }
 import akka.http.scaladsl.server.Directives.{ encodeResponse, handleRejections, _ }
 import akka.http.scaladsl.server.Route
-import akka.util.Timeout
+import akka.stream.scaladsl.Sink
+import akka.util.{ ByteString, Timeout }
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{ cors, corsRejectionHandler }
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.filing.submissions.{ EditsSign, SignedResponse }
 import hmda.auth.OAuth2Authorization
+import hmda.messages.institution.InstitutionCommands.{ GetInstitution, ModifyInstitution }
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.messages.submission.SubmissionProcessingCommands.SignSubmission
 import hmda.messages.submission.SubmissionProcessingEvents.{ SubmissionNotReadyToBeSigned, SubmissionSigned, SubmissionSignedEvent }
 import hmda.model.filing.submission.{ Submission, SubmissionId }
+import hmda.model.filing.ts.TransmittalSheet
+import hmda.model.institution.{ Institution, Respondent }
+import hmda.parser.filing.ts.TsCsvParser
+import hmda.persistence.institution.InstitutionPersistence.selectInstitution
 import hmda.persistence.submission.HmdaValidationError.selectHmdaValidationError
 import hmda.persistence.submission.SubmissionPersistence.selectSubmissionPersistence
+import hmda.query.HmdaQuery.readRawData
 import hmda.util.http.FilingResponseUtils._
+import hmda.util.streams.FlowUtils.framing
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
 
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
 object SignHttpApi {
-  def create(log: Logger, sharding: ClusterSharding)(implicit t: Timeout): OAuth2Authorization => Route =
-    new SignHttpApi(log, sharding)(t).signRoutes _
+  def create(log: Logger, sharding: ClusterSharding)(implicit t: Timeout, ec: ExecutionContext, system: ActorSystem[_]): OAuth2Authorization => Route =
+    new SignHttpApi(log, sharding)(t, ec, system).signRoutes _
 }
 
-private class SignHttpApi(log: Logger, sharding: ClusterSharding)(implicit t: Timeout) {
+private class SignHttpApi(log: Logger, sharding: ClusterSharding)(implicit t: Timeout, ec: ExecutionContext, system: ActorSystem[_]) {
 
   // GET & POST institutions/<lei>/filings/<year>/submissions/<submissionId>/sign
   // GET & POST institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/sign
@@ -92,7 +101,9 @@ private class SignHttpApi(log: Logger, sharding: ClusterSharding)(implicit t: Ti
     if (!signed) badRequest(submissionId, uri, "Illegal argument: signed = false")
     else {
       val hmdaValidationError                    = selectHmdaValidationError(sharding, submissionId)
+      val institutionPersistence = selectInstitution(sharding, lei, year)
       val fSigned: Future[SubmissionSignedEvent] = hmdaValidationError ? (ref => SignSubmission(submissionId, ref, email, username))
+
       onComplete(fSigned) {
         case Failure(e) =>
           failedResponse(StatusCodes.InternalServerError, uri, e)
@@ -101,6 +112,24 @@ private class SignHttpApi(log: Logger, sharding: ClusterSharding)(implicit t: Ti
           submissionSignedEvent match {
             case signed @ SubmissionSigned(_, _, status) =>
               val signedResponse = SignedResponse(email, signed.timestamp, signed.receipt, status, Some(username))
+
+              for {
+                originalInstitution <- institutionPersistence ? GetInstitution
+                tsRes <- readRawData(submissionId)
+                  .take(1)
+                  .map(_.data)
+                  .map(ByteString(_))
+                  .via(framing("\n"))
+                  .map(_.utf8String.trim)
+                  .map(s => TsCsvParser(s, fromCassandra = true))
+                  .runWith(Sink.head)
+                _ = tsRes match {
+                  case Right(ts) =>
+                    institutionPersistence ? (ref => ModifyInstitution(getUpdatedInstitution(Institution.empty, originalInstitution, ts), ref))
+                  case Left(e) => log.error("Failed to modify actor persistence institution.\n{}", e)
+                }
+              } yield ()
+
               complete(ToResponseMarshallable(signedResponse))
 
             case SubmissionNotReadyToBeSigned(id) =>
@@ -118,4 +147,36 @@ private class SignHttpApi(log: Logger, sharding: ClusterSharding)(implicit t: Ti
         }
       }
     }
+
+  private def getUpdatedInstitution(
+    incomingInstitution: Institution,
+    originalInstOpt: Option[Institution],
+    transmittalSheet: TransmittalSheet,
+  ): Institution = {
+    val originalFilerFlag = originalInstOpt.getOrElse(Institution.empty).hmdaFiler
+    val originalHasFiledQ1Flag = originalInstOpt.getOrElse(Institution.empty).quarterlyFilerHasFiledQ1
+    val originalHasFiledQ2Flag = originalInstOpt.getOrElse(Institution.empty).quarterlyFilerHasFiledQ2
+    val originalHasFiledQ3Flag = originalInstOpt.getOrElse(Institution.empty).quarterlyFilerHasFiledQ3
+    val institutionId_2017Flag =originalInstOpt.getOrElse(Institution.empty).institutionId_2017
+    val emailDomainsFlag = originalInstOpt.getOrElse(Institution.empty).emailDomains
+
+    val iFilerFlagsSet = incomingInstitution.copy(
+      LEI = transmittalSheet.LEI,
+      activityYear = transmittalSheet.year,
+      agency = transmittalSheet.agency,
+      taxId = Some(transmittalSheet.taxId),
+      respondent = Respondent(
+        Some(transmittalSheet.institutionName),
+        Some(transmittalSheet.contact.address.state),
+        Some(transmittalSheet.contact.address.city)),
+      institutionId_2017 = institutionId_2017Flag,
+      emailDomains = emailDomainsFlag,
+      hmdaFiler = originalFilerFlag,
+      quarterlyFilerHasFiledQ1 = originalHasFiledQ1Flag,
+      quarterlyFilerHasFiledQ2 = originalHasFiledQ2Flag,
+      quarterlyFilerHasFiledQ3 = originalHasFiledQ3Flag
+    )
+
+    iFilerFlagsSet
+  }
 }
