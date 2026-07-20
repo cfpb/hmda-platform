@@ -14,16 +14,20 @@ import slick.jdbc.JdbcProfile
 
 import scala.util.{ Failure, Success, Try }
 
-object HmdaPersistenceMigrator extends App {
+object HmdaPersistenceMigrator {
   private val log = LoggerFactory.getLogger(getClass)
-  val dbConfig: DatabaseConfig[JdbcProfile] = DatabaseConfig.forConfig[JdbcProfile]("slickdb")
+  private val dbConfig: DatabaseConfig[JdbcProfile] = DatabaseConfig.forConfig[JdbcProfile]("slickdb")
+  val name = "HmdaPersistenceMigrator"
   import dbConfig._
   import dbConfig.profile.api._
 
-  private val main: Behavior[Try[Result]] = Behaviors.setup { context =>
-    val migration = new MigrationTool(context.system)
+  val main: Behavior[Try[Result]] = Behaviors.setup { context =>
+    implicit val system: ActorSystem[Nothing] = context.system
+    implicit val ec = context.executionContext
+    implicit val mat = Materializer(system)
+    val migration = new MigrationTool(system)
 
-    val migrationConfig = context.system.settings.config.getConfig("akka.persistence.r2dbc.migration")
+    val migrationConfig = system.settings.config.getConfig("akka.persistence.r2dbc.migration")
 
     val skipLeis = migrationConfig.getStringList("hmda.lei.skip")
 
@@ -31,8 +35,6 @@ object HmdaPersistenceMigrator extends App {
     val sourceReadJournal = PersistenceQuery(context.system).readJournalFor[ReadJournal](sourceQueryPluginId)
     val sourcePersistenceIdsQuery = sourceReadJournal.asInstanceOf[CurrentPersistenceIdsQuery]
     val parallelism = migrationConfig.getInt("parallelism")
-    implicit val ec = context.executionContext
-    implicit val mat = Materializer(context.system)
 
     sys.env.get("PERSISTENCE_ID") match {
       case Some("DEBUG") =>
@@ -137,6 +139,4 @@ object HmdaPersistenceMigrator extends App {
         Behaviors.stopped
     }
   }
-
-  ActorSystem(main, "HmdaPersistenceMigrator")
 }

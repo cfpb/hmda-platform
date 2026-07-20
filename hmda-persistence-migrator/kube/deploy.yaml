@@ -1,0 +1,158 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: akka-persistence-failover-deployment
+  labels:
+    app: akka-persistence-failover-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: akka-persistence-failover-deployment
+  template:
+    metadata:
+      labels:
+        app: akka-persistence-failover-deployment
+    spec:
+      serviceAccountName: hmda-platform
+      containers:
+        - name: akka-persistence-migrator
+          image: 039774476268.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:persistence_migrator.260720.1
+          env:
+            - name: MODE
+              value: server
+            - name: CASSANDRA_JOURNAL_KEYSPACE
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-keyspace
+            - name: CASSANDRA_SNAPSHOT_KEYSPACE
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-keyspace-snapshot
+            - name: CASSANDRA_CLUSTER_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-hosts
+            - name: CASSANDRA_CLUSTER_DC
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-cluster-dc
+            - name: AKKA_LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: akka-license-key
+                  key: key
+#            - name: AKKA_PERSISTENCE_MIGRATE_BATCH
+#              value: "500"
+#            - name: HMDA_MIGRATOR_LOG
+#              value: DEBUG
+#            - name: AKKA_PERSISTENCE_MIGRATE_PARALLELISM
+#              value: "1"
+#            - name: PERSISTENCE_ID
+#              value: "HmdaRawData-549300ONBM4MGXXBTA44-2022-1"
+            - name: AKKA_PERSISTENCE_PG_JOURNAL_TABLE
+              value: event_journal
+            - name: AKKA_PERSISTENCE_PG_SNAP_TABLE
+              value: snapshot
+            - name: AKKA_PERSISTENCE_PG_DURABLE_STATE_TABLE
+              value: durable_state
+            - name: AKKA_PERSISTENCE_PG_SSL_ENABLED
+              value: "on"
+            - name: AKKA_PERSISTENCE_PG_SSL_MODE
+              value: allow
+#            - name: MIGRATION_TOOL_LOG
+#              value: DEBUG
+            - name: AKKA_PERSISTENCE_PG_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: actor-persistence-secrets
+                  key: host
+            - name: AKKA_PERSISTENCE_PG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: actor-persistence-secrets
+                  key: username
+            - name: AKKA_PERSISTENCE_PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: actor-persistence-secrets
+                  key: password
+            - name: AKKA_PERSISTENCE_PG_DB
+              valueFrom:
+                secretKeyRef:
+                  name: actor-persistence-secrets
+                  key: database
+            - name: AKKA_PERSISTENCE_PG_SCHEMA
+              value: actor_persistence_failover
+            - name: CASSANDRA_CLUSTER_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: cluster1-user
+                  key: username
+            - name: CASSANDRA_CLUSTER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cluster1-user
+                  key: password
+          volumeMounts:
+            - name: actor-persistence-secrets
+              mountPath: /mnt/actor-persistence-secrets
+              readOnly: true
+            - name: akka-license
+              mountPath: /mnt/akka-license
+              readOnly: true
+#            - name: cassandra-secrets
+#              mountPath: /mnt/cass-secrets
+#              readOnly: true
+          ports:
+            - name: http
+              containerPort: 8080
+      volumes:
+       - name: actor-persistence-secrets
+         csi:
+           driver: secrets-store.csi.k8s.io
+           readOnly: true
+           volumeAttributes:
+             secretProviderClass: actor-persistence-secrets-provider
+       - name: akka-license
+         csi:
+           driver: secrets-store.csi.k8s.io
+           readOnly: true
+           volumeAttributes:
+             secretProviderClass: akka-license-provider
+#       - name: cassandra-secrets
+#         csi:
+#           driver: secrets-store.csi.k8s.io
+#           readOnly: true
+#           volumeAttributes:
+#             secretProviderClass: k8ssandra-credentials-provider
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: akka-persistence-failover-deployment
+  labels:
+    service: akka-persistence-failover-deployment
+spec:
+  selector:
+    app: akka-persistence-failover-deployment
+  ports:
+    - port: 8080
+      targetPort: 8080
+---
+apiVersion: getambassador.io/v2
+kind: Mapping
+metadata:
+  labels:
+    service: akka-persistence-failover-deployment
+  name: akka-persistence-failover-deployment
+spec:
+  host: hmda-cass-eks.staging-regtech.aws.cfpb.gov
+  timeout_ms: 300000
+  prefix: /migrator/
+  rewrite: /
+  service: akka-persistence-failover-deployment:8080

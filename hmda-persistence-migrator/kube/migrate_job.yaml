@@ -1,14 +1,14 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: akka-persistence-failover-migrator-260629-3
+  name: akka-persistence-failover-migrator-260720-1
 spec:
   template:
     spec:
       serviceAccountName: hmda-platform
       containers:
         - name: akka-persistence-migrator
-          image: 039774476268.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:persistence_migrator.260629.1
+          image: 039774476268.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:persistence_migrator.260720.1
           env:
             - name: CASSANDRA_JOURNAL_KEYSPACE
               valueFrom:
