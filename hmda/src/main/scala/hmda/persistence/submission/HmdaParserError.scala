@@ -42,7 +42,7 @@ object HmdaParserError extends HmdaTypedPersistentActor[SubmissionProcessingComm
         emptyState = HmdaParserErrorState(),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
-      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000, keepNSnapshots = 10))
+      ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 1000))
     }
 
   override def commandHandler(
@@ -51,7 +51,8 @@ object HmdaParserError extends HmdaTypedPersistentActor[SubmissionProcessingComm
     val log                                   = ctx.log
     implicit val system: ActorSystem[_]       = ctx.system
     implicit val materializer: Materializer   = Materializer(ctx)
-    implicit val blockingEc: ExecutionContext = system.dispatchers.lookup(DispatcherSelector.fromConfig("akka.blocking-parser-dispatcher"))
+//    implicit val blockingEc: ExecutionContext = system.dispatchers.lookup(DispatcherSelector.fromConfig("akka.blocking-parser-dispatcher"))
+    implicit val blockingEc: ExecutionContext = system.dispatchers.lookup(DispatcherSelector.default())
     val sharding                              = ClusterSharding(system)
 
     cmd match {

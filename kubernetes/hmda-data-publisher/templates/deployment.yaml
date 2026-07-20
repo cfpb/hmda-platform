@@ -29,6 +29,12 @@ spec:
             readOnly: true
             volumeAttributes:
               secretProviderClass: hmda-rds-secrets-provider
+        - name: akka-license
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: akka-license-provider
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
@@ -39,6 +45,8 @@ spec:
             - name: rds-provider-vol
               readOnly: true
               mountPath: /mnt/rds-secrets-store
+            - name: akka-license
+              mountPath: /mnt/akka-license
             - name: tz-config
               mountPath: /etc/localtime
           securityContext:
@@ -55,6 +63,11 @@ spec:
               name: {{ include "hmda-data-publisher.name" . }}-dynamic-schedule-config
               optional: true
           env:
+          - name: AKKA_LICENSE_KEY
+            valueFrom:
+              secretKeyRef:
+                name: akka-license-key
+                key: key
           - name: AWS_ENVIRONMENT
             valueFrom:
               configMapKeyRef:

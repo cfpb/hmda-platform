@@ -23,6 +23,12 @@ spec:
     spec:
       serviceAccountName: hmda-platform
       volumes:
+        - name: akka-license
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: irsa-akka-license-provider
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
@@ -30,6 +36,8 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           volumeMounts:
+            - name: akka-license
+              mountPath: /mnt/akka-license
             - name: tz-config
               mountPath: /etc/localtime
           securityContext:
@@ -52,6 +60,11 @@ spec:
 #                secretKeyRef:
 #                  name: aws-credentials
 #                  key: aws-secret-access-key
+            - name: AKKA_LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: irsa-akka-license-key
+                  key: key
             - name: AWS_ENVIRONMENT
               valueFrom:
                 configMapKeyRef:

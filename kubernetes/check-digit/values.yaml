@@ -14,6 +14,8 @@ service:
   port: 9091
   targetPort: 9091
   name: http-chk-digit
+  account:
+    name: hmda-platform
 
 grpc:
   type: ClusterIP
