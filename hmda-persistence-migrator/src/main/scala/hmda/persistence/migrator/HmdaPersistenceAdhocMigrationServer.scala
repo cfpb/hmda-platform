@@ -6,7 +6,8 @@ import org.apache.pekko.actor.typed.{ ActorSystem, Behavior }
 import org.apache.pekko.actor.typed.scaladsl.Behaviors
 import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.http.scaladsl.server.Directives._
-import org.apache.pekko.http.scaladsl.server.Directives.{ as, complete, cors, entity, path }
+import org.apache.pekko.http.scaladsl.server.Directives.{ as, complete, entity, path }
+import org.apache.pekko.http.cors.scaladsl.CorsDirectives.cors
 import org.apache.pekko.http.scaladsl.server.Route
 import org.apache.pekko.persistence.r2dbc.migration.MigrationTool
 import org.apache.pekko.util.Timeout
