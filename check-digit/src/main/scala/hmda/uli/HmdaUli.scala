@@ -1,6 +1,6 @@
 package hmda.uli
 
-import akka.actor.typed.ActorSystem
+import org.apache.pekko.actor.typed.ActorSystem
 import hmda.uli.api.http.HmdaUliApi
 import org.slf4j.LoggerFactory
 

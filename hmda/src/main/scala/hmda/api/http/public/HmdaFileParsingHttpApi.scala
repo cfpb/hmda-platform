@@ -1,16 +1,16 @@
 package hmda.api.http.public
 
-import akka.NotUsed
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.headers.RawHeader
-import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, StatusCodes }
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import akka.stream.scaladsl.{ Broadcast, Concat, Flow, GraphDSL, Sink, Source }
-import akka.stream.{ FlowShape, Materializer }
-import akka.util.ByteString
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import org.apache.pekko.NotUsed
+import org.apache.pekko.http.scaladsl.marshalling.ToResponseMarshallable
+import org.apache.pekko.http.scaladsl.model.headers.RawHeader
+import org.apache.pekko.http.scaladsl.model.{ ContentTypes, HttpEntity, StatusCodes }
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.Route
+import org.apache.pekko.stream.scaladsl.{ Broadcast, Concat, Flow, GraphDSL, Sink, Source }
+import org.apache.pekko.stream.{ FlowShape, Materializer }
+import org.apache.pekko.util.ByteString
+import org.apache.pekko.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.filing.submissions.HmdaRowParsedErrorSummary
 import hmda.api.http.utils.ParserErrorUtils
 import hmda.parser.filing.lar.LarCsvParser

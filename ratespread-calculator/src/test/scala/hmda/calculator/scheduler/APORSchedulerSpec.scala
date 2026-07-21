@@ -3,14 +3,14 @@
 //import java.time.LocalDate
 //import java.time.format.DateTimeFormatter
 //
-//import akka.actor.ActorSystem
-//import akka.actor.typed.scaladsl.adapter._
-//import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
-//import akka.stream.alpakka.s3.scaladsl.S3
-//import akka.stream.alpakka.s3.{ MemoryBufferType, S3Attributes, S3Settings }
-//import akka.stream.scaladsl.{ Sink, Source }
-//import akka.testkit.{ ImplicitSender, TestKit }
-//import akka.util.ByteString
+//import org.apache.pekko.actor.ActorSystem
+//import org.apache.pekko.actor.typed.scaladsl.adapter._
+//import org.apache.pekko.stream.connectors.s3.ApiVersion.ListBucketVersion2
+//import org.apache.pekko.stream.connectors.s3.scaladsl.S3
+//import org.apache.pekko.stream.connectors.s3.{ MemoryBufferType, S3Attributes, S3Settings }
+//import org.apache.pekko.stream.scaladsl.{ Sink, Source }
+//import org.apache.pekko.testkit.{ ImplicitSender, TestKit }
+//import org.apache.pekko.util.ByteString
 //import com.adobe.testing.s3mock.S3MockApplication
 //import hmda.calculator.apor.APOR
 //import hmda.calculator.scheduler.APORScheduler.Command

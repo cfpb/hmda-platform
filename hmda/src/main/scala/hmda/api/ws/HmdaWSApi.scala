@@ -1,14 +1,14 @@
 package hmda.api.ws
 
-import akka.actor.CoordinatedShutdown
-import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{ ActorSystem, Behavior }
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import akka.stream.Materializer
-import akka.{ actor, Done }
+import org.apache.pekko.actor.CoordinatedShutdown
+import org.apache.pekko.actor.typed.scaladsl.Behaviors
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.actor.typed.{ ActorSystem, Behavior }
+import org.apache.pekko.http.scaladsl.Http
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.Route
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.{ actor, Done }
 import hmda.api.ws.filing.submissions.SubmissionWsApi
 import hmda.api.ws.routes.BaseWsApi
 

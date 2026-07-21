@@ -1,6 +1,6 @@
 package hmda.serialization.filing
 
-import akka.actor.typed.ActorRefResolver
+import org.apache.pekko.actor.typed.ActorRefResolver
 import hmda.messages.filing.FilingCommands._
 import hmda.persistence.serialization.filing.FilingMessage
 import hmda.persistence.serialization.filing.commands._

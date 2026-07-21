@@ -3,12 +3,12 @@ import BuildSettings._
 import sbtassembly.AssemblyPlugin.autoImport.assemblyMergeStrategy
 import com.typesafe.sbt.packager.docker._
 
-lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson, testContainers, apacheCommonsIO, log4jToSlf4j, kubernetesApi, scalaLogging)
+lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, pekkoHttpSprayJson, testContainers, apacheCommonsIO, log4jToSlf4j, kubernetesApi, scalaLogging)
 
 lazy val sparkDeps =
   Seq(
     postgres,
-    akkaKafkaStreams,
+    pekkoKafkaStreams,
     kafkaClients
   )
 
@@ -16,46 +16,45 @@ lazy val authDeps = Seq(keycloakAdmin, jbossLogging, httpClient)
 
 lazy val keycloakServerDeps = Seq(resteasyClient, resteasyJackson, resteasyMulti)
 
-lazy val akkaDeps = Seq(
-  akkaSlf4J,
-  akkaCluster,
-  akkaTyped,
-  akkaClusterTyped,
-  akkaStream,
-  akkaStreamTyped,
-  akkaManagement,
-  akkaManagementClusterBootstrap,
-  akkaServiceDiscoveryDNS,
-  akkaServiceDiscoveryKubernetes,
-  akkaClusterHttpManagement,
-  akkaClusterHttpManagement,
-  akkaTestkitTyped,
-  akkaStreamsTestKit,
-  akkaCors,
+lazy val pekkoDeps = Seq(
+  pekkoSlf4J,
+  pekkoCluster,
+  pekkoTyped,
+  pekkoClusterTyped,
+  pekkoStream,
+  pekkoStreamTyped,
+  pekkoManagement,
+  pekkoManagementClusterBootstrap,
+  pekkoServiceDiscoveryDNS,
+  pekkoServiceDiscoveryKubernetes,
+  pekkoClusterHttpManagement,
+  pekkoClusterHttpManagement,
+  pekkoTestkitTyped,
+  pekkoStreamsTestKit,
+  pekkoCors,
   mskdriver,
-  akkaKafkaStreams,
+  pekkoKafkaStreams,
   kafkaClients,
-  alpakkaS3,
-  akkaQuartzScheduler,
-  alpakkaFile
+  pekkoS3,
+  pekkoQuartzScheduler,
+  pekkoFile
 )
 
-lazy val akkaPersistenceDeps =
+lazy val pekkoPersistenceDeps =
   Seq(
-    akkaPersistence,
-    akkaClusterSharding,
-    akkaPersistenceTyped,
-    akkaPersistenceQuery,
-    akkaClusterShardingTyped,
-    akkaPersistenceR2DBC,
-    akkaPersistenceCassandra
+    pekkoPersistence,
+    pekkoClusterSharding,
+    pekkoPersistenceTyped,
+    pekkoPersistenceQuery,
+    pekkoClusterShardingTyped,
+    pekkoPersistenceR2DBC,
+    pekkoPersistenceCassandra
   )
 
-lazy val akkaHttpDeps =
-  Seq(akkaHttp, akkaHttp2, akkaHttpXml, akkaHttpTestkit, akkaStreamsTestKit, akkaHttpCirce)
+lazy val pekkoHttpDeps =
+  Seq(pekkoHttp, pekkoHttp2, pekkoHttpXml, pekkoHttpTestkit, pekkoStreamsTestKit, pekkoHttpCirce)
 lazy val circeDeps      = Seq(circe, circeGeneric, circeParser)
 lazy val enumeratumDeps = Seq(enumeratum, enumeratumCirce)
-
 lazy val slickDeps = Seq(slick, slickHikariCP, postgres, h2)
 
 lazy val metaInfMatcher = """META-INF/.+\.(SF|DSA|RSA)""".r
@@ -132,10 +131,13 @@ lazy val common = (project in file("common"))
       scalapb.gen() -> (Compile / sourceManaged).value / "protobuf"
     ),
     Seq(
-      libraryDependencies ++= commonDeps ++ authDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++ List(
+      libraryDependencies ++= commonDeps ++ authDeps ++ pekkoDeps ++ pekkoPersistenceDeps ++ pekkoHttpDeps ++ circeDeps ++ slickDeps ++ List(
         cormorant, cormorantGeneric, scalaMock, scalacheckShapeless, diffx
       )
     ),
+    Seq(dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ))
+    ,
+    // addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
     // https://github.com/aws-samples/amazon-keyspaces-java-driver-helpers
     Runtime / unmanagedBase := baseDirectory.value / "lib"
@@ -156,6 +158,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
   .settings(
     Seq(
       libraryDependencies ++= List(guava, zeroAllocationHashing),
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       Compile / mainClass := Some("hmda.HmdaPlatform"),
       assembly / assemblyJarName := "hmda2.jar",
       assembly / assemblyMergeStrategy := {
@@ -172,6 +175,24 @@ lazy val `hmda-platform` = (project in file("hmda"))
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
+        case PathList("META-INF", "services", xs @ _*) => MergeStrategy.concat
+        case PathList("net", "jpountz", xs @ _*) => MergeStrategy.last
+        case PathList("org", "lz4", xs @ _*) => MergeStrategy.last
+        case PathList(ps @ _*) if ps.last endsWith ".proto" => MergeStrategy.first
+        case PathList("com", "datastax", xs@_*) => MergeStrategy.first
+        case PathList("org", "apache", xs@_*) => MergeStrategy.first
+        case PathList("org", "glassfish", xs@_*) => MergeStrategy.first
+        case PathList("com", "sun", xs@_*) => MergeStrategy.first
+        case x if x.endsWith("reference-overrides.conf") => MergeStrategy.concat
+        case x if x.endsWith("reference.conf") => MergeStrategy.concat
+        case x if x.endsWith("version.conf") => MergeStrategy.concat
+        case x if x.endsWith("module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
+        case x if x.endsWith("/liblz4-java.so") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4ByteBufferUtils$Match.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
         case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
         case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
@@ -199,6 +220,7 @@ lazy val `check-digit` = (project in file("check-digit"))
   .settings(
     Seq(
       Compile / mainClass := Some("hmda.uli.HmdaUli"),
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyJarName := {
         s"${name.value}.jar"
       },
@@ -215,6 +237,24 @@ lazy val `check-digit` = (project in file("check-digit"))
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
+        case PathList("META-INF", "services", xs @ _*) => MergeStrategy.concat
+        case PathList("net", "jpountz", xs @ _*) => MergeStrategy.last
+        case PathList("org", "lz4", xs @ _*) => MergeStrategy.last
+        case PathList(ps @ _*) if ps.last endsWith ".proto" => MergeStrategy.first
+        case PathList("com", "datastax", xs@_*) => MergeStrategy.first
+        case PathList("org", "apache", xs@_*) => MergeStrategy.first
+        case PathList("org", "glassfish", xs@_*) => MergeStrategy.first
+        case PathList("com", "sun", xs@_*) => MergeStrategy.first
+        case x if x.endsWith("reference-overrides.conf") => MergeStrategy.concat
+        case x if x.endsWith("reference.conf") => MergeStrategy.concat
+        case x if x.endsWith("version.conf") => MergeStrategy.concat
+        case x if x.endsWith("module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
+        case x if x.endsWith("/liblz4-java.so") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4ByteBufferUtils$Match.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
         case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
         case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
@@ -240,8 +280,9 @@ lazy val `check-digit` = (project in file("check-digit"))
     .settings(hmdaBuildSettings: _*)
     .settings(
       Seq(
-        libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
+        libraryDependencies ++= commonDeps ++ pekkoDeps ++ pekkoHttpDeps ++ circeDeps ++ slickDeps ++
         enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
+        dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
         Compile / mainClass := Some("hmda.proxy.FileProxy"),
         assembly / assemblyJarName := {
           s"${name.value}.jar"
@@ -258,6 +299,26 @@ lazy val `check-digit` = (project in file("check-digit"))
           case PathList(ps @ _*) if ps.last endsWith ".proto" =>
             MergeStrategy.first
           case "module-info.class" => MergeStrategy.concat
+          case PathList("META-INF", "services", xs @ _*) => MergeStrategy.concat
+          case PathList("net", "jpountz", xs @ _*) => MergeStrategy.last
+          case PathList("org", "lz4", xs @ _*) => MergeStrategy.last
+          case PathList(ps @ _*) if ps.last endsWith ".proto" => MergeStrategy.first
+          case PathList("com", "datastax", xs@_*) => MergeStrategy.first
+          case PathList("org", "apache", xs@_*) => MergeStrategy.first
+          case PathList("org", "glassfish", xs@_*) => MergeStrategy.first
+          case PathList("com", "sun", xs@_*) => MergeStrategy.first
+          case x if x.endsWith("reference-overrides.conf") => MergeStrategy.concat
+          case x if x.endsWith("reference.conf") => MergeStrategy.concat
+          case x if x.endsWith("version.conf") => MergeStrategy.concat
+          case x if x.endsWith("module-info.class") => MergeStrategy.concat
+          case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
+          case x if x.endsWith("/liblz4-java.so") => MergeStrategy.concat
+          case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+          case x if x.endsWith("/LZ4ByteBufferUtils$Match.class") => MergeStrategy.concat
+          case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+          case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+          case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+          case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
           case x if x.endsWith("/module-info.class") => MergeStrategy.concat
           case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
           case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
@@ -284,6 +345,7 @@ lazy val `institutions-api` = (project in file("institutions-api"))
   .settings(
     Seq(
       Compile / mainClass := Some("hmda.institution.HmdaInstitutionApi"),
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "version.conf" => MergeStrategy.concat
@@ -296,6 +358,24 @@ lazy val `institutions-api` = (project in file("institutions-api"))
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
+        case PathList("META-INF", "services", xs @ _*) => MergeStrategy.concat
+        case PathList("net", "jpountz", xs @ _*) => MergeStrategy.last
+        case PathList("org", "lz4", xs @ _*) => MergeStrategy.last
+        case PathList(ps @ _*) if ps.last endsWith ".proto" => MergeStrategy.first
+        case PathList("com", "datastax", xs@_*) => MergeStrategy.first
+        case PathList("org", "apache", xs@_*) => MergeStrategy.first
+        case PathList("org", "glassfish", xs@_*) => MergeStrategy.first
+        case PathList("com", "sun", xs@_*) => MergeStrategy.first
+        case x if x.endsWith("reference-overrides.conf") => MergeStrategy.concat
+        case x if x.endsWith("reference.conf") => MergeStrategy.concat
+        case x if x.endsWith("version.conf") => MergeStrategy.concat
+        case x if x.endsWith("module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
+        case x if x.endsWith("/liblz4-java.so") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4ByteBufferUtils$Match.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
         case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
         case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
@@ -323,8 +403,9 @@ lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++ enumeratumDeps :+
+      libraryDependencies ++= commonDeps ++ pekkoDeps ++ pekkoHttpDeps ++ circeDeps ++ slickDeps ++ enumeratumDeps :+
         scalaMock :+ cormorantGeneric :+ scalacheckShapeless :+ diffx,
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       Compile / mainClass := Some("hmda.publisher.HmdaDataPublisherApp"),
       assembly / assemblyJarName := {
         s"${name.value}.jar"
@@ -341,6 +422,24 @@ lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
+        case PathList("META-INF", "services", xs @ _*) => MergeStrategy.concat
+        case PathList("net", "jpountz", xs @ _*) => MergeStrategy.last
+        case PathList("org", "lz4", xs @ _*) => MergeStrategy.last
+        case PathList(ps @ _*) if ps.last endsWith ".proto" => MergeStrategy.first
+        case PathList("com", "datastax", xs@_*) => MergeStrategy.first
+        case PathList("org", "apache", xs@_*) => MergeStrategy.first
+        case PathList("org", "glassfish", xs@_*) => MergeStrategy.first
+        case PathList("com", "sun", xs@_*) => MergeStrategy.first
+        case x if x.endsWith("reference-overrides.conf") => MergeStrategy.concat
+        case x if x.endsWith("reference.conf") => MergeStrategy.concat
+        case x if x.endsWith("version.conf") => MergeStrategy.concat
+        case x if x.endsWith("module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
+        case x if x.endsWith("/liblz4-java.so") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4ByteBufferUtils$Match.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
         case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
         case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
@@ -367,8 +466,9 @@ lazy val `hmda-dashboard` = (project in file("hmda-dashboard"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
+      libraryDependencies ++= commonDeps ++ pekkoDeps ++ pekkoHttpDeps ++ circeDeps ++ slickDeps ++
         enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "version.conf" => MergeStrategy.concat
@@ -378,8 +478,27 @@ lazy val `hmda-dashboard` = (project in file("hmda-dashboard"))
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
         case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs@_*) => MergeStrategy.last
-        case PathList(ps @ _*) if ps.last endsWith ".proto" =>
-          MergeStrategy.first
+        case PathList(ps @ _*) if ps.last endsWith ".proto" => MergeStrategy.first
+        case PathList("META-INF", "services", xs @ _*) => MergeStrategy.concat
+        case PathList("net", "jpountz", xs @ _*) => MergeStrategy.last
+        case PathList("org", "lz4", xs @ _*) => MergeStrategy.last
+        case PathList(ps @ _*) if ps.last endsWith ".proto" => MergeStrategy.first
+        case PathList("com", "datastax", xs@_*) => MergeStrategy.first
+        case PathList("org", "apache", xs@_*) => MergeStrategy.first
+        case PathList("org", "glassfish", xs@_*) => MergeStrategy.first
+        case PathList("com", "sun", xs@_*) => MergeStrategy.first
+        case x if x.endsWith("reference-overrides.conf") => MergeStrategy.concat
+        case x if x.endsWith("reference.conf") => MergeStrategy.concat
+        case x if x.endsWith("version.conf") => MergeStrategy.concat
+        case x if x.endsWith("module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
+        case x if x.endsWith("/liblz4-java.so") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4ByteBufferUtils$Match.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
         case "module-info.class" => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
         case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
@@ -408,24 +527,40 @@ lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
   )
   .settings(hmdaBuildSettings: _*)
   .settings(
-    Seq(
-      Compile / mainClass := Some("hmda.calculator.HmdaRateSpread"),
+    Seq(       dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
+        Compile / mainClass := Some("hmda.calculator.HmdaRateSpread"),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case "reference.conf" => MergeStrategy.concat
         case metaInfMatcher(_) => MergeStrategy.discard
+        case PathList("META-INF", "services", xs @ _*) => MergeStrategy.concat
+
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("net", "jpountz", xs @ _*) => MergeStrategy.last
+        case PathList("org", "lz4", xs @ _*) => MergeStrategy.last
         case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs@_*) => MergeStrategy.last
-        case PathList(ps @ _*) if ps.last endsWith ".proto" =>
-          MergeStrategy.first
-        case "module-info.class" => MergeStrategy.concat
-        case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+        case PathList(ps @ _*) if ps.last endsWith ".proto" => MergeStrategy.first
+        case PathList("com", "datastax", xs@_*) => MergeStrategy.first
+        case PathList("org", "apache", xs@_*) => MergeStrategy.first
+        case PathList("org", "glassfish", xs@_*) => MergeStrategy.first
+        case PathList("com", "sun", xs@_*) => MergeStrategy.first
+        case x if x.endsWith("reference-overrides.conf") => MergeStrategy.concat
+        case x if x.endsWith("reference.conf") => MergeStrategy.concat
+        case x if x.endsWith("version.conf") => MergeStrategy.concat
+        case x if x.endsWith("module-info.class") => MergeStrategy.concat
         case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
         case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
         case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
         case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
+        case x if x.endsWith("/liblz4-java.so") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4ByteBufferUtils$Match.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
         case x =>
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
@@ -450,6 +585,7 @@ lazy val `modified-lar` = (project in file("modified-lar"))
   .settings(
     Seq(
       Compile / mainClass := Some("hmda.publication.lar.ModifiedLarApp"),
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "version.conf" => MergeStrategy.concat
@@ -462,6 +598,24 @@ lazy val `modified-lar` = (project in file("modified-lar"))
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
+        case PathList("META-INF", "services", xs @ _*) => MergeStrategy.concat
+        case PathList("net", "jpountz", xs @ _*) => MergeStrategy.last
+        case PathList("org", "lz4", xs @ _*) => MergeStrategy.last
+        case PathList(ps @ _*) if ps.last endsWith ".proto" => MergeStrategy.first
+        case PathList("com", "datastax", xs@_*) => MergeStrategy.first
+        case PathList("org", "apache", xs@_*) => MergeStrategy.first
+        case PathList("org", "glassfish", xs@_*) => MergeStrategy.first
+        case PathList("com", "sun", xs@_*) => MergeStrategy.first
+        case x if x.endsWith("reference-overrides.conf") => MergeStrategy.concat
+        case x if x.endsWith("reference.conf") => MergeStrategy.concat
+        case x if x.endsWith("version.conf") => MergeStrategy.concat
+        case x if x.endsWith("module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
+        case x if x.endsWith("/liblz4-java.so") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4ByteBufferUtils$Match.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
         case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
         case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
@@ -492,6 +646,7 @@ lazy val `irs-publisher` = (project in file("irs-publisher"))
   .settings(
     Seq(
       Compile / mainClass := Some("hmda.publication.lar.IrsPublisherApp"),
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "version.conf" => MergeStrategy.concat
@@ -504,6 +659,24 @@ lazy val `irs-publisher` = (project in file("irs-publisher"))
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
+        case PathList("META-INF", "services", xs @ _*) => MergeStrategy.concat
+        case PathList("net", "jpountz", xs @ _*) => MergeStrategy.last
+        case PathList("org", "lz4", xs @ _*) => MergeStrategy.last
+        case PathList(ps @ _*) if ps.last endsWith ".proto" => MergeStrategy.first
+        case PathList("com", "datastax", xs@_*) => MergeStrategy.first
+        case PathList("org", "apache", xs@_*) => MergeStrategy.first
+        case PathList("org", "glassfish", xs@_*) => MergeStrategy.first
+        case PathList("com", "sun", xs@_*) => MergeStrategy.first
+        case x if x.endsWith("reference-overrides.conf") => MergeStrategy.concat
+        case x if x.endsWith("reference.conf") => MergeStrategy.concat
+        case x if x.endsWith("version.conf") => MergeStrategy.concat
+        case x if x.endsWith("module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
+        case x if x.endsWith("/liblz4-java.so") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4ByteBufferUtils$Match.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
         case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
         case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
@@ -534,6 +707,7 @@ lazy val `hmda-reporting` = (project in file("hmda-reporting"))
   .settings(
     Seq(
       Compile / mainClass := Some("hmda.reporting.HmdaReporting"),
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "version.conf" => MergeStrategy.concat
@@ -546,6 +720,24 @@ lazy val `hmda-reporting` = (project in file("hmda-reporting"))
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
+        case PathList("META-INF", "services", xs @ _*) => MergeStrategy.concat
+        case PathList("net", "jpountz", xs @ _*) => MergeStrategy.last
+        case PathList("org", "lz4", xs @ _*) => MergeStrategy.last
+        case PathList(ps @ _*) if ps.last endsWith ".proto" => MergeStrategy.first
+        case PathList("com", "datastax", xs@_*) => MergeStrategy.first
+        case PathList("org", "apache", xs@_*) => MergeStrategy.first
+        case PathList("org", "glassfish", xs@_*) => MergeStrategy.first
+        case PathList("com", "sun", xs@_*) => MergeStrategy.first
+        case x if x.endsWith("reference-overrides.conf") => MergeStrategy.concat
+        case x if x.endsWith("reference.conf") => MergeStrategy.concat
+        case x if x.endsWith("version.conf") => MergeStrategy.concat
+        case x if x.endsWith("module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
+        case x if x.endsWith("/liblz4-java.so") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4ByteBufferUtils$Match.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
         case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
         case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
@@ -571,7 +763,7 @@ lazy val `hmda-protocol` = (project in file("protocol"))
     JavaServerAppPackaging,
     sbtdocker.DockerPlugin,
     AshScriptPlugin,
-    AkkaGrpcPlugin
+    PekkoGrpcPlugin
   )
   .settings(hmdaBuildSettings: _*)
 
@@ -585,6 +777,7 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
   .settings(
     Seq(
       Compile / mainClass := Some("hmda.analytics.HmdaAnalyticsApp"),
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "version.conf" => MergeStrategy.concat
@@ -597,6 +790,24 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
+        case PathList("META-INF", "services", xs @ _*) => MergeStrategy.concat
+        case PathList("net", "jpountz", xs @ _*) => MergeStrategy.last
+        case PathList("org", "lz4", xs @ _*) => MergeStrategy.last
+        case PathList(ps @ _*) if ps.last endsWith ".proto" => MergeStrategy.first
+        case PathList("com", "datastax", xs@_*) => MergeStrategy.first
+        case PathList("org", "apache", xs@_*) => MergeStrategy.first
+        case PathList("org", "glassfish", xs@_*) => MergeStrategy.first
+        case PathList("com", "sun", xs@_*) => MergeStrategy.first
+        case x if x.endsWith("reference-overrides.conf") => MergeStrategy.concat
+        case x if x.endsWith("reference.conf") => MergeStrategy.concat
+        case x if x.endsWith("version.conf") => MergeStrategy.concat
+        case x if x.endsWith("module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
+        case x if x.endsWith("/liblz4-java.so") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4ByteBufferUtils$Match.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
         case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
         case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
@@ -626,6 +837,7 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
       Seq(
         libraryDependencies ++= keycloakServerDeps,
         Compile / mainClass := Some("hmda.authService.HmdaAuth"),
+        dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
         assembly / assemblyJarName := {
           s"${name.value}.jar"
         },
@@ -642,6 +854,26 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
           case PathList(ps @ _*) if ps.last endsWith ".proto" =>
             MergeStrategy.first
           case "module-info.class" => MergeStrategy.concat
+          case PathList("META-INF", "services", xs @ _*) => MergeStrategy.concat
+          case PathList("net", "jpountz", xs @ _*) => MergeStrategy.last
+          case PathList("org", "lz4", xs @ _*) => MergeStrategy.last
+          case PathList(ps @ _*) if ps.last endsWith ".proto" => MergeStrategy.first
+          case PathList("com", "datastax", xs@_*) => MergeStrategy.first
+          case PathList("org", "apache", xs@_*) => MergeStrategy.first
+          case PathList("org", "glassfish", xs@_*) => MergeStrategy.first
+          case PathList("com", "sun", xs@_*) => MergeStrategy.first
+          case x if x.endsWith("reference-overrides.conf") => MergeStrategy.concat
+          case x if x.endsWith("reference.conf") => MergeStrategy.concat
+          case x if x.endsWith("version.conf") => MergeStrategy.concat
+          case x if x.endsWith("module-info.class") => MergeStrategy.concat
+          case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
+          case x if x.endsWith("/liblz4-java.so") => MergeStrategy.concat
+          case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+          case x if x.endsWith("/LZ4ByteBufferUtils$Match.class") => MergeStrategy.concat
+          case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+          case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+          case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+          case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
           case x if x.endsWith("/module-info.class") => MergeStrategy.concat
           case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
           case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
@@ -667,7 +899,8 @@ lazy val `rate-limit` = (project in file("rate-limit"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps :+ guava,
+      libraryDependencies ++= commonDeps ++ pekkoDeps ++ pekkoHttpDeps :+ guava,
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       Compile / mainClass := Some("hmda.rateLimit.RateLimitApp"),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
@@ -680,6 +913,24 @@ lazy val `rate-limit` = (project in file("rate-limit"))
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
+        case PathList("META-INF", "services", xs @ _*) => MergeStrategy.concat
+        case PathList("net", "jpountz", xs @ _*) => MergeStrategy.last
+        case PathList("org", "lz4", xs @ _*) => MergeStrategy.last
+        case PathList(ps @ _*) if ps.last endsWith ".proto" => MergeStrategy.first
+        case PathList("com", "datastax", xs@_*) => MergeStrategy.first
+        case PathList("org", "apache", xs@_*) => MergeStrategy.first
+        case PathList("org", "glassfish", xs@_*) => MergeStrategy.first
+        case PathList("com", "sun", xs@_*) => MergeStrategy.first
+        case x if x.endsWith("reference-overrides.conf") => MergeStrategy.concat
+        case x if x.endsWith("reference.conf") => MergeStrategy.concat
+        case x if x.endsWith("version.conf") => MergeStrategy.concat
+        case x if x.endsWith("module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
+        case x if x.endsWith("/liblz4-java.so") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4ByteBufferUtils$Match.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
         case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
         case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
@@ -708,8 +959,9 @@ lazy val `data-browser` = (project in file("data-browser"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
+      libraryDependencies ++= commonDeps ++ pekkoDeps ++ pekkoHttpDeps ++ circeDeps ++ slickDeps ++
         enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
@@ -721,6 +973,24 @@ lazy val `data-browser` = (project in file("data-browser"))
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
+        case PathList("META-INF", "services", xs @ _*) => MergeStrategy.concat
+        case PathList("net", "jpountz", xs @ _*) => MergeStrategy.last
+        case PathList("org", "lz4", xs @ _*) => MergeStrategy.last
+        case PathList(ps @ _*) if ps.last endsWith ".proto" => MergeStrategy.first
+        case PathList("com", "datastax", xs@_*) => MergeStrategy.first
+        case PathList("org", "apache", xs@_*) => MergeStrategy.first
+        case PathList("org", "glassfish", xs@_*) => MergeStrategy.first
+        case PathList("com", "sun", xs@_*) => MergeStrategy.first
+        case x if x.endsWith("reference-overrides.conf") => MergeStrategy.concat
+        case x if x.endsWith("reference.conf") => MergeStrategy.concat
+        case x if x.endsWith("version.conf") => MergeStrategy.concat
+        case x if x.endsWith("module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
+        case x if x.endsWith("/liblz4-java.so") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4ByteBufferUtils$Match.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
         case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
         case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
@@ -744,7 +1014,8 @@ lazy val `submission-errors` = (project in file("submission-errors"))
   .settings(hmdaBuildSettings)
   .settings(
     Seq(
-      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps :+ monix :+ slickPostgres,
+      libraryDependencies ++= commonDeps ++ pekkoDeps ++ pekkoHttpDeps ++ circeDeps ++ slickDeps :+ monix :+ slickPostgres,
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf" => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
@@ -756,6 +1027,24 @@ lazy val `submission-errors` = (project in file("submission-errors"))
         case PathList(ps@_*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
+        case PathList("META-INF", "services", xs @ _*) => MergeStrategy.concat
+        case PathList("net", "jpountz", xs @ _*) => MergeStrategy.last
+        case PathList("org", "lz4", xs @ _*) => MergeStrategy.last
+        case PathList(ps @ _*) if ps.last endsWith ".proto" => MergeStrategy.first
+        case PathList("com", "datastax", xs@_*) => MergeStrategy.first
+        case PathList("org", "apache", xs@_*) => MergeStrategy.first
+        case PathList("org", "glassfish", xs@_*) => MergeStrategy.first
+        case PathList("com", "sun", xs@_*) => MergeStrategy.first
+        case x if x.endsWith("reference-overrides.conf") => MergeStrategy.concat
+        case x if x.endsWith("reference.conf") => MergeStrategy.concat
+        case x if x.endsWith("version.conf") => MergeStrategy.concat
+        case x if x.endsWith("module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
+        case x if x.endsWith("/liblz4-java.so") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4ByteBufferUtils$Match.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
         case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
         case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
@@ -777,6 +1066,7 @@ lazy val `email-service` = (project in file("email-service"))
   .settings(
     Seq(
       Compile / mainClass := Some("hmda.publication.lar.EmailReceiptApp"),
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "version.conf" => MergeStrategy.concat
@@ -789,6 +1079,24 @@ lazy val `email-service` = (project in file("email-service"))
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
+        case PathList("META-INF", "services", xs @ _*) => MergeStrategy.concat
+        case PathList("net", "jpountz", xs @ _*) => MergeStrategy.last
+        case PathList("org", "lz4", xs @ _*) => MergeStrategy.last
+        case PathList(ps @ _*) if ps.last endsWith ".proto" => MergeStrategy.first
+        case PathList("com", "datastax", xs@_*) => MergeStrategy.first
+        case PathList("org", "apache", xs@_*) => MergeStrategy.first
+        case PathList("org", "glassfish", xs@_*) => MergeStrategy.first
+        case PathList("com", "sun", xs@_*) => MergeStrategy.first
+        case x if x.endsWith("reference-overrides.conf") => MergeStrategy.concat
+        case x if x.endsWith("reference.conf") => MergeStrategy.concat
+        case x if x.endsWith("version.conf") => MergeStrategy.concat
+        case x if x.endsWith("module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
+        case x if x.endsWith("/liblz4-java.so") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4ByteBufferUtils$Match.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.last
         case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.last
         case x if x.endsWith("/LogSupport.class") => MergeStrategy.last
@@ -801,7 +1109,7 @@ lazy val `email-service` = (project in file("email-service"))
       assembly / assemblyJarName := {
         s"${name.value}.jar"
       },
-      libraryDependencies ++= monix :: akkaKafkaStreams :: kafkaClients :: awsSesSdk :: jakartaMail :: logback :: Nil
+      libraryDependencies ++= monix :: pekkoKafkaStreams :: kafkaClients :: awsSesSdk :: jakartaMail :: logback :: Nil
     ),
     dockerSettings,
     packageSettings
@@ -818,11 +1126,11 @@ lazy val `hmda-quarterly-data-service` = (project in file ("hmda-quarterly-data-
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
+      libraryDependencies ++= commonDeps ++ pekkoDeps ++ pekkoHttpDeps ++ circeDeps ++ slickDeps ++
         enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
+      dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
-        case "version.conf" => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case metaInfMatcher(_) => MergeStrategy.discard
@@ -832,6 +1140,24 @@ lazy val `hmda-quarterly-data-service` = (project in file ("hmda-quarterly-data-
         case PathList(ps @ _*) if ps.last endsWith ".proto" =>
           MergeStrategy.first
         case "module-info.class" => MergeStrategy.concat
+        case PathList("META-INF", "services", xs @ _*) => MergeStrategy.concat
+        case PathList("net", "jpountz", xs @ _*) => MergeStrategy.last
+        case PathList("org", "lz4", xs @ _*) => MergeStrategy.last
+        case PathList(ps @ _*) if ps.last endsWith ".proto" => MergeStrategy.first
+        case PathList("com", "datastax", xs@_*) => MergeStrategy.first
+        case PathList("org", "apache", xs@_*) => MergeStrategy.first
+        case PathList("org", "glassfish", xs@_*) => MergeStrategy.first
+        case PathList("com", "sun", xs@_*) => MergeStrategy.first
+        case x if x.endsWith("reference-overrides.conf") => MergeStrategy.concat
+        case x if x.endsWith("reference.conf") => MergeStrategy.concat
+        case x if x.endsWith("version.conf") => MergeStrategy.concat
+        case x if x.endsWith("module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
+        case x if x.endsWith("/liblz4-java.so") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4ByteBufferUtils$Match.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
         case x if x.endsWith("/module-info.class") => MergeStrategy.concat
         case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
         case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
@@ -862,8 +1188,8 @@ lazy val `hmda-persistence-migrator` = (project in file ("hmda-persistence-migra
     Seq(
       libraryDependencies += "com.lightbend.akka" %% "akka-persistence-r2dbc-migration" % "1.3.12",
       libraryDependencies ++= slickDeps,
-//      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
-//        enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
+      //      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
+      //        enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat

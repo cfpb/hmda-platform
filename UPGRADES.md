@@ -1,25 +1,25 @@
 # Upgrades
 
-## Akka Cassandra Persistence Plugin Upgrade
-Migration Documentation: https://doc.akka.io/docs/akka-persistence-cassandra/current/migrations.html
+## pekko Cassandra Persistence Plugin Upgrade
+Migration Documentation: https://doc.pekko.io/docs/pekko-persistence-cassandra/current/migrations.html
 
 ##### new table needed for upgrading to 1.0+
 ```sql
-CREATE TABLE IF NOT EXISTS akka.all_persistence_ids(
+CREATE TABLE IF NOT EXISTS pekko.all_persistence_ids(
   persistence_id text PRIMARY KEY);
 ```
 
 new environment variable to put into `cassandra-configmap`: `cassandra-cluster-dc` (e.g.: `dc` / `dc2`)
 
 ### Migration
-newly added table needs to be populated, refer to [Migration Documentation](https://doc.akka.io/docs/akka-persistence-cassandra/current/migrations.html) in [plugin upgrade](#akka-cassandra-persistence-plugin-upgrade) section,
+newly added table needs to be populated, refer to [Migration Documentation](https://doc.pekko.io/docs/pekko-persistence-cassandra/current/migrations.html) in [plugin upgrade](#pekko-cassandra-persistence-plugin-upgrade) section,
 code snippet for migration tool:
 ```scala
 import scala.util.Failure
 import scala.util.Success
 
-import akka.actor.ActorSystem
-import akka.persistence.cassandra.reconciler.Reconciliation
+import org.apache.pekko.actor.ActorSystem
+import pekko.persistence.cassandra.reconciler.Reconciliation
 
 // System should have the same Cassandra plugin configuration as your application
 // but be careful to remove seed nodes so this doesn't join the cluster

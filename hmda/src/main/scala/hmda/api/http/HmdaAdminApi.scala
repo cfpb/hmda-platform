@@ -1,13 +1,13 @@
 package hmda.api.http
 
-import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{ActorSystem, Behavior}
-import akka.actor.{CoordinatedShutdown, ActorSystem => ClassicActorSystem}
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.http.scaladsl.server.Directives._
-import akka.stream.Materializer
-import akka.util.Timeout
+import org.apache.pekko.actor.typed.scaladsl.Behaviors
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.actor.typed.{ActorSystem, Behavior}
+import org.apache.pekko.actor.{CoordinatedShutdown, ActorSystem => ClassicActorSystem}
+import org.apache.pekko.cluster.sharding.typed.scaladsl.ClusterSharding
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.util.Timeout
 import hmda.api.http.admin.{InstitutionAdminHttpApi, PublishAdminHttpApi, StatsAdminHttpApi, SubmissionAdminHttpApi}
 import hmda.api.http.directives.HmdaTimeDirectives._
 import hmda.api.http.routes.BaseHttpApi

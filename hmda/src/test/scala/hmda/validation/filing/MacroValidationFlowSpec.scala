@@ -1,10 +1,10 @@
 package hmda.validation.filing
 
-import akka.NotUsed
-import akka.actor.ActorSystem
-import akka.actor.typed.scaladsl.adapter._
-import akka.stream.Materializer
-import akka.stream.scaladsl.Source
+import org.apache.pekko.NotUsed
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl.Source
 import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.enums._
 import hmda.model.filing.lar.{ LarAction, LoanApplicationRegister }

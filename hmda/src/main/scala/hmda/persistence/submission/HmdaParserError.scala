@@ -1,16 +1,16 @@
 package hmda.persistence.submission
 
-import akka.actor.typed.scaladsl.{ ActorContext, Behaviors }
-import akka.actor.typed.{ ActorRef, ActorSystem, Behavior, DispatcherSelector }
-import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
-import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
-import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
-import akka.stream.Materializer
-import akka.stream.scaladsl.{ Sink, Source }
-import akka.stream.typed.scaladsl.ActorFlow
-import akka.util.{ ByteString, Timeout }
+import org.apache.pekko.actor.typed.scaladsl.{ ActorContext, Behaviors }
+import org.apache.pekko.actor.typed.{ ActorRef, ActorSystem, Behavior, DispatcherSelector }
+import org.apache.pekko.cluster.sharding.typed.ShardingEnvelope
+import org.apache.pekko.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
+import org.apache.pekko.persistence.typed.PersistenceId
+import org.apache.pekko.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
+import org.apache.pekko.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior, RetentionCriteria }
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl.{ Sink, Source }
+import org.apache.pekko.stream.typed.scaladsl.ActorFlow
+import org.apache.pekko.util.{ ByteString, Timeout }
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.utils.ParserErrorUtils._
 import hmda.messages.submission.SubmissionProcessingCommands._
@@ -51,8 +51,7 @@ object HmdaParserError extends HmdaTypedPersistentActor[SubmissionProcessingComm
     val log                                   = ctx.log
     implicit val system: ActorSystem[_]       = ctx.system
     implicit val materializer: Materializer   = Materializer(ctx)
-//    implicit val blockingEc: ExecutionContext = system.dispatchers.lookup(DispatcherSelector.fromConfig("akka.blocking-parser-dispatcher"))
-    implicit val blockingEc: ExecutionContext = system.dispatchers.lookup(DispatcherSelector.default())
+    implicit val blockingEc: ExecutionContext = system.dispatchers.lookup(DispatcherSelector.fromConfig("pekko.blocking-parser-dispatcher"))
     val sharding                              = ClusterSharding(system)
 
     cmd match {

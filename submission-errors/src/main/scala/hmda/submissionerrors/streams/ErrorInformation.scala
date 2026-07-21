@@ -1,9 +1,9 @@
 package hmda.submissionerrors.streams
 
-import akka.NotUsed
-import akka.actor.typed.ActorSystem
-import akka.persistence.query.EventEnvelope
-import akka.stream.scaladsl.{ Sink, Source }
+import org.apache.pekko.NotUsed
+import org.apache.pekko.actor.typed.ActorSystem
+import org.apache.pekko.persistence.query.EventEnvelope
+import org.apache.pekko.stream.scaladsl.{ Sink, Source }
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowValidatedError
 import hmda.model.filing.submission.SubmissionId
 import hmda.query.HmdaQuery
@@ -27,7 +27,7 @@ object ErrorInformation {
    * )
    *
    * @param submissionId is the submission ID
-   * @param system is the actor system needed to run the Akka Stream
+   * @param system is the actor system needed to run the pekko Stream
    * @return
    */
   def obtainSubmissionErrors(submissionId: SubmissionId)(implicit system: ActorSystem[_]): Task[Map[LineNumber, Set[EditName]]] =

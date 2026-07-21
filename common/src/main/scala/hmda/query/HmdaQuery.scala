@@ -1,10 +1,10 @@
 package hmda.query
 
-import akka.NotUsed
-import akka.actor.typed.ActorSystem
-import akka.persistence.query.scaladsl._
-import akka.persistence.query.{ EventEnvelope, Offset, PersistenceQuery }
-import akka.stream.scaladsl.Source
+import org.apache.pekko.NotUsed
+import org.apache.pekko.actor.typed.ActorSystem
+import org.apache.pekko.persistence.query.scaladsl._
+import org.apache.pekko.persistence.query.{ EventEnvelope, Offset, PersistenceQuery }
+import org.apache.pekko.stream.scaladsl.Source
 import com.typesafe.config.ConfigFactory
 import hmda.messages.CommonMessages.Event
 import hmda.messages.submission.HmdaRawDataEvents.LineAdded
@@ -24,7 +24,7 @@ object HmdaQuery {
 
   val configuration = ConfigFactory.load()
 
-  val journalId = configuration.getString("akka.persistence.query.journal.id")
+  val journalId = configuration.getString("pekko.persistence.query.journal.id")
 
   def readJournal(system: ActorSystem[_]): RJ =
     PersistenceQuery(system).readJournalFor[RJ](journalId)

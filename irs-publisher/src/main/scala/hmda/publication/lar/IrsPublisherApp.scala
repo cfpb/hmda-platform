@@ -1,15 +1,15 @@
 package hmda.publication.lar
 
-import akka.Done
-import akka.actor.ActorSystem
-import akka.actor.typed.scaladsl.adapter._
-import akka.kafka.scaladsl.Consumer
-import akka.kafka.scaladsl.Consumer.DrainingControl
-import akka.kafka.{ConsumerSettings, Subscriptions}
-import akka.pattern.ask
-import akka.stream.Materializer
-import akka.stream.scaladsl.{Keep, Sink, Source}
-import akka.util.Timeout
+import org.apache.pekko.Done
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.kafka.scaladsl.Consumer
+import org.apache.pekko.kafka.scaladsl.Consumer.DrainingControl
+import org.apache.pekko.kafka.{ConsumerSettings, Subscriptions}
+import org.apache.pekko.pattern.ask
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl.{Keep, Sink, Source}
+import org.apache.pekko.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.census.records.CensusRecords
 import hmda.messages.HmdaMessageFilter
@@ -48,7 +48,7 @@ object IrsPublisherApp extends App {
 
   implicit val timeout = Timeout(5.seconds)
 
-  val kafkaConfig = system.settings.config.getConfig("akka.kafka.consumer")
+  val kafkaConfig = system.settings.config.getConfig("pekko.kafka.consumer")
   val config      = ConfigFactory.load()
   val parallelism = config.getInt("hmda.lar.irs.parallelism")
 

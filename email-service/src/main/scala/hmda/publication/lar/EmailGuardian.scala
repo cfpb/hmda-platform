@@ -1,12 +1,12 @@
 package hmda.publication.lar
 
-import akka.actor.typed.Behavior
-import akka.actor.typed.scaladsl._
-import akka.actor.typed.scaladsl.adapter._
-import akka.actor.{ ActorSystem => UntypedActorSystem }
-import akka.kafka.CommitterSettings
-import akka.stream.{ ActorMaterializer, Materializer }
-import akka.stream.scaladsl.Keep
+import org.apache.pekko.actor.typed.Behavior
+import org.apache.pekko.actor.typed.scaladsl._
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.actor.{ ActorSystem => UntypedActorSystem }
+import org.apache.pekko.kafka.CommitterSettings
+import org.apache.pekko.stream.{ ActorMaterializer, Materializer }
+import org.apache.pekko.stream.scaladsl.Keep
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.simpleemail.{ AmazonSimpleEmailService, AmazonSimpleEmailServiceClientBuilder }
 import hmda.publication.lar.config.Settings

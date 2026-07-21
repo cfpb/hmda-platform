@@ -1,6 +1,6 @@
 package hmda.dashboard
 
-import akka.actor.typed.ActorSystem
+import org.apache.pekko.actor.typed.ActorSystem
 import hmda.dashboard.api.HmdaDashboardApi
 import org.slf4j.LoggerFactory
 

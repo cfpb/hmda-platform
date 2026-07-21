@@ -1,26 +1,26 @@
 package hmda.api.http.directives
 
-import akka.actor.testkit.typed.scaladsl.TestProbe
-import akka.actor.typed.ActorSystem
-import akka.actor.typed.scaladsl.adapter._
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.cluster.typed.{ Cluster, Join }
-import akka.http.scaladsl.model.StatusCodes._
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.testkit.ScalatestRouteTest
-import akka.util.Timeout
+import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
+import org.apache.pekko.actor.typed.ActorSystem
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.cluster.sharding.typed.scaladsl.ClusterSharding
+import org.apache.pekko.cluster.typed.{ Cluster, Join }
+import org.apache.pekko.http.scaladsl.model.StatusCodes._
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.Route
+import org.apache.pekko.http.scaladsl.testkit.ScalatestRouteTest
+import org.apache.pekko.util.Timeout
 import hmda.messages.institution.InstitutionCommands.CreateInstitution
 import hmda.messages.institution.InstitutionEvents.{ InstitutionCreated, InstitutionEvent }
 import hmda.model.institution.Institution
-import hmda.persistence.AkkaCassandraPersistenceSpec
+import hmda.persistence.PekkoCassandraPersistenceSpec
 import hmda.persistence.institution.InstitutionPersistence
 import org.scalatest.{ Assertion, MustMatchers }
 import org.slf4j.{ Logger, LoggerFactory }
 
 import scala.concurrent.duration._
 
-class QuarterlyFilingAuthorizationSpec extends AkkaCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest {
+class QuarterlyFilingAuthorizationSpec extends PekkoCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest {
 
   override implicit val typedSystem: ActorSystem[_] = system.toTyped
   val sharding                                      = ClusterSharding(typedSystem)

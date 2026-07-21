@@ -1,6 +1,6 @@
 package hmda.publication.lar
 
-import akka.actor.typed.ActorSystem
+import org.apache.pekko.actor.typed.ActorSystem
 import hmda.publication.lar.EmailGuardian.GuardianProtocol
 
 object EmailReceiptApp {

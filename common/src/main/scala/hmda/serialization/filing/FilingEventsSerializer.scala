@@ -2,7 +2,7 @@ package hmda.serialization.filing
 
 import java.io.NotSerializableException
 
-import akka.serialization.SerializerWithStringManifest
+import org.apache.pekko.serialization.SerializerWithStringManifest
 import hmda.messages.filing.FilingEvents.{ FilingCreated, FilingStatusUpdated, SubmissionAdded, SubmissionUpdated }
 import hmda.persistence.serialization.filing.events.{
   FilingCreatedMessage,

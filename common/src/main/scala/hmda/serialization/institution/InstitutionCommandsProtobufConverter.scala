@@ -1,6 +1,6 @@
 package hmda.serialization.institution
 
-import akka.actor.typed.ActorRefResolver
+import org.apache.pekko.actor.typed.ActorRefResolver
 import hmda.messages.institution.InstitutionCommands._
 import hmda.messages.institution.InstitutionEvents.InstitutionEvent
 import hmda.model.institution.InstitutionDetail

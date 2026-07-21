@@ -75,12 +75,12 @@ public:
 cluster:
   name: management
   protocol: TCP
-  port: 8558
+  port: 7626
 
 bootstrap:
   name: bootstrap
   protocol: TCP
-  port: 8558
+  port: 7626
 
 websockets:
   name: websockets

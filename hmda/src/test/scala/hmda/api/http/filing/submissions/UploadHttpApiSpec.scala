@@ -1,18 +1,19 @@
 package hmda.api.http.filing.submissions
 
-import akka.actor.testkit.typed.scaladsl.TestProbe
-import akka.actor.typed.scaladsl.adapter._
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.cluster.typed.{ Cluster, Join }
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.model.Uri.Path
-import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
-import akka.stream.scaladsl.Source
-import akka.testkit._
-import akka.util.Timeout
+import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.cluster.sharding.typed.scaladsl.ClusterSharding
+import org.apache.pekko.cluster.typed.{ Cluster, Join }
+import org.apache.pekko.http.scaladsl.model.StatusCodes
+import org.apache.pekko.http.scaladsl.model.Uri.Path
+import org.apache.pekko.http.scaladsl.server.Route
+import org.apache.pekko.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
+import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
+import org.apache.pekko.testkit._
+import org.apache.pekko.util.Timeout
 import com.typesafe.config.Config
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.api.http.filing.FileUploadUtils
 import hmda.api.http.model.ErrorResponse
 import hmda.auth.{ KeycloakTokenVerifier, OAuth2Authorization }
@@ -31,7 +32,7 @@ import hmda.model.filing.ts.TsGenerators._
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators.institutionGen
 import hmda.model.submission.SubmissionGenerator.submissionGen
-import hmda.persistence.AkkaCassandraPersistenceSpec
+import hmda.persistence.PekkoCassandraPersistenceSpec
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission._
@@ -41,7 +42,7 @@ import org.slf4j.{ Logger, LoggerFactory }
 
 import scala.concurrent.duration._
 
-class UploadHttpApiSpec extends AkkaCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest with FileUploadUtils {
+class UploadHttpApiSpec extends PekkoCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest with FileUploadUtils {
 
   implicit val typedSystem                       = system.toTyped
   val log: Logger                                = LoggerFactory.getLogger(getClass)
