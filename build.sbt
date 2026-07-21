@@ -1186,7 +1186,7 @@ lazy val `hmda-persistence-migrator` = (project in file ("hmda-persistence-migra
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      libraryDependencies += "com.lightbend.akka" %% "akka-persistence-r2dbc-migration" % "1.3.12",
+      libraryDependencies += "org.apache.pekko" %% "pekko-persistence-r2dbc-migration" % "1.2.0",
       libraryDependencies ++= slickDeps,
       //      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
       //        enumeratumDeps :+ monix :+ lettuce :+ scalaMock,

@@ -1,7 +1,7 @@
 package hmda.persistence.migrator
 
-import akka.actor.typed.ActorSystem
-import akka.persistence.r2dbc.migration.MigrationTool.Result
+import org.apache.pekko.actor.typed.ActorSystem
+import org.apache.pekko.persistence.r2dbc.migration.MigrationTool.Result
 
 import scala.util.Try
 

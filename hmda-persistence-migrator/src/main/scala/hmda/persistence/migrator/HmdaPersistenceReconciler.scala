@@ -1,8 +1,8 @@
 package hmda.persistence.migrator
 
-import akka.actor.typed.{ ActorSystem, Behavior }
-import akka.actor.typed.scaladsl.Behaviors
-import akka.persistence.cassandra.reconciler.Reconciliation
+import org.apache.pekko.actor.typed.{ ActorSystem, Behavior }
+import org.apache.pekko.actor.typed.scaladsl.Behaviors
+import org.apache.pekko.persistence.cassandra.reconciler.Reconciliation
 import org.slf4j.LoggerFactory
 
 import scala.util.{ Failure, Success }

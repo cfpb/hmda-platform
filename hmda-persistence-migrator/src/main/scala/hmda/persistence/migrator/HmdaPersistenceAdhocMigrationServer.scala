@@ -1,18 +1,18 @@
 package hmda.persistence.migrator
 
-import akka.actor
-import akka.actor.CoordinatedShutdown
-import akka.actor.typed.{ ActorSystem, Behavior }
-import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.scaladsl.adapter._
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Directives.{ as, complete, cors, entity, path }
-import akka.http.scaladsl.server.Route
-import akka.persistence.r2dbc.migration.MigrationTool
-import akka.util.Timeout
+import org.apache.pekko.actor
+import org.apache.pekko.actor.CoordinatedShutdown
+import org.apache.pekko.actor.typed.{ ActorSystem, Behavior }
+import org.apache.pekko.actor.typed.scaladsl.Behaviors
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.Directives.{ as, complete, cors, entity, path }
+import org.apache.pekko.http.scaladsl.server.Route
+import org.apache.pekko.persistence.r2dbc.migration.MigrationTool
+import org.apache.pekko.util.Timeout
 import hmda.api.http.directives.HmdaTimeDirectives.timed
 import hmda.api.http.routes.BaseHttpApi
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import org.apache.pekko.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import org.slf4j.LoggerFactory
 import spray.json.DefaultJsonProtocol._
 

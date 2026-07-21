@@ -1,13 +1,13 @@
 package hmda.persistence.migrator
 
-import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ ActorSystem, Behavior }
-import akka.persistence.query.PersistenceQuery
-import akka.persistence.query.scaladsl.{ CurrentPersistenceIdsQuery, ReadJournal }
-import akka.persistence.r2dbc.migration.MigrationTool
-import akka.persistence.r2dbc.migration.MigrationTool.Result
-import akka.stream.Materializer
-import akka.stream.scaladsl.Sink
+import org.apache.pekko.actor.typed.scaladsl.Behaviors
+import org.apache.pekko.actor.typed.{ ActorSystem, Behavior }
+import org.apache.pekko.persistence.query.PersistenceQuery
+import org.apache.pekko.persistence.query.scaladsl.{ CurrentPersistenceIdsQuery, ReadJournal }
+import org.apache.pekko.persistence.r2dbc.migration.MigrationTool
+import org.apache.pekko.persistence.r2dbc.migration.MigrationTool.Result
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl.Sink
 import org.slf4j.LoggerFactory
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
