@@ -34,12 +34,6 @@ spec:
             readOnly: true
             volumeAttributes:
               secretProviderClass: hmda-rds-secrets-provider
-        - name: akka-license
-          csi:
-            driver: secrets-store.csi.k8s.io
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: akka-license-provider
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -47,8 +41,6 @@ spec:
           volumeMounts:
             - name: rds-secret-provider-vol
               mountPath: /mnt/rds-secrets-store
-            - name: akka-license
-              mountPath: /mnt/akka-license
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
@@ -57,11 +49,6 @@ spec:
             - configMapRef:
                 name: {{ include "hmda-quarterly-data-service.fullname" . }}-verbiage-configmap
           env:
-            - name: AKKA_LICENSE_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: akka-license-key
-                  key: key
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:

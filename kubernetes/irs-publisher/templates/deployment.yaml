@@ -30,21 +30,12 @@ spec:
             readOnly: true
             volumeAttributes:
               secretProviderClass: irsa-actor-persistence-secrets-provider
-        - name: akka-license
-          csi:
-            driver: secrets-store.csi.k8s.io
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: irsa-akka-license-provider
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           volumeMounts:
             - name: actor-persistence-secrets
               mountPath: /mnt/actor-persistence-secrets
-              readOnly: true
-            - name: akka-license
-              mountPath: /mnt/akka-license
               readOnly: true
           securityContext:
             seccompProfile:
@@ -60,11 +51,6 @@ spec:
               cpu: "4"
               memory: "2200Mi"
           env:
-            - name: AKKA_LICENSE_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: irsa-akka-license-key
-                  key: key
             - name: ACTOR_PERSISTENCE_PG_HOST
               valueFrom:
                 secretKeyRef:

@@ -36,12 +36,6 @@ spec:
             readOnly: true
             volumeAttributes:
               secretProviderClass: irsa-actor-persistence-secrets-provider
-        - name: akka-license
-          csi:
-            driver: secrets-store.csi.k8s.io
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: irsa-akka-license-provider
 #        - name: cassandra-truststore
 #          csi:
 #            driver: secrets-store.csi.k8s.io
@@ -63,9 +57,6 @@ spec:
             mountPath: /etc/localtime
           - name: actor-persistence-secrets
             mountPath: /mnt/actor-persistence-secrets
-            readOnly: true
-          - name: akka-license
-            mountPath: /mnt/akka-license
             readOnly: true
 #          - name: cassandra-truststore
 #            readOnly: true
@@ -89,11 +80,6 @@ spec:
           valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-        - name: AKKA_LICENSE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: irsa-akka-license-key
-              key: key
         - name: ACTOR_PERSISTENCE_PG_HOST
           valueFrom:
             secretKeyRef:

@@ -38,12 +38,6 @@ spec:
             readOnly: true
             volumeAttributes:
               secretProviderClass: irsa-actor-persistence-secrets-provider
-        - name: akka-license
-          csi:
-            driver: secrets-store.csi.k8s.io
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: irsa-akka-license-provider
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/America/New_York
@@ -55,9 +49,6 @@ spec:
               mountPath: /mnt/rds-secrets-store
             - name: actor-persistence-secrets
               mountPath: /mnt/actor-persistence-secrets
-              readOnly: true
-            - name: akka-license
-              mountPath: /mnt/akka-license
               readOnly: true
             - name: tz-config
               mountPath: /etc/localtime
@@ -81,11 +72,6 @@ spec:
               value: >
                 -Dhttps.protocols=SSLv3,TLSv1,TLSv1.1,TLSv1.2
                 -Dcom.sun.security.enableAIAcaIssuers=true
-            - name: AKKA_LICENSE_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: irsa-akka-license-key
-                  key: key
             - name: ACTOR_PERSISTENCE_PG_HOST
               valueFrom:
                 secretKeyRef:
