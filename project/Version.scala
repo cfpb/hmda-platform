@@ -20,6 +20,7 @@ object Version {
   val slick                  = "3.4.1"
   val slickPostgres          = "0.21.1"
   val postgres               = "42.7.6"
+  val r2dbcPostgres          = "1.1.2.RELEASE"
   val h2                     = "2.1.214"
   val apacheCommons          = "2.6"
   val keycloakAdmin          = "26.0.5"

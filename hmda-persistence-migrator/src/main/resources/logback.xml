@@ -20,12 +20,12 @@
     <logger name="com.datastax.driver.core.RequestHandler" level="${CASSANDRA_LOG_LEVEL:-INFO}"/>
     <logger name="com.datastax.driver.core.Session" level="${CASSANDRA_LOG_LEVEL:-INFO}"/>
     <!--   <logger name="com.datastax.oss.driver" level="${CASSANDRA_LOG_LEVEL:-INFO}"/>  -->
-    <logger name="akka.persistence.cassandra.query" level="${CASSANDRA_LOG_LEVEL:-INFO}"/>
-    <logger name="akka.persistence.r2dbc.query" level="INFO"/>
-    <logger name="akka.persistence.r2dbc.migration.MigrationTool" level="INFO"/>
+    <logger name="pekko.persistence.cassandra.query" level="${CASSANDRA_LOG_LEVEL:-INFO}"/>
+    <logger name="pekko.persistence.r2dbc.query" level="INFO"/>
+    <logger name="pekko.persistence.r2dbc.migration.MigrationTool" level="INFO"/>
     <logger name="io.r2dbc.postgresql.client.ReactorNettyClient" level="INFO"/>
     <logger name="io.r2dbc.postgresql.QUERY" level="INFO"/>
     <logger name="io.r2dbc.postgresql.ExceptionFactory" level="INFO"/>
-    <logger name="akka.persistence.r2dbc.migration.MigrationTool" level="${MIGRATION_TOOL_LOG:-INFO}"/>
+    <logger name="pekko.persistence.r2dbc.migration.MigrationTool" level="${MIGRATION_TOOL_LOG:-INFO}"/>
     <logger name="hmda.persistence.migrator.HmdaPersistenceMigrator" level="${HMDA_MIGRATOR_LOG:-INFO}"/>
 </configuration>

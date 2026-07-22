@@ -27,7 +27,7 @@ object HmdaPersistenceMigrator {
     implicit val mat = Materializer(system)
     val migration = new MigrationTool(system)
 
-    val migrationConfig = system.settings.config.getConfig("akka.persistence.r2dbc.migration")
+    val migrationConfig = system.settings.config.getConfig("pekko.persistence.r2dbc.migration")
 
     val skipLeis = migrationConfig.getStringList("hmda.lei.skip")
 

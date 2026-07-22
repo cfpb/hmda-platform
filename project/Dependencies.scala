@@ -54,6 +54,7 @@ object Dependencies {
   lazy val slickHikariCP            = "com.typesafe.slick" %% "slick-hikaricp"                      % Version.slick
   lazy val pekkoSlick             = "org.apache.pekko" %% "pekko-connectors-slick"           % Version.pekkoVersion
   lazy val postgres                 = "org.postgresql"     % "postgresql"                           % Version.postgres
+  lazy val r2dbcPostgres          =   "org.postgresql"     % "r2dbc-postgresql"                     % Version.r2dbcPostgres
   lazy val h2                       = "com.h2database"     % "h2"                                   % Version.h2 % Test
   lazy val testContainers        = "org.testcontainers"         % "testcontainers"              % Version.testContainers % Test
   lazy val apacheCommonsIO        = "commons-io"                % "commons-io"                  % Version.apacheCommons % Test

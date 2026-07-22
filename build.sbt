@@ -48,6 +48,7 @@ lazy val pekkoPersistenceDeps =
     pekkoPersistenceQuery,
     pekkoClusterShardingTyped,
     pekkoPersistenceR2DBC,
+    r2dbcPostgres,
     pekkoPersistenceCassandra
   )
 
@@ -1188,6 +1189,7 @@ lazy val `hmda-persistence-migrator` = (project in file ("hmda-persistence-migra
     Seq(
       libraryDependencies += "org.apache.pekko" %% "pekko-persistence-r2dbc-migration" % "1.2.0",
       libraryDependencies ++= slickDeps,
+      dependencyOverrides ++= Seq(jacksonDatabind, pekkoSerialization),
       //      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
       //        enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
       assembly / assemblyMergeStrategy := {
