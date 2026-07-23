@@ -25,9 +25,9 @@ object HmdaInstitutionQueryApi {
     val oAuth2Authorization           = OAuth2Authorization(log, config)
     val host: String                  = config.getString("hmda.institution.http.host")
     val port: Int                     = config.getInt("hmda.institution.http.port")
-    val proxyRoute                    = InstitutionQueryHttpApi.create(config)
+    val institutionRoute              = InstitutionQueryHttpApi.create(config)
 
-    val routes = BaseHttpApi.routes(name) ~ proxyRoute(oAuth2Authorization)
+    val routes = BaseHttpApi.routes(name) ~ institutionRoute(oAuth2Authorization)
     BaseHttpApi.runServer(shutdown, name)(timed(routes), host, port)
 
     Behaviors.ignore
