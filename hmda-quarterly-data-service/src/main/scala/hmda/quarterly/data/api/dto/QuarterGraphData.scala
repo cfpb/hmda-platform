@@ -1,6 +1,6 @@
 package hmda.quarterly.data.api.dto
 
-import akka.http.scaladsl.server.Route
+import org.apache.pekko.http.scaladsl.server.Route
 import hmda.quarterly.data.api.route.lib.Verbiage.DEFAULT_DECIMAL_PRECISION
 
 object QuarterGraphData {

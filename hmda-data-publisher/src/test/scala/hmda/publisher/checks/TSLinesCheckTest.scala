@@ -1,7 +1,7 @@
 package hmda.publisher.validation
 
-import akka.actor.ActorSystem
-import akka.testkit.TestKit
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.testkit.TestKit
 import hmda.publisher.query.component.{ PublisherComponent2018, TransmittalSheetTable, TsRepository }
 import hmda.publisher.query.lar.{ LarEntityImpl2018, LarPartFive2018, LarPartFour2018, LarPartOne2018, LarPartSix2018, LarPartThree2018, LarPartTwo2018 }
 import hmda.query.ts.TransmittalSheetEntity

@@ -1,7 +1,7 @@
 package hmda.dataBrowser.repositories
 
-import akka.NotUsed
-import akka.stream.scaladsl.Source
+import org.apache.pekko.NotUsed
+import org.apache.pekko.stream.scaladsl.Source
 import hmda.dataBrowser.models.{ FilerInformation2017, ModifiedLarEntity2017, QueryField, LarQueryField, Statistic }
 import monix.eval.Task
 import slick.basic.DatabaseConfig

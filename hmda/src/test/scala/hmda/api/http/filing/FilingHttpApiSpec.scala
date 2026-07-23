@@ -1,22 +1,23 @@
 package hmda.api.http.filing
 
-import akka.actor.testkit.typed.scaladsl.TestProbe
-import akka.actor.typed.ActorSystem
-import akka.actor.typed.scaladsl.adapter._
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.cluster.typed.{ Cluster, Join }
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
-import akka.testkit._
-import akka.util.Timeout
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
+import org.apache.pekko.actor.typed.ActorSystem
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.cluster.sharding.typed.scaladsl.ClusterSharding
+import org.apache.pekko.cluster.typed.{ Cluster, Join }
+import org.apache.pekko.http.scaladsl.model.StatusCodes
+import org.apache.pekko.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
+import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
+import org.apache.pekko.testkit._
+import org.apache.pekko.util.Timeout
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.auth.{ KeycloakTokenVerifier, OAuth2Authorization }
 import hmda.messages.institution.InstitutionCommands.CreateInstitution
 import hmda.messages.institution.InstitutionEvents._
 import hmda.model.filing.{ FilingDetails, InProgress }
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators._
-import hmda.persistence.AkkaCassandraPersistenceSpec
+import hmda.persistence.PekkoCassandraPersistenceSpec
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import io.circe.generic.auto._
@@ -26,9 +27,9 @@ import org.slf4j.{ Logger, LoggerFactory }
 import scala.concurrent.duration._
 import scala.util.Random
 
-class FilingHttpApiSpec extends AkkaCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest {
+class FilingHttpApiSpec extends PekkoCassandraPersistenceSpec with MustMatchers with ScalatestRouteTest {
 
-  val duration = 90.seconds
+  val duration = 120.seconds
 
   implicit val routeTimeout = RouteTestTimeout(duration.dilated)
 

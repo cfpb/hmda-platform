@@ -1,21 +1,21 @@
 package hmda.persistence.filing
 
-import akka.actor
-import akka.actor.testkit.typed.scaladsl.TestProbe
-import akka.actor.typed.scaladsl.adapter._
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.cluster.typed.{ Cluster, Join }
+import org.apache.pekko.actor
+import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.cluster.sharding.typed.scaladsl.ClusterSharding
+import org.apache.pekko.cluster.typed.{ Cluster, Join }
 import hmda.messages.filing.FilingCommands._
 import hmda.messages.filing.FilingEvents.FilingCreated
 import hmda.model.filing.{ Filing, FilingDetails, FilingId }
-import hmda.persistence.AkkaCassandraPersistenceSpec
+import hmda.persistence.PekkoCassandraPersistenceSpec
 import hmda.model.filing.FilingGenerator._
 import hmda.model.filing.submission._
 import hmda.model.submission.SubmissionGenerator._
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.utils.YearUtils.Period
 
-class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
+class FilingPersistenceSpec extends PekkoCassandraPersistenceSpec {
   override implicit val system      = actor.ActorSystem()
   override implicit val typedSystem = system.toTyped
 

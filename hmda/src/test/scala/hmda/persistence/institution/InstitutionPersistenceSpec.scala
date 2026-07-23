@@ -1,22 +1,22 @@
 package hmda.persistence.institution
 
-import akka.actor
-import akka.actor.typed.ActorSystem
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.cluster.typed.Cluster
-import akka.cluster.typed.Join
-import akka.actor.testkit.typed.scaladsl.TestProbe
+import org.apache.pekko.actor
+import org.apache.pekko.actor.typed.ActorSystem
+import org.apache.pekko.cluster.sharding.typed.scaladsl.ClusterSharding
+import org.apache.pekko.cluster.typed.Cluster
+import org.apache.pekko.cluster.typed.Join
+import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators._
-import hmda.persistence.AkkaCassandraPersistenceSpec
-import akka.actor.typed.scaladsl.adapter._
+import hmda.persistence.PekkoCassandraPersistenceSpec
+import org.apache.pekko.actor.typed.scaladsl.adapter._
 import hmda.messages.institution.InstitutionCommands._
 import hmda.messages.institution.InstitutionEvents._
 import org.scalatest.Tag
 
 object CustomTag extends Tag("actions-ignore")
 
-class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
+class InstitutionPersistenceSpec extends PekkoCassandraPersistenceSpec {
 
   override val system                               = actor.ActorSystem()
   override implicit val typedSystem: ActorSystem[_] = system.toTyped

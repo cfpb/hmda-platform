@@ -1,9 +1,9 @@
 package hmda.api.http.public
 
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.testkit.ScalatestRouteTest
-import akka.util.Timeout
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import org.apache.pekko.http.scaladsl.model.StatusCodes
+import org.apache.pekko.http.scaladsl.testkit.ScalatestRouteTest
+import org.apache.pekko.util.Timeout
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.filing.submissions.HmdaRowParsedErrorSummary
 import hmda.api.http.model.public.{ SingleValidationErrorResult, TsValidateRequest }
 import hmda.model.filing.ts.{ Address, Contact, TransmittalSheet }

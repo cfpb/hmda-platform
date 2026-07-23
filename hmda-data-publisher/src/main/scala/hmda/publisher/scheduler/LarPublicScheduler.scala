@@ -1,15 +1,15 @@
 package hmda.publisher.scheduler
 
 import java.time.Instant
-import akka.actor.typed.ActorRef
-import akka.stream.Materializer
-import akka.stream.alpakka.file.ArchiveMetadata
-import akka.stream.alpakka.file.scaladsl.Archive
-import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
-import akka.stream.alpakka.s3._
-import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.scaladsl.Source
-import akka.util.ByteString
+import org.apache.pekko.actor.typed.ActorRef
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.connectors.file.ArchiveMetadata
+import org.apache.pekko.stream.connectors.file.scaladsl.Archive
+import org.apache.pekko.stream.connectors.s3.ApiVersion.ListBucketVersion2
+import org.apache.pekko.stream.connectors.s3._
+import org.apache.pekko.stream.connectors.s3.scaladsl.S3
+import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.util.ByteString
 import hmda.actor.HmdaActor
 import hmda.publisher.helper.CronConfigLoader.{ CronString, larPublicCron, larPublicYears }
 import hmda.publisher.helper._

@@ -1,10 +1,10 @@
 package hmda.parser.filing
 
-import akka.actor.ActorSystem
-import akka.stream.Materializer
-import akka.stream.scaladsl.Source
-import akka.stream.testkit.scaladsl.TestSink
-import akka.util.ByteString
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.stream.testkit.scaladsl.TestSink
+import org.apache.pekko.util.ByteString
 import hmda.model.filing.PipeDelimited
 import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister
