@@ -7,6 +7,7 @@ import akka.actor.{ ActorSystem, CoordinatedShutdown }
 import akka.http.scaladsl.server.Directives._
 import hmda.api.http.directives.HmdaTimeDirectives._
 import hmda.api.http.routes.BaseHttpApi
+import hmda.auth.OAuth2Authorization
 
 import scala.concurrent.ExecutionContext
 
@@ -20,10 +21,13 @@ object HmdaInstitutionQueryApi {
     implicit val classic: ActorSystem = ctx.system.toClassic
     val shutdown: CoordinatedShutdown = CoordinatedShutdown(ctx.system)
     val config                        = classic.settings.config
+    val log                           = ctx.log
+    val oAuth2Authorization           = OAuth2Authorization(log, config)
     val host: String                  = config.getString("hmda.institution.http.host")
     val port: Int                     = config.getInt("hmda.institution.http.port")
+    val institutionRoute              = InstitutionQueryHttpApi.create(config)
 
-    val routes = BaseHttpApi.routes(name) ~ InstitutionQueryHttpApi.create(config)
+    val routes = BaseHttpApi.routes(name) ~ institutionRoute(oAuth2Authorization)
     BaseHttpApi.runServer(shutdown, name)(timed(routes), host, port)
 
     Behaviors.ignore

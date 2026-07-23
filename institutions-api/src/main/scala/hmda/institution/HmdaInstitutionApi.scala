@@ -47,7 +47,6 @@ object HmdaInstitutionApi extends App {
   val kafkaConfig = system.settings.config.getConfig("akka.kafka.consumer")
 
   val jdbcUrl = config.getString("db.db.url")
-  log.info(s"Connection URL is \n\n$jdbcUrl\n")
 
   system.spawn[Nothing](HmdaInstitutionQueryApi(), HmdaInstitutionQueryApi.name)
 
