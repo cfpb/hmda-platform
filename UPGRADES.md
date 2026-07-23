@@ -43,6 +43,9 @@ so it is visible if errors occur, or if the process stalled,
 and to increase request timeout.
 ```HOCON
 datastax-java-driver {
+  basic.request {
+    timeout = 10 seconds
+  }
   basic {
     contact-points = ["localhost:9042"]
     contact-points = [${?CASSANDRA_CLUSTER_HOSTS}":9042"]
