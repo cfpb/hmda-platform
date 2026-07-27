@@ -58,7 +58,7 @@ service:
 databrowser:
   name: databrowser
   loglevel: INFO
-  s3Url: https://files.ffiec.cfpb.gov
+  s3Url: https://hmda-eks.dev-regtech.aws.cfpb.gov/file/passthrough
   redis: hmda-redis
   protocol: TCP
   port: 8070

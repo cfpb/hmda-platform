@@ -18,6 +18,10 @@ kafka:
   signTopic: hmda-sign
   security: "SASL_SSL"
 
+hmda:
+  actorSystemPersistence:
+    schema: actor_persistence
+
 ingress:
   enabled: false
   annotations: {}
