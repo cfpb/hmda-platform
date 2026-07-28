@@ -28,6 +28,7 @@ hmda:
       parallelism: 2
   actorSystemPersistence:
     schema: actor_persistence
+    maxConn: 200
 #  podNamespace: default
 #  apiNamespace: hmda-api
 #  serviceNamespace: default.svc.cluster.local

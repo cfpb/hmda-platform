@@ -112,6 +112,10 @@ spec:
           value: "1s"
         - name: HMDA_ERROR_PERSIST_PARALLELISM
           value: "2"
+        - name: ACTOR_PERSISTENCE_PG_MAX_CONN
+          value: {{ .Values.hmda.actorSystemPersistence.maxConn | quote }}
+        - name: LOG_DB_CALLS_EXCEEDING
+          value: "60 s"
         - name: CURRENT_YEAR
           valueFrom:
             configMapKeyRef:
