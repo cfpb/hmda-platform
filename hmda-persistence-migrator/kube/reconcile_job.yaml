@@ -1,14 +1,14 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: actor-persistence-failover-reconcile-260729-1
+  name: actor-persistence-failover-reconcile-260729-2
 spec:
   template:
     spec:
       serviceAccountName: hmda-platform
       containers:
         - name: actor-persistence-reconciler
-          image: 039774476268.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:pekko_persistence_migrator.260729.1
+          image: 039774476268.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:pekko_persistence_migrator.260729.6
           env:
             - name: MODE
               value: reconcile
