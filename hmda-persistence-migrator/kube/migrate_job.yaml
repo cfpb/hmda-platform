@@ -7,8 +7,8 @@ spec:
     spec:
       serviceAccountName: hmda-platform
       containers:
-        - name: akka-persistence-migrator
-          image: 039774476268.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:persistence_migrator_pk.260722.5
+        - name: actor-persistence-migrator
+          image: 039774476268.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:pekko_persistence_migrator.260729.1
           env:
             - name: CASSANDRA_JOURNAL_KEYSPACE
 #              value: hmda2_journal_beta
@@ -40,6 +40,8 @@ spec:
 #              value: "1"
 #            - name: PERSISTENCE_ID
 #              value: "DEBUG"
+            - name: ACTOR_PERSISTENCE_PG_MAX_CONN
+              value: "200"
             - name: ACTOR_PERSISTENCE_PG_JOURNAL_TABLE
               value: event_journal
             - name: ACTOR_PERSISTENCE_PG_SNAP_TABLE

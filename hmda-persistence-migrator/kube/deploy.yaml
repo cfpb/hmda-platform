@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: akka-persistence-failover-deployment
+  name: actor-persistence-failover-deployment
   labels:
-    app: akka-persistence-failover-deployment
+    app: actor-persistence-failover-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: akka-persistence-failover-deployment
+      app: actor-persistence-failover-deployment
   template:
     metadata:
       labels:
-        app: akka-persistence-failover-deployment
+        app: actor-persistence-failover-deployment
     spec:
       serviceAccountName: hmda-platform
       containers:
-        - name: akka-persistence-migrator
-          image: 039774476268.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:persistence_migrator.260720.1
+        - name: actor-persistence-deploy
+          image: 039774476268.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:pekko_persistence_migrator.260729.1
           env:
             - name: MODE
               value: server
@@ -97,9 +97,6 @@ spec:
             - name: actor-persistence-secrets
               mountPath: /mnt/actor-persistence-secrets
               readOnly: true
-            - name: akka-license
-              mountPath: /mnt/akka-license
-              readOnly: true
 #            - name: cassandra-secrets
 #              mountPath: /mnt/cass-secrets
 #              readOnly: true
@@ -113,12 +110,6 @@ spec:
            readOnly: true
            volumeAttributes:
              secretProviderClass: actor-persistence-secrets-provider
-#       - name: akka-license
-#         csi:
-#           driver: secrets-store.csi.k8s.io
-#           readOnly: true
-#           volumeAttributes:
-#             secretProviderClass: akka-license-provider
 #       - name: cassandra-secrets
 #         csi:
 #           driver: secrets-store.csi.k8s.io
@@ -129,12 +120,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: akka-persistence-failover-deployment
+  name: actor-persistence-failover-deployment
   labels:
-    service: akka-persistence-failover-deployment
+    service: actor-persistence-failover-deployment
 spec:
   selector:
-    app: akka-persistence-failover-deployment
+    app: actor-persistence-failover-deployment
   ports:
     - port: 8080
       targetPort: 8080
@@ -143,11 +134,11 @@ apiVersion: getambassador.io/v2
 kind: Mapping
 metadata:
   labels:
-    service: akka-persistence-failover-deployment
-  name: akka-persistence-failover-deployment
+    service: actor-persistence-failover-deployment
+  name: actor-persistence-failover-deployment
 spec:
   host: hmda-cass-eks.staging-regtech.aws.cfpb.gov
   timeout_ms: 300000
   prefix: /migrator/
   rewrite: /
-  service: akka-persistence-failover-deployment:8080
+  service: actor-persistence-failover-deployment:8080
