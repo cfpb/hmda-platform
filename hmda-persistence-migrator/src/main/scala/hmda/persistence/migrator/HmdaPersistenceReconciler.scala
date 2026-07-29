@@ -19,7 +19,10 @@ object HmdaPersistenceReconciler {
 
     val reconciler = new Reconciliation(system)
 
-    context.pipeToSelf(reconciler.rebuildAllPersistenceIds())(_: Any => _)
+    context.pipeToSelf(reconciler.rebuildAllPersistenceIds()) {
+      case Success(_) => Success(1)
+      case Failure(e) => Failure(e)
+    }
 
     Behaviors.receiveMessage {
       case Success(_) =>
