@@ -7,7 +7,7 @@ metadata:
     app: {{ template "hmda-platform.name" . }}
   name: {{ template "hmda-platform.fullname" . }}
 spec:
-  replicas: 3
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: {{ template "hmda-platform.name" . }}
