@@ -91,7 +91,7 @@ trait InstitutionComponent {
     val snapshotTable2025         = snapshotInstitutionsTable2025
 
     
-    def fetchYearTable(year: Int, snapshot: Boolean) = 
+    private def fetchYearTable(year: Int, snapshot: Boolean) = 
     snapshot match {
         case true =>
             year match {
@@ -119,6 +119,9 @@ trait InstitutionComponent {
                 case _    => table2025
             }
     }
+
+    def createSchema(year: Int) = db.run(fetchYearTable(year, false).schema.create)
+    def getYearTable(year: Int, snapshot: Boolean) = fetchYearTable(year, snapshot)
 
     def findByLei(lei: String, year: Int, snapshot: Boolean) =
       db.run(fetchYearTable(year, snapshot).filter(_.lei === lei).result)
