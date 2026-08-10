@@ -14,6 +14,7 @@ import hmda.parser.institution.InstitutionCsvParser
 import io.circe.syntax._
 import org.slf4j.LoggerFactory
 import scala.concurrent.duration._
+import hmda.auth.OAuth2Authorization
 
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
@@ -33,10 +34,10 @@ object InstitutionLoader extends App {
   implicit val ec: ExecutionContext       = system.dispatcher
 
   def parallelism = config.getInt("hmda.loader.parallelism")
-  val url         = config.getString("hmda.loader.institution.url")
-
+  val url         = ""
   val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
   val token = ""
+
   val bankFilterList =
     bankFilter.getString("bank-filter-list").toUpperCase.split(",")
 
@@ -70,15 +71,15 @@ object InstitutionLoader extends App {
     }
 
   //- REQUEST WITH BEARER TOKEN
-  //  def request(json: String) =
-  //    postOrPut match {
-  //      case "put" =>
-  //        HttpRequest(uri = s"$url", method = HttpMethods.PUT)
-  //          .withEntity(ContentTypes.`application/json`, ByteString(json)).addHeader((Authorization(OAuth2BearerToken(token))) )
-  //      case _ =>
-  //        HttpRequest(uri = s"$url", method = HttpMethods.POST)
-  //          .withEntity(ContentTypes.`application/json`, ByteString(json)).addHeader((Authorization(OAuth2BearerToken(token))) )
-  //    }
+//    def request(json: String) =
+//      postOrPut match {
+//        case "put" =>
+//          HttpRequest(uri = s"$url", method = HttpMethods.PUT)
+//            .withEntity(ContentTypes.`application/json`, ByteString(json)).addHeader((Authorization(OAuth2BearerToken(token))) )
+//        case _ =>
+//          HttpRequest(uri = s"$url", method = HttpMethods.POST)
+//            .withEntity(ContentTypes.`application/json`, ByteString(json)).addHeader((Authorization(OAuth2BearerToken(token))) )
+//      }
 
 
   source

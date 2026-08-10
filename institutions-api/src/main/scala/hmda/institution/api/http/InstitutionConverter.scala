@@ -39,7 +39,7 @@ object InstitutionConverter {
       entity.quarterlyFilerHasFiledQ1,
       entity.quarterlyFilerHasFiledQ2,
       entity.quarterlyFilerHasFiledQ3,
-      entity.notes
+      ""
     ))
   }
 
