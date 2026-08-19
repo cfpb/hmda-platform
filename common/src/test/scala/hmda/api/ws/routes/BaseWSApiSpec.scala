@@ -1,7 +1,7 @@
 package hmda.api.ws.routes
 
-import akka.http.scaladsl.model.headers.{ HttpOrigin, Origin }
-import akka.http.scaladsl.testkit.{ ScalatestRouteTest, WSProbe }
+import org.apache.pekko.http.scaladsl.model.headers.{ HttpOrigin, Origin }
+import org.apache.pekko.http.scaladsl.testkit.{ ScalatestRouteTest, WSProbe }
 import hmda.api.http.model.HmdaServiceStatus
 import io.circe.Json
 import io.circe.generic.auto._

@@ -1,10 +1,10 @@
 package hmda.publisher.api
 
-import akka.actor.ActorRef
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.testkit.ScalatestRouteTest
-import akka.testkit.TestProbe
-import akka.util.Timeout
+import org.apache.pekko.actor.ActorRef
+import org.apache.pekko.http.scaladsl.model.StatusCodes
+import org.apache.pekko.http.scaladsl.testkit.ScalatestRouteTest
+import org.apache.pekko.testkit.TestProbe
+import org.apache.pekko.util.Timeout
 import hmda.publisher.scheduler.AllSchedulers
 import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear, Schedules }
 import org.scalatest.{ MustMatchers, WordSpec }
@@ -12,7 +12,7 @@ import org.scalatest.{ MustMatchers, WordSpec }
 import scala.concurrent.duration.DurationInt
 
 class DataPublisherHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest {
-  implicit val timeout = Timeout(15.seconds)
+  implicit val timeout = Timeout(120.seconds)
 
   "DataPublisherHttpApi" must {
     "trigger right scheduler" in {

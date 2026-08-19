@@ -1,7 +1,7 @@
 package hmda.quarterly.data.api
 
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server._
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server._
 import hmda.quarterly.data.api.route._
 import hmda.quarterly.data.api.serde.JsonSupport
 

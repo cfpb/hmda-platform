@@ -1,10 +1,10 @@
 package hmda.serialization.projection
 
-import akka.actor.ActorSystem
-import akka.actor.testkit.typed.scaladsl.TestProbe
-import akka.actor.typed.ActorRefResolver
-import akka.actor.typed.scaladsl.adapter._
-import akka.persistence.query.TimeBasedUUID
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
+import org.apache.pekko.actor.typed.ActorRefResolver
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.persistence.query.TimeBasedUUID
 import com.datastax.oss.driver.api.core.uuid.Uuids
 import hmda.messages.projection.CommonProjectionMessages.{ GetOffset, OffsetSaved, SaveOffset }
 import hmda.serialization.projection.ProjectionProtobufConverter._

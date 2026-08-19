@@ -17,7 +17,8 @@ service:
   account:
     name: hmda-platform-irsa
 
-#currentYear: 2018
+hmda:
+  runtimeMode: kubernetes
 
 kafka:
   institutionsGroup: institutions-group

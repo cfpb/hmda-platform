@@ -1,9 +1,9 @@
 package hmda.submissionerrors.streams
 
-import akka.NotUsed
-import akka.actor.typed.ActorSystem
-import akka.persistence.query.EventEnvelope
-import akka.stream.scaladsl.{ Sink, Source }
+import org.apache.pekko.NotUsed
+import org.apache.pekko.actor.typed.ActorSystem
+import org.apache.pekko.persistence.query.EventEnvelope
+import org.apache.pekko.stream.scaladsl.{ Sink, Source }
 import hmda.messages.submission.HmdaRawDataEvents.LineAdded
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.submission.SubmissionId

@@ -1,10 +1,10 @@
 package hmda.uli.api.http
 
-import akka.actor.typed.Behavior
-import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.scaladsl.adapter._
-import akka.actor.{ ActorSystem, CoordinatedShutdown }
-import akka.http.scaladsl.server.Directives._
+import org.apache.pekko.actor.typed.Behavior
+import org.apache.pekko.actor.typed.scaladsl.Behaviors
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.actor.{ ActorSystem, CoordinatedShutdown }
+import org.apache.pekko.http.scaladsl.server.Directives._
 import hmda.api.http.routes.BaseHttpApi
 import hmda.api.http.directives.HmdaTimeDirectives._
 

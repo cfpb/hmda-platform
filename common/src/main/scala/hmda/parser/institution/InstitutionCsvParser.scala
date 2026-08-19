@@ -5,6 +5,8 @@ import hmda.util.CSVConsolidator.{listDeDupeToList, stringDeDupeToList}
 import io.chrisdavenport.cormorant.parser.CSVLikeParser
 import io.chrisdavenport.cormorant
 
+import scala.util.Try
+
 object InstitutionCsvParser {
   val parser: CSVLikeParser = new CSVLikeParser('|') {}
 
@@ -12,20 +14,20 @@ object InstitutionCsvParser {
     val values              = cormorant.parser.parseRow(s, parser).toTry.get.l.map(_.x).toList
     val activityYear        = values.head.toInt
     val lei                 = values(1)
-    val agencyCode          = values(2).toInt
-    val institutionTypeCode = values(3).toInt
+    val agencyCode          = Try(values(2).toInt).getOrElse(-1)
+    val institutionTypeCode = Try(values(3).toInt).getOrElse(-1)
     val instId2017          = values(4)
     val taxId               = values(5)
-    val rssd                = values(6).toInt
+    val rssd                =  Try(values(6).toInt).getOrElse(-1)
     val emailDomains        = values(7)
     val respondentName      = values(8)
     val respondentState     = values(9)
     val respondentCity      = values(10)
-    val parentIdRssd        = values(11).toInt
+    val parentIdRssd        = Try(values(11).toInt).getOrElse(-1)
     val parentName          = values(12)
-    val assets              = values(13).toLong
-    val otherLenderCode     = values(14).toInt
-    val topHolderIdRssd     = values(15).toInt
+    val assets              = Try(values(13).toLong).getOrElse(-1L)
+    val otherLenderCode     = Try(values(14).toInt).getOrElse(-1)
+    val topHolderIdRssd     = Try(values(15).toInt).getOrElse(-1)
     val topHolderName       = values(16)
     val hmdaFiler           = values(17)
     val quarterlyFiler      = values(18)

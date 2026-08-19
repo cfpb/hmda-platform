@@ -1,6 +1,6 @@
 package hmda.publisher.qa
 
-import akka.stream.alpakka.s3.S3Settings
+import org.apache.pekko.stream.connectors.s3.S3Settings
 
 case class QAFileSpec[T](
                           bucket: String,

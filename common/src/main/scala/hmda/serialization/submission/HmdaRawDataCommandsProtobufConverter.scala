@@ -1,6 +1,6 @@
 package hmda.serialization.submission
 
-import akka.actor.typed.ActorRefResolver
+import org.apache.pekko.actor.typed.ActorRefResolver
 import hmda.messages.submission.HmdaRawDataCommands.AddLines
 import hmda.persistence.serialization.raw.data.commands.{AddLineMessage, AddLinesMessage}
 import hmda.persistence.serialization.submission.SubmissionIdMessage

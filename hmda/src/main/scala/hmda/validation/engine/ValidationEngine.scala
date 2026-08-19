@@ -1,7 +1,7 @@
 package hmda.validation.engine
 
-import akka.stream.Materializer
-import akka.stream.scaladsl.{ Sink, Source }
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl.{ Sink, Source }
 import cats.data.Validated
 import cats.implicits._
 import hmda.model.validation._

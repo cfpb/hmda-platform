@@ -2,8 +2,8 @@ package hmda.serialization.projection
 
 import java.util.UUID
 
-import akka.actor.typed.ActorRefResolver
-import akka.persistence.query.TimeBasedUUID
+import org.apache.pekko.actor.typed.ActorRefResolver
+import org.apache.pekko.persistence.query.TimeBasedUUID
 import hmda.messages.projection.CommonProjectionMessages.{ GetOffset, OffsetSaved, SaveOffset }
 import hmda.messages.projection.projection.{ GetOffsetMessage, OffsetSavedMessage, SaveOffsetMessage }
 

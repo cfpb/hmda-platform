@@ -1,6 +1,6 @@
 package hmda.publication.lar.config
 
-import akka.actor.{ActorSystem => UntypedActorSystem}
+import org.apache.pekko.actor.{ActorSystem => UntypedActorSystem}
 import com.typesafe.config.Config
 import hmda.util.BankFilterUtils._
 
@@ -23,7 +23,7 @@ class Settings(config: Config) {
 
   object kafka {
     val bootstrapServers: String = config.getString("kafka.hosts")
-    val commitSettings: Config   = config.getConfig("kafka.commit")
+    val commitSettings: Config   = config.getConfig("kafka.committer")
   }
 
   object client {

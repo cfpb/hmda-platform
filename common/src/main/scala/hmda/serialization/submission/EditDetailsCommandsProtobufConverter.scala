@@ -1,6 +1,6 @@
 package hmda.serialization.submission
 
-import akka.actor.typed.ActorRefResolver
+import org.apache.pekko.actor.typed.ActorRefResolver
 import hmda.messages.submission.EditDetailsCommands.{ GetEditDetails, GetEditRowCount, PersistEditDetails }
 import hmda.persistence.serialization.edit.details.EditDetailsMessage
 import hmda.persistence.serialization.edit.details.commands.{ GetEditDetailsMessage, GetEditRowCountMessage, PersistEditDetailsMessage }

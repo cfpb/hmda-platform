@@ -2,10 +2,10 @@ package hmda.serialization.submission
 
 import java.io.NotSerializableException
 
-import akka.actor.ExtendedActorSystem
-import akka.actor.typed.ActorRefResolver
-import akka.actor.typed.scaladsl.adapter._
-import akka.serialization.SerializerWithStringManifest
+import org.apache.pekko.actor.ExtendedActorSystem
+import org.apache.pekko.actor.typed.ActorRefResolver
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.serialization.SerializerWithStringManifest
 import hmda.messages.submission.SubmissionProcessingCommands.{ CompleteSyntacticalValidity, GetHmdaValidationErrorState, _ }
 import hmda.persistence.serialization.submission.processing.commands._
 import hmda.serialization.submission.SubmissionProcessingCommandsProtobufConverter._

@@ -1,17 +1,17 @@
 package hmda.calculator.scheduler
 
-import akka.actor.typed.SupervisorStrategy
-import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{Behavior, PostStop}
-import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
-import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{MemoryBufferType, ObjectMetadata, S3Attributes, S3Settings}
-import akka.stream.scaladsl.{Flow, Framing, Sink, Source}
-import akka.stream.{Attributes, Materializer}
-import akka.util.ByteString
-import akka.{Done, NotUsed}
-import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
+import org.apache.pekko.actor.typed.SupervisorStrategy
+import org.apache.pekko.actor.typed.scaladsl.Behaviors
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.actor.typed.{Behavior, PostStop}
+import org.apache.pekko.stream.connectors.s3.ApiVersion.ListBucketVersion2
+import org.apache.pekko.stream.connectors.s3.scaladsl.S3
+import org.apache.pekko.stream.connectors.s3.{MemoryBufferType, ObjectMetadata, S3Attributes, S3Settings}
+import org.apache.pekko.stream.scaladsl.{Flow, Framing, Sink, Source}
+import org.apache.pekko.stream.{Attributes, Materializer}
+import org.apache.pekko.util.ByteString
+import org.apache.pekko.{Done, NotUsed}
+import org.apache.pekko.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.calculator.apor.{AporListEntity, FixedRate, RateType, VariableRate}
 import hmda.calculator.parser.APORCsvParser

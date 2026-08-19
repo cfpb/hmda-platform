@@ -1,9 +1,9 @@
 package hmda.publisher.util
 
-import akka.actor.ActorRef
-import akka.actor.typed.Behavior
-import akka.actor.typed.scaladsl.{ ActorContext, Behaviors }
-import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
+import org.apache.pekko.actor.ActorRef
+import org.apache.pekko.actor.typed.Behavior
+import org.apache.pekko.actor.typed.scaladsl.{ ActorContext, Behaviors }
+import org.apache.pekko.extension.quartz.QuartzSchedulerExtension
 import hmda.publisher.scheduler.schedules.ScheduleWithYear
 import org.slf4j.LoggerFactory
 

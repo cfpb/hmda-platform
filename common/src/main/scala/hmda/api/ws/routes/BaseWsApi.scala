@@ -3,12 +3,12 @@ package hmda.api.ws.routes
 import java.net.InetAddress
 import java.time.Instant
 
-import akka.NotUsed
-import akka.http.scaladsl.model.ws.{ Message, TextMessage }
-import akka.http.scaladsl.server.Directives.{ get, handleWebSocketMessages, pathSingleSlash }
-import akka.http.scaladsl.server.Route
-import akka.stream.scaladsl.Flow
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
+import org.apache.pekko.NotUsed
+import org.apache.pekko.http.scaladsl.model.ws.{ Message, TextMessage }
+import org.apache.pekko.http.scaladsl.server.Directives.{ get, handleWebSocketMessages, pathSingleSlash }
+import org.apache.pekko.http.scaladsl.server.Route
+import org.apache.pekko.stream.scaladsl.Flow
+import org.apache.pekko.http.cors.scaladsl.CorsDirectives.cors
 import hmda.api.http.model.HmdaServiceStatus
 import io.circe.generic.auto._
 import io.circe.syntax._

@@ -1,8 +1,8 @@
 package hmda.dataBrowser.services
 
-import akka.NotUsed
-import akka.stream.scaladsl.Source
-import akka.util.ByteString
+import org.apache.pekko.NotUsed
+import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.util.ByteString
 import hmda.dataBrowser.models.{Delimiter, QueryField}
 import monix.eval.Task
 

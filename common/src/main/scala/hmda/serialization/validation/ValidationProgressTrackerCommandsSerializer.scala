@@ -1,9 +1,9 @@
 package hmda.serialization.validation
 
-import akka.actor.ExtendedActorSystem
-import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.ActorRefResolver
-import akka.serialization.SerializerWithStringManifest
+import org.apache.pekko.actor.ExtendedActorSystem
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.actor.typed.ActorRefResolver
+import org.apache.pekko.serialization.SerializerWithStringManifest
 import hmda.messages.submission.ValidationProgressTrackerCommands
 import hmda.model.processing.state.ValidationProgressTrackerState
 import hmda.persistence.serialization.validationProgressTracker.{ValidationProgressTrackerPollMessage, ValidationProgressTrackerStateMessage, ValidationProgressTrackerSubscribeMessage}

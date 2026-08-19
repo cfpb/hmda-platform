@@ -1,6 +1,6 @@
 package hmda.messages.filing
 
-import akka.actor.typed.ActorRef
+import org.apache.pekko.actor.typed.ActorRef
 import hmda.messages.CommonMessages.Command
 import hmda.messages.filing.FilingEvents.FilingCreated
 import hmda.model.filing.submission.{ Submission, SubmissionId }

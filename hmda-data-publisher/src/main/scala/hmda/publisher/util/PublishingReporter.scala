@@ -2,8 +2,8 @@ package hmda.publisher.util
 
 import java.time.Instant
 
-import akka.actor.typed.Behavior
-import akka.actor.typed.scaladsl.{ AbstractBehavior, ActorContext, Behaviors }
+import org.apache.pekko.actor.typed.Behavior
+import org.apache.pekko.actor.typed.scaladsl.{ AbstractBehavior, ActorContext, Behaviors }
 import hmda.publisher.scheduler.schedules.{ Schedule, Schedules }
 import hmda.publisher.util.PublishingReporter.Command
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted

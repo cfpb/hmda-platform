@@ -2,8 +2,8 @@ package hmda.institution.projection
 
 import java.time.Instant
 
-import akka.actor.typed.Behavior
-import akka.actor.typed.scaladsl.Behaviors
+import org.apache.pekko.actor.typed.Behavior
+import org.apache.pekko.actor.typed.scaladsl.Behaviors
 import com.typesafe.config.ConfigFactory
 import hmda.institution.api.http.InstitutionConverter
 import hmda.institution.query.{InstitutionNoteHistoryEntity, _}

@@ -1,7 +1,7 @@
 package hmda.publisher
 
-import akka.actor.typed.scaladsl.adapter.ClassicActorSystemOps
-import akka.actor.{ ActorSystem, Props }
+import org.apache.pekko.actor.typed.scaladsl.adapter.ClassicActorSystemOps
+import org.apache.pekko.actor.{ ActorSystem, Props }
 import hmda.publisher.api.HmdaDataPublisherApi
 import hmda.publisher.helper.PGTableNameLoader
 import hmda.publisher.scheduler._
@@ -40,7 +40,7 @@ object HmdaDataPublisherApp extends App with PGTableNameLoader {
   /**
    * Only 1 scheduler should be created
    * QuartzSchedulerExtension in the current version is not thread safe, look into updating dep
-   * https://github.com/enragedginger/akka-quartz-scheduler/issues/33
+   * https://github.com/enragedginger/pekko-quartz-scheduler/issues/33
    * */
   private val scheduleCoordinator = actorSystem.spawn(ScheduleCoordinator.behaviors, "ScheduleCoordinator")
 

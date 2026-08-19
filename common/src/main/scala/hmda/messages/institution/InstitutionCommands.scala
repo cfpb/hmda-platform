@@ -1,6 +1,6 @@
 package hmda.messages.institution
 
-import akka.actor.typed.ActorRef
+import org.apache.pekko.actor.typed.ActorRef
 import hmda.messages.CommonMessages.Command
 import hmda.messages.institution.InstitutionEvents.InstitutionEvent
 import hmda.model.filing.Filing

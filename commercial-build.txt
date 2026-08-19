@@ -11,48 +11,48 @@ lazy val sparkDeps =
     sparkStreaming,
     sparkKafka,
     postgres,
-    akkaKafkaStreams
+    pekkoKafkaStreams
   )
 
 lazy val authDeps = Seq(keycloakAdapter, keycloak, jbossLogging, httpClient)
 
-lazy val akkaDeps = Seq(
-  akkaSlf4J,
-  akkaCluster,
-  akkaTyped,
-  akkaClusterTyped,
-  akkaStream,
-  akkaStreamTyped,
-  akkaManagement,
-  akkaManagementClusterBootstrap,
-  akkaServiceDiscoveryDNS,
-  akkaServiceDiscoveryKubernetes,
-  akkaClusterHttpManagement,
-  akkaClusterHttpManagement,
-  akkaTestkitTyped,
-  akkaStreamsTestKit,
-  akkaCors,
-  akkaKafkaStreams,
+lazy val pekkoDeps = Seq(
+  pekkoSlf4J,
+  pekkoCluster,
+  pekkoTyped,
+  pekkoClusterTyped,
+  pekkoStream,
+  pekkoStreamTyped,
+  pekkoManagement,
+  pekkoManagementClusterBootstrap,
+  pekkoServiceDiscoveryDNS,
+  pekkoServiceDiscoveryKubernetes,
+  pekkoClusterHttpManagement,
+  pekkoClusterHttpManagement,
+  pekkoTestkitTyped,
+  pekkoStreamsTestKit,
+  pekkoCors,
+  pekkoKafkaStreams,
   embeddedKafka,
-  alpakkaS3,
-  akkaQuartzScheduler,
+  pekkoS3,
+  pekkoQuartzScheduler,
   phantomDSL,
   phantomJDK8
 )
 
-lazy val akkaPersistenceDeps =
+lazy val pekkoPersistenceDeps =
   Seq(
-    akkaPersistence,
-    akkaClusterSharding,
-    akkaPersistenceTyped,
-    akkaPersistenceQuery,
-    akkaClusterShardingTyped,
-    akkaPersistenceCassandra,
+    pekkoPersistence,
+    pekkoClusterSharding,
+    pekkoPersistenceTyped,
+    pekkoPersistenceQuery,
+    pekkoClusterShardingTyped,
+    pekkoPersistenceCassandra,
     cassandraLauncher
   )
 
-lazy val akkaHttpDeps =
-  Seq(akkaHttp, akkaHttp2, akkaHttpTestkit, akkaStreamsTestKit, akkaHttpCirce)
+lazy val pekkoHttpDeps =
+  Seq(pekkoHttp, pekkoHttp2, pekkoHttpTestkit, pekkoStreamsTestKit, pekkohttpcirce)
 lazy val circeDeps      = Seq(circe, circeGeneric, circeParser)
 lazy val enumeratumDeps = Seq(enumeratum, enumeratumCirce)
 
@@ -102,7 +102,7 @@ lazy val common = (project in file("common"))
       scalapb.gen() -> (sourceManaged in Compile).value
     ),
     Seq(
-      libraryDependencies ++= commonDeps ++ authDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps
+      libraryDependencies ++= commonDeps ++ authDeps ++ pekkoDeps ++ pekkoPersistenceDeps ++ pekkoHttpDeps ++ circeDeps ++ slickDeps
     )
   )
 
@@ -132,7 +132,7 @@ lazy val `hmda-spark-reporting` = (project in file("hmda-spark-reporting"))
           oldStrategy(x)
       }
     ),
-    Seq(libraryDependencies ++= sparkDeps ++ circeDeps ++ akkaDeps),
+    Seq(libraryDependencies ++= sparkDeps ++ circeDeps ++ pekkoDeps),
     dockerSettings,
     packageSettings
   )
@@ -256,7 +256,7 @@ lazy val `hmda-dashboard` = (project in file("hmda-dashboard"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
+      libraryDependencies ++= commonDeps ++ pekkoDeps ++ pekkoHttpDeps ++ circeDeps ++ slickDeps ++
         enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
@@ -391,7 +391,7 @@ lazy val `hmda-protocol` = (project in file("protocol"))
     JavaServerAppPackaging,
     sbtdocker.DockerPlugin,
     AshScriptPlugin,
-    AkkaGrpcPlugin
+    pekkoGrpcPlugin
   )
   .settings(hmdaBuildSettings: _*)
 
@@ -430,7 +430,7 @@ lazy val `rate-limit` = (project in file("rate-limit"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps :+ guava,
+      libraryDependencies ++= commonDeps ++ pekkoDeps ++ pekkoHttpDeps :+ guava,
       mainClass in Compile := Some("hmda.rateLimit.RateLimitApp"),
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
@@ -458,7 +458,7 @@ lazy val `data-browser` = (project in file("data-browser"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
+      libraryDependencies ++= commonDeps ++ pekkoDeps ++ pekkoHttpDeps ++ circeDeps ++ slickDeps ++
         enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
@@ -492,7 +492,7 @@ lazy val `email-service` = (project in file("email-service"))
       assemblyJarName in assembly := {
         s"${name.value}.jar"
       },
-      libraryDependencies ++= monix :: akkaKafkaStreams :: awsSesSdk :: logback :: Nil
+      libraryDependencies ++= monix :: pekkoKafkaStreams :: awsSesSdk :: logback :: Nil
     ),
     dockerSettings,
     packageSettings

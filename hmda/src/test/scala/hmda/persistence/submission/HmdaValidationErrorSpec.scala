@@ -1,14 +1,14 @@
 package hmda.persistence.submission
 
-import akka.actor
-import akka.actor.testkit.typed.scaladsl.TestProbe
-import akka.actor.typed.ActorRef
-import akka.actor.typed.scaladsl.adapter._
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.cluster.typed.{Cluster, Join}
-import akka.stream.Materializer
-import akka.stream.scaladsl.StreamConverters
-import akka.util.Timeout
+import org.apache.pekko.actor
+import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
+import org.apache.pekko.actor.typed.ActorRef
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.cluster.sharding.typed.scaladsl.ClusterSharding
+import org.apache.pekko.cluster.typed.{Cluster, Join}
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl.StreamConverters
+import org.apache.pekko.util.Timeout
 import hmda.messages.submission.HmdaRawDataCommands.AddLines
 import hmda.messages.submission.HmdaRawDataReplies.LinesAdded
 import hmda.messages.submission.SubmissionProcessingCommands._
@@ -18,7 +18,7 @@ import hmda.messages.submission.ValidationProgressTrackerCommands.ValidationProg
 import hmda.model.filing.submission.{MacroErrors, SubmissionId, Verified}
 import hmda.model.processing.state.{EditSummary, HmdaValidationErrorState, ValidationProgress, ValidationProgressTrackerState}
 import hmda.model.validation._
-import hmda.persistence.AkkaCassandraPersistenceSpec
+import hmda.persistence.PekkoCassandraPersistenceSpec
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.util.streams.FlowUtils.framing
 import hmda.utils.YearUtils.Period
@@ -28,7 +28,7 @@ import org.scalatest.concurrent.ScalaFutures
 import java.time.Instant
 import scala.concurrent.duration._
 
-class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec with ScalaFutures {
+class HmdaValidationErrorSpec extends PekkoCassandraPersistenceSpec with ScalaFutures {
   override implicit val system      = actor.ActorSystem()
   override implicit val typedSystem = system.toTyped
 

@@ -1,14 +1,14 @@
 package hmda.calculator.api.http
 
-import akka.http.scaladsl.model.MediaTypes.`text/csv`
-import akka.http.scaladsl.model.StatusCodes.BadRequest
-import akka.http.scaladsl.model.{ HttpCharsets, HttpEntity }
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import akka.stream.scaladsl.Source
-import akka.util.ByteString
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import org.apache.pekko.http.scaladsl.model.MediaTypes.`text/csv`
+import org.apache.pekko.http.scaladsl.model.StatusCodes.BadRequest
+import org.apache.pekko.http.scaladsl.model.{ HttpCharsets, HttpEntity }
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.Route
+import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.util.ByteString
+import org.apache.pekko.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.calculator.api.model.RateSpreadRequest
 import hmda.calculator.apor.APORCommands
 import hmda.calculator.parser.RateSpreadCSVParser

@@ -2,7 +2,7 @@ package hmda.serialization.submission
 
 import java.io.NotSerializableException
 
-import akka.serialization.SerializerWithStringManifest
+import org.apache.pekko.serialization.SerializerWithStringManifest
 import hmda.messages.submission.SubmissionEvents.{ SubmissionCreated, SubmissionModified, SubmissionNotExists }
 import hmda.persistence.serialization.submission.events.{ SubmissionCreatedMessage, SubmissionModifiedMessage, SubmissionNotExistsMessage }
 import hmda.serialization.submission.SubmissionEventsProtobufConverter._

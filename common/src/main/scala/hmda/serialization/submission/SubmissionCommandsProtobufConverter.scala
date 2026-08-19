@@ -1,6 +1,6 @@
 package hmda.serialization.submission
 
-import akka.actor.typed.ActorRefResolver
+import org.apache.pekko.actor.typed.ActorRefResolver
 import hmda.messages.submission.SubmissionCommands.{ CreateSubmission, GetSubmission, ModifySubmission, SubmissionStop }
 import hmda.persistence.serialization.submission.commands.{
   CreateSubmissionMessage,

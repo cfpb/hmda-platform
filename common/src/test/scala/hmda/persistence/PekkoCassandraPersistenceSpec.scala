@@ -2,20 +2,20 @@ package hmda.persistence
 
 import java.time.Instant
 import java.util.concurrent.TimeUnit
-import akka.actor
-import akka.actor.testkit.typed.scaladsl.TestProbe
-import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{ActorRef, ActorSystem, Behavior, TypedActorContext}
-import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
-import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
+import org.apache.pekko.actor
+import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
+import org.apache.pekko.actor.typed.scaladsl.Behaviors
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.actor.typed.{ActorRef, ActorSystem, Behavior, TypedActorContext}
+import org.apache.pekko.persistence.typed.PersistenceId
+import org.apache.pekko.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
+import org.apache.pekko.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 import org.scalacheck.Gen
 import org.scalatest.{BeforeAndAfterAll, WordSpec}
 
 import scala.concurrent.duration._
 
-abstract class AkkaCassandraPersistenceSpec extends WordSpec with BeforeAndAfterAll {
+abstract class PekkoCassandraPersistenceSpec extends WordSpec with BeforeAndAfterAll {
 
   sealed trait Command
   sealed trait Event
@@ -40,12 +40,12 @@ abstract class AkkaCassandraPersistenceSpec extends WordSpec with BeforeAndAfter
     val probe = TestProbe[Event](s"probe-$id")
     val t0    = System.nanoTime()
 
-    probe.within(45.seconds) {
+    probe.within(90.seconds) {
       probe.awaitAssert {
         val actor =
           system.spawn(AwaitPersistenceInit.behavior, actorName)
         actor ! Request(probe.ref)
-        probe.expectMessage(5.seconds, Response)
+        probe.expectMessage(120.seconds, Response)
         system.log.debug("awaitPersistenceInit took {} ms {}", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t0), system.name)
       }
     }

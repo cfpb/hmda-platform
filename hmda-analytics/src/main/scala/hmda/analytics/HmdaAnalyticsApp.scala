@@ -1,14 +1,14 @@
 package hmda.analytics
 
-import akka.Done
-import akka.actor.{ActorSystem, typed}
-import akka.actor.typed.scaladsl.adapter._
-import akka.kafka.scaladsl.Consumer.DrainingControl
-import akka.kafka.scaladsl.{Committer, Consumer}
-import akka.kafka.{CommitterSettings, ConsumerSettings, Subscriptions}
-import akka.stream.Materializer
-import akka.stream.scaladsl.{Keep, Sink, Source}
-import akka.util.{ByteString, Timeout}
+import org.apache.pekko.Done
+import org.apache.pekko.actor.{ActorSystem, typed}
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.kafka.scaladsl.Consumer.DrainingControl
+import org.apache.pekko.kafka.scaladsl.{Committer, Consumer}
+import org.apache.pekko.kafka.{CommitterSettings, ConsumerSettings, Subscriptions}
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl.{Keep, Sink, Source}
+import org.apache.pekko.util.{ByteString, Timeout}
 import com.typesafe.config.ConfigFactory
 import hmda.analytics.query._
 import hmda.messages.HmdaMessageFilter
@@ -52,9 +52,9 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
   implicit val materializer: Materializer = Materializer(system)
   implicit val ec: ExecutionContextExecutor = system.dispatcher
 
-  implicit val timeout: Timeout = Timeout(5.seconds)
+  implicit val timeout: Timeout = Timeout(10.seconds)
 
-  val kafkaConfig = system.settings.config.getConfig("akka.kafka.consumer")
+  val kafkaConfig = system.settings.config.getConfig("pekko.kafka.consumer")
   val config      = ConfigFactory.load()
   val parallelism = config.getInt("hmda.analytics.parallelism")
   val larDeletion = config.getBoolean("hmda.analytics.larDeletion")
@@ -114,7 +114,9 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
       processData(msg.record.value()).map(_ => msg.committableOffset)
     })
     .toMat(Committer.sink(CommitterSettings(system).withParallelism(2)))(Keep.both)
-    .mapMaterializedValue(DrainingControl.apply)
+    .mapMaterializedValue {
+      case (control, future) => DrainingControl.apply(control, future)
+    }
     .run()
 
   def processData(msg: String): Future[Done] =
@@ -305,7 +307,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
     result.recover {
       case t: Throwable =>
         log.error("Error happened in inserting: ", t)
-        akka.Done.done()
+        Done.done()
     }
 
   }

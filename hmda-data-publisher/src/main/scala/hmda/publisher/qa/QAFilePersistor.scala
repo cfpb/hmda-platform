@@ -1,11 +1,11 @@
 package hmda.publisher.qa
 
-import akka.NotUsed
-import akka.stream.Materializer
-import akka.stream.alpakka.s3.S3Attributes
-import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.scaladsl.{ Framing, Source }
-import akka.util.ByteString
+import org.apache.pekko.NotUsed
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.connectors.s3.S3Attributes
+import org.apache.pekko.stream.connectors.s3.scaladsl.S3
+import org.apache.pekko.stream.scaladsl.{ Framing, Source }
+import org.apache.pekko.util.ByteString
 import cats.instances.future._
 import cats.syntax.all._
 import com.typesafe.scalalogging.StrictLogging

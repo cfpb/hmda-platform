@@ -1,7 +1,7 @@
 package hmda.publication
 
-import akka.actor.typed.{ Behavior, PostStop, PreRestart }
-import akka.actor.typed.scaladsl.Behaviors
+import org.apache.pekko.actor.typed.{ Behavior, PostStop, PreRestart }
+import org.apache.pekko.actor.typed.scaladsl.Behaviors
 
 object HmdaPublication {
 

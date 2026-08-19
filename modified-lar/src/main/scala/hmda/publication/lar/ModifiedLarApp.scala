@@ -1,15 +1,15 @@
 package hmda.publication.lar
 
-import akka.Done
-import akka.actor.typed.scaladsl.AskPattern._
-import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{ActorRef, ActorSystem}
-import akka.actor.{ActorSystem => ClassicActorSystem}
-import akka.kafka.scaladsl.{Committer, Consumer}
-import akka.kafka.{CommitterSettings, ConsumerMessage, ConsumerSettings, Subscriptions}
-import akka.stream.Materializer
-import akka.stream.scaladsl._
-import akka.util.Timeout
+import org.apache.pekko.{Done, pattern}
+import org.apache.pekko.actor.typed.scaladsl.AskPattern._
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.actor.typed.{ActorRef, ActorSystem}
+import org.apache.pekko.actor.{ActorSystem => ClassicActorSystem}
+import org.apache.pekko.kafka.scaladsl.{Committer, Consumer}
+import org.apache.pekko.kafka.{CommitterSettings, ConsumerMessage, ConsumerSettings, Subscriptions}
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl._
+import org.apache.pekko.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.census.records._
 import hmda.messages.HmdaMessageFilter
@@ -44,7 +44,7 @@ object ModifiedLarApp extends App {
       val futRes: Future[PersistModifiedLarResult] =
         modifiedLarPublisher ? ((ref: ActorRef[PersistModifiedLarResult]) => PersistToS3AndPostgres(submissionId, ref))
       // bubble up failure if there is any (this is done to prevent a commit to Kafka from happening
-      // when used in Kafka consumer Akka Stream
+      // when used in Kafka consumer pekko Stream
       futRes.map(result => result.status).flatMap {
         case UploadSucceeded         => Future.successful(Done.done())
         case UploadFailed(exception) => Future.failed(exception)
@@ -73,7 +73,7 @@ object ModifiedLarApp extends App {
   implicit val timeout: Timeout                  = Timeout(1.hour)
 
   val config      = ConfigFactory.load()
-  val kafkaConfig = config.getConfig("akka.kafka.consumer")
+  val kafkaConfig = config.getConfig("pekko.kafka.consumer")
   val parallelism = config.getInt("hmda.lar.modified.parallelism")
 
   val censusTractMap2018: Map[String, Census] =
@@ -127,7 +127,7 @@ object ModifiedLarApp extends App {
             log.info(s"Received a message - key: ${msg.record.key().toUpperCase()}, value: ${msg.record.value().toUpperCase()}")
             processKafkaRecord(msg.record.value().toUpperCase().trim).map(_ => msg.committableOffset)
           }
-          akka.pattern.retry(
+          pattern.retry(
             attempt = () => processMsg(),
             attempts = 2,
             delay = 90.seconds

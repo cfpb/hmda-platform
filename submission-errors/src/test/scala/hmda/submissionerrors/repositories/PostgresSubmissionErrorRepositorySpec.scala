@@ -1,7 +1,7 @@
 package hmda.submissionerrors.repositories
 
-import akka.actor.ActorSystem
-import akka.testkit.TestKit
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.testkit.TestKit
 import hmda.model.filing.submission.SubmissionId
 import hmda.utils.EmbeddedPostgres
 import hmda.utils.YearUtils.Period

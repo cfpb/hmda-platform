@@ -1,15 +1,15 @@
 package hmda.projection
 
-import akka.actor.typed.scaladsl.AskPattern._
-import akka.actor.typed.scaladsl.{ ActorContext, Behaviors }
-import akka.actor.typed.{ ActorSystem, Behavior, Scheduler }
-import akka.persistence.query.{ EventEnvelope, NoOffset, Offset }
-import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
-import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior }
-import akka.stream.Materializer
-import akka.stream.scaladsl.Sink
-import akka.util.Timeout
+import org.apache.pekko.actor.typed.scaladsl.AskPattern._
+import org.apache.pekko.actor.typed.scaladsl.{ ActorContext, Behaviors }
+import org.apache.pekko.actor.typed.{ ActorSystem, Behavior, Scheduler }
+import org.apache.pekko.persistence.query.{ EventEnvelope, NoOffset, Offset }
+import org.apache.pekko.persistence.typed.PersistenceId
+import org.apache.pekko.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
+import org.apache.pekko.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior }
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl.Sink
+import org.apache.pekko.util.Timeout
 import hmda.messages.projection.CommonProjectionMessages._
 import hmda.query.HmdaQuery._
 

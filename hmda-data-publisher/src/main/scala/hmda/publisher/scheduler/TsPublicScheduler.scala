@@ -1,12 +1,12 @@
 package hmda.publisher.scheduler
 
-import akka.actor.typed.ActorRef
-import akka.stream.Materializer
-import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
-import akka.stream.alpakka.s3._
-import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.scaladsl.Source
-import akka.util.ByteString
+import org.apache.pekko.actor.typed.ActorRef
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.connectors.s3.ApiVersion.ListBucketVersion2
+import org.apache.pekko.stream.connectors.s3._
+import org.apache.pekko.stream.connectors.s3.scaladsl.S3
+import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.util.ByteString
 import hmda.actor.HmdaActor
 import hmda.publisher.helper.{ PrivateAWSConfigLoader, PublicAWSConfigLoader, S3Archiver, S3Utils, SnapshotCheck, TSHeader }
 import hmda.publisher.query.component.{ PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, TransmittalSheetTable, TsRepository, YearPeriod }
@@ -14,8 +14,8 @@ import hmda.publisher.scheduler.schedules.Schedules.{ TsPublicSchedule }
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.ts._
 import hmda.util.BankFilterUtils._
-import akka.stream.alpakka.file.scaladsl.Archive
-import akka.stream.alpakka.file.ArchiveMetadata
+import org.apache.pekko.stream.connectors.file.scaladsl.Archive
+import org.apache.pekko.stream.connectors.file.ArchiveMetadata
 import hmda.publisher.helper.CronConfigLoader.{ CronString, tsPublicCron, tsPublicYears }
 import hmda.publisher.scheduler.schedules.{ Schedule, ScheduleWithYear }
 import hmda.publisher.util.{ PublishingReporter, ScheduleCoordinator }

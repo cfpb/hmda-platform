@@ -1,9 +1,9 @@
 package hmda.serialization.submission
 
-import akka.actor.ActorSystem
-import akka.actor.testkit.typed.scaladsl.TestProbe
-import akka.actor.typed.ActorRefResolver
-import akka.actor.typed.scaladsl.adapter._
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
+import org.apache.pekko.actor.typed.ActorRefResolver
+import org.apache.pekko.actor.typed.scaladsl.adapter._
 import hmda.generators.CommonGenerators.emailGen
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents.{SubmissionProcessingEvent, SubmissionSignedEvent}

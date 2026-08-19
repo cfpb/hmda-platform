@@ -1,6 +1,6 @@
 package hmda.reporting
 
-import akka.actor.typed.ActorSystem
+import org.apache.pekko.actor.typed.ActorSystem
 import hmda.reporting.api.http.HmdaReportingApi
 import org.slf4j.LoggerFactory
 

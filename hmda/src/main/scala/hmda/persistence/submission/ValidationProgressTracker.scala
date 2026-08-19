@@ -1,9 +1,9 @@
 package hmda.persistence.submission
 
-import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{ Behavior, Terminated }
-import akka.actor.{ ActorRef => ClassicActorRef }
+import org.apache.pekko.actor.typed.scaladsl.Behaviors
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.actor.typed.{ Behavior, Terminated }
+import org.apache.pekko.actor.{ ActorRef => ClassicActorRef }
 import hmda.messages.submission.ValidationProgressTrackerCommands._
 import hmda.model.processing.state.{ HmdaValidationErrorState, ValidationProgressTrackerState, ValidationType }
 // $COVERAGE-OFF$

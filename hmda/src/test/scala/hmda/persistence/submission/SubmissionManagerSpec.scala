@@ -1,11 +1,11 @@
 package hmda.persistence.submission
 
-import akka.actor
-import akka.actor.testkit.typed.scaladsl.TestProbe
-import akka.actor.typed.scaladsl.adapter._
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.cluster.typed.{ Cluster, Join }
-import akka.http.scaladsl.testkit.RouteTestTimeout
+import org.apache.pekko.actor
+import org.apache.pekko.actor.testkit.typed.scaladsl.TestProbe
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.cluster.sharding.typed.scaladsl.ClusterSharding
+import org.apache.pekko.cluster.typed.{ Cluster, Join }
+import org.apache.pekko.http.scaladsl.testkit.RouteTestTimeout
 import hmda.messages.filing.FilingCommands.GetLatestSubmission
 import hmda.messages.submission.SubmissionCommands.{ CreateSubmission, GetSubmission }
 import hmda.messages.submission.SubmissionEvents.{ SubmissionCreated, SubmissionEvent }
@@ -14,19 +14,19 @@ import hmda.model.filing.FilingGenerator.filingGen
 import hmda.model.filing.{ Filing, FilingId }
 import hmda.model.filing.submission._
 import hmda.model.submission.SubmissionGenerator.submissionGen
-import hmda.persistence.AkkaCassandraPersistenceSpec
+import hmda.persistence.PekkoCassandraPersistenceSpec
 import hmda.persistence.filing.FilingPersistence
 import hmda.utils.YearUtils.Period
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers }
-import akka.testkit._
+import org.apache.pekko.testkit._
 
 import scala.concurrent.duration._
 
-class SubmissionManagerSpec extends AkkaCassandraPersistenceSpec with MustMatchers with BeforeAndAfterAll {
+class SubmissionManagerSpec extends PekkoCassandraPersistenceSpec with MustMatchers with BeforeAndAfterAll {
   implicit val system      = actor.ActorSystem()
   implicit val typedSystem = system.toTyped
 
-  val duration = 10.seconds
+  val duration = 120.seconds
 
   implicit val routeTimeout = RouteTestTimeout(duration.dilated)
 

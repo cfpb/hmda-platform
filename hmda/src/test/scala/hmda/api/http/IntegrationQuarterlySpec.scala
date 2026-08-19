@@ -1,14 +1,14 @@
 package hmda.api.http
 
-import akka.actor.typed.ActorSystem
-import akka.actor.typed.scaladsl.adapter._
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.cluster.typed.{Cluster, Join}
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.model.StatusCodes.Created
-import akka.http.scaladsl.testkit.ScalatestRouteTest
-import akka.stream.scaladsl.Sink
-import akka.util.Timeout
+import org.apache.pekko.actor.typed.ActorSystem
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.cluster.sharding.typed.scaladsl.ClusterSharding
+import org.apache.pekko.cluster.typed.{Cluster, Join}
+import org.apache.pekko.http.scaladsl.model.StatusCodes
+import org.apache.pekko.http.scaladsl.model.StatusCodes.Created
+import org.apache.pekko.http.scaladsl.testkit.ScalatestRouteTest
+import org.apache.pekko.stream.scaladsl.Sink
+import org.apache.pekko.util.Timeout
 import com.typesafe.config.Config
 import hmda.api.http.admin.{ InstitutionAdminHttpApi, SubmissionAdminHttpApi }
 import hmda.api.http.filing.submissions._
@@ -20,7 +20,7 @@ import hmda.model.filing.FilingDetails
 import hmda.model.filing.submission.{Submission, SubmissionId}
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators.institutionGen
-import hmda.persistence.AkkaCassandraPersistenceSpec
+import hmda.persistence.PekkoCassandraPersistenceSpec
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission._
@@ -37,7 +37,7 @@ import scala.concurrent.{Await, ExecutionContext}
 import scala.util.Random
 
 class IntegrationQuarterlySpec
-  extends AkkaCassandraPersistenceSpec
+  extends PekkoCassandraPersistenceSpec
     with MustMatchers
     with ScalatestRouteTest
     with FileUploadUtils
@@ -111,7 +111,7 @@ class IntegrationQuarterlySpec
 
   "IntegrationQuarterlySpec" must {
     "run through for a quarterly submission" in {
-      import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+      import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
       val institution = Post("/institutions", sampleInstitutionQuarterly) ~> institutionAdminRoute(oAuth2Authorization) ~> check {
         response.status mustBe Created
         responseAs[Institution]

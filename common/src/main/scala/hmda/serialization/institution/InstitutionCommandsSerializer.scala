@@ -2,10 +2,10 @@ package hmda.serialization.institution
 
 import java.io.NotSerializableException
 
-import akka.actor.ExtendedActorSystem
-import akka.actor.typed.ActorRefResolver
-import akka.actor.typed.scaladsl.adapter._
-import akka.serialization.SerializerWithStringManifest
+import org.apache.pekko.actor.ExtendedActorSystem
+import org.apache.pekko.actor.typed.ActorRefResolver
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.serialization.SerializerWithStringManifest
 import hmda.messages.institution.InstitutionCommands.{ GetInstitutionDetails, _ }
 import hmda.model.institution.Institution
 import hmda.persistence.serialization.institution.InstitutionMessage

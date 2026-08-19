@@ -1,6 +1,6 @@
 package hmda.rateLimit
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import org.slf4j.LoggerFactory
 
 object RateLimitApp extends App {

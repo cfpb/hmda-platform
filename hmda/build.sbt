@@ -8,8 +8,8 @@ packageName in Docker := "hmda-platform"
 dockerExposedPorts := Vector(8080, 8081, 8082, 19999, 9080, 1099)
 
 dockerEntrypoint ++= Seq(
-  """-Dakka.remote.netty.tcp.hostname="$(eval "echo $AKKA_REMOTING_BIND_HOST")"""",
-  """-Dakka.management.http.hostname="$(eval "echo $AKKA_REMOTING_BIND_HOST")""""
+  """-Dpekko.remote.artery.bind.hostname="$(eval "echo $PEKKO_REMOTING_BIND_HOST")"""",
+  """-Dpekko.management.http.hostname="$(eval "echo $PEKKO_REMOTING_BIND_HOST")""""
 )
 
 //Add Yourkit profiler

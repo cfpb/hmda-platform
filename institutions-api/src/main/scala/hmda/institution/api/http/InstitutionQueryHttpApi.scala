@@ -1,12 +1,12 @@
 package hmda.institution.api.http
 
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.{StatusCodes, Uri}
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
+import org.apache.pekko.http.scaladsl.marshalling.ToResponseMarshallable
+import org.apache.pekko.http.scaladsl.model.{StatusCodes, Uri}
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.Route
+import org.apache.pekko.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
 import com.typesafe.config.Config
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.api.http.directives.CreateFilingAuthorization._
 import hmda.api.http.model.ErrorResponse
 import hmda.institution.api.http.model.{InstitutionNoteHistoryResponse, InstitutionsResponse}
@@ -18,14 +18,16 @@ import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 import hmda.api.http.EmailUtils._
 import org.slf4j.LoggerFactory
+import hmda.auth.OAuth2Authorization
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 object InstitutionQueryHttpApi {
-  def create(config: Config)(implicit ec: ExecutionContext): Route =
+  def create(config: Config)(implicit ec: ExecutionContext): OAuth2Authorization => Route =
     new InstitutionQueryHttpApi(config)(ec).institutionPublicRoutes
 }
+
 private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionContext) extends InstitutionEmailComponent with InstitutionNoteHistoryComponent{
   val dbConfig = DatabaseConfig.forConfig[JdbcProfile]("institution_db")
 
@@ -69,30 +71,17 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
       }
     }
 
-  private val institutionByDomainPath =
-    path("institutions" / "year" / IntNumber) { year =>
+  private def institutionHistoryPath(oAuth2Authorization: OAuth2Authorization) = {
+    val hmdaAdminRole   = "hmda-admin"
+    path("institutions" / Segment / "year" / IntNumber  / "history") { (lei, year) =>
       (extractUri & get) { uri =>
-        isInstitutionsYearAllowed(yearsAvailable.contains(year.toString)){
-          parameter('domain.as[String]) { domain =>
-            val f = findByEmail(domain, year.toString)
-            completeInstitutionsFuture(f, uri)
-          } ~
-            parameters('domain.as[String], 'lei.as[String], 'respondentName.as[String], 'taxId.as[String])  {
-              (domain, lei, respondentName, taxId) =>
-                val f = findByFields(lei, respondentName, taxId, domain, year.toString)
-                completeInstitutionsFuture(f, uri)
-            }
+        oAuth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
+          val f = institutionNoteHistoryRepository.findInstitutionHistory( year.toString,lei)
+          completeInstitutionsNoteHistoryFuture(f, uri)
         }
       }
     }
-
-  private val institutionHistoryPath =
-    path("institutions" / Segment / "year" / IntNumber  / "history") { (lei, year) =>
-      (extractUri & get) { uri =>
-        val f = institutionNoteHistoryRepository.findInstitutionHistory( year.toString,lei)
-        completeInstitutionsNoteHistoryFuture(f, uri)
-      }
-    }
+  }
 
   def completeInstitutionsNoteHistoryFuture(f: Future[Seq[InstitutionNoteHistoryEntity]], uri: Uri): Route = {
     val entityMarshaller: PartialFunction[Seq[InstitutionNoteHistoryEntity], ToResponseMarshallable] = {
@@ -102,7 +91,7 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
     completeFuture(f, uri, entityMarshaller)
   }
 
-  private val institutionByDomainDefaultPath =
+  private val institutionByDomainPath =
     path("institutions") {
       (extractUri & get) { uri =>
         parameter('domain.as[String]) { domain =>
@@ -132,7 +121,7 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
             .map(_.sumLars(bankFilterList.toSeq)
               .recover({
                 case err: Throwable => log.debug("ts repo failure, most likely table not yet available for year, skipping...", err)
-                0
+                  0
               })
               .map(AnnualLarCount(yr, _)))
             .getOrElse(Future(AnnualLarCount(yr, 0)))
@@ -181,11 +170,11 @@ private class InstitutionQueryHttpApi(config: Config)(implicit ec: ExecutionCont
     complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
   }
 
-  def institutionPublicRoutes: Route =
+  def institutionPublicRoutes(oAuth2Authorization: OAuth2Authorization): Route =
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          institutionByIdPath ~ institutionByDomainPath ~ institutionHistoryPath ~ institutionByDomainDefaultPath ~
+          institutionByIdPath ~ institutionByDomainPath ~ institutionHistoryPath(oAuth2Authorization) ~
             quarterlyFilersLarCountsPath
         }
       }

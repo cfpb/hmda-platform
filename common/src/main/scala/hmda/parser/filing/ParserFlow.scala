@@ -1,9 +1,9 @@
 package hmda.parser.filing
 
-import akka.NotUsed
-import akka.stream.FlowShape
-import akka.stream.scaladsl.{ Broadcast, Concat, Flow, GraphDSL }
-import akka.util.ByteString
+import org.apache.pekko.NotUsed
+import org.apache.pekko.stream.FlowShape
+import org.apache.pekko.stream.scaladsl.{ Broadcast, Concat, Flow, GraphDSL }
+import org.apache.pekko.util.ByteString
 import hmda.model.filing.PipeDelimited
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.ts.TransmittalSheet

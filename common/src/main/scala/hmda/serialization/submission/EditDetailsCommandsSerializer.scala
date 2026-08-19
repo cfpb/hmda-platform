@@ -2,10 +2,10 @@ package hmda.serialization.submission
 
 import java.io.NotSerializableException
 
-import akka.actor.ExtendedActorSystem
-import akka.actor.typed.ActorRefResolver
-import akka.actor.typed.scaladsl.adapter._
-import akka.serialization.SerializerWithStringManifest
+import org.apache.pekko.actor.ExtendedActorSystem
+import org.apache.pekko.actor.typed.ActorRefResolver
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.serialization.SerializerWithStringManifest
 import hmda.messages.submission.EditDetailsCommands.{ GetEditDetails, GetEditRowCount, PersistEditDetails }
 import hmda.persistence.serialization.edit.details.commands.{ GetEditDetailsMessage, GetEditRowCountMessage, PersistEditDetailsMessage }
 import hmda.serialization.submission.EditDetailsCommandsProtobufConverter._
