@@ -26,7 +26,9 @@ object Dependencies {
   lazy val pekkoStreamTyped          = "org.apache.pekko"   %% "pekko-stream-typed"           % Version.pekkoVersion
   lazy val pekkoStreamsTestKit       = "org.apache.pekko"   %% "pekko-stream-testkit"         % Version.pekkoVersion % Test
   lazy val pekkoHttp                 = "org.apache.pekko"   %% "pekko-http"                   % Version.pekkoVersion
-  lazy val pekkoHttp2                = "org.playframework"   %% "play-pekko-http2-support"          % Version.pekkoHttp2Support
+  lazy val pekkoHttp2                = "org.playframework"   %% "play-pekko-http2-support"    % Version.pekkoHttp2Support
+  lazy val jacksonModuleParameternamesPekkoHttp2   = "com.fasterxml.jackson.module" % "jackson-module-parameter-names"   % Version.jacksonDatabind
+  lazy val jacksonModuleScalaPekkoHttp2            = "com.fasterxml.jackson.module" %% "jackson-module-scala"   % Version.jacksonDatabind
   lazy val pekkoHttpXml              = "org.apache.pekko"   %% "pekko-http-xml"               % Version.pekkoVersion
   lazy val pekkoHttpTestkit          = "org.apache.pekko"   %% "pekko-http-testkit"           % Version.pekkoVersion % Test
   lazy val pekkoHttpSprayJson        = "org.apache.pekko"   %% "pekko-http-spray-json"        % Version.pekkoVersion
@@ -65,8 +67,11 @@ object Dependencies {
   lazy val httpClient            = "org.apache.httpcomponents"  % "httpclient"                  % Version.httpcomponents
   lazy val pekkoKafkaStreams      = "org.apache.pekko"          %% "pekko-connectors-kafka"          % Version.pekkoKafkaStreams exclude("org.apache.kafka", "kafka-clients")
   lazy val kafkaClients          = "org.apache.kafka"           % "kafka-clients"               % Version.kafkaClients
+  lazy val lz4JavaCompression    = "at.yawk.lz4"                % "lz4-java"                    % Version.lz4JavaCompression
   lazy val pekkoS3             = "org.apache.pekko"             %% "pekko-connectors-s3"     % Version.pekkoVersion
   lazy val pekkoQuartzScheduler   = "io.github.samueleresca"    %% "pekko-quartz-scheduler"      % Version.pekkoQuartzScheduler
+  lazy val mchangeC3p0pekkoQuartzScheduler = "com.mchange"        % "c3p0"                       % Version.mchangeC3p0pekkoQuartzScheduler
+  lazy val mchangeCommonsJavapekkoQuartzScheduler = "com.mchange" % "mchange-commons-java"       % Version.mchangeCommonsJavapekkoQuartzScheduler
   lazy val sbtResolver           = "io.spray"                   %% "sbt-revolver"               % Version.sprayresolver
   lazy val enumeratum            = "com.beachape"               %% "enumeratum"                 % Version.enumeratum
   lazy val enumeratumCirce       = "com.beachape"               %% "enumeratum-circe"           % Version.enumeratumCirce
@@ -84,10 +89,10 @@ object Dependencies {
   lazy val scalacheckShapeless   = "com.github.alexarchambault" %% "scalacheck-shapeless_1.14"  % Version.scalacheckShapeless % Test
   lazy val diffx                 = "com.softwaremill.diffx"     %% "diffx-core"                 % Version.diffx % Test
   lazy val kubernetesApi         = "io.kubernetes"              % "client-java"                 % Version.kubernetesApi
-  lazy val keyspacedriver        = "software.aws.mcs"           % "aws-sigv4-auth-cassandra-java-driver-plugin"  % Version.keyspaceDriver
-  // https://mvnrepository.com/artifact/software.amazon.msk/aws-msk-iam-auth
+  lazy val amazonAwssdk          = "software.amazon.awssdk"     % "sts"                         % Version.amazonAwssdk
   lazy val mskdriver             = "software.amazon.msk"        % "aws-msk-iam-auth"            % Version.mskAuth
   // overriding the log4j-slf4j bridge used by spring, transitively brought in by s3mock
   // this is needed because of CVE-2021-44228 https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228
   lazy val log4jToSlf4j          = "org.apache.logging.log4j"   % "log4j-to-slf4j"              % Version.log4j % Test
+  lazy val pekkoGrpcSbtpluginLibrary       = "io.grpc"          % "grpc-netty-shaded"           % Version.pekkoGrpcSbtpluginLibrary
 }

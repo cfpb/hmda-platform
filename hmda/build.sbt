@@ -28,7 +28,7 @@ dockerCommands :=
     case v => Seq(v)
   }
 
-javaOptions in Universal ++= Seq(
+Universal / javaOptions ++= Seq(
   "-J-XX:+UnlockExperimentalVMOptions",
   "-J-XX:+UseContainerSupport",
   "-J-XX:+UnlockDiagnosticVMOptions",
@@ -45,4 +45,4 @@ javaOptions in Universal ++= Seq(
   //  ,"-agentpath:/opt/docker/YourKit-JavaProfiler-2019.8/bin/linux-x86-64/libyjpagent.so=port=10001,listen=all,dir=/opt/docker,sampling_settings_path=/ope/docker"
 )
 
-javaOptions in reStart ++= (javaOptions in run).value
+reStart / javaOptions ++= (javaOptions in run).value
