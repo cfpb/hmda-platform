@@ -12,6 +12,20 @@ class InstitutionRepository(
   override val table: TableQuery[InstitutionsTable])
   extends TableRepository[InstitutionsTable, String] {
 
+  def fetchYearTable(year: Int): String =
+    year match {
+      case 2018 => "institutions2018"
+      case 2019 => "institutions2019"
+      case 2020 => "institutions2020"
+      case 2021 => "institutions2021"
+      case 2022 => "institutions2022"
+      case 2023 => "institutions2023"
+      case 2024 => "institutions2024"
+      case 2025 => "institutions2025"
+      case 2026 => "institutions2026"
+      case _    => "institutions2025"
+    }
+
   override def getId(row: InstitutionsTable): config.profile.api.Rep[Id] =
     row.lei
 

@@ -30,6 +30,19 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
       case _    => "modifiedlar2025"
     }
 
+  def fetchSnapshotYearTable(year: Int): String =
+    year match {
+      case 2018 => "modifiedlar2018"
+      case 2019 => "modifiedlar2019"
+      case 2020 => "modifiedlar2020"
+      case 2021 => "modifiedlar2021"
+      case 2022 => "modifiedlar2022"
+      case 2023 => "modifiedlar2023"
+      case 2024 => "modifiedlar2024_snapshot_v3"
+      case 2025 => "modifiedlar2025_snapshot_06022026"
+      case _    => "modifiedlar2025_snapshot_06022026"
+    }
+
   /**
     * Deletes entries in the Modified LAR table by their LEI
     * @param lei
@@ -39,6 +52,13 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
     db.run {
       sql"""SELECT  msa_md, case when msa_md = '99999' then 'NA' else max(msa_md_name) end
                          FROM #${fetchYearTable(filingYear)} WHERE lei = ${lei.toUpperCase}  AND msa_md <> 0 group by msa_md order by msa_md"""
+        .as[(String, String)]
+    }
+  
+  def msaMdsSnapshot(lei: String, filingYear: Int): Future[Vector[(String, String)]] =
+    db.run {
+      sql"""SELECT  msa_md, case when msa_md = '99999' then 'NA' else max(msa_md_name) end
+                         FROM #${fetchSnapshotYearTable(filingYear)} WHERE lei = ${lei.toUpperCase}  AND msa_md <> 0 group by msa_md order by msa_md"""
         .as[(String, String)]
     }
 
