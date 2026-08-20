@@ -1,6 +1,7 @@
 package hmda.reporting.api.http
 
 import org.apache.pekko.http.scaladsl.model.StatusCodes.OK
+import org.apache.pekko.http.scaladsl.model.StatusCodes.BadRequest
 import org.apache.pekko.http.scaladsl.server.Route
 import org.apache.pekko.http.scaladsl.testkit.ScalatestRouteTest
 import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport
@@ -59,10 +60,8 @@ class ReportingHttpApiSpec
         response.status shouldBe OK
         responseAs[HmdaFilerResponse] shouldBe HmdaFilerResponse(Set(HmdaFiler("EXAMPLE-LEI-2", "", 2019.toString)))
       }
-
       Get("/filers/1111") ~> routes ~> check {
-        response.status shouldBe OK
-        responseAs[HmdaFilerResponse] shouldBe HmdaFilerResponse(Set(HmdaFiler("", "", "")))
+        response.status shouldBe BadRequest
       }
     }
 

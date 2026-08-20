@@ -13,7 +13,7 @@ import hmda.util.http.FilingResponseUtils.entityNotPresentResponse
 import io.circe.generic.auto._
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
-import akka.http.scaladsl.model.Uri
+import org.apache.pekko.http.scaladsl.model.Uri
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
