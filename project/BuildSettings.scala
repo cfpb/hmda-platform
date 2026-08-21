@@ -24,6 +24,7 @@ object BuildSettings {
       Test / parallelExecution:= false,
       Test / fork := true,
       Test / envVars    := Map("SCALACTIC_FILL_FILE_PATHNAMES" -> "yes"),
+      Test / javaOptions ++= Seq("-Xms4G", "-Xmx12G"),
       Compile / envVars := Map("SCALACTIC_FILL_FILE_PATHNAMES" -> "yes"),
       resolvers += "pekko library repository".at("https://repo.pekko.io/maven"),
       commands += dockerPublishLocalSkipTestsCommand
