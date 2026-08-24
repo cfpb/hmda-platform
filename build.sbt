@@ -70,7 +70,7 @@ lazy val dockerSettings = Seq(
     } else dockerBuildCommand.value
   },
   Docker / maintainer := "Hmda-Ops",
-  dockerBaseImage := "dhi.io/eclipse-temurin:26.0.2.10-alpine3.24",
+  dockerBaseImage := "dhi.io/eclipse-temurin:26.0.2.10-alpine3.24-dev",
 
   dockerRepository := Some("hmda"),
   Docker / daemonUser := "nonroot",
