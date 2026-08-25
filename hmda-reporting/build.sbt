@@ -1,5 +1,5 @@
 Docker / packageName := "hmda-reporting"
 
-version in Docker := "latest"
+Docker / version := "latest"
 
 dockerExposedPorts := Vector(9094)

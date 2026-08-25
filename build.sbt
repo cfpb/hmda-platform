@@ -3,8 +3,8 @@ import BuildSettings._
 import sbtassembly.AssemblyPlugin.autoImport.assemblyMergeStrategy
 import com.typesafe.sbt.packager.docker._
 
-lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, pekkoHttpSprayJson, testContainers, apacheCommonsIO, log4jToSlf4j, kubernetesApi, scalaLogging)
-
+lazy val commonDeps = Seq(
+  logback, scalaTest, scalaCheck, pekkoHttpSprayJson, testContainers, apacheCommonsIO, log4jToSlf4j, kubernetesApi, scalaLogging, amazonAwssdk)
 lazy val sparkDeps =
   Seq(
     postgres,
@@ -37,7 +37,13 @@ lazy val pekkoDeps = Seq(
   kafkaClients,
   pekkoS3,
   pekkoQuartzScheduler,
-  pekkoFile
+  pekkoFile,
+  lz4JavaCompression,
+  mchangeC3p0pekkoQuartzScheduler,
+  mchangeCommonsJavapekkoQuartzScheduler,
+  pekkoGrpcSbtpluginLibrary,
+  jacksonModuleParameternamesPekkoHttp2,
+  jacksonModuleScalaPekkoHttp2,
 )
 
 lazy val pekkoPersistenceDeps =
@@ -48,7 +54,6 @@ lazy val pekkoPersistenceDeps =
     pekkoPersistenceQuery,
     pekkoClusterShardingTyped,
     pekkoPersistenceCassandra,
-    keyspacedriver
   )
 
 lazy val pekkoHttpDeps =
@@ -65,7 +70,7 @@ lazy val dockerSettings = Seq(
     } else dockerBuildCommand.value
   },
   Docker / maintainer := "Hmda-Ops",
-  dockerBaseImage := "dhi.io/eclipse-temurin:26.0.1.8-alpine3.24-dev",
+  dockerBaseImage := "dhi.io/eclipse-temurin:26.0.2.10-alpine3.24-dev",
 
   dockerRepository := Some("hmda"),
   Docker / daemonUser := "nonroot",
@@ -94,18 +99,18 @@ lazy val `hmda-root` = (project in file("."))
   .aggregate(
     common,
     `hmda-platform`,
-    `check-digit`,
-    `file-proxy`,
-    `institutions-api`,
-    `modified-lar`,
-    `hmda-analytics`,
-    `hmda-auth`,
-    `hmda-data-publisher`,
-    `hmda-reporting`,
-    `ratespread-calculator`,
-    `data-browser`,
-    `submission-errors`,
-    `hmda-quarterly-data-service`
+    // `check-digit`,
+    // `file-proxy`,
+    // `institutions-api`,
+    // `modified-lar`,
+    // `hmda-analytics`,
+    // `hmda-auth`,
+    // `hmda-data-publisher`,
+    // `hmda-reporting`,
+    // `ratespread-calculator`,
+    // `data-browser`,
+    // `submission-errors`,
+    // `hmda-quarterly-data-service`
   )
 
 val latestGitTag = settingKey[String]("The latest git tag.")
@@ -497,7 +502,7 @@ lazy val `hmda-dashboard` = (project in file("hmda-dashboard"))
         case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
         case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
         case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
-        
+
         case x =>
           val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
