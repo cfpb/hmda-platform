@@ -18,7 +18,6 @@ class Q303 private (institution: Institution) extends EditCheck[TransmittalSheet
   override def name: String = "Q303"
 
   override def apply(ts: TransmittalSheet): ValidationResult =
-    (ts.LEI.toLowerCase is equalTo(institution.LEI.toLowerCase)) and
       (ts.agency.code is equalTo(institution.agency.code)) and
       (ts.taxId is equalTo(institution.taxId.getOrElse("")))
 }
