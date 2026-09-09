@@ -1,4 +1,4 @@
 Docker / packageName := "hmda-data-publisher"
 
-version in Docker := "latest"
+Docker / version := "latest"
 coverageExcludedPackages := "hmda.publisher.qa*"
