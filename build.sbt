@@ -99,18 +99,18 @@ lazy val `hmda-root` = (project in file("."))
   .aggregate(
     common,
     `hmda-platform`,
-    `check-digit`,
-    `file-proxy`,
-    `institutions-api`,
-    `modified-lar`,
-    `hmda-analytics`,
-    `hmda-auth`,
-    `hmda-data-publisher`,
-    `hmda-reporting`,
-    `ratespread-calculator`,
-    `data-browser`,
-    `submission-errors`,
-    `hmda-quarterly-data-service`
+    // `check-digit`,
+    // `file-proxy`,
+    // `institutions-api`,
+    // `modified-lar`,
+    // `hmda-analytics`,
+    // `hmda-auth`,
+    // `hmda-data-publisher`,
+    // `hmda-reporting`,
+    // `ratespread-calculator`,
+    // `data-browser`,
+    // `submission-errors`,
+    // `hmda-quarterly-data-service`
   )
 
 val latestGitTag = settingKey[String]("The latest git tag.")
