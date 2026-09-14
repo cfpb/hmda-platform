@@ -1,5 +1,5 @@
-packageName in Docker := "institutions-api"
+Docker / packageName := "institutions-api"
 
 dockerExposedPorts := Vector(9092)
 
-version in Docker := "latest"
+Docker / version := "latest"

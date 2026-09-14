@@ -43,7 +43,7 @@ object SubmissionProtobufConverter {
   def submissionIdFromProtobuf(submissionIdMessage: SubmissionIdMessage): SubmissionId =
     SubmissionId(
       submissionIdMessage.lei,
-      parsePeriod(submissionIdMessage.period).right.get,
+      parsePeriod(submissionIdMessage.period).toOption.get,
       submissionIdMessage.sequenceNumber
     )
 

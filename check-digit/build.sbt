@@ -1,5 +1,5 @@
-packageName in Docker := "check-digit"
+Docker / packageName := "check-digit"
 
 dockerExposedPorts := Vector(9091, 60080)
 
-version in Docker := "latest"
+Docker / version := "latest"

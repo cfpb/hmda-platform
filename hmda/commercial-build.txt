@@ -3,7 +3,7 @@ import com.typesafe.sbt.packager.docker._
 
 version := "latest"
 
-packageName in Docker := "hmda-platform"
+Docker / packageName := "hmda-platform"
 
 dockerExposedPorts := Vector(8080, 8081, 8082, 19999, 9080, 1099)
 

@@ -29,9 +29,10 @@ class KeycloakTokenVerifier extends TokenVerifier {
   def verifyToken(token: String): Try[AccessToken] = {
     val tokenVerifier = keycloakTV.create(token, classOf[AccessToken])
     Try {
-      tokenVerifier.withDefaultChecks().realmUrl(realmUrl)
-      tokenVerifier.publicKey(publicKey).verify().getToken
+      tokenVerifier.withChecks(new keycloakTV.RealmUrlCheck(realmUrl))
+      tokenVerifier.publicKey(publicKey).verify().getToken()
     }
+
   }
 }
 // $COVERAGE-ON$

@@ -1,3 +1,3 @@
-packageName in Docker := "rate-limit"
+Docker / packageName := "rate-limit"
 
 version in Docker := "latest"

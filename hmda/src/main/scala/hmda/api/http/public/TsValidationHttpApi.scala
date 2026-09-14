@@ -42,7 +42,7 @@ private class TsValidationHttpApi {
   //ts/validate/<year>
   private val validateYearTsRoute =
     path("validate" / IntNumber) { year =>
-      parameters('check.as[String] ? "all") { checkType =>
+      parameters(Symbol("check").as[String] ? "all") { checkType =>
         post {
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             entity(as[TsValidateRequest]) { req =>
@@ -62,7 +62,7 @@ private class TsValidationHttpApi {
   // $COVERAGE-OFF$
   private val validateQuarterTsRoute =
   path("validate" / IntNumber / "quarter" / Quarter) { (year, quarter) =>
-    parameters('check.as[String] ? "all") { checkType =>
+    parameters(Symbol("check").as[String] ? "all") { checkType =>
       post {
         respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
           entity(as[TsValidateRequest]) { req =>

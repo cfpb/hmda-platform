@@ -67,8 +67,8 @@ object HmdaPlatform extends App {
   implicit val classic: ClassicActorSystem = ClassicActorSystem(clusterConfig.getString("hmda.cluster.name"), clusterConfig)
   implicit val system: ActorSystem[_]      = classic.toTyped
 
-  implicit val mat     = Materializer(system)
-  implicit val cluster = Cluster(system)
+  implicit val mat: Materializer      = Materializer(system)
+  implicit val cluster: Cluster = Cluster(system)
 
   ClusterBootstrap(system).start()
   PekkoManagement(system).start()

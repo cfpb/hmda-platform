@@ -12,7 +12,7 @@ import hmda.messages.institution.InstitutionEvents.InstitutionKafkaEvent
 import hmda.serialization.kafka.InstitutionKafkaEventsSerializer
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.{ProducerRecord, Producer => KafkaProducer}
-import org.apache.kafka.common.config.{SslConfigs,SaslConfigs}
+import org.apache.kafka.common.config.SaslConfigs
 //import org.apache.kafka.common.security.auth.SecurityProtocol
 import org.apache.kafka.common.serialization.StringSerializer
 

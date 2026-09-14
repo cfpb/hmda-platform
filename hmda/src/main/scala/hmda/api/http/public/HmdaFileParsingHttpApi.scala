@@ -52,7 +52,7 @@ private class HmdaFileParsingHttpApi(implicit mat: Materializer) {
             fileUpload("file") {
               case (_, byteSource) =>
                 val headerSource =
-                  Source.fromIterator(() => List("Row Number|Estimated ULI|Field Name|Input Value|Valid Values\n").toIterator)
+                  Source.fromIterator(() => List("Row Number|Estimated ULI|Field Name|Input Value|Valid Values\n").iterator)
                 val errors = byteSource
                   .via(processHmdaFile)
                   .filter(_.isDefined)

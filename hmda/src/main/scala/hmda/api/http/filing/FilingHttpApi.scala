@@ -57,7 +57,7 @@ private class FilingHttpApi(log: Logger, sharding: ClusterSharding)(implicit val
             } ~
               // GET/institutions/<lei>/filings/<year>
               (get & extractUri) { uri =>
-                parameter('page.as[Int] ? 1)(pageNumber => getFilingForInstitution(lei, year, None, uri, pageNumber))
+                parameter(Symbol("page").as[Int] ? 1)(pageNumber => getFilingForInstitution(lei, year, None, uri, pageNumber))
               }
           }
         }
@@ -71,7 +71,7 @@ private class FilingHttpApi(log: Logger, sharding: ClusterSharding)(implicit val
               } ~
                 // GET /institutions/<lei>/filings/<year>/quarters/<quarter>
                 (get & extractUri) { uri =>
-                  parameter('page.as[Int] ? 1)(pageNumber => getFilingForInstitution(lei, period, Option(quarter), uri, pageNumber))
+                  parameter(Symbol("page").as[Int] ? 1)(pageNumber => getFilingForInstitution(lei, period, Option(quarter), uri, pageNumber))
                 }
             }
           }

@@ -3,7 +3,7 @@ import com.typesafe.sbt.packager.docker._
 
 version := "latest"
 
-packageName in Docker := "hmda-platform"
+Docker / packageName := "hmda-platform"
 
 dockerExposedPorts := Vector(8080, 8081, 8082, 19999, 9080, 1099)
 
@@ -28,7 +28,7 @@ dockerCommands :=
     case v => Seq(v)
   }
 
-javaOptions in Universal ++= Seq(
+Universal / javaOptions ++= Seq(
   "-J-XX:+UnlockExperimentalVMOptions",
   "-J-XX:+UseContainerSupport",
   "-J-XX:+UnlockDiagnosticVMOptions",
@@ -45,4 +45,4 @@ javaOptions in Universal ++= Seq(
   //  ,"-agentpath:/opt/docker/YourKit-JavaProfiler-2019.8/bin/linux-x86-64/libyjpagent.so=port=10001,listen=all,dir=/opt/docker,sampling_settings_path=/ope/docker"
 )
 
-javaOptions in reStart ++= (javaOptions in run).value
+reStart / javaOptions ++= (javaOptions in run).value

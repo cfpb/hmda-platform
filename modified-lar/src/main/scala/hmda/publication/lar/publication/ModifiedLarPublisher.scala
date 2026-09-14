@@ -11,18 +11,14 @@ import org.apache.pekko.stream.scaladsl._
 import org.apache.pekko.util.ByteString
 import org.apache.pekko.{Done, NotUsed}
 import com.typesafe.config.ConfigFactory
-import hmda.messages.pubsub.HmdaTopics._
 import hmda.messages.submission.HmdaRawDataEvents.LineAdded
 import hmda.census.records.CensusRecords._
 import hmda.model.census.Census
 import hmda.model.filing.submission.SubmissionId
 import hmda.model.modifiedlar.{EnrichedModifiedLoanApplicationRegister, ModifiedLoanApplicationRegister}
-import hmda.publication.KafkaUtils
-import hmda.publication.KafkaUtils._
 import hmda.publication.lar.parser.ModifiedLarCsvParser
 import hmda.query.HmdaQuery
 import hmda.query.repository.ModifiedLarRepository
-import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.regions.providers.AwsRegionProvider
 
@@ -78,8 +74,6 @@ object ModifiedLarPublisher {
         .withBufferType(MemoryBufferType)
         .withS3RegionProvider(awsRegionProvider)
         .withListBucketApiVersion(ListBucketVersion2)
-
-      val kafkaProducer = KafkaUtils.getStringKafkaProducer(ctx.system)
 
       Behaviors
         .supervise[ModifiedLarCommand] {

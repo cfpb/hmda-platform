@@ -8,7 +8,6 @@ import org.apache.pekko.actor.typed.scaladsl.adapter._
 import org.apache.pekko.http.scaladsl.server.Directives._
 import hmda.api.http.directives.HmdaTimeDirectives._
 import hmda.api.http.routes.BaseHttpApi
-import org.apache.pekko.stream.Materializer
 import hmda.dataBrowser.Settings
 import hmda.dataBrowser.repositories.{ PostgresModifiedLarRepository, PostgresModifiedLarRepository2017, RedisModifiedLarAggregateCache }
 import hmda.dataBrowser.services.{ DataBrowserQueryService, HealthCheckService, QueryService, S3FileService }
@@ -33,7 +32,6 @@ object DataBrowserApi extends Settings {
         Behaviors.setup[Nothing] { ctx =>
           implicit val system: ActorSystem[Nothing] = ctx.system
           implicit val classic: actor.ActorSystem   = system.toClassic
-          implicit val mat: Materializer            = Materializer(ctx)
           implicit val ec: ExecutionContext         = ctx.executionContext
           val shutdown                              = CoordinatedShutdown(system)
           val log                                   = ctx.log
@@ -56,7 +54,6 @@ object DataBrowserApi extends Settings {
                   .builder()
                   .autoReconnect(true)
                   .disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS)
-                  .cancelCommandsOnReconnectFailure(true)
                   .build()
               )
 

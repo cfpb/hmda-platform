@@ -1,3 +1,3 @@
-packageName in Docker := "data-browser"
+Docker / packageName := "data-browser"
 
-version in Docker := "latest"
+Docker / version := "latest"

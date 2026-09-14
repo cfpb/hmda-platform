@@ -1,3 +1,3 @@
-packageName in Docker := "hmda-quarterly-data-service"
+Docker / packageName := "hmda-quarterly-data-service"
 
-version in Docker := "latest"
+Docker / version := "latest"

@@ -60,7 +60,7 @@ object SubmissionStream {
     submissionWithReceipt.split("-").size match {
       case 4 =>
         val lei :: year :: seqNo :: receipt :: Nil = submissionWithReceipt.split("-").take(4).toList
-        Submission(id = SubmissionId(lei, YearUtils.parsePeriod(year).right.get, seqNo.toInt), receipt = receipt)
+        Submission(id = SubmissionId(lei, YearUtils.parsePeriod(year).toOption.get, seqNo.toInt), receipt = receipt)
       case 5 =>
         val lei :: year :: quarter :: seqNo :: receipt :: Nil = submissionWithReceipt.split("-").take(5).toList
         Submission(id = SubmissionId(lei, Period(year.toInt, Some(quarter)), seqNo.toInt), receipt = receipt)

@@ -2,7 +2,6 @@ package hmda.dataBrowser.services
 import org.apache.pekko.NotUsed
 import org.apache.pekko.stream.scaladsl.Source
 import hmda.dataBrowser.models._
-import hmda.dataBrowser.models.Aggregation._
 import hmda.dataBrowser.repositories._
 import monix.eval.Task
 import org.slf4j.Logger
@@ -48,10 +47,6 @@ class DataBrowserQueryService(repoLatest: ModifiedLarRepositoryLatest, repo2017:
   override def fetchAggregate(
     queryFields: QueryFields
   ): Task[(ServedFrom, Seq[Aggregation])] = {
-    val repo = queryFields.year match {
-      case "2017" => repo2017
-      case _      => repoLatest
-    }
     val fields = queryFields.queryFields
     val optState: Option[QueryField] =
       fields.filter(_.values.nonEmpty).find(_.name == "state")
@@ -61,8 +56,6 @@ class DataBrowserQueryService(repoLatest: ModifiedLarRepositoryLatest, repo2017:
       fields.filter(_.values.nonEmpty).find(_.name == "county")
     val optLEI: Option[QueryField] =
       fields.filter(_.values.nonEmpty).find(_.name == "lei")
-    val optARID: Option[QueryField] =
-      fields.filter(_.values.nonEmpty).find(_.name == "arid")
 
     val geoFilter: Option[QueryField] = {
       if (optState.nonEmpty) optState

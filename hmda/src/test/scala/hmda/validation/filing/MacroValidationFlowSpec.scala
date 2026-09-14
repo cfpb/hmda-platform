@@ -45,10 +45,10 @@ class MacroValidationFlowSpec extends AsyncWordSpec with MustMatchers with Befor
   val total = lars.size
 
   val source: Source[LoanApplicationRegister, NotUsed] = Source
-    .fromIterator(() => lars.toIterator)
+    .fromIterator(() => lars.iterator)
 
   val tsSource: Source[TransmittalSheet, NotUsed] = Source
-    .fromIterator(() => ts.toIterator)
+    .fromIterator(() => ts.iterator)
 
   def fTotal: Future[Int] = count(source)
 
@@ -194,7 +194,7 @@ class MacroValidationFlowSpec extends AsyncWordSpec with MustMatchers with Befor
       val q639Fail = source.map { lar =>
         val larAction = lar.action.copy(actionTakenType = PurchasedLoan, preapproval = PreapprovalRequested)
         lar.copy(action = larAction)
-      } concat Source.fromIterator(() => List(extraLar).toIterator)
+      } concat Source.fromIterator(() => List(extraLar).iterator)
 
       Q639(q639Fail).map(e => e mustBe MacroValidationError("Q639"))
     }

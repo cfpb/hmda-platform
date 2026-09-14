@@ -1,3 +1,3 @@
-packageName in Docker := "email-service"
+Docker / packageName := "email-service"
 
-version in Docker := "latest"
+Docker / version := "latest"

@@ -66,10 +66,10 @@ class ValidationFlowSpec extends WordSpec with MustMatchers {
   val errorRows: Seq[String] = errorTsTxt ++ errorLarTxt
 
   "Validation Flow" must {
-    val cleanHmdaFileSource = Source.fromIterator(() => cleanRows.toIterator)
+    val cleanHmdaFileSource = Source.fromIterator(() => cleanRows.iterator)
     val cleanTs             = TsCsvParser(cleanRows.head).getOrElse(TransmittalSheet())
     val cleanLars           = cleanRows.tail.map(s => LarCsvParser(s).getOrElse(LoanApplicationRegister()))
-    val errorHmdaFileSource = Source.fromIterator(() => errorRows.toIterator)
+    val errorHmdaFileSource = Source.fromIterator(() => errorRows.iterator)
 
     "validate Transmittal Sheet" in {
       cleanHmdaFileSource

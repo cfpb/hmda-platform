@@ -2,9 +2,8 @@ package hmda.validation.rules.lar.quality._2025
 
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.dsl.PredicateCommon._
-import hmda.validation.dsl.PredicateHmda._
 import hmda.validation.dsl.PredicateSyntax._
-import hmda.validation.dsl.{ValidationFailure, ValidationResult, ValidationSuccess}
+import hmda.validation.dsl.ValidationResult
 import hmda.validation.rules.EditCheck
 
 

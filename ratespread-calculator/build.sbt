@@ -1,3 +1,3 @@
-packageName in Docker := "ratespread-calculator"
+Docker / packageName := "ratespread-calculator"
 
-version in Docker := "latest"
+Docker / version := "latest"

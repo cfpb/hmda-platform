@@ -16,7 +16,6 @@ import org.apache.pekko.stream.scaladsl.{ Sink, Source }
 import scala.concurrent.Future
 import org.apache.pekko.stream.connectors.s3._
 import com.typesafe.config.ConfigFactory
-import software.amazon.awssdk.auth.credentials.{ AwsBasicCredentials, StaticCredentialsProvider }
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.regions.providers.AwsRegionProvider
 import software.amazon.awssdk.regions.providers._
@@ -124,7 +123,6 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
   }
 
   private def retrieveData(path: String): Future[Option[Source[ByteString, NotUsed]]] = {
-    val timeout: Timeout = Timeout(config.getInt("hmda.http.timeout").seconds)
     log.info("retrieving bucket: {}, path: {}", bucket, path)
     S3.download(bucket, path).withAttributes(S3Attributes.settings(s3Settings)).runWith(Sink.head)
       .map(opt => opt.map { case (source, _) => source })

@@ -7,8 +7,6 @@ import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.dsl.ValidationResult
 import hmda.validation.rules.EditCheck
 
-import scala.util.Try
-
 object V695_3 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V695-3"
 

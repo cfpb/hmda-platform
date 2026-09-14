@@ -296,7 +296,7 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
   val routes: OAuth2Authorization => Route = { (oauth2Authorization: OAuth2Authorization) =>
     (get & path("institutions" / Segment / "signed" / "oldest" / Segment)) { (lei, period) =>
       oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
-        val fil = selectFiling(clusterSharding, lei, YearUtils.parsePeriod(period).right.get.year, YearUtils.parsePeriod(period).right.get.quarter)
+        val fil = selectFiling(clusterSharding, lei, YearUtils.parsePeriod(period).toOption.get.year, YearUtils.parsePeriod(period).toOption.get.quarter)
         val fOldestSigned: Future[Option[Submission]] = fil ? (ref => GetOldestSignedSubmission(ref))
 
         onComplete(fOldestSigned) {
@@ -311,7 +311,7 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
       }
     } ~ (get & path("institutions" / Segment / "signed" / "latest" / Segment)) { (lei, period) =>
       oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
-        val fil = selectFiling(clusterSharding, lei, YearUtils.parsePeriod(period).right.get.year, YearUtils.parsePeriod(period).right.get.quarter)
+        val fil = selectFiling(clusterSharding, lei, YearUtils.parsePeriod(period).toOption.get.year, YearUtils.parsePeriod(period).toOption.get.quarter)
         val fLatestSigned: Future[Option[Submission]] = fil ? (ref => GetLatestSignedSubmission(ref))
 
         onComplete(fLatestSigned) {
@@ -326,7 +326,7 @@ private class SubmissionAdminHttpApi(log: Logger, config: Config, clusterShardin
       }
     } ~ (get & path("institutions" / Segment / "hmdafile" / "latest" / Segment)) { (lei, period) =>
       oauth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
-        val fil = selectFiling(clusterSharding, lei, YearUtils.parsePeriod(period).right.get.year, YearUtils.parsePeriod(period).right.get.quarter)
+        val fil = selectFiling(clusterSharding, lei, YearUtils.parsePeriod(period).toOption.get.year, YearUtils.parsePeriod(period).toOption.get.quarter)
         val fLatest: Future[Option[Submission]] = fil ? (ref => GetLatestSignedSubmission(ref))
 
         onComplete(fLatest) {

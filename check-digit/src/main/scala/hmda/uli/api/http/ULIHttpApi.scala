@@ -82,7 +82,7 @@ private class ULIHttpApi(log: Logger) {
                 respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
                   fileUpload("file") {
                     case (_, byteSource) =>
-                      val headerSource = Source.fromIterator(() => List("loanId,checkDigit,uli\n").toIterator)
+                      val headerSource = Source.fromIterator(() => List("loanId,checkDigit,uli\n").iterator)
                       val checkDigit = processLoanIdFile(byteSource)
                         .map(l => l.toCSV)
                         .map(l => l + "\n")
@@ -155,7 +155,7 @@ private class ULIHttpApi(log: Logger) {
                   fileUpload("file") {
                     case (_, byteSource) =>
                       val headerSource =
-                        Source.fromIterator(() => List("uli,isValid\n").toIterator)
+                        Source.fromIterator(() => List("uli,isValid\n").iterator)
                       val validated = processUliFile(byteSource)
                         .map(u => u.toCSV)
                         .map(l => l + "\n")

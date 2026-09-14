@@ -18,6 +18,7 @@ import hmda.serialization.kafka.InstitutionKafkaEventsDeserializer
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.LoggerFactory
+import scala.concurrent.ExecutionContextExecutor
 
 import scala.concurrent.Future
 
@@ -37,9 +38,9 @@ object HmdaInstitutionApi extends App {
 
   val config = ConfigFactory.load()
 
-  implicit val system       = ActorSystem("hmda-institutions")
-  implicit val materializer = Materializer(system)
-  implicit val ec           = system.dispatcher
+  implicit val system: ActorSystem          = ActorSystem("hmda-institutions")
+  implicit val materializer: Materializer   = Materializer(system)
+  implicit val ec: ExecutionContextExecutor = system.dispatcher
 
   val host = config.getString("hmda.institution.http.host")
   val port = config.getString("hmda.institution.http.port")

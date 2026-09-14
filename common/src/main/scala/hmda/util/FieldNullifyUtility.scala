@@ -1,6 +1,6 @@
 package hmda.util
 
-import hmda.model.institution.{Institution, InstitutionType, Parent, Respondent, TopHolder}
+import hmda.model.institution.{Institution, InstitutionType, Parent, TopHolder}
 
 
 object FieldNullifyUtility {

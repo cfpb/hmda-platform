@@ -98,7 +98,7 @@ class ParserFlowSpec extends WordSpec with MustMatchers {
         .map(ByteString(_))
         .via(parseHmdaFile)
         .map(_._1)
-        .map(_.right.get)
+        .map(_.toOption.get)
         .runWith(TestSink.probe[PipeDelimited])
         .request(hmdaFile.size)
         .expectNextN(hmdaFile)

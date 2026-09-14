@@ -52,10 +52,10 @@ private class RateSpreadAPIRoutes(log: Logger) {
                 case (_, byteSource) =>
                   val headerSource =
                     Source.fromIterator(() =>
-                      List("action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,rate_spread\n").toIterator
+                      List("action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,rate_spread\n").iterator
                     )
                   val rateSpreadValues = processRateSpreadRow(byteSource)
-                    .map(rateSpread => rateSpread + "\n")
+                    .map(rateSpread => rateSpread.toString + "\n")
                     .map(s => ByteString(s))
 
                   val csv =

@@ -257,12 +257,12 @@ object ModifiedLarCsvParser {
     if (code == 0) "" else code.toString
 
   private def roundToMidPoint(x: Int): Int = {
-    val rounded = 10000 * Math.floor(x / 10000) + 5000
+    val rounded = 10000 * Math.floor(x.toDouble / 10000) + 5000
     rounded.toDouble.toInt
   }
 
   private def roundToBigIntMidPoint(x: BigDecimal): String = {
-    val rounded = 10000 * (x/10000).setScale(0, RoundingMode.FLOOR)  + 5000
+    val rounded = 10000 * (x / 10000).setScale(0, RoundingMode.FLOOR)  + 5000
     rounded.toBigInt.toString
   }
 

@@ -5,7 +5,6 @@ import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
 import hmda.model.census.CountyLoanLimit
 import hmda.census.records.OverallLoanLimit
-import hmda.model.filing.EditDescriptionLookup.config
 // $COVERAGE-OFF$
 case class LoanLimitInfo(
   totalUnits: Int,

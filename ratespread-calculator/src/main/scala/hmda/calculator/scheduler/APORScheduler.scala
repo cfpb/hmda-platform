@@ -16,7 +16,6 @@ import com.typesafe.config.ConfigFactory
 import hmda.calculator.apor.{AporListEntity, FixedRate, RateType, VariableRate}
 import hmda.calculator.parser.APORCsvParser
 import org.slf4j.LoggerFactory
-import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.regions.providers.AwsRegionProvider
 
@@ -126,7 +125,7 @@ object APORScheduler {
       .runWith(Sink.ignore)
   }
 
-  private def checkDownload(src: Option[(Source[ByteString, NotUsed], ObjectMetadata)],rateType: RateType){
+  private def checkDownload(src: Option[(Source[ByteString, NotUsed], ObjectMetadata)],rateType: RateType): Unit = {
     if(src ==None){
       logger.error(s"${APORScheduler.name} had an error downloading APOR file for: "+ rateType)
     }

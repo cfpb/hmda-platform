@@ -5,7 +5,6 @@ import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.context.ValidationContext
 import hmda.census.records.CensusRecords
 import hmda.validation.rules.lar.validity._
-import hmda.validation.engine.LarEngine2025
 
 private[engine] object LarEngine2026Q extends ValidationEngine[LoanApplicationRegister] {
 

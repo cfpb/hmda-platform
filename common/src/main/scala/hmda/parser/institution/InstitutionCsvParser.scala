@@ -1,7 +1,7 @@
 package hmda.parser.institution
 
 import hmda.model.institution._
-import hmda.util.CSVConsolidator.{listDeDupeToList, stringDeDupeToList}
+import hmda.util.CSVConsolidator.stringDeDupeToList
 import io.chrisdavenport.cormorant.parser.CSVLikeParser
 import io.chrisdavenport.cormorant
 

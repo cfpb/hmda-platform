@@ -4,6 +4,7 @@ import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.grpc.GrpcClientSettings
 import org.apache.pekko.stream.Materializer
 import hmda.grpc.services.{ CheckDigitServiceClient, ValidUliRequest }
+import scala.concurrent.ExecutionContextExecutor
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -13,9 +14,9 @@ import scala.concurrent.duration._
 
 object CheckDigitTest extends App {
 
-  implicit val clientSystem = ActorSystem("CheckDigitClient")
-  implicit val mat          = Materializer(clientSystem)
-  implicit val ec           = clientSystem.dispatcher
+  implicit val clientSystem: ActorSystem    = ActorSystem("CheckDigitClient")
+  implicit val mat: Materializer            = Materializer(clientSystem)
+  implicit val ec: ExecutionContextExecutor = clientSystem.dispatcher
 
   val client = CheckDigitServiceClient(GrpcClientSettings.connectToServiceAt("127.0.0.1", 60080).withTls(false))
 

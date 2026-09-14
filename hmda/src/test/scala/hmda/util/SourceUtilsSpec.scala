@@ -12,9 +12,9 @@ class SourceUtilsSpec extends AsyncWordSpec with MustMatchers {
   implicit val materializer = Materializer(system)
   implicit val ec           = system.dispatcher
 
-  val source1 = Source.fromIterator(() => List(1, 2, 3, 4, 5).toIterator)
-  val source2 = Source.fromIterator(() => List(1, 2, 3, 4).toIterator)
-  val source3 = Source.fromIterator(() => List(1, 2, 3).toIterator)
+  val source1 = Source.fromIterator(() => List(1, 2, 3, 4, 5).iterator)
+  val source2 = Source.fromIterator(() => List(1, 2, 3, 4).iterator)
+  val source3 = Source.fromIterator(() => List(1, 2, 3).iterator)
 
   "SourceUtils" must {
     "count elements in a Source" in {
