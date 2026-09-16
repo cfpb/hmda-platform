@@ -87,8 +87,7 @@ private class AuthHttpApi(log: Logger)(implicit ec: ExecutionContext) extends In
     private def getDomainFromEmail(email: String): String = email.split("@")(1)
 
     private def verifyLeis(emailDomain: String, proposedLeis: List[String]): Future[Boolean] = {
-        findByEmailAnyYear(emailDomain).map { institutions =>
-            val availableLeis = institutions.map(institution => institution.LEI)
+        findLeiByEmail(emailDomain).map { availableLeis =>
             proposedLeis.forall(availableLeis.contains)
         }
     }
