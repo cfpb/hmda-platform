@@ -17,10 +17,11 @@ import org.apache.pekko.util.{ByteString, Timeout}
 import org.apache.pekko.{Done, NotUsed}
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.StrictLogging
-import hmda.HmdaPlatform.stringKafkaProducer
+import hmda.HmdaPlatform. { stringKafkaProducer, institutionKafkaProducer }
 import hmda.messages.institution.InstitutionCommands.{GetInstitution, ModifyInstitution}
 import hmda.messages.institution.InstitutionEvents.InstitutionEvent
 import hmda.messages.pubsub.HmdaTopics._
+import hmda.messages.institution.InstitutionEvents.{ InstitutionKafkaEvent, InstitutionModified }
 import hmda.messages.submission.EditDetailsCommands.{EditDetailsPersistenceCommand, PersistEditDetails}
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
 import hmda.messages.submission.SubmissionProcessingCommands._
@@ -59,10 +60,6 @@ object HmdaValidationError
   extends HmdaTypedPersistentActor[SubmissionProcessingCommand, SubmissionProcessingEvent, HmdaValidationErrorState] with StrictLogging {
 
   override val name: String = "HmdaValidationError"
-
-  val quarterlyRegexQ1 = "\\b[0-9]{4}\\b-(Q*[1])$".r
-  val quarterlyRegexQ2 = "\\b[0-9]{4}\\b-(Q*[2])$".r
-  val quarterlyRegexQ3 = "\\b[0-9]{4}\\b-(Q*[3])$".r
 
   override def behavior(entityId: String): Behavior[SubmissionProcessingCommand] =
     Behaviors.setup { ctx =>
@@ -353,6 +350,8 @@ object HmdaValidationError
                 signerUsername
               )
 
+              setHmdaFilerFlag(submissionId.lei, submissionId.period, sharding)
+
               publishSignEvent(submissionId, email, signed.timestamp, config).map(signed =>
                 log.info(
                   s"Published signed event for $submissionId. " +
@@ -360,7 +359,7 @@ object HmdaValidationError
                     s"${emailTopic} (key: ${submissionId.toString}, value: ${email})"
                 )
               )
-              setHmdaFilerFlag(submissionId.lei, submissionId.period, sharding)
+
               replyTo ! signed
             }
           } else {
@@ -706,7 +705,9 @@ object HmdaValidationError
     } yield Done
 
   private def setHmdaFilerFlag(institutionID: String, period: Period, sharding: ClusterSharding)(
-    implicit ec: ExecutionContext,
+    implicit system: ActorSystem[_],
+    materializer: Materializer,
+    ec: ExecutionContext,
     t: Timeout
   ): Unit = {
 
@@ -725,16 +726,19 @@ object HmdaValidationError
     fInstitution.foreach { maybeInst =>
       val institution = maybeInst.getOrElse(Institution.empty)
 
-      val modifiedInstitution = periodType match {
-        case quarterlyRegexQ1(_*) => institution.copy(quarterlyFilerHasFiledQ1 = true)
-        case quarterlyRegexQ2(_*) => institution.copy(quarterlyFilerHasFiledQ2 = true)
-        case quarterlyRegexQ3(_*) => institution.copy(quarterlyFilerHasFiledQ3 = true)
+      val modifiedInstitution = period.quarter match {
+        case Some("Q1") => institution.copy(quarterlyFilerHasFiledQ1 = true)
+        case Some("Q2") => {
+            institution.copy(quarterlyFilerHasFiledQ2 = true)
+          }
+        case Some("Q3") => institution.copy(quarterlyFilerHasFiledQ3 = true)
         case _                    => institution.copy(hmdaFiler = true)
       }
       if (institution.LEI.nonEmpty) {
 
         val modified: Future[InstitutionEvent] =
           institutionPersistence ? (ref => ModifyInstitution(modifiedInstitution, ref))
+        produceInstitutionRecord(institutionTopic, institution.LEI, InstitutionKafkaEvent("InstitutionModified", InstitutionModified(institution)), institutionKafkaProducer)
         modified
       } else ()
     }
