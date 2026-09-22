@@ -19,7 +19,6 @@ import com.typesafe.config.Config
 import com.typesafe.scalalogging.StrictLogging
 import hmda.HmdaPlatform.stringKafkaProducer
 import hmda.messages.institution.InstitutionCommands.{GetInstitution, ModifyInstitution}
-import hmda.messages.institution.InstitutionEvents.InstitutionEvent
 import hmda.messages.pubsub.HmdaTopics._
 import hmda.messages.submission.EditDetailsCommands.{EditDetailsPersistenceCommand, PersistEditDetails}
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
@@ -28,7 +27,7 @@ import hmda.messages.submission.SubmissionProcessingEvents._
 import hmda.messages.submission.ValidationProgressTrackerCommands._
 import hmda.model.filing.submission._
 import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
-import hmda.model.institution.Institution
+import hmda.model.institution.{Institution, Respondent}
 import hmda.model.processing.state.ValidationProgress.InProgress
 import hmda.model.processing.state.{HmdaValidationErrorState, ValidationProgress, ValidationType}
 import hmda.model.validation.{MacroValidationError, QualityValidationError, SyntacticalValidationError, ValidationError}
@@ -360,7 +359,7 @@ object HmdaValidationError
                     s"${emailTopic} (key: ${submissionId.toString}, value: ${email})"
                 )
               )
-              setHmdaFilerFlag(submissionId.lei, submissionId.period, sharding)
+              updateInstitutionFromSubmission(submissionId, sharding)
               replyTo ! signed
             }
           } else {
@@ -705,10 +704,13 @@ object HmdaValidationError
       _ <- produceRecord(emailTopic, s"${submissionId.toString}-${signedTimestamp}", email, stringKafkaProducer)
     } yield Done
 
-  private def setHmdaFilerFlag(institutionID: String, period: Period, sharding: ClusterSharding)(
+  private def updateInstitutionFromSubmission(submissionId: SubmissionId, sharding: ClusterSharding)(
     implicit ec: ExecutionContext,
+    actorSystem: ActorSystem[_],
     t: Timeout
   ): Unit = {
+    val institutionID = submissionId.lei
+    val period = submissionId.period
 
     val year       = period.year.toString
     val periodType = period.toString
@@ -720,24 +722,34 @@ object HmdaValidationError
         sharding.entityRefFor(InstitutionPersistence.typeKey, s"${InstitutionPersistence.name}-$institutionID-$year")
       }
 
-    val fInstitution: Future[Option[Institution]] = institutionPersistence ? (ref => GetInstitution(ref))
+    for {
+      instOpt <- institutionPersistence ? (ref => GetInstitution(ref))
+      tsOpt <- maybeTs(submissionId)
+      _ = (instOpt, tsOpt) match {
+        case (Some(institution), Some(transmittalSheet)) =>
+          val filerStatusUpdatedInstitution = periodType match {
+            case quarterlyRegexQ1(_*) => institution.copy(quarterlyFilerHasFiledQ1 = true)
+            case quarterlyRegexQ2(_*) => institution.copy(quarterlyFilerHasFiledQ2 = true)
+            case quarterlyRegexQ3(_*) => institution.copy(quarterlyFilerHasFiledQ3 = true)
+            case _                    => institution.copy(hmdaFiler = true)
+          }
+          val modifiedInstitution = filerStatusUpdatedInstitution.copy(
+            LEI = transmittalSheet.LEI,
+            activityYear = transmittalSheet.year,
+            agency = transmittalSheet.agency,
+            taxId = Some(transmittalSheet.taxId),
+            respondent = Respondent(
+              Some(transmittalSheet.institutionName),
+              Some(transmittalSheet.contact.address.state),
+              Some(transmittalSheet.contact.address.city)
+            )
+          )
 
-    fInstitution.foreach { maybeInst =>
-      val institution = maybeInst.getOrElse(Institution.empty)
-
-      val modifiedInstitution = periodType match {
-        case quarterlyRegexQ1(_*) => institution.copy(quarterlyFilerHasFiledQ1 = true)
-        case quarterlyRegexQ2(_*) => institution.copy(quarterlyFilerHasFiledQ2 = true)
-        case quarterlyRegexQ3(_*) => institution.copy(quarterlyFilerHasFiledQ3 = true)
-        case _                    => institution.copy(hmdaFiler = true)
-      }
-      if (institution.LEI.nonEmpty) {
-
-        val modified: Future[InstitutionEvent] =
           institutionPersistence ? (ref => ModifyInstitution(modifiedInstitution, ref))
-        modified
-      } else ()
-    }
+
+        case _ => logger.warn("Couldn't find institution or transmittal sheet. inst: {}, ts: {}", instOpt.getOrElse(None), tsOpt.getOrElse(None))
+      }
+    } yield ()
   }
 
   def selectHmdaValidationError(sharding: ClusterSharding, submissionId: SubmissionId): EntityRef[SubmissionProcessingCommand] =
