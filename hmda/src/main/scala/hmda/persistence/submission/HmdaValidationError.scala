@@ -359,7 +359,7 @@ object HmdaValidationError
                     s"${emailTopic} (key: ${submissionId.toString}, value: ${email})"
                 )
               )
-              setHmdaFilerFlag(submissionId, sharding)
+              updateInstitutionFromSubmission(submissionId, sharding)
               replyTo ! signed
             }
           } else {
@@ -704,7 +704,7 @@ object HmdaValidationError
       _ <- produceRecord(emailTopic, s"${submissionId.toString}-${signedTimestamp}", email, stringKafkaProducer)
     } yield Done
 
-  private def setHmdaFilerFlag(submissionId: SubmissionId, sharding: ClusterSharding)(
+  private def updateInstitutionFromSubmission(submissionId: SubmissionId, sharding: ClusterSharding)(
     implicit ec: ExecutionContext,
     actorSystem: ActorSystem[_],
     t: Timeout
