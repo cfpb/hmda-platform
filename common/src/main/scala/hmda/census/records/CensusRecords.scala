@@ -44,7 +44,7 @@ object CensusRecords {
   private val censusFileName2024 = config.getString("hmda.census.fields.2024.filename")
   private val censusFileName2025 = config.getString("hmda.census.fields.2025.filename")
   private val censusFileName2026 = config.getString("hmda.census.fields.2026.filename")
-
+  private val censusFileName2027 = config.getString("hmda.census.fields.2027.filename")
 
 
   val (
@@ -102,6 +102,12 @@ object CensusRecords {
     indexedSmallCounty2026: Map[String, Census]
     ) = getCensus(censusFileName2026)
 
+  val (
+    indexedTract2027: Map[String, Census],
+    indexedCounty2027: Map[String, Census],
+    indexedSmallCounty2027: Map[String, Census]
+    ) = getCensus(censusFileName2027)
+
   def yearTractMap(year: Int): Map[String, Census] = {
     year match {
       case 2018 =>
@@ -122,8 +128,10 @@ object CensusRecords {
         indexedTract2025
       case 2026 =>
         indexedTract2026
+      case 2027 =>
+        indexedTract2027
       case _ =>
-        indexedTract2025
+        indexedTract2026
     }
   }
 
@@ -147,8 +155,10 @@ object CensusRecords {
         indexedCounty2025
       case 2026 =>
         indexedCounty2026
+      case 2027 =>
+        indexedCounty2027
       case _ =>
-        indexedCounty2025
+        indexedCounty2026
     }
   }
 
