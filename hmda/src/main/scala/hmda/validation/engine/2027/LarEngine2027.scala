@@ -12,7 +12,7 @@ import hmda.validation.rules.lar.validity.{_2020, _2022, _2024, _}
 import hmda.census.records.CensusRecords
 import hmda.validation.rules.lar.quality._2024._
 
-private[engine] object LarEngine2026 extends ValidationEngine[LoanApplicationRegister] {
+private[engine] object LarEngine2027 extends ValidationEngine[LoanApplicationRegister] {
 
   override def syntacticalChecks(ctx: ValidationContext) = Vector(
     S300,
@@ -44,7 +44,7 @@ private[engine] object LarEngine2026 extends ValidationEngine[LoanApplicationReg
     V617,
     V618,
     V619_1,
-    V619_2.withYear("2026"),
+    V619_2.withYear("2027"),
     V619_3,
     V620,
     V621,
@@ -52,9 +52,9 @@ private[engine] object LarEngine2026 extends ValidationEngine[LoanApplicationReg
     V623,
     V624,
     V625_1,
-    V625_2.withIndexedTracts(CensusRecords.indexedTract2026),
-    V626.withIndexedCounties(CensusRecords.indexedCounty2026),
-    V627.withIndexedCounties(CensusRecords.indexedCounty2026),
+    V625_2.withIndexedTracts(CensusRecords.indexedTract2027),
+    V626.withIndexedCounties(CensusRecords.indexedCounty2027),
+    V627.withIndexedCounties(CensusRecords.indexedCounty2027),
     V628_1,
     V628_2,
     V628_3,
@@ -236,7 +236,7 @@ private[engine] object LarEngine2026 extends ValidationEngine[LoanApplicationReg
     V713,
     V714,
     V715,
-    _2020.V716.withIndexedCounties(CensusRecords.indexedCounty2026),
+    _2020.V716.withIndexedCounties(CensusRecords.indexedCounty2027),
     _2022.V721_1,
     _2022.V721_2,
     _2024.V720_1,
@@ -248,7 +248,7 @@ private[engine] object LarEngine2026 extends ValidationEngine[LoanApplicationReg
   override def qualityChecks(ctx: ValidationContext) = Vector(
     Q601,
     Q602,
-    Q603.withIndexedSmallCounties(CensusRecords.indexedSmallCounty2026),
+    Q603.withIndexedSmallCounties(CensusRecords.indexedSmallCounty2027),
     Q605_1,
     Q605_2,
     quality2020.Q606,
