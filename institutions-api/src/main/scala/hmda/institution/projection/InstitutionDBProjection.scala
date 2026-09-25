@@ -38,7 +38,7 @@ object InstitutionDBProjection extends InstitutionEmailComponent with Institutio
   implicit val institutionRepository2024   = new InstitutionRepository(dbConfig, "institutions2024")
   implicit val institutionRepository2025   = new InstitutionRepository(dbConfig, "institutions2025")
   implicit val institutionRepository2026   = new InstitutionRepository(dbConfig, "institutions2026")
-
+  implicit val institutionRepository2027   = new InstitutionRepository(dbConfig, "institutions2027")
 
 
 
@@ -90,6 +90,8 @@ object InstitutionDBProjection extends InstitutionEmailComponent with Institutio
             institutionRepository2025.deleteById(lei)
           case 2026 =>
             institutionRepository2026.deleteById(lei)
+          case 2027 =>
+            institutionRepository2027.deleteById(lei)
           case _ =>
             institutionRepository2025.deleteById(lei)
         }
@@ -122,6 +124,8 @@ object InstitutionDBProjection extends InstitutionEmailComponent with Institutio
           institutionRepository2025.insertOrUpdate(InstitutionConverter.convert(inst))
         case 2026 =>
           institutionRepository2026.insertOrUpdate(InstitutionConverter.convert(inst))
+        case 2027 =>
+          institutionRepository2027.insertOrUpdate(InstitutionConverter.convert(inst))
         case _ =>
           institutionRepository2025.insertOrUpdate(InstitutionConverter.convert(inst))
       }
