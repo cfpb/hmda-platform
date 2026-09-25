@@ -1,13 +1,14 @@
 package hmda.reporting.api.http
 
 import org.apache.pekko.http.scaladsl.model.StatusCodes.OK
+import org.apache.pekko.http.scaladsl.model.StatusCodes.BadRequest
 import org.apache.pekko.http.scaladsl.server.Route
 import org.apache.pekko.http.scaladsl.testkit.ScalatestRouteTest
 import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport
 import hmda.model.institution.{ HmdaFiler, HmdaFilerResponse, MsaMd, MsaMdResponse }
 import hmda.query.institution.InstitutionEntity
 import hmda.query.repository.ModifiedLarRepository
-import hmda.reporting.repository.InstitutionComponent
+import hmda.query.repository.InstitutionComponent
 import hmda.utils.EmbeddedPostgres
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{ Matchers, WordSpec }
@@ -28,16 +29,15 @@ class ReportingHttpApiSpec
   import dbConfig._
   import dbConfig.profile.api._
 
-  val institutionRepo2018 = new InstitutionRepository(dbConfig, "institutions2018")
-  val institutionRepo2019 = new InstitutionRepository(dbConfig, "institutions2019")
-  val mlarRepo            = new ModifiedLarRepository(dbConfig)
+  val institutionRepo = new InstitutionRepository(dbConfig)
+  val mlarRepo        = new ModifiedLarRepository(dbConfig)
 
   override def bootstrapSqlFile: String = "modifiedlar.sql"
 
   override def beforeAll(): Unit = {
     super.beforeAll()
-    Await.ready(institutionRepo2018.createSchema(), 30.seconds)
-    Await.ready(institutionRepo2019.createSchema(), 30.seconds)
+    Await.ready(institutionRepo.createSchema(2018), 30.seconds)
+    Await.ready(institutionRepo.createSchema(2019), 30.seconds)
   }
 
   val routes: Route = ReportingHttpApi.create(system.settings.config)
@@ -46,8 +46,8 @@ class ReportingHttpApiSpec
     "respond to filers/<year>" in {
       whenReady(
         db.run(
-          (institutionRepo2018.institutionsTable += InstitutionEntity(lei = "EXAMPLE-LEI-1", activityYear = 2018, hmdaFiler = true)) >>
-            (institutionRepo2019.institutionsTable += InstitutionEntity(lei = "EXAMPLE-LEI-2", activityYear = 2019, hmdaFiler = true))
+          (institutionRepo.getYearTable(2018, false) += InstitutionEntity(lei = "EXAMPLE-LEI-1", activityYear = 2018, hmdaFiler = true)) >>
+            (institutionRepo.getYearTable(2019, false) += InstitutionEntity(lei = "EXAMPLE-LEI-2", activityYear = 2019, hmdaFiler = true))
         )
       )(_ shouldBe 1)
 
@@ -60,10 +60,8 @@ class ReportingHttpApiSpec
         response.status shouldBe OK
         responseAs[HmdaFilerResponse] shouldBe HmdaFilerResponse(Set(HmdaFiler("EXAMPLE-LEI-2", "", 2019.toString)))
       }
-
       Get("/filers/1111") ~> routes ~> check {
-        response.status shouldBe OK
-        responseAs[HmdaFilerResponse] shouldBe HmdaFilerResponse(Set(HmdaFiler("", "", "")))
+        response.status shouldBe BadRequest
       }
     }
 
@@ -77,8 +75,8 @@ class ReportingHttpApiSpec
 
       whenReady(
         db.run(
-          (institutionRepo2018.institutionsTable += InstitutionEntity(lei = "EXAMPLE-LEI-10", activityYear = 2018, hmdaFiler = true)) >>
-            (institutionRepo2019.institutionsTable += InstitutionEntity(lei = "EXAMPLE-LEI-20", activityYear = 2019, hmdaFiler = true))
+          (institutionRepo.getYearTable(2018, false) += InstitutionEntity(lei = "EXAMPLE-LEI-10", activityYear = 2018, hmdaFiler = true)) >>
+            (institutionRepo.getYearTable(2019, false) += InstitutionEntity(lei = "EXAMPLE-LEI-20", activityYear = 2019, hmdaFiler = true))
         )
       )(_ shouldBe 1)
 
