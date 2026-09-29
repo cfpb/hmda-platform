@@ -32,7 +32,7 @@ cfkeys = census_file_columns.keys()
 cfcolnames = {k: v[0] for k, v in census_file_columns.items()}
 cfconverters = {k: v[1] for k, v in census_file_columns.items()}
 parsed_census_df = pd.read_csv(args.censusfile, sep=',', header=None, usecols=cfkeys,
-    converters=cfconverters, skipfooter=5)[cfkeys].rename(cfcolnames, axis=1) # include skipfooter=5 for CensusFlatFile2025.csv because of an upstream encoding error
+    converters=cfconverters, skipfooter=0)[cfkeys].rename(cfcolnames, axis=1) # include skipfooter=5 for CensusFlatFile2025.csv because of an upstream encoding error
 parsed_census_df = apply_authorized_modifications(census_file_authorized_modifications,
                                                   parsed_census_df)
 logging.info(f"Parsed {args.censusfile}")

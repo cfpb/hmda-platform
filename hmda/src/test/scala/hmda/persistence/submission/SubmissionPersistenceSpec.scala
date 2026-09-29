@@ -26,7 +26,7 @@ class SubmissionPersistenceSpec extends PekkoCassandraPersistenceSpec {
   val maybeSubmissionProbe =
     TestProbe[Option[Submission]]("submission-get-probe")
 
-  val submissionId = SubmissionId("12345", Period(2018, None), 1)
+  val submissionId = SubmissionId("12345", Period(2023, None), 1)
 
   val sampleSubmission = submissionGen
     .suchThat(s => !s.id.isEmpty)

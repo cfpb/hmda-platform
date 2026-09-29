@@ -27,7 +27,8 @@ class ModifiedLarRepository(databaseConfig: DatabaseConfig[JdbcProfile]) {
       case 2024 => "modifiedlar2024"
       case 2025 => "modifiedlar2025"
       case 2026 => "modifiedlar2026"
-      case _    => "modifiedlar2025"
+      case 2027 => "modifiedlar2027"
+      case _    => "modifiedlar2026"
     }
 
   /**
