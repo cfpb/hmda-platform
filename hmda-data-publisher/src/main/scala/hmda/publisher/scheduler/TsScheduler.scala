@@ -16,7 +16,7 @@ import hmda.publisher.helper.TsPublicHeaderObj.TSPrivateHeader
 import hmda.publisher.helper.{PrivateAWSConfigLoader, QuarterTimeBarrier, S3Utils, SnapshotCheck}
 import hmda.publisher.query.component.{PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, TransmittalSheetTable, TsRepository, YearPeriod}
 import hmda.publisher.scheduler.schedules.{Schedule, ScheduleWithYear}
-import hmda.publisher.scheduler.schedules.Schedules.{TsAltSchedule, TsQuarterlySchedule, TsSchedule}
+import hmda.publisher.scheduler.schedules.Schedules.{TsAltQuarterlySchedule, TsAltSchedule, TsQuarterlySchedule, TsSchedule}
 import hmda.publisher.util.{PublishingReporter, ScheduleCoordinator}
 import hmda.publisher.util.PublishingReporter.Command.FilePublishingCompleted
 import hmda.publisher.util.ScheduleCoordinator.Command._
@@ -136,11 +136,17 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
           case Some(repo) => publishAnnualAltTsData(TsSchedule, year, repo)
           case None => log.error("No available ts alt publisher for {}", year)
         }
+        case TsAltQuarterlySchedule => quarterRepos.get(year) match {
+          case Some((q1Repo, q2Repo, q3Repo)) =>
+            publishAltQuarterTsData(TsAltQuarterlySchedule, year, YearPeriod.Q1, s"quarter_1_${year}_ts_plusFirstSignDate.txt.txt", q1Repo)
+            publishAltQuarterTsData(TsAltQuarterlySchedule, year, YearPeriod.Q2, s"quarter_2_${year}_ts_plusFirstSignDate.txt.txt", q2Repo)
+            publishAltQuarterTsData(TsAltQuarterlySchedule, year, YearPeriod.Q3, s"quarter_3_${year}_ts_plusFirstSignDate.txt.txt", q3Repo)
+        }
         case TsQuarterlySchedule => quarterRepos.get(year) match {
           case Some((q1Repo, q2Repo, q3Repo)) =>
-            publishQuarterTsData(TsQuarterlySchedule, year, YearPeriod.Q1, s"quarter_1_${year}_ts.txt", q1Repo)
-            publishQuarterTsData(TsQuarterlySchedule, year, YearPeriod.Q2, s"quarter_2_${year}_ts.txt", q2Repo)
-            publishQuarterTsData(TsQuarterlySchedule, year, YearPeriod.Q3, s"quarter_3_${year}_ts.txt", q3Repo)
+            publishQuarterTsData(TsQuarterlySchedule, year, YearPeriod.Q1, s"quarter_1_${year}_ts_.txt", q1Repo)
+            publishQuarterTsData(TsQuarterlySchedule, year, YearPeriod.Q2, s"quarter_2_${year}_ts_.txt", q2Repo)
+            publishQuarterTsData(TsQuarterlySchedule, year, YearPeriod.Q3, s"quarter_3_${year}_ts_.txt", q3Repo)
           case None => log.error("No available ts quarterly publisher for {}", year)
         }
       }
@@ -160,6 +166,16 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
     publishAltTsData(schedule, year, YearPeriod.Whole, fullDate.format(LocalDateTime.now().minusDays(1)) + s"${year}_ts_plusFirstSignDate.txt", tsRepo)
     //new-ts-file
   }
+
+  private def publishAltQuarterTsData[TsTable <: Table[TransmittalSheetEntity]](
+                                                                              schedule: Schedule,
+                                                                              year: Int,
+                                                                              quarter: YearPeriod,
+                                                                              fileName: String,
+                                                                              tsRepo: TsRepository[TransmittalSheetTable]): Option[Future[Unit]] =
+    timeBarrier.runIfStillRelevant(year, quarter) {
+      publishAltTsData(schedule, year, quarter, fullDateQuarterly.format(LocalDateTime.now().minusDays(1)) + fileName, tsRepo)
+    }
 
   private def publishQuarterTsData[TsTable <: Table[TransmittalSheetEntity]](
     schedule: Schedule,

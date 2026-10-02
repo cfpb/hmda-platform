@@ -41,6 +41,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
     with PublisherComponent2022
     with PublisherComponent2023
     with LoanLimitLarHeader
+    with QuarterlyLarHeader
     with PrivateAWSConfigLoader {
 
   implicit val ec = context.system.dispatcher
@@ -154,6 +155,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
                       val allResultsSource: Source[String, NotUsed] = Source
                         .fromPublisher(repo.getAllLARs(getFilterList()))
                         .map(larEntity => larEntity.toRegulatorPSV)
+                        .prepend(Source(List(QuarterlyLarHeader)))
 
                       def countF: Future[Int] = repo.getAllLARsCount(getFilterList())
 
@@ -170,8 +172,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
           publishingGuard.runIfDataIsValid(year, YearPeriod.Whole, Scope.Private) {
             val now = LocalDateTime.now().minusDays(1)
             val formattedDate = fullDate.format(now)
-            val fileName = s"${year}F_AGY_LAR_withFlag_$formattedDate${year}_lar.txt"
-
+            val fileName = s"${year}_appended_data_$formattedDate-${year}_lar.txt"
             annualRepos.get(year) match {
               case Some(repo) =>
                 val allResultsSource: Source[String, NotUsed] =
