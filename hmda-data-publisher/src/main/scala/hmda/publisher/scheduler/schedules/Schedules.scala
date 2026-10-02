@@ -16,9 +16,7 @@ object Schedules extends Enum[Schedule] {
   case object TsSchedule extends Schedule
   case object TsAltSchedule extends Schedule
   case object LarQuarterlySchedule extends Schedule
-  case object LarAltQuarterlySchedule extends Schedule
   case object TsQuarterlySchedule extends Schedule
-  case object TsAltQuarterlySchedule extends Schedule
   override def values: immutable.IndexedSeq[Schedule] = findValues
 }
 
