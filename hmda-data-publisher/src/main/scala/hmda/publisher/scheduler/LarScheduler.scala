@@ -172,7 +172,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
           publishingGuard.runIfDataIsValid(year, YearPeriod.Whole, Scope.Private) {
             val now = LocalDateTime.now().minusDays(1)
             val formattedDate = fullDate.format(now)
-            val fileName = s"${year}_appended_data_$formattedDate-${year}_lar.txt"
+            val fileName = s"${year}_appended_data_$formattedDate${year}_lar.txt"
             annualRepos.get(year) match {
               case Some(repo) =>
                 val allResultsSource: Source[String, NotUsed] =
