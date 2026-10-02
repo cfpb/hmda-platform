@@ -12,6 +12,7 @@ import org.apache.pekko.util.ByteString
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.publisher.helper.CronConfigLoader.{CronString, specificTsAltCron, specificTsAltYears, specificTsCron, specificTsYears, tsAltCron, tsAltYears, tsCron, tsQuarterlyCron, tsQuarterlyYears, tsYears}
+import hmda.publisher.helper.TsPublicHeaderObj.{TSPrivateHeader, TSPublicHeader}
 import hmda.publisher.helper.{PrivateAWSConfigLoader, QuarterTimeBarrier, S3Utils, SnapshotCheck}
 import hmda.publisher.query.component.{PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, TransmittalSheetTable, TsRepository, YearPeriod}
 import hmda.publisher.scheduler.schedules.{Schedule, ScheduleWithYear}
@@ -111,13 +112,14 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
   }
 
   private def uploadAltFileToS3(
-                              s3Sink: Sink[ByteString, Future[MultipartUploadResult]],
-                              transmittalSheets: => Future[Seq[TransmittalSheetEntity]]
-                            ): Future[MultipartUploadResult] = {
+                                 s3Sink: Sink[ByteString, Future[MultipartUploadResult]],
+                                 transmittalSheets: => Future[Seq[TransmittalSheetEntity]]
+                               ): Future[MultipartUploadResult] = {
     val source = Source
       .future(transmittalSheets)
       .mapConcat(_.toList)
       .map(transmittalSheet => transmittalSheet.toRegulatorAltPSV + "\n")
+      .prepend(Source.single(TSPrivateHeader))
       .map(ByteString(_))
     S3Utils.uploadWithRetry(source, s3Sink)
   }
@@ -146,35 +148,35 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
 
   import dbConfig.profile.api._
   private def publishAnnualTsData[TsTable <: Table[TransmittalSheetEntity]](
-    schedule: Schedule,
-    year: Int,
-    tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] =
-    publishTsData(schedule, year, YearPeriod.Whole, fullDate.format(LocalDateTime.now().minusDays(1)) + s"${year}_ts.txt", tsRepo)
-
-  private def publishAnnualAltTsData[TsTable <: Table[TransmittalSheetEntity]](
                                                                              schedule: Schedule,
                                                                              year: Int,
-                                                                             tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] = {
+                                                                             tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] =
+    publishAltTsData(schedule, year, YearPeriod.Whole, fullDate.format(LocalDateTime.now().minusDays(1)) + s"${year}_ts.txt", tsRepo)
+
+  private def publishAnnualAltTsData[TsTable <: Table[TransmittalSheetEntity]](
+                                                                                schedule: Schedule,
+                                                                                year: Int,
+                                                                                tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] = {
     publishAltTsData(schedule, year, YearPeriod.Whole, fullDate.format(LocalDateTime.now().minusDays(1)) + s"${year}_ts_plusFirstSignDate.txt", tsRepo)
     //new-ts-file
   }
 
   private def publishQuarterTsData[TsTable <: Table[TransmittalSheetEntity]](
-    schedule: Schedule,
-    year: Int,
-    quarter: YearPeriod,
-    fileName: String,
-    tsRepo: TsRepository[TransmittalSheetTable]): Option[Future[Unit]] =
+                                                                              schedule: Schedule,
+                                                                              year: Int,
+                                                                              quarter: YearPeriod,
+                                                                              fileName: String,
+                                                                              tsRepo: TsRepository[TransmittalSheetTable]): Option[Future[Unit]] =
     timeBarrier.runIfStillRelevant(year, quarter) {
-      publishTsData(schedule, year, quarter, fullDateQuarterly.format(LocalDateTime.now().minusDays(1)) + fileName, tsRepo)
+      publishAltTsData(schedule, year, quarter, fullDateQuarterly.format(LocalDateTime.now().minusDays(1)) + fileName, tsRepo)
     }
 
   private def publishTsData[TsTable <: Table[TransmittalSheetEntity]](
-    schedule: Schedule,
-    year: Int,
-    period: YearPeriod,
-    fullFileName: String,
-    tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] =
+                                                                       schedule: Schedule,
+                                                                       year: Int,
+                                                                       period: YearPeriod,
+                                                                       fullFileName: String,
+                                                                       tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] =
     publishingGuard.runIfDataIsValid(year, period, Scope.Private) {
       val s3Path = "dynamic-data/ts/"
       val fullFilePath = SnapshotCheck.pathSelector(s3Path, fullFileName)
@@ -197,11 +199,11 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
     }
 
   private def publishAltTsData[TsTable <: Table[TransmittalSheetEntity]](
-                                                                       schedule: Schedule,
-                                                                       year: Int,
-                                                                       period: YearPeriod,
-                                                                       fullFileName: String,
-                                                                       tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] =
+                                                                          schedule: Schedule,
+                                                                          year: Int,
+                                                                          period: YearPeriod,
+                                                                          fullFileName: String,
+                                                                          tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] =
     publishingGuard.runIfDataIsValid(year, period, Scope.Private) {
       val s3Path = "dynamic-data/ts/"
       val fullFilePath = SnapshotCheck.pathSelector(s3Path, fullFileName)
@@ -231,7 +233,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
       Instant.now,
       FilePublishingCompleted.Status.Success)
     log.info(s"Pushed to S3: $bucketPrivate/$fullFilePath.")
-    }
+  }
 
   def reportPublishingResultError( schedule: Schedule, fullFilePath: String,message:Throwable) {
     publishingReporter ! FilePublishingCompleted(

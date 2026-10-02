@@ -98,7 +98,7 @@ class TsPublicScheduler(publishingReporter: ActorRef[PublishingReporter.Command]
         .future(allResults)
         .mapConcat(seek => seek.toList)
         .map(_.toPublicPSV + "\n")
-        .prepend(Source.single(TSHeader))
+        .prepend(Source.single(TSPublicHeader))
         .map(s => ByteString(s))
 
       val zipStream = Source(
