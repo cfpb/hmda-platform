@@ -157,7 +157,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
                                                                                 schedule: Schedule,
                                                                                 year: Int,
                                                                                 tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] = {
-    publishAltTsData(schedule, year, YearPeriod.Whole, fullDate.format(LocalDateTime.now().minusDays(1)) + s"${year}d.txt", tsRepo)
+    publishAltTsData(schedule, year, YearPeriod.Whole, fullDate.format(LocalDateTime.now().minusDays(1)) + s"${year}.txt", tsRepo)
     //new-ts-file
   }
 
