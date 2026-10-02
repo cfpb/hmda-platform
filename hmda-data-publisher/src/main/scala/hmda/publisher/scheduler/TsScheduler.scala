@@ -151,13 +151,13 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
                                                                              schedule: Schedule,
                                                                              year: Int,
                                                                              tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] =
-    publishTsData(schedule, year, YearPeriod.Whole, fullDate.format(LocalDateTime.now().minusDays(1)) + s"${year}_ts.txt", tsRepo)
+    publishAltTsData(schedule, year, YearPeriod.Whole, fullDate.format(LocalDateTime.now().minusDays(1)) + s"${year}_ts.txt", tsRepo)
 
   private def publishAnnualAltTsData[TsTable <: Table[TransmittalSheetEntity]](
                                                                                 schedule: Schedule,
                                                                                 year: Int,
                                                                                 tsRepo: TsRepository[TransmittalSheetTable]): Future[Unit] = {
-    publishAltTsData(schedule, year, YearPeriod.Whole, fullDate.format(LocalDateTime.now().minusDays(1)) + s"${year}_ts_plusFirstSignDate.txt", tsRepo)
+    publishAltTsData(schedule, year, YearPeriod.Whole, fullDate.format(LocalDateTime.now().minusDays(1)) + s"${year}d.txt", tsRepo)
     //new-ts-file
   }
 
