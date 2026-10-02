@@ -107,7 +107,6 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
       .future(transmittalSheets)
       .mapConcat(_.toList)
       .map(transmittalSheet => transmittalSheet.toRegulatorPSV + "\n")
-      .prepend(Source.single(TSPrivateHeader))
       .map(ByteString(_))
     S3Utils.uploadWithRetry(source, s3Sink)
   }
@@ -120,6 +119,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
       .future(transmittalSheets)
       .mapConcat(_.toList)
       .map(transmittalSheet => transmittalSheet.toRegulatorAltPSV + "\n")
+      .prepend(Source.single(TSPrivateHeader))
       .map(ByteString(_))
     S3Utils.uploadWithRetry(source, s3Sink)
   }
