@@ -1,8 +1,8 @@
 package hmda.publisher.helper
 
-trait QuarterlyLarHeader {
+trait LarHeader {
 
-  val QuarterlyLarHeader = "record_id|lei|uli|application_date|loan_type|loan_purpose|preapprovals|" +
+  val LarHeader = "record_id|lei|uli|application_date|loan_type|loan_purpose|preapprovals|" +
     "construction_method|occupancy|loan_amount|action_type|action_date|address|city|state_code|zip|" +
     "county_code|census_tract_number|applicant_ethnicity_1|applicant_ethnicity_2|applicant_ethnicity_3|" +
     "applicant_ethnicity_4|applicant_ethnicity_5|applicant_ethnicity_other|coapplicant_ethnicity_1|" +
@@ -27,9 +27,9 @@ trait QuarterlyLarHeader {
     "business_commercial_purpose"
 }
 
-object QuarterlyLarHeader extends QuarterlyLarHeader {
+object LarHeader extends LarHeader {
   def getHeaderString = {
-    QuarterlyLarHeader
+    LarHeader
   }
 
 }

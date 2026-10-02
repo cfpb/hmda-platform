@@ -41,7 +41,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
     with PublisherComponent2022
     with PublisherComponent2023
     with LoanLimitLarHeader
-    with QuarterlyLarHeader
+    with LarHeader
     with PrivateAWSConfigLoader {
 
   implicit val ec = context.system.dispatcher
@@ -131,7 +131,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
                   Source
                     .fromPublisher(repo.getAllLARs(getFilterList()))
                     .map(larEntity => larEntity.toRegulatorPSV)
-
+                    .prepend(Source(List(LarHeader)))
                 def countF: Future[Int] = repo.getAllLARsCount(getFilterList())
 
                 for {
@@ -155,7 +155,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
                       val allResultsSource: Source[String, NotUsed] = Source
                         .fromPublisher(repo.getAllLARs(getFilterList()))
                         .map(larEntity => larEntity.toRegulatorPSV)
-                        .prepend(Source(List(QuarterlyLarHeader)))
+                        .prepend(Source(List(LarHeader)))
 
                       def countF: Future[Int] = repo.getAllLARsCount(getFilterList())
 
