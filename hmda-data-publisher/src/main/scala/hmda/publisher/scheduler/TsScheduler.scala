@@ -12,6 +12,7 @@ import org.apache.pekko.util.ByteString
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.publisher.helper.CronConfigLoader.{CronString, specificTsAltCron, specificTsAltYears, specificTsCron, specificTsYears, tsAltCron, tsAltYears, tsCron, tsQuarterlyCron, tsQuarterlyYears, tsYears}
+import hmda.publisher.helper.TsPublicHeaderObj.TSPrivateHeader
 import hmda.publisher.helper.{PrivateAWSConfigLoader, QuarterTimeBarrier, S3Utils, SnapshotCheck}
 import hmda.publisher.query.component.{PublisherComponent, PublisherComponent2018, PublisherComponent2019, PublisherComponent2020, PublisherComponent2021, PublisherComponent2022, PublisherComponent2023, TransmittalSheetTable, TsRepository, YearPeriod}
 import hmda.publisher.scheduler.schedules.{Schedule, ScheduleWithYear}
@@ -106,6 +107,7 @@ class TsScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sche
       .future(transmittalSheets)
       .mapConcat(_.toList)
       .map(transmittalSheet => transmittalSheet.toRegulatorPSV + "\n")
+      .prepend(Source.single(TSPrivateHeader))
       .map(ByteString(_))
     S3Utils.uploadWithRetry(source, s3Sink)
   }
