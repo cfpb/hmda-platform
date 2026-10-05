@@ -142,7 +142,6 @@ private[engine] object LarEngine2027 extends ValidationEngine[LoanApplicationReg
     V670_3,
     V670_4,
     V671_1,
-    V671_2,
     V672_1,
     V672_2,
     V672_3,
