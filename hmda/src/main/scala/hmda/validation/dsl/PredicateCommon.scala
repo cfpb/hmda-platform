@@ -38,7 +38,7 @@ object PredicateCommon {
     Try(lessThanOrEqual(BigDecimal(upper)).check(BigDecimal(x))).getOrElse(false) && Try(greaterThanOrEqual(BigDecimal(lower)).check(BigDecimal(x))).getOrElse(false)
   }
 
-  def startWith(str: String): Predicate[String] = str.startsWith(_)
+  def startWith(str: String): Predicate[String] = str.startsWith(_: String)
 
   def containedInSet[A](domain: Set[A]): Predicate[A] = domain.contains(_: A)
 
