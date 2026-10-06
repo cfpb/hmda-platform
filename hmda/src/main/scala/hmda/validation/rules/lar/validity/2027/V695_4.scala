@@ -13,6 +13,9 @@ object V695_4 extends EditCheck[LoanApplicationRegister] {
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
     val nmlsrID = lar.larIdentifier.NMLSRIdentifier
-    nmlsrID not startWith("0")
+    when (nmlsrID not oneOf("Exempt", "NA")) {
+      val leadChar = nmlsrID.headOption.getOrElse(' ').toString
+      leadChar not equalTo("0") and (leadChar is numeric)
+    }
   }
 }
