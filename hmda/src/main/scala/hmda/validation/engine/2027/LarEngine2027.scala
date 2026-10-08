@@ -5,7 +5,7 @@ import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.lar.quality._2019._
 import hmda.validation.rules.lar.validity.common.V619_2
-import hmda.validation.rules.lar.quality.{_2020 => quality2020, _2021 => quality2021, _2022 => quality2022, _2025 => quality2025}
+import hmda.validation.rules.lar.quality.{_2020 => quality2020, _2021 => quality2021, _2022 => quality2022, _2025 => quality2025, _2027 => quality2027}
 import hmda.validation.rules.lar.quality.common._
 import hmda.validation.rules.lar.syntactical.{S300, S301}
 import hmda.validation.rules.lar.validity.{_2020, _2022, _2024, _}
@@ -259,8 +259,8 @@ private[engine] object LarEngine2027 extends ValidationEngine[LoanApplicationReg
     Q611,
     Q612,
     Q613,
-    quality2020.Q614_1,
-    quality2020.Q614_2,
+    quality2027.Q614_1,
+    quality2027.Q614_2,
     quality2021.Q615_1,
     quality2021.Q615_2,
     Q616_1,
