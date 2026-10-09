@@ -288,7 +288,6 @@ private[engine] object LarEngine2027 extends ValidationEngine[LoanApplicationReg
     Q643,
     Q644,
     Q645_1,
-    Q645_2,
     quality2025.Q646,
     quality2025.Q647.withContext(ctx),
     quality2020.Q648,
