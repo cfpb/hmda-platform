@@ -271,7 +271,7 @@ Q619|If Construction Method equals 2, then Manufactured Home Land Property Inter
 Q620|If Business or Commercial Purpose equals 2, then NMLSR ID generally should not be NA.|Business or Commercial Purpose; NMLSR ID
 Q622|If Reverse Mortgage equals 1, then the Age of Applicant or Borrower generally should be greater than or equal to 62. Your data indicates a number outside this range.|Reverse Mortgage; Age of Applicant or Borrower
 Q623|If Total Units is less than or equal to 4, and Income is less than or equal to $200,000 (reported as 200), then Loan Amount generally should be less than $2,000,000 (reported as 2000000).|Loan Amount; Total Units; Income
-Q624|If Loan Type equals 2, and Total Units equals 1, then Loan Amount generally should be less than or equal to $637,000 (reported as 637000).|Loan Type; Total Units; Loan Amount
+Q624|Please review the information below and update your file, if needed: If Loan Type equals 2 and Total Units equals 1, then Loan Amount generally should be less than or equal to $1,239,125 (reported as 1239125).|Loan Type; Total Units; Loan Amount
 Q625|If Loan Type equals 3, and Total Units is less than or equal to 4, then Loan Amount generally should be less than or equal to $1,050,000 (reported as 1050000).|Loan Type; Total Units; Loan Amount
 Q626|If Type of Purchaser equals 1, 2, 3, or 4, and Total Units is less than or equal to 4, then Loan Amount generally should be less than or equal to $1,225,000 (reported as 1225000).|Type of Purchaser; Total Units; Loan Amount
 Q627|If Total Units is greater than or equal to 5, then Loan Amount generally should be between $100,000 (reported as 100000) and $10,000,000 (reported as 10000000).|Total Units; Loan Amount
