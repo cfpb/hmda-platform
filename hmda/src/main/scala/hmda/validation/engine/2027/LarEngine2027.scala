@@ -5,7 +5,7 @@ import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.lar.quality._2019._
 import hmda.validation.rules.lar.validity.common.V619_2
-import hmda.validation.rules.lar.quality.{_2020 => quality2020, _2021 => quality2021, _2022 => quality2022, _2025 => quality2025}
+import hmda.validation.rules.lar.quality.{_2020 => quality2020, _2021 => quality2021, _2022 => quality2022, _2025 => quality2025, _2027 => quality2027}
 import hmda.validation.rules.lar.quality.common._
 import hmda.validation.rules.lar.syntactical.{S300, S301}
 import hmda.validation.rules.lar.validity.{_2020, _2022, _2024, _}
@@ -142,7 +142,6 @@ private[engine] object LarEngine2027 extends ValidationEngine[LoanApplicationReg
     V670_3,
     V670_4,
     V671_1,
-    V671_2,
     V672_1,
     V672_2,
     V672_3,
@@ -211,6 +210,8 @@ private[engine] object LarEngine2027 extends ValidationEngine[LoanApplicationReg
     _2021.V695_1,
     _2021.V695_2,
     _2026.V695_3,
+    _2027.V695_4,
+    _2027.V695_5,
     _2021.V696_1,
     _2021.V696_2,
     V696_3,
@@ -253,31 +254,31 @@ private[engine] object LarEngine2027 extends ValidationEngine[LoanApplicationReg
     Q605_2,
     quality2020.Q606,
     Q609,
-    Q607,
     Q608,
     Q610,
     Q611,
     Q612,
     Q613,
-    quality2020.Q614_1,
-    quality2020.Q614_2,
+    quality2027.Q614_1,
+    quality2027.Q614_2,
     quality2021.Q615_1,
     quality2021.Q615_2,
     Q616_1,
     Q616_2,
     quality2025.Q616_3,
-    quality2020.Q617,
+    quality2027.Q617,
     Q618,
     Q619,
     Q620,
     Q622,
     Q623,
-    Q624,
-    Q625,
-    Q626,
-    Q627,
-    Q628,
-    Q629,
+    quality2027.Q624,
+    quality2027.Q625,
+    quality2027.Q626,
+    quality2027.Q627,
+    quality2027.Q628_1,
+    quality2027.Q628_2,
+    quality2027.Q629,
     Q630,
     Q631,
     Q632,
@@ -287,7 +288,6 @@ private[engine] object LarEngine2027 extends ValidationEngine[LoanApplicationReg
     Q643,
     Q644,
     Q645_1,
-    Q645_2,
     quality2025.Q646,
     quality2025.Q647.withContext(ctx),
     quality2020.Q648,
@@ -296,8 +296,7 @@ private[engine] object LarEngine2027 extends ValidationEngine[LoanApplicationReg
     quality2025.Q651_1,
     quality2025.Q651_2,
     quality2020.Q652,
-    quality2021.Q650_1,
-    quality2021.Q650_2,
+    quality2027.Q650,
     quality2020.Q653_1,
     quality2020.Q653_2,
     quality2022.Q654,
@@ -310,7 +309,8 @@ private[engine] object LarEngine2027 extends ValidationEngine[LoanApplicationReg
     Q660_1,
     Q660_2,
     Q660_3,
-    Q660_4
+    Q660_4,
+    quality2027.Q661
   )
 }
 // $COVERAGE-ON$
