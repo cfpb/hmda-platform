@@ -8,15 +8,19 @@ import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.dsl.ValidationResult
 import hmda.validation.rules.EditCheck
 
-object Q624 extends EditCheck[LoanApplicationRegister] {
+trait Q624 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q624"
+  protected val amount: Int
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    val config = ConfigFactory.load()
-    val amount = config.getInt("edits.Q624.amount")
 
     when(lar.loan.loanType is equalTo(FHAInsured) and (lar.property.totalUnits is equalTo(1))) {
       lar.loan.amount is lessThanOrEqual(amount)
     }
   }
+}
+
+object Q624 extends Q624 {
+  private val config = ConfigFactory.load()
+  override protected val amount: Int = config.getInt("edits.Q624.amount")
 }

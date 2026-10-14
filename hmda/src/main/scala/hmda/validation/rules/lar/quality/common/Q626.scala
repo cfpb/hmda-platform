@@ -8,19 +8,22 @@ import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.dsl.ValidationResult
 import hmda.validation.rules.EditCheck
 
-object Q626 extends EditCheck[LoanApplicationRegister] {
+trait Q626 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q626"
+  protected val amount: Int
+  protected val units: Int
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    val config = ConfigFactory.load()
-    val amount = config.getInt("edits.Q626.amount")
-    val units  = config.getInt("edits.Q626.units")
-
+  override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(
       lar.purchaserType is oneOf(FannieMae, GinnieMae, FreddieMac, FarmerMac) and
         (lar.property.totalUnits is lessThanOrEqual(units))
     ) {
       lar.loan.amount is lessThanOrEqual(amount)
     }
-  }
+}
+
+object Q626 extends Q626 {
+  private val config = ConfigFactory.load()
+  override protected val amount: Int = config.getInt("edits.Q626.amount")
+  override protected val units: Int = config.getInt("edits.Q626.units")
 }
