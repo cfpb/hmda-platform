@@ -41,11 +41,13 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
     with PublisherComponent2022
     with PublisherComponent2023
     with LoanLimitLarHeader
+    with LarHeader
     with PrivateAWSConfigLoader {
 
   implicit val ec = context.system.dispatcher
   implicit val materializer = Materializer(context)
   private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
+  private val fullCLLDate = DateTimeFormatter.ofPattern("yyyy-MM-dd")
   private val fullDateQuarterly = DateTimeFormatter.ofPattern("yyyy-MM-dd_")
 
 
@@ -130,7 +132,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
                   Source
                     .fromPublisher(repo.getAllLARs(getFilterList()))
                     .map(larEntity => larEntity.toRegulatorPSV)
-
+                    .prepend(Source(List(LarHeader)))
                 def countF: Future[Int] = repo.getAllLARsCount(getFilterList())
 
                 for {
@@ -154,6 +156,7 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
                       val allResultsSource: Source[String, NotUsed] = Source
                         .fromPublisher(repo.getAllLARs(getFilterList()))
                         .map(larEntity => larEntity.toRegulatorPSV)
+                        .prepend(Source(List(LarHeader)))
 
                       def countF: Future[Int] = repo.getAllLARsCount(getFilterList())
 
@@ -169,9 +172,8 @@ class LarScheduler(publishingReporter: ActorRef[PublishingReporter.Command], sch
         case LarLoanLimitSchedule =>
           publishingGuard.runIfDataIsValid(year, YearPeriod.Whole, Scope.Private) {
             val now = LocalDateTime.now().minusDays(1)
-            val formattedDate = fullDate.format(now)
-            val fileName = s"${year}F_AGY_LAR_withFlag_$formattedDate${year}_lar.txt"
-
+            val formattedDate = fullCLLDate.format(now)
+            val fileName = s"${year}_appended_data_${formattedDate}_lar.txt"
             annualRepos.get(year) match {
               case Some(repo) =>
                 val allResultsSource: Source[String, NotUsed] =
