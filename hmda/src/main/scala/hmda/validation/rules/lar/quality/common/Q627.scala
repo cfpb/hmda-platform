@@ -1,6 +1,5 @@
 package hmda.validation.rules.lar.quality.common
 
-import com.typesafe.config.ConfigFactory
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
@@ -21,8 +20,7 @@ trait Q627 extends EditCheck[LoanApplicationRegister] {
 }
 
 object Q627 extends Q627 {
-  private val config = ConfigFactory.load()
-  override protected val minAmount: Int = config.getInt("edits.Q627.minAmount")
-  override protected val maxAmount: Int = config.getInt("edits.Q627.maxAmount")
-  override protected val units: Int = config.getInt("edits.Q627.units")
+  override protected val minAmount: Int = 100000
+  override protected val maxAmount: Int = 10000000
+  override protected val units: Int = 5
 }

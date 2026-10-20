@@ -1,6 +1,5 @@
 package hmda.validation.rules.lar.quality.common
 
-import com.typesafe.config.ConfigFactory
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums.FHAInsured
 import hmda.validation.dsl.PredicateCommon._
@@ -21,6 +20,5 @@ trait Q624 extends EditCheck[LoanApplicationRegister] {
 }
 
 object Q624 extends Q624 {
-  private val config = ConfigFactory.load()
-  override protected val amount: Int = config.getInt("edits.Q624.amount")
+  override protected val amount: Int = 637000
 }
