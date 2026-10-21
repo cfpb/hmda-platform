@@ -7,7 +7,7 @@ import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.dsl.ValidationResult
 import hmda.validation.rules.lar.quality.common.Q617
 
-import scala.math.BigDecimal.{ RoundingMode, javaBigDecimal2bigDecimal }
+import scala.math.BigDecimal.RoundingMode
 
 object Q617 extends Q617 {
   override protected def qualifiedForEdit(lar: LoanApplicationRegister): ValidationResult =
@@ -25,6 +25,8 @@ object Q617 extends Q617 {
     val ratioToPrecision =
       calculatedRatio.setScale(precision, RoundingMode.HALF_UP).underlying()
 
-    ratioToPrecision is lessThanOrEqual(combinedLoanValueRatioStripped * 1.02)
+    val cltvFactor = BigDecimal(1.02).underlying()
+
+    ratioToPrecision is lessThanOrEqual(combinedLoanValueRatioStripped.multiply(cltvFactor))
   }
 }
