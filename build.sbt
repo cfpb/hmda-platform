@@ -840,6 +840,7 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
           case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
           case "META-INF/MANIFEST.MF" => MergeStrategy.discard
           case metaInfMatcher(_) => MergeStrategy.discard
+          case "logback.xml" => MergeStrategy.first
           case PathList("META-INF", xs @ _*) => MergeStrategy.concat
           case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
           case PathList("jakarta", xs @ _*) => MergeStrategy.last
