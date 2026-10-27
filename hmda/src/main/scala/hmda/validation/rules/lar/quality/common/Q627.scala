@@ -11,11 +11,17 @@ trait Q627 extends EditCheck[LoanApplicationRegister] {
   protected val minAmount: Int
   protected val maxAmount: Int
   protected val units: Int
+  protected val isRangeExclusive: Boolean = false
 
   override def apply(lar: LoanApplicationRegister): ValidationResult =
     when(lar.property.totalUnits is greaterThanOrEqual(units)) {
-      lar.loan.amount is lessThanOrEqual(maxAmount) and
-        (lar.loan.amount is greaterThanOrEqual(minAmount))
+      if (isRangeExclusive) {
+        lar.loan.amount is lessThan(maxAmount) and
+          (lar.loan.amount is greaterThan(minAmount))
+      } else {
+        lar.loan.amount is lessThanOrEqual(maxAmount) and
+          (lar.loan.amount is greaterThanOrEqual(minAmount))
+      }
     }
 }
 
