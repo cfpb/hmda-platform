@@ -6,4 +6,5 @@ object Q627 extends Q627 {
   override protected val minAmount: Int = 100000
   override protected val maxAmount: Int = 50000000
   override protected val units: Int = 5
+  override protected val isRangeExclusive: Boolean = true
 }
