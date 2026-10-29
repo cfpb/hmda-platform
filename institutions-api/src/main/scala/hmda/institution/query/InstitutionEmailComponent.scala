@@ -144,6 +144,21 @@ trait InstitutionEmailComponent extends InstitutionComponent {
     }
   }
 
+  def findLeiByEmail(email: String)(
+    implicit ec: ExecutionContext,
+    institutionEmailsRepository: InstitutionEmailsRepository
+  ): Future[Seq[String]] = {
+    val emailDomain = extractDomain(email)
+    val emailQuery = institutionEmailsRepository.table.filter(_.emailDomain.trim === emailDomain.trim)
+    for {
+      tableOutput <- institutionEmailsRepository.db.run(emailQuery.result)
+      leiList = tableOutput.map(_.lei)
+    } yield {
+      leiList
+    }
+  }
+  
+
   private def mergeEmailIntoInstitutions(emails: Seq[InstitutionEmailEntity], institution: InstitutionEntity) = {
     val filteredEmails =
       emails.filter(_.lei == institution.lei).map(_.emailDomain)
