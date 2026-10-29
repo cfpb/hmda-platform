@@ -13,6 +13,6 @@ zipCode, Contact Person's Office ZIP Code, Alphanumeric, Contact Person's Office
 agency, Federal Agency, Numeric,The institution's primary federal regulator
 totalLines, Total Number of Entries Contained in Submission, Numeric,Total number of entries contained in submission
 taxId, Federal Taxpayer Identification Number, Alphanumeric,The federal tax ID of the filing institution.
-lei, Legal Entity Identifier (LEI), Alphanumeric,The financial institution’s Legal Entity Identifier
+lei, Legal Entity Identifier (LEI), Alphanumeric,The financial institution's Legal Entity Identifier
 signDate, HMDA Filing Sign Datetime, Alphanumeric, HMDA Filing most recent sign date and time
 firstSignDate, HMDA Filing First Sign Datetime, Alphanumeric, HMDA Filing first sign date and time
