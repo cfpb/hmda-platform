@@ -18,20 +18,15 @@ import org.apache.pekko.stream.connectors.s3._
 import com.typesafe.config.ConfigFactory
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.regions.providers.AwsRegionProvider
-import software.amazon.awssdk.regions.providers._
 import org.apache.pekko.stream.connectors.s3.ApiVersion.ListBucketVersion2
 import org.apache.pekko.actor.ActorSystem
 
 import scala.concurrent._
 import org.apache.pekko.http.scaladsl.model.ContentTypes
 
-import scala.util.{ Failure, Success, Try }
+import scala.util.{ Failure, Success }
 import org.apache.pekko.http.scaladsl.model.StatusCodes.BadRequest
 import hmda.auth.OAuth2Authorization
-import org.apache.pekko.util.Timeout
-import hmda.util.RealTimeConfig
-
-import scala.concurrent.duration._
 
 object ProxyHttpApi {
   def create(log: Logger)(implicit ec: ExecutionContext, system: ActorSystem): OAuth2Authorization => Route = new ProxyHttpApi(log).proxyHttpRoutes _
@@ -138,7 +133,7 @@ private class ProxyHttpApi(log: Logger)(implicit ec: ExecutionContext, system: A
 
     onComplete(fStream){
       case Success(stream) => complete(HttpEntity(ContentTypes.`text/csv(UTF-8)`, stream))
-      case Failure(error) => complete(StatusCodes.BadRequest)
+      case Failure(_) => complete(StatusCodes.BadRequest)
     }
   }
 
