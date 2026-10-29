@@ -151,6 +151,26 @@ object MacroValidationFlow {
           Q639,
           Q640
         )
+      case Period(2026, _) =>
+        List(
+          Q634,
+          Q635(totalCount),
+          Q636(totalCount),
+          Q637(totalCount),
+          Q638,
+          Q639,
+          Q640
+        )
+      case Period(2027, _) =>
+        List(
+          Q634,
+          Q635(totalCount),
+          Q636(totalCount),
+          Q637(totalCount),
+          Q638,
+          Q639,
+          Q640
+        )
       case _ =>
         List(
         )
