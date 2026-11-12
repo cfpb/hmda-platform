@@ -1,46 +1,29 @@
 package hmda.validation.rules.lar.quality._2020
 
 import hmda.model.filing.lar.LoanApplicationRegister
+import hmda.model.filing.lar.enums.Conventional
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.dsl.ValidationResult
-import hmda.validation.rules.EditCheck
-import hmda.model.filing.lar.enums.Conventional
+import hmda.validation.rules.lar.quality.common.Q617
 
 import scala.math.BigDecimal.RoundingMode
-import scala.util.Try
 
-object Q617 extends EditCheck[LoanApplicationRegister] {
-  override def name: String = "Q617"
+object Q617 extends Q617 {
+  override protected def qualifiedForEdit(lar: LoanApplicationRegister): ValidationResult =
+    lar.loan.loanType is equalTo(Conventional) and
+      (lar.loan.combinedLoanToValueRatio not oneOf("NA", "Exempt"))
 
-  override def apply(lar: LoanApplicationRegister): ValidationResult =
-    when(
-      lar.loan.loanType is equalTo(Conventional) and
-        (lar.loan.combinedLoanToValueRatio not oneOf("NA", "Exempt"))
-    ) {
+  override protected def checkCondition(propValue: Double, combinedLoanValueRatio: BigDecimal, loanAmount: BigDecimal): ValidationResult = {
+    val combinedLoanValueRatioStripped = combinedLoanValueRatio.underlying().stripTrailingZeros()
 
-      val propValue =
-        Try(lar.property.propertyValue.toDouble).getOrElse(Double.MaxValue)
-      val combinedLoanValueRatio =
-        Try(BigDecimal(lar.loan.combinedLoanToValueRatio))
-          .getOrElse(BigDecimal(0))
+    val precision = getPrecision(combinedLoanValueRatioStripped)
 
-      val combinedLoanValueRatioStripped = combinedLoanValueRatio.underlying().stripTrailingZeros()
+    val calculatedRatio = (loanAmount / propValue) * 100
 
-      val precision = getPrecision(combinedLoanValueRatioStripped)
+    val ratioToPrecision =
+      calculatedRatio.setScale(precision, RoundingMode.HALF_UP).underlying()
 
-      val calculatedRatio = (lar.loan.amount / propValue) * 100
-
-      val ratioToPrecision =
-        calculatedRatio.setScale(precision, RoundingMode.HALF_UP).underlying()
-
-      combinedLoanValueRatioStripped is greaterThanOrEqual(ratioToPrecision)
-    }
-
-  private def getPrecision(number: BigDecimal): Int =
-    if (number.isValidInt) {
-      0
-    } else {
-      number.scale
-    }
+    combinedLoanValueRatioStripped is greaterThanOrEqual(ratioToPrecision)
+  }
 }
