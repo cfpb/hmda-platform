@@ -44,7 +44,6 @@ object Version {
   val scalacheckShapeless    = "1.2.5"
   val diffx                  = "0.4.0"
   val log4j                  = "2.25.4"
-  val kubernetesApi          = "27.0.0"
   val testContainers         = "2.0.5"
   val amazonAwssdk           = "2.53.1"
   val mskAuth                = "2.3.7"
