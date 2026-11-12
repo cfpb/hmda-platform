@@ -1,0 +1,111 @@
+Column Name ,Data Field Name,Data Field Type,Description
+record_id, Record Identifier, Numeric,Record identifier number 
+lei, Legal Entity Identifier, Alphanumeric,The financial institution’s Legal Entity Identifier
+uli, Universal Loan Identifier (ULI) or Non-Universal Loan Identifier (NULI), Alphanumeric,"A unique, alphanumeric code (up to 45 characters) assigned to track a single loan or application industry-wide without exposing the borrower's personal identity. It begins with the institution's Legal Entity Identifier"
+application_date, Application Date, Alphanumeric,Date the application was received 
+loan_type, Loan Type, Numeric,The type of covered loan or application
+loan_purpose, Loan Purpose, Numeric,The purpose of covered loan or application
+preapprovals, Preapproval, Numeric,Whether the covered loan or application involved a request for a preapproval of a home purchase loan under a preapproval program
+construction_method, Construction Method, Numeric,Construction method for the dwelling
+occupancy, Occupancy Type, Numeric,Occupancy type for the dwelling
+loan_amount, Loan Amount, Numeric,"The amount of the covered loan, or the amount applied for"
+action_type, Action Taken, Numeric,The action taken on the covered loan or application
+action_date, Action Taken Date, Numeric,The date the action taken on the covered loan or application
+address, Street Address, Alphanumeric,street address
+city, City, Alphanumeric,City name
+state_code, State, Alphanumeric,Two-letter state code
+zip, ZIP Code, Alphanumeric,zip code
+county_code, County, Alphanumeric,State-county FIPS code
+census_tract_number, Census Tract, Alphanumeric,11 digit census tract number
+applicant_ethnicity_1, Ethnicity of Applicant or Borrower: 1, Numeric,Ethnicity of the applicant or borrower
+applicant_ethnicity_2, Ethnicity of Applicant or Borrower: 2, Numeric,Ethnicity of the applicant or borrower
+applicant_ethnicity_3, Ethnicity of Applicant or Borrower: 3, Numeric,Ethnicity of the applicant or borrower
+applicant_ethnicity_4, Ethnicity of Applicant or Borrower: 4, Numeric,Ethnicity of the applicant or borrower
+applicant_ethnicity_5, Ethnicity of Applicant or Borrower: 5, Numeric,Ethnicity of the applicant or borrower
+applicant_ethnicity_other, Ethnicity of Applicant or Borrower: Free Form Text Field for Other Hispanic or Latino, Alphanumeric,Free form text field to enter ethnicity of applicant or borrower
+coapplicant_ethnicity_1, Ethnicity of Co-Applicant or Co-Borrower: 1, Numeric,Ethnicity of the first co-applicant or co-borrower
+coapplicant_ethnicity_2, Ethnicity of Co-Applicant or Co-Borrower: 2, Numeric,Ethnicity of the first co-applicant or co-borrower
+coapplicant_ethnicity_3, Ethnicity of Co-Applicant or Co-Borrower: 3, Numeric,Ethnicity of the first co-applicant or co-borrower
+coapplicant_ethnicity_4, Ethnicity of Co-Applicant or Co-Borrower: 4, Numeric,Ethnicity of the first co-applicant or co-borrower
+coapplicant_ethnicity_5, Ethnicity of Co-Applicant or Co-Borrower: 5, Numeric,Ethnicity of the first co-applicant or co-borrower
+coapplicant_ethnicity_other, Ethnicity of Co-Applicant or Co-Borrower: Free Form Text Field for Other Hispanic or Latino, Alphanumeric,Free form text field to enter ethnicity of co-applicant or co-borrower
+applicant_ethnicity_v, Ethnicity of Applicant or Borrower Collected on the Basis of Visual Observation of Surname, Numeric,Whether the ethnicity of the applicant or borrower was collected on the basis of visual observation or surname
+coapplicant_ethnicity_v, Ethnicity of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation of Surname, Numeric, Whether the ethnicity of the first co-applicant or co-borrower was collected on the basis of visual observation or surname
+applicant_race1, Race of Applicant or Borrower: 1, Numeric,Race of the applicant or borrower
+applicant_race2, Race of Applicant or Borrower: 2, Numeric,Race of the applicant or borrower
+applicant_race3, Race of Applicant or Borrower: 3, Numeric,Race of the applicant or borrower
+applicant_race4, Race of Applicant or Borrower: 4, Numeric,Race of the applicant or borrower
+applicant_race5, Race of Applicant or Borrower: 5, Numeric,Race of the applicant or borrower
+applicant_race_other1, Race of Applicant or Borrower: Free Form Text Field for American Indian or Alaska Native Enrolled or Principal Tribe, Alphanumeric,Free form text field to enter race of applicant or borrower
+applicant_race_other2, Race of Applicant or Borrower: Free Form Text Field for Other Asian, Alphanumeric,Free form text field to enter race of applicant or borrower
+applicant_race_other3, Race of Applicant or Borrower: Free Form Text Field for Other Pacific Islander, Alphanumeric,Free form text field to enter race of applicant or borrower
+coapplicant_race1, Race of Co-Applicant or Co-Borrower: 1, Numeric,Race of the first co-applicant or co-borrower
+coapplicant_race2, Race of Co-Applicant or Co-Borrower: 2, Numeric,Race of the first co-applicant or co-borrower
+coapplicant_race3, Race of Co-Applicant or Co-Borrower: 3, Numeric,Race of the first co-applicant or co-borrower
+coapplicant_race4, Race of Co-Applicant or Co-Borrower: 4, Numeric,Race of the first co-applicant or co-borrower
+coapplicant_race5, Race of Co-Applicant or Co-Borrower: 5, Numeric,Race of the first co-applicant or co-borrower
+coapplicant_race_other1, Race of Co-Applicant or Co-Borrower:  Free Form Text Field for American Indian or Alaska Native Enrolled or Principal Tribe, Alphanumeric,Free form text field to enter race of co-applicant or co-borrower
+coapplicant_race_other2, Race of Co-Applicant or Co-Borrower: Free Form Text Field for Other Asian, Alphanumeric,Free form text field to enter race of co-applicant or co-borrower
+coapplicant_race_other3, Race of Co-Applicant or Co-Borrower: Free Form Text Field for Other Pacific Islander, Alphanumeric,Free form text field to enter race of co-applicant or co-borrower
+applicant_race_v, Race of Applicant or Borrower Collected on the Basis of Visual Observation of Surname, Numeric,Whether the race of the applicant or borrower was collected on the basis of visual observation or surname
+coapplicant_race_v, Race of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation of Surname, Numeric,Whether the race of the first co-applicant or co-borrower was collected on the basis of visual observation or surname
+applicant_sex, Sex of Applicant or Borrower, Numeric,Sex of the applicant or borrower
+coapplicant_sex, Sex of Co-Applicant or Co-Borrower, Numeric,Sex of the first co-applicant or co-borrower
+applicant_sex_v, Sex of Applicant or Borrower Collected on the Basis of Visual Observation of Surname, Numeric,Whether the sex of the applicant or borrower was collected on the basis of visual observation or surname
+coapplicant_sex_v, Sex of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation of Surname, Numeric,Whether the sex of the first co-applicant or co-borrower was collected on the basis of visual observation or surname
+applicant_age, Age of Applicant or Borrower, Numeric,The age of the applicant
+coapplicant_age, Age of Co-Applicant or Co-Borrower, Numeric,"The age, in years, of the first co-applicant or co-borrower"
+applicant_income, Income, Alphanumeric,"The gross annual income, in thousands of dollars, relied on in making the credit decision, or if a credit decision was not made, the gross annual income relied on in processing the application"
+purchaser_type, Type of Purchaser, Numeric,Type of entity purchasing a covered loan from the institution
+rate_spread, Rate Spread, Alphanumeric,The difference between the covered loan’s annual percentage rate (APR) and the average prime offer rate (APOR) for a comparable transaction as of the date the interest rate is set
+hoepa_status, HOEPA Status, Numeric,Whether the covered loan is a high-cost mortgage
+lien_status, Lien Status, Numeric," Lien status of the property securing the covered loan, or in the case of an application, proposed to secure the covered loan"
+applicant_creditscore, Credit Score of Applicant or Borrower, Numeric,Applicant or Borrower Credit Score
+coapplicant_creditscore, Credit Score of Co-Applicant or Co-Borrower, Numeric,Co-Applicant or Co-Borrower Credit Score
+applicant_creditscore_model, Applicant or Borrower Name and Version of Credit Scoring Model, Numeric,"The name and version of the credit scoring model used to generate the credit score, or scores, relied on in making the credit decision"
+applicant_creditscore_model_c, Applicant or Borrower Name and Version of Credit Scoring Model: Conditional Free Form Text Field for Code 8, Numeric,"Free form text box for the name and version of the credit scoring model used to generate the credit score, or scores, relied on in making the credit decision"
+coapplicant_creditscore_model, Co-Applicant or Co-Borrower Name and Version of Credit Scoring Model, Numeric,"The name and version of the credit scoring model used to generate the credit score, or scores, relied on in making the credit decision"
+coapplicant_creditscore_model_c, Co-Applicant or Co-Borrower Name and Version of Credit Scoring Model: Conditional Free Form Text Field for Code 8, Numeric,"Free form text box for the name and version of the credit scoring model used to generate the credit score, or scores, relied on in making the credit decision"
+denial_reason1, Reason for Denial: 1, Numeric,"The principal reason, or reasons, for denial"
+denial_reason2, Reason for Denial: 2, Numeric,"The principal reason, or reasons, for denial"
+denial_reason3, Reason for Denial: 3, Numeric,"The principal reason, or reasons, for denial"
+denial_reason4, Reason for Denial: 4, Numeric,"The principal reason, or reasons, for denial"
+denial_reason5, Reason for Denial: Conditional Free Form Text Field for Code 9, Numeric,Free form text for reason for denial 
+total_loan_costs, Total Loan Costs, Alphanumeric,"The amount, in dollars, of total loan costs"
+total_points_fees, Total Points and Fees, Alphanumeric,"The total points and fees, in dollars, charged in connection with the covered loan"
+origination_charges, Origination Charges, Alphanumeric,"The total of all itemized amounts, in dollars, that are designated borrower-paid at or before closing"
+discount_points, Discount Points, Alphanumeric,"The points paid, in dollars, to the creditor to reduce the interest rate"
+lender_credits, Lender Credits, Alphanumeric,"The amount, in dollars, of lender credits"
+interest_rate, Interest Rate, Alphanumeric,The interest rate for the covered loan or application
+prepayment_penalty_term, Prepayment Penalty Term, Alphanumeric,"The term, in months, of any prepayment penalty"
+debt_to_income_ratio, Debt-to-Income Ratio, Alphanumeric,"The ratio, as a percentage, of the applicant’s or borrower’s total monthly debt to the total monthly income relied on in making the credit decision"
+combinedloan_to_value_ratio, Combined Loan-to-Value Ratio, Alphanumeric,The ratio of the total amount of debt secured by the property to the value of the property relied on in making the credit decision
+loan_term, Loan Term, Alphanumeric,"The number of months after which the legal obligation will mature or terminate, or would have matured or terminated"
+introductory_rate_period, Introductory Rate Period, Alphanumeric,"The number of months, or proposed number of months in the case of an application, until the first date the interest rate may change after closing or account opening"
+balloon_payment, Balloon Payment, Numeric,"Whether the contractual terms include, or would have included, a balloon payment"
+interest_only_payments, Interest-Only Payments, Numeric,"Whether the contractual terms include, or would have included, interest-only payments"
+negative_amortization, Negative Amortization, Numeric,"Whether the contractual terms include, or would have included, a term that would cause the covered loan to be a negative amortization loan"
+other_nonamortizing_features, Other Non-Amortizing Features, Numeric,"Whether the contractual terms include, or would have included, any term, other than those described in Paragraphs 1003.4(a)(27)(i), (ii), and (iii) that would allow for payments other than fully amortizing payments during the loan term"
+property_value, Property Value, Alphanumeric,"The value of the property securing the covered loan or, in the case of an application, proposed to secure the covered loan, relied on in making the credit decision"
+manufacturedhome_secured_property_type, Manufacture Home Secured Property Type, Numeric,"Whether the covered loan or application is, or would have been, secured by a manufactured home and land, or by a manufactured home and not land"
+manufacturedhome_land_property_interest, Manufactured Home Land Property Type, Numeric,"The applicant’s or borrower’s land property interest in the land on which a manufactured home is, or will be, located"
+total_units_interest, Total Units, Numeric,"The number of individual dwelling units related to the property securing the covered loan or, in the case of an application, proposed to secure the covered loan"
+multifamily_affordable_units, Multifamily Affordable Units, Alphanumeric,"Reported values as a percentage, rounded to the nearest whole number, of the value reported for Total Units"
+submission_of_application, Submission of Application, Numeric,Whether the applicant or borrower submitted the application directly to the financial institution
+initially_payable, Initially Payable to Your Institution, Numeric,"Whether the obligation arising from the covered loan was, or, in the case of an application, would have been, initially payable to the financial institution"
+nmlsr_identifier, Mortgage Loan Originator NMLSR Identifier, Alphanumeric, Mortgage Loan Originator NMLSR Identifier
+autounderwriting_sys1, Automated Underwriting System: 1, Numeric,The automated underwriting system(s) (AUS) used by the financial institution to evaluate the application
+autounderwriting_sys2, Automated Underwriting System: 2, Numeric,The automated underwriting system(s) (AUS) used by the financial institution to evaluate the application
+autounderwriting_sys3, Automated Underwriting System: 3, Numeric,The automated underwriting system(s) (AUS) used by the financial institution to evaluate the application
+autounderwriting_sys4, Automated Underwriting System: 4, Numeric,The automated underwriting system(s) (AUS) used by the financial institution to evaluate the application
+autounderwriting_sys5, Automated Underwriting System: 5, Numeric,The automated underwriting system(s) (AUS) used by the financial institution to evaluate the application
+autounderwriting_sys_other, Automated Underwriting System: Conditional Free Form Text Field for Code 5, Alphanumeric, Conditional Free Form Text Field for AUS used
+autounderwriting_sys_result1, Automated Underwriting System Result: 1, Numeric,The specific result generated by the Automated Underwriting System
+autounderwriting_sys_result2, Automated Underwriting System Result: 2, Numeric,The specific result generated by the Automated Underwriting System
+autounderwriting_sys_result3, Automated Underwriting System Result: 3, Numeric,The specific result generated by the Automated Underwriting System
+autounderwriting_sys_result4, Automated Underwriting System Result: 4, Numeric,The specific result generated by the Automated Underwriting System
+autounderwriting_sys_result5, Automated Underwriting System Result: 5, Numeric,The specific result generated by the Automated Underwriting System
+autounderwriting_sys_result_other, Automated Underwriting System Result: Conditional Free Form Text Field for Code 16, Alphanumeric,Contitional free form text fields for the AUS result
+reverse_mortgage, Reverse Mortgage, Numeric,Whether the covered loan or application is for a reverse mortgage
+openend_line_of_credit, Open-End Line of Credit, Numeric,Whether the covered loan or application is for an open-end line of credit
+business_commercial_purpose, Business of Commercial Purpose, Numeric,Whether the covered loan or application is primarily for a business or commercial purpose

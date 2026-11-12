@@ -1,19 +1,19 @@
-Column Name, Data Field Name, Data Field Type
-lei, Legal Entity Identifier (LEI), Alphanumeric
-activityYear, Activity Year, Numeric
-agency, Federal Agency, Numeric
-institutionType, Institution Type, Alphanumeric
-id2017, ID 2017, Numeric
-taxId, Tax ID, Alphanumeric
-rssd, RSSD, Numeric
-emailDomains, Associated Email Domains, Alphanumeric
-respondentName, Respondent Name, Alphanumeric
-respondentState, Respondent State, Alphanumeric
-respondentCity, Respondent City, Alphanumeric
-parentIdRssd, Parent RSSD, Numeric
-parentName, Parent Name, Alphanumeric
-assets, Assests, Numeric
-otherLenderCode, Other Lender Code, Numeric
-topHolderIdRssd, Top Holder RSSD, Numeric
-topHolderName, Top Holder Name, Alphanumeric
-hmdaFiler, HMDA Filer, Numeric
+Column Name, Data Field Name, Data Field Type,Description
+lei, Legal Entity Identifier (LEI), Alphanumeric,A financial institution’s Legal Entity Identifier
+activityYear, Activity Year, Numeric,The calendar year the data submission covers
+agency, Federal Agency, Numeric,The institution's primary federal regulator
+institutionType, Institution Type, Alphanumeric,Classification of the financial institution reporting mortgage lending data derived from NIC data
+id2017, ID 2017, Numeric,The 2017 HMDA Platform primary identifier for an institution. This identifier is used in the naming of 2017 Modified LAR files.
+taxId, Tax ID, Alphanumeric,The federal tax ID of the filing institution
+rssd, RSSD, Numeric,The National Information Center RSSD of the institution
+emailDomains, Associated Email Domains, Alphanumeric,Email domain associated with the filer account
+respondentName, Respondent Name, Alphanumeric,The name of the institution as registered with GLEIF
+respondentState, Respondent State, Alphanumeric,Two-letter state code of the institution's headquarters
+respondentCity, Respondent City, Alphanumeric,The headquarters city of the institution
+parentIdRssd, Parent RSSD, Numeric,The National Information Center's RSSD for the parent of the institution
+parentName, Parent Name, Alphanumeric,The legal name of the parent institution
+assets, Assests, Numeric,The count of assets of the institution in the 4th quarter of the HMDA collection year
+otherLenderCode, Other Lender Code, Numeric,"Derived assignment of an institution's status as, or relationship to, a depository institution"
+topHolderIdRssd, Top Holder RSSD, Numeric,The National Information Center's RSSD for the top holder of the institution
+topHolderName, Top Holder Name, Alphanumeric,The legal name of the top holder of the institution
+hmdaFiler, HMDA Filer,Boolean,Indicator of HMDA filer
