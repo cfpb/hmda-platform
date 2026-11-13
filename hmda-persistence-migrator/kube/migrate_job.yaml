@@ -1,14 +1,14 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: actor-persistence-pk-migrator-260723-1
+  name: actor-persistence-prod-migrator-261113-1
 spec:
   template:
     spec:
-      serviceAccountName: hmda-platform
+      serviceAccountName: hmda-platform-irsa
       containers:
         - name: actor-persistence-migrator
-          image: 039774476268.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:pekko_persistence_migrator.260729.1
+          image: 039774476268.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:pekko_persistence_migrator.260729.6
           env:
             - name: CASSANDRA_JOURNAL_KEYSPACE
 #              value: hmda2_journal_beta
@@ -38,8 +38,8 @@ spec:
 #              value: DEBUG
 #            - name: ACTOR_PERSISTENCE_MIGRATE_PARALLELISM
 #              value: "1"
-#            - name: PERSISTENCE_ID
-#              value: "DEBUG"
+            - name: PERSISTENCE_ID
+              value: "DEBUG"
             - name: ACTOR_PERSISTENCE_PG_MAX_CONN
               value: "200"
             - name: ACTOR_PERSISTENCE_PG_JOURNAL_TABLE
@@ -57,34 +57,34 @@ spec:
             - name: ACTOR_PERSISTENCE_PG_HOST
               valueFrom:
                 secretKeyRef:
-                  name: actor-persistence-secrets
+                  name: irsa-actor-persistence-secrets
                   key: host
             - name: ACTOR_PERSISTENCE_PG_USER
               valueFrom:
                 secretKeyRef:
-                  name: actor-persistence-secrets
+                  name: irsa-actor-persistence-secrets
                   key: username
             - name: ACTOR_PERSISTENCE_PG_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: actor-persistence-secrets
+                  name: irsa-actor-persistence-secrets
                   key: password
             - name: ACTOR_PERSISTENCE_PG_DB
               valueFrom:
                 secretKeyRef:
-                  name: actor-persistence-secrets
+                  name: irsa-actor-persistence-secrets
                   key: database
             - name: ACTOR_PERSISTENCE_PG_SCHEMA
-              value: actor_persistence_beta
+              value: actor_persistence
             - name: CASSANDRA_CLUSTER_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: cassandra-credentials
+                  name: irsa-cassandra-credentials
                   key: cassandra.username
             - name: CASSANDRA_CLUSTER_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: cassandra-credentials
+                  name: irsa-cassandra-credentials
                   key: cassandra.password
           volumeMounts:
             - name: actor-persistence-secrets
@@ -99,12 +99,12 @@ spec:
            driver: secrets-store.csi.k8s.io
            readOnly: true
            volumeAttributes:
-             secretProviderClass: actor-persistence-secrets-provider
+             secretProviderClass: irsa-actor-persistence-secrets-provider
        - name: cassandra-secrets
          csi:
            driver: secrets-store.csi.k8s.io
            readOnly: true
            volumeAttributes:
-             secretProviderClass: k8ssandra-credentials-provider
+             secretProviderClass: irsa-k8ssandra-credentials-provider
       restartPolicy: Never
   backoffLimit: 4

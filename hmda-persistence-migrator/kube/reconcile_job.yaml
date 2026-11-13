@@ -1,11 +1,11 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: actor-persistence-failover-reconcile-260729-2
+  name: actor-persistence-prod-reconcile-261113-1
 spec:
   template:
     spec:
-      serviceAccountName: hmda-platform
+      serviceAccountName: hmda-platform-irsa
       containers:
         - name: actor-persistence-reconciler
           image: 039774476268.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:pekko_persistence_migrator.260729.6
@@ -87,13 +87,13 @@ spec:
             - name: CASSANDRA_CLUSTER_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: cluster1-user
-                  key: username
+                  name: irsa-cassandra-credentials
+                  key: cassandra.username
             - name: CASSANDRA_CLUSTER_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: cluster1-user
-                  key: password
+                  name: irsa-cassandra-credentials
+                  key: cassandra.password
           volumeMounts:
             - name: actor-persistence-secrets
               mountPath: /mnt/actor-persistence-secrets
@@ -107,7 +107,7 @@ spec:
            driver: secrets-store.csi.k8s.io
            readOnly: true
            volumeAttributes:
-             secretProviderClass: actor-persistence-secrets-provider
+             secretProviderClass: irsa-actor-persistence-secrets-provider
 #       - name: cassandra-secrets
 #         csi:
 #           driver: secrets-store.csi.k8s.io
