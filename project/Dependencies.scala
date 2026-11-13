@@ -51,10 +51,12 @@ object Dependencies {
   lazy val circeGeneric             = "io.circe"           %% "circe-generic"                       % Version.circe
   lazy val circeParser              = "io.circe"           %% "circe-parser"                        % Version.circe
   lazy val pekkoPersistenceCassandra = "org.apache.pekko"  %% "pekko-persistence-cassandra"          % Version.cassandraPluginVersion
+  lazy val pekkoPersistenceR2DBC     = "org.apache.pekko" %% "pekko-persistence-r2dbc"              % Version.r2dbcPluginVersion
   lazy val slick                    = "com.typesafe.slick" %% "slick"                               % Version.slick
   lazy val slickHikariCP            = "com.typesafe.slick" %% "slick-hikaricp"                      % Version.slick
   lazy val pekkoSlick             = "org.apache.pekko" %% "pekko-connectors-slick"           % Version.pekkoVersion
   lazy val postgres                 = "org.postgresql"     % "postgresql"                           % Version.postgres
+  lazy val r2dbcPostgres          =   "org.postgresql"     % "r2dbc-postgresql"                     % Version.r2dbcPostgres
   lazy val h2                       = "com.h2database"     % "h2"                                   % Version.h2 % Test
   lazy val testContainers        = "org.testcontainers"         % "testcontainers"              % Version.testContainers % Test
   lazy val apacheCommonsIO        = "commons-io"                % "commons-io"                  % Version.apacheCommons % Test

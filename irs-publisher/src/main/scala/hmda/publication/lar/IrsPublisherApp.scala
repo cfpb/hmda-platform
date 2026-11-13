@@ -68,7 +68,7 @@ object IrsPublisherApp extends App {
     .mapAsync(parallelism * 2)(offset => offset.commitScaladsl())
     .toMat(Sink.seq)(Keep.both)
     .mapMaterializedValue {
-      case (control, future) => DrainingControl.apply(control, future)
+      case (ctrl, future) => DrainingControl.apply(ctrl, future)
     }
     .run()
 

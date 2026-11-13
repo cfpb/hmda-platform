@@ -19,10 +19,10 @@ import hmda.api.http.directives.QuarterlyFilingAuthorization._
 import hmda.api.http.model.ErrorResponse
 import hmda.api.ws.WebSocketProgressTracker
 import hmda.auth.OAuth2Authorization
-import hmda.messages.submission.HmdaRawDataCommands.{AddLines, HmdaRawDataCommand}
+import hmda.messages.submission.HmdaRawDataCommands.{ AddLines, HmdaRawDataCommand }
 import hmda.messages.submission.HmdaRawDataReplies.LinesAdded
 import hmda.messages.submission.SubmissionCommands.GetSubmission
-import hmda.messages.submission.SubmissionManagerCommands.{SubmissionManagerCommand, UpdateSubmissionStatus}
+import hmda.messages.submission.SubmissionManagerCommands.{ SubmissionManagerCommand, UpdateSubmissionStatus }
 import hmda.model.filing.submission._
 import hmda.persistence.submission.HmdaRawData.selectHmdaRawData
 import hmda.persistence.submission.SubmissionManager.selectSubmissionManager
@@ -31,8 +31,8 @@ import hmda.util.http.FilingResponseUtils._
 import hmda.utils.YearUtils.Period
 import org.slf4j.Logger
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.{ Failure, Success }
 
 object UploadHttpApi {
   def create(

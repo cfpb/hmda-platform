@@ -36,6 +36,7 @@ spec:
           volumeMounts:
             - name: secret-provider-vol
               mountPath: /mnt/secrets-store
+              readOnly: true
             - name: tz-config
               mountPath: /etc/localtime
           securityContext:

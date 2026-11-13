@@ -115,7 +115,7 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent with LarCompo
     })
     .toMat(Committer.sink(CommitterSettings(system).withParallelism(2)))(Keep.both)
     .mapMaterializedValue {
-      case (control, future) => DrainingControl.apply(control, future)
+      case (ctrl, future) => DrainingControl.apply(ctrl, future)
     }
     .run()
 

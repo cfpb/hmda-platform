@@ -15,7 +15,7 @@ object HmdaQuery {
 
   type RJ =
     ReadJournal
-      with PersistenceIdsQuery
+//      with PersistenceIdsQuery // incompatible with r2dbc, and method defined not used in code base
       with CurrentPersistenceIdsQuery
       with EventsByPersistenceIdQuery
       with CurrentEventsByPersistenceIdQuery

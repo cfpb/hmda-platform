@@ -24,18 +24,21 @@ hmda:
   runtimeMode: kubernetes
   upload:
     lines:
-      batch: 30
-      parallelism: 1
+      batch: 100
+      parallelism: 2
+  actorSystemPersistence:
+    schema: actor_persistence_failover
+    maxConn: 200
 #  podNamespace: default
 #  apiNamespace: hmda-api
 #  serviceNamespace: default.svc.cluster.local
 
 kafka:
-  institutionsTopic: institution
+  institutionsTopic: test
   modifiedLarTopic: hmda-modified-lar
   irsTopic: hmda-irs
   analyticsTopic: hmda-analytics
-  signTopic: hmda-sign
+  signTopic: test
   disclosureTopic: hmda-spark-disclosure
   security: "SASL_SSL"
 

@@ -35,6 +35,10 @@ service:
   account:
     name: hmda-platform-irsa
 
+hmda:
+  actorSystemPersistence:
+    schema: actor_persistence
+
 resources:
   limits:
     memory: "3200Mi"
