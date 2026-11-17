@@ -4,8 +4,8 @@ import hmda.model.filing.ts.TransmittalSheet
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.ts.syntactical.{S300, S302, S303}
 import hmda.validation.rules.ts.validity._
-import hmda.validation.rules.ts.syntactical._2026
-import hmda.validation.rules.ts.quality._2026
+import hmda.validation.rules.ts.syntactical._
+import hmda.validation.rules.ts.quality._
 
 // $COVERAGE-OFF$
 private[engine] object TsEngine2026 extends ValidationEngine[TransmittalSheet] {
