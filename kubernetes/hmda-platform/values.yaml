@@ -27,18 +27,18 @@ hmda:
       batch: 100
       parallelism: 2
   actorSystemPersistence:
-    schema: actor_persistence_failover
+    schema: actor_persistence
     maxConn: 200
 #  podNamespace: default
 #  apiNamespace: hmda-api
 #  serviceNamespace: default.svc.cluster.local
 
 kafka:
-  institutionsTopic: test
+  institutionsTopic: institution
   modifiedLarTopic: hmda-modified-lar
   irsTopic: hmda-irs
   analyticsTopic: hmda-analytics
-  signTopic: test
+  signTopic: hmda-sign
   disclosureTopic: hmda-spark-disclosure
   security: "SASL_SSL"
 
