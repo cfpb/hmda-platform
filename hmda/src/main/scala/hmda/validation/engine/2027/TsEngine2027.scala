@@ -3,9 +3,11 @@ package hmda.validation.engine
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.ts.syntactical.{ S300, S302 }
+import hmda.validation.rules.ts.syntactical.{ _2027 => syn2027 }
 import hmda.validation.rules.ts.validity._
-import hmda.validation.rules.ts.quality._
-import hmda.validation.rules.ts.syntactical._
+import hmda.validation.rules.ts.quality.{ _2027 => qual2027 }
+
+
 
 // $COVERAGE-OFF$
 private[engine] object TsEngine2027 extends ValidationEngine[TransmittalSheet] {
@@ -13,7 +15,7 @@ private[engine] object TsEngine2027 extends ValidationEngine[TransmittalSheet] {
   override def syntacticalChecks(ctx: ValidationContext) = Vector(
     S300,
     S302.withContext(ctx),
-    _2027.S303.withContext(ctx)
+    syn2027.S303.withContext(ctx)
   )
 
   override def validityChecks(ctx: ValidationContext) = Vector(
@@ -31,7 +33,7 @@ private[engine] object TsEngine2027 extends ValidationEngine[TransmittalSheet] {
   )
 
   override def qualityChecks(ctx: ValidationContext) = Vector(
-    _2027.Q303.withContext(ctx)
+    qual2027.Q303.withContext(ctx)
   )
 
 }
