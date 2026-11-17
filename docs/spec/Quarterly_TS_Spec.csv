@@ -1,0 +1,18 @@
+Column Name,Data Field Name,Data Field Type,Description
+record_identifier, Record Identified - Value is 1, Numeric,Record Identified - Value is 1
+respondent_name, Financial Institution Name, Alphanumeric,Financial Institution Name
+calendar_year, Calendar Year, Numeric,The calendar year of data collection
+calendar_quarter, Calendar Quarter, Numeric,The calandar quarter to which the data refer. Quarter 4 is for the annual submission of data
+contact_name, Contact Person's Name, Alphanumeric,Name of contact person 
+contact_phone, Contact Person's Telephone Number, Alphanumeric,Telephone number of contact person
+contact_email, Contact Person's E-mail Address, Alphanumeric,E-mail address of contact person 
+contact_street, Contact Person's Office Street Address, Alphanumeric, Contact Person's Office Street Address
+contact_city, Contact Person's Office City, Alphanumeric, Contact Person's Office City
+contact_state, Contact Person's Office State, Alphanumeric, Contact Person's Office State
+contact_zip_code, Contact Person's Office ZIP Code, Alphanumeric, Contact Person's Office ZIP Code
+agency_code, Federal Agency, Numeric,The institution's primary federal regulator
+lar_count, Total Number of Entries Contained in Submission, Numeric, Total Number of Entries Contained in Submission
+tax_id, Federal Taxpayer Identification Number, Alphanumeric,The federal tax ID of the filing institution.
+lei, Legal Entity Identifier (LEI), Alphanumeric,The financial institution’s Legal Entity Identifier
+latest_sign_date, HMDA Filing Sign Datetime, Alphanumeric, HMDA Filing Sign Date and time
+first_sign_date, HMDA Filing First Sign Datetime, Alphanumeric, HMDA Filing First Sign Date and time
