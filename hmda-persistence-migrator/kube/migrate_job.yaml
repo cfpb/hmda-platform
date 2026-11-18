@@ -1,0 +1,110 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: actor-persistence-prod-migrator-261113-1
+spec:
+  template:
+    spec:
+      serviceAccountName: hmda-platform-irsa
+      containers:
+        - name: actor-persistence-migrator
+          image: 039774476268.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:pekko_persistence_migrator.260729.6
+          env:
+            - name: CASSANDRA_JOURNAL_KEYSPACE
+#              value: hmda2_journal_beta
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-keyspace
+            - name: CASSANDRA_SNAPSHOT_KEYSPACE
+#              value: hmda2_snapshot_beta
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-keyspace-snapshot
+            - name: CASSANDRA_CLUSTER_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-hosts
+            - name: CASSANDRA_CLUSTER_DC
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-cluster-dc
+#            - name: ACTOR_PERSISTENCE_MIGRATE_BATCH
+#              value: "500"
+#            - name: HMDA_MIGRATOR_LOG
+#              value: DEBUG
+#            - name: ACTOR_PERSISTENCE_MIGRATE_PARALLELISM
+#              value: "1"
+            - name: PERSISTENCE_ID
+              value: "DEBUG"
+            - name: ACTOR_PERSISTENCE_PG_MAX_CONN
+              value: "200"
+            - name: ACTOR_PERSISTENCE_PG_JOURNAL_TABLE
+              value: event_journal
+            - name: ACTOR_PERSISTENCE_PG_SNAP_TABLE
+              value: snapshot
+            - name: ACTOR_PERSISTENCE_PG_DURABLE_STATE_TABLE
+              value: durable_state
+            - name: ACTOR_PERSISTENCE_PG_SSL_ENABLED
+              value: "on"
+            - name: ACTOR_PERSISTENCE_PG_SSL_MODE
+              value: allow
+#            - name: MIGRATION_TOOL_LOG
+#              value: DEBUG
+            - name: ACTOR_PERSISTENCE_PG_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: irsa-actor-persistence-secrets
+                  key: host
+            - name: ACTOR_PERSISTENCE_PG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: irsa-actor-persistence-secrets
+                  key: username
+            - name: ACTOR_PERSISTENCE_PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: irsa-actor-persistence-secrets
+                  key: password
+            - name: ACTOR_PERSISTENCE_PG_DB
+              valueFrom:
+                secretKeyRef:
+                  name: irsa-actor-persistence-secrets
+                  key: database
+            - name: ACTOR_PERSISTENCE_PG_SCHEMA
+              value: actor_persistence
+            - name: CASSANDRA_CLUSTER_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: irsa-cassandra-credentials
+                  key: cassandra.username
+            - name: CASSANDRA_CLUSTER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: irsa-cassandra-credentials
+                  key: cassandra.password
+          volumeMounts:
+            - name: actor-persistence-secrets
+              mountPath: /mnt/actor-persistence-secrets
+              readOnly: true
+            - name: cassandra-secrets
+              mountPath: /mnt/cass-secrets
+              readOnly: true
+      volumes:
+       - name: actor-persistence-secrets
+         csi:
+           driver: secrets-store.csi.k8s.io
+           readOnly: true
+           volumeAttributes:
+             secretProviderClass: irsa-actor-persistence-secrets-provider
+       - name: cassandra-secrets
+         csi:
+           driver: secrets-store.csi.k8s.io
+           readOnly: true
+           volumeAttributes:
+             secretProviderClass: irsa-k8ssandra-credentials-provider
+      restartPolicy: Never
+  backoffLimit: 4
