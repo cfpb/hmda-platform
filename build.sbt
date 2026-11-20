@@ -4,7 +4,7 @@ import sbtassembly.AssemblyPlugin.autoImport.assemblyMergeStrategy
 import com.typesafe.sbt.packager.docker._
 
 lazy val commonDeps = Seq(
-  logback, scalaTest, scalaCheck, pekkoHttpSprayJson, testContainers, apacheCommonsIO, log4jToSlf4j, kubernetesApi, scalaLogging, amazonAwssdk)
+  logback, scalaTest, scalaCheck, pekkoHttpSprayJson, testContainers, apacheCommonsIO, log4jToSlf4j, scalaLogging, amazonAwssdk)
 lazy val sparkDeps =
   Seq(
     postgres,
