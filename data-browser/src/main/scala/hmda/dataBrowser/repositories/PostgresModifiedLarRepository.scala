@@ -174,10 +174,11 @@ class PostgresModifiedLarRepository(config: DatabaseConfig[JdbcProfile], tableSe
       case 2019 => "institutions2019_three_year_04122023"
       case 2020 => "institutions2020_three_year_05012024"
       case 2021 => "institutions2021_three_year_05192025_v2"
-      case 2022 => "institutions2022_one_year_05012024"
+      case 2022 => "institutions2022_three_year_06012026"
       case 2023 => "institutions2023_one_year_05192025_v2"
-      case 2024 => "institutions2024_snapshot_v3"
-      case _    => "institutions2024_snapshot_v3"
+      case 2024 => "institutions2024_one_year_06012026"
+      case 2025 => "institutions2025_snapshot_06022026"
+      case _    => "institutions2025_snapshot_06022026"
     }
 
     //do not include year in the WHERE clause because all entries in the table (modifiedlar2018_snapshot) have filing_year = 2018
