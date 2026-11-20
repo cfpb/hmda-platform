@@ -66,6 +66,6 @@ This utility parses Census Flat Files produced annually by the Federal Financial
 4. Run parse_census_file.py on the CSV files. Example: `python parse_census_file.py data/CensusFlatFile2025.csv data/list1_2023.csv -o output/ffiec_census_2025.txt`
 5. Commit the output file to the [resources](https://github.com/cfpb/hmda-platform/tree/master/common/src/main/resources) folder of the `hmda-platform` repo and process as normal.
 
-Future note: per the 2025 FFIEC Census File documentation, "Indices 86, 87, 874, and 875 were expected to be available in the DHC but are no longer available in any file. They have been marked "NA" to preserve index compatibility and will be removed at a future date if they are still unavailable." In years after 2025, we may need to adjust the code to account for the index removal. 
+Future note: per the 2025 and 2026 FFIEC Census File documentation, "Indices 86, 87, 874, and 875 were expected to be available in the DHC but are no longer available in any file. They have been marked "NA" to preserve index compatibility and will be removed at a future date if they are still unavailable." In years after 2026, we may need to adjust the code to account for the index removal. 
 
-For 2025 it was necessary to include the `skipfooter = 5` argument in the `parse_census_file.py` file because of an upstream issue with the `CensusFlatFile2025.csv` provided by the FFIEC that inadvertently included metadata. 
+For 2025 it was necessary to include the `skipfooter = 5` argument in the `parse_census_file.py` file because of an upstream issue with the `CensusFlatFile2025.csv` provided by the FFIEC that inadvertently included metadata. This issue was fixed in 2026. 
