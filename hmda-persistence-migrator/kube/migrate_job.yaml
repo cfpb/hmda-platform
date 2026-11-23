@@ -6,6 +6,19 @@ spec:
   template:
     spec:
       serviceAccountName: hmda-platform-irsa
+      initContainers:
+        - name: get-rds-cert
+          image: curlimages/curl
+          command:
+            - curl
+          args:
+            - -o
+            - /etc/rds/certs/rds-root.pem
+            - https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
+          volumeMounts:
+            - name: rds-root-cert
+              mountPath: /etc/rds/certs
+              readOnly: false
       containers:
         - name: actor-persistence-migrator
           image: 039774476268.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:pekko_persistence_migrator.260729.6
@@ -51,7 +64,9 @@ spec:
             - name: ACTOR_PERSISTENCE_PG_SSL_ENABLED
               value: "on"
             - name: ACTOR_PERSISTENCE_PG_SSL_MODE
-              value: allow
+              value: verify-full
+            - name: RDS_ROOT_CERT
+              value: /etc/rds/certs/rds-root.pem
 #            - name: MIGRATION_TOOL_LOG
 #              value: DEBUG
             - name: ACTOR_PERSISTENCE_PG_HOST
@@ -93,6 +108,9 @@ spec:
             - name: cassandra-secrets
               mountPath: /mnt/cass-secrets
               readOnly: true
+            - name: rds-root-cert
+              mountPath: /etc/rds/certs
+              readOnly: true
       volumes:
        - name: actor-persistence-secrets
          csi:
@@ -106,5 +124,7 @@ spec:
            readOnly: true
            volumeAttributes:
              secretProviderClass: irsa-k8ssandra-credentials-provider
+       - name: rds-root-cert
+         emptyDir: {}
       restartPolicy: Never
   backoffLimit: 4

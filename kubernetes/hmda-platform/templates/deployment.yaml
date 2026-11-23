@@ -36,6 +36,8 @@ spec:
             readOnly: true
             volumeAttributes:
               secretProviderClass: irsa-actor-persistence-secrets-provider
+        - name: rds-root-cert
+          emptyDir: {}
 #        - name: cassandra-truststore
 #          csi:
 #            driver: secrets-store.csi.k8s.io
@@ -48,7 +50,20 @@ spec:
 #            readOnly: true
 #            volumeAttributes:
 #              secretProviderClass: irsa-k8ssandra-credentials-provider
-      serviceAccountName: {{ .Values.service.account.name }} 
+      serviceAccountName: {{ .Values.service.account.name }}
+      initContainers:
+      - name: get-rds-cert
+        image: curlimages/curl
+        command:
+        - curl
+        args:
+        - -o
+        - /etc/rds/certs/rds-root.pem
+        - https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
+        volumeMounts:
+          - name: rds-root-cert
+            mountPath: /etc/rds/certs
+            readOnly: false
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -57,6 +72,9 @@ spec:
             mountPath: /etc/localtime
           - name: actor-persistence-secrets
             mountPath: /mnt/actor-persistence-secrets
+            readOnly: true
+          - name: rds-root-cert
+            mountPath: /etc/rds/certs
             readOnly: true
 #          - name: cassandra-truststore
 #            readOnly: true
@@ -105,7 +123,9 @@ spec:
         - name: ACTOR_PERSISTENCE_PG_SSL_ENABLED
           value: "on"
         - name: ACTOR_PERSISTENCE_PG_SSL_MODE
-          value: allow
+          value: verify-full
+        - name: RDS_ROOT_CERT
+          value: /etc/rds/certs/rds-root.pem
         - name: ACTOR_PERSISTENCE_PG_BUFFER_SIZE
           value: "2000"
         - name: ACTOR_PERSISTENCE_PG_REFRESH_INTERVAL
