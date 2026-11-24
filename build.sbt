@@ -53,7 +53,9 @@ lazy val pekkoPersistenceDeps =
     pekkoPersistenceTyped,
     pekkoPersistenceQuery,
     pekkoClusterShardingTyped,
-    pekkoPersistenceCassandra,
+    pekkoPersistenceR2DBC,
+    r2dbcPostgres,
+    pekkoPersistenceCassandra
   )
 
 lazy val pekkoHttpDeps =
@@ -169,6 +171,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
         case "cinnamon-reference.conf"               => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "logback.xml"                           => MergeStrategy.concat
+        case "version.conf"                          => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case metaInfMatcher(_) => MergeStrategy.discard
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
@@ -229,6 +232,7 @@ lazy val `check-digit` = (project in file("check-digit"))
       assembly / assemblyMergeStrategy := {
 
         case "application.conf"                      => MergeStrategy.concat
+        case "version.conf" => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case metaInfMatcher(_) => MergeStrategy.discard
@@ -290,6 +294,7 @@ lazy val `check-digit` = (project in file("check-digit"))
         },
         assembly/ assemblyMergeStrategy := {
           case "application.conf"                      => MergeStrategy.concat
+          case "version.conf" => MergeStrategy.concat
           case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
           case "META-INF/MANIFEST.MF" => MergeStrategy.discard
           case metaInfMatcher(_) => MergeStrategy.discard
@@ -348,6 +353,7 @@ lazy val `institutions-api` = (project in file("institutions-api"))
       dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
+        case "version.conf" => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case metaInfMatcher(_) => MergeStrategy.discard
@@ -411,6 +417,7 @@ lazy val `hmda-data-publisher` = (project in file("hmda-data-publisher"))
       },
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
+        case "version.conf" => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case metaInfMatcher(_) => MergeStrategy.discard
@@ -469,6 +476,7 @@ lazy val `hmda-dashboard` = (project in file("hmda-dashboard"))
       dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
+        case "version.conf" => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case metaInfMatcher(_) => MergeStrategy.discard
@@ -586,6 +594,7 @@ lazy val `modified-lar` = (project in file("modified-lar"))
       dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
+        case "version.conf" => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case metaInfMatcher(_) => MergeStrategy.discard
@@ -646,6 +655,7 @@ lazy val `irs-publisher` = (project in file("irs-publisher"))
       dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
+        case "version.conf" => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case metaInfMatcher(_) => MergeStrategy.discard
@@ -706,6 +716,7 @@ lazy val `hmda-reporting` = (project in file("hmda-reporting"))
       dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
+        case "version.conf" => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case metaInfMatcher(_) => MergeStrategy.discard
@@ -775,6 +786,7 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
       dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
+        case "version.conf" => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case metaInfMatcher(_) => MergeStrategy.discard
@@ -837,6 +849,7 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
         },
         assembly / assemblyMergeStrategy := {
           case "application.conf"                      => MergeStrategy.concat
+          case "version.conf" => MergeStrategy.concat
           case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
           case "META-INF/MANIFEST.MF" => MergeStrategy.discard
           case metaInfMatcher(_) => MergeStrategy.discard
@@ -1063,6 +1076,7 @@ lazy val `email-service` = (project in file("email-service"))
       dependencyOverrides ++= Seq(jacksonDatabind,pekkoSerialization ),
       assembly / assemblyMergeStrategy := {
         case "application.conf"                      => MergeStrategy.concat
+        case "version.conf" => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case metaInfMatcher(_) => MergeStrategy.discard
@@ -1127,6 +1141,69 @@ lazy val `hmda-quarterly-data-service` = (project in file ("hmda-quarterly-data-
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "META-INF/MANIFEST.MF" => MergeStrategy.discard
         case metaInfMatcher(_) => MergeStrategy.discard
+        case PathList("META-INF", xs@_*) => MergeStrategy.concat
+        case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
+        case PathList("jakarta", xs@_*) => MergeStrategy.last
+        case PathList(ps @ _*) if ps.last endsWith ".proto" =>
+          MergeStrategy.first
+        case "module-info.class" => MergeStrategy.concat
+        case PathList("META-INF", "services", xs @ _*) => MergeStrategy.concat
+        case PathList("net", "jpountz", xs @ _*) => MergeStrategy.last
+        case PathList("org", "lz4", xs @ _*) => MergeStrategy.last
+        case PathList(ps @ _*) if ps.last endsWith ".proto" => MergeStrategy.first
+        case PathList("com", "datastax", xs@_*) => MergeStrategy.first
+        case PathList("org", "apache", xs@_*) => MergeStrategy.first
+        case PathList("org", "glassfish", xs@_*) => MergeStrategy.first
+        case PathList("com", "sun", xs@_*) => MergeStrategy.first
+        case x if x.endsWith("reference-overrides.conf") => MergeStrategy.concat
+        case x if x.endsWith("reference.conf") => MergeStrategy.concat
+        case x if x.endsWith("version.conf") => MergeStrategy.concat
+        case x if x.endsWith("module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
+        case x if x.endsWith("/liblz4-java.so") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4ByteBufferUtils$Match.class") => MergeStrategy.concat
+        case x if x.endsWith("/LZ4BlockInputStream.class") => MergeStrategy.concat
+        case x if x.endsWith("/XXHash64JavaSafe.class") => MergeStrategy.concat
+        case x if x.endsWith("/module-info.class") => MergeStrategy.concat
+        case x if x.endsWith("/LineTokenizer.class") => MergeStrategy.concat
+        case x if x.endsWith("/LogSupport.class") => MergeStrategy.concat
+        case x if x.endsWith("/MailcapFile.class") => MergeStrategy.concat
+        case x if x.endsWith("/MimeTypeFile.class") => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assembly / assemblyMergeStrategy).value
+          oldStrategy(x)
+      },
+      assembly / assemblyJarName := {
+        s"${name.value}.jar"
+      }
+    ),
+    dockerSettings,
+    packageSettings
+  )
+  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(`hmda-protocol` % "compile->compile;test->test")
+
+lazy val `hmda-persistence-migrator` = (project in file ("hmda-persistence-migrator"))
+  .enablePlugins(
+    JavaServerAppPackaging,
+    sbtdocker.DockerPlugin,
+    AshScriptPlugin
+  )
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      libraryDependencies += "org.apache.pekko" %% "pekko-persistence-r2dbc-migration" % "1.2.0",
+      libraryDependencies ++= slickDeps,
+      dependencyOverrides ++= Seq(jacksonDatabind, pekkoSerialization),
+      //      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
+      //        enumeratumDeps :+ monix :+ lettuce :+ scalaMock,
+      assembly / assemblyMergeStrategy := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+        case metaInfMatcher(_) => MergeStrategy.discard
+        case "version.conf" => MergeStrategy.concat
         case PathList("META-INF", xs@_*) => MergeStrategy.concat
         case PathList("org", "bouncycastle", xs @_*) => MergeStrategy.first
         case PathList("jakarta", xs@_*) => MergeStrategy.last
