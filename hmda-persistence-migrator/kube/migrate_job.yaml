@@ -21,7 +21,7 @@ spec:
               readOnly: false
       containers:
         - name: actor-persistence-migrator
-          image: 039774476268.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:pekko_persistence_migrator.260729.6
+          image: 039774476268.dkr.ecr.us-east-1.amazonaws.com/cfpb/regtech/hmda/hmda-platform:pekko_persistence_migrator.261123.1
           env:
             - name: CASSANDRA_JOURNAL_KEYSPACE
 #              value: hmda2_journal_beta
